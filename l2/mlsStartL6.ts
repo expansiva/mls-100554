@@ -1,11 +1,23 @@
-/// <mls shortName="mlsStartL6" project="100554" enhancement="_100541_enhancementLit" />
-				
-import { html, LitElement} from 'lit';
-import { customElement } from 'lit/decorators.js';
+/// <mls shortName="mlsStartL6" project="100554" enhancement="_100554_enhancementVanilla" />
 
-@customElement('mls-start-l6-100554')
-export class MLSStartL6 extends LitElement {
-    render() {
-        return html` <h3>Teste Pagina</h3> `;
+export class MLSStartL6 extends HTMLElement {
+    async getHTMLFile() {
+        const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL6', '', '.html');
+        const storFileHTML = mls.stor.files[key];
+        let src: string | Blob;
+        const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
+        const haveInfo: boolean = info && !!info.content;
+        src = haveInfo ? info.content : await storFileHTML.getContent();
+        return src;
+    }
+
+    connectedCallback() {
+        this.render();
+    }
+
+    async render() {
+        const src = await this.getHTMLFile() as string;
+        return this.innerHTML = src;
     }
 }
+customElements.define('mls-start-l6-100544', MLSStartL6);
