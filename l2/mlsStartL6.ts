@@ -1,6 +1,7 @@
-/// <mls shortName="mlsStartL6" project="100554" enhancement="_100554_enhancementVanilla" />
+/// <mls shortName="mlsStartL6" project="100554" enhancement="_100554_enhancementVanilla" groupName="internal" />
 
 export class MLSStartL6 extends HTMLElement {
+    
     async getHTMLFile() {
         const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL6', '', '.html');
         const storFileHTML = mls.stor.files[key];
