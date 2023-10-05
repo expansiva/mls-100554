@@ -1,10 +1,11 @@
 /// <mls shortName="enhancementVanilla" project="100554" enhancement="_100541_enhancementBase" />
-				
+
 export const description = "Use this enhancement for model using lit - a simple and fast web component.\nRef: https://lit.dev/"
 
 export const example = ``;
 
 export const requires: mls.l2.editor.IRequire[] = [
+
 ];
 
 
@@ -39,7 +40,7 @@ export const prepareAdd = (prompt: string): { sourceTS: string, aiHeader: string
 
 export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
     try {
-        
+
     } catch (e) {
         return e.message;
     }
