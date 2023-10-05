@@ -16,8 +16,10 @@ export class MLSStartL6 extends HTMLElement {
     }
 
     async render() {
-        const src = await this.getHTMLFile() as string;
+        const src = 'gibios'; // await this.getHTMLFile() as string;
         return this.innerHTML = src;
     }
 }
+
+
 customElements.define('mls-start-l6-100544', MLSStartL6);
