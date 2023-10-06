@@ -1,6 +1,6 @@
-/// <mls shortName="mlsStartL6" project="100554" enhancement="_100554_enhancementVanilla" groupName="internal" />
+/// <mls shortName="mlsStartL6" project="100554" enhancement="_100541_enhancementLit" groupName="internal" />
 
-export class MLSStartL6 extends HTMLElement {
+/* export class MLSStartL6 extends HTMLElement {
     
     async getHTMLFile() {
         const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL6', '', '.html');
@@ -21,10 +21,11 @@ export class MLSStartL6 extends HTMLElement {
         return this.innerHTML = src;
     }
 }
-
+ 
 customElements.define('mls-start-l6-100554', MLSStartL6);
+ */
 
-/* import { html, unsafeHTML, LitElement } from 'lit';
+import { html, unsafeHTML, css, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 @customElement('mls-start-l6-100554')
@@ -45,4 +46,3 @@ export class MLSStartL6 extends LitElement {
         return html`${unsafeHTML(src)}`;
     }
 }
- */
