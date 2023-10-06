@@ -1,4 +1,4 @@
-/// <mls shortName="enhancementPreviewHtml" project="100554" enhancement="_100541_enhancementBase" />
+/// <mls shortName="enhancementPreviewHtml" project="100554" enhancement="_blank" />
 
         
 export const description = "Use this enhancement for model using lit - a simple and fast web component.\nRef: https://lit.dev/"
@@ -92,9 +92,9 @@ export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> 
 
 export const getPromptDefault = (): string => {
     return `
-    Propriedade: O componente aceitará uma propriedade 'name'.
+    Propriedade: O componente aceitarÃ¡ uma propriedade 'name'.
 
-    Funcionalidade: O componente web exibirá um cabeçalho h1 estilizado em azul. O conteúdo do cabeçalho será uma mensagem de saudação que lê 'Olá,' seguido pelo valor da propriedade 'name'. Por exemplo, se a propriedade 'name' estiver definida como 'João', a mensagem exibida será 'Olá, João!'.`;
+    Funcionalidade: O componente web exibirÃ¡ um cabeÃ§alho h1 estilizado em azul. O conteÃºdo do cabeÃ§alho serÃ¡ uma mensagem de saudaÃ§Ã£o que lÃª 'OlÃ¡,' seguido pelo valor da propriedade 'name'. Por exemplo, se a propriedade 'name' estiver definida como 'JoÃ£o', a mensagem exibida serÃ¡ 'OlÃ¡, JoÃ£o!'.`;
 }
 
 export const teste = () => {
