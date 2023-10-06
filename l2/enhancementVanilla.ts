@@ -1,4 +1,4 @@
-/// <mls shortName="enhancementVanilla" project="100554" enhancement="_100541_enhancementBase" />
+/// <mls shortName="enhancementVanilla" project="100554" enhancement="_blank" />
 
 export const description = "Use this enhancement for model using lit - a simple and fast web component.\nRef: https://lit.dev/"
 
