@@ -42,7 +42,10 @@ export class MLSStartL6 extends LitElement {
     }
 
     async render() {
-        const src = await this.getHTMLFile() as string;
-        return html`${unsafeHTML(src)}`;
+        // const src = await this.getHTMLFile() as string;
+        // return html`${unsafeHTML(src)}`;
+        return html`teste`;
+
+
     }
 }
