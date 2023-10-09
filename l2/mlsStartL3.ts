@@ -6,54 +6,51 @@ import { customElement, property } from 'lit/decorators.js';
 @customElement('mls-start-l3-100554')
 export class MLSStartL3 extends LitElement {
 
-    @property({ type: String }) html: string | null = null;
-    @property({ type: Boolean }) loading: boolean = true;
-    @property({ type: String }) msize: string | null = null;
+  @property({ type: String }) html: string | null = null;
+  @property({ type: Boolean }) loading: boolean = true;
+  @property({ type: String }) msize: string | null = null;
 
-    static get styles() {
-        return css`
+  static get styles() {
+    return css`
       :host {
         display:block;
         overflow: auto;
       }
     `;
-    }
+  }
 
-    async connectedCallback() {
-        super.connectedCallback();
-        await this.getHTMLFile();
-        this.loading = false;
-        this.requestUpdate(); // Trigger a re-render
-    }
+  async connectedCallback() {
+    super.connectedCallback();
+    await this.getHTMLFile();
+    this.loading = false;
+    this.requestUpdate(); // Trigger a re-render
+  }
 
-    async getHTMLFile() {
-        return 'reste';
-        const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL4', '', '.html');
-        const storFileHTML = mls.stor.files[key];
-        let src: string | Blob;
-        const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
-        const haveInfo: boolean = info && !!info.content;
-        src = haveInfo ? info.content : await storFileHTML.getContent();
-        this.html = src as string;
-    }
+  async getHTMLFile() {
+    const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL4', '', '.html');
+    const storFileHTML = mls.stor.files[key];
+    let src: string | Blob;
+    const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
+    const haveInfo: boolean = info && !!info.content;
+    src = haveInfo ? info.content : await storFileHTML.getContent();
+    this.html = src as string;
+  }
 
-    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
-        super.attributeChangedCallback(name, oldVal, newVal);
-        if (name === 'msize') {
-            const [width, height] = newVal.split(',');
-            this.style.height = height + 'px';
-        }
+  attributeChangedCallback(name: string, oldVal: string, newVal: string) {
+    super.attributeChangedCallback(name, oldVal, newVal);
+    if (name === 'msize') {
+      const [width, height] = newVal.split(',');
+      this.style.height = height + 'px';
     }
+  }
 
-    render() {
-        return html`
+  render() {
+    return html`
       <div>
         ${this.loading
-                ? html`<p>Loading...</p>`
-                : html`<div>${unsafeHTML(this.html)}</div>`}
+        ? html`<p>Loading...</p>`
+        : html`<div>${unsafeHTML(this.html)}</div>`}
       </div>
     `;
-
-
-    }
+  }
 }
