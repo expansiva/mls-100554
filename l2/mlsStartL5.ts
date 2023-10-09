@@ -4,7 +4,7 @@ import { html, unsafeHTML, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 @customElement('mls-start-l5-100554')
-export class MLSStartL6 extends LitElement {
+export class MLSStartL5 extends LitElement {
 
   @property({ type: String }) html: string | null = null;
   @property({ type: Boolean }) loading: boolean = true;
