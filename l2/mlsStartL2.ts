@@ -68,7 +68,13 @@ export class MLSStartL2 extends LitElement {
         ${this.loading
         ? html`<p>Loading...</p>`
         : html`
-        <div><input id="l2check" type="checkbox" ${this.state[2] === true ? "checked" : ''} @change="${this.changeStatusService}" ></input> Mostrar este service na primeira vez que entrar neste módulo </div>
+        <div>
+          <input
+            id="l2check"
+            type="checkbox"
+            .checked=${(this.state[2])} 
+            @change="${this.changeStatusService}">
+          </input> Mostrar este service na primeira vez que entrar neste módulo </div>
         <div>${unsafeHTML(this.html)}</div>
         `}
       </div>
