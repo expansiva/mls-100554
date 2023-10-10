@@ -10,7 +10,7 @@ export class MLSStartL2 extends LitElement {
   @property({ type: Boolean }) loading: boolean = true;
   @property({ type: String }) msize: string | null = null;
 
-  @query('#l2check') check:HTMLInputElement;
+  @query('#l2check') check: HTMLInputElement;
 
   static get styles() {
     return css`
@@ -21,8 +21,17 @@ export class MLSStartL2 extends LitElement {
     `;
   }
 
+  private state: boolean[] = [];
+  private getData() {
+    let data: boolean[] = [true, true, true, true, true, true, true, true]
+    const dataStr = localStorage.getItem('collabcodes-showstart');
+    if (dataStr) data = JSON.parse(dataStr);
+    this.state = data;
+  }
+
   async connectedCallback() {
     super.connectedCallback();
+    this.getData();
     await this.getHTMLFile();
     this.loading = false;
     this.requestUpdate(); // Trigger a re-render
@@ -47,11 +56,8 @@ export class MLSStartL2 extends LitElement {
     }
   }
   changeStatusService() {
-    let data: boolean[] = [true, true, true, true, true, true, true, true]
-    const dataStr = localStorage.getItem('collabcodes-showstart');
-    if (dataStr) data = JSON.parse(dataStr);
-    data[2] = this.check.checked;
-    localStorage.setItem('collabcodes-showstart', JSON.stringify(data));  
+    this.state[2] = this.check.checked;
+    localStorage.setItem('collabcodes-showstart', JSON.stringify(this.state));
   }
 
   render() {
@@ -60,7 +66,7 @@ export class MLSStartL2 extends LitElement {
         ${this.loading
         ? html`<p>Loading...</p>`
         : html`
-        <div><input id="l2check" checked type="checkbox" @change="${this.changeStatusService}" ></input> Mostrar este service na primeira vez que entrar neste módulo </div>
+        <div><input id="l2check" checked type="checkbox" checked="${this.state[2]}" @change="${this.changeStatusService}" ></input> Mostrar este service na primeira vez que entrar neste módulo </div>
         <div>${unsafeHTML(this.html)}</div>
         `}
       </div>
