@@ -2,6 +2,7 @@
 
 import { html, unsafeHTML, css, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { MLSCheckboxStart } from './_100554_mlsStartCheckbox'
 
 @customElement('mls-start-l2-100554')
 export class MLSStartL2 extends LitElement {
@@ -12,6 +13,8 @@ export class MLSStartL2 extends LitElement {
 
   @query('#l2check') check: HTMLInputElement;
 
+  @query('mls-start-checkbox-100554') mlsCheck: MLSCheckboxStart;
+
   static get styles() {
     return css`
       :host {
@@ -20,7 +23,7 @@ export class MLSStartL2 extends LitElement {
       }
     `;
   }
-  
+
   private state: boolean[] = [];
   private getData() {
     let data: boolean[] = [true, true, true, true, true, true, true, true]
@@ -69,12 +72,8 @@ export class MLSStartL2 extends LitElement {
         ? html`<p>Loading...</p>`
         : html`
         <div>
-          <input
-            id="l2check"
-            type="checkbox"
-            .checked=${(this.state[2])} 
-            @change="${this.changeStatusService}">
-          </input> Mostrar este service na primeira vez que entrar neste módulo </div>
+          <mls-start-checkbox-100554 level="2"></mls-start-checkbox-100554>
+        </div>
         <div>${unsafeHTML(this.html)}</div>
         `}
       </div>
