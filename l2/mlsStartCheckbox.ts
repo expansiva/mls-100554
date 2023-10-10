@@ -7,7 +7,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 export class MLSCheckboxStart extends LitElement {
 
     @property() level = '';
-    @query('input') check: HTMLInputElement;
+    @query('input[type="checkbox"]') check: HTMLInputElement;
 
     private state: boolean[] = [];
     private getData() {
@@ -30,11 +30,13 @@ export class MLSCheckboxStart extends LitElement {
 
     render() {
         return html`
+        <span>
           <input
             type="checkbox"
             .checked=${(this.state[this.level])} 
             @change="${this.changeStatusService}">
-          </input> Mostrar este service na primeira vez que entrar neste módulo </div>    
+          </input> Mostrar este service na primeira vez que entrar neste módulo 
+        </span>    
     `;
     }
 }
