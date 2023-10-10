@@ -1,7 +1,7 @@
 /// <mls shortName="mlsStartL2" project="100554" enhancement="_100541_enhancementLit" />
 
 import { html, unsafeHTML, css, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
 @customElement('mls-start-l2-100554')
 export class MLSStartL2 extends LitElement {
@@ -20,7 +20,8 @@ export class MLSStartL2 extends LitElement {
       }
     `;
   }
-
+  
+  @state()
   private state: boolean[] = [];
   private getData() {
     let data: boolean[] = [true, true, true, true, true, true, true, true]
