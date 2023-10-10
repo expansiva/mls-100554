@@ -27,7 +27,6 @@ export class MLSStartL7 extends LitElement {
   }
 
   async getHTMLFile() {
-    await mls.stor.server.loadProjectInfoIfNeeded(100554);
     const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL7', '', '.html');
     const storFileHTML = mls.stor.files[key];
     let src: string | Blob;
@@ -45,12 +44,19 @@ export class MLSStartL7 extends LitElement {
     }
   }
 
+  changeStatusService() {
+    console.info('do something')
+  }
+
   render() {
     return html`
       <div>
         ${this.loading
         ? html`<p>Loading...</p>`
-        : html`<div>${unsafeHTML(this.html)}</div>`}
+      : html`
+        <div><input checked type="checkbox" @change="${this.changeStatusService}" ></input> Mostrar este service na primeira vez que entrar neste módulo </div>
+        <div>${unsafeHTML(this.html)}</div>
+        `}
       </div>
     `;
   }
