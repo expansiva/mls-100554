@@ -61,6 +61,8 @@ export class MLSStartL2 extends LitElement {
   }
 
   render() {
+
+    console.info(this.state[2])
     return html`
       <div>
         ${this.loading
