@@ -27,9 +27,7 @@ export class MLSStartL7 extends LitElement {
   }
 
     async getHTMLFile() {
-        return '';
     const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL7', '', '.html');
-    
     const storFileHTML = mls.stor.files[key];
     let src: string | Blob;
     const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
