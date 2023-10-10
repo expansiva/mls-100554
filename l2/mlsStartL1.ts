@@ -43,13 +43,17 @@ export class MLSStartL1 extends LitElement {
       this.style.height = height + 'px';
     }
   }
-
   render() {
     return html`
       <div>
         ${this.loading
         ? html`<p>Loading...</p>`
-        : html`<div>${unsafeHTML(this.html)}</div>`}
+        : html`
+        <div>
+          <mls-start-checkbox-100554 level="1"></mls-start-checkbox-100554>
+        </div>
+        <div>${unsafeHTML(this.html)}</div>
+        `}
       </div>
     `;
   }
