@@ -3,8 +3,8 @@
 import { html, unsafeHTML, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('mls-start-l3-100554')
-export class MLSStartL3 extends LitElement {
+@customElement('mls-start-l2-100554')
+export class MLSStartL2 extends LitElement {
 
     @property({ type: String }) html: string | null = null;
     @property({ type: Boolean }) loading: boolean = true;
@@ -27,9 +27,8 @@ export class MLSStartL3 extends LitElement {
     }
 
     async getHTMLFile() {
-        return '';
-        const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL2', '', '.html');
 
+        const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL2', '', '.html');
         const storFileHTML = mls.stor.files[key];
         let src: string | Blob;
         const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
