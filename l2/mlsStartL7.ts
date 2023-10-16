@@ -44,17 +44,15 @@ export class MLSStartL7 extends LitElement {
     }
   }
 
-  changeStatusService() {
-    console.info('do something')
-  }
-
   render() {
     return html`
       <div>
         ${this.loading
         ? html`<p>Loading...</p>`
-      : html`
-        <div><input checked type="checkbox" @change="${this.changeStatusService}" ></input> Mostrar este service na primeira vez que entrar neste módulo </div>
+        : html`
+        <div>
+          <mls-start-checkbox-100554 level="7"></mls-start-checkbox-100554>
+        </div>
         <div>${unsafeHTML(this.html)}</div>
         `}
       </div>
