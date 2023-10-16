@@ -49,11 +49,14 @@ export class MLSStartL4 extends LitElement {
       <div>
         ${this.loading
         ? html`<p>Loading...</p>`
-        : html`<div>${unsafeHTML(this.html)}</div>`}
+        : html`
+        <div>
+          <mls-start-checkbox-100554 level="4"></mls-start-checkbox-100554>
+        </div>
+        <div>${unsafeHTML(this.html)}</div>
+        `}
       </div>
     `;
-
-
   }
 }
 
