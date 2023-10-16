@@ -1,5 +1,5 @@
 /// <mls shortName="mlsStartL1" project="100554" enhancement="_100541_enhancementLit" />
-				
+
 import { html, unsafeHTML, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -26,13 +26,11 @@ export class MLSStartL1 extends LitElement {
     this.requestUpdate(); // Trigger a re-render
   }
 
-    async getHTMLFile() {
-    const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL1', '', '.html');
+  async getHTMLFile() {
+    const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL4', '', '.html');
     const storFileHTML = mls.stor.files[key];
-    let src: string | Blob;
     const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
-    const haveInfo: boolean = info && !!info.content;
-    src = haveInfo ? info.content : await storFileHTML.getContent();
+    const src = info && info.content ? info.content as string : await storFileHTML.getContent();
     this.html = src as string;
   }
 
@@ -52,7 +50,7 @@ export class MLSStartL1 extends LitElement {
         <div>
           <mls-start-checkbox-100554 level="1"></mls-start-checkbox-100554>
         </div>
-        <div>${unsafeHTML(this.html)}</div>
+        <div>${unsafeHTML(this.html || '')}</div>
         `}
       </div>
     `;
