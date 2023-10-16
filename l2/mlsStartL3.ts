@@ -27,13 +27,10 @@ export class MLSStartL3 extends LitElement {
   }
 
   async getHTMLFile() {
-    const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL3', '', '.html');
-    
+    const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL4', '', '.html');
     const storFileHTML = mls.stor.files[key];
-    let src: string | Blob;
     const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
-    const haveInfo: boolean = info && !!info.content;
-    src = haveInfo ? info.content : await storFileHTML.getContent();
+    const src = info && info.content ? info.content as string : await storFileHTML.getContent();
     this.html = src as string;
   }
 
@@ -54,7 +51,7 @@ export class MLSStartL3 extends LitElement {
         <div>
           <mls-start-checkbox-100554 level="3"></mls-start-checkbox-100554>
         </div>
-        <div>${unsafeHTML(this.html)}</div>
+        <div>${unsafeHTML(this.html || '')}</div>
         `}
       </div>
     `;
