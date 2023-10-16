@@ -24,6 +24,7 @@ export class MLSStartL5 extends LitElement {
     await this.getHTMLFile();
     this.loading = false;
     this.requestUpdate(); // Trigger a re-render
+  
   }
 
   async getHTMLFile() {
@@ -49,10 +50,13 @@ export class MLSStartL5 extends LitElement {
       <div>
         ${this.loading
         ? html`<p>Loading...</p>`
-        : html`<div>${unsafeHTML(this.html)}</div>`}
+        : html`
+        <div>
+          <mls-start-checkbox-100554 level="5"></mls-start-checkbox-100554>
+        </div>
+        <div>${unsafeHTML(this.html)}</div>
+        `}
       </div>
     `;
-
-
   }
 }
