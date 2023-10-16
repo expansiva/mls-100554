@@ -7,7 +7,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 export class MLSCheckboxStart extends LitElement {
 
     @property() level = '';
-    @query('input[type="checkbox"]') check: HTMLInputElement;
+    @query('input[type="checkbox"]') check: HTMLInputElement | undefined;
 
     private state: boolean[] = [];
     private getData() {
@@ -24,7 +24,7 @@ export class MLSCheckboxStart extends LitElement {
     }
 
     changeStatusService() {
-        this.state[this.level] = this.check.checked;
+        this.state[this.level] = this.check ? this.check.checked : true;
         localStorage.setItem('collabcodes-showstart', JSON.stringify(this.state));
     }
 
