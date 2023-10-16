@@ -26,15 +26,13 @@ export class MLSStartL0 extends LitElement {
         this.requestUpdate(); // Trigger a re-render
     }
 
-    async getHTMLFile() {
-        const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL0', '', '.html');
-        const storFileHTML = mls.stor.files[key];
-        let src: string | Blob;
-        const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
-        const haveInfo: boolean = info && !!info.content;
-        src = haveInfo ? info.content : await storFileHTML.getContent();
-        this.html = src as string;
-    }
+  async getHTMLFile() {
+    const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL4', '', '.html');
+    const storFileHTML = mls.stor.files[key];
+    const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
+    const src = info && info.content ? info.content as string : await storFileHTML.getContent();
+    this.html = src as string;
+  }
 
     attributeChangedCallback(name: string, oldVal: string, newVal: string) {
         super.attributeChangedCallback(name, oldVal, newVal);
@@ -53,7 +51,7 @@ export class MLSStartL0 extends LitElement {
         <div>
           <mls-start-checkbox-100554 level="0"></mls-start-checkbox-100554>
         </div>
-        <div>${unsafeHTML(this.html)}</div>
+        <div>${unsafeHTML(this.html || '')}</div>
         `}
       </div>
     `;
