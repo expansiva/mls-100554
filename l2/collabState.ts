@@ -4,8 +4,8 @@
  * Class responsible for managing shared state.
  */
 export class CollabState {
-  private stateMap: Map<string, any> = new Map();
-  private componentMap: Map<string, Set<Object>> = new Map();
+  private stateMap: Map<string, any> = new Map(); // values of variables
+  private componentMap: Map<string, Set<Object>> = new Map(); // subscribes
 
   /**
    * Update state for a given key.
@@ -26,24 +26,32 @@ export class CollabState {
   }
 
   /**
-   * Subscribe a component to a state key.
-   * @param key - The state key.
+   * Subscribe a component to a state key or keys.
+   * @param keyOrKeys - The state key or keys.
    * @param component - The subscribing component.
    */
-  subscribe(key: string, component: Object): void {
-    if (!this.componentMap.has(key)) {
-      this.componentMap.set(key, new Set());
-    }
-    this.componentMap.get(key)!.add(component);
+  subscribe(keyOrKeys: string | string[], component: Object): void {
+    const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
+    
+    keys.forEach((key) => {
+      if (!this.componentMap.has(key)) {
+        this.componentMap.set(key, new Set());
+      }
+      this.componentMap.get(key)!.add(component);
+    });
   }
 
   /**
-   * Unsubscribe a component from a state key.
-   * @param key - The state key.
+   * Unsubscribe a component from a state key or keys.
+   * @param keyOrKeys - The state key or keys.
    * @param component - The unsubscribing component.
    */
-  unsubscribe(key: string, component: Object): void {
-    this.componentMap.get(key)?.delete(component);
+  unsubscribe(keyOrKeys: string | string[], component: Object): void {
+    const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
+    
+    keys.forEach((key) => {
+      this.componentMap.get(key)?.delete(component);
+    });
   }
 
   /**
