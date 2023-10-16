@@ -32,6 +32,17 @@ export function collabState(customKey?: string): PropertyDecorator {
         this.requestUpdate(propertyKey as string, value);
       }
     };
+
+    Object.defineProperty(proto, propertyKey, {
+      get() {
+        return state1.getState(key);
+      },
+      set(value: any) {
+        state1.setState(key, value);
+      },
+      configurable: true,
+      enumerable: true
+    });    
   };
 }
 
