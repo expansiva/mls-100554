@@ -30,13 +30,15 @@ export class MLSCheckboxStart extends LitElement {
 
     render() {
         return html`
-        <span>
+        <div>
           <input
+            id = "checkbox_level_${ this.level}"
             type="checkbox"
             .checked=${(this.state[this.level])} 
             @change="${this.changeStatusService}">
-          </input> Mostrar este service na primeira vez que entrar neste módulo 
-        </span>    
+          </input>
+          <label for="checkbox_level_${ this.level}"> Mostrar este service na primeira vez que entrar neste módulo </label>
+        </div>    
     `;
     }
 }
