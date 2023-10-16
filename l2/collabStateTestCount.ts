@@ -3,17 +3,24 @@
 import { html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { CollabLitElement, collabState } from 'CollabLitElement';
+import * as states from './_100554_collabStore';
 
 
 @customElement('collab-state-test-count-100554')
 class MyComponent extends CollabLitElement {
-  @collabState() count = 0;
+  @collabState(states.COUNTHITSPAGES) count = 0;
+
+  @collabState()
+  user: { name: string, codigo: number } = { name: 'wagner', codigo: 11 }
+
 
   static styles = css`
     /* seu CSS aqui */
   `;
 
   render() {
+    this.setCollabState( 'user', { name: this.user.name, codigo: 12 } )
+    
     return html`
       <button @click=${() => this.setCollabState('count', this.count + 1)}>
         Increment
