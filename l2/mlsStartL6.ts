@@ -44,15 +44,18 @@ export class MLSStartL6 extends LitElement {
         }
     }
 
-    render() {
-        return html`
+  render() {
+    return html`
       <div>
         ${this.loading
-                ? html`<p>Loading...</p>`
-                : html`<div>${unsafeHTML(this.html)}</div>`}
+        ? html`<p>Loading...</p>`
+        : html`
+        <div>
+          <mls-start-checkbox-100554 level="6"></mls-start-checkbox-100554>
+        </div>
+        <div>${unsafeHTML(this.html)}</div>
+        `}
       </div>
     `;
-
-
-    }
+  }
 }
