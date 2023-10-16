@@ -1,8 +1,7 @@
 /// <mls shortName="mlsStartL2" project="100554" enhancement="_100541_enhancementLit" />
 
 import { html, unsafeHTML, css, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import { MLSCheckboxStart } from './_100554_mlsStartCheckbox'
+import { customElement, property, query } from 'lit/decorators.js';
 
 @customElement('mls-start-l2-100554')
 export class MLSStartL2 extends LitElement {
@@ -11,9 +10,6 @@ export class MLSStartL2 extends LitElement {
   @property({ type: Boolean }) loading: boolean = true;
   @property({ type: String }) msize: string | null = null;
 
-  @query('#l2check') check: HTMLInputElement;
-
-  @query('mls-start-checkbox-100554') mlsCheck: MLSCheckboxStart;
 
   static get styles() {
     return css`
@@ -24,17 +20,8 @@ export class MLSStartL2 extends LitElement {
     `;
   }
 
-  private state: boolean[] = [];
-  private getData() {
-    let data: boolean[] = [true, true, true, true, true, true, true, true]
-    const dataStr = localStorage.getItem('collabcodes-showstart');
-    if (dataStr) data = JSON.parse(dataStr);
-    this.state = data;
-  }
-
   async connectedCallback() {
     super.connectedCallback();
-    this.getData();
     await this.getHTMLFile();
     this.loading = false;
     this.requestUpdate(); // Trigger a re-render
@@ -58,14 +45,8 @@ export class MLSStartL2 extends LitElement {
       this.style.height = height + 'px';
     }
   }
-  changeStatusService() {
-    this.state[2] = this.check.checked;
-    localStorage.setItem('collabcodes-showstart', JSON.stringify(this.state));
-  }
 
   render() {
-
-    console.info(this.state[2])
     return html`
       <div>
         ${this.loading
