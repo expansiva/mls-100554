@@ -19,7 +19,7 @@ class MyComponent extends CollabLitElement {
   `;
 
   render() {
-    super.setCollabState( 'user', { name: this.user.name, codigo: 12 } )
+    
     
     return html`
       <button @click=${() => super.setCollabState('count', this.count + 1)}>
