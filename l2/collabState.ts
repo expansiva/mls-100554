@@ -1,5 +1,7 @@
 /// <mls shortName="collabState" project="100554" enhancement="_blank" />
-				
+
+const isTrace = false;
+
 /**
  * Class responsible for managing shared state.
  */
@@ -13,8 +15,12 @@ export class CollabState {
    * @param value - The new state value.
    */
   setState(key: string, value: any): void {
-    this.stateMap.set(key, value);
-    this.notify(key);
+    const oldValue = this.stateMap.get(key);
+    if (isTrace) console.info('setState key: ' + key + ' value=', value, ", oldValue=", oldValue)
+    if (oldValue !== value) {
+      this.stateMap.set(key, value);
+      this.notify(key);
+    }
   }
 
   /**
@@ -22,7 +28,9 @@ export class CollabState {
    * @param key - The state key.
    */
   getState(key: string): any {
-    return this.stateMap.get(key);
+    const value = this.stateMap.get(key);
+    if (isTrace) console.info('getState key: ' + key + ' value=', value);
+    return value;
   }
 
   /**
