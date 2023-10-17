@@ -1,31 +1,37 @@
 /// <mls shortName="collabStateTestCount" project="100554" enhancement="_100554_enhancementLit" />
 
-import { html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { html,  } from 'lit';
+import { customElement, property  } from 'lit/decorators.js';
 import { CollabLitElement, collabState } from './_100554_collabLitElement';
 import * as states from './_100554_collabStore';
 
-
 @customElement('collab-state-test-count-100554')
 class MyComponent extends CollabLitElement {
-  @collabState(states.COUNTHITSPAGES) count = 0;
+  @property({ type: Number })
+  @collabState(states.COUNTHITSPAGES)
+  count = 0;
 
-  @collabState()
-  user: { name: string, codigo: number } = { name: 'wagner', codigo: 11 }
-
-
-  static styles = css`
-    /* seu CSS aqui */
-  `;
+  connectedCallback() {
+    super.connectedCallback();
+    setTimeout(() => {
+      this.count += 10; // set count += 10 after 3 sec. 
+    }, 3000);
+  }
 
   render() {
-    
-    
     return html`
-      <button @click=${() => super.setCollabState('count', this.count + 1)}>
-        Increment
+      <button @click=${this.increment}>Increment Lit default</button>
+      <button @click=${() => super.setCollabState(states.COUNTHITSPAGES, this.count + 1)} style='margin: 2em'>
+        Increment CollabState
       </button>
       <div>Count: ${this.count}</div>
     `;
   }
+
+  increment() {
+    this.count++;
+    // call setCollabState to update state on others
+    super.setCollabState(states.COUNTHITSPAGES, this.count); 
+  }  
+
 }
