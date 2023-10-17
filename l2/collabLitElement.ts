@@ -3,6 +3,7 @@
 import { LitElement } from 'lit';
 import { CollabState } from './_100554_collabState';
 
+const isTrace = false;
 const state1 = new CollabState();
 
 /**
@@ -16,33 +17,42 @@ export function collabState(customKey?: string): PropertyDecorator {
     const { connectedCallback, disconnectedCallback } = proto as any;
 
     (proto as any).connectedCallback = function() {
+      if (isTrace) console.log('connectedCallback, key=' + key);
       connectedCallback?.call(this);
       state1.subscribe(key, this);
-      this[propertyKey] = state1.getState(key);
+      // const value = state1.getState(key);
+      // this[propertyKey] = value !== undefined ? value : this[propertyKey];
     };
 
     (proto as any).disconnectedCallback = function() {
+      if (isTrace) console.log('disconnectedCallback, key=' + key);
       disconnectedCallback?.call(this);
       state1.unsubscribe(key, this);
     };
 
-    (proto as any).handleCollabStateChange = function(changedKey: string, value: any) {
-      if (changedKey === key) {
-        this[propertyKey] = value;
-        this.requestUpdate(propertyKey as string, value);
-      }
+    (proto as any).handleCollabStateChange = function (changedKey: string, value: any) {
+      if (isTrace) console.log('handleCollabStateChange, key=' + key + ', value=', value);
+      this[propertyKey] = value;
+      this.requestUpdate(propertyKey as string, value);
+      // if (changedKey === key && this[propertyKey] !== value) {
+      //   this[propertyKey] = value;
+      //   this.requestUpdate(propertyKey as string, value);
+      // }
     };
 
-    Object.defineProperty(proto, propertyKey, {
-      get() {
-        return state1.getState(key);
-      },
-      set(value: any) {
-        state1.setState(key, value);
-      },
-      configurable: true,
-      enumerable: true
-    });    
+    // Object.defineProperty(proto, propertyKey, {
+    //   get() {
+    //     const value = state1.getState(key);
+    //     console.log('state get, key=' + key + ', value=', value);
+    //     return value;
+    //   },
+    //   set(value: any) {
+    //     console.log('state set, key=' + key + ', value=', value);
+    //     state1.setState(key, value);
+    //   },
+    //   configurable: true,
+    //   enumerable: true
+    // });    
   };
 }
 
@@ -57,6 +67,10 @@ export class CollabLitElement extends LitElement {
    */
   setCollabState(key: string, value: any): void {
     state1.setState(key, value);
+  }
+
+  collabRequestUpdate() {
+    super.requestUpdate()
   }
 }
 
