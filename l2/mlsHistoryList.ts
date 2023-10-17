@@ -202,7 +202,7 @@ export class SimpleGreeting extends LitElement {
         }
 
         console.info(obj)
-        //mls.events.fire([2], 'HistoriesSelected' as any, JSON.stringify(obj), 0);
+        mls.events.fire([2], 'HistoriesSelected' as any, JSON.stringify(obj), 0);
     }
 
     render() {
