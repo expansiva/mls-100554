@@ -8,6 +8,7 @@ export class SimpleGreeting extends LitElement {
 
     @property({ type: Number }) project: number = 100554;
     @property({ type: String }) shortName: string = 'mlsStartL2';
+    @property({ type: String }) position: 'left' | 'right' = 'left';
     @property({ type: String }) folder: string = '';
     @property({ type: Number }) level: number = 2;
     @property({ type: String }) extension: string = '.ts';
@@ -190,12 +191,13 @@ export class SimpleGreeting extends LitElement {
             project: this.project,
             shortName: this.shortName,
             extension: this.extension,
+            position: this.position,
             level: this.level,
             folder: this.folder,
             hashOriginal,
             hashModified,
         }
-        mls.events.fire([2], 'HistoriesSelected' as any, JSON.stringify(obj), 0)
+        mls.events.fire([2], 'HistoriesSelected' as any, JSON.stringify(obj), 0);
     }
 
     render() {
@@ -240,6 +242,7 @@ interface IEventParams {
     shortName: string,
     extension: string,
     level: number,
+    position: 'left' | 'right',
     folder: string,
     hashOriginal:string,
     hashModified:string,
