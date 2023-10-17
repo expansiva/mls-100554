@@ -176,16 +176,19 @@ export class SimpleGreeting extends LitElement {
         const li = (target as HTMLElement).closest('li');
         if (!li) return;
 
-        const hashOriginal = li.getAttribute('hash') || '';
+        const hashModified = li.getAttribute('hash') || '';
         let nextLi = li.nextElementSibling as HTMLElement;
         if (!nextLi) {
             const actualUl = li.closest('ul');
-            const nextUl = actualUl?.nextElementSibling;
-            if (nextUl) nextLi = nextUl.childNodes[0] as HTMLElement;
+            const nextParentUl = actualUl?.closest('li');
+            const nextUlLi = nextParentUl?.nextElementSibling;
+            const nextUl = nextUlLi?.querySelector('ul');
+            if (nextUl) nextLi = nextUl.children[0] as HTMLElement;
         }
 
-        let hashModified = '';
-        if (nextLi) hashModified = nextLi.getAttribute('hash') || '';
+
+        let hashOriginal = '';
+        if (nextLi) hashOriginal = nextLi.getAttribute('hash') || '';
 
         const obj:IEventParams = {
             project: this.project,
@@ -197,7 +200,9 @@ export class SimpleGreeting extends LitElement {
             hashOriginal,
             hashModified,
         }
-        mls.events.fire([2], 'HistoriesSelected' as any, JSON.stringify(obj), 0);
+
+        console.info(obj)
+        //mls.events.fire([2], 'HistoriesSelected' as any, JSON.stringify(obj), 0);
     }
 
     render() {
