@@ -32,6 +32,7 @@ export class SimpleGreeting extends LitElement {
         // const arrayOfArrays = Object.values(data2);
         // const data3: (IHistoryItem | IHistory)[] = [].concat(...arrayOfArrays as any);
         this.data = data;
+        console.info(data)
     }
 
     attributeChangedCallback(name: string, oldVal: string, newVal: string) {
@@ -168,7 +169,35 @@ export class SimpleGreeting extends LitElement {
     createRenderRoot() {
         return this;
     }
-    
+
+    handleClick(a: PointerEvent) {
+        const target = a.target;
+        const li = (target as HTMLElement).closest('li');
+        if (!li) return;
+
+        const hashOriginal = li.getAttribute('hash') || '';
+        let nextLi = li.nextElementSibling as HTMLElement;
+        if (!nextLi) {
+            const actualUl = li.closest('ul');
+            const nextUl = actualUl?.nextElementSibling;
+            if (nextUl) nextLi = nextUl.childNodes[0] as HTMLElement;
+        }
+
+        let hashModified = '';
+        if (nextLi) hashModified = nextLi.getAttribute('hash') || '';
+
+        const obj:IEventParams = {
+            project: this.project,
+            shortName: this.shortName,
+            extension: this.extension,
+            level: this.level,
+            folder: this.folder,
+            hashOriginal,
+            hashModified,
+        }
+        mls.events.fire([2], 'HistoriesSelected' as any, JSON.stringify(obj), 0)
+    }
+
     render() {
         return html`
       <div>
@@ -184,7 +213,7 @@ export class SimpleGreeting extends LitElement {
                             <div>
                                 <ul>
                                     ${itemT.itens.map(itemH => html`
-                                        <li class="historie-item">
+                                        <li class="historie-item" hash="${itemH.hash}" @click="${this.handleClick}">
                                             <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
                                             <span>${itemH.time}</span>
                                             <img src="${itemH.authorUrl}" alt="${itemH.author}"></img>
@@ -206,6 +235,15 @@ export class SimpleGreeting extends LitElement {
 
 }
 
+interface IEventParams {
+    project: number,
+    shortName: string,
+    extension: string,
+    level: number,
+    folder: string,
+    hashOriginal:string,
+    hashModified:string,
+}
 interface IHistoryRet {
     authorName: string,
     authorUrl: string,
