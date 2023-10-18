@@ -14,12 +14,12 @@ export class MLSStartL0 extends LitElement {
         return css`
       :host {
         display:block;
-        overflow: auto;
+        overflow: auto;;
       }
     `;
     }
 
-    async connectedCallback() {
+  async connectedCallback() {
         super.connectedCallback();
         await this.getHTMLFile();
         this.loading = false;
