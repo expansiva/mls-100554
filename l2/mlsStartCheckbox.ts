@@ -6,7 +6,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 @customElement('mls-start-checkbox-100554')
 export class MLSCheckboxStart extends LitElement {
 
-    @property() level = '';
+    @property() level:number = 0;
     @query('input[type="checkbox"]') check: HTMLInputElement | undefined;
 
     private state: boolean[] = [];
