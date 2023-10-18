@@ -11,10 +11,12 @@ class MyComponent extends CollabLitElement {
   @collabState(states.COUNTHITSPAGES)
   count = 0;
 
+
   connectedCallback() {
     super.connectedCallback();
     setTimeout(() => {
       this.count += 10; // set count += 10 after 3 sec. 
+      super.setCollabState(states.COUNTHITSPAGES, this.count); 
     }, 3000);
   }
 
