@@ -1,6 +1,6 @@
 /// <mls shortName="mlsHistoryList" project="100554" enhancement="_100541_enhancementLit" groupName="internal" />
 
-import { html, css, LitElement } from 'lit';
+import { html, ifDefined, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 @customElement('mls-history-list-100554')
@@ -11,8 +11,8 @@ export class SimpleGreeting extends LitElement {
     @property({ type: String }) position: 'left' | 'right' = 'left';
     @property({ type: String }) folder: string = '';
     @property({ type: Number }) level: number = 2;
-    @property({ type: String }) extension: string = '.ts';
-    @property({ type: Boolean }) loading: boolean = true;
+    @property({ type: String, }) extension: string = '.ts';
+    @property({ type: Boolean, }) loading: boolean = true;
 
     private data: IHistory[] = [];
 
@@ -20,7 +20,8 @@ export class SimpleGreeting extends LitElement {
         super.connectedCallback();
         await this.getListHistory();
         this.loading = false;
-        this.requestUpdate(); // Trigger a re-render
+        // this.requestUpdate(); // Trigger a re-render
+
     }
 
     async getListHistory() {
@@ -28,10 +29,9 @@ export class SimpleGreeting extends LitElement {
         const storFile = mls.stor.files[key];
         const driver: any = mls.stor.others.getDriver(100529, "github");
         const historie: IHistoryRet[] = await driver.getHistory(storFile);
+        console.info(historie)
+
         const data = this.createJson(historie);
-        // const data2 = data.map((item) => [item, ...item.itens])
-        // const arrayOfArrays = Object.values(data2);
-        // const data3: (IHistoryItem | IHistory)[] = [].concat(...arrayOfArrays as any);
         this.data = data;
         console.info(data)
     }
@@ -45,11 +45,8 @@ export class SimpleGreeting extends LitElement {
     }
 
     private createJson(gitObj: IHistoryRet[]): IHistory[] {
-
         const today: Date = new Date();
-
         gitObj.forEach((item: IHistoryRet, index: number) => {
-
             const itemDate: Date = new Date(item.data);
             const yesterday = new Date(new Date().setDate((today.getDate() - 1)));
             if (today.toDateString() === itemDate.toDateString()) item.offsetDay = 0;
@@ -61,17 +58,33 @@ export class SimpleGreeting extends LitElement {
             item.index = this.findFirstInFilters(item);
             const filterTitle = this.filters[item.index].title;
             item.title = filterTitle.replace('{year}', itemDate.getFullYear().toString()).replace('{month}', `${itemDate.getFullYear()}-${('00' + (itemDate.getMonth() + 1)).slice(-2)}`);
-
         });
-
         return this.createJson2(gitObj);
-
     }
 
     private createJson2(gitObj: IHistoryRet[]): IHistory[] {
 
         const ret: IHistory[] = [];
         const ret2 = {} as any;
+
+        const objLocal: IHistory = {} as { title: string, open: boolean, itens: [], type: 'item' | 'title' };
+        objLocal.title = 'Local Changes'
+        const localAuthor = localStorage.getItem('loginUser') || 'unknow';
+        const localItem: IHistoryItem = {
+            author: localAuthor,
+            authorUrl: '',
+            dateAm: '',
+            hash: 'local',
+            time: '',
+            type: 'item',
+            linesDeleted: undefined,
+            linesInserted: undefined
+        }
+        objLocal.type = 'title';
+        objLocal.itens = [];
+        objLocal.itens.push(localItem);
+        ret.push(objLocal);
+
         gitObj.forEach((item) => {
             if (ret2[item.title]) ret2[item.title].push(item);
             else ret2[item.title] = [item];
@@ -80,6 +93,8 @@ export class SimpleGreeting extends LitElement {
         Object.keys(ret2).forEach((keys) => {
             const obj: IHistory = {} as { title: string, open: boolean, itens: [], type: 'item' | 'title' };
             ret.push(obj);
+
+
             ret2[keys].forEach((item: IHistoryRet, index: number) => {
                 if (index === 0) {
                     obj.title = item.title;
@@ -95,12 +110,16 @@ export class SimpleGreeting extends LitElement {
                     hash: item.ref,
                     authorUrl: item.authorUrl,
                     type: 'item',
+                    linesDeleted: item.deletions,
+                    linesInserted: item.additions
                 };
                 obj.itens.push(objItem);
                 obj.open = false;
             });
 
         });
+
+        console.info(ret)
         return ret;
     }
 
@@ -190,7 +209,7 @@ export class SimpleGreeting extends LitElement {
         let hashOriginal = '';
         if (nextLi) hashOriginal = nextLi.getAttribute('hash') || '';
 
-        const obj:IEventParams = {
+        const obj: IEventParams = {
             project: this.project,
             shortName: this.shortName,
             extension: this.extension,
@@ -223,7 +242,14 @@ export class SimpleGreeting extends LitElement {
                                         <li class="historie-item" hash="${itemH.hash}" @click="${this.handleClick}">
                                             <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
                                             <span>${itemH.time}</span>
-                                            <img src="${itemH.authorUrl}" alt="${itemH.author}"></img>
+                                            <div class="historie-lines" style="${itemH.linesInserted === undefined ? 'display:none' : 'display-block'}">
+                                                <span class='historie-additions'>+${itemH.linesInserted}</span>
+                                                <span class='historie-deletions'>-${itemH.linesDeleted}</span>
+                                            </div>
+                                            ${itemH.authorUrl
+                                                    ? html`<img src="${itemH.authorUrl}" alt="${itemH.author}"></img>`
+                                                    : html`<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M448 80v48c0 44.2-100.3 80-224 80S0 172.2 0 128V80C0 35.8 100.3 0 224 0S448 35.8 448 80zM393.2 214.7c20.8-7.4 39.9-16.9 54.8-28.6V288c0 44.2-100.3 80-224 80S0 332.2 0 288V186.1c14.9 11.8 34 21.2 54.8 28.6C99.7 230.7 159.5 240 224 240s124.3-9.3 169.2-25.3zM0 346.1c14.9 11.8 34 21.2 54.8 28.6C99.7 390.7 159.5 400 224 400s124.3-9.3 169.2-25.3c20.8-7.4 39.9-16.9 54.8-28.6V432c0 44.2-100.3 80-224 80S0 476.2 0 432V346.1z"/></svg>`
+                                            } 
                                             <span>${itemH.author}</span>
                                         </li>
                                     `)}
@@ -249,8 +275,8 @@ interface IEventParams {
     level: number,
     position: 'left' | 'right',
     folder: string,
-    hashOriginal:string,
-    hashModified:string,
+    hashOriginal: string,
+    hashModified: string,
 }
 interface IHistoryRet {
     authorName: string,
@@ -258,6 +284,8 @@ interface IHistoryRet {
     data: Date,
     ref: string,
     message: string,
+    additions: number
+    deletions: number
     offsetDay: number,
     offsetWeek: number,
     offsetMonth: number,
@@ -281,8 +309,8 @@ export interface IHistoryItem {
     dateAm: string,
     hash: string,
     subject?: string,
-    linesInserted?: string,
-    linesDeleted?: string,
+    linesInserted: number | undefined,
+    linesDeleted: number | undefined,
     authorUrl: string,
     type: 'item' | 'title',
 }
