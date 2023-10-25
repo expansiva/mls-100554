@@ -14,7 +14,19 @@ export class MLSStartL0 extends LitElement {
         return css`
       :host {
         display:block;
-        overflow: auto;;
+        overflow: auto;
+      
+        padding: 0rem 3.5rem;
+        font-family: 'Cambria', serif;
+      }
+      h1, h2, h3 ,h4 , h5, h6, h7 {
+        letter-spacing: -0.011em;
+      }
+      ol > li , ul > li {
+        margin-top:1em;
+      }
+      span, p {
+          line-height: 32px;
       }
     `;
     }

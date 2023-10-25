@@ -15,6 +15,18 @@ export class MLSStartL7 extends LitElement {
       :host {
         display:block;
         overflow: auto;
+      
+        padding: 0rem 3.5rem;
+        font-family: 'Cambria', serif;
+      }
+      h1, h2, h3 ,h4 , h5, h6, h7 {
+        letter-spacing: -0.011em;
+      }
+      ol > li , ul > li {
+        margin-top:1em;
+      }
+      span, p {
+          line-height: 32px;
       }
     `;
   }
@@ -26,7 +38,7 @@ export class MLSStartL7 extends LitElement {
     this.requestUpdate(); // Trigger a re-render
   }
 
-    async getHTMLFile() {
+  async getHTMLFile() {
     const key = mls.stor.getKeyToFiles(100554, 2, 'mlsStartL7', '', '.html');
     const storFileHTML = mls.stor.files[key];
     const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
