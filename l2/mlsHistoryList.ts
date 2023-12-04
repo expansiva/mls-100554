@@ -89,7 +89,6 @@ export class SimpleGreeting extends LitElement {
             const obj: IHistory = {} as { title: string, open: boolean, itens: [], type: 'item' | 'title' };
             ret.push(obj);
 
-
             ret2[keys].forEach((item: IHistoryRet, index: number) => {
                 if (index === 0) {
                     obj.title = item.title;
@@ -114,7 +113,6 @@ export class SimpleGreeting extends LitElement {
 
         });
 
-        console.info(ret)
         return ret;
     }
 
@@ -238,7 +236,7 @@ export class SimpleGreeting extends LitElement {
                                         <li class="historie-item" hash="${itemH.hash}" @click="${this.handleClick}">
                                             <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
                                             <span>${itemH.time}</span>
-                                            <div class="historie-lines" style="${itemH.linesInserted === undefined ? 'display:none' : 'display-block'}">
+                                            <div class="historie-lines" style="${itemH.linesInserted === undefined ? 'display:none' : 'display:inline-flex'}">
                                                 <span class='historie-additions'>+${itemH.linesInserted}</span>
                                                 <span class='historie-deletions'>-${itemH.linesDeleted}</span>
                                             </div>
