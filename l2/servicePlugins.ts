@@ -166,10 +166,10 @@ export class ServicePlugins extends LitElement {
                         </div>
                         <div class="plugin-actions">
                             ${plugin.status === 'active' ?
-                html`<a  href="#" @click="${() => this.deactivateClicked(plugin)}">Deactivate</a>` :
-                html`<a  href="#" @click="${() => this.activateClicked(plugin)}">Activate</a>`
+                    html`<a  href="#" @click="${(e:MouseEvent) => { e.preventDefault(); this.deactivateClicked(plugin)}}">Deactivate</a>` :
+                    html`<a  href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.activateClicked(plugin) }}">Activate</a>`
             }
-                            <a class="delete" href="#" @click="${() => this.deleteClicked(plugin)}">Delete</a>
+                            <a class="delete" href="#" @click="${(e:MouseEvent) => {e.preventDefault(); this.deleteClicked(plugin)}}">Delete</a>
                         </div>
                     </li>
                 `)}
