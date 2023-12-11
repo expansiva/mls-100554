@@ -4,7 +4,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 @customElement('service-plugins-100554')
-export class SimpleGreeting extends LitElement {
+export class ServicePlugins extends LitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
@@ -14,17 +14,18 @@ export class SimpleGreeting extends LitElement {
     @property({ type: String, reflect: true })
     public position: 'left' | 'right' | undefined;
 
-    private projectActual = 0;
+    @property({ type: Array }) plugins: Plugin[] = this.getExamplesPlugins();
 
+    @property({ type: String }) filterTerm: string = '';
 
     // eslint-disable-next-line
     public static details = {
         icon: '&#xf142',//'&#xf142', '&#xf15b'
-        name: 'Teste',
+        name: 'Plugins',
         mode: 'A',
         position: 'all',
         readOnly: false,
-        tooltip: 'Teste',
+        tooltip: 'Plugins',
         visible: 'A',
         className: '',
         tags: []
@@ -70,17 +71,6 @@ export class SimpleGreeting extends LitElement {
         ];
     }
 
-    // Método para renderizar o cabeçalho
-    renderHeader() {
-        return html`
-            <div class="header">
-                <button @click="${this.installPluginClicked}">Install Plugin</button>
-                <button @click="${this.createNewPluginClicked}">Create New Plugin</button>
-                <input type="text" placeholder="Search plugin..." @input="${this.searchInputChanged}">
-            </div>
-        `;
-    }
-
     // Handlers para eventos de clique (Implementações fictícias)
     installPluginClicked() {
         console.log("Install Plugin clicked");
@@ -95,32 +85,10 @@ export class SimpleGreeting extends LitElement {
     searchInputChanged(event: Event) {
         const searchTerm = (event.target as HTMLInputElement).value;
         console.log("Search Term:", searchTerm);
-        // Implementar lógica de pesquisa
-    }
-
-    renderListPlugins() {
-        return html`
-        <div class="plugin-list">
-            ${this.getExamplesPlugins().map(plugin => html`
-                <div class="plugin">
-                    <div class="plugin-info">
-                        <h3>${plugin.name}</h3>
-                        <p>${plugin.description}</p>
-                        <p><strong>Category:</strong> ${plugin.category}</p>
-                        <p><strong>Reference:</strong> ${plugin.ref}</p>
-                    </div>
-                    <div class="plugin-actions">
-                        ${plugin.status === 'active' ?
-                html`<button @click="${() => this.deactivateClicked(plugin)}">Deactivate</button>` :
-                html`<button @click="${() => this.activateClicked(plugin)}">Activate</button>`
-            }
-                        <button @click="${() => this.deleteClicked(plugin)}">Delete</button>
-                        <button @click="${() => this.optionsClicked(plugin)}">Options</button>
-                    </div>
-                </div>
-            `)}
-        </div>
-    `;
+        this.filterTerm = searchTerm;
+        const plugins = this.filterPlugins(this.getExamplesPlugins());
+        console.info(plugins)
+        this.plugins = plugins;
     }
 
     // Handlers para eventos de clique (Implementações fictícias)
@@ -130,7 +98,7 @@ export class SimpleGreeting extends LitElement {
     }
 
     deactivateClicked(plugin: Plugin) {
-        console.log("Deactivate clicked for:", plugin.name);
+        console.info("Deactivate clicked for:", plugin.name);
         // Implementar lógica de desativação
     }
 
@@ -144,6 +112,71 @@ export class SimpleGreeting extends LitElement {
         // Implementar lógica para opções
     }
 
+    groupPluginsByCategory(plugins: Plugin[]): { [category: string]: Plugin[] } {
+        return plugins.reduce((acc, plugin) => {
+            if (!acc[plugin.category]) {
+                acc[plugin.category] = [];
+            }
+            acc[plugin.category].push(plugin);
+            return acc;
+        }, {} as { [category: string]: Plugin[] });
+    }
+
+    filterPlugins(plugins: Plugin[]): Plugin[] {
+    
+        if (!this.filterTerm.trim()) {
+            return plugins;
+        }
+        const searchTerm = this.filterTerm.toLowerCase();
+        console.info({searchTerm})
+        return plugins.filter(plugin =>
+            plugin.name.toLowerCase().includes(searchTerm) ||
+            plugin.description.toLowerCase().includes(searchTerm) ||
+            plugin.ref.toLowerCase().includes(searchTerm)
+        );
+    }
+
+    // Método para renderizar o cabeçalho
+    renderHeader() {
+        return html`
+            <div class="header">
+                <button @click="${this.installPluginClicked}">Install Plugin</button>
+                <button @click="${this.createNewPluginClicked}">Create New Plugin</button>
+                <input type="text" placeholder="Search plugin..." @input="${this.searchInputChanged}">
+            </div>
+        `;
+    }
+
+    renderListPlugins() {
+        // Agrupar plugins por categoria
+        const groupedPlugins = this.groupPluginsByCategory(this.plugins);
+        console.info(this.plugins);
+        return html`
+        <ul class="plugin-list">
+            ${Object.keys(groupedPlugins).map(category => html`
+                <li class="headerCategory">${category}</li>
+                ${groupedPlugins[category].map(plugin => html`
+                    <li class="plugin">
+                        <div class="plugin-info">
+                            <div>
+                                <h3>${plugin.name}</h3>
+                                <p>${plugin.description}</p>
+                            </div>
+                            <p><strong>Reference:</strong> ${plugin.ref}</p>
+                        </div>
+                        <div class="plugin-actions">
+                            ${plugin.status === 'active' ?
+                html`<a  href="#" @click="${() => this.deactivateClicked(plugin)}">Deactivate</a>` :
+                html`<a  href="#" @click="${() => this.activateClicked(plugin)}">Activate</a>`
+            }
+                            <a class="delete" href="#" @click="${() => this.deleteClicked(plugin)}">Delete</a>
+                        </div>
+                    </li>
+                `)}
+            `)}
+        </ul>
+    `;
+    }
 
     render() {
         return html`
