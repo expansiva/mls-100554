@@ -6,13 +6,15 @@ service-plugins-100554 {
         font-family: @font-family-primary;
         padding: @space-8;
         box-sizing: border-box;
+        overflow: auto;
+        height: 100%;
     }
 
     .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom:  @space-16;
+        margin-bottom: @space-16;
     }
 
     .header button {
@@ -39,7 +41,7 @@ service-plugins-100554 {
         list-style: none;
         border-top: 2px solid @grey-color-dark;
         padding-top: 10px;
-        
+
         .headerCategory {
             &:not(:first-of-type) {
                 margin-top: 2rem;
@@ -53,28 +55,31 @@ service-plugins-100554 {
         li {
             border-bottom: 1px solid @grey-color;
             padding: 10px 0;
+
             .plugin-info {
                 margin-bottom: 10px;
             }
         }
 
-        li .plugin-title{
-             width: 15rem;
-             h3{
+        li .plugin-title {
+            width: 15rem;
+
+            h3 {
                 margin: 0;
                 font-size: @font-size-12;
 
-             }
+            }
         }
 
-        li details> summary {
+        li details>summary {
             cursor: pointer;
         }
-        li details > div {
-            padding-left:2rem; 
+
+        li details>div {
+            padding-left: 2rem;
             margin-top: 1rem;
-            display:flex; 
-            align-items:center;
+            display: flex;
+            align-items: center;
         }
 
         li .plugin-info>div {
@@ -88,11 +93,12 @@ service-plugins-100554 {
             font-size: @font-size-12;
         }
 
-   
+
         li .plugin-actions a {
             font-size: @font-size-12;
             color: @text-secondary-color;
-            &.delete{
+
+            &.delete {
                 color: @error-color;
             }
         }

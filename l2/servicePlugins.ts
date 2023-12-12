@@ -6,7 +6,7 @@ import { ServiceBase, IService } from './_100554_serviceBase';
 
 @customElement('service-plugins-100554')
 export class ServicePlugins extends ServiceBase {
-    
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property({ type: Array }) plugins: Plugin[] = this.getExamplesPlugins();
@@ -14,7 +14,7 @@ export class ServicePlugins extends ServiceBase {
     @property({ type: String }) filterTerm: string = '';
 
     // eslint-disable-next-line
-    public static details:IService = {
+    public details: IService = {
         icon: '&#xf1e6',
         name: 'Plugins',
         mode: 'A',
@@ -23,7 +23,7 @@ export class ServicePlugins extends ServiceBase {
         tooltip: 'Plugins',
         className: '',
         tags: [],
-        levels: []
+        levels: [5]
     }
 
     /*createRenderRoot() {

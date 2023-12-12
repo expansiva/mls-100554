@@ -7,12 +7,12 @@ import { customElement, property } from 'lit/decorators.js';
 export abstract class ServiceBase extends LitElement implements IServiceMethods {
 
     @property({ type: String, reflect: true })
-    private level: mls.events.Level | undefined;
+    public level: mls.events.Level | undefined;
 
     @property({ type: String, reflect: true })
     public position: 'left' | 'right' | undefined;
 
-    details: IService | undefined = undefined;
+    abstract details: IService | undefined;
 
 }
 
