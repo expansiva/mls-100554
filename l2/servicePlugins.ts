@@ -8,7 +8,7 @@ import { ServiceBase, IService } from './_100554_serviceBase';
 export class ServicePlugins extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-    
+
     @property({ type: Array }) plugins: Plugin[] = this.getExamplesPlugins();
 
     @property({ type: String }) filterTerm: string = '';
@@ -190,6 +190,7 @@ export class ServicePlugins extends ServiceBase {
     }
 
     render() {
+        this.style.height = '100%';
         return html`
         ${this.renderHeader()}
         ${this.renderListPlugins()}
