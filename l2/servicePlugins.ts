@@ -31,10 +31,12 @@ export class ServicePlugins extends ServiceBase {
         levels: [5]
     }
 
-    /*createRenderRoot() {
-        return this;
-    }*/
+    onServiceClick(visible: boolean) {
 
+        console.info({visible})
+        
+    }
+    
     getExamplesPlugins(): Plugin[] {
 
         return [

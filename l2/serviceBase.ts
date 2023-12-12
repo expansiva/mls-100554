@@ -15,15 +15,16 @@ export abstract class ServiceBase extends LitElement {
     @property({ type: String })
     visible = 'false';
 
-    public static details: IService;
+    static details: IService;
+
+    abstract onServiceClick(visible: boolean): void;
 
     updated(changedProperties: Map<string | number | symbol, unknown>): void {
         super.updated(changedProperties);
 
         if (changedProperties.has('visible')) {
-            const novoValor = changedProperties.get('visible');
-            console.info('meuAtributo mudou:', novoValor);
-            // Faça o que você precisa com o novo valor do atributo aqui
+            const visible = changedProperties.get('visible');
+            if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible === 'true' || visible === null)
         }
     }
 
@@ -45,6 +46,3 @@ export interface IService {
 export type IServicePosition = 'left' | 'right' | 'all';
 export type IServiceMode = 'A' | 'H' | 'D' | 'B';// active, hidden, disabled, 
 
-export interface IServiceMethods {
-    details: IService | undefined;
-}
