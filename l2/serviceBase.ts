@@ -20,12 +20,13 @@ export abstract class ServiceBase extends LitElement {
     abstract onServiceClick(visible: boolean, reinit: boolean): void;
 
     updated(changedProperties: Map<string | number | symbol, unknown>): void {
+
         super.updated(changedProperties);
 
         if (changedProperties.has('visible')) {
             const visible = changedProperties.get('visible');
-            const reinit: boolean = visible === 'true';
-            if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible === 'true' || visible === undefined, reinit)
+            const reinit: boolean = visible !== 'true';
+            if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible !== 'true' || visible === undefined, reinit)
         }
     }
 
