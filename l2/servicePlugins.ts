@@ -8,8 +8,8 @@ import { ServiceBase, IService } from './_100554_serviceBase';
 export class ServicePlugins extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-    
-    private project: number = mls.actual[5].project;
+
+    get project(): number { return mls.actual[5].project };
 
     @property({ type: Array }) userPlugins: Plugin[] = this.getUserPluginsByProject(this.project);
 
@@ -31,12 +31,18 @@ export class ServicePlugins extends ServiceBase {
         levels: [5]
     }
 
-    onServiceClick(visible: boolean, reinit:boolean) {
+    onServiceClick(visible: boolean, reinit: boolean) {
+        console.info({ visible, reinit })
 
-        console.info({visible, reinit})
-        
+        if (reinit) {
+            this.userPlugins = this.getUserPluginsByProject(this.project);
+            this.avaliablePlugins = this.getAvaliablePlugins(this.project);
+            this.currentScenario = 'list'
+        }
+
+
     }
-    
+
     getExamplesPlugins(): Plugin[] {
 
         return [
@@ -234,7 +240,7 @@ export class ServicePlugins extends ServiceBase {
                     <details open ">
                         <summary>${category}</summary>
                             ${groupedPlugins[category].map(plugin => html`
-                                <div class="${plugin.status === 'active' ? 'plugin active': 'plugin'}">
+                                <div class="${plugin.status === 'active' ? 'plugin active' : 'plugin'}">
                                     <div class= "plugin-title">
                                         <h3>${plugin.name}</h3>
                                         <div class="plugin-actions">
