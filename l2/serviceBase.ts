@@ -4,7 +4,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 @customElement('service-base-100554')
-export abstract class ServiceBase extends LitElement  {
+export abstract class ServiceBase extends LitElement {
 
     @property({ type: String, reflect: true })
     public level: mls.events.Level | undefined;
@@ -12,7 +12,21 @@ export abstract class ServiceBase extends LitElement  {
     @property({ type: String, reflect: true })
     public position: 'left' | 'right' | undefined;
 
+    @property({ type: String })
+    visible = 'false';
+
     public static details: IService;
+
+    updated(changedProperties: Map<string | number | symbol, unknown>): void {
+        super.updated(changedProperties);
+
+        if (changedProperties.has('visible')) {
+            const novoValor = changedProperties.get('visible');
+            console.info('meuAtributo mudou:', novoValor);
+            // Faça o que você precisa com o novo valor do atributo aqui
+        }
+    }
+
 
 }
 
@@ -32,5 +46,5 @@ export type IServicePosition = 'left' | 'right' | 'all';
 export type IServiceMode = 'A' | 'H' | 'D' | 'B';// active, hidden, disabled, 
 
 export interface IServiceMethods {
-   details: IService | undefined;
+    details: IService | undefined;
 }
