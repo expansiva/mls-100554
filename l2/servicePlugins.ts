@@ -31,9 +31,9 @@ export class ServicePlugins extends ServiceBase {
         levels: [5]
     }
 
-    onServiceClick(visible: boolean) {
+    onServiceClick(visible: boolean, reinit:boolean) {
 
-        console.info({visible})
+        console.info({visible, reinit})
         
     }
     
