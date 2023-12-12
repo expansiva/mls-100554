@@ -20,7 +20,7 @@ export class ServicePlugins extends LitElement {
 
     // eslint-disable-next-line
     public static details = {
-        icon: '&#xf142',//'&#xf142', '&#xf15b'
+        icon: '&#xf1e6',//'&#xf142', '&#xf15b'
         name: 'Plugins',
         mode: 'A',
         position: 'all',
@@ -140,8 +140,10 @@ export class ServicePlugins extends LitElement {
     renderHeader() {
         return html`
             <div class="header">
-                <button @click="${this.installPluginClicked}">Install Plugin</button>
-                <button @click="${this.createNewPluginClicked}">Create New Plugin</button>
+                <div>
+                    <button @click="${this.installPluginClicked}">Install Plugin</button>
+                    <button @click="${this.createNewPluginClicked}">Create New Plugin</button>
+                </div>
                 <input type="text" placeholder="Search plugin..." @input="${this.searchInputChanged}">
             </div>
         `;
