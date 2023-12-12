@@ -25,7 +25,7 @@ export abstract class ServiceBase extends LitElement {
 
         if (changedProperties.has('visible')) {
             const visible = changedProperties.get('visible');
-            const reinit: boolean = visible !== 'true';
+            const reinit: boolean = visible !== 'true' && visible !== undefined;
             if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible !== 'true' || visible === undefined, reinit)
         }
     }
