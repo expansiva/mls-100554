@@ -19,7 +19,6 @@ export class ServicePlugins extends ServiceBase {
 
     @property({ type: String }) currentScenario: IScenaries = 'list'
 
-    // eslint-disable-next-line
     public details: IService = {
         icon: '&#xf1e6',
         name: 'Plugins',
@@ -27,7 +26,6 @@ export class ServicePlugins extends ServiceBase {
         position: 'all',
         readOnly: false,
         tooltip: 'Plugins',
-        visible: 'A',
         className: '',
         tags: [],
         levels: [5]

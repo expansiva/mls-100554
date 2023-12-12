@@ -24,7 +24,6 @@ export interface IService {
     readOnly: boolean,
     tooltip: string,
     className: string,
-    visible: string,
     tags: string[],
     levels: (0 | 1 | 2 | 3 | 4 | 5 | 6 | 7)[];
 }
