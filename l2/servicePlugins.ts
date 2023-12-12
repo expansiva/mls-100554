@@ -9,9 +9,15 @@ export class ServicePlugins extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    @property({ type: Array }) plugins: Plugin[] = this.getExamplesPlugins();
+    private project: number = mls.actual[5].project;
+
+    @property({ type: Array }) userPlugins: Plugin[] = this.getUserPluginsByProject(this.project);
+
+    @property({ type: Array }) avaliablePlugins: Plugin[] = this.getAvaliablePlugins(this.project);
 
     @property({ type: String }) filterTerm: string = '';
+
+    @property({ type: String }) currentScenario: IScenaries = 'list'
 
     // eslint-disable-next-line
     public details: IService = {
@@ -67,10 +73,12 @@ export class ServicePlugins extends ServiceBase {
         ];
     }
 
-    // Handlers para eventos de clique (Implementações fictícias)
+    backListClicked() {
+        this.toggleScenario();
+    }
+
     installPluginClicked() {
-        console.log("Install Plugin clicked");
-        // Implementar lógica
+        this.toggleScenario();
     }
 
     createNewPluginClicked() {
@@ -80,32 +88,91 @@ export class ServicePlugins extends ServiceBase {
 
     searchInputChanged(event: Event) {
         const searchTerm = (event.target as HTMLInputElement).value;
-        console.log("Search Term:", searchTerm);
         this.filterTerm = searchTerm;
         const plugins = this.filterPlugins(this.getExamplesPlugins());
-        console.info(plugins)
-        this.plugins = plugins;
+        this.userPlugins = plugins;
     }
 
-    // Handlers para eventos de clique (Implementações fictícias)
     activateClicked(plugin: Plugin) {
         console.log("Activate clicked for:", plugin.name);
-        // Implementar lógica de ativação
+        this.changeStatus(this.project, plugin.prjID, 'active');
+        this.userPlugins = this.getUserPluginsByProject(this.project);
     }
 
     deactivateClicked(plugin: Plugin) {
         console.info("Deactivate clicked for:", plugin.name);
-        // Implementar lógica de desativação
+        this.changeStatus(this.project, plugin.prjID, 'inactive');
+        this.userPlugins = this.getUserPluginsByProject(this.project);
     }
 
     deleteClicked(plugin: Plugin) {
         console.log("Delete clicked for:", plugin.name);
-        // Implementar lógica de remoção
+        this.deletePlugin(this.project, plugin.prjID);
+        this.userPlugins = this.getUserPluginsByProject(this.project);
+        this.avaliablePlugins = this.getAvaliablePlugins(this.project);
     }
 
-    optionsClicked(plugin: Plugin) {
-        console.log("Options clicked for:", plugin.name);
-        // Implementar lógica para opções
+    addPluginClicked(plugin: Plugin) {
+        this.addPlugin(this.project, plugin.prjID);
+        this.userPlugins = this.getUserPluginsByProject(this.project);
+        this.avaliablePlugins = this.getAvaliablePlugins(this.project);
+    }
+
+    getAvaliablePlugins(project: number): Plugin[] {
+        const pluginsUser = this.getUserPluginsByProject(project);
+        const allPlugins = this.getExamplesPlugins();
+        const avaliablePlugins = allPlugins.filter(itemA => !pluginsUser.some(itemB => itemB.prjID === itemA.prjID));
+        return avaliablePlugins;
+    }
+
+    getUserPlugins(): IProjectsUserPlugins {
+        const data = localStorage.getItem('collab-user-plugins');
+        const plugins: IProjectsUserPlugins = data ? JSON.parse(data) : {};
+        return plugins;
+    }
+
+    getUserPluginsByProject(project: number): Plugin[] {
+        let plugins: IProjectsUserPlugins = this.getUserPlugins();
+        if (!plugins[project]) return [];
+        const rc = this.mergeAndRemoveMissing(this.getExamplesPlugins(), plugins[project])
+        return rc;
+    }
+
+    mergeAndRemoveMissing(arr1: Plugin[], arr2: IUserPlugins[]) {
+        const filteredArr1 = arr1.filter(obj1 => arr2.some(obj2 => obj2.prjID === obj1.prjID));
+        const mergedArray = filteredArr1.map(obj1 => {
+            const matchingObject = arr2.find(obj2 => obj2.prjID === obj1.prjID);
+            return { ...obj1, ...matchingObject };
+        });
+        return mergedArray;
+    }
+
+    addPlugin(project: number, pluginId: number) {
+        const userPlugins: IProjectsUserPlugins = { ... this.getUserPlugins() };
+        if (!userPlugins[project]) userPlugins[project] = [];
+        const findPlugin = userPlugins[project].find((item: IUserPlugins) => item.prjID === pluginId);
+        if (findPlugin) throw new Error('Plugin already installed');
+        userPlugins[project].push({ prjID: pluginId, status: 'active' });
+        localStorage.setItem('collab-user-plugins', JSON.stringify(userPlugins));
+    }
+
+    changeStatus(project: number, pluginId: number, status: PluginStatus) {
+        const plugins: IProjectsUserPlugins = this.getUserPlugins();
+        if (!plugins[project]) plugins[project] = [];
+        const findPlugin = plugins[project].find((item: IUserPlugins) => item.prjID === pluginId);
+        if (findPlugin) {
+            findPlugin.status = status;
+        } else plugins[project].push({ prjID: pluginId, status });
+        localStorage.setItem('collab-user-plugins', JSON.stringify(plugins));
+    }
+
+    deletePlugin(project: number, pluginId: number) {
+        const plugins: IProjectsUserPlugins = this.getUserPlugins();
+        if (!plugins[project]) plugins[project] = [];
+        const index = plugins[project].findIndex((item: IUserPlugins) => item.prjID === pluginId);
+        if (!index) return;
+        plugins[project].splice(index, 1);
+        localStorage.setItem('collab-user-plugins', JSON.stringify(plugins));
     }
 
     groupPluginsByCategory(plugins: Plugin[]): { [category: string]: Plugin[] } {
@@ -119,12 +186,8 @@ export class ServicePlugins extends ServiceBase {
     }
 
     filterPlugins(plugins: Plugin[]): Plugin[] {
-
-        if (!this.filterTerm.trim()) {
-            return plugins;
-        }
+        if (!this.filterTerm.trim()) return plugins;
         const searchTerm = this.filterTerm.toLowerCase();
-        console.info({ searchTerm })
         return plugins.filter(plugin =>
             plugin.name.toLowerCase().includes(searchTerm) ||
             plugin.description.toLowerCase().includes(searchTerm) ||
@@ -132,58 +195,94 @@ export class ServicePlugins extends ServiceBase {
         );
     }
 
-    // Método para renderizar o cabeçalho
+    toggleScenario() {
+        this.currentScenario = this.currentScenario === 'list' ? 'add' : 'list';
+    }
+
     renderHeader() {
-        return html`
-            <div class="header">
-                <div>
-                    <button @click="${this.installPluginClicked}">Install Plugin</button>
-                    <button @click="${this.createNewPluginClicked}">Create New Plugin</button>
+        return html` <div>${this.currentScenario === 'list' ?
+            html`
+                <div class="header">
+                    <div>
+                        <button @click="${this.installPluginClicked}">Install Plugin</button>
+                        <button @click="${this.createNewPluginClicked}">Create New Plugin</button>
+                    </div>
+                    <input type="text" placeholder="Search plugin..." @input="${this.searchInputChanged}">
                 </div>
-                <input type="text" placeholder="Search plugin..." @input="${this.searchInputChanged}">
-            </div>
+            `
+            : html`
+                    <div class="header">
+                        <div>
+                            <button @click="${this.backListClicked}">Back List</button>
+                        </div>
+                    </div>
+                `}
+                </div>            
         `;
     }
 
     renderListPlugins() {
         // Agrupar plugins por categoria
-        const groupedPlugins = this.groupPluginsByCategory(this.plugins);
-        console.info(this.plugins);
+        const groupedPlugins = this.groupPluginsByCategory(this.userPlugins);
+        const sortedCategories = Object.keys(groupedPlugins).sort();
         return html`
+        <h4 style="${sortedCategories.length === 0 ? 'display:block' : 'display:none'}"> No plugins installed!</h4>
         <ul class="plugin-list">
-            ${Object.keys(groupedPlugins).sort().map(category => html`
+            ${sortedCategories.map(category => html`
                 <li class="headerCategory">
                     <details open ">
                         <summary>${category}</summary>
-                                ${groupedPlugins[category].map(plugin => html`
-                    <div class="plugin">
-
-                        <div class= "plugin-title">
-                            <h3>${plugin.name}</h3>
-                            <div class="plugin-actions">
-                            ${plugin.status === 'active' ?
+                            ${groupedPlugins[category].map(plugin => html`
+                                <div class="plugin">
+                                    <div class= "plugin-title">
+                                        <h3>${plugin.name}</h3>
+                                        <div class="plugin-actions">
+                                            ${plugin.status === 'active' ?
                 html`<a  href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.deactivateClicked(plugin) }}">Deactivate</a>` :
                 html`<a  href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.activateClicked(plugin) }}">Activate</a>`
             }
-                            
-                            <a href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.deleteClicked(plugin) }}">Delete</a>
-                        </div>
-                        </div>
-                        
-
-                        <div class="plugin-info">
-                                
-                                <p>${plugin.description}</p>
-                                <p><strong>Reference:</strong> ${plugin.ref}</p>
-                        </div>
-                    </div>
-                `)}
+                                            <a href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.deleteClicked(plugin) }}">Delete</a>
+                                        </div>
+                                    </div>
+                                    <div class="plugin-info">    
+                                        <p>${plugin.description}</p>
+                                        <p><strong>Reference:</strong> ${plugin.ref}</p>
+                                    </div>
+                                </div>
+                            `)}
                     </details>
-                </li>
+                </li>        
+            `)}
+        </ul>
+    `;
+    }
 
-                
-
-        
+    renderListAvaliablePlugins() {
+        const groupedPlugins = this.groupPluginsByCategory(this.avaliablePlugins);
+        const sortedCategories = Object.keys(groupedPlugins).sort();
+        return html`
+        <h4 style="${sortedCategories.length === 0 ? 'display:block' : 'display:none'}"> No plugins avaliables!</h4>
+        <ul class="plugin-list">
+            ${sortedCategories.map(category => html`
+                <li class="headerCategory">
+                    <details open ">
+                        <summary>${category}</summary>
+                            ${groupedPlugins[category].map(plugin => html`
+                                <div class="plugin">
+                                    <div class= "plugin-title">
+                                        <h3>${plugin.name}</h3>
+                                        <div class="plugin-actions">
+                                            <a href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.addPluginClicked(plugin) }}">Install</a>
+                                        </div>
+                                    </div>
+                                    <div class="plugin-info">    
+                                        <p>${plugin.description}</p>
+                                        <p><strong>Reference:</strong> ${plugin.ref}</p>
+                                    </div>
+                                </div>
+                            `)}
+                    </details>
+                </li>        
             `)}
         </ul>
     `;
@@ -192,13 +291,23 @@ export class ServicePlugins extends ServiceBase {
     render() {
         this.style.height = '100%';
         return html`
-        ${this.renderHeader()}
-        ${this.renderListPlugins()}
+        <div>${this.currentScenario === 'list' ?
+                html`
+                    ${this.renderHeader()}
+                    ${this.renderListPlugins()}
+                `
+                : html`
+                    ${this.renderHeader()}
+                    ${this.renderListAvaliablePlugins()}
+
+                `}
+        </div>
+        
         `
     }
-
-
 }
+
+type IScenaries = 'list' | 'add';
 
 interface Plugin {
     prjID: number; // unique
@@ -206,5 +315,16 @@ interface Plugin {
     description: string;
     category: string;
     ref: string;
-    status: 'active' | 'inactive';
+    status: PluginStatus
+}
+
+type PluginStatus = 'active' | 'inactive';
+
+interface IProjectsUserPlugins {
+    [key: number]: IUserPlugins[]
+}
+
+interface IUserPlugins {
+    prjID: number;
+    status: PluginStatus
 }
