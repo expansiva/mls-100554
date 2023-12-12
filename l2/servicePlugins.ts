@@ -19,7 +19,7 @@ export class ServicePlugins extends ServiceBase {
 
     @property({ type: String }) currentScenario: IScenaries = 'list'
 
-    static detailss: IService = {
+    static details: IService = {
         icon: '&#xf1e6',
         name: 'Plugins',
         mode: 'A',
