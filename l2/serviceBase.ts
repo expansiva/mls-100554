@@ -4,7 +4,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 @customElement('service-base-100554')
-export abstract class ServiceBase extends LitElement implements IServiceMethods {
+export abstract class ServiceBase extends LitElement  {
 
     @property({ type: String, reflect: true })
     public level: mls.events.Level | undefined;
@@ -12,7 +12,7 @@ export abstract class ServiceBase extends LitElement implements IServiceMethods 
     @property({ type: String, reflect: true })
     public position: 'left' | 'right' | undefined;
 
-    abstract details: IService | undefined;
+    public static details: IService;
 
 }
 
@@ -31,6 +31,6 @@ export interface IService {
 export type IServicePosition = 'left' | 'right' | 'all';
 export type IServiceMode = 'A' | 'H' | 'D' | 'B';// active, hidden, disabled, 
 
-interface IServiceMethods {
+export interface IServiceMethods {
    details: IService | undefined;
 }
