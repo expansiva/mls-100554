@@ -1,34 +1,29 @@
 /// <mls shortName="servicePlugins" project="100554" enhancement="_100541_enhancementLit" groupName="services" />
 
-import { html, css, LitElement } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { ServiceBase, IService } from './_100554_serviceBase';
 
 @customElement('service-plugins-100554')
-export class ServicePlugins extends LitElement {
-
+export class ServicePlugins extends ServiceBase {
+    
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-
-    @property({ type: String, reflect: true })
-    private level: mls.events.Level | undefined;
-
-    @property({ type: String, reflect: true })
-    public position: 'left' | 'right' | undefined;
 
     @property({ type: Array }) plugins: Plugin[] = this.getExamplesPlugins();
 
     @property({ type: String }) filterTerm: string = '';
 
     // eslint-disable-next-line
-    public static details = {
+    public static details:IService = {
         icon: '&#xf1e6',
         name: 'Plugins',
         mode: 'A',
         position: 'all',
         readOnly: false,
         tooltip: 'Plugins',
-        visible: 'A',
         className: '',
-        tags: []
+        tags: [],
+        levels: []
     }
 
     /*createRenderRoot() {
@@ -36,6 +31,7 @@ export class ServicePlugins extends LitElement {
     }*/
 
     getExamplesPlugins(): Plugin[] {
+
         return [
             // Exemplos de plugins comuns do WordPress
             { prjID: 1, name: "SEO Optimizer", description: "Enhances your site's SEO.", category: "SEO", ref: "https://example.com/plugin/seo-optimizer", status: "active" },
