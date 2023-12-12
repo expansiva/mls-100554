@@ -89,7 +89,7 @@ export class ServicePlugins extends ServiceBase {
     searchInputChanged(event: Event) {
         const searchTerm = (event.target as HTMLInputElement).value;
         this.filterTerm = searchTerm;
-        const plugins = this.filterPlugins(this.getExamplesPlugins());
+        const plugins = this.filterPlugins(this.getUserPluginsByProject(this.project));
         this.userPlugins = plugins;
     }
 
@@ -186,6 +186,8 @@ export class ServicePlugins extends ServiceBase {
     }
 
     filterPlugins(plugins: Plugin[]): Plugin[] {
+
+        console.info(plugins)
         if (!this.filterTerm.trim()) return plugins;
         const searchTerm = this.filterTerm.toLowerCase();
         return plugins.filter(plugin =>
