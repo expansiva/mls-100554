@@ -76,10 +76,14 @@ service-plugins-100554 {
         }
 
         li details>div {
-            padding-left: 2rem;
+            margin-left: 1rem;
+            padding: 2rem;
             margin-top: 1rem;
             display: flex;
             align-items: center;
+            &.active{
+                background-color: @grey-color-lighter;
+            }
         }
 
         li .plugin-info>div {

@@ -233,7 +233,7 @@ export class ServicePlugins extends ServiceBase {
                     <details open ">
                         <summary>${category}</summary>
                             ${groupedPlugins[category].map(plugin => html`
-                                <div class="plugin">
+                                <div class="${plugin.status === 'active' ? 'plugin active': 'plugin'}">
                                     <div class= "plugin-title">
                                         <h3>${plugin.name}</h3>
                                         <div class="plugin-actions">
