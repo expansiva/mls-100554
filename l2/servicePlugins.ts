@@ -20,7 +20,7 @@ export class ServicePlugins extends LitElement {
 
     // eslint-disable-next-line
     public static details = {
-        icon: '&#xf1e6',//'&#xf142', '&#xf15b'
+        icon: '&#xf1e6',
         name: 'Plugins',
         mode: 'A',
         position: 'all',
@@ -123,12 +123,12 @@ export class ServicePlugins extends LitElement {
     }
 
     filterPlugins(plugins: Plugin[]): Plugin[] {
-    
+
         if (!this.filterTerm.trim()) {
             return plugins;
         }
         const searchTerm = this.filterTerm.toLowerCase();
-        console.info({searchTerm})
+        console.info({ searchTerm })
         return plugins.filter(plugin =>
             plugin.name.toLowerCase().includes(searchTerm) ||
             plugin.description.toLowerCase().includes(searchTerm) ||
@@ -155,26 +155,39 @@ export class ServicePlugins extends LitElement {
         console.info(this.plugins);
         return html`
         <ul class="plugin-list">
-            ${Object.keys(groupedPlugins).map(category => html`
-                <li class="headerCategory">${category}</li>
-                ${groupedPlugins[category].map(plugin => html`
-                    <li class="plugin">
-                        <div class="plugin-info">
-                            <div>
-                                <h3>${plugin.name}</h3>
-                                <p>${plugin.description}</p>
-                            </div>
-                            <p><strong>Reference:</strong> ${plugin.ref}</p>
-                        </div>
-                        <div class="plugin-actions">
+            ${Object.keys(groupedPlugins).sort().map(category => html`
+                <li class="headerCategory">
+                    <details open ">
+                        <summary>${category}</summary>
+                                ${groupedPlugins[category].map(plugin => html`
+                    <div class="plugin">
+
+                        <div class= "plugin-title">
+                            <h3>${plugin.name}</h3>
+                            <div class="plugin-actions">
                             ${plugin.status === 'active' ?
-                    html`<a  href="#" @click="${(e:MouseEvent) => { e.preventDefault(); this.deactivateClicked(plugin)}}">Deactivate</a>` :
-                    html`<a  href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.activateClicked(plugin) }}">Activate</a>`
+                html`<a  href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.deactivateClicked(plugin) }}">Deactivate</a>` :
+                html`<a  href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.activateClicked(plugin) }}">Activate</a>`
             }
-                            <a class="delete" href="#" @click="${(e:MouseEvent) => {e.preventDefault(); this.deleteClicked(plugin)}}">Delete</a>
+                            
+                            <a href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.deleteClicked(plugin) }}">Delete</a>
                         </div>
-                    </li>
+                        </div>
+                        
+
+                        <div class="plugin-info">
+                                
+                                <p>${plugin.description}</p>
+                                <p><strong>Reference:</strong> ${plugin.ref}</p>
+                        </div>
+                    </div>
                 `)}
+                    </details>
+                </li>
+
+                
+
+        
             `)}
         </ul>
     `;

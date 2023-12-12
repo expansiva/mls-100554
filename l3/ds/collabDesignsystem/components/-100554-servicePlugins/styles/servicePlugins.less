@@ -15,14 +15,6 @@ service-plugins-100554 {
         margin-bottom:  @space-16;
     }
 
-    .headerCategory {
-        font-size: @font-size-40;
-
-        &:not(:first-of-type) {
-            margin-top: 2rem;
-        }
-    }
-
     .header button {
         padding: 8px 16px;
         background-color: @success-color;
@@ -47,6 +39,12 @@ service-plugins-100554 {
         list-style: none;
         border-top: 2px solid @grey-color-dark;
         padding-top: 10px;
+        
+        .headerCategory {
+            &:not(:first-of-type) {
+                margin-top: 2rem;
+            }
+        }
 
         p {
             margin: 0;
@@ -58,11 +56,25 @@ service-plugins-100554 {
             .plugin-info {
                 margin-bottom: 10px;
             }
-            .plugin-info h3 {
+        }
+
+        li .plugin-title{
+             width: 15rem;
+             h3{
                 margin: 0;
-                color: @text-primary-color;
-                font-size: @font-size-16;
-            }
+                font-size: @font-size-12;
+
+             }
+        }
+
+        li details> summary {
+            cursor: pointer;
+        }
+        li details > div {
+            padding-left:2rem; 
+            margin-top: 1rem;
+            display:flex; 
+            align-items:center;
         }
 
         li .plugin-info>div {
@@ -76,6 +88,7 @@ service-plugins-100554 {
             font-size: @font-size-12;
         }
 
+   
         li .plugin-actions a {
             font-size: @font-size-12;
             color: @text-secondary-color;
