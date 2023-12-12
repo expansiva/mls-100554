@@ -8,7 +8,7 @@ import { ServiceBase, IService } from './_100554_serviceBase';
 export class ServicePlugins extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-
+    
     private project: number = mls.actual[5].project;
 
     @property({ type: Array }) userPlugins: Plugin[] = this.getUserPluginsByProject(this.project);
@@ -186,8 +186,6 @@ export class ServicePlugins extends ServiceBase {
     }
 
     filterPlugins(plugins: Plugin[]): Plugin[] {
-
-        console.info(plugins)
         if (!this.filterTerm.trim()) return plugins;
         const searchTerm = this.filterTerm.toLowerCase();
         return plugins.filter(plugin =>
