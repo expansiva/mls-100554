@@ -9,7 +9,7 @@ export class ServicePlugins extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    get project(): number  { return window['mls'] ? mls.actual[5].project : 0 };
+    get project(): number { return window['mls'] ? mls.actual[5].project : 0 };
 
     @property({ type: Array }) userPlugins: Plugin[] = this.getUserPluginsByProject(this.project);
 
@@ -126,7 +126,9 @@ export class ServicePlugins extends ServiceBase {
         this.userPlugins = this.getUserPluginsByProject(this.project);
         this.avaliablePlugins = this.getAvaliablePlugins(this.project);
         this.toggleScenario();
-        this.scrollToAddPlugin(plugin.prjID)
+        setTimeout(() => {
+            this.scrollToAddPlugin(plugin.prjID);
+        }, 100)
     }
 
     getAvaliablePlugins(project: number): Plugin[] {
@@ -212,7 +214,8 @@ export class ServicePlugins extends ServiceBase {
 
     scrollToAddPlugin(pluginId: number) {
         const el = this.querySelector(`[pluginId="${pluginId}"`);
-        if (el) el.scrollIntoView();
+        console.info(el)
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
 
     renderHeader() {
