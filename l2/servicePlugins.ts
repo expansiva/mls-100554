@@ -1,7 +1,7 @@
 /// <mls shortName="servicePlugins" project="100554" enhancement="_100541_enhancementLit" groupName="services" />
 
 import { html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService } from './_100554_serviceBase';
 
 @customElement('service-plugins-100554')
@@ -17,9 +17,9 @@ export class ServicePlugins extends ServiceBase {
 
     @property({ type: String }) filterTerm: string = '';
 
-    @property({ type: Number }) lastPluginIdAdd: number | undefined = undefined;
+    @property({ type: Number }) lastPluginIdAdd: number = -1;
 
-    @property({ type: String }) currentScenario: IScenaries = 'list'
+    @property({ type: String }) currentScenario: IScenaries = 'list';
 
     public details: IService = {
         icon: '&#xf1e6',
@@ -128,7 +128,7 @@ export class ServicePlugins extends ServiceBase {
         this.toggleScenario();
         setTimeout(() => {
             this.scrollToAddPlugin(plugin.prjID);
-        }, 100)
+        }, 400)
     }
 
     getAvaliablePlugins(project: number): Plugin[] {
@@ -213,8 +213,7 @@ export class ServicePlugins extends ServiceBase {
     }
 
     scrollToAddPlugin(pluginId: number) {
-        const el = this.querySelector(`[pluginId="${pluginId}"`);
-        console.info(el)
+        const el = (this.shadowRoot as any).querySelector(`[plugin-id="${pluginId}"`);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -253,7 +252,7 @@ export class ServicePlugins extends ServiceBase {
                         <summary>${category}</summary>
                             ${groupedPlugins[category].map(plugin => html`
                                 <div
-                                pluginId="${plugin.prjID}"
+                                plugin-id="${plugin.prjID}"
                                 class="${plugin.status === 'active' ? 'plugin active' : 'plugin'}"
                                 style="${plugin.prjID === this.lastPluginIdAdd ? 'background:#edffed' : ''}"
                                 
