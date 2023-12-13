@@ -323,6 +323,7 @@ interface Plugin {
     category: string;
     ref: string;
     status: PluginStatus
+    selected?: boolean
 }
 
 type PluginStatus = 'active' | 'inactive';
