@@ -15,7 +15,7 @@ export abstract class ServiceBase extends LitElement {
     @property({ type: String })
     visible = 'false';
 
-    static details: IService;
+    abstract details: IService;
 
     abstract onServiceClick(visible: boolean, reinit: boolean): void;
 

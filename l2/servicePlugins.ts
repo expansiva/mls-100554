@@ -19,7 +19,7 @@ export class ServicePlugins extends ServiceBase {
 
     @property({ type: String }) currentScenario: IScenaries = 'list'
 
-    static details: IService = {
+    public details: IService = {
         icon: '&#xf1e6',
         name: 'Plugins',
         mode: 'A',
@@ -253,7 +253,7 @@ export class ServicePlugins extends ServiceBase {
                                     </div>
                                     <div class="plugin-info">    
                                         <p>${plugin.description}</p>
-                                        <p><strong>Reference:</strong> ${plugin.ref}</p>
+                                        <p>Reference: ${plugin.ref}</p>
                                     </div>
                                 </div>
                             `)}
@@ -261,6 +261,7 @@ export class ServicePlugins extends ServiceBase {
                 </li>        
             `)}
         </ul>
+        
     `;
     }
 
@@ -284,7 +285,7 @@ export class ServicePlugins extends ServiceBase {
                                     </div>
                                     <div class="plugin-info">    
                                         <p>${plugin.description}</p>
-                                        <p><strong>Reference:</strong> ${plugin.ref}</p>
+                                        <p>Reference: ${plugin.ref}</p>
                                     </div>
                                 </div>
                             `)}
