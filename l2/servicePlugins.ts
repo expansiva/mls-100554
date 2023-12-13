@@ -9,13 +9,15 @@ export class ServicePlugins extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    get project(): number { return mls.actual[5].project };
+    get project(): number  { return window['mls'] ? mls.actual[5].project : 0 };
 
     @property({ type: Array }) userPlugins: Plugin[] = this.getUserPluginsByProject(this.project);
 
     @property({ type: Array }) avaliablePlugins: Plugin[] = this.getAvaliablePlugins(this.project);
 
     @property({ type: String }) filterTerm: string = '';
+
+    @property({ type: Number }) lastPluginIdAdd: number | undefined = undefined;
 
     @property({ type: String }) currentScenario: IScenaries = 'list'
 
@@ -32,9 +34,8 @@ export class ServicePlugins extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-        console.info({ visible, reinit })
 
-        if (reinit) {
+        if (visible && reinit) {
             this.userPlugins = this.getUserPluginsByProject(this.project);
             this.avaliablePlugins = this.getAvaliablePlugins(this.project);
             this.currentScenario = 'list'
@@ -121,8 +122,11 @@ export class ServicePlugins extends ServiceBase {
 
     addPluginClicked(plugin: Plugin) {
         this.addPlugin(this.project, plugin.prjID);
+        this.lastPluginIdAdd = plugin.prjID;
         this.userPlugins = this.getUserPluginsByProject(this.project);
         this.avaliablePlugins = this.getAvaliablePlugins(this.project);
+        this.toggleScenario();
+        this.scrollToAddPlugin(plugin.prjID)
     }
 
     getAvaliablePlugins(project: number): Plugin[] {
@@ -206,6 +210,11 @@ export class ServicePlugins extends ServiceBase {
         this.currentScenario = this.currentScenario === 'list' ? 'add' : 'list';
     }
 
+    scrollToAddPlugin(pluginId: number) {
+        const el = this.querySelector(`[pluginId="${pluginId}"`);
+        if (el) el.scrollIntoView();
+    }
+
     renderHeader() {
         return html` <div>${this.currentScenario === 'list' ?
             html`
@@ -240,7 +249,12 @@ export class ServicePlugins extends ServiceBase {
                     <details open ">
                         <summary>${category}</summary>
                             ${groupedPlugins[category].map(plugin => html`
-                                <div class="${plugin.status === 'active' ? 'plugin active' : 'plugin'}">
+                                <div
+                                pluginId="${plugin.prjID}"
+                                class="${plugin.status === 'active' ? 'plugin active' : 'plugin'}"
+                                style="${plugin.prjID === this.lastPluginIdAdd ? 'background:#edffed' : ''}"
+                                
+                                >
                                     <div class= "plugin-title">
                                         <h3>${plugin.name}</h3>
                                         <div class="plugin-actions">
