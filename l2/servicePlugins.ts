@@ -82,16 +82,15 @@ export class ServicePlugins extends ServiceBase {
     }
 
     backListClicked() {
-        this.toggleScenario();
+        this.changeScenario('list');
     }
 
     installPluginClicked() {
-        this.toggleScenario();
+        this.changeScenario('add');
     }
 
     createNewPluginClicked() {
-        console.log("Create New Plugin clicked");
-        // Implementar lógica
+        this.changeScenario('help');
     }
 
     searchInputChanged(event: Event) {
@@ -125,7 +124,7 @@ export class ServicePlugins extends ServiceBase {
         this.lastPluginIdAdd = plugin.prjID;
         this.userPlugins = this.getUserPluginsByProject(this.project);
         this.avaliablePlugins = this.getAvaliablePlugins(this.project);
-        this.toggleScenario();
+        this.changeScenario('list');
         setTimeout(() => {
             this.scrollToAddPlugin(plugin.prjID);
         }, 400)
@@ -208,8 +207,8 @@ export class ServicePlugins extends ServiceBase {
         );
     }
 
-    toggleScenario() {
-        this.currentScenario = this.currentScenario === 'list' ? 'add' : 'list';
+    changeScenario(scenario: IScenaries) {
+        this.currentScenario = scenario
     }
 
     scrollToAddPlugin(pluginId: number) {
@@ -311,26 +310,50 @@ export class ServicePlugins extends ServiceBase {
     `;
     }
 
-    render() {
-        this.style.height = '100%';
+    private renderHelper() {
         return html`
-        <div>${this.currentScenario === 'list' ?
-                html`
+            <h2>O que são plugins?</h2>
+            <p>Plugins são trechos de código que incorporam funcionalidades adicionais ao seu projeto. Eles são desenvolvidos para estender e aprimorar as capacidades do seu projeto.</p>
+            <h2>Como os plugins funcionam?</h2>
+            <p>Quando você instala e ativa um plugin, ele introduz novos recursos ou funcionalidades ao seu projeto. Os plugins podem modificar a maneira como o seu projeto opera, adicionando novas opções de configuração, inteligência artificial, widgets, códigos curtos, entre outras funcionalidades.</p>
+
+            <h2>Onde encontrar plugins?</h2>
+            <p>Você pode localizar plugins diretamente no (L5) do seu projeto, na seção de Serviços (Service) chamado "Plugins". Neste local, é possível gerenciar e adicionar novos plugins ao seu projeto.</p>
+
+            <h2>Como criar um plugin?</h2>
+            <p>Para criar um plugin...</p>
+        `
+    }
+
+    renderScenario() {
+        switch (this.currentScenario) {
+            case 'list':
+                return html`
                     ${this.renderHeader()}
                     ${this.renderListPlugins()}
                 `
-                : html`
+            case 'add':
+                return html`
                     ${this.renderHeader()}
                     ${this.renderListAvaliablePlugins()}
-
-                `}
-        </div>
-        
-        `
+                `
+            case 'help':
+                return html`
+                    ${this.renderHeader()}
+                    ${this.renderHelper()}
+                `
+        }
     }
+
+    render() {
+        this.style.height = '100%';
+        return html`<div> ${this.renderScenario()}</div>`
+    }
+
+
 }
 
-type IScenaries = 'list' | 'add';
+type IScenaries = 'list' | 'add' | 'help';
 
 interface Plugin {
     prjID: number; // unique
