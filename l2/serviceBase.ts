@@ -15,7 +15,7 @@ export abstract class ServiceBase extends LitElement {
     @property({ type: String })
     visible = 'false';
 
-    abstract details: IService;
+    static details: IService;
 
     abstract onServiceClick(visible: boolean, reinit: boolean): void;
 
@@ -40,11 +40,11 @@ export interface IService {
     position: IServicePosition
     readOnly: boolean,
     tooltip: string,
-    className: string,
+    className: IServiceClassName,
     tags: string[],
     levels: (0 | 1 | 2 | 3 | 4 | 5 | 6 | 7)[];
 }
-
+export type IServiceClassName = 'separator-left' | 'separator-right' | undefined;
 export type IServicePosition = 'left' | 'right' | 'all';
 export type IServiceMode = 'A' | 'H' | 'D' | 'B';// active, hidden, disabled, 
 
