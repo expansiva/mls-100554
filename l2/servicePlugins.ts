@@ -14,7 +14,7 @@ import { ServiceBase, IService } from './_100554_serviceBase';
 
 export class ServicePlugins extends ServiceBase {
     
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
+    // static styles = css`[[mls_getDefaultDesignSystem]]`;
     
     get project(): number { return window['mls'] ? mls.actual[5].project : 0 };
 
@@ -41,14 +41,15 @@ export class ServicePlugins extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-
         if (visible && reinit) {
             this.userPlugins = this.getUserPluginsByProject(this.project);
             this.avaliablePlugins = this.getAvaliablePlugins(this.project);
             this.currentScenario = 'list'
         }
+    }
 
-
+    createRenderRoot() {
+        return this;
     }
 
     getExamplesPlugins(): Plugin[] {
