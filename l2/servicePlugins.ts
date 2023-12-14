@@ -5,7 +5,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService } from './_100554_serviceBase';
 
 @customElement('service-plugins-100554')
-
 export class ServicePlugins extends ServiceBase {
     
     // static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -345,7 +344,11 @@ export class ServicePlugins extends ServiceBase {
     }
 
     render() {
-        return html`<div> ${this.renderScenario()}</div>`
+        return html`
+        <div>
+            
+            ${this.renderScenario()}
+        </div>`
     }
 
 
@@ -360,7 +363,6 @@ interface Plugin {
     category: string;
     ref: string;
     status: PluginStatus
-    selected?: boolean
 }
 
 type PluginStatus = 'active' | 'inactive';

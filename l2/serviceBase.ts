@@ -19,6 +19,10 @@ export abstract class ServiceBase extends LitElement {
 
     abstract onServiceClick(visible: boolean, reinit: boolean): void;
 
+    createRenderRoot() {
+        return this;
+    }
+
     updated(changedProperties: Map<string | number | symbol, unknown>): void {
 
         super.updated(changedProperties);
