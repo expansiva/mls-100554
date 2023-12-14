@@ -355,9 +355,9 @@ export class ServicePlugins extends ServiceBase {
         return html`
         <div>
             <toolbar-service-100554></toolbar-service-100554>
-            <div>
+            <section>
                 ${this.renderScenario()}
-            </div>
+            </section>
         </div>`
     }
 
