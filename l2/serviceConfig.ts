@@ -9,7 +9,7 @@ export class ServiceConfig100554 extends ServiceBase {
 
     static styles = css`
     .bodyServiceConfig{
-        padding:2rem 1rem;
+        padding:2rem 2rem;
     }
     
     .header{
