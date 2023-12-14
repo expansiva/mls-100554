@@ -6,7 +6,7 @@ toolbar-service-100554 { //don't change this line
     /* header */
 
     .header {
-        background-color: var(--mls-toolbar-bg-3);
+        background-color: @mls-toolbar-bg-3;
         box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, .1);
         //position: relative;
         width: 100%;
@@ -25,9 +25,10 @@ toolbar-service-100554 { //don't change this line
         padding: 0;
         list-style: none;
         overflow: hidden;
-        background-color: var(--mls-toolbar-bg-3);
+        background-color: @mls-toolbar-bg-3;
         border-top: 1px solid rgba(0, 0, 0, 0.125);
         box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
+        display: none;
     }
 
     .header>ul>li {
@@ -35,7 +36,7 @@ toolbar-service-100554 { //don't change this line
         display: block;
         margin-bottom: -1px;
         cursor: pointer;
-        background: var(--mls-toolbar-bg-3);
+        background: @mls-toolbar-bg-3;
         // text-transform: uppercase;
         font-size: 14px;
     }
