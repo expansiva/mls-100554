@@ -5,10 +5,11 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService } from './_100554_serviceBase';
 
 @customElement('service-plugins-100554')
+
 export class ServicePlugins extends ServiceBase {
     
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-
+    
     get project(): number { return window['mls'] ? mls.actual[5].project : 0 };
 
     @property({ type: Array }) userPlugins: Plugin[] = this.getUserPluginsByProject(this.project);
@@ -346,7 +347,6 @@ export class ServicePlugins extends ServiceBase {
     }
 
     render() {
-        this.style.height = '100%';
         return html`<div> ${this.renderScenario()}</div>`
     }
 
