@@ -1,5 +1,11 @@
 /// <mls shortName="servicePlugins" project="100554" enhancement="_100541_enhancementLit" groupName="services" />
 
+/**
+ * This code has been forked and modified from a project found on https://github.com/shoelace-style/shoelace.
+ * The original project is licensed under the MIT license.
+ * @mlsComponentDetails {"webComponentDependencies": ["icon-100541"]}
+ */
+
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService } from './_100554_serviceBase';
@@ -220,10 +226,14 @@ export class ServicePlugins extends ServiceBase {
     renderHeader() {
         return html` <div>${this.currentScenario === 'list' ?
             html`
+            
                 <div class="header">
                     <div>
                         <button @click="${this.installPluginClicked}">Install Plugin</button>
                         <button @click="${this.createNewPluginClicked}">Create New Plugin</button>
+                    </div>
+                    <div style="width:12px; height:12px;" >
+                        <icon-100541 library="fa" name="far-bell"></icon-100541>
                     </div>
                     <input type="text" placeholder="Search plugin..." @input="${this.searchInputChanged}">
                 </div>
@@ -285,6 +295,7 @@ export class ServicePlugins extends ServiceBase {
         const sortedCategories = Object.keys(groupedPlugins).sort();
         return html`
         <h4 style="${sortedCategories.length === 0 ? 'display:block' : 'display:none'}"> No plugins avaliables!</h4>
+        
         <ul class="plugin-list">
             ${sortedCategories.map(category => html`
                 <li class="headerCategory">
