@@ -32,6 +32,10 @@ export class ServicePlugins extends ServiceBase {
         tags: [],
         levels: [5]
     }
+    
+    createRenderRoot() {
+        return this;
+    }
 
     onServiceClick(visible: boolean, reinit: boolean) {
         if (visible && reinit) {

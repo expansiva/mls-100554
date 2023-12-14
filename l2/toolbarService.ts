@@ -7,7 +7,11 @@ import { customElement, property } from 'lit/decorators.js';
 export class ToolbaarService_100554 extends LitElement {
     
     @property()
-    name: string = 'Somebody';
+	name: string = 'Somebody';
+	
+    createRenderRoot() {
+        return this;
+    }
 
     render() {
         return html`
