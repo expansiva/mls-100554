@@ -66,6 +66,7 @@ async function getDepedences(filename: string, html: string, withCss: boolean = 
         wcComponents: tags,
         importsMap: myImportsMap,
         importsJs: myImports,
+        css: myCss,
         errors: myErrors
     }
 
@@ -266,5 +267,6 @@ interface IJSONDEpendence {
     wcComponents: string[],
     importsMap: string[],
     importsJs: string[],
+    css:string[],
     errors: { tag: string, error: string }[]
 }
