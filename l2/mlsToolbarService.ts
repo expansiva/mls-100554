@@ -3,7 +3,7 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-@customElement('mls-toolbar-service-100554') 
+@customElement('mls-toolbar-service-100554')
 export class ToolbaarService_100554 extends LitElement {
 
 	@property({ type: String })
