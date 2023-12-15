@@ -5,71 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { IService } from './_100554_serviceBase';
 
 @customElement('collab-config-service-100554')
-export class ServiceConfig100554 extends LitElement {
-
-    static styles = css`
-    .bodyServiceConfig{
-        padding:2rem 2rem;
-    }
-    
-    .header{
-        border-bottom:1.5px solid rgb(230, 230, 230);
-        padding-bottom:.2rem;
-    }
-    .header button {
-        padding: 8px 16px;
-        background-color: rgb(82, 196, 26);
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-    .header button:hover {
-        background-color: #45a049;
-    }
-    
-    .listView{
-        list-style:none
-        margin:0px;
-        padding:0px;
-    }
-    .listView li{ 
-        width: 100%;   
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        padding:1rem 0.3rem;
-        border-bottom:1px solid rgb(230, 230, 230);
-    }
-    .listView li:hover{ 
-        background:#f9f9f9;
-    }
-    .groupInfos{
-        display:flex;
-        gap:.5rem;
-        align-items: center;
-    }
-
-    .groupHidden{
-        padding-left:1rem;
-        user-select:none;
-    }
-
-    .listView a{
-        color:blue;
-        cursor:pointer;
-    }
-
-    .listView select{
-        height:25px;
-        border-radius:5px;
-        border: 1px solid rgb(230, 230, 230);
-    }
-
-
-    `;
+export class CollabConfig100554 extends LitElement {
 
     @property({ type: String }) currentScenario: 'list' | 'add' = 'list';
 
@@ -96,6 +32,10 @@ export class ServiceConfig100554 extends LitElement {
                 `
             }
         </div>`;
+    }
+
+    createRenderRoot() {
+        return this;
     }
 
     private renderHeader() {
