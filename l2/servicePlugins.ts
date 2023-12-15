@@ -1,13 +1,13 @@
 /// <mls shortName="servicePlugins" project="100554" enhancement="_100541_enhancementLit" groupName="services" />
 
 /**
- * @mlsComponentDetails {"webComponentDependencies": ["toolbar-service-100554"]}
+ * @mlsComponentDetails {"webComponentDependencies": ["mls-toolbar-service-100554"]}
  */
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService } from './_100554_serviceBase';
-import { IMenu } from './_100554_toolbarService';
+import { IMenu } from './_100554_mlsToolbarService';
 
 
 @customElement('service-plugins-100554')
@@ -388,7 +388,7 @@ export class ServicePlugins extends ServiceBase {
 
     render() {
         return html`
-            <toolbar-service-100554 widget="service-plugins-100554"></toolbar-service-100554>
+            <mls-toolbar-service-100554 widget="service-plugins-100554"></mls-toolbar-service-100554>
             <section>
                 ${this.renderScenario()}
             </section>
