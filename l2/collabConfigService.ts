@@ -1,8 +1,9 @@
-/// <mls shortName="collabConfigService" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="collabConfigService" project="100554" enhancement="_100541_enhancementLit" groupName="other" />
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IService } from './_100554_serviceBase';
+import { getDepedencesByHtml } from './_100554_libCompile';
 
 @customElement('collab-config-service-100554')
 export class CollabConfig100554 extends LitElement {
@@ -17,10 +18,10 @@ export class CollabConfig100554 extends LitElement {
 
     render() {
 
+        getDepedencesByHtml('<service-plugins-100554></service-plugins-100554>', true).then((ret) => console.info(ret));
         this.style.height = '100%';
         return html`
         <div class="bodyServiceConfig">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
             ${this.currentScenario === 'list' ?
                 html`
                     ${this.renderHeader()}
