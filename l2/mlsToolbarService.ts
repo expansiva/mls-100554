@@ -46,6 +46,20 @@ export class ToolbaarService_100554 extends LitElement {
 	}
 
 	connectedCallback() {
+		if (!this.widget) {
+			this.menuOptions = {
+				title: 'Example',
+				actions: {
+					opAbout: 'About',
+					opExample: 'Plugins',
+				},
+				icons: {},
+				actionDefault: 'opExample', // call after close icon clicked
+				onClickLink: undefined,
+			}
+			super.connectedCallback();
+			return;
+		}
 		customElements.whenDefined(this.widget).then(() => {
 			this.menuOptions = this.getMenuOptions();
 			super.connectedCallback();
@@ -79,7 +93,7 @@ export class ToolbaarService_100554 extends LitElement {
 	}
 
 	private handleOnChangeMenu() {
-
+		console.info('handleOnChangeMenu')
 		if (!this.checkbox) return;
 		if (this.menuToogle) {
 			const parentDiv = this.menuToogle.closest('div');
@@ -143,10 +157,9 @@ export class ToolbaarService_100554 extends LitElement {
 	private toogleIconHamburger(show: boolean) {
 		// falsee = hanburguer icon 
 		// true = X icon(close icon)
-		const checkbox: HTMLInputElement = this.querySelector('[class="menu-btn"]') as HTMLInputElement;
-		if (checkbox) {
-			checkbox.checked = show;
-			checkbox.dispatchEvent(new Event('change'));
+		if (this.checkbox) {
+			this.checkbox.checked = show;
+			this.checkbox.dispatchEvent(new Event('change'));
 		}
 	}
 
@@ -231,6 +244,7 @@ export class ToolbaarService_100554 extends LitElement {
 	}
 
 	private showMenuItens(): void {
+		console.info('showMenuItens')
 		if (!this.menu) return;
 		this.menu.style.display = 'block';
 	}
@@ -275,7 +289,7 @@ export class ToolbaarService_100554 extends LitElement {
         <header class="header">
             <div>
                 <label class="menu-icon">
-                    <input class="menu-btn" type="checkbox" @change=${this.handleOnChangeMenu()}/>					
+                    <input class="menu-btn" type="checkbox" @change=${this.handleOnChangeMenu}/>					
                     <span class="navicon"></span>
                 </label>
                 <ul class="icon-menu">
