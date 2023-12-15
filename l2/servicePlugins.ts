@@ -71,10 +71,6 @@ export class ServicePlugins extends ServiceBase {
         return true;
     }
 
-    createRenderRoot() {
-        return this;
-    }
-
     onServiceClick(visible: boolean, reinit: boolean) {
 
         if (visible && reinit) {
