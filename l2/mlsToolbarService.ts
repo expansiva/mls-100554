@@ -1,4 +1,4 @@
-/// <mls shortName="mlsToolbarService" project="100554" enhancement="_100554_enhancementLit" groupName="navigation" />
+/// <mls shortName="mlsToolbarService" project="100554" enhancement="_100541_enhancementLit" groupName="navigation" />
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -39,10 +39,6 @@ export class ToolbaarService_100554 extends LitElement {
 			if (this.menu) this.menu.style.width = width + 'px';
 			this.msize = newVal;
 		}
-	}
-
-	createRenderRoot() {
-		return this;
 	}
 
 	connectedCallback() {
