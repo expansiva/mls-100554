@@ -35,6 +35,7 @@ export class ToolbaarService_100554 extends LitElement {
 	createRenderRoot() {
 		return this;
 	}
+
 	attributeChangedCallback(name: string, oldVal: string, newVal: string) {
 		super.attributeChangedCallback(name, oldVal, newVal);
 		if (name === 'msize') {
