@@ -278,12 +278,10 @@ export class ToolbaarService_100554 extends LitElement {
 	render() {
 		this.setAttribute('mheight', '40');
 		this.tabIndex = 0;
-
-		this.menuOptions.setMode = this.setMode as any;
-		this.menuOptions.updateTitle = this.updateTitle;
-		this.menuOptions.getLastMode = this.getLastMode;
+		this.menuOptions.setMode = this.setMode.bind(this) as any;
+		this.menuOptions.updateTitle = this.updateTitle.bind(this);
+		this.menuOptions.getLastMode = this.getLastMode.bind(this);
 		this.menuOptions.setIconActive = this.setIconActive.bind(this);
-
 
 		return html`
         <header class="header">
