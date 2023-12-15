@@ -19,9 +19,15 @@ export abstract class ServiceBase extends LitElement {
 
     abstract onServiceClick(visible: boolean, reinit: boolean): void;
 
+    connectedCallback() {
+        super.connectedCallback();
+        (this as any)['mlsWidget'] = this;
+    }
+
     updated(changedProperties: Map<string | number | symbol, unknown>): void {
 
         super.updated(changedProperties);
+
 
         if (changedProperties.has('visible')) {
             const visible = changedProperties.get('visible');
@@ -47,4 +53,3 @@ export interface IService {
 export type IServiceClassName = 'separator-left' | 'separator-right' | undefined;
 export type IServicePosition = 'left' | 'right' | 'all';
 export type IServiceMode = 'A' | 'H' | 'D' | 'B';// active, hidden, disabled, 
-

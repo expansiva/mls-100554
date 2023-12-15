@@ -7,12 +7,14 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService } from './_100554_serviceBase';
+import { IMenu } from './_100554_toolbarService';
+
 
 @customElement('service-plugins-100554')
 export class ServicePlugins extends ServiceBase {
-    
+
     // static styles = css`[[mls_getDefaultDesignSystem]]`;
-    
+
     get project(): number { return window['mls'] ? mls.actual[5].project : 0 };
 
     @property({ type: Array }) userPlugins: Plugin[] = this.getUserPluginsByProject(this.project);
@@ -36,12 +38,45 @@ export class ServicePlugins extends ServiceBase {
         tags: [],
         levels: [5]
     }
-    
+
+    public onClickLink = (op: string): boolean => {
+        if (op === 'opAbout') return this.showAbout();
+        if (op === 'opPlugins') return this.showInitial();
+        if (this.menu.setMode) this.menu.setMode('initial');
+        return false;
+
+    }
+
+    public menu: IMenu = {
+        title: 'Plugins',
+        actions: {
+            opAbout: 'About',
+            opPlugins: 'Plugins',
+        },
+        icons: {},
+        actionDefault: 'opPlugins', // call after close icon clicked
+        setMode: undefined, // child will set this
+        onClickLink: this.onClickLink,
+    }
+
+    private showInitial(): boolean {
+        if (this.menu.setMode) this.menu.setMode('initial');
+        return true;
+    }
+
+    private showAbout(): boolean {
+        const div1 = document.createElement('div');
+        div1.innerHTML = '<h1>About this Service</h1>'
+        if (this.menu.setMode) this.menu.setMode('page', div1);
+        return true;
+    }
+
     createRenderRoot() {
         return this;
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
+
         if (visible && reinit) {
             this.userPlugins = this.getUserPluginsByProject(this.project);
             this.avaliablePlugins = this.getAvaliablePlugins(this.project);
@@ -353,12 +388,11 @@ export class ServicePlugins extends ServiceBase {
 
     render() {
         return html`
-        <div>
-            <toolbar-service-100554></toolbar-service-100554>
+            <toolbar-service-100554 widget="service-plugins-100554"></toolbar-service-100554>
             <section>
                 ${this.renderScenario()}
             </section>
-        </div>`
+        `
     }
 
 
