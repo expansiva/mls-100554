@@ -12,13 +12,16 @@ export class CollabConfig100554 extends LitElement {
 
     @property({ type: String }) error: string = '';
 
-    @property({ type: Array }) userServices: IService[] = this.getUserServices();
+    @property({ type: Array }) userServices: IService[] = [];
 
     @property({ type: Array }) avaliableServices: IService[] = [];
 
+    createRenderRoot() {
+        return this;
+    }
+
     render() {
 
-        getDepedencesByHtml('<service-plugins-100554></service-plugins-100554>', true).then((ret) => console.info(ret));
         this.style.height = '100%';
         return html`
         <div class="bodyServiceConfig">
@@ -35,8 +38,11 @@ export class CollabConfig100554 extends LitElement {
         </div>`;
     }
 
-    createRenderRoot() {
-        return this;
+    async connectedCallback() {
+        super.connectedCallback();
+        // set loading
+        await this.getServices();
+        // remove loading
     }
 
     private renderHeader() {
@@ -86,14 +92,6 @@ export class CollabConfig100554 extends LitElement {
 
     }
 
-    private goToScenaryAdd() {
-        this.currentScenario = 'add';
-    }
-
-    private goToScenaryList() {
-        this.currentScenario = 'list';
-    }
-
     private renderListServices() {
 
         return html`
@@ -133,6 +131,14 @@ export class CollabConfig100554 extends LitElement {
         </ul>
         `
 
+    }
+
+    private goToScenaryAdd() {
+        this.currentScenario = 'add';
+    }
+
+    private goToScenaryList() {
+        this.currentScenario = 'list';
     }
 
     private openHiddenConfigs(e: MouseEvent) {
@@ -259,7 +265,129 @@ export class CollabConfig100554 extends LitElement {
 
     }
 
-    private getUserServices(): IService[] {
+    private async getServices() {
+
+        try {
+
+            const arrayUserServices = await this.getUserServices();
+            const arrayAvaliableServices = await this.getAvaliableServices();
+
+            await this.getMls2Services(arrayUserServices, arrayAvaliableServices);
+
+            this.userServices = arrayUserServices;
+            this.avaliableServices = arrayAvaliableServices;
+
+        } catch (e) {
+
+            this.error = 'Error load services';
+
+        }
+
+
+
+    }
+
+    private async getMls2Services(user: IService[], avaliable: IService[]) {
+
+        for await (const i of Object.keys(mls.stor.files)) {
+
+            try {
+
+                const f = mls.stor.files[i];
+                if (!f || f.hasError || f.project !== mls.actual[5].project || f.extension !== '.ts' || !f.shortName.startsWith('service')) continue;
+
+                const v = this.verifyExist(f, user, avaliable);
+                if (v.act || v.inact) continue;
+
+                const mf = mls.l2.editor.get({ project: f.project, shortName: f.shortName });
+                if (!mf) continue;
+
+                let info: any;
+                if (!mf.compilerResults || (mf.compilerResults && !mf.compilerResults.prodJS)) {
+
+                    if (mf.compilerResults) mf.compilerResults.modelNeedCompile = true;
+                    await mls.l2.editor.getCompilerResultTS(mf, true);
+
+                }
+
+                info = this.getInfosClassService(mf.model.getValue());
+
+                if (!info /*|| (info.levels && !info.levels.includes(this.actualLevel))*/) continue;
+
+
+                const obj = {
+
+                    active: false,
+                    className: info.className,
+                    icon: info.icon,
+                    mode: info.mode,
+                    name: info.name,
+                    path: `_${f.project}_${f.shortName}`,
+                    position: info.position,
+                    readOnly: info.readOnly,
+                    ref: `_${f.project}_${f.shortName}`,
+                    tooltip: info.tooltip,
+                    visible: info.visible,
+                    shortcut: '',
+                    tags: info.tags,
+                    isMls2: true
+
+                };
+
+                avaliable.push(obj as any);
+
+            } catch (e) {
+                console.info(e);
+                continue;
+            }
+
+        };
+
+    }
+
+    private verifyExist(f: mls.stor.IFileInfo, user: IService[], avaliable: IService[]): { act: boolean, inact: boolean } {
+
+        const ret = { act: false, inact: false }
+
+        const act = user.find((i: any) => i.path === `_${f.project}_${f.shortName}`);
+        const inact = avaliable.find((i: any) => i.path === `_${f.project}_${f.shortName}`);
+
+        ret.act = !!act;
+        ret.inact = !!inact;
+
+        return ret;
+
+
+    }
+
+    private getInfosClassService(content: string) {
+
+        const startMarker = 'public details:';
+        const endMarker = '}';
+        const startIndex = content.indexOf(startMarker);
+        if (startIndex !== -1) {
+            const endIndex = content.indexOf(endMarker, startIndex);
+            if (endIndex !== -1) {
+                let detailsBlock = content.substring(startIndex + startMarker.length, endIndex + 1).trim();
+                const ssindex = detailsBlock.indexOf('{');
+                detailsBlock = detailsBlock.substring(ssindex, detailsBlock.length).trim();
+                let result = {};
+                eval('result = ' + detailsBlock);
+                return result;
+            }
+        }
+
+        return null;
+
+    }
+
+    private async getAvaliableServices() {
+
+        return [] as any;
+
+    }
+
+    private async getUserServices() {
 
         return [
             {
@@ -326,8 +454,7 @@ export class CollabConfig100554 extends LitElement {
                 "tooltip": " Results",
                 "position": "all"
             }
-
-        ] as any[];
+        ] as any;
 
     }
 
