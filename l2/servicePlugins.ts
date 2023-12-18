@@ -44,7 +44,6 @@ export class ServicePlugins extends ServiceBase {
         if (op === 'opPlugins') return this.showInitial();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
-
     }
 
     public menu: IMenu = {
