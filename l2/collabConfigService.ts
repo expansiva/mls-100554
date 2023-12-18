@@ -3,7 +3,6 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IService } from './_100554_serviceBase';
-import { getDepedencesByHtml } from './_100554_libCompile';
 
 @customElement('collab-config-service-100554')
 export class CollabConfig100554 extends LitElement {
