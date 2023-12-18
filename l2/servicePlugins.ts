@@ -4,8 +4,8 @@
  * @mlsComponentDetails {"webComponentDependencies": ["mls-toolbar-service-100554"]}
  */
 
-import { html, css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService } from './_100554_serviceBase';
 import { IMenu } from './_100554_mlsToolbarService';
 
@@ -60,9 +60,8 @@ export class ServicePlugins extends ServiceBase {
     }
 
     private showInitial(): boolean {
-        if (this.menu.setMode) this.menu.setMode('initial');
         return true;
-    }
+    }    
 
     private showAbout(): boolean {
         const div1 = document.createElement('div');
