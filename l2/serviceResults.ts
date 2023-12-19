@@ -171,6 +171,8 @@ export class ServiceResults extends ServiceBase {
         monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
             noImplicitAny: true
         });
+        (this.c2 as any)['mlsEditor'] = this._ed1;
+
     }
 
     private createOrGetModel(resultName: string, editorType: string, src: string): mls.l2.editor.IMFile {
@@ -335,20 +337,6 @@ export class ServiceResults extends ServiceBase {
     private showProdJS3(): boolean {
         this.actualResultMode = 'prodJS';
         return this.showProdJS2();
-    }
-
-    private showDevTs(): boolean {
-        if (this.menu.setMode) this.menu.setMode('editor');
-        this.actualResultMode = 'devTS';
-        this.setModelLanguage(this.resultsLanguages.devTS, this.results.devTS);
-        return true;
-    }
-
-    private showDevJs(): boolean {
-        if (this.menu.setMode) this.menu.setMode('editor');
-        this.actualResultMode = 'devJS';
-        this.setModelLanguage(this.resultsLanguages.devJS, this.results.devJS);
-        return true;
     }
 
     private showTsConfig(): boolean {
