@@ -13,8 +13,6 @@ import { IMenu } from './_100554_mlsToolbarService';
 @customElement('service-plugins-100554')
 export class ServicePlugins extends ServiceBase {
 
-    // static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     get project(): number { return window['mls'] ? mls.actual[5].project : 0 };
 
     @property({ type: Array }) userPlugins: Plugin[] = this.getUserPluginsByProject(this.project);
