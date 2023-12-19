@@ -13,6 +13,7 @@ export class ServiceResults extends ServiceBase {
 
     constructor() {
         super();
+        console.info('constrcutor')
         this.editorModelName = `serviceresults_${this.position}.js`;
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
