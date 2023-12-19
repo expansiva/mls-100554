@@ -31,7 +31,15 @@ export class ServiceResults extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-
+        if (op === 'opAbout') return this.showAbout();
+        if (op === 'opProdJS') return this.showProdJS();
+        if (op === 'opProdJS2') return this.showProdJS3();
+        if (op === 'opTSConfig') return this.showTsConfig();
+        if (op === 'opTSLibs') return this.showTsLib();
+        if (op === 'opDevDoc') return this.showDevDoc();
+        if (op === 'opDevDocJson') return this.showDevDocJson();
+        if (op === 'opReferences') return this.showFileRefs();
+        if (op === 'opAssistant') return this.showAssistant();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
