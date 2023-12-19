@@ -10,7 +10,7 @@ export class ServiceListFiles extends ServiceBase {
 
     get actualLevel(): number { return 2 };
 
-    @property() project: number = 0;
+    @property() project: number = 1;
 
     @property() errorAux: string = '';
 
