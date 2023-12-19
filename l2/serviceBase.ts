@@ -17,7 +17,7 @@ export abstract class ServiceBase extends LitElement {
 
     abstract details: IService;
 
-    abstract onServiceClick(visible: boolean, reinit: boolean): void;
+    abstract onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void;
 
     connectedCallback() {
         super.connectedCallback();
@@ -28,16 +28,25 @@ export abstract class ServiceBase extends LitElement {
         return this;
     }
 
+    private getParent() {
+        const parentToolbarContent = this.closest('mls-toolbar-content-service-100529') as IToolbarContent | null;
+        return parentToolbarContent;
+    }
+
     updated(changedProperties: Map<string | number | symbol, unknown>): void {
         super.updated(changedProperties);
         if (changedProperties.has('visible')) {
             const visible = changedProperties.get('visible');
             const reinit: boolean = visible !== 'true' && visible !== undefined;
-            if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible !== 'true' || visible === undefined, reinit)
+            if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible !== 'true' || visible === undefined, reinit, this.getParent())
         }
     }
 
 
+}
+
+export interface IToolbarContent extends HTMLElement {
+    layout:Function
 }
 
 export interface IService {
