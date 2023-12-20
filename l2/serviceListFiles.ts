@@ -116,7 +116,7 @@ export class ServiceListFiles extends ServiceBase {
                     <input id="radioProjectZero" name="projectFind" type="radio" value="0">
                     <label for="radioProjectZero">Local project</label>
                 </div>
-                <input type="text" placeholder="Filter">
+                <input type="text" placeholder="Filter" @input="${this.filterLiChange}">
             </div>
             <div class="groupInfo">
                 <span style="margin-right:10px">
@@ -159,22 +159,22 @@ export class ServiceListFiles extends ServiceBase {
                     ${repeat(
                     this.files,
                     ((item: mls.stor.IFileInfo) => item.shortName) as any,
-                        ((file: mls.stor.IFileInfo, index: any) => {
+                    ((file: mls.stor.IFileInfo, index: any) => {
 
-                            if (letterInit !== file.shortName.charAt(0).toUpperCase()) {
+                        if (letterInit !== file.shortName.charAt(0).toUpperCase()) {
 
-                                letterInit = file.shortName.charAt(0).toUpperCase();
+                            letterInit = file.shortName.charAt(0).toUpperCase();
 
-                                return html`
+                            return html`
                                     <li class="headerTitle">${letterInit} </li>
                                     ${this.createLiItem(file, index, false)}
                                 `
-                            }
+                        }
 
-                            return this.createLiItem(file, index, false)
+                        return this.createLiItem(file, index, false)
 
-                        }) as any    
-                    )}
+                    }) as any
+                )}
                 `
             }
         `;
@@ -207,6 +207,7 @@ export class ServiceListFiles extends ServiceBase {
 
         const name = this.project === 0 && inHistory ? '_' + file.project + '_' + file.shortName : file.shortName;
 
+        const nameFilter = inHistory ? '*******' : name.toLocaleLowerCase();
         let auxVersion = '';
         let auxStorage = '';
         let auxBug = '';
@@ -230,13 +231,13 @@ export class ServiceListFiles extends ServiceBase {
         }
 
         return html`
-            <li @click="${this.clickOptOpen}" .myFile=${file}>
+            <li @click="${this.clickOptOpen}" .myFile=${file} .nameFilter="${nameFilter}">
                 <div class="elContent">
                     <div class="groupHiddenList" @click="${this.clickGroupHidden}">
-                        <span class="mls-gpbtnslider-item fa fa-undo" title="undo"></span>
+                        <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${this.clickOptUndo}"></span>
                         <span class="mls-gpbtnslider-item fa fa-clone" title="clone" @click="${this.clickOptClone}"></span>
                         <span class="mls-gpbtnslider-item fa fa-file-pen" title="rename" @click="${this.clickOptRename}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-trash" title="delete"></span>
+                        <span class="mls-gpbtnslider-item fa fa-trash" title="delete" @click="${this.clickOptDel}"></span>
                     </div>
                     <span class="${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
                     <div .innerHTML="${auxStorage + auxBug + auxVersion}"></div>
@@ -294,6 +295,58 @@ export class ServiceListFiles extends ServiceBase {
 
     }
 
+    private timeFilterChange = 0;
+    private filterLiChange(e: InputEvent) {
+
+        e.stopPropagation();
+
+        clearTimeout(this.timeFilterChange);
+        this.timeFilterChange = setTimeout(() => {
+
+            const el = e.target as HTMLInputElement;
+            if (!el) return;
+            const contentServiceList = el.closest('.contentServiceList');
+            if (!contentServiceList) return;
+
+            const all = contentServiceList.querySelectorAll('li');
+            all.forEach((li: any) => {
+
+                const name = li.nameFilter ? li.nameFilter : '******';
+                const inp = el.value.toLocaleLowerCase();
+
+                if (name.indexOf(inp) >= 0) {
+                    li.style.display = '';
+                } else {
+                    li.style.display = 'none';
+                }
+
+
+            })
+
+        }, 500);
+
+    }
+
+    private clickOptUndo(e: MouseEvent) {
+
+        e.stopPropagation();
+        const mfile = this.getMyFileInElement(e.target as HTMLElement);
+        if (!mfile) return;
+
+        console.info('undo', mfile);
+
+    }
+
+    private clickOptDel(e: MouseEvent) {
+
+        e.stopPropagation();
+        const mfile = this.getMyFileInElement(e.target as HTMLElement);
+        if (!mfile) return;
+
+        console.info('del', mfile);
+
+    }
+
     private clickOptOpen(e: MouseEvent) {
 
         e.stopPropagation();
@@ -322,7 +375,7 @@ export class ServiceListFiles extends ServiceBase {
 
     }
 
-    private clickOptRenameClone(el: HTMLElement, mode:string) {
+    private clickOptRenameClone(el: HTMLElement, mode: string) {
 
         if (!el) return;
 
@@ -351,10 +404,10 @@ export class ServiceListFiles extends ServiceBase {
 
                 console.info(mode, myfile);
 
-            } catch (er:any) {
+            } catch (er: any) {
 
                 this.errorAux = er.message;
-                setTimeout(() => {this.errorAux = ''}, 2000);
+                setTimeout(() => { this.errorAux = '' }, 2000);
 
             }
 
