@@ -73,7 +73,7 @@ async function setCodeLensMlsComponents(model: monaco.editor.ITextModel, mfile: 
         mfile.storFile.hasError = true;
         const text = model.getLineContent(errorInfo.line);
         errorInfo.end = text.length;
-        setErrorOnModel(model, errorInfo.line, errorInfo.start, errorInfo.end, hasError.startsWith('onl') ? hasError : `Not found dependence: ${hasError}`)
+        setErrorOnModel(model, errorInfo.line, errorInfo.start, errorInfo.end, hasError.startsWith('onl') ? hasError : `Not found dependence: ${hasError}`, monaco.MarkerSeverity.Error)
 
         mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
         mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
