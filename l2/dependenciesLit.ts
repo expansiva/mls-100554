@@ -1,4 +1,4 @@
-/// <mls shortName="dependeciesLit" project="100554" enhancement="_blank" />
+/// <mls shortName="dependenciesLit" project="100554" enhancement="_blank" />
 				
 import { convertTagToFileName } from './_100554_utilsLit'
 import type { IJSDoc } from './_100554_propiertiesLit';
@@ -62,4 +62,5 @@ function getJsDocInfoTags(objDocs: IJSDoc[]): string | undefined {
         return tagComponentDetails.comment;
     }
 }
+
 

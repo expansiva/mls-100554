@@ -1,22 +1,19 @@
 /// <mls shortName="enhancementLit" project="100554" enhancement="_100554_enhancementVanilla" groupName="other" />
-
-
-import { convertFileNameToTag } from './_100541_utilsLit'
-import { getPropierties } from './_100541_propiertiesLit'
-import { getComponentDependencies } from './_100541_dependenciesLit'
-import { validateTagName, validateRender } from './_100541_validateLit'
-import { setCodeLens } from './_100541_codeLensLit'
-import { injectStyle, MLS_GETDEFAULTDESIGNSYSTEM } from './_100541_processCssLit'
+import { convertFileNameToTag } from './_100554_utilsLit'
+import { getPropierties } from './_100554_propiertiesLit'
+import { getComponentDependencies } from './_100554_dependenciesLit'
+import { validateTagName, validateRender } from './_100554_validateLit'
+import { setCodeLens } from './_100554_codeLensLit'
+import { injectStyle, MLS_GETDEFAULTDESIGNSYSTEM } from './_100554_processCssLit'
 
 
 export const description = "Use this enhancement for model using lit - a simple and fast web component.\nRef: https://lit.dev/"
-
 
 export const example = `
     import { html, css, LitElement } from 'lit'; 
     import { customElement, property } from 'lit/decorators.js';
 
-    @customElement('litteste-100541')
+    @customElement('litteste-100554')
     export class SimpleGreeting extends LitElement {
         static styles = css\`p { color: red }\`;
 
@@ -32,24 +29,12 @@ export const requires: mls.l2.editor.IRequire[] = [
     {
         type: 'tspath',
         name: 'lit',
-        ref: "file://server/_100541_litElement.ts"
+        ref: "file://server/_100554_litElement.ts"
     },
     {
         type: 'tspath',
         name: 'lit/decorators.js',
-        ref: "file://server/_100541_litDecorators.ts"
-    },
-    {
-        type: 'tspath',
-        name: 'CollabLitElement',
-        ref: "file://server/_100554_collabLitElement.ts"
-    },
-    {
-        // test
-        type: "cdn",
-        name: "mobx",
-        ref: "https://cdn.jsdelivr.net/gh/lit/dist@2.7.5/all/lit-all.min.js",
-
+        ref: "file://server/_100554_litDecorators.ts"
     },
     {
         type: "cdn",
@@ -60,12 +45,6 @@ export const requires: mls.l2.editor.IRequire[] = [
     {
         type: "cdn",
         name: "lit/decorators.js",
-        ref: "https://cdn.jsdelivr.net/npm/lit-element@3.3.2/+esm",
-
-    },
-    {
-        type: "cdn",
-        name: "CollabLitElement2", // fake ???
         ref: "https://cdn.jsdelivr.net/npm/lit-element@3.3.2/+esm",
 
     }
@@ -84,7 +63,7 @@ export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.en
             ret.defaultHtmlExamplePreview = getDefaultHtmlExamplePreview(model);
             ret.properties = getPropierties(model);
             ret.webComponentDependencies = getComponentDependencies(model);
-            ret['servicePreviewDefault'] = '_100529_service_preview';
+            (ret as any)['servicePreviewDefault'] = '_100529_service_preview';
             resolve(ret);
         } catch (e) {
             reject(e);
@@ -98,7 +77,7 @@ export const prepareAdd = (prompt: string): { sourceTS: string, aiHeader: string
         import { html, css, LitElement } from 'lit'; 
         import { customElement, property } from 'lit/decorators.js';
 
-        @customElement('litteste-100541')
+        @customElement('litteste-100554')
         export class SimpleGreeting extends LitElement {
 
         ::: e com as funcionalidades:::`;
@@ -111,10 +90,17 @@ export const prepareAdd = (prompt: string): { sourceTS: string, aiHeader: string
 
 export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
     try {
-        validateTagName(mfile);
-        validateRender(mfile)
         setCodeLens(mfile);
-        // await injectStyle(mfile, 0);
+        if (validateTagName(mfile)) {
+            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
+            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
+            return;
+        }
+        if (validateRender(mfile)) {
+            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
+            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
+            return;
+        }
     } catch (e: any) {
         return e.message || e;
     }
@@ -128,9 +114,6 @@ export const getPromptDefault = (): string => {
 }
 
 export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
-
     await injectStyle(mfile, 0);
     return;
-
 }
-
