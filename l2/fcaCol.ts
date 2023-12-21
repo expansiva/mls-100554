@@ -1,0 +1,123 @@
+/// <mls shortName="fcaCol" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+/**
+ * @mlsComponentDetails {
+ *  "webComponentDependencies": ["wcd-toolbox-100554"]
+ * } 
+ */
+
+import { html, unsafeHTML } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { FcaLitElementBase } from './_100554_fcaLitElementBase';
+import { IActionLevels } from './_100554_fcaGlobal';
+
+@customElement('fca-col-100554')
+export class FCACol extends FcaLitElementBase {
+
+    public allowAddBody = false;
+    public allowsChild = (tag: string): boolean => {
+
+        return tag !== 'fca-row-100554' && tag !== 'fca-col-100554';
+
+    };
+
+    public actions: IActionLevels = {
+        '1': [],
+        '2': [],
+        '3': [],
+        '4': [
+            this.templateActions.move,
+            this.templateActions.size,
+            {
+                position: 'p-m1',
+                tp: 'menu',
+                format: '',
+                title: '',
+                iconSvg: '',
+                onclick: undefined,
+                menuItens: [
+                    this.templateActionsMenu.goToParents
+
+                ],
+                menuSubItens: [
+                    this.templateActionsMenu.goToFirstChild,
+                    this.templateActionsMenu.removeMe
+                ],
+            }
+        ],
+        '5': [],
+        '6': [],
+        '7': [],
+    }
+
+    private styleElMain: CSSStyleDeclaration | undefined = undefined;
+
+    firstUpdated(changedProperties: any) {
+
+        super.firstUpdated(changedProperties);
+        let elS: HTMLElement = document.createElement('span');
+        this.styleElMain = elS.style;
+
+    }
+
+    public renderPreview = (param: string): any => {
+
+        this.style.display = 'block';
+        this.style.flex = '1';
+
+        const code = `<div ${this.styleel}">${this.myInnerHTML}</div>`;
+
+        const objRender = html`${unsafeHTML(code)}`;
+        return objRender;
+
+    }
+
+    public renderTag = (param: string): any => {
+
+        this.style.display = 'block';
+        this.style.flex = '1';
+
+        const code = `<div ${this.styleel}">${this.myInnerHTML}</div>`;
+
+        const objRender = html`${unsafeHTML(code)}`;
+        return objRender;
+
+    }
+
+    public renderEdit = (param: string): any => {
+
+        this.style.display = 'block';
+        this.style.flex = '1';
+
+        const code = `<div ${this.styleel}">${this.myInnerHTML}</div><wcd-toolbox-100554 level="${this.level}" widget="div"></wcd-toolbox-100554>`;
+
+        const objRender = html`${unsafeHTML(code)}`;
+        return objRender;
+
+    }
+
+    createRenderRoot() {
+        return this;
+    }
+
+    public changeStateHtml(html: string): void {
+
+    }
+
+    public changeStateStyle(style: {}): void {
+
+        if (!this.styleElMain || !style) return;
+
+        const el = this.querySelector(`${this.widget}:first-child`) as HTMLElement
+        if (el) {
+
+            this.styleElMain.cssText = el.style.cssText;
+            Object.assign(this.styleElMain, style as CSSStyleDeclaration);
+            el.style.cssText = this.styleElMain.cssText;
+            this.styleel = el.style.cssText
+
+        }
+
+    }
+
+}
