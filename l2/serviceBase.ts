@@ -1,4 +1,4 @@
-/// <mls shortName="serviceBase" project="100554" enhancement="_100541_enhancementLit" groupName="other" />
+/// <mls shortName="serviceBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
