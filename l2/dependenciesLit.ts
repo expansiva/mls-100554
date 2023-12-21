@@ -24,7 +24,7 @@ export function getComponentDependencies(model: mls.l2.editor.IMFile): string[] 
 
         model.storFile.hasError = true;
 
-        setErrorOnModel(model.model, 1, 0, 10, 'Line breaks are not allowed in webComponentDependencies');
+        setErrorOnModel(model.model, 1, 0, 10, 'Line breaks are not allowed in webComponentDependencies', monaco.MarkerSeverity.Error);
 
         mls.events.fireFileAction('statusOrErrorChanged', model.storFile, 'left');
         mls.events.fireFileAction('statusOrErrorChanged', model.storFile, 'right');
@@ -44,7 +44,7 @@ export function getComponentDependencies(model: mls.l2.editor.IMFile): string[] 
             //console.error('Error parsing webComponentDependencies array :', error);
             model.storFile.hasError = true;
 
-            setErrorOnModel(model.model, 1, 0, 10, 'Error parsing webComponentDependencies array :');
+            setErrorOnModel(model.model, 1, 0, 10, 'Error parsing webComponentDependencies array ', monaco.MarkerSeverity.Error);
 
             mls.events.fireFileAction('statusOrErrorChanged', model.storFile, 'left');
             mls.events.fireFileAction('statusOrErrorChanged', model.storFile, 'right');
