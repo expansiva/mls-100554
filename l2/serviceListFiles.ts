@@ -460,6 +460,7 @@ export class ServiceListFiles extends ServiceBase {
 
     private getFilesProject(): mls.stor.IFileInfo[] {
 
+        if (!mls) return [];
         const arraySf: mls.stor.IFileInfo[] = [];
         const ext = (this.extensionLevel as any)[this.actualLevel] as string;
         for (const i of Object.keys(mls.stor.files).sort()) {
@@ -488,6 +489,7 @@ export class ServiceListFiles extends ServiceBase {
 
     private async getFileHistory() {
 
+        if (!mls) return [];
         const arraySfHistory: mls.stor.IFileInfo[] = [];
         const lh = this.getHistory();
         if (lh.length <= 0 || !window['mls']) return [];
