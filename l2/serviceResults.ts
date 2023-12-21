@@ -7,6 +7,7 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent } from './_100554_serviceBase';
 import { IMenu } from './_100554_mlsToolbarService';
+import { getDepedencesByMFile } from './_100554_libCompile';
 
 @customElement('service-results-100554')
 export class ServiceResults extends ServiceBase {
@@ -39,6 +40,7 @@ export class ServiceResults extends ServiceBase {
         if (op === 'opTSLibs') return this.showTsLib();
         if (op === 'opDevDoc') return this.showDevDoc();
         if (op === 'opDevDocJson') return this.showDevDocJson();
+        if (op === 'opJsonImport') return this.showJsonImport();
         if (op === 'opReferences') return this.showFileRefs();
         if (op === 'opAssistant') return this.showAssistant();
         if (this.menu.setMode) this.menu.setMode('initial');
@@ -55,6 +57,7 @@ export class ServiceResults extends ServiceBase {
             opReferences: 'References',
             opDevDoc: 'Dev - Documentation',
             opDevDocJson: 'Dev - Documentation Json',
+            opJsonImport: 'Json Imports'
         },
         actionDefault: 'opProdJS2', // call after close icon clicked
         icons: {},
@@ -138,7 +141,8 @@ export class ServiceResults extends ServiceBase {
         references: [],
         decorators: '',
         configTS: '',
-        libTS: ''
+        libTS: '',
+        jsonImport: '',
     };
 
     private resultsLanguages: IResultNames = {
@@ -149,6 +153,7 @@ export class ServiceResults extends ServiceBase {
         errors: 'json',
         configTS: 'json',
         libTS: 'json',
+        jsonImport: 'json',
     }
 
     private extensions: any = {
@@ -239,13 +244,16 @@ export class ServiceResults extends ServiceBase {
                 version: libs[key].version
             };
         });
+
+        const jsonImp = await getDepedencesByMFile(mfile);
         this.hasError = results.errors.length > 0;
         this.results = {
             ...results,
             errors: JSON.stringify(errs, null, 2),
             references: [],
             configTS: JSON.stringify(monaco.languages.typescript.typescriptDefaults.getCompilerOptions(), null, 2),
-            libTS: JSON.stringify(libs2, null, 2)
+            libTS: JSON.stringify(libs2, null, 2),
+            jsonImport: JSON.stringify(jsonImp, null, 2),
         };
     }
 
@@ -445,6 +453,15 @@ export class ServiceResults extends ServiceBase {
         return true;
     }
 
+    private showJsonImport(): boolean {
+        if (this.menu.setMode) this.menu.setMode('editor');
+        this.actualResultMode = 'jsonImport';
+        this.setModelLanguage(this.resultsLanguages.jsonImport, this.results.jsonImport);
+        return true;
+    }
+
+    
+
     private delay(ms: number) {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
@@ -501,7 +518,7 @@ export class ServiceResults extends ServiceBase {
     }
 }
 
-type ResultMode = 'refs' | 'prodJS' | 'devTS' | 'devJS' | 'devDoc' | 'devDocPage' | 'configTS' | 'libTS' | 'errors' | 'assistant'
+type ResultMode = 'refs' | 'prodJS' | 'devTS' | 'devJS' | 'devDoc' | 'devDocPage' | 'configTS' | 'libTS' | 'errors' | 'assistant' | 'jsonImport'
 
 type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R
 
@@ -514,6 +531,7 @@ type Results = Modify<mls.l2.editor.ICompilerResult, {
     refs?: string,
     devDocPage?: string,
     assistant?: string,
+    jsonImport: string,
 }>
 
 type IResultNames = {
@@ -527,5 +545,6 @@ type IResultNames = {
     refs?: string,
     devDocPage?: string,
     assistant?: string,
+    jsonImport: string,
 }
 
