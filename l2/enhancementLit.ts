@@ -96,11 +96,12 @@ export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> 
             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
             return;
         }
+
         if (validateRender(mfile)) {
-            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
-            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
-            return;
-        }
+             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
+             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
+             return;
+         }
     } catch (e: any) {
         return e.message || e;
     }
