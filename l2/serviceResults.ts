@@ -19,7 +19,9 @@ export class ServiceResults extends ServiceBase {
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
     }
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
+    createRenderRoot() {
+        return this;
+    }
 
     public details: IService = {
         icon: '&#xf1e6',
