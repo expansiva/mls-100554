@@ -18,7 +18,7 @@ export class ServiceResults extends ServiceBase {
         this.editorModelName = `serviceresults_${this.position}.js`;
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
-        
+
     }
 
     createRenderRoot() {
@@ -88,7 +88,6 @@ export class ServiceResults extends ServiceBase {
         if (!reinit) {
             this.createEditor();
             this.setInitialModelProdJS('');
-            console.info(el);
             if (el && typeof el.layout === 'function') el.layout();
         }
 
@@ -292,6 +291,7 @@ export class ServiceResults extends ServiceBase {
 
     private onMonacoEvents(ev: mls.events.IEvent): void {
 
+
         if (!ev.desc) return;
         const args: mls.events.IMonacoAction = JSON.parse(ev.desc);
         if (!args) return;
@@ -310,7 +310,7 @@ export class ServiceResults extends ServiceBase {
     private getMyToolbarItem(): HTMLElement | undefined {
         const toolbar = this.closest('mls-toolbar-100529');
         if (!toolbar) return undefined;
-        const ref = this.getAttribute('data-service');
+        const ref = this.getAttribute('path');
         const item = toolbar.querySelector(`mls-toolbar-item-100529[ref="${ref}"]`) as HTMLElement;
         return item;
     }
