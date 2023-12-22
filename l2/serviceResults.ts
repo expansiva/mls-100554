@@ -14,11 +14,12 @@ export class ServiceResults extends ServiceBase {
 
     constructor() {
         super();
-        console.info('constrcutor')
         this.editorModelName = `serviceresults_${this.position}.js`;
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
     }
+
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
         icon: '&#xf1e6',
@@ -460,7 +461,7 @@ export class ServiceResults extends ServiceBase {
         return true;
     }
 
-    
+
     private delay(ms: number) {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
@@ -481,6 +482,7 @@ export class ServiceResults extends ServiceBase {
         this.devDocContainer.setAttribute('force', 'true');
         this.devDocContainer.setAttribute('path', '_100529_service_results_doc');
     }
+
 
     private openReferenceMode() {
         const toolbarService = this.querySelector('mls-toolbar-service-100529');
@@ -511,7 +513,7 @@ export class ServiceResults extends ServiceBase {
 
     render() {
         return html`
-            <mls-toolbar-service-100554 widget="service-results-100554"></mls-toolbar-service-100554>
+            <mls-toolbar-service-100554 .mlsService=${this}  widget="service-results-100554"></mls-toolbar-service-100554>
             <mls-editor-100529></mls-editor-100529>
         `
     }
