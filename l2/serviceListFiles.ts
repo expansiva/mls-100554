@@ -1,10 +1,13 @@
 /// <mls shortName="serviceListFiles" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/**
+ * @mlsComponentDetails {"webComponentDependencies": ["mls-toolbar-service-100554"]}
+ */
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService } from './_100554_serviceBase';
 import { IMenu } from './_100554_mlsToolbarService';
-
+ 
 @customElement('service-list-files-100554')
 export class ServiceListFiles extends ServiceBase {
 
@@ -71,6 +74,7 @@ export class ServiceListFiles extends ServiceBase {
 
     render() {
         return html`
+            <mls-toolbar-service-100554 widget="service-list-files-100554"></mls-toolbar-service-100554>
             <div class="contentServiceList scroll-custom">
                 ${this.renderHeader()}
                 <ul>
