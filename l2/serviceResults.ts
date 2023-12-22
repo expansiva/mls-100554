@@ -518,8 +518,6 @@ export class ServiceResults extends ServiceBase {
         this.onClickLink(op);
     }
 
-
-
     render() {
         return html`
             <mls-toolbar-service-100554 .mlsService=${this}  widget="service-results-100554"></mls-toolbar-service-100554>
