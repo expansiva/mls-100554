@@ -174,11 +174,10 @@ export class CollabConfig100554 extends LitElement {
 
         this.userServices[indexOri].className = el.value as any;
 
-        // Avisa alteração
-        //this.father['updateClassName'](index, el.value);
-
         if (el.parentElement) el.parentElement.style.display = 'none';
         this.userServices = [...this.userServices] as IService[];
+
+        this.fireChangeClassName(indexOri, el.value);
 
     }
 
@@ -265,10 +264,9 @@ export class CollabConfig100554 extends LitElement {
             this.userServices.splice((indexOri + 1), 1);
         }
 
-        // Avisa alteração
-        // this.father['moveService'](indexOri, indexDest);
-
         this.userServices = [...this.userServices] as IService[];
+
+        this.fireMoveService(indexOri, indexDest);
 
     }
 
