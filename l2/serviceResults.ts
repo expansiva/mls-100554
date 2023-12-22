@@ -3,6 +3,7 @@
 /**
  * @mlsComponentDetails {"webComponentDependencies": ["mls-toolbar-service-100554"]}
  */
+
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent } from './_100554_serviceBase';
@@ -291,7 +292,6 @@ export class ServiceResults extends ServiceBase {
 
     private onMonacoEvents(ev: mls.events.IEvent): void {
 
-
         if (!ev.desc) return;
         const args: mls.events.IMonacoAction = JSON.parse(ev.desc);
         if (!args) return;
@@ -308,10 +308,13 @@ export class ServiceResults extends ServiceBase {
     }
 
     private getMyToolbarItem(): HTMLElement | undefined {
+
         const toolbar = this.closest('mls-toolbar-100529');
         if (!toolbar) return undefined;
-        const ref = this.getAttribute('path');
-        const item = toolbar.querySelector(`mls-toolbar-item-100529[ref="${ref}"]`) as HTMLElement;
+        const parent = this.parentElement;
+        if (!parent) return;
+        const path = parent.getAttribute('path');
+        const item = toolbar.querySelector(`mls-toolbar-item-100529[path="${path}"]`) as HTMLElement;
         return item;
     }
 
