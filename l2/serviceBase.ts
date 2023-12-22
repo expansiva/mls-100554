@@ -24,9 +24,6 @@ export abstract class ServiceBase extends LitElement {
         (this as any)['mlsWidget'] = this;
     }
 
-    createRenderRoot() {
-        return this;
-    }
 
     private getParent() {
         const parentToolbarContent = this.closest('mls-toolbar-content-service-100529') as IToolbarContent | null;

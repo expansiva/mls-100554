@@ -1,24 +1,28 @@
 service-plugins-100554 {//don't change this line 
     
-    display: block;
-    font-family: @font-family-primary;
-    box-sizing: border-box;
-    font-size: @font-size-16;
-    height: 100%;
 
-    >section{
+
+    :host {
+        display: block;
+        font-family: @font-family-primary;
+        box-sizing: border-box;
+        font-size: @font-size-16;
+        height: 100%;
+    }
+
+    :host >section{
         padding: @space-16;
         overflow: auto;
         height: calc(100% - 64px);
     }
     
-    >section .header {
+    :host >section .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
 
-    >section .header button {
+    :host >section .header button {
         padding: 8px 16px;
         background-color: @success-color;
         color: white;
@@ -28,11 +32,11 @@ service-plugins-100554 {//don't change this line
         font-size: 16px;
     }
 
-    >section .header button:hover {
+    :host >section .header button:hover {
         background-color: #45a049;
     }
 
-    >section .header input[type="text"] {
+    :host >section .header input[type="text"] {
         padding: 8px;
         border: 1px solid @grey-color-darker;
         border-radius: 4px;

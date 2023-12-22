@@ -5,13 +5,14 @@
  */
 
 import { html, css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService } from './_100554_serviceBase';
 import { IMenu } from './_100554_mlsToolbarService';
 
-
 @customElement('service-plugins-100554')
 export class ServicePlugins extends ServiceBase {
+
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     get project(): number { return window['mls'] ? mls.actual[5].project : 0 };
 
@@ -379,8 +380,9 @@ export class ServicePlugins extends ServiceBase {
     }
 
     render() {
+
         return html`
-            <mls-toolbar-service-100554 widget="service-plugins-100554"></mls-toolbar-service-100554>
+            <mls-toolbar-service-100554 .mlsService=${this} widget="service-plugins-100554"></mls-toolbar-service-100554>
             <section>
                 ${this.renderScenario()}
             </section>

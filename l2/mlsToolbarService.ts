@@ -6,6 +6,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 @customElement('mls-toolbar-service-100554')
 export class ToolbaarService_100554 extends LitElement {
 
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
+
 	@property({ type: String })
 	widget = '';
 
@@ -32,9 +34,9 @@ export class ToolbaarService_100554 extends LitElement {
 
 	@property({ type: Object }) menuOptions: IMenu = {} as IMenu;
 
-	createRenderRoot() {
-		return this;
-	}
+	// createRenderRoot() {
+	// 	return this;
+	// }
 
 	attributeChangedCallback(name: string, oldVal: string, newVal: string) {
 		super.attributeChangedCallback(name, oldVal, newVal);
@@ -134,10 +136,15 @@ export class ToolbaarService_100554 extends LitElement {
 
 	// return widget service , ex: service_source
 	private getServiceWidget(): IService {
-		const parent: any = this.closest(this.widget) as any;
-		if (!parent) throw new Error(`${this.widget} is not defined`);
-		const widget = parent['mlsWidget'];
+
+		const widget = (this as any)['mlsService'];
+		if (!widget) throw new Error('mlsService is not defined');
 		return widget;
+		
+		// const parent: any = (this.closest(this.widget) as any);
+		// if (!parent) throw new Error(`${this.widget} is not defined`);
+		// const widget = parent['mlsWidget'];
+		// return widget;
 	}
 
 	// return options menu from widget service
