@@ -40,8 +40,16 @@ export class CollabConfig100554 extends LitElement {
     async connectedCallback() {
         super.connectedCallback();
         // set loading
+        this.setInfos();
         await this.getServices();
         // remove loading
+    }
+
+    private infos:{ toolbar: undefined | HTMLElement } = {} as any;
+    private setInfos() {
+
+        this.infos.toolbar = this.closest('mls-toolbar-100529') as HTMLElement;
+
     }
 
     private renderHeader() {
@@ -106,7 +114,7 @@ export class CollabConfig100554 extends LitElement {
                         </div>
                     </div>
                     <div class="groupInfos" style="justify-content:end;display:flex; gap:1rem;">
-                        <div>
+                        <div style="display: flex; justify-content: center; align-items: center;">
                             <span class="fa" style="cursor:pointer" @click="${this.openHiddenConfigs}">&#xf142</span>
                             <span class="groupHidden" style="display:none">
                                 <a myIndex="${index}" @click="${this.desactiveService}">Desactivate</a>
@@ -197,10 +205,10 @@ export class CollabConfig100554 extends LitElement {
         avaliableArray.push(obj);
         userArray.splice(indexOri, 1);
 
-        // Avisa alteração
-
         this.userServices = userArray;
         this.avaliableServices = avaliableArray;
+
+        this.fireRemoveService(indexOri);
 
     }
 
@@ -219,13 +227,13 @@ export class CollabConfig100554 extends LitElement {
         const obj = avaliableArray[indexOri];
         if (!obj) return;
 
-        userArray.push(obj);
+        userArray.splice(userArray.length - 1 , 0, obj);
         avaliableArray.splice(indexOri, 1);
-
-        // Avisa alteração
 
         this.userServices = userArray;
         this.avaliableServices = avaliableArray;
+
+        this.fireAddService(this.userServices.length - 2);
 
     }
 
@@ -380,81 +388,71 @@ export class CollabConfig100554 extends LitElement {
 
     }
 
+    
     private async getAvaliableServices() {
 
-        return [] as any;
+        if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['getAvaliableServices'] ) {
+			return [];
+		}
+
+        return (this.infos as any).toolbar['getAvaliableServices']() || [];
 
     }
 
     private async getUserServices() {
 
-        return [
-            {
-                "name": " Start",
-                "active": true,
-                "readOnly": true,
-                "ref": "_100529_service_start",
-                "path": "_100529_service_start",
-                "className": "",
-                "mode": "A",
-                "icon": "&#xf059",
-                "tooltip": " Start",
-                "position": "left",
-                "isStatic": true
-            },
-            {
-                "name": "Select Page",
-                "active": true,
-                "readOnly": true,
-                "ref": "_100529_service_List",
-                "path": "_100529_service_List",
-                "className": "",
-                "mode": "A",
-                "icon": "&#xf15b",
-                "tooltip": "Select Page",
-                "position": "all"
-            },
-            {
-                "name": "Save",
-                "active": false,
-                "readOnly": true,
-                "ref": "_100529_service_save",
-                "path": "_100529_service_save",
-                "className": "",
-                "mode": "B",
-                "icon": "&#xf0c7",
-                "tooltip": "Save",
-                "position": "all"
-            },
-            {
-                "name": "Source",
-                "active": false,
-                "readOnly": true,
-                "ref": "_100529_service_Source",
-                "path": "_100529_service_Source",
-                "className": "",
-                "mode": "B",
-                "icon": "&#xf121",
-                "tooltip": " Source",
-                "position": "all",
-                "tags": [
-                    "preview"
-                ]
-            },
-            {
-                "name": "Results",
-                "active": false,
-                "readOnly": true,
-                "ref": "_100529_service_results",
-                "path": "_100529_service_results",
-                "className": "",
-                "mode": "B",
-                "icon": "&#xf1c9",
-                "tooltip": " Results",
-                "position": "all"
-            }
-        ] as any;
+        if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['getUserServices'] ) {
+			return [];
+		}
 
+        return (this.infos as any).toolbar['getUserServices']() || [];
+
+    }
+
+    /******Toolbar *******/
+
+    private saveConfig(): void {
+
+        if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['updateServices']) return;
+        
+        (this.infos as any).toolbar['updateServices'](this.userServices);
+
+    }
+
+    private fireChangeClassName(index: number, cls: string): void {
+
+        if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['updateClassName']) return;
+
+		!(this.infos as any).toolbar['updateClassName'](index, cls);
+
+		
+    }
+
+    private fireAddService(index: number): void {
+console.info('a')
+        if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['addService']) return;
+
+		!(this.infos as any).toolbar['addService'](this.userServices[index]);
+
+		
+    }
+
+    private fireRemoveService(index: number): void {
+
+        if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['removeService']) return;
+
+		!(this.infos as any).toolbar['removeService'](index);
+
+		
+    }
+
+    private fireMoveService(indexOri: number, indexDest: number): void {
+
+        if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['moveService']) return;
+
+		!(this.infos as any).toolbar['moveService'](indexOri, indexDest);
+
+		
     }
 
 
