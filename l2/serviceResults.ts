@@ -7,6 +7,7 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent } from './_100554_serviceBase';
 import { IMenu } from './_100554_mlsToolbarService';
+
 import { getDepedencesByMFile } from './_100554_libCompile';
 
 @customElement('service-results-100554')
@@ -17,6 +18,7 @@ export class ServiceResults extends ServiceBase {
         this.editorModelName = `serviceresults_${this.position}.js`;
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
+        
     }
 
     createRenderRoot() {
@@ -289,6 +291,7 @@ export class ServiceResults extends ServiceBase {
     }
 
     private onMonacoEvents(ev: mls.events.IEvent): void {
+
         if (!ev.desc) return;
         const args: mls.events.IMonacoAction = JSON.parse(ev.desc);
         if (!args) return;
