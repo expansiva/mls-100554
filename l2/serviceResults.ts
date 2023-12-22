@@ -4,10 +4,11 @@
  * @mlsComponentDetails {"webComponentDependencies": ["mls-toolbar-service-100554"]}
  */
 
-import { html, css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+
+import { html} from 'lit';
+import { customElement, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent } from './_100554_serviceBase';
-import { IMenu } from './_100554_mlsToolbarService';
+import { IMenu, initToolbar } from './_100554_mlsToolbarService';
 
 import { getDepedencesByMFile } from './_100554_libCompile';
 
@@ -16,10 +17,10 @@ export class ServiceResults extends ServiceBase {
 
     constructor() {
         super();
+        initToolbar();
         this.editorModelName = `serviceresults_${this.position}.js`;
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
-
     }
 
     createRenderRoot() {
