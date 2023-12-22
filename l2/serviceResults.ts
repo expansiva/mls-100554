@@ -9,7 +9,6 @@ import { html} from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent } from './_100554_serviceBase';
 import { IMenu, initToolbar } from './_100554_mlsToolbarService';
-
 import { getDepedencesByMFile } from './_100554_libCompile';
 
 @customElement('service-results-100554')
@@ -344,6 +343,8 @@ export class ServiceResults extends ServiceBase {
     }
 
     private showProdJS2(): boolean {
+
+        console.info(this.results)
         if (this.hasError) {
             this.setModelLanguage(this.resultsLanguages.errors, this.results.errors);
             return true;
@@ -358,6 +359,8 @@ export class ServiceResults extends ServiceBase {
     }
 
     private showTsConfig(): boolean {
+        console.info(this.results)
+
         if (this.menu.setMode) this.menu.setMode('editor');
         this.actualResultMode = 'configTS';
         this.setModelLanguage(this.resultsLanguages.configTS, this.results.configTS);

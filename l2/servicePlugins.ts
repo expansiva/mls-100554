@@ -7,10 +7,15 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService } from './_100554_serviceBase';
-import { IMenu } from './_100554_mlsToolbarService';
+import { IMenu, initToolbar } from './_100554_mlsToolbarService';
 
 @customElement('service-plugins-100554')
 export class ServicePlugins extends ServiceBase {
+
+    constructor() {
+        super();
+        initToolbar();
+    }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
