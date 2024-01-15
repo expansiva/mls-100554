@@ -11,6 +11,8 @@ export class CollabConfig100554 extends LitElement {
 
     @property({ type: String }) error: string = '';
 
+    @property({ type: Number }) actualLevel: number = -1;
+
     @property({ type: Array }) userServices: IService[] = [];
 
     @property({ type: Array }) avaliableServices: IService[] = [];
@@ -49,6 +51,9 @@ export class CollabConfig100554 extends LitElement {
     private setInfos() {
 
         this.infos.toolbar = this.closest('mls-toolbar-100529') as HTMLElement;
+        if (!this.infos.toolbar) return;
+        let level = this.infos.toolbar.getAttribute('level');
+        this.actualLevel = level ? +level : -1;
 
     }
 
@@ -317,7 +322,7 @@ export class CollabConfig100554 extends LitElement {
 
                 info = this.getInfosClassService(mf.model.getValue());
 
-                if (!info /*|| (info.levels && !info.levels.includes(this.actualLevel))*/) continue;
+                if (!info || (info.levels && !info.levels.includes(this.actualLevel))) continue;
 
 
                 const obj = {
