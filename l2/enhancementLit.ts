@@ -39,13 +39,13 @@ export const requires: mls.l2.editor.IRequire[] = [
     {
         type: "cdn",
         name: "lit",
-        ref: "https://cdn.jsdelivr.net/gh/lit/dist@2.7.5/all/lit-all.min.js",
+        ref: "https://cdn.jsdelivr.net/gh/lit/dist@3/all/lit-all.min.js",
 
     },
     {
         type: "cdn",
         name: "lit/decorators.js",
-        ref: "https://cdn.jsdelivr.net/npm/lit-element@3.3.2/+esm",
+        ref: "https://cdn.jsdelivr.net/npm/lit@3.0.0/decorators/+esm",
 
     }
 ];
