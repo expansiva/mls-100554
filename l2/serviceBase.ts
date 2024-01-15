@@ -42,6 +42,38 @@ export abstract class ServiceBase extends LitElement {
 
 }
 
+export interface IMenuKeyValue {
+	[key: string]: string
+}
+export interface IIconsKeyValue {
+	[key: string]: string
+}
+
+export type IClickLinkCallBack = (op: string) => boolean | undefined;
+export type IClickIconCallBack = (op: string) => void | undefined;
+
+export type ISetMode = (mode: IMode | null, page?: HTMLElement) => void;
+export type IGetLastMode = () => IMode;
+export type IMode =
+	'initial' // show siblings with hamburguer icon
+	| 'page' // show page (About ...) with close icon
+	| 'editor'; // show siblings with close icon
+
+export interface IMenu {
+	title: string,
+	actions: IMenuKeyValue,
+	icons: IIconsKeyValue,
+	actionDefault?: string,
+	iconDefault?: string,
+	onClickLink?: IClickLinkCallBack,
+	onClickIcon?: IClickIconCallBack,
+	setMode?: ISetMode,
+	setIconActive?: (op: string) => void,
+	getLastMode?: IGetLastMode,
+	lastIcon?: string,
+	updateTitle?: Function,
+}
+
 export interface IToolbarContent extends HTMLElement {
     layout:Function
 }

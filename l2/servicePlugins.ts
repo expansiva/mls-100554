@@ -2,8 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService } from './_100554_serviceBase';
-import { IMenu } from './_100554_mlsToolbarService';
+import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
 @customElement('service-plugins-100554')
 export class ServicePlugins extends ServiceBase {
