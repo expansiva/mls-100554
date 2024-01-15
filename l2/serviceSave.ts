@@ -134,8 +134,9 @@ export class ServiceSave extends ServiceBase {
             </div>
             <ul>
                 ${keys.map((key, indexl) => {
-            return this.renderLevels(key, project, index, indexl);
-        })}
+                    return this.renderLevels(key, project, index, indexl);
+                    
+                })}
             </ul>
         </li>
         `;
@@ -143,6 +144,57 @@ export class ServiceSave extends ServiceBase {
     }
 
     renderLevels(level: string, project: string, indexP: number, index: number) {
+
+        if (level === '3') { 
+            return this.renderLevel3(level, project, indexP, index) ;
+        } else {
+            return this.renderLevelsDefault(level, project, indexP, index);
+        }
+ 
+    }
+
+    renderLevel3(level: string, project: string, indexP: number, index: number) {
+
+        const objP = this.itens[project];
+        const keys = Object.keys(objP[level]);
+    
+        return html`
+        <li>
+            <div>
+                <span class="fatv fa-caret-righttv" @click="${this.openMe}"></span>
+                <input type="checkbox" id="l0-${project}-${index}" @click="${this.clickSetValueAllChilds}">
+                <label for="l0-${project}-${index}">l${level}</label>
+            </div>
+            <ul>
+                ${keys.map((key, index3) => {
+                    const objL = objP[level];
+                    const objDS = objL[key];
+                    const itens = objDS ? objDS as [] : []  ;
+                    return html`
+                        <li>
+                            <div>
+                                <span class="fatv fa-caret-righttv" @click="${this.openMe}"></span>
+                                <input type="checkbox" id="l0-${project}-${index}-${index3}" @click="${this.clickSetValueAllChilds}">
+                                <label for="l0-${project}-${index}-${index3}">${key}</label>
+                            </div>
+                            <ul>
+                                ${itens.map((item, indexI) => {
+                            return this.renderItem(item, indexP, index, indexI);
+                        })}
+                            </ul>
+                        </li>
+                    `    
+                })}
+            </ul>
+        </li>
+        
+        
+        `;
+
+    }
+
+
+    renderLevelsDefault(level: string, project: string, indexP: number, index: number) {
 
         const objP = this.itens[project];
         const itens = objP[+level] as [];
@@ -202,11 +254,28 @@ export class ServiceSave extends ServiceBase {
                 const level = file.level;
 
                 if (!objProjects[pj]) objProjects[pj] = {};
-                const opj = objProjects[pj];
-                if (!opj[level]) {
-                    opj[level] = [await this.configItem(file)];
+                const obj = objProjects[pj];
+                if (!obj[level] && level === 3) {
+
+                    const nNivel = file.folder.split('/');
+                    if (nNivel.length >= 2) {
+                        obj[level] = {[nNivel[1]] : [await this.configItem(file)]}
+                    }
+                    
+                } else if (!obj[level]) {
+                    obj[level] = [await this.configItem(file)];
+
+                } else if (obj[level] && level === 3) { 
+
+                    const nNivel = file.folder.split('/');
+                    const obj3 = obj[level];
+                    if (nNivel.length >= 2 && obj3[nNivel[1]]) {
+                        
+                        obj3[nNivel[1]].push(await this.configItem(file))
+                    }
+
                 } else {
-                    opj[level].push(await this.configItem(file));
+                    obj[level].push(await this.configItem(file));
                 }
 
             }
