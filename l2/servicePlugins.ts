@@ -35,7 +35,6 @@ export class ServicePlugins extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (op === 'opAbout') return this.showAbout();
         if (op === 'opPlugins') return this.showInitial();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
@@ -44,7 +43,6 @@ export class ServicePlugins extends ServiceBase {
     public menu: IMenu = {
         title: 'Plugins',
         actions: {
-            opAbout: 'About',
             opPlugins: 'Plugins',
         },
         icons: {},
@@ -54,13 +52,6 @@ export class ServicePlugins extends ServiceBase {
     }
 
     private showInitial(): boolean {
-        return true;
-    }
-
-    private showAbout(): boolean {
-        const div1 = document.createElement('div');
-        div1.innerHTML = '<h1>About this Service</h1>'
-        if (this.menu.setMode) this.menu.setMode('page', div1);
         return true;
     }
 
@@ -382,10 +373,6 @@ export class ServicePlugins extends ServiceBase {
             </section>
         `
     }
-
-
-
-
 }
 
 type IScenaries = 'list' | 'add' | 'help';
