@@ -51,6 +51,7 @@ export class ServicePlugins extends ServiceBase {
     }
 
     private showInitial(): boolean {
+
         return true;
     }
 
