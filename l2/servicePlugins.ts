@@ -19,7 +19,7 @@ export class ServicePlugins extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    get project(): number { return window['mls'] ? mls.actual[5].project : 0 };
+    get project(): number { return window['mls'] ? mls.actual[5].project as number : 0 };
 
     @property({ type: Array }) userPlugins: Plugin[] = this.getUserPluginsByProject(this.project);
 
