@@ -8,13 +8,22 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 @customElement('service-list-files-100554')
 export class ServiceListFiles extends ServiceBase {
 
+    @property() mode: string = 'list';
+
     @property() project: number = 1;
+
+    @property() projectLabel: string = '1';
 
     @property() errorAux: string = '';
 
     @property({ type: Array }) files: mls.stor.IFileInfo[] = [];
 
     @property({ type: Array }) history: mls.stor.IFileInfo[] = [];
+
+    constructor() {
+        super();
+        this.setEvents();
+    }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
@@ -28,7 +37,7 @@ export class ServiceListFiles extends ServiceBase {
     public details: IService = {
         icon: '&#xf15b',
         name: 'List 2',
-        mode: 'A',
+        mode: 'B',
         position: 'all',
         readOnly: false,
         tooltip: 'List Files 2',
@@ -38,7 +47,7 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (op === 'opAbout') return true;
+        if (op === 'opAdd') return this.showAdd();
         if (this.menu.setMode) this.onServiceClick(true, true);
         return false;
     }
@@ -46,7 +55,7 @@ export class ServiceListFiles extends ServiceBase {
     public menu: IMenu = {
         title: 'List Files',
         actions: {
-            opAbout: 'About',
+            opAdd: 'Add new file',
         },
         icons: {},
         actionDefault: 'opPlugins', // call after close icon clicked
@@ -56,11 +65,49 @@ export class ServiceListFiles extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
+        this.mode = 'list';
         if (visible && reinit) {
-
+            
         }
 
     }
+
+    private showAdd() {
+        this.mode = 'add';
+        return true;
+    }
+
+    // -------------- EVENTS -------------------
+
+    private setEvents() {
+
+        mls.events.addEventListener([2, 5], ['ProjectSelected'], (ev) => {
+
+            if (this.project === mls.actual[5].project) return;
+			this.init();
+
+		});
+        
+        mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
+        
+    }
+
+    private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
+
+		if (!this.visible) return;
+        if (ev.level !== this.level || (ev.type !== 'FileAction')) return;
+        
+        const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
+        
+        if (
+            fileAction.position === this.position ||
+            !['statusOrErrorChanged', 'projectListChanged'].includes(fileAction.action) ||
+            fileAction.project === 0
+        ) return;
+
+		this.getFiles();
+
+	}
 
 
     // -------------  WEBCOMPONENT -------------
@@ -72,7 +119,8 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     render() {
-        return html`
+        if (this.mode === 'list') {
+            return html`
             <div class="contentServiceList scroll-custom">
                 ${this.renderHeader()}
                 <ul>
@@ -82,6 +130,12 @@ export class ServiceListFiles extends ServiceBase {
                 ${this.renderAuxEdit()}
             </div>
         `;
+        } else {
+
+            return html`${this.renderAdd()}`
+            
+        }
+
     }
 
     renderHeader() {
@@ -109,13 +163,13 @@ export class ServiceListFiles extends ServiceBase {
         <div class="groupHeader">
             <div class="groupAction"> 
                 <a @click="${this.verifyChangeInList}"> update list/ verify</a>
-                <a> add new file</a>
+                <a @click="${this.showAdd}"> add new file</a>
             </div>
             <div class="groupFilter">
                 <div class="groupFilterRadio">
-                    <input id="radioProjectActual" name="projectFind" type="radio" checked="checked" value="${this.project}">
-                    <label for="radioProjectActual">${this.project}</label>
-                    <input id="radioProjectZero" name="projectFind" type="radio" value="0">
+                    <input id="radioProjectActual" name="projectFind" type="radio" checked="checked" value="${this.projectLabel}" @click="${this.clickRadioProjectActual}">
+                    <label for="radioProjectActual">${this.projectLabel}</label>
+                    <input id="radioProjectZero" name="projectFind" type="radio" value="0" @click="${this.clickRadioProject0}">
                     <label for="radioProjectZero">Local project</label>
                 </div>
                 <input type="text" placeholder="Filter" @input="${this.filterLiChange}">
@@ -244,6 +298,10 @@ export class ServiceListFiles extends ServiceBase {
 
     }
 
+    renderAdd() {
+        return html`add`
+    }
+
     private extensionLevel = {
         2: '.ts',
         4: '.html'
@@ -254,8 +312,9 @@ export class ServiceListFiles extends ServiceBase {
     private async init() {
 
         this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
-        
+
         this.project = mls.actual[5].project as number;
+        this.projectLabel = this.project.toString();
         this.showLoader(true);
         await this.getFiles();
         this.showLoader(false);
@@ -314,6 +373,28 @@ export class ServiceListFiles extends ServiceBase {
     private clickOptStop(e: MouseEvent) {
 
         e.stopPropagation();
+
+    }
+
+    private async clickRadioProject0(e: MouseEvent) {
+        
+        this.info.tot = 0;
+        this.info.version = 0;
+        this.info.storage = 0;
+        this.info.error = 0;
+        this.project = 0;
+        await this.getFiles();
+
+    }
+
+    private clickRadioProjectActual(e: MouseEvent): void {
+
+        this.info.tot = 0;
+        this.info.version = 0;
+        this.info.storage = 0;
+        this.info.error = 0;
+        this.project = mls.actual[5].project as number;
+        this.getFiles();
 
     }
 
@@ -405,8 +486,8 @@ export class ServiceListFiles extends ServiceBase {
             const arraySf: mls.stor.IFileInfo[] = this.getFilesProject();
             const arraySfHistory: mls.stor.IFileInfo[] = await this.getFileHistory();
 
-            this.files = arraySf;
-            this.history = arraySfHistory;
+            this.files = [...arraySf];
+            this.history = [...arraySfHistory];
 
 
         } catch (e) {
@@ -427,8 +508,8 @@ export class ServiceListFiles extends ServiceBase {
             const sf = mls.stor.files[i];
 
             if (
-                sf.project !== +this.project ||
-                sf.level !== this.level ||
+                sf.project !== this.project ||
+                sf.level !== +(this.level as any) ||
                 sf.extension !== ext
             ) continue;
 

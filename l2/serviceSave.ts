@@ -15,9 +15,7 @@ export class ServiceSave extends ServiceBase {
 
     constructor() {
         super();
-        mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
-        mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
-        mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
+        this.setEvents();
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -35,7 +33,6 @@ export class ServiceSave extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (op === 'opAbout') return this.showAbout();
         if (op === 'opSave') return this.showInitial();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
@@ -44,7 +41,6 @@ export class ServiceSave extends ServiceBase {
     public menu: IMenu = {
         title: 'Save',
         actions: {
-            opAbout: 'About',
         },
         icons: {},
         actionDefault: 'opSave', // call after close icon clicked
@@ -56,11 +52,22 @@ export class ServiceSave extends ServiceBase {
         return true;
     }
 
-    private showAbout(): boolean {
-        const div1 = document.createElement('div');
-        div1.innerHTML = '<h1>About this Service</h1>'
-        if (this.menu.setMode) this.menu.setMode('page', div1);
-        return true;
+    onServiceClick(visible: boolean, reinit: boolean) {
+
+        if (visible && reinit) {
+        
+            this.updateList();
+        }
+    }
+
+    // -------------- EVENTS -------------------
+
+    private setEvents() {
+
+        mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
+        mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
+        mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
+            
     }
 
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
@@ -111,14 +118,6 @@ export class ServiceSave extends ServiceBase {
         (this.infos.father as any).toogleBadge(true, '_100554_serviceSave');
 
 
-    }
-
-    onServiceClick(visible: boolean, reinit: boolean) {
-console.info({visible , reinit})
-        if (visible && reinit) {
-        
-            this.updateList();
-        }
     }
 
     // -------------  WEBCOMPONENT -------------
