@@ -107,8 +107,8 @@ export class ServiceListFiles extends ServiceBase {
 
         return html`
         <div class="groupHeader">
-            <div class="groupAction">
-                <a> update list/ verify</a>
+            <div class="groupAction"> 
+                <a @click="${this.verifyChangeInList}"> update list/ verify</a>
                 <a> add new file</a>
             </div>
             <div class="groupFilter">
