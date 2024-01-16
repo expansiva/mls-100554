@@ -9,6 +9,8 @@ export class ServiceSave extends ServiceBase {
 
     @property() itens: any = undefined;
 
+    @property() error: string = '';
+
     constructor() {
         super();
     }
@@ -16,7 +18,7 @@ export class ServiceSave extends ServiceBase {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
-        icon: '&#xf15b',
+        icon: '&#xf0c7',
         name: 'Save',
         mode: 'A',
         position: 'all',
@@ -24,7 +26,7 @@ export class ServiceSave extends ServiceBase {
         tooltip: 'Save',
         className: undefined,
         tags: [],
-        levels: [5, 4, 2]
+        levels: [5]
     }
 
     public onClickLink = (op: string): boolean => {
@@ -65,12 +67,16 @@ export class ServiceSave extends ServiceBase {
 
     // -------------  WEBCOMPONENT -------------
 
-    async connectedCallback() {
+    connectedCallback() {
         super.connectedCallback();
-        await this.setInfos();
+        this.init();
     }
 
+
+
     render() {
+
+        if (this.error !== '') return html`${this.error}`;
 
         return html`
             <sectionsaveheader>
@@ -80,11 +86,11 @@ export class ServiceSave extends ServiceBase {
             
         `
     }
-
+ 
     renderHeader() {
         return html`
             <i class="fa fa-floppy-o"></i>
-            <span>Update Changes</span>    
+            <span>${this.myMsg.updateChanges}</span>    
         
         `
     }
@@ -92,7 +98,7 @@ export class ServiceSave extends ServiceBase {
     renderNoItens() {
         return html`
             <sectionnosave>
-                <span>No items to save</span> 
+                <span>${this.myMsg.noItemsToSave}</span> 
             </sectionnosave>  
         
         `
@@ -104,15 +110,15 @@ export class ServiceSave extends ServiceBase {
         return html`
             <sectionsave>
                 <div id="Save_menu_action" style="display:flex;">
-                    <div style="width:calc(100% - 68px);" >
-                        <h4 class="mt-3">Comments:</h4>
+                    <div style="width:calc(100% - 85px);" >
+                        <h4 class="mt-3">${this.myMsg.comments}:</h4>
                         <textarea id="commitMessage" class="form-control" style="width:95%;" rows="2" maxlength="50"></textarea>
                     </div>
-                    <div id="div_btn_save" class="text-right" style="width:64px; display: flex; align-items: self-end;">
-                        <button id="btn_save" class="btn btn-sm btn-primary">Update</button>
+                    <div id="div_btn_save" class="text-right" style="width:79px; display: flex; align-items: self-end;">
+                        <button id="btn_save" style="width:78px" class="btn btn-sm btn-primary" @click="${this.onSave}">${this.myMsg.update}</button>
                     </div>
                 </div>
-                <h4 class="mt-3" data-mlsline="23">File changes</h4>
+                <h4 class="mt-3" data-mlsline="23">${this.myMsg.fileChanges}</h4>
                 <ul>
                     ${keys.map((key, index) => { return this.renderProject(key, index); })}
                 </ul>
@@ -134,9 +140,9 @@ export class ServiceSave extends ServiceBase {
             </div>
             <ul>
                 ${keys.map((key, indexl) => {
-                    return this.renderLevels(key, project, index, indexl);
-                    
-                })}
+            return this.renderLevels(key, project, index, indexl);
+
+        })}
             </ul>
         </li>
         `;
@@ -145,19 +151,19 @@ export class ServiceSave extends ServiceBase {
 
     renderLevels(level: string, project: string, indexP: number, index: number) {
 
-        if (level === '3') { 
-            return this.renderLevel3(level, project, indexP, index) ;
+        if (level === '3') {
+            return this.renderLevel3(level, project, indexP, index);
         } else {
             return this.renderLevelsDefault(level, project, indexP, index);
         }
- 
+
     }
 
     renderLevel3(level: string, project: string, indexP: number, index: number) {
 
         const objP = this.itens[project];
         const keys = Object.keys(objP[level]);
-    
+
         return html`
         <li>
             <div>
@@ -167,10 +173,10 @@ export class ServiceSave extends ServiceBase {
             </div>
             <ul>
                 ${keys.map((key, index3) => {
-                    const objL = objP[level];
-                    const objDS = objL[key];
-                    const itens = objDS ? objDS as [] : []  ;
-                    return html`
+            const objL = objP[level];
+            const objDS = objL[key];
+            const itens = objDS ? objDS as [] : [];
+            return html`
                         <li>
                             <div>
                                 <span class="fatv fa-caret-righttv" @click="${this.openMe}"></span>
@@ -179,12 +185,12 @@ export class ServiceSave extends ServiceBase {
                             </div>
                             <ul>
                                 ${itens.map((item, indexI) => {
-                            return this.renderItem(item, indexP, index, indexI);
-                        })}
+                return this.renderItem(item, indexP, index, indexI);
+            })}
                             </ul>
                         </li>
-                    `    
-                })}
+                    `
+        })}
             </ul>
         </li>
         
@@ -222,9 +228,9 @@ export class ServiceSave extends ServiceBase {
         <li style="padding-left: 1.1rem;" > 
             <div>
                 ${item.disabled || item.onlyFather
-                    ? html`<input type="checkbox" id="l0-${indexP}-${indexL}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}">`
-                    : html`<input type="checkbox" id="l0-${indexP}-${indexL}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}">`
-                }
+                ? html`<input type="checkbox" id="l0-${indexP}-${indexL}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
+                : html`<input type="checkbox" id="l0-${indexP}-${indexL}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
+            }
                 
                 <label for="l0-${indexP}-${indexL}-${index}">
                 
@@ -238,6 +244,25 @@ export class ServiceSave extends ServiceBase {
 
     }
 
+    private infos: { toolbar: undefined | HTMLElement } = {} as any;
+
+    private async init() {
+
+        this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
+        this.showLoader(true);
+        this.updateMyMessages();
+        await this.setInfos();
+        this.showLoader(false);
+
+    }
+
+    private showLoader(loader: boolean): void {
+
+        if (!this.infos || !this.infos.toolbar) return;
+        this.infos.toolbar.setAttribute('loading', loader.toString());
+
+    }
+
     private async setInfos() {
 
         try {
@@ -248,7 +273,7 @@ export class ServiceSave extends ServiceBase {
             for (const fKey of filesKeys) {
 
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
-                if (!file.inLocalStorage || file.status === 'nochange' || file.project === 0 ) continue;
+                if (!file.inLocalStorage || file.status === 'nochange' || file.project === 0) continue;
 
                 const pj = file.project;
                 const level = file.level;
@@ -259,18 +284,18 @@ export class ServiceSave extends ServiceBase {
 
                     const nNivel = file.folder.split('/');
                     if (nNivel.length >= 2) {
-                        obj[level] = {[nNivel[1]] : [await this.configItem(file)]}
+                        obj[level] = { [nNivel[1]]: [await this.configItem(file)] }
                     }
-                    
+
                 } else if (!obj[level]) {
                     obj[level] = [await this.configItem(file)];
 
-                } else if (obj[level] && level === 3) { 
+                } else if (obj[level] && level === 3) {
 
                     const nNivel = file.folder.split('/');
                     const obj3 = obj[level];
                     if (nNivel.length >= 2 && obj3[nNivel[1]]) {
-                        
+
                         obj3[nNivel[1]].push(await this.configItem(file))
                     }
 
@@ -281,10 +306,10 @@ export class ServiceSave extends ServiceBase {
             }
 
             this.itens = objProjects;
-            console.info(this.itens)
 
         } catch {
 
+            this.itens = [];
             // setar error;
 
         }
@@ -355,22 +380,22 @@ export class ServiceSave extends ServiceBase {
 
     private setValueAllChilds(el: HTMLInputElement): void {
 
-		const father = el.closest('li');
-		if (!father) return;
-		const subList = father.querySelector('ul');
-		if (!subList) return;
+        const father = el.closest('li');
+        if (!father) return;
+        const subList = father.querySelector('ul');
+        if (!subList) return;
 
-		const all = subList.querySelectorAll('input');
-		
-		all.forEach((i) => {
+        const all = subList.querySelectorAll('input');
+
+        all.forEach((i) => {
 
             const onlyStatusFather = i.getAttribute('onlyStatusFather') === 'true';
-			if (i.disabled && !onlyStatusFather) return;
-			i.checked = el.checked;
+            if (i.disabled && !onlyStatusFather) return;
+            i.checked = el.checked;
 
-		});
+        });
 
-		if (all.length === 1 && all[0].disabled) el.checked = false;
+        if (all.length === 1 && all[0].disabled) el.checked = false;
 
     }
 
@@ -386,30 +411,149 @@ export class ServiceSave extends ServiceBase {
 
     private verifyStatusFather(el: HTMLInputElement): void {
 
-		const father = el.closest('ul');
-		if (!father) return;
-		const grandfather = father.closest('li');
-		if (!grandfather) return;
-		const inpMain = grandfather.querySelector('input');
-		if (!inpMain) return
+        const father = el.closest('ul');
+        if (!father) return;
+        const grandfather = father.closest('li');
+        if (!grandfather) return;
+        const inpMain = grandfather.querySelector('input');
+        if (!inpMain) return
 
-		if (el.checked) {
-			inpMain.checked = true;
-			return;
-		}
+        if (el.checked) {
+            inpMain.checked = true;
+            return;
+        }
 
-		let needDisable = true;
+        let needDisable = true;
 
-		const all = father.querySelectorAll('input');
-		all.forEach((i) => {
+        const all = father.querySelectorAll('input');
+        all.forEach((i) => {
 
-			if (i.checked) needDisable = false;
+            if (i.checked) needDisable = false;
 
-		});
+        });
 
-		if (needDisable) inpMain.checked = false;
+        if (needDisable) inpMain.checked = false;
 
-	}
+    }
+
+    private async onSave(e: MouseEvent) {
+
+        e.stopPropagation();
+        const el = e.target as HTMLButtonElement;
+        if (!el) return;
+        const father = el.closest('sectionsave') as HTMLDivElement;
+        if (!father) return;
+
+        const txt = father.querySelector('textarea')
+        const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
+        console.info(array);
+        this.showLoader(true);
+        const msg = txt ? txt.value : '';
+
+        setTimeout(async () => {
+
+            try {
+
+                await this.onSavenew(array, msg);
+                await this.setInfos();
+                this.showLoader(false);
+
+            } catch (e: any) {
+                this.error = e.message;
+                this.showLoader(false);
+            }
+
+        }, 500);
+
+    }
+
+    private getAllFileToSave(father: HTMLElement): mls.stor.IFileInfo[]{
+
+        const ar: mls.stor.IFileInfo[] = [];
+        const els = father.querySelectorAll('input[type="checkbox"][onlyStatusFather]:checked');
+
+        els.forEach((el:any) => {
+            if (el.instance) ar.push(el.instance);
+        })
+
+        return ar;
+    }
+
+    private async onSavenew(ar: mls.stor.IFileInfo[], msg: string) {
+
+        if (ar.length <= 0) return;
+        try {
+
+            ar.forEach((i) => {
+
+                i.inLocalStorage = false;
+                if (!i.onAction) i.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdate(i);
+
+            });
+
+            await mls.stor.setContents(ar, msg);
+
+            return;
+
+        } catch (e: any) {
+
+            this.error = e.message;
+
+        }
+
+    }
+
+    private async afterUpdate(storFile: mls.stor.IFileInfo) {
+
+        const mmodel: mls.l2.editor.IMFile | undefined = mls.l2.editor.get(storFile);
+
+        if (storFile.status === 'deleted') {
+            this.deleteFile(storFile);
+            return;
+        }
+        if (storFile.status === 'renamed' && mmodel) {
+
+            mmodel.originalProject = undefined;
+            mmodel.originalShortName = undefined;
+            mmodel.originalCRC = mls.common.crc.crc32(mmodel.model.getValue()).toString(16);
+
+        }
+
+        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+
+        storFile.status = 'nochange';
+
+    }
+
+    private async deleteFile(storFile: mls.stor.IFileInfo) {
+
+        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+        mls.l2.editor.remove(storFile);
+        const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
+        delete mls.stor.files[keyFiles];
+
+    }
+
+    private updateMyMessages() {
+
+        if (!window['message' as any]) return;
+        const m = window['message' as any] as any;
+
+        if (m.updateChanges) this.myMsg.updateChanges = m.updateChanges;
+        if (m.comments) this.myMsg.comments = m.comments;
+        if (m.update) this.myMsg.update = m.update;
+        if (m.fileChanges) this.myMsg.fileChanges = m.fileChanges;
+        if (m.noItemsToSave) this.myMsg.noItemsToSave = m.noItemsToSave;
+
+    }
+
+    private myMsg = {
+        updateChanges: 'Update Changes',
+        comments: 'Comments',
+        update: 'Update',
+        fileChanges: 'File Changes',
+        noItemsToSave: 'No items to save'
+    }
 
 }
 
