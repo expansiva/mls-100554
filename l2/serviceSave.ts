@@ -26,7 +26,7 @@ export class ServiceSave extends ServiceBase {
     public details: IService = {
         icon: '&#xf0c7',
         name: 'Save',
-        mode: 'A',
+        mode: 'B',
         position: 'all',
         readOnly: false,
         tooltip: 'Save',
