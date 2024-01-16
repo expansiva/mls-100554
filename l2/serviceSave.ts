@@ -133,7 +133,6 @@ export class ServiceSave extends ServiceBase {
     render() {
 
         if (this.error !== '') return html`${this.error}`;
-        console.info(this.itens)
         return html` ${this.itens
             ? html`<sectionsaveheader> ${this.renderHeader()} </sectionsaveheader>${this.renderItens()}` : this.renderNoItens()}
             
