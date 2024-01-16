@@ -56,7 +56,6 @@ export class ServicePlugins extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-
         if (visible && reinit) {
             this.userPlugins = this.getUserPluginsByProject(this.project);
             this.avaliablePlugins = this.getAvaliablePlugins(this.project);

@@ -24,29 +24,27 @@ export abstract class ServiceBase extends LitElement {
         (this as any)['mlsWidget'] = this;
     }
 
+    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
+        super.attributeChangedCallback(name, oldVal, newVal);
+        if (name === 'visible') {
+            const visible = newVal === 'true';
+            const reinit: boolean = oldVal !== null && visible !== false;
+            if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible, reinit, this.getParent())
+        }
+    }
 
     private getParent() {
         const parentToolbarContent = this.closest('mls-toolbar-content-service-100529') as IToolbarContent | null;
         return parentToolbarContent;
     }
 
-    updated(changedProperties: Map<string | number | symbol, unknown>): void {
-        super.updated(changedProperties);
-        if (changedProperties.has('visible')) {
-            const visible = changedProperties.get('visible');
-            const reinit: boolean = visible !== 'true' && visible !== undefined;
-            if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible !== 'true' || visible === undefined, reinit, this.getParent())
-        }
-    }
-
-
 }
 
 export interface IMenuKeyValue {
-	[key: string]: string
+    [key: string]: string
 }
 export interface IIconsKeyValue {
-	[key: string]: string
+    [key: string]: string
 }
 
 export type IClickLinkCallBack = (op: string) => boolean | undefined;
@@ -55,27 +53,27 @@ export type IClickIconCallBack = (op: string) => void | undefined;
 export type ISetMode = (mode: IMode | null, page?: HTMLElement) => void;
 export type IGetLastMode = () => IMode;
 export type IMode =
-	'initial' // show siblings with hamburguer icon
-	| 'page' // show page (About ...) with close icon
-	| 'editor'; // show siblings with close icon
+    'initial' // show siblings with hamburguer icon
+    | 'page' // show page (About ...) with close icon
+    | 'editor'; // show siblings with close icon
 
 export interface IMenu {
-	title: string,
-	actions: IMenuKeyValue,
-	icons: IIconsKeyValue,
-	actionDefault?: string,
-	iconDefault?: string,
-	onClickLink?: IClickLinkCallBack,
-	onClickIcon?: IClickIconCallBack,
-	setMode?: ISetMode,
-	setIconActive?: (op: string) => void,
-	getLastMode?: IGetLastMode,
-	lastIcon?: string,
-	updateTitle?: Function,
+    title: string,
+    actions: IMenuKeyValue,
+    icons: IIconsKeyValue,
+    actionDefault?: string,
+    iconDefault?: string,
+    onClickLink?: IClickLinkCallBack,
+    onClickIcon?: IClickIconCallBack,
+    setMode?: ISetMode,
+    setIconActive?: (op: string) => void,
+    getLastMode?: IGetLastMode,
+    lastIcon?: string,
+    updateTitle?: Function,
 }
 
 export interface IToolbarContent extends HTMLElement {
-    layout:Function
+    layout: Function
 }
 
 export interface IService {
