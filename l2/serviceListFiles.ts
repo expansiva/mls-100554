@@ -1,17 +1,16 @@
 /// <mls shortName="serviceListFiles" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-/**
- * @mlsComponentDetails {"webComponentDependencies": ["mls-toolbar-service-100554"]}
- */
+
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService } from './_100554_serviceBase';
-import { IMenu } from './_100554_mlsToolbarService';
- 
+import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
+
 @customElement('service-list-files-100554')
 export class ServiceListFiles extends ServiceBase {
 
-    get actualLevel(): number { return 2 };
+    private actualLevel: number = -1;
+
+    private mePosition: string = '';
 
     @property() project: number = 1;
 
@@ -20,6 +19,8 @@ export class ServiceListFiles extends ServiceBase {
     @property({ type: Array }) files: mls.stor.IFileInfo[] = [];
 
     @property({ type: Array }) history: mls.stor.IFileInfo[] = [];
+
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     private info = {
         tot: 0,
@@ -30,11 +31,11 @@ export class ServiceListFiles extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf15b',
-        name: 'List',
+        name: 'List 2',
         mode: 'A',
         position: 'all',
         readOnly: false,
-        tooltip: 'List Files',
+        tooltip: 'List Files 2',
         className: undefined,
         tags: [],
         levels: [2, 4]
@@ -65,16 +66,17 @@ export class ServiceListFiles extends ServiceBase {
 
     }
 
-    async connectedCallback() {
+
+    // -------------  WEBCOMPONENT -------------
+
+    connectedCallback() {
         super.connectedCallback();
-        // set loading
-        await this.getFiles();
-        // remove loading
+        this.init();
+
     }
 
     render() {
         return html`
-            <mls-toolbar-service-100554 widget="service-list-files-100554"></mls-toolbar-service-100554>
             <div class="contentServiceList scroll-custom">
                 ${this.renderHeader()}
                 <ul>
@@ -86,7 +88,7 @@ export class ServiceListFiles extends ServiceBase {
         `;
     }
 
-    private renderHeader() {
+    renderHeader() {
 
         let auxV = '';
         let auxE = '';
@@ -136,7 +138,7 @@ export class ServiceListFiles extends ServiceBase {
         `;
     }
 
-    private renderHistory() {
+    renderHistory() {
 
         return html`
             ${this.history.length <= 0 ? '' :
@@ -147,14 +149,14 @@ export class ServiceListFiles extends ServiceBase {
                     ${repeat(
                     this.history,
                     ((item: mls.stor.IFileInfo) => item.shortName) as any,
-                    ((file: mls.stor.IFileInfo, index: any) => this.createLiItem(file, index, true)) as any
+                    ((file: mls.stor.IFileInfo, index: any) => this.renderLiItem(file, index, true)) as any
                 )}
                 `
             }
         `;
     }
 
-    private renderList() {
+    renderList() {
 
         let letterInit = '';
         return html`
@@ -171,11 +173,11 @@ export class ServiceListFiles extends ServiceBase {
 
                             return html`
                                     <li class="headerTitle">${letterInit} </li>
-                                    ${this.createLiItem(file, index, false)}
+                                    ${this.renderLiItem(file, index, false)}
                                 `
                         }
 
-                        return this.createLiItem(file, index, false)
+                        return this.renderLiItem(file, index, false)
 
                     }) as any
                 )}
@@ -184,7 +186,7 @@ export class ServiceListFiles extends ServiceBase {
         `;
     }
 
-    private renderAuxEdit() {
+    renderAuxEdit() {
         return html`
             <div class="elContentAux" style="display:none" @click="${this.clickOptStop}">
                 <div class="elContentAux2">
@@ -202,12 +204,7 @@ export class ServiceListFiles extends ServiceBase {
         `;
     }
 
-    private extensionLevel = {
-        2: '.ts',
-        4: '.html'
-    }
-
-    private createLiItem(file: mls.stor.IFileInfo, index: number, inHistory: boolean) {
+    renderLiItem(file: mls.stor.IFileInfo, index: number, inHistory: boolean) {
 
         const name = this.project === 0 && inHistory ? '_' + file.project + '_' + file.shortName : file.shortName;
 
@@ -248,6 +245,37 @@ export class ServiceListFiles extends ServiceBase {
                 </div>
             </li>
         `;
+
+    }
+
+    private extensionLevel = {
+        2: '.ts',
+        4: '.html'
+    }
+
+    private infos: { toolbar: undefined | HTMLElement, father: undefined | HTMLElement } = {} as any;
+
+    private async init() {
+
+        this.infos.father = this.closest('mls-toolbar-100529') as HTMLElement;
+        this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
+        if (this.info && this.infos.father) {
+            this.actualLevel = +(this.infos.father as any).level;
+            this.mePosition = (this.infos.father as any).positionToolbar;
+        }
+
+        this.project = mls.actual[5].project as number;
+
+        this.showLoader(true);
+        await this.getFiles();
+        this.showLoader(false);
+
+    }
+
+    private showLoader(loader: boolean): void {
+
+        if (!this.infos || !this.infos.toolbar) return;
+        this.infos.toolbar.setAttribute('loading', loader.toString());
 
     }
 
@@ -303,12 +331,11 @@ export class ServiceListFiles extends ServiceBase {
     private filterLiChange(e: InputEvent) {
 
         e.stopPropagation();
-
+        const el = e.target as HTMLInputElement;
+        if (!el) return;
         clearTimeout(this.timeFilterChange);
         this.timeFilterChange = setTimeout(() => {
 
-            const el = e.target as HTMLInputElement;
-            if (!el) return;
             const contentServiceList = el.closest('.contentServiceList');
             if (!contentServiceList) return;
 
@@ -331,13 +358,13 @@ export class ServiceListFiles extends ServiceBase {
 
     }
 
+    //------------ EVENTOS -----------------
     private clickOptUndo(e: MouseEvent) {
 
         e.stopPropagation();
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
-
-        console.info('undo', mfile);
+        this.fireEvents('undo', mfile, {});
 
     }
 
@@ -346,8 +373,7 @@ export class ServiceListFiles extends ServiceBase {
         e.stopPropagation();
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
-
-        console.info('del', mfile);
+        this.fireEvents('delete', mfile, {});
 
     }
 
@@ -356,8 +382,7 @@ export class ServiceListFiles extends ServiceBase {
         e.stopPropagation();
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
-
-        console.info('open', mfile);
+        this.fireEvents('open', mfile, {});
 
     }
 
@@ -406,7 +431,7 @@ export class ServiceListFiles extends ServiceBase {
 
                 this.validInputsAux(myfile, { mode: mode, project: iptProj.value, name: iptName.value });
 
-                console.info(mode, myfile);
+                this.fireEvents(mode, myfile, { project: +iptProj, shortName: iptName });
 
             } catch (er: any) {
 
@@ -418,6 +443,56 @@ export class ServiceListFiles extends ServiceBase {
         }
 
     }
+
+
+    private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
+
+        const params = {} as mls.events.IFileAction;
+
+        (params.action as any) = action;
+        params.level = file.level;
+        params.project = file.project;
+        params.shortName = file.shortName;
+        params.extension = file.extension;
+        params.folder = file.folder;
+        params.position = this.mePosition as ('right' | 'left');
+
+        if (info && info.shortName) {
+            params.newshortName = info.shortName;
+            params.newProject = info.project;
+            params.newfolder = file.folder;
+        }
+
+        if (['open'].includes(action)) {
+
+            mls.actual[this.actualLevel].setFullName(`_${file.project}_${file.shortName}`);
+            (mls.actual[this.actualLevel] as any)[this.mePosition] = {
+                project: file.project,
+                shortName: file.shortName
+            }  as any;
+
+        }
+
+        mls.events.fire([this.actualLevel as mls.events.Level], ['FileAction'], JSON.stringify(params), timeout);
+
+        if (['open'].includes(action)) return;
+        this.changeList(100);
+
+    }
+
+    private changeListTimeout: number = 0;
+    public changeList(time: number = 500): void {
+
+        clearTimeout(this.changeListTimeout);
+        this.changeListTimeout = setTimeout(() => {
+
+            this.init();
+
+        }, time);
+
+    }
+
+    //------------ FIM EVENTOS -----------------
 
     private validInputsAux(file: mls.stor.IFileInfo, action: { mode: string, project: string, name: string }): void {
 
