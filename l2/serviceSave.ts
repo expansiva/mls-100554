@@ -15,6 +15,7 @@ export class ServiceSave extends ServiceBase {
 
     constructor() {
         super();
+        debugger;
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
