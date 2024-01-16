@@ -61,7 +61,7 @@ export class ServiceSave extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean) {
 
         if (visible && reinit) {
-
+            this.updateList();
         }
     }
 
@@ -86,7 +86,7 @@ export class ServiceSave extends ServiceBase {
             
         `
     }
- 
+
     renderHeader() {
         return html`
             <i class="fa fa-floppy-o"></i>
@@ -436,6 +436,19 @@ export class ServiceSave extends ServiceBase {
 
     }
 
+    private async updateList() {
+        try {
+
+            this.showLoader(true);
+            await this.setInfos();
+            this.showLoader(false);
+
+        } catch (e: any) {
+            this.error = e.message;
+            this.showLoader(false);
+        }
+    }
+
     private async onSave(e: MouseEvent) {
 
         e.stopPropagation();
@@ -467,12 +480,12 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private getAllFileToSave(father: HTMLElement): mls.stor.IFileInfo[]{
+    private getAllFileToSave(father: HTMLElement): mls.stor.IFileInfo[] {
 
         const ar: mls.stor.IFileInfo[] = [];
         const els = father.querySelectorAll('input[type="checkbox"][onlyStatusFather]:checked');
 
-        els.forEach((el:any) => {
+        els.forEach((el: any) => {
             if (el.instance) ar.push(el.instance);
         })
 
