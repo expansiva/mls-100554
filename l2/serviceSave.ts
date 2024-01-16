@@ -302,7 +302,7 @@ export class ServiceSave extends ServiceBase {
 
             }
 
-            this.itens = objProjects;
+            if(Object.keys(objProjects).length > 0) this.itens = objProjects;
 
         } catch {
 
