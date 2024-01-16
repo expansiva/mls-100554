@@ -1,7 +1,7 @@
 /// <mls shortName="serviceBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('service-base-100554')
 export abstract class ServiceBase extends LitElement {
@@ -14,6 +14,8 @@ export abstract class ServiceBase extends LitElement {
 
     @property({ type: String })
     visible = 'false';
+
+    @state() loading = false;
 
     get serviceContent() { return this.getParent(); }
 
@@ -32,6 +34,14 @@ export abstract class ServiceBase extends LitElement {
             const visible = newVal === 'true';
             const reinit: boolean = oldVal !== null && visible !== false;
             if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible, reinit, this.getParent())
+        }
+    }
+
+    updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('loading')) {
+            const loading = changedProperties.get('loading');
+            if(loading !== undefined) this.serviceContent?.setAttribute('loading', (!loading).toString());
         }
     }
 
