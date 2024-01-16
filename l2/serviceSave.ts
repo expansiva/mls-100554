@@ -77,12 +77,8 @@ export class ServiceSave extends ServiceBase {
     render() {
 
         if (this.error !== '') return html`${this.error}`;
-
-        return html`
-            <sectionsaveheader>
-                ${html`${this.renderHeader()}`}
-            </sectionsaveheader>
-            ${this.itens ? this.renderItens() : this.renderNoItens()}
+        return html` ${this.itens
+            ? html`<sectionsaveheader> ${this.renderHeader()} </sectionsaveheader>${this.renderItens()}` : this.renderNoItens()}
             
         `
     }
@@ -105,7 +101,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     renderItens() {
-
+    
         const keys = Object.keys(this.itens);
         return html`
             <sectionsave>
@@ -309,7 +305,7 @@ export class ServiceSave extends ServiceBase {
 
         } catch {
 
-            this.itens = [];
+            this.itens = undefined;
             // setar error;
 
         }
