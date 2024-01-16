@@ -15,6 +15,8 @@ export abstract class ServiceBase extends LitElement {
     @property({ type: String })
     visible = 'false';
 
+    get serviceContent() { return this.getParent(); }
+
     abstract details: IService;
 
     abstract onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void;
