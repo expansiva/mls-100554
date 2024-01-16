@@ -114,7 +114,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-
+console.info({visible , reinit})
         if (visible && reinit) {
         
             this.updateList();
