@@ -8,10 +8,6 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 @customElement('service-list-files-100554')
 export class ServiceListFiles extends ServiceBase {
 
-    private actualLevel: number = -1;
-
-    private mePosition: string = '';
-
     @property() project: number = 1;
 
     @property() errorAux: string = '';
@@ -257,15 +253,9 @@ export class ServiceListFiles extends ServiceBase {
 
     private async init() {
 
-        this.infos.father = this.closest('mls-toolbar-100529') as HTMLElement;
         this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
-        if (this.info && this.infos.father) {
-            this.actualLevel = +(this.infos.father as any).level;
-            this.mePosition = (this.infos.father as any).positionToolbar;
-        }
-
+        
         this.project = mls.actual[5].project as number;
-
         this.showLoader(true);
         await this.getFiles();
         this.showLoader(false);
@@ -431,14 +421,14 @@ export class ServiceListFiles extends ServiceBase {
 
         if (!window['mls']) return [];
         const arraySf: mls.stor.IFileInfo[] = [];
-        const ext = (this.extensionLevel as any)[this.actualLevel] as string;
+        const ext = (this.extensionLevel as any)[this.level as any] as string;
         for (const i of Object.keys(mls.stor.files).sort()) {
 
             const sf = mls.stor.files[i];
 
             if (
                 sf.project !== +this.project ||
-                sf.level !== this.actualLevel ||
+                sf.level !== this.level ||
                 sf.extension !== ext
             ) continue;
 
@@ -465,12 +455,12 @@ export class ServiceListFiles extends ServiceBase {
 
         for await (const i of lh) {
 
-            let key = mls.stor.getKeyToFiles(i.project, this.actualLevel, i.shortName, i.folder, i.extension);
+            let key = mls.stor.getKeyToFiles(i.project, this.level as any, i.shortName, i.folder, i.extension);
 
             if (!mls.stor.files[key] && +this.project === 0) {
 
                 await mls.stor.server.loadProjectInfoIfNeeded(i.project);
-                key = mls.stor.getKeyToFiles(i.project, this.actualLevel, i.shortName, i.folder, i.extension);
+                key = mls.stor.getKeyToFiles(i.project, this.level as any, i.shortName, i.folder, i.extension);
 
             }
 
@@ -485,14 +475,14 @@ export class ServiceListFiles extends ServiceBase {
 
     private getHistory(): { project: number, shortName: string, extension: string, folder: string }[] {
 
-        const info = localStorage.getItem('mlsInfoHistoryL' + this.actualLevel);
+        const info = localStorage.getItem('mlsInfoHistoryL' + this.level as any);
         return info ? JSON.parse(info) : [];
 
     }
 
     private setHistory(file: mls.stor.IFileInfo): void {
 
-        const info = localStorage.getItem('mlsInfoHistoryL' + this.actualLevel);
+        const info = localStorage.getItem('mlsInfoHistoryL' + this.level as any);
         const res: any[] = info ? JSON.parse(info) : [];
         let idx = -1;
         res.forEach((i: any, index) => {
@@ -509,7 +499,7 @@ export class ServiceListFiles extends ServiceBase {
         res.unshift({ project: file.project, shortName: file.shortName, extension: file.extension, folder: file.folder });
 
         if (res.length > 10) res.length = 10;
-        localStorage.setItem('mlsInfoHistoryL' + this.actualLevel, JSON.stringify(res));
+        localStorage.setItem('mlsInfoHistoryL' + this.level as any, JSON.stringify(res));
 
     }
 
@@ -610,7 +600,7 @@ export class ServiceListFiles extends ServiceBase {
         params.shortName = file.shortName;
         params.extension = file.extension;
         params.folder = file.folder;
-        params.position = this.mePosition as ('right' | 'left');
+        params.position = this.position as ('right' | 'left');
 
         if (info && info.shortName) {
             params.newshortName = info.shortName;
@@ -620,15 +610,15 @@ export class ServiceListFiles extends ServiceBase {
 
         if (['open'].includes(action)) {
 
-            mls.actual[this.actualLevel].setFullName(`_${file.project}_${file.shortName}`);
-            (mls.actual[this.actualLevel] as any)[this.mePosition] = {
+            mls.actual[this.level as any].setFullName(`_${file.project}_${file.shortName}`);
+            (mls.actual[this.level as any] as any)[this.position as any] = {
                 project: file.project,
                 shortName: file.shortName
             } as any;
 
         }
 
-        mls.events.fire([this.actualLevel as mls.events.Level], ['FileAction'], JSON.stringify(params), timeout);
+        mls.events.fire([this.level as mls.events.Level], ['FileAction'], JSON.stringify(params), timeout);
 
         if (['open'].includes(action)) return;
         this.changeList(100);
@@ -666,7 +656,7 @@ export class ServiceListFiles extends ServiceBase {
         const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~∫∞""''``·‡‚„ÈËÍÌÔÛÙıˆ˙ÁÒ¡¿¬√…»Õœ”‘’÷⁄«—]/;
         if (invalidCharacters.test(action.name)) return false;
 
-        const key = mls.stor.getKeyToFiles(+action.project, this.actualLevel, action.name, file.folder, file.extension);
+        const key = mls.stor.getKeyToFiles(+action.project, this.level as any, action.name, file.folder, file.extension);
 
         return !mls.stor.files[key];
 
