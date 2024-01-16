@@ -106,7 +106,7 @@ async function loadMyNeedsToCompile(
 
         mls.actual[0].setFullName(name);
         const { project, path } = mls.actual[0];
-
+        if (!project || !path) return;
         const mfile = mls.l2.editor.get({ project, shortName: path });
         if (!mfile) throw new Error('not found');
 
