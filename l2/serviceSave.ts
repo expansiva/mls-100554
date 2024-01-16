@@ -7,23 +7,18 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 @customElement('service-save-100554')
 export class ServiceSave extends ServiceBase {
 
-    @property() itens: any = undefined;
+    @property() itens: any = undefined; 
 
-    @property() error: string = '';
+    @property() error: string = ''; 
 
     private infos: { toolbar: undefined | HTMLElement, father: undefined | HTMLElement } = {} as any;
 
     constructor() {
         super();
-
-        this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
-        this.infos.father = this.closest('mls-toolbar-100529') as HTMLElement;
-
+        debugger;
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
-
-        this.verifyExitFileChanged();
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -97,7 +92,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private verifyExitFileChanged(): void {
-
+    
         if (!mls.stor.files) return;
 
         const array = Object.keys(mls.stor.files);
@@ -304,6 +299,8 @@ export class ServiceSave extends ServiceBase {
 
     private async init() {
 
+        this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
+        this.infos.father = this.closest('mls-toolbar-100529') as HTMLElement;
         this.showLoader(true);
         this.updateMyMessages();
         await this.setInfos();

@@ -255,7 +255,7 @@ export class ServiceListFiles extends ServiceBase {
 
     private infos: { toolbar: undefined | HTMLElement, father: undefined | HTMLElement } = {} as any;
 
-    private async init() {
+    private async init() {  
 
         this.infos.father = this.closest('mls-toolbar-100529') as HTMLElement;
         this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
