@@ -11,10 +11,21 @@ export class ServiceSave extends ServiceBase {
 
     @property() error: string = '';
 
+    private infos: { toolbar: undefined | HTMLElement, father: undefined | HTMLElement } = {} as any;
+
     constructor() {
         super();
+
+        this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
+        this.infos.father = this.closest('mls-toolbar-100529') as HTMLElement;
+
+        mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
+        mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
+        mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
+
+        this.verifyExitFileChanged();
     }
- 
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
@@ -56,6 +67,56 @@ export class ServiceSave extends ServiceBase {
         div1.innerHTML = '<h1>About this Service</h1>'
         if (this.menu.setMode) this.menu.setMode('page', div1);
         return true;
+    }
+
+    private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
+
+        if (ev.type !== 'FileAction') return;
+        const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
+
+        if (!['changed', 'delete', 'new', 'rename'].includes(fileAction.action)) return;
+
+        if (this.isServiceVisible()) {
+            this.init();
+        }
+
+        if (!this.infos || !this.infos.father || !(this.infos.father as any).toogleBadge) return;
+
+        (this.infos.father as any).toogleBadge(true, '_100554_serviceSave');
+
+    }
+
+    private isServiceVisible(): boolean {
+
+        const container = this.closest('mls-toolbar-content-100529') as HTMLElement;
+        if (!container) return false;
+        const serviceName = container.getAttribute('servicename');
+        if (serviceName !== '_100554_serviceSave') return false;
+        return true;
+
+    }
+
+    private verifyExitFileChanged(): void {
+
+        if (!mls.stor.files) return;
+
+        const array = Object.keys(mls.stor.files);
+        let exist = false;
+        array.forEach((i) => {
+
+            const f = mls.stor.files[i];
+            if (!f) return;
+            if (f.project === mls.actual[5].project && f.status !== 'nochange')
+                exist = true;
+
+        });
+
+        if (!exist) return;
+        if (!this.infos || !this.infos.father || !(this.infos.father as any).toogleBadge) return;
+
+        (this.infos.father as any).toogleBadge(true, '_100554_serviceSave');
+
+
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
@@ -102,7 +163,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     renderItens() {
-    
+
         const keys = Object.keys(this.itens);
         return html`
             <sectionsave>
@@ -241,11 +302,8 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private infos: { toolbar: undefined | HTMLElement } = {} as any;
-
     private async init() {
 
-        this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
         this.showLoader(true);
         this.updateMyMessages();
         await this.setInfos();
