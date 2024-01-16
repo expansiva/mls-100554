@@ -255,7 +255,7 @@ export class ServiceListFiles extends ServiceBase {
 
     private infos: { toolbar: undefined | HTMLElement, father: undefined | HTMLElement } = {} as any;
 
-    private async init() {  
+    private async init() {
 
         this.infos.father = this.closest('mls-toolbar-100529') as HTMLElement;
         this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
@@ -355,6 +355,161 @@ export class ServiceListFiles extends ServiceBase {
             })
 
         }, 500);
+
+    }
+
+    private async verifyChangeInList(e: MouseEvent) {
+
+        try {
+
+            await this.verifyChangeInList2(e);
+
+        } catch (e) {
+
+            //this.shomMyError(e.message);
+
+        }
+
+    }
+
+    private async verifyChangeInList2(e: MouseEvent) {
+
+        try {
+
+            e.stopPropagation();
+            const el = e.target as HTMLElement;
+            if (!el) return;
+
+            const isClick = el.innerText === 'updated';
+            if (isClick) return;
+
+            el.innerText = 'updated';
+
+            mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true).then(() => {
+
+                const key = Object.keys(mls.stor.files)?.filter((item) => item.indexOf((mls.actual[5].project as number).toString()) >= 0);
+                if (key.length > 0) this.fireEvents('projectListChanged', mls.stor.files[key[0]], {}, 3000);
+                this.changeList(3000);
+
+            });
+
+            setTimeout(() => {
+
+                if (!this) return;
+                el.innerText = 'update list/ verify';
+
+            }, 50000);
+
+        } catch (e) {
+
+            //this.shomMyError(e.message);
+
+        }
+
+    }
+
+    private async getFiles() {
+
+        try {
+
+            const arraySf: mls.stor.IFileInfo[] = this.getFilesProject();
+            const arraySfHistory: mls.stor.IFileInfo[] = await this.getFileHistory();
+
+            this.files = arraySf;
+            this.history = arraySfHistory;
+
+
+        } catch (e) {
+
+            console.info(e);
+
+        }
+
+    }
+
+    private getFilesProject(): mls.stor.IFileInfo[] {
+
+        if (!window['mls']) return [];
+        const arraySf: mls.stor.IFileInfo[] = [];
+        const ext = (this.extensionLevel as any)[this.actualLevel] as string;
+        for (const i of Object.keys(mls.stor.files).sort()) {
+
+            const sf = mls.stor.files[i];
+
+            if (
+                sf.project !== +this.project ||
+                sf.level !== this.actualLevel ||
+                sf.extension !== ext
+            ) continue;
+
+            this.info.tot++;
+
+            if (sf.isLocalVersionOutdated) this.info.version++;
+            if (sf.inLocalStorage) this.info.storage++;
+            if (sf.hasError) this.info.error++;
+
+            arraySf.push(sf);
+
+        }
+
+        return arraySf;
+
+    }
+
+    private async getFileHistory() {
+
+        if (!window['mls']) return [];
+        const arraySfHistory: mls.stor.IFileInfo[] = [];
+        const lh = this.getHistory();
+        if (lh.length <= 0 || !window['mls']) return [];
+
+        for await (const i of lh) {
+
+            let key = mls.stor.getKeyToFiles(i.project, this.actualLevel, i.shortName, i.folder, i.extension);
+
+            if (!mls.stor.files[key] && +this.project === 0) {
+
+                await mls.stor.server.loadProjectInfoIfNeeded(i.project);
+                key = mls.stor.getKeyToFiles(i.project, this.actualLevel, i.shortName, i.folder, i.extension);
+
+            }
+
+            if (!mls.stor.files[key] || (i.project !== +this.project && +this.project !== 0)) continue;
+            arraySfHistory.push(mls.stor.files[key]);
+
+        }
+
+        return arraySfHistory;
+
+    }
+
+    private getHistory(): { project: number, shortName: string, extension: string, folder: string }[] {
+
+        const info = localStorage.getItem('mlsInfoHistoryL' + this.actualLevel);
+        return info ? JSON.parse(info) : [];
+
+    }
+
+    private setHistory(file: mls.stor.IFileInfo): void {
+
+        const info = localStorage.getItem('mlsInfoHistoryL' + this.actualLevel);
+        const res: any[] = info ? JSON.parse(info) : [];
+        let idx = -1;
+        res.forEach((i: any, index) => {
+
+            if (i.project !== file.project || i.shortName !== file.shortName) return;
+            idx = index;
+
+        });
+
+        if (idx >= 0) {
+            res.splice(idx, 1);
+        }
+
+        res.unshift({ project: file.project, shortName: file.shortName, extension: file.extension, folder: file.folder });
+
+        if (res.length > 10) res.length = 10;
+        localStorage.setItem('mlsInfoHistoryL' + this.actualLevel, JSON.stringify(res));
 
     }
 
@@ -469,7 +624,7 @@ export class ServiceListFiles extends ServiceBase {
             (mls.actual[this.actualLevel] as any)[this.mePosition] = {
                 project: file.project,
                 shortName: file.shortName
-            }  as any;
+            } as any;
 
         }
 
@@ -518,109 +673,6 @@ export class ServiceListFiles extends ServiceBase {
     }
 
 
-    private async getFiles() {
 
-        try {
-
-            const arraySf: mls.stor.IFileInfo[] = this.getFilesProject();
-            const arraySfHistory: mls.stor.IFileInfo[] = await this.getFileHistory();
-
-            this.files = arraySf;
-            this.history = arraySfHistory;
-
-
-        } catch (e) {
-
-            console.info(e);
-
-        }
-
-    }
-
-    private getFilesProject(): mls.stor.IFileInfo[] {
-
-        if (!window['mls']) return [];
-        const arraySf: mls.stor.IFileInfo[] = [];
-        const ext = (this.extensionLevel as any)[this.actualLevel] as string;
-        for (const i of Object.keys(mls.stor.files).sort()) {
-
-            const sf = mls.stor.files[i];
-
-            if (
-                sf.project !== +this.project ||
-                sf.level !== this.actualLevel ||
-                sf.extension !== ext
-            ) continue;
-
-            this.info.tot++;
-
-            if (sf.isLocalVersionOutdated) this.info.version++;
-            if (sf.inLocalStorage) this.info.storage++;
-            if (sf.hasError) this.info.error++;
-
-            arraySf.push(sf);
-
-        }
-
-        return arraySf;
-
-    }
-
-    private async getFileHistory() {
-
-        if (!window['mls']) return [];
-        const arraySfHistory: mls.stor.IFileInfo[] = [];
-        const lh = this.getHistory();
-        if (lh.length <= 0 || !window['mls']) return [];
-
-        for await (const i of lh) {
-
-            let key = mls.stor.getKeyToFiles(i.project, this.actualLevel, i.shortName, i.folder, i.extension);
-
-            if (!mls.stor.files[key] && +this.project === 0) {
-
-                await mls.stor.server.loadProjectInfoIfNeeded(i.project);
-                key = mls.stor.getKeyToFiles(i.project, this.actualLevel, i.shortName, i.folder, i.extension);
-
-            }
-
-            if (!mls.stor.files[key] || (i.project !== +this.project && +this.project !== 0)) continue;
-            arraySfHistory.push(mls.stor.files[key]);
-
-        }
-
-        return arraySfHistory;
-
-    }
-
-    private getHistory(): { project: number, shortName: string, extension: string, folder: string }[] {
-
-        const info = localStorage.getItem('mlsInfoHistoryL' + this.actualLevel);
-        return info ? JSON.parse(info) : [];
-
-    }
-
-    private setHistory(file: mls.stor.IFileInfo): void {
-
-        const info = localStorage.getItem('mlsInfoHistoryL' + this.actualLevel);
-        const res: any[] = info ? JSON.parse(info) : [];
-        let idx = -1;
-        res.forEach((i: any, index) => {
-
-            if (i.project !== file.project || i.shortName !== file.shortName) return;
-            idx = index;
-
-        });
-
-        if (idx >= 0) {
-            res.splice(idx, 1);
-        }
-
-        res.unshift({ project: file.project, shortName: file.shortName, extension: file.extension, folder: file.folder });
-
-        if (res.length > 10) res.length = 10;
-        localStorage.setItem('mlsInfoHistoryL' + this.actualLevel, JSON.stringify(res));
-
-    }
 
 }
