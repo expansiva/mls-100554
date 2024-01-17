@@ -343,6 +343,7 @@ export class ServiceSave extends ServiceBase {
 
             }
 
+            console.info(objProjects)
             if (Object.keys(objProjects).length > 0) this.itens = objProjects;
             else this.itens = undefined;
 
