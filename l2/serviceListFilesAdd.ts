@@ -3,6 +3,9 @@
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+export const initServiceListFilesAdd = () =>{
+
+}
 @customElement('service-list-files-add-100554')
 export class ServiceListFilesAdd100554 extends LitElement {
 

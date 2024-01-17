@@ -10,6 +10,7 @@
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
+import { initServiceListFilesAdd } from './_100554_serviceListFilesAdd';
 
 @customElement('service-list-files-100554')
 export class ServiceListFiles extends ServiceBase {
@@ -28,6 +29,7 @@ export class ServiceListFiles extends ServiceBase {
 
     constructor() {
         super();
+        initServiceListFilesAdd();
         this.setEvents();
     }
 
@@ -53,7 +55,6 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (op === 'opAdd') return this.showAdd();
         if (this.menu.setMode) this.onServiceClick(true, true);
         return false;
     }
@@ -61,7 +62,6 @@ export class ServiceListFiles extends ServiceBase {
     public menu: IMenu = {
         title: 'List Files',
         actions: {
-            opAdd: 'Add new file',
         },
         icons: {},
         actionDefault: 'opPlugins', // call after close icon clicked
@@ -80,6 +80,7 @@ export class ServiceListFiles extends ServiceBase {
 
     private showAdd() {
         this.mode = 'add';
+        this.menu.setMode
         return true;
     }
 
