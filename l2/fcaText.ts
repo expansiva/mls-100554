@@ -4,7 +4,7 @@
  * @mlsComponentDetails {
  *  "webComponentDependencies": ["wcd-toolbox-100554"]
  * }
- */ 
+ */
 
 import { html, unsafeHTML } from 'lit';  
 import { customElement } from 'lit/decorators.js';
