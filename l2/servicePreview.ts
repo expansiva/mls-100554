@@ -33,7 +33,7 @@ export class ServicePreview100554 extends ServiceBase {
         icon: '&#xf5b8',
         name: 'Preview 2',
         mode: 'H',
-        position: 'all',
+        position: 'right',
         readOnly: false,
         tooltip: 'Preview 2',
         className: undefined,
