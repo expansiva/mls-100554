@@ -8,7 +8,7 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 @customElement('service-list-files-100554')
 export class ServiceListFiles extends ServiceBase {
 
-    @property() mode: string = 'list';
+    @property() mode: string = 'list'; 
 
     @property() project: number = 1;
 
@@ -444,11 +444,8 @@ export class ServiceListFiles extends ServiceBase {
         4: '.html'
     }
 
-    private infos: { toolbar: undefined | HTMLElement, father: undefined | HTMLElement } = {} as any;
 
     private async init() {
-
-        this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
 
         this.project = mls.actual[5].project as number;
         this.projectLabel = this.project.toString();
@@ -461,8 +458,7 @@ export class ServiceListFiles extends ServiceBase {
 
     private showLoader(loader: boolean): void {
 
-        if (!this.infos || !this.infos.toolbar) return;
-        this.infos.toolbar.setAttribute('loading', loader.toString());
+        this.loading = loader;
 
     }
 
