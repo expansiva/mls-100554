@@ -73,7 +73,7 @@ export class ServiceListFiles extends ServiceBase {
 
         this.mode = 'list';
         if (visible && reinit) {
-            
+            this.init();
         }
 
     }
