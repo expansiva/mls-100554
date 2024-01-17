@@ -372,8 +372,13 @@ export class ServiceSave extends ServiceBase {
             }
 
             console.info(objProjects)
-            if (Object.keys(objProjects).length > 0) this.itens = objProjects;
-            else this.itens = undefined;
+            if (Object.keys(objProjects).length > 0) {
+                this.itens = objProjects;
+            }
+            else {
+                this.itens = undefined;
+                this.toogleBadge(false, '_100554_serviceSave');
+            }
 
         } catch {
 
