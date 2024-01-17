@@ -1,10 +1,5 @@
 /// <mls shortName="serviceListFiles" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": ["service-list-files-add-100554"]
- * }
- */ 
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -304,7 +299,7 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     renderAdd() {
-        return html`<service-list-files-add-100554 level="${this.level}" position="${this.position}" .father="${this}"></service-list-files-add-100554>`
+        return html`add`
     }
 
     //------------ EVENTOS -----------------
@@ -327,7 +322,6 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     private clickOptOpen(e: MouseEvent) {
-
         e.stopPropagation();
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
@@ -423,7 +417,7 @@ export class ServiceListFiles extends ServiceBase {
 
         }
 
-        mls.events.fire([this.level as mls.events.Level], ['FileAction'], JSON.stringify(params), timeout);
+        mls.events.fire([(+(this.level as any) as any)], ['FileAction'], JSON.stringify(params), timeout);
 
         if (['open'].includes(action)) return;
         this.changeList(100);
@@ -452,6 +446,10 @@ export class ServiceListFiles extends ServiceBase {
 
     private async init() {
 
+        this.info.tot = 0;
+        this.info.version = 0;
+        this.info.storage = 0;
+        this.info.error = 0;
         this.project = mls.actual[5].project as number;
         this.projectLabel = this.project.toString();
         this.showLoader(true);
