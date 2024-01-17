@@ -4,7 +4,7 @@ import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 @customElement('codelens-component-details-100554')
-export class SimpleGreeting extends LitElement {
+export class CodeLensComponentDetails100554 extends LitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
