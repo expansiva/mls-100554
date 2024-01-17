@@ -16,7 +16,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     @property() error: string = '';
 
-    private info:any = {};
+    private info: any = {};
 
     constructor() {
         super();
@@ -61,7 +61,6 @@ export class ServicePreview100554 extends ServiceBase {
         iconDefault: 'icPreview',
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon
     }
 
     private showInitial(): boolean {
@@ -76,97 +75,46 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private preview() {
-        const doc = document.createElement('service-preview-view-100554');
-        if (this.menu.setMode) this.menu.setMode('page', doc);
-        return true;
-    
+
     }
 
     // -------------- EVENTS -------------------
 
     private setEvents() {
 
-        mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
+        mls.events.addEventListener([2], ['ToolBarSelected'], (ev) => this.onToolBarSelected(ev));
 
     }
 
-    
-    private timeEvent: number = -1;
-    private async onMLSEvents(ev: mls.events.IEvent): Promise<void> {
+    private onToolBarSelected(ev: mls.events.IEvent) {
 
-        try {
+        if (!ev || !ev.desc) return;
+        const params: { level: number, position: string, from: string, to: string } = ev.desc ? JSON.parse(ev.desc) : {};
 
-            if (ev.level !== +(this.level as any) || (ev.type !== 'FileAction')) return;
-
-            const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
-
-
-            if (fileAction.position === this.position || !['open', 'statusOrErrorChanged', 'changed', 'new'].includes(fileAction.action) || fileAction.project === 0) return;
-
-            clearTimeout(this.timeEvent);
-            this.timeEvent = setTimeout(async () => {
-
-                await this.onMLSEvents2(fileAction);
-
-            }, 500);
-
-        } catch (e) {
-
-            console.info(e);
-
+        if (![2].includes(params.level) || this.position === params.position) {
+            return;
         }
 
-    }
+        if (!['_100529_service_Source'].includes(params.to)) {
 
-    private async onMLSEvents2(fileAction: mls.events.IFileAction) {
-
-        const visible = this.visible === 'true';
-
-        if (['open', 'new'].includes(fileAction.action)) {
-
-            const mfile = mls.l2.editor.get({ project: fileAction.project, shortName: fileAction.shortName });
-
-            if (!mfile) {
-                this.activeMe('H', false);
-                return;
-            }
-
-            const mmodule = await mls.l2.enhancement.getEnhancementInstance(mfile);
-            if (!mmodule) {
-                this.activeMe('H', false);
-                return;
-            }
-
-            //att
-
-        } else if (visible && ['statusOrErrorChanged', 'changed'].includes(fileAction.action)) {
-
-            const mfile = mls.l2.editor.get({ project: fileAction.project, shortName: fileAction.shortName });
-
-            this.setError('');
-            if (mfile && mfile.storFile.hasError) {
-                this.setError('File has error');
-                return;
-            }
-
-            //att
+            this.activeMe('H', false);
+        } else {
+            this.activeMe('A', true);
         }
 
-    }
+    };
+
 
     private activeMe(status: string, click: boolean): void {
-        
+
         if (!this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', status);
         if (click) this.serviceItemNav.click();
 
     }
 
-    
-
-    
-
     // -------------- COMPONENT ---------------
+
     render() {
         return html``;
     }
