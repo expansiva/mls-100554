@@ -357,13 +357,13 @@ export class ServiceSave extends ServiceBase {
     }
 
     private oIcon = {
-        nochange: { icon: '&#xf1c0', title: 'Local' },
-        changed: { icon: '&#xf303', title: 'Edited' },
-        renamed: { icon: '&#xf0c5', title: 'Renamed' },
-        deleted: { icon: '&#xf068', title: 'Deleted' },
+        nochange: { icon: 'fa-nochange', title: 'Local' },
+        changed: { icon: 'fa-add', title: 'Edited' },
+        renamed: { icon: 'fa-rename', title: 'Renamed' },
+        deleted: { icon: 'fa-del', title: 'Deleted' },
         //deleted: { icon: '&#xf1f8', title: 'Deleted' },f068
         //new: { icon: '&#xf006', title: 'New' }2b
-        new: { icon: '&#x2b', title: 'New' }
+        new: { icon: 'fa-new', title: 'New' }
     };
 
     private async configItem(item: mls.stor.IFileInfo) {
@@ -372,10 +372,10 @@ export class ServiceSave extends ServiceBase {
 
         let disabled = false;
 
-        let span = `<span style="font-size: 12px; color: #7678a6; margin-left: 5px;" class="fa" title="${this.oIcon[item.status].title}">${this.oIcon[item.status].icon}</span>`;
+        let span = `<span style="font-size: 12px; color: #7678a6; margin-left: 5px;" class="fa ${this.oIcon[item.status].icon}" title="${this.oIcon[item.status].title}"></span>`;
 
         if (item.hasError && item.status !== 'deleted') {
-            span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px;" class="fa" title="Error">&#xf188</span>';
+            span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px;" class="fa fa-bug" title="Error"></span>';
             disabled = true;
         }
 
