@@ -630,8 +630,7 @@ export class ServiceSave extends ServiceBase {
         params.project = mls.actual[5].project as number;
         params.position = this.position as ('right' | 'left');
 
-        mls.events.fire([2,3,4], ['FileAction'], JSON.stringify(params), 0);
-
+        mls.events.fire([5], ['FileAction'], JSON.stringify(params), 0);
 
     }
 
