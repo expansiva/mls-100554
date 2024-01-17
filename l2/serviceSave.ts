@@ -1,15 +1,15 @@
 /// <mls shortName="serviceSave" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, unsafeHTML } from 'lit';
+import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
 @customElement('service-save-100554')
 export class ServiceSave extends ServiceBase {
 
-    @property() itens: any = undefined; 
+    @property() itens: any = undefined;
 
-    @property() error: string = ''; 
+    @property() error: string = '';
 
     constructor() {
         super();
@@ -53,7 +53,7 @@ export class ServiceSave extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean) {
 
         if (visible && reinit) {
-        
+
             this.updateList();
         }
     }
@@ -61,12 +61,12 @@ export class ServiceSave extends ServiceBase {
     // -------------- EVENTS -------------------
 
     private setEvents() {
-        
+
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
         this.verifyExitFileChanged();
-            
+
     }
 
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
@@ -91,7 +91,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private verifyExitFileChanged(): void {
-    
+
         if (!mls.stor.files) return;
 
         const array = Object.keys(mls.stor.files);
@@ -162,7 +162,15 @@ export class ServiceSave extends ServiceBase {
                 </div>
                 <h4 class="mt-3" data-mlsline="23">${this.myMsg.fileChanges}</h4>
                 <ul>
-                    ${keys.map((key, index) => { return this.renderProject(key, index); })}
+                    ${repeat(
+            keys,
+            ((key: any) => key) as any,
+            ((k: any, index: any) => {
+
+                return this.renderProject(k, index);
+
+            }) as any
+        )}
                 </ul>
             </sectionsave>  
         
@@ -181,10 +189,15 @@ export class ServiceSave extends ServiceBase {
                 <label for="l0-${index}">${project}</label>
             </div>
             <ul>
-                ${keys.map((key, indexl) => {
-            return this.renderLevels(key, project, index, indexl);
+                ${repeat(
+                    keys,
+                    ((key: any) => key) as any,
+                    ((k: any, indexl: any) => {
 
-        })}
+                        return this.renderLevels(k, project, index, indexl);
+
+                    }) as any
+                )}
             </ul>
         </li>
         `;
@@ -214,29 +227,38 @@ export class ServiceSave extends ServiceBase {
                 <label for="l0-${project}-${index}">l${level}</label>
             </div>
             <ul>
-                ${keys.map((key, index3) => {
-            const objL = objP[level];
-            const objDS = objL[key];
-            const itens = objDS ? objDS as [] : [];
-            return html`
-                        <li>
-                            <div>
-                                <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
-                                <input type="checkbox" id="l0-${project}-${index}-${index3}" @click="${this.clickSetValueAllChilds}">
-                                <label for="l0-${project}-${index}-${index3}">${key}</label>
-                            </div>
-                            <ul>
-                                ${itens.map((item, indexI) => {
-                return this.renderItem(item, indexP, index, indexI);
-            })}
-                            </ul>
-                        </li>
-                    `
-        })}
+                ${repeat(
+                    keys,
+                    ((key: any) => key) as any,
+                    ((k: any, index3: any) => {
+                        const objL = objP[level];
+                        const objDS = objL[k];
+                        const itens = objDS ? objDS as [] : [];
+                        return html`
+                                <li>
+                                    <div>
+                                        <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
+                                        <input type="checkbox" id="l0-${project}-${index}-${index3}" @click="${this.clickSetValueAllChilds}">
+                                        <label for="l0-${project}-${index}-${index3}">${k}</label>
+                                    </div>
+                                    <ul>                        
+                                        ${repeat(
+                                            itens,
+                                            ((item: any) => item) as any,
+                                            ((i: any, indexI: any) => {
+
+                                                return this.renderItem(i, indexP, index, indexI);
+
+                                            }) as any
+                                        )}
+                                    </ul>
+                                </li>
+                            `
+
+                        }) as any
+                    )}
             </ul>
         </li>
-        
-        
         `;
 
     }
@@ -255,9 +277,15 @@ export class ServiceSave extends ServiceBase {
                 <label for="l0-${project}-${index}">l${level}</label>
             </div>
             <ul>
-                ${itens.map((item, indexI) => {
-            return this.renderItem(item, indexP, index, indexI);
-        })}
+                ${repeat(
+                    itens,
+                    ((item: any) => item) as any,
+                    ((i: any, indexI: any) => {
+
+                        return this.renderItem(i, indexP, index, indexI);
+
+                    }) as any
+                )}
             </ul>
         </li>
         `;
