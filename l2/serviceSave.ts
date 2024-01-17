@@ -4,7 +4,7 @@ import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
-@customElement('service-save-100554')
+@customElement('service-save-100554') 
 export class ServiceSave extends ServiceBase {
 
     @property() itens: any = undefined; 
