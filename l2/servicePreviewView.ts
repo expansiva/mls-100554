@@ -6,7 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 export const initServicePreviewView = '';
 @customElement('service-preview-view-100554')
 export class ServicePreviewView extends LitElement {
-    static styles = css`p { color: red }`;
+    static styles = css`p { color: red } `;
 
     @property()
     name: string = 'Somebody';
