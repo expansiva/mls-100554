@@ -146,31 +146,31 @@ export class ServiceListFiles extends ServiceBase {
 
         if (this.info.version > 0) {
 
-            auxV = `<b>[${this.info.version}]</b> <span class="fa fa-unbalanced"></span> <b>files changed on the server, </b>`;
+            auxV = `<b>[${this.info.version}]</b> <span class="fa fa-unbalanced"></span> <b>${this.myMsg.filesChangedOnTheServer}, </b>`;
         }
 
         if (this.info.error > 0) {
 
-            auxE = `<b>[${this.info.error}]</b> <span class="fa fa-bug"></span><b>files with errors,</b>`;
+            auxE = `<b>[${this.info.error}]</b> <span class="fa fa-bug"></span><b>${this.myMsg.filesWithErrors},</b>`;
         }
 
         if (this.info.storage > 0) {
 
-            auxS = `<b>[${this.info.storage}]</b> <span class="fa fa-location-dot"></span> <b>files in local storage.</b>`;
+            auxS = `<b>[${this.info.storage}]</b> <span class="fa fa-location-dot"></span> <b>${this.myMsg.filesInLocalStorage}.</b>`;
         }
 
         return html`
         <div class="groupHeader">
             <div class="groupAction"> 
-                <a @click="${this.verifyChangeInList}"> update list/ verify</a>
-                <a @click="${this.showAdd}"> add new file</a>
+                <a @click="${this.verifyChangeInList}">${this.myMsg.updateListVerify}</a>
+                <a @click="${this.showAdd}">${this.myMsg.addNewFile}</a>
             </div>
             <div class="groupFilter">
                 <div class="groupFilterRadio">
                     <input id="radioProjectActual" name="projectFind" type="radio" checked="checked" value="${this.projectLabel}" @click="${this.clickRadioProjectActual}">
                     <label for="radioProjectActual">${this.projectLabel}</label>
                     <input id="radioProjectZero" name="projectFind" type="radio" value="0" @click="${this.clickRadioProject0}">
-                    <label for="radioProjectZero">Local project</label>
+                    <label for="radioProjectZero">${this.myMsg.localProject}</label>
                 </div>
                 <input type="text" placeholder="Filter" @input="${this.filterLiChange}">
             </div>
@@ -178,7 +178,7 @@ export class ServiceListFiles extends ServiceBase {
                 <span style="margin-right:10px">
                     [${this.info.tot}]
 				    <span class="fa fa-file"></span> 
-                    total files
+                    ${this.myMsg.totalFiles}
                 </span>
                 ${auxV ? html`<span .innerHTML="${auxV}" style="margin-right:10px"></span>` : ''}
                 ${auxE ? html`<span .innerHTML="${auxE}" style="margin-right:10px"></span>` : ''}
@@ -194,7 +194,7 @@ export class ServiceListFiles extends ServiceBase {
             ${this.history.length <= 0 ? '' :
                 html`
                     <li class="headerTitle">
-                        ${+this.project === 0 ? 'History (All Projects)' : 'History'}
+                        ${+this.project === 0 ? `${this.myMsg.history} (All Projects)` : `${this.myMsg.history}`}
                     </li>
                     ${repeat(
                     this.history,
@@ -285,10 +285,10 @@ export class ServiceListFiles extends ServiceBase {
             <li @click="${this.clickOptOpen}" .myFile=${file} .nameFilter="${nameFilter}">
                 <div class="elContent">
                     <div class="groupHiddenList" @click="${this.clickGroupHidden}">
-                        <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${this.clickOptUndo}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-clone" title="clone" @click="${this.clickOptClone}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-file-pen" title="rename" @click="${this.clickOptRename}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-trash" title="delete" @click="${this.clickOptDel}"></span>
+                        <span class="mls-gpbtnslider-item fa fa-undo" title="${this.myMsg.undo}" @click="${this.clickOptUndo}"></span>
+                        <span class="mls-gpbtnslider-item fa fa-clone" title="${this.myMsg.clone}" @click="${this.clickOptClone}"></span>
+                        <span class="mls-gpbtnslider-item fa fa-file-pen" title="${this.myMsg.rename}" @click="${this.clickOptRename}"></span>
+                        <span class="mls-gpbtnslider-item fa fa-trash" title="${this.myMsg.delete}" @click="${this.clickOptDel}"></span>
                     </div>
                     <span class="${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
                     <div .innerHTML="${auxStorage + auxBug + auxVersion}"></div>
@@ -301,6 +301,143 @@ export class ServiceListFiles extends ServiceBase {
     renderAdd() {
         return html`add`
     }
+
+    //------------ EVENTOS -----------------
+    private clickOptUndo(e: MouseEvent) {
+
+        e.stopPropagation();
+        const mfile = this.getMyFileInElement(e.target as HTMLElement);
+        if (!mfile) return;
+        this.fireEvents('undo', mfile, {});
+
+    }
+
+    private clickOptDel(e: MouseEvent) {
+
+        e.stopPropagation();
+        const mfile = this.getMyFileInElement(e.target as HTMLElement);
+        if (!mfile) return;
+        this.fireEvents('delete', mfile, {});
+
+    }
+
+    private clickOptOpen(e: MouseEvent) {
+
+        e.stopPropagation();
+        const mfile = this.getMyFileInElement(e.target as HTMLElement);
+        if (!mfile) return;
+        this.setHistory(mfile);
+        this.fireEvents('open', mfile, {});
+
+    }
+
+    private clickOptRename(e: MouseEvent) {
+
+        e.stopPropagation();
+        const el = e.target as HTMLElement;
+        if (!el) return;
+        this.clickOptRenameClone(el, 'rename')
+
+    }
+
+    private clickOptClone(e: MouseEvent) {
+
+        e.stopPropagation();
+        const el = e.target as HTMLElement;
+        if (!el) return;
+        this.clickOptRenameClone(el, 'clone');
+
+    }
+
+    private clickOptRenameClone(el: HTMLElement, mode: string) {
+
+        if (!el) return;
+
+        const myfile = this.getMyFileInElement(el);
+        if (!myfile) return;
+
+        const father = el.closest('.contentServiceList') as HTMLElement;
+        const li = el.closest('li') as HTMLElement;
+        if (!father || !li) return;
+
+        const elContentAux = father.querySelector('.elContentAux') as HTMLElement;
+        const btnActCloneRename = father.querySelector('.btnActCloneRename') as HTMLElement;
+        if (!father || !li) return;
+
+        li.appendChild(elContentAux);
+        elContentAux.style.display = '';
+        btnActCloneRename.onclick = (e2: MouseEvent) => {
+
+            try {
+
+                e2.stopPropagation();
+                const iptProj = elContentAux.querySelector('.spanPrj input') as HTMLInputElement;
+                const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
+
+                this.validInputsAux(myfile, { mode: mode, project: iptProj.value, name: iptName.value });
+
+                this.fireEvents(mode, myfile, { project: +iptProj, shortName: iptName });
+
+            } catch (er: any) {
+
+                this.errorAux = er.message;
+                setTimeout(() => { this.errorAux = '' }, 2000);
+
+            }
+
+        }
+
+    }
+
+
+    private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
+
+        const params = {} as mls.events.IFileAction;
+
+        (params.action as any) = action;
+        params.level = file.level;
+        params.project = file.project;
+        params.shortName = file.shortName;
+        params.extension = file.extension;
+        params.folder = file.folder;
+        params.position = this.position as ('right' | 'left');
+
+        if (info && info.shortName) {
+            params.newshortName = info.shortName;
+            params.newProject = info.project;
+            params.newfolder = file.folder;
+        }
+
+        if (['open'].includes(action)) {
+
+            mls.actual[this.level as any].setFullName(`_${file.project}_${file.shortName}`);
+            (mls.actual[this.level as any] as any)[this.position as any] = {
+                project: file.project,
+                shortName: file.shortName
+            } as any;
+
+        }
+
+        mls.events.fire([this.level as mls.events.Level], ['FileAction'], JSON.stringify(params), timeout);
+
+        if (['open'].includes(action)) return;
+        this.changeList(100);
+
+    }
+
+    private changeListTimeout: number = 0;
+    public changeList(time: number = 500): void {
+
+        clearTimeout(this.changeListTimeout);
+        this.changeListTimeout = setTimeout(() => {
+
+            this.init();
+
+        }, time);
+
+    }
+
+    //------------ IMPLEMENTS -----------------
 
     private extensionLevel = {
         2: '.ts',
@@ -316,6 +453,7 @@ export class ServiceListFiles extends ServiceBase {
         this.project = mls.actual[5].project as number;
         this.projectLabel = this.project.toString();
         this.showLoader(true);
+        this.updateMyMessages()
         await this.getFiles();
         this.showLoader(false);
 
@@ -584,142 +722,6 @@ export class ServiceListFiles extends ServiceBase {
 
     }
 
-    //------------ EVENTOS -----------------
-    private clickOptUndo(e: MouseEvent) {
-
-        e.stopPropagation();
-        const mfile = this.getMyFileInElement(e.target as HTMLElement);
-        if (!mfile) return;
-        this.fireEvents('undo', mfile, {});
-
-    }
-
-    private clickOptDel(e: MouseEvent) {
-
-        e.stopPropagation();
-        const mfile = this.getMyFileInElement(e.target as HTMLElement);
-        if (!mfile) return;
-        this.fireEvents('delete', mfile, {});
-
-    }
-
-    private clickOptOpen(e: MouseEvent) {
-
-        e.stopPropagation();
-        const mfile = this.getMyFileInElement(e.target as HTMLElement);
-        if (!mfile) return;
-        this.fireEvents('open', mfile, {});
-
-    }
-
-    private clickOptRename(e: MouseEvent) {
-
-        e.stopPropagation();
-        const el = e.target as HTMLElement;
-        if (!el) return;
-        this.clickOptRenameClone(el, 'rename')
-
-    }
-
-    private clickOptClone(e: MouseEvent) {
-
-        e.stopPropagation();
-        const el = e.target as HTMLElement;
-        if (!el) return;
-        this.clickOptRenameClone(el, 'clone');
-
-    }
-
-    private clickOptRenameClone(el: HTMLElement, mode: string) {
-
-        if (!el) return;
-
-        const myfile = this.getMyFileInElement(el);
-        if (!myfile) return;
-
-        const father = el.closest('.contentServiceList') as HTMLElement;
-        const li = el.closest('li') as HTMLElement;
-        if (!father || !li) return;
-
-        const elContentAux = father.querySelector('.elContentAux') as HTMLElement;
-        const btnActCloneRename = father.querySelector('.btnActCloneRename') as HTMLElement;
-        if (!father || !li) return;
-
-        li.appendChild(elContentAux);
-        elContentAux.style.display = '';
-        btnActCloneRename.onclick = (e2: MouseEvent) => {
-
-            try {
-
-                e2.stopPropagation();
-                const iptProj = elContentAux.querySelector('.spanPrj input') as HTMLInputElement;
-                const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
-
-                this.validInputsAux(myfile, { mode: mode, project: iptProj.value, name: iptName.value });
-
-                this.fireEvents(mode, myfile, { project: +iptProj, shortName: iptName });
-
-            } catch (er: any) {
-
-                this.errorAux = er.message;
-                setTimeout(() => { this.errorAux = '' }, 2000);
-
-            }
-
-        }
-
-    }
-
-
-    private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
-
-        const params = {} as mls.events.IFileAction;
-
-        (params.action as any) = action;
-        params.level = file.level;
-        params.project = file.project;
-        params.shortName = file.shortName;
-        params.extension = file.extension;
-        params.folder = file.folder;
-        params.position = this.position as ('right' | 'left');
-
-        if (info && info.shortName) {
-            params.newshortName = info.shortName;
-            params.newProject = info.project;
-            params.newfolder = file.folder;
-        }
-
-        if (['open'].includes(action)) {
-
-            mls.actual[this.level as any].setFullName(`_${file.project}_${file.shortName}`);
-            (mls.actual[this.level as any] as any)[this.position as any] = {
-                project: file.project,
-                shortName: file.shortName
-            } as any;
-
-        }
-
-        mls.events.fire([this.level as mls.events.Level], ['FileAction'], JSON.stringify(params), timeout);
-
-        if (['open'].includes(action)) return;
-        this.changeList(100);
-
-    }
-
-    private changeListTimeout: number = 0;
-    public changeList(time: number = 500): void {
-
-        clearTimeout(this.changeListTimeout);
-        this.changeListTimeout = setTimeout(() => {
-
-            this.init();
-
-        }, time);
-
-    }
-
-    //------------ FIM EVENTOS -----------------
-
     private validInputsAux(file: mls.stor.IFileInfo, action: { mode: string, project: string, name: string }): void {
 
         if (file.hasError && ['clone', 'rename'].includes(action.mode)) throw new Error('It is not possible to perform this action on files with an error.');
@@ -741,6 +743,45 @@ export class ServiceListFiles extends ServiceBase {
 
         return !mls.stor.files[key];
 
+    }
+
+    private updateMyMessages() {
+
+        if (!window['message' as any]) return;
+        const m = window['message' as any] as any;
+
+        if (m.updateListVerify) this.myMsg.updateListVerify = m.updateListVerify;
+        if (m.update) this.myMsg.update = m.update;
+        if (m.addNewFile) this.myMsg.addNewFile = m.addNewFile;
+        if (m.filter) this.myMsg.filter = m.filter;
+        if (m.localProject) this.myMsg.localProject = m.localProject;
+        if (m.totalFiles) this.myMsg.totalFiles = m.totalFiles;
+        if (m.filesWithErrors) this.myMsg.filesWithErrors = m.filesWithErrors;
+        if (m.filesInLocalStorage) this.myMsg.filesInLocalStorage = m.filesInLocalStorage;
+        if (m.filesChangedOnTheServer) this.myMsg.filesChangedOnTheServer = m.filesChangedOnTheServer;
+        if (m.history) this.myMsg.history = m.history;
+        if (m.undo) this.myMsg.undo = m.undo;
+        if (m.clone) this.myMsg.clone = m.clone;
+        if (m.rename) this.myMsg.rename = m.rename;
+        if (m.delete) this.myMsg.delete = m.delete;
+
+    }
+
+    private myMsg = {
+        updateListVerify: 'update list/ verify',
+        update: 'update',
+        addNewFile: 'add new file',
+        filter: 'Filter',
+        localProject: 'Local project',
+        totalFiles: 'total files',
+        filesWithErrors: 'files with errors',
+        filesInLocalStorage: 'file in local storage',
+        filesChangedOnTheServer: 'files changed on the server',
+        history: 'History',
+        undo: 'undo',
+        clone: 'clone',
+        rename: 'rename',
+        delete: 'delete',
     }
 
 
