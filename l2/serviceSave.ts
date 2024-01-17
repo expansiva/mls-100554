@@ -311,7 +311,7 @@ export class ServiceSave extends ServiceBase {
             for (const fKey of filesKeys) {
 
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
-                if (!file.inLocalStorage || file.status === 'nochange' || file.project === 0) continue;
+                if ((!file.inLocalStorage && file.status === 'nochange') || file.status === 'nochange' || file.project === 0) continue;
 
                 const pj = file.project;
                 const level = file.level;
