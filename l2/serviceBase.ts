@@ -7,10 +7,10 @@ import { customElement, property, state } from 'lit/decorators.js';
 export abstract class ServiceBase extends LitElement {
 
     @property({ type: String, reflect: true })
-    public level: mls.events.Level | undefined;
+    public level: mls.events.Level = 7;
 
     @property({ type: String, reflect: true })
-    public position: 'left' | 'right' | undefined;
+    public position: 'left' | 'right' = 'left';
 
     @property({ type: String })
     visible = 'false';

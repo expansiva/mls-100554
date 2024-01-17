@@ -1,0 +1,1019 @@
+/// <mls shortName="serviceSource" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
+
+import { html } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
+import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+
+@customElement('service-source-100554')
+export class ServiceSource100554 extends ServiceBase {
+
+    constructor() {
+        super();
+        mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
+        mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
+        mls.events.addListener(2, 'ProjectLoaded', (ev) => this.onProjectLoadedEvents(ev));
+        this.initMonaco_GlobalEditor();
+        this.initMonaco();
+
+    }
+
+    public details: IService = {
+        icon: '&#xf121',
+        name: 'Source',
+        mode: 'B',
+        position: 'all',
+        readOnly: true,
+        tooltip: 'Source',
+        className: undefined,
+        tags: [],
+        levels: [2]
+    }
+
+    public onClickLink = (op: string): boolean => {
+        if (op === 'opTS2') return true;
+        if (op === 'opTheme') return this.showPageTheme();
+        if (op === 'opMonacoConfig') return this.showConfEditor();
+        if (op === 'opMonacoReset') return this.showMonacoReset();
+        if (op === 'opHistory') return this.showHistory();
+        if (this.menu.setMode) this.menu.setMode('initial');
+        return false;
+    }
+
+    public onClickIcon = (op: string): void => {
+        if (op === 'icTs') this.showActiveModel();
+        if (op === 'icHTML') this.createOrShowModelHTML(true);
+    }
+
+
+    public menu: IMenu = {
+        title: 'L2 - widget1',
+        actions: {
+            opTheme: 'Editor - Themes',
+            opMonacoConfig: 'Editor - config',
+            opMonacoReset: 'Editor - reset',
+            opHistory: 'History',
+        },
+        icons: {
+            icTs: 'Typescript;f121',
+            icHTML: 'HTML;f1c9'
+        },
+        actionDefault: '', // call after close icon clicked
+        iconDefault: 'icTs',
+        setMode: undefined, // child will set this
+        updateTitle: undefined, // child will set this
+        getLastMode: undefined, // child will set this
+        lastIcon: undefined, // child will set this
+        setIconActive: undefined, // child will set this
+        onClickLink: this.onClickLink,
+        onClickIcon: this.onClickIcon
+    }
+
+    createRenderRoot() {
+        return this;
+    }
+
+    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+        if (visible && reinit) {
+
+        }
+
+        if (!reinit) {
+            if (el && typeof el.layout === 'function') el.layout();
+        }
+    }
+
+    public last: mls.IActual | undefined = undefined;
+    private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
+    private mConfEditor: monaco.editor.ITextModel | undefined;
+    get confE() { return `l${this.level}_${this.position}`; }
+    private confE2(positionToolbar: string) { return `l${this.level}_${positionToolbar}`; }
+    get confETS() { return this.confE + '_TS'; }
+    get confEJS() { return this.confE + '_JS'; }
+
+
+    private showHistory() {
+        this.showHistorie2();
+        return true;
+    }
+
+    private async showHistorie2() {
+
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const div = document.createElement('div');
+        const scr = document.createElement('script');
+        const i2 = `/_${'100554'}_${'mlsHistoryList'}`;
+        scr.type = 'module';
+        scr.id = i2.replace('/', '');
+        scr.src = i2;
+        div.appendChild(scr);
+
+        const ds = mls.l3.getDSInstance(100554, 0);
+        if (ds) {
+            await ds.init();
+            ds.components.getCSS('_100554_mlsHistoryList').then((css) => {
+                const style = document.createElement('style');
+                style.textContent = css;
+                div.appendChild(style);
+            });
+        }
+
+        const obj = {
+            icTs: '.ts',
+            icHTML: '.html',
+        };
+
+        const wc = document.createElement('mls-history-list-100554');
+        wc.setAttribute('project', project.toString());
+        wc.setAttribute('shortName', shortName);
+        wc.setAttribute('level', '2');
+        wc.setAttribute('extension', obj[this.menu.lastIcon as 'icTs' | 'icHTML']);
+        wc.setAttribute('position', this.position);
+        div.appendChild(wc);
+        if (this.menu.setMode) this.menu.setMode('page', div);
+    }
+
+    private showPageTheme(): boolean {
+        if (this.menu.setMode) this.menu.setMode('page', this.getGlobalPageSetTHeme());
+        return true;
+    }
+
+    private showMonacoReset(): boolean {
+        // reset editor configurations 
+
+        mls.editor.conf[this.confE] = '';
+        this.loadMonacoConfigurations();
+        if (this.menu.setMode) this.menu.setMode('initial');
+        this.updateMonacoConfigutarions();
+        this.saveConfEditorToLocalStorage();
+        return true;
+    }
+
+    private showConfEditor(): boolean {
+        if (this.menu.setMode) this.menu.setMode('editor');
+        this.setModelConfEditor();
+        return true;
+    }
+
+    private static projectsLoaded: number[] = [];
+
+    private async readAllProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true): Promise<void> {
+        // load all typescripts dependencies of project , except shortName
+        if (ServiceSource100554.projectsLoaded.includes(project)) return;
+        if (mls.istrace) console.log('loading files from project ' + project);
+        ServiceSource100554.projectsLoaded.push(project);
+        const promises: Promise<mls.l2.editor.IMFile>[] = [];
+        const keys: string[] = Object.keys(mls.stor.files);
+        for (const key of keys) {
+            const storFile = mls.stor.files[key];
+            if (storFile.project === project
+                && storFile.level === 2
+                && storFile.extension === '.ts'
+                && storFile.shortName !== shortName) {
+                promises.push(this.createModelTS2(storFile, false, false));
+            }
+        }
+        await Promise.all(promises);
+        if (needCompile) await mls.l2.editor.compileAllProjectIfNeed(project, true);
+    }
+
+    private async deleteFile(storFile: mls.stor.IFileInfo) {
+        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+        const activeModel = mls.l2.editor.editors[this.confE];
+        if (activeModel.project === storFile.project && activeModel.shortName === storFile.shortName) await this.createModelTS_testFile(); // show test file
+        mls.l2.editor.remove(storFile);
+        this.removeEventsModelTS(storFile);
+        const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
+        delete mls.stor.files[keyFiles];
+    }
+
+    private async afterUpdate(storFile: mls.stor.IFileInfo) {
+        const mmodel: mls.l2.editor.IMFile | undefined = mls.l2.editor.get(storFile);
+        if (!mmodel) return;
+        if (storFile.status === 'deleted') {
+            this.deleteFile(storFile);
+            return;
+        }
+        if (storFile.status === 'renamed') {
+            mmodel.originalProject = undefined;
+            mmodel.originalShortName = undefined;
+            mmodel.originalCRC = mls.common.crc.crc32(mmodel.model.getValue()).toString(16);
+        }
+        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+        storFile.status = 'nochange';
+    }
+
+    private addEventsModelTS(storFile: mls.stor.IFileInfo, model1: mls.l2.editor.IMFile): void {
+        storFile.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdate(storFile);
+        storFile.getValueInfo = () => this.getValueInfo(model1);
+        model1.model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelChange(e, model1, storFile));
+    }
+
+    private removeEventsModelTS(storFile: mls.stor.IFileInfo): void {
+        storFile.onAction = undefined;
+        storFile.getValueInfo = undefined;
+    }
+
+    private _onChangedContent: number | undefined = undefined;
+
+    private onModelChange = (e: monaco.editor.IModelContentChangedEvent, activeModel: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo): void => {
+        // some changes is to simulate changes to force compile
+        clearTimeout(this._onChangedContent);
+        this._onChangedContent = window.setTimeout(async () => {
+            await this.updateModelStatus(activeModel, true);
+            const ignoreChanges = (e.changes.length === 1 && e.changes[0].range.startLineNumber === 1 && e.changes[0].range.endLineNumber === 1 && e.changes[0].range.endColumn <= 2);
+            if (ignoreChanges) return;
+            let position: 'left' | 'right';
+            if (mls.l2.editor.editors[this.confE2('left')]?.model.id === activeModel.model.id) {
+                position = 'left';
+            } else {
+                position = 'right';
+            }
+            mls.events.fireFileAction('changed', storFile, position);
+        }, 400);
+    };
+
+    private getValueInfo = async (activeModel: mls.l2.editor.IMFile): Promise<mls.stor.IFileInfoValue> => {
+        const rc: mls.stor.IFileInfoValue = {
+            content: activeModel.model.getValue(),
+            contentType: 'string',
+            originalShortName: activeModel.originalShortName,
+            originalProject: activeModel.originalProject,
+            originalCRC: activeModel.originalCRC
+        };
+        return rc;
+    }
+
+    private onMonacoEvents(ev: mls.events.IEvent): void {
+        if (!ev.desc) return;
+        const args: mls.events.IMonacoAction = JSON.parse(ev.desc);
+        if (!args) return;
+        const { action, filePosition, position, project, shortName } = args;
+        if (position !== this.position) return;
+        if (action === 'gotoPosition') {
+            this.goToPosition(filePosition, position);
+        }
+        if (mls.istrace) console.info('received monaco actions', args);
+    }
+
+    private goToPosition(position: number, editorPosition: 'left' | 'right') {
+        const confInvert = `l${this.level}_${editorPosition === 'left' ? 'right' : 'left'}`;
+        const offset = position - 1;
+        const { lineNumber, column } = mls.l2.editor.editors[confInvert].model.getPositionAt(offset);
+        if (this._ed1) this._ed1.revealPositionInCenter({ lineNumber, column }, monaco.editor.ScrollType.Immediate);
+        const lineLength = mls.l2.editor.editors[confInvert].model.getLineContent(lineNumber).length + 1;
+        const range = new monaco.Range(lineNumber, column, lineNumber, lineLength);
+        if (this._ed1) this._ed1.setSelection(new monaco.Selection(range.startLineNumber, 0, range.startLineNumber, lineLength));
+    }
+
+    private onProjectLoadedEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
+        if (ev.level !== this.level) return;
+        if (!ev.desc) return;
+
+        try {
+            const projectLoadedInfo = JSON.parse(ev.desc) as mls.events.IProjectLoaded;
+            await this.readAllProjectTypescriptAndCompile(projectLoadedInfo.project, '', projectLoadedInfo.needCompile);
+        } catch (e) {
+            console.error('Error on serviceSource_onProjectLoadedEvents: ', e);
+        }
+    }
+
+    private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
+
+        if (ev.level !== this.level || (ev.type !== 'FileAction')) return;
+        if (!ev.desc) return;
+        const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
+        if (fileAction.position !== this.position) return;
+        let keyFiles: string; // set on getStorFile 
+        let keyFilesHTML: string; // set on getStorFile 
+        const getStorFile = (): mls.stor.IFileInfo => {
+            keyFiles = mls.stor.getKeyToFiles(fileAction.project, fileAction.level, fileAction.shortName, fileAction.folder, fileAction.extension);
+            const storFile = mls.stor.files[keyFiles];
+            if (!storFile) throw new Error('Error on open, mls.stor.files dont exists, key:' + keyFiles);
+            return storFile;
+        };
+
+        const getStorFileHTML = (): mls.stor.IFileInfo | undefined => {
+            keyFilesHTML = mls.stor.getKeyToFiles(fileAction.project, fileAction.level, fileAction.shortName, fileAction.folder, '.html');
+            return mls.stor.files[keyFilesHTML];
+        };
+
+        const onNew = async (): Promise<void> => {
+            this.activeThisService();
+            const newTSSource = fileAction.newTSSource
+                || `/// <mls shortName="${fileAction.newshortName}" project="${fileAction.newProject}" enhancement="${fileAction.newEnhancement}" />
+				\n// typescript new file\n`;
+            await this.createModelTS1(fileAction.newshortName as string, fileAction.newProject as number,
+                newTSSource, true);
+            this.showActiveModel();
+        };
+
+        const onOpen = async (): Promise<void> => {
+            await this.createModelTS_loading();
+            this.activeThisService();
+            const storFile = getStorFile();
+            const fileModel = mls.l2.editor.get(storFile); // { project: fileAction.project, shortName: fileAction.shortName });
+            if (!fileModel) {
+                await this.readAllProjectTypescriptAndCompile(storFile.project, storFile.shortName);
+                await this.createModelTS2(storFile, true, true);
+            } else {
+                mls.l2.editor.editors[this.confE] = fileModel;
+                // if (!fileModel.compilerResults || fileModel.compilerResults.modelNeedCompile) 
+                mls.l2.editor.forceModelUpdate(fileModel.model);
+            }
+            await this.createOrShowModelHTML(false);
+            this.showActiveModel();
+        };
+
+        const onDelete = async (): Promise<void> => {
+            const storFile = getStorFile();
+            const storFileHTML: mls.stor.IFileInfo | undefined = getStorFileHTML();
+
+            if (storFile.status === 'new') {
+                this.deleteFile(storFile);
+            } else storFile.status = 'deleted';
+
+            if (storFileHTML) {
+                if (storFileHTML.status === 'new') {
+                    this.deleteFile(storFileHTML);
+                } else storFileHTML.status = 'deleted';
+            }
+
+            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+        };
+
+        const onUndo = async (): Promise<void> => {
+            const storFile = getStorFile();
+            const storFileHTML: mls.stor.IFileInfo | undefined = getStorFileHTML();
+
+            if (storFile.status === 'deleted') {
+                storFile.status = 'changed';
+                if (storFileHTML) storFileHTML.status = 'changed';
+                mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+                return;
+            }
+
+            if (storFile.status === 'renamed') {
+                throw new Error('not implemented');
+            }
+
+            // clear memory changes and localstor changes
+            const imFile = mls.l2.editor.editors[this.confE];
+            if (imFile.project === storFile.project && imFile.shortName === storFile.shortName) await this.createModelTS_testFile(); // show test file
+            mls.l2.editor.remove(storFile);
+            this.removeEventsModelTS(storFile);
+            await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+            if (storFile.status === 'new') {
+                delete mls.stor.files[keyFiles];
+                mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+                return;
+            }
+            if (storFile.status === 'changed') {
+                storFile.status = 'nochange';
+                if (storFile.isLocalVersionOutdated && storFile.newVersionRefIfOutdated) {
+                    storFile.versionRef = storFile.newVersionRefIfOutdated;
+                    storFile.isLocalVersionOutdated = false;
+                    storFile.newVersionRefIfOutdated = undefined;
+                }
+            } else {
+                storFile.status = 'changed';
+            }
+            await this.createModelTS2(storFile, false, true);
+            await this.undoHTMLFile(storFileHTML, keyFilesHTML);
+            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+        };
+
+        const onRename = async (): Promise<void> => {
+            const storFile = getStorFile();
+            const storFileHTML = getStorFileHTML();
+
+            await this.createModelTS_loading();
+            this.activeThisService();
+            let model1 = mls.l2.editor.get(storFile);
+            if (!model1) model1 = await this.createModelTS2(storFile, false, true);
+            this.renameTSFile(model1, storFile, fileAction.newProject as number, fileAction.newshortName as string);
+
+            mls.l2.editor.editors[this.confE] = model1;
+
+            this.renameHTMLFile(storFileHTML, fileAction.newProject as number, fileAction.newshortName as string);
+            this.showActiveModel();
+            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+        };
+
+        const onClone = async (): Promise<void> => {
+            const storFile = getStorFile();
+            await this.createModelTS_loading();
+            this.activeThisService();
+            await this.createModelTS_clone(storFile, fileAction.newProject as number, fileAction.newshortName as string);
+            this.showActiveModel();
+        };
+
+        if (mls.istrace) console.time('onAction_' + fileAction.action + '_' + fileAction.position);
+        // if (fileAction.action !== 'preLoadProject') await this.initMonaco(false); // init if needed
+        await this.initMonaco(); // init if needed
+        switch (fileAction.action) {
+            case 'new': await onNew(); break;
+            case 'open': await onOpen(); break;
+            case 'delete': await onDelete(); break;
+            case 'undo': await onUndo(); break;
+            case 'rename': await onRename(); break;
+            case 'clone': await onClone(); break;
+            default: {
+                // console.error('invalid action: ' + fileAction.action);
+            }
+        }
+        if (mls.istrace) console.timeEnd('onAction_' + fileAction.action + '_' + fileAction.position);
+    }
+
+    private activeThisService(): void {
+
+        if (!this.serviceItemNav) return;
+        this.serviceItemNav.setAttribute('mode', 'A');
+        this.serviceItemNav.click();
+        mls.editor.setActiveInstance(this.level as number, this.position);
+    }
+
+    private async updateModelStatus(model1: mls.l2.editor.IMFile, changed: boolean): Promise<void> {
+        if (model1.project === 0) changed = true; // always in localstorage
+        model1.changed = changed;
+
+        const cr: mls.l2.editor.ICompilerResult = await mls.l2.editor.getCompilerResultTS({ project: model1.project, shortName: model1.shortName }, true);
+        let hasError = cr.errors.length > 0;
+        model1.error = hasError;
+        const key = mls.stor.getKeyToFiles(model1.project, this.level, model1.shortName, '', model1.extension);
+        const storFile: mls.stor.IFileInfo = mls.stor.files[key];
+        const d = { project: model1.project, shortName: model1.shortName, level: this.level, position: this.position };
+        // mls.events.fire(2, 'TSSourceChanged', JSON.stringify(d));
+        if (!hasError) {
+            const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementInstance(model1).catch((e) => undefined);
+            if (enhancementInstance) await enhancementInstance.onAfterChange(model1);
+            hasError = storFile.hasError;
+        }
+        await this.changeStatusFile(model1, storFile, cr.tripleSlashMLS?.variables, hasError);
+    }
+
+    private async changeStatusFile(model1: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, variables: mls.common.tripleslash.ITripleSlashVariables, hasError: boolean): Promise<void> {
+        if (!storFile) return; // new file dont have storFile ???
+        const oldStatus = storFile.status;
+        storFile.hasError = hasError;
+        const sameContent: boolean = model1.originalCRC === mls.common.crc.crc32(model1.model.getValue()).toString(16);
+        if (sameContent) {
+            if (storFile.status !== 'new') storFile.status = 'nochange';
+            await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
+        } else {
+            if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
+            await mls.stor.localStor.setContent(storFile, await this.getValueInfo(model1));
+        }
+        if (oldStatus !== storFile.status) {
+            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+        }
+    }
+
+    private renameTSFile(model1: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): void {
+        if (storFile.hasError) throw new Error('Error on rename, clear errors before rename');
+        if (!this.isNewNameValid(newShortName)) throw new Error('Error on rename, new shortName is a invalid name');
+        const newSts: mls.l2.editor.IPath = { shortName: newShortName, project: newProject };
+        if (!mls.l2.editor.rename(model1, newSts)) throw new Error('Error on rename mls.l2.editor.mfiles');
+        if (!mls.stor.renameFile(storFile, newSts)) throw new Error('Error on rename mls.stor.files');
+        mls.common.tripleslash.changeVariable(model1, 'shortName', newShortName);
+        mls.common.tripleslash.changeVariable(model1, 'project', newProject.toString());
+        if (storFile.status === 'new') return;
+        storFile.status = 'renamed'; // poderia ficar na funÁ„o 
+        // setTimeout(() => {
+        // 	storFile.status = 'renamed';
+        // }, 600); // after change editor, status change to 'changed'
+    }
+
+    private isNewNameValid(newShortName: string): boolean {
+        if (newShortName.length === 0 || newShortName.length > 255) return false;
+        const invalidCharacters = /[_\/{}\t\[\]\*$@#=\-+!|?,<>=.;^~∫∞""''``·‡‚„ÈËÍÌÔÛÙıˆ˙ÁÒ¡¿¬√…»Õœ”‘’÷⁄«—]/;
+        return (!invalidCharacters.test(newShortName));
+    }
+
+    private showActiveModel(): boolean {
+        const activeModel = mls.l2.editor.editors[this.confE];
+        if (!this._ed1 || !activeModel || !this.menu.getLastMode) return false;
+        const changedFile: boolean = this.menu.title !== activeModel.shortName;
+        this.menu.title = activeModel.shortName;
+        const lastMode = this.menu.getLastMode();
+        if (changedFile && lastMode !== 'initial') {
+            // user choice another file, goto initial editor
+            this._ed1.setModel(activeModel.model);
+            if (this.menu.setMode) this.menu.setMode('initial');
+        } else if (lastMode === 'initial') {
+            this._ed1.setModel(activeModel.model);
+            if (this.menu.updateTitle) this.menu.updateTitle();
+        } else if (lastMode === 'editor') {
+            // dont change model , ex TS Config
+        } else if (lastMode === 'page') {
+            // in page, ex About, prepare model to after close hamburger
+            this._ed1.setModel(activeModel.model);
+        }
+        return true;
+    }
+
+    private async initMonaco() {
+        if (!this._ed1) {
+            await this.initMonaco_Editor();
+            if (this.serviceContent) this.serviceContent.layout(); // resize
+        }
+    }
+
+    private monacoGlobalInitialized = false;
+    private async initMonaco_GlobalEditor(): Promise<void> {
+
+        this.loadMonacoConfigurations();
+
+        if (this.monacoGlobalInitialized) return;
+        this.monacoGlobalInitialized = true;
+        this.loadMonacoThemeFromLocalStorage();
+        this.updateMonacoGlobalTheme();
+        mls.editor.InitMonaco();
+
+    }
+
+    private loadMonacoConfigurations() {
+        if (!mls.editor.conf || Object.keys(mls.editor.conf).length === 0) {
+            this.loadConfEditorFromLocalStorage();
+        }
+        if (mls.editor.conf[this.confE]) return;
+        mls.editor.conf[this.confE] = {
+            contextmenu: true,
+            autoIndent: 'full',
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            tabCompletion: 'on',
+            renderControlCharacters: false,
+            showUnused: true,
+            glyphMargin: true,
+            // acceptSuggestionOnEnter: "off",  // "on", "smart" -> ex: "dd" , invalid work will be get for next suggestion, bad
+            minimap: { enabled: false },
+            useTabStops: true,
+            scrollBeyondLastColumn: 2,
+            scrollBeyondLastLine: false,
+            formatOnType: true,
+            fixedOverflowWidgets: true,
+            codeLens: true,
+            showFoldingControls: 'mouseover',
+            suggestSelection: 'first',
+            stickyScroll: { enabled: false, maxLineCount: 3 },
+            stickyTabStops: true,
+            fontSize: 20,
+            automaticLayout: true,
+        } as monaco.editor.IEditorOptions;
+    }
+
+    private getUri(shortFN: string, ftype: '.ts' | '.d.ts' | '.html'): monaco.Uri {
+        return monaco.Uri.parse(`file://server/${shortFN}${ftype}`);
+    }
+
+    private async createModelTS_testFile() {
+        const shortName = 'testFile';
+        const project = 0; // localstorage project
+        const defaultTS = `/// <mls shortName="${shortName}" project="${project}" enhancement="config_ts_web-component" />\n// typescript example`;
+        await this.createModelTS1(shortName, project, defaultTS, true);
+    }
+
+    onFirtModel = true;
+    private async createModelTS_loading() {
+        const shortName = 'loading...';
+        const project = 0; // localstorage project
+        const defaultTS = 'wait...';
+        const mfile = await this.createModelTS1(shortName, project, defaultTS, true);
+        if (this.onFirtModel) {
+            this.onFirtModel = false;
+            if (this._ed1) this._ed1.setModel(mfile.model);
+        }
+        // await mls.l2.editor.getCompilerResultTS(mfile, true);
+    }
+
+    private async createModelTS_clone(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string) {
+        let model1 = mls.l2.editor.get(storFile);
+        if (!model1) model1 = await this.createModelTS2(storFile, false, true);
+        const defaultTS = model1.model.getValue();
+        model1 = await this.createModelTS1(newShortName, newProject, defaultTS, true);
+        mls.common.tripleslash.changeVariable(model1, 'shortName', newShortName);
+        mls.common.tripleslash.changeVariable(model1, 'project', newProject.toString());
+    }
+
+    private async createModelTS1(shortName: string, project: number, defaultTS: string, activateModel: boolean): Promise<mls.l2.editor.IMFile> {
+        // create new file or load project 0 file
+        const level = 2;
+        const extension = '.ts';
+        if (project > 1) await mls.stor.server.loadProjectInfoIfNeeded(project);
+        const key = mls.stor.getKeyToFiles(project, level, shortName, '', extension);
+        let storFile = mls.stor.files[key];
+        if (storFile && project !== 0) throw new Error('Error on createModelTS1, model already exists: ' + key);
+        if (!storFile) {
+            storFile = await mls.stor.addOrUpdateFile({ project, level, shortName, extension, versionRef: new Date().toISOString(), folder: '' });
+            storFile.status = 'new';
+        }
+        let model1 = mls.l2.editor.get({ project, shortName });
+        if (!model1) {
+            const src: string = storFile ? (await storFile.getContent(defaultTS)) as string || defaultTS : defaultTS;
+            const ftype = src.split("\n")[0].indexOf(' type="definition"') > 0 ? ".d.ts" : ".ts";
+            const uri = this.getUri(`_${project}_${shortName}`, ftype);
+            model1 = mls.l2.editor.get({ project, shortName });
+            if (model1) return model1; // created in another instance
+            const model = monaco.editor.createModel(src, 'typescript', uri);
+            model1 = {
+                changed: true,
+                error: false,
+                project,
+                shortName,
+                extension,
+                model,
+                storFile,
+                codeLens: [],
+            };
+            mls.l2.editor.add(model1);
+            this.addEventsModelTS(storFile, model1);
+        }
+        await this.updateModelStatus(model1, false); // first compilation
+        if (activateModel) mls.l2.editor.editors[this.confE] = model1;
+        return model1;
+    }
+
+    private async createModelTS2(storFile: mls.stor.IFileInfo, activedModel: boolean, compile: boolean): Promise<mls.l2.editor.IMFile> {
+        // load source from repository
+        const { project, shortName, extension } = storFile;
+        let model1 = mls.l2.editor.get({ project, shortName });
+        if (model1) return model1;
+        const info: mls.stor.IFileInfoValue | null = storFile.getValueInfo ? await storFile.getValueInfo() : null;
+        const haveInfo: boolean | null = info && !!info.content;
+
+        const src: string | Blob | null | undefined = haveInfo ? info?.content : await storFile.getContent();
+        if (src instanceof Blob) throw new Error('ts file must be string');
+        const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src as string).toString(16);
+        const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
+        const originalShortName: string | undefined = haveInfo ? info?.originalShortName : undefined;
+        const ftype = (src as string).split("\n")[0].indexOf(' type="definition"') > 0 ? ".d.ts" : ".ts";
+        const uri = this.getUri(`_${project}_${shortName}`, ftype);
+        const model = monaco.editor.createModel(src as string, 'typescript', uri);
+        model1 = {
+            changed: false, // not changed in this section, but storFile.changed is about all sections
+            error: false,
+            project,
+            shortName,
+            extension,
+            model,
+            storFile,
+            originalCRC,
+            originalProject,
+            originalShortName,
+            codeLens: [],
+        };
+        mls.l2.editor.add(model1);
+        this.addEventsModelTS(storFile, model1);
+        if (compile) {
+            await this.updateModelStatus(model1, false);
+        }
+        if (activedModel) {
+            mls.l2.editor.editors[this.confE] = model1;
+        }
+        return model1;
+    }
+
+    private setModelConfEditor() {
+        const src = this.getConfEditorToTypescript();
+        (this.mConfEditor as any)['mlsConf'] = 'confEditor';
+        if (!this.mConfEditor) return;
+        this.mConfEditor.setValue(src);
+        if (this._ed1) this._ed1.setModel(this.mConfEditor);
+    }
+
+    private async createModelConf(src: string) {
+        if (mls.istrace) console.log(`ServiceSource, createModelConf_${this.position}, ${!!this.mConfEditor}`);
+        if (this.mConfEditor) return;
+        const shortName = this.confE + '_service_source.confEditor';
+        const level = 2;
+        const project = 0;
+        const extension = '.ts';
+        const storFile = await mls.stor.addOrUpdateFile({ project, level, shortName, extension, versionRef: new Date().toISOString(), folder: '' });
+        const uri = this.getUri(shortName, extension);
+        this.mConfEditor = monaco.editor.createModel(src, 'typescript', uri);
+        mls.l2.editor.add({
+            changed: false,
+            error: false,
+            model: this.mConfEditor,
+            storFile,
+            project: 0,
+            shortName,
+            extension,
+            codeLens: [],
+        });
+        this.mConfEditor.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => {
+            if (!this.mConfEditor) return;
+            const mode = (this.mConfEditor as any)['mlsConf'];
+            if (!mode) return;
+
+            src = this.mConfEditor.getValue();
+            this.compileSrcEditor(mode, src);
+        });
+    }
+
+    timeout_compileConfEditor = 0;
+    private compileSrcEditor(mode: 'confEditor', src: string) {
+        // wait 500ms to get diagnostics
+        clearTimeout(this.timeout_compileConfEditor);
+        this.timeout_compileConfEditor = window.setTimeout(async () => {
+            if (!this.mConfEditor) return;
+            const mmodel = mls.l2.editor.find(this.mConfEditor.id);
+            // console.info(`js compiled, model id=${this.mConfEditor.id}, model found=${!!mmodel}`);
+            if (!mmodel) return; // not in model
+            const rcc = await mls.l2.editor.getCompilerResultTS(mmodel, true);
+            if (rcc.errors.length !== 0 || !rcc.prodJS) return;
+            if (mode === 'confEditor') this.setConfEditorFromJavascript(rcc.prodJS, src);
+        }, 500);
+    }
+
+    private loadConfEditorFromLocalStorage() {
+        const json: string | null = localStorage.getItem('mlsConfEditor');
+        if (json) {
+            mls.editor.loadConfFromJSON(json);
+        }
+    }
+
+    private saveConfEditorToLocalStorage() {
+        localStorage.setItem('mlsConfEditor', JSON.stringify(mls.editor.conf));
+    }
+
+    private loadMonacoThemeFromLocalStorage(): void {
+        if (!mls.editor.themeName) mls.editor.setThemeName(localStorage.getItem('mlsConfTheme'));
+    }
+
+    private saveMonacoGlobalThemeToLS(): void {
+        localStorage.setItem('mlsConfTheme', mls.editor.themeName);
+    }
+
+    private getConfEditorToTypescript(): string {
+        return `/// <mls shortName="config_monaco_editor" project="0" enhancement="config_config" />
+		
+mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE], null, 2) + ';\n';
+    }
+
+    private setConfEditorFromJavascript(javastr: string, src: string): void {
+        if (this.level < 1) return;
+        const that = this;
+        (function scope() {
+            eval(javastr); // eslint-disable-line no-eval
+            if (mls.editor.conf[that.confE] && typeof mls.editor.conf[that.confE] === 'object') {
+                // mls.editor.loadConf(that.confETS, src);
+                that.updateMonacoConfigutarions();
+                that.saveConfEditorToLocalStorage();
+            }
+        }).call(this); // eval in context scopeDesenv https://stackoverflow.com/questions/8403108/calling-eval-in-particular-context
+    }
+
+    private async updateMonacoConfigutarions(): Promise<void> {
+        if (this._ed1) this._ed1.updateOptions(mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
+    }
+
+    private updateMonacoGlobalTheme(): boolean {
+        let rc = true;
+        if (mls.istrace) console.log(`service source, updating monaco theme: ${this.position}`);
+        const internalThemes = ['VS', 'VS Dark', 'High Contrast (Dark)'];
+        const internalThemes2 = ['vs', 'vs-dark', 'hc-black', 'hc-light'];
+        let name2: string = ''; // name to use , internal name or mytheme
+        try {
+            const internalIndex = internalThemes.indexOf(mls.editor.themeName);
+            if (internalIndex < 0) {
+                // load and define theme
+                name2 = 'mytheme';
+                const path = (mls as any)['baseMonaco'] + '../themes/' + mls.editor.themeName + '.json';
+                mls.api.get(path, {}, (data: string) => {
+                    const json = JSON.parse(data);
+                    monaco.editor.defineTheme(name2, json);
+                    monaco.editor.setTheme(name2);
+                });
+            } else {
+                name2 = internalThemes2[internalIndex];
+                monaco.editor.setTheme(name2);
+            }
+        } catch (ex) {
+            console.error('error on set theme ' + name2, ex);
+            rc = false;
+        }
+        return rc;
+    }
+
+    private getGlobalPageSetTHeme(): HTMLDivElement {
+        const div1 = document.createElement('div');
+        div1.innerHTML = `<div>` // eslint-disable-line
+            + `<p id='theme-actual'>Theme actual: ${mls.editor.themeName} </p><br>`
+            + `<p>Set Theme (only 1 theme in all editors)</p>` // eslint-disable-line
+            // eslint-disable-next-line
+            + `<select class="hidden" id="theme-select" style="display: initial;"><option>select ...</option><option value="vs">VS</option><option value="vs-dark">VS Dark</option><option value="hc-black">High Contrast (Dark)</option><option value="active4d">Active4D</option><option value="all-hallows-eve">All Hallows Eve</option><option value="amy">Amy</option><option value="birds-of-paradise">Birds of Paradise</option><option value="blackboard">Blackboard</option><option value="brilliance-black">Brilliance Black</option><option value="brilliance-dull">Brilliance Dull</option><option value="chrome-devtools">Chrome DevTools</option><option value="clouds-midnight">Clouds Midnight</option><option value="clouds">Clouds</option><option value="cobalt">Cobalt</option><option value="cobalt2">Cobalt2</option><option value="dawn">Dawn</option><option value="dracula">Dracula</option><option value="dreamweaver">Dreamweaver</option><option value="eiffel">Eiffel</option><option value="espresso-libre">Espresso Libre</option><option value="github">GitHub</option><option value="idle">IDLE</option><option value="katzenmilch">Katzenmilch</option><option value="kuroir-theme">Kuroir Theme</option><option value="lazy">LAZY</option><option value="magicwb--amiga-">MagicWB (Amiga)</option><option value="merbivore-soft">Merbivore Soft</option><option value="merbivore">Merbivore</option><option value="monokai-bright">Monokai Bright</option><option value="monokai">Monokai</option><option value="night-owl">Night Owl</option><option value="oceanic-next">Oceanic Next</option><option value="pastels-on-dark">Pastels on Dark</option><option value="slush-and-poppies">Slush and Poppies</option><option value="solarized-dark">Solarized-dark</option><option value="solarized-light">Solarized-light</option><option value="spacecadet">SpaceCadet</option><option value="sunburst">Sunburst</option><option value="textmate--mac-classic-">Textmate (Mac Classic)</option><option value="tomorrow-night-blue">Tomorrow-Night-Blue</option><option value="tomorrow-night-bright">Tomorrow-Night-Bright</option><option value="tomorrow-night-eighties">Tomorrow-Night-Eighties</option><option value="tomorrow-night">Tomorrow-Night</option><option value="tomorrow">Tomorrow</option><option value="twilight">Twilight</option><option value="upstream-sunburst">Upstream Sunburst</option><option value="vibrant-ink">Vibrant Ink</option><option value="xcode-default">Xcode_default</option><option value="zenburnesque">Zenburnesque</option><option value="iplastic">iPlastic</option><option value="idlefingers">idleFingers</option><option value="krtheme">krTheme</option><option value="monoindustrial">monoindustrial</option></select>`;
+        const sel = div1.querySelector('#theme-select') as HTMLSelectElement;
+        if (!sel) return div1;
+        sel.oninput = (ev: any) => {
+            if (ev?.srcElement?.localName === 'select') {
+                const el = (ev.srcElement as HTMLSelectElement);
+                const actual = div1.querySelector('#theme-actual');
+                if (el.selectedIndex < 1) return; // option 0 is select ...
+                mls.editor.setThemeName(el.options?.[el.selectedIndex].text || 'default');
+                this.saveMonacoGlobalThemeToLS();
+                this.updateMonacoGlobalTheme();
+                if (actual) actual.innerHTML = `Theme changed to: ${mls.editor.themeName}`;
+            }
+        };
+        return div1;
+    }
+
+    private async createOrShowModelHTML(open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
+
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const uri = this.getUri(`_${project}_${shortName}`, '.html');
+        let model = monaco.editor.getModel(uri);
+
+        const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', '.html');
+        let storFileHTML = mls.stor.files[key];
+        if (!storFileHTML) {
+            await this.createHTMLFile(project, shortName, `<h1>_${project}_${shortName}</h1>`);
+            storFileHTML = mls.stor.files[key];
+        }
+
+        if (!model) model = await this.getOrCreateModelHTML(shortName, project, storFileHTML, fileInfo);
+        let src: string | Blob | null | undefined;
+
+        const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
+        const haveInfo: boolean | null = info && !!info.content;
+        src = haveInfo ? info?.content : await storFileHTML.getContent();
+        const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src as string).toString(16);
+        (model as any)['originalCRC'] = originalCRC;
+
+        if (src instanceof Blob) throw new Error('html file must be string');
+
+        if (src) model.setValue(src);
+        if (open && this._ed1) this._ed1.setModel(model);
+        return storFileHTML;
+    }
+
+    private async createHTMLFile(project: number, shortName: string, content: string) {
+        const params = {
+            project,
+            level: 2,
+            shortName,
+            extension: '.html',
+            versionRef: '0',
+            folder: ''
+        };
+        const file = await mls.stor.addOrUpdateFile(params);
+        file.status = 'new';
+        const fileInfo: mls.stor.IFileInfoValue = {
+            content,
+            contentType: 'string',
+        };
+        await mls.stor.localStor.setContent(file, fileInfo);
+    }
+
+    private async getOrCreateModelHTML(shortName: string, project: number, storFileHTML: mls.stor.IFileInfo, fileInfo?: mls.stor.IFileInfoValue): Promise<monaco.editor.ITextModel> {
+
+        const uri = this.getUri(`_${project}_${shortName}`, '.html');
+        let model = monaco.editor.getModel(uri);
+        if (model) return model;
+        const content = fileInfo ? fileInfo.content : await storFileHTML.getContent();
+        model = monaco.editor.createModel(content as string, 'html', uri);
+        (model as any)['position'] = this.position;
+        (storFileHTML as any)['originalCRC'] = mls.common.crc.crc32(model.getValue()).toString(16);
+        if (storFileHTML.status === 'renamed' && fileInfo) {
+            this.setEventsModelHTML(model, storFileHTML, fileInfo.originalShortName as string, fileInfo.originalProject as number);
+            model.setValue(fileInfo.content as string);
+        } else {
+            this.setEventsModelHTML(model, storFileHTML, storFileHTML.shortName, storFileHTML.project);
+        }
+        return model;
+    }
+
+    private setEventsModelHTML(model: monaco.editor.ITextModel, storFileHTML: mls.stor.IFileInfo, shortName: string, project: number): void {
+        storFileHTML.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdateHTML(storFileHTML, model);
+        storFileHTML.getValueInfo = () => this.getValueInfoHTML(
+            model,
+            shortName,
+            project,
+            (storFileHTML as any)['originalCRC']
+        );
+
+        if (model) model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelHTMLChange(e, storFileHTML, model));
+    }
+
+    private _onChangedContentHTML: number | undefined = undefined;
+
+    private onModelHTMLChange = (e: monaco.editor.IModelContentChangedEvent, storFileHTML: mls.stor.IFileInfo, model: monaco.editor.ITextModel): void => {
+        // some changes is to simulate changes to force compile
+        clearTimeout(this._onChangedContentHTML);
+        this._onChangedContentHTML = window.setTimeout(async () => {
+
+            const sameContent: boolean = (storFileHTML as any)['originalCRC'] === mls.common.crc.crc32(model.getValue()).toString(16);
+            if (sameContent) {
+                if (storFileHTML.status !== 'new' && storFileHTML.status !== 'renamed') storFileHTML.status = 'nochange';
+                if (storFileHTML.status !== 'renamed') await mls.stor.localStor.setContent(storFileHTML, { content: null }); // clear localstorage
+            } else {
+                if (storFileHTML.status !== 'renamed' && (storFileHTML.status !== 'new')) storFileHTML.status = 'changed';
+                await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: model.getValue() });
+            }
+            mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, (model as any)['position']);
+        }, 400);
+    };
+
+    private async renameHTMLFile(storFileHTML: mls.stor.IFileInfo | undefined, newProject: number, newShortName: string) {
+
+        if (!storFileHTML) return;
+        const newSts: mls.l2.editor.IPath = { shortName: newShortName, project: newProject };
+        await this.getOrCreateModelHTML(storFileHTML.shortName, storFileHTML.project, storFileHTML);
+        const valueInfo = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : undefined;
+        const { status } = storFileHTML;
+        if (!mls.stor.renameFile(storFileHTML, newSts)) throw new Error('Error on rename mls.stor.files');
+        const key = mls.stor.getKeyToFiles(newProject, this.level as number, newShortName, '', '.html');
+        const newStorFileHTML = mls.stor.files[key];
+        newStorFileHTML.status = 'renamed';
+        await mls.stor.localStor.setContent(newStorFileHTML, valueInfo);
+        setTimeout(async () => {
+            const file = await this.createOrShowModelHTML(false, valueInfo);
+            if (status === 'new') file.status = status;
+        }, 500);
+
+    }
+
+    private async undoHTMLFile(storFileHTML: mls.stor.IFileInfo | undefined, keyFiles: string) {
+
+        if (!storFileHTML) return;
+        await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: null });
+        const uri = this.getUri(`_${storFileHTML.project}_${storFileHTML.shortName}`, '.html');
+        const model = monaco.editor.getModel(uri);
+        if (model) model.dispose();
+
+        if (storFileHTML.status === 'new') {
+            delete mls.stor.files[keyFiles];
+            return;
+        }
+        if (storFileHTML.status === 'changed') {
+            storFileHTML.status = 'nochange';
+            if (storFileHTML.isLocalVersionOutdated && storFileHTML.newVersionRefIfOutdated) {
+                storFileHTML.versionRef = storFileHTML.newVersionRefIfOutdated;
+                storFileHTML.isLocalVersionOutdated = false;
+                storFileHTML.newVersionRefIfOutdated = undefined;
+            }
+        } else {
+            storFileHTML.status = 'changed';
+        }
+    }
+
+    private getValueInfoHTML = async (activeModel: monaco.editor.ITextModel, originalShortName: string, originalProject: number, originalCRC: string): Promise<mls.stor.IFileInfoValue> => {
+        const rc: mls.stor.IFileInfoValue = {
+            content: activeModel.getValue(),
+            contentType: 'string',
+            originalShortName,
+            originalProject,
+            originalCRC
+        };
+        return rc;
+    }
+
+    private async afterUpdateHTML(storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel) {
+
+        if (storFile.status === 'deleted') {
+            await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+            const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
+            delete mls.stor.files[keyFiles];
+            return;
+        }
+        if (storFile.status === 'renamed') {
+            (storFile as any)['originalCRC'] = mls.common.crc.crc32(model.getValue()).toString(16);
+        }
+        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+        storFile.status = 'nochange';
+    }
+    @query('mls-editor-100529')
+    c2: HTMLElement | undefined = undefined
+
+    public render() {
+        return html`<mls-editor-100529 ismls2="true"></mls-editor-100529>`
+    }
+
+    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
+        super.firstUpdated(changedProperties);
+        await this.initMonaco_Editor();
+    }
+
+    async initMonaco_Editor() {
+        const addEventsEditor = () => {
+            if (!this._ed1) return;
+            this._ed1.onDidFocusEditorWidget(() => {
+                if (this.menu.lastIcon === 'icHTML') return;
+                mls.editor.setActiveInstance(this.level, this.position);
+            });
+        };
+
+        this._ed1 = monaco.editor.create(this.c2 as HTMLElement, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
+        (this.c2 as any)['mlsEditor'] = this._ed1;
+        mls.editor.instances[this.confE] = this._ed1;
+        mls.editor.InitEditor(this._ed1);
+        addEventsEditor();
+
+        this.createModelTS_loading();
+        this.createModelConf('// loading ...'); // model 
+        await this.createModelTS_testFile();
+    }
+
+
+}
