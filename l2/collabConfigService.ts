@@ -68,7 +68,7 @@ export class CollabConfig100554 extends LitElement {
                 `
                 : html``
             }
-            <div style="fonst-size:90%; display: flex; justify-content: center; align-items: center;">
+            <div style="font-size:90%; display: flex; justify-content: center; align-items: center; padding-right: 0.5rem;">
                 <span style="margin-right:5px">Position:</span>
                 ${this.positionToolbar === 'left' ?
             html`<input type="radio" value="left" id="leftradioopt" name="radioOpt" checked 
