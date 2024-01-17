@@ -53,7 +53,8 @@ export class ServiceSave extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean) {
 
         if (visible && reinit) {
-
+            this.updateList();
+        } else if (visible && !reinit) {
             this.updateList();
         }
     }
