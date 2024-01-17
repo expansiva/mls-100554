@@ -95,7 +95,7 @@ export class ServiceListFiles extends ServiceBase {
 
 		});
         
-        mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
+        mls.events.addEventListener([2, 5], ['FileAction'], this.onMLSEvents.bind(this));
         
     }
 
