@@ -4,7 +4,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IService } from './_100554_serviceBase';
 
-@customElement('collab-config-service-100554')
+@customElement('collab-config-service-100554') 
 export class CollabConfig100554 extends LitElement {
 
     @property({ type: String }) currentScenario: 'list' | 'add' = 'list';
@@ -53,14 +53,7 @@ export class CollabConfig100554 extends LitElement {
         return html`
         
         <div class="header">
-            <div style="font-size:90%">
-                <span>Position:</span>
-                <input type="radio" value="left" id="leftradioopt" name="radioOpt" checked 
-                @click="${this.onclickPositionLeft}" />
-                <label for="leftradioopt">left</label>
-                <input type="radio" value="right" id="rightradioopt" name="radioOpt" @click="${this.onclickPositionRight}"/>
-                <label for="rightradioopt">right</label>
-            </div>
+            
             ${this.currentScenario === 'list' ?
                 html`
                     <button @click="${this.goToScenaryAdd}">Add Service</button>
@@ -75,6 +68,22 @@ export class CollabConfig100554 extends LitElement {
                 `
                 : html``
             }
+            <div style="fonst-size:90%; display: flex; justify-content: center; align-items: center;">
+                <span style="margin-right:5px">Position:</span>
+                ${this.positionToolbar === 'left' ?
+            html`<input type="radio" value="left" id="leftradioopt" name="radioOpt" checked 
+                @click="${this.onclickPositionLeft}" />
+                <label for="leftradioopt" style="margin-right:5px">left</label>
+                <input type="radio" value="right" id="rightradioopt" name="radioOpt" @click="${this.onclickPositionRight}"/>
+                <label for="rightradioopt">right</label>` :
+            html`<input type="radio" value="left" id="leftradioopt" name="radioOpt"  
+                @click="${this.onclickPositionLeft}" />
+                <label for="leftradioopt" style="margin-right:5px">left</label>
+                <input type="radio" value="right" id="rightradioopt" name="radioOpt" @click="${this.onclickPositionRight}" checked/>
+                <label for="rightradioopt">right</label>`
+                }
+                
+            </div>
         </div>
         `
     }
