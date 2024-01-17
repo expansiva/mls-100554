@@ -76,7 +76,9 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private preview() {
-
+        const doc = document.createElement('service-preview-view-100554');
+        if (this.menu.setMode) this.menu.setMode('page', doc);
+        return true;
     }
 
     // -------------- EVENTS -------------------
