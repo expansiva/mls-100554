@@ -74,12 +74,13 @@ export class ServiceSource100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (visible && reinit) {
-
+            if (this.menu.setIconActive) this.menu.setIconActive('icTs');
+            if (el) el.layout();
         }
 
-        if (!reinit) {
-            if (el && typeof el.layout === 'function') el.layout();
-        }
+        // if (!reinit) {
+        //     if (el && typeof el.layout === 'function') el.layout();
+        // }
     }
 
     public last: mls.IActual | undefined = undefined;
