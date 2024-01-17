@@ -1,6 +1,6 @@
 /// <mls shortName="collabConfigService" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IService } from './_100554_serviceBase';
 
@@ -103,24 +103,28 @@ export class CollabConfig100554 extends LitElement {
     private renderListAddServices() {
         return html`
         <ul class="listView">
-            ${this.avaliableServices.map((service, index) => {
-            return html`
-                <li>
-                    <div class="groupInfos" style="justify-content:start;">
-                        <div>#${index + 1}</div>
-                        <div>
-                            <span class="fa" .innerHTML="${service.icon}"></span> 
-                            ${service.name}
-                        </div>
-                    </div>
-                    <div class="groupInfos" style="justify-content:end;">
-                        <div>
-                            <a myIndex="${index}" @click="${this.activeService}">Active</a>
-                        </div>
-                    </div>
-                </li>
-                `
-        })}
+            ${repeat(
+                this.avaliableServices,
+                ((item: IService) => item.name) as any,
+                ((service: IService, index: any) => {
+                    return html`
+                        <li>
+                            <div class="groupInfos" style="justify-content:start;">
+                                <div>#${index + 1}</div>
+                                <div>
+                                    <span class="fa" .innerHTML="${service.icon}"></span> 
+                                    ${service.name}
+                                </div>
+                            </div>
+                            <div class="groupInfos" style="justify-content:end;">
+                                <div>
+                                    <a myIndex="${index}" @click="${this.activeService}">Active</a>
+                                </div>
+                            </div>
+                        </li>
+                    `
+                }) as any
+            )}    
         </ul>
         `
 
@@ -130,38 +134,42 @@ export class CollabConfig100554 extends LitElement {
 
         return html`
         <ul class="listView">
-            ${this.userServices.map((service, index) => {
-            return html`
-                <li>
-                    <div class="groupInfos" style="justify-content:start;">
-                        <div>#${index + 1}</div>
-                        <div>
-                            <span class="fa" .innerHTML="${service.icon}"></span> 
-                            ${service.name}
+            ${repeat(
+                this.userServices,
+                ((item: IService) => item.name) as any,
+                ((service: IService, index: any) => {
+                    return html`
+                    <li>
+                        <div class="groupInfos" style="justify-content:start;">
+                            <div>#${index + 1}</div>
+                            <div>
+                                <span class="fa" .innerHTML="${service.icon}"></span> 
+                                ${service.name}
+                            </div>
                         </div>
-                    </div>
-                    <div class="groupInfos" style="justify-content:end;display:flex; gap:1rem;">
-                        <div style="display: flex; justify-content: center; align-items: center;">
-                            <span class="fa" style="cursor:pointer" @click="${this.openHiddenConfigs}">&#xf142</span>
-                            <span class="groupHidden" style="display:none">
-                                <a myIndex="${index}" @click="${this.desactiveService}">Desactivate</a>
-                                <span style="margin: 0px 1rem">|</span>
-                                <label>Style</label>
-                                <select  myIndex="${index}" @change="${this.changeClassName}"> 
-                                <option value="" ?selected="${service && !['separator-left', 'separator-right'].includes(service.className as any)}"></option>
-                                <option value="separator-left" ?selected="${service.className === 'separator-left'}">separator-left</option>
-                                <option value="separator-right" ?selected="${service.className === 'separator-right'}">separator-right</option>
-                                </select>
-                            </span>
+                        <div class="groupInfos" style="justify-content:end;display:flex; gap:1rem;">
+                            <div style="display: flex; justify-content: center; align-items: center;">
+                                <span class="fa" style="cursor:pointer" @click="${this.openHiddenConfigs}">&#xf142</span>
+                                <span class="groupHidden" style="display:none">
+                                    <a myIndex="${index}" @click="${this.desactiveService}">Desactivate</a>
+                                    <span style="margin: 0px 1rem">|</span>
+                                    <label>Style</label>
+                                    <select  myIndex="${index}" @change="${this.changeClassName}"> 
+                                    <option value="" ?selected="${service && !['separator-left', 'separator-right'].includes(service.className as any)}"></option>
+                                    <option value="separator-left" ?selected="${service.className === 'separator-left'}">separator-left</option>
+                                    <option value="separator-right" ?selected="${service.className === 'separator-right'}">separator-right</option>
+                                    </select>
+                                </span>
+                            </div>
+                            <div>
+                                <span class="fa" style="cursor:pointer" move="up" myIndex="${index}" @click="${this.moveElement}">&#xf176</span>
+                                <span class="fa" style="cursor:pointer" move="down" myIndex="${index}" @click="${this.moveElement}">&#xf175</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="fa" style="cursor:pointer" move="up" myIndex="${index}" @click="${this.moveElement}">&#xf176</span>
-                            <span class="fa" style="cursor:pointer" move="down" myIndex="${index}" @click="${this.moveElement}">&#xf175</span>
-                        </div>
-                    </div>
-                </li>
-                `
-        })}
+                    </li>
+                    `
+                }) as any
+            )}
         </ul>
         `
 
