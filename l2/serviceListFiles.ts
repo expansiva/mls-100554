@@ -14,7 +14,7 @@ import { initServiceListFilesAdd } from './_100554_serviceListFilesAdd';
 @customElement('service-list-files-100554')
 export class ServiceListFiles extends ServiceBase {
 
-    @property() mode: string = 'list'; 
+    @property() mode: string = 'list';
 
     @property() project: number = 1;
 
@@ -90,31 +90,45 @@ export class ServiceListFiles extends ServiceBase {
         mls.events.addEventListener([2, 5], ['ProjectSelected'], (ev) => {
 
             if (this.project === mls.actual[5].project) return;
-			this.init();
+            this.init();
 
-		});
-        
+        });
+
+        mls.events.addListener(5, 'FileAction', (ev) => {
+
+            if ((ev.type !== 'FileAction')) return;
+
+            if (this.visible === undefined || this.visible === null || (this.visible && this.visible === 'false')) return;
+
+            const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
+
+            if (!['projectListChanged'].includes(fileAction.action)) return;
+
+            this.init();
+
+        });
+
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
-        
+
     }
 
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
-        if (this.visible === undefined || this.visible === null || (this.visible && this.visible === 'false') ) return;
-        
+        if (this.visible === undefined || this.visible === null || (this.visible && this.visible === 'false')) return;
+
         if (ev.level !== +(this.level as any) || (ev.type !== 'FileAction')) return;
-        
+
         const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
-        
+
         if (
             fileAction.position !== this.position ||
             !['statusOrErrorChanged', 'projectListChanged'].includes(fileAction.action) ||
             fileAction.project === 0
         ) return;
 
-		this.getFiles();
+        this.init();
 
-	}
+    }
 
 
     // -------------  WEBCOMPONENT -------------
@@ -140,7 +154,7 @@ export class ServiceListFiles extends ServiceBase {
         } else {
 
             return html`${this.renderAdd()}`
-            
+
         }
 
     }
@@ -521,7 +535,7 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     private async clickRadioProject0(e: MouseEvent) {
-        
+
         this.info.tot = 0;
         this.info.version = 0;
         this.info.storage = 0;
