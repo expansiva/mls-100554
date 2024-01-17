@@ -313,7 +313,7 @@ export class ServiceListFiles extends ServiceBase {
                         <span class="mls-gpbtnslider-item fa fa-trash" title="${this.myMsg.delete}" @click="${this.clickOptDel}"></span>
                     </div>
                     <span class="${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
-                    <div .innerHTML="${auxStorage + auxBug + auxVersion}"></div>
+                    <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion}"></div>
                 </div>
             </li>
         `;
