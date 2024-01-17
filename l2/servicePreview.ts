@@ -22,7 +22,7 @@ export class ServicePreview100554 extends ServiceBase {
         super();
         initServicePreviewView;
         this.setEvents();
-        console.info('passou')
+        console.info('inicializou os eventos')
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
