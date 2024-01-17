@@ -171,8 +171,8 @@ export class CollabConfig100554 extends LitElement {
     private setInfos() {
 
         this.infos.toolbar = this.closest('mls-container-split-100529') as HTMLElement;
-        if (!this.infos.toolbar) return;
-        let level = this.infos.toolbar.getAttribute('level');
+        if (!this.infos.toolbar || !(this.infos.toolbar as any).leftPanel || !(this.infos.toolbar as any).leftPanel.level) return;
+        let level = (this.infos.toolbar as any).leftPanel.level;
         this.actualLevel = level ? +level : -1;
 
     }
