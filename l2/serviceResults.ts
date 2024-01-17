@@ -1,15 +1,19 @@
 /// <mls shortName="serviceResults" project="100554" enhancement="_100554_enhancementLit" groupName="services" />
 
-import { html} from 'lit';
+import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { getDepedencesByMFile } from './_100554_libCompile';
+import { initCodelensCustomElement } from './_100554_codelensCustomElement';
+import { initCodelensComponentDetails } from './_100554_codelensComponentDetails';
 
 @customElement('service-results-100554')
 export class ServiceResults extends ServiceBase {
 
     constructor() {
         super();
+        initCodelensCustomElement();
+        initCodelensComponentDetails();
         this.editorModelName = `serviceresults_${this.position}.js`;
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
@@ -294,8 +298,6 @@ export class ServiceResults extends ServiceBase {
     }
 
     private showProdJS2(): boolean {
-
-        console.info(this.results)
         if (this.hasError) {
             this.setModelLanguage(this.resultsLanguages.errors, this.results.errors);
             return true;
@@ -310,8 +312,6 @@ export class ServiceResults extends ServiceBase {
     }
 
     private showTsConfig(): boolean {
-        console.info(this.results)
-
         if (this.menu.setMode) this.menu.setMode('editor');
         this.actualResultMode = 'configTS';
         this.setModelLanguage(this.resultsLanguages.configTS, this.results.configTS);
@@ -362,11 +362,11 @@ export class ServiceResults extends ServiceBase {
 
         const div1 = document.createElement('div');
         div1.style.padding = '2rem';
-        const divDoc = document.createElement('mls-load-page-l4-100529');
+
         if (this.assistantArgs && this.assistantArgs.codeLenCommand) {
-            divDoc.setAttribute('path', this.assistantArgs.codeLenCommand.refs as string);
+            const el = document.createElement(this.assistantArgs.codeLenCommand.refs)
+            div1.appendChild(el)
         }
-        div1.appendChild(divDoc);
         if (this.menu.setMode) this.menu.setMode('page', div1);
         return true;
     }
@@ -448,18 +448,18 @@ export class ServiceResults extends ServiceBase {
 
 
     private openReferenceMode() {
-        if(this.menu.setMenuActive) this.menu.setMenuActive('opReferences');
+        if (this.menu.setMenuActive) this.menu.setMenuActive('opReferences');
         this.isReferenceOpen = false;
     }
 
     private openHelpAssistantMode() {
-        if(this.menu.setMenuActive) this.menu.setMenuActive('opAssistant');
+        if (this.menu.setMenuActive) this.menu.setMenuActive('opAssistant');
         this.isHelpAssistant = false;
     }
 
     render() {
         return html`
-            <mls-editor-100529></mls-editor-100529>
+            <mls-editor-100529 ismls2="true"></mls-editor-100529>
         `
     }
 }

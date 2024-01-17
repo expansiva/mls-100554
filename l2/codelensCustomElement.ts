@@ -3,6 +3,10 @@
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+export function initCodelensCustomElement() {
+    return true;
+}
+
 @customElement('codelens-custom-element-100554')
 export class CodeLensCustomElement100554 extends LitElement {
 

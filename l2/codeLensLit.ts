@@ -29,7 +29,7 @@ function setCodeLensDecoratorClass(model: monaco.editor.ITextModel, decorators: 
         if (!decoratorInfo || decoratorInfo.type !== 'ClassDeclaration') return;
         decoratorInfo.decorators.forEach((_decorator) => {
             if (_decorator.text.startsWith('customElement(')) {
-                mls.l2.codeLens.addCodeLen(model, _decorator.line + 1, { id: 'helpAssistant', title: `customElement`, jsComm: '', refs: '_100529_codelens_customElement' });
+                mls.l2.codeLens.addCodeLen(model, _decorator.line + 1, { id: 'helpAssistant', title: `customElement`, jsComm: '', refs: 'codelens-custom-element-100554' });
             }
         })
     })
@@ -48,7 +48,7 @@ async function setCodeLensMlsComponents(model: monaco.editor.ITextModel, mfile: 
     lines.forEach((line) => {
 
         errorInfo.line = line;
-        mls.l2.codeLens.addCodeLen(model, line, { id: 'helpAssistant', title: `mlsComponentDetails`, jsComm: '', refs: '_100529_codelens_mlsComponentDetails' });
+        mls.l2.codeLens.addCodeLen(model, line, { id: 'helpAssistant', title: `mlsComponentDetails`, jsComm: '', refs: 'codelens-component-details-100554' });
     });
 
     const mModule = await mls.l2.enhancement.getEnhancementInstance(mfile);
