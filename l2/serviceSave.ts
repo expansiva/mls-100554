@@ -542,6 +542,7 @@ export class ServiceSave extends ServiceBase {
 
                 await this.onSavenew(array, msg);
                 await this.setInfos();
+                this.fireEvents();
                 this.showLoader(false);
 
             } catch (e: any) {
@@ -617,6 +618,20 @@ export class ServiceSave extends ServiceBase {
         mls.l2.editor.remove(storFile);
         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
         delete mls.stor.files[keyFiles];
+
+    }
+
+    private fireEvents(): void {
+
+        const params = {} as mls.events.IFileAction;
+
+        params.action = 'projectListChanged';
+        params.level = 5;
+        params.project = mls.actual[5].project as number;
+        params.position = this.position as ('right' | 'left');
+
+        mls.events.fire([2,3,4], ['FileAction'], JSON.stringify(params), 0);
+
 
     }
 
