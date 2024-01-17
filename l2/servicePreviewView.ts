@@ -3,8 +3,9 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+export const initServicePreviewView = '';
 @customElement('service-preview-view-100554')
-export class SimpleGreeting extends LitElement {
+export class ServicePreviewView extends LitElement {
     static styles = css`p { color: red }`;
 
     @property()
