@@ -15,9 +15,11 @@ export abstract class ServiceBase extends LitElement {
     @property({ type: String })
     visible = 'false';
 
-    @state() loading = false;
+    @state() loading: boolean = false;
 
     get serviceContent() { return this.getParent(); }
+
+    get serviceItemNav() { return this.getServiceItemNav(); }
 
     abstract details: IService;
 
@@ -45,8 +47,11 @@ export abstract class ServiceBase extends LitElement {
         }
     }
 
-    toogleBadge(show: boolean, serviceName: string) {
+    setError(error:string): void {
+        this.serviceContent?.setAttribute('error', error);
+    }
 
+    toogleBadge(show: boolean, serviceName: string) {
         const mlsNav2 = this.getMlsNav2();
         if (!mlsNav2) {
             console.error('Function toogleBadge: mls-nav-2 dont exist');
@@ -63,6 +68,16 @@ export abstract class ServiceBase extends LitElement {
     private getParent() {
         const parentToolbarContent = this.closest('mls-toolbar-content-service-100529') as IToolbarContent | null;
         return parentToolbarContent;
+    }
+
+    private getServiceItemNav(): IMlsNav2Item | null {
+        const toolbar = this.getMlsNav2();
+        if (!toolbar) return null;
+        const parent = this.parentElement;
+        if (!parent) return null;
+        const path = parent.getAttribute('path');
+        const item = toolbar.querySelector(`mls-toolbar-item-100529[path="${path}"]`) as IMlsNav2Item;
+        return item;
     }
 
 }
@@ -94,7 +109,6 @@ export interface IMenu {
     onClickIcon?: IClickIconCallBack,
     setMode?: ISetMode,
     setIconActive?: (op: string) => void,
-    setMenuActive?: (op: string) => void
     getLastMode?: IGetLastMode,
     lastIcon?: string,
     updateTitle?: Function,
@@ -106,6 +120,10 @@ export interface IToolbarContent extends HTMLElement {
 
 export interface IMlsNav2 extends HTMLElement {
     toogleBadge: (show: boolean, serviceName: string) => void
+}
+
+export interface IMlsNav2Item extends HTMLElement {
+
 }
 
 export interface IService {
