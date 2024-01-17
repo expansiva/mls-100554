@@ -94,6 +94,7 @@ export interface IMenu {
     onClickIcon?: IClickIconCallBack,
     setMode?: ISetMode,
     setIconActive?: (op: string) => void,
+    setMenuActive?: (op: string) => void
     getLastMode?: IGetLastMode,
     lastIcon?: string,
     updateTitle?: Function,
