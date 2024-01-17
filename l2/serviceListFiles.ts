@@ -104,7 +104,6 @@ export class ServiceListFiles extends ServiceBase {
 
             if (!['projectListChanged'].includes(fileAction.action)) return;
 
-            console.info('disparou lado:' + this.position);
             this.init();
 
         });
