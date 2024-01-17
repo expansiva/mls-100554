@@ -66,7 +66,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
             </div>
             <div class="grpButtonServiceListNewFile">
                 <button class="btnCancelServiceListNewFile" @click="${this.clickCancel}">${this.myMsg.cancel}</button>
-                <button class="btnAddServiceListNewFile">${this.myMsg.add}</button>
+                <button class="btnAddServiceListNewFile" @click="${this.add}">${this.myMsg.add}</button>
             </div>
         </sectionListAddDef>
         `
