@@ -176,7 +176,7 @@ export class ServiceSave extends ServiceBase {
         return html`
         <li>
             <div>
-                <span class="fatv fa-caret-righttv" @click="${this.openMe}"></span>
+                <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
                 <input type="checkbox" id="l0-${index}" @click="${this.clickSetValueAllChilds}">
                 <label for="l0-${index}">${project}</label>
             </div>
@@ -209,7 +209,7 @@ export class ServiceSave extends ServiceBase {
         return html`
         <li>
             <div>
-                <span class="fatv fa-caret-righttv" @click="${this.openMe}"></span>
+                <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
                 <input type="checkbox" id="l0-${project}-${index}" @click="${this.clickSetValueAllChilds}">
                 <label for="l0-${project}-${index}">l${level}</label>
             </div>
@@ -221,7 +221,7 @@ export class ServiceSave extends ServiceBase {
             return html`
                         <li>
                             <div>
-                                <span class="fatv fa-caret-righttv" @click="${this.openMe}"></span>
+                                <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
                                 <input type="checkbox" id="l0-${project}-${index}-${index3}" @click="${this.clickSetValueAllChilds}">
                                 <label for="l0-${project}-${index}-${index3}">${key}</label>
                             </div>
@@ -250,7 +250,7 @@ export class ServiceSave extends ServiceBase {
         return html`
         <li>
             <div>
-                <span class="fatv fa-caret-righttv" @click="${this.openMe}"></span>
+                <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
                 <input type="checkbox" id="l0-${project}-${index}" @click="${this.clickSetValueAllChilds}">
                 <label for="l0-${project}-${index}">l${level}</label>
             </div>
@@ -394,7 +394,7 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private openMe(e: MouseEvent) {
+    private openMeList(e: MouseEvent) {
 
         e.stopPropagation();
         const el = e.target as HTMLElement;
