@@ -61,6 +61,7 @@ export class ServicePreview100554 extends ServiceBase {
         iconDefault: 'icPreview',
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
+		onClickIcon: this.onClickIcon
     }
 
     private showInitial(): boolean {
