@@ -1,14 +1,8 @@
 /// <mls shortName="serviceResults" project="100554" enhancement="_100554_enhancementLit" groupName="services" />
 
-/**
- * @mlsComponentDetails {"webComponentDependencies": ["mls-toolbar-service-100554"]}
- */
-
-
 import { html} from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent } from './_100554_serviceBase';
-import { IMenu, initToolbar } from './_100554_mlsToolbarService';
+import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { getDepedencesByMFile } from './_100554_libCompile';
 
 @customElement('service-results-100554')
@@ -16,7 +10,6 @@ export class ServiceResults extends ServiceBase {
 
     constructor() {
         super();
-        initToolbar();
         this.editorModelName = `serviceresults_${this.position}.js`;
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
@@ -39,7 +32,6 @@ export class ServiceResults extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (op === 'opAbout') return this.showAbout();
         if (op === 'opProdJS') return this.showProdJS();
         if (op === 'opProdJS2') return this.showProdJS3();
         if (op === 'opTSConfig') return this.showTsConfig();
@@ -56,7 +48,6 @@ export class ServiceResults extends ServiceBase {
     public menu: IMenu = {
         title: 'Production - Javascript',
         actions: {
-            opAbout: 'About',
             opProdJS: 'Production - Javascript',
             opTSConfig: 'Typescript Config',
             opTSLibs: 'Typescript Libs',
@@ -130,21 +121,12 @@ export class ServiceResults extends ServiceBase {
     get confInvert() { return `l${this.level}_${this.position === 'left' ? 'right' : 'left'}`; }
 
     private results: Results = {
-        delay: 0,
         devDoc: '',
         devJS: '',
         devTS: '',
         errors: '',
-        imports: [],
-        modelNeedCompile: false,
-        modelVersion: 0,
-        prodDTS: '',
         prodJS: '',
-        prodMap: '',
-        trace: [],
-        tripleSlashMLS: undefined,
         references: [],
-        decorators: '',
         configTS: '',
         libTS: '',
         jsonImport: '',
@@ -168,11 +150,7 @@ export class ServiceResults extends ServiceBase {
     }
 
     private isServiceVisible(): boolean {
-        const container = this.closest('mls-toolbar-content-100529') as HTMLElement;
-        if (!container) return false;
-        const serviceName = container.getAttribute('servicename');
-        if (serviceName !== this.constructor.name) return false;
-        return true;
+        return this.visible === 'true';
     }
 
     private createEditor(): void {
@@ -282,10 +260,8 @@ export class ServiceResults extends ServiceBase {
 
         } else if (params.action === 'fileReference') {
             await this.getCompileResults(shortName, project);
-            const itemService = this.getMyToolbarItem();
             this.isReferenceOpen = true;
-            if (!itemService) return;
-            itemService.click();
+            this.openMe();
         }
 
     }
@@ -300,40 +276,15 @@ export class ServiceResults extends ServiceBase {
         if (action === 'helpAssistant' as any) {
             this.actualResultMode = 'assistant';
             this.assistantArgs = args;
-            const itemService = this.getMyToolbarItem();
             this.isHelpAssistant = true;
-            if (!itemService) return;
-            itemService.click();
+            this.openMe();
         }
-    }
-
-    private getMyToolbarItem(): HTMLElement | undefined {
-
-        const toolbar = this.closest('mls-toolbar-100529');
-        if (!toolbar) return undefined;
-        const parent = this.parentElement;
-        if (!parent) return;
-        const path = parent.getAttribute('path');
-        const item = toolbar.querySelector(`mls-toolbar-item-100529[path="${path}"]`) as HTMLElement;
-        return item;
     }
 
     private async getReferences(shortName: string, project: number): Promise<mls.l2.editor.IMFile[]> {
         await mls.l2.editor.compileAllProjectIfNeed(project);
         const refs: mls.l2.editor.IMFile[] = mls.l2.editor.listAllAffectedFiles(project, shortName);
         return refs;
-    }
-
-    private showAbout(): boolean {
-        const div1 = document.createElement('div');
-        div1.innerHTML = '<h1>About this Service</h1>'
-            + '<h2>Service Name: _100529_service_results</h2>'
-            + '<hr>'
-            + '<a target="_blank" href="https://multilevelstudio.com/#/l2/_100529_service_results"> Widget Source https://multilevelstudio.com/#/l2/_100529_service_results </a>'
-            + '<hr>'
-            + '<br>';
-        if (this.menu.setMode) this.menu.setMode('page', div1);
-        return true;
     }
 
     private showProdJS(): boolean {
@@ -497,43 +448,30 @@ export class ServiceResults extends ServiceBase {
 
 
     private openReferenceMode() {
-        const toolbarService = this.querySelector('mls-toolbar-service-100529');
-        if (!toolbarService) return;
-        const checkbox = toolbarService.querySelector('.menu-btn') as HTMLInputElement;
-        checkbox.checked = true;
-        if (checkbox.onchange) checkbox.onchange(new Event('change'));
-        this.onClickLink('opReferences');
+        if(this.menu.setMenuActive) this.menu.setMenuActive('opReferences');
         this.isReferenceOpen = false;
     }
 
     private openHelpAssistantMode() {
-        this.openMenuItem('opAssistant');
+        if(this.menu.setMenuActive) this.menu.setMenuActive('opAssistant');
         this.isHelpAssistant = false;
-    }
-
-    private openMenuItem(op: string) {
-        const toolbarService = this.querySelector('mls-toolbar-service-100529');
-        if (!toolbarService) return;
-        const checkbox = toolbarService.querySelector('.menu-btn') as HTMLInputElement;
-        checkbox.checked = true;
-        if (checkbox.onchange) checkbox.onchange(new Event('change'));
-
-        this.onClickLink(op);
     }
 
     render() {
         return html`
-            <mls-toolbar-service-100554 .mlsService=${this}  widget="service-results-100554"></mls-toolbar-service-100554>
             <mls-editor-100529></mls-editor-100529>
         `
     }
 }
 
-type ResultMode = 'refs' | 'prodJS' | 'devTS' | 'devJS' | 'devDoc' | 'devDocPage' | 'configTS' | 'libTS' | 'errors' | 'assistant' | 'jsonImport'
+type ResultMode = 'refs' | 'prodJS' | 'devTS' | 'devJS' | 'devDoc' | 'devDocPage' | 'configTS' | 'libTS' | 'errors' | 'assistant' | 'jsonImport';
 
 type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R
 
-type Results = Modify<mls.l2.editor.ICompilerResult, {
+type Results = {
+    prodJS: string,
+    devJS: string,
+    devTS: string,
     errors: string;
     devDoc: string;
     libTS: string;
@@ -543,7 +481,7 @@ type Results = Modify<mls.l2.editor.ICompilerResult, {
     devDocPage?: string,
     assistant?: string,
     jsonImport: string,
-}>
+}
 
 type IResultNames = {
     prodJS: string,
