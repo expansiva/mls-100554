@@ -75,7 +75,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private preview() {
-
+        
     }
 
     // -------------- EVENTS -------------------
@@ -91,7 +91,7 @@ export class ServicePreview100554 extends ServiceBase {
     private async onMLSEvents(ev: mls.events.IEvent): Promise<void> {
 
         try {
-            debugger;
+
             if (ev.level !== +(this.level as any) || (ev.type !== 'FileAction')) return;
 
             const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
