@@ -7,7 +7,7 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 @customElement('service-save-100554')
 export class ServiceSave extends ServiceBase {
 
-    @property() itens: any = undefined;
+    @property() itens: any = undefined; 
 
     @property() error: string = '';
 
