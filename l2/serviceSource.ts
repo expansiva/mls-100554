@@ -6,14 +6,13 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
-
     constructor() {
         super();
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
         mls.events.addListener(2, 'ProjectLoaded', (ev) => this.onProjectLoadedEvents(ev));
-        this.initMonaco_GlobalEditor();
-        this.initMonaco();
+        // this.initMonaco_GlobalEditor();
+        // this.initMonaco();
 
     }
 
@@ -523,7 +522,6 @@ export class ServiceSource100554 extends ServiceBase {
     private async initMonaco_GlobalEditor(): Promise<void> {
 
         this.loadMonacoConfigurations();
-
         if (this.monacoGlobalInitialized) return;
         this.monacoGlobalInitialized = true;
         this.loadMonacoThemeFromLocalStorage();
@@ -984,16 +982,16 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
         storFile.status = 'nochange';
     }
-    @query('mls-editor-100529')
-    c2: HTMLElement | undefined = undefined
 
+    
     public render() {
-        return html`<mls-editor-100529 ismls2="true"></mls-editor-100529>`
+        return html`<mls-editor-100529 .mlsEditor=${this._ed1}  ismls2="true"></mls-editor-100529>`
     }
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         await this.initMonaco_Editor();
+        this.initMonaco_GlobalEditor();
     }
 
     async initMonaco_Editor() {
@@ -1005,8 +1003,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             });
         };
 
-        this._ed1 = monaco.editor.create(this.c2 as HTMLElement, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
-        (this.c2 as any)['mlsEditor'] = this._ed1;
+        this._ed1 = monaco.editor.create(this.querySelector('mls-editor-100529') as HTMLElement, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
         mls.editor.instances[this.confE] = this._ed1;
         mls.editor.InitEditor(this._ed1);
         addEventsEditor();
