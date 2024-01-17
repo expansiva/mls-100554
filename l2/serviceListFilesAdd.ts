@@ -27,7 +27,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
     }
 
     renderDefinition() {
-        console.info(this.arEnhacements);
+    
         return html`
         <sectionListAddDef>
             <div class="grpInputServiceListNewFile">
