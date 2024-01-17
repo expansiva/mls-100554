@@ -61,6 +61,7 @@ export class ServicePreview100554 extends ServiceBase {
         iconDefault: 'icPreview',
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
+        onClickIcon: this.onClickIcon
     }
 
     private showInitial(): boolean {
@@ -75,7 +76,10 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private preview() {
-        
+        const doc = document.createElement('service-preview-view-100554');
+        if (this.menu.setMode) this.menu.setMode('page', doc);
+        return true;
+    
     }
 
     // -------------- EVENTS -------------------
