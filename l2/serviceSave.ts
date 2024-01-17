@@ -11,8 +11,6 @@ export class ServiceSave extends ServiceBase {
 
     @property() error: string = ''; 
 
-    private infos: { toolbar: undefined | HTMLElement, father: undefined | HTMLElement } = {} as any;
-
     constructor() {
         super();
         this.setEvents();
@@ -63,10 +61,11 @@ export class ServiceSave extends ServiceBase {
     // -------------- EVENTS -------------------
 
     private setEvents() {
-
+        
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
+        this.verifyExitFileChanged();
             
     }
 
@@ -81,19 +80,13 @@ export class ServiceSave extends ServiceBase {
             this.init();
         }
 
-        if (!this.infos || !this.infos.father || !(this.infos.father as any).toogleBadge) return;
-
-        (this.infos.father as any).toogleBadge(true, '_100554_serviceSave');
+        this.toogleBadge(true, '_100554_serviceSave');
 
     }
 
     private isServiceVisible(): boolean {
 
-        const container = this.closest('mls-toolbar-content-100529') as HTMLElement;
-        if (!container) return false;
-        const serviceName = container.getAttribute('servicename');
-        if (serviceName !== '_100554_serviceSave') return false;
-        return true;
+        return this.visible === 'true';
 
     }
 
@@ -113,9 +106,7 @@ export class ServiceSave extends ServiceBase {
         });
 
         if (!exist) return;
-        if (!this.infos || !this.infos.father || !(this.infos.father as any).toogleBadge) return;
-
-        (this.infos.father as any).toogleBadge(true, '_100554_serviceSave');
+        this.toogleBadge(true, '_100554_serviceSave');
 
 
     }
@@ -297,8 +288,6 @@ export class ServiceSave extends ServiceBase {
 
     private async init() {
 
-        this.infos.toolbar = this.closest('mls-toolbar-content-service-100529') as HTMLElement;
-        this.infos.father = this.closest('mls-toolbar-100529') as HTMLElement;
         this.showLoader(true);
         this.updateMyMessages();
         await this.setInfos();
@@ -308,8 +297,7 @@ export class ServiceSave extends ServiceBase {
 
     private showLoader(loader: boolean): void {
 
-        if (!this.infos || !this.infos.toolbar) return;
-        this.infos.toolbar.setAttribute('loading', loader.toString());
+        this.loading = loader;
 
     }
 
