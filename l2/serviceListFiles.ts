@@ -100,13 +100,13 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
-
+        
         if (this.visible === undefined || this.visible === null || (this.visible && this.visible === 'false') ) return;
         
         if (ev.level !== +(this.level as any) || (ev.type !== 'FileAction')) return;
         
         const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
-        
+        console.info(this.position, fileAction.position)
         if (
             fileAction.position === this.position ||
             !['statusOrErrorChanged', 'projectListChanged'].includes(fileAction.action) ||
