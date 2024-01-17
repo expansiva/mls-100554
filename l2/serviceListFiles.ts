@@ -1,5 +1,10 @@
 /// <mls shortName="serviceListFiles" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+/**
+ * @mlsComponentDetails {
+ *  "webComponentDependencies": ["service-list-files-add-100554"]
+ * }
+ */ 
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -299,7 +304,7 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     renderAdd() {
-        return html`add`
+        return html`<service-list-files-add-100554 level="${this.level}" position="${this.position}" .father="${this}"></service-list-files-add-100554>`
     }
 
     //------------ EVENTOS -----------------

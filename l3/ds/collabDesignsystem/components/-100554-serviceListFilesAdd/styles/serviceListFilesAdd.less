@@ -28,17 +28,7 @@ service-list-files-add-100554 { //don't change this line
         border: 1px solid #dee2e6;
         border-radius: 5px;
     }
-    #iptSNameServiceListNewFileErro {
-        position: relative;
-        &:before {
-            content: var(--srcListMsgErroContent);
-            color: red;
-            width: 100px;
-            position: absolute;
-            top:-5px;
-            font-size: 12px;
-        }
-    }
+
     .grpInputServiceListNewFile {
         display: flex;
         flex-direction: column;
@@ -52,6 +42,12 @@ service-list-files-add-100554 { //don't change this line
             height: 25px;
             border: 1px solid #dee2e6;
             border-radius: 5px;
+        }
+        span{
+            color: red;
+            width: 100px;
+            top:-5px;
+            font-size: 12px;
         }
     }
     .grpButtonServiceListNewFile {
