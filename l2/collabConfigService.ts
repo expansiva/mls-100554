@@ -11,6 +11,8 @@ export class CollabConfig100554 extends LitElement {
 
     @property({ type: String }) error: string = '';
 
+    @property({ type: String }) positionToolbar: string = 'left';
+
     @property({ type: Number }) actualLevel: number = -1;
 
     @property({ type: Array }) userServices: IService[] = [];
@@ -50,7 +52,7 @@ export class CollabConfig100554 extends LitElement {
     private infos:{ toolbar: undefined | HTMLElement } = {} as any;
     private setInfos() {
 
-        this.infos.toolbar = this.closest('mls-toolbar-100529') as HTMLElement;
+        this.infos.toolbar = this.closest('mls-container-split-100529') as HTMLElement;
         if (!this.infos.toolbar) return;
         let level = this.infos.toolbar.getAttribute('level');
         this.actualLevel = level ? +level : -1;
@@ -398,7 +400,7 @@ export class CollabConfig100554 extends LitElement {
 			return [];
 		}
 
-        return (this.infos as any).toolbar['getAvaliableServices']() || [];
+        return (this.infos as any).toolbar['getAvaliableServices'](this.positionToolbar) || [];
 
     }
 
@@ -408,7 +410,7 @@ export class CollabConfig100554 extends LitElement {
 			return [];
 		}
 
-        return (this.infos as any).toolbar['getUserServices']() || [];
+        return (this.infos as any).toolbar['getUserServices'](this.positionToolbar) || [];
 
     }
 
@@ -418,7 +420,7 @@ export class CollabConfig100554 extends LitElement {
 
         if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['updateServices']) return;
         
-        (this.infos as any).toolbar['updateServices'](this.userServices);
+        (this.infos as any).toolbar['updateServices'](this.userServices, this.positionToolbar);
 
     }
 
@@ -426,16 +428,16 @@ export class CollabConfig100554 extends LitElement {
 
         if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['updateClassName']) return;
 
-		!(this.infos as any).toolbar['updateClassName'](index, cls);
+		!(this.infos as any).toolbar['updateClassName'](index, cls, this.positionToolbar);
 
 		
     }
 
     private fireAddService(index: number): void {
-console.info('a')
+
         if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['addService']) return;
 
-		!(this.infos as any).toolbar['addService'](this.userServices[index]);
+		!(this.infos as any).toolbar['addService'](this.userServices[index], this.positionToolbar);
 
 		
     }
@@ -444,7 +446,7 @@ console.info('a')
 
         if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['removeService']) return;
 
-		!(this.infos as any).toolbar['removeService'](index);
+		!(this.infos as any).toolbar['removeService'](index, this.positionToolbar);
 
 		
     }
@@ -453,7 +455,7 @@ console.info('a')
 
         if (!this.infos || !this.infos.toolbar || !(this.infos as any).toolbar['moveService']) return;
 
-		!(this.infos as any).toolbar['moveService'](indexOri, indexDest);
+		!(this.infos as any).toolbar['moveService'](indexOri, indexDest, this.positionToolbar);
 
 		
     }
