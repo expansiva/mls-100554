@@ -60,6 +60,11 @@ export abstract class ServiceBase extends LitElement {
         mlsNav2.toogleBadge(show, serviceName);
     }
 
+    openMe() {
+        const itemService = this.serviceItemNav;
+        if (itemService) itemService.click();
+    }
+
     private getMlsNav2(): IMlsNav2 | null {
         const mlsNav2 = this.closest('mls-toolbar-100529') as IMlsNav2 | null;
         return mlsNav2;
