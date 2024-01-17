@@ -372,7 +372,6 @@ export class ServiceSave extends ServiceBase {
 
             }
 
-            console.info(objProjects)
             if (Object.keys(objProjects).length > 0) {
                 this.itens = objProjects;
             }
@@ -533,7 +532,6 @@ export class ServiceSave extends ServiceBase {
 
         const txt = father.querySelector('textarea')
         const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
-        console.info(array);
         this.showLoader(true);
         const msg = txt ? txt.value : '';
 
