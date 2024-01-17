@@ -41,8 +41,23 @@ export abstract class ServiceBase extends LitElement {
         super.updated(changedProperties);
         if (changedProperties.has('loading')) {
             const loading = changedProperties.get('loading');
-            if(loading !== undefined) this.serviceContent?.setAttribute('loading', (!loading).toString());
+            if (loading !== undefined) this.serviceContent?.setAttribute('loading', (!loading).toString());
         }
+    }
+
+    toogleBadge(show: boolean, serviceName: string) {
+
+        const mlsNav2 = this.getMlsNav2();
+        if (!mlsNav2) {
+            console.error('Function toogleBadge: mls-nav-2 dont exist');
+            return;
+        }
+        mlsNav2.toogleBadge(show, serviceName);
+    }
+
+    private getMlsNav2(): IMlsNav2 | null {
+        const mlsNav2 = this.closest('mls-toolbar-100529') as IMlsNav2 | null;
+        return mlsNav2;
     }
 
     private getParent() {
@@ -86,6 +101,10 @@ export interface IMenu {
 
 export interface IToolbarContent extends HTMLElement {
     layout: Function
+}
+
+export interface IMlsNav2 extends HTMLElement {
+    toogleBadge: (show: boolean, serviceName: string) => void
 }
 
 export interface IService {
