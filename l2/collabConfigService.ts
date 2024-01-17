@@ -49,19 +49,18 @@ export class CollabConfig100554 extends LitElement {
         // remove loading
     }
 
-    private infos:{ toolbar: undefined | HTMLElement } = {} as any;
-    private setInfos() {
-
-        this.infos.toolbar = this.closest('mls-container-split-100529') as HTMLElement;
-        if (!this.infos.toolbar) return;
-        let level = this.infos.toolbar.getAttribute('level');
-        this.actualLevel = level ? +level : -1;
-
-    }
-
     private renderHeader() {
         return html`
+        
         <div class="header">
+            <div style="font-size:90%">
+                <span>Position:</span>
+                <input type="radio" value="left" id="leftradioopt" name="radioOpt" checked 
+                @click="${this.onclickPositionLeft}" />
+                <label for="leftradioopt">left</label>
+                <input type="radio" value="right" id="rightradioopt" name="radioOpt" @click="${this.onclickPositionRight}"/>
+                <label for="rightradioopt">right</label>
+            </div>
             ${this.currentScenario === 'list' ?
                 html`
                     <button @click="${this.goToScenaryAdd}">Add Service</button>
@@ -78,6 +77,18 @@ export class CollabConfig100554 extends LitElement {
             }
         </div>
         `
+    }
+
+    private onclickPositionLeft(): void {
+        this.positionToolbar = 'left';
+        this.getServices();
+
+    }
+
+    private onclickPositionRight(): void {
+        this.positionToolbar = 'right';
+        this.getServices();
+
     }
 
     private renderListAddServices() {
@@ -144,6 +155,16 @@ export class CollabConfig100554 extends LitElement {
         })}
         </ul>
         `
+
+    }
+
+    private infos:{ toolbar: undefined | HTMLElement } = {} as any;
+    private setInfos() {
+
+        this.infos.toolbar = this.closest('mls-container-split-100529') as HTMLElement;
+        if (!this.infos.toolbar) return;
+        let level = this.infos.toolbar.getAttribute('level');
+        this.actualLevel = level ? +level : -1;
 
     }
 

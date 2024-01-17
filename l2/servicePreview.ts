@@ -22,6 +22,7 @@ export class ServicePreview100554 extends ServiceBase {
         super();
         initServicePreviewView;
         this.setEvents();
+        console.info('passou')
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -29,15 +30,15 @@ export class ServicePreview100554 extends ServiceBase {
     private levels = [1, 2, 3, 4, 5, 6, 7];
 
     public details: IService = {
-        icon: '&#xf06e',
-        name: 'Preview',
-        mode: 'B',
+        icon: '&#xf5b8',
+        name: 'Preview 2',
+        mode: 'H',
         position: 'all',
         readOnly: false,
-        tooltip: 'Preview',
+        tooltip: 'Preview 2',
         className: undefined,
         tags: [],
-        levels: this.levels as any
+        levels: [1, 2, 3, 4, 5, 6, 7]
     }
 
     public onClickLink = (op: string): boolean => {
@@ -90,7 +91,7 @@ export class ServicePreview100554 extends ServiceBase {
     private async onMLSEvents(ev: mls.events.IEvent): Promise<void> {
 
         try {
-
+            debugger;
             if (ev.level !== +(this.level as any) || (ev.type !== 'FileAction')) return;
 
             const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
