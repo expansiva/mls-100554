@@ -77,11 +77,14 @@ export class ServicePreview100554 extends ServiceBase {
 
     private preview() {
         
-        const doc = document.createElement('service-preview-view-100554');
+        /*const doc = document.createElement('service-preview-view-100554');
         doc.setAttribute('page', '_100554_ateste');
         doc.setAttribute('level', '2');
         
-        if (this.menu.setMode) this.menu.setMode('page', doc);
+        if (this.menu.setMode) this.menu.setMode('page', doc);*/
+        const doc = document.createElement('iframe');
+        doc.style.cssText = `width: 100%;height: calc(100vh - 230px);    border: none;`;
+        doc.src =  'https://multilevelstudio.com/l4/_100529_service_preview_blocks.json.html'
         return true;
     }
 
