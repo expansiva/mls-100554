@@ -1,6 +1,6 @@
 /// <mls shortName="collabLitElement" project="100554" enhancement="_blank" />
 				
-import { LitElement } from 'lit';
+import { LitElement } from 'lit'; 
 import { CollabState } from './_100554_collabState';
 
 const isTrace = false;

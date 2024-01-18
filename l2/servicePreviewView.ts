@@ -2,7 +2,7 @@
 
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDepedencesByHTML, IJSONDEpendence } from './_100554_libCompile';
+import { getDepedencesByHtml, IJSONDEpendence } from './_100554_libCompile'; 
 
 export const initServicePreviewView = '';
 @customElement('service-preview-view-100554')
@@ -12,23 +12,18 @@ export class ServicePreviewView extends LitElement {
 
     @property() father: any = undefined;
 
-    @property() page: string = '';
+    @property() page: string = ''; 
 
     @property() level: string = '';
 
     @property() error: string = '';
 
-    @property() lastCompiled: string = '';
+    @property() lastCompiledUrl: string = ''; 
 
     connectedCallback() {
         super.connectedCallback();
         this.init();
     }
-
-    createRenderRoot() {
-        return this;
-    }
-
 
     render() {
 
@@ -42,7 +37,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     renderPreview() {
-        return unsafeHTML(this.lastCompiled);
+        return html`<iframe style="width:100%; height:100%; border:none" src="${this.lastCompiledUrl}"></iframe>`;
     }
 
     //-------- IMPLEMENTS---------
@@ -86,6 +81,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     private lastHTML: string = '';
+    private myFileBlob: Blob | undefined = undefined;
 
     private async setHtml() {
 
@@ -98,42 +94,48 @@ export class ServicePreviewView extends LitElement {
             txt = await this.file.getContent() as string;
 
         if (this.lastHTML === txt) {
-            const h = this.lastCompiled;
-            this.lastCompiled = h;
+            const h = this.lastCompiledUrl;
+            this.lastCompiledUrl = h;
             return;
         }
 
         this.lastHTML = txt;
-        const ret = await getDepedencesByHTML(txt, true);
-        this.mountJSImporMap(ret);
-        this.mountCSS(ret);
-        this.mountJS(ret);
+        const ret = await getDepedencesByHtml(txt, true);
+        console.info(ret)
+        const jsonMap = this.mountJSImporMap(ret);
+        const scriptJs = await this.mountJS(ret);
+        const css = this.mountCSS(ret); 
+  
+        const src = `
+                <head>
+                    <script type="importmap">
+                        ${jsonMap.replace('"}',     '",'+scriptJs.i+'}')}
+                        
+                    </script>
+                    ${css}
+                </head>
+                <body>
+                    ${txt}
+                    ${scriptJs.j}
+                    
+                </body>
+        `;
 
-        this.lastCompiled = txt;
-
-
-
+        if (this.myFileBlob) URL.revokeObjectURL(this.lastCompiledUrl);
+        this.myFileBlob = new Blob([src], { type: 'text/html' });
+        this.lastCompiledUrl = URL.createObjectURL(this.myFileBlob);
+ 
     }
 
 
-    private mountJSImporMap(info: IJSONDEpendence) {
+    private mountJSImporMap(info: IJSONDEpendence): string {
 
         try {
 
-            if (info.importsMap.length <= 0) return;
-
-            const sc = document.head.querySelector('script[type=importmap]');
-            if (sc) return;
+            if (info.importsMap.length <= 0) return '';
 
             const js = '{"imports": { ' + info.importsMap.join(',\n') + '} }';
-
-            const script = document.createElement('script');
-            script.type = 'importmap';
-            script.textContent = js;
-            document.head.appendChild(script);
-
-            return;
-
+            return js;
 
         } catch (e: any) {
 
@@ -144,47 +146,69 @@ export class ServicePreviewView extends LitElement {
 
     }
 
-    private mountJS(info: IJSONDEpendence) {
+    private async mountJS(info: IJSONDEpendence) {
 
         try {
 
-            if (info.importsJs.length <= 0) return;
+            if (info.importsJs.length <= 0) return {j:'', i:''};
 
-            info.importsJs.forEach((i) => {
+            let ret = '';
+            let imp = '';
+            for await (const s of info.importsJs) {
 
-                const script = document.createElement('script');
-                script.type = 'module';
-                script.id = i.replace('/', '');
-                script.src = i;
-                this.appendChild(script);
+                const txt = await this.getScript(s);
+                const b = new Blob([txt], { type: 'text/javascript' });
+                const url = URL.createObjectURL(b);
+                
+                ret = ` ${ret}
+                    <script type="module" id="${s.replace('/', '')}">
+                        ${txt.replace(/\.\/_/g, '_')}
+                    </script>
+                `
+                imp = `${imp}"${s.replace(/\/_/g, '_')}": "${url}",` 
+            }  
 
-            });
+            imp = imp.slice(0, -1);
+
+
+            return {j: ret, i: imp};
 
         } catch (e: any) {
 
             console.info('Error mountJS: ' + e.message);
-            return '';
+            return {j:'', i:''};
 
 
         }
 
     }
 
-    private mountCSS(info: IJSONDEpendence) {
+    private async getScript(url: string) {
+
+        try {
+
+            const ret = await fetch(url);
+            return await ret.text();
+            
+        } catch (e: any) {
+            return e.message;
+        }
+        
+    }
+
+    
+
+    private mountCSS(info: IJSONDEpendence) : string {
 
         try {
 
             if (info.css.length <= 0) return '';
-
-            const sc = document.head.querySelector('style[mystyle]');
-            if (sc) return;
-
             const css = info.css.join(' \n');
-            const style = document.createElement('style');
-            style.textContent = css;
-            style.setAttribute('mystyle', 'true');
-            document.head.appendChild(style);
-            return '';
+            return `
+                <style>
+                    ${css}
+                </style>
+            `
 
         } catch (e: any) {
 

@@ -42,24 +42,6 @@ export const getDepedencesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boole
 
 }
 
-export const getDepedencesByHTML = (html: string, withCss: boolean = false): Promise<IJSONDEpendence> => {
-
-    return new Promise<IJSONDEpendence>(async (resolve, reject) => {
-
-        try {
-
-            resolve(await getDepedences('byHTML', html, withCss))
-
-        } catch (e) {
-
-            reject(e);
-
-        }
-
-    });
-
-}
-
 async function getDepedences(filename: string, html: string, withCss: boolean = false) {
 
     const myImportsMap: string[] = [];
@@ -214,6 +196,8 @@ async function getJSImporMap(myImportsMap: string[], enhacementName: string, mfi
     myModules[enhacementName].jsMap = true;
     const mmodule = myModules[enhacementName].mModule as mls.l2.enhancement.IEnhancementInstance;
 
+    if (!mmodule || !mmodule.requires) return;
+
     const aRequire = mmodule.requires;
 
     aRequire.forEach((i) => {
@@ -232,22 +216,52 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.l2.
         throw new Error('Enhacement not found ');
     }
 
-    /*if (mfile.compilerResults && mfile.compilerResults.imports && mfile.compilerResults.imports.length > 0) {
+    if (mfile.compilerResults && mfile.compilerResults.imports && mfile.compilerResults.imports.length > 0) {
 
         mfile.compilerResults.imports.forEach((n: string) => {
 
             const name = n.replace('./', '/');
-            if (!myImports.includes(name) && n.startsWith('./')) myImports.push(name);
+            if (!myImports.includes(name) && n.startsWith('./')){
+                myImports.push(name);
+                myImports = verifyMyImportsNeedImport(myImports, name);
+            }
 
         });
         
-    }*/
+    }
 
     if (myImports.includes(`/_${mfile.project}_${mfile.shortName}`)) return;
     
     myImports.push(`/_${mfile.project}_${mfile.shortName}`);
 
 }
+
+function verifyMyImportsNeedImport(myImports: string[], name: string): string[]{
+
+    name = name.replace('.', '').replace('/', '');
+    const { project, path } = mls.actual[0].setFullName(name);
+    const key = mls.l2.editor.getKey({ project: project as number, shortName: path as string });
+
+    const mfile = mls.l2.editor.mfiles[key];
+    if (!mfile) return myImports;
+
+    if (mfile.compilerResults && mfile.compilerResults.imports && mfile.compilerResults.imports.length > 0) {
+
+        mfile.compilerResults.imports.forEach((n: string) => {
+
+            const name = n.replace('./', '/');
+            if (!myImports.includes(name) && n.startsWith('./')) {
+                myImports.push(name);
+            }
+            
+
+        });
+        
+    }
+
+    return myImports;
+    
+};
 
 async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IMFile) {
 
