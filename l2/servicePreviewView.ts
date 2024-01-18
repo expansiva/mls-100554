@@ -109,8 +109,7 @@ export class ServicePreviewView extends LitElement {
         const src = `
                 <head>
                     <script type="importmap">
-                        ${jsonMap.replace('"}',     '",'+scriptJs.i+'}')}
-                        
+                        ${jsonMap}
                     </script>
                     ${css}
                 </head>
@@ -147,6 +146,34 @@ export class ServicePreviewView extends LitElement {
     }
 
     private async mountJS(info: IJSONDEpendence) {
+
+        try {
+
+            if (info.importsJs.length <= 0) return {j:'', i:''};
+
+            let ret = '';
+            let imp = '';
+            for await (const s of info.importsJs) {
+
+                ret = ` ${ret}
+                    <script type="module" id="${s.replace('/', '')}" src="${s}">
+                        
+                    </script>
+                ` 
+            }  
+            return {j: ret, i: imp};
+
+        } catch (e: any) {
+
+            console.info('Error mountJS: ' + e.message);
+            return {j:'', i:''};
+
+
+        }
+
+    }
+
+    /*private async mountJS(info: IJSONDEpendence) {
 
         try {
 
@@ -194,7 +221,7 @@ export class ServicePreviewView extends LitElement {
             return e.message;
         }
         
-    }
+    }*/
 
     
 

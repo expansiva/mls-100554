@@ -223,8 +223,9 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.l2.
             const name = n.replace('./', '/');
             if (!myImports.includes(name) && n.startsWith('./')){
                 myImports.push(name);
-                myImports = verifyMyImportsNeedImport(myImports, name);
+                
             }
+            //myImports = verifyMyImportsNeedImport(myImports, name);
 
         });
         
