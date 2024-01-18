@@ -1,37 +1,14 @@
 service-list-files-100554 { //don't change this line 
     :host{
-        font-family: 'Charlie Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        overflow-y: auto;
+        height: calc(100vh - 100px);
+        width: 100%;
         display: block;
-        padding: 1rem;
-    }
-    .scroll-custom::-webkit-scrollbar {
-        width: 5px;
-    }
-
-    .scroll-custom::-webkit-scrollbar-track {
-        background: #ddd; 
-    }
-
-    .scroll-custom::-webkit-scrollbar-thumb {
-        background: #666;
-    }
-
-    .scroll-custom::scrollbar {
-        width: 2px;
-    }
-
-    .scroll-custom::scrollbar-track {
-        background: #ddd;
-    }
-
-    .scroll-custom::scrollbar-thumb {
-        background: #666;
+        font-family: @font-family-primary;
     }
 
     .contentServiceList {
-        overflow-y: auto;
-        height: calc(100vh - 70px);
-        width: 100%;
+        padding: 1rem;
         position: relative;
     }
 
