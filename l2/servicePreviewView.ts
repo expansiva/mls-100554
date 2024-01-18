@@ -2,7 +2,7 @@
 
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDepedencesByHtml, IJSONDEpendence } from './_100554_libCompile'; 
+import { getDepedencesByHtml, IJSONDEpendence } from './_100554_libCompile';
 
 export const initServicePreviewView = '';
 @customElement('service-preview-view-100554')
@@ -12,17 +12,16 @@ export class ServicePreviewView extends LitElement {
 
     @property() father: any = undefined;
 
-    @property() page: string = ''; 
+    @property() page: string = '';
 
     @property() level: string = '';
 
     @property() error: string = '';
 
-    @property() lastCompiledUrl: string = ''; 
+    @property() lastCompiledUrl: string = '';
 
     connectedCallback() {
         super.connectedCallback();
-        this.init();
     }
 
     render() {
@@ -36,24 +35,23 @@ export class ServicePreviewView extends LitElement {
         return html`<h3 style="color:red">${this.error}</h3>`
     }
 
-    renderPreview() {
-        return html`<iframe style="width:100%; height:100%; border:none" src="${this.lastCompiledUrl}"></iframe>`;
+    renderPreview() { 
+        return html`<iframe style="width:100%; height:100vh; border:none; display:none" src="/_100554_servicePreview" @load="${this.load}" ></iframe>`;
     }
 
     //-------- IMPLEMENTS---------
 
-    private async init() {
+    private load(): void {
+        if (!this.shadowRoot) return;
+        const iframe = this.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
+        this.init(iframe);
+    }
 
-        try {
-            this.setMyFile();
-            await this.setHtml();
+    private async init(iframe: HTMLIFrameElement) {
 
-        } catch (e: any) {
-
-            this.error = e.message;
-            this.showError(e.message);
-
-        }
+        this.setMyFile();
+        await this.setHTml(iframe);
+        iframe.style.display = '';
 
     }
 
@@ -81,9 +79,9 @@ export class ServicePreviewView extends LitElement {
     }
 
     private lastHTML: string = '';
-    private myFileBlob: Blob | undefined = undefined;
+    private async setHTml(iframe: HTMLIFrameElement) {
 
-    private async setHtml() {
+        if (!iframe.contentDocument) return;
 
         let txt = '<h3>Configure your html by editor option!</h3>';
 
@@ -100,152 +98,92 @@ export class ServicePreviewView extends LitElement {
         }
 
         this.lastHTML = txt;
-        const ret = await getDepedencesByHtml(txt, true);
-        console.info(ret)
-        const jsonMap = this.mountJSImporMap(ret);
-        const scriptJs = await this.mountJS(ret);
-        const css = this.mountCSS(ret); 
-  
-        const src = `
-                <head>
-                    <script type="importmap">
-                        ${jsonMap}
-                    </script>
-                    ${css}
-                </head>
-                <body>
-                    ${txt}
-                    ${scriptJs.j}
-                    
-                </body>
-        `;
+        iframe.contentDocument.body.innerHTML = txt;
 
-        if (this.myFileBlob) URL.revokeObjectURL(this.lastCompiledUrl);
-        this.myFileBlob = new Blob([src], { type: 'text/html' });
-        this.lastCompiledUrl = URL.createObjectURL(this.myFileBlob);
- 
+        const ret = await getDepedencesByHtml(txt, true);
+        this.mountJSImporMap(ret, iframe);
+        this.mountJS(ret, iframe);
+        this.mountCSS(ret, iframe);
+
+
     }
 
-
-    private mountJSImporMap(info: IJSONDEpendence): string {
+    private mountJSImporMap(info: IJSONDEpendence, ifr: HTMLIFrameElement): void {
 
         try {
 
-            if (info.importsMap.length <= 0) return '';
+            if (info.importsMap.length <= 0 || !ifr.contentDocument) return;
 
             const js = '{"imports": { ' + info.importsMap.join(',\n') + '} }';
-            return js;
+            const script = document.createElement('script');
+            script.type = 'importmap';
+            script.textContent = js;
+            ifr.contentDocument.head.appendChild(script);
 
         } catch (e: any) {
 
             console.info('Error mountJSImporMap: ' + e.message);
-            return '';
+            return;
 
         }
 
     }
 
-    private async mountJS(info: IJSONDEpendence) {
+    private mountJS(info: IJSONDEpendence, ifr: HTMLIFrameElement): void {
 
         try {
 
-            if (info.importsJs.length <= 0) return {j:'', i:''};
+            if (info.importsJs.length <= 0 || !ifr.contentDocument) return;
 
-            let ret = '';
-            let imp = '';
-            for await (const s of info.importsJs) {
+            info.importsJs.forEach((i) => {
 
-                ret = ` ${ret}
-                    <script type="module" id="${s.replace('/', '')}" src="${s}">
-                        
-                    </script>
-                ` 
-            }  
-            return {j: ret, i: imp};
+                if (!ifr.contentDocument) return
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.id = i.replace('/', '');
+                script.src = i;
+                ifr.contentDocument.body.appendChild(script);
+
+            });
+
+            const s = document.createElement('script') as HTMLScriptElement;
+				s.textContent = `
+				window['mls'] = window['mls']  ? window['mls']  : parent.mls ? parent.mls : top['mls'];
+				window['Quill'] = window['Quill']  ? window['Quill']  : parent.Quill ? parent.Quill : top['Quill'];
+				window['monaco'] = window['monaco']  ? window['monaco']  : parent.monaco ? parent.monaco : top['monaco'];
+				window['l2_html'] = window['l2_html']  ? window['l2_html']  : parent.l2_html ? parent.l2_html : top['l2_html'];
+				window['l2_fieldTypes'] = window['l2_fieldTypes']  ? window['l2_fieldTypes']  : parent.l2_fieldTypes ? parent.l2_fieldTypes : top['l2_fieldTypes'];window['litDisableBundleWarning'] = true;
+
+
+				`;
+				ifr.contentDocument.body.appendChild(s);
 
         } catch (e: any) {
 
             console.info('Error mountJS: ' + e.message);
-            return {j:'', i:''};
 
 
         }
 
     }
 
-    /*private async mountJS(info: IJSONDEpendence) {
+    private mountCSS(info: IJSONDEpendence, ifr: HTMLIFrameElement): void {
 
         try {
 
-            if (info.importsJs.length <= 0) return {j:'', i:''};
-
-            let ret = '';
-            let imp = '';
-            for await (const s of info.importsJs) {
-
-                const txt = await this.getScript(s);
-                const b = new Blob([txt], { type: 'text/javascript' });
-                const url = URL.createObjectURL(b);
-                
-                ret = ` ${ret}
-                    <script type="module" id="${s.replace('/', '')}">
-                        ${txt.replace(/\.\/_/g, '_')}
-                    </script>
-                `
-                imp = `${imp}"${s.replace(/\/_/g, '_')}": "${url}",` 
-            }  
-
-            imp = imp.slice(0, -1);
-
-
-            return {j: ret, i: imp};
-
-        } catch (e: any) {
-
-            console.info('Error mountJS: ' + e.message);
-            return {j:'', i:''};
-
-
-        }
-
-    }
-
-    private async getScript(url: string) {
-
-        try {
-
-            const ret = await fetch(url);
-            return await ret.text();
-            
-        } catch (e: any) {
-            return e.message;
-        }
-        
-    }*/
-
-    
-
-    private mountCSS(info: IJSONDEpendence) : string {
-
-        try {
-
-            if (info.css.length <= 0) return '';
+            if (info.css.length <= 0 || !ifr.contentDocument) return;
             const css = info.css.join(' \n');
-            return `
-                <style>
-                    ${css}
-                </style>
-            `
+            const style = document.createElement('style');
+            style.textContent = css;
+            ifr.contentDocument.head.appendChild(style);
 
         } catch (e: any) {
 
             console.info('Error mountCSS: ' + e.message);
-            return '';
 
         }
 
     }
-
 
     private showLoader(show: boolean) {
 
