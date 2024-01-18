@@ -12,6 +12,6 @@ export class ServicePreviewView extends LitElement {
     name: string = 'Somebody';
 
     render() {
-        return html`<p> Hello, ${this.name} !</p>`;
+        return html`<p> Hello2, ${this.name} !</p>`;
     }
 }
