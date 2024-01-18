@@ -84,7 +84,8 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.menu.setMode) this.menu.setMode('page', doc);*/
         const doc = document.createElement('iframe');
         doc.style.cssText = `width: 100%;height: calc(100vh - 230px);    border: none;`;
-        doc.src =  'https://multilevelstudio.com/l4/_100529_service_preview_blocks.json.html'
+        doc.src = 'https://multilevelstudio.com/l4/_100529_service_preview_blocks.json.html';
+        if (this.menu.setMode) this.menu.setMode('page', doc);
         return true;
     }
 
