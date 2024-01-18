@@ -8,6 +8,7 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 export class ServiceHistories100554 extends ServiceBase {
 
     constructor() {
+        console.info('passei no constructor ServiceHistories100554')
         super();
         mls.events.addEventListener([2], ['HistoriesSelected' as any], (ev) => this.onSelectHistories(ev));
         mls.events.addEventListener([2], ['ToolBarSelected'], (ev) => { this.onToolbarSelected(ev); });
@@ -24,7 +25,7 @@ export class ServiceHistories100554 extends ServiceBase {
     public details: IService = {
         icon: '&#xf15c',
         name: 'Histories',
-        mode: 'H',
+        mode: 'A',
         position: 'right',
         readOnly: true,
         tooltip: 'Histories',
@@ -43,7 +44,6 @@ export class ServiceHistories100554 extends ServiceBase {
         title: 'Histories',
         actions: {
             opHistories: 'Start',
-            opAbout: 'About',
         },
         icons: {},
         actionDefault: 'opHistories', // call after close icon clicked
@@ -75,23 +75,22 @@ export class ServiceHistories100554 extends ServiceBase {
     private onToolbarSelected(ev: mls.events.IEvent) {
         if (!ev || !ev.desc) return;
         const params: { level: number, position: string, from: string, to: string } = ev.desc ? JSON.parse(ev.desc) : {};
-        const item = this.serviceContent;
+        const item = this.serviceItemNav;
         if (!item) return;
         const actualMode = item.getAttribute('mode');
         if (!['_100529_service_Source'].includes(params.to) && actualMode === 'A' && this.position !== params.position) item.setAttribute('mode', 'H');
     }
 
     private async onSelectHistories(ev: mls.events.IEvent) {
-
         if (!ev.desc) return;
         const params: IEventParams = JSON.parse(ev.desc);
         if (params.position === this.position) return;
         if (params.level !== this.level) return;
 
 
-        if (!this.serviceContent) return;
-        this.serviceContent.setAttribute('mode', 'A');
-        this.serviceContent.click();
+        if (!this.serviceItemNav) return;
+        this.serviceItemNav.setAttribute('mode', 'A');
+        this.serviceItemNav.click();
 
         const key = mls.stor.getKeyToFiles(params.project, params.level, params.shortName, params.folder, params.extension);
         const storFile = mls.stor.files[key];
@@ -162,11 +161,13 @@ export class ServiceHistories100554 extends ServiceBase {
         if (!reinit) {
             this.createEditor();
             this.setInitialHistories('Loading...', 'Loading...');
-            if (el && typeof el.layout === 'function') el.layout();
         }
 
         if (visible) {
             if (!this.fileInfo) this.setInitialHistories('No histories selected', 'No histories selected');
+            setTimeout(() => {
+                if (el && typeof el.layout === 'function') el.layout();
+            }, 100)
         }
     }
 

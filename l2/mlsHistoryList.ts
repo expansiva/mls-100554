@@ -1,6 +1,6 @@
 /// <mls shortName="mlsHistoryList" project="100554" enhancement="_100554_enhancementLit" groupName="internal" />
 
-import { html, ifDefined, LitElement } from 'lit';
+import { html,  LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 @customElement('mls-history-list-100554')

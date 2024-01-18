@@ -6,7 +6,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 @customElement('service-base-100554')
 export abstract class ServiceBase extends LitElement {
 
-    @property({ type: String, reflect: true })
+    @property({ type: Number, reflect: true })
     public level: mls.events.Level = 7;
 
     @property({ type: String, reflect: true })
