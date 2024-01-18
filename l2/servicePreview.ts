@@ -117,7 +117,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async preview() {
 
-        if (!mls.actual[2]) return true;
+        if (!mls.actual[2].project) return true;
 
         const doc = document.createElement('service-preview-view-100554');
         doc.setAttribute('page', mls.actual[2].getFullName());

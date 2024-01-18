@@ -36,6 +36,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     renderPreview() { 
+
         return html`<iframe style="width:100%; height:100vh; border:none; display:none" src="/_100554_servicePreview" @load="${this.load}" ></iframe>`;
     }
 
