@@ -377,7 +377,7 @@ export class CollabConfig100554 extends LitElement {
                     readOnly: info.readOnly,
                     ref: `_${f.project}_${f.shortName}`,
                     tooltip: info.tooltip,
-                    visible: info.visible,
+                    //visible: info.visible,
                     shortcut: '',
                     tags: info.tags,
                     isMls2: true
