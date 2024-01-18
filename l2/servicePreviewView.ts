@@ -102,23 +102,21 @@ export class ServicePreviewView extends LitElement {
         this.lastHTML = txt;
         const ret = await getDepedencesByHTML(txt, true);
         const jsonMap = this.mountJSImporMap(ret);
-        const scriptJs = this.mountJS(ret);
+        const scriptJs = await this.mountJS(ret);
         const css = this.mountCSS(ret); 
  
         const src = `
                 <head>
                     <script type="importmap">
                         ${jsonMap}
-                        ${scriptJs}
+                        
                     </script>
                     ${css}
                 </head>
                 <body>
                     ${txt}
+                    ${scriptJs}
                     
-                    <script>
-                        alert('a');
-                    </script>
                 </body>
         `;
 
@@ -127,6 +125,7 @@ export class ServicePreviewView extends LitElement {
         this.lastCompiledUrl = URL.createObjectURL(this.myFileBlob);
 
     }
+
 
     private mountJSImporMap(info: IJSONDEpendence): string {
 
@@ -146,7 +145,7 @@ export class ServicePreviewView extends LitElement {
 
     }
 
-    private mountJS(info: IJSONDEpendence): string {
+    private async mountJS(info: IJSONDEpendence) {
 
         try {
 
@@ -154,12 +153,15 @@ export class ServicePreviewView extends LitElement {
 
             let ret = '';
 
-            info.importsJs.forEach((i) => {
+            for await (const s of info.importsJs) {
 
                 ret = ` ${ret}
-                <script type="module" id="${i.replace('/', '')}" src="${i}"></script>`
+                    <script type="module" id="${s.replace('/', '')}">
+                        ${await this.getScript(s)}
+                    </script>
+                `
+            } 
 
-            });
 
             return ret;
 
@@ -172,6 +174,21 @@ export class ServicePreviewView extends LitElement {
         }
 
     }
+
+    private async getScript(url: string) {
+
+        try {
+
+            const ret = await fetch(url);
+            return await ret.text();
+            
+        } catch (e: any) {
+            return e.message;
+        }
+        
+    }
+
+    
 
     private mountCSS(info: IJSONDEpendence) : string {
 
