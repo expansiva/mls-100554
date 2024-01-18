@@ -42,6 +42,24 @@ export const getDepedencesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boole
 
 }
 
+export const getDepedencesByHTML = (html: string, withCss: boolean = false): Promise<IJSONDEpendence> => {
+
+    return new Promise<IJSONDEpendence>(async (resolve, reject) => {
+
+        try {
+
+            resolve(await getDepedences('byHTML', html, withCss))
+
+        } catch (e) {
+
+            reject(e);
+
+        }
+
+    });
+
+}
+
 async function getDepedences(filename: string, html: string, withCss: boolean = false) {
 
     const myImportsMap: string[] = [];
@@ -134,7 +152,7 @@ async function loadMyNeedsToCompile(
         await getJSImporMap(myImportsMap, enhacementName, mfile, myModules);
         await getJS(myImports, enhacementName, mfile, myModules);
         if (compileCss) {
-            await getCss(myCss, mls.actual[0].getFullName(), mfile);
+            await getCss(myCss, name, mfile);
         }
 
     } catch (e: any) {
@@ -233,11 +251,20 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.l2.
 
 async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IMFile) {
 
-    const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-    const ds = mls.l3.getDSInstance(mfile.project, dsindex);
-    if (!ds) return;
-    const css = await ds.components.getCSS(fullName)
-    myCss.push(css);
+    try {
+
+        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
+        const ds = mls.l3.getDSInstance(mfile.project, dsindex);
+        if (!ds) return;
+        const css = await ds.components.getCSS(fullName)
+        myCss.push(css);
+
+    } catch (e:any) {
+
+        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
+        
+    }
+    
 
 }
 
@@ -273,7 +300,7 @@ function convertTagToFileName(tag: string) {
 
 }
 
-interface IJSONDEpendence {
+export interface IJSONDEpendence {
     file: string,
     wcComponents: string[],
     importsMap: string[],
