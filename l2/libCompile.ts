@@ -232,7 +232,7 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.l2.
         throw new Error('Enhacement not found ');
     }
 
-    if (mfile.compilerResults && mfile.compilerResults.imports && mfile.compilerResults.imports.length > 0) {
+    /*if (mfile.compilerResults && mfile.compilerResults.imports && mfile.compilerResults.imports.length > 0) {
 
         mfile.compilerResults.imports.forEach((n: string) => {
 
@@ -241,7 +241,7 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.l2.
 
         });
         
-    }
+    }*/
 
     if (myImports.includes(`/_${mfile.project}_${mfile.shortName}`)) return;
     

@@ -18,12 +18,17 @@ export class ServicePreviewView extends LitElement {
 
     @property() error: string = '';
 
-    @property() lastCompiledUrl: string = '';
+    @property() lastCompiled: string = '';
 
     connectedCallback() {
         super.connectedCallback();
         this.init();
     }
+
+    createRenderRoot() {
+        return this;
+    }
+
 
     render() {
 
@@ -37,7 +42,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     renderPreview() {
-        return html`<iframe style="width:100%; height:100%; border:none" src="${this.lastCompiledUrl}"></iframe>`;
+        return unsafeHTML(this.lastCompiled);
     }
 
     //-------- IMPLEMENTS---------
@@ -81,7 +86,6 @@ export class ServicePreviewView extends LitElement {
     }
 
     private lastHTML: string = '';
-    private myFileBlob: Blob | undefined = undefined;
 
     private async setHtml() {
 
@@ -94,47 +98,42 @@ export class ServicePreviewView extends LitElement {
             txt = await this.file.getContent() as string;
 
         if (this.lastHTML === txt) {
-            const h = this.lastCompiledUrl;
-            this.lastCompiledUrl = h;
+            const h = this.lastCompiled;
+            this.lastCompiled = h;
             return;
         }
 
         this.lastHTML = txt;
         const ret = await getDepedencesByHTML(txt, true);
-        const jsonMap = this.mountJSImporMap(ret);
-        const scriptJs = await this.mountJS(ret);
-        const css = this.mountCSS(ret); 
- 
-        const src = `
-                <head>
-                    <script type="importmap">
-                        ${jsonMap}
-                        
-                    </script>
-                    ${css}
-                </head>
-                <body>
-                    ${txt}
-                    ${scriptJs}
-                    
-                </body>
-        `;
+        this.mountJSImporMap(ret);
+        this.mountCSS(ret);
+        this.mountJS(ret);
 
-        if (this.myFileBlob) URL.revokeObjectURL(this.lastCompiledUrl);
-        this.myFileBlob = new Blob([src], { type: 'text/html' });
-        this.lastCompiledUrl = URL.createObjectURL(this.myFileBlob);
+        this.lastCompiled = txt;
+
+
 
     }
 
 
-    private mountJSImporMap(info: IJSONDEpendence): string {
+    private mountJSImporMap(info: IJSONDEpendence) {
 
         try {
 
-            if (info.importsMap.length <= 0) return '';
+            if (info.importsMap.length <= 0) return;
+
+            const sc = document.head.querySelector('script[type=importmap]');
+            if (sc) return;
 
             const js = '{"imports": { ' + info.importsMap.join(',\n') + '} }';
-            return js;
+
+            const script = document.createElement('script');
+            script.type = 'importmap';
+            script.textContent = js;
+            document.head.appendChild(script);
+
+            return;
+
 
         } catch (e: any) {
 
@@ -145,25 +144,21 @@ export class ServicePreviewView extends LitElement {
 
     }
 
-    private async mountJS(info: IJSONDEpendence) {
+    private mountJS(info: IJSONDEpendence) {
 
         try {
 
-            if (info.importsJs.length <= 0) return '';
+            if (info.importsJs.length <= 0) return;
 
-            let ret = '';
+            info.importsJs.forEach((i) => {
 
-            for await (const s of info.importsJs) {
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.id = i.replace('/', '');
+                script.src = i;
+                this.appendChild(script);
 
-                ret = ` ${ret}
-                    <script type="module" id="${s.replace('/', '')}">
-                        ${await this.getScript(s)}
-                    </script>
-                `
-            } 
-
-
-            return ret;
+            });
 
         } catch (e: any) {
 
@@ -175,32 +170,21 @@ export class ServicePreviewView extends LitElement {
 
     }
 
-    private async getScript(url: string) {
-
-        try {
-
-            const ret = await fetch(url);
-            return await ret.text();
-            
-        } catch (e: any) {
-            return e.message;
-        }
-        
-    }
-
-    
-
-    private mountCSS(info: IJSONDEpendence) : string {
+    private mountCSS(info: IJSONDEpendence) {
 
         try {
 
             if (info.css.length <= 0) return '';
+
+            const sc = document.head.querySelector('style[mystyle]');
+            if (sc) return;
+
             const css = info.css.join(' \n');
-            return `
-                <style>
-                    ${css}
-                </style>
-            `
+            const style = document.createElement('style');
+            style.textContent = css;
+            style.setAttribute('mystyle', 'true');
+            document.head.appendChild(style);
+            return '';
 
         } catch (e: any) {
 
