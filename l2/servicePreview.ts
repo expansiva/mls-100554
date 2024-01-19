@@ -86,7 +86,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onToolBarSelected(ev: mls.events.IEvent) {
-        console.info('passou');
+    
         if (!ev || !ev.desc) return;
         const params: { level: number, position: string, from: string, to: string } = ev.desc ? JSON.parse(ev.desc) : {};
 
