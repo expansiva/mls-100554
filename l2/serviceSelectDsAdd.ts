@@ -11,6 +11,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
     @property()
     state: IState = {
+        dsAvaliables: [],
         copyFrom: {
             name: undefined,
             dsindex: undefined,
@@ -61,7 +62,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
         this.currentScenario = scenario
     }
 
-    validateLettersAndNumbers(str:string) {
+    validateLettersAndNumbers(str: string) {
         const pattern = /^[A-Za-z0-9]+$/;
         return pattern.test(str);
     }
@@ -101,6 +102,49 @@ export class ServiceListFilesAdd100554 extends LitElement {
             this.service.loading = false;
 
         }
+    }
+
+    getDsAvaliable(): IDs[] {
+        const projects: number[] = this.getProjectsInMemory();
+        const rc: IDs[] = [];
+        projects.forEach((prj) => {
+            const dsByPrj: mls.l5.IPrjDesignSystem[] = mls.l5['getProjectDesingSystems'](prj);
+            dsByPrj.forEach((info) => {
+                rc.push({
+                    dsindex: info.dsIndex,
+                    name: info.dsName,
+                    project: prj,
+                    widgetIOName: info.widgetIOName
+                });
+            });
+        });
+
+        return rc;
+    }
+
+    getProjectsInMemory(): number[] {
+        const projectInMemory: Set<number> = new Set();
+        Object.entries(mls.stor.files).forEach((item) => {
+            const [key, value] = item;
+            projectInMemory.add(value.project);
+        });
+        return Array.from(projectInMemory);
+    }
+
+    fireEvent(e: MouseEvent) {
+        const index: number = +(e.target as HTMLSelectElement).value;
+        if (!this.state.copyFrom) return;
+        const params = {
+            service: ['_100529_service_styles_preview'],
+            isAddShowPreview: true,
+            dsInfoAddShowPreview: {
+                index: this.state.dsAvaliables[index].dsindex,
+                project: this.state.dsAvaliables[index].project
+            }
+        };
+
+        mls.events.fire([3], ['DSStyleSelected'], JSON.stringify(params), 0);
+
     }
 
     renderScenario() {
@@ -172,7 +216,11 @@ export class ServiceListFilesAdd100554 extends LitElement {
                 <div >
                     <label >Templates:</label>
                     <div >
-                        <mls-l3-select-ds-100529> </mls-l3-select-ds-100529>
+                        <select @change=${(e: MouseEvent) => { this.fireEvent(e) }}> 
+                            ${this.state.dsAvaliables.map((ds, index) => html`
+                                <option value=${index}>Project: ${ds.project} Name: ${ds.name}</option>
+                            `)}
+                            </select>
                     </div>
                 </div>
                 <hr >
@@ -208,6 +256,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
     render() {
         this.state.project = mls.actual[5].project;
+        this.state.dsAvaliables = this.getDsAvaliable();
         return html`
             <section class="service-selectds-add">
                 ${this.renderScenario()}
@@ -220,14 +269,16 @@ export class ServiceListFilesAdd100554 extends LitElement {
 type IScenaries = 'sc1' | 'sc2' | 'sc3';
 type IMode = 'default' | 'template';
 
+interface IDs {
+    name: string | undefined,
+    dsindex: number | undefined,
+    project: number | undefined,
+    widgetIOName: string | undefined,
+}
 
 interface IState {
-    copyFrom: {
-        name: string | undefined,
-        dsindex: number | undefined,
-        project: number | undefined,
-        widgetIOName: string | undefined,
-    },
+    dsAvaliables: IDs[],
+    copyFrom: IDs,
     name: string | undefined,
     project: number | undefined,
 }
