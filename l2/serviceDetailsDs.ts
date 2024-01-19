@@ -1,16 +1,226 @@
 /// <mls shortName="serviceDetailsDs" project="100554" enhancement="_100554_enhancementLit" groupName="services" />
 
-    import { html, css, LitElement } from 'lit'; 
-    import { customElement, property } from 'lit/decorators.js';
+import { html, css } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
-    @customElement('service-details-ds-100554')
-    export class SimpleGreeting extends LitElement {
-        static styles = css`p { color: red }`;
+@customElement('service-details-ds-100554')
+export class ServiceDetailsDs100554 extends ServiceBase {
 
-        @property() 
-        name: string = 'Somebody';
-
-        render() {
-            return html`<p> Hello, ${ this.name } !</p>`;
-        }
+    constructor() {
+        super();
+        this.setEvents();
     }
+
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
+
+    public details: IService = {
+        icon: '&#xf229',
+        name: 'Details Ds',
+        mode: 'B',
+        position: 'right',
+        readOnly: true,
+        tooltip: 'Details Design System',
+        className: undefined,
+        tags: [],
+        levels: [3]
+    }
+
+    public onClickLink = (op: string): boolean => {
+        if (op === 'opResume') return this.showOverview();
+        if (this.menu.setMode) this.menu.setMode('initial');
+        return false;
+    }
+
+    public menu: IMenu = {
+        title: 'Details',
+        actions: {
+            opOverview: 'Resume',
+        },
+        icons: {},
+        actionDefault: 'opResume', // call after close icon clicked
+        setMode: undefined, // child will set this
+        onClickLink: this.onClickLink,
+        getLastMode: undefined,
+        updateTitle: undefined
+    }
+
+
+    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+        this._onServiceClick(visible, reinit, el)
+    }
+
+    async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+
+        if (visible && reinit) {
+
+        }
+
+    }
+
+    @property()
+    state: IState = { assets: 0, components: 0, createdBy: '', documentation: 0, lastUpdated: '', lastUpdatedBy: '', name: '', style: 0, tokens: 0 };
+
+    setEvents() {
+        mls.events.addEventListener([this.level], ['DSSelected'], (ev) => {
+            if (!this.serviceItemNav) return;
+            this.serviceItemNav.setAttribute('mode', 'A');
+            this.openMe();
+        });
+    }
+
+    private ds: mls.l3.DesignSystemIO | undefined;
+
+    showOverview(): boolean {
+        return true;
+    }
+
+    private async init() {
+        const { mode } = mls.actual[3];
+        const { project } = mls.actual[5];
+        if (mode === undefined || project === undefined) return;
+        this.ds = mls.l3.getDSInstance(project, mode);
+        await this.ds.init();
+        this.setResume(project, mode);
+        this.setEvents();
+    }
+
+    private async setResume(project: number, index: number) {
+        const dsInfo = mls.l5.getProjectDesingSystems(project);
+        const { dsName } = dsInfo[index];
+        if (!this.ds) return;
+        this.state.name = dsName;
+        this.state.createdBy = this.ds.createdBy;
+        this.state.lastUpdated = this.getLastModifiedFormated(this.ds.lastUpdated);
+        this.state.lastUpdatedBy = this.ds.lastUpdatedBy;
+
+        this.state.components = Object.keys(this.ds.components.list).length;
+        this.state.assets = this.getAssetsLenght(project, dsName);
+        this.state.documentation = Object.keys(this.ds.docs.list).length;
+        this.state.tokens = Object.keys(this.ds.tokens.list).length;
+        this.state.style = await this.getStyleLines();
+    }
+
+    private async getStyleLines(): Promise<number> {
+        if (!this.ds) return 0;
+        const style = await this.ds.css.list.definitions.getContent();
+        const lenght = style.split('\n').length;
+        return lenght;
+    }
+    private getAssetsLenght(project: number, nameDs: string): number {
+        const listFiles = mls.stor.files;
+        const onlyProjects = Object.keys(listFiles).filter((file) => listFiles[file].project === project);
+        const l3files = onlyProjects.filter((item) => {
+            const { level, folder } = listFiles[item];
+            return (level === 3 && folder.startsWith(`ds/${nameDs}/assets`));
+        });
+        return l3files.length;
+    }
+
+    private getLastModifiedFormated(dt: string): string {
+
+        let lastUpdated: string;
+        const dateToday = new Date();
+        const dtLastWrite = new Date(dt);
+        const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+        function dateDiffInDays(a: Date, b: Date) {
+            // Discard the time and time-zone information.
+            const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+            const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+            return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+        }
+
+        const diffDays = dateDiffInDays(dtLastWrite, dateToday);
+        const moreThanTwoDays = diffDays > 1;
+
+        if (diffDays === 0) lastUpdated = 'today';
+        else if (diffDays < 30) lastUpdated = `${diffDays} ${moreThanTwoDays ? 'days' : 'day'} ago`;
+        else {
+            const lastWriteYear = dtLastWrite.getFullYear();
+            const lastWriteMounth: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 = dtLastWrite.getMonth() as any;
+            const lastWriteDay = dtLastWrite.getDate();
+            const mounthFilter = {
+                0: 'Jan', 1: 'Feb', 2: 'Mar', 3: 'Apr', 4: 'May', 5: 'June', 6: 'July', 7: 'Aug', 8: 'Sept', 9: 'Oct', 10: 'Nov', 11: 'Dec',
+            };
+            lastUpdated = `on ${lastWriteYear}, ${lastWriteDay} ${mounthFilter[lastWriteMounth]} `;
+        }
+        return lastUpdated;
+    }
+
+    private onLinkClick(service: string) {
+        this.openService(service, 'left', 3);
+    }
+
+    render() {
+        this.init();
+        return html`
+            <div class="mls-ds-resume">
+                <details open="open">
+                    <summary>Resume</summary>
+                    <ul>
+                        <li>
+                            <i class="fa-solid fa-file-signature"></i>
+                            <span>Name:</span>
+                            <span>${this.state.name}</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-user"></i>
+                            <span>Created By:</span>
+                            <span>${this.state.createdBy}</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-calendar-days""></i>
+                            <span>Last Updated:</span>
+                            <span>${this.state.lastUpdated}</span>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-user""></i>
+                            <span>Last Updated By:</span>
+                            <span>${this.state.lastUpdatedBy}</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-book""></i>
+                            <span>Documentation:</span>
+                            <a href="#"  @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_l3_documentation') }}> ${this.state.documentation} docs </a>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Tokens:</span>
+                            <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_tokens') }}>${this.state.tokens} tokens</a>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-folder-tree""></i>
+                            <span>Assets:</span>
+                            <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_assets') }}>${this.state.assets} assets </a>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-cubes""></i>
+                            <span>Components:</span>
+                            <a href="#"" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_widgets') }}>${this.state.components} components </a>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-pen-nib"></i>
+                            <span>Style:</span>
+                            <a href="#""  @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_styles') }}>${this.state.style} lines</a>
+                        </li>
+                    </ul>
+                </details>
+            </div>
+        `;
+    }
+}
+
+interface IState {
+    name: string | undefined,
+    createdBy: string | undefined,
+    lastUpdated: string | undefined,
+    lastUpdatedBy: string | undefined,
+    documentation: number | undefined,
+    tokens: number | undefined,
+    assets: number | undefined,
+    components: number | undefined,
+    style: number | undefined,
+
+}
+

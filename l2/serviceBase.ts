@@ -49,7 +49,7 @@ export abstract class ServiceBase extends LitElement {
         }
     }
 
-    setError(error:string): void {
+    setError(error: string): void {
         this.serviceContent?.setAttribute('error', error);
     }
 
@@ -65,6 +65,40 @@ export abstract class ServiceBase extends LitElement {
     openMe() {
         const itemService = this.serviceItemNav;
         if (itemService) itemService.click();
+    }
+
+    openService(service: string, position: 'left' | 'right', level: number) {
+        const page = this.closest('mls-page-100529');
+        if (!page) return;
+        const toolbar = page.querySelector(`mls-toolbar-100529[toolbarposition="${position}"][level="${level}"]`);
+        if (!toolbar) return;
+        const toolbarItem = toolbar.querySelector(`mls-toolbar-item-100529[path="${service}"`) as HTMLElement;
+
+        if (toolbarItem) {
+            if (this.level !== level) {
+                this.selectLevel(level);
+                toolbar.setAttribute('service-to-open', service);
+                return;
+            }
+            toolbarItem.click();
+        }
+    }
+
+    selectLevel(level: number) {
+        const nav = this.closest('mls-nav1-100529');
+        const objIndex = {
+            0: 7,
+            1: 6,
+            2: 5,
+            3: 4,
+            4: 3,
+            5: 2,
+            6: 1,
+            7: 0,
+
+        } as any;
+        if (!nav) return;
+        nav.setAttribute('tabindexactive', objIndex[level]);
     }
 
     private getMlsNav2(): IMlsNav2 | null {
