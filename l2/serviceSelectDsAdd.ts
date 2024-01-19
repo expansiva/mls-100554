@@ -35,7 +35,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
         if (this.mode === 'template') {
             this.changeScenario('sc2');
-            //this.fireEvent();
+            this.fireEvent(0);
             return;
         }
         this.state.copyFrom.name = 'config_ds_default';
@@ -46,7 +46,6 @@ export class ServiceListFilesAdd100554 extends LitElement {
     }
 
     onBtnNext2Click() {
-        // this.state.copyFrom = this.elements.selectTemplates.copyfrom;
         this.changeScenario('sc3');
     }
 
@@ -131,8 +130,8 @@ export class ServiceListFilesAdd100554 extends LitElement {
         return Array.from(projectInMemory);
     }
 
-    fireEvent(e: MouseEvent) {
-        const index: number = +(e.target as HTMLSelectElement).value;
+    fireEvent(index: number) {
+        this.state.copyFrom = this.state.dsAvaliables[index];
         if (!this.state.copyFrom) return;
         const params = {
             service: ['_100529_service_styles_preview'],
@@ -216,7 +215,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
                 <div >
                     <label >Templates:</label>
                     <div >
-                        <select @change=${(e: MouseEvent) => { this.fireEvent(e) }}> 
+                        <select @change=${(e: MouseEvent) => { this.fireEvent(+(e.target as HTMLSelectElement).value) }}> 
                             ${this.state.dsAvaliables.map((ds, index) => html`
                                 <option value=${index}>Project: ${ds.project} Name: ${ds.name}</option>
                             `)}
