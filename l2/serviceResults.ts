@@ -25,10 +25,10 @@ export class ServiceResults extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf1e6',
-        name: 'Results2',
+        name: 'Results',
         mode: 'A',
         position: 'all',
-        readOnly: false,
+        readOnly: true,
         tooltip: 'Results',
         className: undefined,
         tags: [],
