@@ -5,7 +5,6 @@ import { customElement, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
 
-
 @customElement('service-select-ds-100554')
 export class ServiceSelectDs100554 extends ServiceBase {
 
@@ -80,7 +79,6 @@ export class ServiceSelectDs100554 extends ServiceBase {
     private setEvents() {
         mls.events.addEventListener([3], ['DSChanged'] as any, (ev) => {
             this.toogleBadge(true, '_100554_serviceSave')
-
         });
 
         mls.events.addEventListener([5], ['ProjectSelected'], (ev) => {
@@ -136,8 +134,6 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
     private setLastDsSelected(dsindex: number, project: number) {
-
-        debugger
         if (!dsindex || !project) return;
         const list = this.getLastDsSelectedList();
         list[project] = dsindex;
@@ -170,7 +166,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
             value: dsindex
         };
         mls.actual[3].mode = dsindex;
-        mls.events.fire(3, ['DSSelected'], JSON.stringify(params));
+        mls.events.fire(3, ['DSSelected'], JSON.stringify(params), 500);
 
     }
 
@@ -198,6 +194,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
 
         }
     }
+
 
     public async restoreDs(item: mls.l5.IPrjDesignSystem) {
         if (!this.state.actualProject) return;
@@ -254,15 +251,17 @@ export class ServiceSelectDs100554 extends ServiceBase {
                                 <span>${ds.dsInfo.dsName + ' (' + ds.dsInfo.dsIndex.toString() + ')'}</span>
                                 <i  class="fa fa-location-dot"
                                     title="in local storage" 
-                                    style="display:${ds.inLocalStorage ? 'block' : ''}">
+                                    style="display:${ds.inLocalStorage ? 'block' : 'none'}">
                                 </i>
                                 <i class="fa fa-unbalanced" 
                                    title="need conciliation"
-                                   style="display:${ds.outdated ? 'block' : ''}">
+                                   style="display:${ds.outdated ? 'block' : 'none'}">
                                 </i>
                                 <i class="fa fa-rotate-left" 
                                    title="clear"
-                                   style="display:${ds.inLocalStorage ? 'block' : ''}">
+                                   style="display:${ds.inLocalStorage ? 'block' : 'none'}"
+                                   @click=${(e: MouseEvent) => { e.preventDefault(); this.restoreDs(ds.dsInfo) }}
+                                >
                                 </i>
                             </div>
                             <span class="fa-solid fa-chevron-right"></span>
