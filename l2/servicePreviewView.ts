@@ -318,7 +318,7 @@ export class ServicePreviewView extends LitElement {
     private showLoader(show: boolean) {
 
         if (!this.father) return;
-        this.father.loader = show;
+        this.father.loading = show;
 
     }
 
