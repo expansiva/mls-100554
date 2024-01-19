@@ -4,11 +4,14 @@ import { html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+
+
 @customElement('service-select-ds-100554')
 export class ServiceSelectDs100554 extends ServiceBase {
 
     constructor() {
         super();
+
         this.setEvents();
     }
 
@@ -58,15 +61,8 @@ export class ServiceSelectDs100554 extends ServiceBase {
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (visible) {
-            // const { project } = mls.actual[5];
-            // if (!project) return;
-            // let lastDsIndex = this.getLastDsSelectedByProject(project);
-            // if (!lastDsIndex) lastDsIndex = 0;
-            // const dss = mls.l5.ds.list(project);
-            // const dsInfo = dss[lastDsIndex];
-            // if (!dsInfo) return;
-            // this.onItemClick(dsInfo);
+        if (visible && reinit) {
+        
         }
 
     }
@@ -95,11 +91,8 @@ export class ServiceSelectDs100554 extends ServiceBase {
     public init() {
         this.clearState();
         this.setProjectActual();
-        // this.state.history = this.loadHistory();
         if (!this.state.actualProject) return;
-        // if (!this.state.history[this.state.actualProject]) this.state.history[this.state.actualProject] = [];
         this.getDs();
-
     }
 
     private clearState() {
@@ -130,7 +123,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
     private getLastDsSelectedList(): ILastDsSelected {
-        const str = localStorage.getItem('mls-last-ds-selected');
+        const str = localStorage.getItem('collab-last-ds-selected');
         if (!str) return {};
         const obj = JSON.parse(str);
         return obj;
@@ -143,10 +136,12 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
     private setLastDsSelected(dsindex: number, project: number) {
+
+        debugger
         if (!dsindex || !project) return;
         const list = this.getLastDsSelectedList();
         list[project] = dsindex;
-        localStorage.setItem('mls-last-ds-selected', JSON.stringify(list));
+        localStorage.setItem('collab-last-ds-selected', JSON.stringify(list));
     }
 
     private getDs() {
@@ -181,17 +176,17 @@ export class ServiceSelectDs100554 extends ServiceBase {
 
     openAdd() {
 
-        console.info('ADD')
+        console.info('openAdd')
 
     }
 
     private async onItemClick(item: mls.l5.IPrjDesignSystem) {
+        console.info('onItemClick')
 
         this.loading = true;
         this.serviceContent?.setAttribute('error', '');
 
         try {
-            //this.addOnHistory(item);
             await this.initDsSelected(item.dsIndex);
             this._fireEventDsSelected(item.dsIndex);
             if (this.state.actualProject) this.setLastDsSelected(item.dsIndex, this.state.actualProject);
@@ -223,14 +218,24 @@ export class ServiceSelectDs100554 extends ServiceBase {
         }
     }
 
+    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
+        await super.firstUpdated(changedProperties);
+        if (!this.state.actualProject || !this.state.dsSelected) return;
+        const dss = mls.l5.ds.list(this.state.actualProject);
+        const dsInfo = dss[this.state.dsSelected];
+        if (!dsInfo) return;
+        this.onItemClick(dsInfo);
+    }
 
     render() {
 
         this.init();
+        if (this.state.actualProject) {
+            let lastDsIndex = this.getLastDsSelectedByProject(this.state.actualProject);
+            if (!lastDsIndex) lastDsIndex = 0;
+            this.state.dsSelected = lastDsIndex;
+        }
 
-        console.info({
-            state: this.state
-        })
 
         return html`
         <div class="l5-ds-list">
@@ -242,7 +247,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
                 <ul class="serviceListList">
                     ${this.state.ds.map(ds => html`
                         <li
-                        @click="${(e: MouseEvent) => { e.preventDefault(); this.onItemClick(ds.dsInfo) }}
+                        @click=${(e: MouseEvent) => { e.preventDefault(); this.onItemClick(ds.dsInfo) }}
                         class= "${ds.dsInfo.dsIndex === this.state?.dsSelected ? 'selected' : ''}"
                         >
                             <div>
@@ -251,13 +256,13 @@ export class ServiceSelectDs100554 extends ServiceBase {
                                     title="in local storage" 
                                     style="display:${ds.inLocalStorage ? 'block' : ''}">
                                 </i>
-                                <i class="fa fa-rotate-left" 
-                                   title="clear"
-                                   style="display:${ds.inLocalStorage ? 'block' : ''}>
-                                </i>
                                 <i class="fa fa-unbalanced" 
                                    title="need conciliation"
-                                   style="display:${ds.outdated ? 'block' : ''}>
+                                   style="display:${ds.outdated ? 'block' : ''}">
+                                </i>
+                                <i class="fa fa-rotate-left" 
+                                   title="clear"
+                                   style="display:${ds.inLocalStorage ? 'block' : ''}">
                                 </i>
                             </div>
                             <span class="fa-solid fa-chevron-right"></span>
