@@ -42,7 +42,7 @@ export class ServicePreviewView extends LitElement {
 
     renderPreview() {
         if (this.mode === 'm') {
-
+            this.classList.add('mobilemode');
             return html` 
                 <div class="groupSetMobile">
                     <div>
@@ -65,13 +65,14 @@ export class ServicePreviewView extends LitElement {
 
         } else {
 
+            this.classList.add('remove');
             return html`<iframe style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview" @load="${this.load}" ></iframe>`;
 
         }
     }
 
     static styles = css`
-        :host{
+        :host.mobilemode{
             width:100%;
             height:100vh;
             min-height:700px;
