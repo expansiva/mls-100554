@@ -74,7 +74,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
     private sectionAdd: HTMLElement | undefined;
 
     private showAdd(): boolean {
-        if (!this.sectionAdd) this.sectionAdd = document.createElement('service-list-files-add-100554')
+        if (!this.sectionAdd) this.sectionAdd = document.createElement('service-select-ds-add-100554')
         if (this.menu.setMode) this.menu.setMode('page', this.sectionAdd);
         return true;
     }
