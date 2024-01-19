@@ -23,6 +23,8 @@ export abstract class ServiceBase extends LitElement {
 
     abstract details: IService;
 
+    abstract menu: IMenu;
+
     abstract onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void;
 
     connectedCallback() {

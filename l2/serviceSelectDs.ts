@@ -133,7 +133,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
         return list[project] || undefined;
     }
 
-    private setLastDsSelected(dsindex: number, project: number) {
+    public setLastDsSelected(dsindex: number, project: number) {
         if (!dsindex || !project) return;
         const list = this.getLastDsSelectedList();
         list[project] = dsindex;

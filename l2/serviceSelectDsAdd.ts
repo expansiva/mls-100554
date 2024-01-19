@@ -1,3 +1,233 @@
 /// <mls shortName="serviceSelectDsAdd" project="100554" enhancement="_100554_enhancementLit" groupName="internal" />
-				
-// typescript new file
+
+import { html, css, LitElement, classMap } from 'lit';
+import { customElement, query, property } from 'lit/decorators.js';
+import { ServiceSelectDs100554 } from './_100554_serviceSelectDs';
+
+@customElement('service-select-ds-add-100554')
+export class ServiceListFilesAdd100554 extends LitElement {
+
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
+
+    @property()
+    state: IState = {
+        copyFrom: {
+            name: undefined,
+            dsindex: undefined,
+            project: undefined,
+            widgetIOName: undefined,
+        },
+        name: undefined,
+        project: undefined
+    }
+
+    @property({ type: String }) currentScenario: IScenaries = 'sc1';
+
+    @property({ type: String }) mode: IMode = 'default';
+
+    @query('#l5_ds_add_input_name')
+    inputName: HTMLInputElement | undefined;
+
+    service: ServiceSelectDs100554 | undefined;
+
+    onBtnNext1Click() {
+
+        if (this.mode === 'template') {
+            this.changeScenario('sc2');
+            //this.fireEvent();
+            return;
+        }
+        this.state.copyFrom.name = 'config_ds_default';
+        this.state.copyFrom.dsindex = 0;
+        this.state.copyFrom.project = 100529;
+        this.state.copyFrom.widgetIOName = '_100529_config_ds_default';
+        this.changeScenario('sc3');
+    }
+
+    onBtnNext2Click() {
+        // this.state.copyFrom = this.elements.selectTemplates.copyfrom;
+        this.changeScenario('sc3');
+    }
+
+    onBtnNext3Click() {
+        this.addDs();
+    }
+
+    onRadioClick(mode: IMode) {
+        this.mode = mode;
+    }
+
+    changeScenario(scenario: IScenaries) {
+        this.currentScenario = scenario
+    }
+
+    validateLettersAndNumbers(str:string) {
+        const pattern = /^[A-Za-z0-9]+$/;
+        return pattern.test(str);
+    }
+
+    async addDs() {
+
+        if (!this.service || !this.inputName) return;
+        this.service.setError('');
+        this.service.loading = true;
+
+        const isValidName = this.validateLettersAndNumbers(this.inputName.value);
+
+        if (!this.inputName.value || !isValidName) {
+            this.service.setError('Name invalid!');
+            this.service.loading = false;
+            return;
+        }
+
+        if (!this.state.project) {
+            this.service.setError('Project invalid!');
+            this.service.loading = false;
+            return;
+        }
+
+        this.state.name = this.inputName.value;
+
+        try {
+
+            if (!this.state.copyFrom || !this.state.copyFrom.widgetIOName) return;
+            const dsAdded = await mls.l5.ds.addDesignSystem(this.state.project, this.state.name, this.state.copyFrom.widgetIOName);
+            this.service.setLastDsSelected(dsAdded.dsIndex, this.state.project);
+            this.service.loading = true;
+            if (this.service.menu.setMenuActive) this.service.menu.setMenuActive('opSelect')
+        } catch (err: any) {
+            this.service.setError(err.message);
+        } finally {
+            this.service.loading = false;
+
+        }
+    }
+
+    renderScenario() {
+        switch (this.currentScenario) {
+            case 'sc1':
+                return html`
+                    ${this.renderSc1()}
+                `
+            case 'sc2':
+                return html`
+                    ${this.renderSc2()}
+                `
+            case 'sc3':
+                return html`
+                    ${this.renderSc3()}
+                `
+        }
+    }
+
+    renderSc1() {
+        return html`
+            <section id="service_selectds_section_1">
+                    <h1>Add a new design system</h1>
+                    <h4>Here you can create a new design system selecting empty default design system or select a template.</h4>
+                    <div class="ds-type-select">
+                        <div class="ds-type-select-item ${classMap({ active: this.mode === 'default' })}">
+                            <input
+                             name="typeGroup"
+                             type="radio"
+                             checked="checked"
+                             value="default"
+                             @click=${(e: MouseEvent) => { this.onRadioClick('default') }}
+                             >
+                            <div>
+                                <svg fill="#000000" height="40px" width="40px" version="1.1" id="XMLID_89_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" xml:space="preserve"> 
+                                    <g id="template"> 	<g> 		<path d="M8,22H0V2h24v20H8z M2,20h4V7.9H2V20z M8,20h14V8H8V20z M6,6h16V4H2v2H6z"></path> 	
+                                        </g> 
+                                    </g> 
+                                </svg>
+                            </div>
+                            <span >Empty</span>
+                        </div>
+                        <div class="ds-type-select-item ${classMap({ active: this.mode === 'template' })}" >
+                            <input 
+                                name="typeGroup" 
+                                type="radio" 
+                                value="template" 
+                                @click=${(e: MouseEvent) => { this.onRadioClick('template') }}
+                                >
+                            <div >
+                                <svg width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> 
+                                    <path d="M20.9983 10C20.9862 7.82497 20.8897 6.64706 20.1213 5.87868C19.2426 5 17.8284 5 15 5H12C9.17157 5 7.75736 5 6.87868 5.87868C6 6.75736 6 8.17157 6 11V16C6 18.8284 6 20.2426 6.87868 21.1213C7.75736 22 9.17157 22 12 22H15C17.8284 22 19.2426 22 20.1213 21.1213C21 20.2426 21 18.8284 21 16V15" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"></path> 
+                                    <path d="M3 10V16C3 17.6569 4.34315 19 6 19M18 5C18 3.34315 16.6569 2 15 2H11C7.22876 2 5.34315 2 4.17157 3.17157C3.51839 3.82475 3.22937 4.69989 3.10149 6" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"></path> 
+                                </svg>
+                            </div>
+                            <span >Templates</span>
+                        </div>
+                    </div>
+                    <hr >
+                    <div class="next-action" >
+                        <button @click=${(e: MouseEvent) => { e.preventDefault(); this.onBtnNext1Click() }} >Next</button>
+                    </div>
+                </section>`
+    }
+
+    renderSc2() {
+        return html`
+            <section>
+                <div >
+                    <label >Templates:</label>
+                    <div >
+                        <mls-l3-select-ds-100529> </mls-l3-select-ds-100529>
+                    </div>
+                </div>
+                <hr >
+                <div >
+                    <button @click=${(e: MouseEvent) => { e.preventDefault(); this.onBtnNext2Click() }}>Next</button>
+                </div>
+            </section>
+        `
+    }
+
+    renderSc3() {
+        return html`
+            <section >
+                <div>
+                    <label >Resume:</label>
+                    <ul >
+                        <li>Project: ${this.state.project}</li>
+                        <li>Template: ${this.state.copyFrom.project + '_' + this.state.copyFrom.name}</li>
+                    </ul>
+                    <label>Name:</label>
+                    <div>
+                        <input id="l5_ds_add_input_name" >
+                    </div>
+                    <hr >
+                    <div >
+                        <button @click=${(e: MouseEvent) => { e.preventDefault(); this.onBtnNext3Click() }}>Create Design System </button>
+                    </div>
+                </div>
+            </section>
+        `
+    }
+
+
+    render() {
+        this.state.project = mls.actual[5].project;
+        return html`
+            <section class="service-selectds-add">
+                ${this.renderScenario()}
+            </section>
+        `
+    }
+
+}
+
+type IScenaries = 'sc1' | 'sc2' | 'sc3';
+type IMode = 'default' | 'template';
+
+
+interface IState {
+    copyFrom: {
+        name: string | undefined,
+        dsindex: number | undefined,
+        project: number | undefined,
+        widgetIOName: string | undefined,
+    },
+    name: string | undefined,
+    project: number | undefined,
+}
