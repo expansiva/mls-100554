@@ -257,7 +257,7 @@ export class ServicePreviewView extends LitElement {
                 ifr.contentDocument.body.appendChild(script);
 
             });
-            console.info(this.level);
+            
             const s = document.createElement('script') as HTMLScriptElement;
             s.textContent = `
 				window['mls'] = window['mls']  ? window['mls']  : parent.mls ? parent.mls : top['mls'];
