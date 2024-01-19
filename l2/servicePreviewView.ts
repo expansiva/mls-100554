@@ -257,14 +257,14 @@ export class ServicePreviewView extends LitElement {
                 ifr.contentDocument.body.appendChild(script);
 
             });
-            
+        
             const s = document.createElement('script') as HTMLScriptElement;
             s.textContent = `
 				window['mls'] = window['mls']  ? window['mls']  : parent.mls ? parent.mls : top['mls'];
 				window['Quill'] = window['Quill']  ? window['Quill']  : parent.Quill ? parent.Quill : top['Quill'];
 				window['monaco'] = window['monaco']  ? window['monaco']  : parent.monaco ? parent.monaco : top['monaco'];
 				window['l2_html'] = window['l2_html']  ? window['l2_html']  : parent.l2_html ? parent.l2_html : top['l2_html'];
-				window['l2_fieldTypes'] = window['l2_fieldTypes']  ? window['l2_fieldTypes']  : parent.l2_fieldTypes ? parent.l2_fieldTypes : top['l2_fieldTypes'];window['litDisableBundleWarning'] = true; mls.levelActual = ${this.level};
+				window['l2_fieldTypes'] = window['l2_fieldTypes']  ? window['l2_fieldTypes']  : parent.l2_fieldTypes ? parent.l2_fieldTypes : top['l2_fieldTypes'];window['litDisableBundleWarning'] = true; window['collabActualLevel'] = ${this.level};
 
 
 				`;

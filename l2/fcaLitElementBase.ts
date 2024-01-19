@@ -26,7 +26,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     public styleel: string | undefined;
 
     get levelActual(): number{
-        if ((mls as any)['levelActual']) return (mls as any)['levelActual'];
+        if (window['collabActualLevel' as any]) return window['collabActualLevel' as any] as any;
         return 7
     };
 
