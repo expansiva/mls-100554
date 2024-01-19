@@ -47,7 +47,8 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public onClickIcon = (op: string): void => {
-        if (op === 'icPreview') this.preview();
+        if (op === 'icPreviewD') this.preview('d');
+        if (op === 'icPreviewM') this.preview('m');
     }
 
     public menu: IMenu = {
@@ -55,10 +56,11 @@ export class ServicePreview100554 extends ServiceBase {
         actions: {
         },
         icons: {
-            icPreview: 'Preview;f06e'
+            icPreviewD: 'Desktop;f390',
+            icPreviewM: 'Mobile;f3cf'
         },
         actionDefault: '', // call after close icon clicked
-        iconDefault: 'icPreview',
+        iconDefault: 'icPreviewD',
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
         onClickIcon: this.onClickIcon
@@ -115,13 +117,14 @@ export class ServicePreview100554 extends ServiceBase {
 
     // -------------- IMPLEMENTS-----------------
 
-    private async preview() {
+    private async preview(mode:string) {
 
         if (!mls.actual[2].project) return true;
 
         const doc = document.createElement('service-preview-view-100554');
         doc.setAttribute('page', mls.actual[2].getFullName());
         doc.setAttribute('level', '2');
+        doc.setAttribute('mode', mode);
         if (this.menu.setMode) this.menu.setMode('page', doc);
         return true;
         
