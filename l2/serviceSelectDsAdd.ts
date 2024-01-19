@@ -4,8 +4,11 @@ import { html, css, LitElement, classMap } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceSelectDs100554 } from './_100554_serviceSelectDs';
 
+export const initServiceSelectDsAdd = () =>{
+    return true;
+}
 @customElement('service-select-ds-add-100554')
-export class ServiceListFilesAdd100554 extends LitElement {
+export class ServiceSelectDsAdd100554 extends LitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 

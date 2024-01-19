@@ -3,13 +3,14 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-
+import {initServiceSelectDsAdd} from './_100554_serviceSelectDsAdd'
 
 @customElement('service-select-ds-100554')
 export class ServiceSelectDs100554 extends ServiceBase {
 
     constructor() {
         super();
+        initServiceSelectDsAdd();
         this.setEvents();
     }
 
@@ -60,7 +61,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
         if (visible && reinit) {
-        
+
         }
 
     }
@@ -69,11 +70,14 @@ export class ServiceSelectDs100554 extends ServiceBase {
         return true;
     }
 
+
+    private sectionAdd: HTMLElement | undefined;
+
     private showAdd(): boolean {
-        if (this.menu.setMode) this.menu.setMode('editor');
+        if (!this.sectionAdd) this.sectionAdd = document.createElement('service-list-files-add-100554')
+        if (this.menu.setMode) this.menu.setMode('page', this.sectionAdd);
         return true;
     }
-
 
     private setEvents() {
         mls.events.addEventListener([3], ['DSChanged'] as any, (ev) => {
@@ -170,7 +174,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
     openAdd() {
-        if(this.menu.setMenuActive) this.menu.setMenuActive('opAdd')
+        if (this.menu.setMenuActive) this.menu.setMenuActive('opAdd')
     }
 
     private async onItemClick(item: mls.l5.IPrjDesignSystem) {
