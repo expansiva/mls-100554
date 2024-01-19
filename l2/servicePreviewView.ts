@@ -30,7 +30,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     render() {
-
+        this.showLoader(true);
         if (this.error !== '') return this.renderError();
         else return this.renderPreview();
 
@@ -163,6 +163,7 @@ export class ServicePreviewView extends LitElement {
         this.setMyFile();
         await this.setHTml(iframe);
         iframe.style.display = '';
+        this.showLoader(false);
 
     }
 

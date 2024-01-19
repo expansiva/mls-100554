@@ -75,34 +75,48 @@ export class ServicePreview100554 extends ServiceBase {
         }
     }
 
-    
+
 
     // -------------- EVENTS -------------------
 
     private setEvents() {
 
-        mls.events.addEventListener([2], ['ToolBarSelected'], (ev) => this.onToolBarSelected(ev));
+        mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
 
     }
 
-    private onToolBarSelected(ev: mls.events.IEvent) {
-    
-        if (!ev || !ev.desc) return;
-        const params: { level: number, position: string, from: string, to: string } = ev.desc ? JSON.parse(ev.desc) : {};
+    private timeEvent: number = -1;
+    private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
-        if (![2].includes(params.level) || this.position === params.position) {
-            return;
+        try {
+
+            if (this.visible === 'false' || !this.visible) return;
+
+            if (ev.level !== +this.level || (ev.type !== 'FileAction')) return;
+
+            const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
+
+            const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new'];
+
+            if (
+                fileAction.position === this.position ||
+                !eventsValid.includes(fileAction.action)
+            ) return;
+
+            clearTimeout(this.timeEvent);
+            this.timeEvent = setTimeout(async () => {
+
+                this.onServiceClick(true, false);
+
+            }, 500);
+
+        } catch (e) {
+
+            console.info(e);
+
         }
 
-        if (!['_100529_service_Source'].includes(params.to)) {
-
-            this.activeMe('H', false);
-        } else {
-            this.activeMe('A', false);
-        }
-
-    };
-
+    }
 
     private activeMe(status: string, click: boolean): void {
 
@@ -120,7 +134,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     // -------------- IMPLEMENTS-----------------
 
-    private async preview(mode:string) {
+    private async preview(mode: string) {
 
         if (!mls.actual[2].project) return true;
 
@@ -128,9 +142,10 @@ export class ServicePreview100554 extends ServiceBase {
         doc.setAttribute('page', mls.actual[2].getFullName());
         doc.setAttribute('level', '2');
         doc.setAttribute('mode', mode);
+        (doc as any).father = this;
         if (this.menu.setMode) this.menu.setMode('page', doc);
         return true;
-        
+
     }
 
 }
