@@ -140,7 +140,7 @@ export class ServicePreview100554 extends ServiceBase {
 
         const doc = document.createElement('service-preview-view-100554');
         doc.setAttribute('page', mls.actual[2].getFullName());
-        doc.setAttribute('level', '2');
+        doc.setAttribute('level', this.level as any);
         doc.setAttribute('mode', mode);
         (doc as any).father = this;
         if (this.menu.setMode) this.menu.setMode('page', doc);
