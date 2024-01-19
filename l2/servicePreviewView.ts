@@ -79,6 +79,7 @@ export class ServicePreviewView extends LitElement {
             display: flex!important;
             flex-direction: column;
             align-items: center;
+            padding-top:.5rem;
         }
 
         .groupSetMobile{
