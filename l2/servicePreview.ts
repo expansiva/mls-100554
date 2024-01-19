@@ -75,8 +75,6 @@ export class ServicePreview100554 extends ServiceBase {
         }
     }
 
-
-
     // -------------- EVENTS -------------------
 
     private setEvents() {
