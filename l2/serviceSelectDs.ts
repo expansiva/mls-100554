@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import {initServiceSelectDsAdd} from './_100554_serviceSelectDsAdd'
+import { initServiceSelectDsAdd } from './_100554_serviceSelectDsAdd'
 
 @customElement('service-select-ds-100554')
 export class ServiceSelectDs100554 extends ServiceBase {
@@ -70,12 +70,9 @@ export class ServiceSelectDs100554 extends ServiceBase {
         return true;
     }
 
-
-    private sectionAdd: HTMLElement | undefined;
-
     private showAdd(): boolean {
-        if (!this.sectionAdd) this.sectionAdd = document.createElement('service-select-ds-add-100554')
-        if (this.menu.setMode) this.menu.setMode('page', this.sectionAdd);
+        const sectionAdd = document.createElement('service-select-ds-add-100554')
+        if (this.menu.setMode) this.menu.setMode('page', sectionAdd);
         return true;
     }
 
@@ -85,7 +82,16 @@ export class ServiceSelectDs100554 extends ServiceBase {
         });
 
         mls.events.addEventListener([5], ['ProjectSelected'], (ev) => {
-            // this.loadService();
+            if (!ev.desc) return;
+            const data: IParamsEvent = JSON.parse(ev.desc);
+            if (data.value) {
+                this.state.actualProject = data.value;
+                this.requestUpdate();
+                setTimeout(() => {
+                    this.fireOpenDetails();
+                }, 1000)
+            }
+
         });
     }
 
@@ -160,6 +166,8 @@ export class ServiceSelectDs100554 extends ServiceBase {
             };
             this.state.ds.push(obj);
         });
+
+        this.state = this.state;
     }
 
     private _fireEventDsSelected(dsindex: number) {
@@ -178,8 +186,6 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
     private async onItemClick(item: mls.l5.IPrjDesignSystem) {
-        console.info('onItemClick')
-
         this.loading = true;
         this.serviceContent?.setAttribute('error', '');
 
@@ -216,14 +222,20 @@ export class ServiceSelectDs100554 extends ServiceBase {
         }
     }
 
-    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
-        await super.firstUpdated(changedProperties);
+    fireOpenDetails() {
         if (!this.state.actualProject || !this.state.dsSelected) return;
         const dss = mls.l5.ds.list(this.state.actualProject);
         const dsInfo = dss[this.state.dsSelected];
         if (!dsInfo) return;
         this.onItemClick(dsInfo);
     }
+
+    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
+        await super.firstUpdated(changedProperties);
+        this.fireOpenDetails();
+    }
+
+
 
     render() {
 
