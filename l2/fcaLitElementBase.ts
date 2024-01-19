@@ -25,6 +25,11 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     @property({ type: String, reflect: true })
     public styleel: string | undefined;
 
+    get levelActual(): number{
+        if (mls.actualLevel) return mls.actualLevel;
+        return 7
+    };
+
     abstract actions: vglobal.IActionLevels;
 
     //abstract doChangeState(info: string): void;
@@ -39,6 +44,11 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     createRenderRoot() {
         return this;
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.setAttribute('level', this.levelActual.toString());
     }
 
     public shouldUpdate(changedProperties: Map<string, string>): boolean {
@@ -103,7 +113,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
                 this.clearTree(document.createElement('span'), span).then((el) => {
                     this.myInnerHTML = el ? el.innerHTML : this.myInnerHTML
                     Array.from(this.children).forEach((e) => e.remove());
-                    const l = this.level;
+                    const l = this.levelActual.toString();
                     this.setAttribute('level', '0');
                     this.setAttribute('level', l as string);
                 });
