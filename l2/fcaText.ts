@@ -9,12 +9,10 @@
 import { html, unsafeHTML } from 'lit';  
 import { customElement } from 'lit/decorators.js';
 import { FcaLitElementBase } from './_100554_fcaLitElementBase';
-import { IActionLevels, updateHtmlTreeFCA } from './_100554_fcaGlobal'; 
+import { IActionLevels } from './_100554_fcaGlobal'; 
 
 @customElement('fca-text-100554')
 export class FCAText extends FcaLitElementBase {
-
-  public teste(el:FcaLitElementBase):void { updateHtmlTreeFCA(el)};
 
   public allowsChild = (tag: string): boolean => { return false };
   public allowAddBody = false;
