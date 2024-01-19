@@ -14,13 +14,3 @@ export class SimpleGreeting extends LitElement {
         return html`<p> Hello, ${this.name} !</p>`;
     }
 }
-
-const updateAllHtml = (el: HTMLElement) => {
-    
-}
-
-const el = document.createElement('div');
-el.innerHTML = `
-<div> um teste</div>
-
-`

@@ -270,3 +270,50 @@ export const changeStateDrop = (elBase: FcaLitElementBase, tagMove: string) => {
     
 
 }
+
+export const updateAllHtml = async (el: HTMLElement) => {
+
+    /*
+        temp1
+        body = temp1.closest('body')
+        t = await temp1.updateAllHtml(body)
+        a = monaco.editor.getModels()
+        a[80].setValue(t)
+    
+    */
+    const all = document.createElement('div');
+    for await (const c of Array.from(el.children)) {
+        
+        await updateAllHtmlChild(all as HTMLElement, c as HTMLElement);
+    }
+
+    return all.innerHTML;
+
+}
+
+const updateAllHtmlChild = async (parent: HTMLElement, el: HTMLElement) => {
+
+    try {
+
+        const tag = el.tagName.toLocaleLowerCase();
+        if (tag.startsWith('fca-')) {
+            const clone = el.cloneNode(false);
+            parent.appendChild(clone);
+            for await (const c of Array.from(el.children)) {
+                await updateAllHtmlChild(clone as HTMLElement, c as HTMLElement);
+            }
+        } else {
+            for await (const c of Array.from(el.children)) {
+                await updateAllHtmlChild(parent, c as HTMLElement);
+            }
+        }
+
+        return;
+
+    } catch (e) {
+        console.info(e);
+        return;
+    }
+
+
+}
