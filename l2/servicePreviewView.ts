@@ -42,7 +42,15 @@ export class ServicePreviewView extends LitElement {
 
     renderPreview() {
         if (this.mode === 'm') {
-            this.classList.add('mobilemode');
+            this.style.cssText = `
+                width:100%;
+                height:100vh;
+                min-height:700px;
+                display: flex!important;
+                flex-direction: column;
+                align-items: center;
+                padding-top:.5rem;
+            `;
             return html` 
                 <div class="groupSetMobile">
                     <div>
@@ -65,23 +73,14 @@ export class ServicePreviewView extends LitElement {
 
         } else {
 
-            this.classList.add('remove');
+            this.style.cssText = ``;
+
             return html`<iframe style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview" @load="${this.load}" ></iframe>`;
 
         }
     }
 
     static styles = css`
-        :host.mobilemode{
-            width:100%;
-            height:100vh;
-            min-height:700px;
-            display: flex!important;
-            flex-direction: column;
-            align-items: center;
-            padding-top:.5rem;
-        }
-
         .groupSetMobile{
             display:flex;
             width:300px;
@@ -148,8 +147,7 @@ export class ServicePreviewView extends LitElement {
             border-radius: 50%;
             margin: 1rem auto;
         }
-
-        
+    
     `;
 
     //-------- IMPLEMENTS---------
