@@ -16,13 +16,14 @@ export class ServicePreview100554 extends ServiceBase {
 
     @property() error: string = '';
 
+    private lastMode: string = 'icPreviewD';
+
     private info: any = {};
 
     constructor() {
         super();
         initServicePreviewView;
         this.setEvents();
-        console.info('inicializou os eventos')
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -47,6 +48,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public onClickIcon = (op: string): void => {
+        this.lastMode = op;
         if (op === 'icPreviewD') this.preview('d');
         if (op === 'icPreviewM') this.preview('m');
     }
@@ -68,11 +70,12 @@ export class ServicePreview100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (visible && reinit) {
-
+        if (visible && this.menu.setIconActive) {
+            this.menu.setIconActive(this.lastMode);
         }
     }
 
+    
 
     // -------------- EVENTS -------------------
 
