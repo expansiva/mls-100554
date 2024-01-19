@@ -160,10 +160,20 @@ export class ServicePreviewView extends LitElement {
 
     private async init(iframe: HTMLIFrameElement) {
 
-        this.setMyFile();
-        await this.setHTml(iframe);
-        iframe.style.display = '';
-        this.showLoader(false);
+        try {
+
+            this.setMyFile();
+            await this.setHTml(iframe);
+            iframe.style.display = '';
+            this.showLoader(false);
+            
+        } catch (e: any) {
+            
+            this.error = e.message;
+            this.showLoader(false);
+            
+        }
+        
 
     }
 
