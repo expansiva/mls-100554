@@ -1,7 +1,7 @@
 /// <mls shortName="serviceSelectDs" project="100554" enhancement="_100554_enhancementLit" groupName="services" />
 
 import { html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
 
@@ -10,7 +10,6 @@ export class ServiceSelectDs100554 extends ServiceBase {
 
     constructor() {
         super();
-
         this.setEvents();
     }
 
@@ -50,7 +49,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
 
-    @state()
+    @property()
     state: IState = { history: [], actualProject: undefined, ds: [], dsSelected: undefined };
 
 
@@ -171,9 +170,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
     openAdd() {
-
-        console.info('openAdd')
-
+        if(this.menu.setMenuActive) this.menu.setMenuActive('opAdd')
     }
 
     private async onItemClick(item: mls.l5.IPrjDesignSystem) {
