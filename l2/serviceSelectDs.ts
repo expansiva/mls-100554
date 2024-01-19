@@ -17,15 +17,15 @@ export class ServiceSelectDs100554 extends ServiceBase {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
-        icon: '&#xf1e6',
-        name: 'Results2',
+        icon: '&#xf15b',
+        name: 'Select Ds',
         mode: 'A',
-        position: 'all',
-        readOnly: false,
-        tooltip: 'Results',
+        position: 'left',
+        readOnly: true,
+        tooltip: 'Select Ds',
         className: undefined,
         tags: [],
-        levels: [2]
+        levels: [3]
     }
 
     public onClickLink = (op: string): boolean => {
