@@ -173,6 +173,38 @@ export class ServiceSource100554 extends ServiceBase {
 
     }
 
+    private async initHTML() {
+
+        const fc = async () => {
+
+            if (!mls.actual[2].project || !this.activeModel) {
+                this.error = 'Please, select a file!';
+                return;
+            }
+
+            if (!this.myEditors.html) {
+                const div = document.createElement('div');
+                const editor = monaco.editor.create(div, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
+                div.style.cssText = 'width: 100%; height: 100%;';
+                this.myEditors.html = {
+                    el: div,
+                    editor
+                }
+            }
+
+            if (this.menu.setMode) this.menu.setMode('page', this.myEditors.html.el);
+
+            this.myEditors.html.editor.setModel(this.activeModel);
+            this.myEditors.html.editor.layout();
+
+        }
+
+        fc();
+
+        return true;
+
+    }
+
 
 
     private showLoader(show: boolean): void {
