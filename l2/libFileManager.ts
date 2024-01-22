@@ -263,7 +263,7 @@ async function createFileAndModel(src: string, file: { project: number, shortNam
 
         const uri = getUri(`_${file.project}_${file.shortName}`, ftype as any);
 
-        model1 = mls.l2.editor.get({ project: file.project, shortName: file.shortName });
+        model1 = mls.l2.editor.get({ project: file.project, shortName: file.shortName + aux  });
 
         if (model1) return model1; // created in another instance
 
@@ -282,7 +282,10 @@ async function createFileAndModel(src: string, file: { project: number, shortNam
         addEventsModel(storFile, model1);
     }
 
-    await updateModelStatus(model1, false); // first compilation
+    if (storFile.extension === '.ts') {
+        await updateModelStatus(model1, false); // first compilation
+    }
+    
     return model1;
 }
 
