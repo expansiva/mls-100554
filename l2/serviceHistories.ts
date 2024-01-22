@@ -27,9 +27,7 @@ export class ServiceHistories100554 extends ServiceBase {
         name: 'Histories',
         mode: 'A',
         position: 'right',
-        readOnly: true,
         tooltip: 'Histories',
-        className: undefined,
         tags: [],
         levels: [2]
     }

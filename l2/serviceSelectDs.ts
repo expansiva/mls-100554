@@ -21,9 +21,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
         name: 'Select Ds',
         mode: 'A',
         position: 'left',
-        readOnly: true,
         tooltip: 'Select Ds',
-        className: undefined,
         tags: [],
         levels: [3]
     }

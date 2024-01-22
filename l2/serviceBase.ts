@@ -173,9 +173,9 @@ export interface IService {
     name: string,
     mode: IServiceMode,
     position: IServicePosition
-    readOnly: boolean,
+    readOnly?: boolean,
     tooltip: string,
-    className: IServiceClassName,
+    className?: IServiceClassName,
     tags: string[],
     levels: (0 | 1 | 2 | 3 | 4 | 5 | 6 | 7)[];
 }

@@ -19,9 +19,7 @@ export class ServiceDetailsDs100554 extends ServiceBase {
         name: 'Details Ds',
         mode: 'B',
         position: 'right',
-        readOnly: true,
         tooltip: 'Details Design System',
-        className: undefined,
         tags: [],
         levels: [3]
     }

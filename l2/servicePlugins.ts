@@ -26,9 +26,7 @@ export class ServicePlugins extends ServiceBase {
         name: 'Plugins',
         mode: 'A',
         position: 'left',
-        readOnly: false,
         tooltip: 'Plugins',
-        className: undefined,
         tags: [],
         levels: [5]
     }

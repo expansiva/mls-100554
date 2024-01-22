@@ -28,9 +28,7 @@ export class ServiceResults extends ServiceBase {
         name: 'Results',
         mode: 'A',
         position: 'all',
-        readOnly: true,
         tooltip: 'Results',
-        className: undefined,
         tags: [],
         levels: [2]
     }
