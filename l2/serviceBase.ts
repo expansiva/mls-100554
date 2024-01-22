@@ -43,9 +43,13 @@ export abstract class ServiceBase extends LitElement {
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {
         super.updated(changedProperties);
+
         if (changedProperties.has('loading')) {
             const loading = changedProperties.get('loading');
-            if (loading !== undefined) this.serviceContent?.setAttribute('loading', (!loading).toString());
+
+            if (loading !== undefined) {
+                this.serviceContent?.setAttribute('loading', (!loading).toString());
+            }
         }
     }
 

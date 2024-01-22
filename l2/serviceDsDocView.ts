@@ -55,10 +55,40 @@ export class ServiceDsDocView100554 extends ServiceBase {
     }
 
     setEvents() {
+        mls.events.addEventListener([3], ['DSDocPageClicked'], (ev) => {
+            // this.onDSDocPageClicked(ev);
+        });
 
+        mls.events.addEventListener([this.level], ['DSDocSelected'], (ev) => {
+            if (!this.serviceItemNav) return;
+            this.serviceItemNav.setAttribute('mode', 'A');
+            this.openMe();    
+        });
+
+        mls.events.addEventListener([this.level], ['DSDocUnSelected'], (ev) => {
+            if (!this.serviceItemNav) return;
+            this.serviceItemNav.setAttribute('mode', 'H');
+        });
     }
 
     render() {
-        return html`<p> Hello</p>`;
+        return html`
+            <div style="padding: 1rem; display:none;">
+                <div style="display:flex; gap:1rem; justify-content: center;">
+                    <button id="btnAddChildServiceL3SeeDocumentation" class="btn-docs">
+                        <span>Add Child</span>
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    <button id="btnDelServiceL3SeeDocumentation" class="btn-docs">
+                        <span>Remove this</span>
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+                <div style="width:100%; display: flex; align-items: center;">
+                    <h1 id="titleServiceL3SeeDocumentation" style="width:calc(100% - 35px)"></h1>
+                </div>
+                <editor-quill-docs-100554 opened="false"></editor-quill-docs-100554>
+            </div>
+        `;
     }
 }
