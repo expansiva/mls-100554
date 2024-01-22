@@ -158,47 +158,47 @@ export class ServiceDetailsDs100554 extends ServiceBase {
                     <summary>Resume</summary>
                     <ul>
                         <li>
-                            <i class="fa-solid fa-file-signature"></i>
+                            <i class="fa fa-file-signature"></i>
                             <span>Name:</span>
                             <span>${this.state.name}</span>
                         </li>
                         <li>
-                            <i class="fa-solid fa-user"></i>
+                            <i class="fa fa-user"></i>
                             <span>Created By:</span>
                             <span>${this.state.createdBy}</span>
                         </li>
                         <li>
-                            <i class="fa-solid fa-calendar-days""></i>
+                            <i class="fa fa-calendar-days""></i>
                             <span>Last Updated:</span>
                             <span>${this.state.lastUpdated}</span>
                         </li>
                         <li>
-                            <i class="fa-regular fa-user""></i>
+                            <i class="fa fa-regular fa-user""></i>
                             <span>Last Updated By:</span>
                             <span>${this.state.lastUpdatedBy}</span>
                         </li>
                         <li>
-                            <i class="fa-solid fa-book""></i>
+                            <i class="fa fa-book""></i>
                             <span>Documentation:</span>
                             <a href="#"  @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_l3_documentation') }}> ${this.state.documentation} docs </a>
                         </li>
                         <li>
-                            <i class="fa-solid fa-list-check"></i>
+                            <i class="fa fa-list-check"></i>
                             <span>Tokens:</span>
                             <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_tokens') }}>${this.state.tokens} tokens</a>
                         </li>
                         <li>
-                            <i class="fa-solid fa-folder-tree""></i>
+                            <i class="fa fa-folder-tree""></i>
                             <span>Assets:</span>
                             <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_assets') }}>${this.state.assets} assets </a>
                         </li>
                         <li>
-                            <i class="fa-solid fa-cubes""></i>
+                            <i class="fa fa-cubes""></i>
                             <span>Components:</span>
                             <a href="#"" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_widgets') }}>${this.state.components} components </a>
                         </li>
                         <li>
-                            <i class="fa-solid fa-pen-nib"></i>
+                            <i class="fa fa-pen-nib"></i>
                             <span>Style:</span>
                             <a href="#""  @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_styles') }}>${this.state.style} lines</a>
                         </li>
