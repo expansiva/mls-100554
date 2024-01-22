@@ -25,7 +25,7 @@ export class ServiceDetailsDs100554 extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (op === 'opResume') return this.showOverview();
+        if (op === 'opOverview') return this.showOverview();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -36,7 +36,7 @@ export class ServiceDetailsDs100554 extends ServiceBase {
             opOverview: 'Resume',
         },
         icons: {},
-        actionDefault: 'opResume', // call after close icon clicked
+        actionDefault: 'opOverview', // call after close icon clicked
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
         getLastMode: undefined,
