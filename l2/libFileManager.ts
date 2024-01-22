@@ -3,6 +3,11 @@
 
 //------------ EXPORT ----------------
 
+export async function readAllProjectAndCompile(project: number, shortName: string, needCompile: boolean = true): Promise<void> { 
+
+    return _readAllProjectAndCompile(project, shortName, needCompile);
+}
+
 export function getStorFile(file: { project: number, shortName: string, enhancement: string, extension: string, level: number, folder: string }): mls.stor.IFileInfo {
 
     return _getStorFile(file);
@@ -45,6 +50,36 @@ export async function cloneFileWithModel(file: { project: number, shortName: str
 
 function getUri(shortFN: string, ftype: '.ts' | '.d.ts' | '.html'): monaco.Uri {
     return monaco.Uri.parse(`file://server/${shortFN}${ftype}`);
+}
+
+const projectsLoaded: number[] = [];
+async function _readAllProjectAndCompile(project: number, shortName: string, needCompile: boolean = true): Promise<void> {
+
+    // load all typescripts dependencies of project , except shortName
+    if (projectsLoaded.includes(project)) return;
+
+    if (mls.istrace) console.log('loading files from project ' + project);
+
+    projectsLoaded.push(project);
+
+    const promises: Promise<mls.l2.editor.IMFile>[] = [];
+
+    const keys: string[] = Object.keys(mls.stor.files);
+    for (const key of keys) {
+
+        const storFile = mls.stor.files[key];
+        if (storFile.project === project
+            && storFile.level === 2
+            && storFile.shortName !== shortName) {
+            promises.push(_createModel(storFile, false));
+        }
+    }
+
+    await Promise.all(promises);
+
+    if (needCompile) await mls.l2.editor.compileAllProjectIfNeed(project, true);
+
+    return;
 }
 
 const code = {
@@ -165,10 +200,10 @@ async function _cloneFileWithModel(file: { project: number, shortName: string, e
         enhancement: file.enhancement,
         extension: file.extension,
         level: file.level,
-        folder: file.folder, 
+        folder: file.folder,
     }
 
-    model1 = await _createNewFileWithModel (src, newFile);
+    model1 = await _createNewFileWithModel(src, newFile);
     mls.common.tripleslash.changeVariable(model1, 'shortName', file.newShortName);
     mls.common.tripleslash.changeVariable(model1, 'project', file.newProject.toString());
 
