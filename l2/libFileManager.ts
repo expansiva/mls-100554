@@ -272,7 +272,7 @@ async function createFileAndModel(src: string, file: { project: number, shortNam
             changed: true,
             error: false,
             project: file.project,
-            shortName: file.shortName,
+            shortName: file.shortName+aux,
             extension: file.extension,
             model,
             storFile,
@@ -318,11 +318,12 @@ async function _createModel(storFile: mls.stor.IFileInfo, compile: boolean): Pro
 
     const model = monaco.editor.createModel(src, (code as any)[storFile.extension], uri);
 
+    const aux = storFile.extension === '.ts' ? '' : storFile.extension;
     model1 = {
         changed: false, // not changed in this section, but storFile.changed is about all sections
         error: false,
         project,
-        shortName: storFile.extension !== '.ts' ? shortName + extension : shortName,
+        shortName: shortName + aux,
         extension,
         model,
         storFile,
