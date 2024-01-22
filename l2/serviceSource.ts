@@ -8,6 +8,7 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 export class ServiceSource100554 extends ServiceBase {
 
     private activeModel: monaco.editor.ITextModel | undefined;
+    private activeModelHTML: monaco.editor.ITextModel | undefined;
 
     get confE() { return `l${this.level}_${this.position}`; };
 
@@ -42,7 +43,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     public onClickIcon = (op: string): void => {
         if (op === 'icTs') this.initTS();
-        if (op === 'icHTML') () => true;
+        if (op === 'icHTML') this.initHTML();
     }
 
 
@@ -103,6 +104,8 @@ export class ServiceSource100554 extends ServiceBase {
         }
 
         const fileModel = mls.l2.editor.get(storFile);
+        const fileModelHTml = mls.l2.editor.get({ project: storFile.project, shortName: storFile.shortName + '.html' });
+        
         if (!fileModel) {
 
             this.error = 'Not found filemodel' + keyFiles;
@@ -116,6 +119,7 @@ export class ServiceSource100554 extends ServiceBase {
         }
 
         this.activeModel = fileModel.model
+        this.activeModelHTML = fileModelHTml ? fileModelHTml.model : undefined;
 
         this.initTS();
         if (mls.istrace) console.timeEnd('onAction_' + fileAction.action + '_' + fileAction.position);
@@ -177,7 +181,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         const fc = async () => {
 
-            if (!mls.actual[2].project || !this.activeModel) {
+            if (!mls.actual[2].project || !this.activeModelHTML) {
                 this.error = 'Please, select a file!';
                 return;
             }
@@ -194,7 +198,7 @@ export class ServiceSource100554 extends ServiceBase {
 
             if (this.menu.setMode) this.menu.setMode('page', this.myEditors.html.el);
 
-            this.myEditors.html.editor.setModel(this.activeModel);
+            this.myEditors.html.editor.setModel(this.activeModelHTML);
             this.myEditors.html.editor.layout();
 
         }
