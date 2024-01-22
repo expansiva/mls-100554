@@ -168,17 +168,17 @@ export class ServiceDetailsDs100554 extends ServiceBase {
                             <span>${this.state.createdBy}</span>
                         </li>
                         <li>
-                            <i class="fa fa-calendar-days""></i>
+                            <i class="fa fa-calendar-days"></i>
                             <span>Last Updated:</span>
                             <span>${this.state.lastUpdated}</span>
                         </li>
                         <li>
-                            <i class="fa fa-regular fa-user""></i>
+                            <i class="fa fa-regular fa-user"></i>
                             <span>Last Updated By:</span>
                             <span>${this.state.lastUpdatedBy}</span>
                         </li>
                         <li>
-                            <i class="fa fa-book""></i>
+                            <i class="fa fa-book"></i>
                             <span>Documentation:</span>
                             <a href="#"  @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_l3_documentation') }}> ${this.state.documentation} docs </a>
                         </li>
@@ -188,12 +188,12 @@ export class ServiceDetailsDs100554 extends ServiceBase {
                             <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_tokens') }}>${this.state.tokens} tokens</a>
                         </li>
                         <li>
-                            <i class="fa fa-folder-tree""></i>
+                            <i class="fa fa-folder-tree"></i>
                             <span>Assets:</span>
                             <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_assets') }}>${this.state.assets} assets </a>
                         </li>
                         <li>
-                            <i class="fa fa-cubes""></i>
+                            <i class="fa fa-cubes"></i>
                             <span>Components:</span>
                             <a href="#"" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_widgets') }}>${this.state.components} components </a>
                         </li>
