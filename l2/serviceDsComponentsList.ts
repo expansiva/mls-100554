@@ -31,7 +31,6 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (op === 'opResume') return true;
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -39,10 +38,9 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
     public menu: IMenu = {
         title: 'Details',
         actions: {
-            opOverview: 'Resume',
         },
         icons: {},
-        actionDefault: 'opResume', // call after close icon clicked
+        actionDefault: '', // call after close icon clicked
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
         getLastMode: undefined,
@@ -56,7 +54,8 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
 
     async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (visible && reinit) {
+        if (visible) {
+            this.init();
         }
     }
 
