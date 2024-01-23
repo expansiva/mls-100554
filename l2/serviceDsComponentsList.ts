@@ -47,12 +47,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
         updateTitle: undefined
     }
 
-
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-        this._onServiceClick(visible, reinit, el)
-    }
-
-    async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
         if (visible) {
             this.init();
