@@ -123,7 +123,12 @@ export class ServiceSave extends ServiceBase {
 
     render() {
 
-        if (this.error !== '') return html`${this.error}`;
+        if (this.error !== '') {
+
+            setTimeout(() => this.error = '', 3000);
+            return html`${this.error}`;
+            
+        }
         return html` ${this.itens
             ? html`<sectionsaveheader> ${this.renderHeader()} </sectionsaveheader>${this.renderItens()}` : this.renderNoItens()}
             
