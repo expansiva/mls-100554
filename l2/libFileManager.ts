@@ -175,7 +175,8 @@ async function _renameFileWithModel(file: { project: number, shortName: string, 
 
     const storFile = _getStorFile(file);
 
-    let model1 = mls.l2.editor.get(storFile);
+    const aux = storFile.extension === '.ts' ? '' : storFile.extension;
+    const model1: mls.l2.editor.IMFile | undefined = mls.l2.editor.get({ project: storFile.project, shortName: storFile.shortName + aux });
 
     if (!model1) throw new Error('Error renameFile: not found mfile');
 
@@ -189,7 +190,8 @@ async function _renameFileWithModel(file: { project: number, shortName: string, 
 async function _cloneFileWithModel(file: { project: number, shortName: string, enhancement: string, extension: string, level: number, folder: string, newProject: number, newShortName: string, }): Promise<void> {
 
     const storFile = _getStorFile(file);
-    let model1 = mls.l2.editor.get(storFile);
+    const aux = storFile.extension === '.ts' ? '' : storFile.extension;
+    let model1: mls.l2.editor.IMFile | undefined = mls.l2.editor.get({ project: storFile.project, shortName: storFile.shortName + aux });
     if (!model1) throw new Error('Error cloneFile, not found mfile');
 
     const src = model1.model.getValue();
@@ -295,7 +297,8 @@ async function _createModel(storFile: mls.stor.IFileInfo, compile: boolean): Pro
     // load source from repository
     const { project, shortName, extension } = storFile;
 
-    let model1 = mls.l2.editor.get({ project, shortName });
+    const aux = storFile.extension === '.ts' ? '' : storFile.extension;
+    let model1 = mls.l2.editor.get({ project: storFile.project, shortName: storFile.shortName + aux });
     if (model1) return model1;
 
     const info: mls.stor.IFileInfoValue | null = storFile.getValueInfo ? await storFile.getValueInfo() : null;
@@ -318,7 +321,6 @@ async function _createModel(storFile: mls.stor.IFileInfo, compile: boolean): Pro
 
     const model = monaco.editor.createModel(src, (code as any)[storFile.extension], uri);
 
-    const aux = storFile.extension === '.ts' ? '' : storFile.extension;
     model1 = {
         changed: false, // not changed in this section, but storFile.changed is about all sections
         error: false,
@@ -367,7 +369,8 @@ async function afterUpdate(storFile: mls.stor.IFileInfo) {
 
     if (!project || !shortName) return;
 
-    const mmodel: mls.l2.editor.IMFile | undefined = mls.l2.editor.get({ project, shortName });
+    const aux = storFile.extension === '.ts' ? '' : storFile.extension;
+    const mmodel: mls.l2.editor.IMFile | undefined = mls.l2.editor.get({ project: storFile.project, shortName: storFile.shortName + aux });
 
     if (!mmodel) return;
 
@@ -480,7 +483,14 @@ async function fcDeleteFile(storFile: mls.stor.IFileInfo) {
 
     await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
 
-    mls.l2.editor.remove(storFile);
+    //mls.l2.editor.remove(storFile);
+    const aux = storFile.extension === '.ts' ? '' : storFile.extension;
+    const key = `_${storFile.project}_${storFile.shortName+aux}`;
+    if (mls.l2.editor.mfiles[key]) {
+        if (mls.l2.editor.mfiles[key].model) mls.l2.editor.mfiles[key].model.dispose();
+        delete mls.l2.editor.mfiles[key];
+    }
+
 
     removeEventsModel(storFile);
 
