@@ -12,8 +12,9 @@ export class ServiceSelectDs100554 extends ServiceBase {
         super();
         initServiceSelectDsAdd();
         this.setEvents();
-        console.log('aaaxxx');
     }
+
+    
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
@@ -217,7 +218,9 @@ export class ServiceSelectDs100554 extends ServiceBase {
         } catch (err: any) {
             this.setError(err.message);
         } finally {
-            this.loading = false;
+            setTimeout(() => {
+                this.loading = false;
+            }, 100)
         }
     }
 

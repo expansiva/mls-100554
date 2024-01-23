@@ -11,7 +11,6 @@ export class ServiceDsDocList100554 extends ServiceBase {
         this.setEvents();
     }
 
-
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property()
@@ -237,7 +236,6 @@ export class ServiceDsDocList100554 extends ServiceBase {
             parentID: item.parentID,
             hasChildren
         };
-        console.info({ obj })
 
         mls.events.fire([3], ['DSDocPageClicked'], JSON.stringify(obj));
     }

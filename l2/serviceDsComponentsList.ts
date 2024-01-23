@@ -1,11 +1,11 @@
-/// <mls shortName="serviceDsTokens" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
+/// <mls shortName="serviceDsComponentsList" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
-@customElement('service-ds-tokens-100554')
-export class ServiceDsTokens100554 extends ServiceBase {
+@customElement('service-ds-components-list-100554')
+export class ServiceDsComponentsList100554 extends ServiceBase {
     constructor() {
         super();
         this.setEvents();
@@ -14,25 +14,23 @@ export class ServiceDsTokens100554 extends ServiceBase {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
-        icon: '&#xf0ae',
-        name: 'Tokens',
-        mode: 'A',
-        position: 'left',
-        tooltip: 'Tokens',
-        tags: ['ds_tokens'],
+        icon: '&#xf229',
+        name: 'Details Ds',
+        mode: 'B',
+        position: 'right',
+        tooltip: 'Details Design System',
+        tags: [],
         levels: [3]
     }
 
-
-
     public onClickLink = (op: string): boolean => {
-        if (op === 'opEditor') return true;
+        if (op === 'opResume') return true;
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
 
     public menu: IMenu = {
-        title: 'Tokens',
+        title: 'Details',
         actions: {
             opOverview: 'Resume',
         },
