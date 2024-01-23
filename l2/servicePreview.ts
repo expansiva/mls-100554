@@ -33,7 +33,7 @@ export class ServicePreview100554 extends ServiceBase {
     public details: IService = {
         icon: '&#xf5b8',
         name: 'Preview 2',
-        mode: 'B',
+        mode: 'A',
         position: 'right',
         readOnly: false,
         tooltip: 'Preview 2',

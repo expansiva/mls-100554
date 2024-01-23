@@ -25,6 +25,7 @@ export class ServicePreviewView extends LitElement {
     @property() widthP: string = '300';
     @property() heightP: string = '600';
 
+
     connectedCallback() {
         super.connectedCallback();
     }
@@ -52,6 +53,7 @@ export class ServicePreviewView extends LitElement {
                 padding-top:.5rem;
             `;
             return html` 
+                ${this.renderEditStyle()}
                 <div class="groupSetMobile">
                     <div>
                         <label>Width:</label>
@@ -69,18 +71,54 @@ export class ServicePreviewView extends LitElement {
                     </div>
                     <div class="phone_button"></div>
                 </div>
+                
             `
 
         } else {
 
-            this.style.cssText = ``;
-
-            return html`<iframe style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview" @load="${this.load}" ></iframe>`;
+            this.style.cssText = `
+                display: block;
+                width: 100%;
+                height: 100%;
+            `;
+            return html`${this.renderEditStyle()}<iframe style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview" @load="${this.load}" ></iframe>`;
 
         }
     }
 
+
+    renderEditStyle() {
+
+        if (!this.verifyWC()) return '';
+        return html`
+            <edit-style title="Edit styles" @click="${this.onStyleEditClick}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:19px; height:19px"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 32C0 14.3 14.3 0 32 0H160c17.7 0 32 14.3 32 32V416c0 53-43 96-96 96s-96-43-96-96V32zM223.6 425.9c.3-3.3 .4-6.6 .4-9.9V154l75.4-75.4c12.5-12.5 32.8-12.5 45.3 0l90.5 90.5c12.5 12.5 12.5 32.8 0 45.3L223.6 425.9zM182.8 512l192-192H480c17.7 0 32 14.3 32 32V480c0 17.7-14.3 32-32 32H182.8zM128 64H64v64h64V64zM64 192v64h64V192H64zM96 440a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"/></svg>
+            </edit-style>        
+        `
+    }
+
     static styles = css`
+        :host{
+            position:relative;
+        }
+        edit-style{
+            background: white;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 2px 2px;
+            position: absolute;
+            top: 5px;
+            right: 20px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        edit-style:hover{
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 5px 2px;
+        }
         .groupSetMobile{
             display:flex;
             width:300px;
@@ -166,14 +204,14 @@ export class ServicePreviewView extends LitElement {
             await this.setHTml(iframe);
             iframe.style.display = '';
             this.showLoader(false);
-            
+
         } catch (e: any) {
-            
+
             this.error = e.message;
             this.showLoader(false);
-            
+
         }
-        
+
 
     }
 
@@ -267,7 +305,7 @@ export class ServicePreviewView extends LitElement {
                 ifr.contentDocument.body.appendChild(script);
 
             });
-        
+
             const s = document.createElement('script') as HTMLScriptElement;
             s.textContent = `
 				window['mls'] = window['mls']  ? window['mls']  : parent.mls ? parent.mls : top['mls'];
@@ -292,7 +330,7 @@ export class ServicePreviewView extends LitElement {
     private mountCSS(info: IJSONDEpendence, ifr: HTMLIFrameElement): void {
 
         try {
-            
+
 
             if (!ifr.contentDocument) return;
             let cls = '';
@@ -330,6 +368,56 @@ export class ServicePreviewView extends LitElement {
         if (!this.father) return;
         this.father.loading = show;
 
+    }
+
+    private infoDS = { project: -1, level: '-1', myDS: undefined as any };
+    private verifyWC(): boolean {
+
+        if (this.infoDS.project !== mls.actual[5].project) {
+            this.infoDS.level = '-1';
+            this.infoDS.myDS = undefined;
+            this.infoDS.project = mls.actual[5].project as any;
+        }
+
+        let comp;
+        if (this.infoDS.level !== this.level && this.level === '2') {
+
+            this.infoDS.myDS = mls.l3.getDSInstance(mls.actual[5].project as any, 0);
+
+        } else if (this.infoDS.level !== this.level) {
+
+            this.infoDS.myDS = mls.l3.getDSInstance(mls.actual[5].project as any, mls.actual[3].mode);
+        }
+
+        if (this.infoDS.myDS) {
+
+            mls.actual[0].setFullName(this.page);
+            const info = mls.actual[0];
+            comp = this.infoDS.myDS.components.find(`_${info.project}_${info.path}`);
+        }
+
+        return !!comp;
+        
+    }
+
+    private async onStyleEditClick() {
+
+        const styleService = document.querySelector(`mls-toolbar-content-service-100529[path="_100529_service_styles"]`);
+        if(styleService) styleService.setAttribute('forceinstance', 'true');
+
+        mls.actual[0].setFullName(this.page);
+        const info = mls.actual[0];
+            
+        const rc = {
+            emitter: 'right',
+            less: '',
+            isComponent: true,
+            widget: `_${info.project}_${info.path}`,
+            helper: '_100529_service_preview',
+            origemLevel: +this.level
+        };
+
+        mls.events.fire(3, 'DSStyleChanged', JSON.stringify(rc));
     }
 
     private showError(err: string) {
