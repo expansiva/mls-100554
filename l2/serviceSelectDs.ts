@@ -12,7 +12,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
         super();
         initServiceSelectDsAdd();
         this.setEvents();
-        console.log('aaa');
+        console.log('aaaxxx');
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
