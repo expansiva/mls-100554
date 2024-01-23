@@ -43,10 +43,8 @@ export class CollabConfig100554 extends LitElement {
 
     async connectedCallback() {
         super.connectedCallback();
-        // set loading
         this.setInfos();
         await this.getServices();
-        // remove loading
     }
 
     private renderHeader() {
@@ -319,6 +317,7 @@ export class CollabConfig100554 extends LitElement {
 
         try {
 
+            this.showLoader(true);
             const arrayUserServices = await this.getUserServices();
             const arrayAvaliableServices = await this.getAvaliableServices();
 
@@ -326,6 +325,7 @@ export class CollabConfig100554 extends LitElement {
 
             this.userServices = arrayUserServices;
             this.avaliableServices = arrayAvaliableServices;
+            this.showLoader(false);
 
         } catch (e) {
 
@@ -335,6 +335,14 @@ export class CollabConfig100554 extends LitElement {
 
 
 
+    }
+
+    private showLoader(show: boolean): void {
+
+        const el = this.closest('mls-toolbar-content-service-100529');
+        if (!el) return;
+        el.setAttribute('loading', show.toString());
+        
     }
 
     private async getMls2Services(user: IService[], avaliable: IService[]) {
