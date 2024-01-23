@@ -11,6 +11,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
         this.setEvents();
     }
 
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property()
@@ -64,7 +65,8 @@ export class ServiceDsDocList100554 extends ServiceBase {
 
     async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (visible && reinit) {
+        if (visible) {
+            mls.events.fire([this.level], ['DSDocSelected'], 'Doc Selected', 0);
         }
     }
 
@@ -79,7 +81,6 @@ export class ServiceDsDocList100554 extends ServiceBase {
     }
 
     setEvents() {
-
         mls.events.addEventListener([this.level], ['DSDocPageChanged'], (ev) => {
             this.onDocPageChanged(ev);
         });
@@ -143,7 +144,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
 
     private onDocPageChanged(ev: mls.events.IEvent) {
         if (!ev.desc) return;
-        const st: IEventParams = JSON.parse(ev.desc);
+        const st: IDocData = JSON.parse(ev.desc);
         if (st.op === 'Add') this.addDoc(st.id);
         if (st.op === 'Change') this.changedMe(st.id, st.content);
         if (st.op === 'Update') this.updateDoc(st.id, st.parentID, st.title);
@@ -228,7 +229,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
     private async seeDocumentation(item: mls.l3.IDocInfo | undefined, title: string | undefined, hasChildren: boolean) {
         if (!item || !title) return;
         const text = await item.getContent();
-        const obj: IEventParams = {
+        const obj: IDocData = {
             op: 'Open',
             title,
             content: text,
@@ -298,7 +299,7 @@ interface IDsSelectEvent {
     value: number
 }
 
-interface IEventParams {
+export interface IDocData {
     op: 'Open' | 'Add' | 'Update' | 'Change' | 'Delete',
     title: string,
     content: string,

@@ -2,7 +2,9 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-
+export function initEditorQuillDocs() {
+    return true;
+}
 @customElement('editor-quill-docs-100554')
 export class EditorQuillDocs100554 extends LitElement {
 
