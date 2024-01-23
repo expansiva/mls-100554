@@ -98,14 +98,8 @@ export class ServicePlugins extends ServiceBase {
         ];
     }
 
-    backListClicked() {
-
-        this.loading = true;
-        setTimeout(() => {
-            this.loading = false;
-            this.changeScenario('list');
-        }, 5000)
-
+    backListClicked() {        
+        this.changeScenario('list');
     }
 
     installPluginClicked() {

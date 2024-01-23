@@ -64,10 +64,8 @@ export class ServiceDsDocList100554 extends ServiceBase {
     }
 
     async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
-        if (visible) {
-            mls.events.fire([this.level], ['DSDocSelected'], 'Doc Selected', 0);
-        }
+        if (visible) mls.events.fire([this.level], ['DSDocSelected'], 'Doc Selected', 0);
+        else mls.events.fire([this.level], ['DSDocUnSelected'], 'Doc UnSelected');
     }
 
     async connectedCallback() {
@@ -81,7 +79,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
     }
 
     setEvents() {
-        mls.events.addEventListener([this.level], ['DSDocPageChanged'], (ev) => {
+        mls.events.addEventListener([3], ['DSDocPageChanged'], (ev) => {
             this.onDocPageChanged(ev);
         });
 
@@ -143,6 +141,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
     }
 
     private onDocPageChanged(ev: mls.events.IEvent) {
+        
         if (!ev.desc) return;
         const st: IDocData = JSON.parse(ev.desc);
         if (st.op === 'Add') this.addDoc(st.id);
@@ -190,9 +189,10 @@ export class ServiceDsDocList100554 extends ServiceBase {
         let nextEl = el.nextElementSibling || el.closest(`details[docId = "${doc.parentID}"]`);
         nextEl = nextEl || el.previousElementSibling;
         const nextElId = nextEl?.getAttribute('docId');
-        if (nextElId) this.selectDoc(+nextElId);
         await this.dsInstance.docs.remove(id);
         await this.getState();
+        if (nextElId) this.selectDoc(+nextElId);
+        
     }
 
     private async addNewDoc() {
@@ -274,7 +274,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
                     <div class="list-docs-container">
                         ${this.renderList(this.list)}
                     </div>
-                    <div>
+                    <div class="list-docs-actions">
                         <button @click=${() => { this.addNewDoc(); }}>
                             <span>Add</span>
                             <i class="fa fa-plus"></i>
@@ -287,7 +287,6 @@ export class ServiceDsDocList100554 extends ServiceBase {
     }
 
 }
-
 
 interface IServiceDocs {
     list: IDocNode[],

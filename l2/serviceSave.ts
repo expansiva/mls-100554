@@ -158,12 +158,12 @@ export class ServiceSave extends ServiceBase {
         return html`
             <sectionsave>
                 <div id="Save_menu_action" style="display:flex;">
-                    <div style="width:calc(100% - 85px);" >
+                    <div style="width:100%;" >
                         <h4 class="mt-3">${this.myMsg.comments}:</h4>
                         <textarea id="commitMessage" class="form-control" style="width:95%;" rows="2" maxlength="50"></textarea>
                     </div>
                     <div id="div_btn_save" class="text-right" style="width:79px; display: flex; align-items: self-end;">
-                        <button id="btn_save" style="width:78px" class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMsg.update}</button>
+                        <button id="btn_save" class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMsg.update}</button>
                     </div>
                 </div>
                 <h4 class="mt-3" data-mlsline="23">${this.myMsg.fileChanges}</h4>

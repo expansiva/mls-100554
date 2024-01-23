@@ -20,18 +20,9 @@ service-plugins-100554 {//don't change this line
         align-items: center;
     }
 
-    :host >section .header button {
-        padding: 8px 16px;
-        background-color: @success-color;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-    :host >section .header button:hover {
-        background-color: #45a049;
+    :host >section .header > div{
+        display: flex;
+        gap: 1rem;
     }
 
     :host >section .header input[type="text"] {

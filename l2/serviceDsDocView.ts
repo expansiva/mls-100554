@@ -22,6 +22,10 @@ export class ServiceDsDocView100554 extends ServiceBase {
     @query('editor-quill-docs-100554')
     editor: EditorQuillDocs100554 | undefined;
 
+
+    @query('.title')
+    docTitle: HTMLElement | undefined;
+
     public details: IService = {
         icon: '&#xf06e',
         name: 'Documentation View',
@@ -62,16 +66,13 @@ export class ServiceDsDocView100554 extends ServiceBase {
         }
     }
 
-    setEvents() {
+    private setEvents() {
         mls.events.addEventListener([3], ['DSDocPageClicked'], (ev) => {
             this.onDSDocPageClicked(ev);
         });
 
         mls.events.addEventListener([3], ['DSDocSelected'], (ev) => {
-            console.info('DSDocSelected view')
-
             if (!this.serviceItemNav) return;
-
             this.serviceItemNav.setAttribute('mode', 'A');
             this.openMe();
         });
@@ -82,10 +83,52 @@ export class ServiceDsDocView100554 extends ServiceBase {
         });
     }
 
-    onDSDocPageClicked(ev: mls.events.IEvent) {
+    private async onDSDocPageClicked(ev: mls.events.IEvent) {
         if (!ev.desc) return;
         this.doc = JSON.parse(ev.desc);
+        if (!this.editor) {
+            await this.waitForEditorLoad();
+        }
         if (this.editor && this.doc) this.editor.text = this.doc.content;
+    }
+
+    private waitForEditorLoad():Promise<void> {
+        return new Promise((resolve, reject) => {
+            const intervalId = setInterval(() => {
+                if (this.editor) {
+                    clearInterval(intervalId);
+                    resolve();
+                }
+            }, 1000);
+
+            setTimeout(() => {
+                clearInterval(intervalId);
+                reject('Editor not found');
+            }, 5000);
+        });
+    }
+
+    private fireComunication(op: 'Open' | 'Add' | 'Change' | 'Update' | 'Delete'): void {
+
+        console.info({ fireComunication: op })
+        this.setError('');
+
+        if (!this.doc) {
+            this.setError('No documentation selected.');
+            return;
+        }
+
+        if (op === 'Delete' && this.doc.hasChildren) {
+            this.setError('Please, remove the subitens first.');
+            return;
+        }
+
+        if (!this.docTitle || !this.editor) return;
+        this.doc.title = this.docTitle.innerText;
+        this.doc.content = this.editor.text;
+        this.doc.op = op;
+        const json = JSON.stringify(this.doc);
+        mls.events.fire([3], ['DSDocPageChanged'], json);
     }
 
     render() {
@@ -97,19 +140,19 @@ export class ServiceDsDocView100554 extends ServiceBase {
                 html`
                 <div style="padding: 1rem;">
                     <div style="display:flex; gap:1rem; justify-content: center;">
-                        <button class="btn-docs">
+                        <button class="btn-docs" @click=${() => { this.fireComunication('Add') }}>
                             <span>Add Child</span>
                             <i class="fa fa-plus"></i>
                         </button>
-                        <button class="btn-docs">
+                        <button class="btn-docs" @click=${() => { this.fireComunication('Delete') }}>
                             <span>Remove this</span>
                             <i class="fa fa-trash"></i>
                         </button>
                     </div>
                     <div style="width:100%; display: flex; align-items: center;">
-                        <h1>${this.doc.title}</h1>
+                        <h1 contenteditable class="title" @blur=${() => { this.fireComunication('Update') }}>${this.doc.title}</h1>
                     </div>
-                    <editor-quill-docs-100554 opened="false"></editor-quill-docs-100554>
+                    <editor-quill-docs-100554 opened="false" .cbFinishEdit=${() => { this.fireComunication('Change') }}></editor-quill-docs-100554>
                 </div>
             `}            
         `;
