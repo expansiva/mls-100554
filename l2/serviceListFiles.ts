@@ -4,13 +4,13 @@
  * @mlsComponentDetails {
  *  "webComponentDependencies": ["service-list-files-add-100554"]
  * }
- */ 
+ */
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initServiceListFilesAdd } from './_100554_serviceListFilesAdd';
- 
+
 @customElement('service-list-files-100554')
 export class ServiceListFiles extends ServiceBase {
 
@@ -267,8 +267,8 @@ export class ServiceListFiles extends ServiceBase {
                     <span class="spanName">
                         <input @click="${this.clickOptStop}">
                     </span>
-                    <button class="btnActCloneRename fa fa-file-pen"></button>
-                    <button class="fa fa-ban" title="cancel" @click="${this.clickHiddenAux}"></button>
+                    <button class="btnActCloneRename fa fa-file-pen" style="margin: 4px 0px;"></button>
+                    <button class="fa fa-ban" title="cancel" @click="${this.clickHiddenAux}" style="margin: 4px 0px;"></button>
                 </div>
                 <div class="showError"style="color: red; font-size: 10px;">${this.errorAux}</div>
             </div>
@@ -338,6 +338,7 @@ export class ServiceListFiles extends ServiceBase {
         e.stopPropagation();
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
+        
         this.fireEvents('delete', mfile, {});
 
     }
@@ -386,7 +387,7 @@ export class ServiceListFiles extends ServiceBase {
 
         li.appendChild(elContentAux);
         elContentAux.style.display = '';
-        btnActCloneRename.onclick = (e2: MouseEvent) => {
+        btnActCloneRename.onclick = async (e2: MouseEvent) => {
 
             try {
 
@@ -396,10 +397,11 @@ export class ServiceListFiles extends ServiceBase {
 
                 this.validInputsAux(myfile, { mode: mode, project: iptProj.value, name: iptName.value });
 
-                this.fireEvents(mode, myfile, { project: +iptProj, shortName: iptName });
+                this.fireEvents(mode, myfile, { project: +iptProj, shortName: iptName.value });
 
             } catch (er: any) {
 
+                this.showLoader(false);
                 this.errorAux = er.message;
                 setTimeout(() => { this.errorAux = '' }, 2000);
 
@@ -480,9 +482,14 @@ export class ServiceListFiles extends ServiceBase {
 
     }
 
+    private setLoader = -1;
     private showLoader(loader: boolean): void {
 
-        this.loading = loader;
+        clearTimeout(this.setLoader);
+        this.setLoader = setTimeout(() => {
+            this.loading = loader;
+        }, 200)
+
 
     }
 

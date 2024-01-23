@@ -3,7 +3,7 @@
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-export const initServiceListFilesAdd = () =>{
+export const initServiceListFilesAdd = () => {
 
 }
 @customElement('service-list-files-add-100554')
@@ -102,11 +102,8 @@ export class ServiceListFilesAdd100554 extends LitElement {
     private async init() {
 
         try {
-
-            this.showLoader(true);
             this.updateMyMessages();
             this.setEnhacement();
-            this.showLoader(false);
 
         } catch (e) {
 
@@ -120,7 +117,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
     private showLoader(loader: boolean): void {
 
         if (!this.father) return
-        (this.father as any).loader = loader;
+        (this.father as any).loading = loader;
 
     }
 
@@ -132,6 +129,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
     private async add() {
 
         try {
+
 
             if (!this.shadowRoot) return;
 

@@ -3,7 +3,7 @@
 
 //------------ EXPORT ----------------
 
-export async function readAllProjectAndCompile(project: number, shortName: string, needCompile: boolean = true): Promise<void> { 
+export async function readAllProjectAndCompile(project: number, shortName: string, needCompile: boolean = true): Promise<void> {
 
     return _readAllProjectAndCompile(project, shortName, needCompile);
 }
@@ -50,6 +50,36 @@ export async function cloneFileWithModel(file: { project: number, shortName: str
 
 function getUri(shortFN: string, ftype: '.ts' | '.d.ts' | '.html'): monaco.Uri {
     return monaco.Uri.parse(`file://server/${shortFN}${ftype}`);
+}
+
+async function _readAllFileExtensionAndCompile(project: number, extension: string, needCompile: boolean = true): Promise<void> {
+
+
+    if (mls.istrace) console.log('loading files from project ' + project);
+
+    const keys: string[] = Object.keys(mls.stor.files);
+    for await (const key of keys) {
+
+        try {
+
+            const storFile = mls.stor.files[key];
+            if (storFile.project === project && storFile.level === 2
+                && storFile.extension !== extension) continue;
+
+            await _createModel(storFile, false);
+
+        } catch (e) {
+
+            console.info('Error readAllFileExtensionAndCompile:' + key);
+
+        }
+
+
+    }
+
+    if (needCompile) await mls.l2.editor.compileAllProjectIfNeed(project, true);
+
+    return;
 }
 
 const projectsLoaded: number[] = [];
@@ -265,7 +295,7 @@ async function createFileAndModel(src: string, file: { project: number, shortNam
 
         const uri = getUri(`_${file.project}_${file.shortName}`, ftype as any);
 
-        model1 = mls.l2.editor.get({ project: file.project, shortName: file.shortName + aux  });
+        model1 = mls.l2.editor.get({ project: file.project, shortName: file.shortName + aux });
 
         if (model1) return model1; // created in another instance
 
@@ -274,7 +304,7 @@ async function createFileAndModel(src: string, file: { project: number, shortNam
             changed: true,
             error: false,
             project: file.project,
-            shortName: file.shortName+aux,
+            shortName: file.shortName + aux,
             extension: file.extension,
             model,
             storFile,
@@ -287,7 +317,7 @@ async function createFileAndModel(src: string, file: { project: number, shortNam
     if (storFile.extension === '.ts') {
         await updateModelStatus(model1, false); // first compilation
     }
-    
+
     return model1;
 }
 
@@ -485,7 +515,7 @@ async function fcDeleteFile(storFile: mls.stor.IFileInfo) {
 
     //mls.l2.editor.remove(storFile);
     const aux = storFile.extension === '.ts' ? '' : storFile.extension;
-    const key = `_${storFile.project}_${storFile.shortName+aux}`;
+    const key = `_${storFile.project}_${storFile.shortName + aux}`;
     if (mls.l2.editor.mfiles[key]) {
         if (mls.l2.editor.mfiles[key].model) mls.l2.editor.mfiles[key].model.dispose();
         delete mls.l2.editor.mfiles[key];
