@@ -31,7 +31,7 @@ export class ServicePreview100554 extends ServiceBase {
     private levels = [1, 2, 3, 4, 5, 6, 7];
 
     public details: IService = {
-        icon: '&#xf5b8',
+        icon: '&#xf06e',
         name: 'Preview 2',
         mode: 'A',
         position: 'right',
