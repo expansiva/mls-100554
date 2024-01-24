@@ -5,10 +5,11 @@
  * }
  */
 
-import { html, css, unsafeHTML, repeat } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initServicePreviewView } from './_100554_servicePreviewView';
+import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
 @customElement('service-preview-100554')
 export class ServicePreview100554 extends ServiceBase {
 
@@ -23,6 +24,7 @@ export class ServicePreview100554 extends ServiceBase {
     constructor() {
         super();
         initServicePreviewView;
+        initServicePreviewAddStyle;
         this.setEvents();
     }
 
@@ -43,6 +45,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
+        if (op === 'actAddStyle') return this.actAddStyle();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -56,6 +59,7 @@ export class ServicePreview100554 extends ServiceBase {
     public menu: IMenu = {
         title: 'Save',
         actions: {
+            actAddStyle: 'Add Style'
         },
         icons: {
             icPreviewD: 'Desktop;f390',
@@ -131,6 +135,19 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     // -------------- IMPLEMENTS-----------------
+
+    private actAddStyle() {
+
+        if (!mls.actual[2].project) return true;
+
+        const doc = document.createElement('service-preview-add-style-100554');
+        doc.setAttribute('widget', mls.actual[2].getFullName());
+        doc.setAttribute('level', this.level as any);
+        (doc as any).father = this;
+        if (this.menu.setMode) this.menu.setMode('page', doc);
+        return true;
+
+    }
 
     private async preview(mode: string) {
 

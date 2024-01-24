@@ -1,16 +1,233 @@
 /// <mls shortName="servicePreviewAddStyle" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement } from 'lit'; 
+import { html, repeat, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+export const initServicePreviewAddStyle = '';
 @customElement('service-preview-add-style-100554')
-export class SimpleGreeting extends LitElement {
-    static styles = css`p { color: red }`;
+export class ServicePreviewAddStyle extends LitElement {
 
-    @property() 
-    name: string = 'Somebody';
+    private dsInstance: mls.l3.DesignSystemIO | undefined;
+
+    @property() father: any = undefined;
+
+    @property() widget: string = '';
+
+    @property() level: string = '';
+
+    @property({ type: Array }) tags: string[] = [];
+
+    @property() error: string = '';
+
+    @property() styleAlready: boolean = true;
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.updateMyMessages();
+        this.init();
+    }
 
     render() {
-        return html`<p> Hello, ${ this.name } !</p>`;
+    
+        if (this.styleAlready) return this.renderStyleAlreadyr();
+        else return this.renderAdd();
+
     }
+
+    renderStyleAlreadyr() {
+        return html`<h3>${this.myMsg.thisComponentAlreadyHasStyleAdded}</h3>`
+    }
+
+    renderAdd() {
+        return html`
+            <div>
+                <span>${this.myMsg.groupAndSubgroup}</span>
+                <input type="text" class="inputGroup"></input>
+            </div>
+            <div>
+                <span>${this.myMsg.tagsForSearch}</span>
+                <mls-input-tags>
+                    ${repeat(this.tags, ((item: string) => item) as any,
+            ((vl: string, index: number) => this.renderItemTag(vl, index)) as any
+        )}
+                    <input type="text" @keydown="${this.addInputTag}"></input>
+                </mls-input-tags>
+                <span>${this.myMsg.exInputList}</span>
+            </div>
+            <div>
+                <button @click="${this.addComponent}">${this.myMsg.addInDesingSystem}</button>
+            </div>
+            <h3 style="color:red">${this.error}</h3>
+        `;
+    }
+
+    renderItemTag(vl: string, idx: number) {
+        return html`
+            <div>
+                ${vl}
+                <span .idx="${idx}" @click="${this.deleteItemTag}">x</span>
+            </div>
+        `
+    }
+
+    //-----------IMPLEMENTS---------------
+
+    private async init() {
+
+        try {
+
+            this.showLoader(true);
+            await this.initds();
+            this.verifyAlready();
+            this.showLoader(false);
+
+        } catch (e: any) {
+            
+            this.error = e.message;
+        }
+        
+
+    }
+
+    private verifyAlready(): void {
+
+        if (!this.widget || !this.dsInstance) return;
+
+        const componentName = this.widget;
+		const comp = this.dsInstance.components.find(componentName);
+        if (!comp) this.styleAlready = false;
+
+    }
+
+    private async initds() {
+
+        this.dsInstance = mls.l3.getDSInstance(mls.actual[5].project as any, mls.actual[3].mode);
+
+    }
+
+    private addInputTag(e: KeyboardEvent): void {
+
+        e.stopPropagation();
+
+        const el = e.target as HTMLInputElement;
+        if (!el) return;
+
+        const { value } = el;
+
+        if (e.keyCode === 13) {
+
+            this.addTag(value);
+            el.value = '';
+
+        } else if (e.keyCode === 188) {
+
+            e.preventDefault();
+            this.addTag(value);
+            el.value = '';
+
+        } else if (e.keyCode === 8 && value.length === 0) {
+
+            this.deleteTag(this.tags.length - 1);
+
+        }
+    }
+
+    private addTag(vl: string): void {
+
+        if (this.tags.includes(vl)) return;
+        this.tags.push(vl);
+        this.tags = [... this.tags];
+
+    }
+
+    private deleteTag(idx: number): void {
+
+        if (idx > this.tags.length || idx < 0) return;
+        this.tags.splice(idx, 1);
+        this.tags = [... this.tags];
+
+    }
+
+    private deleteItemTag(e: MouseEvent): void {
+
+        e.stopPropagation();
+        const el = e.target as HTMLInputElement;
+        if (!el) return;
+
+        const idx = +(el as any).idx;
+        this.deleteTag(idx);
+
+    }
+
+    private setTimeLoader = -1;
+    private showLoader(show: boolean) {
+
+        if (!this.father) return;
+        clearTimeout(this.setTimeLoader);
+        this.setTimeLoader = setTimeout(() => {
+            this.father.loading = show;
+        }, 200);
+        
+
+    }
+
+    private async addComponent() {
+
+        if (!this.widget || !this.shadowRoot || !this.dsInstance) return;
+        const group = this.shadowRoot.querySelector('.inputGroup') as HTMLInputElement;
+        if (!group || !group.value) throw new Error('Not found group');
+
+        this.showLoader(true);
+        const componentName = this.widget;
+        const widget: mls.l3.IComponentInfo = {
+            docPath: '',
+            examples: [],
+            group: group.value as mls.l3.ComponentsGroups,
+            l4MarketingRef: '',
+            name: componentName,
+            reference: undefined as any,
+            styles: [],
+            tags: this.tags,
+            widgetExampleRef: {
+                path: '',
+                tagname: ''
+            }
+        };
+
+        try {
+
+            await this.dsInstance.components.add(widget);
+            this.styleAlready = true;
+
+        } catch (err:any) {
+            this.error = err.message;
+        }
+        finally {
+            this.showLoader(false);
+        }
+
+    }
+
+    private updateMyMessages() {
+
+        if (!window['message' as any]) return;
+        const m = window['message' as any] as any;
+
+        if (m.groupAndSubgroup) this.myMsg.groupAndSubgroup = m.groupAndSubgroup;
+        if (m.tagsForSearch) this.myMsg.tagsForSearch = m.tagsForSearch;
+        if (m.exInputList) this.myMsg.exInputList = m.exInputList;
+        if (m.addInDesingSystem) this.myMsg.addInDesingSystem = m.addInDesingSystem;
+        if (m.thisComponentAlreadyHasStyleAdded) this.myMsg.thisComponentAlreadyHasStyleAdded = m.thisComponentAlreadyHasStyleAdded;
+
+
+    }
+
+    private myMsg = {
+        groupAndSubgroup: 'Group and subgroup',
+        tagsForSearch: 'Tags for search',
+        exInputList: 'ex: input,list',
+        addInDesingSystem: 'Add in Desing System',
+        thisComponentAlreadyHasStyleAdded:'This component already has style added'
+    }
+
 }
