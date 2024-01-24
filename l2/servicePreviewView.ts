@@ -219,6 +219,7 @@ export class ServicePreviewView extends LitElement {
 
             this.setMyFile();
             await this.setHTml(iframe);
+            await this.initDS();
             iframe.style.display = '';
             this.showLoader(false);
 
@@ -388,23 +389,31 @@ export class ServicePreviewView extends LitElement {
     }
 
     private infoDS = { project: -1, level: '-1', myDS: undefined as any };
+    private async initDS() {
+
+        this.infoDS.myDS = mls.l3.getDSInstance(mls.actual[5].project as any, mls.actual[3].mode);
+
+        if (this.infoDS.myDS) await this.infoDS.myDS.init();
+
+    }
+
     private verifyWC(): boolean {
 
-        if (this.infoDS.project !== mls.actual[5].project) {
+        /*if (this.infoDS.project !== mls.actual[5].project) {
             this.infoDS.level = '-1';
             this.infoDS.myDS = undefined;
             this.infoDS.project = mls.actual[5].project as any;
-        }
+        }*/
 
         let comp;
-        if (this.infoDS.level !== this.level && this.level === '2') {
+        /*if (this.infoDS.level !== this.level && this.level === '2') {
 
             this.infoDS.myDS = mls.l3.getDSInstance(mls.actual[5].project as any, 0);
 
         } else if (this.infoDS.level !== this.level) {
 
             this.infoDS.myDS = mls.l3.getDSInstance(mls.actual[5].project as any, mls.actual[3].mode);
-        }
+        }*/
 
         if (this.infoDS.myDS) {
 
