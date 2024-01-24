@@ -125,7 +125,7 @@ export abstract class ServiceBase extends LitElement {
     private getServiceItemNav(): IMlsNav2Item | null {
         const toolbar = this.getMlsNav2();
         if (!toolbar) return null;
-        const parent = this.parentElement;
+        const parent = this.getParent();
         if (!parent) return null;
         const path = parent.getAttribute('path');
         const item = toolbar.querySelector(`mls-toolbar-item-100529[path="${path}"]`) as IMlsNav2Item;
