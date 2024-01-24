@@ -79,6 +79,10 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     private themes: IThemesTokens = {};
 
+
+    @property()
+    showAddContainer: boolean = false;
+
     @property()
     private themeList: string[] = [];
 
@@ -118,6 +122,12 @@ export class ServiceDsColors100554 extends ServiceBase {
     @query('#service_color_revert')
     service_color_revert: HTMLElement | undefined;
 
+    @query('#service_color_inp_themedesc')
+    service_color_inp_themedesc: HTMLInputElement | undefined;
+
+    @query('#service_color_inp_themename')
+    service_color_inp_themename: HTMLInputElement | undefined;
+
     private async init() {
 
         const { project } = mls.actual[5];
@@ -130,10 +140,9 @@ export class ServiceDsColors100554 extends ServiceBase {
         await this.ds.init();
         this.getThemes();
 
-        console.info(this.actualTokens)
+        this.updateActualTokens();
         if (this.actualTokens) this.getColorsItem(this.actualTokens['default']);
 
-        // this.setTooltip();
 
     }
 
@@ -143,7 +152,6 @@ export class ServiceDsColors100554 extends ServiceBase {
         await this.init();
         this.loading = false;
     }
-
 
     private setTooltip() {
         if (!this.tooltipEl) return;
@@ -264,7 +272,7 @@ export class ServiceDsColors100554 extends ServiceBase {
             emitter: 'right',
             value: JSON.stringify(allTokens) + ';;helper'
         };
-        mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
+        // mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
 
     }
 
@@ -276,13 +284,124 @@ export class ServiceDsColors100554 extends ServiceBase {
         this.onChangeTokens(true);
     }
 
+    private handleAddThemeClick() {
+        this.setError('');
+        this.showAddContainer = true;
+    }
+
+    private onCancelAction() {
+        this.showAddContainer = false;
+    }
+
+    private async onConfirmAction() {
+
+        this.setError('');
+        const onlyLetterNumbers = /^[a-zA-Z0-9]+$/;
+        if (!this.service_color_inp_themename || !this.service_color_inp_themedesc) return;
+        if (!onlyLetterNumbers.test(this.service_color_inp_themename.value)) {
+            this.setError('Theme name accept only letters and numbers!');
+            return;
+        }
+        await this.saveTheme(this.service_color_inp_themename.value, this.service_color_inp_themedesc.value);
+        this.onCancelAction();
+    }
+
+    private async updateTheme() {
+        this.setError('');
+        if (this.themes[this.selectedTheme]?.isdefault || this.selectedTheme === 'default') {
+            this.setError('This is a system theme, cannot be updated!');
+            return;
+        }
+        if (!this.actualTokens || !this.ds) return;
+
+        this.toogleIconOnAction(this.service_color_update as HTMLElement, true);
+        const theme: ITheme = {
+            description: this.themes[this.selectedTheme]?.description || '',
+            tokens: this.actualTokens['default'].tokens
+        } as ITheme;
+        await (this.ds.tokens as any)['updateTheme'](this.selectedTheme, theme);
+        this.themes[this.selectedTheme].description = theme.description;
+        this.themes[this.selectedTheme].tokens = theme.tokens;
+        this.toogleIconOnAction(this.service_color_update as HTMLElement, false);
+
+    }
+
+    private async deleteTheme() {
+        this.setError('');
+        if (this.themes[this.selectedTheme]?.isdefault || this.selectedTheme === 'default') {
+            this.setError('This is a system theme, cannot be deleted!');
+            return;
+        }
+        if (!this.ds) return;
+
+        this.toogleIconOnAction(this.service_color_update as HTMLElement, true);
+        await (this.ds.tokens as any)['removeTheme'](this.selectedTheme);
+        this.selectedTheme = 'default';
+        await this.getThemes();
+        this.toogleIconOnAction(this.service_color_delete as HTMLElement, false);
+
+    }
+
+    private async saveTheme(themename: string, description: string) {
+        if (!this.actualTokens || !this.ds) return;
+        const { tokens } = this.actualTokens['default'];
+        const newTheme: ITheme = {
+            description,
+            tokens
+        } as ITheme;
+        await (this.ds.tokens as any)['setTheme'](themename, JSON.stringify(newTheme));
+        await this.getThemes();
+    }
+
+    private async revertTokensColors() {
+        this.setError('');
+        this.toogleIconOnAction(this.service_color_revert as HTMLElement, true);
+        if (!this.ds || !this.actualTokens) return;
+        try {
+            const tokens: mls.l3.ITokenInfo[] = await (this.ds.tokens as any)['getOriginalTokens']();
+            const tokensColors = tokens.filter((tok) => tok.category === 'color');
+            this.actualTokens['default'].tokens = tokensColors;
+            // this.selectThemes.value = 'default';
+            //this.mlscolors['init'](this.actualTokens['default']);
+            const params: IEditorChangedEventsObj = {
+                emitter: 'right',
+                value: JSON.stringify(tokensColors) + ';;helper'
+            };
+
+            mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
+        } catch (err: any) {
+            this.setError(err.message);
+        } finally {
+            this.toogleIconOnAction(this.service_color_revert as HTMLElement, false);
+        }
+    }
+
+
+    private toogleIconOnAction(el: HTMLElement, force: boolean) {
+        const parent = el.closest('.action-item');
+        if (!parent) return;
+        if (force) parent.classList.add('clicked');
+        else {
+            setTimeout(() => {
+                parent.classList.remove('clicked');
+            }, 1000);
+        }
+
+    }
+
+
+    firstUpdated(changedProperties: any) {
+        super.firstUpdated(changedProperties);
+        this.setTooltip();
+    }
+
     render() {
         return html`
             <div class="service_tokens_color">
                 <fieldset>
                     <legend>Themes</legend>
                     <div class="header">
-                        <div class="row-primary">
+                        <div class="row-primary ${this.showAddContainer ? 'disabled' : ''}">
                             <div>
                                 <label>Themes</label>
                                 <select @change=${(e: MouseEvent) => { this.onChangeTheme(e) }}>
@@ -292,21 +411,25 @@ export class ServiceDsColors100554 extends ServiceBase {
                                 </select>
                             </div>
                             <div class="actions">
-                                <div id="service_color_add" data-tooltip="Add new theme" class="action-item">
+                                <div 
+                                id="service_color_add" 
+                                data-tooltip="Add new theme" 
+                                class="action-item"
+                                @click=${() => { this.handleAddThemeClick(); }}>
                                     <i class="fa fa-plus"></i>
                                 </div>
-                                <div id="service_color_update" data-tooltip="Delete this theme" class="action-item">
+                                <div id="service_color_update" data-tooltip="Delete this theme" class="action-item" @click=${() => { this.updateTheme() }} >
                                     <i class="fa fa-floppy-disk"></i>
                                 </div>
-                                <div id="service_color_delete" data-tooltip="Update this theme" class="action-item">
+                                <div id="service_color_delete" data-tooltip="Update this theme" class="action-item" @click=${() => { this.deleteTheme(); }}>
                                     <i class="fa fa-trash"></i>
                                 </div>
-                                <div id="service_color_revert" data-tooltip="Revert tokens to original" class="action-item">
+                                <div id="service_color_revert" data-tooltip="Revert tokens to original" class="action-item" @click=${() => { this.revertTokensColors(); }}>
                                     <i class="fa fa-undo"></i>
                                 </div>
                             </div>
                         </div>
-                        <div class="row-form" style="display:none;">
+                        <div class="row-form" style="${this.showAddContainer ? 'display:block' : 'display:none;'}">
                             <fieldset>
                                 <legend>Add Theme</legend>
                                 <label>Theme Name:</label>
@@ -315,11 +438,11 @@ export class ServiceDsColors100554 extends ServiceBase {
                                 <textarea id="service_color_inp_themedesc" maxlength="200"></textarea>
                             </fieldset>
                             <div>
-                                <div id="service_color_confirm" class="action-item">
+                                <div id="service_color_confirm" class="action-item" @click=${() => { this.onConfirmAction() }}>
                                     <i class="fa fa-check" title="Confirm"></i>
                                 </div>
-                                <div id="service_color_cancel" class="action-item">
-                                    <i class="fa fa-times" title="Cancel"></i>
+                                <div id="service_color_cancel" class="action-item" @click=${() => { this.onCancelAction(); }}>
+                                    <i class="fa fa-xmark" title="Cancel"></i>
                                 </div>
                             </div>
                         </div>
@@ -335,20 +458,20 @@ export class ServiceDsColors100554 extends ServiceBase {
             const [keyname, values] = item;
             const val: { light: string, dark: string } = values as { light: string, dark: string };
             return html`
-                                        <mls-l3-color-item>
-                                            <div class="ds-colors-section-item">
-                                                <div class="thumbnail">
-                                                    <div data-tooltip="${val.light}" style="background-color: ${val.light}">
-                                                        <input type="color" value="${val.light}">
-                                                    </div>
-                                                    <div data-tooltip="${val.dark}" style="background-color: ${val.dark}">
-                                                        <input type="color" value="${val.dark}">
-                                                    </div>
-                                                </div>
-                                                <span class="color-token-name">${keyname}</span>
-                                            </div>
-                                        
-                                        </mls-l3-color-item>`
+                    <mls-l3-color-item>
+                        <div class="ds-colors-section-item">
+                            <div class="thumbnail">
+                                <div data-tooltip="${val.light}" style="background-color: ${val.light}">
+                                    <input type="color" value="${val.light}">
+                                </div>
+                                <div data-tooltip="${val.dark}" style="background-color: ${val.dark}">
+                                    <input type="color" value="${val.dark}">
+                                </div>
+                            </div>
+                            <span class="color-token-name">${keyname}</span>
+                        </div>
+                    
+                    </mls-l3-color-item>`
         })}
                             </div>
                         </mls-l3-color>
