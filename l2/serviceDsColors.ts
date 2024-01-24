@@ -82,6 +82,9 @@ export class ServiceDsColors100554 extends ServiceBase {
     @property()
     private themeList: string[] = [];
 
+    @property()
+    private newDataTokens: any = {};
+
     private defaultThemeList: string[] = [];
 
     private userThemeList: string[] = [];
@@ -126,6 +129,9 @@ export class ServiceDsColors100554 extends ServiceBase {
         if (!this.ds) return;
         await this.ds.init();
         this.getThemes();
+
+        console.info(this.actualTokens)
+        if (this.actualTokens) this.getColorsItem(this.actualTokens['default']);
 
         // this.setTooltip();
 
@@ -213,6 +219,63 @@ export class ServiceDsColors100554 extends ServiceBase {
         this.actualTokens = this.getTokens(onlyColorsTokens);
     }
 
+    private getColorsItem(data: IThemes) {
+        this.newDataTokens = {};
+        data.tokens.forEach((token) => {
+            if (!token.key || !token.value) return;
+            const isDark = token.key.startsWith('_dark-');
+            const key = isDark ? token.key.substring(6, token.key.length) : token.key;
+            if (!this.newDataTokens[key]) this.newDataTokens[key] = { light: '', dark: '' };
+            this.newDataTokens[key][isDark ? 'dark' : 'light'] = token.value;
+        });
+
+    }
+
+    private async onChangeTokens(fireEvent: boolean = false) {
+
+        this.setError('');
+        if (!this.actualTokens) return;
+
+
+        if (this.selectedTheme === 'default') {
+            this.getColorsItem(this.actualTokens['default']);
+            return;
+        }
+
+        if (this.selectedTheme && !this.themes[this.selectedTheme] && this.ds) {
+
+            const theme: ITheme = await (this.ds.tokens as any)['getTheme'](this.selectedTheme);
+            theme.isdefault = false;
+            this.themes[this.selectedTheme] = theme;
+        }
+
+        if (!fireEvent) {
+            if (!this.actualTokens) return;
+            this.getColorsItem(this.actualTokens['default']);
+            return;
+        }
+
+        this.getColorsItem(this.themes[this.selectedTheme]);
+        const allTokens = this.themes[this.selectedTheme].tokens;
+
+        this.actualTokens['default'] = this.themes[this.selectedTheme];
+
+        const params: IEditorChangedEventsObj = {
+            emitter: 'right',
+            value: JSON.stringify(allTokens) + ';;helper'
+        };
+        mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
+
+    }
+
+    private onChangeTheme(e: MouseEvent) {
+        this.setError('');
+        const target = e.target as HTMLSelectElement;
+        const theme = target.value;
+        this.selectedTheme = theme;
+        this.onChangeTokens(true);
+    }
+
     render() {
         return html`
             <div class="service_tokens_color">
@@ -222,7 +285,7 @@ export class ServiceDsColors100554 extends ServiceBase {
                         <div class="row-primary">
                             <div>
                                 <label>Themes</label>
-                                <select>
+                                <select @change=${(e: MouseEvent) => { this.onChangeTheme(e) }}>
                                     ${this.themeList.map(theme => html`
                                         <option value="${theme}">${this.keysName[theme] || theme}</option>
                                     `)}
@@ -265,9 +328,30 @@ export class ServiceDsColors100554 extends ServiceBase {
                 <fieldset>
                     <legend>Colors</legend>
                     <div>
-                        <mls-l3-color-100529>
-                            <mls-l3-color-item-100529></mls-l3-color-item-100529>
-                        </mls-l3-color-100529>
+                        <mls-l3-color class="ds-colors-section">
+                            <div class="desc"></div>
+                            <div class="colors-container">
+                                ${Object.entries(this.newDataTokens).map(item => {
+            const [keyname, values] = item;
+            const val: { light: string, dark: string } = values as { light: string, dark: string };
+            return html`
+                                        <mls-l3-color-item>
+                                            <div class="ds-colors-section-item">
+                                                <div class="thumbnail">
+                                                    <div data-tooltip="${val.light}" style="background-color: ${val.light}">
+                                                        <input type="color" value="${val.light}">
+                                                    </div>
+                                                    <div data-tooltip="${val.dark}" style="background-color: ${val.dark}">
+                                                        <input type="color" value="${val.dark}">
+                                                    </div>
+                                                </div>
+                                                <span class="color-token-name">${keyname}</span>
+                                            </div>
+                                        
+                                        </mls-l3-color-item>`
+        })}
+                            </div>
+                        </mls-l3-color>
                     </div>
                 </fieldset>
             </div>
@@ -347,6 +431,10 @@ interface IThemesTokens {
     [theme: string]: ITheme
 }
 
+interface IThemes {
+    description: string,
+    tokens: mls.l3.ITokenInfo[]
+}
 interface ITheme {
     description: string,
     isdefault: boolean,
