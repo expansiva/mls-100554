@@ -1,11 +1,13 @@
 /// <mls shortName="servicePreviewAddStyle" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, repeat, LitElement } from 'lit';
+import { html, repeat, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 export const initServicePreviewAddStyle = '';
 @customElement('service-preview-add-style-100554')
 export class ServicePreviewAddStyle extends LitElement {
+
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     private dsInstance: mls.l3.DesignSystemIO | undefined;
 
@@ -19,7 +21,7 @@ export class ServicePreviewAddStyle extends LitElement {
 
     @property() error: string = '';
 
-    @property() styleAlready: boolean = true;
+    @property() styleAlready: boolean = false;
 
     connectedCallback() {
         super.connectedCallback();
@@ -44,7 +46,7 @@ export class ServicePreviewAddStyle extends LitElement {
                 <span>${this.myMsg.groupAndSubgroup}</span>
                 <input type="text" class="inputGroup"></input>
             </div>
-            <div>
+            <div style="display:flex; flex-direction: column;">
                 <span>${this.myMsg.tagsForSearch}</span>
                 <mls-input-tags>
                     ${repeat(this.tags, ((item: string) => item) as any,
@@ -52,9 +54,9 @@ export class ServicePreviewAddStyle extends LitElement {
         )}
                     <input type="text" @keydown="${this.addInputTag}"></input>
                 </mls-input-tags>
-                <span>${this.myMsg.exInputList}</span>
+                <span style="font-size:.8rem; color: #595959;">${this.myMsg.exInputList}</span>
             </div>
-            <div>
+            <div style="display:flex; justify-content:center;">
                 <button @click="${this.addComponent}">${this.myMsg.addInDesingSystem}</button>
             </div>
             <h3 style="color:red">${this.error}</h3>
