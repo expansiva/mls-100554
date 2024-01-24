@@ -73,24 +73,39 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-        
+
         if (visible && this.menu.setIconActive) {
             this.menu.setIconActive(this.lastMode);
         }
     }
 
     // -------------- EVENTS -------------------
+    
 
     private setEvents() {
 
         mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
 
+        mls.events.addEventListener([2, 3], ['DSStyleChanged'], async (ev) => {
+
+            const rc: any = JSON.parse(ev.desc as any);
+            if (rc.emitter === 'right' || rc.emitter === 'right-get') return;
+            this.onReloader();
+
+        });
+
     }
 
     private timeEvent: number = -1;
-    private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
-        console.info('onMLSFileAction')
+    private onReloader(): void {
+        clearTimeout(this.timeEvent);
+        this.timeEvent = setTimeout(async () => {
+            this.onServiceClick(true, false);
+        }, 500);
+    }
+
+    private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
         try {
 
@@ -107,10 +122,7 @@ export class ServicePreview100554 extends ServiceBase {
                 !eventsValid.includes(fileAction.action)
             ) return;
 
-            clearTimeout(this.timeEvent);
-            this.timeEvent = setTimeout(async () => {
-                this.onServiceClick(true, false);
-            }, 500);
+            this.onReloader();
 
         } catch (e) {
 
@@ -129,6 +141,13 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     // -------------- COMPONENT ---------------
+
+    async connectedCallback() {
+        super.connectedCallback();
+        const dsIndex = mls.actual[3].mode && +this.level !== 2 ? mls.actual[3].mode : 0;
+        const ds = mls.l3.getDSInstance(mls.actual[5].project as any, dsIndex);
+        await ds.init();
+    }
 
     render() {
         return html``;
