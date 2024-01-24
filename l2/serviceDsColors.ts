@@ -1,7 +1,7 @@
 /// <mls shortName="serviceDsColors" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
 import { html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
 @customElement('service-ds-colors-100554')
@@ -90,8 +90,8 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     private ds: mls.l3.DesignSystemIO | undefined;
 
-    private keysName = {
-        default: 'default',
+    private keysName: any = {
+        default: '',
         lightAiry: 'Light and Airy',
         minimalist: 'Minimalist Monochrome',
         vibrantenergetic: 'Vibrant and Energetic',
@@ -101,6 +101,50 @@ export class ServiceDsColors100554 extends ServiceBase {
         urbanchic: 'Urban Chic',
         sunsetgradient: 'Sunset Gradient',
         oceandepths: 'Ocean Depths',
+    }
+
+    @query('#service_color_add')
+    service_color_add: HTMLElement | undefined;
+
+    @query('#service_color_delete')
+    service_color_delete: HTMLElement | undefined;
+
+    @query('#service_color_update')
+    service_color_update: HTMLElement | undefined;
+
+    @query('#service_color_revert')
+    service_color_revert: HTMLElement | undefined;
+
+    private async init() {
+
+        const { project } = mls.actual[5];
+        const { mode } = mls.actual[3];
+
+        if (project === undefined || mode === undefined) return;
+
+        this.ds = mls.l3.getDSInstance(project, mode);
+        if (!this.ds) return;
+        await this.ds.init();
+        this.getThemes();
+
+        // this.setTooltip();
+
+    }
+
+    async connectedCallback() {
+        super.connectedCallback();
+        this.loading = true;
+        await this.init();
+        this.loading = false;
+    }
+
+
+    private setTooltip() {
+        if (!this.tooltipEl) return;
+        if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_add as HTMLElement);
+        if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_delete as HTMLElement);
+        if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_update as HTMLElement);
+        if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_revert as HTMLElement);
     }
 
     private async getThemes() {
@@ -178,19 +222,23 @@ export class ServiceDsColors100554 extends ServiceBase {
                         <div class="row-primary">
                             <div>
                                 <label>Themes</label>
-                                <select id="service_color_select"></select>
+                                <select>
+                                    ${this.themeList.map(theme => html`
+                                        <option value="${theme}">${this.keysName[theme] || theme}</option>
+                                    `)}
+                                </select>
                             </div>
                             <div class="actions">
-                                <div id="service_color_add" class="action-item">
+                                <div id="service_color_add" data-tooltip="Add new theme" class="action-item">
                                     <i class="fa fa-plus"></i>
                                 </div>
-                                <div id="service_color_update" class="action-item">
+                                <div id="service_color_update" data-tooltip="Delete this theme" class="action-item">
                                     <i class="fa fa-floppy-disk"></i>
                                 </div>
-                                <div id="service_color_delete" class="action-item">
+                                <div id="service_color_delete" data-tooltip="Update this theme" class="action-item">
                                     <i class="fa fa-trash"></i>
                                 </div>
-                                <div id="service_color_revert" class="action-item">
+                                <div id="service_color_revert" data-tooltip="Revert tokens to original" class="action-item">
                                     <i class="fa fa-undo"></i>
                                 </div>
                             </div>
