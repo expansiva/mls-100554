@@ -61,7 +61,6 @@ export class ServiceDsTokens100554 extends ServiceBase {
     async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
         if (visible) {
-            mls.events.fire([this.level], ['DSColorClicked'], 'left');
             const params: IEventsSelectedObj = { isComponent: false, service: ['_100529_service_styles_preview'] };
             mls.events.fire([this.level], ['DSTokenSelected'], JSON.stringify(params), 0);
             if (el && typeof el.layout === 'function') el.layout();

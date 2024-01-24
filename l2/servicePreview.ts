@@ -69,7 +69,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-
+        console.info({visible, reinit})
         if (visible && this.menu.setIconActive) {
             this.menu.setIconActive(this.lastMode);
         }
@@ -85,6 +85,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     private timeEvent: number = -1;
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
+
+        console.info('onMLSFileAction')
 
         try {
 
@@ -103,9 +105,7 @@ export class ServicePreview100554 extends ServiceBase {
 
             clearTimeout(this.timeEvent);
             this.timeEvent = setTimeout(async () => {
-
                 this.onServiceClick(true, false);
-
             }, 500);
 
         } catch (e) {

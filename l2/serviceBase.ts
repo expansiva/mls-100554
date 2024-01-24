@@ -21,6 +21,8 @@ export abstract class ServiceBase extends LitElement {
 
     get serviceItemNav() { return this.getServiceItemNav(); }
 
+    get tooltipEl() { return this.getTooltip(); }
+
     abstract details: IService;
 
     abstract menu: IMenu;
@@ -115,6 +117,11 @@ export abstract class ServiceBase extends LitElement {
         return parentToolbarContent;
     }
 
+    private getTooltip() {
+        const tooltip = document.querySelector('mls-tooltip-100529') as ITooltipElement | null;
+        return tooltip;
+    }
+
     private getServiceItemNav(): IMlsNav2Item | null {
         const toolbar = this.getMlsNav2();
         if (!toolbar) return null;
@@ -162,6 +169,10 @@ export interface IMenu {
 
 export interface IToolbarContent extends HTMLElement {
     layout: Function
+}
+
+export interface ITooltipElement extends HTMLElement {
+    tooltip: (el:HTMLElement) => void
 }
 
 export interface IMlsNav2 extends HTMLElement {
