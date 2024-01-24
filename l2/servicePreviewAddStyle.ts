@@ -21,7 +21,9 @@ export class ServicePreviewAddStyle extends LitElement {
 
     @property() error: string = '';
 
-    @property() styleAlready: boolean = false;
+    @property() groupName: string = '';
+
+    @property() styleAlready: boolean = true;
 
     connectedCallback() {
         super.connectedCallback();
@@ -30,7 +32,7 @@ export class ServicePreviewAddStyle extends LitElement {
     }
 
     render() {
-    
+
         if (this.styleAlready) return this.renderStyleAlreadyr();
         else return this.renderAdd();
 
@@ -44,7 +46,7 @@ export class ServicePreviewAddStyle extends LitElement {
         return html`
             <div>
                 <span>${this.myMsg.groupAndSubgroup}</span>
-                <input type="text" class="inputGroup"></input>
+                <input type="text" class="inputGroup" .value="${this.groupName}"></input>
             </div>
             <div style="display:flex; flex-direction: column;">
                 <span>${this.myMsg.tagsForSearch}</span>
@@ -80,14 +82,15 @@ export class ServicePreviewAddStyle extends LitElement {
 
             this.showLoader(true);
             await this.initds();
+            await this.getGroup();
             this.verifyAlready();
             this.showLoader(false);
 
         } catch (e: any) {
-            
+
             this.error = e.message;
         }
-        
+
 
     }
 
@@ -96,14 +99,31 @@ export class ServicePreviewAddStyle extends LitElement {
         if (!this.widget || !this.dsInstance) return;
 
         const componentName = this.widget;
-		const comp = this.dsInstance.components.find(componentName);
+        const comp = this.dsInstance.components.find(componentName);
         if (!comp) this.styleAlready = false;
 
+    }
+
+    private async getGroup() {
+
+        mls.actual[0].setFullName(this.widget);
+        const model = mls.l2.editor.get({ project: mls.actual[0].project as any, shortName: mls.actual[0].path as any });
+
+        if (!model || !model.compilerResults) return;
+
+        const { variables } = model.compilerResults.tripleSlashMLS;
+        if (!variables) return;
+
+        const { groupName } = variables;
+        if (!groupName) return;
+
+        this.groupName = groupName
     }
 
     private async initds() {
 
         this.dsInstance = mls.l3.getDSInstance(mls.actual[5].project as any, mls.actual[3].mode);
+
 
     }
 
@@ -169,7 +189,7 @@ export class ServicePreviewAddStyle extends LitElement {
         this.setTimeLoader = setTimeout(() => {
             this.father.loading = show;
         }, 200);
-        
+
 
     }
 
@@ -201,7 +221,7 @@ export class ServicePreviewAddStyle extends LitElement {
             await this.dsInstance.components.add(widget);
             this.styleAlready = true;
 
-        } catch (err:any) {
+        } catch (err: any) {
             this.error = err.message;
         }
         finally {
@@ -229,7 +249,7 @@ export class ServicePreviewAddStyle extends LitElement {
         tagsForSearch: 'Tags for search',
         exInputList: 'ex: input,list',
         addInDesingSystem: 'Add in Desing System',
-        thisComponentAlreadyHasStyleAdded:'This component already has style added'
+        thisComponentAlreadyHasStyleAdded: 'This component already has style added'
     }
 
 }
