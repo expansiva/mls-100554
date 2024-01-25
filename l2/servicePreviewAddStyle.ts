@@ -23,7 +23,7 @@ export class ServicePreviewAddStyle extends LitElement {
 
     @property() groupName: string = '';
 
-    @property() styleAlready: boolean = true;
+    @property() styleAlready: boolean = false;
 
     connectedCallback() {
         super.connectedCallback();
@@ -45,6 +45,7 @@ export class ServicePreviewAddStyle extends LitElement {
     renderAdd() {
         return html`
             <div>
+                <h4 style="text-align:center">This component is not added in Design System, please add below</h4>
                 <span>${this.myMsg.groupAndSubgroup}</span>
                 <input type="text" class="inputGroup" .value="${this.groupName}"></input>
             </div>
