@@ -1,9 +1,14 @@
 /// <mls shortName="serviceDsStyleSize" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/**
+ * @mlsComponentDetails {
+ *  "webComponentDependencies": ["collab-ds-input-range-100554"]
+ * }
+ */
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
-
+import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 @customElement('service-ds-style-size-100554')
 export class SimpleGreeting extends ServiceBase {
 
@@ -15,6 +20,7 @@ export class SimpleGreeting extends ServiceBase {
 
     constructor() {
         super();
+        initCollabDSInputRange;
         this.setEvents();
     }
 
@@ -138,21 +144,15 @@ export class SimpleGreeting extends ServiceBase {
                 <h5>${this.myMsg.width}</h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.width}</span>
-                    ${this.renderInputRangeAndSearch('width', this.tpMeasures,
-            0, 0, -1, this.onChangeProp.bind(this)
-        )}
+                    <collab-ds-input-range-100554 prop="width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.maxWidth}</span>
-                    ${this.renderInputRangeAndSearch('max-width', this.tpMeasures,
-            0, 0, -1, this.onChangeProp.bind(this)
-        )}
+                    <collab-ds-input-range-100554 prop="max-width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>    
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.minWidth}</span>
-                    ${this.renderInputRangeAndSearch('min-width', this.tpMeasures,
-            0, 0, -1, this.onChangeProp.bind(this)
-        )}
+                    <collab-ds-input-range-100554 prop="min-width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
             </div>
         `;
@@ -166,21 +166,15 @@ export class SimpleGreeting extends ServiceBase {
                 <h5>${this.myMsg.height}</h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.height}</span>
-                    ${this.renderInputRangeAndSearch('height', this.tpMeasures,
-            0, 0, -1, this.onChangeProp.bind(this)
-        )}
+                    <collab-ds-input-range-100554 prop="height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.maxHeight}</span>
-                    ${this.renderInputRangeAndSearch('max-height', this.tpMeasures,
-            0, 0, -1, this.onChangeProp.bind(this)
-        )}
+                    <collab-ds-input-range-100554 prop="max-height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.minHeight}</span>
-                    ${this.renderInputRangeAndSearch('min-height', this.tpMeasures,
-            0, 0, -1, this.onChangeProp.bind(this)
-        )}
+                    <collab-ds-input-range-100554 prop="min-height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
             </div>
         `;
@@ -229,83 +223,13 @@ export class SimpleGreeting extends ServiceBase {
 
     }
 
-    renderInputRangeAndSearch(prop: string, ar: string[], init: number, min: number, max: number, fcChange: Function) {
-
-        return html`
-            <serv-group-input-range .onchangeprop=${fcChange} .prop="${prop}">
-                <input type="range" .value="${init}" min="${min}" max="${max < 0 ? '' : max}" @input="${this.changeRange}">
-                <div>
-                    <input type="search" .value="${init}" @input="${this.changeInput}">
-                    <select @change="${this.changeSelect}">
-                        ${repeat(
-            ar,
-            ((key: any) => key) as any,
-            ((k: any, index: any) => {
-
-                return html`<option value="${k}">${k}</option>`;
-
-            }) as any
-        )}
-                    </select>
-                </div>
-            </serv-group-input-range>
-        `
-    }
-
+    
     //------------IMPLEMENTS-----------
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
     private tpOverflow = ['none', 'auto', 'hidden', 'inherit', 'initial', 'overlay', 'revert', 'scroll', 'unset', 'visible']
 
-    private changeRange(e: InputEvent): void {
-        this.allChange(e, 'range')
-    }
-
-    private changeInput(e: InputEvent): void {
-        this.allChange(e, 'input')
-    }
-
-    private changeSelect(e: InputEvent): void {
-        this.allChange(e, 'sel')
-    }
-
-    private allChange(e: InputEvent, mode: string): void {
-
-        e.stopPropagation();
-        const el = e.target as HTMLInputElement;
-        if (!el) return;
-
-        const parent = el.closest('serv-group-input-range');
-        if (!parent) return;
-
-        let input = parent.querySelector('input[type="search"]') as HTMLInputElement;
-
-        let range = parent.querySelector('input[type="range"]') as HTMLInputElement;
-
-        let sel = parent.querySelector('select') as HTMLSelectElement;
-
-        if (!input || !sel || !range) return;
-
-        if (mode === 'range') {
-            input.value = range.value;
-        } else if (mode === 'input') {
-
-            const regexNum = /\d+/;
-            const tot = input.value.match(regexNum);
-            const max = range.getAttribute('max');
-            if (!max || max < (tot as any)[0]) range.setAttribute('max', (tot as any)[0]);
-            range.value = (tot as any)[0];
-        }
-
-        if ((parent as any).onchangeprop) (parent as any).onchangeprop(
-            {
-                key: (parent as any).prop,
-                value: input.value + sel.value
-            }
-        );
-
-    }
 
     private timeonChangeProp = -1;
     private onChangeProp(obj: IBlockLessLine) {

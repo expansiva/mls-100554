@@ -3,14 +3,13 @@
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+export const initCollabDSInputRange = '';
 @customElement('collab-ds-input-range-100554')
 export class CollabDSInputRange extends LitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public arraySelect: string[] = [];
-
-    private _value: number | undefined;
 
     @property() value: string = '';
 
@@ -105,7 +104,7 @@ export class CollabDSInputRange extends LitElement {
 
         this.fireEvents(
             {
-                key: (parent as any).prop,
+                key: this.prop,
                 value: input.value + sel.value
             }
         );
