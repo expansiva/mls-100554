@@ -62,7 +62,7 @@ export class SimpleGreeting extends ServiceBase {
 
     private setEvents(): void {
         mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
-            console.info(ev.desc);
+            this.onstylechanged(ev.desc as any);
         });
 
         mls.events.addEventListener([3], ['DSStyleSelected'], (ev) => {
@@ -77,6 +77,17 @@ export class SimpleGreeting extends ServiceBase {
             this.onDSStyleCursorChanged(ev);
         });
     }
+
+    private onstylechanged(desc: string) {
+
+		const obj: IEventsObj = JSON.parse(desc);
+		if (obj.emitter === 'left' && obj.helper === this.helper && obj.value.length > 0) {
+
+            console.info(obj.value);
+
+		}
+
+	}
 
     private onDSStyleSelected(ev: mls.events.IEvent) {
 
@@ -94,7 +105,7 @@ export class SimpleGreeting extends ServiceBase {
 
     private onDSStyleCursorChanged(ev: mls.events.IEvent) {
 		const rc: ICursorChangeEventsObj = JSON.parse(ev.desc as any);
-		if (rc.helper === this.constructor.name) {
+		if (rc.helper === this.helper) {
 			if (this.visible === 'true' || !this.serviceItemNav) return;
 			this.serviceItemNav.click();
 		}
