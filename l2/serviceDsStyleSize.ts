@@ -85,11 +85,11 @@ export class SimpleGreeting extends ServiceBase {
         });
 
         
-        const rc = {
+        /*const rc = {
             emitter: 'right-get',
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc)); 
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc)); */
         
          
     }
