@@ -221,7 +221,7 @@ export class SimpleGreeting extends ServiceBase {
     renderInputRangeAndSearch(prop: string, ar: string[], init: number, min: number, max: number, fcChange: Function) {
 
         return html`
-            <serv-group-input-range .onchange=${fcChange} .prop="${prop}">
+            <serv-group-input-range .onchangeprop=${fcChange} .prop="${prop}">
                 <input type="range" .value="${init}" min="${min}" max="${max < 0 ? '' : max}" @input="${this.changeRange}">
                 <div>
                     <input type="search" .value="${init}" @input="${this.changeInput}">
@@ -287,7 +287,7 @@ export class SimpleGreeting extends ServiceBase {
             range.value = (tot as any)[0];
         }
 
-        if ((parent as any).onchange) (parent as any).onchange(
+        if ((parent as any).onchangeprop) (parent as any).onchangeprop(
             {
                 key: (parent as any).prop,
                 value: input.value + sel.value
