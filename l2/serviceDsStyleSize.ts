@@ -80,9 +80,9 @@ export class SimpleGreeting extends ServiceBase {
             this.onDSStyleUnSelected(ev);
         });
 
-        /*mls.events.addEventListener([3], ['DSStyleCursorChanged'], (ev) => {
+        mls.events.addEventListener([3], ['DSStyleCursorChanged'], (ev) => {
             this.onDSStyleCursorChanged(ev);
-        });*/
+        });
 
         /*
         const rc = {
