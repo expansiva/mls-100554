@@ -15,6 +15,7 @@ export class SimpleGreeting extends ServiceBase {
 
     constructor() {
         super();
+        this.setEvents();
     }
 
     public details: IService = {
@@ -59,6 +60,13 @@ export class SimpleGreeting extends ServiceBase {
 
     //-------------EVENTS--------------
 
+    private setEvents(): void {
+        mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
+
+            console.info(ev.desc);
+
+		});
+    }
 
     //-------------COMPONENT-----------
 
