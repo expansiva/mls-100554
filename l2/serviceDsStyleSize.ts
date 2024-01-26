@@ -66,6 +66,7 @@ export class SimpleGreeting extends ServiceBase {
 
     //-------------EVENTS--------------
 
+
     private setEvents(): void {
         mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
             this.onstylechanged(ev.desc as any);
@@ -79,26 +80,40 @@ export class SimpleGreeting extends ServiceBase {
             this.onDSStyleUnSelected(ev);
         });
 
-        mls.events.addEventListener([3], ['DSStyleCursorChanged'], (ev) => {
+        /*mls.events.addEventListener([3], ['DSStyleCursorChanged'], (ev) => {
             this.onDSStyleCursorChanged(ev);
-        });
+        });*/
+
+        /*
+        const rc = {
+            emitter: 'right-get',
+        };
+
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        
+         */
     }
 
     private onstylechanged(desc: string) {
 
-		const obj: IEventsObj = JSON.parse(desc);
-		if (obj.emitter === 'left' && obj.helper === this.helper && obj.value.length > 0) {
+        const obj: IEventsObj = JSON.parse(desc);
+        if (obj.emitter === 'left' && obj.helper === this.helper && obj.value.length > 0) {
 
-            if (!this.shadowRoot || !obj.value[0] || !obj.value[0].value || !obj.value[0].key) return;
+            if ( !obj.value[0] || !obj.value[0].value || !obj.value[0].key) return;
 
-            const value = obj.value[0].value;
-            const prop = obj.value[0].key;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-            if (el) el.value = value;
+            obj.value.forEach((i: any) => {
 
-		}
+                if (!this.shadowRoot ) return;
+                const value = i.value;
+                const prop = i.key;
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                if (el) el.value = value;
 
-	}
+            })
+
+        }
+
+    }
 
     private onDSStyleSelected(ev: mls.events.IEvent) {
 
@@ -109,24 +124,30 @@ export class SimpleGreeting extends ServiceBase {
     }
 
     private onDSStyleUnSelected(ev: mls.events.IEvent) {
-		const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
-		if (params.service.includes('_100554_serviceDsStyleSize') || !this.serviceItemNav) return;
-		this.serviceItemNav.setAttribute('mode', 'H');
+        const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
+        if (params.service.includes('_100554_serviceDsStyleSize') || !this.serviceItemNav) return;
+        this.serviceItemNav.setAttribute('mode', 'H');
     }
 
     private onDSStyleCursorChanged(ev: mls.events.IEvent) {
-		const rc: ICursorChangeEventsObj = JSON.parse(ev.desc as any);
-		if (rc.helper === this.helper) {
-			if (this.visible === 'true' || !this.serviceItemNav) return;
-			this.serviceItemNav.click();
-		}
-	}
+        const rc: ICursorChangeEventsObj = JSON.parse(ev.desc as any);
+        if (rc.helper === this.helper) {
+            if (this.visible === 'true' || !this.serviceItemNav) return;
+            this.serviceItemNav.click();
+        }
+    }
 
     //-------------COMPONENT-----------
 
     connectedCallback() {
         super.connectedCallback();
         this.updateMyMessages();
+
+
+    }
+
+    firstUpdated() {
+
     }
 
     render() {
@@ -149,15 +170,15 @@ export class SimpleGreeting extends ServiceBase {
                 <h5>${this.myMsg.width}</h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.width}</span>
-                    <collab-ds-input-range-100554 prop="width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.maxWidth}</span>
-                    <collab-ds-input-range-100554 prop="max-width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>    
+                    <collab-ds-input-range-100554 prop="max-width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>    
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.minWidth}</span>
-                    <collab-ds-input-range-100554 prop="min-width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="min-width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
             </div>
         `;
@@ -171,15 +192,15 @@ export class SimpleGreeting extends ServiceBase {
                 <h5>${this.myMsg.height}</h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.height}</span>
-                    <collab-ds-input-range-100554 prop="height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.maxHeight}</span>
-                    <collab-ds-input-range-100554 prop="max-height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="max-height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.minHeight}</span>
-                    <collab-ds-input-range-100554 prop="min-height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e:any)=> this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="min-height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
             </div>
         `;
@@ -228,7 +249,7 @@ export class SimpleGreeting extends ServiceBase {
 
     }
 
-    
+
     //------------IMPLEMENTS-----------
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
@@ -298,13 +319,13 @@ export class SimpleGreeting extends ServiceBase {
 }
 
 interface ICursorChangeEventsObj {
-	emitter: 'left'
-	helper: string,
+    emitter: 'left'
+    helper: string,
 }
 
 interface IEventsSelectedObj {
-	service: string[]
-	isComponent: boolean
+    service: string[]
+    isComponent: boolean
 }
 
 interface IEventsObj {
