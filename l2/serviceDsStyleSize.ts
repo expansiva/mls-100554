@@ -11,7 +11,7 @@ export class SimpleGreeting extends ServiceBase {
 
     @property() error: string = '';
 
-    @property() helper: string = '';
+    @property() helper: string = '_100554_serviceDsStyleSize';
 
     constructor() {
         super();
@@ -128,19 +128,19 @@ export class SimpleGreeting extends ServiceBase {
                 <div class="groupEdit">
                     <span>${this.myMsg.width}</span>
                     ${this.renderInputRangeAndSearch('width', this.tpMeasures,
-            0, 0, -1, (vl: any) => { console.info(vl) }
+            0, 0, -1, this.onChangeProp.bind(this)
         )}
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.maxWidth}</span>
                     ${this.renderInputRangeAndSearch('max-width', this.tpMeasures,
-            0, 0, -1, (vl: any) => { console.info(vl) }
+            0, 0, -1, this.onChangeProp.bind(this)
         )}
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.minWidth}</span>
                     ${this.renderInputRangeAndSearch('min-width', this.tpMeasures,
-            0, 0, -1, (vl: any) => { console.info(vl) }
+            0, 0, -1, this.onChangeProp.bind(this)
         )}
                 </div>
             </div>
@@ -156,19 +156,19 @@ export class SimpleGreeting extends ServiceBase {
                 <div class="groupEdit">
                     <span>${this.myMsg.height}</span>
                     ${this.renderInputRangeAndSearch('height', this.tpMeasures,
-            0, 0, -1, (vl: any) => { console.info(vl) }
+            0, 0, -1, this.onChangeProp.bind(this)
         )}
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.maxHeight}</span>
                     ${this.renderInputRangeAndSearch('max-height', this.tpMeasures,
-            0, 0, -1, (vl: any) => { console.info(vl) }
+            0, 0, -1, this.onChangeProp.bind(this)
         )}
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.minHeight}</span>
                     ${this.renderInputRangeAndSearch('min-height', this.tpMeasures,
-            0, 0, -1, (vl: any) => { console.info(vl) }
+            0, 0, -1, this.onChangeProp.bind(this)
         )}
                 </div>
             </div>
@@ -289,11 +289,19 @@ export class SimpleGreeting extends ServiceBase {
 
         if ((parent as any).onchange) (parent as any).onchange(
             {
-                prop: (parent as any).prop,
+                key: (parent as any).prop,
                 value: input.value + sel.value
             }
         );
 
+    }
+
+    private timeonChangeProp = -1;
+    private onChangeProp(obj: IBlockLessLine) {
+        clearTimeout(this.timeonChangeProp);
+        this.timeonChangeProp = setTimeout(() => {
+            this.emitEvent(obj);
+        }, 500);
     }
 
     private emitEvent(obj: IBlockLessLine) {
