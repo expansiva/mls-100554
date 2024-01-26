@@ -84,14 +84,14 @@ export class SimpleGreeting extends ServiceBase {
             this.onDSStyleCursorChanged(ev);
         });
 
-        /*
+        
         const rc = {
             emitter: 'right-get',
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc)); 
         
-         */
+         
     }
 
     private onstylechanged(desc: string) {

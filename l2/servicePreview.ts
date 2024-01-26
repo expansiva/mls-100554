@@ -89,7 +89,11 @@ export class ServicePreview100554 extends ServiceBase {
         mls.events.addEventListener([2, 3], ['DSStyleChanged'], async (ev) => {
 
             const rc: any = JSON.parse(ev.desc as any);
-            if (rc.emitter === 'right' || rc.emitter === 'right-get') return;
+            console.info(rc.emitter)
+            if (
+                rc.emitter === 'right' ||
+                rc.emitter === 'right-get' ||
+                (rc.emitter === 'left' && rc.helper)) return;
             this.onReloader();
 
         });
