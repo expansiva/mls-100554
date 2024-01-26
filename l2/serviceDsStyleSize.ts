@@ -65,15 +65,15 @@ export class SimpleGreeting extends ServiceBase {
             console.info(ev.desc);
         });
 
-        mls.events.addEventListener([this.level], ['DSStyleSelected'], (ev) => {
+        mls.events.addEventListener([3], ['DSStyleSelected'], (ev) => {
             this.onDSStyleSelected(ev);
         });
 
-        mls.events.addEventListener([this.level], ['DSStyleUnSelected'], (ev) => {
+        mls.events.addEventListener([3], ['DSStyleUnSelected'], (ev) => {
             this.onDSStyleUnSelected(ev);
         });
 
-        mls.events.addEventListener([this.level], ['DSStyleCursorChanged'], (ev) => {
+        mls.events.addEventListener([3], ['DSStyleCursorChanged'], (ev) => {
             this.onDSStyleCursorChanged(ev);
         });
     }
