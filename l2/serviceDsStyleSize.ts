@@ -19,15 +19,15 @@ export class SimpleGreeting extends ServiceBase {
     }
 
     public details: IService = {
-        icon: '&#xf06e',
-        name: 'Preview 2',
-        mode: 'A',
+        icon: '&#xf07e',
+        name: 'Size',
+        mode: 'B',
         position: 'right',
         readOnly: false,
-        tooltip: 'Preview 2',
+        tooltip: 'Size',
         className: undefined,
         tags: [],
-        levels: [1, 2, 3, 4, 5, 6, 7]
+        levels: [3]
     }
 
     public onClickLink = (op: string): boolean => {
@@ -39,7 +39,7 @@ export class SimpleGreeting extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Save',
+        title: 'Size',
         actions: {
         },
         icons: {
