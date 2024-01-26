@@ -89,7 +89,12 @@ export class SimpleGreeting extends ServiceBase {
 		const obj: IEventsObj = JSON.parse(desc);
 		if (obj.emitter === 'left' && obj.helper === this.helper && obj.value.length > 0) {
 
-            console.info(obj.value);
+            if (!this.shadowRoot || !obj.value[0] || !obj.value[0].value || !obj.value[0].key) return;
+
+            const value = obj.value[0].value;
+            const prop = obj.value[0].key;
+            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+            if (el) el.value = value;
 
 		}
 
