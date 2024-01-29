@@ -223,8 +223,8 @@ export class ServiceDsStyleBorder extends ServiceBase {
             return;
         }
 
-        console.info({
-            key: el.getAttribute('prop'),
+        this.emitEvent({
+            key: el.getAttribute('prop') as string,
             value: el.value,
         })
 
@@ -260,7 +260,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
         });
 
-        console.info({
+        this.emitEvent({
             key: 'border',
             value: elTop.value,
         })
@@ -287,7 +287,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
                       
         });
 
-        console.info({
+        this.emitEvent({
             key: 'border-radius',
             value: elTopLeft.value,
         })
