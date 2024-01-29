@@ -59,7 +59,9 @@ export class SimpleGreeting extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (visible && this.menu.setIconActive) {
+        if (visible) {
+
+            this.fireEventAboutMe();
 
         }
     }
@@ -84,34 +86,23 @@ export class SimpleGreeting extends ServiceBase {
             this.onDSStyleCursorChanged(ev);
         });
 
-        
-        /*const rc = {
-            emitter: 'right-get',
-        };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc)); */
-        
-         
     }
 
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if (obj.emitter === 'left' && obj.helper === this.helper && obj.value.length > 0) {
+        if ( obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
 
-            if ( !obj.value[0] || !obj.value[0].value || !obj.value[0].key) return;
+        obj.value.forEach((i: any) => {
 
-            obj.value.forEach((i: any) => {
+            if (!this.shadowRoot || !i.key) return;
+            const value = i.value;
+            const prop = i.key;
+            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+            if (el) el.value = value;
 
-                if (!this.shadowRoot ) return;
-                const value = i.value;
-                const prop = i.key;
-                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-                if (el) el.value = value;
-
-            })
-
-        }
+        })
 
     }
 
@@ -143,10 +134,6 @@ export class SimpleGreeting extends ServiceBase {
         super.connectedCallback();
         this.updateMyMessages();
 
-
-    }
-
-    firstUpdated() {
 
     }
 
@@ -219,8 +206,7 @@ export class SimpleGreeting extends ServiceBase {
                 <div class="groupEdit">
                     <span>${this.myMsg.overflowX}</span>
                     <select>
-                        ${repeat(
-            this.tpOverflow,
+                        ${repeat(this.tpOverflow,
             ((key: any) => key) as any,
             ((k: any, index: any) => {
 
@@ -233,8 +219,7 @@ export class SimpleGreeting extends ServiceBase {
                 <div class="groupEdit">
                     <span>${this.myMsg.overflowY}</span>
                     <select>
-                        ${repeat(
-            this.tpOverflow,
+                        ${repeat(this.tpOverflow,
             ((key: any) => key) as any,
             ((k: any, index: any) => {
 
@@ -263,6 +248,14 @@ export class SimpleGreeting extends ServiceBase {
         this.timeonChangeProp = setTimeout(() => {
             this.emitEvent(obj);
         }, 500);
+    }
+
+    private fireEventAboutMe(): void {
+        const rc = {
+            emitter: 'right-get',
+        };
+
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
     }
 
     private emitEvent(obj: IBlockLessLine) {
