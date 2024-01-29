@@ -147,22 +147,22 @@ export class ServiceDsStyleBorder extends ServiceBase {
     renderBorder() {
         return html`
             <div>
-                <h5>${this.myMsg.border}</h5>
+                <h5 style="display:flex; gap:1.5rem" prop="border">${this.myMsg.border}<input type="checkbox"></h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.top}</span>
-                    <collab-ds-input-select-color-100554 prop="top" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
+                    <collab-ds-input-select-color-100554 prop="border-top" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.left}</span>
-                    <collab-ds-input-select-color-100554 prop="left" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>   
+                    <collab-ds-input-select-color-100554 prop="border-left" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>   
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.bottom}</span>
-                    <collab-ds-input-select-color-100554 prop="bottom" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
+                    <collab-ds-input-select-color-100554 prop="border-bottom" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.right}</span>
-                    <collab-ds-input-select-color-100554 prop="right" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
+                    <collab-ds-input-select-color-100554 prop="border-right" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
                 </div>
             </div>
         `
