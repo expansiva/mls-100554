@@ -1,4 +1,5 @@
-/// <mls shortName="serviceDsStyleSize" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="serviceDsStyleBorder" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
 /**
  * @mlsComponentDetails {
  *  "webComponentDependencies": ["collab-ds-input-range-100554"]
@@ -9,14 +10,15 @@ import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
-@customElement('service-ds-style-size-100554')
-export class ServiceDsStyleSize extends ServiceBase {
+
+@customElement('service-ds-style-border-100554')
+export class ServiceDsStyleBorder extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
 
-    @property() helper: string = '_100554_serviceDsStyleSize';
+    @property() helper: string = '_100554_serviceDsStyleBorder';
 
     constructor() {
         super();
@@ -67,8 +69,7 @@ export class ServiceDsStyleSize extends ServiceBase {
     }
 
     //-------------EVENTS--------------
-
-
+    
     private setEvents(): void {
         mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
             this.onstylechanged(ev.desc as any);
@@ -138,104 +139,10 @@ export class ServiceDsStyleSize extends ServiceBase {
     }
 
     render() {
-        if (this.error) return html`<h3 style="color:red">${this.error}</h3>`;
-        return this.renderBody();
+        return html`<p> Hello, ${this.error} !</p>`;
     }
 
-    renderBody() {
-        return html`
-            ${this.renderWidth()}
-            ${this.renderHeight()}
-            ${this.renderOverflow()}
-        `
-    }
-
-    renderWidth() {
-
-        return html`
-            <div>
-                <h5>${this.myMsg.width}</h5>
-                <div class="groupEdit">
-                    <span>${this.myMsg.width}</span>
-                    <collab-ds-input-range-100554 prop="width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.maxWidth}</span>
-                    <collab-ds-input-range-100554 prop="max-width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>    
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.minWidth}</span>
-                    <collab-ds-input-range-100554 prop="min-width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
-                </div>
-            </div>
-        `;
-
-    }
-
-    renderHeight() {
-
-        return html`
-            <div>
-                <h5>${this.myMsg.height}</h5>
-                <div class="groupEdit">
-                    <span>${this.myMsg.height}</span>
-                    <collab-ds-input-range-100554 prop="height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.maxHeight}</span>
-                    <collab-ds-input-range-100554 prop="max-height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.minHeight}</span>
-                    <collab-ds-input-range-100554 prop="min-height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
-                </div>
-            </div>
-        `;
-
-    }
-
-    renderOverflow() {
-
-        return html`
-            <div>
-                <h5>${this.myMsg.overflow}</h5>
-                <div class="groupEdit">
-                    <span>${this.myMsg.overflow}</span>
-                    <input type="checkbox"></input>
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.overflowX}</span>
-                    <select>
-                        ${repeat(this.tpOverflow,
-            ((key: any) => key) as any,
-            ((k: any, index: any) => {
-
-                return html`<option value="${k}">${k}</option>`;
-
-            }) as any
-        )}
-                    </select>
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.overflowY}</span>
-                    <select>
-                        ${repeat(this.tpOverflow,
-            ((key: any) => key) as any,
-            ((k: any, index: any) => {
-
-                return html`<option value="${k}">${k}</option>`;
-
-            }) as any
-        )}
-                    </select>
-                </div>
-            </div>
-        `;
-
-    }
-
-
-    //------------IMPLEMENTS-----------
+    //-------------IMPLEMENTS--------------
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
@@ -287,27 +194,11 @@ export class ServiceDsStyleSize extends ServiceBase {
         const m = window['message' as any] as any;
 
         if (m.width) this.myMsg.width = m.width;
-        if (m.maxWidth) this.myMsg.maxWidth = m.maxWidth;
-        if (m.minWidth) this.myMsg.minWidth = m.minWidth;
-        if (m.height) this.myMsg.height = m.height;
-        if (m.maxHeight) this.myMsg.maxHeight = m.maxHeight;
-        if (m.minHeight) this.myMsg.minHeight = m.minHeight;
-        if (m.overflow) this.myMsg.overflow = m.overflow;
-        if (m.overflowX) this.myMsg.overflowX = m.overflowX;
-        if (m.overflowY) this.myMsg.overflowY = m.overflowY;
 
     }
 
     private myMsg = {
         width: 'Width',
-        maxWidth: 'Max Width',
-        minWidth: 'Min Width',
-        height: 'Height',
-        maxHeight: 'Max Height',
-        minHeight: 'Min Height',
-        overflow: 'Overflow',
-        overflowX: 'Overflow-x',
-        overflowY: 'Overflow-y'
     }
 }
 
