@@ -9,9 +9,9 @@ export class CollabDsInputSelectColor extends LitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    public arrayInputSelect: string[] = ['px', 'rem'];
+    public arrayInputSelect: string[] = [];
 
-    public arraySelect: string[] = ['none', 'solid'];
+    public arraySelect: string[] = [];
 
     @property() valueInput: string = '';
 

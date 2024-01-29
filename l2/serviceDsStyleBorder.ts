@@ -2,7 +2,7 @@
 
 /**
  * @mlsComponentDetails {
- *  "webComponentDependencies": ["collab-ds-input-range-100554"]
+ *  "webComponentDependencies": ["collab-ds-input-range-100554","collab-ds-input-select-color-100554"]
  * }
  */
 
@@ -10,6 +10,7 @@ import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
+import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
 
 @customElement('service-ds-style-border-100554')
 export class ServiceDsStyleBorder extends ServiceBase {
@@ -23,6 +24,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
     constructor() {
         super();
         initCollabDSInputRange;
+        initCollabDsInputSelectColor;
         this.setEvents();
     }
 
@@ -139,14 +141,38 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     render() {
-        return html`<p> Hello, ${this.error} !</p>`;
+        return html`${this.renderBorder()}`;
     }
+
+    renderBorder() {
+        return html`
+            <div>
+                <h5>${this.myMsg.border}</h5>
+                <div class="groupEdit">
+                    <span>${this.myMsg.top}</span>
+                    <collab-ds-input-select-color-100554 prop="top" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.left}</span>
+                    <collab-ds-input-select-color-100554 prop="left" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>   
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.bottom}</span>
+                    <collab-ds-input-select-color-100554 prop="bottom" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.right}</span>
+                    <collab-ds-input-select-color-100554 prop="right" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
+                </div>
+            </div>
+        `
+    } 
 
     //-------------IMPLEMENTS--------------
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
-    private tpOverflow = ['none', 'auto', 'hidden', 'inherit', 'initial', 'overlay', 'revert', 'scroll', 'unset', 'visible']
+    private tpBorder = ['none','solid','dotted','dashed','double','groove','ridge','inset','outset','hidden']
 
 
     private timeonChangeProp = -1;
@@ -193,12 +219,20 @@ export class ServiceDsStyleBorder extends ServiceBase {
         if (!window['message' as any]) return;
         const m = window['message' as any] as any;
 
-        if (m.width) this.myMsg.width = m.width;
+        if (m.border) this.myMsg.border = m.border;
+        if (m.top) this.myMsg.top = m.top;
+        if (m.left) this.myMsg.left = m.left;
+        if (m.bottom) this.myMsg.bottom = m.bottom;
+        if (m.right) this.myMsg.right = m.right;
 
     }
 
     private myMsg = {
-        width: 'Width',
+        border: 'Border',
+        top: 'Top',
+        left: 'Left',
+        bottom: 'Bottom',
+        right: 'Right',
     }
 }
 
