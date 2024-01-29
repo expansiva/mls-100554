@@ -141,7 +141,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     render() {
-        return html`${this.renderBorder()}`;
+        return html`${this.renderBorder()}${this.renderRadius()}`;
     }
 
     renderBorder() {
@@ -163,6 +163,30 @@ export class ServiceDsStyleBorder extends ServiceBase {
                 <div class="groupEdit">
                     <span>${this.myMsg.right}</span>
                     <collab-ds-input-select-color-100554 prop="border-right" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
+                </div>
+            </div>
+        `
+    }
+
+    renderRadius() {
+        return html`
+            <div>
+                <h5 style="display:flex; gap:1.5rem" >${this.myMsg.borderRadius}<input type="checkbox" prop="radius"></h5>
+                <div class="groupEdit">
+                    <span>${this.myMsg.topLeft}</span>
+                    <collab-ds-input-range-100554 prop="border-top-left-radius" value="0px" .arraySelect=${this.tpMeasures} group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.topRight}</span>
+                    <collab-ds-input-range-100554 prop="border-top-right-radius" value="0px" .arraySelect=${this.tpMeasures} group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>    
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.bottomLeft}</span>
+                    <collab-ds-input-range-100554 prop="border-bottom-left-radius" value="0px" .arraySelect=${this.tpMeasures} group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.bottomRight}</span>
+                    <collab-ds-input-range-100554 prop="border-bottom-right-radius" value="0px" .arraySelect=${this.tpMeasures} group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
                 </div>
             </div>
         `
@@ -195,6 +219,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
         if (isGroup) {
 
             if (group === 'border') this.uppBorder(obj);
+            if (group === 'radius') this.uppRadius(obj);
             return;
         }
 
@@ -242,6 +267,33 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     }
 
+    private uppRadius(obj: any): void {
+    
+        if (!this.shadowRoot) return;
+        const elTopLeft = this.shadowRoot.querySelector(`*[prop="border-top-left-radius"]`) as HTMLInputElement;
+        const elTopRight = this.shadowRoot.querySelector(`*[prop="border-top-right-radius"]`) as HTMLInputElement;
+        const elBottomLeft = this.shadowRoot.querySelector(`*[prop="border-bottom-left-radius"]`) as HTMLInputElement;
+        const elBottomRight = this.shadowRoot.querySelector(`*[prop="border-bottom-right-radius"]`) as HTMLInputElement;
+
+        const ar: HTMLInputElement[] = [];
+        
+        if (elTopLeft) ar.push(elTopLeft);
+        if (elTopRight) ar.push(elTopRight);
+        if (elBottomLeft) ar.push(elBottomLeft);
+        if (elBottomRight) ar.push(elBottomRight);
+
+        ar.forEach((i) => {
+            i.value = obj.value;
+                      
+        });
+
+        console.info({
+            key: 'border-radius',
+            value: elTopLeft.value,
+        })
+
+    }
+
     private fireEventAboutMe(): void {
         const rc = {
             emitter: 'right-get',
@@ -283,6 +335,11 @@ export class ServiceDsStyleBorder extends ServiceBase {
         if (m.left) this.myMsg.left = m.left;
         if (m.bottom) this.myMsg.bottom = m.bottom;
         if (m.right) this.myMsg.right = m.right;
+        if (m.borderRadius) this.myMsg.borderRadius = m.borderRadius;
+        if (m.topLeft) this.myMsg.topLeft = m.topLeft;
+        if (m.topRight) this.myMsg.topRight = m.topRight;
+        if (m.bottomLeft) this.myMsg.bottomLeft = m.bottomLeft;
+        if (m.bottomRight) this.myMsg.bottomRight = m.bottomRight;
 
     }
 
@@ -292,6 +349,11 @@ export class ServiceDsStyleBorder extends ServiceBase {
         left: 'Left',
         bottom: 'Bottom',
         right: 'Right',
+        borderRadius: 'Border Radius',
+        topLeft: 'Top/Left',
+        topRight: 'Top/Right',
+        bottomLeft: 'Bottom/Left',
+        bottomRight: 'Bottom/Right',
     }
 }
 
