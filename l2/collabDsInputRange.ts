@@ -113,6 +113,7 @@ export class CollabDSInputRange extends LitElement {
 
     private fireEvents(obj: any): void {
 
+        obj.target = this;
         const onChangePropEvento = new CustomEvent('onchange', {
             bubbles: true,
             detail: obj

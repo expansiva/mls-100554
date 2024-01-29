@@ -9,6 +9,8 @@ export class CollabDsInputSelectColor extends LitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
+    get value() { return (`${this.useInput === 'true' ? this.valueInput ? this.valueInput : '0px' : ''} ${this.useSelect === 'true' ? this.valueSelect ? this.valueSelect : 'solid' : ''} ${this.useColor === 'true' ? this.valueColor ? this.valueColor : '#ffffff' : ''}`).trim() };
+
     public arrayInputSelect: string[] = [];
 
     public arraySelect: string[] = [];
@@ -138,10 +140,11 @@ export class CollabDsInputSelectColor extends LitElement {
     }
 
     private fireEvents(obj: any): void {
-    console.info(obj)
+
+        obj.target = this;
         const onChangePropEvento = new CustomEvent('onchange', {
             bubbles: true,
-            detail: obj
+            detail: obj,
         });
 
         this.dispatchEvent(onChangePropEvento);

@@ -95,7 +95,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if ( obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
+        if (obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
 
         obj.value.forEach((i: any) => {
 
@@ -147,40 +147,99 @@ export class ServiceDsStyleBorder extends ServiceBase {
     renderBorder() {
         return html`
             <div>
-                <h5 style="display:flex; gap:1.5rem" prop="border">${this.myMsg.border}<input type="checkbox"></h5>
+                <h5 style="display:flex; gap:1.5rem" >${this.myMsg.border}<input type="checkbox" prop="border"></h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.top}</span>
-                    <collab-ds-input-select-color-100554 prop="border-top" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
+                    <collab-ds-input-select-color-100554 prop="border-top" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.left}</span>
-                    <collab-ds-input-select-color-100554 prop="border-left" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>   
+                    <collab-ds-input-select-color-100554 prop="border-left" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>   
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.bottom}</span>
-                    <collab-ds-input-select-color-100554 prop="border-bottom" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
+                    <collab-ds-input-select-color-100554 prop="border-bottom" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.right}</span>
-                    <collab-ds-input-select-color-100554 prop="border-right" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-select-color-100554>
+                    <collab-ds-input-select-color-100554 prop="border-right" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
                 </div>
             </div>
         `
-    } 
+    }
 
     //-------------IMPLEMENTS--------------
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
-    private tpBorder = ['none','solid','dotted','dashed','double','groove','ridge','inset','outset','hidden']
+    private tpBorder = ['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset', 'hidden']
 
 
     private timeonChangeProp = -1;
-    private onChangeProp(obj: IBlockLessLine) {
+    private onChangeProp(e: KeyboardEvent) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
-            this.emitEvent(obj);
+            const el = (e.detail as any).target as HTMLInputElement;
+            this.beforeEmitEvent(el, e.detail as any);
         }, 500);
+    }
+
+    private beforeEmitEvent(el: HTMLInputElement, obj: IBlockLessLine) {
+
+        if (!this.shadowRoot) return;
+        const group = el ? el.getAttribute('group') as string : '';
+        const elGroup = this.shadowRoot.querySelector(`input[prop="${group}"]`) as HTMLInputElement;
+        let isGroup = false;
+        if (elGroup) isGroup = elGroup.checked;
+
+        if (isGroup) {
+
+            if (group === 'border') this.uppBorder(obj);
+            return;
+        }
+
+        console.info({
+            key: el.getAttribute('prop'),
+            value: el.value,
+        })
+
+    }
+
+    private uppBorder(obj: any): void {
+
+        if (!this.shadowRoot) return;
+        const elTop = this.shadowRoot.querySelector(`*[prop="border-top"]`) as HTMLInputElement;
+        const elLeft = this.shadowRoot.querySelector(`*[prop="border-left"]`) as HTMLInputElement;
+        const elRight = this.shadowRoot.querySelector(`*[prop="border-right"]`) as HTMLInputElement;
+        const elBottom = this.shadowRoot.querySelector(`*[prop="border-bottom"]`) as HTMLInputElement;
+
+        const ar: HTMLInputElement[] = [];
+        
+        if (elTop) ar.push(elTop);
+        if (elLeft) ar.push(elLeft);
+        if (elRight) ar.push(elRight);
+        if (elBottom) ar.push(elBottom);
+
+        ar.forEach((i) => {
+
+            obj.value.forEach((v:any) => {
+
+                let attr = '';
+                if (v.tp === 'input') attr = 'valueinput';
+                if (v.tp === 'select') attr = 'valueselect';
+                if (v.tp === 'color') attr = 'valuecolor';
+
+                i.setAttribute(attr, v.value);
+                
+            })            
+
+        });
+
+        console.info({
+            key: 'border',
+            value: elTop.value,
+        })
+
     }
 
     private fireEventAboutMe(): void {
