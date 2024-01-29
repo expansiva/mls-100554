@@ -27,12 +27,12 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     public details: IService = {
-        icon: '&#xf07e',
-        name: 'Size',
+        icon: '&#xf853',
+        name: 'Border',
         mode: 'B',
         position: 'right',
         readOnly: false,
-        tooltip: 'Size',
+        tooltip: 'Border',
         className: undefined,
         tags: [],
         levels: [3]
@@ -47,7 +47,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Size',
+        title: 'Border',
         actions: {
         },
         icons: {
@@ -69,7 +69,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     //-------------EVENTS--------------
-    
+
     private setEvents(): void {
         mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
             this.onstylechanged(ev.desc as any);
