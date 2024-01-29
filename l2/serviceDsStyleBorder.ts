@@ -141,7 +141,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     render() {
-        return html`${this.renderBorder()}${this.renderRadius()}`;
+        return html`${this.renderBorder()}${this.renderRadius()}${this.renderGallery()}`;
     }
 
     renderBorder() {
@@ -192,12 +192,25 @@ export class ServiceDsStyleBorder extends ServiceBase {
         `
     }
 
+    renderGallery() {
+
+        return html`
+            <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer">
+                ${repeat(this.arrayGallery, ((key: any) => key) as any,
+            ((css: any, index: any) => {
+                return html`<h5 style="${css}" @click="${this.clickGallery}" .gallery=${css}>Item</h5>`;
+            }) as any
+        )}
+            </div>
+        
+        `
+    }
+
     //-------------IMPLEMENTS--------------
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
     private tpBorder = ['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset', 'hidden']
-
 
     private timeonChangeProp = -1;
     private onChangeProp(e: KeyboardEvent) {
@@ -239,7 +252,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
         const elBottom = this.shadowRoot.querySelector(`*[prop="border-bottom"]`) as HTMLInputElement;
 
         const ar: HTMLInputElement[] = [];
-        
+
         if (elTop) ar.push(elTop);
         if (elLeft) ar.push(elLeft);
         if (elRight) ar.push(elRight);
@@ -247,7 +260,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
         ar.forEach((i) => {
 
-            obj.value.forEach((v:any) => {
+            obj.value.forEach((v: any) => {
 
                 let attr = '';
                 if (v.tp === 'input') attr = 'valueinput';
@@ -255,8 +268,8 @@ export class ServiceDsStyleBorder extends ServiceBase {
                 if (v.tp === 'color') attr = 'valuecolor';
 
                 i.setAttribute(attr, v.value);
-                
-            })            
+
+            })
 
         });
 
@@ -268,7 +281,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     private uppRadius(obj: any): void {
-    
+
         if (!this.shadowRoot) return;
         const elTopLeft = this.shadowRoot.querySelector(`*[prop="border-top-left-radius"]`) as HTMLInputElement;
         const elTopRight = this.shadowRoot.querySelector(`*[prop="border-top-right-radius"]`) as HTMLInputElement;
@@ -276,7 +289,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
         const elBottomRight = this.shadowRoot.querySelector(`*[prop="border-bottom-right-radius"]`) as HTMLInputElement;
 
         const ar: HTMLInputElement[] = [];
-        
+
         if (elTopLeft) ar.push(elTopLeft);
         if (elTopRight) ar.push(elTopRight);
         if (elBottomLeft) ar.push(elBottomLeft);
@@ -284,7 +297,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
         ar.forEach((i) => {
             i.value = obj.value;
-                      
+
         });
 
         this.emitEvent({
@@ -355,6 +368,54 @@ export class ServiceDsStyleBorder extends ServiceBase {
         bottomLeft: 'Bottom/Left',
         bottomRight: 'Bottom/Right',
     }
+
+    private clickGallery(e: MouseEvent): void {
+        
+        const el = e.target as HTMLElement;
+        if (!el) return;
+        const css = (el as any).gallery;
+        if (!css) return;
+
+        const commands: string[] = css.split(';');
+        const changes:any[] = [];
+        commands.forEach((item) => {
+
+            const [key, value] = item.split(':');
+            if (!key) return;
+
+            changes.push({
+                key: key.trim(),
+                value: value.trim()
+            });
+
+        });
+
+        const rc: IEventsObj = {
+            emitter: 'right',
+            value: changes,
+            helper: this.helper
+        };
+    
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+
+    }
+
+    private arrayGallery = [
+        'border-left: 1px solid #000000; border-right: 1px solid #000000; border-top: 1px solid #000000;',
+        'border-left: 1px solid #000000; border-right: 1px solid #000000; border-bottom: 1px solid #000000;',
+        'border: 5px dashed #32557f;',
+        'border: 4px solid transparent; background: linear-gradient(white, white) padding-box, repeating-linear-gradient(-45deg, #f69ec4 0, #f69ec4 12.5%, transparent 0, transparent 25%, #7eb4e2 0, #7eb4e2 37.5%, transparent 0, transparent 50%) 0 / 15px 15px;',
+        'border: 10px solid transparent; border-width: 10px 0; background-color: #7eb4e2; background-color: hsla(0, 0%, 0%, 0); background-image: linear-gradient(#7eb4e2, #32557f), linear-gradient(to bottom right, transparent 50.5%, #7eb4e2 50.5%), linear-gradient(to bottom left, transparent 50.5%, #7eb4e2 50.5%), linear-gradient(to top right, transparent 50.5%, #32557f 50.5%), linear-gradient(to top left, transparent 50.5%, #32557f 50.5%); background-repeat: repeat, repeat-x, repeat-x, repeat-x, repeat-x; background-position: 0 0, 10px 0, 10px 0, 10px 100%, 10px 100%; background-size: auto auto, 20px 20px, 20px 20px, 20px 20px, 20px 20px; background-clip: padding-box, border-box, border-box, border-box, border-box; background-origin: padding-box, border-box, border-box, border-box, border-box;',
+        'border: 4px solid transparent; background: linear-gradient(#000, #000) padding-box, radial-gradient(farthest-corner at 50% 50%, #00C9A7, #845EC2) border-box;',
+        'border: 4px solid transparent; background: linear-gradient(#000, #000) padding-box, linear-gradient(to bottom left, #f83600, #f9d423) border-box;',
+        'border: 4px solid transparent; background: linear-gradient(#000, #000) padding-box, linear-gradient(#f9f047, #0fd850) border-box;',
+        'border-left: 4px solid #e85f99; border-right: 4px solid #f18867; border-top: 4px solid #65587f; border-bottom: 4px solid #50bda1;',
+        'border: 5px dashed #FF5722; background: linear-gradient(to top, green, 5px, transparent 5px), linear-gradient(to right, green, 5px, transparent 5px), linear-gradient(to bottom, green, 5px, transparent 5px), linear-gradient(to left, green, 5px, transparent 5px); background-origin: border-box;',
+        'box-shadow: 0 0 0 4px #009688;border: 4px solid #009688;outline: dashed 4px white;',
+        'border: 8px groove;',
+        'border-top: 2px solid #3C514D;border-bottom: 3px dashed #3C514D;border-left: 5px double #212410;border-right: 3px dotted rgb(223,112,0);'
+
+    ];
 }
 
 interface ICursorChangeEventsObj {
