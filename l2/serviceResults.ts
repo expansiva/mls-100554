@@ -458,12 +458,9 @@ export class ServiceResults extends ServiceBase {
         this.isHelpAssistant = false;
     }
 
-    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
-        super.attributeChangedCallback(name, oldVal, newVal);
-        console.info('attributeChangedCallback')
-
-        if (name === 'msize') {
-
+    updated(changedProperties: any) {
+        if (changedProperties.has('msize')) {
+            console.log(`O valor de meuAtributo foi alterado para: ${this.msize}`);
             (this.c2 as any).layout();
         }
     }
