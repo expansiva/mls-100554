@@ -457,7 +457,10 @@ export class ServiceResults extends ServiceBase {
 
     attributeChangedCallback(name: string, oldVal: string, newVal: string) {
         super.attributeChangedCallback(name, oldVal, newVal);
+        console.info('attributeChangedCallback')
+
         if (name === 'msize') {
+
             (this.c2 as any).layout();
         }
     }
