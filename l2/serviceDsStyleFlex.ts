@@ -6,7 +6,7 @@
  * }
  */
 
-import { html, css, LitElement, repeat } from 'lit';
+import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
@@ -139,7 +139,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
     }
 
     render() {
-        return html`${this.renderFlex()}`;
+        return html`${this.renderFlex()}${this.renderGallery()}`;
     }
 
     renderFlex() {
@@ -212,6 +212,37 @@ export class ServiceDsStyleFlex extends ServiceBase {
         `;
     }
 
+    renderGallery() {
+
+        return html`
+            <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer;border:none">
+                ${repeat(this.arrayGallery.slice(0,4), ((key: any) => key) as any,
+                    ((css: any, index: any) => {
+            
+                        return html`<div style="${css}" @click="${this.clickGallery}" .gallery=${css}>
+                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
+                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
+                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
+                        </div>`;
+                    }) as any
+                )}
+            </div>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer">
+                ${repeat(this.arrayGallery.slice(4,8), ((key: any) => key) as any,
+                    ((css: any, index: any) => {
+            
+                return html`<div style="${css}" @click="${this.clickGallery}" .gallery=${css}>
+                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
+                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
+                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
+                </div>`;
+            }) as any
+        )}
+            </div>
+        
+        `
+    }
+
     //-------------IMPLEMENTS--------------
 
 
@@ -253,6 +284,49 @@ export class ServiceDsStyleFlex extends ServiceBase {
         }, 200);
 
     }
+
+    private clickGallery(e: MouseEvent): void {
+
+        const el = e.target as HTMLElement;
+        if (!el) return;
+        const css = (el as any).gallery;
+        if (!css) return;
+
+        const commands: string[] = css.split(';');
+        const changes: any[] = [];
+        commands.forEach((item) => {
+
+            const [key, value] = item.split(':');
+            if (!key) return;
+
+            changes.push({
+                key: key.trim(),
+                value: value.trim()
+            });
+
+        });
+
+        const rc: IEventsObj = {
+            emitter: 'right',
+            value: changes,
+            helper: this.helper
+        };
+
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+
+    }
+
+    private arrayGallery = [
+        'display: flex;flex-direction: row; justify-content: flex-start;border: 1px solid #cccccc;margin-left: 10px; width:120px;padding: 5px; cursor: pointer;background:white',
+        'display: flex; flex-direction: row; justify-content: flex-end; border: 1px solid rgb(204, 204, 204); margin-left: 10px; width: 120px; padding: 5px; cursor: pointer;background:white',
+        'display: flex; flex-direction: row; justify-content: center; border: 1px solid rgb(204, 204, 204); margin-left: 10px; width: 120px; padding: 5px; cursor: pointer;background:white',
+        'display: flex; flex-direction: row; justify-content: space-between; border: 1px solid rgb(204, 204, 204); margin-left: 10px; width: 120px; padding: 5px; cursor: pointer;background:white',
+        'display: flex;flex-direction: column; justify-content: flex-start;border: 1px solid #cccccc;margin-left: 10px; width:60px;height:200px; padding: 5px; cursor: pointer;background:white',
+        'display: flex;flex-direction: column; justify-content: flex-end;border: 1px solid #cccccc;margin-left: 10px; width:60px;height:200px; padding: 5px; cursor: pointer;background:white',
+        'display: flex;flex-direction: column; justify-content: center;border: 1px solid #cccccc;margin-left: 10px; width:60px;height:200px; padding: 5px; cursor: pointer;background:white',
+        'display: flex;flex-direction: column; justify-content: space-between;border: 1px solid #cccccc;margin-left: 10px; width:60px;height:200px; padding: 5px; cursor: pointer;background:white'
+
+    ];
 
     private updateMyMessages() {
 
