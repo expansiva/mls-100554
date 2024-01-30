@@ -102,8 +102,19 @@ export class ServiceDsStyleBorder extends ServiceBase {
             if (!this.shadowRoot || !i.key) return;
             const value = i.value;
             const prop = i.key;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-            if (el) el.value = value;
+
+            if (prop === 'border') {
+                this.uppProp(value, 'border');
+            } else if (prop === 'border-radius') {
+                this.uppProp(value, 'radius');
+            } else {
+
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                if (el) el.value = value;
+
+            }
+
+
 
         })
 
@@ -231,7 +242,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
         if (isGroup) {
 
-            this.uppProp(obj, group);
+            this.uppProp(el.value, group);
             return;
         }
 
@@ -242,11 +253,11 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     }
 
-    private uppProp(obj: any, group:string): void {
+    private uppProp(value:string, group: string): void {
 
         if (!this.shadowRoot) return;
 
-        const info:any = {
+        const info: any = {
             border: {
                 p1: 'border-top',
                 p2: 'border-left',
@@ -261,12 +272,12 @@ export class ServiceDsStyleBorder extends ServiceBase {
             },
         }
 
-        const prop = group === 'border' ? group : 'border-radius'; 
+        const prop = group === 'border' ? group : 'border-radius';
 
-        const elP1 = this.shadowRoot.querySelector(`*[prop="${ info[group].p1 }"]`) as HTMLInputElement;
-        const elP2 = this.shadowRoot.querySelector(`*[prop="${ info[group].p2 }"]`) as HTMLInputElement;
-        const elP3 = this.shadowRoot.querySelector(`*[prop="${ info[group].p3 }"]`) as HTMLInputElement;
-        const elP4 = this.shadowRoot.querySelector(`*[prop="${ info[group].p4 }"]`) as HTMLInputElement;
+        const elP1 = this.shadowRoot.querySelector(`*[prop="${info[group].p1}"]`) as HTMLInputElement;
+        const elP2 = this.shadowRoot.querySelector(`*[prop="${info[group].p2}"]`) as HTMLInputElement;
+        const elP3 = this.shadowRoot.querySelector(`*[prop="${info[group].p3}"]`) as HTMLInputElement;
+        const elP4 = this.shadowRoot.querySelector(`*[prop="${info[group].p4}"]`) as HTMLInputElement;
 
         const ar: HTMLInputElement[] = [];
 
@@ -276,7 +287,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
         if (elP4) ar.push(elP4);
 
         ar.forEach((i) => {
-            i.value = obj.target.value;
+            i.value = value;
         });
 
         this.emitEvent({
