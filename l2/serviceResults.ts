@@ -1,7 +1,7 @@
 /// <mls shortName="serviceResults" project="100554" enhancement="_100554_enhancementLit" groupName="services" />
 
 import { html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { getDepedencesByMFile } from './_100554_libCompile';
 import { initCodelensCustomElement } from './_100554_codelensCustomElement';
@@ -18,6 +18,9 @@ export class ServiceResults extends ServiceBase {
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
     }
+
+    @property({ type: String })
+    msize = '';
 
     createRenderRoot() {
         return this;
