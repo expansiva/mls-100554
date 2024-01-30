@@ -73,62 +73,70 @@ export abstract class ServiceBase extends LitElement {
         if (itemService) itemService.click();
     }
 
-    openService(service: string, position: 'left' | 'right', level: number) {
-        const page = this.closest('mls-page-100529');
-        if (!page) return;
-        const toolbar = page.querySelector(`mls-toolbar-100529[toolbarposition="${position}"][level="${level}"]`);
-        if (!toolbar) return;
-        const toolbarItem = toolbar.querySelector(`mls-toolbar-item-100529[path="${service}"`) as HTMLElement;
+    // openService(service: string, position: 'left' | 'right', level: number) {
+    //     const page = this.closest('mls-page-100529');
+    //     if (!page) return;
+    //     const toolbar = page.querySelector(`mls-toolbar-100529[toolbarposition="${position}"][level="${level}"]`);
+    //     if (!toolbar) return;
+    //     const toolbarItem = toolbar.querySelector(`mls-toolbar-item-100529[path="${service}"`) as HTMLElement;
 
-        if (toolbarItem) {
-            if (this.level !== level) {
-                this.selectLevel(level);
-                toolbar.setAttribute('service-to-open', service);
-                return;
-            }
-            toolbarItem.click();
-        }
-    }
+    //     if (toolbarItem) {
+    //         if (this.level !== level) {
+    //             this.selectLevel(level);
+    //             toolbar.setAttribute('service-to-open', service);
+    //             return;
+    //         }
+    //         toolbarItem.click();
+    //     }
+    // }
 
-    selectLevel(level: number) {
-        const nav = this.closest('mls-nav1-100529');
-        const objIndex = {
-            0: 7,
-            1: 6,
-            2: 5,
-            3: 4,
-            4: 3,
-            5: 2,
-            6: 1,
-            7: 0,
+    // selectLevel(level: number) {
+    //     let nav = this.closest('mls-nav1-100529');
+    //     if (!nav) {
+    //         const page = this.closest('collab-page');
+    //         nav = page?.querySelector('collab-nav-1') as HTMLElement;
+    //     }
+    //     const objIndex = {
+    //         0: 7,
+    //         1: 6,
+    //         2: 5,
+    //         3: 4,
+    //         4: 3,
+    //         5: 2,
+    //         6: 1,
+    //         7: 0,
 
-        } as any;
-        if (!nav) return;
-        nav.setAttribute('tabindexactive', objIndex[level]);
-    }
+    //     } as any;
+    //     if (!nav) return;
+    //     nav.setAttribute('tabindexactive', objIndex[level]);
+    // }
 
     private getMlsNav2(): IMlsNav2 | null {
-        const mlsNav2 = this.closest('mls-toolbar-100529') as IMlsNav2 | null;
+        let mlsNav2 = this.closest('mls-toolbar-100529') as IMlsNav2 | null;;
+        if (!mlsNav2) mlsNav2 = this.closest('collab-nav-3')?.previousElementSibling as IMlsNav2 | null;
         return mlsNav2;
     }
 
     private getParent() {
-        const parentToolbarContent = this.closest('mls-toolbar-content-service-100529') as IToolbarContent | null;
+        let parentToolbarContent = this.closest('mls-toolbar-content-service-100529') as IToolbarContent | null;
+        if (!parentToolbarContent) parentToolbarContent = this.closest('collab-nav-3-service') as IToolbarContent | null;
         return parentToolbarContent;
     }
 
     private getTooltip() {
-        const tooltip = document.querySelector('mls-tooltip-100529') as ITooltipElement | null;
+        let tooltip = document.querySelector('mls-tooltip-100529') as ITooltipElement | null;
+        if (!tooltip) tooltip = document.querySelector('collab-tooltip') as ITooltipElement | null;
         return tooltip;
     }
 
     private getServiceItemNav(): IMlsNav2Item | null {
         const toolbar = this.getMlsNav2();
         if (!toolbar) return null;
-        const parent = this.getParent();
-        if (!parent) return null;
-        const path = parent.getAttribute('path');
-        const item = toolbar.querySelector(`mls-toolbar-item-100529[path="${path}"]`) as IMlsNav2Item;
+        const content = this.getParent();
+        if (!content) return null;
+        const dataservice = content.getAttribute('data-service');
+        let item = toolbar.querySelector(`mls-toolbar-item-100529[ref="${dataservice}"]`) as HTMLElement;
+        if (!item) item = toolbar.querySelector(`collab-nav-2-item[data-service="${dataservice}"]`) as HTMLElement;
         return item;
     }
 
@@ -172,7 +180,7 @@ export interface IToolbarContent extends HTMLElement {
 }
 
 export interface ITooltipElement extends HTMLElement {
-    tooltip: (el:HTMLElement) => void
+    tooltip: (el: HTMLElement) => void
 }
 
 export interface IMlsNav2 extends HTMLElement {
