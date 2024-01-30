@@ -461,7 +461,7 @@ export class ServiceResults extends ServiceBase {
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
             console.log(`O valor de meuAtributo foi alterado para: ${this.msize}`);
-            this.c2?.setAttribute('msize', this.msize)
+            this.c2?.setAttribute('msize', this.msize);
         }
     }
 
