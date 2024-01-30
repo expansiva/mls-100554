@@ -455,6 +455,13 @@ export class ServiceResults extends ServiceBase {
         this.isHelpAssistant = false;
     }
 
+    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
+        super.attributeChangedCallback(name, oldVal, newVal);
+        if (name === 'msize') {
+            (this.c2 as any).layout();
+        }
+    }
+
     render() {
         return html`
             <mls-editor-100529 ismls2="true"></mls-editor-100529>
