@@ -69,7 +69,7 @@ export class ServiceDsStyleSpacing extends ServiceBase {
     }
 
     //-------------EVENTS--------------
-    
+
     private setEvents(): void {
         mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
             this.onstylechanged(ev.desc as any);
@@ -93,15 +93,23 @@ export class ServiceDsStyleSpacing extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if ( obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
+        if (obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
 
         obj.value.forEach((i: any) => {
 
             if (!this.shadowRoot || !i.key) return;
             const value = i.value;
             const prop = i.key;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-            if (el) el.value = value;
+
+            if (['margin', 'padding'].includes(prop)) {
+                this.uppProp(value, prop);
+
+            } else {
+
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                if (el) el.value = value;
+
+            }
 
         })
 
@@ -110,14 +118,14 @@ export class ServiceDsStyleSpacing extends ServiceBase {
     private onDSStyleSelected(ev: mls.events.IEvent) {
 
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
-        if (params.service.length > 0 && !params.service.includes('_100554_serviceDsStyleSize') || !this.serviceItemNav) return;
+        if (params.service.length > 0 && !params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'A');
 
     }
 
     private onDSStyleUnSelected(ev: mls.events.IEvent) {
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
-        if (params.service.includes('_100554_serviceDsStyleSize') || !this.serviceItemNav) return;
+        if (params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'H');
     }
 
@@ -139,22 +147,133 @@ export class ServiceDsStyleSpacing extends ServiceBase {
     }
 
     render() {
-        return html`<p> Hello, ${this.error} !</p>`;
+        return html`${this.renderMargin()}${this.renderPadding()}`;
+    }
+
+    renderMargin() {
+        return html`
+            <div>
+                <h5 style="display:flex; gap:1.5rem" >${this.myMsg.margin}<input type="checkbox" prop="margin"></h5>
+                <div class="groupEdit">
+                    <span>${this.myMsg.top}</span>
+                    <collab-ds-input-range-100554 prop="margin-top" value="0px" .arraySelect=${this.tpMeasures} group="margin" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.left}</span>
+                    <collab-ds-input-range-100554 prop="margin-left" value="0px" .arraySelect=${this.tpMeasures} group="margin" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>    
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.bottom}</span>
+                    <collab-ds-input-range-100554 prop="margin-bottom" value="0px" .arraySelect=${this.tpMeasures} group="margin" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.right}</span>
+                    <collab-ds-input-range-100554 prop="margin-right" value="0px" .arraySelect=${this.tpMeasures} group="margin" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
+                </div>
+            </div>
+        `;
+    }
+
+    renderPadding() {
+        return html`
+            <div>
+                <h5 style="display:flex; gap:1.5rem" >${this.myMsg.padding}<input type="checkbox" prop="padding"></h5>
+                <div class="groupEdit">
+                    <span>${this.myMsg.top}</span>
+                    <collab-ds-input-range-100554 prop="padding-top" value="0px" .arraySelect=${this.tpMeasures} group="padding" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.left}</span>
+                    <collab-ds-input-range-100554 prop="padding-left" value="0px" .arraySelect=${this.tpMeasures} group="padding" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>    
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.bottom}</span>
+                    <collab-ds-input-range-100554 prop="padding-bottom" value="0px" .arraySelect=${this.tpMeasures} group="padding" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.right}</span>
+                    <collab-ds-input-range-100554 prop="padding-right" value="0px" .arraySelect=${this.tpMeasures} group="padding" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
+                </div>
+            </div>
+        `;
     }
 
     //-------------IMPLEMENTS--------------
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
-    private tpOverflow = ['none', 'auto', 'hidden', 'inherit', 'initial', 'overlay', 'revert', 'scroll', 'unset', 'visible']
-
-
     private timeonChangeProp = -1;
-    private onChangeProp(obj: IBlockLessLine) {
+    private onChangeProp(e: KeyboardEvent) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
-            this.emitEvent(obj);
+            const el = (e.detail as any).target as HTMLInputElement;
+            this.beforeEmitEvent(el, e.detail as any);
         }, 500);
+    }
+
+    private beforeEmitEvent(el: HTMLInputElement, obj: IBlockLessLine) {
+
+        if (!this.shadowRoot) return;
+        const group = el ? el.getAttribute('group') as string : '';
+        const elGroup = this.shadowRoot.querySelector(`input[prop="${group}"]`) as HTMLInputElement;
+        let isGroup = false;
+        if (elGroup) isGroup = elGroup.checked;
+
+        if (isGroup) {
+
+            this.uppProp(el.value, group);
+            return;
+        }
+
+        this.emitEvent({
+            key: el.getAttribute('prop') as string,
+            value: el.value,
+        })
+
+    }
+
+    private uppProp(value: string, group: string): void {
+
+        if (!this.shadowRoot) return;
+
+        const info: any = {
+            margin: {
+                p1: 'margin-top',
+                p2: 'margin-left',
+                p3: 'margin-right',
+                p4: 'margin-bottom',
+            },
+            padding: {
+                p1: 'padding-top',
+                p2: 'padding-left',
+                p3: 'padding-bottom',
+                p4: 'padding-right',
+            },
+        }
+
+        const prop = group;
+
+        const elP1 = this.shadowRoot.querySelector(`*[prop="${info[group].p1}"]`) as HTMLInputElement;
+        const elP2 = this.shadowRoot.querySelector(`*[prop="${info[group].p2}"]`) as HTMLInputElement;
+        const elP3 = this.shadowRoot.querySelector(`*[prop="${info[group].p3}"]`) as HTMLInputElement;
+        const elP4 = this.shadowRoot.querySelector(`*[prop="${info[group].p4}"]`) as HTMLInputElement;
+
+        const ar: HTMLInputElement[] = [];
+
+        if (elP1) ar.push(elP1);
+        if (elP2) ar.push(elP2);
+        if (elP3) ar.push(elP3);
+        if (elP4) ar.push(elP4);
+
+        ar.forEach((i) => {
+            i.value = value;
+        });
+
+        this.emitEvent({
+            key: prop,
+            value: value,
+        })
+
     }
 
     private fireEventAboutMe(): void {
@@ -193,12 +312,22 @@ export class ServiceDsStyleSpacing extends ServiceBase {
         if (!window['message' as any]) return;
         const m = window['message' as any] as any;
 
-        if (m.width) this.myMsg.width = m.width;
+        if (m.margin) this.myMsg.margin = m.margin;
+        if (m.padding) this.myMsg.padding = m.padding;
+        if (m.top) this.myMsg.top = m.top;
+        if (m.left) this.myMsg.left = m.left;
+        if (m.bottom) this.myMsg.bottom = m.bottom;
+        if (m.right) this.myMsg.right = m.right;
 
     }
 
     private myMsg = {
-        width: 'Width',
+        margin: 'Margin',
+        padding: 'Padding',
+        top: 'Top',
+        left: 'Left',
+        bottom: 'Bottom',
+        right: 'Right',
     }
 }
 

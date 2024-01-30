@@ -109,14 +109,14 @@ export class ServiceDsStyleSize extends ServiceBase {
     private onDSStyleSelected(ev: mls.events.IEvent) {
 
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
-        if (params.service.length > 0 && !params.service.includes('_100554_serviceDsStyleSize') || !this.serviceItemNav) return;
+        if (params.service.length > 0 && !params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'A');
 
     }
 
     private onDSStyleUnSelected(ev: mls.events.IEvent) {
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
-        if (params.service.includes('_100554_serviceDsStyleSize') || !this.serviceItemNav) return;
+        if (params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'H');
     }
 
