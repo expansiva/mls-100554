@@ -82,8 +82,9 @@ export class ServiceResults extends ServiceBase {
             this.actualFileProject = project;
         }
 
+        if(this.visible) this.createEditor();
+
         if (!reinit) {
-            this.createEditor();
             this.setInitialModelProdJS('');
             if (el && typeof el.layout === 'function') el.layout();
         }
@@ -159,7 +160,7 @@ export class ServiceResults extends ServiceBase {
     }
 
     private createEditor(): void {
-        if (!this.c2) return;
+        if (!this.c2 || this._ed1) return;
         this._ed1 = monaco.editor.create(this.c2, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
         monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
             noImplicitAny: true
