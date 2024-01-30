@@ -113,7 +113,7 @@ export abstract class ServiceBase extends LitElement {
 
     private getMlsNav2(): IMlsNav2 | null {
         let mlsNav2 = this.closest('mls-toolbar-100529') as IMlsNav2 | null;;
-        if (!mlsNav2) mlsNav2 = this.closest('collab-nav-3')?.previousElementSibling as IMlsNav2 | null;
+        if (!mlsNav2) mlsNav2 = this.closest('collab-nav-2')?.previousElementSibling as IMlsNav2 | null;
         return mlsNav2;
     }
 
