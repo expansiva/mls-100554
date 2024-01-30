@@ -231,8 +231,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
         if (isGroup) {
 
-            if (group === 'border') this.uppBorder(obj);
-            if (group === 'radius') this.uppRadius(obj);
+            this.uppProp(obj, group);
             return;
         }
 
@@ -243,66 +242,46 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     }
 
-    private uppBorder(obj: any): void {
+    private uppProp(obj: any, group:string): void {
 
         if (!this.shadowRoot) return;
-        const elTop = this.shadowRoot.querySelector(`*[prop="border-top"]`) as HTMLInputElement;
-        const elLeft = this.shadowRoot.querySelector(`*[prop="border-left"]`) as HTMLInputElement;
-        const elRight = this.shadowRoot.querySelector(`*[prop="border-right"]`) as HTMLInputElement;
-        const elBottom = this.shadowRoot.querySelector(`*[prop="border-bottom"]`) as HTMLInputElement;
+
+        const info:any = {
+            border: {
+                p1: 'border-top',
+                p2: 'border-left',
+                p3: 'border-right',
+                p4: 'border-bottom',
+            },
+            radius: {
+                p1: 'border-top-left-radius',
+                p2: 'border-top-right-radius',
+                p3: 'border-bottom-left-radius',
+                p4: 'border-bottom-right-radius',
+            },
+        }
+
+        const prop = group === 'border' ? group : 'border-radius'; 
+
+        const elP1 = this.shadowRoot.querySelector(`*[prop="${ info[group].p1 }"]`) as HTMLInputElement;
+        const elP2 = this.shadowRoot.querySelector(`*[prop="${ info[group].p2 }"]`) as HTMLInputElement;
+        const elP3 = this.shadowRoot.querySelector(`*[prop="${ info[group].p3 }"]`) as HTMLInputElement;
+        const elP4 = this.shadowRoot.querySelector(`*[prop="${ info[group].p4 }"]`) as HTMLInputElement;
 
         const ar: HTMLInputElement[] = [];
 
-        if (elTop) ar.push(elTop);
-        if (elLeft) ar.push(elLeft);
-        if (elRight) ar.push(elRight);
-        if (elBottom) ar.push(elBottom);
+        if (elP1) ar.push(elP1);
+        if (elP2) ar.push(elP2);
+        if (elP3) ar.push(elP3);
+        if (elP4) ar.push(elP4);
 
         ar.forEach((i) => {
-
-            obj.value.forEach((v: any) => {
-
-                let attr = '';
-                if (v.tp === 'input') attr = 'valueinput';
-                if (v.tp === 'select') attr = 'valueselect';
-                if (v.tp === 'color') attr = 'valuecolor';
-
-                i.setAttribute(attr, v.value);
-
-            })
-
+            i.value = obj.target.value;
         });
 
         this.emitEvent({
-            key: 'border',
-            value: elTop.value,
-        })
-
-    }
-
-    private uppRadius(obj: any): void {
-
-        if (!this.shadowRoot) return;
-        const elTopLeft = this.shadowRoot.querySelector(`*[prop="border-top-left-radius"]`) as HTMLInputElement;
-        const elTopRight = this.shadowRoot.querySelector(`*[prop="border-top-right-radius"]`) as HTMLInputElement;
-        const elBottomLeft = this.shadowRoot.querySelector(`*[prop="border-bottom-left-radius"]`) as HTMLInputElement;
-        const elBottomRight = this.shadowRoot.querySelector(`*[prop="border-bottom-right-radius"]`) as HTMLInputElement;
-
-        const ar: HTMLInputElement[] = [];
-
-        if (elTopLeft) ar.push(elTopLeft);
-        if (elTopRight) ar.push(elTopRight);
-        if (elBottomLeft) ar.push(elBottomLeft);
-        if (elBottomRight) ar.push(elBottomRight);
-
-        ar.forEach((i) => {
-            i.value = obj.value;
-
-        });
-
-        this.emitEvent({
-            key: 'border-radius',
-            value: elTopLeft.value,
+            key: prop,
+            value: elP1.value,
         })
 
     }
@@ -370,14 +349,14 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     private clickGallery(e: MouseEvent): void {
-        
+
         const el = e.target as HTMLElement;
         if (!el) return;
         const css = (el as any).gallery;
         if (!css) return;
 
         const commands: string[] = css.split(';');
-        const changes:any[] = [];
+        const changes: any[] = [];
         commands.forEach((item) => {
 
             const [key, value] = item.split(':');
@@ -395,7 +374,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
             value: changes,
             helper: this.helper
         };
-    
+
         mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
 
     }

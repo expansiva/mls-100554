@@ -102,6 +102,7 @@ export class CollabDSInputRange extends LitElement {
 
         }
 
+        this.value = input.value + sel.value;
         this.fireEvents(
             {
                 key: this.prop,
