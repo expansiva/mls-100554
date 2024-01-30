@@ -9,7 +9,9 @@ export class CollabDsInputSelectColor extends LitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    get value() { return (`${this.useInput === 'true' ? this.valueInput ? this.valueInput : '0px' : ''} ${this.useSelect === 'true' ? this.valueSelect ? this.valueSelect : 'solid' : ''} ${this.useColor === 'true' ? this.valueColor ? this.valueColor : '#ffffff' : ''}`).trim() };
+    get value() { return this.configGetValue(); };
+
+    set value(str) { this.configSetValue(str) };
 
     public arrayInputSelect: string[] = [];
 
@@ -85,6 +87,45 @@ export class CollabDsInputSelectColor extends LitElement {
     }
 
     //---------IMPLEMENTS-------------
+
+    private configGetValue(): string{
+
+        let ret = '';
+
+        if (this.useInput === 'true' && this.valueInput) ret = this.valueInput;
+        else if (this.useInput === 'true') ret = '0px';
+
+        if (this.useSelect === 'true' && this.valueSelect) ret += ' '+this.valueSelect;
+        else if (this.useSelect === 'true') ret = ' none';
+
+        if (this.useColor === 'true' && this.valueColor) ret += ' '+this.valueColor;
+        else if (this.useColor === 'true') ret = ' #ffffff';
+
+        return ret.trim();
+
+    }
+
+    private configSetValue(str:string){
+
+        if (!str) return;
+        const array = str.split(' ');
+        
+        if (this.useInput === 'true' && array.length >= 1) {
+            this.valueInput = array[0];
+            array.splice(0, 1);
+        }
+
+        if (this.useSelect === 'true' && array.length >= 1) {
+            this.valueSelect = array[0];
+            array.splice(0, 1);
+        }
+
+        if (this.useColor === 'true' && array.length >= 1) {
+            this.valueColor = array[0];
+            array.splice(0, 1);
+        }
+        
+    }
 
     private onlyNumber(str: string): string {
         const regexNum = /\d+/;
