@@ -73,6 +73,11 @@ export abstract class ServiceBase extends LitElement {
         if (itemService) itemService.click();
     }
 
+    showNav2Item(show:boolean) {
+        const itemService = this.serviceItemNav as IMlsNav2Item;
+        if (itemService) itemService?.show(show);
+    }
+
     // openService(service: string, position: 'left' | 'right', level: number) {
     //     const page = this.closest('mls-page-100529');
     //     if (!page) return;
@@ -129,14 +134,14 @@ export abstract class ServiceBase extends LitElement {
         return tooltip;
     }
 
-    private getServiceItemNav(): IMlsNav2Item | null {
+    private getServiceItemNav(): IMlsNav2Item | HTMLElement | null {
         const toolbar = this.getMlsNav2();
         if (!toolbar) return null;
         const content = this.getParent();
         if (!content) return null;
         const dataservice = content.getAttribute('data-service');
         let item = toolbar.querySelector(`mls-toolbar-item-100529[ref="${dataservice}"]`) as HTMLElement;
-        if (!item) item = toolbar.querySelector(`collab-nav-2-item[data-service="${dataservice}"]`) as HTMLElement;
+        if (!item) item = toolbar.querySelector(`collab-nav-2-item[data-service="${dataservice}"]`) as IMlsNav2Item;
         return item;
     }
 
@@ -188,7 +193,7 @@ export interface IMlsNav2 extends HTMLElement {
 }
 
 export interface IMlsNav2Item extends HTMLElement {
-
+    show: (show: boolean) => void
 }
 
 export interface IService {
