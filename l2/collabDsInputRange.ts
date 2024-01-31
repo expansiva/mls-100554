@@ -11,6 +11,8 @@ export class CollabDSInputRange extends LitElement {
 
     public arraySelect: string[] = [];
 
+    @property() useSelect: string = 'true';
+
     @property() value: string = '';
 
     @property() prop: string = '';
@@ -26,7 +28,7 @@ export class CollabDSInputRange extends LitElement {
             <input type="range" .value="${this.onlyNumber(this.value)}" min="${this.min}" max="${this.max}" @input="${this.changeRange}">
                 <div>
                     <input type="search" .value="${this.onlyNumber(this.value)}" @input="${this.changeInput}">
-                    <select @change="${this.changeSelect}" .value="px">
+                    <select @change="${this.changeSelect}" style="${this.useSelect === 'false' ? 'display:none' : ''}" .value="px">
                         ${repeat(
             this.arraySelect,
             ((key: any) => key) as any,
