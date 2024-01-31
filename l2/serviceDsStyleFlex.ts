@@ -139,13 +139,13 @@ export class ServiceDsStyleFlex extends ServiceBase {
     }
 
     render() {
-        return html`${this.renderFlex()}${this.renderGallery()}`;
-    }
+        return html`${this.renderFlex()}${this.renderFlexItem()}${this.renderGallery()}`;
+    } 
 
     renderFlex() {
         return html`
             <div>
-                
+                <h5>Flex</h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.display}</span>
                     <select style="width:150px" prop="display">
@@ -207,6 +207,45 @@ export class ServiceDsStyleFlex extends ServiceBase {
                         <option value="stretch">Stretch</option>
                     </select>  
                 </div>
+            </div>
+        
+        `;
+    }
+
+    renderFlexItem() {
+        return html`
+            <div>
+                <h5>Flex-Item</h5>
+                <div class="groupEdit">
+                    <span>${this.myMsg.alignSelf}</span>
+                    <select style="width:150px" prop="align-self">
+                        <option value=""></option>
+                        <option value="auto">auto</option>
+                        <option value="flex-start">Flex start</option>
+                        <option value="flex-end">Flex end</option>
+                        <option value="center">Center</option>
+                        <option value="baseline">Baseline</option>
+                        <option value="stretch">Stretch</option>
+                    </select>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.order}</span>
+                    <select style="width:150px" prop="order">
+                        <option value=""></option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        
+                    </select>   
+                </div>
+                
             </div>
         
         `;
@@ -339,6 +378,8 @@ export class ServiceDsStyleFlex extends ServiceBase {
         if (m.justifyContent) this.myMsg.justifyContent = m.justifyContent;
         if (m.alignItems) this.myMsg.alignItems = m.alignItems;
         if (m.alignContent) this.myMsg.alignContent = m.alignContent;
+        if (m.alignSelf) this.myMsg.alignSelf = m.alignSelf;
+        if (m.order) this.myMsg.order = m.order;
 
     }
 
@@ -349,6 +390,8 @@ export class ServiceDsStyleFlex extends ServiceBase {
         justifyContent: 'Justify content',
         alignItems: 'Align items',
         alignContent: 'Align content',
+        alignSelf: 'Align self',
+        order: 'Order'
     }
 }
 
