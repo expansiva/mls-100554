@@ -12,7 +12,7 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 
 @customElement('service-ds-style-transform-100554')
-export class ServiceDsStyleTransform extends ServiceBase {
+export class ServiceDsStyleTransform extends ServiceBase { 
 
     private filter = {
 		scaleX: '',
@@ -328,14 +328,14 @@ export class ServiceDsStyleTransform extends ServiceBase {
         const elTX = this.shadowRoot.querySelector('*[prop="translateX"]') as HTMLInputElement; 
         const elTY = this.shadowRoot.querySelector('*[prop="translateY"]') as HTMLInputElement; 
         const elR = this.shadowRoot.querySelector('*[prop="rotate"]') as HTMLInputElement; 
-
-        if (elSX) elSX.value = this.filter.scaleX;
-        if (elSY) elSY.value = this.filter.scaleY;
-        if (elSKX) elSKX.value = this.filter.skewX;
-        if (elSKY) elSKY.value = this.filter.skewY;
-        if (elTX) elTX.value = this.filter.translateX;
-        if (elTY) elTY.value = this.filter.translateY;
-        if (elR) elR.value = this.filter.rotate;
+    
+        if (elSX && this.filter.scaleX) elSX.value = this.filter.scaleX;
+        if (elSY && this.filter.scaleY) elSY.value = this.filter.scaleY;
+        if (elSKX && this.filter.skewX) elSKX.value = this.filter.skewX;
+        if (elSKY && this.filter.skewY) elSKY.value = this.filter.skewY;
+        if (elTX && this.filter.translateX) elTX.value = this.filter.translateX;
+        if (elTY && this.filter.translateY) elTY.value = this.filter.translateY;
+        if (elR && this.filter.rotate) elR.value = this.filter.rotate;
 
     }
 
@@ -360,7 +360,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
         });
 
-        //this.setValues([{key:'transform', value:css}]); 
+        this.setValues([{key:'transform', value:css.replace('transform:','').trim()}]); 
 
         const rc: IEventsObj = {
             emitter: 'right',
@@ -368,12 +368,19 @@ export class ServiceDsStyleTransform extends ServiceBase {
             helper: this.helper
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        //mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
 
     }
 
     private arrayGallery = [
-        'transform: scale(1.5);'
+        'transform: scale(1.5);',
+        'transform: rotate(90deg);',
+        'transform: rotate(181deg);', 
+        'transform: rotate(270deg);',
+        'transform: skew(50deg);',
+        'transform: skew(50deg, -50deg);',
+        'transform: skew(-50deg, 0deg);',
+        'transform: skew(-50deg, 50deg);'
 
     ];
 

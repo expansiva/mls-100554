@@ -25,7 +25,7 @@ export class CollabDSInputRange extends LitElement {
 
         return html`
             
-            <input type="range" .value="${this.onlyNumber(this.value)}" min="${this.min}" max="${this.max}" @input="${this.changeRange}">
+            <input type="range" step="0.01 .value="${this.onlyNumber(this.value)}" min="${this.min}" max="${this.max}" @input="${this.changeRange}">
                 <div>
                     <input type="search" .value="${this.onlyNumber(this.value)}" @input="${this.changeInput}">
                     <select @change="${this.changeSelect}" style="${this.useSelect === 'false' ? 'display:none' : ''}" .value="px">
@@ -53,7 +53,7 @@ export class CollabDSInputRange extends LitElement {
     //---------IMPLEMENTS-------------
 
     private onlyNumber(str: string): string {
-        const regexNum = /\d+/;
+        const regexNum = /(\d+(?:\.\d+)?)/;
         const res = str.match(regexNum);
         return res && (res as any)[0] ? (res as any)[0] as string : '';
     }
