@@ -17,7 +17,7 @@ export abstract class ServiceBase extends LitElement {
 
     @state() loading: boolean = false;
 
-    get serviceContent() { return this.getParent(); }
+    get serviceContent() { return this.getNav3ServiceContent(); }
 
     get serviceItemNav() { return this.getServiceItemNav(); }
 
@@ -39,7 +39,7 @@ export abstract class ServiceBase extends LitElement {
         if (name === 'visible') {
             const visible = newVal === 'true';
             const reinit: boolean = oldVal !== null && visible !== false;
-            if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible, reinit, this.getParent())
+            if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible, reinit, this.getNav3ServiceContent())
         }
     }
 
@@ -50,13 +50,13 @@ export abstract class ServiceBase extends LitElement {
             const loading = changedProperties.get('loading');
 
             if (loading !== undefined) {
-                this.serviceContent?.setAttribute('loading', (!loading).toString());
+                this.getNav3Service()?.setAttribute('loading', (!loading).toString());
             }
         }
     }
 
     setError(error: string): void {
-        this.serviceContent?.setAttribute('error', error);
+        this.getNav3Service()?.setAttribute('error', error);
     }
 
     toogleBadge(show: boolean, serviceName: string) {
@@ -118,13 +118,19 @@ export abstract class ServiceBase extends LitElement {
 
     private getMlsNav2(): IMlsNav2 | null {
         let mlsNav2 = this.closest('mls-toolbar-100529') as IMlsNav2 | null;;
-        if (!mlsNav2) mlsNav2 = this.closest('collab-nav-2')?.previousElementSibling as IMlsNav2 | null;
+        if (!mlsNav2) mlsNav2 = this.closest('collab-nav-2') as IMlsNav2 | null;
         return mlsNav2;
     }
 
-    private getParent() {
+    private getNav3ServiceContent() {
         let parentToolbarContent = this.closest('mls-toolbar-content-service-100529') as IToolbarContent | null;
         if (!parentToolbarContent) parentToolbarContent = this.closest('collab-nav-3-service') as IToolbarContent | null;
+        return parentToolbarContent;
+    }
+
+    private getNav3Service() {
+        let parentToolbarContent = this.closest('mls-toolbar-content-service-100529') as IToolbarContent | null;
+        if (!parentToolbarContent) parentToolbarContent = this.closest('collab-nav-3') as IToolbarContent | null;
         return parentToolbarContent;
     }
 
@@ -137,7 +143,7 @@ export abstract class ServiceBase extends LitElement {
     private getServiceItemNav(): IMlsNav2Item | HTMLElement | null {
         const toolbar = this.getMlsNav2();
         if (!toolbar) return null;
-        const content = this.getParent();
+        const content = this.getNav3ServiceContent();
         if (!content) return null;
         const dataservice = content.getAttribute('data-service');
         let item = toolbar.querySelector(`mls-toolbar-item-100529[ref="${dataservice}"]`) as HTMLElement;
