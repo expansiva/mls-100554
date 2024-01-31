@@ -1,7 +1,7 @@
 /// <mls shortName="serviceHistories" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
 import { html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
 @customElement('service-histories-100554')
@@ -13,6 +13,9 @@ export class ServiceHistories100554 extends ServiceBase {
         mls.events.addEventListener([2], ['HistoriesSelected' as any], (ev) => this.onSelectHistories(ev));
         mls.events.addEventListener([2], ['ToolBarSelected'], (ev) => { this.onToolbarSelected(ev); });
     }
+
+    @property({ type: String })
+    msize = '';
 
     createRenderRoot() {
         return this;
@@ -79,13 +82,12 @@ export class ServiceHistories100554 extends ServiceBase {
     }
 
     private async onSelectHistories(ev: mls.events.IEvent) {
+
         if (!ev.desc) return;
         const params: IEventParams = JSON.parse(ev.desc);
         if (params.position === this.position) return;
         if (params.level !== this.level) return;
 
-
-        
         if (!this.serviceItemNav) return;
         this.showNav2Item(true);
         this.serviceItemNav.setAttribute('mode', 'A'); // old
@@ -167,6 +169,14 @@ export class ServiceHistories100554 extends ServiceBase {
             setTimeout(() => {
                 if (el && typeof el.layout === 'function') el.layout();
             }, 100)
+        }
+    }
+
+
+    updated(changedProperties: any) {
+        if (changedProperties.has('msize')) {
+            if (!this.visible) return;
+            this.c2?.setAttribute('msize', this.msize);
         }
     }
 

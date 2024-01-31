@@ -128,6 +128,9 @@ export class ServiceDsColors100554 extends ServiceBase {
     @query('#service_color_inp_themename')
     service_color_inp_themename: HTMLInputElement | undefined;
 
+    @query('#select_theme')
+    select_theme: HTMLSelectElement | undefined;
+
     private async init() {
 
         const { project } = mls.actual[5];
@@ -266,7 +269,7 @@ export class ServiceDsColors100554 extends ServiceBase {
         this.getColorsItem(this.themes[this.selectedTheme]);
         const allTokens = this.themes[this.selectedTheme].tokens;
 
-        this.actualTokens['default'] = this.themes[this.selectedTheme];
+        this.actualTokens['default'] = { ...this.themes[this.selectedTheme] };
 
         const params: IEditorChangedEventsObj = {
             emitter: 'right',
@@ -275,6 +278,7 @@ export class ServiceDsColors100554 extends ServiceBase {
         // mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
 
     }
+
 
     private onChangeTheme(e: MouseEvent) {
         this.setError('');
@@ -326,6 +330,7 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     }
 
+
     private async deleteTheme() {
         this.setError('');
         if (this.themes[this.selectedTheme]?.isdefault || this.selectedTheme === 'default') {
@@ -361,14 +366,15 @@ export class ServiceDsColors100554 extends ServiceBase {
             const tokens: mls.l3.ITokenInfo[] = await (this.ds.tokens as any)['getOriginalTokens']();
             const tokensColors = tokens.filter((tok) => tok.category === 'color');
             this.actualTokens['default'].tokens = tokensColors;
-            // this.selectThemes.value = 'default';
-            //this.mlscolors['init'](this.actualTokens['default']);
+
+            if (this.select_theme) this.select_theme.value = 'default'
+            this.getColorsItem(this.actualTokens['default']);
             const params: IEditorChangedEventsObj = {
                 emitter: 'right',
                 value: JSON.stringify(tokensColors) + ';;helper'
             };
 
-            mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
+            // mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
         } catch (err: any) {
             this.setError(err.message);
         } finally {
@@ -386,7 +392,50 @@ export class ServiceDsColors100554 extends ServiceBase {
                 parent.classList.remove('clicked');
             }, 1000);
         }
+    }
 
+    handleClickColorItem(key: string, value: string, el: HTMLElement) {
+        this.setActive(el);
+        const input = el.querySelector('input') as HTMLElement;
+        if (!input) return;
+        input.click();
+        const params: IEditorChangedEventsObj = {
+            emitter: 'right',
+            value: `${key};${value};line`
+        };
+
+        console.info({ params })
+        // mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
+    }
+
+    handleInputColorItem(key: string, e: MouseEvent) {
+        const target = e.target as HTMLInputElement;
+        const container = target.closest('div');
+        const value = target.value;
+        if (!container) return;
+        console.info({
+            container,
+            value
+        })
+        container.style.backgroundColor = value;
+
+        const params: IEditorChangedEventsObj = {
+            emitter: 'right',
+            value: `${key};${value};helper`
+        };
+        console.info({ params })
+
+        // mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
+
+    }
+
+    private setActive(element: HTMLElement) {
+        const mlscolor = element.closest('mls-l3-color');
+        if (!mlscolor) return;
+        const allelements = mlscolor.querySelectorAll('mls-l3-color-item');
+        allelements.forEach((el) => el.classList.remove('active'));
+        const actualItem = element.closest('mls-l3-color-item');
+        if (actualItem) actualItem.classList.add('active');
     }
 
 
@@ -404,7 +453,7 @@ export class ServiceDsColors100554 extends ServiceBase {
                         <div class="row-primary ${this.showAddContainer ? 'disabled' : ''}">
                             <div>
                                 <label>Themes</label>
-                                <select @change=${(e: MouseEvent) => { this.onChangeTheme(e) }}>
+                                <select id="select_theme" @change=${(e: MouseEvent) => { this.onChangeTheme(e) }}>
                                     ${this.themeList.map(theme => html`
                                         <option value="${theme}">${this.keysName[theme] || theme}</option>
                                     `)}
@@ -461,11 +510,25 @@ export class ServiceDsColors100554 extends ServiceBase {
                     <mls-l3-color-item>
                         <div class="ds-colors-section-item">
                             <div class="thumbnail">
-                                <div data-tooltip="${val.light}" style="background-color: ${val.light}">
-                                    <input type="color" value="${val.light}">
+                                <div
+                                    data-tooltip="${val.light}" 
+                                    style="background-color: ${val.light}"
+                                    @click=${(e: MouseEvent) => { this.handleClickColorItem(keyname, val.light, e.target as HTMLElement) }}
+                                    >
+                                    <input
+                                        type="color"
+                                        @input=${(e: MouseEvent) => { this.handleInputColorItem(keyname, e) }}
+                                        value="${val.light}">
                                 </div>
-                                <div data-tooltip="${val.dark}" style="background-color: ${val.dark}">
-                                    <input type="color" value="${val.dark}">
+                                <div
+                                    data-tooltip="${val.dark}" 
+                                    style="background-color: ${val.dark}"
+                                    @click=${(e: MouseEvent) => { this.handleClickColorItem(keyname, val.dark, e.target as HTMLElement) }}
+                                >
+                                    <input
+                                    type="color"
+                                    @input=${(e: MouseEvent) => { this.handleInputColorItem(keyname, e) }}
+                                    value="${val.dark}">
                                 </div>
                             </div>
                             <span class="color-token-name">${keyname}</span>

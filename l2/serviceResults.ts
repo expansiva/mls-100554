@@ -82,7 +82,8 @@ export class ServiceResults extends ServiceBase {
             this.actualFileProject = project;
         }
 
-        if(this.visible) this.createEditor();
+        if (this.visible) this.createEditor();
+        
 
         if (!reinit) {
             this.setInitialModelProdJS('');
