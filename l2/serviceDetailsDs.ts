@@ -147,6 +147,7 @@ export class ServiceDetailsDs100554 extends ServiceBase {
     }
 
     private onLinkClick(service: string) {
+        console.info('onLinkClick', service)
         this.openService(service, 'left', 3);
     }
 
@@ -180,12 +181,12 @@ export class ServiceDetailsDs100554 extends ServiceBase {
                         <li>
                             <i class="fa fa-book"></i>
                             <span>Documentation:</span>
-                            <a href="#"  @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_l3_documentation') }}> ${this.state.documentation} docs </a>
+                            <a href="#"  @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100554_serviceDsDocList') }}> ${this.state.documentation} docs </a>
                         </li>
                         <li>
                             <i class="fa fa-list-check"></i>
                             <span>Tokens:</span>
-                            <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_tokens') }}>${this.state.tokens} tokens</a>
+                            <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100554_serviceDsTokens') }}>${this.state.tokens} tokens</a>
                         </li>
                         <li>
                             <i class="fa fa-folder-tree"></i>
@@ -195,7 +196,7 @@ export class ServiceDetailsDs100554 extends ServiceBase {
                         <li>
                             <i class="fa fa-cubes"></i>
                             <span>Components:</span>
-                            <a href="#"" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_widgets') }}>${this.state.components} components </a>
+                            <a href="#"" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100554_serviceDsComponentsList') }}>${this.state.components} components </a>
                         </li>
                         <li>
                             <i class="fa fa-pen-nib"></i>

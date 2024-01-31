@@ -73,48 +73,63 @@ export abstract class ServiceBase extends LitElement {
         if (itemService) itemService.click();
     }
 
-    showNav2Item(show:boolean) {
+    showNav2Item(show: boolean) {
         const itemService = this.serviceItemNav as IMlsNav2Item;
         if (itemService) itemService?.show(show);
     }
 
-    // openService(service: string, position: 'left' | 'right', level: number) {
-    //     const page = this.closest('mls-page-100529');
-    //     if (!page) return;
-    //     const toolbar = page.querySelector(`mls-toolbar-100529[toolbarposition="${position}"][level="${level}"]`);
-    //     if (!toolbar) return;
-    //     const toolbarItem = toolbar.querySelector(`mls-toolbar-item-100529[path="${service}"`) as HTMLElement;
+    openService(service: string, position: 'left' | 'right', level: number) {
+        let page = this.closest('mls-page-100529') || this.closest('collab-page');
+        if (!page) return;
 
-    //     if (toolbarItem) {
-    //         if (this.level !== level) {
-    //             this.selectLevel(level);
-    //             toolbar.setAttribute('service-to-open', service);
-    //             return;
-    //         }
-    //         toolbarItem.click();
-    //     }
-    // }
+        let toolbar = page.querySelector(`mls-toolbar-100529[toolbarposition="${position}"][level="${level}"]`);
+        if (!toolbar) {
+            toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
+            if (!toolbar) return;
+            if (this.level !== level) {
+                (toolbar as any).state[level][position] = service;
+                this.selectLevel(level);
+                return;
+            }
 
-    // selectLevel(level: number) {
-    //     let nav = this.closest('mls-nav1-100529');
-    //     if (!nav) {
-    //         const page = this.closest('collab-page');
-    //         nav = page?.querySelector('collab-nav-1') as HTMLElement;
-    //     }
-    //     const objIndex = {
-    //         0: 7,
-    //         1: 6,
-    //         2: 5,
-    //         3: 4,
-    //         4: 3,
-    //         5: 2,
-    //         6: 1,
-    //         7: 0,
+            const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
+            if (item) item.click();
+            return;
+        }
 
-    //     } as any;
-    //     if (!nav) return;
-    //     nav.setAttribute('tabindexactive', objIndex[level]);
-    // }
+        if (!toolbar) return;
+        const toolbarItem = toolbar.querySelector(`mls-toolbar-item-100529[path="${service}"`) as HTMLElement;
+
+        if (toolbarItem) {
+            if (this.level !== level) {
+                this.selectLevel(level);
+                toolbar.setAttribute('service-to-open', service);
+                return;
+            }
+            toolbarItem.click();
+        }
+    }
+
+    selectLevel(level: number) {
+        let nav = this.closest('mls-nav1-100529');
+        if (!nav) {
+            const page = this.closest('collab-page');
+            nav = page?.querySelector('collab-nav-1') as HTMLElement;
+        }
+        const objIndex = {
+            0: 7,
+            1: 6,
+            2: 5,
+            3: 4,
+            4: 3,
+            5: 2,
+            6: 1,
+            7: 0,
+
+        } as any;
+        if (!nav) return;
+        nav.setAttribute('tabindexactive', objIndex[level]);
+    }
 
     private getMlsNav2(): IMlsNav2 | null {
         let mlsNav2 = this.closest('mls-toolbar-100529') as IMlsNav2 | null;;
