@@ -111,6 +111,9 @@ export class ServiceHistories100554 extends ServiceBase {
         const src1 = this.hashOriginal ? await this.getHistories(this.hashOriginal) : '';
         this.setInitialHistories(src1, src2);
 
+        this.c2?.setAttribute('msize', this.msize);
+
+
     }
 
     private async getHistories(hash: string): Promise<string> {
@@ -155,6 +158,8 @@ export class ServiceHistories100554 extends ServiceBase {
         };
         this._ed1 = monaco.editor.createDiffEditor(this.c2, opt);
         (this.c2 as any)['mlsEditor'] = this._ed1;
+        this.c2?.setAttribute('msize', this.msize);
+
     }
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
