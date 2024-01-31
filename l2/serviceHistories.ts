@@ -75,8 +75,7 @@ export class ServiceHistories100554 extends ServiceBase {
         const params: { level: number, position: string, from: string, to: string } = ev.desc ? JSON.parse(ev.desc) : {};
         const item = this.serviceItemNav;
         if (!item) return;
-        const actualMode = item.getAttribute('mode');
-        if (!['_100529_service_Source'].includes(params.to) && actualMode === 'A' && this.position !== params.position) item.setAttribute('mode', 'H');
+        if (!['_100529_service_Source'].includes(params.to) && this.visible === 'true' && this.position !== params.position) this.showNav2Item(false);
     }
 
     private async onSelectHistories(ev: mls.events.IEvent) {
@@ -86,9 +85,11 @@ export class ServiceHistories100554 extends ServiceBase {
         if (params.level !== this.level) return;
 
 
+        
         if (!this.serviceItemNav) return;
-        this.serviceItemNav.setAttribute('mode', 'A');
-        this.serviceItemNav.click();
+        this.showNav2Item(true);
+        this.serviceItemNav.setAttribute('mode', 'A'); // old
+        this.openMe();
 
         const key = mls.stor.getKeyToFiles(params.project, params.level, params.shortName, params.folder, params.extension);
         const storFile = mls.stor.files[key];
