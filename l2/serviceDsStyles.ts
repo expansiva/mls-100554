@@ -186,6 +186,8 @@ export class ServiceDsStyles extends ServiceBase {
         this.setModelAPI();
     }
 
+    private isEventAdd: boolean = false;
+
     private setModelAPI() {
 
         const modelStyle = this.models['style'] as IMonacoModelStyle;
@@ -202,14 +204,21 @@ export class ServiceDsStyles extends ServiceBase {
                     forceMoveMarkers: true
                 };
 
-                if (this._ed1) this._ed1.executeEdits('style', [newLine]);
+                if (this._ed1) {
+                    this.isEventAdd = true;
+                    this._ed1.executeEdits('style', [newLine]);
+
+                }
                 lineToChange = newLineNumber;
             }
 
             const columnStart = modelStyle['getLineIndentColumn'](lineToChange);
             const columnEnd = modelStyle.getLineLength(lineToChange) + 1;
             const range = new monaco.Range(lineToChange, columnStart, lineToChange, columnEnd);
-            if (this._ed1) this._ed1.executeEdits('style', [{ range, text }]);
+            if (this._ed1) {
+                this.isEventAdd = true;
+                this._ed1.executeEdits('style', [{ range, text }]);
+            }
             const endLineLength = modelStyle.getLineLength(blockInfo.endLine) + 1;
             const rangeBlock = new monaco.Range(blockInfo.startLine, 1, blockInfo.endLine, endLineLength);
             modelStyle.removeBlankLines(rangeBlock);
@@ -255,7 +264,10 @@ export class ServiceDsStyles extends ServiceBase {
             const columnEnd = modelStyle.getLineLength(lineNumber) + 1;
             const columnStart = modelStyle.getLineIndentColumn(lineNumber);
             const range = new monaco.Range(lineNumber, columnStart, lineNumber, columnEnd);
-            if (this._ed1) this._ed1.executeEdits('', [{ range, text: null }]);
+            if (this._ed1) {
+                this.isEventAdd = true;
+                this._ed1.executeEdits('', [{ range, text: null }]);
+            }
         };
 
         modelStyle.removeBlankLines = (range: monaco.IRange) => {
@@ -265,6 +277,7 @@ export class ServiceDsStyles extends ServiceBase {
             if (!text) return;
             const newText = text.replace(/^\s*[\r\n]/gm, '');
             const edit = { range, text: newText };
+            this.isEventAdd = true;
             this._ed1.executeEdits('style', [edit]);
 
         };
@@ -606,8 +619,11 @@ export class ServiceDsStyles extends ServiceBase {
             rc.less = await this.onChangeEditorIfComponent(rc);
         }
 
-        mls.events.fire([2], ['DSStyleChanged'], JSON.stringify(rc));
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 300);
+        if (!this.isEventAdd) {
+            if(isGet) console.info('DSStyleChanged right get')
+            mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 300);
+        }
+        else this.isEventAdd = false;
 
     }
 

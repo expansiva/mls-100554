@@ -3,7 +3,7 @@
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-export function initCollabDSInputRange(){}; 
+export function initCollabDSInputRange() { };
 @customElement('collab-ds-input-range-100554')
 export class CollabDSInputRange extends LitElement {
 
@@ -17,9 +17,9 @@ export class CollabDSInputRange extends LitElement {
 
     @property() prop: string = '';
 
-    @property() min: number = 0;
+    min: number = 0;
 
-    @property() max: number = 100;
+    max: number = 100;
 
     render() {
         return html`
@@ -31,7 +31,7 @@ export class CollabDSInputRange extends LitElement {
 
     renderInput() {
         return html`
-            <input type="range" step="0.01 .value="${this.onlyNumber(this.value)}" min="${this.min}" max="${this.max}" @input="${this.changeRange}"></input>
+            <input type="range" .value="${this.onlyNumber(this.value)}" min="${this.min}" max="${this.max}"   @input="${(e:InputEvent) => this.changeRange(e)}"></input>
         `;
     }
 
@@ -40,13 +40,13 @@ export class CollabDSInputRange extends LitElement {
             <div>
                 <input type="search" .value="${this.onlyNumber(this.value)}" @input="${this.changeInput}"> </input>
                 <select @change="${this.changeSelect}" style="${this.useSelect === 'false' ? 'display:none' : ''}">
-                    ${repeat( this.arraySelect, ((key: any) => key) as any,
-                    ((k: any, index: any) => {
+                    ${repeat(this.arraySelect, ((key: any) => key) as any,
+            ((k: any, index: any) => {
 
-                        return html`<option value="${k}">${k}</option>`;
+                return html`<option value="${k}">${k}</option>`;
 
-                    }) as any
-                )}
+            }) as any
+        )}
                 </select>
             </div>
         `;
@@ -55,8 +55,8 @@ export class CollabDSInputRange extends LitElement {
     updated() {
         if (!this.shadowRoot) return;
         const sel = this.shadowRoot.querySelector('select') as HTMLSelectElement;
-        if (!sel) return; 
-        sel.value = this.onlyTxt(this.value); 
+        if (!sel) return;
+        sel.value = this.onlyTxt(this.value);
     }
 
     //---------IMPLEMENTS-------------
@@ -107,8 +107,8 @@ export class CollabDSInputRange extends LitElement {
         } else if (mode === 'input') {
 
             const tot = this.onlyNumber(input.value);
-            const max = range.getAttribute('max');
-            if (!max || max < tot) range.setAttribute('max', tot);
+            const max = range.max;
+            if (!max || max < tot) range.max = tot;
             range.value = tot;
 
         }

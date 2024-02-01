@@ -11,7 +11,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
- 
+
 @customElement('service-ds-style-border-100554')
 export class ServiceDsStyleBorder extends ServiceBase {
 
@@ -62,9 +62,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-
         if (visible) {
-
             this.fireEventAboutMe();
 
         }
@@ -95,28 +93,32 @@ export class ServiceDsStyleBorder extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if (obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
-
-        obj.value.forEach((i: any) => {
-
-            if (!this.shadowRoot || !i.key) return;
-            const value = i.value;
-            const prop = i.key;
-
-            if (prop === 'border') {
-                this.uppProp(value, 'border');
-            } else if (prop === 'border-radius') {
-                this.uppProp(value, 'radius');
-            } else {
-
-                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-                if (el) el.value = value;
-
-            }
-
-
-
+        console.info({
+            obj
         })
+        if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
+
+            obj.value.forEach((i: any) => {
+
+                if (!this.shadowRoot || !i.key) return;
+                const value = i.value;
+                const prop = i.key;
+
+                if (prop === 'border') {
+                    this.uppProp(value, 'border');
+                } else if (prop === 'border-radius') {
+                    this.uppProp(value, 'radius');
+                } else {
+
+                    const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                    if (el) el.value = value;
+
+                }
+
+            })
+        }
+
+
 
     }
 
@@ -186,7 +188,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
                 <h5 style="display:flex; gap:1.5rem" >${this.myMsg.borderRadius}<input type="checkbox" prop="radius"></h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.topLeft}</span>
-                    <collab-ds-input-range-100554 prop="border-top-left-radius" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this. onChangeProp(e)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="border-top-left-radius" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.topRight}</span>
@@ -255,7 +257,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     }
 
-    private uppProp(value:string, group: string): void {
+    private uppProp(value: string, group: string): void {
 
         if (!this.shadowRoot) return;
 
@@ -288,6 +290,8 @@ export class ServiceDsStyleBorder extends ServiceBase {
         if (elP3) ar.push(elP3);
         if (elP4) ar.push(elP4);
 
+        console.info(ar);
+
         ar.forEach((i) => {
             i.value = value;
         });
@@ -300,6 +304,8 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     private fireEventAboutMe(): void {
+
+        console.info('fireEventAboutMe')
         const rc = {
             emitter: 'right-get',
         };
