@@ -422,6 +422,7 @@ export class ServicePreviewView extends LitElement {
 
         const styleService = document.querySelector(`mls-toolbar-content-service-100529[path="_100529_service_styles"]`);
         if(styleService) styleService.setAttribute('forceinstance', 'true');
+        else this.father.openService('_100529_service_styles', 'left', '3');
 
         mls.actual[0].setFullName(this.page);
         const info = mls.actual[0];
