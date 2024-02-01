@@ -115,6 +115,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
         if (params.service.length > 0 && !params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'A');
+        if (this.showNav2Item) this.showNav2Item(true);
 
     }
 
@@ -122,6 +123,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
         if (params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'H');
+        if (this.showNav2Item) this.showNav2Item(false);
     }
 
     private onDSStyleCursorChanged(ev: mls.events.IEvent) {
