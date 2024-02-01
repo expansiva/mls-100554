@@ -23,7 +23,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     constructor() {
         super();
-        initCollabDSInputRange;
+        //initCollabDSInputRange;
         initCollabDsInputSelectColor;
         this.setEvents();
     }
