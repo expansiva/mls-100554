@@ -127,8 +127,8 @@ export class ServiceDsStyleClippath extends ServiceBase {
                     ((css: any, index: any) => {
                         return html`
                             <div @click="${this.clickGallery}" style="display: flex; justify-content: center; align-items: center;flex-direction:column; width:120px;margin-top:1rem" .gallery=${css.css}>
-                                <div style="background:black; width:60px;height:80px;${css.css}"></div>
-                                <div>${css.name}</div>
+                                <div style="background:black; width:60px;height:80px;${css.css}" .gallery=${css.css}></div>
+                                <div .gallery=${css.css}>${css.name}</div>
                             </div>
                         `;
                     }) as any
