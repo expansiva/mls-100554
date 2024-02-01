@@ -153,31 +153,31 @@ export class ServiceDsStyleTransform extends ServiceBase {
             <div>
                 <div class="groupEdit">
                     <span>${this.myMsg.scaleX}</span>
-                    <collab-ds-input-range-100554 prop="scaleX" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="scaleX" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.scaleY}</span>
-                    <collab-ds-input-range-100554 prop="scaleY" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="scaleY" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.skewX}</span>
-                    <collab-ds-input-range-100554 prop="skewX" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="skewX" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.skewY}</span>
-                    <collab-ds-input-range-100554 prop="skewY" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="skewY" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.translateX}</span>
-                    <collab-ds-input-range-100554 prop="translateX" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="translateX" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.translateY}</span>
-                    <collab-ds-input-range-100554 prop="translateY" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="translateY" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.rotate}</span>
-                    <collab-ds-input-range-100554 prop="rotate" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="rotate" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
             </div>
         `;
