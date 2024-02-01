@@ -8,6 +8,11 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 @customElement('service-ds-styles-100554')
 export class ServiceDsStyles extends ServiceBase {
 
+    constructor() {
+        super();
+        this.init();
+    }
+
     public details: IService = {
         icon: '&#xf1e6',
         name: 'Results',
@@ -90,33 +95,38 @@ export class ServiceDsStyles extends ServiceBase {
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (visible) {
-            this.createEditor();
-            const serviceDef = this.isComponent ? this.defaultServices.componentStyle : this.defaultServices.globalStyle;
-            const params: IEventsSelectedObj = {
-                service: [serviceDef],
-                isComponent: this.isComponent,
-                component: this.componentName
-            };
-
-            const params2: IEventsSelectedObj = {
-                service: [],
-                isComponent: this.isComponent,
-                component: this.componentName
-            };
-
-            mls.events.fire([this.level], ['DSStyleUnSelected'], JSON.stringify(params2), 0);
-            mls.events.fire([this.level], ['DSStyleSelected'], JSON.stringify(params), 100);
-            this.openServiceHelper(serviceDef);
-            this.rightServiceOpened = this.getServiceRightOpened();
+            this.isComponent = false;
+            this.start1();
         }
+        if (reinit) this.reinit();
+    }
 
-        if (!reinit) {
-            if (el && typeof el.layout === 'function') el.layout();
-        } else {
-            if (this._ed1) this._ed1.setModel(this.models['style'] as monaco.editor.ITextModel);
-            if (this.menu.setMode) this.menu.setMode('initial');
-            // if (!this.isComponent && this.c3) this.c3.style.display = 'none';
-        }
+    private start1() {
+        this.createEditor();
+        const serviceDef = this.isComponent ? this.defaultServices.componentStyle : this.defaultServices.globalStyle;
+        const params: IEventsSelectedObj = {
+            service: [serviceDef],
+            isComponent: this.isComponent,
+            component: this.componentName
+        };
+
+        const params2: IEventsSelectedObj = {
+            service: [],
+            isComponent: this.isComponent,
+            component: this.componentName
+        };
+
+        mls.events.fire([this.level], ['DSStyleUnSelected'], JSON.stringify(params2), 0);
+        mls.events.fire([this.level], ['DSStyleSelected'], JSON.stringify(params), 100);
+        this.openServiceHelper(serviceDef);
+        this.rightServiceOpened = this.getServiceRightOpened();
+        this.setMsizeEditor();
+        if (this.serviceContent && typeof this.serviceContent.layout === 'function') this.serviceContent.layout();
+    }
+
+    private reinit() {
+        if (this._ed1) this._ed1.setModel(this.models['style'] as monaco.editor.ITextModel);
+        if (this.menu.setMode) this.menu.setMode('initial');
     }
 
     private init() {
@@ -126,7 +136,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private setEvents() {
-        mls.events.addEventListener([this.level], ['DSStyleChanged'], (ev) => {
+        mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
             this.onDSStyleChanged(ev);
         });
     }
@@ -161,7 +171,6 @@ export class ServiceDsStyles extends ServiceBase {
         if (!this.c2 || this._ed1) return;
         this._ed1 = monaco.editor.create(this.c2, mls.editor.conf['style_config'] as monaco.editor.IEditorOptions);
         (this.c2 as any)['mlsEditor'] = this._ed1;
-
     }
 
     private getUri(shortFN: string): monaco.Uri {
@@ -871,6 +880,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async onDSStyleChanged(obj: mls.events.IEvent) {
+        console.info('onDSStyleChanged')
 
         if (!obj.desc) return;
         const desc: IEditorChangedEventsObj = JSON.parse(obj.desc);
@@ -881,16 +891,18 @@ export class ServiceDsStyles extends ServiceBase {
         }
 
         if (desc.isComponent) {
+
             mls.actual[3].mode = 0;
             this.isComponent = true;
             this.defaultServices.componentStyle = desc.helper;
             const { widget } = desc;
-            const itemStyles = this.serviceItemNav;
-            if (!itemStyles || !widget) return;
+            if (!widget) return;
 
             this.componentName = widget;
-            this.onServiceClick(true, !!this._ed1, this.serviceContent);
+            this.start1();
+            this.reinit();
 
+            // this.onServiceClick(true, !!this._ed1, this.serviceContent);
             // this.c3.setAttribute('component', widget);
 
 
@@ -968,17 +980,41 @@ export class ServiceDsStyles extends ServiceBase {
         return formattedString;
     }
 
+    updated(changedProperties: any) {
+        if (changedProperties.has('msize')) {
+            this.setMsizeEditor();
+        }
+    }
+
+    private setMsizeEditor() {
+        if (!this.visible) return;
+        if (this.isComponent) {
+            const [w, h, t, l] = this.msize.split(',');
+            const newH = (+h) - 50;
+            const newT = (+t) + 50;
+            const newMsize = [w, newH, newT, l].join(',')
+            this.c2?.setAttribute('msize', newMsize);
+            return;
+        }
+        this.c2?.setAttribute('msize', this.msize);
+    }
+
     render() {
         return html`
-            <select
+            <div
+                style=${this.isComponent ? "display:block; height: 50px;" : "display:none"}
+            >
+                <select 
                 .onChange = ${async (less: string) => this.onChangeWidgetStyle(less)}
                 .onDelete =  ${async (style: mls.l3.IComponentsStyle) => this.onDeleteWidgetStyle(style)}
                 .onAdd =  ${async (value: string) => this.onAddWidgetStyle(value)}
                 .onAfterAdd =  ${async () => this.onAfterAdd()}
                 .onRename =  ${async (style: mls.l3.IComponentsStyle, value: string) => this.onRenameWidgetStyle(style, value)}
-            >
-                <option value="0">Default</option>
-            </select>
+                >
+                    <option value="0">Default</option>
+                </select>
+            </div>
+            
             <mls-editor-100529 ismls2="true"></mls-editor-100529>
         
         `

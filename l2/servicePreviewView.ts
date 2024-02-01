@@ -390,7 +390,7 @@ export class ServicePreviewView extends LitElement {
     private infoDS = { project: -1, level: '-1', myDS: undefined as any };
 
     private verifyWC(): boolean {
-    
+
         if (this.infoDS.project !== mls.actual[5].project) {
             this.infoDS.level = '-1';
             this.infoDS.myDS = undefined;
@@ -415,18 +415,18 @@ export class ServicePreviewView extends LitElement {
         }
 
         return !!comp;
-        
+
     }
 
     private async onStyleEditClick() {
 
         const styleService = document.querySelector(`mls-toolbar-content-service-100529[path="_100529_service_styles"]`);
-        if(styleService) styleService.setAttribute('forceinstance', 'true');
-        else this.father.openService('_100529_service_styles', 'left', '3');
-
+        if (styleService) styleService.setAttribute('forceinstance', 'true');
+        else this.father.openService('_100554_serviceDsStyles', 'left', '3');
+    
         mls.actual[0].setFullName(this.page);
         const info = mls.actual[0];
-            
+
         const rc = {
             emitter: 'right',
             less: '',
@@ -436,7 +436,8 @@ export class ServicePreviewView extends LitElement {
             origemLevel: +this.level
         };
 
-        mls.events.fire(3, 'DSStyleChanged', JSON.stringify(rc));
+        mls.events.fire(3, 'DSStyleChanged', JSON.stringify(rc), 500);
+
     }
 
     private showError(err: string) {

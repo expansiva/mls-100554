@@ -91,7 +91,6 @@ export abstract class ServiceBase extends LitElement {
                 this.selectLevel(level);
                 return;
             }
-
             const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
             if (item) item.click();
             return;
