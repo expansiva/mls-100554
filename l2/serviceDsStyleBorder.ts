@@ -183,7 +183,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
                 <h5 style="display:flex; gap:1.5rem" >${this.myMsg.borderRadius}<input type="checkbox" prop="radius"></h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.topLeft}</span>
-                    <collab-ds-input-range-100554 prop="border-top-left-radius" value="0px" .arraySelect=${this.tpMeasures} group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="border-top-left-radius" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this. onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.topRight}</span>
@@ -197,6 +197,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
                     <span>${this.myMsg.bottomRight}</span>
                     <collab-ds-input-range-100554 prop="border-bottom-right-radius" value="0px" .arraySelect=${this.tpMeasures} group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
                 </div>
+                
             </div>
         `
     }
