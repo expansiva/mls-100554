@@ -6,7 +6,7 @@
  * }
  */
 
-import { html, css, LitElement, repeat } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
@@ -30,11 +30,11 @@ export class ServiceDsStyleColumn extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf07e',
-        name: 'Size',
+        name: 'Column',
         mode: 'B',
         position: 'right',
         readOnly: false,
-        tooltip: 'Size',
+        tooltip: 'Column',
         className: undefined,
         tags: [],
         levels: [3]
@@ -49,7 +49,7 @@ export class ServiceDsStyleColumn extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Size',
+        title: 'Column',
         actions: {
         },
         icons: {
@@ -71,7 +71,7 @@ export class ServiceDsStyleColumn extends ServiceBase {
     }
 
     //-------------EVENTS--------------
-    
+
     private setEvents(): void {
         mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
             this.onstylechanged(ev.desc as any);
@@ -95,7 +95,7 @@ export class ServiceDsStyleColumn extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if ( obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
+        if (obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
 
         obj.value.forEach((i: any) => {
 
@@ -112,15 +112,17 @@ export class ServiceDsStyleColumn extends ServiceBase {
     private onDSStyleSelected(ev: mls.events.IEvent) {
 
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
-        if (params.service.length > 0 && !params.service.includes('_100554_serviceDsStyleSize') || !this.serviceItemNav) return;
+        if (params.service.length > 0 && !params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'A');
+        this.showNav2Item(true);
 
     }
 
     private onDSStyleUnSelected(ev: mls.events.IEvent) {
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
-        if (params.service.includes('_100554_serviceDsStyleSize') || !this.serviceItemNav) return;
+        if (params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'H');
+        this.showNav2Item(false);
     }
 
     private onDSStyleCursorChanged(ev: mls.events.IEvent) {
@@ -147,8 +149,6 @@ export class ServiceDsStyleColumn extends ServiceBase {
     //-------------IMPLEMENTS--------------
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
-
-    private tpOverflow = ['none', 'auto', 'hidden', 'inherit', 'initial', 'overlay', 'revert', 'scroll', 'unset', 'visible']
 
 
     private timeonChangeProp = -1;
@@ -195,12 +195,22 @@ export class ServiceDsStyleColumn extends ServiceBase {
         if (!window['message' as any]) return;
         const m = window['message' as any] as any;
 
-        if (m.width) this.myMsg.width = m.width;
+        if (m.columnsCount) this.myMsg.columnsCount = m.columnsCount;
+        if (m.columnsWidth) this.myMsg.columnsWidth = m.columnsWidth;
+        if (m.columnsGap) this.myMsg.columnsGap = m.columnsGap;
+        if (m.columnsRule) this.myMsg.columnsRule = m.columnsRule;
+        if (m.columnSpan) this.myMsg.columnSpan = m.columnSpan;
+        if (m.breakInside) this.myMsg.breakInside = m.breakInside;
 
     }
 
     private myMsg = {
-        width: 'Width',
+        columnsCount: 'Columns Count',
+        columnsWidth: 'Columns Width',
+        columnsGap: 'Columns Gap',
+        columnsRule: 'Columns Rule',
+        columnSpan: 'Column Span',
+        breakInside: 'Break Inside'
     }
 }
 
