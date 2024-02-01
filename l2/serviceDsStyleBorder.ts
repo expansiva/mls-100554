@@ -12,11 +12,6 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
 
-const needComponenet = () => {
-    initCollabDSInputRange; 
-    initCollabDsInputSelectColor;
-}
-
 @customElement('service-ds-style-border-100554')
 export class ServiceDsStyleBorder extends ServiceBase {
 
@@ -28,7 +23,6 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     constructor() {
         super();
-        
         this.setEvents();
     }
 
@@ -431,4 +425,9 @@ interface IEventsObj {
 interface IBlockLessLine {
     key: string,
     value: string,
+}
+
+interface initComponents {
+    1:initCollabDSInputRange; 
+    2:initCollabDsInputSelectColor;
 }

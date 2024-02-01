@@ -22,7 +22,6 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
     constructor() {
         super();
-        initCollabDSInputRange;
         this.setEvents();
     }
 
@@ -414,4 +413,8 @@ interface IEventsObj {
 interface IBlockLessLine {
     key: string,
     value: string,
+}
+
+interface initComponents {
+    1:initCollabDSInputRange;
 }
