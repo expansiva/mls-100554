@@ -62,7 +62,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-        if (visible) {
+        if (visible || reinit) {
             this.fireEventAboutMe();
 
         }
