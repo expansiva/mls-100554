@@ -34,11 +34,12 @@ export class CollabDSInputRange extends LitElement {
             <input type="range" step="0.01 .value="${this.onlyNumber(this.value)}" min="${this.min}" max="${this.max}" @input="${this.changeRange}"></input>
         `;
     }
+
     renderSelect() {
         return html`
             <div>
                 <input type="search" .value="${this.onlyNumber(this.value)}" @input="${this.changeInput}"> </input>
-                <select @change="${this.changeSelect}" style="${this.useSelect === 'false' ? 'display:none' : ''}" .value="px">
+                <select @change="${this.changeSelect}" style="${this.useSelect === 'false' ? 'display:none' : ''}">
                     ${repeat( this.arraySelect, ((key: any) => key) as any,
                     ((k: any, index: any) => {
 
@@ -69,7 +70,7 @@ export class CollabDSInputRange extends LitElement {
     private onlyTxt(str: string): string {
         const regexStr = /[a-zA-Z]+/;
         const res = str.match(regexStr);
-        return res && (res as any)[0] ? (res as any)[0] as string : '';
+        return res && (res as any)[0] ? ((res as any)[0] as string).replace('.', '') : '';
     }
 
     private changeRange(e: InputEvent): void {

@@ -137,7 +137,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
 
 
     }
-
+ 
     render() {
         return html`
             <div>
@@ -147,7 +147,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.fontFamily}</span>
-                    <select prop="font-family" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="font-family" @change="${(e: any) => this.onChangeProp(e)}">
                         <option value=""></option>
                         <option value="COURIER">Courier</option>
                         <option value="VERDANA">Verdana</option>
@@ -157,7 +157,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.fontWeight}</span>
-                    <select prop="font-weight" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="font-weight" @change="${(e: any) => this.onChangeProp(e)}">
                         <option value=""></option>
                         <option value="100">100</option>
                         <option value="200">200</option>
@@ -172,18 +172,81 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.fontStyle}</span>
-                    <select prop="font-weight" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="font-style" @change="${(e: any) => this.onChangeProp(e)}">
                         <option value=""></option>
                         <option value="NULL">null</option>
                         <option value="NORMAL">normal</option>
                         <option value="ITALIC">italic</option>
                     </select>
+                </div> 
+                <div class="groupEdit">
+                    <span>${this.myMsg.fontSize}</span>
+                    <collab-ds-input-range-100554 prop="font-size" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this. onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit"> 
+                    <span>${this.myMsg.letterSpacing}</span>
+                    <collab-ds-input-range-100554 prop="letter-spacing" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this. onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit"> 
+                    <span>${this.myMsg.wordSpacing}</span>
+                    <collab-ds-input-range-100554 prop="word-spacing" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this. onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit"> 
+                    <span>${this.myMsg.lineHeight}</span>
+                    <collab-ds-input-range-100554 prop="line-height" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this. onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.fontStyle}</span>
-                    <collab-ds-input-range-100554 > </collab-ds-input-range-100554>
+                    <span>${this.myMsg.textAlign}</span>
+                    <select style="width:160px" prop="text-align" @change="${(e: any) => this.onChangeProp(e)}">
+                        <option value=""></option>
+                        <option value="CENTER">center</option>
+                        <option value="END">end</option>
+                        <option value="INHERIT">inherit</option>
+                        <option value="INITIAL">initial</option>
+                        <option value="JUSTIFY">justify</option>
+                        <option value="LEFT">left</option>
+                        <option value="REVERT">revert</option>
+                        <option value="RIGHT">right</option>
+                        <option value="START">start</option>
+                        <option value="UNSET">unset</option>
+                    </select>
                 </div>
-                
+                <div class="groupEdit">
+                    <span>${this.myMsg.variant}</span>
+                    <select style="width:160px" prop="variant" @change="${(e: any) => this.onChangeProp(e)}">
+                        <option value=""></option>
+                        <option value="NORMAL">normal</option>
+                        <option value="SMALL-CAPS">small-caps</option>
+                    </select>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.transform}</span>
+                    <select style="width:160px" prop="transform" @change="${(e: any) => this.onChangeProp(e)}">
+                        <option value=""></option>
+                        <option value="UPPERCASE">uppercase</option>
+                        <option value="LOWERCASE">lowercase</option>
+                        <option value="CAPITALIZE">capitalize</option>
+                    </select>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.decoration}</span>
+                    <select style="width:160px" prop="decoration" @change="${(e: any) => this.onChangeProp(e)}">
+                        <option value=""></option>
+                        <option value="NORMAL">normal</option>
+                        <option value="UNDERLINE">underline</option>
+                        <option value="OVERLINE">overline</option>
+                        <option value="LINE-THROUGH">line-through</option>
+                    </select>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.textOverflow}</span>
+                    <select style="width:160px" prop="text-overflow" @change="${(e: any) => this.onChangeProp(e)}">
+                        <option value=""></option>
+                        <option value="ELLIPSIS">ellipsis</option>
+                        <option value="CLIP">clip</option>
+                        <option value="INITIAL">initial</option>
+                    </select>
+                </div>
             </div>
         `;
     }
