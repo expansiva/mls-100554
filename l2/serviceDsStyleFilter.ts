@@ -147,7 +147,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
     }
 
     render() {
-        return html`${this.renderFilter()}`;
+        return html`${this.renderFilter()}${this.renderGallery()}`;
     }
 
     renderFilter() {
@@ -201,7 +201,10 @@ export class ServiceDsStyleStyle extends ServiceBase {
             <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer">
                 ${repeat(this.arrayGallery, ((key: any) => key) as any,
                     ((css: any, index: any) => {
-                        return html`<img style="${css}" @click="${this.clickGallery}" .gallery=${css} src="http://angrytools.com/css-generator/img/rose.jpg" />`;
+                        return html`
+                                <img style="width:100px;${css}" @click="${this.clickGallery}" .gallery=${css} src="http://angrytools.com/css-generator/img/rose.jpg" />
+                            `
+                        ;
                     }) as any
                 )}
             </div>
@@ -309,7 +312,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
 			if (myFilter[prop] !== undefined) myFilter[prop] = num;
 
 		});
-
+        
 		const elG = this.shadowRoot.querySelector('*[prop="grayscale"]') as HTMLInputElement; 
         const elB = this.shadowRoot.querySelector('*[prop="blur"]') as HTMLInputElement; 
         const elS = this.shadowRoot.querySelector('*[prop="sepia"]') as HTMLInputElement; 
@@ -337,7 +340,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
         const el = e.target as HTMLElement;
         if (!el) return;
         const css = (el as any).gallery;
-        if (!css) return;
+        //if (!css) return;
 
         const commands: string[] = css.split(';');
         const changes: any[] = [];
@@ -361,19 +364,22 @@ export class ServiceDsStyleStyle extends ServiceBase {
             helper: this.helper
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        //mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
 
     }
 
     private arrayGallery = [
-        'transform: scale(1.5);',
-        'transform: rotate(90deg);',
-        'transform: rotate(181deg);', 
-        'transform: rotate(270deg);',
-        'transform: skew(50deg);',
-        'transform: skew(50deg, -50deg);',
-        'transform: skew(-50deg, 0deg);',
-        'transform: skew(-50deg, 50deg);'
+        '',
+        'filter: brightness(20%) sepia(1) hue-rotate(180deg) saturate(5);',
+        'filter: brightness(20%) sepia(1) hue-rotate(310deg) saturate(5);',
+        'filter: brightness(70%) sepia(1) hue-rotate(360deg) saturate(6);',
+        'filter: brightness(70%) sepia(1) hue-rotate(206deg) saturate(6);',
+        'filter: brightness(40%) sepia(1) hue-rotate(-42deg) saturate(6);',
+        'filter: brightness(40%) sepia(1) hue-rotate(-40deg);',
+        'filter: blur(2px);',
+        'filter: invert(100%) sepia(2);',
+        'filter: brightness(40%) sepia(1) hue-rotate(-40deg);'
+        
 
     ];
 
