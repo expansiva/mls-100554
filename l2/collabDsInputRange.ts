@@ -22,25 +22,33 @@ export class CollabDSInputRange extends LitElement {
     @property() max: number = 100;
 
     render() {
-
         return html`
+            ${this.renderInput()}
+            ${this.renderSelect()}
             
-            <input type="range" step="0.01 .value="${this.onlyNumber(this.value)}" min="${this.min}" max="${this.max}" @input="${this.changeRange}">
-                <div>
-                    <input type="search" .value="${this.onlyNumber(this.value)}" @input="${this.changeInput}">
-                    <select @change="${this.changeSelect}" style="${this.useSelect === 'false' ? 'display:none' : ''}" .value="px">
-                        ${repeat(
-            this.arraySelect,
-            ((key: any) => key) as any,
-            ((k: any, index: any) => {
-
-                return html`<option value="${k}">${k}</option>`;
-
-            }) as any
-        )}
-                    </select>
-                </div>
         `
+    }
+
+    renderInput() {
+        return html`
+            <input type="range" step="0.01 .value="${this.onlyNumber(this.value)}" min="${this.min}" max="${this.max}" @input="${this.changeRange}"></input>
+        `;
+    }
+    renderSelect() {
+        return html`
+            <div>
+                <input type="search" .value="${this.onlyNumber(this.value)}" @input="${this.changeInput}"> </input>
+                <select @change="${this.changeSelect}" style="${this.useSelect === 'false' ? 'display:none' : ''}" .value="px">
+                    ${repeat( this.arraySelect, ((key: any) => key) as any,
+                    ((k: any, index: any) => {
+
+                        return html`<option value="${k}">${k}</option>`;
+
+                    }) as any
+                )}
+                </select>
+            </div>
+        `;
     }
 
     updated() {
