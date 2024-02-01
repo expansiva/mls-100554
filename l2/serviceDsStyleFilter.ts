@@ -15,16 +15,16 @@ import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 export class ServiceDsStyleStyle extends ServiceBase {
 
     private filter = {
-		grayscale: '',
-		blur: '',
-		sepia: '',
-		saturate: '',
-		opacity: '',
-		brightness: '',
-		contrast: '',
-		huerotate: '',
-		invert: ''
-	}
+        grayscale: '',
+        blur: '',
+        sepia: '',
+        saturate: '',
+        opacity: '',
+        brightness: '',
+        contrast: '',
+        huerotate: '',
+        invert: ''
+    }
 
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -74,7 +74,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (visible) {
+        if (visible || reinit) {
 
             this.fireEventAboutMe();
 
@@ -82,7 +82,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
     }
 
     //-------------EVENTS--------------
-    
+
     private setEvents(): void {
         mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
             this.onstylechanged(ev.desc as any);
@@ -106,9 +106,10 @@ export class ServiceDsStyleStyle extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if ( obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
+        if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-        this.setValues(obj.value);
+            this.setValues(obj.value);
+        }
 
     }
 
@@ -155,39 +156,39 @@ export class ServiceDsStyleStyle extends ServiceBase {
             <div>
                 <div class="groupEdit">
                     <span>${this.myMsg.grayscale}</span>
-                    <collab-ds-input-range-100554 prop="grayscale" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="grayscale" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.blur}</span>
-                    <collab-ds-input-range-100554 prop="blur" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="blur" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.sepia}</span>
-                    <collab-ds-input-range-100554 prop="sepia" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="sepia" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.saturate}</span>
-                    <collab-ds-input-range-100554 prop="saturate" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="saturate" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.opacity}</span>
-                    <collab-ds-input-range-100554 prop="opacity" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="opacity" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.brightness}</span>
-                    <collab-ds-input-range-100554 prop="brightness" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="brightness" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.contrast}</span>
-                    <collab-ds-input-range-100554 prop="contrast" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="contrast" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.hueRotate}</span>
-                    <collab-ds-input-range-100554 prop="huerotate" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="huerotate" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.invert}</span>
-                    <collab-ds-input-range-100554 prop="invert" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="invert" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
             </div>
         `;
@@ -199,13 +200,13 @@ export class ServiceDsStyleStyle extends ServiceBase {
         return html`
             <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer">
                 ${repeat(this.arrayGallery, ((key: any) => key) as any,
-                    ((css: any, index: any) => {
-                        return html`
+            ((css: any, index: any) => {
+                return html`
                                 <img style="width:60px;${css}" @click="${this.clickGallery}" .gallery=${css} src="http://angrytools.com/css-generator/img/rose.jpg" />
                             `
-                        ;
-                    }) as any
-                )}
+                    ;
+            }) as any
+        )}
             </div>
         
         `
@@ -227,7 +228,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
             emitter: 'right-get',
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 500);
     }
 
     private emitEvent(obj: IBlockLessLine) {
@@ -259,34 +260,34 @@ export class ServiceDsStyleStyle extends ServiceBase {
 
         let value = '';
 
-        const elG = this.shadowRoot.querySelector('*[prop="grayscale"]') as HTMLInputElement; 
-        const elB = this.shadowRoot.querySelector('*[prop="blur"]') as HTMLInputElement; 
-        const elS = this.shadowRoot.querySelector('*[prop="sepia"]') as HTMLInputElement; 
-        const elSt = this.shadowRoot.querySelector('*[prop="saturate"]') as HTMLInputElement; 
-        const elO = this.shadowRoot.querySelector('*[prop="opacity"]') as HTMLInputElement; 
-        const elBr = this.shadowRoot.querySelector('*[prop="brightness"]') as HTMLInputElement; 
-        const elC = this.shadowRoot.querySelector('*[prop="contrast"]') as HTMLInputElement; 
-        const elH = this.shadowRoot.querySelector('*[prop="huerotate"]') as HTMLInputElement; 
-        const elI = this.shadowRoot.querySelector('*[prop="invert"]') as HTMLInputElement; 
+        const elG = this.shadowRoot.querySelector('*[prop="grayscale"]') as HTMLInputElement;
+        const elB = this.shadowRoot.querySelector('*[prop="blur"]') as HTMLInputElement;
+        const elS = this.shadowRoot.querySelector('*[prop="sepia"]') as HTMLInputElement;
+        const elSt = this.shadowRoot.querySelector('*[prop="saturate"]') as HTMLInputElement;
+        const elO = this.shadowRoot.querySelector('*[prop="opacity"]') as HTMLInputElement;
+        const elBr = this.shadowRoot.querySelector('*[prop="brightness"]') as HTMLInputElement;
+        const elC = this.shadowRoot.querySelector('*[prop="contrast"]') as HTMLInputElement;
+        const elH = this.shadowRoot.querySelector('*[prop="huerotate"]') as HTMLInputElement;
+        const elI = this.shadowRoot.querySelector('*[prop="invert"]') as HTMLInputElement;
 
-		value += elG.value ? 'grayscale(' + elG.value + '%)' : '';
-		value += elB.value ? ' blur(' + elB.value + 'px)' : '';
-		value += elS.value ? ' sepia(' + elS.value + ')' : '';
-		value += elSt.value ? ' saturate(' + elSt.value + ')' : '';
-		value += elO.value ? ' opacity(' + elO.value + ')' : '';
-		value += elBr.value ? ' brightness(' + elBr.value + '%)' : '';
-		value += elC.value ? ' contrast(' + elC.value + '%)' : '';
-		value += elH.value ? ' hue-rotate(' + elH.value + 'deg)' : '';
-		value += elI.value ? ' invert(' + elI.value + '%)' : '';
+        value += elG.value ? 'grayscale(' + elG.value + '%)' : '';
+        value += elB.value ? ' blur(' + elB.value + 'px)' : '';
+        value += elS.value ? ' sepia(' + elS.value + ')' : '';
+        value += elSt.value ? ' saturate(' + elSt.value + ')' : '';
+        value += elO.value ? ' opacity(' + elO.value + ')' : '';
+        value += elBr.value ? ' brightness(' + elBr.value + '%)' : '';
+        value += elC.value ? ' contrast(' + elC.value + '%)' : '';
+        value += elH.value ? ' hue-rotate(' + elH.value + 'deg)' : '';
+        value += elI.value ? ' invert(' + elI.value + '%)' : '';
 
-		const change: IBlockLessLine = {
-			key: 'filter',
-			value
-		};
+        const change: IBlockLessLine = {
+            key: 'filter',
+            value
+        };
 
         this.emitEvent(change);
 
-	}
+    }
 
     private setValues(block: IBlockLessLine[]) {
 
@@ -294,34 +295,34 @@ export class ServiceDsStyleStyle extends ServiceBase {
 
         const myFilter = this.filter as any;
 
-		Object.keys(myFilter).forEach((item) => { myFilter[item] = ''; });
+        Object.keys(myFilter).forEach((item) => { myFilter[item] = ''; });
 
-		const textFilter = block.find((item) => item.key === 'filter');
-		if (!textFilter) return;
+        const textFilter = block.find((item) => item.key === 'filter');
+        if (!textFilter) return;
 
-		const { value } = textFilter;
+        const { value } = textFilter;
 
-		const filter = value.split(' ');
+        const filter = value.split(' ');
 
-		filter.forEach((item) => {
+        filter.forEach((item) => {
 
-			const prop = item.substr(0, item.indexOf('(')).replace('-', '');
-			item = item.substr(item.indexOf('('), item.length);
-			const num = item.match(/[\.-\d]/g)?.join('');
-			if (myFilter[prop] !== undefined) myFilter[prop] = num;
+            const prop = item.substr(0, item.indexOf('(')).replace('-', '');
+            item = item.substr(item.indexOf('('), item.length);
+            const num = item.match(/[\.-\d]/g)?.join('');
+            if (myFilter[prop] !== undefined) myFilter[prop] = num;
 
-		});
-        
-		const elG = this.shadowRoot.querySelector('*[prop="grayscale"]') as HTMLInputElement; 
-        const elB = this.shadowRoot.querySelector('*[prop="blur"]') as HTMLInputElement; 
-        const elS = this.shadowRoot.querySelector('*[prop="sepia"]') as HTMLInputElement; 
-        const elSt = this.shadowRoot.querySelector('*[prop="saturate"]') as HTMLInputElement; 
-        const elO = this.shadowRoot.querySelector('*[prop="opacity"]') as HTMLInputElement; 
-        const elBr = this.shadowRoot.querySelector('*[prop="brightness"]') as HTMLInputElement; 
-        const elC = this.shadowRoot.querySelector('*[prop="contrast"]') as HTMLInputElement; 
-        const elH = this.shadowRoot.querySelector('*[prop="huerotate"]') as HTMLInputElement; 
-        const elI = this.shadowRoot.querySelector('*[prop="invert"]') as HTMLInputElement; 
-    
+        });
+
+        const elG = this.shadowRoot.querySelector('*[prop="grayscale"]') as HTMLInputElement;
+        const elB = this.shadowRoot.querySelector('*[prop="blur"]') as HTMLInputElement;
+        const elS = this.shadowRoot.querySelector('*[prop="sepia"]') as HTMLInputElement;
+        const elSt = this.shadowRoot.querySelector('*[prop="saturate"]') as HTMLInputElement;
+        const elO = this.shadowRoot.querySelector('*[prop="opacity"]') as HTMLInputElement;
+        const elBr = this.shadowRoot.querySelector('*[prop="brightness"]') as HTMLInputElement;
+        const elC = this.shadowRoot.querySelector('*[prop="contrast"]') as HTMLInputElement;
+        const elH = this.shadowRoot.querySelector('*[prop="huerotate"]') as HTMLInputElement;
+        const elI = this.shadowRoot.querySelector('*[prop="invert"]') as HTMLInputElement;
+
         if (elG) elG.value = this.filter.grayscale;
         if (elB) elB.value = this.filter.blur;
         if (elS) elS.value = this.filter.sepia;
@@ -355,7 +356,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
 
         });
 
-        this.setValues([{key:'filter', value:css.replace('filter:','').trim()}]); 
+        this.setValues([{ key: 'filter', value: css.replace('filter:', '').trim() }]);
 
         const rc: IEventsObj = {
             emitter: 'right',
@@ -378,7 +379,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
         'filter: blur(2px);',
         'filter: invert(100%) sepia(2);',
         'filter: brightness(40%) sepia(1) hue-rotate(-40deg);'
-        
+
 
     ];
 

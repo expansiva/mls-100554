@@ -59,7 +59,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (visible) {
+        if (visible || reinit) {
 
             this.fireEventAboutMe();
 
@@ -67,7 +67,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
     }
 
     //-------------EVENTS--------------
-    
+
     private setEvents(): void {
         mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
             this.onstylechanged(ev.desc as any);
@@ -91,18 +91,18 @@ export class ServiceDsStyleFlex extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if ( obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
+        if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-        obj.value.forEach((i: any) => {
+            obj.value.forEach((i: any) => {
 
-            if (!this.shadowRoot || !i.key) return;
-            const value = i.value;
-            const prop = i.key;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-            if (el) el.value = value;
+                if (!this.shadowRoot || !i.key) return;
+                const value = i.value;
+                const prop = i.key;
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                if (el) el.value = value;
 
-        })
-
+            })
+        }
     }
 
     private onDSStyleSelected(ev: mls.events.IEvent) {
@@ -140,7 +140,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
     render() {
         return html`${this.renderFlex()}${this.renderFlexItem()}${this.renderGallery()}`;
-    } 
+    }
 
     renderFlex() {
         return html`
@@ -148,7 +148,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                 <h5>Flex</h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.display}</span>
-                    <select style="width:150px" prop="display">
+                    <select @change="${this.onChangeProp}" style="width:150px" prop="display">
                         <option value=""></option>
                         <option value="flex">Flex</option>
                         <option value="inline-flex">Inline Flex</option>
@@ -156,7 +156,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.flexDirection}</span>
-                    <select style="width:150px" prop="flex-direction">
+                    <select @change="${this.onChangeProp}" style="width:150px" prop="flex-direction">
                         <option value=""></option>
                         <option value="row">Row</option>
                         <option value="row-reverse">Row Reverse</option>
@@ -166,7 +166,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.flexWrap}</span>
-                    <select style="width:150px" prop="flex-wrap">
+                    <select @change="${this.onChangeProp}" style="width:150px" prop="flex-wrap">
                         <option value=""></option>
                         <option value="nowrap">Nowrap</option>
                         <option value="wrap">Wrap</option>
@@ -175,7 +175,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.justifyContent}</span>
-                    <select style="width:150px" prop="justify-content">
+                    <select @change="${this.onChangeProp}" style="width:150px" prop="justify-content">
                         <option value=""></option>
                         <option value="flex-start">Flex start</option>
                         <option value="flex-end">Flex end</option>
@@ -186,7 +186,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.alignItems}</span>
-                    <select style="width:150px" prop="align-items">
+                    <select @change="${this.onChangeProp}" style="width:150px" prop="align-items">
                         <option value=""></option>
                         <option value="flex-start">Flex start</option>
                         <option value="flex-end">Flex end</option>
@@ -197,7 +197,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.alignContent}</span>
-                    <select style="width:150px" prop="align-content">
+                    <select @change="${this.onChangeProp}" style="width:150px" prop="align-content">
                         <option value=""></option>
                         <option value="flex-start">Flex start</option>
                         <option value="flex-end">Flex end</option>
@@ -218,7 +218,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                 <h5>Flex-Item</h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.alignSelf}</span>
-                    <select style="width:150px" prop="align-self">
+                    <select @change="${this.onChangeProp}" style="width:150px" prop="align-self">
                         <option value=""></option>
                         <option value="auto">auto</option>
                         <option value="flex-start">Flex start</option>
@@ -230,7 +230,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.order}</span>
-                    <select style="width:150px" prop="order">
+                    <select @change="${this.onChangeProp}" style="width:150px" prop="order">
                         <option value=""></option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -255,21 +255,21 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
         return html`
             <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer;border:none">
-                ${repeat(this.arrayGallery.slice(0,4), ((key: any) => key) as any,
-                    ((css: any, index: any) => {
-            
-                        return html`<div style="${css}" @click="${this.clickGallery}" .gallery=${css}>
+                ${repeat(this.arrayGallery.slice(0, 4), ((key: any) => key) as any,
+            ((css: any, index: any) => {
+
+                return html`<div style="${css}" @click="${this.clickGallery}" .gallery=${css}>
                             <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
                             <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
                             <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
                         </div>`;
-                    }) as any
-                )}
+            }) as any
+        )}
             </div>
             <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer">
-                ${repeat(this.arrayGallery.slice(4,8), ((key: any) => key) as any,
-                    ((css: any, index: any) => {
-            
+                ${repeat(this.arrayGallery.slice(4, 8), ((key: any) => key) as any,
+            ((css: any, index: any) => {
+
                 return html`<div style="${css}" @click="${this.clickGallery}" .gallery=${css}>
                     <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
                     <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
@@ -286,10 +286,12 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
 
     private timeonChangeProp = -1;
-    private onChangeProp(obj: IBlockLessLine) {
+    private onChangeProp(obj: MouseEvent) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
-            this.emitEvent(obj);
+            const el = obj.target as HTMLSelectElement;
+            const prop = el.getAttribute('prop') as string;
+            this.emitEvent({key:prop, value: el.value});
         }, 500);
     }
 
@@ -298,7 +300,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
             emitter: 'right-get',
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 500);
     }
 
     private emitEvent(obj: IBlockLessLine) {

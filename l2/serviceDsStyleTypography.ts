@@ -63,7 +63,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (visible) {
+        if (visible || reinit) {
 
             this.fireEventAboutMe();
 
@@ -71,7 +71,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
     }
 
     //-------------EVENTS--------------
-    
+
     private setEvents(): void {
         mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
             this.onstylechanged(ev.desc as any);
@@ -95,17 +95,18 @@ export class ServiceDsStyleTypography extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if ( obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
+        if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-        obj.value.forEach((i: any) => {
+            obj.value.forEach((i: any) => {
 
-            if (!this.shadowRoot || !i.key) return;
-            const value = i.value;
-            const prop = i.key;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-            if (el) el.value = value;
+                if (!this.shadowRoot || !i.key) return;
+                const value = i.value;
+                const prop = i.key;
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                if (el) el.value = value;
 
-        })
+            })
+        }
 
     }
 
@@ -141,7 +142,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
 
 
     }
- 
+
     render() {
         return html`
             <div>
@@ -185,19 +186,19 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div> 
                 <div class="groupEdit">
                     <span>${this.myMsg.fontSize}</span>
-                    <collab-ds-input-range-100554 prop="font-size" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this. onChangeProp(e)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="font-size" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit"> 
                     <span>${this.myMsg.letterSpacing}</span>
-                    <collab-ds-input-range-100554 prop="letter-spacing" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this. onChangeProp(e)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="letter-spacing" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit"> 
                     <span>${this.myMsg.wordSpacing}</span>
-                    <collab-ds-input-range-100554 prop="word-spacing" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this. onChangeProp(e)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="word-spacing" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit"> 
                     <span>${this.myMsg.lineHeight}</span>
-                    <collab-ds-input-range-100554 prop="line-height" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this. onChangeProp(e)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="line-height" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.textAlign}</span>
@@ -273,7 +274,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
             emitter: 'right-get',
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 500);
     }
 
     private emitEvent(obj: IBlockLessLine) {
@@ -333,7 +334,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
         variant: 'Variant',
         transform: 'Transform',
         decoration: 'Decoration',
-        textOverflow:'Text-overflow',
+        textOverflow: 'Text-overflow',
     }
 
 }

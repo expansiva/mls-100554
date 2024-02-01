@@ -59,7 +59,7 @@ export class ServiceDsStyleSize extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (visible) {
+        if (visible || reinit) {
 
             this.fireEventAboutMe();
 
@@ -92,17 +92,19 @@ export class ServiceDsStyleSize extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if ( obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
+        if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-        obj.value.forEach((i: any) => {
+            obj.value.forEach((i: any) => {
 
-            if (!this.shadowRoot || !i.key) return;
-            const value = i.value;
-            const prop = i.key;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-            if (el) el.value = value;
+                if (!this.shadowRoot || !i.key) return;
+                const value = i.value;
+                const prop = i.key;
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                if (el) el.value = value;
 
-        })
+            })
+
+        }
 
     }
 
@@ -207,7 +209,7 @@ export class ServiceDsStyleSize extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.overflowX}</span>
-                    <select>
+                    <select @change="${this.onChangeProp2}" prop="overflow-x">
                         ${repeat(this.tpOverflow,
             ((key: any) => key) as any,
             ((k: any, index: any) => {
@@ -220,7 +222,7 @@ export class ServiceDsStyleSize extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.overflowY}</span>
-                    <select>
+                    <select @change="${this.onChangeProp2}" prop="overflow-y">
                         ${repeat(this.tpOverflow,
             ((key: any) => key) as any,
             ((k: any, index: any) => {
@@ -244,6 +246,16 @@ export class ServiceDsStyleSize extends ServiceBase {
     private tpOverflow = ['none', 'auto', 'hidden', 'inherit', 'initial', 'overlay', 'revert', 'scroll', 'unset', 'visible']
 
 
+    private timeonChangeProp2 = -1;
+    private onChangeProp2(obj: MouseEvent) {
+        clearTimeout(this.timeonChangeProp);
+        this.timeonChangeProp = setTimeout(() => {
+            const el = obj.target as HTMLSelectElement;
+            const prop = el.getAttribute('prop') as string;
+            this.emitEvent({key:prop, value: el.value});
+        }, 500);
+    }
+
     private timeonChangeProp = -1;
     private onChangeProp(obj: IBlockLessLine) {
         clearTimeout(this.timeonChangeProp);
@@ -257,7 +269,7 @@ export class ServiceDsStyleSize extends ServiceBase {
             emitter: 'right-get',
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 500);
     }
 
     private emitEvent(obj: IBlockLessLine) {
