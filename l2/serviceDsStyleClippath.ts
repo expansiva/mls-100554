@@ -173,6 +173,7 @@ export class ServiceDsStyleClippath extends ServiceBase {
     }
 
     private arrayGallery = [
+        { css: '', name:'none' },
         { css: 'clip-path: polygon(50% 0%, 0% 100%, 100% 100%);', name: 'triangle' },
         { css: 'clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)', name: 'trapezoid' },
         { css: 'clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%)', name: 'parallelogram' },

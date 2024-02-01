@@ -1,6 +1,5 @@
 /// <mls shortName="serviceDsStyleFilter" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-
 /**
  * @mlsComponentDetails {
  *  "webComponentDependencies": ["collab-ds-input-range-100554"]
@@ -201,7 +200,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
                 ${repeat(this.arrayGallery, ((key: any) => key) as any,
                     ((css: any, index: any) => {
                         return html`
-                                <img style="width:100px;${css}" @click="${this.clickGallery}" .gallery=${css} src="http://angrytools.com/css-generator/img/rose.jpg" />
+                                <img style="width:60px;${css}" @click="${this.clickGallery}" .gallery=${css} src="http://angrytools.com/css-generator/img/rose.jpg" />
                             `
                         ;
                     }) as any

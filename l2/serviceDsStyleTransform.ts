@@ -330,13 +330,13 @@ export class ServiceDsStyleTransform extends ServiceBase {
         const elTY = this.shadowRoot.querySelector('*[prop="translateY"]') as HTMLInputElement; 
         const elR = this.shadowRoot.querySelector('*[prop="rotate"]') as HTMLInputElement; 
     
-        if (elSX && this.filter.scaleX) elSX.value = this.filter.scaleX;
-        if (elSY && this.filter.scaleY) elSY.value = this.filter.scaleY;
-        if (elSKX && this.filter.skewX) elSKX.value = this.filter.skewX;
-        if (elSKY && this.filter.skewY) elSKY.value = this.filter.skewY;
-        if (elTX && this.filter.translateX) elTX.value = this.filter.translateX;
-        if (elTY && this.filter.translateY) elTY.value = this.filter.translateY;
-        if (elR && this.filter.rotate) elR.value = this.filter.rotate;
+        if (elSX) elSX.value = this.filter.scaleX;
+        if (elSY) elSY.value = this.filter.scaleY;
+        if (elSKX) elSKX.value = this.filter.skewX;
+        if (elSKY) elSKY.value = this.filter.skewY;
+        if (elTX) elTX.value = this.filter.translateX;
+        if (elTY) elTY.value = this.filter.translateY;
+        if (elR) elR.value = this.filter.rotate;
 
     }
 
@@ -345,7 +345,6 @@ export class ServiceDsStyleTransform extends ServiceBase {
         const el = e.target as HTMLElement;
         if (!el) return;
         const css = (el as any).gallery;
-        if (!css) return;
 
         const commands: string[] = css.split(';');
         const changes: any[] = [];
@@ -374,6 +373,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
     }
 
     private arrayGallery = [
+        '',
         'transform: scale(1.5);',
         'transform: rotate(90deg);',
         'transform: rotate(181deg);', 
