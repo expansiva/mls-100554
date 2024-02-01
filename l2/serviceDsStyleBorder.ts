@@ -11,7 +11,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
-
+ 
 @customElement('service-ds-style-border-100554')
 export class ServiceDsStyleBorder extends ServiceBase {
 
