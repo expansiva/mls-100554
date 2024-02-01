@@ -3,7 +3,7 @@
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-export const initCollabDSInputRange = ()=>{console.info('a')};
+export const initCollabDSInputRange = ''; 
 @customElement('collab-ds-input-range-100554')
 export class CollabDSInputRange extends LitElement {
 
