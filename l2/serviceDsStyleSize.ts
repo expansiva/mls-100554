@@ -274,6 +274,7 @@ export class ServiceDsStyleSize extends ServiceBase {
 
     private emitEvent(obj: IBlockLessLine) {
 
+        if ((obj as any).target) delete (obj as any).target;
         const rc: IEventsObj = {
             emitter: this.position,
             value: [obj],
