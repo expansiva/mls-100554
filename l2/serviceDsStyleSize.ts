@@ -20,6 +20,7 @@ export class ServiceDsStyleSize extends ServiceBase {
 
     constructor() {
         super();
+        initCollabDSInputRange();
         this.setEvents();
     }
 
@@ -110,6 +111,7 @@ export class ServiceDsStyleSize extends ServiceBase {
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
         if (params.service.length > 0 && !params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'A');
+        this.showNav2Item(true);
 
     }
 
@@ -117,6 +119,7 @@ export class ServiceDsStyleSize extends ServiceBase {
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
         if (params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'H');
+        this.showNav2Item(false);
     }
 
     private onDSStyleCursorChanged(ev: mls.events.IEvent) {
@@ -329,8 +332,4 @@ interface IEventsObj {
 interface IBlockLessLine {
     key: string,
     value: string,
-}
-
-interface initComponents {
-    1:initCollabDSInputRange;
 }

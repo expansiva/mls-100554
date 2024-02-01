@@ -35,6 +35,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
 
     constructor() {
         super();
+        initCollabDSInputRange();
         this.setEvents();
     }
 
@@ -432,6 +433,3 @@ interface IBlockLessLine {
     value: string,
 }
 
-interface initComponents {
-    1:initCollabDSInputRange; 
-}

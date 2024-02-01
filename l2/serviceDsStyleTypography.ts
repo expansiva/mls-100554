@@ -23,6 +23,8 @@ export class ServiceDsStyleTypography extends ServiceBase {
 
     constructor() {
         super();
+        initCollabDSInputRange();
+        initCollabDsInputSelectColor();
         this.setEvents();
     }
 
@@ -112,6 +114,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
         if (params.service.length > 0 && !params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'A');
+        this.showNav2Item(true);
 
     }
 
@@ -119,6 +122,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
         if (params.service.includes(this.helper) || !this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', 'H');
+        this.showNav2Item(false);
     }
 
     private onDSStyleCursorChanged(ev: mls.events.IEvent) {
@@ -355,7 +359,3 @@ interface IBlockLessLine {
     value: string,
 }
 
-interface initComponents {
-    1: initCollabDSInputRange;
-    2:initCollabDsInputSelectColor
-}
