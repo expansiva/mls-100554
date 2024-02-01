@@ -209,7 +209,7 @@ export class ServiceDsStyleSize extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.overflowX}</span>
-                    <select @change="${this.onChangeProp2}" prop="overflow-x">
+                    <select @change="${(e:MouseEvent) => this.onChangeProp2('overflow-x')}" prop="overflow-x">
                         ${repeat(this.tpOverflow,
             ((key: any) => key) as any,
             ((k: any, index: any) => {
@@ -246,12 +246,11 @@ export class ServiceDsStyleSize extends ServiceBase {
     private tpOverflow = ['none', 'auto', 'hidden', 'inherit', 'initial', 'overlay', 'revert', 'scroll', 'unset', 'visible']
 
 
-    private timeonChangeProp2 = -1;
-    private onChangeProp2(obj: MouseEvent) {
+    private onChangeProp2(prop:string) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
-            const el = obj.target as HTMLSelectElement;
-            const prop = el.getAttribute('prop') as string;
+            if (!this.shadowRoot) return;
+            const el = this.shadowRoot.querySelector('*[prop="'+prop+'"]') as HTMLSelectElement;
             this.emitEvent({key:prop, value: el.value});
         }, 500);
     }

@@ -148,11 +148,11 @@ export class ServiceDsStyleTypography extends ServiceBase {
             <div>
                 <div class="groupEdit">
                     <span>${this.myMsg.color}</span>
-                    <collab-ds-input-select-color-100554 prop="color" useSelect="false" useInput="false" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
+                    <input type="color" prop="color" @change="${(e: any) => this.onChangeProp2('color')}"></input>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.fontFamily}</span>
-                    <select style="width:160px" prop="font-family" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="font-family" @change="${(e: any) => this.onChangeProp2('font-family')}">
                         <option value=""></option>
                         <option value="COURIER">Courier</option>
                         <option value="VERDANA">Verdana</option>
@@ -162,7 +162,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.fontWeight}</span>
-                    <select style="width:160px" prop="font-weight" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="font-weight" @change="${(e: any) => this.onChangeProp2('font-weight')}">
                         <option value=""></option>
                         <option value="100">100</option>
                         <option value="200">200</option>
@@ -177,7 +177,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.fontStyle}</span>
-                    <select style="width:160px" prop="font-style" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="font-style" @change="${(e: any) => this.onChangeProp2('font-style')}">
                         <option value=""></option>
                         <option value="NULL">null</option>
                         <option value="NORMAL">normal</option>
@@ -202,7 +202,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.textAlign}</span>
-                    <select style="width:160px" prop="text-align" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="text-align" @change="${(e: any) => this.onChangeProp2('text-align')}">
                         <option value=""></option>
                         <option value="CENTER">center</option>
                         <option value="END">end</option>
@@ -218,7 +218,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.variant}</span>
-                    <select style="width:160px" prop="variant" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="variant" @change="${(e: any) => this.onChangeProp2('variant')}">
                         <option value=""></option>
                         <option value="NORMAL">normal</option>
                         <option value="SMALL-CAPS">small-caps</option>
@@ -226,7 +226,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.transform}</span>
-                    <select style="width:160px" prop="transform" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="transform" @change="${(e: any) => this.onChangeProp2('transform')}">
                         <option value=""></option>
                         <option value="UPPERCASE">uppercase</option>
                         <option value="LOWERCASE">lowercase</option>
@@ -235,7 +235,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.decoration}</span>
-                    <select style="width:160px" prop="decoration" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="decoration" @change="${(e: any) => this.onChangeProp2('decoration')}">
                         <option value=""></option>
                         <option value="NORMAL">normal</option>
                         <option value="UNDERLINE">underline</option>
@@ -245,7 +245,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.textOverflow}</span>
-                    <select style="width:160px" prop="text-overflow" @change="${(e: any) => this.onChangeProp(e)}">
+                    <select style="width:160px" prop="text-overflow" @change="${(e: any) => this.onChangeProp2('text-overflow')}">
                         <option value=""></option>
                         <option value="ELLIPSIS">ellipsis</option>
                         <option value="CLIP">clip</option>
@@ -266,6 +266,15 @@ export class ServiceDsStyleTypography extends ServiceBase {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
             this.emitEvent(obj);
+        }, 500);
+    }
+
+    private onChangeProp2(prop:string) {
+        clearTimeout(this.timeonChangeProp);
+        this.timeonChangeProp = setTimeout(() => {
+            if (!this.shadowRoot) return;
+            const el = this.shadowRoot.querySelector('*[prop="'+prop+'"]') as HTMLSelectElement;
+            this.emitEvent({key:prop, value: el.value});
         }, 500);
     }
 
