@@ -304,7 +304,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
             emitter: 'right-get',
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 500);
     }
 
     private emitEvent(obj: IBlockLessLine) {
