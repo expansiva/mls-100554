@@ -12,16 +12,16 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 
 @customElement('service-ds-style-transform-100554')
-export class ServiceDsStyleTransform extends ServiceBase { 
+export class ServiceDsStyleTransform extends ServiceBase {
 
     private filter = {
-		scaleX: '',
-		scaleY: '',
-		rotate: '',
-		translateX: '',
-		translateY: '',
-		skewX: '',
-		skewY: '',
+        scaleX: '',
+        scaleY: '',
+        rotate: '',
+        translateX: '',
+        translateY: '',
+        skewX: '',
+        skewY: '',
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -71,7 +71,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (visible) {
+        if (visible || reinit) {
 
             this.fireEventAboutMe();
 
@@ -79,7 +79,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
     }
 
     //-------------EVENTS--------------
-    
+
     private setEvents(): void {
         mls.events.addEventListener([3], ['DSStyleChanged'], (ev) => {
             this.onstylechanged(ev.desc as any);
@@ -103,10 +103,11 @@ export class ServiceDsStyleTransform extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if ( obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
+        if (obj.emitter === 'left' && this.visible === 'true' || obj.value.length > 0) {
 
-        this.setValues(obj.value);
-        
+            this.setValues(obj.value);
+
+        }
 
     }
 
@@ -136,7 +137,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
     //-------------COMPONENT-----------
 
-    connectedCallback() { 
+    connectedCallback() {
         super.connectedCallback();
         this.updateMyMessages();
 
@@ -199,7 +200,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
     //-------------IMPLEMENTS--------------
 
-    
+
     private timeonChangeProp = -1;
     private onChangeProp(obj: IBlockLessLine) {
         clearTimeout(this.timeonChangeProp);
@@ -213,7 +214,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
             emitter: 'right-get',
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 500);
     }
 
     private emitEvent(obj: IBlockLessLine) {
@@ -243,94 +244,94 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
         if (!this.shadowRoot) return;
 
-        const elSX = this.shadowRoot.querySelector('*[prop="scaleX"]') as HTMLInputElement; 
-        const elSY = this.shadowRoot.querySelector('*[prop="scaleY"]') as HTMLInputElement; 
-        const elSKX = this.shadowRoot.querySelector('*[prop="skewX"]') as HTMLInputElement; 
-        const elSKY = this.shadowRoot.querySelector('*[prop="skewY"]') as HTMLInputElement; 
-        const elTX = this.shadowRoot.querySelector('*[prop="translateX"]') as HTMLInputElement; 
-        const elTY = this.shadowRoot.querySelector('*[prop="translateY"]') as HTMLInputElement; 
-        const elR = this.shadowRoot.querySelector('*[prop="rotate"]') as HTMLInputElement; 
+        const elSX = this.shadowRoot.querySelector('*[prop="scaleX"]') as HTMLInputElement;
+        const elSY = this.shadowRoot.querySelector('*[prop="scaleY"]') as HTMLInputElement;
+        const elSKX = this.shadowRoot.querySelector('*[prop="skewX"]') as HTMLInputElement;
+        const elSKY = this.shadowRoot.querySelector('*[prop="skewY"]') as HTMLInputElement;
+        const elTX = this.shadowRoot.querySelector('*[prop="translateX"]') as HTMLInputElement;
+        const elTY = this.shadowRoot.querySelector('*[prop="translateY"]') as HTMLInputElement;
+        const elR = this.shadowRoot.querySelector('*[prop="rotate"]') as HTMLInputElement;
 
         let value = '';
 
-		if (elSX.value || elSY.value) {
+        if (elSX.value || elSY.value) {
 
-			value += 'scale(' + (elSX.value ? elSX.value : '1') + (elSY.value ? ', ' + elSY.value : '') + ')';
+            value += 'scale(' + (elSX.value ? elSX.value : '1') + (elSY.value ? ', ' + elSY.value : '') + ')';
 
-		}
+        }
 
-		if (elR.value) {
+        if (elR.value) {
 
-			value += elR.value ? ' rotate(' + elR.value + 'deg)' : '';
+            value += elR.value ? ' rotate(' + elR.value + 'deg)' : '';
 
-		}
+        }
 
-		if (elTX.value || elTY.value) {
+        if (elTX.value || elTY.value) {
 
-			value += 'translate(' + (elTX.value ? elTX.value + 'px' : '0px') + (elTY.value ? ', ' + elTY.value : ', 0') + 'px)';
+            value += 'translate(' + (elTX.value ? elTX.value + 'px' : '0px') + (elTY.value ? ', ' + elTY.value : ', 0') + 'px)';
 
-		}
+        }
 
-		if (elSKX.value || elSKY.value) {
+        if (elSKX.value || elSKY.value) {
 
-			value += 'skew(' + (elSKX.value ? elSKX.value + 'deg' : '0deg') + (elSKY.value ? ', ' + elSKY.value : ', 0') + 'deg)';
+            value += 'skew(' + (elSKX.value ? elSKX.value + 'deg' : '0deg') + (elSKY.value ? ', ' + elSKY.value : ', 0') + 'deg)';
 
-		}
+        }
 
-		const change: IBlockLessLine = {
-			key: 'transform',
-			value
+        const change: IBlockLessLine = {
+            key: 'transform',
+            value
         };
 
         this.emitEvent(change);
-        
+
 
     }
 
     private setValues(block: IBlockLessLine[]) {
 
-		Object.keys(this.filter).forEach((item) => { (this.filter as any)[item] = ''; });
+        Object.keys(this.filter).forEach((item) => { (this.filter as any)[item] = ''; });
 
-		const textTransform = block.find((item) => item.key === 'transform');
-		if (!textTransform || !this.shadowRoot) return;
+        const textTransform = block.find((item) => item.key === 'transform');
+        if (!textTransform || !this.shadowRoot) return;
 
-		let { value } = textTransform;
+        let { value } = textTransform;
 
         const myFilter = this.filter as any;
-		const filter = value.split(')');
-		filter.forEach((item) => {
+        const filter = value.split(')');
+        filter.forEach((item) => {
 
-			if (!item) return;
-			const prop = item.substr(0, item.indexOf('(')).trim();
-			item = item.substr(item.indexOf('('), item.length);
-			if (prop.indexOf('scale') >= 0 || prop.indexOf('translate') >= 0 || prop.indexOf('skew') >= 0) {
+            if (!item) return;
+            const prop = item.substr(0, item.indexOf('(')).trim();
+            item = item.substr(item.indexOf('('), item.length);
+            if (prop.indexOf('scale') >= 0 || prop.indexOf('translate') >= 0 || prop.indexOf('skew') >= 0) {
 
-				item.split(',').forEach((vl, index) => {
+                item.split(',').forEach((vl, index) => {
 
-					if (!vl) return;
-					const num = vl.match(/[\.-\d]/g)?.join('');
-					const prefx = index === 0 ? 'X' : 'Y';
-					if (myFilter[prop + prefx] !== undefined) myFilter[prop + prefx] = num;
+                    if (!vl) return;
+                    const num = vl.match(/[\.-\d]/g)?.join('');
+                    const prefx = index === 0 ? 'X' : 'Y';
+                    if (myFilter[prop + prefx] !== undefined) myFilter[prop + prefx] = num;
 
-				});
+                });
 
-			} else {
+            } else {
 
-				const num = item.match(/[\.-\d]/g)?.join('');
-				if (myFilter[prop] !== undefined) myFilter[prop] = num;
+                const num = item.match(/[\.-\d]/g)?.join('');
+                if (myFilter[prop] !== undefined) myFilter[prop] = num;
 
-			}
+            }
 
-		});
+        });
 
-        const elSX = this.shadowRoot.querySelector('*[prop="scaleX"]') as HTMLInputElement; 
-        const elSY = this.shadowRoot.querySelector('*[prop="scaleY"]') as HTMLInputElement; 
-        const elSKX = this.shadowRoot.querySelector('*[prop="skewX"]') as HTMLInputElement; 
-        const elSKY = this.shadowRoot.querySelector('*[prop="skewY"]') as HTMLInputElement; 
-        const elTX = this.shadowRoot.querySelector('*[prop="translateX"]') as HTMLInputElement; 
-        const elTY = this.shadowRoot.querySelector('*[prop="translateY"]') as HTMLInputElement; 
-        const elR = this.shadowRoot.querySelector('*[prop="rotate"]') as HTMLInputElement; 
-    
+        const elSX = this.shadowRoot.querySelector('*[prop="scaleX"]') as HTMLInputElement;
+        const elSY = this.shadowRoot.querySelector('*[prop="scaleY"]') as HTMLInputElement;
+        const elSKX = this.shadowRoot.querySelector('*[prop="skewX"]') as HTMLInputElement;
+        const elSKY = this.shadowRoot.querySelector('*[prop="skewY"]') as HTMLInputElement;
+        const elTX = this.shadowRoot.querySelector('*[prop="translateX"]') as HTMLInputElement;
+        const elTY = this.shadowRoot.querySelector('*[prop="translateY"]') as HTMLInputElement;
+        const elR = this.shadowRoot.querySelector('*[prop="rotate"]') as HTMLInputElement;
+
         if (elSX) elSX.value = this.filter.scaleX;
         if (elSY) elSY.value = this.filter.scaleY;
         if (elSKX) elSKX.value = this.filter.skewX;
@@ -361,7 +362,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
         });
 
-        this.setValues([{key:'transform', value:css.replace('transform:','').trim()}]); 
+        this.setValues([{ key: 'transform', value: css.replace('transform:', '').trim() }]);
 
         const rc: IEventsObj = {
             emitter: 'right',
@@ -377,7 +378,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
         '',
         'transform: scale(1.5);',
         'transform: rotate(90deg);',
-        'transform: rotate(181deg);', 
+        'transform: rotate(181deg);',
         'transform: rotate(270deg);',
         'transform: skew(50deg);',
         'transform: skew(50deg, -50deg);',
