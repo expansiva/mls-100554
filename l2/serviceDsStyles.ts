@@ -221,8 +221,8 @@ export class ServiceDsStyles extends ServiceBase {
             const blockLess = modelStyle.getLessBlock();
             const { lineNumber } = this._ed1.getPosition() as monaco.Position;
             const text = `${key}: ${value};//${comment}`;
-            const objChanged = {
-                lineChange: -1,
+            const objChanged: any = {
+                lineChange: undefined,
                 prop: key,
                 newValue: value,
                 oldValue: ''
