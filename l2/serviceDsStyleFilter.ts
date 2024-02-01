@@ -15,6 +15,19 @@ import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 @customElement('service-ds-style-filter-100554')
 export class ServiceDsStyleStyle extends ServiceBase {
 
+    private filter = {
+		grayscale: '',
+		blur: '',
+		sepia: '',
+		saturate: '',
+		opacity: '',
+		brightness: '',
+		contrast: '',
+		huerotate: '',
+		invert: ''
+	}
+
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
@@ -28,12 +41,12 @@ export class ServiceDsStyleStyle extends ServiceBase {
     }
 
     public details: IService = {
-        icon: '&#xf07e',
-        name: 'Size',
+        icon: '&#xf0b0',
+        name: 'Filter',
         mode: 'B',
         position: 'right',
         readOnly: false,
-        tooltip: 'Size',
+        tooltip: 'Filter',
         className: undefined,
         tags: [],
         levels: [3]
@@ -48,7 +61,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Size',
+        title: 'Filter',
         actions: {
         },
         icons: {
@@ -96,15 +109,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
         const obj: IEventsObj = JSON.parse(desc);
         if ( obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
 
-        obj.value.forEach((i: any) => {
-
-            if (!this.shadowRoot || !i.key) return;
-            const value = i.value;
-            const prop = i.key;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-            if (el) el.value = value;
-
-        })
+        this.setValues(obj.value);
 
     }
 
@@ -142,21 +147,76 @@ export class ServiceDsStyleStyle extends ServiceBase {
     }
 
     render() {
-        return html`<p> Hello, ${this.error} !</p>`;
+        return html`${this.renderFilter()}`;
+    }
+
+    renderFilter() {
+
+        return html`
+            <div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.grayscale}</span>
+                    <collab-ds-input-range-100554 prop="grayscale" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.blur}</span>
+                    <collab-ds-input-range-100554 prop="blur" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.sepia}</span>
+                    <collab-ds-input-range-100554 prop="sepia" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.saturate}</span>
+                    <collab-ds-input-range-100554 prop="saturate" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.opacity}</span>
+                    <collab-ds-input-range-100554 prop="opacity" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.brightness}</span>
+                    <collab-ds-input-range-100554 prop="brightness" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.contrast}</span>
+                    <collab-ds-input-range-100554 prop="contrast" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.hueRotate}</span>
+                    <collab-ds-input-range-100554 prop="huerotate" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.invert}</span>
+                    <collab-ds-input-range-100554 prop="invert" value="0px" useSelect="false" .@onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
+                </div>
+            </div>
+        `;
+
+    }
+
+    renderGallery() {
+
+        return html`
+            <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer">
+                ${repeat(this.arrayGallery, ((key: any) => key) as any,
+                    ((css: any, index: any) => {
+                        return html`<img style="${css}" @click="${this.clickGallery}" .gallery=${css} src="http://angrytools.com/css-generator/img/rose.jpg" />`;
+                    }) as any
+                )}
+            </div>
+        
+        `
     }
 
     //-------------IMPLEMENTS--------------
-
-    private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
-
-    private tpOverflow = ['none', 'auto', 'hidden', 'inherit', 'initial', 'overlay', 'revert', 'scroll', 'unset', 'visible']
 
 
     private timeonChangeProp = -1;
     private onChangeProp(obj: IBlockLessLine) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
-            this.emitEvent(obj);
+            this.mountValue();
         }, 500);
     }
 
@@ -191,17 +251,159 @@ export class ServiceDsStyleStyle extends ServiceBase {
 
     }
 
+    public mountValue() {
+
+        if (!this.shadowRoot) return;
+
+        let value = '';
+
+        const elG = this.shadowRoot.querySelector('*[prop="grayscale"]') as HTMLInputElement; 
+        const elB = this.shadowRoot.querySelector('*[prop="blur"]') as HTMLInputElement; 
+        const elS = this.shadowRoot.querySelector('*[prop="sepia"]') as HTMLInputElement; 
+        const elSt = this.shadowRoot.querySelector('*[prop="saturate"]') as HTMLInputElement; 
+        const elO = this.shadowRoot.querySelector('*[prop="opacity"]') as HTMLInputElement; 
+        const elBr = this.shadowRoot.querySelector('*[prop="brightness"]') as HTMLInputElement; 
+        const elC = this.shadowRoot.querySelector('*[prop="contrast"]') as HTMLInputElement; 
+        const elH = this.shadowRoot.querySelector('*[prop="huerotate"]') as HTMLInputElement; 
+        const elI = this.shadowRoot.querySelector('*[prop="invert"]') as HTMLInputElement; 
+
+		value += elG.value ? 'grayscale(' + elG.value + '%)' : '';
+		value += elB.value ? ' blur(' + elB.value + 'px)' : '';
+		value += elS.value ? ' sepia(' + elS.value + ')' : '';
+		value += elSt.value ? ' saturate(' + elSt.value + ')' : '';
+		value += elO.value ? ' opacity(' + elO.value + ')' : '';
+		value += elBr.value ? ' brightness(' + elBr.value + '%)' : '';
+		value += elC.value ? ' contrast(' + elC.value + '%)' : '';
+		value += elH.value ? ' hue-rotate(' + elH.value + 'deg)' : '';
+		value += elI.value ? ' invert(' + elI.value + '%)' : '';
+
+		const change: IBlockLessLine = {
+			key: 'filter',
+			value
+		};
+
+        this.emitEvent(change);
+
+	}
+
+    private setValues(block: IBlockLessLine[]) {
+
+        if (!this.shadowRoot) return;
+
+        const myFilter = this.filter as any;
+
+		Object.keys(myFilter).forEach((item) => { myFilter[item] = ''; });
+
+		const textFilter = block.find((item) => item.key === 'filter');
+		if (!textFilter) return;
+
+		const { value } = textFilter;
+
+		const filter = value.split(' ');
+
+		filter.forEach((item) => {
+
+			const prop = item.substr(0, item.indexOf('(')).replace('-', '');
+			item = item.substr(item.indexOf('('), item.length);
+			const num = item.match(/[\.-\d]/g)?.join('');
+			if (myFilter[prop] !== undefined) myFilter[prop] = num;
+
+		});
+
+		const elG = this.shadowRoot.querySelector('*[prop="grayscale"]') as HTMLInputElement; 
+        const elB = this.shadowRoot.querySelector('*[prop="blur"]') as HTMLInputElement; 
+        const elS = this.shadowRoot.querySelector('*[prop="sepia"]') as HTMLInputElement; 
+        const elSt = this.shadowRoot.querySelector('*[prop="saturate"]') as HTMLInputElement; 
+        const elO = this.shadowRoot.querySelector('*[prop="opacity"]') as HTMLInputElement; 
+        const elBr = this.shadowRoot.querySelector('*[prop="brightness"]') as HTMLInputElement; 
+        const elC = this.shadowRoot.querySelector('*[prop="contrast"]') as HTMLInputElement; 
+        const elH = this.shadowRoot.querySelector('*[prop="huerotate"]') as HTMLInputElement; 
+        const elI = this.shadowRoot.querySelector('*[prop="invert"]') as HTMLInputElement; 
+    
+        if (elG) elG.value = this.filter.grayscale;
+        if (elB) elB.value = this.filter.blur;
+        if (elS) elS.value = this.filter.sepia;
+        if (elSt) elSt.value = this.filter.saturate;
+        if (elO) elO.value = this.filter.opacity;
+        if (elBr) elBr.value = this.filter.brightness;
+        if (elC) elC.value = this.filter.contrast;
+        if (elH) elH.value = this.filter.huerotate;
+        if (elI) elI.value = this.filter.invert;
+
+    }
+
+    private clickGallery(e: MouseEvent): void {
+
+        const el = e.target as HTMLElement;
+        if (!el) return;
+        const css = (el as any).gallery;
+        if (!css) return;
+
+        const commands: string[] = css.split(';');
+        const changes: any[] = [];
+        commands.forEach((item) => {
+
+            const [key, value] = item.split(':');
+            if (!key) return;
+
+            changes.push({
+                key: key.trim(),
+                value: value.trim()
+            });
+
+        });
+
+        this.setValues([{key:'filter', value:css.replace('filter:','').trim()}]); 
+
+        const rc: IEventsObj = {
+            emitter: 'right',
+            value: changes,
+            helper: this.helper
+        };
+
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+
+    }
+
+    private arrayGallery = [
+        'transform: scale(1.5);',
+        'transform: rotate(90deg);',
+        'transform: rotate(181deg);', 
+        'transform: rotate(270deg);',
+        'transform: skew(50deg);',
+        'transform: skew(50deg, -50deg);',
+        'transform: skew(-50deg, 0deg);',
+        'transform: skew(-50deg, 50deg);'
+
+    ];
+
     private updateMyMessages() {
 
         if (!window['message' as any]) return;
         const m = window['message' as any] as any;
 
-        if (m.width) this.myMsg.width = m.width;
+        if (m.grayscale) this.myMsg.grayscale = m.grayscale;
+        if (m.blur) this.myMsg.blur = m.blur;
+        if (m.sepia) this.myMsg.sepia = m.sepia;
+        if (m.saturate) this.myMsg.saturate = m.saturate;
+        if (m.opacity) this.myMsg.opacity = m.opacity;
+        if (m.brightness) this.myMsg.brightness = m.brightness;
+        if (m.contrast) this.myMsg.contrast = m.contrast;
+        if (m.hueRotate) this.myMsg.hueRotate = m.hueRotate;
+        if (m.invert) this.myMsg.invert = m.invert;
 
     }
 
     private myMsg = {
-        width: 'Width',
+        grayscale: 'Grayscale',
+        blur: 'Blur',
+        sepia: 'Sepia',
+        saturate: 'Saturate',
+        opacity: 'Opacity',
+        brightness: 'Brightness',
+        contrast: 'Contrast',
+        hueRotate: 'Hue-rotate',
+        invert: 'Invert',
     }
 }
 

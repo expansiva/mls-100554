@@ -370,7 +370,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
             helper: this.helper
         };
 
-        //mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
 
     }
 
