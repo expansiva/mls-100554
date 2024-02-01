@@ -265,7 +265,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
     private onChangeProp(obj: IBlockLessLine) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
-            this.emitEvent(obj);
+            this.emitEvent((obj as any).detail);
         }, 500);
     }
 

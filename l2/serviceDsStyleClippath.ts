@@ -147,7 +147,7 @@ export class ServiceDsStyleClippath extends ServiceBase {
         const el = e.target as HTMLElement;
         if (!el) return;
         const css = (el as any).gallery;
-        if (!css) return;
+        if (!css && css !== '') return;
 
         const commands: string[] = css.split(';');
         const changes: any[] = [];
@@ -162,6 +162,8 @@ export class ServiceDsStyleClippath extends ServiceBase {
             });
 
         });
+
+        if(changes.length === 0 )changes.push({key:'clip-path', value: ''})
 
         const rc: IEventsObj = {
             emitter: 'right',
