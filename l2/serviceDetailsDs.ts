@@ -60,7 +60,7 @@ export class ServiceDetailsDs100554 extends ServiceBase {
     state: IState = { assets: 0, components: 0, createdBy: '', documentation: 0, lastUpdated: '', lastUpdatedBy: '', name: '', style: 0, tokens: 0 };
 
     setEvents() {
-        mls.events.addEventListener([this.level], ['DSSelected'], (ev) => {
+        mls.events.addEventListener([3], ['DSSelected'], (ev) => {
             if (!this.serviceItemNav) return;
             this.serviceItemNav.setAttribute('mode', 'A');
             this.openMe();
@@ -80,7 +80,6 @@ export class ServiceDetailsDs100554 extends ServiceBase {
         this.ds = mls.l3.getDSInstance(project, mode);
         await this.ds.init();
         this.setResume(project, mode);
-        this.setEvents();
     }
 
     private async setResume(project: number, index: number) {
@@ -147,7 +146,6 @@ export class ServiceDetailsDs100554 extends ServiceBase {
     }
 
     private onLinkClick(service: string) {
-        console.info('onLinkClick', service)
         this.openService(service, 'left', 3);
     }
 

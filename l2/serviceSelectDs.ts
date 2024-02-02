@@ -172,6 +172,8 @@ export class ServiceSelectDs100554 extends ServiceBase {
 
     private _fireEventDsSelected(dsindex: number) {
 
+        console.info('_fireEventDsSelected');
+
         const params: IParamsEvent = {
             emitter: 'left',
             value: dsindex
