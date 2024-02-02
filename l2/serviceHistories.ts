@@ -110,9 +110,7 @@ export class ServiceHistories100554 extends ServiceBase {
 
         const src1 = this.hashOriginal ? await this.getHistories(this.hashOriginal) : '';
         this.setInitialHistories(src1, src2);
-
-        this.c2?.setAttribute('msize', this.msize);
-
+        this.setMsizeEditor();
 
     }
 
@@ -152,24 +150,25 @@ export class ServiceHistories100554 extends ServiceBase {
     }
 
     private createEditor(): void {
-        if (!this.c2) return;
+        if (!this.c2 || this._ed1) return;
         const opt = {
             automaticLayout: true,
         };
         this._ed1 = monaco.editor.createDiffEditor(this.c2, opt);
         (this.c2 as any)['mlsEditor'] = this._ed1;
-        this.c2?.setAttribute('msize', this.msize);
+        this.setMsizeEditor();
+    }
 
+    private setMsizeEditor() {
+        if (!this.visible) return;
+        this.c2?.setAttribute('msize', this.msize);
     }
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (!reinit) {
+        if (visible) {
             this.createEditor();
             this.setInitialHistories('Loading...', 'Loading...');
-        }
-
-        if (visible) {
             if (!this.fileInfo) this.setInitialHistories('No histories selected', 'No histories selected');
             setTimeout(() => {
                 if (el && typeof el.layout === 'function') el.layout();
@@ -181,7 +180,8 @@ export class ServiceHistories100554 extends ServiceBase {
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
             if (!this.visible) return;
-            this.c2?.setAttribute('msize', this.msize);
+            this.setMsizeEditor();
+
         }
     }
 
