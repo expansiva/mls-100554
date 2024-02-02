@@ -12,6 +12,8 @@ import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 @customElement('service-ds-style-size-100554')
 export class ServiceDsStyleSize extends ServiceBase {
 
+    private myUpp = false;
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
@@ -94,34 +96,42 @@ export class ServiceDsStyleSize extends ServiceBase {
         const obj: IEventsObj = JSON.parse(desc);
         if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-            obj.value.forEach((i: any) => {
-
-                if (!this.shadowRoot || !i.key) return;
-                const value = i.value;
-                const prop = i.key;
-
-                if (prop === 'overflow') {
-
-                    const elGroup = this.shadowRoot.querySelector('*[prop="overflow"]') as HTMLInputElement;
-
-                    const el = this.shadowRoot.querySelector('*[prop="overflow-x"]') as HTMLSelectElement;
-
-                    const el2 = this.shadowRoot.querySelector('*[prop="overflow-y"]') as HTMLSelectElement;
-
-                    if (elGroup) elGroup.checked = true;
-                    if (el) el.value = el.value;
-                    if (el2) el2.value = el.value;
-
-                } else {
-
-                    const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-                    if (el) el.value = value;
-
-                }
-
-            })
+            this.setValues(obj.value);
 
         }
+
+    }
+
+    private setValues(ar: IBlockLessLine[]): void {
+
+        this.myUpp = true;
+        ar.forEach((i: any) => {
+
+            if (!this.shadowRoot || !i.key) return;
+            const value = i.value;
+            const prop = i.key;
+
+            if (prop === 'overflow') {
+
+                const elGroup = this.shadowRoot.querySelector('*[prop="overflow"]') as HTMLInputElement;
+
+                const el = this.shadowRoot.querySelector('*[prop="overflow-x"]') as HTMLSelectElement;
+
+                const el2 = this.shadowRoot.querySelector('*[prop="overflow-y"]') as HTMLSelectElement;
+
+                if (elGroup) elGroup.checked = true;
+                if (el) el.value = el.value;
+                if (el2) el2.value = el.value;
+
+            } else {
+
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                if (el) el.value = value;
+
+            }
+
+        })
+        this.myUpp = false;
 
     }
 
@@ -312,6 +322,7 @@ export class ServiceDsStyleSize extends ServiceBase {
 
     private emitEvent(obj: IBlockLessLine) {
 
+        if (this.myUpp) return;
         if ((obj as any).target) delete (obj as any).target;
         const rc: IEventsObj = {
             emitter: this.position,

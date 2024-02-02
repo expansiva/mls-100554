@@ -13,6 +13,8 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 @customElement('service-ds-style-flex-100554')
 export class ServiceDsStyleFlex extends ServiceBase {
 
+    private myUpp = false;
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
@@ -100,6 +102,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
     private setValues(ar: IBlockLessLine[]): void {
 
+        this.myUpp = true;
         ar.forEach((i: any) => {
 
             if (!this.shadowRoot || !i.key) return;
@@ -109,6 +112,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
             if (el) el.value = value;
 
         })
+        this.myUpp = false;
 
     }
 
@@ -312,6 +316,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
     private emitEvent(obj: IBlockLessLine) {
 
+        if (this.myUpp) return;
         const rc: IEventsObj = {
             emitter: this.position,
             value: [obj],

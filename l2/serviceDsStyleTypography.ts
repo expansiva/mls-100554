@@ -15,6 +15,8 @@ import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor
 @customElement('service-ds-style-typography-100554')
 export class ServiceDsStyleTypography extends ServiceBase {
 
+    private myUpp = false;
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
@@ -97,16 +99,25 @@ export class ServiceDsStyleTypography extends ServiceBase {
         const obj: IEventsObj = JSON.parse(desc);
         if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-            obj.value.forEach((i: any) => {
-
-                if (!this.shadowRoot || !i.key) return;
-                const value = i.value;
-                const prop = i.key;
-                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-                if (el) el.value = value;
-
-            })
+            this.setValues(obj.value);
+            
         }
+
+    }
+
+    private setValues(ar: IBlockLessLine[]): void {
+
+        this.myUpp = true;
+        ar.forEach((i: any) => {
+
+            if (!this.shadowRoot || !i.key) return;
+            const value = i.value;
+            const prop = i.key;
+            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+            if (el) el.value = value;
+
+        })
+        this.myUpp = false;
 
     }
 
@@ -269,12 +280,12 @@ export class ServiceDsStyleTypography extends ServiceBase {
         }, 500);
     }
 
-    private onChangeProp2(prop:string) {
+    private onChangeProp2(prop: string) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
             if (!this.shadowRoot) return;
-            const el = this.shadowRoot.querySelector('*[prop="'+prop+'"]') as HTMLSelectElement;
-            this.emitEvent({key:prop, value: el.value});
+            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLSelectElement;
+            this.emitEvent({ key: prop, value: el.value });
         }, 500);
     }
 
@@ -288,6 +299,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
 
     private emitEvent(obj: IBlockLessLine) {
 
+        if (this.myUpp) return;
         if ((obj as any).target) delete (obj as any).target;
         const rc: IEventsObj = {
             emitter: this.position,

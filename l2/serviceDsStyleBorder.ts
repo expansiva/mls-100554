@@ -15,6 +15,8 @@ import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor
 @customElement('service-ds-style-border-100554')
 export class ServiceDsStyleBorder extends ServiceBase {
 
+    private myUpp = false;
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
@@ -98,7 +100,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
         })
         if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-            this.updateValues(obj.value);
+            this.setValues(obj.value);
 
         }
 
@@ -106,8 +108,9 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     }
 
-    private updateValues(ar: IBlockLessLine[]): void {
+    private setValues(ar: IBlockLessLine[]): void {
 
+        this.myUpp = true;
         ar.forEach((i: any) => {
 
             if (!this.shadowRoot || !i.key) return;
@@ -125,7 +128,8 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
             }
 
-        })
+        });
+        this.myUpp = false;
 
     }
 
@@ -322,6 +326,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     private emitEvent(obj: IBlockLessLine) {
 
+        if (this.myUpp) return;
         const rc: IEventsObj = {
             emitter: this.position,
             value: [obj],
@@ -401,7 +406,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
             helper: this.helper
         };
 
-        this.updateValues(changes);
+        this.setValues(changes);
 
         mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
 

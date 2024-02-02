@@ -26,6 +26,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
         invert: ''
     }
 
+    private myUpp = false;
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
@@ -233,6 +234,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
 
     private emitEvent(obj: IBlockLessLine) {
 
+        if (this.myUpp) return;
         const rc: IEventsObj = {
             emitter: this.position,
             value: [obj],
@@ -300,6 +302,8 @@ export class ServiceDsStyleStyle extends ServiceBase {
         const textFilter = block.find((item) => item.key === 'filter');
         if (!textFilter) return;
 
+        this.myUpp = true;
+
         const { value } = textFilter;
 
         const filter = value.split(' ');
@@ -332,6 +336,8 @@ export class ServiceDsStyleStyle extends ServiceBase {
         if (elC) elC.value = this.filter.contrast;
         if (elH) elH.value = this.filter.huerotate;
         if (elI) elI.value = this.filter.invert;
+
+        this.myUpp = false;
 
     }
 

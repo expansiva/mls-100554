@@ -24,6 +24,8 @@ export class ServiceDsStyleTransform extends ServiceBase {
         skewY: '',
     }
 
+    private myUpp = false;
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
@@ -219,6 +221,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
     private emitEvent(obj: IBlockLessLine) {
 
+        if (this.myUpp) return;
         const rc: IEventsObj = {
             emitter: this.position,
             value: [obj],
@@ -295,6 +298,8 @@ export class ServiceDsStyleTransform extends ServiceBase {
         const textTransform = block.find((item) => item.key === 'transform');
         if (!textTransform || !this.shadowRoot) return;
 
+        this.myUpp = true;
+
         let { value } = textTransform;
 
         const myFilter = this.filter as any;
@@ -339,6 +344,8 @@ export class ServiceDsStyleTransform extends ServiceBase {
         if (elTX) elTX.value = this.filter.translateX;
         if (elTY) elTY.value = this.filter.translateY;
         if (elR) elR.value = this.filter.rotate;
+
+        this.myUpp = false;
 
     }
 

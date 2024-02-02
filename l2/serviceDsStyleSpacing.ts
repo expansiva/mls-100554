@@ -14,6 +14,8 @@ import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 @customElement('service-ds-style-spacing-100554')
 export class ServiceDsStyleSpacing extends ServiceBase {
 
+    private myUpp = false;
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
@@ -95,25 +97,31 @@ export class ServiceDsStyleSpacing extends ServiceBase {
         const obj: IEventsObj = JSON.parse(desc);
         if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-            obj.value.forEach((i: any) => {
-
-                if (!this.shadowRoot || !i.key) return;
-                const value = i.value;
-                const prop = i.key;
-
-                if (['margin', 'padding'].includes(prop)) {
-                    this.uppProp(value, prop);
-
-                } else {
-
-                    const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-                    if (el) el.value = value;
-
-                }
-
-            })
+            this.setValues(obj.value);
         }
 
+    }
+
+    private setValues(ar: IBlockLessLine[]): void {
+        this.myUpp = true;
+        ar.forEach((i: any) => {
+
+            if (!this.shadowRoot || !i.key) return;
+            const value = i.value;
+            const prop = i.key;
+
+            if (['margin', 'padding'].includes(prop)) {
+                this.uppProp(value, prop);
+
+            } else {
+
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                if (el) el.value = value;
+
+            }
+
+        })
+        this.myUpp = false;
     }
 
     private onDSStyleSelected(ev: mls.events.IEvent) {
@@ -289,6 +297,7 @@ export class ServiceDsStyleSpacing extends ServiceBase {
 
     private emitEvent(obj: IBlockLessLine) {
 
+        if (this.myUpp) return;
         const rc: IEventsObj = {
             emitter: this.position,
             value: [obj],
