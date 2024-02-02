@@ -120,8 +120,8 @@ export class ServiceDsStyleSize extends ServiceBase {
                 const el2 = this.shadowRoot.querySelector('*[prop="overflow-y"]') as HTMLSelectElement;
 
                 if (elGroup) elGroup.checked = true;
-                if (el) el.value = el.value;
-                if (el2) el2.value = el.value;
+                if (el) el.value = value;
+                if (el2) el2.value = value;
 
             } else {
 

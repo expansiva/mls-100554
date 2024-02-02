@@ -270,9 +270,9 @@ export class ServiceDsStyleFlex extends ServiceBase {
             ((css: any, index: any) => {
 
                 return html`<div style="${css}" @click="${this.clickGallery}" .gallery=${css}>
-                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
-                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
-                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
+                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
+                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
+                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
                         </div>`;
             }) as any
         )}
@@ -282,9 +282,9 @@ export class ServiceDsStyleFlex extends ServiceBase {
             ((css: any, index: any) => {
 
                 return html`<div style="${css}" @click="${this.clickGallery}" .gallery=${css}>
-                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
-                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
-                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;"></span>
+                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
+                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
+                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
                 </div>`;
             }) as any
         )}
@@ -339,7 +339,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
     }
 
     private clickGallery(e: MouseEvent): void {
-
+    
         const el = e.target as HTMLElement;
         if (!el) return;
         const css = (el as any).gallery;
