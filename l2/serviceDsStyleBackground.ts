@@ -23,10 +23,10 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
     @property() helper: string = '_100554_serviceDsStyleBackground';
 
-    constructor() { 
-        super(); 
+    constructor() {
+        super();
         this.setEvents();
-        
+
     }
 
     public details: IService = {
@@ -151,7 +151,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
         this.configString('background: linear-gradient(84deg, rgba(2,0,36,1) 36%, rgba(60,70,193,0.5) 66%);')
 
     }
- 
+
     render() {
         return html`<div class="container">${this.renderBody()}</div>`;
     }
@@ -161,20 +161,43 @@ export class ServiceDsStyleBackground extends ServiceBase {
             <div class="showtransparent"></div>
             <div class="showres" style="${this.css}"></div>
             <div class="showConfig" >
-            oi
+                ${this.renderItens()}
             </div>
 
         `;
     }
 
+    renderItens() {
+        return html`
+            <div style="display:flex; gap:.5rem; font-size:80%; color:#6d6d6d;margin-bottom:.5rem">
+                <div style="width:50px;text-align:center; ">Color</div> 
+                <div style="width:132px;text-align:center;">Transparency</div> 
+                <div style="width:60px;text-align:center;">Stop</div> 
+            </div>  
+            ${repeat(this.info.itens, ((key: any) => key.value) as any,
+            ((i: any, index: any) => {
+                return html`
+                    <div style="display:flex; gap:.5rem;margin-bottom:.5rem">
+                        <input type="color" .value="${i.value}" style="width:50px"/> 
+                        <input type="range" min="0" max="100" .value="${i.transp}" style="width:132px"/> 
+                        <input type="number" style="width:50px" min="0" max="100" .value="${i.start}" />
+                    </div>    
+                `;
+            }) as any
+        )}
+        
+        `
+    }
+
     //-------------IMPLEMENTS--------------
 
-    private info: { tp: string, aux: string, itens: { value: string, start: string }[] } = { tp: '', aux: '', itens: [] };
+    private info: { tp: string, aux: string, itens: { value: string, transp: string, start: string }[] } = { tp: '', aux: '', itens: [] };
 
-    
+
     private configString(str: string): void {
 
         this.css = str;
+
         if (str.indexOf('linear-gradient') > 0) {
             this.info.tp = 'linear-gradient';
         } else if (str.indexOf('radial-gradient')) {
@@ -184,10 +207,10 @@ export class ServiceDsStyleBackground extends ServiceBase {
         }
 
         if (this.info.tp === 'background') {
-            this.info.itens = [{value: str.split(':')[1], start:''}]
+            this.info.itens = [{ value: str.split(':')[1], transp: '100', start: '' }]
         } else {
 
-            let ar:string[] = [];
+            let ar: string[] = [];
             str = str.substr(str.indexOf('('));
             str = this.changeStr(str);
 
@@ -200,39 +223,71 @@ export class ServiceDsStyleBackground extends ServiceBase {
                     return;
                 }
 
-                
+
                 if (i.indexOf('#') >= 0 || i.indexOf('abgr') >= 0 || i.indexOf('bgr') >= 0) {
 
                     let vl = '';
-                    let start = '0%';
+                    let start = '0';
                     const a2 = i.trim().split(' ');
                     if (a2.length > 0) vl = a2[0].replace('abgr', 'rgba').replace('bgr', 'rgb').replace(/;/g, ',');
 
-                    if (a2.length > 1) start = a2[1];
+                    if (a2.length > 1) start = a2[1].replace('%','');
 
                     if (vl === '') return;
 
-                    if (!this.info.itens) this.info.itens = [{ value: vl, start: start }]
-                    else this.info.itens.push({ value: vl, start: start });
+                    let vlI = { vl: vl, transp: '100' };
+
+                    if (vl.indexOf('rgb') >= 0) {
+                        vlI = this.rgbaToHex(vl);
+                    }
+
+                    if (!this.info.itens) this.info.itens = [{ value: vlI.vl, transp: vlI.transp, start: start }]
+                    else this.info.itens.push({ value: vlI.vl, transp: vlI.transp, start: start });
                 }
 
             });
-            
-        }
-        
 
+        }
+        console.info(this.info);
     }
 
+    private rgbaToHex(rgbaString:string): { vl: string, transp: string } {
+        const match = rgbaString.match(/(\d+(?:\.\d+)?)/g);
+
+        if (!match) {
+            return { vl: '', transp: '' };
+        }
+    
+        const r = parseInt(match[0], 10);
+        const g = parseInt(match[1], 10);
+        const b = parseInt(match[2], 10);
+        const a = match[3] ? (+match[3] * 100).toString() : '100';
+ 
+        // Converte os componentes RGB para hexadecimal
+        const toHex = (component:number) => {
+            const hex = component.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        };
+
+        // Converte os componentes para hexadecimal
+        const hexR = toHex(r);
+        const hexG = toHex(g);
+        const hexB = toHex(b);
+
+        const hexColor = `#${hexR}${hexG}${hexB}`;
+
+        return { vl:hexColor, transp:a };
+    }
 
     private changeStr(s: string): string {
-    
+
         if (s.indexOf('rgba') >= 0 || s.indexOf('rgb') >= 0) {
 
             let tp = s.indexOf('rgba') >= 0 ? 'rgba' : 'rgb';
             let tpR = s.indexOf('rgba') >= 0 ? 'abgr' : 'bgr';
             let newst = '';
             let oldstr = '';
-            let st = s.indexOf(tp); 
+            let st = s.indexOf(tp);
             let ste = -1;
 
             st = s.substr(st).indexOf('(') + st;
@@ -248,9 +303,9 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
             if (s.indexOf('(') === 0) s = s.substr(1);
             if (s.lastIndexOf(')') === s.length - 1) s = s.substring(0, s.length - 1);
-            if (s.lastIndexOf(');') === s.length - 2) s = s.substring(0,s.lastIndexOf(');'));
+            if (s.lastIndexOf(');') === s.length - 2) s = s.substring(0, s.lastIndexOf(');'));
             return s;
-            
+
         }
 
     }
