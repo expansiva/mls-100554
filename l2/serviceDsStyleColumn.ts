@@ -6,7 +6,7 @@
  * }
  */
 
-import { html, css } from 'lit';
+import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
@@ -31,7 +31,7 @@ export class ServiceDsStyleColumn extends ServiceBase {
     }
 
     public details: IService = {
-        icon: '&#xf07e',
+        icon: '&#xf0db',
         name: 'Column',
         mode: 'B',
         position: 'right',
@@ -154,7 +154,7 @@ export class ServiceDsStyleColumn extends ServiceBase {
     }
 
     render() {
-        return html`${this.renderColumn()}`;
+        return html`${this.renderColumn()}${this.renderGallery()}`;
     }
 
     renderColumn() {
@@ -204,6 +204,22 @@ export class ServiceDsStyleColumn extends ServiceBase {
                 </div>
             </div>
         `;
+    }
+
+    renderGallery() {
+
+        return html`
+            <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer">
+                ${repeat(this.arrayGallery, ((key: any) => key) as any,
+                    ((css: any, index: any) => {
+                        return html`
+                        <h5 style="width:235px;height:160px;font-size:60%;border: 1px solid #c3c3c3; padding:1rem;${css}" @click="${this.clickGallery}" .gallery=${css}>Lorem ipsum dolor sit amet, consectetur adipisicing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua.</h5>
+                        `;
+                    }) as any
+                )}
+            </div>
+        
+        `
     }
 
     //-------------IMPLEMENTS--------------
@@ -260,6 +276,48 @@ export class ServiceDsStyleColumn extends ServiceBase {
         }, 200);
 
     }
+
+    private clickGallery(e: MouseEvent): void {
+
+        const el = e.target as HTMLElement;
+        if (!el) return;
+        const css = (el as any).gallery;
+        if (!css) return;
+
+        const commands: string[] = css.split(';');
+        const changes: any[] = [];
+        commands.forEach((item) => {
+
+            const [key, value] = item.split(':');
+            if (!key) return;
+
+            changes.push({
+                key: key.trim(),
+                value: value.trim()
+            });
+
+        });
+
+        const rc: IEventsObj = {
+            emitter: 'right',
+            value: changes,
+            helper: this.helper
+        };
+
+        this.setValues(changes);
+
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+
+    }
+
+    private arrayGallery = [
+        '',
+        'column-count: 2;',
+        'column-count: 2; column-gap: 20px; column-rule-width: 1px; column-rule-style: dashed;',
+        'column-count: 3;',
+        'column-count: 2; column-rule-width: 1px; column-rule-style: solid;'
+
+    ];
 
     private updateMyMessages() {
 
