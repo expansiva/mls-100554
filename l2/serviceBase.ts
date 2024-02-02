@@ -75,7 +75,7 @@ export abstract class ServiceBase extends LitElement {
 
     showNav2Item(show: boolean) {
         const itemService = this.serviceItemNav as IMlsNav2Item;
-        if (itemService) itemService?.show(show);
+        if (itemService && itemService.show) itemService.show(show);
     }
 
     openService(service: string, position: 'left' | 'right', level: number) {
