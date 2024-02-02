@@ -1,7 +1,6 @@
 /// <mls shortName="serviceDsStyles" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
-
-import { html } from 'lit';
+import { html, css } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
@@ -52,11 +51,24 @@ export class ServiceDsStyles extends ServiceBase {
     @property()
     private isComponent: boolean = false;
 
+    @property()
+    private stylesComponent: mls.l3.IComponentsStyle[] = [];
+
+    private modeComponent: 'add' | 'rename' = 'add';
+
+    private firstStyleIndex: number = 0;
+
+    @property()
+    private actionsMode: 'confirm' | 'actions' | 'default' = 'default';
+
     @query('mls-editor-100529')
     private c2: HTMLElement | undefined;
 
-    @query('selectaaa')
-    private c3: HTMLElement | undefined;
+    @query('#service_styles_select_comp_styles')
+    private selectStyles: HTMLSelectElement | undefined;
+
+    @query('#service_styles_input_comp_styles')
+    private inputAddStyles: HTMLInputElement | undefined;
 
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
     private timeoutChangesEditorStyle: number = 0;
@@ -152,7 +164,7 @@ export class ServiceDsStyles extends ServiceBase {
         const modelResults = this.models['results'] as IMonacoModelStyle;
         this._ed1.setModel(modelResults);
         if (this.menu.setMode) this.menu.setMode('editor');
-        if (this.c3) this.c3.style.display = 'none';
+        // if (this.c3) this.c3.style.display = 'none';
         this.serviceContent?.layout();
         this._ed1.updateOptions({ readOnly: true });
 
@@ -620,7 +632,6 @@ export class ServiceDsStyles extends ServiceBase {
         }
 
         if (!this.isEventAdd) {
-            if(isGet) console.info('DSStyleChanged right get')
             mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 300);
         }
         else this.isEventAdd = false;
@@ -628,13 +639,16 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async onAfterAdd() {
-        const style: mls.l3.IComponentsStyle = (this.c3 as any).styles[(this.c3 as any).value];
+        if (!this.selectStyles) return;
+        const style: mls.l3.IComponentsStyle = this.stylesComponent[+this.selectStyles.value];
         const less = await style.getStyleLessIO();
         this.onChangeWidgetStyle(less);
     }
 
     private async onChangeEditorIfComponent(params: IEditorChangedEventsObj): Promise<string> {
-        const style: mls.l3.IComponentsStyle = (this.c3 as any).styles[(this.c3 as any).value];
+        if (!this.selectStyles) return '';
+
+        const style: mls.l3.IComponentsStyle = this.stylesComponent[+this.selectStyles.value];
         if (!style) return params.less;
 
         const isFirstLineCorrect = this.checkIfFirtsLineCorrect(params.less, style.stylename);
@@ -896,7 +910,6 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async onDSStyleChanged(obj: mls.events.IEvent) {
-        console.info('onDSStyleChanged')
 
         if (!obj.desc) return;
         const desc: IEditorChangedEventsObj = JSON.parse(obj.desc);
@@ -920,6 +933,8 @@ export class ServiceDsStyles extends ServiceBase {
 
             // this.onServiceClick(true, !!this._ed1, this.serviceContent);
             // this.c3.setAttribute('component', widget);
+
+            this.loadStylesComponent(this.componentName);
 
 
             const params = this.getParamsServices();
@@ -986,6 +1001,99 @@ export class ServiceDsStyles extends ServiceBase {
 
     }
 
+
+    private async loadStylesComponent(componentName: string, index?: number) {
+
+        const dsindex: number = mls.actual[3].mode || 0;
+        const { project } = mls.actual[5];
+        if (project === undefined) return;
+
+        this.firstStyleIndex = index || 0;
+
+        const dsInstance = mls.l3.getDSInstance(project, dsindex);
+        await dsInstance.init();
+        const comp = await dsInstance.components.find(componentName);
+        if (!comp) return;
+        this.stylesComponent = comp.styles;
+
+        if (this.stylesComponent.length === 0) {
+            const tag = this.getWidgetTagName(comp.name);
+            const stName = comp.name;
+            await dsInstance.components.styles.add(comp.name, stName.substr(8, stName.length), `${tag} { //don't change this line \n \t \n}`);
+            this.stylesComponent = comp.styles;
+        }
+
+        setTimeout(() => {
+            this.handleChangeSelectStyles();
+        }, 200)
+
+    }
+
+    private async handleChangeSelectStyles() {
+
+        if (!this.selectStyles) return;
+        if (this.selectStyles.value === '0') this.showDefaultMode();
+        else this.showActionsMode();
+
+        const style = this.stylesComponent[+this.selectStyles.value];
+        const less = await style.getStyleLessIO();
+        this.onChangeWidgetStyle(less);
+    }
+
+    private showConfirmMode() {
+        this.actionsMode = 'confirm';
+    }
+
+    private showActionsMode() {
+        this.actionsMode = 'actions';
+        if (this.inputAddStyles) this.inputAddStyles.value = '';
+    }
+
+    private showDefaultMode() {
+        this.actionsMode = 'default';
+    }
+
+    private handleAddStylesClick() {
+        this.modeComponent = 'add';
+        this.showConfirmMode();
+    }
+
+    private handleRenameStylesClick() {
+        this.modeComponent = 'rename';
+        this.showConfirmMode();
+    }
+
+    private async handleDeleteStylesClick() {
+        if (!this.selectStyles) return;
+        await this.onDeleteWidgetStyle(this.stylesComponent[+this.selectStyles.value]);
+        await this.loadStylesComponent(this.componentName);
+    }
+
+    private handleCancelStylesClick() {
+        if (!this.selectStyles) return;
+        const st = this.stylesComponent[+this.selectStyles.value];
+        if (st.stylename === this.componentName.substr(8, this.componentName.length)) this.showDefaultMode();
+        else this.showActionsMode();
+    }
+
+
+    private async handleConfirmStylesClick() {
+        if (!this.selectStyles || !this.inputAddStyles) return;
+
+        if (this.modeComponent === 'rename') {
+
+            await this.onRenameWidgetStyle(this.stylesComponent[+this.selectStyles.value], this.inputAddStyles.value);
+            await this.loadStylesComponent(this.componentName);
+            this.showActionsMode();
+        } else if (this.modeComponent === 'add') {
+            await this.onAddWidgetStyle(this.inputAddStyles.value);
+            await this.loadStylesComponent(this.componentName, this.stylesComponent.length);
+            await this.onAfterAdd();
+            this.showActionsMode();
+        }
+    }
+
+
     private getWidgetTagName(widgetName: string): string {
 
         const parts = widgetName.split('_');
@@ -993,6 +1101,7 @@ export class ServiceDsStyles extends ServiceBase {
         const project = parts.shift() || '';
         let formattedString = `${parts.join('-')}-${project}`;
         formattedString = formattedString.replace(/([^A-Z-]|^)([A-Z])/g, (_, prefix, letter) => `${prefix}-${letter.toLowerCase()}`).toLowerCase();
+
         return formattedString;
     }
 
@@ -1000,6 +1109,13 @@ export class ServiceDsStyles extends ServiceBase {
         if (changedProperties.has('msize')) {
             this.setMsizeEditor();
         }
+
+        // if (changedProperties.has('stylesComponent')) {
+        //     if (this.selectStyles && this.isComponent) {
+        //         this.selectStyles.selectedIndex = this.firstStyleIndex;
+        //         this.selectStyles.dispatchEvent(new Event('change'));
+        //     }
+        // }
     }
 
     private setMsizeEditor() {
@@ -1017,24 +1133,66 @@ export class ServiceDsStyles extends ServiceBase {
 
     render() {
         return html`
-            <div
-                style=${this.isComponent ? "display:block; height: 50px;" : "display:none"}
+            <style>${this.myStyle}</style>
+            <div class="styles-if-component"
+                style=${this.isComponent ? "display:'';" : "display:none"}
             >
                 <select 
-                .onChange = ${async (less: string) => this.onChangeWidgetStyle(less)}
-                .onDelete =  ${async (style: mls.l3.IComponentsStyle) => this.onDeleteWidgetStyle(style)}
-                .onAdd =  ${async (value: string) => this.onAddWidgetStyle(value)}
-                .onAfterAdd =  ${async () => this.onAfterAdd()}
-                .onRename =  ${async (style: mls.l3.IComponentsStyle, value: string) => this.onRenameWidgetStyle(style, value)}
+                    id="service_styles_select_comp_styles"
+                    .selectedIndex=${this.firstStyleIndex}
+                    @change=${() => { this.handleChangeSelectStyles(); }}
                 >
-                    <option value="0">Default</option>
+                    ${this.stylesComponent.map((st, index) => {
+            return html`
+                            <option value="${index}">
+                                ${st.stylename !== this.componentName.substr(8, this.componentName.length) ? st.stylename : 'Default'}
+                            </option>
+                        `
+        })}
+                    
                 </select>
+                <div class="actions">
+                    <input id="service_styles_input_comp_styles" style=${this.actionsMode === 'confirm' ? "display:block" : "display:none"}></input>
+                    <i class="fa fa-plus" @click=${() => { this.handleAddStylesClick() }} style=${this.actionsMode === 'confirm' ? "display:none" : "display:block"}></i>
+                    <i class="fa fa-trash" @click=${() => { this.handleDeleteStylesClick() }} style=${this.actionsMode === 'actions' ? "display:block" : "display:none"}></i>
+                    <i class="fa fa-pencil" @click=${() => { this.handleRenameStylesClick() }} style=${this.actionsMode === 'actions' ? "display:block" : "display:none"}></i>
+                    <i class="fa fa-check" @click=${() => { this.handleConfirmStylesClick() }} style=${this.actionsMode === 'confirm' ? "display:block" : "display:none"}></i>
+                    <i class="fa fa-times" @click=${() => { this.handleCancelStylesClick() }} style=${this.actionsMode === 'confirm' ? "display:block" : "display:none"}></i>
+                </div>
             </div>
             
             <mls-editor-100529 ismls2="true"></mls-editor-100529>
         
         `
     }
+
+    private myStyle = `
+        .styles-if-component {
+            padding: 6px;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+
+            select{
+                width: 200px;
+            }
+            input{
+                margin-right: 1rem;
+                line-height: 0.5;
+                padding: 0.1rem;
+            }
+            .actions{
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 0.5rem;
+                border: 1px solid #cecece;
+                i{
+                    cursor:pointer;
+                }
+            }
+        }
+    `
 }
 
 type IModels = Record<string, IMonacoModelStyle | monaco.editor.ITextModel | undefined>
