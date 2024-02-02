@@ -5,7 +5,7 @@
  * }
  */
 
-import { html, css, LitElement, repeat } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
@@ -99,8 +99,25 @@ export class ServiceDsStyleSize extends ServiceBase {
                 if (!this.shadowRoot || !i.key) return;
                 const value = i.value;
                 const prop = i.key;
-                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-                if (el) el.value = value;
+
+                if (prop === 'overflow') {
+
+                    const elGroup = this.shadowRoot.querySelector('*[prop="overflow"]') as HTMLInputElement;
+
+                    const el = this.shadowRoot.querySelector('*[prop="overflow-x"]') as HTMLSelectElement;
+
+                    const el2 = this.shadowRoot.querySelector('*[prop="overflow-y"]') as HTMLSelectElement;
+
+                    if (elGroup) elGroup.checked = true;
+                    if (el) el.value = el.value;
+                    if (el2) el2.value = el.value;
+
+                } else {
+
+                    const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                    if (el) el.value = value;
+
+                }
 
             })
 
@@ -205,32 +222,36 @@ export class ServiceDsStyleSize extends ServiceBase {
                 <h5>${this.myMsg.overflow}</h5>
                 <div class="groupEdit">
                     <span>${this.myMsg.overflow}</span>
-                    <input type="checkbox"></input>
+                    <input type="checkbox" prop="overflow"></input>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.overflowX}</span>
-                    <select @change="${(e:MouseEvent) => this.onChangeProp2('overflow-x')}" prop="overflow-x">
-                        ${repeat(this.tpOverflow,
-            ((key: any) => key) as any,
-            ((k: any, index: any) => {
-
-                return html`<option value="${k}">${k}</option>`;
-
-            }) as any
-        )}
+                    <select @change="${(e: MouseEvent) => this.onChangeProp2('overflow-x')}" prop="overflow-x" group="overflow">
+                        <option value="none">none</option>
+                        <option value="auto">auto</option>
+                        <option value="hidden">hidden</option>
+                        <option value="inherit">inherit</option>
+                        <option value="initial">initial</option>
+                        <option value="overlay">overlay</option>
+                        <option value="revert">revert</option>
+                        <option value="scroll">scroll</option>
+                        <option value="unset">unset</option>
+                        <option value="visible">visible</option>
                     </select>
                 </div>
                 <div class="groupEdit">
                     <span>${this.myMsg.overflowY}</span>
-                    <select @change="${this.onChangeProp2}" prop="overflow-y">
-                        ${repeat(this.tpOverflow,
-            ((key: any) => key) as any,
-            ((k: any, index: any) => {
-
-                return html`<option value="${k}">${k}</option>`;
-
-            }) as any
-        )}
+                    <select @change="${this.onChangeProp2}" prop="overflow-y" group="overflow">
+                        <option value="none">none</option>
+                        <option value="auto">auto</option>
+                        <option value="hidden">hidden</option>
+                        <option value="inherit">inherit</option>
+                        <option value="initial">initial</option>
+                        <option value="overlay">overlay</option>
+                        <option value="revert">revert</option>
+                        <option value="scroll">scroll</option>
+                        <option value="unset">unset</option>
+                        <option value="visible">visible</option>
                     </select>
                 </div>
             </div>
@@ -243,15 +264,33 @@ export class ServiceDsStyleSize extends ServiceBase {
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
-    private tpOverflow = ['none', 'auto', 'hidden', 'inherit', 'initial', 'overlay', 'revert', 'scroll', 'unset', 'visible']
-
-
-    private onChangeProp2(prop:string) {
+    private onChangeProp2(prop: string) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
+
             if (!this.shadowRoot) return;
-            const el = this.shadowRoot.querySelector('*[prop="'+prop+'"]') as HTMLSelectElement;
-            this.emitEvent({key:prop, value: el.value});
+
+            const elGroup = this.shadowRoot.querySelector('*[prop="overflow"]') as HTMLInputElement;
+
+            const isGroup = elGroup && elGroup.checked;
+
+            if (isGroup) {
+
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLSelectElement;
+
+                const el2 = this.shadowRoot.querySelector('*[prop="' + (prop === 'overflow-x' ? 'overflow-y' : 'overflow-x') + '"]') as HTMLSelectElement;
+
+                if (el2) el2.value = el.value;
+
+                this.emitEvent({ key: 'overflow', value: el.value });
+
+            } else {
+
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLSelectElement;
+                this.emitEvent({ key: prop, value: el.value });
+
+            }
+
         }, 500);
     }
 

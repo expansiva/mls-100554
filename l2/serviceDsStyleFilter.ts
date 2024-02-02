@@ -200,13 +200,13 @@ export class ServiceDsStyleStyle extends ServiceBase {
         return html`
             <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer">
                 ${repeat(this.arrayGallery, ((key: any) => key) as any,
-            ((css: any, index: any) => {
-                return html`
+                    ((css: any, index: any) => {
+                        return html`
                                 <img style="width:60px;${css}" @click="${this.clickGallery}" .gallery=${css} src="http://angrytools.com/css-generator/img/rose.jpg" />
                             `
-                    ;
-            }) as any
-        )}
+                        ;
+                    }) as any
+                )}
             </div>
         
         `
@@ -356,7 +356,9 @@ export class ServiceDsStyleStyle extends ServiceBase {
 
         });
 
-        this.setValues([{ key: 'filter', value: css.replace('filter:', '').trim() }]);
+        if (changes.length <= 0) changes.push({ key: 'filter', value: '' });
+
+        this.setValues(changes);
 
         const rc: IEventsObj = {
             emitter: 'right',

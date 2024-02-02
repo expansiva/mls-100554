@@ -362,7 +362,8 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
         });
 
-        this.setValues([{ key: 'transform', value: css.replace('transform:', '').trim() }]);
+        if (changes.length <= 0) changes.push({ key: 'transform', value: '' });
+        this.setValues(changes);
 
         const rc: IEventsObj = {
             emitter: 'right',
