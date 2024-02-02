@@ -15,6 +15,8 @@ import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor
 @customElement('service-ds-style-column-100554')
 export class ServiceDsStyleColumn extends ServiceBase {
 
+    private myUpp = false;
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
@@ -63,7 +65,7 @@ export class ServiceDsStyleColumn extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (visible) {
+        if (visible || reinit) {
 
             this.fireEventAboutMe();
 
@@ -95,9 +97,17 @@ export class ServiceDsStyleColumn extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        if (obj.emitter !== 'left' || this.visible === 'false' || obj.value.length <= 0) return;
+        if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-        obj.value.forEach((i: any) => {
+            this.setValues(obj.value);
+        }
+
+    }
+
+    private setValues(ar: IBlockLessLine[]): void{
+
+        this.myUpp = true;
+        ar.forEach((i: any) => {
 
             if (!this.shadowRoot || !i.key) return;
             const value = i.value;
@@ -106,7 +116,8 @@ export class ServiceDsStyleColumn extends ServiceBase {
             if (el) el.value = value;
 
         })
-
+        this.myUpp = false;
+        
     }
 
     private onDSStyleSelected(ev: mls.events.IEvent) {
@@ -143,14 +154,64 @@ export class ServiceDsStyleColumn extends ServiceBase {
     }
 
     render() {
-        return html`<p> Hello, ${this.error} !</p>`;
+        return html`${this.renderColumn()}`;
+    }
+
+    renderColumn() {
+        return html`
+            <div>
+                
+                <div class="groupEdit">
+                    <span>${this.myMsg.columnsCount}</span>
+                    <collab-ds-input-range-100554 prop="column-count" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.columnsWidth}</span>
+                    <collab-ds-input-range-100554 prop="column-width" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.columnsGap}</span>
+                    <collab-ds-input-range-100554 prop="column-gap" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.columnsRule}</span>
+                    <collab-ds-input-select-color-100554 prop="column-rule" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.columnSpan}</span>
+                    <select @change="${() => this.onChangeProp2("column-span")}" style="width:150px" prop="column-span">
+                        <option value=""></option>
+                        <option value="row">Row</option>
+                        <option value="row-reverse">Row Reverse</option>
+                        <option value="column">Column</option>
+                        <option value="column-reverse">Column Reverse</option>
+                    </select>   
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.breakInside}</span>
+                    <select @change="${() => this.onChangeProp2("break-inside")}" style="width:150px" prop="break-inside">
+                        <option value=""></option>
+                        <option value="none">none</option>
+                        <option value="auto">auto</option>
+                        <option value="avoid">avoid</option>
+                        <option value="avoid-page">avoid-page</option>
+                        <option value="avoid-column">avoid-column</option>
+                        <option value="avoid-region">avoid-region</option>
+                        <option value="inherit">inherit</option>
+                        <option value="initial">initial</option>
+                        <option value="unset">unset</option>
+                    </select>   
+                </div>
+            </div>
+        `;
     }
 
     //-------------IMPLEMENTS--------------
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
-
+    private tpBorder = ['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset', 'hidden', 'inherit', 'initial', 'unset'];
+    
     private timeonChangeProp = -1;
     private onChangeProp(obj: IBlockLessLine) {
         clearTimeout(this.timeonChangeProp);
@@ -159,16 +220,26 @@ export class ServiceDsStyleColumn extends ServiceBase {
         }, 500);
     }
 
+    private onChangeProp2(prop: string) {
+        clearTimeout(this.timeonChangeProp);
+        this.timeonChangeProp = setTimeout(() => {
+            if (!this.shadowRoot) return;
+            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLSelectElement;
+            this.emitEvent({ key: prop, value: el.value });
+        }, 500);
+    }
+
     private fireEventAboutMe(): void {
         const rc = {
             emitter: 'right-get',
         };
 
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
+        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 500);
     }
 
     private emitEvent(obj: IBlockLessLine) {
 
+        if (this.myUpp) return;
         const rc: IEventsObj = {
             emitter: this.position,
             value: [obj],
