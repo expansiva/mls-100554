@@ -106,16 +106,52 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
 
     private setValues(ar: IBlockLessLine[]): void{
 
+        
+        if (!this.shadowRoot) return;
+
+        const textShadowLine = ar.find((item) => item.key === 'text-shadow');
+		if (!textShadowLine) return;
+
         this.myUpp = true;
-        ar.forEach((i: any) => {
 
-            if (!this.shadowRoot || !i.key) return;
-            const value = i.value;
-            const prop = i.key;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-            if (el) el.value = value;
+		let { value } = textShadowLine;
 
-        })
+		let vColor = '';
+		if (value.indexOf('rgb') >= 0) {
+
+			vColor = value.substr(value.indexOf('rgb'), value.indexOf(')') + 1);
+			value = value.replace(vColor, '').trim();
+
+		} else if (value.indexOf('#') >= 0) {
+
+			vColor = value.substr(value.indexOf('#'), value.indexOf(' ') + 1).trim();
+			value = value.replace(vColor, '').trim();
+
+		} else if (/[a-z]/.test(value.substr(0, 1))) {
+
+			vColor = value.substr(value.indexOf(value.substr(0, 2)), value.indexOf(' ') + 1).trim();
+			value = value.replace(vColor, '').trim();
+
+		}
+
+        const arrayValues = value.split(' ');
+
+        const elX = this.shadowRoot.querySelector('*[prop="x"]') as HTMLInputElement;
+        const elY = this.shadowRoot.querySelector('*[prop="y"]') as HTMLInputElement;
+        const elC = this.shadowRoot.querySelector('*[prop="color"]') as HTMLInputElement;
+        const elB = this.shadowRoot.querySelector('*[prop="blur"]') as HTMLInputElement;
+
+        if (elX && arrayValues.length > 0) elX.value = arrayValues[0]
+        else elX.value = '';
+
+        if (elY && arrayValues.length > 1) elY.value = arrayValues[1]
+        else elY.value = '';
+
+        if (elB && arrayValues.length > 2) elB.value = arrayValues[2]
+        else elB.value = '';
+
+        if (elC) elC.value = vColor;
+        
         this.myUpp = false;
         
     }
@@ -150,58 +186,33 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
         super.connectedCallback();
         this.updateMyMessages();
 
-
     }
 
     render() {
-        return html`oi`;
+        return html`${this.renderColumn()}${this.renderGallery()}`;
     }
 
     renderColumn() {
         return html`
             <div>
+                <h5>${this.myMsg.textShadow}</h5>
+                <div class="groupEdit">
+                    <span>${this.myMsg.xOffset}</span>
+                    <collab-ds-input-range-100554 prop="x" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.yOffset}</span>
+                    <collab-ds-input-range-100554 prop="y" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.blur}</span>
+                    <collab-ds-input-range-100554 prop="blur" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                </div>
+                <div class="groupEdit">
+                    <span>${this.myMsg.color}</span>
+                    <collab-ds-input-select-color-100554 prop="color" useInput="false" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
+                </div>
                 
-                <div class="groupEdit">
-                    <span>${this.myMsg.columnsCount}</span>
-                    <collab-ds-input-range-100554 prop="column-count" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.columnsWidth}</span>
-                    <collab-ds-input-range-100554 prop="column-width" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.columnsGap}</span>
-                    <collab-ds-input-range-100554 prop="column-gap" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.columnsRule}</span>
-                    <collab-ds-input-select-color-100554 prop="column-rule" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.columnSpan}</span>
-                    <select @change="${() => this.onChangeProp2("column-span")}" style="width:150px" prop="column-span">
-                        <option value=""></option>
-                        <option value="row">Row</option>
-                        <option value="row-reverse">Row Reverse</option>
-                        <option value="column">Column</option>
-                        <option value="column-reverse">Column Reverse</option>
-                    </select>   
-                </div>
-                <div class="groupEdit">
-                    <span>${this.myMsg.breakInside}</span>
-                    <select @change="${() => this.onChangeProp2("break-inside")}" style="width:150px" prop="break-inside">
-                        <option value=""></option>
-                        <option value="none">none</option>
-                        <option value="auto">auto</option>
-                        <option value="avoid">avoid</option>
-                        <option value="avoid-page">avoid-page</option>
-                        <option value="avoid-column">avoid-column</option>
-                        <option value="avoid-region">avoid-region</option>
-                        <option value="inherit">inherit</option>
-                        <option value="initial">initial</option>
-                        <option value="unset">unset</option>
-                    </select>   
-                </div>
             </div>
         `;
     }
@@ -213,7 +224,7 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
                 ${repeat(this.arrayGallery, ((key: any) => key) as any,
                     ((css: any, index: any) => {
                         return html`
-                        <h5 style="width:235px;height:160px;font-size:60%;border: 1px solid #c3c3c3; padding:1rem;${css}" @click="${this.clickGallery}" .gallery=${css}>Lorem ipsum dolor sit amet, consectetur adipisicing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua.</h5>
+                        <h5 style="${css}" @click="${this.clickGallery}" .gallery=${css}>Text</h5>
                         `;
                     }) as any
                 )}
@@ -226,24 +237,42 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
-    private tpBorder = ['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset', 'hidden', 'inherit', 'initial', 'unset'];
     
     private timeonChangeProp = -1;
     private onChangeProp(obj: IBlockLessLine) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
-            this.emitEvent(obj);
+            this.mountValue();
         }, 500);
     }
 
-    private onChangeProp2(prop: string) {
-        clearTimeout(this.timeonChangeProp);
-        this.timeonChangeProp = setTimeout(() => {
-            if (!this.shadowRoot) return;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLSelectElement;
-            this.emitEvent({ key: prop, value: el.value });
-        }, 500);
+    private mountValue(): void {
+
+        if (!this.shadowRoot) return;
+
+        const elX = this.shadowRoot.querySelector('*[prop="x"]') as HTMLInputElement;
+        const elY = this.shadowRoot.querySelector('*[prop="y"]') as HTMLInputElement;
+        const elC = this.shadowRoot.querySelector('*[prop="color"]') as HTMLInputElement;
+        const elB = this.shadowRoot.querySelector('*[prop="blur"]') as HTMLInputElement;
+
+        let value = '';
+
+        if (elC) value += elC.value;
+
+        if (elX) value += ' ' + elX.value;
+
+        if (elY) value += ' ' + elY.value;
+
+        if (elB) value += ' ' + elB.value;
+
+        const change: IBlockLessLine = {
+            key: 'text-shadow',
+            value
+        };
+
+        this.emitEvent(change);
     }
+
 
     private fireEventAboutMe(): void {
         const rc = {
@@ -282,7 +311,7 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
         const el = e.target as HTMLElement;
         if (!el) return;
         const css = (el as any).gallery;
-        if (!css) return;
+        //if (!css) return;
 
         const commands: string[] = css.split(';');
         const changes: any[] = [];
@@ -304,6 +333,8 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
             helper: this.helper
         };
 
+        if (changes.length <= 0) changes.push({ key: 'text-shadow', value: '' });
+
         this.setValues(changes);
 
         mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
@@ -312,10 +343,11 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
 
     private arrayGallery = [
         '',
-        'column-count: 2;',
-        'column-count: 2; column-gap: 20px; column-rule-width: 1px; column-rule-style: dashed;',
-        'column-count: 3;',
-        'column-count: 2; column-rule-width: 1px; column-rule-style: solid;'
+        'text-shadow: 2px 2px;',
+        'text-shadow: 2px 2px 5px;',
+        'text-shadow: 0 0 3px',
+        'text-shadow: 3px 3px 3px;',
+        'text-shadow: 3px -3px 3px;'
 
     ];
 
@@ -324,22 +356,20 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
         if (!window['message' as any]) return;
         const m = window['message' as any] as any;
 
-        if (m.columnsCount) this.myMsg.columnsCount = m.columnsCount;
-        if (m.columnsWidth) this.myMsg.columnsWidth = m.columnsWidth;
-        if (m.columnsGap) this.myMsg.columnsGap = m.columnsGap;
-        if (m.columnsRule) this.myMsg.columnsRule = m.columnsRule;
-        if (m.columnSpan) this.myMsg.columnSpan = m.columnSpan;
-        if (m.breakInside) this.myMsg.breakInside = m.breakInside;
+        if (m.textShadow) this.myMsg.textShadow = m.textShadow;
+        if (m.xOffset) this.myMsg.xOffset = m.xOffset;
+        if (m.yOffset) this.myMsg.yOffset = m.yOffset;
+        if (m.blur) this.myMsg.blur = m.blur;
+        if (m.color) this.myMsg.color = m.color;
 
     }
 
     private myMsg = {
-        columnsCount: 'Columns Count',
-        columnsWidth: 'Columns Width',
-        columnsGap: 'Columns Gap',
-        columnsRule: 'Columns Rule',
-        columnSpan: 'Column Span',
-        breakInside: 'Break Inside'
+        textShadow: 'Text Shadow',
+        xOffset: 'X Offset',
+        yOffset: 'Y Offset',
+        blur: 'Blur',
+        color: 'Color',
     }
 }
 
