@@ -62,7 +62,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-        if (visible || reinit) {
+        if (visible) {
             this.fireEventAboutMe();
 
         }
@@ -98,27 +98,34 @@ export class ServiceDsStyleBorder extends ServiceBase {
         })
         if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-            obj.value.forEach((i: any) => {
+            this.updateValues(obj.value);
 
-                if (!this.shadowRoot || !i.key) return;
-                const value = i.value;
-                const prop = i.key;
-
-                if (prop === 'border') {
-                    this.uppProp(value, 'border');
-                } else if (prop === 'border-radius') {
-                    this.uppProp(value, 'radius');
-                } else {
-
-                    const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-                    if (el) el.value = value;
-
-                }
-
-            })
         }
 
 
+
+    }
+
+    private updateValues(ar: IBlockLessLine[]): void {
+
+        ar.forEach((i: any) => {
+
+            if (!this.shadowRoot || !i.key) return;
+            const value = i.value;
+            const prop = i.key;
+
+            if (prop === 'border') {
+                this.uppProp(value, 'border');
+            } else if (prop === 'border-radius') {
+                this.uppProp(value, 'radius');
+            } else {
+
+                const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+                if (el) el.value = value;
+
+            }
+
+        })
 
     }
 
@@ -393,6 +400,8 @@ export class ServiceDsStyleBorder extends ServiceBase {
             value: changes,
             helper: this.helper
         };
+
+        this.updateValues(changes);
 
         mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
 
