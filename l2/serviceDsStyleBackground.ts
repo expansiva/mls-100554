@@ -19,11 +19,14 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
     @property() error: string = '';
 
+    @property() css: string = '';
+
     @property() helper: string = '_100554_serviceDsStyleBackground';
 
-    constructor() {
-        super();
+    constructor() { 
+        super(); 
         this.setEvents();
+        
     }
 
     public details: IService = {
@@ -63,7 +66,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
         if (visible || reinit) {
 
-            this.fireEventAboutMe();
+            //this.fireEventAboutMe();
 
         }
     }
@@ -95,12 +98,12 @@ export class ServiceDsStyleBackground extends ServiceBase {
         const obj: IEventsObj = JSON.parse(desc);
         if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-            this.setValues(obj.value);
+            //this.setValues(obj.value);
         }
 
     }
 
-    private setValues(ar: IBlockLessLine[]): void{
+    private setValues(ar: IBlockLessLine[]): void {
 
         this.myUpp = true;
         ar.forEach((i: any) => {
@@ -113,7 +116,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
         })
         this.myUpp = false;
-        
+
     }
 
     private onDSStyleSelected(ev: mls.events.IEvent) {
@@ -145,15 +148,117 @@ export class ServiceDsStyleBackground extends ServiceBase {
     connectedCallback() {
         super.connectedCallback();
         this.updateMyMessages();
-
+        this.configString('background: linear-gradient(84deg, rgba(2,0,36,1) 36%, rgba(60,70,193,0.5) 66%);')
 
     }
-
+ 
     render() {
-        return html`ok`;
+        return html`<div class="container">${this.renderBody()}</div>`;
+    }
+
+    renderBody() {
+        return html`
+            <div class="showtransparent"></div>
+            <div class="showres" style="${this.css}"></div>
+            <div class="showConfig" >
+            oi
+            </div>
+
+        `;
     }
 
     //-------------IMPLEMENTS--------------
+
+    private info: { tp: string, aux: string, itens: { value: string, start: string }[] } = { tp: '', aux: '', itens: [] };
+
+    
+    private configString(str: string): void {
+
+        this.css = str;
+        if (str.indexOf('linear-gradient') > 0) {
+            this.info.tp = 'linear-gradient';
+        } else if (str.indexOf('radial-gradient')) {
+            this.info.tp = 'radial-gradient';
+        } else {
+            this.info.tp = 'background';
+        }
+
+        if (this.info.tp === 'background') {
+            this.info.itens = [{value: str.split(':')[1], start:''}]
+        } else {
+
+            let ar:string[] = [];
+            str = str.substr(str.indexOf('('));
+            str = this.changeStr(str);
+
+            ar = str.split(',');
+
+            ar.forEach((i, idx) => {
+
+                if (idx === 0) {
+                    this.info.aux = i;
+                    return;
+                }
+
+                
+                if (i.indexOf('#') >= 0 || i.indexOf('abgr') >= 0 || i.indexOf('bgr') >= 0) {
+
+                    let vl = '';
+                    let start = '0%';
+                    const a2 = i.trim().split(' ');
+                    if (a2.length > 0) vl = a2[0].replace('abgr', 'rgba').replace('bgr', 'rgb').replace(/;/g, ',');
+
+                    if (a2.length > 1) start = a2[1];
+
+                    if (vl === '') return;
+
+                    if (!this.info.itens) this.info.itens = [{ value: vl, start: start }]
+                    else this.info.itens.push({ value: vl, start: start });
+                }
+
+            });
+            
+        }
+        
+
+    }
+
+
+    private changeStr(s: string): string {
+    
+        if (s.indexOf('rgba') >= 0 || s.indexOf('rgb') >= 0) {
+
+            let tp = s.indexOf('rgba') >= 0 ? 'rgba' : 'rgb';
+            let tpR = s.indexOf('rgba') >= 0 ? 'abgr' : 'bgr';
+            let newst = '';
+            let oldstr = '';
+            let st = s.indexOf(tp); 
+            let ste = -1;
+
+            st = s.substr(st).indexOf('(') + st;
+            ste = s.substr(st).indexOf(')') + st;
+            newst = s.slice(st, ste);
+            oldstr = newst;
+            newst = newst.replace(/,/g, ';');
+            s = s.replace(oldstr, newst).replace(tp, tpR)
+
+            return this.changeStr(s);
+
+        } else {
+
+            if (s.indexOf('(') === 0) s = s.substr(1);
+            if (s.lastIndexOf(')') === s.length - 1) s = s.substring(0, s.length - 1);
+            if (s.lastIndexOf(');') === s.length - 2) s = s.substring(0,s.lastIndexOf(');'));
+            return s;
+            
+        }
+
+    }
+
+
+
+
+
 
     private timeonChangeProp = -1;
     private onChangeProp(obj: IBlockLessLine) {
@@ -210,13 +315,13 @@ export class ServiceDsStyleBackground extends ServiceBase {
         const m = window['message' as any] as any;
 
         if (m.columnsCount) this.myMsg.columnsCount = m.columnsCount;
-        
+
 
     }
 
     private myMsg = {
         columnsCount: 'Columns Count',
-        
+
     }
 }
 
