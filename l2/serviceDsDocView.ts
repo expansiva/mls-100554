@@ -74,12 +74,14 @@ export class ServiceDsDocView100554 extends ServiceBase {
         mls.events.addEventListener([3], ['DSDocSelected'], (ev) => {
             if (!this.serviceItemNav) return;
             this.serviceItemNav.setAttribute('mode', 'A');
+            this.showNav2Item(true);
             this.openMe();
         });
 
         mls.events.addEventListener([3], ['DSDocUnSelected'], (ev) => {
             if (!this.serviceItemNav) return;
             this.serviceItemNav.setAttribute('mode', 'H');
+            this.showNav2Item(false);
         });
     }
 
@@ -110,7 +112,6 @@ export class ServiceDsDocView100554 extends ServiceBase {
 
     private fireComunication(op: 'Open' | 'Add' | 'Change' | 'Update' | 'Delete'): void {
 
-        console.info({ fireComunication: op })
         this.setError('');
 
         if (!this.doc) {

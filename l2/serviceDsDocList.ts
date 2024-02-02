@@ -63,8 +63,17 @@ export class ServiceDsDocList100554 extends ServiceBase {
     }
 
     async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-        if (visible) mls.events.fire([this.level], ['DSDocSelected'], 'Doc Selected', 0);
-        else mls.events.fire([this.level], ['DSDocUnSelected'], 'Doc UnSelected');
+
+        if (visible) mls.events.fire([3], ['DSDocSelected'], 'Doc Selected', 0);
+        else mls.events.fire([3], ['DSDocUnSelected'], 'Doc UnSelected', 0);
+
+        if (reinit) {
+            const { project } = mls.actual[5];
+            const { mode } = mls.actual[3];
+            if (this.lastProject !== project || this.lastDsIndex !== mode) {
+                this.getState();
+            }
+        }
     }
 
     async connectedCallback() {
@@ -81,10 +90,6 @@ export class ServiceDsDocList100554 extends ServiceBase {
         mls.events.addEventListener([3], ['DSDocPageChanged'], (ev) => {
             this.onDocPageChanged(ev);
         });
-
-        mls.events.addEventListener([3], ['DSSelected'], (ev: mls.events.IEvent) => {
-            this.onDsSelected(ev);
-        });
     }
 
     async getState() {
@@ -95,6 +100,8 @@ export class ServiceDsDocList100554 extends ServiceBase {
     async getListDocs(): Promise<mls.l3.IDocInfo[]> {
         const { project } = mls.actual[5];
         const { mode } = mls.actual[3];
+
+
         if (project === undefined || mode === undefined) return [];
         const dss = mls.l5.ds.list(project);
         this.lastDsIndex = mode;
@@ -140,23 +147,13 @@ export class ServiceDsDocList100554 extends ServiceBase {
     }
 
     private onDocPageChanged(ev: mls.events.IEvent) {
-        
+
         if (!ev.desc) return;
         const st: IDocData = JSON.parse(ev.desc);
         if (st.op === 'Add') this.addDoc(st.id);
         if (st.op === 'Change') this.changedMe(st.id, st.content);
         if (st.op === 'Update') this.updateDoc(st.id, st.parentID, st.title);
         else if (st.op === 'Delete') this.removeDoc(st.id);
-    }
-
-    private onDsSelected(ev: mls.events.IEvent) {
-        if (!ev.desc) return;
-        const data: IDsSelectEvent = JSON.parse(ev.desc);
-        const { project } = mls.actual[5];
-
-        if (this.lastDsIndex !== data.value || this.lastProject !== project) {
-            this.getListDocs();
-        }
     }
 
     private async addDoc(parentID: number) {
@@ -191,7 +188,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
         await this.dsInstance.docs.remove(id);
         await this.getState();
         if (nextElId) this.selectDoc(+nextElId);
-        
+
     }
 
     private async addNewDoc() {
