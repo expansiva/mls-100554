@@ -23,6 +23,8 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
     @property() helper: string = '_100554_serviceDsStyleBackground';
 
+    @property() info: IMyInfoBackground = { tp: '', aux: '', itens: [] };
+
     constructor() {
         super();
         this.setEvents();
@@ -103,22 +105,6 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
     }
 
-    private setValues(ar: IBlockLessLine[]): void {
-
-        this.myUpp = true;
-        ar.forEach((i: any) => {
-
-            if (!this.shadowRoot || !i.key) return;
-            const value = i.value;
-            const prop = i.key;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
-            if (el) el.value = value;
-
-        })
-        this.myUpp = false;
-
-    }
-
     private onDSStyleSelected(ev: mls.events.IEvent) {
 
         const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
@@ -172,15 +158,17 @@ export class ServiceDsStyleBackground extends ServiceBase {
             <div style="display:flex; gap:.5rem; font-size:80%; color:#6d6d6d;margin-bottom:.5rem">
                 <div style="width:50px;text-align:center; ">Color</div> 
                 <div style="width:132px;text-align:center;">Transparency</div> 
-                <div style="width:60px;text-align:center;">Stop</div> 
+                <div style="width:60px;text-align:center;" >Stop</div>
+                <div style="width:50px;text-align:center; cursor:pointer" @click="${this.add}">Add</div>
             </div>  
             ${repeat(this.info.itens, ((key: any) => key.value) as any,
             ((i: any, index: any) => {
                 return html`
-                    <div style="display:flex; gap:.5rem;margin-bottom:.5rem">
-                        <input type="color" .value="${i.value}" style="width:50px"/> 
-                        <input type="range" min="0" max="100" .value="${i.transp}" style="width:132px"/> 
-                        <input type="number" style="width:50px" min="0" max="100" .value="${i.start}" />
+                    <div style="display:flex; gap:.5rem;margin-bottom:.5rem" index="${index}" class="groupEdit">
+                        <input type="color" .value="${i.value}" style="width:50px" prop="color" index="${index}" @change="${(e: InputEvent) => this.onChangeProp(index)}"/> 
+                        <input type="range" min="0" max="100" .value="${i.transp}" style="width:132px" prop="transp" index="${index}" @input="${(e: InputEvent) => this.onChangeProp(index)}"/> 
+                        <input type="number" style="width:50px" min="0" max="100" .value="${i.stop}" prop="stop" index="${index}" @input="${(e: InputEvent) => this.onChangeProp(index)}"></input>
+                        <div style="width:50px;text-align:center;font-size:80%; color:#6d6d6d;cursor:pointer" >Del</div>
                     </div>    
                 `;
             }) as any
@@ -191,8 +179,16 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
     //-------------IMPLEMENTS--------------
 
-    private info: { tp: string, aux: string, itens: { value: string, transp: string, start: string }[] } = { tp: '', aux: '', itens: [] };
+    private add(): void {
 
+        this.info.itens.push({value:'#ffffff', transp:'100', stop:'100'})
+        if (this.info.itens.length >= 2 && this.info.tp === 'background') {
+            this.info.tp = 'linear-gradient';
+            this.info.aux = '84deg';
+        }
+
+        this.mountMyValue();
+    }
 
     private configString(str: string): void {
 
@@ -207,7 +203,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
         }
 
         if (this.info.tp === 'background') {
-            this.info.itens = [{ value: str.split(':')[1], transp: '100', start: '' }]
+            this.info.itens = [{ value: str.split(':')[1], transp: '100', stop: '' }]
         } else {
 
             let ar: string[] = [];
@@ -231,7 +227,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
                     const a2 = i.trim().split(' ');
                     if (a2.length > 0) vl = a2[0].replace('abgr', 'rgba').replace('bgr', 'rgb').replace(/;/g, ',');
 
-                    if (a2.length > 1) start = a2[1].replace('%','');
+                    if (a2.length > 1) start = a2[1].replace('%', '');
 
                     if (vl === '') return;
 
@@ -241,30 +237,30 @@ export class ServiceDsStyleBackground extends ServiceBase {
                         vlI = this.rgbaToHex(vl);
                     }
 
-                    if (!this.info.itens) this.info.itens = [{ value: vlI.vl, transp: vlI.transp, start: start }]
-                    else this.info.itens.push({ value: vlI.vl, transp: vlI.transp, start: start });
+                    if (!this.info.itens) this.info.itens = [{ value: vlI.vl, transp: vlI.transp, stop: start }]
+                    else this.info.itens.push({ value: vlI.vl, transp: vlI.transp, stop: start });
                 }
 
             });
 
         }
-        console.info(this.info);
+
     }
 
-    private rgbaToHex(rgbaString:string): { vl: string, transp: string } {
+    private rgbaToHex(rgbaString: string): { vl: string, transp: string } {
         const match = rgbaString.match(/(\d+(?:\.\d+)?)/g);
 
         if (!match) {
             return { vl: '', transp: '' };
         }
-    
+
         const r = parseInt(match[0], 10);
         const g = parseInt(match[1], 10);
         const b = parseInt(match[2], 10);
         const a = match[3] ? (+match[3] * 100).toString() : '100';
- 
+
         // Converte os componentes RGB para hexadecimal
-        const toHex = (component:number) => {
+        const toHex = (component: number) => {
             const hex = component.toString(16);
             return hex.length === 1 ? '0' + hex : hex;
         };
@@ -276,7 +272,21 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
         const hexColor = `#${hexR}${hexG}${hexB}`;
 
-        return { vl:hexColor, transp:a };
+        return { vl: hexColor, transp: a };
+    }
+
+    private hexToRgba(hex:string, alpha = 1): string {
+        // Remove o '#' se estiver presente
+        hex = hex.replace(/^#/, '');
+
+        // Converte para r, g, b
+        const bigint = parseInt(hex, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+
+        // Retorna a string RGBA
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     private changeStr(s: string): string {
@@ -310,27 +320,60 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
     }
 
-
-
-
-
-
     private timeonChangeProp = -1;
-    private onChangeProp(obj: IBlockLessLine) {
-        clearTimeout(this.timeonChangeProp);
-        this.timeonChangeProp = setTimeout(() => {
-            this.emitEvent(obj);
-        }, 500);
-    }
-
-    private onChangeProp2(prop: string) {
+    private onChangeProp(index: string) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
             if (!this.shadowRoot) return;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLSelectElement;
-            this.emitEvent({ key: prop, value: el.value });
+            const el = this.shadowRoot.querySelector('.groupEdit[index="' + index + '"]')
+            if (!el) return;
+            this.changeValues(el as HTMLDivElement, index);
         }, 500);
     }
+
+    private changeValues(el: HTMLDivElement, idx: string): void {
+
+
+        const elC = el.querySelector('input[prop="color"]') as HTMLInputElement;
+        const elT = el.querySelector('input[prop="transp"]') as HTMLInputElement;
+        const elS = el.querySelector('input[prop="stop"]') as HTMLInputElement;
+
+        if (!elC || !elT || !elS || !this.info.itens[idx as any]) return;
+
+        this.info.itens[idx as any].value = elC.value;
+        this.info.itens[idx as any].transp = elT.value;
+        this.info.itens[idx as any].stop = elS.value;
+
+        this.info.itens.sort((a: any, b: any) => a.stop - b.stop);
+
+        this.mountMyValue();
+
+    }
+
+    private mountMyValue(): void {
+
+        const aux = 'background:';
+        let text = '';
+
+        if (this.info.tp === 'background' && this.info.itens.length > 0) {
+            text =  this.hexToRgba(this.info.itens[0].value, +this.info.itens[0].transp / 100);
+        } else {
+            text = `${this.info.tp}( ${this.info.aux},`
+            this.info.itens.forEach((i, idx) => {
+                
+                const aux = idx === this.info.itens.length - 1 ? '' : ',';
+                text = text + ` ${this.hexToRgba(i.value, +i.transp / 100)} ${i.stop}%${aux}`
+            });
+
+            text = text + ')';
+            
+        }
+
+        this.css = aux + text;
+        this.info = Object.assign({}, this.info);
+
+    }
+
 
     private fireEventAboutMe(): void {
         const rc = {
@@ -394,6 +437,12 @@ interface IEventsObj {
     emitter: 'right' | 'left' | 'right-get',
     helper: string,
     value: IBlockLessLine[],
+}
+
+interface IMyInfoBackground {
+    tp: string,
+    aux: string,
+    itens: { value: string, transp: string, stop: string }[]
 }
 
 interface IBlockLessLine {
