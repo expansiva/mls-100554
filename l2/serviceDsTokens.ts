@@ -1,7 +1,7 @@
 /// <mls shortName="serviceDsTokens" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
 import { html, css } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
 @customElement('service-ds-tokens-100554')
@@ -12,10 +12,13 @@ export class ServiceDsTokens100554 extends ServiceBase {
         this.setEvents();
     }
 
+    @property({ type: String })
+    msize = '';
+
     createRenderRoot() {
         return this;
     }
-    
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
@@ -62,11 +65,11 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
         if (visible) {
             const params: IEventsSelectedObj = { isComponent: false, service: ['_100529_service_styles_preview'] };
-            mls.events.fire([this.level], ['DSTokenSelected'], JSON.stringify(params), 0);
+            mls.events.fire([3], ['DSTokenSelected'], JSON.stringify(params), 0);
             if (el && typeof el.layout === 'function') el.layout();
         } else {
             const params: IEventsSelectedObj = { isComponent: false, service: [] };
-            mls.events.fire([this.level], ['DSTokenUnSelected'], JSON.stringify(params));
+            mls.events.fire([3], ['DSTokenUnSelected'], JSON.stringify(params));
         }
 
     }
@@ -156,7 +159,10 @@ export class ServiceDsTokens100554 extends ServiceBase {
     private createEditor(): void {
         if (this.c2) this._ed1 = monaco.editor.create(this.c2, mls.editor.conf['tokens'] as monaco.editor.IEditorOptions);
         (this.c2 as any)['mlsEditor'] = this._ed1;
-        if (this.serviceContent) this.serviceContent.layout();
+        if (this.serviceContent) {
+            this.serviceContent.layout();
+            this.setMsizeEditor();
+        }
     }
 
     private getUri(shortFN: string): monaco.Uri {
@@ -436,6 +442,11 @@ export class ServiceDsTokens100554 extends ServiceBase {
         return rc;
     }
 
+    private setMsizeEditor() {
+        if (!this.visible) return;
+        this.c2?.setAttribute('msize', this.msize);
+    }
+
     setEvents() {
         mls.events.addEventListener([3], ['DSColorChanged'], (ev) => {
             if (ev.desc) this.editEditorByDSColorChanged(ev.desc);
@@ -450,7 +461,13 @@ export class ServiceDsTokens100554 extends ServiceBase {
             if (ev.desc !== 'right') return;
             this.onClickLink('opColors');
         });
+    }
 
+    updated(changedProperties: any) {
+        if (changedProperties.has('msize')) {
+            if (!this.visible) return;
+            this.setMsizeEditor();
+        }
     }
 
     render() {

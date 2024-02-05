@@ -8,7 +8,6 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 export class ServiceHistories100554 extends ServiceBase {
 
     constructor() {
-        console.info('passei no constructor ServiceHistories100554')
         super();
         mls.events.addEventListener([2], ['HistoriesSelected' as any], (ev) => this.onSelectHistories(ev));
         mls.events.addEventListener([2], ['ToolBarSelected'], (ev) => { this.onToolbarSelected(ev); });
@@ -181,7 +180,6 @@ export class ServiceHistories100554 extends ServiceBase {
         if (changedProperties.has('msize')) {
             if (!this.visible) return;
             this.setMsizeEditor();
-
         }
     }
 

@@ -61,17 +61,20 @@ export class ServiceDsColors100554 extends ServiceBase {
         mls.events.addEventListener([3], ['DSColorChanged'], (ev) => {
             const visible = this.visible === 'true';
             if (!visible) return;
-            // if (this.onDSColorChanged) this.onDSColorChanged(ev);
+            this.onDSColorChanged(ev);
         });
 
-        mls.events.addEventListener([this.level], ['DSTokenSelected'], (ev) => {
+        mls.events.addEventListener([3], ['DSTokenSelected'], (ev) => {
             if (!this.serviceContent) return;
             this.serviceContent.setAttribute('mode', 'A');
+            this.showNav2Item(true);
         });
 
-        mls.events.addEventListener([this.level], ['DSTokenUnSelected'], (ev) => {
+        mls.events.addEventListener([3], ['DSTokenUnSelected'], (ev) => {
             if (!this.serviceContent) return;
             this.serviceContent.setAttribute('mode', 'H');
+            this.showNav2Item(false);
+
         });
     }
 
@@ -206,13 +209,36 @@ export class ServiceDsColors100554 extends ServiceBase {
         return themes;
     }
 
+    private onDSColorChanged(ev: mls.events.IEvent) {
+
+        console.info('onDSColorChanged')
+
+        if (!ev.desc) return;
+
+        const params: IEditorChangedEventsObj = JSON.parse(ev.desc);
+        if (params.emitter !== 'left') return;
+        const [key, value, mode] = params.value.split(';');
+        if (mode === 'line') {
+            this.scrollToKey(key);
+            return;
+        }
+        if (mode === 'helper') return;
+        this.updateActualTokens();
+        this.scrollToKey(key);
+        if (mode === 'refresh') return;
+        this.onChangeTokens();
+
+    }
+
     private scrollToKey(key: string) {
         if (key.startsWith('[')) return;
         setTimeout(() => {
-            const allelements = document.querySelectorAll('mls-l3-color-item');
+
+            if (!this.shadowRoot) return;
+            const allelements = this.shadowRoot.querySelectorAll('mls-l3-color-item');
             allelements.forEach((el) => el.classList.remove('active'));
-            let element = document.querySelector(`mls-l3-color-item[key="${key}"]`);
-            if (!element) element = document.querySelector(`mls-l3-color-item[keydark="${key}"]`);
+            let element = this.shadowRoot.querySelector(`mls-l3-color-item[key="${key}"]`);
+            if (!element) element = this.shadowRoot.querySelector(`mls-l3-color-item[keydark="${key}"]`);
             if (!element) return;
             element.scrollIntoView({
                 behavior: 'smooth',
@@ -394,18 +420,11 @@ export class ServiceDsColors100554 extends ServiceBase {
         }
     }
 
-    handleClickColorItem(key: string, value: string, el: HTMLElement) {
+    handleClickColorItem(el: HTMLElement) {
         this.setActive(el);
         const input = el.querySelector('input') as HTMLElement;
         if (!input) return;
         input.click();
-        const params: IEditorChangedEventsObj = {
-            emitter: 'right',
-            value: `${key};${value};line`
-        };
-
-        console.info({ params })
-        // mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
     }
 
     handleInputColorItem(key: string, e: MouseEvent) {
@@ -413,19 +432,13 @@ export class ServiceDsColors100554 extends ServiceBase {
         const container = target.closest('div');
         const value = target.value;
         if (!container) return;
-        console.info({
-            container,
-            value
-        })
-        container.style.backgroundColor = value;
 
+        container.style.backgroundColor = value;
         const params: IEditorChangedEventsObj = {
             emitter: 'right',
             value: `${key};${value};helper`
         };
-        console.info({ params })
-
-        // mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
+        mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
 
     }
 
@@ -507,13 +520,13 @@ export class ServiceDsColors100554 extends ServiceBase {
             const [keyname, values] = item;
             const val: { light: string, dark: string } = values as { light: string, dark: string };
             return html`
-                    <mls-l3-color-item>
+                    <mls-l3-color-item key=${keyname}>
                         <div class="ds-colors-section-item">
                             <div class="thumbnail">
                                 <div
                                     data-tooltip="${val.light}" 
                                     style="background-color: ${val.light}"
-                                    @click=${(e: MouseEvent) => { this.handleClickColorItem(keyname, val.light, e.target as HTMLElement) }}
+                                    @click=${(e: MouseEvent) => { this.handleClickColorItem(e.target as HTMLElement) }}
                                     >
                                     <input
                                         type="color"
@@ -523,7 +536,7 @@ export class ServiceDsColors100554 extends ServiceBase {
                                 <div
                                     data-tooltip="${val.dark}" 
                                     style="background-color: ${val.dark}"
-                                    @click=${(e: MouseEvent) => { this.handleClickColorItem(keyname, val.dark, e.target as HTMLElement) }}
+                                    @click=${(e: MouseEvent) => { this.handleClickColorItem(e.target as HTMLElement) }}
                                 >
                                     <input
                                     type="color"
