@@ -13,7 +13,6 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-
     public details: IService = {
         icon: '&#xf53f',
         name: 'Colors',
