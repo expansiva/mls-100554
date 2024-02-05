@@ -33,16 +33,33 @@ service-ds-style-background-100554 {
 
             }
 
-            .showConfig {
+            .showConfigContainer {
                 margin-top: -70px;
                 width: 80%;
-                height: 250px;
+                min-height: 250px;
                 z-index: 2;
                 position: relative;
                 background: white;
                 border-radius: 5px;
                 padding: 1rem;
                 border: 1px solid #dfe1e6;
+                display: flex;
+                .showConfig{
+                    width: 50%;
+                    padding: .5rem;
+                    .showConfigItem {
+                        width: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+
+                        .active{
+                            background: #c6c5c5;
+                            color: #191919;
+                        }
+                    }
+                }
             }
         }
     }
