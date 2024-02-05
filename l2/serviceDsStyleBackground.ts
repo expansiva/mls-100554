@@ -168,7 +168,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
                         <input type="color" .value="${i.value}" style="width:50px" prop="color" index="${index}" @change="${(e: InputEvent) => this.onChangeProp(index)}"/> 
                         <input type="range" min="0" max="100" .value="${i.transp}" style="width:132px" prop="transp" index="${index}" @input="${(e: InputEvent) => this.onChangeProp(index)}"/> 
                         <input type="number" style="width:50px" min="0" max="100" .value="${i.stop}" prop="stop" index="${index}" @input="${(e: InputEvent) => this.onChangeProp(index)}"></input>
-                        <div style="width:50px;text-align:center;font-size:80%; color:#6d6d6d;cursor:pointer" >Del</div>
+                        <div style="width:50px;text-align:center;font-size:80%; color:#6d6d6d;cursor:pointer" @click="${(e:any)=> this.del(index)}">Del</div>
                     </div>    
                 `;
             }) as any
@@ -187,6 +187,16 @@ export class ServiceDsStyleBackground extends ServiceBase {
             this.info.aux = '84deg';
         }
 
+        this.mountMyValue();
+    }
+
+    private del(index:number): void {
+
+        this.info.itens.splice(index, 1);
+        if (this.info.itens.length <= 1 && this.info.tp !== 'background') {
+            this.info.tp = 'background';
+            this.info.aux = '';
+        }
         this.mountMyValue();
     }
 
@@ -357,7 +367,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
         if (this.info.tp === 'background' && this.info.itens.length > 0) {
             text =  this.hexToRgba(this.info.itens[0].value, +this.info.itens[0].transp / 100);
-        } else {
+        } else if(this.info.itens.length > 0){
             text = `${this.info.tp}( ${this.info.aux},`
             this.info.itens.forEach((i, idx) => {
                 
