@@ -13,6 +13,7 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
+
     public details: IService = {
         icon: '&#xf53f',
         name: 'Colors',
@@ -240,10 +241,10 @@ export class ServiceDsColors100554 extends ServiceBase {
             let element = this.shadowRoot.querySelector(`mls-l3-color-item[key="${key}"]`);
             if (!element) element = this.shadowRoot.querySelector(`mls-l3-color-item[keydark="${key}"]`);
             if (!element) return;
-            element.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-            });
+            // element.scrollIntoView({
+            //     behavior: 'smooth',
+            //     block: 'center',
+            // });
             element.classList.add('active');
         }, 300);
     }
