@@ -27,13 +27,13 @@ export class ServiceResults extends ServiceBase {
     }
 
     public details: IService = {
-        icon: '&#xf1e6',
-        name: 'Results',
-        mode: 'A',
-        position: 'all',
+        icon: '&#xf1c9',
+        state: 'background',
         tooltip: 'Results',
-        tags: [],
-        levels: [2]
+        visible: true,
+        position: "all",
+        widget: '_100554_serviceResults',
+        level: [2]
     }
 
     public onClickLink = (op: string): boolean => {
@@ -83,7 +83,7 @@ export class ServiceResults extends ServiceBase {
         }
 
         if (this.visible) this.createEditor();
-        
+
 
         if (!reinit) {
             this.setInitialModelProdJS('');

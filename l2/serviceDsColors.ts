@@ -15,12 +15,12 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf53f',
-        name: 'Colors',
-        mode: 'H',
-        position: 'right',
+        state: 'background',
         tooltip: 'Colors',
-        tags: ['ds_tokens'],
-        levels: [3]
+        visible: false,
+        position: "right",
+        widget: '_100554_serviceDsColors',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

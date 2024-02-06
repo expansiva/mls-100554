@@ -13,15 +13,14 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     public details: IService = {
-        icon: '&#xf1e6',
-        name: 'Results',
-        mode: 'A',
-        position: 'all',
-        tooltip: 'Results',
-        tags: [],
-        levels: [2]
+        icon: '&#xf5ad',
+        state: 'foreground',
+        tooltip: 'Styles',
+        visible: true,
+        position: "left",
+        widget: '_100554_serviceDsStyles',
+        level: [3]
     }
-
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opResultCss') return this.showResultCss();

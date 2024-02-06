@@ -19,12 +19,12 @@ export class ServiceSelectDs100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf15b',
-        name: 'Select Ds',
-        mode: 'A',
-        position: 'left',
+        state: 'foreground',
         tooltip: 'Select Ds',
-        tags: [],
-        levels: [3]
+        visible: true,
+        position: "left",
+        widget: '_100554_serviceSelectDs',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

@@ -17,12 +17,12 @@ export class ServiceDsAssetsEditor100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf121',
-        name: 'Assets Editor',
-        mode: 'H',
-        position: 'right',
+        state: 'background',
         tooltip: 'Assets Editor',
-        tags: ['ds_tokens'],
-        levels: [3]
+        visible: false,
+        position: "right",
+        widget: '_100554_serviceDsAssetsEditor',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {
@@ -109,7 +109,7 @@ export class ServiceDsAssetsEditor100554 extends ServiceBase {
     private onDsAssetsChanged(ev: mls.events.IEvent) {
         if (!ev.desc) return;
         const params: IAssetsEventChangedParams = JSON.parse(ev.desc);
-    
+
         if (params.position === 'right') return;
         if (params.info.helper.includes('_100554_serviceDsAssetsEditor')) {
             this.data = params;

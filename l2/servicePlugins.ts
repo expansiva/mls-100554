@@ -23,12 +23,12 @@ export class ServicePlugins extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf1e6',
-        name: 'Plugins',
-        mode: 'A',
-        position: 'left',
+        state: 'foreground',
         tooltip: 'Plugins',
-        tags: [],
-        levels: [5]
+        visible: true,
+        position: "left",
+        widget: '_100554_servicePlugins',
+        level: [5]
     }
 
     public onClickLink = (op: string): boolean => {

@@ -17,12 +17,12 @@ export class ServiceDsAssets100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf802',
-        name: 'Assets',
-        mode: 'H',
-        position: 'right',
+        state: 'background',
         tooltip: 'Assets',
-        tags: ['ds_tokens'],
-        levels: [3]
+        visible: false,
+        position: "right",
+        widget: '_100554_serviceDsAssets',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

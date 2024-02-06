@@ -22,18 +22,17 @@ export class ServiceDsDocView100554 extends ServiceBase {
     @query('editor-quill-docs-100554')
     editor: EditorQuillDocs100554 | undefined;
 
-
     @query('.title')
     docTitle: HTMLElement | undefined;
 
     public details: IService = {
         icon: '&#xf06e',
-        name: 'Documentation View',
-        mode: 'B',
-        position: 'right',
+        state: 'background',
         tooltip: 'Documentation View',
-        tags: ['ds_docs'],
-        levels: [3]
+        visible: true,
+        position: "right",
+        widget: '_100554_serviceDsDocView',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

@@ -23,12 +23,12 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf0ae',
-        name: 'Tokens',
-        mode: 'A',
-        position: 'left',
+        state: 'foreground',
         tooltip: 'Tokens',
-        tags: ['ds_tokens'],
-        levels: [3]
+        visible: true,
+        position: "left",
+        widget: '_100554_serviceDsTokens',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

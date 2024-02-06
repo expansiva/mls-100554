@@ -21,6 +21,7 @@ export class ServiceDetailsDs100554 extends ServiceBase {
         visible: true,
         position: "right",
         widget: '_100554_serviceDetailsDs',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

@@ -30,12 +30,12 @@ export class ServiceDsDocList100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf02d',
-        name: 'Documentation List',
-        mode: 'A',
-        position: 'left',
+        state: 'foreground',
         tooltip: 'Documentation List',
-        tags: ['ds_docs'],
-        levels: [3]
+        visible: true,
+        position: "left",
+        widget: '_100554_serviceDsDocList',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {
