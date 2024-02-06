@@ -33,7 +33,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     render() {
-        this.showLoader(true);
+
         if (this.error !== '') return this.renderError();
         else return this.renderPreview();
 
@@ -422,11 +422,15 @@ export class ServicePreviewView extends LitElement {
         this.heightP = el.value;
     }
 
+    private timeShow = -1;
     private showLoader(show: boolean) {
+        clearTimeout(this.timeShow);
 
-        if (!this.father) return;
-        this.father.loading = show;
-
+        this.timeShow = setTimeout(() => { 
+            if (!this.father) return;
+            this.father.loading = show;
+        }, 200);
+        
     }
 
     private infoDS = { project: -1, level: '-1', myDS: undefined as any };
