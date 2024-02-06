@@ -25,6 +25,7 @@ export class ServiceDsAssetsImage100554 extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
+        if (op === 'opHelper') return this.showInitial();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -55,6 +56,12 @@ export class ServiceDsAssetsImage100554 extends ServiceBase {
     private setEvents() {
 
     }
+
+    private showInitial(): boolean {
+        this.menu.title = 'Assets';
+        return true;
+    }
+
 
     render() {
         return html`<p> Hello!</p>`;

@@ -26,6 +26,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
+        if (op === 'opHelper') return this.showInitial();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -49,14 +50,26 @@ export class ServiceDsAssets100554 extends ServiceBase {
 
     async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
+        console.info('passei _onServiceClick dsAssets');
+
         if (visible && reinit) {
+            const params: IAssetsEventSelectedParams = {
+                service: ['_100529_service_assets_overview'],
+            };
+            mls.events.fire([this.level], ['DSAssetsSelected'], JSON.stringify(params), 100);
+        }
+
+        if (!visible) {
+            const params: IAssetsEventSelectedParams = {
+                service: [],
+            };
+            mls.events.fire([this.level], ['DSAssetsUnSelected'], JSON.stringify(params), 0);
         }
     }
 
     private setEvents() {
 
     }
-
     async connectedCallback() {
         super.connectedCallback();
         await this.prepareFiles();
@@ -91,6 +104,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
         totalFiles: 0,
         totalFilesSelected: 0,
         filesSelected: new Set([]),
+        filesSelectedArr: [],
         helper: '',
         readOnly: false
     }
@@ -136,6 +150,12 @@ export class ServiceDsAssets100554 extends ServiceBase {
         gz: 'fa-solid fa-file-zipper',
         none: 'fa-solid fa-file',
     }
+
+    private showInitial(): boolean {
+        this.menu.title = 'Assets';
+        return true;
+    }
+
 
     private async initDsInstance(project: number, dsIndex: number) {
         this.dsInstance = mls.l3.getDSInstance(project, dsIndex);
@@ -285,7 +305,15 @@ export class ServiceDsAssets100554 extends ServiceBase {
             this.filesController.readOnly = true;
         }
 
-        mls.events.fire([3], ['DSAssetsChanged'], JSON.stringify(this.filesController));
+        this.filesController.filesSelectedArr = Array.from(this.filesController.filesSelected)
+
+        const params: IAssetsEventChangedParams = {
+            action: 'show',
+            info: this.filesController,
+            position: 'left'
+        }
+
+        mls.events.fire([3], ['DSAssetsChanged'], JSON.stringify(params));
     }
 
     private onFileClick(e: MouseEvent, item: mls.stor.IFileInfo) {
@@ -443,8 +471,15 @@ export interface IFileController {
     totalFiles: number,
     totalFilesSelected: number,
     filesSelected: Set<mls.stor.IFileInfo>,
+    filesSelectedArr: mls.stor.IFileInfo[],
     helper: string,
     readOnly: boolean
+}
+
+export interface IAssetsEventChangedParams {
+    info: IFileController,
+    position: "left" | "right",
+    action: "show" | "delete" | "update"
 }
 
 interface IFiles {
@@ -461,6 +496,11 @@ interface TreeNode {
 interface ITreeItemFolder {
     shortName: string;
     folder: string;
+}
+
+
+export interface IAssetsEventSelectedParams {
+    service: string[]
 }
 
 type IStoreFiles = Record<string, mls.stor.IFileInfo>
