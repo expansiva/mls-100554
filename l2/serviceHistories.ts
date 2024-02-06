@@ -26,12 +26,12 @@ export class ServiceHistories100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf15c',
-        name: 'Histories',
-        mode: 'A',
-        position: 'right',
+        state: 'background',
         tooltip: 'Histories',
-        tags: [],
-        levels: [2]
+        visible: false,
+        position: "all",
+        widget: '_100554_serviceHistories',
+        level: [2]
     }
 
     public onClickLink = (op: string): boolean => {
