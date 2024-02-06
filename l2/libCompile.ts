@@ -124,11 +124,6 @@ async function loadMyNeedsToCompile(
         const enhacementName = (mfile.compilerResults as any).tripleSlashMLS.variables.enhancement;
         if (!enhacementName) throw new Error('enhacementName not valid');
 
-        if (['blank', '_blank'].includes(enhacementName)) {
-            if (!myImports.includes(`/_${mfile.project}_${mfile.shortName}`)) myImports.push(`/_${mfile.project}_${mfile.shortName}`);
-
-            return;
-        }
 
         if (!myModules[enhacementName]) {
 
@@ -146,6 +141,8 @@ async function loadMyNeedsToCompile(
         if (compileCss) {
             await getCss(myCss, name, mfile);
         }
+
+
 
     } catch (e: any) {
 
@@ -231,23 +228,23 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.l2.
         mfile.compilerResults.imports.forEach((n: string) => {
 
             const name = n.replace('./', '/');
-            if (!myImports.includes(name) && n.startsWith('./')){
+            if (!myImports.includes(name) && n.startsWith('./')) {
                 myImports.push(name);
-                
+
             }
             //myImports = verifyMyImportsNeedImport(myImports, name);
 
         });
-        
+
     }
 
     if (myImports.includes(`/_${mfile.project}_${mfile.shortName}`)) return;
-    
+
     myImports.push(`/_${mfile.project}_${mfile.shortName}`);
 
 }
 
-function verifyMyImportsNeedImport(myImports: string[], name: string): string[]{
+function verifyMyImportsNeedImport(myImports: string[], name: string): string[] {
 
     name = name.replace('.', '').replace('/', '');
     const { project, path } = mls.actual[0].setFullName(name);
@@ -264,14 +261,14 @@ function verifyMyImportsNeedImport(myImports: string[], name: string): string[]{
             if (!myImports.includes(name) && n.startsWith('./')) {
                 myImports.push(name);
             }
-            
+
 
         });
-        
+
     }
 
     return myImports;
-    
+
 };
 
 async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IMFile) {
@@ -284,12 +281,12 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IM
         const css = await ds.components.getCSS(fullName)
         myCss.push(css);
 
-    } catch (e:any) {
+    } catch (e: any) {
 
         if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
-        
+
     }
-    
+
 
 }
 
@@ -330,6 +327,6 @@ export interface IJSONDEpendence {
     wcComponents: string[],
     importsMap: string[],
     importsJs: string[],
-    css:string[],
+    css: string[],
     errors: { tag: string, error: string }[]
 }
