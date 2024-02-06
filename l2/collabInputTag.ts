@@ -12,7 +12,7 @@ export class CollabInputTag extends LitElement {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property()
-    tags: string[] = ['kkk', 'teste'];
+    tags: string[] = [];
 
     @query('#tag-input')
     input: HTMLInputElement | undefined

@@ -4,12 +4,14 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { IAssetsEventSelectedParams, IAssetsEventChangedParams } from './_100554_serviceDsAssets'
+import { initCollabInputTag } from './_100554_collabInputTag';
 
 @customElement('service-ds-assets-overview-100554')
 export class ServiceDsAssetsOverview100554 extends ServiceBase {
     constructor() {
         super();
         this.setEvents();
+        initCollabInputTag();
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -170,13 +172,12 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
     }
 
     private handleValueChanged(value: string) {
-        if (!this.ds) return;
 
+        if (!this.ds) return;
         if (this.state.actualAssetsItem) {
             this.ds.assets.update(this.state.folder, this.state.actualAssetsItem.shortname, value.split(','), this.state.actualAssetsItem.description, this.state.actualAssetsItem.type);
         }
     }
-
 
     private async handleDelete() {
         if (!this.ds) return;
@@ -194,8 +195,6 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
 
         }
     }
-
-
 
     render() {
         return html`
@@ -218,7 +217,7 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
                     <label>Description:</label>
                     <textarea @input=${(e: MouseEvent) => { this.handleKeyUp(e) }} .value="${this.state.description}"></textarea>
                     <label>Tags:</label>
-                    <mls-l3-input-tags-100529></mls-l3-input-tags-100529>
+                    <collab-input-tag-100554 .value=${this.state.tags} .onValueChanged=${(value: string) => { this.handleValueChanged(value) }} ></collab-input-tag-100554>
                     <div class="actions">
                         <button @click=${() => { this.handleDelete(); }}>Delete File</button>
                     </div>
