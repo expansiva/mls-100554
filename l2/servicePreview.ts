@@ -74,7 +74,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (visible && this.menu.setIconActive) {
+        if (visible && !reinit && this.menu.setIconActive) {
             this.menu.setIconActive(this.lastMode);
         }
     }
