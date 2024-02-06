@@ -7,7 +7,7 @@ export const getDepedencesByHtml = (mfile: mls.l2.editor.IMFile, html: string, w
     return new Promise<IJSONDEpendence>(async (resolve, reject) => {
 
         try {
-            console.info('getDepedencesByHtml')
+
             resolve(await getDepedences(mfile, 'byHtml', html, withCss))
 
         } catch (e) {
