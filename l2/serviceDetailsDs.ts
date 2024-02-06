@@ -16,12 +16,11 @@ export class ServiceDetailsDs100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf229',
-        name: 'Details Ds',
-        mode: 'B',
-        position: 'right',
+        state: 'background',
         tooltip: 'Details Design System',
-        tags: [],
-        levels: [3]
+        visible: true,
+        position: "right",
+        widget: '_100554_serviceDetailsDs',
     }
 
     public onClickLink = (op: string): boolean => {

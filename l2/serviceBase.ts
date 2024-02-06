@@ -217,16 +217,16 @@ export interface IMlsNav2Item extends HTMLElement {
 }
 
 export interface IService {
+    widget: string,
+    state: ICollabServiceState,
     icon: string,
-    name: string,
-    mode: IServiceMode,
-    position: IServicePosition
-    readOnly?: boolean,
     tooltip: string,
-    className?: IServiceClassName,
-    tags: string[],
-    levels: (0 | 1 | 2 | 3 | 4 | 5 | 6 | 7)[];
+    visible: boolean,
+    position:ICollabServicePosition,
+    classname?: ICollabServiceClass,
+    isStatic?: boolean,
 }
-export type IServiceClassName = 'separator-left' | 'separator-right' | undefined;
-export type IServicePosition = 'left' | 'right' | 'all';
-export type IServiceMode = 'A' | 'H' | 'D' | 'B';// active, hidden, disabled, background, 
+
+export type ICollabServicePosition = "left" | "right"
+export type ICollabServiceState = "foreground" | "background"
+export type ICollabServiceClass = "separator-left" | "separator-right"
