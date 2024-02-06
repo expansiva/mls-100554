@@ -1,8 +1,9 @@
 /// <mls shortName="serviceDsAssets" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
-import { html, css, TemplateResult } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { initCollabInputTag, CollabInputTag } from './_100554_collabInputTag';
 
 
 @customElement('service-ds-assets-100554')
@@ -11,6 +12,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
     constructor() {
         super();
         this.setEvents();
+        initCollabInputTag();
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -54,7 +56,13 @@ export class ServiceDsAssets100554 extends ServiceBase {
             const params: IAssetsEventSelectedParams = {
                 service: ['_100554_serviceDsAssetsOverview'],
             };
+            const { project } = mls.actual[5];
+            const { mode } = mls.actual[3];
             mls.events.fire([this.level], ['DSAssetsSelected'], JSON.stringify(params), 100);
+            if (this.lastProject !== project || this.lastDsIndex !== mode) {
+                this.loading = true;
+                this.init();
+            }
         }
 
         if (!visible) {
@@ -68,8 +76,15 @@ export class ServiceDsAssets100554 extends ServiceBase {
     private setEvents() {
 
     }
+
     async connectedCallback() {
         super.connectedCallback();
+        this.init();
+    }
+
+    private async init() {
+        this.tree = {};
+        this.actualFiles = [];
         await this.prepareFiles();
         this.loading = false;
         this.requestUpdate();
@@ -84,6 +99,18 @@ export class ServiceDsAssets100554 extends ServiceBase {
     @query('#checkAll')
     checkBoxAll: HTMLInputElement | undefined
 
+    @query('collab-input-tag-100554')
+    inputTags: CollabInputTag | undefined;
+
+    @query('.txtDesc')
+    txtDesc: HTMLTextAreaElement | undefined;
+
+    @query('.inputFile')
+    inputFile: HTMLInputElement | undefined;
+
+    @query('.selectType')
+    selectType: HTMLInputElement | undefined;
+
     @property()
     tree: TreeNode = {}
 
@@ -92,6 +119,8 @@ export class ServiceDsAssets100554 extends ServiceBase {
 
     @property()
     actualFiles: mls.stor.IFileInfo[] = [];
+
+    actualPath: string = '';
 
     private treeController = {
         isNodeReadOnly: true
@@ -118,7 +147,6 @@ export class ServiceDsAssets100554 extends ServiceBase {
         project: undefined,
         list: {}
     }
-
 
     private serviceByExtensions: any = {
         _100554_serviceDsAssetsImage: ['.png', '.jpg', '.jpeg', '.webp', '.jfif'],
@@ -164,6 +192,8 @@ export class ServiceDsAssets100554 extends ServiceBase {
         const { project } = mls.actual[5];
         const { mode } = mls.actual[3];
         if (project === undefined || mode === undefined) return;
+        this.lastProject = project;
+        this.lastDsIndex = mode;
         await this.initDsInstance(project, mode);
         await mls.stor.server.loadProjectInfoIfNeeded(project);
         const listDs = mls.l5.ds.list(project);
@@ -206,13 +236,8 @@ export class ServiceDsAssets100554 extends ServiceBase {
 
     private handleFolderClick(e: MouseEvent, folder: string) {
         e.stopPropagation();
-        const files = this.getFilesInFolder(this.tree, folder);
-        this.filesController.totalFiles = files.length;
-        this.filesController.totalFilesSelected = 0;
-        this.filesController.filesSelected = new Set([]);
-        this.actualFiles = files;
-        this.treeController.isNodeReadOnly = this.checkIsReadOnlyNode(folder);
-
+        this.actualPath = folder;
+        this.updateActualFiles(folder);
         if (!this.treeEl) return;
         const target = e.target as HTMLElement;
         const treeItem = target.closest('.tree-item');
@@ -224,6 +249,15 @@ export class ServiceDsAssets100554 extends ServiceBase {
         this.treeEl.querySelectorAll('.tree-item').forEach((it) => it.classList.remove('selected'));
         treeItem.classList.add('selected');
 
+    }
+
+    private updateActualFiles(folder: string) {
+        const files = this.getFilesInFolder(this.tree, folder);
+        this.filesController.totalFiles = files.length;
+        this.filesController.totalFilesSelected = 0;
+        this.filesController.filesSelected = new Set([]);
+        this.actualFiles = files;
+        this.treeController.isNodeReadOnly = this.checkIsReadOnlyNode(folder);
     }
 
     private checkIsReadOnlyNode(pathFolders: string): boolean {
@@ -331,8 +365,23 @@ export class ServiceDsAssets100554 extends ServiceBase {
         this.checkBoxAll.checked = checked;
     }
 
-    private onActionAddConfirm() {
+    private async onActionAddConfirm() {
+
+        if (!this.inputFile || !this.dsInstance) return;
+
+        const tags = this.inputTags?.value.trim().split(',') || [];
+        const description = this.txtDesc?.value || '';
+        const assetType = this.selectType?.value as mls.l3.AssetsGroupType;
+        const file = this.inputFile.files ? this.inputFile.files[0] : undefined;
+        if (!file) return;
+
+        const content = file;
+        const path = this.actualPath;
+        await this.dsInstance.assets.add(path, file.name, tags, description, assetType, content, undefined);
+        await this.prepareFiles();
+        this.updateActualFiles(this.actualPath);
         this.isAddMode = false;
+
     }
 
     private onActionAddCancel() {
@@ -422,15 +471,16 @@ export class ServiceDsAssets100554 extends ServiceBase {
             </div>
 
             <div class="add-file-container ${this.isAddMode ? 'visible' : ''}">
-                <input type="file"></input>
-                <select>
+                <input class="inputFile" type="file"></input>
+                <select class="selectType">
                     ${typesAssets.map((t) => {
             return html`
                             <option value=${t}>${t}</option>
                         `
         })}
                 </select>
-                <textarea placeholder="Description"></textarea>
+                <textarea class="txtDesc" placeholder="Description"></textarea>
+                <collab-input-tag-100554></collab-input-tag-100554>
                 <div class="add-container-actions ${this.isAddMode ? 'visible' : ''}">
                     <button @click=${() => { this.onActionAddConfirm(); }}>Confirm</button>
                     <button @click=${() => { this.onActionAddCancel(); }}>Cancel</button>
