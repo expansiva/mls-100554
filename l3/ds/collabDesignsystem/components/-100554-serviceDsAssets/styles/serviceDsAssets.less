@@ -40,6 +40,7 @@ service-ds-assets-100554 { //don't change this line
 
     
         .assets-details{
+            overflow-x: auto;
             flex:1;
             padding: 0.3rem;
             border-left: 1px solid @grey-color-dark;
@@ -75,6 +76,8 @@ service-ds-assets-100554 { //don't change this line
                 pointer-events: none;
             }
             table {
+                width: 100%;
+                border-collapse: collapse;
                 transition: height 1s ease;
                 input[type="checkbox"]{
                     margin-top: 5px;

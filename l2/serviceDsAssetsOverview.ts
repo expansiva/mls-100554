@@ -82,8 +82,6 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
 
     private onDsAssetsChanged(ev: mls.events.IEvent) {
 
-        console.info('onDsAssetsChanged');
-
         if (!ev.desc) return;
         const params: IAssetsEventChangedParams = JSON.parse(ev.desc);
 
@@ -134,7 +132,7 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
             this.state.text = file.shortName + file.extension;
             this.state.folder = file.folder;
             this.state.inLocalStorage = file.inLocalStorage.toString();
-            this.prepareStateFile(file);
+            await this.prepareStateFile(file);
         }
 
         this.state.readOnly = this.data.info.readOnly;
@@ -151,6 +149,11 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
     }
 
     private async prepareStateFile(file: mls.stor.IFileInfo) {
+
+        this.state.actualAssetsItem = null;
+        this.state.tags = '';
+        this.state.description = '';
+
         await this.initDs();
         if (!this.ds) return;
         const fullname = file.shortName + file.extension;
@@ -215,7 +218,7 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
                 </ul>
                 <div class="ds_assets_ds_container" style="display:${this.state.multiple ? "none;" : ""}" >
                     <label>Description:</label>
-                    <textarea @input=${(e: MouseEvent) => { this.handleKeyUp(e) }} .value="${this.state.description}"></textarea>
+                    <textarea rows="5" @input=${(e: MouseEvent) => { this.handleKeyUp(e) }} .value="${this.state.description}"></textarea>
                     <label>Tags:</label>
                     <collab-input-tag-100554 .value=${this.state.tags} .onValueChanged=${(value: string) => { this.handleValueChanged(value) }} ></collab-input-tag-100554>
                     <div class="actions">
