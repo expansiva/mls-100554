@@ -1,6 +1,6 @@
 /// <mls shortName="serviceDsAssets" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
-import { html, css } from 'lit';
+import { html, css, TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
@@ -16,11 +16,11 @@ export class ServiceDsAssets100554 extends ServiceBase {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
-        icon: '&#xf53f',
-        name: 'Colors',
+        icon: '&#xf802',
+        name: 'Assets',
         mode: 'H',
         position: 'right',
-        tooltip: 'Colors',
+        tooltip: 'Assets',
         tags: ['ds_tokens'],
         levels: [3]
     }
@@ -31,9 +31,9 @@ export class ServiceDsAssets100554 extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Colors',
+        title: 'Assets',
         actions: {
-            opHelper: 'Colors',
+            opHelper: 'Assets',
         },
         icons: {},
         actionDefault: 'opHelper', // call after close icon clicked
@@ -57,7 +57,410 @@ export class ServiceDsAssets100554 extends ServiceBase {
 
     }
 
+    async connectedCallback() {
+        super.connectedCallback();
+        await this.prepareFiles();
+        this.loading = false;
+        console.info(this.tree);
+        this.requestUpdate();
+    }
+
+    @query('tbody')
+    tbody: HTMLElement | undefined;
+
+    @query('.assets-tree')
+    treeEl: HTMLElement | undefined;
+
+    @query('#checkAll')
+    checkBoxAll: HTMLInputElement | undefined
+
+    @property()
+    tree: TreeNode = {}
+
+    @property()
+    isAddMode: boolean = false;
+
+    @property()
+    actualFiles: mls.stor.IFileInfo[] = [];
+
+    private treeController = {
+        isNodeReadOnly: true
+    }
+
+    private filesController: IFileController = {
+        totalFiles: 0,
+        totalFilesSelected: 0,
+        filesSelected: new Set([]),
+        helper: '',
+        readOnly: false
+    }
+
+    private dsInstance: mls.l3.DesignSystemIO | undefined;
+
+    private lastProject: number | undefined;
+
+    private lastDsIndex: number | undefined;
+
+    private files: IFiles = {
+        readOnlyFiles: [],
+        readOnlyFolders: [],
+        project: undefined,
+        list: {}
+    }
+
+
+    private serviceByExtensions: any = {
+        _100554_serviceDsAssetsImage: ['.png', '.jpg', '.jpeg', '.webp', '.jfif'],
+        _100554_serviceDsAssetsVideo: ['.mp4', '.webm'],
+        _100554_serviceDsAssetsIcon: ['.svg', '.ico'],
+        _100554_serviceDsAssetsEditor: ['.json', '.ts', '.js', '.css', '.txt', '.css', '.scss', '.less', '.xml', '.html'],
+    }
+
+    private objIcons: any = {
+        png: 'fa-solid fa-image',
+        jpeg: 'fa-solid fa-image',
+        jpg: 'fa-solid fa-image',
+        webp: 'fa-solid fa-image',
+        jfif: 'fa-solid fa-image',
+        js: 'fa-brands fa-js',
+        ts: 'fa-regular fa-file-code',
+        html: 'fa-regular fa-file-code',
+        json: 'fa-regular fa-file-code',
+        xml: 'fa-regular fa-file-code',
+        pdf: 'fa-solid fa-file-pdf',
+        ico: 'fa fa-info',
+        txt: 'fa-solid fa-file-lines',
+        doc: 'fa-solid fa-file-lines',
+        mp3: 'fa-sharp fa-regular fa-file-audio',
+        zip: 'fa-solid fa-file-zipper',
+        gz: 'fa-solid fa-file-zipper',
+        none: 'fa-solid fa-file',
+    }
+
+    private async initDsInstance(project: number, dsIndex: number) {
+        this.dsInstance = mls.l3.getDSInstance(project, dsIndex);
+        await this.dsInstance.init();
+    }
+
+    private async prepareFiles() {
+
+        const { project } = mls.actual[5];
+        const { mode } = mls.actual[3];
+        if (project === undefined || mode === undefined) return;
+        await this.initDsInstance(project, mode);
+        await mls.stor.server.loadProjectInfoIfNeeded(project);
+        const listDs = mls.l5.ds.list(project);
+        if (!this.dsInstance) return;
+        const nameDs = listDs[this.dsInstance.dsindex].dsName;
+
+        const rc: IStoreFiles = {};
+        const listFiles: IStoreFiles = mls.stor.files;
+        const onlyProjects = Object.keys(listFiles).filter((file) => listFiles[file].project === project);
+        onlyProjects.forEach((item) => {
+            const { level, folder } = listFiles[item];
+            if (level === 3 && (folder.startsWith(`ds/${nameDs}/`) || folder === `ds/${nameDs}`)) rc[item] = listFiles[item];
+        });
+
+        this.files.list = rc;
+        this.files.project = project;
+        this.files.readOnlyFiles = [];
+        this.files.readOnlyFolders = ['ds', `ds/${nameDs}`, `ds/${nameDs}/docs`, `ds/${nameDs}/css`, `ds/${nameDs}/css`, `ds/${nameDs}/components*`];
+
+
+        Object.entries(this.files.list).forEach((entry) => {
+            const [key, value] = entry;
+            const parts = value.folder.split('/');
+            let currentFolder: any = this.tree;
+
+            parts.forEach(folder => {
+                currentFolder[folder] = currentFolder[folder] || {};
+                currentFolder = currentFolder[folder];
+            });
+
+            currentFolder[key] = {
+                shortName: value.shortName,
+                folder: value.folder,
+                info: { ...value }
+            };
+
+        })
+
+    }
+
+    private handleFolderClick(e: MouseEvent, folder: string) {
+        e.stopPropagation();
+        const files = this.getFilesInFolder(this.tree, folder);
+        this.filesController.totalFiles = files.length;
+        this.filesController.totalFilesSelected = 0;
+        this.filesController.filesSelected = new Set([]);
+        this.actualFiles = files;
+        this.treeController.isNodeReadOnly = this.checkIsReadOnlyNode(folder);
+        console.info(this.treeController);
+
+        if (!this.treeEl) return;
+        const target = e.target as HTMLElement;
+        const treeItem = target.closest('.tree-item');
+        if (!treeItem) return;
+        const details = treeItem.closest('details');
+
+        if (!treeItem.classList.contains('selected') && details && details.open) e.preventDefault();
+
+        this.treeEl.querySelectorAll('.tree-item').forEach((it) => it.classList.remove('selected'));
+        treeItem.classList.add('selected');
+
+    }
+
+    private checkIsReadOnlyNode(pathFolders: string): boolean {
+        let isreadonly: boolean = false;
+        this.files.readOnlyFolders.forEach((item: string) => {
+            const deep = item.endsWith('*');
+            const path = deep ? item.substr(0, item.length - 1) : item;
+            if (deep && pathFolders.startsWith(path)) isreadonly = true;
+            else if (pathFolders === path) isreadonly = true;
+        });
+        return isreadonly;
+    }
+
+    private getFilesInFolder(tree: any, folder: string) {
+        const folders = folder.split('/');
+        let currentTree = tree;
+        for (const folder of folders) {
+            if (currentTree[folder]) {
+                currentTree = currentTree[folder];
+            } else {
+                return [];
+            }
+        }
+        return Object.keys(currentTree)
+            .map(key => currentTree[key].shortName ? currentTree[key].info : undefined)
+            .filter(value => value !== undefined);
+    }
+
+    private onCheckAllChange(ev: MouseEvent) {
+
+        const val = (ev.target as HTMLInputElement).checked;
+        if (!this.tbody) return;
+        this.tbody.querySelectorAll('input[type="checkbox"').forEach((item) => {
+            const input = (item as HTMLInputElement);
+            input.checked = val;
+            input.closest('tr')?.classList.toggle('selected', val);
+        });
+
+        if (val) this.filesController.totalFilesSelected = 0;
+
+        this.actualFiles.forEach((item) => {
+            if (val) this.addSelectedItem(item);
+            else this.removeSelectedItem(item);
+        });
+
+        console.info({
+            filesController: this.filesController
+        })
+    }
+
+    private addSelectedItem(item: mls.stor.IFileInfo) {
+        this.filesController.totalFilesSelected += 1;
+        this.filesController.filesSelected.add(item);
+        this.fireEventSelectedsItens();
+    }
+
+    private removeSelectedItem(item: mls.stor.IFileInfo) {
+        this.filesController.totalFilesSelected -= 1;
+        this.filesController.filesSelected.delete(item);
+        this.fireEventSelectedsItens();
+    }
+
+    private fireEventSelectedsItens() {
+        if (this.filesController.totalFilesSelected === 1) {
+
+            const [file] = this.filesController.filesSelected;
+            const extensiosServicesKey = Object.keys(this.serviceByExtensions);
+            extensiosServicesKey.forEach((key) => {
+                if (this.serviceByExtensions[key].includes(file.extension)) this.filesController.helper = key;
+            });
+            this.filesController.readOnly = this.treeController.isNodeReadOnly;
+
+        } else {
+            this.filesController.helper = '_100554_serviceDsAssetsOverview';
+            this.filesController.readOnly = true;
+        }
+
+        mls.events.fire([3], ['DSAssetsChanged'], JSON.stringify(this.filesController));
+    }
+
+    private onFileClick(e: MouseEvent, item: mls.stor.IFileInfo) {
+        e.stopPropagation();
+        const target = e.target as HTMLElement;
+        const tr = target.closest('tr');
+        if (!tr) return;
+        const check = tr.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        tr.classList.toggle('selected');
+
+        if ((target as HTMLElement).tagName !== 'INPUT') check.checked = !check.checked;
+        if (check.checked) this.addSelectedItem(item);
+        else this.removeSelectedItem(item);
+
+        if (this.filesController.totalFiles === this.filesController.totalFilesSelected) this.toogleCheckBoxAll(true);
+        else this.toogleCheckBoxAll(false);
+    }
+
+
+    private toogleCheckBoxAll(checked: boolean) {
+        if (!this.checkBoxAll) return;
+        this.checkBoxAll.checked = checked;
+    }
+
+    private onActionAddConfirm() {
+        this.isAddMode = false;
+    }
+
+    private onActionAddCancel() {
+        this.isAddMode = false;
+    }
+
+    private onAddNewFileClick() {
+        this.isAddMode = true;
+    }
+
+    renderNode(key: string, node: any, folder: string): any {
+
+        const isFile = (str: string) => {
+            return str.split('_').length > 1;;
+        }
+
+        const hasFolderInNode = (checkNode: any) => {
+            const keysNode = Object.keys(checkNode);
+            const check = keysNode.filter((nd) => isFile(nd));
+            return keysNode.length > check.length;
+        }
+
+        if (!isFile(key)) {
+            const newFolder = folder ? `${folder}/${key}` : key;
+            const hasFolder = hasFolderInNode(node);
+
+            if (hasFolder) {
+                return html`
+                    <details style="margin-left: 1rem;" folder=${newFolder} @click=${(e: MouseEvent) => this.handleFolderClick(e, newFolder)}>
+                        <summary class="tree-item">${key}</summary>
+                        ${Object.keys(node).map(keyC => this.renderNode(keyC, node[keyC], newFolder))}
+                    </details>
+                `;
+            }
+
+            return html`
+                    <div class="tree-item" style="margin-left: 1rem;" folder=${newFolder} @click=${(e: MouseEvent) => this.handleFolderClick(e, newFolder)}>
+                        ${key}
+                    </div>
+                `;
+        }
+    }
+
+    private renderTable() {
+        const typesAssets: mls.l3.AssetsGroupType[] = ['image', 'video', 'icon', 'lib', 'other'];
+
+        return html`
+
+            <table class=${this.isAddMode ? "hidden" : ""}>
+                <thead>
+                    <tr>
+                        <th>
+                            <input id="checkAll" type="checkbox" @change=${(ev: MouseEvent) => { this.onCheckAllChange(ev); }}></input>
+                        </th>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>versionRef</th>
+                    </tr>
+                    
+                </thead>
+                <tbody>
+                    ${this.actualFiles.map((file) => {
+            const extWithoutDot: string = file.extension.substring(1, file.extension.length);
+            const extension = this.objIcons[extWithoutDot];
+            const typeFileIcon = extension || this.objIcons['none'];
+            return html`
+                            <tr @click=${(e: MouseEvent) => { this.onFileClick(e, file) }}>
+                                <td>
+                                    <input type="checkbox"></input>
+                                </td>
+                                <td>
+                                    <i class="${typeFileIcon}"></i>
+                                </td>
+                                <td>${file.shortName}</td>
+                                <td>${file.versionRef}</td>
+                            </tr>
+                        `
+        })}
+                </tbody>
+            </table>
+            <div class="actions" style="display:${this.treeController.isNodeReadOnly ? 'none' : ''}">
+                <button
+                    style="display:${this.isAddMode ? 'none' : 'block'}"
+                    @click=${() => { this.onAddNewFileClick(); }}>
+                Add new file
+                </button>
+            </div>
+
+            <div class="add-file-container ${this.isAddMode ? 'visible' : ''}">
+                <input type="file"></input>
+                <select>
+                    ${typesAssets.map((t) => {
+            return html`
+                            <option value=${t}>${t}</option>
+                        `
+        })}
+                </select>
+                <textarea placeholder="Description"></textarea>
+                <div class="add-container-actions ${this.isAddMode ? 'visible' : ''}">
+                    <button @click=${() => { this.onActionAddConfirm(); }}>Confirm</button>
+                    <button @click=${() => { this.onActionAddCancel(); }}>Cancel</button>
+                </div>
+            </div>
+        `
+    }
+
     render() {
-        return html`<p> Hello!</p>`;
+        return html`
+            <div>
+                ${this.loading
+                ? html`<p>Loading...</p>`
+                : html`
+                    <div class="assets-container">
+                        <div class="assets-tree">
+                            ${Object.keys(this.tree).map((item) => {
+                    return this.renderNode(item, this.tree[item], '');
+                })}
+                        </div>
+                        <div class="assets-details">
+                            ${this.renderTable()}
+                        </div> 
+                    </div> 
+                    `
+            }`;
     }
 }
+
+export interface IFileController {
+    totalFiles: number,
+    totalFilesSelected: number,
+    filesSelected: Set<mls.stor.IFileInfo>,
+    helper: string,
+    readOnly: boolean
+}
+
+interface IFiles {
+    list: IStoreFiles,
+    project: number | undefined,
+    readOnlyFolders: string[],
+    readOnlyFiles: string[],
+}
+
+interface TreeNode {
+    [key: string]: ITreeItemFolder | mls.stor.IFileInfo;
+}
+
+interface ITreeItemFolder {
+    shortName: string;
+    folder: string;
+}
+
+type IStoreFiles = Record<string, mls.stor.IFileInfo>
