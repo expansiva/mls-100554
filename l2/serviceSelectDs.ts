@@ -14,7 +14,6 @@ export class ServiceSelectDs100554 extends ServiceBase {
         this.setEvents();
     }
 
-    
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
@@ -71,7 +70,8 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
     private showAdd(): boolean {
-        const sectionAdd = document.createElement('service-select-ds-add-100554')
+        const sectionAdd = document.createElement('service-select-ds-add-100554');
+        (sectionAdd as any)['service'] = this;
         if (this.menu.setMode) this.menu.setMode('page', sectionAdd);
         return true;
     }
