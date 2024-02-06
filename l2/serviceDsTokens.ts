@@ -69,7 +69,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
             if (el && typeof el.layout === 'function') el.layout();
         } else {
             const params: IEventsSelectedObj = { isComponent: false, service: [] };
-            mls.events.fire([3], ['DSTokenUnSelected'], JSON.stringify(params));
+            mls.events.fire([3], ['DSTokenUnSelected'], JSON.stringify(params), 0);
         }
 
     }

@@ -2,7 +2,7 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-
+import { IAssetsEventSelectedParams, IAssetsEventChangedParams } from './_100554_serviceDsAssets'
 
 @customElement('service-ds-assets-image-100554')
 export class ServiceDsAssetsImage100554 extends ServiceBase {
@@ -15,11 +15,11 @@ export class ServiceDsAssetsImage100554 extends ServiceBase {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
-        icon: '&#xf53f',
-        name: 'Colors',
+        icon: '&#xf03e',
+        name: 'Assets Image',
         mode: 'H',
         position: 'right',
-        tooltip: 'Colors',
+        tooltip: 'Assets Image',
         tags: ['ds_tokens'],
         levels: [3]
     }
@@ -31,9 +31,9 @@ export class ServiceDsAssetsImage100554 extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Colors',
+        title: 'Assets Image',
         actions: {
-            opHelper: 'Colors',
+            opHelper: 'Assets Image',
         },
         icons: {},
         actionDefault: 'opHelper', // call after close icon clicked
@@ -49,21 +49,87 @@ export class ServiceDsAssetsImage100554 extends ServiceBase {
 
     async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (visible && reinit) {
+        if (visible) {
+            this.setImage();
+            if (el && typeof el.layout === 'function') el.layout();
         }
     }
 
     private setEvents() {
+        mls.events.addEventListener([this.level], ['DSAssetsUnSelected'], (ev) => {
+            this.onDsAssetsUnSelected(ev);
+        });
+
+        mls.events.addEventListener([this.level], ['DSAssetsChanged'], (ev) => {
+            this.onDsAssetsChanged(ev);
+        });
 
     }
 
+    @query('#serviceassetsimage_img')
+    private imageEl: HTMLImageElement | undefined;
+
+    private data: IAssetsEventChangedParams | undefined;
+
+    private onDsAssetsUnSelected(ev: mls.events.IEvent) {
+        if (!ev.desc) return;
+        const params: IAssetsEventSelectedParams = JSON.parse(ev.desc)
+        if (params.service.includes('_100554_serviceDsAssetsImage')) return;
+        this.showNav2Item(false);
+    }
+
+    private onDsAssetsChanged(ev: mls.events.IEvent) {
+        if (!ev.desc) return;
+        const params: IAssetsEventChangedParams = JSON.parse(ev.desc);
+    
+        if (params.position === 'right') return;
+        if (params.info.helper.includes('_100554_serviceDsAssetsImage')) {
+            this.data = params;
+            this.showNav2Item(true);
+            this.openMe();
+        } else this.showNav2Item(false);
+    }
+
     private showInitial(): boolean {
-        this.menu.title = 'Assets';
+        this.menu.title = 'Assets Image';
+        this.setImage();
         return true;
+    }
+
+    private async setImage() {
+
+        if (!this.data) return;
+        if (!this.data.info.filesSelectedArr) return undefined;
+        console.info(Array.from(this.data.info.filesSelectedArr))
+        const [fileSelected] = this.data.info.filesSelectedArr;
+        if (!fileSelected) return undefined;
+
+        const { folder, extension, level, project, shortName } = fileSelected;
+        const keyFile = mls.stor.getKeyToFiles(project, level, shortName, folder, extension);
+        const value = await mls.stor.files[keyFile]?.getContent();
+        const file = value as Blob;
+        const reader = new FileReader();
+        
+        if (!file) return;
+
+        reader.addEventListener('load', () => {
+            const base64String = btoa(reader.result as string);
+            const base64Full = `data:${file.type};base64,${base64String}`;
+            if(this.imageEl) this.imageEl.src = base64Full;
+        });
+        reader.readAsBinaryString(file);
+
     }
 
 
     render() {
-        return html`<p> Hello!</p>`;
+        return html`
+        <div class="service_assets_image">
+            <div class="zoom-outer">
+                <div class="zoom">
+                    <img id="serviceassetsimage_img">
+                </div>
+            </div>
+        </div>`;
     }
 }

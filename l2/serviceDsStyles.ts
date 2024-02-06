@@ -109,6 +109,14 @@ export class ServiceDsStyles extends ServiceBase {
         if (visible) {
             this.isComponent = false;
             this.start1();
+        } else {
+            const params2: IEventsSelectedObj = {
+                service: [],
+                isComponent: this.isComponent,
+                component: this.componentName
+            };
+            mls.events.fire([this.level], ['DSStyleUnSelected'], JSON.stringify(params2), 0);
+
         }
         if (reinit) this.reinit();
     }
@@ -122,13 +130,6 @@ export class ServiceDsStyles extends ServiceBase {
             component: this.componentName
         };
 
-        const params2: IEventsSelectedObj = {
-            service: [],
-            isComponent: this.isComponent,
-            component: this.componentName
-        };
-
-        mls.events.fire([this.level], ['DSStyleUnSelected'], JSON.stringify(params2), 0);
         mls.events.fire([this.level], ['DSStyleSelected'], JSON.stringify(params), 100);
         this.openServiceHelper(serviceDef);
         this.rightServiceOpened = this.getServiceRightOpened();
