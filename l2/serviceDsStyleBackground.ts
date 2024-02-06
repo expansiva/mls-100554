@@ -106,8 +106,8 @@ export class ServiceDsStyleBackground extends ServiceBase {
                 const value = i.value;
                 const prop = i.key;
 
-                if (prop !== 'background') return;
-                this.configString(value);
+                if (!['background','background-color'].includes(prop)) return;
+                this.configString('background:'+value);
 
             })
         }
@@ -513,7 +513,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
         if (this.myUpp) return;
         const rc: IEventsObj = {
             emitter: this.position,
-            value: [obj],
+            value: [obj, {key:'background-color', value: ''}],
             helper: this.helper
         };
 
