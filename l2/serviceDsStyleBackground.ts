@@ -4,8 +4,8 @@
  * @mlsComponentDetails {
  *  "webComponentDependencies": ["collab-ds-input-range-100554"]
  * }
- */ 
- 
+ */
+
 import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
@@ -68,7 +68,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
         if (visible || reinit) {
 
-            //this.fireEventAboutMe();
+            this.fireEventAboutMe();
 
         }
     }
@@ -100,7 +100,16 @@ export class ServiceDsStyleBackground extends ServiceBase {
         const obj: IEventsObj = JSON.parse(desc);
         if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
-            //this.setValues(obj.value);
+            obj.value.forEach((i: any) => {
+
+                if (!this.shadowRoot || !i.key) return;
+                const value = i.value;
+                const prop = i.key;
+
+                if (prop !== 'background') return;
+                this.configString(value);
+
+            })
         }
 
     }
@@ -134,7 +143,6 @@ export class ServiceDsStyleBackground extends ServiceBase {
     connectedCallback() {
         super.connectedCallback();
         this.updateMyMessages();
-        this.configString('background: linear-gradient(84deg, rgba(2,0,36,1) 36%, rgba(60,70,193,0.5) 66%);')
 
     }
 
@@ -142,7 +150,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
         return html`<div class="container">${this.renderBody()}</div>`;
     }
 
-    renderBody() { 
+    renderBody() {
         return html`
             <div class="showtransparent"></div>
             <div class="showres" style="${this.css}"></div>
@@ -170,19 +178,19 @@ export class ServiceDsStyleBackground extends ServiceBase {
                 </div>
             `
         } else if (this.info.tp !== '') {
-            
+
             return html`
                 <div class="showConfigItem" style="flex-direction:row; margin-bottom:10px">
-                    <div class="${this.info.tp === 'linear-gradient' ? 'active' : ''}" style="border: 1px solid #d0cccc; font-size: 80%; padding: 0.2rem; border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-right:0px; width:130px; text-align:center; cursor:pointer" @click="${()=> this.changeType('linear-gradient')}">Linear-gradient</div>
-                    <div class="${this.info.tp === 'radial-gradient' ? 'active' : ''}" style="border: 1px solid #d0cccc; font-size: 80%; padding: 0.2rem; border-top-right-radius: 5px; border-bottom-right-radius: 5px; width:130px; text-align:center; cursor:pointer" @click="${()=> this.changeType('radial-gradient')}">Radial-gradient</div>
+                    <div class="${this.info.tp === 'linear-gradient' ? 'active' : ''}" style="border: 1px solid #d0cccc; font-size: 80%; padding: 0.2rem; border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-right:0px; width:130px; text-align:center; cursor:pointer" @click="${() => this.changeType('linear-gradient')}">Linear-gradient</div>
+                    <div class="${this.info.tp === 'radial-gradient' ? 'active' : ''}" style="border: 1px solid #d0cccc; font-size: 80%; padding: 0.2rem; border-top-right-radius: 5px; border-bottom-right-radius: 5px; width:130px; text-align:center; cursor:pointer" @click="${() => this.changeType('radial-gradient')}">Radial-gradient</div>
                 </div>
                 ${this.renderAux()}
             `
-            
+
         } else {
             return html``;
         }
-        
+
     }
 
     renderAux() {
@@ -192,10 +200,10 @@ export class ServiceDsStyleBackground extends ServiceBase {
         return html`
             <div class="showConfigItem" style="flex-direction:row;  margin-bottom:10px">
                 <span style="width:50px;text-align:center;font-size:80%; color:#6d6d6d;">Angle:</span>
-                <input type="number" style="width:50px;text-align:center;font-size:80%; color:#6d6d6d; " .value=${this.onlyNumber(this.info.aux)} prop="aux" @input="${(e: InputEvent) => this. onChangeAux('aux')}"/>
+                <input type="number" style="width:50px;text-align:center;font-size:80%; color:#6d6d6d; " .value=${this.onlyNumber(this.info.aux)} prop="aux" @input="${(e: InputEvent) => this.onChangeAux('aux')}"/>
             </div>
         `
-        
+
     }
 
     renderItens() {
@@ -208,17 +216,17 @@ export class ServiceDsStyleBackground extends ServiceBase {
                     <div style="width:50px;text-align:center; cursor:pointer" @click="${this.add}">Add</div>
                 </div>  
                 ${repeat(this.info.itens, ((key: any) => key.value) as any,
-                ((i: any, index: any) => {
-                    return html`
+            ((i: any, index: any) => {
+                return html`
                         <div style="display:flex; gap:.5rem;margin-bottom:.5rem" index="${index}" class="groupEdit">
                             <input type="color" .value="${i.value}" style="width:50px" prop="color" index="${index}" @change="${(e: InputEvent) => this.onChangeProp(index)}"/> 
                             <input type="range" min="0" max="100" .value="${i.transp}" style="width:132px" prop="transp" index="${index}" @input="${(e: InputEvent) => this.onChangeProp(index)}"/> 
                             <input type="number" style="width:50px" min="0" max="100" .value="${i.stop}" prop="stop" index="${index}" @input="${(e: InputEvent) => this.onChangeProp(index)}"></input>
-                            <div style="width:50px;text-align:center;font-size:80%; color:#6d6d6d;cursor:pointer" @click="${(e:any)=> this.del(index)}">Del</div>
+                            <div style="width:50px;text-align:center;font-size:80%; color:#6d6d6d;cursor:pointer" @click="${(e: any) => this.del(index)}">Del</div>
                         </div>    
                     `;
-                }) as any
-            )}
+            }) as any
+        )}
             </div>
         `
     }
@@ -227,14 +235,14 @@ export class ServiceDsStyleBackground extends ServiceBase {
         return html`
             <div style="display:flex; gap:.5rem; flex-wrap:wrap">
             ${repeat(this.arrayGallery, ((key: any) => key) as any,
-                ((css: any, index: any) => {
-                    return html`<div style="width:40px; border-radius:5px; height:30px; cursor:pointer;${css}" @click="${this.clickGallery}" .gallery=${css}></div>`;
-                }) as any
-            )}
+            ((css: any, index: any) => {
+                return html`<div style="width:40px; border-radius:5px; height:30px; cursor:pointer;${css}" @click="${this.clickGallery}" .gallery=${css}></div>`;
+            }) as any
+        )}
             </div>
         `;
     }
-    
+
     //-------------IMPLEMENTS--------------
 
     private clickGallery(e: MouseEvent): void {
@@ -253,7 +261,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
     }
 
     private changeType(tp: string): void {
-        
+
         if (this.info.tp === tp) return;
 
         if (tp === 'linear-gradient') {
@@ -270,7 +278,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
     private add(): void {
 
-        this.info.itens.push({value:'#000000', transp:'100', stop:'100'})
+        this.info.itens.push({ value: '#000000', transp: '100', stop: '100' })
         if (this.info.itens.length >= 2 && this.info.tp === 'background') {
             this.info.tp = 'linear-gradient';
             this.info.aux = '84deg';
@@ -279,18 +287,18 @@ export class ServiceDsStyleBackground extends ServiceBase {
         this.mountMyValue();
     }
 
-    private del(index:number): void {
+    private del(index: number): void {
 
         this.info.itens.splice(index, 1);
         if (this.info.itens.length <= 1 && this.info.tp !== 'background') {
             this.info.tp = 'background';
             this.info.aux = '';
         }
-        this.mountMyValue(); 
+        this.mountMyValue();
     }
 
     private configString(str: string): void {
-    
+
         this.css = str;
 
         this.info = { tp: '', aux: '', itens: [] };
@@ -313,7 +321,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
             let ar: string[] = [];
             str = str.substr(str.indexOf('('));
             str = this.changeStr(str);
-        
+
             ar = str.split(',');
             const auxCount = 100 / (ar.length - 1);
             ar.forEach((i, idx) => {
@@ -327,7 +335,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
                 if (i.indexOf('#') >= 0 || i.indexOf('abgr') >= 0 || i.indexOf('bgr') >= 0) {
 
                     let vl = '';
-                    let start = (auxCount * idx)+'';
+                    let start = (auxCount * idx) + '';
                     const a2 = i.trim().split(' ');
                     if (a2.length > 0) vl = a2[0].replace('abgr', 'rgba').replace('bgr', 'rgb').replace(/;/g, ',');
 
@@ -379,7 +387,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
         return { vl: hexColor, transp: a };
     }
 
-    private hexToRgba(hex:string, alpha = 1): string {
+    private hexToRgba(hex: string, alpha = 1): string {
         // Remove o '#' se estiver presente
         hex = hex.replace(/^#/, '');
 
@@ -435,7 +443,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
         }, 500);
     }
 
-    private onChangeAux(prop:string) {
+    private onChangeAux(prop: string) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
 
@@ -443,7 +451,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
             const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
             this.info.aux = el.value + 'deg';
             this.mountMyValue();
-            
+
         }, 500);
     }
 
@@ -472,21 +480,22 @@ export class ServiceDsStyleBackground extends ServiceBase {
         let text = '';
 
         if (this.info.tp === 'background' && this.info.itens.length > 0) {
-            text =  this.hexToRgba(this.info.itens[0].value, +this.info.itens[0].transp / 100);
-        } else if(this.info.itens.length > 0){
+            text = this.hexToRgba(this.info.itens[0].value, +this.info.itens[0].transp / 100);
+        } else if (this.info.itens.length > 0) {
             text = `${this.info.tp}( ${this.info.aux},`
             this.info.itens.forEach((i, idx) => {
-                
+
                 const aux = idx === this.info.itens.length - 1 ? '' : ',';
                 text = text + ` ${this.hexToRgba(i.value, +i.transp / 100)} ${i.stop}%${aux}`
             });
 
             text = text + ')';
-            
+
         }
 
         this.css = aux + text;
         this.info = Object.assign({}, this.info);
+        this.emitEvent({ key: 'background', value: text });
 
     }
 
@@ -545,35 +554,35 @@ export class ServiceDsStyleBackground extends ServiceBase {
         'background: linear-gradient(342deg, rgb(131, 58, 180) 0%, rgb(253, 29, 29) 50%, rgb(252, 176, 69) 100%);',
         'background: radial-gradient(circle, rgb(238, 174, 202) 0%, rgb(148, 187, 233) 100%);',
         'background: linear-gradient(135deg, rgba(30, 87, 153,1) 0%, rgba(41, 137, 216,1) 50%, rgba(32, 124, 202,1) 51%, rgba(125, 185, 232,1) 100%)',
-		'background: linear-gradient(135deg, rgba(76, 76, 76,1) 0%, rgba(89, 89, 89,1) 12%, rgba(102, 102, 102,1) 25%, rgba(71, 71, 71,1) 39%, rgba(44, 44, 44,1) 50%, rgba(0, 0, 0,1) 51%, rgba(17, 17, 17,1) 60%, rgba(43, 43, 43) 76%, rgba(28, 28, 28,1) 91%, rgba(19, 19, 19,1) 100%)',
-		'background: linear-gradient(135deg, rgba(243, 197, 189,1) 0%, rgba(232, 108, 87,1) 50%, rgba(234, 40, 3,1) 51%, rgba(255, 102, 0,1) 75%, rgba(199, 34, 0,1) 100%)',
-		'background: linear-gradient(90deg, rgba(2, 0, 36,1) 0%, rgba(9, 9, 121,1) 35%, rgba(0, 212, 255,1) 100%)',
-		'background: linear-gradient(0deg, rgba(34, 193, 195,1) 0%, rgba(253, 187, 45,1) 100%)',
-		'background: linear-gradient(90deg, rgba(131, 58, 180,1) 0%, rgba(253, 29, 29,1) 50%, rgba(252, 176, 69,1) 100%)',
-		'background: linear-gradient(310deg, rgba(5, 25, 55, 1) 0%, rgba(0, 77, 122,1) 20%, rgba(0, 135, 147, 1) 40%, rgba(0, 191 ,114, 1) 60%, rgba(168, 235 ,18, 1) 80%)',
-		'background: linear-gradient(270deg, rgba(112, 225, 245, 1), rgba(255, 209, 148, 1))',
-		'background: linear-gradient(90deg, rgba(85, 98, 112, 1), rgba(255, 107, 107, 1))',
-		'background: linear-gradient(90deg, rgba(120, 2, 6,1), rgba(6, 17, 97,1))',
-		'background: linear-gradient(120deg, rgba(45, 195, 195,1), rgba(158, 17, 17,1))',
-		'background: linear-gradient(90deg, rgba(255, 78, 80,1), rgba(249, 212, 35,1))',
-		'background: linear-gradient(90deg, rgba(255,239,0,1) 0%, rgba(127,164,8,1) 35%, rgba(0,212,255,1) 100%)',
-		'background: rgba(240, 236, 227,1)',
-		'background: rgba(223, 211, 195, 1)',
-		'background: rgba(199, 177, 152,1)',
-		'background: rgba(221, 221, 221,1)',
-		'background: rgba(243, 225, 225, 1)',
-		'background: rgba(249, 249, 249, 1)',
-		'background: rgba(252, 247, 187, 1)',
-		'background: rgba(255, 236, 199, 1)',
-		'background: rgba(181, 144, 202, 1)',
-		'background: rgba(166, 177, 225, 1)',
-		'background: rgba(229, 138, 138, 1)',
-		'background: rgba(212, 235, 208, 1)',
-		'background: rgba(186, 223, 219, 1)',
-		'background: rgba(255, 241, 172, 1)',
-		'background: rgba(249, 188, 221, 1)',
-		'background: rgba(56, 81, 112, 1)',
-		'background: rgba(238, 238, 238, 1)',
+        'background: linear-gradient(135deg, rgba(76, 76, 76,1) 0%, rgba(89, 89, 89,1) 12%, rgba(102, 102, 102,1) 25%, rgba(71, 71, 71,1) 39%, rgba(44, 44, 44,1) 50%, rgba(0, 0, 0,1) 51%, rgba(17, 17, 17,1) 60%, rgba(43, 43, 43) 76%, rgba(28, 28, 28,1) 91%, rgba(19, 19, 19,1) 100%)',
+        'background: linear-gradient(135deg, rgba(243, 197, 189,1) 0%, rgba(232, 108, 87,1) 50%, rgba(234, 40, 3,1) 51%, rgba(255, 102, 0,1) 75%, rgba(199, 34, 0,1) 100%)',
+        'background: linear-gradient(90deg, rgba(2, 0, 36,1) 0%, rgba(9, 9, 121,1) 35%, rgba(0, 212, 255,1) 100%)',
+        'background: linear-gradient(0deg, rgba(34, 193, 195,1) 0%, rgba(253, 187, 45,1) 100%)',
+        'background: linear-gradient(90deg, rgba(131, 58, 180,1) 0%, rgba(253, 29, 29,1) 50%, rgba(252, 176, 69,1) 100%)',
+        'background: linear-gradient(310deg, rgba(5, 25, 55, 1) 0%, rgba(0, 77, 122,1) 20%, rgba(0, 135, 147, 1) 40%, rgba(0, 191 ,114, 1) 60%, rgba(168, 235 ,18, 1) 80%)',
+        'background: linear-gradient(270deg, rgba(112, 225, 245, 1), rgba(255, 209, 148, 1))',
+        'background: linear-gradient(90deg, rgba(85, 98, 112, 1), rgba(255, 107, 107, 1))',
+        'background: linear-gradient(90deg, rgba(120, 2, 6,1), rgba(6, 17, 97,1))',
+        'background: linear-gradient(120deg, rgba(45, 195, 195,1), rgba(158, 17, 17,1))',
+        'background: linear-gradient(90deg, rgba(255, 78, 80,1), rgba(249, 212, 35,1))',
+        'background: linear-gradient(90deg, rgba(255,239,0,1) 0%, rgba(127,164,8,1) 35%, rgba(0,212,255,1) 100%)',
+        'background: rgba(240, 236, 227,1)',
+        'background: rgba(223, 211, 195, 1)',
+        'background: rgba(199, 177, 152,1)',
+        'background: rgba(221, 221, 221,1)',
+        'background: rgba(243, 225, 225, 1)',
+        'background: rgba(249, 249, 249, 1)',
+        'background: rgba(252, 247, 187, 1)',
+        'background: rgba(255, 236, 199, 1)',
+        'background: rgba(181, 144, 202, 1)',
+        'background: rgba(166, 177, 225, 1)',
+        'background: rgba(229, 138, 138, 1)',
+        'background: rgba(212, 235, 208, 1)',
+        'background: rgba(186, 223, 219, 1)',
+        'background: rgba(255, 241, 172, 1)',
+        'background: rgba(249, 188, 221, 1)',
+        'background: rgba(56, 81, 112, 1)',
+        'background: rgba(238, 238, 238, 1)',
 
     ];
 }
