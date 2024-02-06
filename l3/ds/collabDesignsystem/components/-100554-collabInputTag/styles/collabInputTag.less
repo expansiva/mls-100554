@@ -1,0 +1,66 @@
+collab-input-tag-100554 { //don't change this line 
+ 	 :host{
+        font-family: @font-family-primary;
+     }
+     .collab-tag-input {
+        max-width: 100%;
+        display: flex;
+        align-content: flex-start;
+        flex-wrap: wrap;
+        background-color: #FFF;
+        border: solid 1px #CCC;
+        border-radius: 2px;
+        min-height: 33px;
+        padding: 0 5px;
+        input {
+            flex-grow: 1;
+            display: inline-block;
+            order: 200;
+            border: none;
+            height: 33px;
+            line-height: 33px;
+            font-size: 14px;
+            margin: 0;
+            width: auto;
+            &:focus{
+                outline: none;
+            }
+        }
+        div.tag {
+            display: inline-block;
+            flex-grow: 0;
+            margin: 5px 5px 5px 0;
+            padding: 0 20px 0 10px;
+            height: 25px;
+            line-height: 25px;
+            background-color: #E1E1E1;
+            color: #333;
+            font-size: 14px;
+            order: 100;
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+            &.duplicate {
+                background-color: rgba(255, 64, 27, 0.71);
+                transition: all 0.3s linear;
+            }
+            &:last-child {
+                margin-right: 5px;
+            }
+            .remove {
+                display: inline-block;
+                color: #000000;
+                padding-left: 0.45rem;
+                position: absolute;
+                text-align: center;
+                border-top-right-radius: 2px;
+                border-bottom-right-radius: 2px;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                top: 0;
+                right: 5px;
+            }
+        }
+    }
+}
+

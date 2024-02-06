@@ -50,11 +50,9 @@ export class ServiceDsAssets100554 extends ServiceBase {
 
     async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        console.info('passei _onServiceClick dsAssets');
-
         if (visible && reinit) {
             const params: IAssetsEventSelectedParams = {
-                service: ['_100529_service_assets_overview'],
+                service: ['_100554_serviceDsAssetsOverview'],
             };
             mls.events.fire([this.level], ['DSAssetsSelected'], JSON.stringify(params), 100);
         }
@@ -74,7 +72,6 @@ export class ServiceDsAssets100554 extends ServiceBase {
         super.connectedCallback();
         await this.prepareFiles();
         this.loading = false;
-        console.info(this.tree);
         this.requestUpdate();
     }
 
@@ -105,7 +102,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
         totalFilesSelected: 0,
         filesSelected: new Set([]),
         filesSelectedArr: [],
-        helper: '',
+        helper: [],
         readOnly: false
     }
 
@@ -215,7 +212,6 @@ export class ServiceDsAssets100554 extends ServiceBase {
         this.filesController.filesSelected = new Set([]);
         this.actualFiles = files;
         this.treeController.isNodeReadOnly = this.checkIsReadOnlyNode(folder);
-        console.info(this.treeController);
 
         if (!this.treeEl) return;
         const target = e.target as HTMLElement;
@@ -273,9 +269,6 @@ export class ServiceDsAssets100554 extends ServiceBase {
             else this.removeSelectedItem(item);
         });
 
-        console.info({
-            filesController: this.filesController
-        })
     }
 
     private addSelectedItem(item: mls.stor.IFileInfo) {
@@ -296,12 +289,12 @@ export class ServiceDsAssets100554 extends ServiceBase {
             const [file] = this.filesController.filesSelected;
             const extensiosServicesKey = Object.keys(this.serviceByExtensions);
             extensiosServicesKey.forEach((key) => {
-                if (this.serviceByExtensions[key].includes(file.extension)) this.filesController.helper = key;
+                if (this.serviceByExtensions[key].includes(file.extension)) this.filesController.helper = [key, '_100554_serviceDsAssetsOverview'];
             });
             this.filesController.readOnly = this.treeController.isNodeReadOnly;
 
         } else {
-            this.filesController.helper = '_100554_serviceDsAssetsOverview';
+            this.filesController.helper = ['_100554_serviceDsAssetsOverview'];
             this.filesController.readOnly = true;
         }
 
@@ -472,7 +465,7 @@ export interface IFileController {
     totalFilesSelected: number,
     filesSelected: Set<mls.stor.IFileInfo>,
     filesSelectedArr: mls.stor.IFileInfo[],
-    helper: string,
+    helper: string[],
     readOnly: boolean
 }
 

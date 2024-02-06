@@ -86,8 +86,7 @@ export class ServiceDsAssetsVideo100554 extends ServiceBase {
     private onDsAssetsChanged(ev: mls.events.IEvent) {
         if (!ev.desc) return;
         const params: IAssetsEventChangedParams = JSON.parse(ev.desc);
-        console.info({ params })
-
+    
         if (params.position === 'right') return;
         if (params.info.helper.includes('_100554_serviceDsAssetsVideo')) {
             this.data = params;

@@ -109,8 +109,7 @@ export class ServiceDsAssetsEditor100554 extends ServiceBase {
     private onDsAssetsChanged(ev: mls.events.IEvent) {
         if (!ev.desc) return;
         const params: IAssetsEventChangedParams = JSON.parse(ev.desc);
-        console.info({ params })
-
+    
         if (params.position === 'right') return;
         if (params.info.helper.includes('_100554_serviceDsAssetsEditor')) {
             this.data = params;
@@ -169,7 +168,7 @@ export class ServiceDsAssetsEditor100554 extends ServiceBase {
     private async getValue(): Promise<IGetValueRet | undefined> {
         if (!this.data) return;
         if (!this.data.info.filesSelectedArr) return undefined;
-        console.info(Array.from(this.data.info.filesSelectedArr))
+
         const [fileSelected] = this.data.info.filesSelectedArr;
         if (!fileSelected) return undefined;
 
