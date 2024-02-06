@@ -22,12 +22,12 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf02d',
-        name: 'Details Ds Components',
-        mode: 'B',
+        state: 'background',
         position: 'right',
         tooltip: 'Components Design System',
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsComponentsList',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {
