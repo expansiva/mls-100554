@@ -222,11 +222,13 @@ export interface IService {
     icon: string,
     tooltip: string,
     visible: boolean,
-    position:ICollabServicePosition,
+    position: ICollabServicePosition,
+    level: number[],
     classname?: ICollabServiceClass,
     isStatic?: boolean,
+
 }
 
-export type ICollabServicePosition = "left" | "right"
+export type ICollabServicePosition = "left" | "right" | "all"
 export type ICollabServiceState = "foreground" | "background"
 export type ICollabServiceClass = "separator-left" | "separator-right"
