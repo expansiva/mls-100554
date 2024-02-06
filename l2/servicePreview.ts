@@ -19,6 +19,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     private lastMode: string = 'icPreviewD';
 
+    private elPreview: HTMLElement | undefined = undefined;
+
     private info: any = {};
 
     constructor() {
@@ -76,7 +78,7 @@ export class ServicePreview100554 extends ServiceBase {
 
         if (visible && !reinit && this.menu.setIconActive) {
             this.menu.setIconActive(this.lastMode);
-        }
+        } else if (this.elPreview) this.elPreview.setAttribute('level', this.level.toString());
     }
 
     // -------------- EVENTS -------------------
@@ -160,10 +162,11 @@ export class ServicePreview100554 extends ServiceBase {
 
     private actAddStyle() {
 
-        if (!mls.actual[2].project) return true;
+        if (!(mls.actual[2] as any).left) return true;
 
+        const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
         const doc = document.createElement('service-preview-add-style-100554');
-        doc.setAttribute('widget', mls.actual[2].getFullName());
+        doc.setAttribute('widget', fullname);
         doc.setAttribute('level', this.level as any);
         (doc as any).father = this;
         if (this.menu.setMode) this.menu.setMode('page', doc);
@@ -173,13 +176,15 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async preview(mode: string) {
 
-        if (!mls.actual[2].project) return true;
+        if (!(mls.actual[2] as any).left) return true;
 
+        const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
         const doc = document.createElement('service-preview-view-100554');
-        doc.setAttribute('page', mls.actual[2].getFullName());
+        doc.setAttribute('page', fullname);
         doc.setAttribute('level', this.level as any);
         doc.setAttribute('mode', mode);
         (doc as any).father = this;
+        this.elPreview = doc;
         if (this.menu.setMode) this.menu.setMode('page', doc);
         return true;
 

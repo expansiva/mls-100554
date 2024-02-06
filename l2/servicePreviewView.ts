@@ -89,7 +89,6 @@ export class ServicePreviewView extends LitElement {
         }
     }
 
-
     renderEditStyle() {
 
         if (!this.verifyWC()) return '';
@@ -99,6 +98,15 @@ export class ServicePreviewView extends LitElement {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:19px; height:19px"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 32C0 14.3 14.3 0 32 0H160c17.7 0 32 14.3 32 32V416c0 53-43 96-96 96s-96-43-96-96V32zM223.6 425.9c.3-3.3 .4-6.6 .4-9.9V154l75.4-75.4c12.5-12.5 32.8-12.5 45.3 0l90.5 90.5c12.5 12.5 12.5 32.8 0 45.3L223.6 425.9zM182.8 512l192-192H480c17.7 0 32 14.3 32 32V480c0 17.7-14.3 32-32 32H182.8zM128 64H64v64h64V64zM64 192v64h64V192H64zM96 440a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"/></svg>
             </edit-style>        
         `
+    }
+
+    updated(changedProperties: any) {
+        super.updated(changedProperties);
+        if (changedProperties.has('level')) {
+            const oldLevel = changedProperties.get('level');
+            if (!oldLevel) return; 
+            this.fireChangeFCA();
+        }
     }
 
     static styles = css`
@@ -209,6 +217,28 @@ export class ServicePreviewView extends LitElement {
 
     //-------- IMPLEMENTS---------
 
+    private fireChangeFCA(): void {
+        if (!this.shadowRoot) return;
+        const iframe = this.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
+        if (!iframe || !iframe.contentDocument) return;
+        this.changeLevelFca(iframe.contentDocument.body);
+    }
+
+    private changeLevelFca(el: HTMLElement): void{
+        
+        let tagEl = el.tagName.toLowerCase();
+        if (tagEl.startsWith('fca-')) { 
+            el.setAttribute('level', this.level);
+        }
+
+        for (const i of el.children) {
+
+            this.changeLevelFca(i as HTMLElement);
+
+        }
+        
+    }
+
     private load(): void {
         if (!this.shadowRoot) return;
         const iframe = this.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
@@ -252,7 +282,8 @@ export class ServicePreviewView extends LitElement {
 
         const mkey = mls.l2.editor.getKey({
             project: info.project as number,
-            shortName: info.path as string,}
+            shortName: info.path as string,
+        }
         );
 
         if (!mls.stor.files[key]) throw new Error(this.myMsg.notFoundStorfile + ': ' + key);
@@ -434,7 +465,7 @@ export class ServicePreviewView extends LitElement {
         const styleService = document.querySelector(`mls-toolbar-content-service-100529[path="_100529_service_styles"]`);
         if (styleService) styleService.setAttribute('forceinstance', 'true');
         else this.father.openService('_100554_serviceDsStyles', 'left', '3');
-    
+
         mls.actual[0].setFullName(this.page);
         const info = mls.actual[0];
 
