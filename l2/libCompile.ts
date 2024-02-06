@@ -2,13 +2,13 @@
 
 // typescript new file
 
-export const getDepedencesByHtml = (html: string, withCss: boolean = false): Promise<IJSONDEpendence> => {
+export const getDepedencesByHtml = (mfile: mls.l2.editor.IMFile, html: string, withCss: boolean = false): Promise<IJSONDEpendence> => {
 
     return new Promise<IJSONDEpendence>(async (resolve, reject) => {
 
         try {
-
-            resolve(await getDepedences('byHtml', html, withCss))
+            console.info('getDepedencesByHtml')
+            resolve(await getDepedences(mfile, 'byHtml', html, withCss))
 
         } catch (e) {
 
@@ -30,7 +30,7 @@ export const getDepedencesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boole
 
             const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
 
-            resolve(await getDepedences(tag, `<${tag}></${tag}>`, withCss))
+            resolve(await getDepedences(mfile, tag, `<${tag}></${tag}>`, withCss))
 
         } catch (e) {
 
@@ -42,7 +42,7 @@ export const getDepedencesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boole
 
 }
 
-async function getDepedences(filename: string, html: string, withCss: boolean = false) {
+async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html: string, withCss: boolean = false) {
 
     const myImportsMap: string[] = [];
     const myImports: string[] = [];
@@ -50,6 +50,10 @@ async function getDepedences(filename: string, html: string, withCss: boolean = 
     const myErrors: { tag: string, error: string }[] = [];
     const myModules = {};
     const tags = extrairTagsCustomizadas(html);
+
+    const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
+
+    if (!tags.includes(tag)) tags.push(tag);
 
     await loadMyNeedsToCompile(
         tags,
@@ -119,6 +123,12 @@ async function loadMyNeedsToCompile(
 
         const enhacementName = (mfile.compilerResults as any).tripleSlashMLS.variables.enhancement;
         if (!enhacementName) throw new Error('enhacementName not valid');
+
+        if (['blank', '_blank'].includes(enhacementName)) {
+            if (!myImports.includes(`/_${mfile.project}_${mfile.shortName}`)) myImports.push(`/_${mfile.project}_${mfile.shortName}`);
+
+            return;
+        }
 
         if (!myModules[enhacementName]) {
 

@@ -10,6 +10,8 @@ export class ServicePreviewView extends LitElement {
 
     private file: mls.stor.IFileInfo | undefined = undefined;
 
+    private mfile: mls.l2.editor.IMFile | undefined = undefined;
+
     @property() father: any = undefined;
 
     @property() page: string = '';
@@ -248,9 +250,18 @@ export class ServicePreviewView extends LitElement {
             '.html'
         );
 
+        const mkey = mls.l2.editor.getKey({
+            project: info.project as number,
+            shortName: info.path as string,}
+        );
+
         if (!mls.stor.files[key]) throw new Error(this.myMsg.notFoundStorfile + ': ' + key);
 
+        if (!mls.l2.editor.mfiles[mkey]) throw new Error(this.myMsg.notFoundStorfile + ' mfile: ' + mkey);
+
         this.file = mls.stor.files[key];
+
+        this.mfile = mls.l2.editor.mfiles[mkey];
 
 
     }
@@ -258,7 +269,7 @@ export class ServicePreviewView extends LitElement {
     private lastHTML: string = '';
     private async setHTml(iframe: HTMLIFrameElement) {
 
-        if (!iframe.contentDocument) return;
+        if (!iframe.contentDocument || !this.mfile) return;
 
         let txt = '<h3>Configure your html by editor option!</h3>';
 
@@ -277,7 +288,7 @@ export class ServicePreviewView extends LitElement {
         this.lastHTML = txt;
         iframe.contentDocument.body.innerHTML = txt;
 
-        const ret = await getDepedencesByHtml(txt, true);
+        const ret = await getDepedencesByHtml(this.mfile, txt, true);
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
         this.mountCSS(ret, iframe);
