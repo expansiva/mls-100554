@@ -28,14 +28,12 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf009',
-        name: 'Flex',
-        mode: 'B',
+        state: 'background',
         position: 'right',
-        readOnly: false,
         tooltip: 'Flex',
-        className: undefined,
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsStyleFlex',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

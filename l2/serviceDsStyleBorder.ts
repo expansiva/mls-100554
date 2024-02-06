@@ -32,14 +32,13 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf853',
-        name: 'Border',
-        mode: 'B',
+        state: 'background',
         position: 'right',
-        readOnly: false,
         tooltip: 'Border',
-        className: undefined,
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsStyleBorder',
+        level: [3]
+
     }
 
     public onClickLink = (op: string): boolean => {

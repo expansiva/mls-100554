@@ -28,14 +28,12 @@ export class ServiceDsStyleSize extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf07e',
-        name: 'Size',
-        mode: 'B',
+        state: 'background',
         position: 'right',
-        readOnly: false,
         tooltip: 'Size',
-        className: undefined,
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsStyleSize',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

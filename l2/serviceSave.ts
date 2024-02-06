@@ -21,14 +21,12 @@ export class ServiceSave extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf0c7',
-        name: 'Save',
-        mode: 'B',
+        state: 'background',
         position: 'all',
-        readOnly: false,
         tooltip: 'Save',
-        className: undefined,
-        tags: [],
-        levels: [5]
+        visible: true,
+        widget: '_100554_serviceSave',
+        level: [5]
     }
 
     public onClickLink = (op: string): boolean => {

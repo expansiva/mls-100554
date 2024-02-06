@@ -40,14 +40,12 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf2f1',
-        name: 'Transform',
-        mode: 'B',
+        state: 'background',
         position: 'right',
-        readOnly: false,
         tooltip: 'Transform',
-        className: undefined,
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsStyleTransform',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

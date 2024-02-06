@@ -32,14 +32,12 @@ export class ServiceDsStyleColumn extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf0db',
-        name: 'Column',
-        mode: 'B',
+        state: 'background',
         position: 'right',
-        readOnly: false,
         tooltip: 'Column',
-        className: undefined,
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsStyleColumn',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

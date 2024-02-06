@@ -33,14 +33,12 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf0db',
-        name: 'Background',
-        mode: 'B',
+        state: 'background',
         position: 'right',
-        readOnly: false,
         tooltip: 'Background',
-        className: undefined,
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsStyleBackground',
+        level: [3],
     }
 
     public onClickLink = (op: string): boolean => {

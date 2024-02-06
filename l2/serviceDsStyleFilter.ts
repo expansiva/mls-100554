@@ -12,7 +12,7 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 
 @customElement('service-ds-style-filter-100554')
-export class ServiceDsStyleStyle extends ServiceBase {
+export class ServiceDsStyleFilter extends ServiceBase {
 
     private filter = {
         grayscale: '',
@@ -32,7 +32,7 @@ export class ServiceDsStyleStyle extends ServiceBase {
 
     @property() error: string = '';
 
-    @property() helper: string = '_100554_serviceDsStyleStyle';
+    @property() helper: string = '_100554_serviceDsStyleFilter';
 
     constructor() {
         super();
@@ -42,14 +42,12 @@ export class ServiceDsStyleStyle extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf0b0',
-        name: 'Filter',
-        mode: 'B',
+        state: 'background',
         position: 'right',
-        readOnly: false,
         tooltip: 'Filter',
-        className: undefined,
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsStyleFilter',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

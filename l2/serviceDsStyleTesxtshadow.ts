@@ -32,14 +32,12 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
 
     public details: IService = {
         icon: '&#x54',
-        name: 'Shadow',
-        mode: 'B',
+        state: 'background',
         position: 'right',
-        readOnly: false,
         tooltip: 'Shadow',
-        className: undefined,
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsStyleTesxtshadow',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

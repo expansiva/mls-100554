@@ -32,14 +32,12 @@ export class ServiceDsStyleTypography extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf07e',
-        name: 'Typography',
-        mode: 'B',
+        state: 'background',
         position: 'right',
-        readOnly: false,
         tooltip: 'Typography',
-        className: undefined,
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsStyleTypography',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {

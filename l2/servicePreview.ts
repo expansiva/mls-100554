@@ -36,14 +36,12 @@ export class ServicePreview100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf06e',
-        name: 'Preview 2',
-        mode: 'A',
+        state: 'foreground',
         position: 'right',
-        readOnly: false,
-        tooltip: 'Preview 2',
-        className: undefined,
-        tags: [],
-        levels: [1, 2, 3, 4, 5, 6, 7]
+        tooltip: 'Preview',
+        visible: true,
+        widget: '_100554_servicePreview',
+        level: [1, 2, 3, 4, 5, 6, 7]
     }
 
     public onClickLink = (op: string): boolean => {

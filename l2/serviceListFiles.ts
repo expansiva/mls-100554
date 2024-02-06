@@ -43,14 +43,12 @@ export class ServiceListFiles extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf15b',
-        name: 'List 2',
-        mode: 'B',
+        state: 'background',
         position: 'all',
-        readOnly: false,
         tooltip: 'List Files 2',
-        className: undefined,
-        tags: [],
-        levels: [2, 4]
+        visible: true,
+        widget: '_100554_serviceListFiles',
+        level: [2, 4]
     }
 
     public onClickLink = (op: string): boolean => {

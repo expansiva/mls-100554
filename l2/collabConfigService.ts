@@ -103,7 +103,7 @@ export class CollabConfig100554 extends LitElement {
         <ul class="listView">
             ${repeat(
                 this.avaliableServices,
-                ((item: IService) => item.name) as any,
+                ((item: IService) => item.icon) as any,
                 ((service: IService, index: any) => {
                     return html`
                         <li>
@@ -111,7 +111,7 @@ export class CollabConfig100554 extends LitElement {
                                 <div>#${index + 1}</div>
                                 <div>
                                     <span class="fa" .innerHTML="${service.icon}"></span> 
-                                    ${service.name}
+                                    ${service.widget}
                                 </div>
                             </div>
                             <div class="groupInfos" style="justify-content:end;">
@@ -134,7 +134,7 @@ export class CollabConfig100554 extends LitElement {
         <ul class="listView">
             ${repeat(
                 this.userServices,
-                ((item: IService) => item.name) as any,
+                ((item: IService) => item.widget) as any,
                 ((service: IService, index: any) => {
                     return html`
                     <li>
@@ -142,7 +142,7 @@ export class CollabConfig100554 extends LitElement {
                             <div>#${index + 1}</div>
                             <div>
                                 <span class="fa" .innerHTML="${service.icon}"></span> 
-                                ${service.name}
+                                ${service.widget}
                             </div>
                         </div>
                         <div class="groupInfos" style="justify-content:end;display:flex; gap:1rem;">
@@ -151,12 +151,7 @@ export class CollabConfig100554 extends LitElement {
                                 <span class="groupHidden" style="display:none">
                                     <a myIndex="${index}" @click="${this.desactiveService}">Desactivate</a>
                                     <span style="margin: 0px 1rem">|</span>
-                                    <label>Style</label>
-                                    <select  myIndex="${index}" @change="${this.changeClassName}"> 
-                                    <option value="" ?selected="${service && !['separator-left', 'separator-right'].includes(service.className as any)}"></option>
-                                    <option value="separator-left" ?selected="${service.className === 'separator-left'}">separator-left</option>
-                                    <option value="separator-right" ?selected="${service.className === 'separator-right'}">separator-right</option>
-                                    </select>
+                                    
                                 </span>
                             </div>
                             <div>
@@ -172,6 +167,13 @@ export class CollabConfig100554 extends LitElement {
         `
 
     }
+
+    /*<label>Style</label>
+    <select  myIndex="${index}" @change="${this.changeClassName}"> 
+    <option value="" ?selected="${service && !['separator-left', 'separator-right'].includes(service.className as any)}"></option>
+    <option value="separator-left" ?selected="${service.className === 'separator-left'}">separator-left</option>
+    <option value="separator-right" ?selected="${service.className === 'separator-right'}">separator-right</option>
+    </select>*/
 
     private infos:{ toolbar: undefined | HTMLElement } = {} as any;
     private setInfos() {
@@ -215,7 +217,7 @@ export class CollabConfig100554 extends LitElement {
 
         if (!this.userServices[indexOri]) return;
 
-        this.userServices[indexOri].className = el.value as any;
+        this.userServices[indexOri].widget = el.value as any;
 
         if (el.parentElement) el.parentElement.style.display = 'none';
         this.userServices = [...this.userServices] as IService[];
@@ -237,7 +239,7 @@ export class CollabConfig100554 extends LitElement {
         const avaliableArray = [...this.avaliableServices];
 
         const obj = userArray[indexOri];
-        if (!obj || obj.readOnly) {
+        if (!obj ) {
 
             this.error = 'This service cannot be deactivated!'
             setTimeout(() => { this.error = '' }, 3000);

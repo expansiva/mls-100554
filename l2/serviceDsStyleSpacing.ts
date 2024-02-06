@@ -30,14 +30,12 @@ export class ServiceDsStyleSpacing extends ServiceBase {
 
     public details: IService = {
         icon: '&#xe4ba',
-        name: 'Spacing',
-        mode: 'B',
+        state: 'background',
         position: 'right',
-        readOnly: false,
         tooltip: 'Spacing',
-        className: undefined,
-        tags: [],
-        levels: [3]
+        visible: true,
+        widget: '_100554_serviceDsStyleSpacing',
+        level: [3]
     }
 
     public onClickLink = (op: string): boolean => {
