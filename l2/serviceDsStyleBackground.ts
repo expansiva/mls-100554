@@ -23,7 +23,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
     @property() helper: string = '_100554_serviceDsStyleBackground';
 
-    @property() info: IMyInfoBackground = { tp: '', aux: '', itens: [] };
+    @property() info: IMyInfoBackground = { tp: 'background', aux: '', itens: [] };
 
     constructor() {
         super();
