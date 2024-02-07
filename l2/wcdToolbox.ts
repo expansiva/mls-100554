@@ -176,7 +176,6 @@ export class WCDToolbox extends CollabLitElement {
         });
 
         this.shadowRoot.appendChild(menuContainer);
-
         updateSize(this.elMain, this, true);
 
     }
@@ -425,8 +424,12 @@ export class WCDToolbox extends CollabLitElement {
 
     updated(changedProperties: any) {
 
+        
         if (!this.parentElement) return;
-        if(this.parentElement.style.flex) updateSize(this.parentElement, this, true);
+        /*if (this.parentElement.style.flex) {
+            updateSize(this.parentElement, this, true);
+        }*/
+        updateSize(this.parentElement, this, true);
 
     }
 
