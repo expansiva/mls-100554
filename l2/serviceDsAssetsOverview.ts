@@ -183,6 +183,7 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
     }
 
     private async handleDelete() {
+
         if (!this.ds) return;
         if (this.state.actualAssetsItem && this.state.actualFileInfo) {
 

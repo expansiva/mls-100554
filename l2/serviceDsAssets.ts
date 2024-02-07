@@ -1,6 +1,6 @@
 /// <mls shortName="serviceDsAssets" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
-import { html, css } from 'lit';
+import { html, css, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initCollabInputTag, CollabInputTag } from './_100554_collabInputTag';
@@ -58,7 +58,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
             };
             const { project } = mls.actual[5];
             const { mode } = mls.actual[3];
-            mls.events.fire([this.level], ['DSAssetsSelected'], JSON.stringify(params), 100);
+            mls.events.fire([3], ['DSAssetsSelected'], JSON.stringify(params), 100);
             if (this.lastProject !== project || this.lastDsIndex !== mode) {
                 this.loading = true;
                 this.init();
@@ -69,12 +69,14 @@ export class ServiceDsAssets100554 extends ServiceBase {
             const params: IAssetsEventSelectedParams = {
                 service: [],
             };
-            mls.events.fire([this.level], ['DSAssetsUnSelected'], JSON.stringify(params), 0);
+            mls.events.fire([3], ['DSAssetsUnSelected'], JSON.stringify(params), 0);
         }
     }
 
     private setEvents() {
-
+        mls.events.addEventListener([3], ['DSAssetsChanged'], (ev) => {
+            this.onDsAssetsChanged(ev);
+        });
     }
 
     async connectedCallback() {
@@ -125,7 +127,6 @@ export class ServiceDsAssets100554 extends ServiceBase {
     private treeController = {
         isNodeReadOnly: true
     }
-
     private filesController: IFileController = {
         totalFiles: 0,
         totalFilesSelected: 0,
@@ -181,7 +182,6 @@ export class ServiceDsAssets100554 extends ServiceBase {
         return true;
     }
 
-
     private async initDsInstance(project: number, dsIndex: number) {
         this.dsInstance = mls.l3.getDSInstance(project, dsIndex);
         await this.dsInstance.init();
@@ -204,7 +204,8 @@ export class ServiceDsAssets100554 extends ServiceBase {
         const listFiles: IStoreFiles = mls.stor.files;
         const onlyProjects = Object.keys(listFiles).filter((file) => listFiles[file].project === project);
         onlyProjects.forEach((item) => {
-            const { level, folder } = listFiles[item];
+            const { level, folder, status } = listFiles[item];
+            if (status === 'deleted') return;
             if (level === 3 && (folder.startsWith(`ds/${nameDs}/`) || folder === `ds/${nameDs}`)) rc[item] = listFiles[item];
         });
 
@@ -231,7 +232,26 @@ export class ServiceDsAssets100554 extends ServiceBase {
             };
 
         })
+    }
 
+    private async onDsAssetsChanged(ev: mls.events.IEvent) {
+        if (!ev.desc) return;
+        const params: IAssetsEventChangedParams = JSON.parse(ev.desc);
+        if (params.position === 'left') return;
+        if (params.action === "delete") {
+            this.onDelete();
+        }
+    }
+
+    private async onDelete() {
+
+        this.actualFiles = [];
+        // await this.prepareFiles();
+        this.updateActualFiles(this.actualPath);
+        const params: IAssetsEventSelectedParams = {
+            service: [],
+        };
+        mls.events.fire([3], ['DSAssetsUnSelected'], JSON.stringify(params), 500);
     }
 
     private handleFolderClick(e: MouseEvent, folder: string) {
@@ -252,7 +272,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
     }
 
     private updateActualFiles(folder: string) {
-        const files = this.getFilesInFolder(this.tree, folder);
+        const files = this.getFilesInFolder(folder);
         this.filesController.totalFiles = files.length;
         this.filesController.totalFilesSelected = 0;
         this.filesController.filesSelected = new Set([]);
@@ -271,19 +291,11 @@ export class ServiceDsAssets100554 extends ServiceBase {
         return isreadonly;
     }
 
-    private getFilesInFolder(tree: any, folder: string) {
-        const folders = folder.split('/');
-        let currentTree = tree;
-        for (const folder of folders) {
-            if (currentTree[folder]) {
-                currentTree = currentTree[folder];
-            } else {
-                return [];
-            }
-        }
-        return Object.keys(currentTree)
-            .map(key => currentTree[key].shortName ? currentTree[key].info : undefined)
-            .filter(value => value !== undefined);
+    private getFilesInFolder(folder: string) {
+        const filesInFolder: mls.stor.IFileInfo[] = Object.keys(this.files.list).map((key) => {
+            if (this.files.list[key].folder === folder && this.files.list[key].status !== "deleted") return this.files.list[key]
+        }).filter(value => value !== undefined) as mls.stor.IFileInfo[]
+        return filesInFolder;
     }
 
     private onCheckAllChange(ev: MouseEvent) {
@@ -378,7 +390,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
         const content = file;
         const path = this.actualPath;
         await this.dsInstance.assets.add(path, file.name, tags, description, assetType, content, undefined);
-        await this.prepareFiles();
+        // await this.prepareFiles();
         this.updateActualFiles(this.actualPath);
         this.isAddMode = false;
 
@@ -443,23 +455,27 @@ export class ServiceDsAssets100554 extends ServiceBase {
                     
                 </thead>
                 <tbody>
-                    ${this.actualFiles.map((file) => {
-            const extWithoutDot: string = file.extension.substring(1, file.extension.length);
-            const extension = this.objIcons[extWithoutDot];
-            const typeFileIcon = extension || this.objIcons['none'];
-            return html`
-                            <tr @click=${(e: MouseEvent) => { this.onFileClick(e, file) }}>
+
+                ${repeat(this.actualFiles, ((key: any) => key) as any,
+                    ((k: any, index: any) => {
+                        const extWithoutDot: string = k.extension.substring(1, k.extension.length);
+                        const extension = this.objIcons[extWithoutDot];
+                        const typeFileIcon = extension || this.objIcons['none'];
+                        return html`
+                            <tr @click=${(e: MouseEvent) => { this.onFileClick(e, k) }}>
                                 <td>
                                     <input type="checkbox"></input>
                                 </td>
                                 <td>
                                     <i class="${typeFileIcon}"></i>
                                 </td>
-                                <td>${file.shortName}</td>
-                                <td>${file.versionRef}</td>
+                                <td>${k.shortName}</td>
+                                <td>${k.versionRef}</td>
                             </tr>
                         `
-        })}
+                    }) as any
+
+                )}
                 </tbody>
             </table>
             <div class="actions" style="display:${this.treeController.isNodeReadOnly ? 'none' : ''}">
