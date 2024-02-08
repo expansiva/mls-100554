@@ -1,19 +1,20 @@
 /// <mls shortName="wcdToolbox" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": [ "wcd-toolbox-item-action-size-100554", "wcd-toolbox-item-action-margin-100554", "wcd-toolbox-item-action-padding-100554","wcd-toolbox-item-action-edit-quill-100554","wcd-toolbox-item-action-move-100554"]
- * } 
- */
 
+//  @mlsComponentDetails {
+ //  "webComponentDependencies": [ "wcd-toolbox-item-action-size-100554", "wcd-toolbox-item-action-margin-100554", "wcd-toolbox-item-action-padding-100554","wcd-toolbox-item-action-edit-quill-100554","wcd-toolbox-item-action-move-100554"]
+//  }  
+ 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { IActionsToolbox, IActionsToolboxMenu, updateSize } from './_100554_fcaGlobal';
+import { IActionsToolbox, IActionsToolboxMenu } from './_100554_fcaGlobal';
 import * as states from './_100554_fcaCollabStore';
 
 @customElement('wcd-toolbox-100554')
 export class WCDToolbox extends CollabLitElement {
+
+    // ------------ PROPERTIES ------------------
 
     @property({ type: String, reflect: true })
     private level: string | undefined;
@@ -23,7 +24,7 @@ export class WCDToolbox extends CollabLitElement {
 
     private elMain: HTMLElement | undefined;
 
-    private itens: IActionsToolbox[] = [];
+    public actions: IActionsToolbox[] = [];
 
     get lastHelper() {
         if (!this.parentElement) return '';
@@ -35,25 +36,46 @@ export class WCDToolbox extends CollabLitElement {
         (this.parentElement as any)['lasthelper'] = helper;
     }
 
-    public setItensActions(acts: IActionsToolbox[]): void {
-        this.itens = acts;
-        this.renderItens();
+    // ------------ COMPONENT-------------------
+
+    private isFirstUpdate = true;
+    firstUpdated() {
+
+        this.renderActions(this.actions);
+        if (this.parentElement) {
+            this.parentElement.style.position = 'relative';
+            
+        }
+        
+        if (!this.shadowRoot || !this.parentElement) return;
+        this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
+        
+        this.updateSize(this.elMain, this, true);
+
     }
 
     render() {
         return html``;
     }
 
-    private renderItens(): void {
+    // ------------ IMPLEMENTATION-------------------
+
+    public setIconsWcdToolbox(act: IActionsToolbox[], useSelf: boolean = false): void {
+
+        if (useSelf) this.renderActions(this.actions); 
+        else this.renderActions(act); 
+    }
+
+    private renderActions(arr:IActionsToolbox[]): void {
 
         if (!this.shadowRoot) return;
-
+        
         let lastHelper: HTMLElement | undefined;
 
         const allItens = this.shadowRoot.querySelectorAll('*');
         allItens.forEach((i: Element) => i.remove());
 
-        this.itens.forEach((i: IActionsToolbox) => {
+        arr.forEach((i: IActionsToolbox) => {
 
             switch (i.tp) {
                 case 'menu':
@@ -66,22 +88,9 @@ export class WCDToolbox extends CollabLitElement {
                 case 'back-button':
                     this.addBackButton(i);
                     break;
-                case 'action-editQuill':
-                    this.addActionEditQuill(i);
+                case 'action':
+                    this.addAction(i);
                     break;
-                case 'action-size':
-                    this.addActionSize(i);
-                    break;
-                case 'action-margin':
-                    this.addActionMargin(i);
-                    break;
-                case 'action-padding':
-                    this.addActionPadding(i);
-                    break;
-                case 'action-move':
-                    this.addActionMove(i);
-                    break;
-
                 default: '';
             }
 
@@ -95,9 +104,7 @@ export class WCDToolbox extends CollabLitElement {
 
     private addMenu(item: IActionsToolbox): void {
 
-        if (!this.shadowRoot || !this.parentElement) return undefined;
-
-        if (!this.elMain) this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
+        if (!this.elMain || !this.shadowRoot) return undefined;
 
         const menuContainer = document.createElement('wcd-toolbox-menu');
         const container = document.createElement('wcd-toolbox-menu-container');
@@ -131,7 +138,7 @@ export class WCDToolbox extends CollabLitElement {
             containerItens.appendChild(a);
             a.onclick = (e) => {
                 e.stopPropagation();
-                i.onclick();
+                i.onclick(e, this);
             }
 
         });
@@ -139,7 +146,7 @@ export class WCDToolbox extends CollabLitElement {
         container.appendChild(containerItens);
         if (item.menuSubItens.length > 0) {
 
-            //iSubItens.className = 'fa-solid fa-ellipsis-vertical menuItensFcaToolbox';
+
             iSubItens.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>`;
 
             iSubItens.onclick = () => {
@@ -169,14 +176,14 @@ export class WCDToolbox extends CollabLitElement {
             a.appendChild(span);
             a.onclick = (e) => {
                 e.stopPropagation();
-                i.onclick();
+                i.onclick(e, this);
             }
             containerSubItens.appendChild(a);
 
         });
 
         this.shadowRoot.appendChild(menuContainer);
-        updateSize(this.elMain, this, true);
+        this.updateSize(this.elMain, this, true);
 
     }
 
@@ -196,42 +203,11 @@ export class WCDToolbox extends CollabLitElement {
         el.onclick = (e: MouseEvent) => {
             e.stopPropagation();
             this.lastHelper = '';
-            if (item.onclick) item.onclick();
+            if (item.onclick) item.onclick(e, this);
 
         }
 
         this.shadowRoot.appendChild(el);
-
-    }
-
-    private addActionEditQuill(item: IActionsToolbox): void {
-
-        if (!this.shadowRoot || !this.parentElement || !item.onclick) return;
-
-        if (!this.elMain) this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
-
-        this.ondblclick = (ev: MouseEvent) => {
-
-            if (!item.onclick || !this.shadowRoot || !this.elMain) return;
-            item.onclick(ev);
-
-            const el = document.createElement('wcd-toolbox-item-action-edit-quill-100554');
-
-            el.setAttribute('text', this.elMain.outerHTML);
-            this.elMain.style.opacity = '0';
-
-            el.addEventListener("onChange", (obj: any) => {
-
-                if (!obj || !obj.detail || !obj.detail.valor) return;
-
-                let ret = `{"tp":"html","html":"${obj.detail.valor}" }`;
-                super.setCollabState(states.CHANGESTATE, ret);
-
-            });
-
-            this.shadowRoot.appendChild(el);
-
-        }
 
     }
 
@@ -253,7 +229,7 @@ export class WCDToolbox extends CollabLitElement {
 
         el.onclick = (e: MouseEvent) => {
             e.stopPropagation();
-            if (item.onclick) item.onclick();
+            if (item.onclick) item.onclick(e, this);
             this.lastHelper = item.title as string;
         }
 
@@ -263,173 +239,71 @@ export class WCDToolbox extends CollabLitElement {
 
     }
 
-    private addActionPadding(item: IActionsToolbox): HTMLElement | undefined {
+    private addAction(act: IActionsToolbox): void {
 
-        if (!this.shadowRoot || !this.parentElement || !['p-l2', 'p-m1', 'p-r2', 'p-m3'].includes(item.position)) return undefined;
+        if (!this.elMain || !this.shadowRoot || !act.widget) return undefined;
 
-        if (!this.elMain) this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
-
-        const el = document.createElement('wcd-toolbox-item-action-padding-100554');
+        const el = document.createElement(act.widget);
         el.innerHTML = '';
-        el.className = `${item.position} f-${item.format}`;
-        (el as any).myFather = this;
+        el.className = `${act.position} f-${act.format}`;
+        (el as any).myParent = this;
         (el as any).elMain = this.elMain;
+        el.style.cursor = act.cursor as string;
 
-        if (item.position === 'p-l2') {
-            el.style.cursor = 'ew-resize';
-            el.setAttribute('tpChange', 'left');
-        }
-        else if (item.position === 'p-m1') {
-            el.style.cursor = 'ns-resize';
-            el.setAttribute('tpChange', 'top');
-        }
-        else if (item.position === 'p-r2') {
-            el.style.cursor = 'ew-resize';
-            el.setAttribute('tpChange', 'right');
-        }
-        else if (item.position === 'p-m3') {
-            el.style.cursor = 'ns-resize';
-            el.setAttribute('tpChange', 'bottom');
+        if (act.attrs) {
+            act.attrs.forEach((attr) => {
+                el.setAttribute(attr.attr, attr.value);
+            })
         }
 
         el.addEventListener("onChange", (obj: any) => {
 
             if (!obj || !obj.detail || !obj.detail.valor) return;
-
-            let ret = `{"tp":"style","style":${obj.detail.valor} }`;
-            super.setCollabState(states.CHANGESTATE, ret);
+            super.setCollabState(states.CHANGESTATE, obj.detail.valor);
 
         })
 
         this.shadowRoot.appendChild(el);
 
-        return el;
-
     }
 
-    private addActionMove(item: IActionsToolbox): HTMLElement | undefined {
+    public updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean):void {
 
-        if (!this.shadowRoot || !this.parentElement || !['p-m2'].includes(item.position)) return undefined;
+    
+        if (!elBase) return;
+        setTimeout(() => {
+            const display = elChange.style.display;
+            elChange.style.display = 'none!important';
 
-        //if (!this.elMain) this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
+            const ad3 = (n1: number, s1: string, s2: string): number => n1 + parseInt(s1, 10) + parseInt(s2, 10);
 
-        const el = document.createElement('wcd-toolbox-item-action-move-100554');
-        el.innerHTML = item.iconSvg as  string;
-        el.className = `${item.position} `;
-        (el as any).myFather = this;
-        (el as any).elMain = this.parentElement;
+            const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom, paddingLeft, paddingRight } = window.getComputedStyle(elBase);
 
-        el.addEventListener("onChange", (obj: any) => {
+            let { width, height, y } = elBase.getBoundingClientRect();
 
-            if (!obj || !obj.detail || !obj.detail.valor) return;
+            let left = 0;
+            let top = 0;
+            left -= parseInt(marginLeft, 10);
+            top -= parseInt(marginTop, 10);
+            if (top > 0) top = 0;
 
-            let ret = `{"tp":${obj.detail.startDrop ? '"drag"': '"drop"'},"drop":${obj.detail.valor} }`;
-            super.setCollabState(states.CHANGESTATE, ret);
+            width = Math.max(ad3(width, marginLeft, marginRight), ad3(0, paddingLeft, paddingRight));
 
-        })
+            if (width > elBase.ownerDocument.body.clientWidth) width -= 20;
 
-        this.shadowRoot.appendChild(el);
+            height = Math.max(ad3(height, marginTop, marginBottom), ad3(0, paddingTop, paddingBottom));
 
-        return el;
+            if (changePosition) {
+                elChange.style.left = `${(left - 1) < 0 ? 0 : (left - 1)}px`;
+                elChange.style.top = `${top - 1}px`;
+            }
 
-    }
+            elChange.style.width = `${width + 2}px`;
+            elChange.style.height = `${height + 2}px`;
+            elChange.style.display = display;
 
-    private addActionMargin(item: IActionsToolbox): HTMLElement | undefined {
+        }, 50);
 
-        if (!this.shadowRoot || !this.parentElement || !['p-l2', 'p-m1', 'p-r2', 'p-m3'].includes(item.position)) return undefined;
-
-        if (!this.elMain) this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
-
-        const el = document.createElement('wcd-toolbox-item-action-margin-100554');
-        el.innerHTML = '';
-        el.className = `${item.position} f-${item.format}`;
-        (el as any).myFather = this;
-        (el as any).elMain = this.elMain;
-
-        if (item.position === 'p-l2') {
-            el.style.cursor = 'ew-resize';
-            el.setAttribute('tpChange', 'left');
-        }
-        else if (item.position === 'p-m1') {
-            el.style.cursor = 'ns-resize';
-            el.setAttribute('tpChange', 'top');
-        }
-        else if (item.position === 'p-r2') {
-            el.style.cursor = 'ew-resize';
-            el.setAttribute('tpChange', 'right');
-        }
-        else if (item.position === 'p-m3') {
-            el.style.cursor = 'ns-resize';
-            el.setAttribute('tpChange', 'bottom');
-        }
-
-        el.addEventListener("onChange", (obj: any) => {
-
-            if (!obj || !obj.detail || !obj.detail.valor) return;
-
-            let ret = `{"tp":"style","style":${obj.detail.valor} }`;
-            super.setCollabState(states.CHANGESTATE, ret);
-
-        })
-
-        this.shadowRoot.appendChild(el);
-
-        return el;
-
-    }
-
-    private addActionSize(item: IActionsToolbox): HTMLElement | undefined {
-
-        if (!this.shadowRoot || !this.parentElement || !['p-r2', 'p-m3', 'p-r3'].includes(item.position)) return undefined;
-
-        if (!this.elMain) this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
-
-        const el = document.createElement('wcd-toolbox-item-action-size-100554');
-        el.style.cursor = 'nwse-resize';
-        el.innerHTML = '';
-        el.className = `${item.position} f-${item.format}`;
-        el.setAttribute('tpChange', 'all');
-        (el as any).myFather = this;
-        (el as any).elMain = this.elMain;
-
-        if (item.position === 'p-r2') {
-            el.style.cursor = 'ew-resize';
-            el.setAttribute('tpChange', 'width');
-        }
-        if (item.position === 'p-m3') {
-            el.style.cursor = 'ns-resize';
-            el.setAttribute('tpChange', 'height');
-        }
-
-        el.addEventListener("onChange", (obj: any) => {
-
-            if (!obj || !obj.detail || !obj.detail.valor) return;
-
-            let ret = `{"tp":"style","style":${obj.detail.valor} }`;
-            super.setCollabState(states.CHANGESTATE, ret);
-
-        })
-
-        this.shadowRoot.appendChild(el);
-
-        return el;
-
-    }
-
-    firstUpdated() {
-        if (!this.shadowRoot || !this.parentElement) return;
-        this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
-
-    }
-
-    updated(changedProperties: any) {
-
-        
-        if (!this.parentElement) return;
-        /*if (this.parentElement.style.flex) {
-            updateSize(this.parentElement, this, true);
-        }*/
-        updateSize(this.parentElement, this, true);
 
     }
 
@@ -581,7 +455,6 @@ export class WCDToolbox extends CollabLitElement {
             box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);
         }
         
-        /* configuration f-squate */
 
         .f-square{
             width:23px;
@@ -640,8 +513,6 @@ export class WCDToolbox extends CollabLitElement {
             bottom:-4px;
             right:-4px;
         }
-
-        /* end f-square */
 
         wcd-toolbox-menu.p-m1{
             top:-30px
@@ -720,6 +591,5 @@ export class WCDToolbox extends CollabLitElement {
 
 
     `;
-
 
 }
