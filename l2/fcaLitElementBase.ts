@@ -49,7 +49,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     }
 
     render() {
-        
+
 
         let objRender;
         switch (this.renderType) {
@@ -73,10 +73,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     shouldUpdate(changedProperties: Map<string, string>): boolean {
         // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = não executa o render().
 
-
-
         const valorAntigo = changedProperties.get('renderType');
-
 
         if (valorAntigo === 'editactive' && this.renderType !== 'editactive') {
 
@@ -109,7 +106,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
                 const all = document.querySelectorAll('*[renderType="editactive"]');
                 Array.from(all).forEach((i) => i.setAttribute('renderType', 'edit'));
                 this.onclick = undefined as any;
-                this.updateMyInnerHtml();
+                this.updateMyInnerHtmlIfNeed();
 
             }
 
@@ -159,21 +156,24 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     }
 
-    private async updateMyInnerHtml(uptType: boolean = true) {
+    private async updateMyInnerHtmlIfNeed(uptType: boolean = true) {
 
-        let elMain = this.querySelector(`${this.widget}:first-child`);
-        if (!elMain) return;
+        if (this.innerHTML.indexOf('<fca-') >= 0) {
+            console.info(this)
+    
+            let elMain = this.querySelector(`${this.widget}:first-child`);
+            if (!elMain) return;
 
-        elMain = elMain.cloneNode(true) as HTMLElement;
+            elMain = elMain.cloneNode(true) as HTMLElement;
 
-        const el = await this.clearTree(document.createElement('span'), elMain as HTMLElement);
+            const el = await this.clearTree(document.createElement('span'), elMain as HTMLElement);
 
-        this.myInnerHTML = el ? el.innerHTML : this.myInnerHTML;
+            this.myInnerHTML = el ? el.innerHTML : this.myInnerHTML;
 
-        if (!uptType) {
             const l = this.level;
             this.setAttribute('level', '0');
             this.setAttribute('level', l as string);
+
         }
 
         if (uptType) this.setAttribute('renderType', 'editactive');
