@@ -136,6 +136,7 @@ export class CollabConfig100554 extends LitElement {
                             <div>#${index + 1}</div>
                             <div>
                                 ${service.widget}
+                                <span class="badge" style="display:${service.visible ? 'none' : 'inline-block'}">hidden<span>
                             </div>
                         </div>
                         <div class="groupInfos" style="justify-content:end;display:flex; gap:1rem;">
