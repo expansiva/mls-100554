@@ -7,6 +7,96 @@
  */
 
 import { html, unsafeHTML } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { FcaLitElementBase } from './_100554_fcaLitElementBase';
+import { getTemplateActionMargin } from './_100554_wcdToolboxItemActionMargin';
+
+@customElement('fca-col-100554')
+export class FcaCol extends FcaLitElementBase { 
+
+    // ------------ PROPERTIES ------------------
+
+
+    private styleElMain: CSSStyleDeclaration | undefined = undefined;
+
+    // ------------ COMPONENT--------------------
+
+    firstUpdated(changedProperties: any) {
+
+        super.firstUpdated(changedProperties);
+
+        const el = document.createElement('span');
+        el.style.cssText = this.styleel ? this.styleel : '';
+        this.styleElMain = el.style;
+
+    }
+
+    // -------------- ABSTRACT ------------------
+
+    public renderPreview = (param: string): any => {
+
+        let code = `
+            <${this.widget} style="${this.styleel}">
+                ${this.myInnerHTML}
+            </${this.widget}>
+            
+        `;
+
+        return html`${unsafeHTML(code)}`;
+
+    }
+
+    public renderEditActive = (param: string): any => {
+
+
+        const ret = getTemplateActionMargin('', '');
+
+        let code = `
+            <${this.widget} style="${this.styleel}">
+                ${this.myInnerHTML}
+            </${this.widget}>
+            
+        `;
+
+        return html`
+            ${unsafeHTML(code)}
+            <wcd-toolbox-100554 level="${this.level}" widget="${this.widget}" 
+            .actions=${[ret]} >
+            </wcd-toolbox-100554>
+        `;
+
+    }
+
+
+    public changeStateHtml(html: string): void {
+
+    }
+
+    public changeStateStyle(style: {}): void {
+
+        if (!this.styleElMain || !style) return;
+
+        const el = this.querySelector(`${this.widget}:first-child`) as HTMLElement
+        if (el) {
+
+            this.styleElMain.cssText = el.style.cssText;
+            Object.assign(this.styleElMain, style as CSSStyleDeclaration);
+            el.style.cssText = this.styleElMain.cssText;
+            this.styleel = el.style.cssText
+
+        }
+
+    }
+
+    // ----------- IMPLEMENTATION ---------------
+
+
+}
+
+
+
+/*
+import { html, unsafeHTML } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { FcaLitElementBase } from './_100554_fcaLitElementBase';
 import { IActionLevels } from './_100554_fcaGlobal';
@@ -120,4 +210,4 @@ export class FCACol extends FcaLitElementBase {
 
     }
 
-}
+}*/

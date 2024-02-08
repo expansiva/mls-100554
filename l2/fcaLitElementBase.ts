@@ -25,6 +25,8 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     @property({ type: String, reflect: true })
     public styleel: string | undefined;
 
+    public myInnerHTML = '';
+
 
     // ------------ ABSTRACT ------------------
 
@@ -36,11 +38,18 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     // ------------ COMPONENT-------------------
 
+    connectedCallback() {
+        super.connectedCallback();
+        this.configFirstTime();
+
+    }
+
     createRenderRoot() {
         return this;
     }
 
     render() {
+        
 
         let objRender;
         switch (this.renderType) {
@@ -63,6 +72,8 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     shouldUpdate(changedProperties: Map<string, string>): boolean {
         // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = não executa o render().
+
+
 
         const valorAntigo = changedProperties.get('renderType');
 
@@ -98,7 +109,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
                 const all = document.querySelectorAll('*[renderType="editactive"]');
                 Array.from(all).forEach((i) => i.setAttribute('renderType', 'edit'));
                 this.onclick = undefined as any;
-                this.setAttribute('rendertype', 'editactive');
+                this.updateMyInnerHtml();
 
             }
 
@@ -107,6 +118,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     }
 
     // ------------ IMPLEMENTATION-------------------
+
 
     private doChangeState(js: string): void {
 
@@ -135,6 +147,63 @@ export abstract class FcaLitElementBase extends CollabLitElement {
         }
 
     }
+
+    private configFirstTime(): void {
+
+        if (this.myInnerHTML === '' && this.innerHTML !== '') {
+
+            this.myInnerHTML = this.innerHTML;
+            this.innerHTML = '';
+
+        }
+
+    }
+
+    private async updateMyInnerHtml(uptType: boolean = true) {
+
+        let elMain = this.querySelector(`${this.widget}:first-child`);
+        if (!elMain) return;
+
+        elMain = elMain.cloneNode(true) as HTMLElement;
+
+        const el = await this.clearTree(document.createElement('span'), elMain as HTMLElement);
+
+        this.myInnerHTML = el ? el.innerHTML : this.myInnerHTML;
+
+        if (!uptType) {
+            const l = this.level;
+            this.setAttribute('level', '0');
+            this.setAttribute('level', l as string);
+        }
+
+        if (uptType) this.setAttribute('renderType', 'editactive');
+
+    }
+
+    private async clearTree(elemento: HTMLElement, elMain: HTMLElement) {
+
+
+        for await (const i of elMain.children) {
+
+            const tag = i.tagName.toLowerCase();
+            if (!tag.startsWith('fca-')) {
+
+                await this.clearTree(elemento, i as HTMLElement);
+
+            } else if (tag.startsWith('fca-')) {
+
+                const clone = i.cloneNode();
+                elemento.appendChild(clone);
+                await this.clearTree(clone as HTMLElement, i as HTMLElement);
+
+            }
+
+        }
+
+        return elemento;
+
+    }
+
 
 }
 

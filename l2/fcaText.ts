@@ -92,7 +92,8 @@ export class FcaText extends FcaLitElementBase {
             this.styleElMain.cssText = el.style.cssText;
             Object.assign(this.styleElMain, style as CSSStyleDeclaration);
             el.style.cssText = this.styleElMain.cssText;
-            this.styleel = el.style.cssText
+            //this.styleel = el.style.cssText;
+            this.setAttribute('styleel', el.style.cssText);
 
         }
 
