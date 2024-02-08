@@ -22,8 +22,8 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf02d',
-        state: 'background',
-        position: 'right',
+        state: 'foreground',
+        position: 'left',
         tooltip: 'Components Design System',
         visible: true,
         widget: '_100554_serviceDsComponentsList',

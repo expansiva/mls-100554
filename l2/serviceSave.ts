@@ -22,7 +22,7 @@ export class ServiceSave extends ServiceBase {
     public details: IService = {
         icon: '&#xf0c7',
         state: 'background',
-        position: 'all',
+        position: 'left',
         tooltip: 'Save',
         visible: true,
         widget: '_100554_serviceSave',
