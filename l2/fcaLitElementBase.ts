@@ -3,6 +3,7 @@
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CollabLitElement, collabState } from './_100554_collabLitElement';
+import {IActionLevels} from './_100554_fcaGlobal';
 import * as states from './_100554_fcaCollabStore';
 
 export abstract class FcaLitElementBase extends CollabLitElement {
@@ -29,6 +30,8 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
 
     // ------------ ABSTRACT ------------------
+
+    abstract actions: IActionLevels;
 
     abstract renderPreview: (param: string) => any;
     abstract renderEditActive: (param: string) => any;

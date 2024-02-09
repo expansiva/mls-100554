@@ -2,9 +2,9 @@
 
 
 //  @mlsComponentDetails {
- //  "webComponentDependencies": [ "wcd-toolbox-item-action-size-100554", "wcd-toolbox-item-action-margin-100554", "wcd-toolbox-item-action-padding-100554","wcd-toolbox-item-action-edit-quill-100554","wcd-toolbox-item-action-move-100554"]
+//  "webComponentDependencies": [ "wcd-toolbox-item-action-size-100554", "wcd-toolbox-item-action-margin-100554", "wcd-toolbox-item-action-padding-100554","wcd-toolbox-item-action-edit-quill-100554","wcd-toolbox-item-action-move-100554"]
 //  }  
- 
+
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
@@ -38,18 +38,18 @@ export class WCDToolbox extends CollabLitElement {
 
     // ------------ COMPONENT-------------------
 
-    private isFirstUpdate = true;
     firstUpdated() {
 
-        this.renderActions(this.actions);
         if (this.parentElement) {
             this.parentElement.style.position = 'relative';
-            
+
         }
-        
+
         if (!this.shadowRoot || !this.parentElement) return;
         this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
-        
+
+        this.renderActions(this.actions);
+
         this.updateSize(this.elMain, this, true);
 
     }
@@ -62,14 +62,14 @@ export class WCDToolbox extends CollabLitElement {
 
     public setIconsWcdToolbox(act: IActionsToolbox[], useSelf: boolean = false): void {
 
-        if (useSelf) this.renderActions(this.actions); 
-        else this.renderActions(act); 
+        if (useSelf) this.renderActions(this.actions);
+        else this.renderActions(act);
     }
 
-    private renderActions(arr:IActionsToolbox[]): void {
+    private renderActions(arr: IActionsToolbox[]): void {
 
         if (!this.shadowRoot) return;
-        
+
         let lastHelper: HTMLElement | undefined;
 
         const allItens = this.shadowRoot.querySelectorAll('*');
@@ -267,9 +267,9 @@ export class WCDToolbox extends CollabLitElement {
 
     }
 
-    public updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean):void {
+    public updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean): void {
 
-    
+
         if (!elBase) return;
         setTimeout(() => {
             const display = elChange.style.display;
@@ -304,6 +304,51 @@ export class WCDToolbox extends CollabLitElement {
 
         }, 50);
 
+
+    }
+
+    public updateBaseNoPadding(elBase: HTMLElement, elChange: HTMLElement):void {
+
+        const st = elChange.style;
+        st.position = 'absolute';
+
+        const { borderTopWidth, borderBottomWidth, borderLeftWidth, borderRightWidth, paddingTop, paddingBottom, paddingLeft, paddingRight } = window.getComputedStyle(elBase);
+
+        let { width, height } = elBase.getBoundingClientRect();
+
+        const cd = (v1: string, v2: string): string => {
+
+            // ex: '1px' + '2px' = '3px'
+            let rc = parseInt(v1, 10) + parseInt(v2, 10);
+            if (rc < 0) rc = 0;
+            return rc + 'px';
+
+        };
+
+        const ci = (v1: string, v2: string): number => {
+
+            // ex: '1px' + '2px' = '3px'
+            let rc = parseInt(v1, 10) + parseInt(v2, 10);
+            if (rc < 0) rc = 0;
+            return rc;
+
+        };
+
+        let cWidth = ci(paddingLeft, paddingRight);
+        let cHeight = ci(paddingTop, paddingBottom);
+
+        if (cWidth > 0 && cWidth < width) width = width - cWidth;
+        if (cHeight > 0 && cHeight < height) height = height - cHeight;
+
+
+
+        st.left = cd(paddingLeft, borderLeftWidth);
+        st.bottom = cd(paddingBottom, borderBottomWidth);
+        st.top = cd(paddingTop, borderTopWidth);
+        st.right = cd(paddingRight, borderRightWidth);
+
+        st.width = width + 'px';
+        st.height = height + 'px';
 
     }
 

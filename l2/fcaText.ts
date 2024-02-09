@@ -9,8 +9,11 @@
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { FcaLitElementBase, IAllowCommand } from './_100554_fcaLitElementBase';
+import { IActionLevels } from './_100554_fcaGlobal';
 import { getTemplateActionMargin } from './_100554_wcdToolboxItemActionMargin';
-
+import { getTemplateActionPadding } from './_100554_wcdToolboxItemActionPadding';
+import { getTemplateActionSize } from './_100554_wcdToolboxItemActionSize';
+ 
 @customElement('fca-text-100554')
 export class FcaText extends FcaLitElementBase {
 
@@ -31,10 +34,14 @@ export class FcaText extends FcaLitElementBase {
         el.style.cssText = this.styleel ? this.styleel : '';
         this.styleElMain = el.style;
 
+        this.setMyActions();
+
     }
 
 
     // -------------- ABSTRACT ------------------
+
+    public actions: IActionLevels = {'1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': []}
 
     public allowCommand(cmd: string, scope: HTMLElement, target: HTMLElement): IAllowCommand{
 
@@ -62,8 +69,6 @@ export class FcaText extends FcaLitElementBase {
 
         if (!this.text) this.text = '';
 
-        const ret = getTemplateActionMargin('', '');
-
         let code = `
             <${this.widget} style="${this.styleel}">
                 ${this.text}
@@ -71,10 +76,13 @@ export class FcaText extends FcaLitElementBase {
             
         `;
 
+        let act = (this.actions as any)[this.level as any];
+        if (!act) act = [];
+        
         return html`
             ${unsafeHTML(code)}
             <wcd-toolbox-100554 level="${this.level}" widget="${this.widget}" 
-            .actions=${[ret]} >
+            .actions=${act} >
             </wcd-toolbox-100554>
         `;
 
@@ -100,7 +108,6 @@ export class FcaText extends FcaLitElementBase {
             this.styleElMain.cssText = el.style.cssText;
             Object.assign(this.styleElMain, style as CSSStyleDeclaration);
             el.style.cssText = this.styleElMain.cssText;
-            //this.styleel = el.style.cssText;
             this.setAttribute('styleel', el.style.cssText);
 
         }
@@ -108,6 +115,18 @@ export class FcaText extends FcaLitElementBase {
     }
 
     // ----------- IMPLEMENTATION ---------------
+
+    private setMyActions(): void {
+
+        const margin = getTemplateActionMargin('', '');
+        const padding = getTemplateActionPadding('', '');
+        const size = getTemplateActionSize('all', ''); 
+
+        this.actions[4].push(margin);
+        this.actions[4].push(padding);
+        this.actions[4].push(size);
+        
+    }
 
     private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand{
 

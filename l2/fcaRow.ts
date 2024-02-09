@@ -9,7 +9,9 @@
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { FcaLitElementBase, IAllowCommand } from './_100554_fcaLitElementBase';
+import { IActionLevels } from './_100554_fcaGlobal';
 import { getTemplateActionMargin } from './_100554_wcdToolboxItemActionMargin';
+import { getTemplateActionPadding } from './_100554_wcdToolboxItemActionPadding';
 
 @customElement('fca-row-100554')
 export class FcaCol extends FcaLitElementBase { 
@@ -28,9 +30,12 @@ export class FcaCol extends FcaLitElementBase {
         el.style.cssText = this.styleel ? this.styleel : '';
         this.styleElMain = el.style;
 
+        this.setMyActions();
     }
 
     // -------------- ABSTRACT ------------------
+
+    public actions: IActionLevels = {'1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': []}
 
     public renderPreview = (param: string): any => {
 
@@ -48,7 +53,8 @@ export class FcaCol extends FcaLitElementBase {
     public renderEditActive = (param: string): any => {
 
 
-        const ret = getTemplateActionMargin('', '');
+        let act = (this.actions as any)[this.level as any];
+        if (!act) act = [];
 
         let code = `
             <${this.widget} style="${this.styleel}">
@@ -60,7 +66,7 @@ export class FcaCol extends FcaLitElementBase {
         return html`
             ${unsafeHTML(code)}
             <wcd-toolbox-100554 level="${this.level}" widget="${this.widget}" 
-            .actions=${[ret]} >
+            .actions=${act} >
             </wcd-toolbox-100554>
         `;
 
@@ -98,6 +104,16 @@ export class FcaCol extends FcaLitElementBase {
     
 
     // ----------- IMPLEMENTATION ---------------
+
+    private setMyActions(): void {
+
+        const margin = getTemplateActionMargin('', '');
+        const padding = getTemplateActionPadding('', '');
+
+        this.actions[4].push(margin);
+        this.actions[4].push(padding);
+        
+    }
 
     private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand{
 

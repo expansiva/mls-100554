@@ -2,7 +2,7 @@
 
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IActionsToolbox, IActionsToolboxMenu } from './_100554_fcaGlobal';
+import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
 
 @customElement('wcd-toolbox-item-action-margin-100554')
@@ -38,7 +38,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
     }
 
     private initDragging(e: MouseEvent): void {
-console.info('teste')
+
         if (!this.elMain || !document.defaultView) return;
         this.startX = e.clientX;
         this.startY = e.clientY;
