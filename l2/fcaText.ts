@@ -8,7 +8,7 @@
  
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { FcaLitElementBase } from './_100554_fcaLitElementBase';
+import { FcaLitElementBase, IAllowCommand } from './_100554_fcaLitElementBase';
 import { getTemplateActionMargin } from './_100554_wcdToolboxItemActionMargin';
 
 @customElement('fca-text-100554')
@@ -35,6 +35,14 @@ export class FcaText extends FcaLitElementBase {
 
 
     // -------------- ABSTRACT ------------------
+
+    public allowCommand(cmd: string, scope: HTMLElement, target: HTMLElement): IAllowCommand{
+
+        if (cmd === 'move') return this.commandMove(scope, target);
+
+        return { inside: false, before: false, after: false };
+            
+    }
 
     public renderPreview = (param: string): any => {
 
@@ -101,6 +109,22 @@ export class FcaText extends FcaLitElementBase {
 
     // ----------- IMPLEMENTATION ---------------
 
+    private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand{
+
+        const myScope = this.getMyScope();
+
+        if(myScope !== scope) return { inside: false, before: false, after: false };
+
+        const parent = this.getMyParentFCA(this);
+        if (!parent) return { inside: false, before: false, after: false };
+
+        const insideFather = parent.allowCommand('move', scope, target);
+        const before = insideFather.inside;
+        const after = insideFather.inside;
+
+        return { inside: false, before, after }
+        
+    }
 
     //preciso limpar o style que já existe para não duplicar na segunda renderização
     private clearStyleTree(el: HTMLElement): HTMLElement {

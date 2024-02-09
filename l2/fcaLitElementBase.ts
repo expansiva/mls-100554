@@ -35,6 +35,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     abstract changeStateStyle(info: {}): void;
     abstract changeStateHtml(info: string): void;
+    abstract allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
 
     // ------------ COMPONENT-------------------
 
@@ -116,6 +117,30 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     // ------------ IMPLEMENTATION-------------------
 
+    public getMyScope(): FcaLitElementBase | undefined {
+
+        return this.closest('fca-page-100554') as FcaLitElementBase;
+
+    }
+
+    public getMyParentFCA(target: HTMLElement): FcaLitElementBase | undefined {
+
+        const parent = target.parentElement;
+        if (!parent) return;
+
+        const tag = parent.tagName.toLowerCase();
+
+        if (!tag.startsWith('fca-')) {
+
+            return this.getMyParentFCA(parent);
+
+        } else if (tag.startsWith('fca-')) {
+
+            return parent as FcaLitElementBase;
+
+        }
+
+    }
 
     private doChangeState(js: string): void {
 
@@ -160,7 +185,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
         if (this.innerHTML.indexOf('<fca-') >= 0) {
             console.info(this)
-    
+
             let elMain = this.querySelector(`${this.widget}:first-child`);
             if (!elMain) return;
 

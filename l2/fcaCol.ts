@@ -8,7 +8,7 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { FcaLitElementBase } from './_100554_fcaLitElementBase';
+import { FcaLitElementBase, IAllowCommand } from './_100554_fcaLitElementBase';
 import { getTemplateActionMargin } from './_100554_wcdToolboxItemActionMargin';
 
 @customElement('fca-col-100554')
@@ -88,7 +88,38 @@ export class FcaCol extends FcaLitElementBase {
 
     }
 
+    public allowCommand(cmd: string, scope: HTMLElement, target: HTMLElement): IAllowCommand{
+
+        if (cmd === 'move') return this.commandMove(scope, target);
+
+        return { inside: false, before: false, after: false };
+            
+    }
+
+    
+
     // ----------- IMPLEMENTATION ---------------
+
+    private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand{
+
+        const myScope = this.getMyScope();
+
+        if(myScope !== scope) return { inside: false, before: false, after: false };
+
+        const tag = target.tagName.toLocaleLowerCase();
+
+        const inside = tag !== 'fca-row-100554' && tag !== 'fca-col-100554';
+
+        const parent = this.getMyParentFCA(this);
+        if (!parent) return { inside, before: false, after: false };
+
+        const insideFather = parent.allowCommand('move', scope, target);
+        const before = insideFather.inside;
+        const after = insideFather.inside;
+
+        return { inside, before, after }
+        
+    }
 
 
 }
