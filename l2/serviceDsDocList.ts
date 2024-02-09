@@ -11,8 +11,9 @@ export class ServiceDsDocList100554 extends ServiceBase {
         this.setEvents();
     }
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
+    
     @property()
     list: IDocNode[] = [];
 

@@ -2,9 +2,9 @@
 
 // typescript new file
 
-export const getDepedencesByHtml = (mfile: mls.l2.editor.IMFile, html: string, withCss: boolean = false): Promise<IJSONDEpendence> => {
+export const getDepedencesByHtml = (mfile: mls.l2.editor.IMFile, html: string, withCss: boolean = false): Promise<IJSONDependence> => {
 
-    return new Promise<IJSONDEpendence>(async (resolve, reject) => {
+    return new Promise<IJSONDependence>(async (resolve, reject) => {
 
         try {
 
@@ -20,9 +20,9 @@ export const getDepedencesByHtml = (mfile: mls.l2.editor.IMFile, html: string, w
 
 }
 
-export const getDepedencesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boolean = false): Promise<IJSONDEpendence> => {
+export const getDepedencesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boolean = false): Promise<IJSONDependence> => {
 
-    return new Promise<IJSONDEpendence>(async (resolve, reject) => {
+    return new Promise<IJSONDependence>(async (resolve, reject) => {
 
         try {
 
@@ -47,6 +47,7 @@ async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html
     const myImportsMap: string[] = [];
     const myImports: string[] = [];
     const myCss: string[] = [];
+    let myTokens: string[] = [];
     const myErrors: { tag: string, error: string }[] = [];
     const myModules = {};
     const tags = extrairTagsCustomizadas(html);
@@ -60,6 +61,7 @@ async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html
         myImportsMap,
         myImports,
         myCss,
+        myTokens,
         myErrors,
         myModules,
         withCss
@@ -71,6 +73,7 @@ async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html
         importsMap: myImportsMap,
         importsJs: myImports,
         css: myCss,
+        tokens:myTokens,
         errors: myErrors
     }
 
@@ -99,6 +102,7 @@ async function loadMyNeedsToCompile(
     myImportsMap: string[],
     myImports: string[],
     myCss: string[],
+    myTokens:string[],
     myErrors: { tag: string, error: string }[],
     myModules: any,
     compileCss: boolean) {
@@ -141,7 +145,7 @@ async function loadMyNeedsToCompile(
         if (compileCss) {
             await getCss(myCss, name, mfile);
         }
-
+        await getTokens(myTokens, mfile)
 
 
     } catch (e: any) {
@@ -158,6 +162,7 @@ async function loadMyNeedsToCompile(
                 myImportsMap,
                 myImports,
                 myCss,
+                myTokens,
                 myErrors,
                 myModules,
                 compileCss
@@ -290,6 +295,24 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IM
 
 }
 
+async function getTokens(myTokens:string[],mfile: mls.l2.editor.IMFile) {
+
+    try {
+
+        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
+        const ds = mls.l3.getDSInstance(mfile.project, dsindex);
+        if (!ds) return;
+        const tokens = await (ds.tokens as any)['getTokensCss']();
+        myTokens.push(tokens);
+    } catch (e: any) {
+
+        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
+
+    }
+
+
+}
+
 
 
 function convertFileNameToTag(widget: string) {
@@ -322,11 +345,12 @@ function convertTagToFileName(tag: string) {
 
 }
 
-export interface IJSONDEpendence {
+export interface IJSONDependence {
     file: string,
     wcComponents: string[],
     importsMap: string[],
     importsJs: string[],
     css: string[],
+    tokens:string[],
     errors: { tag: string, error: string }[]
 }

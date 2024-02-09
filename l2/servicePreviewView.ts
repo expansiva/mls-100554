@@ -2,7 +2,7 @@
 
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDepedencesByHtml, IJSONDEpendence } from './_100554_libCompile';
+import { getDepedencesByHtml, IJSONDependence } from './_100554_libCompile';
 
 export const initServicePreviewView = '';
 @customElement('service-preview-view-100554')
@@ -323,11 +323,11 @@ export class ServicePreviewView extends LitElement {
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
         this.mountCSS(ret, iframe);
-
+        this.mountTokens(ret, iframe);
 
     }
 
-    private mountJSImporMap(info: IJSONDEpendence, ifr: HTMLIFrameElement): void {
+    private mountJSImporMap(info: IJSONDependence, ifr: HTMLIFrameElement): void {
 
         try {
 
@@ -348,7 +348,7 @@ export class ServicePreviewView extends LitElement {
 
     }
 
-    private mountJS(info: IJSONDEpendence, ifr: HTMLIFrameElement): void {
+    private mountJS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
 
         try {
 
@@ -386,7 +386,7 @@ export class ServicePreviewView extends LitElement {
 
     }
 
-    private mountCSS(info: IJSONDEpendence, ifr: HTMLIFrameElement): void {
+    private mountCSS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
 
         try {
 
@@ -405,6 +405,24 @@ export class ServicePreviewView extends LitElement {
         } catch (e: any) {
 
             console.info('Error mountCSS: ' + e.message);
+
+        }
+
+    }
+
+    
+    private mountTokens(info: IJSONDependence, ifr: HTMLIFrameElement): void {
+
+        try {
+            if (!ifr.contentDocument) return;
+            const css = info.tokens[0];
+            const style = document.createElement('style');
+            style.textContent = css;
+            ifr.contentDocument.body.appendChild(style);
+
+        } catch (e: any) {
+
+            console.info('Error mountTokens: ' + e.message);
 
         }
 
