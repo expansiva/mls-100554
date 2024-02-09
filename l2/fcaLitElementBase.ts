@@ -3,7 +3,7 @@
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CollabLitElement, collabState } from './_100554_collabLitElement';
-import {IActionLevels} from './_100554_fcaGlobal';
+import { IActionLevels } from './_100554_fcaGlobal';
 import * as states from './_100554_fcaCollabStore';
 
 export abstract class FcaLitElementBase extends CollabLitElement {
@@ -119,6 +119,31 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     }
 
     // ------------ IMPLEMENTATION-------------------
+
+    public getFCAComponents(scope: HTMLElement): FcaLitElementBase[] {
+
+        let ret: FcaLitElementBase[] = [];
+
+        const reentrance = (el: HTMLElement) => {
+
+            const tag = el.tagName.toLowerCase();
+            if (tag.startsWith('fca-')) {
+
+                ret.push(el as FcaLitElementBase);
+
+            } 
+
+            Array.from(el.children).forEach(i => {
+                reentrance(i as HTMLElement);
+            })
+
+        }
+
+        reentrance(scope);
+        
+        return ret;
+
+    }
 
     public getMyScope(): FcaLitElementBase | undefined {
 

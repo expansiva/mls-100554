@@ -1,6 +1,5 @@
 /// <mls shortName="wcdToolbox" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-
 //  @mlsComponentDetails {
 //  "webComponentDependencies": [ "wcd-toolbox-item-action-size-100554", "wcd-toolbox-item-action-margin-100554", "wcd-toolbox-item-action-padding-100554","wcd-toolbox-item-action-edit-quill-100554","wcd-toolbox-item-action-move-100554"]
 //  }  
@@ -245,6 +244,8 @@ export class WCDToolbox extends CollabLitElement {
 
         const el = document.createElement(act.widget);
         el.innerHTML = '';
+        if (act.iconSvg && act.iconSvg !== '') el.innerHTML = act.iconSvg as string;
+        
         el.className = `${act.position} f-${act.format}`;
         (el as any).myParent = this;
         (el as any).elMain = this.elMain;

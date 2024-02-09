@@ -24,11 +24,15 @@ export class FcaPage extends FcaLitElementBase {
     }
 
     public renderPreview = (param: string): any => {
-        return html``;
+        let code = `${this.myInnerHTML}`;
+        return html`${unsafeHTML(code)}`;
     }
 
     public renderEditActive = (param: string): any => {
-        return html``;
+
+        let code = `${this.myInnerHTML}`;
+        return html`${unsafeHTML(code)}`;
+
     }
 
     public changeStateHtml(html: string): void {

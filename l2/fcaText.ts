@@ -9,12 +9,13 @@
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { FcaLitElementBase, IAllowCommand } from './_100554_fcaLitElementBase';
-import { IActionLevels } from './_100554_fcaGlobal';
+import { IActionLevels } from './_100554_fcaGlobal'; 
 import { getTemplateActionMargin } from './_100554_wcdToolboxItemActionMargin';
 import { getTemplateActionPadding } from './_100554_wcdToolboxItemActionPadding';
 import { getTemplateActionSize } from './_100554_wcdToolboxItemActionSize';
- 
-@customElement('fca-text-100554')
+import { getTemplateActionMove } from './_100554_wcdToolboxItemActionMove';
+
+@customElement('fca-text-100554') 
 export class FcaText extends FcaLitElementBase {
 
     // ------------ PROPERTIES ------------------
@@ -120,11 +121,13 @@ export class FcaText extends FcaLitElementBase {
 
         const margin = getTemplateActionMargin('', '');
         const padding = getTemplateActionPadding('', '');
-        const size = getTemplateActionSize('all', ''); 
+        const size = getTemplateActionSize('all', '');
+        const move = getTemplateActionMove('', ''); 
 
         this.actions[4].push(margin);
         this.actions[4].push(padding);
         this.actions[4].push(size);
+        this.actions[4].push(move);
         
     }
 
