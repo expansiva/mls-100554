@@ -6,6 +6,8 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { getDepedencesByMFile } from './_100554_libCompile';
 import { initCodelensCustomElement } from './_100554_codelensCustomElement';
 import { initCodelensComponentDetails } from './_100554_codelensComponentDetails';
+import { initCodelensServiceDetails } from './_100554_codelensServiceDetails';
+
 
 @customElement('service-results-100554')
 export class ServiceResults extends ServiceBase {
@@ -14,6 +16,7 @@ export class ServiceResults extends ServiceBase {
         super();
         initCodelensCustomElement();
         initCodelensComponentDetails();
+        initCodelensServiceDetails();
         this.editorModelName = `serviceresults_${this.position}.js`;
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));

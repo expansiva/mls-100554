@@ -49,7 +49,7 @@ export class CodeLensServiceDetails100554 extends LitElement {
     }
 
     textExampleIcon = `
-    details: IService = {
+    public details: IService = {
         <br>
         &nbsp;&nbsp;icon: '&#x[seu unicode]',
         <br>
@@ -58,7 +58,7 @@ export class CodeLensServiceDetails100554 extends LitElement {
     }
     `
     textExampleNormal = `
-    details: IService = {
+    public details: IService = {
         <br>
         &nbsp;&nbsp;icon:'&#x[seu unicode]',
         <br>
@@ -76,7 +76,7 @@ export class CodeLensServiceDetails100554 extends LitElement {
     `
 
     textExampleCustom = `
-    details: IService = {
+    public details: IService = {
         <br>
         &nbsp;&nbsp;icon:'&#x[seu unicode]',
         <br>
@@ -126,7 +126,7 @@ export class CodeLensServiceDetails100554 extends LitElement {
     `
 
     textExampleCustomLevel = `
-    details: IService = {
+    public details: IService = {
         <br>
         &nbsp;&nbsp;icon:'&#x[seu unicode]',
         <br>
