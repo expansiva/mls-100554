@@ -119,10 +119,10 @@ export class FcaText extends FcaLitElementBase {
 
     private setMyActions(): void {
 
-        const margin = getTemplateActionMargin('', '');
-        const padding = getTemplateActionPadding('', '');
-        const size = getTemplateActionSize('all', '');
-        const move = getTemplateActionMove('', ''); 
+        const margin = getTemplateActionMargin();
+        const padding = getTemplateActionPadding();
+        const size = getTemplateActionSize('all');
+        const move = getTemplateActionMove(); 
 
         this.actions[4].push(margin);
         this.actions[4].push(padding);

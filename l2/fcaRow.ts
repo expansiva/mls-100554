@@ -107,8 +107,8 @@ export class FcaCol extends FcaLitElementBase {
 
     private setMyActions(): void {
 
-        const margin = getTemplateActionMargin('', '');
-        const padding = getTemplateActionPadding('', '');
+        const margin = getTemplateActionMargin();
+        const padding = getTemplateActionPadding();
 
         this.actions[4].push(margin);
         this.actions[4].push(padding);
@@ -117,6 +117,10 @@ export class FcaCol extends FcaLitElementBase {
 
     private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand{
 
+        const activeInMe = this.querySelector('*[renderType="editactive"]');
+
+        if (activeInMe && this.children.length <= 1) return { inside: false, before: false, after: false }
+        
         const myScope = this.getMyScope();
 
         if(myScope !== scope) return { inside: false, before: false, after: false };
@@ -135,10 +139,11 @@ export class FcaCol extends FcaLitElementBase {
             inside =  true;
         }
 
-        const parent = this.getMyParentFCA(this);
-        if (!parent) return { inside, before: false, after: false };
+        if (activeInMe) inside = false;
 
-        const insideFather = parent.allowCommand('move', scope, target);
+        const parent = this.getMyParentFCA(this);
+
+        const insideFather = parent && parent.tagName.startsWith('FCA-') ?parent.allowCommand('move', scope, target) : {inside:true};
         const before = insideFather.inside;
         const after = insideFather.inside;
 

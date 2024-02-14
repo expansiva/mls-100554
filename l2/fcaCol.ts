@@ -12,6 +12,7 @@ import { FcaLitElementBase, IAllowCommand } from './_100554_fcaLitElementBase';
 import { IActionLevels } from './_100554_fcaGlobal';
 import { getTemplateActionMargin } from './_100554_wcdToolboxItemActionMargin';
 import { getTemplateActionPadding } from './_100554_wcdToolboxItemActionPadding';
+import { getTemplateActionMove } from './_100554_wcdToolboxItemActionMove';
 
 @customElement('fca-col-100554')
 export class FcaCol extends FcaLitElementBase { 
@@ -109,28 +110,35 @@ export class FcaCol extends FcaLitElementBase {
 
     private setMyActions(): void {
 
-        const margin = getTemplateActionMargin('', '');
-        const padding = getTemplateActionPadding('', '');
+        const margin = getTemplateActionMargin();
+        const padding = getTemplateActionPadding();
+        const move = getTemplateActionMove();
 
-        this.actions[4].push(margin);
-        this.actions[4].push(padding);
+        //this.actions[4].push(margin);
+        //this.actions[4].push(padding);
+        this.actions[4].push(move);
         
     }
 
     private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand{
 
+        const activeInMe = this.querySelector('*[renderType="editactive"]');
+
+        if (activeInMe && this.children.length <= 1) return { inside:false, before:false, after:false }
+        
         const myScope = this.getMyScope();
 
         if(myScope !== scope) return { inside: false, before: false, after: false };
 
         const tag = target.tagName.toLocaleLowerCase();
 
-        const inside = tag !== 'fca-row-100554' && tag !== 'fca-col-100554';
+        let inside = tag !== 'fca-row-100554' && tag !== 'fca-col-100554';
 
-        const parent = this.getMyParentFCA(this);
-        if (!parent) return { inside, before: false, after: false };
+        if (activeInMe && this.children.length <= 1) inside = false;
 
-        const insideFather = parent.allowCommand('move', scope, target);
+        const parent = this.getMyParentFCA(this);    
+        
+        const insideFather = parent && parent.tagName.startsWith('FCA-') ? parent.allowCommand('move', scope, target) : {inside:true};
         const before = insideFather.inside;
         const after = insideFather.inside;
 

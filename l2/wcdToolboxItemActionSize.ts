@@ -89,7 +89,7 @@ export class WCDToolboxItemActionSize extends LitElement {
 
 }
 
-export const getTemplateActionSize = (mode: string, position: string): IActionsToolbox => {
+export const getTemplateActionSize = (mode: string = '', position: string = ''): IActionsToolbox => {
 
     let ret: IActionsToolbox = templateActionSize.buttonSize as IActionsToolbox;
 

@@ -17,6 +17,9 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     @property({ type: String, reflect: true })
     public widget: string | undefined;
 
+    @property({ type: Boolean, reflect: true })
+    public isFCAGroup: boolean | undefined;
+
     @property({ type: String })
     public renderType: 'preview' | 'edit' | 'editactive' | undefined;
 
@@ -124,30 +127,40 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
         let ret: FcaLitElementBase[] = [];
 
-        const reentrance = (el: HTMLElement) => {
+        const reentrance = (el: FcaLitElementBase | HTMLElement) => {
 
             const tag = el.tagName.toLowerCase();
             if (tag.startsWith('fca-')) {
 
                 ret.push(el as FcaLitElementBase);
 
-            } 
+            }
 
-            Array.from(el.children).forEach(i => {
-                reentrance(i as HTMLElement);
-            })
+            const isGroup = el.getAttribute('isFCAGroup');
+
+            if (!isGroup || isGroup === 'false') {
+                Array.from(el.children).forEach(i => {
+                    reentrance(i as HTMLElement);
+                })
+            }
 
         }
 
-        reentrance(scope);
-        
+        Array.from(scope.children).forEach(i => {
+            reentrance(i as HTMLElement);
+        })
+
+
+
         return ret;
 
     }
 
-    public getMyScope(): FcaLitElementBase | undefined {
+    public getMyScope(): FcaLitElementBase | HTMLElement | undefined {
 
-        return this.closest('fca-page-100554') as FcaLitElementBase;
+        let ret = this.closest('fca-page-100554') as FcaLitElementBase;
+        if (!ret) ret = this.closest('body') as any;
+        return ret
 
     }
 
@@ -209,10 +222,9 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     }
 
-    private async updateMyInnerHtmlIfNeed(uptType: boolean = true) {
+    public async updateMyInnerHtmlIfNeed(uptType: boolean = true) {
 
         if (this.innerHTML.indexOf('<fca-') >= 0) {
-            console.info(this)
 
             let elMain = this.querySelector(`${this.widget}:first-child`);
             if (!elMain) return;
@@ -227,7 +239,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
             this.setAttribute('level', '0');
             this.setAttribute('level', l as string);
 
-        }
+        } else this.myInnerHTML = '';
 
         if (uptType) this.setAttribute('renderType', 'editactive');
 
