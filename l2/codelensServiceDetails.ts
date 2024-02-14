@@ -86,9 +86,9 @@ export class CodeLensServiceDetails100554 extends LitElement {
         <br>
         &nbsp;&nbsp;visible: true,
         <br>
-        &nbsp;&nbsp;position: "right",
+        &nbsp;&nbsp;position: "all",
         <br>
-        &nbsp;&nbsp;level: [3]
+        &nbsp;&nbsp;level: [4,5]
         <br>
         &nbsp;&nbsp;customConfiguration: {
             <br>
@@ -136,9 +136,9 @@ export class CodeLensServiceDetails100554 extends LitElement {
         <br>
         &nbsp;&nbsp;visible: true,
         <br>
-        &nbsp;&nbsp;position: "right",
+        &nbsp;&nbsp;position: "all",
         <br>
-        &nbsp;&nbsp;level: [3]
+        &nbsp;&nbsp;level: [3,4,5]
         <br>
         &nbsp;&nbsp;&nbsp;&nbsp;customConfiguration: {
             <br>
