@@ -226,7 +226,22 @@ export interface IService {
     level: number[],
     classname?: ICollabServiceClass,
     isStatic?: boolean,
+    customConfiguration?:IServiceCustom
+}
 
+export type IServiceCustom = {
+    [key: number] :IServiceCustomByPosition | IServiceCustomPlace
+}
+export type IServiceCustomByPosition = {
+    right?: IServiceCustomPlace,
+    left?: IServiceCustomPlace,
+}
+
+export interface IServiceCustomPlace{
+    tooltip?: string,
+    visible?: boolean,
+    classname?: ICollabServiceClass,
+    show?:boolean
 }
 
 export type ICollabServicePosition = "left" | "right" | "all"
