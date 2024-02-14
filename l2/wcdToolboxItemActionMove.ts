@@ -40,8 +40,9 @@ export class WCDToolboxItemActionMove extends LitElement {
         const scope = myGrandFather.getMyScope();
         if (!scope) return;
 
-        const array = myGrandFather.getFCAComponents(scope);
-
+        let array = myGrandFather.getFCAComponents(scope);
+    
+        array = this.onlyNeedAddTag(array);
         array.forEach((i) => {
             this.changeStateDrag(i, scope, myGrandFather);
         });
@@ -133,8 +134,32 @@ export class WCDToolboxItemActionMove extends LitElement {
 
     }
 
+    private onlyNeedAddTag(array: FcaLitElementBase[]): FcaLitElementBase[]{
+
+        const a:FcaLitElementBase[] = [];
+
+        for (let i = 0; i <= array.length; i++){
+
+            const elBase = array[i]; 
+            const next = array[i + 1];  
+            if (!next) {
+                a.push(elBase);
+                continue;
+            }
+
+            const parent = next.getMyParentFCA(next);
+            if (!parent) continue;
+            if (parent !== elBase) a.push(elBase);
+
+
+        }
+
+        return a;
+    }
+
     private changeStateDrag(elBase: FcaLitElementBase, elScope: HTMLElement, elMove: FcaLitElementBase): void {
 
+        if (!elBase) return;
         if (elBase.getAttribute('renderType') === 'editactive' || !this.myParent) return;
 
         const valid = elBase.allowCommand('move', elScope, elMove);
@@ -186,7 +211,7 @@ export class WCDToolboxItemActionMove extends LitElement {
 
     private changeStateDrop(elBase: FcaLitElementBase): void {
 
-
+        if (!elBase) return;
         if (elBase.getAttribute('renderType') === 'editactive') return;
 
         const content = elBase.querySelector(':scope > wcd-dragdrop-aux');

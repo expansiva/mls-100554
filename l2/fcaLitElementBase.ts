@@ -213,29 +213,41 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     private async configFirstTime() {
 
-        if (this.myInnerHTML === '' && this.innerHTML !== '') {
+        try {
 
-            this.myInnerHTML = this.innerHTML;
-            this.innerHTML = '';
+            if (this.myInnerHTML === '' && this.innerHTML !== '') {
 
-            if (this.myInnerHTML.indexOf('<!--?lit') >= 0) {
+                this.myInnerHTML = this.innerHTML;
+                this.innerHTML = '';
 
-                const span = document.createElement('span');
-                span.innerHTML = this.myInnerHTML;
+                if (this.myInnerHTML.indexOf('<!--?lit') >= 0) {
 
-                const el = await this.clearTree(document.createElement('span'), span);
+                    const span = document.createElement('span');
+                    span.innerHTML = this.myInnerHTML;
 
-                this.myInnerHTML = el ? el.innerHTML : this.myInnerHTML
-                Array.from(this.children).forEach((e) => e.remove());
-                const l = this.level;
-                this.setAttribute('level', '0');
-                this.setAttribute('level', l as string);
+                    const el = await this.clearTree(document.createElement('span'), span);
+
+                    this.myInnerHTML = el ? el.innerHTML : this.myInnerHTML
+                    Array.from(this.children).forEach((e) => e.remove());
+                    const l = this.level;
+                    this.setAttribute('level', '0');
+                    this.setAttribute('level', l as string);
 
 
+
+                }
 
             }
 
+        } catch (e) {
+
+            if (this.myInnerHTML === '' && this.innerHTML !== '') {
+                this.myInnerHTML = this.innerHTML;
+                this.innerHTML = '';
+            }
+            
         }
+
 
     }
 
