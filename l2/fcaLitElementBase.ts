@@ -211,12 +211,29 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     }
 
-    private configFirstTime(): void {
+    private async configFirstTime() {
 
         if (this.myInnerHTML === '' && this.innerHTML !== '') {
 
             this.myInnerHTML = this.innerHTML;
             this.innerHTML = '';
+
+            if (this.myInnerHTML.indexOf('<!--?lit') >= 0) {
+
+                const span = document.createElement('span');
+                span.innerHTML = this.myInnerHTML;
+
+                const el = await this.clearTree(document.createElement('span'), span);
+
+                this.myInnerHTML = el ? el.innerHTML : this.myInnerHTML
+                Array.from(this.children).forEach((e) => e.remove());
+                const l = this.level;
+                this.setAttribute('level', '0');
+                this.setAttribute('level', l as string);
+
+
+
+            }
 
         }
 
