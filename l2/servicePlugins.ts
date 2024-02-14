@@ -20,15 +20,31 @@ export class ServicePlugins extends ServiceBase {
     @property({ type: Number }) lastPluginIdAdd: number = -1;
 
     @property({ type: String }) currentScenario: IScenaries = 'list';
-
+    
     public details: IService = {
         icon: '&#xf1e6',
         state: 'foreground',
         tooltip: 'Plugins',
         visible: true,
-        position: "left",
+        position: "all",
         widget: '_100554_servicePlugins',
-        level: [5]
+        level: [4, 5],
+        customConfiguration: {
+            4: {
+                left: {
+                    tooltip: 'Plugins l4 left'
+                },
+                right: {
+                    show: false
+                }
+            },
+            5: {
+                right: {
+                    tooltip: 'Plugins Mls',
+                    classname: 'separator-left'
+                }
+            }
+        }
     }
 
     public onClickLink = (op: string): boolean => {
@@ -98,7 +114,7 @@ export class ServicePlugins extends ServiceBase {
         ];
     }
 
-    backListClicked() {        
+    backListClicked() {
         this.changeScenario('list');
     }
 

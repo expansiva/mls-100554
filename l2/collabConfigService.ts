@@ -301,14 +301,12 @@ export class CollabConfig100554 extends LitElement {
     }
 
     private async getServices() {
-        try {
+        
             const arrayUserServices = await this.getUserServices();
             const arrayAvaliableServices = await this.getAvaliableServices();
             this.userServices = arrayUserServices[this.actualLevel][this.positionToolbar];
             this.avaliableServices = arrayAvaliableServices[this.actualLevel][this.positionToolbar];
-        } catch (e) {
-            this.error = 'Error load services';
-        }
+        
     }
 
     private async getAvaliableServices() {
