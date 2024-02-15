@@ -240,6 +240,7 @@ export type IServiceCustomByPosition = {
 export interface IServiceCustomPlace{
     tooltip?: string,
     visible?: boolean,
+    state?: ICollabServiceState,
     classname?: ICollabServiceClass,
     show?:boolean
 }
