@@ -28,23 +28,7 @@ export class ServicePlugins extends ServiceBase {
         visible: true,
         position: "all",
         widget: '_100554_servicePlugins',
-        level: [4, 5],
-        customConfiguration: {
-            4: {
-                left: {
-                    tooltip: 'Plugins l4 left'
-                },
-                right: {
-                    show: false
-                }
-            },
-            5: {
-                right: {
-                    tooltip: 'Plugins Mls',
-                    classname: 'separator-left'
-                }
-            }
-        }
+        level: [5],
     }
 
     public onClickLink = (op: string): boolean => {

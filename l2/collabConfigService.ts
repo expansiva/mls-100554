@@ -105,7 +105,7 @@ export class CollabConfig100554 extends LitElement {
                             <div class="groupInfos" style="justify-content:start;">
                                 <div>#${index + 1}</div>
                                 <div>
-                                    ${service.widget}
+                                    ${service.tooltip}
                                 </div>
                             </div>
                             <div class="groupInfos" style="justify-content:end;">
@@ -135,7 +135,7 @@ export class CollabConfig100554 extends LitElement {
                         <div class="groupInfos" style="justify-content:start;">
                             <div>#${index + 1}</div>
                             <div>
-                                ${service.widget}
+                                ${service.tooltip}
                                 <span class="badge" style="display:${service.visible ? 'none' : 'inline-block'}">hidden<span>
                             </div>
                         </div>
