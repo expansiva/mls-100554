@@ -57,7 +57,6 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     render() {
 
-
         let objRender;
         switch (this.renderType) {
             case 'preview':
@@ -88,7 +87,6 @@ export abstract class FcaLitElementBase extends CollabLitElement {
             super.setCollabState(states.CHANGESTATE, '');
 
         } else if (changedProperties.get('changeState') !== undefined && this.changeState) {
-
             // aviso da alteração do state
             this.doChangeState(this.changeState);
             return false;

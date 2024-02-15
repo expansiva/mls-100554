@@ -14,6 +14,7 @@ export interface IActionsToolbox {
     widget: string | undefined,
     cursor: string | undefined,
     attrs: IAttr[] | undefined,
+    isDblClick: boolean,
 }
 
 export interface IAttr{

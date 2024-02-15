@@ -140,6 +140,7 @@ const templateActionMargin = {
         widget: '',
         cursor: 'pointer',
         attrs: undefined,
+        isDblClick:false,
     },
     buttonMargin: {
         position: 'p-m4',
@@ -156,7 +157,8 @@ const templateActionMargin = {
                     templateActionMargin.marginBottom as IActionsToolbox,
                     templateActionMargin.marginLeft as IActionsToolbox
                 ],
-                false
+                false,
+                'size'
             )
         },
         menuItens: [],
@@ -164,6 +166,7 @@ const templateActionMargin = {
         widget: '',
         cursor: 'pointer',
         attrs: undefined,
+        isDblClick:false,
     },
     marginTop: {
         position: 'p-m1',
@@ -176,7 +179,8 @@ const templateActionMargin = {
         menuSubItens: [],
         widget: 'wcd-toolbox-item-action-margin-100554',
         cursor: 'ns-resize',
-        attrs: [{ attr: 'tpchange', value: 'top' }]
+        attrs: [{ attr: 'tpchange', value: 'top' }],
+        isDblClick:false,
     },
     marginRight: {
         position: 'p-r2',
@@ -189,7 +193,8 @@ const templateActionMargin = {
         menuSubItens: [],
         widget: 'wcd-toolbox-item-action-margin-100554',
         cursor: 'ew-resize',
-        attrs: [{ attr: 'tpchange', value: 'right' }]
+        attrs: [{ attr: 'tpchange', value: 'right' }],
+        isDblClick:false,
 
     },
     marginBottom: {
@@ -203,7 +208,8 @@ const templateActionMargin = {
         menuSubItens: [],
         widget: 'wcd-toolbox-item-action-margin-100554',
         cursor: 'ns-resize',
-        attrs: [{ attr: 'tpchange', value: 'bottom' }]
+        attrs: [{ attr: 'tpchange', value: 'bottom' }],
+        isDblClick:false,
     },
     marginLeft: {
         position: 'p-l2',
@@ -216,7 +222,8 @@ const templateActionMargin = {
         menuSubItens: [],
         widget: 'wcd-toolbox-item-action-margin-100554',
         cursor: 'ew-resize',
-        attrs: [{ attr: 'tpchange', value: 'left' }]
+        attrs: [{ attr: 'tpchange', value: 'left' }],
+        isDblClick:false,
     },
 
 }

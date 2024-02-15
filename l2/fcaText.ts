@@ -14,6 +14,7 @@ import { getTemplateActionMargin } from './_100554_wcdToolboxItemActionMargin';
 import { getTemplateActionPadding } from './_100554_wcdToolboxItemActionPadding';
 import { getTemplateActionSize } from './_100554_wcdToolboxItemActionSize';
 import { getTemplateActionMove } from './_100554_wcdToolboxItemActionMove';
+import { getTemplateActionQuill } from './_100554_wcdToolboxItemActionEditQuill';
 
 @customElement('fca-text-100554') 
 export class FcaText extends FcaLitElementBase {
@@ -91,12 +92,13 @@ export class FcaText extends FcaLitElementBase {
 
 
     public changeStateHtml(html: string): void {
-
+    
         const s = document.createElement('span');
         s.innerHTML = atob(html);
         if (!s.children[0]) return;
         const el = this.clearStyleTree(s.children[0] as HTMLElement);
-        this.text = el.innerHTML;
+        setTimeout(() => { this.setAttribute('text', el.innerHTML); }, 200)
+            
     }
 
     public changeStateStyle(style: {}): void {
@@ -123,11 +125,13 @@ export class FcaText extends FcaLitElementBase {
         const padding = getTemplateActionPadding();
         const size = getTemplateActionSize('all');
         const move = getTemplateActionMove(); 
+        const quill = getTemplateActionQuill();
 
         this.actions[4].push(margin);
         this.actions[4].push(padding);
         this.actions[4].push(size);
         this.actions[4].push(move);
+        this.actions[4].push(quill);
         
     }
 

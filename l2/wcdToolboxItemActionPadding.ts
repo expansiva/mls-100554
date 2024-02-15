@@ -142,6 +142,7 @@ const templateActionPadding = {
         widget: '',
         cursor: 'pointer',
         attrs: undefined,
+        isDblClick:false,
     },
 
     //padding
@@ -159,7 +160,9 @@ const templateActionPadding = {
                     templateActionPadding.paddingRight  as IActionsToolbox,
                     templateActionPadding.paddingBottom  as IActionsToolbox,
                     templateActionPadding.paddingLeft  as IActionsToolbox
-                ]
+                ],
+                false,
+                'padding'
             )
         },
         menuItens: [],
@@ -167,6 +170,7 @@ const templateActionPadding = {
         widget: '',
         cursor: 'pointer',
         attrs: undefined,
+        isDblClick:false,
     },
     paddingTop: {
         position: 'p-m1',
@@ -179,7 +183,8 @@ const templateActionPadding = {
         menuSubItens: [],
         widget: 'wcd-toolbox-item-action-padding-100554',
         cursor: 'ns-resize',
-        attrs: [{ attr: 'tpchange', value: 'top' }]
+        attrs: [{ attr: 'tpchange', value: 'top' }],
+        isDblClick:false,
     },
     paddingRight: {
         position: 'p-r2',
@@ -192,7 +197,8 @@ const templateActionPadding = {
         menuSubItens: [],
         widget: 'wcd-toolbox-item-action-padding-100554',
         cursor: 'ew-resize',
-        attrs: [{ attr: 'tpchange', value: 'right' }]
+        attrs: [{ attr: 'tpchange', value: 'right' }],
+        isDblClick:false,
     },
     paddingBottom: {
         position: 'p-m3',
@@ -205,7 +211,8 @@ const templateActionPadding = {
         menuSubItens: [],
         widget: 'wcd-toolbox-item-action-padding-100554',
         cursor: 'ns-resize',
-        attrs: [{ attr: 'tpchange', value: 'bottom' }]
+        attrs: [{ attr: 'tpchange', value: 'bottom' }],
+        isDblClick:false,
     },
     paddingLeft: {
         position: 'p-l2',
@@ -218,7 +225,8 @@ const templateActionPadding = {
         menuSubItens: [],
         widget: 'wcd-toolbox-item-action-padding-100554',
         cursor: 'ew-resize',
-        attrs: [{ attr: 'tpchange', value: 'left' }]
+        attrs: [{ attr: 'tpchange', value: 'left' }],
+        isDblClick:false,
     },
 }
 

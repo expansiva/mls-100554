@@ -49,7 +49,7 @@ export class WCDToolbox extends CollabLitElement {
 
         this.renderActions(this.actions);
 
-        this.updateSize(this.elMain, this, true);
+        this.updateSize(this.parentElement, this, true);
 
     }
 
@@ -59,10 +59,14 @@ export class WCDToolbox extends CollabLitElement {
 
     // ------------ IMPLEMENTATION-------------------
 
-    public setIconsWcdToolbox(act: IActionsToolbox[], useSelf: boolean = false): void {
+    public setIconsWcdToolbox(act: IActionsToolbox[], useSelf: boolean = false, updataSize: 'false' | 'size' | 'padding' = 'false'): void {
 
         if (useSelf) this.renderActions(this.actions);
         else this.renderActions(act);
+
+        if (this.elMain && updataSize === 'size') this.updateSize(this.elMain, this, true);
+
+        if (this.elMain && updataSize === 'padding') this.updateBaseNoPadding(this.elMain, this);
     }
 
     private renderActions(arr: IActionsToolbox[]): void {
@@ -242,10 +246,27 @@ export class WCDToolbox extends CollabLitElement {
 
         if (!this.elMain || !this.shadowRoot || !act.widget) return undefined;
 
+        if (act.isDblClick && act.onclick) {
+
+            this.ondblclick = (e: MouseEvent) => {
+                if (act.onclick) {
+                    act.onclick(
+                        e,
+                        this,
+                        (vl: string) => {
+                            super.setCollabState(states.CHANGESTATE, vl);
+                        }
+                    );
+                }
+            }
+            return;
+
+        }
+
         const el = document.createElement(act.widget);
         el.innerHTML = '';
         if (act.iconSvg && act.iconSvg !== '') el.innerHTML = act.iconSvg as string;
-        
+
         el.className = `${act.position} f-${act.format}`;
         (el as any).myParent = this;
         (el as any).elMain = this.elMain;
@@ -309,7 +330,7 @@ export class WCDToolbox extends CollabLitElement {
 
     }
 
-    public updateBaseNoPadding(elBase: HTMLElement, elChange: HTMLElement):void {
+    public updateBaseNoPadding(elBase: HTMLElement, elChange: HTMLElement): void {
 
         const st = elChange.style;
         st.position = 'absolute';
