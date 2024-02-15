@@ -31,7 +31,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
         state: 'background',
         position: 'right',
         tooltip: 'Flex',
-        visible: true,
+        visible: false,
         widget: '_100554_serviceDsStyleFlex',
         level: [3]
     }

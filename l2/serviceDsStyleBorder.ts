@@ -35,7 +35,7 @@ export class ServiceDsStyleBorder extends ServiceBase {
         state: 'background',
         position: 'right',
         tooltip: 'Border',
-        visible: true,
+        visible: false,
         widget: '_100554_serviceDsStyleBorder',
         level: [3]
 

@@ -43,7 +43,7 @@ export class ServiceDsStyleTransform extends ServiceBase {
         state: 'background',
         position: 'right',
         tooltip: 'Transform',
-        visible: true,
+        visible: false,
         widget: '_100554_serviceDsStyleTransform',
         level: [3]
     }

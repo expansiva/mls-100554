@@ -45,7 +45,7 @@ export class ServiceDsStyleFilter extends ServiceBase {
         state: 'background',
         position: 'right',
         tooltip: 'Filter',
-        visible: true,
+        visible: false,
         widget: '_100554_serviceDsStyleFilter',
         level: [3]
     }

@@ -32,11 +32,11 @@ export class ServiceDsStyleBackground extends ServiceBase {
     }
 
     public details: IService = {
-        icon: '&#xf0db',
+        icon: '&#xf043',
         state: 'background',
         position: 'right',
         tooltip: 'Background',
-        visible: true,
+        visible: false,
         widget: '_100554_serviceDsStyleBackground',
         level: [3],
     }

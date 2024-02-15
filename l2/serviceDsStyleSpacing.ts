@@ -33,7 +33,7 @@ export class ServiceDsStyleSpacing extends ServiceBase {
         state: 'background',
         position: 'right',
         tooltip: 'Spacing',
-        visible: true,
+        visible: false,
         widget: '_100554_serviceDsStyleSpacing',
         level: [3]
     }

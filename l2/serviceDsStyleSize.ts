@@ -31,7 +31,7 @@ export class ServiceDsStyleSize extends ServiceBase {
         state: 'background',
         position: 'right',
         tooltip: 'Size',
-        visible: true,
+        visible: false,
         widget: '_100554_serviceDsStyleSize',
         level: [3]
     }

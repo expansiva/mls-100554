@@ -35,7 +35,7 @@ export class ServiceDsStyleColumn extends ServiceBase {
         state: 'background',
         position: 'right',
         tooltip: 'Column',
-        visible: true,
+        visible: false,
         widget: '_100554_serviceDsStyleColumn',
         level: [3]
     }
