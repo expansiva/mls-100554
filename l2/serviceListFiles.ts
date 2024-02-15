@@ -45,10 +45,18 @@ export class ServiceListFiles extends ServiceBase {
         icon: '&#xf15b',
         state: 'background',
         position: 'all',
-        tooltip: 'List Files 2',
+        tooltip: 'Select',
         visible: true,
         widget: '_100554_serviceListFiles',
-        level: [2, 4]
+        level: [2, 4],
+        customConfiguration: {
+            2: {
+                tooltip: 'Select Widget'
+            },
+            4: {
+                tooltip: 'Select Page'
+            }
+        }
     }
 
     public onClickLink = (op: string): boolean => {
