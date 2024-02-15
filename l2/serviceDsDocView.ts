@@ -29,7 +29,7 @@ export class ServiceDsDocView100554 extends ServiceBase {
         icon: '&#xf06e',
         state: 'background',
         tooltip: 'Documentation View',
-        visible: true,
+        visible: false,
         position: "right",
         widget: '_100554_serviceDsDocView',
         level: [3]
