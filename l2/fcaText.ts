@@ -4,19 +4,14 @@
  * @mlsComponentDetails {
  *  "webComponentDependencies": ["wcd-toolbox-100554"]
  * }
- */  
- 
+ */
+
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { FcaLitElementBase, IAllowCommand } from './_100554_fcaLitElementBase';
-import { IActionLevels } from './_100554_fcaGlobal'; 
-import { getTemplateActionMargin } from './_100554_wcdToolboxItemActionMargin';
-import { getTemplateActionPadding } from './_100554_wcdToolboxItemActionPadding';
-import { getTemplateActionSize } from './_100554_wcdToolboxItemActionSize';
-import { getTemplateActionMove } from './_100554_wcdToolboxItemActionMove';
-import { getTemplateActionQuill } from './_100554_wcdToolboxItemActionEditQuill';
+import { IActionLevels } from './_100554_fcaGlobal';
 
-@customElement('fca-text-100554') 
+@customElement('fca-text-100554')
 export class FcaText extends FcaLitElementBase {
 
     // ------------ PROPERTIES ------------------
@@ -43,14 +38,14 @@ export class FcaText extends FcaLitElementBase {
 
     // -------------- ABSTRACT ------------------
 
-    public actions: IActionLevels = {'1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': []}
+    public actions: IActionLevels = { '1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': [] }
 
-    public allowCommand(cmd: string, scope: HTMLElement, target: HTMLElement): IAllowCommand{
+    public allowCommand(cmd: string, scope: HTMLElement, target: HTMLElement): IAllowCommand {
 
         if (cmd === 'move') return this.commandMove(scope, target);
 
         return { inside: false, before: false, after: false };
-            
+
     }
 
     public renderPreview = (param: string): any => {
@@ -80,7 +75,7 @@ export class FcaText extends FcaLitElementBase {
 
         let act = (this.actions as any)[this.level as any];
         if (!act) act = [];
-        
+
         return html`
             ${unsafeHTML(code)}
             <wcd-toolbox-100554 level="${this.level}" widget="${this.widget}" 
@@ -92,13 +87,13 @@ export class FcaText extends FcaLitElementBase {
 
 
     public changeStateHtml(html: string): void {
-    
+
         const s = document.createElement('span');
         s.innerHTML = atob(html);
         if (!s.children[0]) return;
         const el = this.clearStyleTree(s.children[0] as HTMLElement);
         setTimeout(() => { this.setAttribute('text', el.innerHTML); }, 200)
-            
+
     }
 
     public changeStateStyle(style: {}): void {
@@ -119,7 +114,13 @@ export class FcaText extends FcaLitElementBase {
 
     // ----------- IMPLEMENTATION ---------------
 
-    private setMyActions(): void {
+    private async setMyActions() {
+
+        const { getTemplateActionMargin } = await import('./_100554_wcdToolboxItemActionMargin');
+        const { getTemplateActionPadding } = await import( './_100554_wcdToolboxItemActionPadding');
+        const { getTemplateActionSize } = await import( './_100554_wcdToolboxItemActionSize');
+        const { getTemplateActionMove } = await import( './_100554_wcdToolboxItemActionMove');
+        const { getTemplateActionQuill } = await import( './_100554_wcdToolboxItemActionEditQuill');
 
         const margin = getTemplateActionMargin();
         const padding = getTemplateActionPadding();
@@ -132,14 +133,14 @@ export class FcaText extends FcaLitElementBase {
         this.actions[4].push(size);
         this.actions[4].push(move);
         this.actions[4].push(quill);
-        
+
     }
 
-    private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand{
+    private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand {
 
         const myScope = this.getMyScope();
 
-        if(myScope !== scope) return { inside: false, before: false, after: false };
+        if (myScope !== scope) return { inside: false, before: false, after: false };
 
         const parent = this.getMyParentFCA(this);
         if (!parent) return { inside: false, before: false, after: false };
@@ -149,7 +150,7 @@ export class FcaText extends FcaLitElementBase {
         const after = insideFather.inside;
 
         return { inside: false, before, after }
-        
+
     }
 
     //preciso limpar o style que já existe para não duplicar na segunda renderização

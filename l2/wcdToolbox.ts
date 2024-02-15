@@ -1,9 +1,5 @@
 /// <mls shortName="wcdToolbox" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-//  @mlsComponentDetails {
-//  "webComponentDependencies": [ "wcd-toolbox-item-action-size-100554", "wcd-toolbox-item-action-margin-100554", "wcd-toolbox-item-action-padding-100554","wcd-toolbox-item-action-edit-quill-100554","wcd-toolbox-item-action-move-100554"]
-//  }  
-
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';

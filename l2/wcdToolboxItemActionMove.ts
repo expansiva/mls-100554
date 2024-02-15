@@ -32,7 +32,14 @@ export class WCDToolboxItemActionMove extends LitElement {
 
     private initClick(e: MouseEvent): void {
 
-        if (!this.elMain || !this.myParent || !document.defaultView) return;
+        if (!this.elMain || !this.elFCA || !this.myParent || !document.defaultView) return;
+
+        const inGroup = this.elFCA.closest('*[isfcagroup]') as HTMLElement;
+        
+        if (inGroup) {
+            inGroup.click();
+            return;
+        }
 
         //WCD's father will always be an FCA
         const myGrandFather = this.myParent.parentElement as FcaLitElementBase;

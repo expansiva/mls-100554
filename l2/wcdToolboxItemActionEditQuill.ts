@@ -170,7 +170,7 @@ export class WCDToolboxItemActionQuill extends LitElement {
         height: 100%;
         outline: none;
         overflow-y: auto;
-        padding: 12px 15px;
+        /*padding: 12px 15px;*/
         tab-size: 4;
         -moz-tab-size: 4;
         text-align: left;
