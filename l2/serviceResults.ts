@@ -271,7 +271,9 @@ export class ServiceResults extends ServiceBase {
         } else if (params.action === 'fileReference') {
             await this.getCompileResults(shortName, project);
             this.isReferenceOpen = true;
-            this.openMe();
+            if (this.visible === 'true') this.openReferenceMode();
+            else this.openMe();
+
         }
 
     }
@@ -287,7 +289,8 @@ export class ServiceResults extends ServiceBase {
             this.actualResultMode = 'assistant';
             this.assistantArgs = args;
             this.isHelpAssistant = true;
-            this.openMe();
+            if (this.visible === 'true') this.openHelpAssistantMode();
+            else this.openMe();
         }
     }
 
