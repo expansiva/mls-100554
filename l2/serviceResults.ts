@@ -304,6 +304,8 @@ export class ServiceResults extends ServiceBase {
     }
 
     private showProdJS2(): boolean {
+        this.menu.title = 'Production - Javascript';
+        if (this.menu.updateTitle) this.menu.updateTitle();
         if (this.hasError) {
             this.setModelLanguage(this.resultsLanguages.errors, this.results.errors);
             return true;
@@ -318,6 +320,8 @@ export class ServiceResults extends ServiceBase {
     }
 
     private showTsConfig(): boolean {
+        this.menu.title = 'Typescript Config';
+        if (this.menu.updateTitle) this.menu.updateTitle();
         if (this.menu.setMode) this.menu.setMode('editor');
         this.actualResultMode = 'configTS';
         this.setModelLanguage(this.resultsLanguages.configTS, this.results.configTS);
@@ -325,6 +329,8 @@ export class ServiceResults extends ServiceBase {
     }
 
     private showTsLib(): boolean {
+        this.menu.title = 'Typescript Libs';
+        if (this.menu.updateTitle) this.menu.updateTitle();
         if (this.menu.setMode) this.menu.setMode('editor');
         this.actualResultMode = 'libTS';
         this.setModelLanguage(this.resultsLanguages.libTS, this.results.libTS);
@@ -333,6 +339,8 @@ export class ServiceResults extends ServiceBase {
 
 
     private showDevDoc(): boolean {
+        this.menu.title = 'Develpoment Docs';
+        if (this.menu.updateTitle) this.menu.updateTitle();
         this.actualResultMode = 'devDocPage';
         if (!this.devDocContainer) {
             this.devDocContainer = document.createElement('mls-load-page-l4-100529');
@@ -345,7 +353,7 @@ export class ServiceResults extends ServiceBase {
 
     private showFileRefs(): boolean {
         this.menu.title = 'File References';
-        if (this.menu && this.menu.updateTitle) this.menu.updateTitle();
+        if (this.menu.updateTitle) this.menu.updateTitle();
         this.menu.title = this.menu.actions['opProdJS'];
         this.actualResultMode = 'refs';
         const div1 = document.createElement('div');
@@ -362,8 +370,8 @@ export class ServiceResults extends ServiceBase {
     }
 
     private showAssistant(): boolean {
-        this.menu.title = 'HelpAssistant';
-        if (this.menu && this.menu.updateTitle) this.menu.updateTitle();
+        this.menu.title = 'Help Assistant';
+        if (this.menu.updateTitle) this.menu.updateTitle();
         this.menu.title = this.menu.actions['opProdJS'];
 
         const div1 = document.createElement('div');
@@ -417,6 +425,8 @@ export class ServiceResults extends ServiceBase {
     }
 
     private showDevDocJson(): boolean {
+        this.menu.title = 'Develpoment Docs Json';
+        if (this.menu.updateTitle) this.menu.updateTitle();
         if (this.menu.setMode) this.menu.setMode('editor');
         this.actualResultMode = 'devDoc';
         this.setModelLanguage(this.resultsLanguages.devDoc, this.results.devDoc);
@@ -424,6 +434,8 @@ export class ServiceResults extends ServiceBase {
     }
 
     private showJsonImport(): boolean {
+        this.menu.title = 'Imports Json';
+        if (this.menu.updateTitle) this.menu.updateTitle();
         if (this.menu.setMode) this.menu.setMode('editor');
         this.actualResultMode = 'jsonImport';
         this.setModelLanguage(this.resultsLanguages.jsonImport, this.results.jsonImport);
@@ -446,6 +458,9 @@ export class ServiceResults extends ServiceBase {
     }
 
     private openResultsDocsPageMode() {
+
+        this.menu.title = 'Develpoment Docs';
+        if (this.menu.updateTitle) this.menu.updateTitle();
         this.actualResultMode = 'devDocPage';
         if (!this.devDocContainer) return;
         this.devDocContainer.setAttribute('force', 'true');
