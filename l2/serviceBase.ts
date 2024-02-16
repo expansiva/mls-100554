@@ -190,6 +190,7 @@ export interface IMenu {
     icons: IIconsKeyValue,
     actionDefault?: string,
     iconDefault?: string,
+    onClickTitle?:Function,
     onClickLink?: IClickLinkCallBack,
     onClickIcon?: IClickIconCallBack,
     setMode?: ISetMode,
