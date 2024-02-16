@@ -1776,6 +1776,11 @@ const templateActionQuill = {
         title: '',
         iconSvg: '',
         onclick: (e: MouseEvent, wc: WCDToolbox, fc: Function) => {
+
+            const elQuill = wc.shadowRoot?.querySelector('wcd-toolbox-item-action-edit-quill-100554');
+
+            if (elQuill) return;
+            
             wc.setIconsWcdToolbox([templateActionQuill.backButton as IActionsToolbox]);
 
             const el = document.createElement('wcd-toolbox-item-action-edit-quill-100554');
