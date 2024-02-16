@@ -119,7 +119,10 @@ export class FcaCol extends FcaLitElementBase {
 
         const activeInMe = this.querySelector('*[renderType="editactive"]');
 
-        if (activeInMe && this.children.length <= 1) return { inside: false, before: false, after: false }
+        const elMychildren = document.createElement('span') as HTMLElement;
+        elMychildren.innerHTML = this.myInnerHTML;
+
+        if (activeInMe && elMychildren.children.length <= 1) return { inside: false, before: false, after: false }
         
         const myScope = this.getMyScope();
 
@@ -138,8 +141,6 @@ export class FcaCol extends FcaLitElementBase {
         if (this.myInnerHTML.indexOf('fca-col-100554') >= 0 && tag === 'fca-col-100554') {
             inside =  true;
         }
-
-        if (activeInMe) inside = false;
 
         const parent = this.getMyParentFCA(this);
 

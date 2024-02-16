@@ -36,7 +36,7 @@ export class WCDToolboxItemActionMove extends LitElement {
 
         const inGroup = this.elFCA.closest('*[isfcagroup]') as HTMLElement;
         
-        if (inGroup && inGroup !== this.elFCA) {
+        if (inGroup && inGroup !== this.elFCA) { 
             inGroup.click();
             return;
         }
@@ -46,9 +46,9 @@ export class WCDToolboxItemActionMove extends LitElement {
 
         const scope = myGrandFather.getMyScope();
         if (!scope) return;
-
+    
         let array = myGrandFather.getFCAComponents(scope);
-        
+
         array = this.onlyNeedAddTag(array);
         array.forEach((i) => {
             this.changeStateDrag(i, scope, myGrandFather);
