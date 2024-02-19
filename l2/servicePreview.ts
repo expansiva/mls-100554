@@ -57,7 +57,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Save',
+        title: 'Preview',
         actions: {
             actAddStyle: 'Add Style'
         },
