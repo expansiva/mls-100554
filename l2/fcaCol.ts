@@ -103,6 +103,7 @@ export class FcaCol extends FcaLitElementBase {
 
         if(level === '4'){
             await this.importAction('_100554_wcdToolboxItemActionMove', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionGroup', this.actions, this.level as any);
         }
 
         return;
