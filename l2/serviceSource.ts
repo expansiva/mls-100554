@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -38,6 +38,10 @@ export class ServiceSource100554 extends ServiceBase {
         if (op === 'icHTML') this.createOrShowModelHTML(true);
     }
 
+    public onClickTitle = () => {
+        this.openService('_100554_serviceListFiles', this.position, 2);
+    }
+
     public details: IService = {
         icon: '&#xf121',
         state: 'background',
@@ -49,7 +53,10 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'L2 - widget1',
+        title: {
+            icon: '&#xf053',
+            text: 'L2 - widget1'
+        },
         actions: {
             opTheme: 'Editor - Themes',
             opMonacoConfig: 'Editor - config',
@@ -68,7 +75,8 @@ export class ServiceSource100554 extends ServiceBase {
         lastIcon: undefined, // child will set this
         setIconActive: undefined, // child will set this
         onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon
+        onClickIcon: this.onClickIcon,
+        onClickTitle: this.onClickTitle
     }
 
 
@@ -78,14 +86,17 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (!visible) return;
+        await this.initMonaco();
         if (this.menu.setIconActive) this.menu.setIconActive('icTs');
-        this.initMonaco();
-        if (el && typeof el.layout === 'function') el.layout();
+        this.c2?.setAttribute('msize', this.msize);
     }
+
+    @query('mls-editor-100529')
+    private c2: HTMLElement | undefined;
 
     public last: mls.IActual | undefined = undefined;
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
-    private c2: HTMLElement | undefined;
+
     private mConfEditor: monaco.editor.ITextModel | undefined;
     get confE() { return `l${this.level}_${this.position}`; }
     private confE2(positionToolbar: string) { return `l${this.level}_${positionToolbar}`; }
@@ -490,7 +501,7 @@ export class ServiceSource100554 extends ServiceBase {
         const activeModel = mls.l2.editor.editors[this.confE];
         if (!this._ed1 || !activeModel || !this.menu.getLastMode) return false;
         const changedFile: boolean = this.menu.title !== activeModel.shortName;
-        this.menu.title = activeModel.shortName;
+        (this.menu.title as IMenuTitle).text = `_${activeModel.project}_${activeModel.shortName}`;
         const lastMode = this.menu.getLastMode();
         if (changedFile && lastMode !== 'initial') {
             // user choice another file, goto initial editor
@@ -505,6 +516,7 @@ export class ServiceSource100554 extends ServiceBase {
             // in page, ex About, prepare model to after close hamburger
             this._ed1.setModel(activeModel.model);
         }
+        this.c2?.setAttribute('msize', this.msize);
         return true;
     }
 
@@ -538,7 +550,8 @@ export class ServiceSource100554 extends ServiceBase {
             });
         };
 
-        this.c2 = document.createElement('mls-editor-100529');
+        if (!this.c2) return;
+
         this._ed1 = monaco.editor.create(this.c2, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
         (this.c2 as any)['mlsEditor'] = this._ed1;
         mls.editor.instances[this.confE] = this._ed1;
@@ -711,7 +724,12 @@ export class ServiceSource100554 extends ServiceBase {
         const extension = '.ts';
         const storFile = await mls.stor.addOrUpdateFile({ project, level, shortName, extension, versionRef: new Date().toISOString(), folder: '' });
         const uri = this.getUri(shortName, extension);
-        this.mConfEditor = monaco.editor.createModel(src, 'typescript', uri);
+
+        const model = monaco.editor.getModel(uri);
+        if (model) {
+            this.mConfEditor = model;
+        } else this.mConfEditor = monaco.editor.createModel(src, 'typescript', uri);
+
         mls.l2.editor.add({
             changed: false,
             error: false,

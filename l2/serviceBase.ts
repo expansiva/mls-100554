@@ -176,6 +176,7 @@ export interface IIconsKeyValue {
 
 export type IClickLinkCallBack = (op: string) => boolean | undefined;
 export type IClickIconCallBack = (op: string) => void | undefined;
+export type IClickTitleCallBack = (title: string) => void | undefined;
 
 export type ISetMode = (mode: IMode | null, page?: HTMLElement) => void;
 export type IGetLastMode = () => IMode;
@@ -185,12 +186,12 @@ export type IMode =
     | 'editor'; // show siblings with close icon
 
 export interface IMenu {
-    title: string,
+    title: IMenuTitle | string,
     actions: IMenuKeyValue,
     icons: IIconsKeyValue,
     actionDefault?: string,
     iconDefault?: string,
-    onClickTitle?:Function,
+    onClickTitle?:IClickTitleCallBack,
     onClickLink?: IClickLinkCallBack,
     onClickIcon?: IClickIconCallBack,
     setMode?: ISetMode,
@@ -199,6 +200,11 @@ export interface IMenu {
     getLastMode?: IGetLastMode,
     lastIcon?: string,
     updateTitle?: Function,
+}
+
+export interface IMenuTitle {
+	text: string,
+	icon: string
 }
 
 export interface IToolbarContent extends HTMLElement {
