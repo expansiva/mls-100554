@@ -9,10 +9,10 @@
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { FcaLitElementBase, IAllowCommand } from './_100554_fcaLitElementBase';
-import { IActionLevels } from './_100554_fcaGlobal';
+import { IActionLevels } from './_100554_fcaGlobal'; 
 
 @customElement('fca-text-100554')
-export class FcaText extends FcaLitElementBase {
+export class FcaText extends FcaLitElementBase { 
 
     // ------------ PROPERTIES ------------------
 
@@ -30,8 +30,6 @@ export class FcaText extends FcaLitElementBase {
         const el = document.createElement('span');
         el.style.cssText = this.styleel ? this.styleel : '';
         this.styleElMain = el.style;
-
-        this.setMyActions();
 
     }
 
@@ -112,29 +110,20 @@ export class FcaText extends FcaLitElementBase {
 
     }
 
-    // ----------- IMPLEMENTATION ---------------
+    public async setMyActions(level:string) {
 
-    private async setMyActions() {
+        if (level === '4') {
+            await this.importAction('_100554_wcdToolboxItemActionMargin', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionPadding', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionSize', this.actions, this.level as any, 'all');
+            await this.importAction('_100554_wcdToolboxItemActionMove', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionEditQuill', this.actions, this.level as any);
+        } 
 
-        const { getTemplateActionMargin } = await import('./_100554_wcdToolboxItemActionMargin');
-        const { getTemplateActionPadding } = await import( './_100554_wcdToolboxItemActionPadding');
-        const { getTemplateActionSize } = await import( './_100554_wcdToolboxItemActionSize');
-        const { getTemplateActionMove } = await import( './_100554_wcdToolboxItemActionMove');
-        const { getTemplateActionQuill } = await import( './_100554_wcdToolboxItemActionEditQuill');
-
-        const margin = getTemplateActionMargin();
-        const padding = getTemplateActionPadding();
-        const size = getTemplateActionSize('all');
-        const move = getTemplateActionMove(); 
-        const quill = getTemplateActionQuill();
-
-        this.actions[4].push(margin);
-        this.actions[4].push(padding);
-        this.actions[4].push(size);
-        this.actions[4].push(move);
-        this.actions[4].push(quill);
-
+        return;
     }
+
+    // ----------- IMPLEMENTATION ---------------
 
     private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand {
 

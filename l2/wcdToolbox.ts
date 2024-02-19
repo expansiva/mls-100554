@@ -49,6 +49,16 @@ export class WCDToolbox extends CollabLitElement {
 
     }
 
+    updated(changedProperties: Map<string, string>) {
+
+        if (this.parentElement && (this.parentElement as any).renderType === 'editactive') {
+
+            this.setIconsWcdToolbox((this.parentElement as any).actions[this.level as any]);
+
+        }
+
+    }
+
     render() {
         return html``;
     }

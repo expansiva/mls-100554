@@ -10,8 +10,6 @@ import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { FcaLitElementBase, IAllowCommand } from './_100554_fcaLitElementBase';
 import { IActionLevels } from './_100554_fcaGlobal';
-import { getTemplateActionMargin } from './_100554_wcdToolboxItemActionMargin';
-import { getTemplateActionPadding } from './_100554_wcdToolboxItemActionPadding';
 
 @customElement('fca-row-100554')
 export class FcaCol extends FcaLitElementBase { 
@@ -29,8 +27,6 @@ export class FcaCol extends FcaLitElementBase {
         const el = document.createElement('span');
         el.style.cssText = this.styleel ? this.styleel : '';
         this.styleElMain = el.style;
-
-        this.setMyActions();
     }
 
     // -------------- ABSTRACT ------------------
@@ -101,19 +97,18 @@ export class FcaCol extends FcaLitElementBase {
             
     }
 
-    
+    public async setMyActions(level:string) {
 
-    // ----------- IMPLEMENTATION ---------------
+        if(level === '4'){
+            await this.importAction('_100554_wcdToolboxItemActionMargin', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionPadding', this.actions, this.level as any);
+        }
 
-    private setMyActions(): void {
-
-        const margin = getTemplateActionMargin();
-        const padding = getTemplateActionPadding();
-
-        this.actions[4].push(margin);
-        this.actions[4].push(padding);
+        return;
         
     }
+
+    // ----------- IMPLEMENTATION ---------------
 
     private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand{
 

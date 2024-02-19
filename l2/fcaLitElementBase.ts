@@ -34,7 +34,9 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     // ------------ ABSTRACT ------------------
 
+    private isLoadMyAction:any = {};
     abstract actions: IActionLevels;
+    abstract setMyActions(level: string):Promise<void>;
 
     abstract renderPreview: (param: string) => any;
     abstract renderEditActive: (param: string) => any;
@@ -101,7 +103,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
         if (this.renderType === 'edit') {
 
 
-            this.onclick = (e: MouseEvent) => {
+            this.onclick = async (e: MouseEvent) => {
 
                 //When clicking on an "edit" item I return the old "editactive" to "edit" and set the new "editactive"
                 e.stopPropagation();
@@ -111,6 +113,14 @@ export abstract class FcaLitElementBase extends CollabLitElement {
                 const all = document.querySelectorAll('*[renderType="editactive"]');
                 Array.from(all).forEach((i) => i.setAttribute('renderType', 'edit'));
                 this.onclick = undefined as any;
+
+                if (!this.isLoadMyAction[this.level as any] || this.isLoadMyAction[this.level as any] === false) {
+
+                    await this.setMyActions(this.level as any);
+                    this.isLoadMyAction[this.level as any] = true;
+
+                }
+                
                 this.updateMyInnerHtmlIfNeed();
 
             }
@@ -120,6 +130,25 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     }
 
     // ------------ IMPLEMENTATION-------------------
+
+    public async importAction(imports: string, actions: IActionLevels, level: string, mode: string = '', position: string = '') {
+
+        try {
+
+            if (!imports.startsWith('./')) imports = './' + imports;
+            const { getTemplate } = await import(imports);
+            const temp = getTemplate(mode, position);
+            (actions as any)[level].push(temp);
+
+        } catch (e) {
+
+            console.info(e);
+
+        }
+
+
+
+    }
 
     public getFCAComponents(scope: HTMLElement): FcaLitElementBase[] {
 
@@ -243,7 +272,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
                 this.myInnerHTML = this.innerHTML;
                 this.innerHTML = '';
             }
-            
+
         }
 
 

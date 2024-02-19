@@ -235,7 +235,7 @@ export class WCDToolboxItemActionMove extends LitElement {
 
 }
 
-export const getTemplateActionMove = (mode: string = '', position: string = ''): IActionsToolbox => {
+export const getTemplate = (mode: string = '', position: string = ''): IActionsToolbox => {
 
     let ret: IActionsToolbox = templateActionMove.move as IActionsToolbox;
     if (position !== '') ret.position = position as any;

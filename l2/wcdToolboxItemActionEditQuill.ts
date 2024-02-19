@@ -1736,7 +1736,7 @@ export class WCDToolboxItemActionQuill extends LitElement {
 
 }
 
-export const getTemplateActionQuill = (mode: string = '', position: string = ''): IActionsToolbox => {
+export const getTemplate = (mode: string = '', position: string = ''): IActionsToolbox => {
 
     let ret: IActionsToolbox = templateActionQuill.editQuill as IActionsToolbox;
     if (position !== '') ret.position = position as any;

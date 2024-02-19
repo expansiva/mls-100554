@@ -114,7 +114,7 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
 }
 
-export const getTemplateActionPadding = (mode: string = '', position: string = ''): IActionsToolbox => {
+export const getTemplate = (mode: string = '', position: string = ''): IActionsToolbox => {
 
     let ret: IActionsToolbox = templateActionPadding.buttonPadding as IActionsToolbox;
     if (mode === 'paddingTop') ret = templateActionPadding.paddingTop as IActionsToolbox;

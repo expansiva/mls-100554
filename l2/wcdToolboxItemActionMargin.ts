@@ -112,7 +112,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
 
 }
 
-export const getTemplateActionMargin = (mode: string = '', position: string = ''): IActionsToolbox => {
+export const getTemplate = (mode: string = '', position: string = ''): IActionsToolbox => {
 
     let ret: IActionsToolbox = templateActionMargin.buttonMargin as IActionsToolbox;
     if (mode === 'marginTop') ret = templateActionMargin.marginTop as IActionsToolbox;
