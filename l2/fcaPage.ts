@@ -43,6 +43,12 @@ export class FcaPage extends FcaLitElementBase {
 
     }
 
+    public async setMyActions(level:string) {
+
+        return;
+        
+    }
+
     // ----------- IMPLEMENTATION ---------------
 
 
