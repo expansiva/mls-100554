@@ -41,7 +41,7 @@ export class ServiceSource100554 extends ServiceBase {
     public details: IService = {
         icon: '&#xf121',
         state: 'background',
-        tooltip: 'Source',
+        tooltip: 'Source 2',
         visible: true,
         position: "all",
         widget: '_100554_serviceSource',
