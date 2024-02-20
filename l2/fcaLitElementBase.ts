@@ -27,7 +27,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     public level: '1' | '2' | '3' | '4' | '5' | '6' | '7' | undefined;
 
     @property({ type: String, reflect: true })
-    public styleel: string | undefined;
+    public styleel: string | undefined = '';
 
     public myInnerHTML = '';
 
