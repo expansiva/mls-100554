@@ -309,6 +309,7 @@ export class ServiceSource100554 extends ServiceBase {
         };
 
         const onNew = async (): Promise<void> => {
+
             this.activeThisService();
             const newTSSource = fileAction.newTSSource
                 || `/// <mls shortName="${fileAction.newshortName}" project="${fileAction.newProject}" enhancement="${fileAction.newEnhancement}" />
@@ -635,7 +636,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (project > 1) await mls.stor.server.loadProjectInfoIfNeeded(project);
         const key = mls.stor.getKeyToFiles(project, level, shortName, '', extension);
         let storFile = mls.stor.files[key];
-        if (storFile && project !== 0) throw new Error('Error on createModelTS1, model already exists: ' + key);
+        // if (storFile && project !== 0) throw new Error('Error on createModelTS1, model already exists: ' + key);
         if (!storFile) {
             storFile = await mls.stor.addOrUpdateFile({ project, level, shortName, extension, versionRef: new Date().toISOString(), folder: '' });
             storFile.status = 'new';
