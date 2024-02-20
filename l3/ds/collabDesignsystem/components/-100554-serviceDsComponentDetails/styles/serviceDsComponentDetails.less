@@ -2,5 +2,22 @@ service-ds-component-details-100554 { //don't change this line
  	 :host{
         font-family: @font-family-primary;
      }
+     section{
+        padding: 0.5rem;
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        button.remove {
+            color: #fff;
+            background-color: @error-color;
+        }
+        button.edit {
+            color: #fff;
+            background-color: @info-color;
+        }
+     }
 }
 
