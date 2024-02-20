@@ -53,6 +53,7 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
 
     @property()
     private state: mls.l3.IComponentInfo | undefined;
+    
 
     private onDsWidgetsSelected() {
         this.showNav2Item(true);
@@ -72,6 +73,85 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
         this.state = data.value;
     }
 
+    private onEditStyleClick() {
+        if (!this.state) return;
+        this.openService('_100554_serviceDsStyles', 'left', 3);
+        mls.actual[0].setFullName(this.state.name);
+        const info = mls.actual[0];
+        const rc = {
+            emitter: 'right',
+            less: '',
+            isComponent: true,
+            widget: `_${info.project}_${info.path}`,
+            helper: '_100554_servicePreview',
+            origemLevel: +this.level,
+            dsindex: mls.actual[3].mode
+        };
+        mls.events.fire(3, 'DSStyleChanged', JSON.stringify(rc), 500);
+    }
+
+    private async removeComponent() {
+        if (!this.state) return;
+        const { project } = mls.actual[5];
+        const { mode } = mls.actual[3];
+
+        if (project === undefined || mode === undefined) return;
+        const ds = mls.l3.getDSInstance(project, mode);
+        await ds.init();
+        await ds.components.remove(this.state.name);
+        const params: IEventDSWidgetsChangedParams = {
+            op: 'update',
+            position: this.position,
+            value: undefined
+        }
+        mls.events.fire(3, 'DSWidgetsChanged', JSON.stringify(params), 300);
+    }
+
+    private async updateComponent() {
+        if (!this.state) return;
+        const { project } = mls.actual[5];
+        const { mode } = mls.actual[3];
+
+        if (project === undefined || mode === undefined) return;
+        const ds = mls.l3.getDSInstance(project, mode);
+        await ds.init();
+        await (ds.components as any)['update'](this.state.name, this.state);
+        const params: IEventDSWidgetsChangedParams = {
+            op: 'update',
+            position: this.position,
+            value: undefined
+        }
+        mls.events.fire(3, 'DSWidgetsChanged', JSON.stringify(params), 300);
+    }
+
+
+    private timeoutGroup: number | undefined;
+
+    private handleInputChangeGroup(event: Event) {
+        if (!event || !this.state) return;
+        const target = event.target as HTMLInputElement;
+        if (!target) return;
+        if (target.value === '') return;
+        
+        this.state.group = target.value as any;
+        console.info(this.state)
+
+        if (this.timeoutGroup) clearTimeout(this.timeoutGroup);
+        this.timeoutGroup = setTimeout(() => {
+            this.updateComponent();
+        }, 1000);
+        
+    }
+
+    private handleInputChangeTags(value: string) {
+        if (!this.state) return;
+        this.state.tags = value.split(',');
+
+        console.info(this.state)
+        this.updateComponent();
+
+    }
+
     render() {
         return html`
         ${!this.state
@@ -79,16 +159,23 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
                 html`<h4> No component selected!</h4>`
                 :
                 html`
-                <p> Widget: ${this.state?.name}</p>
+                <section>
+                    <p> Component: ${this.state?.name}</p>
+                    <div class="actions">
+                        <button class="edit" @click=${() => this.onEditStyleClick()}>Edit Style</button>
+                        <button class="remove" @click=${() => this.removeComponent()}>Remove Component</button>
+                    </div>
 
-                <div>
-                    <label>Group</label>
-                    <input .value=${this.state.group}></input>
-                </div>
-                <div>
-                    <label>Tags</label>
-                    <collab-input-tag-100554 .value=${this.state.tags.join(',')}></collab-input-tag-100554>
-                </div>
+                    <div>
+                        <label>Group:</label>
+                        <br>
+                        <input .value=${this.state.group} @input="${this.handleInputChangeGroup}"></input>
+                    </div>
+                    <div>
+                        <label>Tags:</label>
+                        <collab-input-tag-100554 .onValueChanged=${(value: string) => { this.handleInputChangeTags(value) }} .value=${this.state.tags.join(',')}></collab-input-tag-100554>
+                    </div>
+                <section>
                 
                 `
             }

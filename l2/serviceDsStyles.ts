@@ -921,7 +921,7 @@ export class ServiceDsStyles extends ServiceBase {
 
         if (desc.isComponent) {
 
-            mls.actual[3].mode = 0;
+            mls.actual[3].mode = desc.dsindex || 0;
             this.isComponent = true;
             this.defaultServices.componentStyle = desc.helper;
             const { widget } = desc;
@@ -1245,7 +1245,8 @@ interface IEditorChangedEventsObj {
     less: string,
     widget?: string,
     origemLevel: number,
-    isComponent: boolean
+    isComponent: boolean,
+    dsindex?: number,
 }
 
 interface IErrorLessInfo {

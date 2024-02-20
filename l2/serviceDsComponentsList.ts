@@ -146,6 +146,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
     //------------------- EVENTS---------------
 
     setEvents() {
+        mls.events.addListener(3, 'DSWidgetsChanged', (ev) => this.onDsWidgetsChanged(ev));
 
     }
 
@@ -206,6 +207,13 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
 
         this.itens = rc;
 
+    }
+
+    private onDsWidgetsChanged(ev: mls.events.IEvent) {
+        if (!ev.desc) return;
+        const data: IEventDSWidgetsChangedParams = JSON.parse(ev.desc);
+        if (data.position === this.position) return;
+        if(data.op === 'update') this.setList();
     }
 
     private openComponent(e: MouseEvent) {
@@ -269,9 +277,9 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
 }
 
 export interface IEventDSWidgetsChangedParams {
-    op: 'widgets',
+    op: 'widgets' | 'update',
     position: string,
-    value: mls.l3.IComponentInfo
+    value: mls.l3.IComponentInfo | undefined
 }
 
 interface IServiceComponents {
