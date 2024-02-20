@@ -44,8 +44,8 @@ export class WCDToolbox extends CollabLitElement {
         this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
 
         this.renderActions(this.actions);
-
         this.updateSize(this.parentElement, this, true);
+        this.setAttribute('title', this.parentElement.tagName);
 
     }
 
@@ -131,7 +131,7 @@ export class WCDToolbox extends CollabLitElement {
         containerSubItens.onclick = () => {
             containerSubItens.style.display = 'none';
         }
-
+    
         item.menuItens.forEach((i: IActionsToolboxMenu) => {
 
             if (!i.onclick) return;
@@ -162,6 +162,7 @@ export class WCDToolbox extends CollabLitElement {
                 containerSubItens.style.display = containerSubItens.style.display === '' ? 'none' : '';
             }
 
+            iSubItens.setAttribute('title', '');
             containerItens.appendChild(iSubItens);
             containerSubItens.style.display = 'none';
             container.appendChild(containerSubItens);
@@ -176,6 +177,7 @@ export class WCDToolbox extends CollabLitElement {
             const ic = document.createElement('i');
             const span = document.createElement('span');
             span.innerText = i.text;
+            a.title = i.text;
 
             ic.style.cssText = `width: 18px; background-position: center; height: 18px; background-size: auto; background-repeat: no-repeat;`;
             ic.style.backgroundImage = `url('data:image/svg+xml,${(i.iconSvg as string).replace(/\'/g, '"')}')`
@@ -192,7 +194,7 @@ export class WCDToolbox extends CollabLitElement {
         });
 
         this.shadowRoot.appendChild(menuContainer);
-        this.updateSize(this.elMain, this, true);
+        //this.updateSize(this.elMain, this, true);
 
     }
 

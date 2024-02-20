@@ -102,6 +102,7 @@ export class FcaCol extends FcaLitElementBase {
         if(level === '4'){
             await this.importAction('_100554_wcdToolboxItemActionMargin', this.actions, this.level as any);
             await this.importAction('_100554_wcdToolboxItemActionPadding', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, this.level as any);
         }
 
         return;

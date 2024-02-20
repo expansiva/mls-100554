@@ -118,6 +118,7 @@ export class FcaText extends FcaLitElementBase {
             await this.importAction('_100554_wcdToolboxItemActionSize', this.actions, this.level as string, 'all');
             await this.importAction('_100554_wcdToolboxItemActionMove', this.actions, this.level as string);
             await this.importAction('_100554_wcdToolboxItemActionEditQuill', this.actions, this.level as string);
+            await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, this.level as any);
         } 
 
         return;
