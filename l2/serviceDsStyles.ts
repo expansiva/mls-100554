@@ -91,7 +91,7 @@ export class ServiceDsStyles extends ServiceBase {
 
     private defaultServices: IDefaultServices = {
         componentStyle: '',
-        globalStyle: '_100529_service_styles_preview'
+        globalStyle: '_100554_service_styles_preview'
     }
 
     createRenderRoot() {
@@ -861,13 +861,6 @@ export class ServiceDsStyles extends ServiceBase {
 
     private isReadOnlyAreaIfIsComponent(lineNumber: number): boolean {
         return false;
-        // const modelStyle = this.models['style'] as IMonacoModelStyle;
-        // const blockInfo = modelStyle.getBlockInfoByLine(1);
-        // const { endLine, startLine } = blockInfo;
-        // if (!endLine || !startLine) return false;
-        // if (lineNumber <= startLine) return true;
-        // if (lineNumber >= endLine) return true;
-        // return false;
     }
 
     private async getStyle() {
@@ -930,18 +923,12 @@ export class ServiceDsStyles extends ServiceBase {
             this.componentName = widget;
             this.start1();
             this.reinit();
-
-            // this.onServiceClick(true, !!this._ed1, this.serviceContent);
-            // this.c3.setAttribute('component', widget);
-
             this.loadStylesComponent(this.componentName);
-
 
             const params = this.getParamsServices();
             mls.events.fire([this.level], ['DSStyleSelected'], JSON.stringify(params), 0);
-            setTimeout(() => {
-                this.openServiceHelper(this.defaultServices.componentStyle);
-            }, 1000);
+            this.openService(this.defaultServices.componentStyle, 'right', 3)
+            
             return;
         }
 
@@ -1109,13 +1096,6 @@ export class ServiceDsStyles extends ServiceBase {
         if (changedProperties.has('msize')) {
             this.setMsizeEditor();
         }
-
-        // if (changedProperties.has('stylesComponent')) {
-        //     if (this.selectStyles && this.isComponent) {
-        //         this.selectStyles.selectedIndex = this.firstStyleIndex;
-        //         this.selectStyles.dispatchEvent(new Event('change'));
-        //     }
-        // }
     }
 
     private setMsizeEditor() {

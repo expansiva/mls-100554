@@ -68,8 +68,6 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
         if (!ev.desc) return;
         const data: IEventDSWidgetsChangedParams = JSON.parse(ev.desc);
         if (data.position === this.position) return;
-
-        console.info(data)
         this.state = data.value;
     }
 
@@ -134,8 +132,7 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
         if (target.value === '') return;
         
         this.state.group = target.value as any;
-        console.info(this.state)
-
+    
         if (this.timeoutGroup) clearTimeout(this.timeoutGroup);
         this.timeoutGroup = setTimeout(() => {
             this.updateComponent();
@@ -146,10 +143,7 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
     private handleInputChangeTags(value: string) {
         if (!this.state) return;
         this.state.tags = value.split(',');
-
-        console.info(this.state)
         this.updateComponent();
-
     }
 
     render() {
