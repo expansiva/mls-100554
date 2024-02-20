@@ -51,6 +51,9 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
 
         if (visible) {
             this.init();
+            mls.events.fire([this.level], ['DSWidgetsSelected'], '', 300);
+        } else {
+            mls.events.fire([this.level], ['DSWidgetsUnSelected'], '', 0);
         }
     }
 
@@ -138,7 +141,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
 
     }
 
-    
+
 
     //------------------- EVENTS---------------
 
@@ -212,7 +215,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
         if (!el) return;
         el = el.closest('li') as HTMLElement;
         if (!el) return;
-        
+
         const info: mls.l3.IComponentInfo = (el as any).item;
         this.fireComunication(info);
 
@@ -255,17 +258,20 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
     }
 
     public fireComunication(info: mls.l3.IComponentInfo): void {
+        const obj: IEventDSWidgetsChangedParams = {
+            op: 'widgets',
+            position: this.position,
+            value: info
+        };
+        mls.events.fire([this.level], ['DSWidgetsChanged'], JSON.stringify(obj), 300);
+    }
 
-        const obj = {
-			op: 'widgets',
-			value: info.name
-		};
+}
 
-		mls.events.fire([this.level], ['DSWidgetsSelected'], JSON.stringify(obj), 800);
-
-	}
-
-
+export interface IEventDSWidgetsChangedParams {
+    op: 'widgets',
+    position: string,
+    value: mls.l3.IComponentInfo
 }
 
 interface IServiceComponents {
