@@ -131,7 +131,7 @@ export class WCDToolbox extends CollabLitElement {
         containerSubItens.onclick = () => {
             containerSubItens.style.display = 'none';
         }
-    
+
         item.menuItens.forEach((i: IActionsToolboxMenu) => {
 
             if (!i.onclick) return;
@@ -194,6 +194,13 @@ export class WCDToolbox extends CollabLitElement {
         });
 
         this.shadowRoot.appendChild(menuContainer);
+        setTimeout(() => {
+
+            if (!this.isElementVisible(menuContainer)) {
+                menuContainer.style.top = '0px';
+            }
+
+        }, 300)
         //this.updateSize(this.elMain, this, true);
 
     }
@@ -219,6 +226,14 @@ export class WCDToolbox extends CollabLitElement {
         }
 
         this.shadowRoot.appendChild(el);
+        setTimeout(() => {
+
+            if (!this.isElementVisible(el)) {
+                el.style.top = '0px';
+                el.style.right = '0px';
+            }
+
+        }, 300)
 
     }
 
@@ -245,6 +260,14 @@ export class WCDToolbox extends CollabLitElement {
         }
 
         this.shadowRoot.appendChild(el);
+
+        setTimeout(() => {
+
+            if (!this.isElementVisible(el)) {
+                el.style.bottom = '0px';
+            }
+
+        }, 300)
 
         return el;
 
@@ -320,7 +343,7 @@ export class WCDToolbox extends CollabLitElement {
 
             width = Math.max(ad3(width, marginLeft, marginRight), ad3(0, paddingLeft, paddingRight));
 
-            if (width > elBase.ownerDocument.body.clientWidth) width -= 20;
+            if (width > elBase.ownerDocument.body.clientWidth) width -= 3;
 
             height = Math.max(ad3(height, marginTop, marginBottom), ad3(0, paddingTop, paddingBottom));
 
@@ -381,6 +404,16 @@ export class WCDToolbox extends CollabLitElement {
         st.width = width + 'px';
         st.height = height + 'px';
 
+    }
+
+    public isElementVisible(element: HTMLElement): boolean {
+        const rect = element.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
     }
 
     static styles = css`
