@@ -49,6 +49,9 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     @property()
     private actualProjectDetails: IProjectDetails | undefined;
 
+    @property()
+    private actualKeyGitHub: string | null | undefined;
+
     private getDetailsProject(project: number) {
         const details = mls.l5.getProjectSettings(project);
         if (!this.actualProjectDetails) this.actualProjectDetails = {} as IProjectDetails;
@@ -58,22 +61,42 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         this.actualProjectDetails.projectURL = details.projectURL;
         this.actualProjectDetails.files = Object.keys(mls.stor.files).filter((item => item.startsWith(project.toString()))).length;
 
+        this.actualKeyGitHub = localStorage.getItem('keyGitHub');
+
+        this.requestUpdate();
+
     }
 
     private onProjectSelected(ev: mls.events.IEvent) {
         if (!ev.desc) return;
         const data: IProjectSelectedParams = JSON.parse(ev.desc);
+        console.info(data)
         this.getDetailsProject(data.value);
     }
 
-    render() {
+    private getLastProject() {
+        const lastPrjId = localStorage.getItem('l5-last-project');
+        if (lastPrjId) this.getDetailsProject(+lastPrjId);
+    }
 
+    private handleChangeKey() {
+        if (this.actualKeyGitHub) {
+            localStorage.setItem('keyGitHub', this.actualKeyGitHub as string);    
+        }    
+    }
+
+    private handleInputChangeKey(value: string) {
+        this.actualKeyGitHub = value;
+    }
+
+    render() {
+        this.getLastProject();
         return html`
             ${!this.actualProjectDetails
                 ?
                 html`<h4> No project selected!</h4>`
                 :
-            html`
+                html`
                 <section class="section-details">
                     <details open>
                         <summary>Resume</summary>
@@ -86,6 +109,16 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                         </ul>
                     </details>
                 </section>
+                <section
+                    style=${this.actualProjectDetails.projectDriver === 'github' ? 'display: block' : 'display:none'} 
+                    class="section-config-github">
+                    <div>
+                        <label>Key Github</label>
+                        <textarea .value=${this.actualKeyGitHub} @input="${this.handleInputChangeKey}"></textarea rows=4>
+                        <button @click=${this.handleChangeKey}>Alterar</button>
+                    </div>
+                </section>
+
 
                 `
             }`
