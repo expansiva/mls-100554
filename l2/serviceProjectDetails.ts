@@ -9,6 +9,8 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     constructor() {
         super();
+        mls.events.addListener(5, 'ProjectSelected', (ev) => this.onProjectSelected(ev));
+
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -58,9 +60,14 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     }
 
+    private onProjectSelected(ev: mls.events.IEvent) {
+        if (!ev.desc) return;
+        const data: IProjectSelectedParams = JSON.parse(ev.desc);
+        this.getDetailsProject(data.value);
+    }
+
     render() {
 
-        this.getDetailsProject(100554);
         return html`
             ${!this.actualProjectDetails
                 ?
@@ -83,6 +90,11 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                 `
             }`
     }
+}
+
+interface IProjectSelectedParams {
+    emitter: 'left' | 'right',
+    value: number
 }
 
 export interface IProjectDetails {
