@@ -13,6 +13,9 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
 
     @property() error: string = '';
 
+    @property()
+    private selectWidget: string | undefined;
+
     private ds: mls.l3.DesignSystemIO | undefined;
 
     constructor() {
@@ -21,10 +24,10 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
     }
 
     public details: IService = {
-        icon: '&#xf02d',
+        icon: '&#xf1b3',
         state: 'foreground',
         position: 'left',
-        tooltip: 'Components Design System',
+        tooltip: 'Components',
         visible: true,
         widget: '_100554_serviceDsComponentsList',
         level: [3]
@@ -91,7 +94,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
         return html`
             
                 <ul>
-                    ${repeat(this.itens,
+                    ${repeat(this.itens.sort((a, b) => a.group.localeCompare(b.group)),
             ((i: IServiceComponents) => i.group) as any,
             ((item: IServiceComponents, index: any) => {
 
@@ -103,7 +106,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
         
         `
     }
-
+    
     renderGroup(item: IServiceComponents, index: number) {
 
         return html`
@@ -114,7 +117,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
                 <label style="font-weight:500">${item.group}</label>
             </div>
             <ul>
-                ${repeat(item.components,
+                ${repeat(item.components.sort((a, b) => a.name.localeCompare(b.name)),
             ((i: mls.l3.IComponentInfo) => i.name) as any,
             ((it: mls.l3.IComponentInfo, indexI: any) => {
 
@@ -131,7 +134,12 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
     renderComponent(item: mls.l3.IComponentInfo, index: number) {
 
         return html`
-        <li style="padding-left: 1.1rem;" .item=${item} @click="${this.openComponent}"> 
+        <li
+            style="padding-left: 1.1rem;"
+            class=${item.name === this.selectWidget ? 'selected' : ''} 
+            .item=${item} 
+            @click=${(e: MouseEvent) => { this.openComponent(e, item.name) }}
+        > 
             <div style="display:flex;align-items:center;gap:.5rem">
                 <span class="fa fa-cubes"></span>
                 <span>${item.name}</span>
@@ -216,17 +224,15 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
         if(data.op === 'update') this.setList();
     }
 
-    private openComponent(e: MouseEvent) {
-
+    private openComponent(e: MouseEvent, widget:string) {
         e.stopPropagation();
         let el = e.target as HTMLElement;
         if (!el) return;
         el = el.closest('li') as HTMLElement;
         if (!el) return;
-
+        this.selectWidget = widget;
         const info: mls.l3.IComponentInfo = (el as any).item;
         this.fireComunication(info);
-
     }
 
     private openMeList(e: MouseEvent) {

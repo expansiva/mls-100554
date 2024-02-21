@@ -21,7 +21,7 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
-        icon: '&#xf02d',
+        icon: '&#xf1b3',
         state: 'background',
         position: 'right',
         tooltip: 'Details Component',
@@ -53,8 +53,10 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
 
     @property()
     private state: mls.l3.IComponentInfo | undefined;
-    
 
+    @property()
+    private group: string | undefined;
+    
     private onDsWidgetsSelected() {
         this.showNav2Item(true);
         if (this.visible === 'false') this.openMe();
@@ -68,7 +70,9 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
         if (!ev.desc) return;
         const data: IEventDSWidgetsChangedParams = JSON.parse(ev.desc);
         if (data.position === this.position) return;
-        this.state = data.value;
+        if (!data.value) return;
+        this.state = { ...data.value };
+        this.group = data.value.group;
     }
 
     private onEditStyleClick() {
@@ -132,6 +136,7 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
         if (target.value === '') return;
         
         this.state.group = target.value as any;
+        this.group = target.value as any;
     
         if (this.timeoutGroup) clearTimeout(this.timeoutGroup);
         this.timeoutGroup = setTimeout(() => {
@@ -163,7 +168,7 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
                     <div>
                         <label>Group:</label>
                         <br>
-                        <input .value=${this.state.group} @input="${this.handleInputChangeGroup}"></input>
+                        <input .value=${this.group} @input="${this.handleInputChangeGroup}"></input>
                     </div>
                     <div>
                         <label>Tags:</label>
