@@ -101,6 +101,7 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
         const ds = mls.l3.getDSInstance(project, mode);
         await ds.init();
         await ds.components.remove(this.state.name);
+        this.state = undefined;
         const params: IEventDSWidgetsChangedParams = {
             op: 'update',
             position: this.position,
