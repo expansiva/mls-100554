@@ -61,7 +61,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         this.actualProjectDetails.projectURL = details.projectURL;
         this.actualProjectDetails.files = Object.keys(mls.stor.files).filter((item => item.startsWith(project.toString()))).length;
 
-        this.actualKeyGitHub = localStorage.getItem('keyGitHub');
+        this.actualKeyGitHub = localStorage?.getItem('keyGitHub');
 
         this.requestUpdate();
 
@@ -70,7 +70,6 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     private onProjectSelected(ev: mls.events.IEvent) {
         if (!ev.desc) return;
         const data: IProjectSelectedParams = JSON.parse(ev.desc);
-        console.info(data)
         this.getDetailsProject(data.value);
     }
 
@@ -81,7 +80,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     private handleChangeKey() {
         if (this.actualKeyGitHub) {
-            localStorage.setItem('keyGitHub', this.actualKeyGitHub as string);    
+            localStorage?.setItem('keyGitHub', this.actualKeyGitHub as string);    
         }    
     }
 

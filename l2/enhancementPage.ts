@@ -8,6 +8,10 @@ export const example = ``;
 
 export const requires: mls.l2.editor.IRequire[] = [];
 
+export const getExample = (project: number, shortname: string): string => {
+    let newExample = example;
+    return newExample;
+}
 
 export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.enhancement.IDesignDetailsReturn> => {
     return new Promise<mls.l2.enhancement.IDesignDetailsReturn>((resolve, reject) => {

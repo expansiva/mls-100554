@@ -208,10 +208,15 @@ export class ServiceListFilesAdd100554 extends LitElement {
             let grp = iptGroup.value;
             grp = !grp ? 'other' : grp;
 
+            const { project } = mls.actual[5]
 
-            ret = `/// <mls shortName="${name}" project="${mls.actual[5].project}" enhancement="_${fEnh.project}_${fEnh.shortName}" groupName="${grp}" />\n${mmodule.example}\n`;
 
-            ret = this.changeTagName(ret, this.convertFileNameToTag(`_${mls.actual[5].project}_${name}`));
+            const exampleEnhancement = mmodule.getExample ? mmodule.getExample(project, name) : mmodule.example;
+            ret = `/// <mls shortName="${name}" project="${project}" enhancement="_${fEnh.project}_${fEnh.shortName}" groupName="${grp}" />\n${exampleEnhancement}\n`;
+
+            // ret = this.changeTagName(ret, this.convertFileNameToTag(`_${project}_${name}`));
+            // ret = this.changeClassName(ret, project as number, name);
+            // ret = this.changeWidget(ret, project as number, name);
 
             resolve(ret);
 
@@ -242,6 +247,29 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
     }
 
+    private changeClassName(source: string, project: number, shortname: string) {
+        const regex = /export\s+class\s+(\w+)\s+extends/g;
+        const match = regex.exec(source);
+        const newClassName = shortname.charAt(0).toUpperCase() + shortname.substring(1, shortname.length) + project.toString();
+        if (match) {
+            const originalTag = match[1];
+            const replacedSource = source.replace(originalTag, newClassName);
+            return replacedSource;
+        }
+        return source;
+    }
+
+    private changeWidget(source: string, project: number, shortname: string) {
+        const regex = /widget:\s*'([^']+)'/g;
+        const match = regex.exec(source);
+        const newWidget = `_${project.toString()}_${shortname}`;
+        if (match) {
+            const originalTag = match[1];
+            const replacedSource = source.replace(originalTag, newWidget);
+            return replacedSource;
+        }
+        return source;
+    }
 
     private changeTagName(source: string, tagName: string): string {
 

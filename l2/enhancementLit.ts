@@ -9,6 +9,12 @@ import { injectStyle, MLS_GETDEFAULTDESIGNSYSTEM } from './_100554_processCssLit
 
 export const description = "Use this enhancement for model using lit - a simple and fast web component.\nRef: https://lit.dev/"
 
+export const getExample = (project: number, shortname: string): string => {
+    let newExample = example;
+    newExample = changeTagName(newExample,convertFileNameToTag(`_${project}_${shortname}`));
+    return newExample;
+}
+
 export const example = `
     import { html, css, LitElement } from 'lit'; 
     import { customElement, property } from 'lit/decorators.js';
@@ -51,7 +57,7 @@ export const requires: mls.l2.editor.IRequire[] = [
 ];
 
 
-const getDefaultHtmlExamplePreview = (model: mls.l2.editor.IMFile): string => {
+export const getDefaultHtmlExamplePreview = (model: mls.l2.editor.IMFile): string => {
     const tag = convertFileNameToTag(`_${model.storFile.project}_${model.storFile.shortName}`);
     return `<${tag}></${tag}>`;
 }
@@ -98,10 +104,10 @@ export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> 
         }
 
         if (validateRender(mfile)) {
-             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
-             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
-             return;
-         }
+            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
+            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
+            return;
+        }
     } catch (e: any) {
         return e.message || e;
     }
@@ -117,4 +123,19 @@ export const getPromptDefault = (): string => {
 export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
     await injectStyle(mfile, 0);
     return;
+}
+
+export const changeTagName = (source: string, tagName: string): string => {
+
+    const regex = /@customElement\(['"](.+?)['"]\)/;
+    const match = source.match(regex);
+
+    if (match) {
+        const originalTag = match[1];
+        const replacedSource = source.replace(originalTag, tagName);
+        return replacedSource;
+    }
+
+    return source;
+
 }
