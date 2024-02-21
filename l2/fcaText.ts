@@ -133,7 +133,7 @@ export class FcaText extends FcaLitElementBase {
         if (myScope !== scope) return { inside: false, before: false, after: false };
 
         const parent = this.getMyParentFCA(this);
-        if (!parent) return { inside: false, before: false, after: false };
+        if (!parent) return { inside: false, before: true, after: true };
 
         const insideFather = parent.allowCommand('move', scope, target);
         const before = insideFather.inside;

@@ -196,8 +196,14 @@ export class WCDToolbox extends CollabLitElement {
         this.shadowRoot.appendChild(menuContainer);
         setTimeout(() => {
 
+            
             if (!this.isElementVisible(menuContainer)) {
                 menuContainer.style.top = '0px';
+                const el = this.shadowRoot?.querySelector('.p-m2');
+                if (el) {
+                    menuContainer.style.left = '0px';
+                    menuContainer.style.transform = 'none';
+                }
             }
 
         }, 300)
@@ -214,7 +220,7 @@ export class WCDToolbox extends CollabLitElement {
         el.className = `${item.position} fcaBackButton`;
         el.title = item.title as string;
         el.style.cssText = `width: 18px; background-position: center; height: 18px;
-        background-size: auto; background-repeat: no-repeat;`;
+        background-size: auto; background-repeat: no-repeat; z-index: 9;`;
 
         el.style.backgroundImage = `url('data:image/svg+xml,${(item.iconSvg as string).replace(/\'/g, '"')}')`
 

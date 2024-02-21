@@ -4,13 +4,13 @@ import { customElement } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
 import { FcaLitElementBase } from './_100554_fcaLitElementBase';
- 
-@customElement('wcd-toolbox-item-action-move-100554')
+  
+@customElement('wcd-toolbox-item-action-move-100554') 
 export class WCDToolboxItemActionMove extends LitElement {
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
-    public elFCA: FcaLitElementBase | undefined;
+    public elFCA: FcaLitElementBase | undefined; 
 
     createRenderRoot() {
         return this;
@@ -50,6 +50,7 @@ export class WCDToolboxItemActionMove extends LitElement {
         let array = myGrandFather.getFCAComponents(scope);
 
         array = this.onlyNeedAddTag(array);
+    
         array.forEach((i) => {
             this.changeStateDrag(i, scope, myGrandFather);
         });
@@ -142,6 +143,14 @@ export class WCDToolboxItemActionMove extends LitElement {
 
 
         document.body.addEventListener('mouseup', stopDragging, false);
+        if (!this.myParent.shadowRoot) return;
+        Array.from(this.myParent.shadowRoot.children).forEach((i) => {
+
+            const tag = i.tagName.toLocaleLowerCase();
+            if (tag !== 'wcd-toolbox-item-action-move-100554') i.remove();
+            
+        })
+        
 
     }
 
@@ -159,8 +168,10 @@ export class WCDToolboxItemActionMove extends LitElement {
             }
 
             const parent = next.getMyParentFCA(next);
-            if (!parent) continue;
-            if (parent !== elBase) a.push(elBase);
+        
+            if (!parent && (!next.parentElement || next.parentElement.tagName !== 'BODY')) continue;
+            if(next.parentElement && next.parentElement.tagName === 'BODY') a.push(elBase)
+            else if (parent !== elBase) a.push(elBase);
 
 
         }
