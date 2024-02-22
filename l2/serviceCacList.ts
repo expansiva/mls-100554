@@ -54,8 +54,7 @@ export class ServiceCACList100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-        if (!visible) return;
-        if (this.menu.setIconActive) this.menu.setIconActive('icTs');
+
     }
 
     @property()
