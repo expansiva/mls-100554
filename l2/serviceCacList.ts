@@ -17,7 +17,7 @@ export class ServiceCACList100554 extends ServiceBase {
         position: 'all',
         tooltip: 'CAC List',
         visible: true,
-        widget: '_100554_serviceCACList',
+        widget: '_100554_serviceCacList',
         level: [2]
     }
 
