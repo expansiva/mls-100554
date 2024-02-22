@@ -20,6 +20,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     private lastMode: string = 'icPreviewD';
 
+    private lastLevel: number =  -1;
+
     private elPreview: HTMLElement | undefined = undefined;
 
     private info: any = {};
@@ -75,10 +77,18 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-
+    
         if (visible && !reinit && this.menu.setIconActive) {
             this.menu.setIconActive(this.lastMode);
-        } else if (this.elPreview) this.elPreview.setAttribute('level', this.level.toString());
+            
+        } else if (visible && reinit && this.elPreview && this.menu.setIconActive && this.lastLevel == this.level) { 
+            this.menu.setIconActive(this.lastMode);
+            
+        } if (this.elPreview) {
+    
+            this.lastLevel = this.level;
+            this.elPreview.setAttribute('level', this.level.toString());
+        }
     }
 
     // -------------- EVENTS -------------------
@@ -229,6 +239,7 @@ export class ServicePreview100554 extends ServiceBase {
         doc.setAttribute('level', this.level as any);
         doc.setAttribute('mode', mode);
         (doc as any).father = this;
+        this.lastLevel = this.level;
         this.elPreview = doc;
         if (this.menu.setMode) this.menu.setMode('page', doc);
         return true;

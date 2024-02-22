@@ -12,7 +12,7 @@ import { FcaLitElementBase, IAllowCommand } from './_100554_fcaLitElementBase';
 import { IActionLevels } from './_100554_fcaGlobal'; 
 
 @customElement('fca-text-100554')
-export class FcaText extends FcaLitElementBase { 
+export class FcaText extends FcaLitElementBase {
 
     // ------------ PROPERTIES ------------------
 
