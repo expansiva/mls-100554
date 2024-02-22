@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IMenu, IToolbarChangeEvent } from './_100554_serviceBase';
 
 @customElement('service-cac-list-100554')
 export class ServiceCACList100554 extends ServiceBase {
@@ -10,6 +10,11 @@ export class ServiceCACList100554 extends ServiceBase {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     get invertPosition() { return this.position === 'left' ? 'right' : 'left' };
+
+    constructor() {
+        super();
+        this.setEvents();
+    }
 
     public details: IService = {
         icon: '&#xf03a',
@@ -26,48 +31,62 @@ export class ServiceCACList100554 extends ServiceBase {
         return false;
     }
 
+    public onClickIcon = (op: string): void => {
+        this.activeTab = op as ITabType;
+    }
+
     public menu: IMenu = {
         title: 'CAC List',
         actions: {
         },
-        icons: {},
+        icons: {
+            All: 'All;f560',
+            Service: 'Service;f0ae',
+            Add: 'Add;2b'
+        },
         actionDefault: '', // call after close icon clicked
+        iconDefault: 'All',
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
+        onClickIcon: this.onClickIcon,
         getLastMode: undefined,
         updateTitle: undefined
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
+        if (!visible) return;
+        if (this.menu.setIconActive) this.menu.setIconActive('icTs');
     }
 
     @property()
-    activeTab: ITabType = 'all';
+    activeTab: ITabType = 'All';
 
-    changeTab(tabName: ITabType) {
-        this.activeTab = tabName;
+    setEvents(): void {
+        mls.events.addListener(this.level, 'ToolBarSelected', (ev) => this.onToolbarSelectChange(ev));
     }
 
+    onToolbarSelectChange(ev: mls.events.IEvent) {
+        if (!ev.desc) return;
+        const data: IToolbarChangeEvent = JSON.parse(ev.desc);
+        if (data.level !== this.level) return;
+        if (data.position === this.position) return;
+        if (this.activeTab !== 'Service') return;
+        this.requestUpdate();
+    }
 
     render() {
         return html`
-      <ul class="tabs">
-        <li class="tab ${this.activeTab === 'all' ? 'active' : ''}" @click="${() => this.changeTab('all')}">All</li>
-        <li class="tab ${this.activeTab === 'service' ? 'active' : ''}" @click="${() => this.changeTab('service')}">Service</li>
-        <li class="tab ${this.activeTab === 'add' ? 'active' : ''}" @click="${() => this.changeTab('add')}">Add</li>
-      </ul>
-      ${this.renderContent()}
-    `;
+            ${this.renderContent()}
+        `;
     }
 
     renderContent() {
         switch (this.activeTab) {
-            case 'all':
+            case 'All':
                 return this.renderAll();
-            case 'service':
+            case 'Service':
                 return this.renderService();
-            case 'add':
+            case 'Add':
                 return this.renderAdd();
             default:
                 return html``;
@@ -89,4 +108,4 @@ export class ServiceCACList100554 extends ServiceBase {
     }
 }
 
-type ITabType = 'all' | 'service' | 'add'
+type ITabType = 'All' | 'Service' | 'Add'

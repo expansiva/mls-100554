@@ -85,17 +85,17 @@ export abstract class ServiceBase extends LitElement {
         if (!page) return;
 
 
-            const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
-            if (!toolbar) return;
-            if (this.level !== level) {
-                (toolbar as any).state[level][position] = service;
-                this.selectLevel(level);
-                return;
-            }
-            const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
-            if (item) item.click();
+        const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
+        if (!toolbar) return;
+        if (this.level !== level) {
+            (toolbar as any).state[level][position] = service;
+            this.selectLevel(level);
             return;
-        
+        }
+        const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
+        if (item) item.click();
+        return;
+
     }
 
     selectLevel(level: number) {
@@ -237,6 +237,13 @@ export interface IServiceCustomPlace {
     state?: ICollabServiceState,
     classname?: ICollabServiceClass,
     show?: boolean
+}
+
+export interface IToolbarChangeEvent {
+    level: number,
+    position: 'left' | 'right',
+    from: string,
+    to: string
 }
 
 export type ICollabServicePosition = "left" | "right" | "all"
