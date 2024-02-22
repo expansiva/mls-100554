@@ -79,7 +79,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
 
         const stopDragging = (e: MouseEvent) => {
 
-            if (!this.elMain || !this.myParent) return; 
+            if (!this.elMain || !this.myParent) return;
 
             this.myParent.style.background = '';
 
@@ -96,7 +96,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
 
             if (this.tpChange === 'right') ret = `{"marginRight":"${this.elMain.style.marginRight}"}`;
 
-            
+
             const evento = new CustomEvent('onChange', {
                 detail: { valor: `{"tp":"style","style":${ret} }` },
                 bubbles: true,
@@ -140,7 +140,7 @@ const templateActionMargin = {
         widget: '',
         cursor: 'pointer',
         attrs: undefined,
-        isDblClick:false,
+        isDblClick: false,
     },
     buttonMargin: {
         position: 'p-m4',
@@ -160,13 +160,20 @@ const templateActionMargin = {
                 false,
                 'margin'
             )
+            const params = {
+                level: 4,
+                position: 'right',
+                wdcPath: wc.title,
+                op: 'Styles',
+            }
+            mls.events.fire([4], 'WCDEvent' as any, JSON.stringify(params))
         },
         menuItens: [],
         menuSubItens: [],
         widget: '',
         cursor: 'pointer',
         attrs: undefined,
-        isDblClick:false,
+        isDblClick: false,
     },
     marginTop: {
         position: 'p-m1',
@@ -180,7 +187,7 @@ const templateActionMargin = {
         widget: 'wcd-toolbox-item-action-margin-100554',
         cursor: 'ns-resize',
         attrs: [{ attr: 'tpchange', value: 'top' }],
-        isDblClick:false,
+        isDblClick: false,
     },
     marginRight: {
         position: 'p-r2',
@@ -194,7 +201,7 @@ const templateActionMargin = {
         widget: 'wcd-toolbox-item-action-margin-100554',
         cursor: 'ew-resize',
         attrs: [{ attr: 'tpchange', value: 'right' }],
-        isDblClick:false,
+        isDblClick: false,
 
     },
     marginBottom: {
@@ -209,7 +216,7 @@ const templateActionMargin = {
         widget: 'wcd-toolbox-item-action-margin-100554',
         cursor: 'ns-resize',
         attrs: [{ attr: 'tpchange', value: 'bottom' }],
-        isDblClick:false,
+        isDblClick: false,
     },
     marginLeft: {
         position: 'p-l2',
@@ -223,7 +230,7 @@ const templateActionMargin = {
         widget: 'wcd-toolbox-item-action-margin-100554',
         cursor: 'ew-resize',
         attrs: [{ attr: 'tpchange', value: 'left' }],
-        isDblClick:false,
+        isDblClick: false,
     },
 
 }

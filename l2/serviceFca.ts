@@ -7,6 +7,11 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 @customElement('service-fca-100554')
 export class ServiceFca100554 extends ServiceBase {
 
+    constructor() {
+        super();
+        this.setEvents();
+    }
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
@@ -35,6 +40,7 @@ export class ServiceFca100554 extends ServiceBase {
             Animation: 'Animation;f5ae',
         },
         actionDefault: '', // call after close icon clicked
+        iconDefault: 'AboutFCA',
         setMode: undefined, // child will set this
         onClickIcon: this.onClickIcon,
         getLastMode: undefined,
@@ -72,12 +78,14 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     setEvents(): void {
-        mls.events.addListener(this.level, 'WCDEvent' as any, (ev) => this.onWCDEvent(ev));
+        mls.events.addListener(4, 'WCDEvent' as any, (ev) => this.onWCDEvent(ev));
     }
 
     onWCDEvent(ev: mls.events.IEvent) {
+
+        console.info('evento chegou')
         if (!ev.desc) return;
-        const data = JSON.parse(ev.desc);
+        const data: IWCDParams = JSON.parse(ev.desc);
         if (this.menu.setIconActive) this.menu.setIconActive(data.op);
     }
 
@@ -102,5 +110,12 @@ export class ServiceFca100554 extends ServiceBase {
     }
 }
 
-type ITabType = 'Navigation' | 'Properties' | 'Styles' | 'Animation' | 'AboutFCA'
+export type ITabType = 'Navigation' | 'Properties' | 'Styles' | 'Animation' | 'AboutFCA'
+
+export interface IWCDParams {
+    level: number,
+    position: 'left' | 'right',
+    wdcPath: string,
+    op: ITabType,
+}
 
