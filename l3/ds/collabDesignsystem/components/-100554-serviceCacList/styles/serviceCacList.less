@@ -1,0 +1,43 @@
+service-cac-list-100554 { //don't change this line 
+ 	.tabs {
+        display: flex;
+        list-style: none;
+        padding: 0;
+    }
+
+    .tab {
+        margin-right: 2px;
+        padding: 10px 15px;
+        cursor: pointer;
+        border: 1px solid transparent;
+        border-top-left-radius: 0.25rem;
+        border-top-right-radius: 0.25rem;
+    }
+
+    .tab:not(.active){
+        border-bottom: 1px solid @grey-color-dark;
+    }
+
+    .tab.active {
+        background-color: #f0f0f0;
+        border-color: #ccc;
+        border-bottom-color: transparent;
+    }
+
+    .tab-content {
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-top: none;
+        border-radius: 0 0 0.25rem 0.25rem;
+        background-color: #f0f0f0;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .tab-content:not(.active) {
+        display: none;
+    }
+}
+
