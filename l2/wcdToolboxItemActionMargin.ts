@@ -11,7 +11,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
     @property({ type: String, reflect: true })
     private tpChange: 'top' | 'bottom' | 'left' | 'right' | 'all' | undefined;
 
-    public myParent: HTMLElement | undefined;
+    public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
     private startX: number = 0;
     private startY: number = 0;
@@ -73,7 +73,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
                 this.elMain.style.marginRight = (this.startRight + deltaX) + 'px';
             }
 
-            (this.myParent as any).updateSize(this.elMain, this.myParent, true);
+            this.myParent.updateSizeMargin(this.elMain, this.myParent, true);
 
         }
 
@@ -133,7 +133,7 @@ const templateActionMargin = {
         title: 'Back',
         iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"/></svg>',
         onclick: (e: MouseEvent, wc: WCDToolbox) => {
-            wc.setIconsWcdToolbox([], true);
+            wc.setIconsWcdToolbox([], true, 'size');
         },
         menuItens: [],
         menuSubItens: [],
@@ -158,7 +158,7 @@ const templateActionMargin = {
                     templateActionMargin.marginLeft as IActionsToolbox
                 ],
                 false,
-                'size'
+                'margin'
             )
         },
         menuItens: [],

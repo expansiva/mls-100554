@@ -4,17 +4,17 @@ import { customElement } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
 import { FcaLitElementBase } from './_100554_fcaLitElementBase';
-  
-@customElement('wcd-toolbox-item-action-move-100554') 
-export class WCDToolboxItemActionMove extends LitElement {
 
-    public myParent: WCDToolbox | undefined;
+@customElement('wcd-toolbox-item-action-move-100554')
+export class WCDToolboxItemActionMove extends LitElement {
+ 
+    public myParent: WCDToolbox | undefined; 
     public elMain: HTMLElement | undefined;
-    public elFCA: FcaLitElementBase | undefined; 
+    public elFCA: FcaLitElementBase | undefined;
 
     createRenderRoot() {
         return this;
-    }
+    } 
 
     render() {
 
@@ -35,8 +35,8 @@ export class WCDToolboxItemActionMove extends LitElement {
         if (!this.elMain || !this.elFCA || !this.myParent || !document.defaultView) return;
 
         const inGroup = this.elFCA.closest('*[isfcagroup]') as HTMLElement;
-        
-        if (inGroup && inGroup !== this.elFCA) { 
+
+        if (inGroup && inGroup !== this.elFCA) {
             inGroup.click();
             return;
         }
@@ -46,11 +46,11 @@ export class WCDToolboxItemActionMove extends LitElement {
 
         const scope = myGrandFather.getMyScope();
         if (!scope) return;
-    
+
         let array = myGrandFather.getFCAComponents(scope);
 
         array = this.onlyNeedAddTag(array);
-    
+
         array.forEach((i) => {
             this.changeStateDrag(i, scope, myGrandFather);
         });
@@ -108,13 +108,13 @@ export class WCDToolboxItemActionMove extends LitElement {
 
                 const move = aux.tagName.toLocaleLowerCase();
 
-                const newEl:any = this.elFCA.cloneNode(true);
+                const newEl: any = this.elFCA.cloneNode(true);
                 newEl.myInnerHTML = this.elFCA.myInnerHTML;
-                        
-                switch (move) { 
+
+                switch (move) {
                     case 'wcd-dragdrop-aux-before':
                         father.insertBefore(newEl, elBase);
-                        this.elFCA.remove(); 
+                        this.elFCA.remove();
                         break;
                     case 'wcd-dragdrop-aux-after':
                         father.insertBefore(newEl, elBase.nextSibling);
@@ -127,11 +127,18 @@ export class WCDToolboxItemActionMove extends LitElement {
                     default:
                         '';
                 }
- 
+        
                 if (oldParent) oldParent.updateMyInnerHtmlIfNeed(false);
                 if (newParent) newParent.updateMyInnerHtmlIfNeed(false);
+                else {
+                    newEl.setAttribute('rendertype', 'edit');
+                    setTimeout(() => {                        
+                        newEl.click();
+                    }, 100)
 
-                clearDrag(); 
+                }
+
+                clearDrag();
 
 
             } catch (err) {
@@ -148,29 +155,29 @@ export class WCDToolboxItemActionMove extends LitElement {
 
             const tag = i.tagName.toLocaleLowerCase();
             if (tag !== 'wcd-toolbox-item-action-move-100554') i.remove();
-            
+
         })
-        
+
 
     }
 
-    private onlyNeedAddTag(array: FcaLitElementBase[]): FcaLitElementBase[]{
+    private onlyNeedAddTag(array: FcaLitElementBase[]): FcaLitElementBase[] {
 
-        const a:FcaLitElementBase[] = [];
+        const a: FcaLitElementBase[] = [];
 
-        for (let i = 0; i <= array.length; i++){
+        for (let i = 0; i <= array.length; i++) {
 
-            const elBase = array[i]; 
-            const next = array[i + 1];  
+            const elBase = array[i];
+            const next = array[i + 1];
             if (!next) {
                 a.push(elBase);
                 continue;
             }
 
             const parent = next.getMyParentFCA(next);
-        
+
             if (!parent && (!next.parentElement || next.parentElement.tagName !== 'BODY')) continue;
-            if(next.parentElement && next.parentElement.tagName === 'BODY') a.push(elBase)
+            if (next.parentElement && next.parentElement.tagName === 'BODY') a.push(elBase)
             else if (parent !== elBase) a.push(elBase);
 
 
@@ -268,6 +275,6 @@ const templateActionMove = {
         widget: 'wcd-toolbox-item-action-move-100554',
         cursor: 'pointer',
         attrs: undefined,
-        isDblClick:false
+        isDblClick: false
     }
 }

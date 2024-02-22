@@ -65,14 +65,17 @@ export class WCDToolbox extends CollabLitElement {
 
     // ------------ IMPLEMENTATION-------------------
 
-    public setIconsWcdToolbox(act: IActionsToolbox[], useSelf: boolean = false, updataSize: 'false' | 'size' | 'padding' = 'false'): void {
+    public setIconsWcdToolbox(act: IActionsToolbox[], useSelf: boolean = false, updataSize: 'false' | 'size' | 'padding' | 'margin' = 'false'): void {
 
         if (useSelf) this.renderActions(this.actions);
         else this.renderActions(act);
 
         if (this.elMain && updataSize === 'size') this.updateSize(this.elMain, this, true);
 
+        if (this.elMain && updataSize === 'margin') this.updateSizeMargin(this.elMain, this, true);
+
         if (this.elMain && updataSize === 'padding') this.updateBaseNoPadding(this.elMain, this);
+        
     }
 
     private renderActions(arr: IActionsToolbox[]): void {
@@ -347,6 +350,46 @@ export class WCDToolbox extends CollabLitElement {
             top -= parseInt(marginTop, 10);
             if (top > 0) top = 0;
 
+            //width = Math.max(ad3(width, marginLeft, marginRight), ad3(0, paddingLeft, paddingRight));
+
+            if (width > elBase.ownerDocument.body.clientWidth) width -= 3;
+
+            //height = Math.max(ad3(height, marginTop, marginBottom), ad3(0, paddingTop, paddingBottom));
+
+            if (changePosition) {
+                elChange.style.left = `${(left - 1) < 0 ? 0 : (left - 1)}px`;
+                elChange.style.top = `${top - 1}px`;
+            }
+
+            elChange.style.width = `${width + 2}px`;
+            elChange.style.height = `${height + 2}px`;
+            elChange.style.display = display;
+
+        }, 50);
+
+
+    }
+
+    public updateSizeMargin(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean): void {
+
+
+        if (!elBase) return;
+        setTimeout(() => {
+            const display = elChange.style.display;
+            elChange.style.display = 'none!important';
+
+            const ad3 = (n1: number, s1: string, s2: string): number => n1 + parseInt(s1, 10) + parseInt(s2, 10);
+
+            const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom, paddingLeft, paddingRight } = window.getComputedStyle(elBase);
+
+            let { width, height, y } = elBase.getBoundingClientRect();
+
+            let left = 0;
+            let top = 0;
+            left -= parseInt(marginLeft, 10);
+            top -= parseInt(marginTop, 10);
+            if (top > 0) top = 0;
+
             width = Math.max(ad3(width, marginLeft, marginRight), ad3(0, paddingLeft, paddingRight));
 
             if (width > elBase.ownerDocument.body.clientWidth) width -= 3;
@@ -429,6 +472,7 @@ export class WCDToolbox extends CollabLitElement {
             position:absolute;
             user-select:none;
             z-index:9999;
+            background: #edededc2;
         }
 
         :host(:hover){

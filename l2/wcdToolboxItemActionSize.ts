@@ -52,10 +52,14 @@ export class WCDToolboxItemActionSize extends LitElement {
 
             if (!this.tpChange || ['all', 'width'].includes(this.tpChange)) {
                 this.elMain.style.width = (this.startWidth + e.clientX - this.startX) + 'px';
+            } else {
+                this.elMain.style.width = this.elMain.getBoundingClientRect().width + 'px';
             }
 
             if (!this.tpChange || ['all', 'height'].includes(this.tpChange)) {
                 this.elMain.style.height = (this.startHeight + e.clientY - this.startY) + 'px';
+            } else {
+                this.elMain.style.height = this.elMain.getBoundingClientRect().height + 'px';
             }
 
             this.myParent.updateSize(this.elMain, this.myParent, false);
@@ -76,7 +80,7 @@ export class WCDToolboxItemActionSize extends LitElement {
             if (this.tpChange === 'height') ret = `{"height":"${this.elMain.style.height}"}`;
 
             const evento = new CustomEvent('onChange', {
-                detail: { valor: ret },
+                detail: { valor: `{"tp":"style","style":${ret} }` },
                 bubbles: true,
                 composed: true
             });
