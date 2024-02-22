@@ -19,6 +19,8 @@ export abstract class ServiceBase extends LitElement {
 
     get serviceContent() { return this.getNav3ServiceContent(); }
 
+    get nav3Service() { return this.getNav3Service(); }
+
     get serviceItemNav() { return this.getServiceItemNav(); }
 
     get tooltipEl() { return this.getTooltip(); }
@@ -79,12 +81,11 @@ export abstract class ServiceBase extends LitElement {
     }
 
     openService(service: string, position: 'left' | 'right', level: number) {
-        let page = this.closest('mls-page-100529') || this.closest('collab-page');
+        let page = this.closest('collab-page');
         if (!page) return;
 
-        let toolbar = page.querySelector(`mls-toolbar-100529[toolbarposition="${position}"][level="${level}"]`);
-        if (!toolbar) {
-            toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
+
+            const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
             if (!toolbar) return;
             if (this.level !== level) {
                 (toolbar as any).state[level][position] = service;
@@ -94,27 +95,14 @@ export abstract class ServiceBase extends LitElement {
             const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
             if (item) item.click();
             return;
-        }
-
-        if (!toolbar) return;
-        const toolbarItem = toolbar.querySelector(`mls-toolbar-item-100529[path="${service}"`) as HTMLElement;
-
-        if (toolbarItem) {
-            if (this.level !== level) {
-                this.selectLevel(level);
-                toolbar.setAttribute('service-to-open', service);
-                return;
-            }
-            toolbarItem.click();
-        }
+        
     }
 
     selectLevel(level: number) {
-        let nav = this.closest('mls-nav1-100529');
-        if (!nav) {
-            const page = this.closest('collab-page');
-            nav = page?.querySelector('collab-nav-1') as HTMLElement;
-        }
+
+        const page = this.closest('collab-page');
+        const nav = page?.querySelector('collab-nav-1') as HTMLElement;
+
         const objIndex = {
             0: 7,
             1: 6,
@@ -131,37 +119,32 @@ export abstract class ServiceBase extends LitElement {
     }
 
     private getMlsNav2(): IMlsNav2 | null {
-        let mlsNav2 = this.closest('mls-toolbar-100529') as IMlsNav2 | null;;
-        if (!mlsNav2) mlsNav2 = this.closest('collab-nav-3')?.previousElementSibling as IMlsNav2 | null;
+        const mlsNav2 = this.closest('collab-nav-3')?.previousElementSibling as IMlsNav2 | null;
         return mlsNav2;
     }
 
     private getNav3ServiceContent() {
-        let parentToolbarContent = this.closest('mls-toolbar-content-service-100529') as IToolbarContent | null;
-        if (!parentToolbarContent) parentToolbarContent = this.closest('collab-nav-3-service') as IToolbarContent | null;
+        const parentToolbarContent = this.closest('collab-nav-3-service') as IToolbarContent | null;
         return parentToolbarContent;
     }
 
     private getNav3Service() {
-        let parentToolbarContent = this.closest('mls-toolbar-content-service-100529') as IToolbarContent | null;
-        if (!parentToolbarContent) parentToolbarContent = this.closest('collab-nav-3') as IToolbarContent | null;
+        const parentToolbarContent = this.closest('collab-nav-3') as IToolbarContent | null;
         return parentToolbarContent;
     }
 
     private getTooltip() {
-        let tooltip = document.querySelector('mls-tooltip-100529') as ITooltipElement | null;
-        if (!tooltip) tooltip = document.querySelector('collab-tooltip') as ITooltipElement | null;
+        const tooltip = document.querySelector('collab-tooltip') as ITooltipElement | null;
         return tooltip;
     }
 
-    private getServiceItemNav(): IMlsNav2Item | HTMLElement | null {
+    private getServiceItemNav(): IMlsNav2Item | null {
         const toolbar = this.getMlsNav2();
         if (!toolbar) return null;
         const content = this.getNav3ServiceContent();
         if (!content) return null;
         const dataservice = content.getAttribute('data-service');
-        let item = toolbar.querySelector(`mls-toolbar-item-100529[ref="${dataservice}"]`) as HTMLElement;
-        if (!item) item = toolbar.querySelector(`collab-nav-2-item[data-service="${dataservice}"]`) as IMlsNav2Item;
+        const item = toolbar.querySelector(`collab-nav-2-item[data-service="${dataservice}"]`) as IMlsNav2Item;
         return item;
     }
 
@@ -191,7 +174,7 @@ export interface IMenu {
     icons: IIconsKeyValue,
     actionDefault?: string,
     iconDefault?: string,
-    onClickTitle?:IClickTitleCallBack,
+    onClickTitle?: IClickTitleCallBack,
     onClickLink?: IClickLinkCallBack,
     onClickIcon?: IClickIconCallBack,
     setMode?: ISetMode,
@@ -203,8 +186,8 @@ export interface IMenu {
 }
 
 export interface IMenuTitle {
-	text: string,
-	icon: string
+    text: string,
+    icon: string
 }
 
 export interface IToolbarContent extends HTMLElement {
@@ -217,6 +200,10 @@ export interface ITooltipElement extends HTMLElement {
 
 export interface IMlsNav2 extends HTMLElement {
     toogleBadge: (show: boolean, serviceName: string) => void
+}
+
+export interface IMlsNav3 extends HTMLElement {
+    getActiveInstance: (position: 'left' | 'right') => ServiceBase | undefined
 }
 
 export interface IMlsNav2Item extends HTMLElement {
@@ -233,23 +220,23 @@ export interface IService {
     level: number[],
     classname?: ICollabServiceClass,
     isStatic?: boolean,
-    customConfiguration?:IServiceCustom
+    customConfiguration?: IServiceCustom
 }
 
 export type IServiceCustom = {
-    [key: number] :IServiceCustomByPosition | IServiceCustomPlace
+    [key: number]: IServiceCustomByPosition | IServiceCustomPlace
 }
 export type IServiceCustomByPosition = {
     right?: IServiceCustomPlace,
     left?: IServiceCustomPlace,
 }
 
-export interface IServiceCustomPlace{
+export interface IServiceCustomPlace {
     tooltip?: string,
     visible?: boolean,
     state?: ICollabServiceState,
     classname?: ICollabServiceClass,
-    show?:boolean
+    show?: boolean
 }
 
 export type ICollabServicePosition = "left" | "right" | "all"
