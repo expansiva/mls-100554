@@ -34,9 +34,9 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     // ------------ ABSTRACT ------------------
 
-    private isLoadMyAction:any = {};
+    private isLoadMyAction: any = {};
     abstract actions: IActionLevels;
-    abstract setMyActions(level: string):Promise<void>;
+    abstract setMyActions(level: string): Promise<void>;
 
     abstract renderPreview: (param: string) => any;
     abstract renderEditActive: (param: string) => any;
@@ -112,6 +112,15 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
                 const all = document.querySelectorAll('*[renderType="editactive"]');
                 Array.from(all).forEach((i) => i.setAttribute('renderType', 'edit'));
+
+
+                const inGroup = this.closest('*[isfcagroup]') as HTMLElement;
+
+                if (inGroup && inGroup !== this) {
+                    inGroup.click();
+                    return;
+                }
+
                 this.onclick = undefined as any;
 
                 if (!this.isLoadMyAction[this.level as any] || this.isLoadMyAction[this.level as any] === false) {
@@ -120,7 +129,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
                     this.isLoadMyAction[this.level as any] = true;
 
                 }
-                
+
                 this.updateMyInnerHtmlIfNeed();
 
             }

@@ -14,13 +14,19 @@ import { IActionLevels } from './_100554_fcaGlobal';
 @customElement('fca-page-100554')
 export class FcaPage extends FcaLitElementBase {
 
+    @property({ type: String, reflect: true })
+    public publishMode: string | undefined;
+    
     //-------------- COMPONENT ------------------
 
-    firstUpdated() {
-        /*setTimeout(async () => {
-            //console.info(await this.onlyHTML()) 
-            //console.info(await this.onlyFCA())
-        }, 3000)*/
+    async updated(changedProperties: Map<string, string>) {
+
+        if (this.publishMode === 'true') {
+
+            this.innerHTML = await this.onlyHTML();
+
+        }
+
     }
 
     // -------------- ABSTRACT ------------------
@@ -68,7 +74,6 @@ export class FcaPage extends FcaLitElementBase {
             await this.onlyHTMLChild(all as HTMLElement, c as HTMLElement);
         }
 
-        this.innerHTML = all.innerHTML;
         return all.innerHTML;
 
     }

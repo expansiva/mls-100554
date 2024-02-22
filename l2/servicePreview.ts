@@ -8,6 +8,7 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
+import { convertTagToFileName } from './_100554_utilsLit'
 import { initServicePreviewView } from './_100554_servicePreviewView';
 import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
 @customElement('service-preview-100554')
@@ -46,6 +47,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onClickLink = (op: string): boolean => {
         if (op === 'actAddStyle') return this.actAddStyle();
+        if (op === 'opAboutTag') return this.opAboutTag();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -80,7 +82,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     // -------------- EVENTS -------------------
-    
+
 
     private setEvents() {
 
@@ -157,6 +159,51 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     // -------------- IMPLEMENTS-----------------
+
+    public async setAboutTag(tag: string) {
+
+        try {
+
+            if (!tag) return false;
+
+            const file = convertTagToFileName(tag.toLocaleLowerCase());
+            /*mls.actual[0].setFullName(file);
+            const key = mls.stor.getKeyToFiles(mls.actual[0].project as number, 2, mls.actual[0].path as string, '', '.html');
+            if (!mls.stor.files[key]) return false;
+
+            this.htmlAbout = await mls.stor.files[key].getContent() as string;*/
+
+        
+            this.htmlAbout = `  
+                <h3>About this Component</h3>
+                <ul>
+                    <li>Reference: ${file}</li>
+                    <li>Tag: ${tag} </li>
+                    <li>Level: 2 </li>                    
+                </ul>`
+                ;
+            
+            if (this.menu.setMenuActive && this.htmlAbout) this.menu.setMenuActive('opAboutTag');
+
+        } catch (e) {
+
+            console.info(e);
+            return false;
+
+        }
+
+
+    }
+
+    private htmlAbout = '';
+    private opAboutTag() {
+
+        const doc = document.createElement('div');
+        doc.innerHTML = this.htmlAbout;
+        if (this.menu.setMode) this.menu.setMode('page', doc);
+        return true;
+
+    }
 
     private actAddStyle() {
 

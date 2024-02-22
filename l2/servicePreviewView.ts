@@ -12,7 +12,7 @@ export class ServicePreviewView extends LitElement {
 
     private mfile: mls.l2.editor.IMFile | undefined = undefined;
 
-    @property() father: any = undefined;
+    @property() father: any ;
 
     @property() page: string = '';
 
@@ -318,6 +318,7 @@ export class ServicePreviewView extends LitElement {
 
         this.lastHTML = txt;
         iframe.contentDocument.body.innerHTML = txt;
+        (iframe.contentDocument.body as any)['service'] = this.father;
 
         const ret = await getDepedencesByHtml(this.mfile, txt, true);
         this.mountJSImporMap(ret, iframe);
