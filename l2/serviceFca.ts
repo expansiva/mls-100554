@@ -10,28 +10,33 @@ export class ServiceFca100554 extends ServiceBase {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
-        icon: '&#xf15b',
+        icon: '&#xf2db',
         state: 'foreground',
-        position: 'right',
-        tooltip: 'Service Example',
+        position: 'left',
+        tooltip: 'Service FCA',
         visible: true,
         widget: '_100554_serviceFca',
-        level: [5]
+        level: [4]
     }
 
-    public onClickLink = (op: string): boolean => {
-        if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
+    public onClickIcon = (op: string): void => {
+        this.activeTab = op as ITabType;
     }
 
     public menu: IMenu = {
-        title: 'Example',
+        title: '',
         actions: {
         },
-        icons: {},
+        icons: {
+            AboutFCA: 'About FCA;3f',
+            Navigation: 'Navigation;f041',
+            Properties: 'Properties;f0ce',
+            Styles: 'Styles;f5ad',
+            Animation: 'Animation;f5ae',
+        },
         actionDefault: '', // call after close icon clicked
         setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
+        onClickIcon: this.onClickIcon,
         getLastMode: undefined,
         updateTitle: undefined
     }
@@ -40,11 +45,62 @@ export class ServiceFca100554 extends ServiceBase {
 
     }
 
-
-    @property() 
-    name: string = 'Somebody';
+    @property()
+    activeTab: ITabType = 'AboutFCA';
 
     render() {
-        return html`<p> Hello, ${ this.name } !</p>`;
+        return html`
+            ${this.renderContent()}
+        `;
+    }
+
+    renderContent() {
+        switch (this.activeTab) {
+            case 'Navigation':
+                return this.renderNavigation();
+            case 'Properties':
+                return this.renderProperties();
+            case 'Styles':
+                return this.renderStyles();
+            case 'Animation':
+                return this.renderAnimation();
+            case 'AboutFCA':
+                return this.renderAboutFCA();
+            default:
+                return html``;
+        }
+    }
+
+    setEvents(): void {
+        mls.events.addListener(this.level, 'WCDEvent' as any, (ev) => this.onWCDEvent(ev));
+    }
+
+    onWCDEvent(ev: mls.events.IEvent) {
+        if (!ev.desc) return;
+        const data = JSON.parse(ev.desc);
+        if (this.menu.setIconActive) this.menu.setIconActive(data.op);
+    }
+
+    renderNavigation() {
+        return html`<div>In develpoment : Navigation</div>`;
+    }
+
+    renderProperties() {
+        return html`<div>In develpoment: Properties</div>`;
+    }
+
+    renderStyles() {
+        return html`<div>In develpoment: Styles</div>`;
+    }
+
+    renderAnimation() {
+        return html`<div>In develpoment: Animation</div>`;
+    }
+
+    renderAboutFCA() {
+        return html`<div>In develpoment: AboutFCA</div>`;
     }
 }
+
+type ITabType = 'Navigation' | 'Properties' | 'Styles' | 'Animation' | 'AboutFCA'
+
