@@ -129,7 +129,7 @@ export abstract class ServiceBase extends LitElement {
     }
 
     private getNav3Service() {
-        const parentToolbarContent = this.closest('collab-nav-3') as IToolbarContent | null;
+        const parentToolbarContent = this.closest('collab-nav-3') as IMlsNav3 | null;
         return parentToolbarContent;
     }
 
