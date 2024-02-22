@@ -9,7 +9,7 @@ export class ServiceCACList100554 extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    get invertPosition() { return this.position === 'left' ? 'right' : 'left' };
+    get invertedPosition() { return this.position === 'left' ? 'right' : 'left' };
 
     constructor() {
         super();
@@ -53,8 +53,9 @@ export class ServiceCACList100554 extends ServiceBase {
         updateTitle: undefined
     }
 
-    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
+    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void {
+        if (!visible) return;
+        if (this.menu.setIconActive) this.menu.setIconActive('icTs');
     }
 
     @property()
@@ -69,17 +70,11 @@ export class ServiceCACList100554 extends ServiceBase {
         const data: IToolbarChangeEvent = JSON.parse(ev.desc);
         if (data.level !== this.level) return;
         if (data.position === this.position) return;
-        if (this.activeTab !== 'Service') return;
+        // if (this.activeTab !== 'Service') return;
         this.requestUpdate();
     }
 
     render() {
-        return html`
-            ${this.renderContent()}
-        `;
-    }
-
-    renderContent() {
         switch (this.activeTab) {
             case 'All':
                 return this.renderAll();
@@ -93,17 +88,18 @@ export class ServiceCACList100554 extends ServiceBase {
     }
 
     renderAll() {
-        return html`<div>In develpoment</div>`;
+        return html`<div>In development.</div>`;
     }
 
     renderService() {
-        const serviceActive = this.nav3Service?.getActiveInstance(this.invertPosition);
-        if (!serviceActive) return html`<div>No service select in position ${this.invertPosition} </div>`;;
-        return html`<div>Showing Task for service: ${serviceActive.details.tooltip} </div>`;
+        const serviceActive = this.nav3Service?.getActiveInstance(this.invertedPosition);
+        if (!serviceActive) return html`<div>No service selected in position ${this.invertedPosition} </div>`;
+
+        return html`<div>Showing Jobs for service: ${serviceActive.details.tooltip} </div>`;
     }
 
     renderAdd() {
-        return html`<div>In develpoment</div>`;
+        return html`<div>In development</div>`;
     }
 }
 
