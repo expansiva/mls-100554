@@ -335,39 +335,46 @@ export class WCDToolbox extends CollabLitElement {
     public updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean): void {
 
 
-        if (!elBase) return;
-        setTimeout(() => {
-            const display = elChange.style.display;
-            elChange.style.display = 'none!important';
+        const st = elChange.style;
+        st.position = 'absolute';
 
-            const ad3 = (n1: number, s1: string, s2: string): number => n1 + parseInt(s1, 10) + parseInt(s2, 10);
+        const { borderTopWidth, borderBottomWidth, borderLeftWidth, borderRightWidth, paddingTop, paddingBottom, paddingLeft, paddingRight } = window.getComputedStyle(elBase);
 
-            const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom, paddingLeft, paddingRight } = window.getComputedStyle(elBase);
+        let { width, height } = elBase.getBoundingClientRect();
 
-            let { width, height, y } = elBase.getBoundingClientRect();
+        const cd = (v1: string, v2: string): string => {
 
-            let left = 0;
-            let top = 0;
-            left -= parseInt(marginLeft, 10);
-            top -= parseInt(marginTop, 10);
-            if (top > 0) top = 0;
+            // ex: '1px' + '2px' = '3px'
+            let rc = parseInt(v1, 10) + parseInt(v2, 10);
+            if (rc < 0) rc = 0;
+            return rc + 'px';
 
-            //width = Math.max(ad3(width, marginLeft, marginRight), ad3(0, paddingLeft, paddingRight));
+        };
 
-            if (width > elBase.ownerDocument.body.clientWidth) width -= 3;
+        const ci = (v1: string, v2: string): number => {
 
-            //height = Math.max(ad3(height, marginTop, marginBottom), ad3(0, paddingTop, paddingBottom));
+            // ex: '1px' + '2px' = '3px'
+            let rc = parseInt(v1, 10) + parseInt(v2, 10);
+            if (rc < 0) rc = 0;
+            return rc;
 
-            if (changePosition) {
-                elChange.style.left = `${(left - 1) < 0 ? 0 : (left - 1)}px`;
-                elChange.style.top = `${top - 1}px`;
-            }
+        };
 
-            elChange.style.width = `${width + 2}px`;
-            elChange.style.height = `${height + 2}px`;
-            elChange.style.display = display;
+        let cWidth = ci(paddingLeft, paddingRight);
+        let cHeight = ci(paddingTop, paddingBottom);
 
-        }, 50);
+        if (cWidth > 0 && cWidth < width) width = width - cWidth;
+        if (cHeight > 0 && cHeight < height) height = height - cHeight;
+
+
+
+        st.left = cd(paddingLeft, borderLeftWidth);
+        st.bottom = cd(paddingBottom, borderBottomWidth);
+        st.top = cd(paddingTop, borderTopWidth);
+        st.right = cd(paddingRight, borderRightWidth);
+
+        st.width = width + 'px';
+        st.height = height + 'px';
 
 
     }
