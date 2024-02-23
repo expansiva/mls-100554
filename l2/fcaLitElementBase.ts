@@ -94,8 +94,28 @@ export abstract class FcaLitElementBase extends CollabLitElement {
             return false;
 
         }
+    
+        if (changedProperties.get('level') && !this.isLoadMyAction[this.level as any] && this.renderType === 'editactive') {
+            this.auxSetMyActions();
+        }
+
         return true;
 
+    }
+
+    private async auxSetMyActions() {
+
+        try {
+
+            await this.setMyActions(this.level as any);
+            this.isLoadMyAction[this.level as any] = true;
+            this.renderType = 'edit';
+            setTimeout(() => { this.click(); }, 200) 
+
+        } catch (e) {
+            
+        }
+        
     }
 
     updated(changedProperties: Map<string, string>) {
