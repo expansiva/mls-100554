@@ -52,13 +52,21 @@ export abstract class ServiceBase extends LitElement {
             const loading = changedProperties.get('loading');
 
             if (loading !== undefined) {
-                this.getNav3Service()?.setAttribute('loading', (!loading).toString());
+
+                const nav3Service = this.getNav3Service();
+                if (!nav3Service) return;
+                (nav3Service as any)['serviceBind'] = this.details.widget;
+                nav3Service.setAttribute('loading', (!loading).toString());
+
             }
         }
     }
 
     setError(error: string): void {
-        this.getNav3Service()?.setAttribute('error', error);
+        const nav3Service = this.getNav3Service();
+        if (!nav3Service) return;
+        (nav3Service as any)['serviceBind'] = this.details.widget;
+        nav3Service.setAttribute('error', error);
     }
 
     toogleBadge(show: boolean, serviceName: string) {
