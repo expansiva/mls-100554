@@ -5,6 +5,8 @@
  * }
  */
 
+// version = 1
+
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
