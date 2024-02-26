@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
-console.info('um teste')
+console.info('um teste2')
 @customElement('service-plugins-100554')
 export class ServicePlugins extends ServiceBase {
 
