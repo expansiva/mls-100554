@@ -457,9 +457,12 @@ export class ServiceListFiles extends ServiceBase {
     public changeList(time: number = 500): void {
 
         clearTimeout(this.changeListTimeout);
-        this.changeListTimeout = setTimeout(() => {
+        this.changeListTimeout = setTimeout(async () => {
 
-            this.init();
+            await this.init();
+            if (this.info.version > 0) {
+                (window as any).collabMessages.add(`there are updates on project ${mls.actual[5].project}`, 'information')
+            };
 
         }, time);
 
