@@ -1,31 +1,29 @@
 /// <mls shortName="collabMessagesPt" project="100554" enhancement="_blank" />
-				
-import { CollabMessagesBase, ITranslations } from './_100554_collabMessagesBase';
 
-export function getInstance():CollabMessagesBase {
-  return new CollabMessagesPt();
+const defaultMessages = {
+  formatDate: (date: Date) => formatDate(date),
+  formatCurrency: (amount: number) => formatCurrency(amount),
+  todayIs: (date: Date) => `Hoje é ${formatDate(date)}`,
+  updateChanges: 'Atualizar alterações',
+  comments: 'Comentário',
+  update: 'Atualizar',
+  fileChanges: 'Aquivos alterados',
+  itemsToSave: (tot: number) => tot <= 0 ? 'Não há itens para salvar' : `${tot} itens para salvar`,
+};
+
+// Verifica se window.messages já existe; se não, define-o com defaultMessages.
+if (!(window as any).messages) {
+  (window as any).messages = defaultMessages;
 }
 
-class CollabMessagesPt extends CollabMessagesBase {
+// Exportamos window.messages, permitindo que ele seja de um tipo flexível.
+export const messages: typeof defaultMessages = (window as any).messages;
 
-  public collab_messages: ITranslations = {
-    formatDate: (date: Date) => this.formatDate(date),
-    formatCurrency: (amount: number) => this.formatCurrency(amount),
-    todayIs: (date: Date) => `Hoje é ${this.formatDate(date)}`,
-    updateChanges: 'Atualizar alterações',
-    comments: 'Comentário',
-    update: 'Atualizar',
-    fileChanges: 'Aquivos alterados',
-    itemsToSave: (tot: number) => tot <= 0 ? 'Não há itens para salvar' : `${tot} itens para salvar`
-
-  };
-
-  public formatDate(date: Date): string {
-    return date.toLocaleDateString("pt-BR");
-  }
-
-  public formatCurrency(amount: number): string {
-    return amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });;
-  }
-
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("pt-BR");
 }
+
+function formatCurrency(amount: number): string {
+  return amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });;
+}
+

@@ -1,6 +1,6 @@
 /// <mls shortName="wcdToolboxItemActionPadding" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement } from 'lit';
+import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
@@ -13,6 +13,7 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
+    private elExternal : HTMLElement | undefined;
     private startX: number = 0;
     private startY: number = 0;
     private startTop: number = 0;
@@ -26,17 +27,55 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
     render() {
 
+        this.renderOutdoorScenary();
         return html``;
 
     }
 
     updated(changedProperties: any) {
-    
+
         super.updated(changedProperties);
         if (!this.elMain || !this.myParent) return;
         this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
         this.onmousedown = (e) => this.initDragging(e);
         //this.addEventListener('mousedown', this.initDragging, false);
+
+    }
+
+    private renderOutdoorScenary(): void {
+
+        if (!this.elExternal ) {
+
+            const nav3 = this.getNav3();
+            if (!nav3 || !this.elMain) return;
+            const wc = (nav3 as any).getActiveInstance('left');
+            if (!wc || !wc.shadowRoot) return;
+            if (wc.tagName !== 'SERVICE-FCA-100554') return;
+            this.elExternal  = wc.shadowRoot.querySelector('div');
+
+        }
+
+        if (!this.elExternal  || !this.elMain) return;
+
+        const template = html`
+            <div> Padding top: ${this.elMain.style.paddingTop} </div>
+        `;
+
+        render(template, this.elExternal );
+
+
+    }
+
+    private getNav3(): HTMLElement | undefined {
+
+        if (!this.myParent) return;
+        const bd = this.myParent.closest('body');
+        if (!bd) return;
+        const service = (bd as any).service;
+        if (!service) return;
+        const nav3 = service.getNav3Service();
+        if (!nav3) return;
+        return nav3;
 
     }
 
@@ -76,6 +115,7 @@ export class WCDToolboxItemActionPadding extends LitElement {
                 this.elMain.style.paddingRight = (this.startRight + deltaX * -1) + 'px';
             }
 
+            this.renderOutdoorScenary();
             this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
 
         }
@@ -142,7 +182,7 @@ const templateActionPadding = {
         widget: '',
         cursor: 'pointer',
         attrs: undefined,
-        isDblClick:false,
+        isDblClick: false,
     },
 
     //padding
@@ -155,11 +195,11 @@ const templateActionPadding = {
         onclick: (e: MouseEvent, wc: WCDToolbox) => {
             wc.setIconsWcdToolbox(
                 [
-                    templateActionPadding.backButton  as IActionsToolbox,
-                    templateActionPadding.paddingTop  as IActionsToolbox,
-                    templateActionPadding.paddingRight  as IActionsToolbox,
-                    templateActionPadding.paddingBottom  as IActionsToolbox,
-                    templateActionPadding.paddingLeft  as IActionsToolbox
+                    templateActionPadding.backButton as IActionsToolbox,
+                    templateActionPadding.paddingTop as IActionsToolbox,
+                    templateActionPadding.paddingRight as IActionsToolbox,
+                    templateActionPadding.paddingBottom as IActionsToolbox,
+                    templateActionPadding.paddingLeft as IActionsToolbox
                 ],
                 false,
                 'padding'
@@ -170,7 +210,7 @@ const templateActionPadding = {
         widget: '',
         cursor: 'pointer',
         attrs: undefined,
-        isDblClick:false,
+        isDblClick: false,
     },
     paddingTop: {
         position: 'p-m1',
@@ -184,7 +224,7 @@ const templateActionPadding = {
         widget: 'wcd-toolbox-item-action-padding-100554',
         cursor: 'ns-resize',
         attrs: [{ attr: 'tpchange', value: 'top' }],
-        isDblClick:false,
+        isDblClick: false,
     },
     paddingRight: {
         position: 'p-r2',
@@ -198,7 +238,7 @@ const templateActionPadding = {
         widget: 'wcd-toolbox-item-action-padding-100554',
         cursor: 'ew-resize',
         attrs: [{ attr: 'tpchange', value: 'right' }],
-        isDblClick:false,
+        isDblClick: false,
     },
     paddingBottom: {
         position: 'p-m3',
@@ -212,7 +252,7 @@ const templateActionPadding = {
         widget: 'wcd-toolbox-item-action-padding-100554',
         cursor: 'ns-resize',
         attrs: [{ attr: 'tpchange', value: 'bottom' }],
-        isDblClick:false,
+        isDblClick: false,
     },
     paddingLeft: {
         position: 'p-l2',
@@ -226,7 +266,7 @@ const templateActionPadding = {
         widget: 'wcd-toolbox-item-action-padding-100554',
         cursor: 'ew-resize',
         attrs: [{ attr: 'tpchange', value: 'left' }],
-        isDblClick:false,
+        isDblClick: false,
     },
 }
 
