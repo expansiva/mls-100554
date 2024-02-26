@@ -115,7 +115,6 @@ export class ServiceListFilesAdd100554 extends LitElement {
     }
 
     private showLoader(loader: boolean): void {
-
         if (!this.father) return
         (this.father as any).loading = loader;
 
@@ -129,7 +128,6 @@ export class ServiceListFilesAdd100554 extends LitElement {
     private async add() {
 
         try {
-
 
             if (!this.shadowRoot) return;
 
@@ -165,10 +163,10 @@ export class ServiceListFilesAdd100554 extends LitElement {
             params.extension = '.ts';
             params.newTSSource = ts;
 
-            this.fireComunication(params);
-            this.saveLocalHistory(params.project, params.shortName, params.extension, params.folder);
+            await this.fireComunication(params);
             this.showLoader(false);
 
+            this.saveLocalHistory(params.project, params.shortName, params.extension, params.folder);
         } catch (e: any) {
 
             console.info(e);
@@ -444,13 +442,10 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
     }
 
-    private fireComunication(obj: any): void {
-
+    private async fireComunication(obj: any) {
         obj.position = this.position;
         mls.actual[this.level].setFullName('_' + obj.project + '_' + obj.shortName);
-
-        mls.events.fire([+this.level as any], ['FileAction'], JSON.stringify(obj));
-
+        await mls.events.fire([+this.level as any], ['FileAction'], JSON.stringify(obj), 0);
     }
 
     private updateMyMessages() {
