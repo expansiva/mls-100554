@@ -4,6 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IActionsToolbox, IActionsToolboxMenu } from './_100554_fcaGlobal';
+import { ServiceBase} from './_100554_serviceBase';
 import * as states from './_100554_fcaCollabStore';
 
 @customElement('wcd-toolbox-100554')
@@ -65,6 +66,15 @@ export class WCDToolbox extends CollabLitElement {
 
     // ------------ IMPLEMENTATION-------------------
 
+    private wcServiceFCA: ServiceBase | undefined;
+
+    public backNavigationScenaryOutdoor(): void {
+
+        if (this.level !== '4') return;
+        mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
+        
+    }
+
     public getAndSetScenaryOutDoor(op: string): Promise<HTMLElement | undefined> {
 
         return new Promise<HTMLElement | undefined>((resolve, reject) => {
@@ -73,14 +83,20 @@ export class WCDToolbox extends CollabLitElement {
             mls.events.fire(4, 'WCDEvent' as any, `{"op":"${op}"}`);
             setTimeout(() => {
 
-                const nav3 = this.getNav3();
-                if (!nav3 || !this.elMain) resolve(undefined);
+                if (this.wcServiceFCA) {
+                    resolve((this.wcServiceFCA as any).querySelector('div'));
+                } else {
+                    const nav3 = this.getNav3();
+                    if (!nav3 || !this.elMain) resolve(undefined);
 
-                const wc = (nav3 as any).getActiveInstance('left');
-                if (!wc) resolve(undefined);
-                if (wc.tagName !== 'SERVICE-FCA-100554') resolve(undefined);
+                    const wc = (nav3 as any).getActiveInstance('left');
+                    if (!wc) resolve(undefined);
+                    if (wc.tagName !== 'SERVICE-FCA-100554') resolve(undefined);
 
-                resolve(wc.querySelector('div'));
+                    this.wcServiceFCA = wc;
+                    resolve(wc.querySelector('div'));
+                }
+
             }, 200)
         });
 

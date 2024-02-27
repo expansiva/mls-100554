@@ -164,6 +164,9 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
                 this.updateMyInnerHtmlIfNeed();
 
+                if (this.level !== '4') return;
+                mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
+
             }
 
         }

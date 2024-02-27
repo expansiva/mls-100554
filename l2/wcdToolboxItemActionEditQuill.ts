@@ -1810,6 +1810,7 @@ const templateActionQuill = {
                 }
             }
             wc.setIconsWcdToolbox([], true);
+            wc.backNavigationScenaryOutdoor();
         },
         menuItens: [],
         menuSubItens: [],
