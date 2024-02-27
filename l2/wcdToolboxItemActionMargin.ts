@@ -43,27 +43,14 @@ export class WCDToolboxItemActionMargin extends LitElement {
 
 
     //-----------------
-    private renderOutdoorScenary(): void {
+    private async renderOutdoorScenary() {
 
         if (!this.myParent || this.myParent.level !== '4') return;
+
+        this.elExternal = await this.myParent.getAndSetScenaryOutDoor('Styles');
+        if (!this.elExternal) return;
+        render(this.renderMargin(), this.elExternal);
         
-        mls.events.fire(4, 'WCDEvent' as any, '{"op":"Styles"}');
-        setTimeout(() => {
-
-            const nav3 = this.getNav3();
-            if (!nav3 || !this.elMain) return;
-
-            const wc = (nav3 as any).getActiveInstance('left');
-            if (!wc) return;
-            if (wc.tagName !== 'SERVICE-FCA-100554') return;
-
-            this.elExternal = wc.querySelector('div');
-            if (!this.elExternal || !this.elMain) return;
-
-            render(this.renderMargin(), this.elExternal);
-
-        }, 200)
-
     }
 
     private renderMargin() {
@@ -91,19 +78,6 @@ export class WCDToolboxItemActionMargin extends LitElement {
                 
             </div>
         `;
-    }
-
-    private getNav3(): HTMLElement | undefined {
-
-        if (!this.myParent) return;
-        const bd = this.myParent.closest('body');
-        if (!bd) return;
-        const service = (bd as any).service;
-        if (!service) return;
-        const nav3 = service.getNav3Service();
-        if (!nav3) return;
-        return nav3;
-
     }
 
     private timeonChangeProp = -1;

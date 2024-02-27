@@ -65,6 +65,40 @@ export class WCDToolbox extends CollabLitElement {
 
     // ------------ IMPLEMENTATION-------------------
 
+    public getAndSetScenaryOutDoor(op: string): Promise<HTMLElement | undefined> {
+
+        return new Promise<HTMLElement | undefined>((resolve, reject) => {
+            if (this.level !== '4') resolve(undefined);
+
+            mls.events.fire(4, 'WCDEvent' as any, `{"op":"${op}"}`);
+            setTimeout(() => {
+
+                const nav3 = this.getNav3();
+                if (!nav3 || !this.elMain) resolve(undefined);
+
+                const wc = (nav3 as any).getActiveInstance('left');
+                if (!wc) resolve(undefined);
+                if (wc.tagName !== 'SERVICE-FCA-100554') resolve(undefined);
+
+                resolve(wc.querySelector('div'));
+            }, 200)
+        });
+
+    }
+
+    private getNav3(): HTMLElement | undefined {
+
+        if (!this) return;
+        const bd = this.closest('body');
+        if (!bd) return;
+        const service = (bd as any).service;
+        if (!service) return;
+        const nav3 = service.getNav3Service();
+        if (!nav3) return;
+        return nav3;
+
+    }
+
     public setIconsWcdToolbox(act: IActionsToolbox[], useSelf: boolean = false, updataSize: 'false' | 'size' | 'padding' | 'margin' = 'false'): void {
 
         if (useSelf) this.renderActions(this.actions);
@@ -154,8 +188,8 @@ export class WCDToolbox extends CollabLitElement {
             }
 
         });
-        
-        if(!item.menuSubItens.find((i)=> i.text === 'About'))item.menuSubItens.push(templateAbout);
+
+        if (!item.menuSubItens.find((i) => i.text === 'About')) item.menuSubItens.push(templateAbout);
 
         container.appendChild(containerItens);
         if (item.menuSubItens.length > 0) {
@@ -391,7 +425,7 @@ export class WCDToolbox extends CollabLitElement {
 
             const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom, paddingLeft, paddingRight } = window.getComputedStyle(elBase);
 
-            let { width, height, y, x  } = elBase.getBoundingClientRect();
+            let { width, height, y, x } = elBase.getBoundingClientRect();
 
             let left = 0;
             let top = 0;
@@ -770,7 +804,7 @@ const templateAbout = {
     onclick: (e: MouseEvent, wc: WCDToolbox) => {
 
         const bd = wc.closest('body') as any;
-        if(bd.service && bd.service.setAboutTag)bd.service.setAboutTag(wc.title.toLocaleLowerCase())
+        if (bd.service && bd.service.setAboutTag) bd.service.setAboutTag(wc.title.toLocaleLowerCase())
 
     }
 }

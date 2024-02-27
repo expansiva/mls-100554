@@ -19,7 +19,7 @@ export class ServiceFca100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf2db',
-        state: 'foreground',
+        state: 'background',
         position: 'left',
         tooltip: 'Service FCA',
         visible: true,
@@ -51,7 +51,11 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-        console.info(visible,reinit)
+
+        if (!visible && !reinit && this.menu.setIconActive) {
+            this.menu.setIconActive('Navigation');
+        }
+        
     }
 
     //--------------COMPONENT---------------
