@@ -1,47 +1,97 @@
 /// <mls shortName="wcdToolboxItemActionEditQuill" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-declare var Quill: any; 
-import { html, LitElement } from 'lit'; 
+declare var Quill: any;
+import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_fcaGlobal';
-import { WCDToolbox } from './_100554_wcdToolbox'; 
-import { FcaLitElementBase } from './_100554_fcaLitElementBase';
+import { WCDToolbox } from './_100554_wcdToolbox';
+import { FcaLitElementBase } from './_100554_fcaLitElementBase'; 
 
 @customElement('wcd-toolbox-item-action-edit-quill-100554')
 export class WCDToolboxItemActionQuill extends LitElement {
 
     @property({ type: String })
-    private theme: String = 'bubble';
+    private theme: String = 'snow';//'snow' 'bubble'
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
     public elFCA: FcaLitElementBase | undefined;
+    private elExternal: HTMLElement | undefined;
 
     createRenderRoot() {
         return this;
     }
 
     render() {
-        this.style.cssText = 'background: white; display: block;    position: relative;';
+        /*this.style.cssText = 'background: white; display: block;    position: relative;';
+        return html`
+            <div id="editor-container"></div>
+            <style>${this.styles}</style>
+        `;*/
+        this.renderOutdoorScenary();
+        return html``;
+    }
 
+    firstUpdated() {
+        //this.init();
+    }
+
+    //-----------------
+    private renderOutdoorScenary(): void {
+
+        if (!this.myParent || this.myParent.level !== '4') return;
+
+        mls.events.fire(4, 'WCDEvent' as any, '{"op":"Styles"}');
+        setTimeout(() => {
+
+            const nav3 = this.getNav3();
+            if (!nav3 || !this.elMain) return;
+
+            const wc = (nav3 as any).getActiveInstance('left');
+            if (!wc) return;
+            if (wc.tagName !== 'SERVICE-FCA-100554') return;
+
+            this.elExternal = wc.querySelector('div');
+            if (!this.elExternal || !this.elMain) return;
+
+            render(this.renderQuill(), this.elExternal);
+            this.init();
+
+        }, 200)
+
+
+    }
+
+    private renderQuill() {
+        if (!this.elMain) return html``;
         return html`
             <div id="editor-container"></div>
             <style>${this.styles}</style>
         `;
     }
 
-    firstUpdated() {
-        this.init();
+    private getNav3(): HTMLElement | undefined {
+
+        if (!this.myParent) return;
+        const bd = this.myParent.closest('body');
+        if (!bd) return;
+        const service = (bd as any).service;
+        if (!service) return;
+        const nav3 = service.getNav3Service();
+        if (!nav3) return;
+        return nav3;
+
     }
 
+    //-------------------------------------------
 
     private isfocus: boolean = false;
 
     public quill: any;
     private init(): void {
 
-        if (!this.elFCA) return;
-        let selector = this.querySelector('#editor-container');
+        if (!this.elFCA || !this.elExternal) return;
+        let selector = this.elExternal.querySelector('#editor-container');
         this.quill = new Quill(selector, {
             modules: {
                 toolbar: [
@@ -60,7 +110,7 @@ export class WCDToolboxItemActionQuill extends LitElement {
 
         });
 
-        const normalizeNative = (nativeRange: any) => {
+        /*const normalizeNative = (nativeRange: any) => {
 
             if (nativeRange) {
 
@@ -113,9 +163,16 @@ export class WCDToolboxItemActionQuill extends LitElement {
             if (r.length > 0)
                 this.quill.selection.update();
             else this.quill.theme.tooltip.hide();
-        });
+        });*/
 
         this.quill.root.innerHTML = this.elFCA.getAttribute('text');
+        this.quill.on(Quill.events.EDITOR_CHANGE, (eventType:any, range:any) => { 
+
+            if (!this.elMain || !this.myParent) return;
+            this.elMain.innerHTML = this.quill.root.innerHTML;
+            this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+            
+        })
 
     }
 
@@ -132,6 +189,23 @@ export class WCDToolboxItemActionQuill extends LitElement {
 
 
     private styles = `
+    .ql-toolbar.ql-snow{
+        width: 90%;
+        margin: 0 auto;
+        margin-top: 1rem;
+    }
+
+    .ql-toolbar.ql-snow button{
+        box-shadow: none!important;
+    }
+
+    .ql-container.ql-snow{
+        width: 90%;
+        margin: 0 auto;
+        min-height: 300px;
+        padding:1rem;
+    }
+
     .d-none {
         display: none!important;
     }
@@ -1752,12 +1826,12 @@ const templateActionQuill = {
         title: 'Back',
         iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"/></svg>',
         onclick: (e: MouseEvent, wc: WCDToolbox) => {
-
+            
             if (wc.shadowRoot) {
                 const elFca = wc.shadowRoot.querySelector('wcd-toolbox-item-action-edit-quill-100554');
                 if (elFca && (elFca as any)['onChanged']) {
                     (elFca as any)['onChanged']();
-                    elFca.remove();
+                    //elFca.remove();
                 }
             }
             wc.setIconsWcdToolbox([], true);
@@ -1780,7 +1854,7 @@ const templateActionQuill = {
             const elQuill = wc.shadowRoot?.querySelector('wcd-toolbox-item-action-edit-quill-100554');
 
             if (elQuill) return;
-            
+
             wc.setIconsWcdToolbox([templateActionQuill.backButton as IActionsToolbox]);
 
             const el = document.createElement('wcd-toolbox-item-action-edit-quill-100554');
@@ -1790,7 +1864,7 @@ const templateActionQuill = {
             (el as any).elFCA = wc.parentElement;
 
             el.addEventListener("onChange", (obj: any) => {
-            
+
                 if (!obj || !obj.detail || !obj.detail.valor) return;
                 if (fc) fc(obj.detail.valor);
 

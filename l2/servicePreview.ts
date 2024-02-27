@@ -179,12 +179,7 @@ export class ServicePreview100554 extends ServiceBase {
             if (!tag) return false;
 
             const file = convertTagToFileName(tag.toLocaleLowerCase());
-            /*mls.actual[0].setFullName(file);
-            const key = mls.stor.getKeyToFiles(mls.actual[0].project as number, 2, mls.actual[0].path as string, '', '.html');
-            if (!mls.stor.files[key]) return false;
-
-            this.htmlAbout = await mls.stor.files[key].getContent() as string;*/
-
+            
         
             this.htmlAbout = `  
                 <h3>About this Component</h3>

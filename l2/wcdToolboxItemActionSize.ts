@@ -2,7 +2,7 @@
 
 /// <mls shortName="wcdToolboxItemActionSize" project="100552" enhancement="_100541_enhancementLit" groupName="rating" />
 
-import { html, LitElement, unsafeHTML } from 'lit';
+import { html, LitElement, unsafeHTML, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
@@ -15,6 +15,7 @@ export class WCDToolboxItemActionSize extends LitElement {
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
+    private elExternal: HTMLElement | undefined;
     private startX: number = 0;
     private startY: number = 0;
     private startWidth: number = 0;
@@ -26,6 +27,7 @@ export class WCDToolboxItemActionSize extends LitElement {
 
     render() {
 
+        this.renderOutdoorScenary();
         return html``;
 
     }
@@ -33,10 +35,90 @@ export class WCDToolboxItemActionSize extends LitElement {
     updated(changedProperties: any) {
 
         super.updated(changedProperties);
+        if (!this.elMain || !this.myParent) return;
+        this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
         this.onmousedown = (e) => this.initDragging(e);
-        //(this as HTMLElement).addEventListener('mousedown', this.initDragging, false);
 
     }
+
+    //-----------------
+    private renderOutdoorScenary(): void {
+        
+        if (!this.myParent || this.myParent.level !== '4') return;
+
+        mls.events.fire(4, 'WCDEvent' as any, '{"op":"Styles"}');
+        setTimeout(() => {
+
+            const nav3 = this.getNav3();
+            if (!nav3 || !this.elMain) return;
+
+            const wc = (nav3 as any).getActiveInstance('left');
+            if (!wc) return;
+            if (wc.tagName !== 'SERVICE-FCA-100554') return;
+
+            this.elExternal = wc.querySelector('div');
+            if (!this.elExternal || !this.elMain) return;
+
+            render(this.renderSize(), this.elExternal);
+
+        }, 200)
+
+
+    }
+
+    private renderSize() {
+        if (!this.elMain) return html``;
+        return html`
+            <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
+                <p style=" margin-bottom: 5px;">A <b>width</b> propriedade CSS define a largura de um elemento.<br/>A <b>height</b> propriedade CSS especifica a altura de um elemento.</p>
+                <h4 style="display:flex; gap:1.5rem;margin:0px" >Size</h4>
+                <div style="display:flex; gap:.5rem">
+                    <div style="width:70px">Width</div>
+                    <input prop="width" type="text" .value="${this.elMain.style.width}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                </div>
+                <div style="display:flex; gap:.5rem">
+                    <div style="width:70px">Height</div>
+                    <input prop="height" type="text" .value="${this.elMain.style.height}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                </div> 
+            </div>
+        `;
+    }
+
+    private timeonChangeProp = -1;
+    private onChangeProp(e: KeyboardEvent) {
+        const el = e.currentTarget as HTMLInputElement;
+        clearTimeout(this.timeonChangeProp);
+        this.timeonChangeProp = setTimeout(() => {
+            this.changeEl(el);
+        }, 500);
+    }
+
+    private changeEl(el: HTMLInputElement): void {
+
+        const prop = el.getAttribute('prop');
+        
+
+        if (!prop || !this.elMain || !this.myParent) return;
+
+        this.elMain.style[prop as any] = el.value;
+        this.myParent.updateSize(this.elMain, this.myParent, false);
+        this.fireEvent();
+    }
+
+    private getNav3(): HTMLElement | undefined {
+
+        if (!this.myParent) return;
+        const bd = this.myParent.closest('body');
+        if (!bd) return;
+        const service = (bd as any).service;
+        if (!service) return;
+        const nav3 = service.getNav3Service();
+        if (!nav3) return;
+        return nav3;
+
+    }
+
+    //-------------------------------------------
 
     private initDragging(e: MouseEvent): void {
 
@@ -62,6 +144,7 @@ export class WCDToolboxItemActionSize extends LitElement {
                 this.elMain.style.height = this.elMain.getBoundingClientRect().height + 'px';
             }
 
+            this.renderOutdoorScenary();
             this.myParent.updateSize(this.elMain, this.myParent, false);
 
         }
@@ -73,22 +156,36 @@ export class WCDToolboxItemActionSize extends LitElement {
             document.body.removeEventListener('mousemove', doDragging, false);
             document.body.removeEventListener('mouseup', stopDragging, false);
 
-            let ret = `{"width":"${this.elMain.style.width}", "height":"${this.elMain.style.height}"}`;
+            this.fireEvent();
+            
+        }
+
+        document.body.addEventListener('mousemove', doDragging, false);
+        document.body.addEventListener('mouseup', stopDragging, false);
+    }
+
+    private fireEvent(ret: string = ''): void {
+
+        if (!this.elMain || !this.myParent) return;
+
+        if (ret === '') {
+
+            ret = `{"width":"${this.elMain.style.width}", "height":"${this.elMain.style.height}"}`;
 
             if (this.tpChange === 'width') ret = `{"width":"${this.elMain.style.width}"}`;
 
             if (this.tpChange === 'height') ret = `{"height":"${this.elMain.style.height}"}`;
 
-            const evento = new CustomEvent('onChange', {
-                detail: { valor: `{"tp":"style","style":${ret} }` },
-                bubbles: true,
-                composed: true
-            });
-            this.dispatchEvent(evento);
         }
 
-        document.body.addEventListener('mousemove', doDragging, false);
-        document.body.addEventListener('mouseup', stopDragging, false);
+        const evento = new CustomEvent('onChange', {
+            detail: { valor: `{"tp":"style","style":${ret} }` },
+            bubbles: true,
+            composed: true
+        });
+
+        this.dispatchEvent(evento);
+
     }
 
 }

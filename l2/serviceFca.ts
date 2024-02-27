@@ -51,10 +51,14 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
+        console.info(visible,reinit)
     }
 
     //--------------COMPONENT---------------
+
+    createRenderRoot() {
+        return this;
+    }
 
     render() {
         return html`

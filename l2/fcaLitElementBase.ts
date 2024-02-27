@@ -31,10 +31,10 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
     public myInnerHTML = '';
 
-
+    private isLoadMyAction: any = {};
+    private lastWidget: string = '';
     // ------------ ABSTRACT ------------------
 
-    private isLoadMyAction: any = {};
     abstract actions: IActionLevels;
     abstract setMyActions(level: string): Promise<void>;
 
@@ -119,6 +119,18 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     }
 
     updated(changedProperties: Map<string, string>) {
+
+        if (this.lastWidget !== this.widget) {
+
+            this.lastWidget = this.widget as string;
+            const el = this.querySelector(this.widget as string);
+            if (el) {
+
+                const d = window.getComputedStyle(el);
+                this.style.display = d.display;
+            }
+
+        }
 
         if (this.renderType === 'edit') {
 

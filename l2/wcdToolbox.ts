@@ -12,7 +12,7 @@ export class WCDToolbox extends CollabLitElement {
     // ------------ PROPERTIES ------------------
 
     @property({ type: String, reflect: true })
-    private level: string | undefined;
+    public level: string | undefined;
 
     @property({ type: String, reflect: true })
     private widget: string | undefined;
@@ -391,12 +391,13 @@ export class WCDToolbox extends CollabLitElement {
 
             const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom, paddingLeft, paddingRight } = window.getComputedStyle(elBase);
 
-            let { width, height, y } = elBase.getBoundingClientRect();
+            let { width, height, y, x  } = elBase.getBoundingClientRect();
 
             let left = 0;
             let top = 0;
             left -= parseInt(marginLeft, 10);
             top -= parseInt(marginTop, 10);
+            //top = x - height;
             if (top > 0) top = 0;
 
             width = Math.max(ad3(width, marginLeft, marginRight), ad3(0, paddingLeft, paddingRight));

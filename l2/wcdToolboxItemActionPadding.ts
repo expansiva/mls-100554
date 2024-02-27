@@ -4,7 +4,6 @@ import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
-import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 
 @customElement('wcd-toolbox-item-action-padding-100554')
 export class WCDToolboxItemActionPadding extends LitElement {
@@ -21,11 +20,6 @@ export class WCDToolboxItemActionPadding extends LitElement {
     private startBottom: number = 0;
     private startLeft: number = 0;
     private startRight: number = 0;
-
-    constructor() {
-        super();
-        initCollabDSInputRange()
-    }
 
     createRenderRoot() {
         return this;
@@ -44,13 +38,14 @@ export class WCDToolboxItemActionPadding extends LitElement {
         if (!this.elMain || !this.myParent) return;
         this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
         this.onmousedown = (e) => this.initDragging(e);
-        //this.addEventListener('mousedown', this.initDragging, false);
 
     }
 
 
     //-----------------
     private renderOutdoorScenary(): void {
+        
+        if (!this.myParent || this.myParent.level !== '4') return;
 
         mls.events.fire(4, 'WCDEvent' as any, '{"op":"Styles"}');
         setTimeout(() => {
@@ -59,10 +54,10 @@ export class WCDToolboxItemActionPadding extends LitElement {
             if (!nav3 || !this.elMain) return;
 
             const wc = (nav3 as any).getActiveInstance('left');
-            if (!wc || !wc.shadowRoot) return;
+            if (!wc) return;
             if (wc.tagName !== 'SERVICE-FCA-100554') return;
 
-            this.elExternal = wc.shadowRoot.querySelector('div');
+            this.elExternal = wc.querySelector('div');
             if (!this.elExternal || !this.elMain) return;
 
             render(this.renderPadding(), this.elExternal);

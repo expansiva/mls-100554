@@ -1,6 +1,6 @@
 /// <mls shortName="wcdToolboxItemActionMargin" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement } from 'lit';
+import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
@@ -13,6 +13,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
+    private elExternal: HTMLElement | undefined;
     private startX: number = 0;
     private startY: number = 0;
     private startTop: number = 0;
@@ -26,16 +27,127 @@ export class WCDToolboxItemActionMargin extends LitElement {
 
     render() {
 
+        this.renderOutdoorScenary();
         return html``;
 
     }
 
     updated(changedProperties: any) {
+
         super.updated(changedProperties);
+        if (!this.elMain || !this.myParent) return;
+        this.myParent.updateSizeMargin(this.elMain, this.myParent, true);
         this.onmousedown = (e) => this.initDragging(e);
-        //(this as HTMLElement).addEventListener('mousedown', this.initDragging, false);
 
     }
+
+
+    //-----------------
+    private renderOutdoorScenary(): void {
+
+        if (!this.myParent || this.myParent.level !== '4') return;
+        
+        mls.events.fire(4, 'WCDEvent' as any, '{"op":"Styles"}');
+        setTimeout(() => {
+
+            const nav3 = this.getNav3();
+            if (!nav3 || !this.elMain) return;
+
+            const wc = (nav3 as any).getActiveInstance('left');
+            if (!wc) return;
+            if (wc.tagName !== 'SERVICE-FCA-100554') return;
+
+            this.elExternal = wc.querySelector('div');
+            if (!this.elExternal || !this.elMain) return;
+
+            render(this.renderMargin(), this.elExternal);
+
+        }, 200)
+
+    }
+
+    private renderMargin() {
+        if (!this.elMain) return html``;
+        return html`
+            <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
+                <p style=" margin-bottom: 5px;">A propriedade <b>margin</b> do CSS define a área de margem nos quatro lados do elemento. </p>
+                <h4 style="display:flex; gap:1.5rem;margin:0px" >${this.myMsg.margin}<input type="checkbox" prop="margin"></h4>
+                <div style="display:flex; gap:.5rem">
+                    <div style="width:70px">${this.myMsg.top}</div>
+                    <input prop="marginTop" type="text" .value="${this.elMain.style.marginTop}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
+                </div>
+                <div style="display:flex; gap:.5rem">
+                    <div style="width:70px">${this.myMsg.right}</div>
+                    <input prop="marginRight" type="text" .value="${this.elMain.style.marginRight}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
+                </div> 
+                <div style="display:flex; gap:.5rem">
+                    <div style="width:70px">${this.myMsg.bottom}</div>
+                    <input prop="marginBottom" type="text" .value="${this.elMain.style.marginBottom}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
+                </div>
+                <div style="display:flex; gap:.5rem">
+                    <div style="width:70px">${this.myMsg.left}</div>
+                    <input prop="marginLeft" type="text" .value="${this.elMain.style.marginLeft}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
+                </div>
+                
+            </div>
+        `;
+    }
+
+    private getNav3(): HTMLElement | undefined {
+
+        if (!this.myParent) return;
+        const bd = this.myParent.closest('body');
+        if (!bd) return;
+        const service = (bd as any).service;
+        if (!service) return;
+        const nav3 = service.getNav3Service();
+        if (!nav3) return;
+        return nav3;
+
+    }
+
+    private timeonChangeProp = -1;
+    private onChangeProp(e: KeyboardEvent) {
+        const el = e.currentTarget as HTMLInputElement;
+        clearTimeout(this.timeonChangeProp);
+        this.timeonChangeProp = setTimeout(() => {
+            this.changeEl(el);
+        }, 500);
+    }
+
+    private changeEl(el: HTMLInputElement): void {
+
+        const prop = el.getAttribute('prop');
+        const group = el ? el.getAttribute('group') as string : '';
+        const elGroup = el.closest('.myAuxGroup')?.querySelector(`input[prop="${group}"]`) as HTMLInputElement;
+        let isGroup = false;
+        if (elGroup) isGroup = elGroup.checked;
+
+        if (!prop || !this.elMain || !this.myParent) return;
+
+        if (isGroup) {
+
+            this.elMain.style.margin = el.value;
+            ['marginTop', 'marginBottom', 'marginLeft', 'marginRight'].forEach((pr: string) => {
+
+                const field = el.closest('.myAuxGroup')?.querySelector(`input[prop="${pr}"]`) as HTMLInputElement;
+                if (field) field.value = el.value;
+
+            });
+
+            this.myParent.updateSizeMargin(this.elMain, this.myParent, true);
+            this.fireEvent(`{"margin":"${this.elMain.style.padding}"}`);
+            return;
+
+        }
+
+        this.elMain.style[prop as any] = el.value;
+        this.myParent.updateSizeMargin(this.elMain, this.myParent, true);
+        this.fireEvent();
+    }
+
+
+    //-------------------------------------------
 
     private initDragging(e: MouseEvent): void {
 
@@ -73,6 +185,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
                 this.elMain.style.marginRight = (this.startRight + deltaX) + 'px';
             }
 
+            this.renderOutdoorScenary();
             this.myParent.updateSizeMargin(this.elMain, this.myParent, true);
 
         }
@@ -86,7 +199,19 @@ export class WCDToolboxItemActionMargin extends LitElement {
             document.body.removeEventListener('mousemove', doDragging, false);
             document.body.removeEventListener('mouseup', stopDragging, false);
 
-            let ret = ``;
+            this.fireEvent();
+
+        }
+
+        document.body.addEventListener('mousemove', doDragging, false);
+        document.body.addEventListener('mouseup', stopDragging, false);
+    }
+
+    private fireEvent(ret: string = ''): void {
+
+        if (!this.elMain || !this.myParent) return;
+
+        if (ret === '') {
 
             if (this.tpChange === 'top') ret = `{"marginTop":"${this.elMain.style.marginTop}"}`;
 
@@ -96,18 +221,25 @@ export class WCDToolboxItemActionMargin extends LitElement {
 
             if (this.tpChange === 'right') ret = `{"marginRight":"${this.elMain.style.marginRight}"}`;
 
-
-            const evento = new CustomEvent('onChange', {
-                detail: { valor: `{"tp":"style","style":${ret} }` },
-                bubbles: true,
-                composed: true
-            });
-
-            this.dispatchEvent(evento);
         }
 
-        document.body.addEventListener('mousemove', doDragging, false);
-        document.body.addEventListener('mouseup', stopDragging, false);
+        const evento = new CustomEvent('onChange', {
+            detail: { valor: `{"tp":"style","style":${ret} }` },
+            bubbles: true,
+            composed: true
+        });
+
+        this.dispatchEvent(evento);
+
+    }
+
+    private myMsg = {
+        margin: 'Margin',
+        padding: 'Padding',
+        top: 'Top',
+        left: 'Left',
+        bottom: 'Bottom',
+        right: 'Right',
     }
 
 }
