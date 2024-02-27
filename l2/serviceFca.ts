@@ -7,12 +7,15 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 @customElement('service-fca-100554')
 export class ServiceFca100554 extends ServiceBase {
 
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
+
+    @property()
+    activeTab: ITabType = 'AboutFCA';
+
     constructor() {
         super();
         this.setEvents();
     }
-
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
         icon: '&#xf2db',
@@ -51,8 +54,7 @@ export class ServiceFca100554 extends ServiceBase {
 
     }
 
-    @property()
-    activeTab: ITabType = 'AboutFCA';
+    //--------------COMPONENT---------------
 
     render() {
         return html`
@@ -77,18 +79,6 @@ export class ServiceFca100554 extends ServiceBase {
         }
     }
 
-    setEvents(): void {
-        mls.events.addListener(4, 'WCDEvent' as any, (ev) => this.onWCDEvent(ev));
-    }
-
-    onWCDEvent(ev: mls.events.IEvent) {
-
-        console.info('evento chegou')
-        if (!ev.desc) return;
-        const data: IWCDParams = JSON.parse(ev.desc);
-        if (this.menu.setIconActive) this.menu.setIconActive(data.op);
-    }
-
     renderNavigation() {
         return html`<div>In develpoment : Navigation</div>`;
     }
@@ -98,7 +88,7 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     renderStyles() {
-        return html`<div>In develpoment: Styles</div>`;
+        return html`<div></div>`;
     }
 
     renderAnimation() {
@@ -107,6 +97,23 @@ export class ServiceFca100554 extends ServiceBase {
 
     renderAboutFCA() {
         return html`<div>In develpoment: AboutFCA</div>`;
+    }
+
+    //------------IMPLEMENTATION------------------
+
+    private setEvents(): void {
+        mls.events.addListener(4, 'WCDEvent' as any, (ev) => this.onWCDEvent(ev));
+    }
+
+    private onWCDEvent(ev: mls.events.IEvent) {
+
+        if (!ev.desc) return;
+        const data: IWCDParams = JSON.parse(ev.desc);
+        if (this.menu.setIconActive) {
+            this.openMe();
+            this.menu.setIconActive(data.op);
+        }
+        
     }
 }
 

@@ -4,6 +4,7 @@ import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
+import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 
 @customElement('wcd-toolbox-item-action-padding-100554')
 export class WCDToolboxItemActionPadding extends LitElement {
@@ -13,13 +14,18 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
-    private elExternal : HTMLElement | undefined;
+    private elExternal: HTMLElement | undefined;
     private startX: number = 0;
     private startY: number = 0;
     private startTop: number = 0;
     private startBottom: number = 0;
     private startLeft: number = 0;
     private startRight: number = 0;
+
+    constructor() {
+        super();
+        initCollabDSInputRange()
+    }
 
     createRenderRoot() {
         return this;
@@ -42,28 +48,54 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
     }
 
+
+    //-----------------
     private renderOutdoorScenary(): void {
 
-        if (!this.elExternal ) {
+        mls.events.fire(4, 'WCDEvent' as any, '{"op":"Styles"}');
+        setTimeout(() => {
 
             const nav3 = this.getNav3();
             if (!nav3 || !this.elMain) return;
+
             const wc = (nav3 as any).getActiveInstance('left');
             if (!wc || !wc.shadowRoot) return;
             if (wc.tagName !== 'SERVICE-FCA-100554') return;
-            this.elExternal  = wc.shadowRoot.querySelector('div');
 
-        }
+            this.elExternal = wc.shadowRoot.querySelector('div');
+            if (!this.elExternal || !this.elMain) return;
 
-        if (!this.elExternal  || !this.elMain) return;
+            render(this.renderPadding(), this.elExternal);
 
-        const template = html`
-            <div> Padding top: ${this.elMain.style.paddingTop} </div>
+        }, 200)
+
+
+    }
+
+    private renderPadding() {
+        if (!this.elMain) return html``;
+        return html`
+            <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
+                <h5 style="display:flex; gap:1.5rem" >${this.myMsg.padding}<input type="checkbox" prop="padding"></h5>
+                <div style="display:flex; gap:.5rem">
+                    <div style="width:70px">${this.myMsg.top}</div>
+                    <input prop="paddingTop" type="text" .value="${this.elMain.style.paddingTop}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                </div>
+                <div style="display:flex; gap:.5rem">
+                    <div style="width:70px">${this.myMsg.right}</div>
+                    <input prop="paddingRight" type="text" .value="${this.elMain.style.paddingRight}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                </div> 
+                <div style="display:flex; gap:.5rem">
+                    <div style="width:70px">${this.myMsg.bottom}</div>
+                    <input prop="paddingBottom" type="text" .value="${this.elMain.style.paddingBottom}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                </div>
+                <div style="display:flex; gap:.5rem">
+                    <div style="width:70px">${this.myMsg.left}</div>
+                    <input prop="paddingLeft" type="text" .value="${this.elMain.style.paddingLeft}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                </div>
+                
+            </div>
         `;
-
-        render(template, this.elExternal );
-
-
     }
 
     private getNav3(): HTMLElement | undefined {
@@ -78,6 +110,49 @@ export class WCDToolboxItemActionPadding extends LitElement {
         return nav3;
 
     }
+
+    private timeonChangeProp = -1;
+    private onChangeProp(e: KeyboardEvent) {
+        const el = e.currentTarget as HTMLInputElement;
+        clearTimeout(this.timeonChangeProp);
+        this.timeonChangeProp = setTimeout(() => {
+            this.changeEl(el);
+        }, 500);
+    }
+
+    private changeEl(el: HTMLInputElement): void {
+
+        const prop = el.getAttribute('prop');
+        const group = el ? el.getAttribute('group') as string : '';
+        const elGroup = el.closest('.myAuxGroup')?.querySelector(`input[prop="${group}"]`) as HTMLInputElement;
+        let isGroup = false;
+        if (elGroup) isGroup = elGroup.checked;
+
+        if (!prop || !this.elMain || !this.myParent) return;
+
+        if (isGroup) {
+
+            this.elMain.style.padding = el.value;
+            ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'].forEach((pr: string) => {
+
+                const field = el.closest('.myAuxGroup')?.querySelector(`input[prop="${pr}"]`) as HTMLInputElement;
+                if (field) field.value = el.value;
+
+            });
+
+            this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+            this.fireEvent(`{"padding":"${this.elMain.style.padding}"}`);
+            return;
+
+        }
+
+        this.elMain.style[prop as any] = el.value;
+        this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+        this.fireEvent();
+    }
+
+
+    //-------------------------------------------
 
     private initDragging(e: MouseEvent): void {
 
@@ -129,7 +204,18 @@ export class WCDToolboxItemActionPadding extends LitElement {
             document.body.removeEventListener('mousemove', doDragging, false);
             document.body.removeEventListener('mouseup', stopDragging, false);
 
-            let ret = ``;
+            this.fireEvent();
+        }
+
+        document.body.addEventListener('mousemove', doDragging, false);
+        document.body.addEventListener('mouseup', stopDragging, false);
+    }
+
+    private fireEvent(ret: string = ''): void {
+
+        if (!this.elMain || !this.myParent) return;
+
+        if (ret === '') {
 
             if (this.tpChange === 'top') ret = `{"paddingTop":"${this.elMain.style.paddingTop}"}`;
 
@@ -139,17 +225,27 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
             if (this.tpChange === 'right') ret = `{"paddingRight":"${this.elMain.style.paddingRight}"}`;
 
-            const evento = new CustomEvent('onChange', {
-                detail: { valor: `{"tp":"style","style":${ret} }` },
-                bubbles: true,
-                composed: true
-            });
-
-            this.dispatchEvent(evento);
         }
 
-        document.body.addEventListener('mousemove', doDragging, false);
-        document.body.addEventListener('mouseup', stopDragging, false);
+        const evento = new CustomEvent('onChange', {
+            detail: { valor: `{"tp":"style","style":${ret} }` },
+            bubbles: true,
+            composed: true
+        });
+
+        this.dispatchEvent(evento);
+
+    }
+
+
+
+    private myMsg = {
+        margin: 'Margin',
+        padding: 'Padding',
+        top: 'Top',
+        left: 'Left',
+        bottom: 'Bottom',
+        right: 'Right',
     }
 
 }
