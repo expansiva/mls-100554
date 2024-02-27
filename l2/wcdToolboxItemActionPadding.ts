@@ -76,7 +76,8 @@ export class WCDToolboxItemActionPadding extends LitElement {
         if (!this.elMain) return html``;
         return html`
             <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
-                <h5 style="display:flex; gap:1.5rem" >${this.myMsg.padding}<input type="checkbox" prop="padding"></h5>
+                <p style=" margin-bottom: 5px;">A propriedade <b>padding</b> define uma a distância entre o conteúdo de um elemento e suas bordas</p>
+                <h4 style="display:flex; gap:1.5rem;margin:0px" >${this.myMsg.padding}<input type="checkbox" prop="padding"></h4>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.myMsg.top}</div>
                     <input prop="paddingTop" type="text" .value="${this.elMain.style.paddingTop}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
