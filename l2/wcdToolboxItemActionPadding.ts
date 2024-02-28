@@ -37,6 +37,7 @@ export class WCDToolboxItemActionPadding extends LitElement {
         super.updated(changedProperties);
         if (!this.elMain || !this.myParent) return;
         this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+        this.myParent.updateBackgroundAuxSize('show');
         this.onmousedown = (e) => this.initDragging(e);
 
     }
@@ -111,6 +112,7 @@ export class WCDToolboxItemActionPadding extends LitElement {
             });
 
             this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+            this.myParent.updateBackgroundAuxSize('show');
             this.fireEvent(`{"padding":"${this.elMain.style.padding}"}`);
             return;
 
@@ -118,6 +120,7 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
         this.elMain.style[prop as any] = el.value;
         this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+        this.myParent.updateBackgroundAuxSize('show');
         this.fireEvent();
     }
 
@@ -162,7 +165,7 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
             this.renderOutdoorScenary();
             this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
-
+            this.myParent.updateBackgroundAuxSize('show');
         }
 
         const stopDragging = (e: MouseEvent) => {

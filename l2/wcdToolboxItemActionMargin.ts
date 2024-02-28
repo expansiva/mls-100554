@@ -36,7 +36,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
 
         super.updated(changedProperties);
         if (!this.elMain || !this.myParent) return;
-        this.myParent.updateSizeMargin(this.elMain, this.myParent, true);
+        this.myParent.updateSize(this.elMain, this.myParent, true);
         this.onmousedown = (e) => this.initDragging(e);
 
     }
@@ -109,14 +109,14 @@ export class WCDToolboxItemActionMargin extends LitElement {
 
             });
 
-            this.myParent.updateSizeMargin(this.elMain, this.myParent, true);
+            this.myParent.updateSize(this.elMain, this.myParent, true);
             this.fireEvent(`{"margin":"${this.elMain.style.padding}"}`);
             return;
 
         }
 
         this.elMain.style[prop as any] = el.value;
-        this.myParent.updateSizeMargin(this.elMain, this.myParent, true);
+        this.myParent.updateSize(this.elMain, this.myParent, true);
         this.fireEvent();
     }
 
@@ -160,7 +160,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
             }
 
             this.renderOutdoorScenary();
-            this.myParent.updateSizeMargin(this.elMain, this.myParent, true);
+            this.myParent.updateSize(this.elMain, this.myParent, true);
 
         }
 
@@ -265,7 +265,7 @@ const templateActionMargin = {
                     templateActionMargin.marginLeft as IActionsToolbox
                 ],
                 false,
-                'margin'
+                'size'
             )
             const params = {
                 level: 4,
