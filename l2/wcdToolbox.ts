@@ -401,7 +401,7 @@ export class WCDToolbox extends CollabLitElement {
     }
 
     public updateBackgroundAuxSize(tp: 'show' | 'hide' = 'hide'): void {
-
+        // use restrict to padding
         if (!this.shadowRoot) return;
         const elChange = this.shadowRoot.querySelector('wcd-toolbox-aux-background') as HTMLElement;
         const elBase = this.elMain;
@@ -411,7 +411,6 @@ export class WCDToolbox extends CollabLitElement {
             elChange.style.display = 'none';
             return
         }
-
 
         const display = elChange.style.display;
         elChange.style.display = 'none!important';
@@ -449,11 +448,11 @@ export class WCDToolbox extends CollabLitElement {
         elChange.style.background = '#d6f1da3d';
         elChange.style.position = 'absolute';
 
-        console.info(heightori)
         if ((elBase.style.height && paddingTop) || (paddingTop && paddingBottom)) {
             elChange.style.top = '-'+(parseInt(paddingTop, 10) + parseInt(fontSize, 10)) + 'px';
         } else if (paddingTop !== '0px') elChange.style.top = '-'+(heightori - 6) + 'px';
 
+        if(paddingLeft !== '0px')elChange.style.left = '-'+parseInt(paddingLeft, 10)+'px';
     }
 
     public updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean): void {
