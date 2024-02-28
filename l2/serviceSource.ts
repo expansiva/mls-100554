@@ -334,6 +334,8 @@ export class ServiceSource100554 extends ServiceBase {
             }
             await this.createOrShowModelHTML(false);
             this.showActiveModel();
+            if (storFile && !storFile.inLocalStorage && storFile.isLocalVersionOutdated)
+                storFile.isLocalVersionOutdated = false;
         };
 
         const onDelete = async (): Promise<void> => {
@@ -419,8 +421,38 @@ export class ServiceSource100554 extends ServiceBase {
             this.showActiveModel();
         };
 
-        const onUpdatedOnServer = async ():Promise<void> => {
-            console.info('chegou');
+        const onUpdatedOnServer = async (): Promise<void> => {
+
+            const keys = Object.keys(mls.stor.files);
+            const arr: mls.stor.IFileInfo[] = [];
+            let needMsg = false;
+
+            keys.forEach((key) => {
+
+                const f = mls.stor.files[key];
+                if (!f) return;
+                if (f.inLocalStorage || !f.isLocalVersionOutdated) return;
+                arr.push(f);
+
+            });
+
+            console.info(arr);
+
+            for await (const storFile of arr) {
+
+                mls.l2.editor.remove(storFile);
+                this.removeEventsModelTS(storFile);
+                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+                await this.createModelTS2(storFile, false, true);
+                if (storFile.project === 100554) needMsg = true;
+
+
+            }
+
+            if (needMsg) {
+                window.collabMessages.add("Files changed in server , please use F5 to reload", 'information');
+            }
+
         };
 
         if (mls.istrace) console.time('onAction_' + fileAction.action + '_' + fileAction.position);

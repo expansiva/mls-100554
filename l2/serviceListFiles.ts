@@ -631,7 +631,7 @@ export class ServiceListFiles extends ServiceBase {
 
                 const key = Object.keys(mls.stor.files)?.filter((item) => item.indexOf((mls.actual[5].project as number).toString()) >= 0);
                 if (key.length > 0) this.fireEvents('projectListChanged', mls.stor.files[key[0]], {}, 3000);
-                mls.events.fireFileAction('updatedOnServer', mls.stor.files[key[0]],'left');
+                mls.events.fireFileAction('updatedOnServer', mls.stor.files[key[0]],'left', undefined, undefined,undefined,undefined,3500);
                 this.changeList(3000);
 
             });
