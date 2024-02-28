@@ -58,6 +58,19 @@ export class WCDToolbox extends CollabLitElement {
 
         }
 
+        
+
+    }
+
+    shouldUpdate(changedProperties: Map<string, string>): boolean {
+        // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = não executa o render().
+        
+        if (changedProperties.get('level')) { 
+            this.lastHelper = ''; 
+        }
+
+        return true;
+
     }
 
     render() {
