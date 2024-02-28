@@ -105,9 +105,11 @@ export class WCDToolbox extends CollabLitElement {
                     const wc = (nav3 as any).getActiveInstance('left');
                     if (!wc) resolve(undefined);
                     if (wc.tagName !== 'SERVICE-FCA-100554') resolve(undefined);
-
-                    this.wcServiceFCA = wc;
-                    resolve(wc.querySelector('div'));
+                    else {
+                        this.wcServiceFCA = wc;
+                        resolve(wc.querySelector('div'));
+                    }
+                    
                 }
 
             }, 200)

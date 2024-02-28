@@ -460,9 +460,6 @@ export class ServiceListFiles extends ServiceBase {
         this.changeListTimeout = setTimeout(async () => {
 
             await this.init();
-            if (this.info.version > 0) {
-                (window as any).collabMessages.add(`there are updates on project ${mls.actual[5].project}`, 'information')
-            };
 
         }, time);
 
@@ -634,6 +631,7 @@ export class ServiceListFiles extends ServiceBase {
 
                 const key = Object.keys(mls.stor.files)?.filter((item) => item.indexOf((mls.actual[5].project as number).toString()) >= 0);
                 if (key.length > 0) this.fireEvents('projectListChanged', mls.stor.files[key[0]], {}, 3000);
+                mls.events.fireFileAction('updatedOnServer', mls.stor.files[key[0]],'left');
                 this.changeList(3000);
 
             });

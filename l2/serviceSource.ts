@@ -419,6 +419,10 @@ export class ServiceSource100554 extends ServiceBase {
             this.showActiveModel();
         };
 
+        const onUpdatedOnServer = async ():Promise<void> => {
+            console.info('chegou');
+        };
+
         if (mls.istrace) console.time('onAction_' + fileAction.action + '_' + fileAction.position);
         // if (fileAction.action !== 'preLoadProject') await this.initMonaco(false); // init if needed
         await this.initMonaco(); // init if needed
@@ -429,6 +433,7 @@ export class ServiceSource100554 extends ServiceBase {
             case 'undo': await onUndo(); break;
             case 'rename': await onRename(); break;
             case 'clone': await onClone(); break;
+            case 'updatedOnServer': await onUpdatedOnServer(); break;
             default: {
                 // console.error('invalid action: ' + fileAction.action);
             }
