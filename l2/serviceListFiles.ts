@@ -6,6 +6,8 @@
  * }
  */
 
+//version = 2
+
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
@@ -142,6 +144,9 @@ export class ServiceListFiles extends ServiceBase {
     connectedCallback() {
         super.connectedCallback();
         this.init();
+        /*setTimeout(() => {
+            this.verifyChangeInList3();
+        }, 9000)*/
 
     }
 
@@ -344,7 +349,7 @@ export class ServiceListFiles extends ServiceBase {
         e.stopPropagation();
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
-        
+
         this.fireEvents('delete', mfile, {});
 
     }
@@ -630,8 +635,13 @@ export class ServiceListFiles extends ServiceBase {
             mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true).then(() => {
 
                 const key = Object.keys(mls.stor.files)?.filter((item) => item.indexOf((mls.actual[5].project as number).toString()) >= 0);
-                if (key.length > 0) this.fireEvents('projectListChanged', mls.stor.files[key[0]], {}, 3000);
-                mls.events.fireFileAction('updatedOnServer', mls.stor.files[key[0]],'left', undefined, undefined,undefined,undefined,3500);
+                if (key.length > 0) {
+
+                    this.fireEvents('projectListChanged', mls.stor.files[key[0]], {}, 3000);
+                    mls.events.fireFileAction('updatedOnServer', mls.stor.files[key[0]], 'left', undefined, undefined, undefined, undefined, 3500);
+
+                }
+
                 this.changeList(3000);
 
             });
@@ -648,6 +658,12 @@ export class ServiceListFiles extends ServiceBase {
             //this.shomMyError(e.message);
 
         }
+
+    }
+
+    private async verifyChangeInList3() {
+
+
 
     }
 

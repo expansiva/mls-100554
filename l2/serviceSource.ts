@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
-
+//version = 2
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
 
@@ -423,35 +423,42 @@ export class ServiceSource100554 extends ServiceBase {
 
         const onUpdatedOnServer = async (): Promise<void> => {
 
-            const keys = Object.keys(mls.stor.files);
-            const arr: mls.stor.IFileInfo[] = [];
-            let needMsg = false;
+            try {
 
-            keys.forEach((key) => {
+                const keys = Object.keys(mls.stor.files);
+                const arr: mls.stor.IFileInfo[] = [];
+                let needMsg = false;
 
-                const f = mls.stor.files[key];
-                if (!f) return;
-                if (f.inLocalStorage || !f.isLocalVersionOutdated) return;
-                arr.push(f);
+                keys.forEach((key) => {
 
-            });
+                    const f = mls.stor.files[key];
+                    if (!f) return;
+                    if (f.inLocalStorage || !f.isLocalVersionOutdated) return;
+                    arr.push(f);
 
-            console.info(arr);
+                });
 
-            for await (const storFile of arr) {
+                console.info(arr);
 
-                mls.l2.editor.remove(storFile);
-                this.removeEventsModelTS(storFile);
-                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-                await this.createModelTS2(storFile, false, true);
-                if (storFile.project === 100554) needMsg = true;
+                for await (const storFile of arr) {
+
+                    mls.l2.editor.remove(storFile);
+                    this.removeEventsModelTS(storFile);
+                    await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+                    await this.createModelTS2(storFile, false, true);
+                    if (storFile.project === 100554) needMsg = true;
 
 
+                }
+
+                if (needMsg) {
+                    window.collabMessages.add("Files changed in server , please use F5 to reload", 'information');
+                }
+
+            } catch (e) {
+                console.info('Erro service source: onUpdatedOnServer')
             }
 
-            if (needMsg) {
-                window.collabMessages.add("Files changed in server , please use F5 to reload", 'information');
-            }
 
         };
 
