@@ -21,7 +21,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
         icon: '&#xf802',
         state: 'background',
         tooltip: 'Assets',
-        visible: false,
+        visible: true,
         position: "left",
         widget: '_100554_serviceDsAssets',
         level: [3]
