@@ -16,7 +16,13 @@ export class CollabShowCodeSnippet100554 extends LitElement {
 
   @query('.code')
   codeBlock: HTMLElement | undefined
-  text = '';
+  text = `  set textIn(text: string) {
+    this.text = text;
+    if (!this.codeBlock) return;
+    this.waitForLoadIfNeeded(() => {
+      this.setCode();
+    });
+  }`;
 
   set textIn(text: string) {
     this.text = text;
