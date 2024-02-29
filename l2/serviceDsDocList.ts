@@ -3,6 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { collab_plus, collab_chevron_right } from './_100554_collabIcons'
 
 @customElement('service-ds-doc-list-100554')
 export class ServiceDsDocList100554 extends ServiceBase {
@@ -251,7 +252,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
                     <div>
                         <p>${doc.item?.title}</p>
                         <span></span>
-                        <i class="fa fa-chevron-right"></i>
+                        ${collab_chevron_right}
                     </div>
                 </summary>
                 ${doc.children.length > 0 ? html`<div style="padding-left:1rem">${this.renderList(doc.children)}<div>` : ''}
@@ -273,7 +274,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
                     <div class="list-docs-actions">
                         <button @click=${() => { this.addNewDoc(); }}>
                             <span>Add</span>
-                            <i class="fa fa-plus"></i>
+                            ${collab_plus}
                         </button>
                     </div>
                     

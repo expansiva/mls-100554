@@ -5,6 +5,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initEditorQuillDocs, EditorQuillDocs100554 } from './_100554_editorQuillDocs'
 import { IDocData } from './_100554_serviceDsDocList'
+import { collab_plus, collab_trash } from './_100554_collabIcons'
+
 @customElement('service-ds-doc-view-100554')
 export class ServiceDsDocView100554 extends ServiceBase {
 
@@ -142,11 +144,11 @@ export class ServiceDsDocView100554 extends ServiceBase {
                     <div style="display:flex; gap:1rem; justify-content: center;">
                         <button class="btn-docs" @click=${() => { this.fireComunication('Add') }}>
                             <span>Add Child</span>
-                            <i class="fa fa-plus"></i>
+                            ${collab_plus}
                         </button>
                         <button class="btn-docs" @click=${() => { this.fireComunication('Delete') }}>
                             <span>Remove this</span>
-                            <i class="fa fa-trash"></i>
+                            ${collab_trash}
                         </button>
                     </div>
                     <div style="width:100%; display: flex; align-items: center;">
