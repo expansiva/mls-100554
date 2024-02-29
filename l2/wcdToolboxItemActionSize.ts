@@ -1,8 +1,6 @@
 /// <mls shortName="wcdToolboxItemActionSize" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/// <mls shortName="wcdToolboxItemActionSize" project="100552" enhancement="_100541_enhancementLit" groupName="rating" />
-
-import { html, LitElement, unsafeHTML, render } from 'lit';
+import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
@@ -37,6 +35,7 @@ export class WCDToolboxItemActionSize extends LitElement {
         super.updated(changedProperties);
         if (!this.elMain || !this.myParent) return;
         this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+        this.myParent.updateBackgroundAuxSize('show');
         this.onmousedown = (e) => this.initDragging(e);
 
     }
@@ -51,6 +50,22 @@ export class WCDToolboxItemActionSize extends LitElement {
 
         render(this.renderSize(), this.elExternal);
 
+        setTimeout(() => {
+
+            if (!this.elExternal) return;
+
+            const el = this.elExternal.querySelector('#scriptInputRange');
+            if (el) return;
+
+            const script = document.createElement('script');
+            script.src = '/_100554_collabDsInputRange';
+            script.id = 'scriptInputRange';
+            script.type = 'module';
+
+            this.elExternal.appendChild(script);
+
+        }, 500);
+
     }
 
     private renderSize() {
@@ -61,11 +76,11 @@ export class WCDToolboxItemActionSize extends LitElement {
                 <h4 style="display:flex; gap:1.5rem;margin:0px" >Size</h4>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">Width</div>
-                    <input prop="width" type="text" .value="${this.elMain.style.width}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                    <collab-ds-input-range-100554 prop="width" value="${this.elMain.style.width}" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">Height</div>
-                    <input prop="height" type="text" .value="${this.elMain.style.height}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                    <collab-ds-input-range-100554 prop="height" value="${this.elMain.style.height}" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div> 
             </div>
         `;
@@ -88,11 +103,14 @@ export class WCDToolboxItemActionSize extends LitElement {
         if (!prop || !this.elMain || !this.myParent) return;
 
         this.elMain.style[prop as any] = el.value;
-        this.myParent.updateSize(this.elMain, this.myParent, false);
+        this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+        this.myParent.updateBackgroundAuxSize('show');
         this.fireEvent();
     }
 
     //-------------------------------------------
+
+    private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
     private initDragging(e: MouseEvent): void {
 
@@ -106,20 +124,18 @@ export class WCDToolboxItemActionSize extends LitElement {
 
             if (!this.elMain || !this.myParent) return;
 
+            console.info(this.tpChange)
             if (!this.tpChange || ['all', 'width'].includes(this.tpChange)) {
                 this.elMain.style.width = (this.startWidth + e.clientX - this.startX) + 'px';
-            } else {
-                this.elMain.style.width = this.elMain.getBoundingClientRect().width + 'px';
             }
 
             if (!this.tpChange || ['all', 'height'].includes(this.tpChange)) {
                 this.elMain.style.height = (this.startHeight + e.clientY - this.startY) + 'px';
-            } else {
-                this.elMain.style.height = this.elMain.getBoundingClientRect().height + 'px';
             }
 
             this.renderOutdoorScenary();
-            this.myParent.updateSize(this.elMain, this.myParent, false);
+            this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+            this.myParent.updateBackgroundAuxSize('show');
 
         }
 
@@ -213,7 +229,9 @@ const templateActionSize = {
                     templateActionSize.backButton as IActionsToolbox,
                     templateActionSize.sizeHeight as IActionsToolbox,
                     templateActionSize.sizeWidth as IActionsToolbox
-                ]
+                ],
+                false,
+                'padding'
             )
         },
         menuItens: [],
