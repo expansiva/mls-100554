@@ -90,7 +90,9 @@ export class ServiceListFiles extends ServiceBase {
 
     private firstTimeVerifyProject(): void {
 
-        if ((window as any).updateFile && (window as any).updateFile.includes(mls.actual[5].project)) return;
+        if ((window as any).updateFile && (window as any).updateFile.includes(mls.actual[5].project)) {
+            return;
+        }
         setTimeout(() => {
             const el = this.shadowRoot?.querySelector('#listUpdateFiles') as HTMLElement;
             if (!el) return;
