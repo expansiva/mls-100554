@@ -446,7 +446,7 @@ export class WCDToolbox extends CollabLitElement {
 
 
         elChange.style.display = this.parentElement.style.display;
-        elChange.style.background = '#d6f1da3d';
+        elChange.style.background = '#bdbdbd3d';
         elChange.style.position = 'absolute';
 
         if ((elBase.style.height && paddingTop) || (paddingTop && paddingBottom)) {
@@ -559,7 +559,7 @@ export class WCDToolbox extends CollabLitElement {
             position:absolute;
             user-select:none;
             z-index:9999;
-            background: #edededc2;
+            background: #c8c8c8c2; /*#edededc2;*/
         }
 
         :host(:hover){

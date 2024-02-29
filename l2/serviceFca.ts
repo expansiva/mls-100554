@@ -56,7 +56,7 @@ export class ServiceFca100554 extends ServiceBase {
         if (!visible && !reinit && this.menu.setIconActive) {
             this.menu.setIconActive('Navigation');
         }
-        
+
     }
 
     //--------------COMPONENT---------------
@@ -89,7 +89,8 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     renderNavigation() {
-        return html`<div>In develpoment : Navigation</div>`;
+        //this.setServicePreview();
+        return html`<div>In develpoment: Navigation</div>`;
     }
 
     renderProperties() {
@@ -122,8 +123,29 @@ export class ServiceFca100554 extends ServiceBase {
             this.openMe();
             this.menu.setIconActive(data.op);
         }
-        
+
     }
+
+    private servicePreview: HTMLElement | undefined;
+    private setServicePreview(): void {
+        if (this.servicePreview) return;
+
+        const nav3 = this.nav3Service;
+        if (!nav3) return;
+
+        const wc = (nav3 as any).getActiveInstance('right');
+        if (!wc) return;
+        
+        if (wc.tagName.toLowerCase() !== 'service-preview-100554') return;
+        else {
+            this.servicePreview = wc.parentElement.querySelector('service-preview-view-100554');
+        }
+
+
+    }
+
+
+
 }
 
 export type ITabType = 'Navigation' | 'Properties' | 'Styles' | 'Animation' | 'AboutFCA'
