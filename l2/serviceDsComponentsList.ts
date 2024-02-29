@@ -3,6 +3,7 @@
 import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { collab_cubes, collab_caret_righttv } from './_100554_collabIcons'
 
 @customElement('service-ds-components-list-100554')
 export class ServiceDsComponentsList100554 extends ServiceBase {
@@ -110,10 +111,10 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
     renderGroup(item: IServiceComponents, index: number) {
 
         return html`
-        <li @click="${this.openMeList}">
-            <div>
-                <span class="fatv fa-caret-righttv" >
-                </span>
+        <li @click=${this.openMeList}>
+
+            <div style="display:flex; align-items:center;">
+                ${collab_caret_righttv}
                 <label style="font-weight:500">${item.group}</label>
             </div>
             <ul>
@@ -141,7 +142,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
             @click=${(e: MouseEvent) => { this.openComponent(e, item.name) }}
         > 
             <div style="display:flex;align-items:center;gap:.5rem">
-                <span class="fa fa-cubes"></span>
+                ${collab_cubes}
                 <span>${item.name}</span>
             </div>
         </li>
