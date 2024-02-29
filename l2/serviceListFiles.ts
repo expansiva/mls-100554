@@ -6,7 +6,7 @@
  * }
  */
 
-//version = 2
+//version = 3
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -62,7 +62,7 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (this.menu.setMode) this.onServiceClick(true, true);
+        //if (this.menu.setMode) this.onServiceClick(true, true);
         return false;
     }
 
@@ -80,9 +80,34 @@ export class ServiceListFiles extends ServiceBase {
 
         this.mode = 'list';
         if (visible && reinit) {
+            
             this.init();
+            this.firstTimeVerifyProject();
+
         }
 
+    }
+
+    private firstTimeVerifyProject(): void {
+
+        if ((window as any).updateFile && (window as any).updateFile.includes(mls.actual[5].project)) return;
+        setTimeout(() => {
+            const el = this.shadowRoot?.querySelector('#listUpdateFiles') as HTMLElement;
+            if (!el) return;
+            
+            if (!(window as any).updateFile) {
+
+                (window as any).updateFile = [mls.actual[5].project]
+
+            } else {
+
+                (window as any).updateFile.push(mls.actual[5].project);
+
+            }
+
+            el.click();
+
+        }, 5000)
     }
 
     private showAdd() {
@@ -194,7 +219,7 @@ export class ServiceListFiles extends ServiceBase {
         return html`
         <div class="groupHeader">
             <div class="groupAction"> 
-                <a @click="${this.verifyChangeInList}">${this.myMsg.updateListVerify}</a>
+                <a @click="${this.verifyChangeInList}" id="listUpdateFiles">${this.myMsg.updateListVerify}</a>
                 <a @click="${this.showAdd}">${this.myMsg.addNewFile}</a>
             </div>
             <div class="groupFilter">
