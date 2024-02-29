@@ -318,6 +318,7 @@ export class ServicePreviewView extends LitElement {
 
         this.lastHTML = txt;
         iframe.contentDocument.body.innerHTML = txt;
+        iframe.contentDocument.body.style.paddingTop = '10px';
         (iframe.contentDocument.body as any)['service'] = this.father;
 
         const ret = await getDepedencesByHtml(this.mfile, txt, true);
@@ -399,7 +400,7 @@ export class ServicePreviewView extends LitElement {
             const style = document.createElement('style');
             style.textContent = css + ' \n' + cls;
             ifr.contentDocument.body.className = 'scroll-custom';
-            ifr.contentDocument.body.style.height = 'calc(100vh - 30px)';
+            ifr.contentDocument.body.style.height = 'calc(100vh - 40px)';
             ifr.contentDocument.body.style.width = '98%'; 
             ifr.contentDocument.body.appendChild(style);
 
