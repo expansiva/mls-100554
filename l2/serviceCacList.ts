@@ -1,15 +1,10 @@
 /// <mls shortName="serviceCacList" project="100554" enhancement="_100554_enhancementLitService" groupName="service" />
 
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": ["cac-task-100554"]
- * }
- */
-
 import { html, css, unsafeHTML, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IToolbarChangeEvent } from './_100554_serviceBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
+import { init as initTask } from './_100554_serviceCacSimulate';
 
 @customElement('service-cac-list-100554')
 export class ServiceCACList100554 extends ServiceBase {
@@ -17,6 +12,7 @@ export class ServiceCACList100554 extends ServiceBase {
     constructor() {
         super();
         this.setEvents();
+        initTask();
     }
 
     @property()
@@ -66,9 +62,7 @@ export class ServiceCACList100554 extends ServiceBase {
         updateTitle: undefined
     }
 
-    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void {
-        if (!visible) return;
-        if (this.menu.setIconActive) this.menu.setIconActive('icTs');
+    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void {        
     }
 
     setEvents(): void {
@@ -85,6 +79,7 @@ export class ServiceCACList100554 extends ServiceBase {
     }
 
     render() {
+        if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
         switch (this.activeTab) {
             case 'All':
                 return this.renderAll();
