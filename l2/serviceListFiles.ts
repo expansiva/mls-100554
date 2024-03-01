@@ -171,9 +171,6 @@ export class ServiceListFiles extends ServiceBase {
     connectedCallback() {
         super.connectedCallback();
         this.init();
-        /*setTimeout(() => {
-            this.verifyChangeInList3();
-        }, 9000)*/
 
     }
 
@@ -340,8 +337,10 @@ export class ServiceListFiles extends ServiceBase {
 
         }
 
+        const style = this.inFilter && inHistory ? 'display:none' : '';
+
         return html`
-            <li @click="${this.clickOptOpen}" .myFile=${file} .nameFilter="${nameFilter}">
+            <li @click="${this.clickOptOpen}" style="${style}" .myFile=${file} .nameFilter="${nameFilter}">
                 <div class="elContent">
                     <div class="groupHiddenList" @click="${this.clickGroupHidden}">
                         <span class="mls-gpbtnslider-item fa fa-undo" title="${this.myMsg.undo}" @click="${this.clickOptUndo}"></span>
@@ -601,6 +600,7 @@ export class ServiceListFiles extends ServiceBase {
 
     }
 
+    private inFilter = false;
     private timeFilterChange = 0;
     private filterLiChange(e: InputEvent) {
 
@@ -609,6 +609,8 @@ export class ServiceListFiles extends ServiceBase {
         if (!el) return;
         clearTimeout(this.timeFilterChange);
         this.timeFilterChange = setTimeout(() => {
+
+            this.inFilter = el.value.length > 0;
 
             const contentServiceList = el.closest('.contentServiceList');
             if (!contentServiceList) return;
@@ -794,7 +796,18 @@ export class ServiceListFiles extends ServiceBase {
 
         res.unshift({ project: file.project, shortName: file.shortName, extension: file.extension, folder: file.folder });
 
-        if (res.length > 10) res.length = 10;
+        if (res.length > 10) {
+
+            for (let i = res.length - 1; i >= 0; i--){
+                if (res.length <= 10) break;
+                const key = mls.stor.getKeyToFiles(res[i].project, this.level, res[i].shortName, res[i].folder, res[i].extension);
+                if (mls.stor.files[key] && mls.stor.files[key].status === 'nochange') {
+                    res.splice(i, 1);
+                }
+            }
+
+        }
+
         localStorage.setItem('mlsInfoHistoryL' + this.level as any, JSON.stringify(res));
 
     }
