@@ -46,7 +46,7 @@ export class WCDToolbox extends CollabLitElement {
 
         this.renderActions(this.actions);
         this.updateSize(this.parentElement, this, true);
-        this.setAttribute('title', this.parentElement.tagName);
+        this.setAttribute('title', this.elMain.tagName);
 
     }
 

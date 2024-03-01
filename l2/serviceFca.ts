@@ -89,7 +89,7 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     renderNavigation() {
-        //this.setServicePreview();
+        //console.info(this.getFCAComponents());
         return html`<div>In develpoment: Navigation</div>`;
     }
 
@@ -144,7 +144,46 @@ export class ServiceFca100554 extends ServiceBase {
 
     }
 
+    private getFCAComponents(): HTMLElement[] {
 
+        this.setServicePreview();
+
+        let ret: HTMLElement[] = [];
+
+        if (!this.servicePreview || !this.servicePreview.shadowRoot) return ret;
+
+        const iframe = this.servicePreview.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
+        if (!iframe) return ret;
+
+        const scope = iframe.contentDocument?.body;
+        if (!scope) return ret;
+
+        const reentrance = (el: HTMLElement | HTMLElement) => {
+
+            const tag = el.tagName.toLowerCase();
+            if (tag.startsWith('fca-')) {
+
+                ret.push(el as HTMLElement);
+
+            }
+
+            const isGroup = el.getAttribute('isFCAGroup');
+
+            if (!isGroup || isGroup === 'false') {
+                Array.from(el.children).forEach(i => {
+                    reentrance(i as HTMLElement);
+                })
+            }
+
+        }
+
+        Array.from(scope.children).forEach(i => {
+            reentrance(i as HTMLElement);
+        })
+
+        return ret;
+
+    }
 
 }
 
