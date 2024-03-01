@@ -124,7 +124,6 @@ export class WCDToolboxItemActionSize extends LitElement {
 
             if (!this.elMain || !this.myParent) return;
 
-            console.info(this.tpChange)
             if (!this.tpChange || ['all', 'width'].includes(this.tpChange)) {
                 this.elMain.style.width = (this.startWidth + e.clientX - this.startX) + 'px';
             }
