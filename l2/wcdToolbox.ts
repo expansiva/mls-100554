@@ -7,6 +7,7 @@ import { IActionsToolbox, IActionsToolboxMenu } from './_100554_fcaGlobal';
 import { ServiceBase } from './_100554_serviceBase';
 import * as states from './_100554_fcaCollabStore';
 
+// version 2
 @customElement('wcd-toolbox-100554')
 export class WCDToolbox extends CollabLitElement {
 
