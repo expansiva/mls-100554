@@ -956,7 +956,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const content = fileInfo ? fileInfo.content : await storFileHTML.getContent();
         model = monaco.editor.createModel(content as string, 'html', uri);
         (model as any)['position'] = this.position;
-        (storFileHTML as any)['originalCRC'] = mls.common.crc.crc32(model.getValue()).toString(16);
+        (storFileHTML as any)['originalCRC'] = storFileHTML.inLocalStorage ? 'undefined' : mls.common.crc.crc32(model.getValue()).toString(16);
         if (storFileHTML.status === 'renamed' && fileInfo) {
             this.setEventsModelHTML(model, storFileHTML, fileInfo.originalShortName as string, fileInfo.originalProject as number);
             model.setValue(fileInfo.content as string);
