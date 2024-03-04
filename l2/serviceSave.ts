@@ -556,7 +556,6 @@ export class ServiceSave extends ServiceBase {
             const ret = await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
             this.fireEvents(3000);
             await this.sleep(3000);
-            console.info(mls.stor.files['100554_2_ateste.ts'].isLocalVersionOutdated);
 
 
         } catch (e: any) {
@@ -576,7 +575,7 @@ export class ServiceSave extends ServiceBase {
             if (!father) return;
 
             this.showLoader(true);
-            await this.verifyVersionBlock();
+            //await this.verifyVersionBlock();
             const txt = father.querySelector('textarea')
             const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
             const msg = txt ? txt.value : '';
