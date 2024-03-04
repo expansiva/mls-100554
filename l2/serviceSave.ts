@@ -136,7 +136,7 @@ export class ServiceSave extends ServiceBase {
 
     renderHeader() {
         return html`
-            <i class="fa fa-floppy-o"></i>
+            <i class="fa fa-floppy-disk"></i>
             <span>${this.myMsg.updateChanges}</span>    
         
         `
@@ -396,12 +396,12 @@ export class ServiceSave extends ServiceBase {
 
     private oIcon = {
         nochange: { icon: 'fa-nochange', title: 'Local' },
-        changed: { icon: 'fa-add', title: 'Edited' },
-        renamed: { icon: 'fa-rename', title: 'Renamed' },
-        deleted: { icon: 'fa-del', title: 'Deleted' },
+        changed: { icon: 'fa-file-pen', title: 'Edited' },
+        renamed: { icon: 'fa-clone', title: 'Renamed' },
+        deleted: { icon: 'fa-xmark', title: 'Deleted' },
         //deleted: { icon: '&#xf1f8', title: 'Deleted' },f068
         //new: { icon: '&#xf006', title: 'New' }2b
-        new: { icon: 'fa-new', title: 'New' }
+        new: { icon: 'fa-plus', title: 'New' }
     };
 
     private async configItem(item: mls.stor.IFileInfo) {
@@ -414,6 +414,11 @@ export class ServiceSave extends ServiceBase {
 
         if (item.hasError && item.status !== 'deleted') {
             span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px;" class="fa fa-bug" title="Error"></span>';
+            disabled = true;
+        }
+
+        if (item.isLocalVersionOutdated) {
+            span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px;" class="fa fa-unbalanced" title="Version block"></span>';
             disabled = true;
         }
 
@@ -518,6 +523,7 @@ export class ServiceSave extends ServiceBase {
         try {
 
             this.showLoader(true);
+            await this.verifyVersionBlock();
             await this.setInfos();
             this.showLoader(false);
 
@@ -525,6 +531,31 @@ export class ServiceSave extends ServiceBase {
             this.error = e.message;
             this.showLoader(false);
         }
+    }
+
+    private async verifyVersionBlock() {
+
+        try {
+
+            let needVerify = false;
+            const filesKeys = Object.keys(mls.stor.files);
+
+            for (const fKey of filesKeys) {
+
+                const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
+                if ((!file.inLocalStorage && file.status === 'nochange') || file.status === 'nochange' || file.project === 0) continue;
+                needVerify = true;
+                break;
+            }
+
+            if (!needVerify) return;
+            const ret = await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
+            this.fireEvents(3000);
+
+        } catch (e:any) {
+            console.info('Error save verifyVersionBlock:' + e.message);
+        }
+        
     }
 
     private async onSave(e: MouseEvent) {
@@ -625,7 +656,7 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private fireEvents(): void {
+    private fireEvents(time:number = 0): void {
 
         const params = {} as mls.events.IFileAction;
 
@@ -634,7 +665,7 @@ export class ServiceSave extends ServiceBase {
         params.project = mls.actual[5].project as number;
         params.position = this.position as ('right' | 'left');
 
-        mls.events.fire([5], ['FileAction'], JSON.stringify(params), 0);
+        mls.events.fire([5], ['FileAction'], JSON.stringify(params), time);
 
     }
 
