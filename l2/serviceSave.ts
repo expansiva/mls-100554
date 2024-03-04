@@ -2,17 +2,17 @@
 
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IMenu } from './_100554_serviceBase'; 
+import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
 @customElement('service-save-100554')
 export class ServiceSave extends ServiceBase {
 
-    @property() itens: any = undefined; 
+    @property() itens: any = undefined;
 
     @property() error: string = '';
 
     constructor() {
-    
+
         super();
         this.setEvents();
     }
@@ -126,7 +126,7 @@ export class ServiceSave extends ServiceBase {
 
             setTimeout(() => this.error = '', 3000);
             return html`${this.error}`;
-            
+
         }
         return html` ${this.itens
             ? html`<sectionsaveheader> ${this.renderHeader()} </sectionsaveheader>${this.renderItens()}` : this.renderNoItens()}
@@ -196,14 +196,14 @@ export class ServiceSave extends ServiceBase {
             </div>
             <ul>
                 ${repeat(
-                    keys,
-                    ((key: any) => key) as any,
-                    ((k: any, indexl: any) => {
+            keys,
+            ((key: any) => key) as any,
+            ((k: any, indexl: any) => {
 
-                        return this.renderLevels(k, project, index, indexl);
+                return this.renderLevels(k, project, index, indexl);
 
-                    }) as any
-                )}
+            }) as any
+        )}
             </ul>
         </li>
         `;
@@ -234,13 +234,13 @@ export class ServiceSave extends ServiceBase {
             </div>
             <ul>
                 ${repeat(
-                    keys,
-                    ((key: any) => key) as any,
-                    ((k: any, index3: any) => {
-                        const objL = objP[level];
-                        const objDS = objL[k];
-                        const itens = objDS ? objDS as [] : [];
-                        return html`
+            keys,
+            ((key: any) => key) as any,
+            ((k: any, index3: any) => {
+                const objL = objP[level];
+                const objDS = objL[k];
+                const itens = objDS ? objDS as [] : [];
+                return html`
                                 <li>
                                     <div>
                                         <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
@@ -249,20 +249,20 @@ export class ServiceSave extends ServiceBase {
                                     </div>
                                     <ul>                        
                                         ${repeat(
-                                            itens,
-                                            ((item: any) => item) as any,
-                                            ((i: any, indexI: any) => {
+                    itens,
+                    ((item: any) => item) as any,
+                    ((i: any, indexI: any) => {
 
-                                                return this.renderItem(i, indexP, index, indexI);
+                        return this.renderItem(i, indexP, index, indexI);
 
-                                            }) as any
-                                        )}
+                    }) as any
+                )}
                                     </ul>
                                 </li>
                             `
 
-                        }) as any
-                    )}
+            }) as any
+        )}
             </ul>
         </li>
         `;
@@ -284,14 +284,14 @@ export class ServiceSave extends ServiceBase {
             </div>
             <ul>
                 ${repeat(
-                    itens,
-                    ((item: any) => item) as any,
-                    ((i: any, indexI: any) => {
+            itens,
+            ((item: any) => item) as any,
+            ((i: any, indexI: any) => {
 
-                        return this.renderItem(i, indexP, index, indexI);
+                return this.renderItem(i, indexP, index, indexI);
 
-                    }) as any
-                )}
+            }) as any
+        )}
             </ul>
         </li>
         `;
@@ -523,7 +523,6 @@ export class ServiceSave extends ServiceBase {
         try {
 
             this.showLoader(true);
-            await this.verifyVersionBlock();
             await this.setInfos();
             this.showLoader(false);
 
@@ -531,6 +530,10 @@ export class ServiceSave extends ServiceBase {
             this.error = e.message;
             this.showLoader(false);
         }
+    }
+
+    private async sleep(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     private async verifyVersionBlock() {
@@ -544,6 +547,7 @@ export class ServiceSave extends ServiceBase {
 
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
                 if ((!file.inLocalStorage && file.status === 'nochange') || file.status === 'nochange' || file.project === 0) continue;
+
                 needVerify = true;
                 break;
             }
@@ -551,41 +555,54 @@ export class ServiceSave extends ServiceBase {
             if (!needVerify) return;
             const ret = await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
             this.fireEvents(3000);
+            await this.sleep(3000);
+            console.info(mls.stor.files['100554_2_ateste.ts'].isLocalVersionOutdated);
 
-        } catch (e:any) {
+
+        } catch (e: any) {
             console.info('Error save verifyVersionBlock:' + e.message);
         }
-        
+
     }
 
     private async onSave(e: MouseEvent) {
 
-        e.stopPropagation();
-        const el = e.target as HTMLButtonElement;
-        if (!el) return;
-        const father = el.closest('sectionsave') as HTMLDivElement;
-        if (!father) return;
+        try {
 
-        const txt = father.querySelector('textarea')
-        const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
-        this.showLoader(true);
-        const msg = txt ? txt.value : '';
+            e.stopPropagation();
+            const el = e.target as HTMLButtonElement;
+            if (!el) return;
+            const father = el.closest('sectionsave') as HTMLDivElement;
+            if (!father) return;
 
-        setTimeout(async () => {
+            this.showLoader(true);
+            await this.verifyVersionBlock();
+            const txt = father.querySelector('textarea')
+            const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
+            const msg = txt ? txt.value : '';
 
-            try {
+            setTimeout(async () => {
 
-                await this.onSavenew(array, msg);
-                await this.setInfos();
-                this.fireEvents();
-                this.showLoader(false);
+                try {
 
-            } catch (e: any) {
-                this.error = e.message;
-                this.showLoader(false);
-            }
+                    await this.onSavenew(array, msg);
+                    await this.setInfos();
+                    this.fireEvents();
+                    this.showLoader(false);
 
-        }, 500);
+                } catch (e: any) {
+                    this.error = e.message;
+                    this.showLoader(false);
+                }
+
+            }, 500);
+
+        } catch (e) {
+
+            console.info('Error onSave');
+
+        }
+
 
     }
 
@@ -606,14 +623,27 @@ export class ServiceSave extends ServiceBase {
         if (ar.length <= 0) return;
         try {
 
+            let versionBLock = 0;
+            const arrSet:mls.stor.IFileInfo[] = [];
+
             ar.forEach((i) => {
+
+                if (i.isLocalVersionOutdated) {
+                    versionBLock++;
+                    return;
+                }
 
                 i.inLocalStorage = false;
                 if (!i.onAction) i.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdate(i);
 
+                arrSet.push(i);
+
             });
 
-            await mls.stor.setContents(ar, msg);
+            await mls.stor.setContents(arrSet, msg);
+            if (versionBLock > 0) {
+                window.collabMessages.add(`File ${versionBLock} was changed in server, file was not save`, 'information');
+            }
 
             return;
 
@@ -656,7 +686,7 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private fireEvents(time:number = 0): void {
+    private fireEvents(time: number = 0): void {
 
         const params = {} as mls.events.IFileAction;
 
