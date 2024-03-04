@@ -640,7 +640,7 @@ export class ServiceSave extends ServiceBase {
 
             });
 
-            await mls.stor.setContents(arrSet, msg);
+            if (arrSet.length > 0) await mls.stor.setContents(arrSet, msg);
             if (versionBLock > 0) {
                 window.collabMessages.add(`File ${versionBLock} was changed in server, file was not save`, 'information');
             }
