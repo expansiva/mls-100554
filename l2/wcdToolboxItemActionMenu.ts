@@ -3,6 +3,8 @@
 import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
 
+//version 4
+
 export const getTemplate = (mode: string = '', position: string = ''): IActionsToolbox => {
 
     let ret: IActionsToolbox = templateActionMenu.menu as IActionsToolbox;

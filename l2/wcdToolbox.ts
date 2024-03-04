@@ -7,7 +7,8 @@ import { IActionsToolbox, IActionsToolboxMenu } from './_100554_fcaGlobal';
 import { ServiceBase } from './_100554_serviceBase';
 import * as states from './_100554_fcaCollabStore';
 
-// version 2
+//version 4
+
 @customElement('wcd-toolbox-100554')
 export class WCDToolbox extends CollabLitElement {
 
@@ -46,7 +47,7 @@ export class WCDToolbox extends CollabLitElement {
         this.elMain = this.parentElement.querySelector(`${this.widget}:first-child`) as HTMLElement;
 
         this.renderActions(this.actions);
-        this.updateSize(this.elMain, this, true);
+        this.updateSize(this.parentElement, this, true);
         this.setAttribute('title', this.elMain.tagName);
 
     }

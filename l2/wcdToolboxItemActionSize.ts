@@ -5,6 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
 
+//version 4
 @customElement('wcd-toolbox-item-action-size-100554')
 export class WCDToolboxItemActionSize extends LitElement {
 
@@ -124,6 +125,7 @@ export class WCDToolboxItemActionSize extends LitElement {
 
             if (!this.elMain || !this.myParent) return;
 
+            console.info(this.tpChange)
             if (!this.tpChange || ['all', 'width'].includes(this.tpChange)) {
                 this.elMain.style.width = (this.startWidth + e.clientX - this.startX) + 'px';
             }

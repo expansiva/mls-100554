@@ -5,6 +5,7 @@ import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
 import { FcaLitElementBase } from './_100554_fcaLitElementBase';
 
+//version 4
 @customElement('wcd-toolbox-item-action-move-100554')
 export class WCDToolboxItemActionMove extends LitElement {
  
