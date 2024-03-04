@@ -3,6 +3,7 @@
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getDepedencesByHtml, IJSONDependence } from './_100554_libCompile';
+import { convertFileNameToTag } from './_100554_utilsLit';
 
 export const initServicePreviewView = '';
 @customElement('service-preview-view-100554')
@@ -12,7 +13,7 @@ export class ServicePreviewView extends LitElement {
 
     private mfile: mls.l2.editor.IMFile | undefined = undefined;
 
-    @property() father: any ;
+    @property() father: any;
 
     @property() page: string = '';
 
@@ -104,7 +105,7 @@ export class ServicePreviewView extends LitElement {
         super.updated(changedProperties);
         if (changedProperties.has('level')) {
             const oldLevel = changedProperties.get('level');
-            if (!oldLevel) return; 
+            if (!oldLevel) return;
             this.fireChangeFCA();
         }
     }
@@ -224,10 +225,10 @@ export class ServicePreviewView extends LitElement {
         this.changeLevelFca(iframe.contentDocument.body);
     }
 
-    private changeLevelFca(el: HTMLElement): void{
-        
+    private changeLevelFca(el: HTMLElement): void {
+
         let tagEl = el.tagName.toLowerCase();
-        if (tagEl.startsWith('fca-')) { 
+        if (tagEl.startsWith('fca-')) {
             el.setAttribute('level', this.level);
         }
 
@@ -236,7 +237,7 @@ export class ServicePreviewView extends LitElement {
             this.changeLevelFca(i as HTMLElement);
 
         }
-        
+
     }
 
     private load(): void {
@@ -322,6 +323,7 @@ export class ServicePreviewView extends LitElement {
         (iframe.contentDocument.body as any)['service'] = this.father;
 
         const ret = await getDepedencesByHtml(this.mfile, txt, true);
+
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
         this.mountCSS(ret, iframe);
@@ -352,20 +354,31 @@ export class ServicePreviewView extends LitElement {
 
     private mountJS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
 
+        function carregarScripts(scripts: string[]) {
+            const loadScript = (src: string) => {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.type = 'module';
+                    script.id = src.replace('/', '');
+                    script.src = src;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    ifr.contentDocument?.body.appendChild(script);
+
+                });
+            };
+
+            let nextScript = Promise.resolve();
+            for (const script of scripts) {
+                nextScript = nextScript.then(() => loadScript(script)) as Promise<void>;
+            }
+            return nextScript;
+        }
+
+
         try {
 
             if (info.importsJs.length <= 0 || !ifr.contentDocument) return;
-
-            info.importsJs.forEach((i) => {
-
-                if (!ifr.contentDocument) return
-                const script = document.createElement('script');
-                script.type = 'module';
-                script.id = i.replace('/', '');
-                script.src = i;
-                ifr.contentDocument.body.appendChild(script);
-
-            });
 
             const s = document.createElement('script') as HTMLScriptElement;
             s.textContent = `
@@ -374,18 +387,71 @@ export class ServicePreviewView extends LitElement {
 				window['monaco'] = window['monaco']  ? window['monaco']  : parent.monaco ? parent.monaco : top['monaco'];
 				window['l2_html'] = window['l2_html']  ? window['l2_html']  : parent.l2_html ? parent.l2_html : top['l2_html'];
 				window['l2_fieldTypes'] = window['l2_fieldTypes']  ? window['l2_fieldTypes']  : parent.l2_fieldTypes ? parent.l2_fieldTypes : top['l2_fieldTypes'];window['litDisableBundleWarning'] = true; window['collabActualLevel'] = ${this.level};
-
-
 				`;
-            ifr.contentDocument.body.appendChild(s);
+            ifr.contentDocument?.body.appendChild(s);
+
+            carregarScripts(info.importsJs)
+                .then(() => {
+                    this.simulateService(info, ifr)
+                })
+
+            // info.importsJs.forEach((i) => {
+
+            //     if (!ifr.contentDocument) return
+            //     const script = document.createElement('script');
+            //     script.type = 'module';
+            //     script.id = i.replace('/', '');
+            //     script.src = i;
+            //     ifr.contentDocument.body.appendChild(script);
+
+            // });
 
         } catch (e: any) {
-
             console.info('Error mountJS: ' + e.message);
-
-
         }
 
+    }
+
+    private simulateService(info: IJSONDependence, ifr: HTMLIFrameElement) {
+        if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
+
+        if (info.importsJs.includes('/_100554_serviceBase') && this.file) {
+
+            const tag = convertFileNameToTag(`_${this.file.project}_${this.file.shortName}`);
+
+            const instance = ifr.contentDocument.body.querySelector(tag);
+            if (instance) {
+                this.addFA(ifr);
+
+                if (!ifr.contentWindow.customElements.get('mls-nav3-100529')) {
+                    ifr.contentWindow.customElements.define('mls-nav3-100529', (window as any)['l4_html']._100529_mls_nav3);
+                }
+
+                ifr.contentWindow.customElements.whenDefined('mls-nav3-100529').then(() => {
+                    if (!ifr.contentDocument) return;
+                    const collabNav = document.createElement('collab-nav');
+                    collabNav.style.position = 'relative';
+                    collabNav.style.width = '100%';
+                    collabNav.style.display = 'block';
+
+                    (collabNav as any)['mlsWidget'] = instance;
+                    const mlsnav3 = document.createElement('mls-nav3-100529');
+                    mlsnav3.setAttribute('is-mls2', 'true');
+                    collabNav.appendChild(mlsnav3);
+                    ifr.contentDocument.body.insertBefore(collabNav, instance);
+                });
+
+            }
+        }
+    }
+
+    private addFA(ifr: HTMLIFrameElement) {
+        if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
+        const styleFA = document.createElement('link');
+        styleFA.rel = 'stylesheet';
+        styleFA.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css';
+        styleFA.type = 'text/css';
+        ifr.contentDocument.head.appendChild(styleFA);
     }
 
     private mountCSS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
@@ -401,7 +467,7 @@ export class ServicePreviewView extends LitElement {
             style.textContent = css + ' \n' + cls;
             ifr.contentDocument.body.className = 'scroll-custom';
             ifr.contentDocument.body.style.height = 'calc(100vh - 40px)';
-            ifr.contentDocument.body.style.width = '98%'; 
+            ifr.contentDocument.body.style.width = '98%';
             ifr.contentDocument.body.appendChild(style);
 
         } catch (e: any) {
@@ -412,7 +478,7 @@ export class ServicePreviewView extends LitElement {
 
     }
 
-    
+
     private mountTokens(info: IJSONDependence, ifr: HTMLIFrameElement): void {
 
         try {
@@ -448,11 +514,11 @@ export class ServicePreviewView extends LitElement {
     private showLoader(show: boolean) {
         clearTimeout(this.timeShow);
 
-        this.timeShow = setTimeout(() => { 
+        this.timeShow = setTimeout(() => {
             if (!this.father) return;
             this.father.loading = show;
         }, 200);
-        
+
     }
 
     private infoDS = { project: -1, level: '-1', myDS: undefined as any };

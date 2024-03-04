@@ -7,6 +7,7 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 @customElement('service-plugins-100554')
 export class ServicePlugins extends ServiceBase {
 
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     get project(): number { return window['mls'] ? mls.actual[5].project as number : 0 };
