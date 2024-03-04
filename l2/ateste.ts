@@ -3,7 +3,7 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { messages } from './_100554_collabMessagesPt';
-// teste 1
+// teste 8
 @customElement('ateste-100554')
 export class SimpleGreeting extends LitElement {
     static styles = css`p { color: red }`;
