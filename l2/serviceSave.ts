@@ -345,7 +345,7 @@ export class ServiceSave extends ServiceBase {
             for (const fKey of filesKeys) {
 
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
-                if ((!file.inLocalStorage && file.status === 'nochange') || file.status === 'nochange' || file.project === 0) continue;
+                if ((!file.inLocalStorage && file.status === 'nochange') || file.status === 'nochange' || file.project === 0 || file.project !== mls.actual[5].project) continue;
 
                 const pj = file.project;
                 const level = file.level;
@@ -536,23 +536,48 @@ export class ServiceSave extends ServiceBase {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    private async verifyVersionBlock() {
+    private createArrayInfoVersion(array: mls.stor.IFileInfo[]): { name: string, version: string, file: mls.stor.IFileInfo }[] {
+
+        const ret: any = [];
+        array.forEach((i) => {
+
+            ret.push({
+                name: `l${i.level}/${i.folder}${i.shortName}${i.extension}`,
+                version: i.versionRef,
+                file: i
+            })
+
+        })
+        return ret;
+    }
+
+    private async uppVersionAfterSave(array: mls.stor.IFileInfo[]) {
+
+        const driver = mls.stor.others.getDefaultDriver(mls.actual[5].project as number);
+        const retArray = await driver.loadFilesInfo(mls.actual[5].project as number);
+
+        const arrayVersion = this.createArrayInfoVersion(array);
+
+        retArray.forEach((i) => {
+
+            const file = arrayVersion.filter((f) => f.name === i.ShortPath);
+            if (!file || file.length <= 0 || (file && file.length >= 1 && file[0].version === i.versionRef)) return;
+
+            if (file[0].version !== i.versionRef) {
+                //file[0].file.isLocalVersionOutdated = true;
+                //file[0].file.newVersionRefIfOutdated = i.versionRef;
+                file[0].file.versionRef = i.versionRef;
+            }
+
+        });
+
+    }
+
+    private async verifyVersionBlock(array: mls.stor.IFileInfo[]) {
 
         try {
 
-            let needVerify = false;
-            const filesKeys = Object.keys(mls.stor.files);
-
-            for (const fKey of filesKeys) {
-
-                const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
-                if ((!file.inLocalStorage && file.status === 'nochange') || file.status === 'nochange' || file.project === 0) continue;
-
-                needVerify = true;
-                break;
-            }
-
-            if (!needVerify) return;
+            if (array.length <= 0) return;
             const ret = await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
             this.fireEvents(3000);
             await this.sleep(3000);
@@ -575,7 +600,7 @@ export class ServiceSave extends ServiceBase {
             if (!father) return;
 
             this.showLoader(true);
-            //await this.verifyVersionBlock();
+
             const txt = father.querySelector('textarea')
             const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
             const msg = txt ? txt.value : '';
@@ -584,6 +609,7 @@ export class ServiceSave extends ServiceBase {
 
                 try {
 
+                    await this.verifyVersionBlock(array);
                     await this.onSavenew(array, msg);
                     await this.setInfos();
                     this.fireEvents();
@@ -623,7 +649,7 @@ export class ServiceSave extends ServiceBase {
         try {
 
             let versionBLock = 0;
-            const arrSet:mls.stor.IFileInfo[] = [];
+            const arrSet: mls.stor.IFileInfo[] = [];
 
             ar.forEach((i) => {
 
@@ -639,7 +665,11 @@ export class ServiceSave extends ServiceBase {
 
             });
 
-            if (arrSet.length > 0) await mls.stor.setContents(arrSet, msg);
+            if (arrSet.length > 0) {
+                await mls.stor.setContents(arrSet, msg);
+                await this.uppVersionAfterSave(arrSet);
+            }
+
             if (versionBLock > 0) {
                 window.collabMessages.add(`File ${versionBLock} was changed in server, file was not save`, 'information');
             }
