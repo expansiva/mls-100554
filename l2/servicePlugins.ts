@@ -21,7 +21,7 @@ export class ServicePlugins extends ServiceBase {
     @property({ type: Number }) lastPluginIdAdd: number = -1;
 
     @property({ type: String }) currentScenario: IScenaries = 'list';
-    
+        
     public details: IService = {
         icon: '&#xf1e6',
         state: 'foreground',

@@ -188,6 +188,7 @@ export interface IMenu {
     setMode?: ISetMode,
     setIconActive?: (op: string) => void,
     setMenuActive?: (op: string) => void,
+    closeMenu?: Function,
     getLastMode?: IGetLastMode,
     lastIcon?: string,
     updateTitle?: Function,

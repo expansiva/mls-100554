@@ -311,6 +311,7 @@ export class ServiceSource100554 extends ServiceBase {
         const onNew = async (): Promise<void> => {
 
             this.activeThisService();
+            this.closeMenu();
             const newTSSource = fileAction.newTSSource
                 || `/// <mls shortName="${fileAction.newshortName}" project="${fileAction.newProject}" enhancement="${fileAction.newEnhancement}" />
 				\n// typescript new file\n`;
@@ -322,6 +323,7 @@ export class ServiceSource100554 extends ServiceBase {
         const onOpen = async (): Promise<void> => {
             await this.createModelTS_loading();
             this.activeThisService();
+            this.closeMenu();
             const storFile = getStorFile();
             const fileModel = mls.l2.editor.get(storFile); // { project: fileAction.project, shortName: fileAction.shortName });
             if (!fileModel) {
@@ -356,6 +358,7 @@ export class ServiceSource100554 extends ServiceBase {
         };
 
         const onUndo = async (): Promise<void> => {
+
             const storFile = getStorFile();
             const storFileHTML: mls.stor.IFileInfo | undefined = getStorFileHTML();
 
@@ -397,6 +400,7 @@ export class ServiceSource100554 extends ServiceBase {
         };
 
         const onRename = async (): Promise<void> => {
+            
             const storFile = getStorFile();
             const storFileHTML = getStorFileHTML();
 
@@ -483,6 +487,10 @@ export class ServiceSource100554 extends ServiceBase {
     private activeThisService(): void {
         this.openMe();
         mls.editor.setActiveInstance(this.level, this.position);
+    }
+
+    private closeMenu() {
+        if(this.menu.closeMenu) this.menu.closeMenu()
     }
 
     private async updateModelStatus(model1: mls.l2.editor.IMFile, changed: boolean): Promise<void> {
