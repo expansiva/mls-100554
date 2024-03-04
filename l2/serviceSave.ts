@@ -558,7 +558,7 @@ export class ServiceSave extends ServiceBase {
 
         const arrayVersion = this.createArrayInfoVersion(array);
 
-        retArray.forEach((i) => {
+        retArray.forEach(async (i) => {
 
             const file = arrayVersion.filter((f) => f.name === i.ShortPath);
             if (!file || file.length <= 0 || (file && file.length >= 1 && file[0].version === i.versionRef)) return;
@@ -567,6 +567,7 @@ export class ServiceSave extends ServiceBase {
                 //file[0].file.isLocalVersionOutdated = true;
                 //file[0].file.newVersionRefIfOutdated = i.versionRef;
                 file[0].file.versionRef = i.versionRef;
+                await mls.stor.localStor.setContent(file[0].file, { contentType: 'string', content: null });
             }
 
         });
