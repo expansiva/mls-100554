@@ -55,15 +55,12 @@ export class ServiceUserSettings100554 extends ServiceBase {
     }
 
     private setUserLanguage(language: string) {
-        let data: IUserSettings
+        let data: IUserSettings = { language: ''}
         const userSettings = localStorage.getItem('userSettings');
         if (userSettings) {
             data = JSON.parse(userSettings);
-        } else {
-            data = {
-                language
-            }
         }
+        data.language = language;
         this.actualLanguage = language;
         localStorage.setItem('userSettings', JSON.stringify(data));
     }
@@ -71,6 +68,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
     private handleChanceLanguageClick() {
         if (!this.selectLanguage) return;
         const language = this.selectLanguage.value;
+        console.info(language)
         this.setUserLanguage(language);
         location.reload();
     }
