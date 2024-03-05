@@ -16,6 +16,10 @@ if (!(window as any).messages) {
   (window as any).messages = defaultMessages;
 }
 
+export function setLanguage() {
+  (window as any).messages = defaultMessages;
+}
+
 // Exportamos window.messages, permitindo que ele seja de um tipo flexível.
 export const messages: typeof defaultMessages = (window as any).messages;
 
