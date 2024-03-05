@@ -10,7 +10,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
-        icon: '&#xf15b',
+        icon: '&#xf4fe',
         state: 'foreground',
         position: 'right',
         tooltip: 'User Settings',
@@ -81,7 +81,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
         return html`<details> 
             <summary>Linguagens</summary>
             <div>
-                <select class="select-language">
+                <select .value=${this.actualLanguage} class="select-language">
                     <option value="pt">pt-BR</option>
                     <option value="en">en-US</option>
                 </select>
