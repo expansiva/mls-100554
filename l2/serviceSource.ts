@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
-//version = 2
+//version = 3
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
 
