@@ -55,7 +55,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
         this.getUserSettings();
         const key = './_100554_collabMessages' + this.actualLanguage.charAt(0).toUpperCase() + this.actualLanguage.substr(1, this.actualLanguage.length)
         const { setLanguage } = await import(key);
-        setLanguage();
+        if (setLanguage && typeof setLanguage === 'function') setLanguage();
     }
 
     private getUserSettings() {
@@ -67,7 +67,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
     }
 
     private setUserLanguage(language: string) {
-        let data: IUserSettings = { language: ''}
+        let data: IUserSettings = { language: '' }
         const userSettings = localStorage.getItem('userSettings');
         if (userSettings) {
             data = JSON.parse(userSettings);
