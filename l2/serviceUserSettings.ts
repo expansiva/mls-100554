@@ -7,6 +7,11 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 @customElement('service-user-settings-100554')
 export class ServiceUserSettings100554 extends ServiceBase {
 
+    constructor() {
+        super();
+        this.setMessages();
+    }
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
@@ -44,6 +49,13 @@ export class ServiceUserSettings100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
+    }
+
+    private async setMessages() {
+        this.getUserSettings();
+        const key = './_100554_collabMessages' + this.actualLanguage.charAt(0).toUpperCase() + this.actualLanguage.substr(1, this.actualLanguage.length)
+        const { setLanguage } = await import(key);
+        setLanguage();
     }
 
     private getUserSettings() {

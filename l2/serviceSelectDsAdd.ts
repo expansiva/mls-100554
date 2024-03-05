@@ -2,7 +2,7 @@
 
 import { html, css, LitElement, classMap } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
-import { ServiceSelectDs100554 } from './_100554_serviceSelectDs';
+import { ServiceBase } from './_100554_serviceBase';
 
 export const initServiceSelectDsAdd = () =>{
     return true;
@@ -32,7 +32,7 @@ export class ServiceSelectDsAdd100554 extends LitElement {
     @query('#l5_ds_add_input_name')
     inputName: HTMLInputElement | undefined;
 
-    service: ServiceSelectDs100554 | undefined;
+    service: ServiceBase | undefined;
 
     onBtnNext1Click() {
 
@@ -95,7 +95,7 @@ export class ServiceSelectDsAdd100554 extends LitElement {
 
             if (!this.state.copyFrom || !this.state.copyFrom.widgetIOName) return;
             const dsAdded = await mls.l5.ds.addDesignSystem(this.state.project, this.state.name, this.state.copyFrom.widgetIOName);
-            this.service.setLastDsSelected(dsAdded.dsIndex, this.state.project);
+            (this.service as any).setLastDsSelected(dsAdded.dsIndex, this.state.project);
             this.service.loading = true;
             if (this.service.menu.setMenuActive) this.service.menu.setMenuActive('opSelect')
         } catch (err: any) {
