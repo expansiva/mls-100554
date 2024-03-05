@@ -486,6 +486,19 @@ export class WCDToolbox extends CollabLitElement {
 
             height = Math.max(ad3(height, marginTop, marginBottom), ad3(0, paddingTop, paddingBottom));
 
+            const grandFahter = elBase.parentElement && elBase.parentElement.parentElement ? elBase.parentElement.parentElement : undefined;
+
+            if (grandFahter) {
+                const display = window.getComputedStyle(grandFahter).display;
+                if (['flex'].includes(display) && elBase.parentElement ) {
+
+                    const fTop = elBase.parentElement.getClientRects()[0].top;
+                    const bTop = elBase.getClientRects()[0].top;
+                    top = fTop - bTop;
+                    top = top < 0 ? top * -1 : top;
+                }
+            }
+
             if (changePosition) {
                 elChange.style.left = `${(left - 1) < 0 ? 0 : (left - 1)}px`;
                 elChange.style.top = `${top - 1}px`;
