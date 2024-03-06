@@ -44,10 +44,17 @@ export class SimpleGreeting extends LitElement {
     renderItemTree(item: IInfoElCholdren, idx: string) {
 
         const name = convertTagToFileName(item.el.tagName.toLocaleLowerCase());
+        const cls = (item.el as any).renderType === 'editactive' ? 'activeBranch' : '';
         return html`
             <li>
-                <div id="${name + idx}" .info=${item} class="header" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
+                <div id="${name + idx}" .info=${item} class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
                     ${name}
+                    <div class="groupHiddenList" @click="${this.clickGroupHidden}">
+                        <span class="mls-gpbtnslider-item fa fa-undo"></span>
+                        <span class="mls-gpbtnslider-item fa fa-clone"></span>
+                        <span class="mls-gpbtnslider-item fa fa-file-pen"></span>
+                        <span class="mls-gpbtnslider-item fa fa-trash"></span>
+                    </div>
                 </div>
                 <ul>
                     ${repeat(item.children, ((c: IInfoElCholdren, idx: number) => c.el.tagName + idx) as any, ((i: any, idxI: any) => {
@@ -135,6 +142,12 @@ export class SimpleGreeting extends LitElement {
         e.stopPropagation();
         const target = e.target as HTMLElement;
 
+        const active = this.querySelector('.activeBranch') as HTMLElement;
+        if (active && active === target) return;
+        if (active) active.classList.remove('activeBranch');
+
+        target.classList.add('activeBranch');
+
         const father = item.el.closest('*[rendertype="editactive"]');
         if (father) {
 
@@ -143,10 +156,21 @@ export class SimpleGreeting extends LitElement {
             setTimeout(() => {
 
                 const me = this.querySelector('#' + id) as HTMLElement;
-                if (me) me.click();
+                if (me) {
+                    me.click();
+                }
             }, 150);
 
         } else item.el.click();
+
+    }
+
+    private clickGroupHidden(e: MouseEvent) {
+
+        e.stopPropagation();
+        const el = e.target as HTMLElement;
+        if (!el) return;
+        el.classList.toggle('activegpbtnslider');
 
     }
 
@@ -163,6 +187,7 @@ export class SimpleGreeting extends LitElement {
 
         service-fca-tree-100554 ul li {
             position: relative;
+            user-select:none;
 
         }
 
@@ -176,6 +201,13 @@ export class SimpleGreeting extends LitElement {
 
         }
 
+        service-fca-tree-100554 ul li div.activeBranch{
+            border: 1px solid #d4d4d4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         service-fca-tree-100554 ul li:before {
             content: ' ';
             position: absolute;
@@ -185,6 +217,60 @@ export class SimpleGreeting extends LitElement {
             top: 1.2rem;
             left: -16px;
         }
+
+        service-fca-tree-100554 .groupHiddenList {
+            border-radius: 4px;
+            padding: .3rem;
+            transition: all 0.5s;
+            cursor: pointer;
+            display: none; //flex!important;
+            z-index: 9;
+            height: .7rem;
+            
+        }
+
+        service-fca-tree-100554 ul li div.activeBranch .groupHiddenList{
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        service-fca-tree-100554 .groupHiddenList::after {
+            content: ' ';
+            width: 23px;
+            height: 19px;
+            position: absolute;
+            right: -15px;
+            background-image:  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 512'><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d='M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z' fill='rgb(66,65,65,1)'/></svg>");
+            background-repeat:no-repeat;
+            background-position-y: center;
+        }
+
+        service-fca-tree-100554 .groupHiddenList .mls-gpbtnslider-item {
+            display: none;
+            transition: 0.5s;
+            margin-left: 1rem;
+            z-index: 10;
+            font-size: 16px;
+            line-height: normal;
+        }
+
+        service-fca-tree-100554 .groupHiddenList .mls-gpbtnslider-item:hover {
+            color: #1a83ff;
+        }
+        
+
+        service-fca-tree-100554 .groupHiddenList.activegpbtnslider {
+            padding-right: 24px;
+            padding-left: 8px;
+        }
+
+        service-fca-tree-100554 .groupHiddenList.activegpbtnslider .mls-gpbtnslider-item {
+            display: inherit;
+            text-align: center;
+            float: left;
+        }
+        
     `;
 
 }
