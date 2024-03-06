@@ -871,14 +871,15 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         try {
             const internalIndex = internalThemes.indexOf(mls.editor.themeName);
             if (internalIndex < 0) {
-                // load and define theme
-                name2 = 'mytheme';
-                const path = (mls as any)['baseMonaco'] + '../themes/' + mls.editor.themeName + '.json';
-                mls.api.get(path, {}, (data: string) => {
-                    const json = JSON.parse(data);
-                    monaco.editor.defineTheme(name2, json);
-                    monaco.editor.setTheme(name2);
-                });
+                console.log('invalid monaco editor theme');
+                // // load and define theme
+                // name2 = 'mytheme';
+                // const path = (mls as any)['baseMonaco'] + '../themes/' + mls.editor.themeName + '.json';
+                // mls.api.get(path, {}, (data: string) => {
+                //     const json = JSON.parse(data);
+                //     monaco.editor.defineTheme(name2, json);
+                //     monaco.editor.setTheme(name2);
+                // });
             } else {
                 name2 = internalThemes2[internalIndex];
                 monaco.editor.setTheme(name2);
