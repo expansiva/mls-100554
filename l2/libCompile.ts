@@ -118,7 +118,7 @@ async function loadMyNeedsToCompile(
         const mfile = mls.l2.editor.get({ project, shortName: path });
         if (!mfile) throw new Error('not found');
 
-        if (!mfile.compilerResults || !mfile.compilerResults.prodJS) {
+        if (!mfile.compilerResults || !mfile.compilerResults.prodJS || !(mfile.compilerResults as any).tripleSlashMLS) {
 
             if (mfile.compilerResults) mfile.compilerResults.modelNeedCompile = true;
             await mls.l2.editor.getCompilerResultTS(mfile, true);
