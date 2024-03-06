@@ -80,7 +80,7 @@ export class ServiceListFiles extends ServiceBase {
 
         this.mode = 'list';
         if (visible && reinit) {
-            
+
             this.init();
             this.firstTimeVerifyProject();
 
@@ -96,7 +96,7 @@ export class ServiceListFiles extends ServiceBase {
         setTimeout(() => {
             const el = this.shadowRoot?.querySelector('#listUpdateFiles') as HTMLElement;
             if (!el) return;
-            
+
             if (!(window as any).updateFile) {
 
                 (window as any).updateFile = [mls.actual[5].project]
@@ -661,7 +661,27 @@ export class ServiceListFiles extends ServiceBase {
 
             el.innerText = 'updated';
 
-            mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true).then(() => {
+            await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
+
+            const key = Object.keys(mls.stor.files)?.filter((item) => item.indexOf((mls.actual[5].project as number).toString()) >= 0);
+
+            if (key.length > 0) {
+
+                this.fireEvents('projectListChanged', mls.stor.files[key[0]], {}, 500);
+                mls.events.fireFileAction('updatedOnServer', mls.stor.files[key[0]], 'left', undefined, undefined, undefined, undefined, 600);
+
+            }
+
+            this.changeList(500);
+
+            setTimeout(() => {
+
+                if (!this) return;
+                el.innerText = 'update list/ verify';
+
+            }, 50000);
+
+            /*mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true).then(() => {
 
                 const key = Object.keys(mls.stor.files)?.filter((item) => item.indexOf((mls.actual[5].project as number).toString()) >= 0);
                 if (key.length > 0) {
@@ -680,7 +700,7 @@ export class ServiceListFiles extends ServiceBase {
                 if (!this) return;
                 el.innerText = 'update list/ verify';
 
-            }, 50000);
+            }, 50000);*/
 
         } catch (e) {
 
@@ -798,7 +818,7 @@ export class ServiceListFiles extends ServiceBase {
 
         if (res.length > 10) {
 
-            for (let i = res.length - 1; i >= 0; i--){
+            for (let i = res.length - 1; i >= 0; i--) {
                 if (res.length <= 10) break;
                 const key = mls.stor.getKeyToFiles(res[i].project, this.level, res[i].shortName, res[i].folder, res[i].extension);
                 if (mls.stor.files[key] && mls.stor.files[key].status === 'nochange') {
