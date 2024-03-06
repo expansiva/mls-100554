@@ -22,14 +22,13 @@ export function setLanguage() {
   (window as any).messages = defaultMessages;
 }
 
-export const messages = {
-  get data() {
-    return (window as any).messages as typeof defaultMessages;
+const messagesProxy = new Proxy({}, {
+  get: function (target, prop) {
+    return ((window as any).messages || defaultMessages)[prop];
   }
-};
+});
 
-
-// export const messages = (): typeof defaultMessages => { return (window as any).messages; }
+export const messages: typeof defaultMessages = messagesProxy as any;
 
 // Exportamos window.messages, permitindo que ele seja de um tipo flexível.
 //export const messages: typeof defaultMessages = (window as any).messages;

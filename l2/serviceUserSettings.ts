@@ -43,7 +43,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
     }
 
     @property()
-    actualLanguage: string = 'pt'
+    actualLanguage: ILanguage = 'pt'
 
     @query('.select-language')
     selectLanguage: HTMLSelectElement | undefined
@@ -56,34 +56,54 @@ export class ServiceUserSettings100554 extends ServiceBase {
 
     private async setMessages() {
         this.getUserSettings();
-        const key = './_100554_collabMessages' + this.actualLanguage.charAt(0).toUpperCase() + this.actualLanguage.substr(1, this.actualLanguage.length)
+        const defaultLang = this.getUserDefault(); 
+        const lang = this.actualLanguage === 'default' ? defaultLang : this.actualLanguage;
+        const key = './_100554_collabMessages' + lang.charAt(0).toUpperCase() + lang.substring(1, lang.length)
         const { setLanguage } = await import(key);
         if (setLanguage && typeof setLanguage === 'function') setLanguage();
     }
 
     private getUserSettings() {
         const userSettings = localStorage.getItem('userSettings');
-        if (!userSettings) return;
+        if (!userSettings) {
+            this.actualLanguage = 'default';
+            return;
+        }
         const data: IUserSettings = JSON.parse(userSettings);
-        if (!data || !data.language) return;
-        this.actualLanguage = data.language;
+        if (!data || !data.language) {
+            this.actualLanguage = 'default';
+            return;
+        }
+        this.actualLanguage = data.language as ILanguage;
     }
 
-    private setUserLanguage(language: string) {
+    private setUserLanguage(language: ILanguage) {
         let data: IUserSettings = { language: '' }
         const userSettings = localStorage.getItem('userSettings');
-        if (userSettings) {
-            data = JSON.parse(userSettings);
-        }
+        if (userSettings) data = JSON.parse(userSettings);
+        
+        if (language === 'default') this.actualLanguage = this.getUserDefault();
+        else this.actualLanguage = language;
+        
         data.language = language;
-        this.actualLanguage = language;
         localStorage.setItem('userSettings', JSON.stringify(data));
+    }
+
+    private getNavigatorLanguage() {
+        const lg = navigator.language ? navigator.language.split('-')[0] : '';
+        return lg;
+    };
+
+    private getUserDefault(): ILanguage {
+        const navigatorLanguage = this.getNavigatorLanguage();
+        const acceptLanguages = ['en', 'pt'];
+        const defaultLang = acceptLanguages.includes(navigatorLanguage) ? navigatorLanguage : 'en';
+        return defaultLang as ILanguage;
     }
 
     private handleChanceLanguageClick() {
         if (!this.selectLanguage) return;
-        const language = this.selectLanguage.value;
-        console.info(language)
+        const language = this.selectLanguage.value as ILanguage;
         this.setUserLanguage(language);
         location.reload();
     }
@@ -92,11 +112,10 @@ export class ServiceUserSettings100554 extends ServiceBase {
         languageLabel: 'Linguagens',
         alterarLabel: 'Alterar',
     }
-
     private async setMsg() {
         this.msg = {
-            languageLabel: messages.data.languageLabel || this.msg.languageLabel,
-            alterarLabel: messages.data.alterarLabel || this.msg.alterarLabel,
+            languageLabel: messages.languageLabel || this.msg.languageLabel,
+            alterarLabel: messages.alterarLabel || this.msg.alterarLabel,
         }
     }
 
@@ -110,6 +129,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
                 <summary>${this.msg.languageLabel}</summary>
                 <div>
                     <select style="width:200px" .value=${this.actualLanguage} class="select-language">
+                        <option value="default">Default</option>
                         <option value="pt">pt-BR</option>
                         <option value="en">en-US</option>
                     </select>
@@ -121,6 +141,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
     }
 }
 
+type ILanguage = 'pt' | 'en' | 'default'
 interface IUserSettings {
     language: string,
 }
