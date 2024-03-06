@@ -28,7 +28,7 @@ const messagesProxy = new Proxy({}, {
   }
 });
 
-export const messages: typeof defaultMessages = messagesProxy as any;
+export const messages: typeof defaultMessages = messagesProxy as typeof defaultMessages;
 
 // Exportamos window.messages, permitindo que ele seja de um tipo flexível.
 //export const messages: typeof defaultMessages = (window as any).messages;
