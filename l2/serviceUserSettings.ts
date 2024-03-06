@@ -3,6 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { messages } from './_100554_collabMessagesPt'
 
 @customElement('service-user-settings-100554')
 export class ServiceUserSettings100554 extends ServiceBase {
@@ -48,7 +49,9 @@ export class ServiceUserSettings100554 extends ServiceBase {
     selectLanguage: HTMLSelectElement | undefined
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
+        if (visible && reinit) {
+            this.requestUpdate();
+        }
     }
 
     private async setMessages() {
@@ -85,19 +88,36 @@ export class ServiceUserSettings100554 extends ServiceBase {
         location.reload();
     }
 
+    private msg = {
+        languageLabel: 'Linguagens',
+        alterarLabel: 'Alterar',
+    }
+
+    private async setMsg() {
+        this.msg = {
+            languageLabel: messages().languageLabel || this.msg.languageLabel,
+            alterarLabel: messages().alterarLabel || this.msg.alterarLabel,
+        }
+    }
+
     render() {
 
+        this.setMsg();
         this.getUserSettings();
-        return html`<details> 
-            <summary>Linguagens</summary>
-            <div>
-                <select .value=${this.actualLanguage} class="select-language">
-                    <option value="pt">pt-BR</option>
-                    <option value="en">en-US</option>
-                </select>
-                <button @click=${this.handleChanceLanguageClick}>Alterar</button>
-            </div>
-        </details>`;
+        return html`
+        <section>
+            <details> 
+                <summary>${this.msg.languageLabel}</summary>
+                <div>
+                    <select style="width:200px" .value=${this.actualLanguage} class="select-language">
+                        <option value="pt">pt-BR</option>
+                        <option value="en">en-US</option>
+                    </select>
+                    <button style="margin-top:1rem" @click=${this.handleChanceLanguageClick}>${this.msg.alterarLabel}</button>
+                </div>
+            </details>
+        </section>
+        `;
     }
 }
 

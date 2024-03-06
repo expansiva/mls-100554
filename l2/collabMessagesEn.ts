@@ -1,6 +1,8 @@
 /// <mls shortName="collabMessagesEn" project="100554" enhancement="_blank" />
 
 const defaultMessages = {
+  languageLabel: 'Languages',
+  alterarLabel: 'Change',
   formatDate: (date: Date) => formatDate(date),
   formatCurrency: (amount: number) => formatCurrency(amount),
   todayIs: (date: Date) => `Today is ${formatDate(date)}`,
