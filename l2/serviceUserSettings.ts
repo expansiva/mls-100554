@@ -95,8 +95,8 @@ export class ServiceUserSettings100554 extends ServiceBase {
 
     private async setMsg() {
         this.msg = {
-            languageLabel: messages().languageLabel || this.msg.languageLabel,
-            alterarLabel: messages().alterarLabel || this.msg.alterarLabel,
+            languageLabel: messages.data.languageLabel || this.msg.languageLabel,
+            alterarLabel: messages.data.alterarLabel || this.msg.alterarLabel,
         }
     }
 

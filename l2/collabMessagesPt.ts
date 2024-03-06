@@ -22,7 +22,14 @@ export function setLanguage() {
   (window as any).messages = defaultMessages;
 }
 
-export const messages = (): typeof defaultMessages => { return (window as any).messages; }
+export const messages = {
+  get data() {
+    return (window as any).messages as typeof defaultMessages;
+  }
+};
+
+
+// export const messages = (): typeof defaultMessages => { return (window as any).messages; }
 
 // Exportamos window.messages, permitindo que ele seja de um tipo flexível.
 //export const messages: typeof defaultMessages = (window as any).messages;
