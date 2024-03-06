@@ -182,7 +182,9 @@ export class ServiceSource100554 extends ServiceBase {
                 promises.push(this.createModelTS2(storFile, false, false));
             }
         }
+        if (mls.istrace) console.time('creating models');
         await Promise.all(promises);
+        if (mls.istrace) console.timeEnd('creating models');
         if (needCompile) await mls.l2.editor.compileAllProjectIfNeed(project, true);
     }
 
@@ -325,17 +327,19 @@ export class ServiceSource100554 extends ServiceBase {
             this.activeThisService();
             this.closeMenu();
             const storFile = getStorFile();
-            const fileModel = mls.l2.editor.get(storFile); // { project: fileAction.project, shortName: fileAction.shortName });
+            const fileModel = mls.l2.editor.get(storFile);
             if (!fileModel) {
-                await this.readAllProjectTypescriptAndCompile(storFile.project, storFile.shortName);
-                await this.createModelTS2(storFile, true, true);
+                await this.createModelTS2(storFile, true, false);
+                this.showActiveModel();
+                await this.readAllProjectTypescriptAndCompile(storFile.project, storFile.shortName, true).then(async () => {
+                    await this.createOrShowModelHTML(false);
+                });
             } else {
                 mls.l2.editor.editors[this.confE] = fileModel;
-                // if (!fileModel.compilerResults || fileModel.compilerResults.modelNeedCompile) 
                 mls.l2.editor.forceModelUpdate(fileModel.model);
+                await this.createOrShowModelHTML(false);
+                this.showActiveModel();
             }
-            await this.createOrShowModelHTML(false);
-            this.showActiveModel();
             if (storFile && !storFile.inLocalStorage && storFile.isLocalVersionOutdated)
                 storFile.isLocalVersionOutdated = false;
         };
@@ -927,11 +931,15 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
         const haveInfo: boolean | null = info && !!info.content;
-        src = haveInfo ? info?.content : await storFileHTML.getContent();
+        src = haveInfo ? info?.content : "";
+        if (!src) {
+            src = await storFileHTML.getContent();
+            if (!src) console.log('error on getContent, src is null');
+        }
+        if (src instanceof Blob) throw new Error('html file must be string');
+        if (!src) src = "";
         const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src as string).toString(16);
         (model as any)['originalCRC'] = originalCRC;
-
-        if (src instanceof Blob) throw new Error('html file must be string');
 
         if (src) model.setValue(src);
         if (open && this._ed1) this._ed1.setModel(model);
