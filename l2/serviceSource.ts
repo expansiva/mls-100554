@@ -329,7 +329,7 @@ export class ServiceSource100554 extends ServiceBase {
             const storFile = getStorFile();
             const fileModel = mls.l2.editor.get(storFile);
             if (!fileModel) {
-                await this.createModelTS2(storFile, true, false);
+                await this.createModelTS2(storFile, true, true);
                 this.showActiveModel();
                 await this.readAllProjectTypescriptAndCompile(storFile.project, storFile.shortName, true).then(async () => {
                     await this.createOrShowModelHTML(false);
