@@ -532,9 +532,9 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
-    private async sleep(ms: number) {
+    /*private async sleep(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    }*/
 
     private createArrayInfoVersion(array: mls.stor.IFileInfo[]): { name: string, version: string, file: mls.stor.IFileInfo }[] {
 
@@ -582,8 +582,7 @@ export class ServiceSave extends ServiceBase {
 
             if (array.length <= 0) return;
             const ret = await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
-            this.fireEvents(3000);
-            await this.sleep(3000);
+            this.fireEvents(800);
 
 
         } catch (e: any) {
