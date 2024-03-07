@@ -3,7 +3,7 @@
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { initServiceFCATree } from './_100554_serviceFcaTree';
+import { initCollabFCATree } from './_100554_collabFcaTree';
 //teste
 @customElement('service-fca-100554')
 export class ServiceFca100554 extends ServiceBase { 
@@ -15,7 +15,7 @@ export class ServiceFca100554 extends ServiceBase {
 
     constructor() {
         super();
-        initServiceFCATree;
+        initCollabFCATree;
         this.setEvents();
     }
 
@@ -91,7 +91,7 @@ export class ServiceFca100554 extends ServiceBase {
 
     renderNavigation() {
        
-        return html`<service-fca-tree-100554 .myParent=${this}></service-fca-tree-100554>`;
+        return html`<collab-fca-tree-100554 .myParent=${this}></collab-fca-tree-100554>`;
     }
 
     renderProperties() {
