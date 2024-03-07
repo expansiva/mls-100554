@@ -412,14 +412,16 @@ export class ServicePreviewView extends LitElement {
 
     }
 
-    private simulateService(info: IJSONDependence, ifr: HTMLIFrameElement) {
-        if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
+    private async simulateService(info: IJSONDependence, ifr: HTMLIFrameElement) {
 
-        if (info.importsJs.includes('/_100554_serviceBase') && this.file) {
+        if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;    
+        if (this.file && this.mfile) {
 
+            const txt = this.mfile.model.getValue();
+            if (txt.indexOf('extends ServiceBase') === -1) return;
             const tag = convertFileNameToTag(`_${this.file.project}_${this.file.shortName}`);
-
             const instance = ifr.contentDocument.body.querySelector(tag);
+            
             if (instance) {
                 this.addFA(ifr);
 
