@@ -33,11 +33,11 @@ export class CollabFCATree extends LitElement {
         const obj = html`
             <ul>
                 ${repeat(array, ((key: IInfoElCholdren, idx: number) => key.el.tagName + idx) as any, ((item: IInfoElCholdren, index: any) => {
-    
-                        return this.renderItemTree(item, index);
 
-                    }) as any
-                )}
+            return this.renderItemTree(item, index);
+
+        }) as any
+        )}
             </ul><style>${this.myCss}</style>
         `;
 
@@ -51,6 +51,10 @@ export class CollabFCATree extends LitElement {
         const cls = (item.el as any).renderType === 'editactive' ? 'activeBranch' : '';
 
         if (this.idLastClick === name + idx) { // Verifico se preciso forçar um click
+
+            const active = this.querySelector('.activeBranch') as HTMLElement;
+            if (active) active.classList.remove('activeBranch');
+
             this.idLastClick = '';
             item.el.click();
         }
@@ -72,10 +76,10 @@ export class CollabFCATree extends LitElement {
                 <ul>
                     ${repeat(item.children, ((c: IInfoElCholdren, idx: number) => c.el.tagName + idx) as any, ((i: any, idxI: any) => {
 
-                            return this.renderItemTree(i, idx + '_' + idxI);
+            return this.renderItemTree(i, idx + '_' + idxI);
 
-                        }) as any
-                    )}
+        }) as any
+        )}
                 </ul>
             </li>
         `;
@@ -115,7 +119,7 @@ export class CollabFCATree extends LitElement {
 
         const view = this.servicePreview.parentElement.querySelector('service-preview-view-100554') as HTMLElement;
 
-        if (!view.shadowRoot) return ret;
+        if (!view || !view.shadowRoot) return ret;
 
         const iframe = view.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
         if (!iframe) return ret;
