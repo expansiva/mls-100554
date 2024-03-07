@@ -55,10 +55,13 @@ export class CollabFCATree extends LitElement {
             item.el.click();
         }
 
+        let mySymbol = 'fa-cubes'
+        if ((item.el as any).mySymbol) mySymbol = (item.el as any).mySymbol;
+
         return html`
             <li>
                 <div id="${name + idx}" .info=${item} class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
-                    ${name}
+                    <info-item><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${name}</info-item>
                     <div class="groupHiddenList" @click="${this.clickGroupHidden}">
                         <span class="mls-gpbtnslider-item fa fa-undo"></span>
                         <span class="mls-gpbtnslider-item fa fa-clone"></span>
@@ -187,7 +190,7 @@ export class CollabFCATree extends LitElement {
         }
         collab-fca-tree-100554 ul {
             list-style: none;
-            padding: 0px 0rem 0rem 1rem;
+            padding: 0px 0rem 0rem .5rem;
             border-left: 1px solid #d4d4d4;
         }
 
@@ -212,16 +215,18 @@ export class CollabFCATree extends LitElement {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-radius: 5px;
+            background: #f8f8f8;
         }
 
         collab-fca-tree-100554 ul li:before {
             content: ' ';
             position: absolute;
-            width: 15px;
+            width: 7px;
             height: 1px;
             background: #d4d4d4;
             top: 1.2rem;
-            left: -16px;
+            left: -8px;
         }
 
         collab-fca-tree-100554 .groupHiddenList {

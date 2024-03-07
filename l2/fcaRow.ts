@@ -31,6 +31,8 @@ export class FcaCol extends FcaLitElementBase {
 
     // -------------- ABSTRACT ------------------
 
+    public mySymbol = 'fa-server';
+
     public actions: IActionLevels = {'1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': []}
 
     public renderPreview = (param: string): any => {

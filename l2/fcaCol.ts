@@ -33,6 +33,8 @@ export class FcaCol extends FcaLitElementBase {
 
     // -------------- ABSTRACT ------------------
 
+    public mySymbol = 'fa-table-columns';
+
     public actions: IActionLevels = {'1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': []}
 
     public renderPreview = (param: string): any => {

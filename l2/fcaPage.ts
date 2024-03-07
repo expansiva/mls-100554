@@ -31,6 +31,8 @@ export class FcaPage extends FcaLitElementBase {
 
     // -------------- ABSTRACT ------------------
 
+    public mySymbol = 'fa-house';
+
     public actions: IActionLevels = { '1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': [] }
 
     public allowCommand(cmd: string, scope: HTMLElement, target: HTMLElement): IAllowCommand {

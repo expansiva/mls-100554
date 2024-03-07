@@ -35,6 +35,8 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     private lastWidget: string = '';
     // ------------ ABSTRACT ------------------
 
+    abstract mySymbol: string;
+
     abstract actions: IActionLevels;
     abstract setMyActions(level: string): Promise<void>;
 
