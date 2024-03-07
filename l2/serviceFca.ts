@@ -6,7 +6,7 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { initCollabFCATree } from './_100554_collabFcaTree';
 //teste
 @customElement('service-fca-100554')
-export class ServiceFca100554 extends ServiceBase { 
+export class ServiceFca100554 extends ServiceBase {
 
     static styles = css``
 
@@ -54,10 +54,16 @@ export class ServiceFca100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (!visible && !reinit && this.menu.setIconActive) {
+        /*if (!visible && !reinit && this.menu.setIconActive) {
             this.menu.setIconActive('Navigation');
-        }
+        }*/
 
+        if (visible && reinit) {
+
+            if (this.activeTab !== 'Navigation') return;
+            const elTree = this.querySelector('collab-fca-tree-100554');
+            if (elTree && (elTree as any).forceUpdate) (elTree as any).forceUpdate();
+        }
     }
 
     //--------------COMPONENT---------------
@@ -90,7 +96,7 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     renderNavigation() {
-       
+
         return html`<collab-fca-tree-100554 .myParent=${this}></collab-fca-tree-100554>`;
     }
 
@@ -130,14 +136,14 @@ export class ServiceFca100554 extends ServiceBase {
 
     private onWCDEventChange(ev: mls.events.IEvent) {
 
-        if(this.activeTab !== 'Navigation') return;
-       
+        if (this.activeTab !== 'Navigation') return;
+
         const elTree = this.querySelector('collab-fca-tree-100554');
-        if(elTree && (elTree as any).forceUpdate) (elTree as any).forceUpdate();
+        if (elTree && (elTree as any).forceUpdate) (elTree as any).forceUpdate();
 
     }
 
-    
+
 
 }
 

@@ -1,21 +1,21 @@
 /// <mls shortName="wcdToolboxItemActionMove" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js'; 
-import { IActionsToolbox } from './_100554_fcaGlobal'; 
+import { customElement } from 'lit/decorators.js';
+import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
 import { FcaLitElementBase } from './_100554_fcaLitElementBase';
 
 //version 4
-@customElement('wcd-toolbox-item-action-move-100554') 
+@customElement('wcd-toolbox-item-action-move-100554')
 export class WCDToolboxItemActionMove extends LitElement {
- 
-    public myParent: WCDToolbox | undefined;    
+
+    public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
     public elFCA: FcaLitElementBase | undefined;
 
     createRenderRoot() {
         return this;
-    } 
+    }
 
     render() {
 
@@ -121,16 +121,21 @@ export class WCDToolboxItemActionMove extends LitElement {
                     default:
                         '';
                 }
-        
+
                 if (oldParent) oldParent.updateMyInnerHtmlIfNeed(false);
                 if (newParent) newParent.updateMyInnerHtmlIfNeed(false);
                 else {
                     newEl.setAttribute('rendertype', 'edit');
-                    setTimeout(() => {                        
+                    setTimeout(() => {
                         newEl.click();
                     }, 100)
 
                 }
+
+                setTimeout(() => {
+                    if(this.myParent) mls.events.fire((+(this.myParent.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+                }, 500)
+
 
                 clearDrag();
 
