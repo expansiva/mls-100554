@@ -60,7 +60,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
     }
 
     render() {
-
+        
         let objRender;
         switch (this.renderType) {
             case 'preview':
@@ -138,7 +138,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
 
             this.onclick = async (e: MouseEvent) => {
-
+            
                 //When clicking on an "edit" item I return the old "editactive" to "edit" and set the new "editactive"
                 e.stopPropagation();
 
@@ -150,7 +150,7 @@ export abstract class FcaLitElementBase extends CollabLitElement {
 
                 const inGroup = this.closest('*[isfcagroup]') as HTMLElement;
 
-                if (inGroup && inGroup !== this) {
+                if (inGroup && inGroup !== this && inGroup.getAttribute('isfcagroup') === 'true') {
                     inGroup.click();
                     return;
                 }
@@ -281,6 +281,8 @@ export abstract class FcaLitElementBase extends CollabLitElement {
             }
 
         }
+
+        mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
 
     }
 

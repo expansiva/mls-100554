@@ -19,8 +19,16 @@ export class FcaPage extends FcaLitElementBase {
     
     //-------------- COMPONENT ------------------
 
+    firstUpdated(changedProperties: any) {
+
+        super.firstUpdated(changedProperties);
+        this.widget = 'div';
+
+    }
+
     async updated(changedProperties: Map<string, string>) {
 
+        super.updated(changedProperties);
         if (this.publishMode === 'true') {
 
             this.innerHTML = await this.onlyHTML();
@@ -41,15 +49,16 @@ export class FcaPage extends FcaLitElementBase {
 
     public renderPreview = (param: string): any => {
         let code = `${this.myInnerHTML}`;
-        return html`${unsafeHTML(code)}`;
+        return html`<div>${unsafeHTML(code)}</div>`;
     }
 
     public renderEditActive = (param: string): any => {
 
         let code = `${this.myInnerHTML}`;
-        return html`
+        return html`<div>
             ${unsafeHTML(code)}
-            <wcd-toolbox-100554 level="${this.level}" widget="fca-page-100554" .actions=${[]} > </wcd-toolbox-100554>
+            </div>
+            <wcd-toolbox-100554 level="${this.level}" widget="div" .actions=${[]} > </wcd-toolbox-100554>
         `;
 
     }

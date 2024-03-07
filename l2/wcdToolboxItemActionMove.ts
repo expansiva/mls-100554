@@ -1,12 +1,12 @@
 /// <mls shortName="wcdToolboxItemActionMove" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js'; 
 import { IActionsToolbox } from './_100554_fcaGlobal'; 
 import { WCDToolbox } from './_100554_wcdToolbox';
 import { FcaLitElementBase } from './_100554_fcaLitElementBase';
 
 //version 4
-@customElement('wcd-toolbox-item-action-move-100554')
+@customElement('wcd-toolbox-item-action-move-100554') 
 export class WCDToolboxItemActionMove extends LitElement {
  
     public myParent: WCDToolbox | undefined;    

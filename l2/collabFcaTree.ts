@@ -52,11 +52,16 @@ export class CollabFCATree extends LitElement {
 
         if (this.idLastClick === name + idx) { // Verifico se preciso forçar um click
 
-            const active = this.querySelector('.activeBranch') as HTMLElement;
-            if (active) active.classList.remove('activeBranch');
+            setTimeout(() => {
 
-            this.idLastClick = '';
-            item.el.click();
+                const active = this.querySelector('.activeBranch') as HTMLElement;
+                if (active) active.classList.remove('activeBranch');
+
+                this.idLastClick = '';
+                item.el.click();
+
+            }, 200);
+
         }
 
         let mySymbol = 'fa-cubes'
@@ -66,11 +71,11 @@ export class CollabFCATree extends LitElement {
             <li>
                 <div id="${name + idx}" .info=${item} class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
                     <info-item><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${name}</info-item>
-                    <div class="groupHiddenList" @click="${this.clickGroupHidden}">
-                        <span class="mls-gpbtnslider-item fa fa-undo"></span>
-                        <span class="mls-gpbtnslider-item fa fa-clone"></span>
-                        <span class="mls-gpbtnslider-item fa fa-file-pen"></span>
-                        <span class="mls-gpbtnslider-item fa fa-trash"></span>
+                    <div class="groupHiddenList" .info=${item} @click="${this.clickGroupHidden}">
+                        <span class="mls-gpbtnslider-item fa fa-arrow-up"></span>
+                        <span class="mls-gpbtnslider-item fa fa-arrow-down"></span>
+                        <span class="mls-gpbtnslider-item fa classLock" @click="${this.setLock}"></span>
+                        <span class="mls-gpbtnslider-item fa fa-trash" @click="${this.delEl}"></span>
                     </div>
                 </div>
                 <ul>
@@ -160,7 +165,12 @@ export class CollabFCATree extends LitElement {
     private selectItem(e: MouseEvent, item: IInfoElCholdren): void {
 
         e.stopPropagation();
-        const target = e.target as HTMLElement;
+        let target = e.target as HTMLElement;
+        if (target && target.className.indexOf('header') < 0) {
+            target = target.closest('.header') as HTMLElement;
+        }
+
+        if (!target) return;
 
         const active = this.querySelector('.activeBranch') as HTMLElement;
         if (active && active === target) return;
@@ -185,7 +195,65 @@ export class CollabFCATree extends LitElement {
         if (!el) return;
         el.classList.toggle('activegpbtnslider');
 
+        if (!(el as any).info) return;
+
+        let lock = 'fa-lock';
+        const isGroup = (el as any).info.el.getAttribute('isFCAGroup');
+        if (isGroup || isGroup === 'true') {
+            lock = 'fa-lock-open';
+        }
+
+        const group = el.querySelector('.classLock') as HTMLElement;
+        if (group) {
+            group.classList.remove('fa-lock');
+            group.classList.remove('fa-lock-open');
+            group.title = lock === 'fa-lock' ? 'lock' : 'lock open';
+            group.classList.add(lock);
+
+        }
+
     }
+
+    private setLock(e: MouseEvent) {
+
+        e.stopPropagation();
+        const el = e.target as HTMLElement;
+        if (!el) return;
+        const info: IInfoElCholdren = (el.parentElement as any).info;
+        if (!info) return;
+
+        const isGroup = (el.className.indexOf('fa-lock-open') < 0);
+        info.el.setAttribute('isFCAGroup', isGroup.toString());
+
+        let lock = 'fa-lock';
+        if (isGroup) {
+            lock = 'fa-lock-open';
+        }
+
+        el.classList.remove('fa-lock');
+        el.classList.remove('fa-lock-open');
+        el.title = lock === 'fa-lock' ? 'lock' : 'lock open';
+        el.classList.add(lock);
+
+        this.requestUpdate();
+
+    }
+
+    private delEl(e: MouseEvent) {
+
+        e.stopPropagation();
+        const el = e.target as HTMLElement;
+        if (!el) return;
+        const info: IInfoElCholdren = (el.parentElement as any).info;
+        if (!info) return;
+
+        info.el.remove();
+
+        this.requestUpdate();
+
+    }
+
+
 
     private myCss = `
         collab-fca-tree-100554{
