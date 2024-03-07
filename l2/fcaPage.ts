@@ -47,7 +47,10 @@ export class FcaPage extends FcaLitElementBase {
     public renderEditActive = (param: string): any => {
 
         let code = `${this.myInnerHTML}`;
-        return html`${unsafeHTML(code)}`;
+        return html`
+            ${unsafeHTML(code)}
+            <wcd-toolbox-100554 level="${this.level}" widget="fca-page-100554" .actions=${[]} > </wcd-toolbox-100554>
+        `;
 
     }
 
