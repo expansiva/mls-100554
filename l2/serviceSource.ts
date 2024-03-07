@@ -1,5 +1,6 @@
 /// <mls shortName="serviceSource" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
+
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
@@ -17,7 +18,6 @@ export class ServiceSource100554 extends ServiceBase {
 
     @property({ type: String })
     msize = '';
-
     createRenderRoot() {
         return this;
     }
@@ -78,7 +78,6 @@ export class ServiceSource100554 extends ServiceBase {
         onClickIcon: this.onClickIcon,
         onClickTitle: this.onClickTitle
     }
-
 
     public onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         this._onServiceClick(visible, reinit, el)
@@ -871,15 +870,14 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         try {
             const internalIndex = internalThemes.indexOf(mls.editor.themeName);
             if (internalIndex < 0) {
-                console.log('invalid monaco editor theme');
-                // // load and define theme
-                // name2 = 'mytheme';
-                // const path = (mls as any)['baseMonaco'] + '../themes/' + mls.editor.themeName + '.json';
-                // mls.api.get(path, {}, (data: string) => {
-                //     const json = JSON.parse(data);
-                //     monaco.editor.defineTheme(name2, json);
-                //     monaco.editor.setTheme(name2);
-                // });
+                // load and define theme
+                name2 = 'mytheme';
+                const path = (mls as any)['baseMonaco'] + '../themes/' + mls.editor.themeName + '.json';
+                mls.api.get(path, {}, (data: string) => {
+                    const json = JSON.parse(data);
+                    monaco.editor.defineTheme(name2, json);
+                    monaco.editor.setTheme(name2);
+                });
             } else {
                 name2 = internalThemes2[internalIndex];
                 monaco.editor.setTheme(name2);
