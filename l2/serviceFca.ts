@@ -133,7 +133,7 @@ export class ServiceFca100554 extends ServiceBase {
         if(this.activeTab !== 'Navigation') return;
        
         const elTree = this.querySelector('collab-fca-tree-100554');
-        if(elTree && (elTree as any)) (elTree as any).forceUpdate();
+        if(elTree && (elTree as any).forceUpdate) (elTree as any).forceUpdate();
 
     }
 

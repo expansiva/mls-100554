@@ -30,21 +30,31 @@ export class CollabFCATree extends LitElement {
 
     createNavigation(array: IInfoElCholdren[]) {
 
-        return html`
+        const obj = html`
             <ul>
                 ${repeat(array, ((key: IInfoElCholdren, idx: number) => key.el.tagName + idx) as any, ((item: IInfoElCholdren, index: any) => {
+    
+                        return this.renderItemTree(item, index);
 
-            return this.renderItemTree(item, index);
+                    }) as any
+                )}
+            </ul><style>${this.myCss}</style>
+        `;
 
-        }) as any
-        )}
-            </ul><style>${this.myCss}</style>`;
+        return obj;
+
     }
 
     renderItemTree(item: IInfoElCholdren, idx: string) {
 
         const name = convertTagToFileName(item.el.tagName.toLocaleLowerCase());
         const cls = (item.el as any).renderType === 'editactive' ? 'activeBranch' : '';
+
+        if (this.idLastClick === name + idx) { // Verifico se preciso forçar um click
+            this.idLastClick = '';
+            item.el.click();
+        }
+
         return html`
             <li>
                 <div id="${name + idx}" .info=${item} class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
@@ -59,10 +69,10 @@ export class CollabFCATree extends LitElement {
                 <ul>
                     ${repeat(item.children, ((c: IInfoElCholdren, idx: number) => c.el.tagName + idx) as any, ((i: any, idxI: any) => {
 
-            return this.renderItemTree(i, idx + '_' + idxI);
+                            return this.renderItemTree(i, idx + '_' + idxI);
 
-        }) as any
-        )}
+                        }) as any
+                    )}
                 </ul>
             </li>
         `;
@@ -73,6 +83,7 @@ export class CollabFCATree extends LitElement {
 
     public forceUpdate(): void {
         this.requestUpdate();
+
     }
 
     private servicePreview: HTMLElement | undefined;
@@ -133,10 +144,12 @@ export class CollabFCATree extends LitElement {
         Array.from(scope.children).forEach(i => {
             reentrance(ret, i as HTMLElement);
         })
+
         return ret;
 
     }
 
+    private idLastClick: string = '';
     private selectItem(e: MouseEvent, item: IInfoElCholdren): void {
 
         e.stopPropagation();
@@ -151,15 +164,8 @@ export class CollabFCATree extends LitElement {
         const father = item.el.closest('*[rendertype="editactive"]');
         if (father) {
 
-            const id = target.id;
+            this.idLastClick = target.id;
             item.el.click();
-            setTimeout(() => {
-
-                const me = this.querySelector('#' + id) as HTMLElement;
-                if (me) {
-                    me.click();
-                }
-            }, 150);
 
         } else item.el.click();
 
