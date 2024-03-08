@@ -3,41 +3,25 @@
 // typescript new file
 
 export const getDepedencesByHtml = (mfile: mls.l2.editor.IMFile, html: string, withCss: boolean = false): Promise<IJSONDependence> => {
-
     return new Promise<IJSONDependence>(async (resolve, reject) => {
-
         try {
-
             resolve(await getDepedences(mfile, 'byHtml', html, withCss))
-
         } catch (e) {
-
             reject(e);
-
         }
-
     });
-
 }
 
 export const getDepedencesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boolean = false): Promise<IJSONDependence> => {
 
     return new Promise<IJSONDependence>(async (resolve, reject) => {
-
         try {
-
             if (mfile.storFile.extension !== '.ts') throw new Error('Only myfile .ts');
-
             const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
-
             resolve(await getDepedences(mfile, tag, `<${tag}></${tag}>`, withCss))
-
         } catch (e) {
-
             reject(e);
-
         }
-
     });
 
 }
@@ -53,8 +37,14 @@ async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html
     const tags = extrairTagsCustomizadas(html);
 
     const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
-
     if (!tags.includes(tag)) tags.push(tag);
+
+    const tagsInTypescript = getAllWebComponentsInSource(mfile.model.getValue());
+    tagsInTypescript.forEach((tagTs) => {
+        if (!tags.includes(tagTs)) tags.push(tagTs);
+    })
+
+    console.info({tags: tags.join(','), tagsInTypescript})
 
     await loadMyNeedsToCompile(
         tags,
@@ -73,11 +63,9 @@ async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html
         importsMap: myImportsMap,
         importsJs: myImports,
         css: myCss,
-        tokens:myTokens,
+        tokens: myTokens,
         errors: myErrors
     }
-
-
 }
 
 function extrairTagsCustomizadas(html: string): string[] {
@@ -102,7 +90,7 @@ async function loadMyNeedsToCompile(
     myImportsMap: string[],
     myImports: string[],
     myCss: string[],
-    myTokens:string[],
+    myTokens: string[],
     myErrors: { tag: string, error: string }[],
     myModules: any,
     compileCss: boolean) {
@@ -295,10 +283,8 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IM
 
 }
 
-async function getTokens(myTokens:string[],mfile: mls.l2.editor.IMFile) {
-
+async function getTokens(myTokens: string[], mfile: mls.l2.editor.IMFile) {
     try {
-
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = mls.l3.getDSInstance(mfile.project, dsindex);
         if (!ds) return;
@@ -309,40 +295,35 @@ async function getTokens(myTokens:string[],mfile: mls.l2.editor.IMFile) {
         if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
 
     }
-
-
 }
 
-
+function getAllWebComponentsInSource(source: string): string[] {
+    const regex = /<([a-z0-9]+-[a-z0-9-]*)(?=\s|>|\/|$)/g;
+    const matches = source.match(regex) || [];
+    const componentNames = matches.map(tag => tag.slice(1));
+    return [...new Set(componentNames)];
+}
 
 function convertFileNameToTag(widget: string) {
-
     const regex = /_([0-9]+)_?(.*)/;
     const match = widget.match(regex);
-
     if (match) {
         const [, number, rest] = match;
         const convertedSrc = rest.replace(/([A-Z])/g, '-$1').toLowerCase();
         widget = `${convertedSrc}-${number}`;
     }
-
     return widget;
-
 }
 
 function convertTagToFileName(tag: string) {
-
     const regex = /(.+)-(\d+)/;
     const match = tag.match(regex);
-
     if (match) {
         const [, rest, number] = match;
         const convertedSrc = rest.replace(/-(.)/g, (_, letter) => letter.toUpperCase());
         tag = `_${number}_${convertedSrc}`;
     }
-
     return tag;
-
 }
 
 export interface IJSONDependence {
@@ -351,6 +332,6 @@ export interface IJSONDependence {
     importsMap: string[],
     importsJs: string[],
     css: string[],
-    tokens:string[],
+    tokens: string[],
     errors: { tag: string, error: string }[]
 }
