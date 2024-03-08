@@ -145,7 +145,11 @@ export abstract class FcaLitElementBase extends CollabLitElement {
                 if ((e.target as HTMLElement).tagName.startsWith('WCD-')) return;
 
                 const all = document.querySelectorAll('*[renderType="editactive"]');
-                Array.from(all).forEach((i) => i.setAttribute('renderType', 'edit'));
+                Array.from(all).forEach((i) => {
+                    const wcd = i.querySelector('wcd-toolbox-100554') as any;
+                    if (wcd && wcd.beforeRemove) wcd.beforeRemove();
+                    i.setAttribute('renderType', 'edit')
+                });
 
 
                 const inGroup = this.closest('*[isfcagroup]') as HTMLElement;

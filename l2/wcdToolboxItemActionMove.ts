@@ -12,6 +12,7 @@ export class WCDToolboxItemActionMove extends LitElement {
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
     public elFCA: FcaLitElementBase | undefined;
+    private myElements: FcaLitElementBase[] | undefined;
 
     createRenderRoot() {
         return this;
@@ -31,6 +32,16 @@ export class WCDToolboxItemActionMove extends LitElement {
 
     }
 
+    public beforeRemove(): void {
+
+        if (!this.myElements) return;
+        document.body.onmouseup = ()=> {};
+        this.myElements.forEach((i) => {
+            this.changeStateDrop(i);
+        });
+
+    }
+
     private initClick(e: MouseEvent): void {
 
         if (!this.elMain || !this.elFCA || !this.myParent || !document.defaultView) return;
@@ -41,11 +52,11 @@ export class WCDToolboxItemActionMove extends LitElement {
         const scope = myGrandFather.getMyScope();
         if (!scope) return;
 
-        let array = myGrandFather.getFCAComponents(scope);
+        this.myElements = myGrandFather.getFCAComponents(scope);
 
-        array = this.onlyNeedAddTag(array);
+        this.myElements = this.onlyNeedAddTag(this.myElements);
 
-        array.forEach((i) => {
+        this.myElements.forEach((i) => {
             this.changeStateDrag(i, scope, myGrandFather);
         });
 
@@ -71,9 +82,12 @@ export class WCDToolboxItemActionMove extends LitElement {
         }
 
         const clearDrag = () => {
-            array.forEach((i) => {
+
+            if (!this.myElements) return;
+            this.myElements.forEach((i) => {
                 this.changeStateDrop(i);
             });
+
         }
 
         const stopDragging = (e: MouseEvent) => {
@@ -133,7 +147,7 @@ export class WCDToolboxItemActionMove extends LitElement {
                 }
 
                 setTimeout(() => {
-                    if(this.myParent) mls.events.fire((+(this.myParent.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+                    if (this.myParent) mls.events.fire((+(this.myParent.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
                 }, 500)
 
 

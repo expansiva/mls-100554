@@ -85,6 +85,18 @@ export class WCDToolbox extends CollabLitElement {
 
     private wcServiceFCA: ServiceBase | undefined;
 
+    public beforeRemove(): void {
+
+        if (!this.shadowRoot) return;
+
+        const allItens = this.shadowRoot.querySelectorAll('*');
+        allItens.forEach((i: Element) => {
+            if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-aux-background') return;
+            if ((i as any).beforeRemove) (i as any).beforeRemove();
+        });
+        
+    }
+
     public backNavigationScenaryOutdoor(): void {
 
         if (this.level !== '4') return;
