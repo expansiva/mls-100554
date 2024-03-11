@@ -1,6 +1,6 @@
 /// <mls shortName="mlsHistoryList" project="100554" enhancement="_100554_enhancementLit" groupName="internal" />
 
-import { html,  LitElement } from 'lit';
+import { html, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 @customElement('mls-history-list-100554')
@@ -14,6 +14,8 @@ export class SimpleGreeting extends LitElement {
     @property({ type: String, }) extension: string = '.ts';
     @property({ type: Boolean, }) loading: boolean = true;
 
+    private error = '';
+
     private data: IHistory[] = [];
 
     async connectedCallback() {
@@ -23,11 +25,20 @@ export class SimpleGreeting extends LitElement {
     }
 
     async getListHistory() {
-        const key = mls.stor.getKeyToFiles(this.project, this.level, this.shortName, this.folder, this.extension);
-        const storFile = mls.stor.files[key];
-        const historie = await storFile.getHistory();
-        const data = this.createJson(historie as IHistoryRet[]);
-        this.data = data;
+        try {
+            const key = mls.stor.getKeyToFiles(this.project, this.level, this.shortName, this.folder, this.extension);
+            const storFile = mls.stor.files[key];
+            const historie = await storFile.getHistory();
+            const data = this.createJson(historie as IHistoryRet[]);
+            this.data = data;
+        } catch (e:any) {
+            this.error = `
+            <div style="width:80%; padding:20px; border:1px solid #eee; border-left-width:5px; border-radius: 3px; margin:10px auto; border-left-color: #d9534f; background-color: rgba(217, 83, 79, 0.1); ">
+                <strong style="color:#d9534f;">Error</strong>- 
+                ${e}
+            </div>`;
+        }
+
     }
 
     attributeChangedCallback(name: string, oldVal: string, newVal: string) {
@@ -39,7 +50,7 @@ export class SimpleGreeting extends LitElement {
     }
 
     private createJson(gitObj: IHistoryRet[] | null): IHistory[] {
-        if(!gitObj) return []
+        if (!gitObj) return []
         const today: Date = new Date();
         gitObj.forEach((item: IHistoryRet, index: number) => {
             const itemDate: Date = new Date(item.data);
@@ -219,6 +230,11 @@ export class SimpleGreeting extends LitElement {
     }
 
     render() {
+        if (this.error !== '') {
+            const obj = unsafeHTML(this.error);
+            this.error = '';
+            return obj;
+        }
         return html`
       <div>
         ${this.loading
