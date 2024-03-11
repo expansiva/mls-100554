@@ -445,6 +445,14 @@ export class ServiceListFilesAdd100554 extends LitElement {
     private async fireComunication(obj: any) {
         obj.position = this.position;
         mls.actual[this.level].setFullName('_' + obj.project + '_' + obj.shortName);
+
+
+        (mls.actual[this.level as any] as any)[this.position as any] = {
+            project: obj.project,
+            shortName: obj.shortName
+        } as any;
+
+
         await mls.events.fire([+this.level as any], ['FileAction'], JSON.stringify(obj), 0);
     }
 
