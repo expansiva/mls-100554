@@ -225,10 +225,6 @@ export class ServicePlugins extends ServiceBase {
     }
 
     changeScenario(scenario: IScenaries) {
-
-        console.info(this.nav3Service?.getActiveInstance('left'))
-        console.info(this.nav3Service?.getActiveInstance('right'))
-
         this.currentScenario = scenario
     }
 

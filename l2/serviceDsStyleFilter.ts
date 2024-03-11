@@ -28,6 +28,9 @@ export class ServiceDsStyleFilter extends ServiceBase {
 
     private myUpp = false;
 
+    @property()
+    private opened = false;
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
@@ -74,9 +77,8 @@ export class ServiceDsStyleFilter extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean) {
 
         if (visible || reinit) {
-
+            if (this.opened === false) this.opened = true;
             this.fireEventAboutMe();
-
         }
     }
 
@@ -146,7 +148,11 @@ export class ServiceDsStyleFilter extends ServiceBase {
     }
 
     render() {
-        return html`${this.renderFilter()}${this.renderGallery()}`;
+        return html` ${this.opened ?
+            html`${this.renderFilter()}${this.renderGallery()}` :
+            html`Loading...`
+            } 
+        `;
     }
 
     renderFilter() {
@@ -199,13 +205,13 @@ export class ServiceDsStyleFilter extends ServiceBase {
         return html`
             <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; cursor:pointer">
                 ${repeat(this.arrayGallery, ((key: any) => key) as any,
-                    ((css: any, index: any) => {
-                        return html`
-                                <img style="width:60px;${css}" @click="${this.clickGallery}" .gallery=${css} src="http://angrytools.com/css-generator/img/rose.jpg" />
+            ((css: any, index: any) => {
+                return html`
+                                <img style="width:60px;${css}" @click="${this.clickGallery}" .gallery=${css} src="https://angrytools.com/css-generator/img/rose.jpg" />
                             `
-                        ;
-                    }) as any
-                )}
+                    ;
+            }) as any
+        )}
             </div>
         
         `
