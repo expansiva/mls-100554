@@ -94,8 +94,8 @@ export class ServiceListFiles extends ServiceBase {
             return;
         }
         setTimeout(() => {
-            const el = this.shadowRoot?.querySelector('#listUpdateFiles') as HTMLElement;
-            if (!el) return;
+            /*const el = this.shadowRoot?.querySelector('#listUpdateFiles') as HTMLElement;
+            if (!el) return;*/
 
             if (!(window as any).updateFile) {
 
@@ -107,7 +107,26 @@ export class ServiceListFiles extends ServiceBase {
 
             }
 
-            el.click();
+            const keys = Object.keys(mls.stor.files);
+            let info;
+            for (const key of keys) {
+                info = mls.stor.files[key];
+                if (info.project !== mls.actual[5].project) continue;
+                break;
+            }
+
+            /*const params = {} as mls.events.IFileAction;
+
+            params.action = 'updatedOnServer';
+            params.level = 2;
+            params.project = mls.actual[5].project as number;
+            params.position = 'left';
+
+            mls.events.fire([2], ['FileAction'], JSON.stringify(params), 600);*/
+
+            mls.events.fireFileAction('updatedOnServer', info, 'left', undefined, undefined, undefined, undefined, 600);
+
+            //el.click();
 
         }, 5000)
     }
