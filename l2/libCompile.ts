@@ -44,8 +44,6 @@ async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html
         if (!tags.includes(tagTs)) tags.push(tagTs);
     })
 
-    console.info({tags: tags.join(','), tagsInTypescript})
-
     await loadMyNeedsToCompile(
         tags,
         myImportsMap,
