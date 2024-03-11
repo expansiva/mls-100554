@@ -32,6 +32,7 @@ export class ServiceListFiles extends ServiceBase {
         super();
         initServiceListFilesAdd();
         this.setEvents();
+	console.info('novar versao')
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -865,7 +866,7 @@ export class ServiceListFiles extends ServiceBase {
 
         if (action.name.length === 0 || action.name.length > 255) return false;
 
-        const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+        const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~ÂºÂ°""''``Ã¡Ã Ã¢Ã£Ã©Ã¨ÃªÃ­Ã¯Ã³Ã´ÃµÃ¶ÃºÃ§Ã±ÃÃ€Ã‚ÃƒÃ‰ÃˆÃÃÃ“Ã”Ã•Ã–ÃšÃ‡Ã‘]/;
         if (invalidCharacters.test(action.name)) return false;
 
         const key = mls.stor.getKeyToFiles(+action.project, this.level as any, action.name, file.folder, file.extension);
