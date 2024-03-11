@@ -28,7 +28,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (op === 'opMonacoConfig') return this.showConfEditor();
         if (op === 'opMonacoReset') return this.showMonacoReset();
         if (op === 'opHistory') return this.showHistory();
-
+        if (op === 'opView') return this.openRepo();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -62,6 +62,8 @@ export class ServiceSource100554 extends ServiceBase {
             opMonacoConfig: 'Editor - config',
             opMonacoReset: 'Editor - reset',
             opHistory: 'History',
+            opView: 'View on repository',
+
         },
         icons: {
             icTs: 'Typescript;f121',
@@ -101,6 +103,26 @@ export class ServiceSource100554 extends ServiceBase {
     private confE2(positionToolbar: string) { return `l${this.level}_${positionToolbar}`; }
     get confETS() { return this.confE + '_TS'; }
     get confEJS() { return this.confE + '_JS'; }
+
+    private openRepo() {
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const ext = this.menu.lastIcon === 'icTs' ? '.ts' : '.html';
+        const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
+        const file = mls.stor.files[keyToFile];
+        if (!file) {
+            window.collabMessages.add('Invalid File', 'information');
+            throw new Error('invalid file');
+        }
+        const driver = mls.stor.others.getDefaultDriver(project);
+        if (!driver) {
+            window.collabMessages.add('Driver not found', 'information');
+            throw new Error('Driver not found');
+        }
+        let url = '';
+        if ((driver as any).getUrl) url = (driver as any).getUrl(file);
+        window.open(url, '_blank');
+        return true;
+    }
 
     private showHistory() {
         this.showHistorie2();
@@ -403,7 +425,7 @@ export class ServiceSource100554 extends ServiceBase {
         };
 
         const onRename = async (): Promise<void> => {
-            
+
             const storFile = getStorFile();
             const storFileHTML = getStorFileHTML();
 
@@ -493,7 +515,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private closeMenu() {
-        if(this.menu.closeMenu) this.menu.closeMenu()
+        if (this.menu.closeMenu) this.menu.closeMenu()
     }
 
     private async updateModelStatus(model1: mls.l2.editor.IMFile, changed: boolean): Promise<void> {
