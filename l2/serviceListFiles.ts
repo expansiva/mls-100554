@@ -32,7 +32,7 @@ export class ServiceListFiles extends ServiceBase {
         super();
         initServiceListFilesAdd();
         this.setEvents();
-	console.info('4')
+	console.info('5')
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
