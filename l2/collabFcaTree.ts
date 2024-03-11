@@ -69,13 +69,12 @@ export class CollabFCATree extends LitElement {
 
         return html`
             <li>
-                <div id="${name + idx}" .info=${item} class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
+                <div id="${name + idx}" .info=${item} @mouseover="${this.mouseOver}" @mouseleave="${this.mouseLeave}" class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
                     <info-item><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${name}</info-item>
                     <div class="groupHiddenList" .info=${item} @click="${this.clickGroupHidden}">
-                        <span class="mls-gpbtnslider-item fa fa-arrow-up"></span>
-                        <span class="mls-gpbtnslider-item fa fa-arrow-down"></span>
+                        <span class="mls-gpbtnslider-item fa fa-up-down-left-right" title="move" @click="${this.activeMove}"></span>
                         <span class="mls-gpbtnslider-item fa classLock" @click="${this.setLock}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-trash" @click="${this.delEl}"></span>
+                        <span class="mls-gpbtnslider-item fa fa-trash" @click="${this.delEl}" title="remove"></span>
                     </div>
                 </div>
                 <ul>
@@ -178,6 +177,7 @@ export class CollabFCATree extends LitElement {
 
         target.classList.add('activeBranch');
 
+        item.el.style.border = '';
         const father = item.el.closest('*[rendertype="editactive"]');
         if (father) {
 
@@ -197,10 +197,10 @@ export class CollabFCATree extends LitElement {
 
         if (!(el as any).info) return;
 
-        let lock = 'fa-lock';
+        let lock = 'fa-lock-open';
         const isGroup = (el as any).info.el.getAttribute('isFCAGroup');
         if (isGroup || isGroup === 'true') {
-            lock = 'fa-lock-open';
+            lock = 'fa-lock';
         }
 
         const group = el.querySelector('.classLock') as HTMLElement;
@@ -223,11 +223,11 @@ export class CollabFCATree extends LitElement {
         if (!info) return;
 
         const isGroup = (el.className.indexOf('fa-lock-open') < 0);
-        info.el.setAttribute('isFCAGroup', isGroup.toString());
+        info.el.setAttribute('isFCAGroup', (!isGroup).toString());
 
-        let lock = 'fa-lock';
-        if (isGroup) {
-            lock = 'fa-lock-open';
+        let lock = 'fa-lock-open';
+        if (!isGroup) {
+            lock = 'fa-lock';
         }
 
         el.classList.remove('fa-lock');
@@ -253,6 +253,58 @@ export class CollabFCATree extends LitElement {
 
     }
 
+    private activeMove(e: MouseEvent) {
+
+        e.stopPropagation();
+        const el = e.target as HTMLElement;
+        if (!el) return;
+        const info: IInfoElCholdren = (el.parentElement as any).info;
+        if (!info) return;
+
+        const wc = info.el.querySelector('wcd-toolbox-100554') as HTMLElement;
+        if (!wc || !wc.shadowRoot) return;
+
+        const move = wc.shadowRoot.querySelector('wcd-toolbox-item-action-move-100554') as HTMLElement;
+        if (move) move.click();
+        
+
+    }
+
+
+    private mouseOver(e: MouseEvent) {
+
+        e.preventDefault();
+        e.stopPropagation();
+        
+        let el = e.target as any;
+        if (el && el.className.indexOf('header') < 0) {
+            el = el.closest('.header') as HTMLElement;
+        }
+
+        let inOver = el.getAttribute('inOver');
+        if (!inOver) inOver = 'false';
+
+        if (!el || !el.info || inOver === 'true' || el.className.indexOf('activeBranch') >= 0) return;
+        el.info.el.style.border = '1px solid blue';
+
+        
+    }
+
+    private mouseLeave(e: MouseEvent) {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        let el = e.target as any;
+        if (el && el.className.indexOf('header') < 0) {
+            el = el.closest('.header') as HTMLElement;
+        }
+
+        el.removeAttribute('inOver'); 
+        el.info.el.style.border = '';
+
+        
+    }
 
 
     private myCss = `
