@@ -469,7 +469,7 @@ export class ServiceSource100554 extends ServiceBase {
                 });
 
                 console.info(arr);
-
+                await mls.l2.editor.compileAllProjectIfNeed(mls.actual[5].project as number, true, false);
                 for await (const storFile of arr) {
 
                     mls.l2.editor.remove(storFile);
