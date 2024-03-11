@@ -567,7 +567,10 @@ export class ServiceSave extends ServiceBase {
                 //file[0].file.isLocalVersionOutdated = true;
                 //file[0].file.newVersionRefIfOutdated = i.versionRef;
                 file[0].file.versionRef = i.versionRef;
+                file[0].file.isLocalVersionOutdated = false;
+                file[0].file.newVersionRefIfOutdated = undefined;
                 await mls.stor.localStor.setContent(file[0].file, { contentType: 'string', content: null });
+                
             }
 
         });
@@ -582,8 +585,6 @@ export class ServiceSave extends ServiceBase {
 
             if (array.length <= 0) return;
             const ret = await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
-            this.fireEvents(800);
-
 
         } catch (e: any) {
             console.info('Error save verifyVersionBlock:' + e.message);
@@ -639,7 +640,19 @@ export class ServiceSave extends ServiceBase {
         const els = father.querySelectorAll('input[type="checkbox"][onlyStatusFather]:checked');
 
         els.forEach((el: any) => {
-            if (el.instance) ar.push(el.instance);
+            if (el.instance) {
+                ar.push(el.instance);
+                const info = el.instance as mls.stor.IFileInfo
+                if (info.extension === '.ts' && info.status === 'deleted') {
+
+                    const key = mls.stor.getKeyToFiles(info.project, info.level, info.shortName, info.folder, '.html');
+                    const fl = mls.stor.files[key];
+                    if (!fl || fl.status === 'new') return;
+                    fl.status = 'deleted';
+                    ar.push(fl);
+                    
+                }
+            }
         })
 
         return ar;
@@ -652,10 +665,10 @@ export class ServiceSave extends ServiceBase {
 
             let versionBLock = 0;
             const arrSet: mls.stor.IFileInfo[] = [];
-
+        
             ar.forEach((i) => {
 
-                if (i.isLocalVersionOutdated) {
+                if (i.isLocalVersionOutdated && !['new', 'deleted'].includes(i.status)) {
                     versionBLock++;
                     return;
                 }
@@ -670,6 +683,7 @@ export class ServiceSave extends ServiceBase {
             if (arrSet.length > 0) {
                 await mls.stor.setContents(arrSet, msg);
                 await this.uppVersionAfterSave(arrSet);
+                this.fireEvents(800);
             }
 
             if (versionBLock > 0) {
