@@ -30,6 +30,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
         position: 'left',
         tooltip: 'Components',
         visible: true,
+        tags: ['ds_components'],
         widget: '_100554_serviceDsComponentsList',
         level: [3]
     }

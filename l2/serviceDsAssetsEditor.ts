@@ -17,10 +17,11 @@ export class ServiceDsAssetsEditor100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf121',
-        state: 'background',
+        state: 'foreground',
         tooltip: 'Assets Editor',
         visible: false,
         position: "right",
+        tags: ['ds_assets'],
         widget: '_100554_serviceDsAssetsEditor',
         level: [3]
     }

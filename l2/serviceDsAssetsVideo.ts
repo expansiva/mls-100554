@@ -17,10 +17,11 @@ export class ServiceDsAssetsVideo100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf03d',
-        state: 'background',
+        state: 'foreground',
         tooltip: 'Assets Video',
         visible: false,
         position: "right",
+        tags: ['ds_assets'],
         widget: '_100554_serviceDsAssetsVideo',
         level: [3]
     }

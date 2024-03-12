@@ -18,10 +18,11 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf229',
-        state: 'background',
+        state: 'foreground',
         tooltip: 'Assets Overview',
         visible: false,
         position: "right",
+        tags: ['ds_assets'],
         widget: '_100554_serviceDsAssetsOverview',
         level: [3]
     }

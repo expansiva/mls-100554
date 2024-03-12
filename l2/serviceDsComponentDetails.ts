@@ -22,10 +22,11 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf1b3',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'Details Component',
         visible: false,
+        tags: ['ds_components'],
         widget: '_100554_serviceDsComponentDetails',
         level: [3]
     }
