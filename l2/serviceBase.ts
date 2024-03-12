@@ -227,6 +227,7 @@ export interface IService {
     visible: boolean,
     position: ICollabServicePosition,
     level: number[],
+    tags?:string[],
     classname?: ICollabServiceClass,
     isStatic?: boolean,
     customConfiguration?: IServiceCustom

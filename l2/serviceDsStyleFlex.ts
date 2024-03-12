@@ -28,9 +28,10 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf009',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'Flex',
+        tags: ['ds_styles'],
         visible: false,
         widget: '_100554_serviceDsStyleFlex',
         level: [3]

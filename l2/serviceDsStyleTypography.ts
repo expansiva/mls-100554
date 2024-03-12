@@ -32,10 +32,11 @@ export class ServiceDsStyleTypography extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf031',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'Typography',
         visible: false,
+        tags: ['ds_styles'],
         widget: '_100554_serviceDsStyleTypography',
         level: [3]
     }

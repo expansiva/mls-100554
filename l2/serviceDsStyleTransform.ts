@@ -40,11 +40,12 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf2f1',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'Transform',
         visible: false,
         widget: '_100554_serviceDsStyleTransform',
+        tags: ['ds_styles'],
         level: [3]
     }
 

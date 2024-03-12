@@ -26,10 +26,11 @@ export class ServiceDsStyleClippath extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf0c4',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'ClipPath',
         visible: false,
+        tags: ['ds_styles'],
         widget: '_100554_serviceDsStyleClippath',
         level: [3]
     }

@@ -32,10 +32,11 @@ export class ServiceDsStyleColumn extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf0db',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'Column',
         visible: false,
+        tags: ['ds_styles'],
         widget: '_100554_serviceDsStyleColumn',
         level: [3]
     }

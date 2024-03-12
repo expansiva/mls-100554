@@ -32,10 +32,11 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf853',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'Border',
         visible: false,
+        tags: ['ds_styles'],
         widget: '_100554_serviceDsStyleBorder',
         level: [3]
 

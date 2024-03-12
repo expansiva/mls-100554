@@ -45,10 +45,11 @@ export class ServiceDsStyleFilter extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf0b0',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'Filter',
         visible: false,
+        tags: ['ds_styles'],
         widget: '_100554_serviceDsStyleFilter',
         level: [3]
     }

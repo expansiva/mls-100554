@@ -28,11 +28,12 @@ export class ServiceDsStyleSize extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf07e',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'Size',
         visible: false,
         widget: '_100554_serviceDsStyleSize',
+        tags: ['ds_styles'],
         level: [3]
     }
 

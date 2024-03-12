@@ -30,9 +30,10 @@ export class ServiceDsStyleSpacing extends ServiceBase {
 
     public details: IService = {
         icon: '&#xe4ba',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'Spacing',
+        tags: ['ds_styles'],
         visible: false,
         widget: '_100554_serviceDsStyleSpacing',
         level: [3]

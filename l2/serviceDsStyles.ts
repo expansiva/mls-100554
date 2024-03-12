@@ -19,6 +19,7 @@ export class ServiceDsStyles extends ServiceBase {
         visible: true,
         position: "left",
         widget: '_100554_serviceDsStyles',
+        tags: ['ds_styles'],
         level: [3]
     }
 

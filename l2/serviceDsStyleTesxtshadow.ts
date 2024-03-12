@@ -32,10 +32,11 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
 
     public details: IService = {
         icon: '&#x54',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'Text Shadow',
         visible: false,
+        tags: ['ds_styles'],
         widget: '_100554_serviceDsStyleTesxtshadow',
         level: [3]
     }
