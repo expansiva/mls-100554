@@ -66,16 +66,11 @@ export class ServiceDsColors100554 extends ServiceBase {
         });
 
         mls.events.addEventListener([3], ['DSTokenSelected'], (ev) => {
-            if (!this.serviceContent) return;
-            this.serviceContent.setAttribute('mode', 'A');
             this.showNav2Item(true);
         });
 
         mls.events.addEventListener([3], ['DSTokenUnSelected'], (ev) => {
-            if (!this.serviceContent) return;
-            this.serviceContent.setAttribute('mode', 'H');
             this.showNav2Item(false);
-
         });
     }
 
