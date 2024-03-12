@@ -107,7 +107,8 @@ export class ServiceDsStyles extends ServiceBase {
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (visible) {
             this.isComponent = false;
-            this.start1();
+            await this.start1();
+            if(!reinit) this.reinit();
         } else {
             const params2: IEventsSelectedObj = {
                 service: [],
@@ -120,8 +121,8 @@ export class ServiceDsStyles extends ServiceBase {
         if (reinit) this.reinit();
     }
 
-    private start1() {
-        this.createEditor();
+    private async start1() {
+        await this.createEditor();
         const serviceDef = this.isComponent ? this.defaultServices.componentStyle : this.defaultServices.globalStyle;
         const params: IEventsSelectedObj = {
             service: [serviceDef],
@@ -179,8 +180,19 @@ export class ServiceDsStyles extends ServiceBase {
         return true;
     }
 
-    private createEditor(): void {
-        if (!this.c2 || this._ed1) return;
+    private async delay() {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    private async createEditor() {
+        
+        if (this._ed1) return;
+        if (!this.c2) {
+            await this.delay();
+            this.createEditor();
+            return;
+        }
+
         this._ed1 = monaco.editor.create(this.c2, mls.editor.conf['style_config'] as monaco.editor.IEditorOptions);
         (this.c2 as any)['mlsEditor'] = this._ed1;
     }
@@ -928,7 +940,7 @@ export class ServiceDsStyles extends ServiceBase {
             const params = this.getParamsServices();
             mls.events.fire([this.level], ['DSStyleSelected'], JSON.stringify(params), 0);
             this.openService(this.defaultServices.componentStyle, 'right', 3)
-            
+
             return;
         }
 

@@ -119,7 +119,8 @@ export class ServiceSource100554 extends ServiceBase {
             throw new Error('Driver not found');
         }
         let url = '';
-        if ((driver as any).getUrl) url = (driver as any).getUrl(file);
+
+        url = driver.getUrl(file);
         window.open(url, '_blank');
         if (this.menu.closeMenu) this.menu.closeMenu();
         return true;
