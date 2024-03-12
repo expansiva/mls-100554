@@ -15,10 +15,11 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf53f',
-        state: 'background',
+        state: 'foreground',
         tooltip: 'Colors',
         visible: false,
         position: "right",
+        tags: ['ds_tokens'],
         widget: '_100554_serviceDsColors',
         level: [3]
     }

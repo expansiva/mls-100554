@@ -27,6 +27,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
         tooltip: 'Tokens',
         visible: true,
         position: "left",
+        tags: ['ds_tokens'],
         widget: '_100554_serviceDsTokens',
         level: [3]
     }

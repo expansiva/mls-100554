@@ -29,10 +29,11 @@ export class ServiceDsDocView100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf06e',
-        state: 'background',
+        state: 'foreground',
         tooltip: 'Documentation View',
         visible: false,
         position: "right",
+        tags: ['ds_docs'],
         widget: '_100554_serviceDsDocView',
         level: [3]
     }
@@ -73,15 +74,11 @@ export class ServiceDsDocView100554 extends ServiceBase {
         });
 
         mls.events.addEventListener([3], ['DSDocSelected'], (ev) => {
-            if (!this.serviceItemNav) return;
-            this.serviceItemNav.setAttribute('mode', 'A');
             this.showNav2Item(true);
             this.openMe();
         });
 
         mls.events.addEventListener([3], ['DSDocUnSelected'], (ev) => {
-            if (!this.serviceItemNav) return;
-            this.serviceItemNav.setAttribute('mode', 'H');
             this.showNav2Item(false);
         });
     }

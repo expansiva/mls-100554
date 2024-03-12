@@ -12,7 +12,6 @@ export class ServiceDsDocList100554 extends ServiceBase {
         this.setEvents();
     }
 
-
     static styles = css`[[mls_getDefaultDesignSystem]]`;
     
     @property()
@@ -36,6 +35,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
         tooltip: 'Documentation List',
         visible: true,
         position: "left",
+        tags: ['ds_docs'],
         widget: '_100554_serviceDsDocList',
         level: [3]
     }
@@ -66,7 +66,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
 
     async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (visible) mls.events.fire([3], ['DSDocSelected'], 'Doc Selected', 0);
+        if (visible) mls.events.fire([3], ['DSDocSelected'], 'Doc Selected', 1000);
         else mls.events.fire([3], ['DSDocUnSelected'], 'Doc UnSelected', 0);
 
         if (reinit) {
