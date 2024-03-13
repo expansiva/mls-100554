@@ -319,7 +319,6 @@ export class CollabFCATree extends LitElement {
         const dragEnd = (e: MouseEvent, el: HTMLElement) => {
             e.stopPropagation();
             try {
-                console.info('foi')
                 //mls.events.fire(2,'DSStyleChanged','{"emitter":"left"}',500);
 
                 Array.from(listItens).forEach((el: any) => {
