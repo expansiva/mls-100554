@@ -32,7 +32,7 @@ export class ServiceListFiles extends ServiceBase {
         super();
         initServiceListFilesAdd();
         this.setEvents();
-	console.info('6')
+	    console.info('6')
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -338,11 +338,14 @@ export class ServiceListFiles extends ServiceBase {
         let auxVersion = '';
         let auxStorage = '';
         let auxBug = '';
+        let auxHtml = '';
+        const keyHtml = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.html');
 
-        if (file.inLocalStorage || (file as any)['statusHtml']) {
+
+        if (file.inLocalStorage) {
 
             auxStorage = `<span title="in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
-            if ((file as any)['statusHtml']) delete (file as any)['statusHtml'];
+            
         }
 
         if (file.hasError) {
@@ -357,6 +360,10 @@ export class ServiceListFiles extends ServiceBase {
 
         }
 
+        if (mls.stor.files[keyHtml] && mls.stor.files[keyHtml].inLocalStorage) {
+            auxHtml = `<span title="html in localstorage" style="color:orange; height: 14px; width:11px; display: flex; justify-content: center; align-items: center;"><svg title="html in localstorage" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 464c-8.8 0-16-7.2-16-16V64c0-8.8 7.2-16 16-16H224v80c0 17.7 14.3 32 32 32h80V448c0 8.8-7.2 16-16 16H64zM64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V154.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0H64zm97 289c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0L79 303c-9.4 9.4-9.4 24.6 0 33.9l48 48c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-31-31 31-31zM257 255c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l31 31-31 31c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l48-48c9.4-9.4 9.4-24.6 0-33.9l-48-48z"/></svg></span>`
+        }
+
         const style = this.inFilter && inHistory ? 'display:none' : '';
 
         return html`
@@ -369,7 +376,7 @@ export class ServiceListFiles extends ServiceBase {
                         <span class="mls-gpbtnslider-item fa fa-trash" title="${this.myMsg.delete}" @click="${this.clickOptDel}"></span>
                     </div>
                     <span class="${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
-                    <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion}"></div>
+                    <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>
                 </div>
             </li>
         `;
@@ -866,7 +873,7 @@ export class ServiceListFiles extends ServiceBase {
 
         if (action.name.length === 0 || action.name.length > 255) return false;
 
-        const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~¬∫¬∞""''``√°√†√¢√£√©√®√™√≠√Ø√≥√¥√µ√∂√∫√ß√±√Å√Ä√Ç√É√â√à√ç√è√ì√î√ï√ñ√ö√á√ë]/;
+        const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~∫∞""''``·‡‚„ÈËÍÌÔÛÙıˆ˙ÁÒ¡¿¬√…»Õœ”‘’÷⁄«—]/;
         if (invalidCharacters.test(action.name)) return false;
 
         const key = mls.stor.getKeyToFiles(+action.project, this.level as any, action.name, file.folder, file.extension);
