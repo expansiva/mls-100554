@@ -71,6 +71,11 @@ export class CollabFCATree extends LitElement {
             <li>
                 <div id="${name + idx}" .info=${item} @mouseover="${this.mouseOver}" @mouseleave="${this.mouseLeave}" class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
                     <info-item><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${name}</info-item>
+                    <div class="dragDropcontainer">
+                        <span class="dbefore fa fa-arrow-up"></span>
+                        <span class="din fa fa-arrow-turn-down"></span>
+                        <span class="dAfter fa fa-arrow-down"></span>
+                    </div>
                     <div class="groupHiddenList" .info=${item} @click="${this.clickGroupHidden}">
                         <span class="mls-gpbtnslider-item fa fa-up-down-left-right" title="move" @click="${this.activeMove}"></span>
                         <span class="mls-gpbtnslider-item fa classLock" @click="${this.setLock}"></span>
@@ -266,16 +271,177 @@ export class CollabFCATree extends LitElement {
 
         const move = wc.shadowRoot.querySelector('wcd-toolbox-item-action-move-100554') as HTMLElement;
         if (move) move.click();
-        
+
+        setTimeout(() => {
+
+            this.setDragDrop(info.el);
+
+        }, 500);
+
 
     }
 
+    private setDragDrop(active: HTMLElement): void {
+
+        const dragStart = (e: MouseEvent, el: HTMLElement) => {
+            e.stopPropagation();
+            if (!(el as any).info) return;
+            el.style.opacity = '0.4';
+        };
+
+        const dragEnter = (e: MouseEvent, el: HTMLElement) => {
+            e.stopPropagation();
+            const elLast = this.querySelector('.overdragdrop') as HTMLElement;
+            if (elLast) elLast.classList.remove('overdragdrop');
+            el.classList.add('overdragdrop');
+        };
+
+        const dragLeave = (e: MouseEvent, el: HTMLElement) => {
+            e.stopPropagation();
+            //el.classList.remove('overdragdrop');
+        };
+
+        const dragOver = (e: MouseEvent, el: HTMLElement) => {
+            e.stopPropagation();
+            e.preventDefault();
+            (e as any).dataTransfer.dropEffect = 'move';
+            return false;
+        };
+
+        const dragDrop = (e: MouseEvent, el: HTMLElement, mode: HTMLElement) => {
+            e.stopPropagation();
+            if (!(el as any).info) return;
+            mode.click();
+
+            return false;
+        };
+
+        const dragEnd = (e: MouseEvent, el: HTMLElement) => {
+            e.stopPropagation();
+            try {
+                console.info('foi')
+                //mls.events.fire(2,'DSStyleChanged','{"emitter":"left"}',500);
+
+                Array.from(listItens).forEach((el: any) => {
+
+                    el.removeAttribute('draggable');
+                    el.classList.remove('overdragdrop');
+                    el.style.opacity = '';
+                    el.ondragstart = () => { };
+                    el.ondragenter = () => { };
+                    el.ondragover = () => { };
+                    el.ondragleave = () => { };                    
+
+                    const elbefore = el.querySelector('.dbefore') as HTMLElement;
+                    const elafter = el.querySelector('.dAfter') as HTMLElement;
+                    const elinn = el.querySelector('.din') as HTMLElement;
+                    
+                    if (elbefore) {
+                        elbefore.removeAttribute('draggable');
+                        elbefore.ondrop = (e: MouseEvent) => { };
+                    }
+                    if (elafter) {
+                        elafter.removeAttribute('draggable');
+                        elafter.ondrop = (e: MouseEvent) => { };
+                    }
+                    if (elinn) {
+                        elinn.removeAttribute('draggable');
+                        elinn.ondrop = (e: MouseEvent) => { };
+                    }
+
+                    const cont = el.querySelector('.dragDropcontainer') as HTMLElement;
+
+                    if (cont) {
+                        cont.classList.remove('b');
+                        cont.classList.remove('a');
+                        cont.classList.remove('i');
+                    }
+
+                    if (el.info) {
+
+                        const elBase = el.info.el;
+                        if (!elBase) return;
+                        if (elBase.getAttribute('renderType') === 'editactive') return;
+
+                        elBase.style.position = '';
+                        const content = elBase.querySelector(':scope > wcd-dragdrop-aux');
+                        if (!content) return;
+                        content.remove();
+
+                    }
+
+                });
+
+            } catch (e) {
+                this.requestUpdate();
+            }
+
+
+
+        };
+
+        const addEventsDragAndDrop = (el: HTMLElement) => {
+
+            if (!(el as any).info) return;
+
+            const rtp = (el as any).info.el.getAttribute('rendertype');
+            const wcd = (el as any).info.el.querySelector(':scope > wcd-dragdrop-aux');
+
+            if (!wcd && rtp === 'edit') return;
+
+            const before = wcd ? wcd.querySelector('wcd-dragdrop-aux-before') : undefined;
+            const after = wcd ? wcd.querySelector('wcd-dragdrop-aux-after') : undefined;
+            const inn = wcd ? wcd.querySelector('wcd-dragdrop-aux-in') : undefined;
+
+            const elbefore = el.querySelector('.dbefore') as HTMLElement;
+            const elafter = el.querySelector('.dAfter') as HTMLElement;
+            const elinn = el.querySelector('.din') as HTMLElement;
+
+            const cont = el.querySelector('.dragDropcontainer') as HTMLElement;
+            if (cont && before) cont.classList.add('b');
+            if (cont && after) cont.classList.add('a');
+            if (cont && inn) cont.classList.add('i');
+
+            if (active === (el as any).info.el) {
+                el.ondragstart = (e: MouseEvent) => dragStart(e, el);
+            }
+
+            if (active !== (el as any).info.el) {
+                el.ondragenter = (e: MouseEvent) => dragEnter(e, el);
+                el.ondragover = (e: MouseEvent) => dragOver(e, el);
+                el.ondragleave = (e: MouseEvent) => dragLeave(e, el);
+                if (before && elbefore) {
+                    elbefore.setAttribute('draggable', 'true');
+                    elbefore.ondrop = (e: MouseEvent) => dragDrop(e, el, before);
+                }
+                if (after && elafter) {
+                    elafter.setAttribute('draggable', 'true');
+                    elafter.ondrop = (e: MouseEvent) => dragDrop(e, el, after);
+                }
+                if (inn && elinn) {
+                    elinn.setAttribute('draggable', 'true');
+                    elinn.ondrop = (e: MouseEvent) => dragDrop(e, el, inn);
+                }
+            }
+
+            el.ondragend = (e: MouseEvent) => dragEnd(e, el);
+
+        }
+
+        const listItens = this.querySelectorAll('.header');
+
+        Array.from(listItens).forEach((el) => {
+            el.setAttribute('draggable', 'true');
+            addEventsDragAndDrop(el as HTMLElement);
+        });
+
+    }
 
     private mouseOver(e: MouseEvent) {
 
         e.preventDefault();
         e.stopPropagation();
-        
+
         let el = e.target as any;
         if (el && el.className.indexOf('header') < 0) {
             el = el.closest('.header') as HTMLElement;
@@ -287,7 +453,7 @@ export class CollabFCATree extends LitElement {
         if (!el || !el.info || inOver === 'true' || el.className.indexOf('activeBranch') >= 0) return;
         el.info.el.style.border = '1px solid blue';
 
-        
+
     }
 
     private mouseLeave(e: MouseEvent) {
@@ -300,10 +466,10 @@ export class CollabFCATree extends LitElement {
             el = el.closest('.header') as HTMLElement;
         }
 
-        el.removeAttribute('inOver'); 
+        el.removeAttribute('inOver');
         el.info.el.style.border = '';
 
-        
+
     }
 
 
@@ -332,6 +498,41 @@ export class CollabFCATree extends LitElement {
         collab-fca-tree-100554 ul li .header:hover {
             border: 1px solid #d4d4d4;
 
+        }
+
+        collab-fca-tree-100554 ul li .header .dragDropcontainer {
+            display:none;
+            gap:0.5rem;
+        }
+
+        collab-fca-tree-100554 ul li .header.overdragdrop {
+            display: flex!important;
+            justify-content: space-between;
+        }
+
+        collab-fca-tree-100554 ul li .header.overdragdrop .dragDropcontainer {
+            display:flex;
+            gap:0.5rem;
+        }
+
+        collab-fca-tree-100554 ul li .header .dragDropcontainer span {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            width:20px;
+            heigth:20px;
+        }
+
+        collab-fca-tree-100554 ul li .header .dragDropcontainer.b .dbefore {
+            display: flex!important;
+        }
+
+        collab-fca-tree-100554 ul li .header .dragDropcontainer.i .din {
+            display: flex!important;
+        }
+
+        collab-fca-tree-100554 ul li .header .dragDropcontainer.a .dAfter {
+            display: flex!important;
         }
 
         collab-fca-tree-100554 ul li div.activeBranch{

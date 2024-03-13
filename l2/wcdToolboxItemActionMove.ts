@@ -35,14 +35,143 @@ export class WCDToolboxItemActionMove extends LitElement {
     public beforeRemove(): void {
 
         if (!this.myElements) return;
-        document.body.onmouseup = ()=> {};
+        document.body.onmouseup = () => { };
         this.myElements.forEach((i) => {
             this.changeStateDrop(i);
         });
 
     }
 
+    private clearDrag(): void {
+
+        if (!this.myElements) return;
+        this.myElements.forEach((i) => {
+            this.changeStateDrop(i);
+        });
+
+    }
+
+    private stopDragging(e: MouseEvent): void {
+
+        try {
+            e.stopPropagation();
+            if (!this.myParent || !this.elFCA) return;
+
+            const myGrandFather = this.myParent.parentElement as FcaLitElementBase;
+
+            document.body.style.cursor = '';
+
+            const aux = this.getAux(e.target as HTMLElement);
+            if (!aux || !(aux as any).elBase) {
+                this.clearDrag();
+                return;
+            }
+
+            const elBase = (aux as any).elBase;
+
+            const oldParent = myGrandFather.getMyParentFCA(this.elFCA);
+            const newParent = myGrandFather.getMyParentFCA(elBase);
+
+            let father = elBase.parentElement as HTMLElement;
+            father = father ? father : document.body as HTMLElement
+
+            const move = aux.tagName.toLocaleLowerCase();
+
+            const newEl: any = this.elFCA.cloneNode(true);
+            newEl.myInnerHTML = this.elFCA.myInnerHTML;
+
+            switch (move) {
+                case 'wcd-dragdrop-aux-before':
+                    father.insertBefore(newEl, elBase);
+                    this.elFCA.remove();
+                    break;
+                case 'wcd-dragdrop-aux-after':
+                    father.insertBefore(newEl, elBase.nextSibling);
+                    this.elFCA.remove();
+                    break;
+                case 'wcd-dragdrop-aux-in':
+                    const elIn = elBase.querySelector(elBase.widget);
+                    if (elIn) elIn.appendChild(this.elFCA);
+                    break;
+                default:
+                    '';
+            }
+
+            if (oldParent) oldParent.updateMyInnerHtmlIfNeed(false);
+            if (newParent) newParent.updateMyInnerHtmlIfNeed(false);
+            else {
+                newEl.setAttribute('rendertype', 'edit');
+                setTimeout(() => {
+                    newEl.click();
+                }, 100)
+
+            }
+
+            setTimeout(() => {
+                if (this.myParent) mls.events.fire((+(this.myParent.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+            }, 500)
+
+
+            this.clearDrag();
+
+
+        } catch (err) {
+
+            this.clearDrag();
+        }
+
+    }
+
+    private getAux(el: HTMLElement): HTMLElement | undefined {
+
+        if (el.tagName.toLocaleLowerCase().startsWith('wcd-dragdrop-aux-')) {
+            return el;
+        }
+
+        const parent = el.parentElement;
+        if (!parent) return;
+
+        const tag = parent.tagName.toLowerCase();
+
+        if (tag.startsWith('wcd-dragdrop-aux-')) {
+
+            return parent;
+
+        }
+
+        return this.getAux(parent);
+    }
+
     private initClick(e: MouseEvent): void {
+
+        if (!this.elMain || !this.elFCA || !this.myParent || !document.defaultView) return;
+
+        //WCD's father will always be an FCA
+        const myGrandFather = this.myParent.parentElement as FcaLitElementBase;
+
+        const scope = myGrandFather.getMyScope();
+        if (!scope) return;
+
+        this.myElements = myGrandFather.getFCAComponents(scope);
+
+        this.myElements = this.onlyNeedAddTag(this.myElements);
+
+        this.myElements.forEach((i) => {
+            this.changeStateDrag(i, scope, myGrandFather);
+        });
+
+        if (!this.myParent.shadowRoot) return;
+        Array.from(this.myParent.shadowRoot.children).forEach((i) => {
+
+            const tag = i.tagName.toLocaleLowerCase();
+            if (tag !== 'wcd-toolbox-item-action-move-100554') i.remove();
+
+        })
+
+
+    }
+
+    /*private initClick(e: MouseEvent): void {
 
         if (!this.elMain || !this.elFCA || !this.myParent || !document.defaultView) return;
 
@@ -172,7 +301,7 @@ export class WCDToolboxItemActionMove extends LitElement {
         })
 
 
-    }
+    }*/
 
     private onlyNeedAddTag(array: FcaLitElementBase[]): FcaLitElementBase[] {
 
@@ -220,6 +349,10 @@ export class WCDToolboxItemActionMove extends LitElement {
         const before = document.createElement('wcd-dragdrop-aux-before');
         const after = document.createElement('wcd-dragdrop-aux-after');
         const inn = document.createElement('wcd-dragdrop-aux-in');
+
+        before.onclick = (e: MouseEvent) => this.stopDragging(e);
+        after.onclick = (e: MouseEvent) => this.stopDragging(e);
+        inn.onclick = (e: MouseEvent) => this.stopDragging(e);
 
         (before as any).elBase = elBase;
         (after as any).elBase = elBase;
