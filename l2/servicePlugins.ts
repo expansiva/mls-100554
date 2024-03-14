@@ -40,7 +40,7 @@ export class ServicePlugins extends ServiceBase {
     public menu: IMenu = {
         title: 'Plugins',
         actions: {
-            opPlugins: 'Plugins',
+            
         },
         icons: {},
         actionDefault: 'opPlugins', // call after close icon clicked
