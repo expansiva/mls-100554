@@ -47,7 +47,6 @@ export class ServiceDsDocView100554 extends ServiceBase {
     public menu: IMenu = {
         title: 'View',
         actions: {
-            opView: 'View',
         },
         icons: {},
         actionDefault: 'opView', // call after close icon clicked

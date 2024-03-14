@@ -37,7 +37,6 @@ export class ServiceDsAssets100554 extends ServiceBase {
     public menu: IMenu = {
         title: 'Assets',
         actions: {
-            opHelper: 'Assets',
         },
         icons: {},
         actionDefault: 'opHelper', // call after close icon clicked

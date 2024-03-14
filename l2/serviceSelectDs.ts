@@ -37,7 +37,6 @@ export class ServiceSelectDs100554 extends ServiceBase {
     public menu: IMenu = {
         title: 'Select Design System',
         actions: {
-            opSelect: 'Select',
             opAdd: 'Add',
         },
         icons: {},
