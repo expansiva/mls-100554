@@ -26,6 +26,21 @@ export const getDepedencesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boole
 
 }
 
+async function getTagsInTypescript(mfile: mls.l2.editor.IMFile, tags: string[]): Promise<string[]> {
+    const tagsInTypescript = getAllWebComponentsInSource(mfile.model.getValue());
+    for (const tagTs of tagsInTypescript) {
+        if (!tags.includes(tagTs)) {
+            const fileName = convertTagToFileName(tagTs);
+            const mfile = mls.l2.editor.mfiles[fileName];
+            if (mfile) {
+                await getTagsInTypescript(mfile, tags);
+                tags.push(tagTs);
+            }
+        }
+    }
+    return tags;
+}
+
 async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html: string, withCss: boolean = false) {
 
     const myImportsMap: string[] = [];
@@ -34,15 +49,17 @@ async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html
     let myTokens: string[] = [];
     const myErrors: { tag: string, error: string }[] = [];
     const myModules = {};
-    const tags = extrairTagsCustomizadas(html);
+    let tags = extrairTagsCustomizadas(html);
 
     const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
     if (!tags.includes(tag)) tags.push(tag);
 
-    const tagsInTypescript = getAllWebComponentsInSource(mfile.model.getValue());
-    tagsInTypescript.forEach((tagTs) => {
-        if (!tags.includes(tagTs)) tags.push(tagTs);
-    })
+    // const tagsInTypescript = getAllWebComponentsInSource(mfile.model.getValue());
+    // tagsInTypescript.forEach((tagTs) => {
+    //     if (!tags.includes(tagTs)) tags.push(tagTs);
+    // })
+
+    tags = await getTagsInTypescript(mfile, tags)
 
     await loadMyNeedsToCompile(
         tags,

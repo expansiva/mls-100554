@@ -427,11 +427,6 @@ export class ServicePreviewView extends LitElement {
         ifr.contentWindow.customElements.whenDefined('collab-tooltip').then(() => {
             if (!ifr.contentDocument) return;
             const collaTbTooltip = document.createElement('collab-tooltip');
-            console.info({
-                ifr,
-                doc: ifr.contentDocument,
-                body: ifr.contentDocument.body
-            })
             ifr.contentDocument.body.appendChild(collaTbTooltip);
         });
     }
