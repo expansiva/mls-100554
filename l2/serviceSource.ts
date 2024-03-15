@@ -365,7 +365,16 @@ export class ServiceSource100554 extends ServiceBase {
             }
             if (storFile && !storFile.inLocalStorage && storFile.isLocalVersionOutdated)
                 storFile.isLocalVersionOutdated = false;
+
+            if (!this._ed1) return;
+            const activeModel = mls.l2.editor.get(storFile);
+
+
+            if ((activeModel as any)[`${this.position}_scrollLeft`]) this._ed1.setScrollLeft((activeModel as any)[`${this.position}_scrollLeft`]);
+            if ((activeModel as any)[`${this.position}_scrollTop`]) this._ed1.setScrollTop((activeModel as any)[`${this.position}_scrollTop`]);
+
         };
+
 
         const onDelete = async (): Promise<void> => {
             const storFile = getStorFile();
@@ -628,6 +637,16 @@ export class ServiceSource100554 extends ServiceBase {
                 if (this.menu.lastIcon === 'icHTML') return;
                 mls.editor.setActiveInstance(this.level, this.position);
             });
+
+            this._ed1.onDidScrollChange((e) => {
+                if (!this._ed1) return;
+                const activeModel = mls.l2.editor.editors[this.confE];
+                if (!activeModel) return;
+                if (e.scrollHeightChanged) return;
+                if (e.scrollTopChanged) (activeModel as any)[`${this.position}_scrollTop`] = e.scrollTop;
+                if (e.scrollLeftChanged) (activeModel as any)[`${this.position}scrollLeft`] = e.scrollLeft;
+
+            })
         };
 
         if (!this.c2) return;
