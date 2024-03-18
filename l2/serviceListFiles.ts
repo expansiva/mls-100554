@@ -452,7 +452,7 @@ export class ServiceListFiles extends ServiceBase {
         li.appendChild(elContentAux);
         elContentAux.style.display = '';
         btnActCloneRename.onclick = async (e2: MouseEvent) => {
-
+    
             try {
 
                 e2.stopPropagation();
@@ -461,7 +461,7 @@ export class ServiceListFiles extends ServiceBase {
 
                 this.validInputsAux(myfile, { mode: mode, project: iptProj.value, name: iptName.value });
 
-                this.fireEvents(mode, myfile, { project: +iptProj, shortName: iptName.value });
+                this.fireEvents(mode, myfile, { project: +iptProj.value, shortName: iptName.value });
 
             } catch (er: any) {
 
