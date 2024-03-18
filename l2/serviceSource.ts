@@ -86,7 +86,10 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-        if (!visible) return;
+        if (!visible) {
+            this.saveViewState();
+            return;
+        }
         await this.initMonaco();
         if (this.menu.setIconActive) this.menu.setIconActive('icTs');
         this.c2?.setAttribute('msize', this.msize);
@@ -103,6 +106,21 @@ export class ServiceSource100554 extends ServiceBase {
     private confE2(positionToolbar: string) { return `l${this.level}_${positionToolbar}`; }
     get confETS() { return this.confE + '_TS'; }
     get confEJS() { return this.confE + '_JS'; }
+
+    private saveViewState() {
+        if (!this._ed1) return;
+        const activeModel = mls.l2.editor.editors[this.confE];
+        if (!activeModel) return;
+        (activeModel as any)[`${this.position}_viewState`] = this._ed1.saveViewState();
+    }
+
+    private restaureViewState() {
+        if (!this._ed1) return;
+        const activeModel = mls.l2.editor.editors[this.confE];
+        if (!activeModel) return;
+        const viewState = (activeModel as any)[`${this.position}_viewState`];
+        if (viewState) this._ed1.restoreViewState(viewState);
+    }
 
     private openRepo() {
         const { shortName, project } = mls.l2.editor.editors[this.confE];
@@ -367,12 +385,8 @@ export class ServiceSource100554 extends ServiceBase {
                 storFile.isLocalVersionOutdated = false;
 
             if (!this._ed1) return;
-            const activeModel = mls.l2.editor.get(storFile);
-
-
-            if ((activeModel as any)[`${this.position}_scrollLeft`]) this._ed1.setScrollLeft((activeModel as any)[`${this.position}_scrollLeft`]);
-            if ((activeModel as any)[`${this.position}_scrollTop`]) this._ed1.setScrollTop((activeModel as any)[`${this.position}_scrollTop`]);
-
+            this.restaureViewState();
+            
         };
 
 
@@ -637,16 +651,6 @@ export class ServiceSource100554 extends ServiceBase {
                 if (this.menu.lastIcon === 'icHTML') return;
                 mls.editor.setActiveInstance(this.level, this.position);
             });
-
-            this._ed1.onDidScrollChange((e) => {
-                if (!this._ed1) return;
-                const activeModel = mls.l2.editor.editors[this.confE];
-                if (!activeModel) return;
-                if (e.scrollHeightChanged) return;
-                if (e.scrollTopChanged) (activeModel as any)[`${this.position}_scrollTop`] = e.scrollTop;
-                if (e.scrollLeftChanged) (activeModel as any)[`${this.position}scrollLeft`] = e.scrollLeft;
-
-            })
         };
 
         if (!this.c2) return;
