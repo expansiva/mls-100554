@@ -1,6 +1,6 @@
 /// <mls shortName="serviceBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { LitElement } from 'lit';
+import { LitElement, adoptStyles } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('service-base-100554')
@@ -227,7 +227,7 @@ export interface IService {
     visible: boolean,
     position: ICollabServicePosition,
     level: number[],
-    tags?:string[],
+    tags?: string[],
     classname?: ICollabServiceClass,
     isStatic?: boolean,
     customConfiguration?: IServiceCustom

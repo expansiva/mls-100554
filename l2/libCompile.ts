@@ -2,28 +2,26 @@
 
 // typescript new file
 
-export const getDepedencesByHtml = (mfile: mls.l2.editor.IMFile, html: string, withCss: boolean = false): Promise<IJSONDependence> => {
+export const getDependenciesByHtml = (mfile: mls.l2.editor.IMFile, html: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
         try {
-            resolve(await getDepedences(mfile, 'byHtml', html, withCss))
+            resolve(await getDependencies(mfile, 'byHtml', html, withCss))
         } catch (e) {
             reject(e);
         }
     });
 }
 
-export const getDepedencesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boolean = false): Promise<IJSONDependence> => {
-
+export const getDependenciesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
         try {
             if (mfile.storFile.extension !== '.ts') throw new Error('Only myfile .ts');
             const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
-            resolve(await getDepedences(mfile, tag, `<${tag}></${tag}>`, withCss))
+            resolve(await getDependencies(mfile, tag, `<${tag}></${tag}>`, withCss))
         } catch (e) {
             reject(e);
         }
     });
-
 }
 
 async function getTagsInTypescript(mfile: mls.l2.editor.IMFile, tags: string[]): Promise<string[]> {
@@ -41,7 +39,7 @@ async function getTagsInTypescript(mfile: mls.l2.editor.IMFile, tags: string[]):
     return tags;
 }
 
-async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html: string, withCss: boolean = false) {
+async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, html: string, withCss: boolean = false) {
 
     const myImportsMap: string[] = [];
     const myImports: string[] = [];
@@ -53,11 +51,6 @@ async function getDepedences(mfile: mls.l2.editor.IMFile, filename: string, html
 
     const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
     if (!tags.includes(tag)) tags.push(tag);
-
-    // const tagsInTypescript = getAllWebComponentsInSource(mfile.model.getValue());
-    // tagsInTypescript.forEach((tagTs) => {
-    //     if (!tags.includes(tagTs)) tags.push(tagTs);
-    // })
 
     tags = await getTagsInTypescript(mfile, tags)
 
@@ -148,7 +141,7 @@ async function loadMyNeedsToCompile(
         if (compileCss) {
             await getCss(myCss, name, mfile);
         }
-        await getTokens(myTokens, mfile)
+        await getTokens(myTokens, mfile);
 
 
     } catch (e: any) {

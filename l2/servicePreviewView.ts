@@ -2,7 +2,7 @@
 
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDepedencesByHtml, IJSONDependence } from './_100554_libCompile';
+import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
 
 export const initServicePreviewView = '';
@@ -21,6 +21,8 @@ export class ServicePreviewView extends LitElement {
 
     @property() level: string = '';
 
+    @property() stylechanged: string = '';
+
     @property() error: string = '';
 
     @property() lastCompiledUrl: string = '';
@@ -31,6 +33,14 @@ export class ServicePreviewView extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
+    }
+
+    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
+        if (name === 'stylechanged') {
+            if (newVal === 'true') this.addStyles();
+            return;
+        }
+        super.attributeChangedCallback(name, oldVal, newVal);
     }
 
     render() {
@@ -233,13 +243,36 @@ export class ServicePreviewView extends LitElement {
         }
 
         for (const i of el.children) {
-
             this.changeLevelFca(i as HTMLElement);
-
         }
+    }
+
+    private async addStyles() {
+        if (!this.mfile) return;
+        let txt = await this.getFileContent();
+        const ret = await getDependenciesByHtml(this.mfile, txt, true);
+        const iframe = this.shadowRoot?.querySelector('iframe');
+        if (!iframe) return;
+        this.mountCSS(ret, iframe);
+        this.mountTokens(ret, iframe);
+        const tag = convertFileNameToTag(`_${this.mfile.project}_${this.mfile.shortName}`);
+        const el = iframe.contentDocument?.body.querySelector(tag);
+        if (!el) return;
+        const css = ret.css.join(' \n');
+        const enhacement = await this.getEnhacement();
+        if (!enhacement) return;
+        (enhacement as any).setStylesProcessed(css, el, tag);
+        // (el as any).setStylesProcessed(css, el, tag);
 
     }
 
+    private async getEnhacement() {
+        if (!this.mfile) return;
+        const enhacementName = (this.mfile.compilerResults as any).tripleSlashMLS.variables.enhancement;
+        if (!enhacementName) throw new Error('enhacementName not valid');
+        const mModule = await mls.l2.enhancement.getEnhancementInstance(this.mfile);
+        return mModule;
+    }
     private load(): void {
         if (!this.shadowRoot) return;
         const iframe = this.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
@@ -247,29 +280,20 @@ export class ServicePreviewView extends LitElement {
     }
 
     private async init(iframe: HTMLIFrameElement) {
-
         try {
-
             this.setMyFile();
             await this.setHTml(iframe);
             iframe.style.display = '';
             this.showLoader(false);
-
         } catch (e: any) {
-
             this.error = e.message;
             this.showLoader(false);
-
         }
-
-
     }
 
     private setMyFile(): void {
 
         if (!this.page || this.page === '') throw new Error(this.myMsg.pageNotDefined);
-
-
         mls.actual[0].setFullName(this.page);
         const info = mls.actual[0];
 
@@ -288,28 +312,16 @@ export class ServicePreviewView extends LitElement {
         );
 
         if (!mls.stor.files[key]) throw new Error(this.myMsg.notFoundStorfile + ': ' + key);
-
         if (!mls.l2.editor.mfiles[mkey]) throw new Error(this.myMsg.notFoundStorfile + ' mfile: ' + mkey);
-
         this.file = mls.stor.files[key];
-
         this.mfile = mls.l2.editor.mfiles[mkey];
-
-
     }
 
     private lastHTML: string = '';
     private async setHTml(iframe: HTMLIFrameElement) {
 
         if (!iframe.contentDocument || !this.mfile) return;
-
-        let txt = '<h3>Configure your html by editor option!</h3>';
-
-        if (this.file && this.file.getValueInfo)
-            txt = (await this.file.getValueInfo()).content as string;
-
-        if (this.file && txt === null)
-            txt = await this.file.getContent() as string;
+        let txt = await this.getFileContent();
 
         if (this.lastHTML === txt) {
             const h = this.lastCompiledUrl;
@@ -322,7 +334,7 @@ export class ServicePreviewView extends LitElement {
         iframe.contentDocument.body.style.paddingTop = '10px';
         (iframe.contentDocument.body as any)['service'] = this.father;
 
-        const ret = await getDepedencesByHtml(this.mfile, txt, true);
+        const ret = await getDependenciesByHtml(this.mfile, txt, true);
 
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
@@ -331,23 +343,31 @@ export class ServicePreviewView extends LitElement {
 
     }
 
+    private async getFileContent(): Promise<string> {
+        let txt = '<h3>Configure your html by editor option!</h3>';
+
+        if (this.file && this.file.getValueInfo)
+            txt = (await this.file.getValueInfo()).content as string;
+
+        if (this.file && txt === null)
+            txt = await this.file.getContent() as string;
+
+        return txt;
+
+    }
+
     private mountJSImporMap(info: IJSONDependence, ifr: HTMLIFrameElement): void {
 
         try {
-
             if (info.importsMap.length <= 0 || !ifr.contentDocument) return;
-
             const js = '{"imports": { ' + info.importsMap.join(',\n') + '} }';
             const script = document.createElement('script');
             script.type = 'importmap';
             script.textContent = js;
             ifr.contentDocument.head.appendChild(script);
-
         } catch (e: any) {
-
             console.info('Error mountJSImporMap: ' + e.message);
             return;
-
         }
 
     }
@@ -460,14 +480,30 @@ export class ServicePreviewView extends LitElement {
         ifr.contentDocument.head.appendChild(styleFA);
     }
 
+    private removeOlderStyle(ifr: HTMLIFrameElement) {
+        const id = this.getIdStyle();
+        if (!ifr.contentDocument || !id) return;
+        const st = ifr.contentDocument.body.querySelectorAll(`#${id}`);
+        st.forEach((s) => s.remove());
+    }
+
+    private removeOlderTokens(ifr: HTMLIFrameElement) {
+        const id = this.getIdTokens();
+        if (!ifr.contentDocument || !id) return;
+        const st = ifr.contentDocument.body.querySelectorAll(`#${id}`);
+        st.forEach((s) => s.remove());
+    }
+
     private mountCSS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
         try {
             if (!ifr.contentDocument) return;
+            this.removeOlderStyle(ifr);
             let cls = '';
             if (this.mode === 'm') cls = this.scrollMobile;
             const css = info.css.join(' \n');
             const style = document.createElement('style');
             style.textContent = css + ' \n' + cls;
+            style.id = this.getIdStyle();
             ifr.contentDocument.body.className = 'scroll-custom';
             ifr.contentDocument.body.style.height = 'calc(100vh - 40px)';
             ifr.contentDocument.body.style.width = '98%';
@@ -477,13 +513,24 @@ export class ServicePreviewView extends LitElement {
         }
     }
 
+    private getIdStyle() {
+        if (!this.mfile) return '';
+        return '_' + this.mfile.project + '_' + this.mfile.shortName;
+    }
+
+    private getIdTokens() {
+        if (!this.mfile) return 'ds_tokens';
+        return '_' + this.mfile.project + '_ds_tokens';
+    }
 
     private mountTokens(info: IJSONDependence, ifr: HTMLIFrameElement): void {
         try {
             if (!ifr.contentDocument) return;
+            this.removeOlderTokens(ifr);
             const css = info.tokens[0];
             const style = document.createElement('style');
             style.textContent = css;
+            style.id = this.getIdTokens();
             ifr.contentDocument.body.appendChild(style);
 
         } catch (e: any) {
@@ -548,10 +595,7 @@ export class ServicePreviewView extends LitElement {
 
     private async onStyleEditClick() {
 
-        const styleService = document.querySelector(`mls-toolbar-content-service-100529[path="_100529_service_styles"]`);
-        if (styleService) styleService.setAttribute('forceinstance', 'true');
-        else this.father.openService('_100554_serviceDsStyles', 'left', '3');
-
+        this.father.openService('_100554_serviceDsStyles', 'left', '3');
         mls.actual[0].setFullName(this.page);
         const info = mls.actual[0];
 

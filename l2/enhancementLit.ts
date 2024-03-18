@@ -4,13 +4,13 @@ import { getPropierties } from './_100554_propiertiesLit'
 import { getComponentDependencies } from './_100554_dependenciesLit'
 import { validateTagName, validateRender } from './_100554_validateLit'
 import { setCodeLens } from './_100554_codeLensLit'
-import { injectStyle } from './_100554_processCssLit'
+import { injectStyle, getCssWithoutTag } from './_100554_processCssLit'
 
 export const description = "Use this enhancement for model using lit - a simple and fast web component.\nRef: https://lit.dev/"
 
 export const getExample = (project: number, shortname: string): string => {
     let newExample = example;
-    newExample = changeTagName(newExample,convertFileNameToTag(`_${project}_${shortname}`));
+    newExample = changeTagName(newExample, convertFileNameToTag(`_${project}_${shortname}`));
     return newExample;
 }
 
@@ -123,17 +123,28 @@ export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void>
     return;
 }
 
-export const changeTagName = (source: string, tagName: string): string => {
+export async function setStylesProcessed(newCss: string, el: HTMLElement, tag: string) {
+    const cssWithoutTag = getCssWithoutTag(newCss, tag);
+    if (!el.shadowRoot) return;
+    const stylesheet = createStyleSheet(cssWithoutTag, el.ownerDocument.defaultView!);
+    if (!stylesheet) return;
+    el.shadowRoot.adoptedStyleSheets = [stylesheet];
+    (el as any).requestUpdate();
+}
 
+function createStyleSheet(cssString: string, defaultView: Window) {
+    const sheet = (new (defaultView as any).CSSStyleSheet() as any);
+    sheet.replaceSync(cssString);
+    return sheet;
+}
+
+export const changeTagName = (source: string, tagName: string): string => {
     const regex = /@customElement\(['"](.+?)['"]\)/;
     const match = source.match(regex);
-
     if (match) {
         const originalTag = match[1];
         const replacedSource = source.replace(originalTag, tagName);
         return replacedSource;
     }
-
     return source;
-
 }

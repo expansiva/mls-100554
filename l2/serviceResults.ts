@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { getDepedencesByMFile } from './_100554_libCompile';
+import { getDependenciesByMFile } from './_100554_libCompile';
 import { initCodelensCustomElement } from './_100554_codelensCustomElement';
 import { initCodelensComponentDetails } from './_100554_codelensComponentDetails';
 import { initCodelensServiceDetails } from './_100554_codelensServiceDetails';
@@ -238,7 +238,7 @@ export class ServiceResults extends ServiceBase {
             };
         });
 
-        const jsonImp = await getDepedencesByMFile(mfile);
+        const jsonImp = await getDependenciesByMFile(mfile);
         this.hasError = results.errors.length > 0;
         this.results = {
             ...results,

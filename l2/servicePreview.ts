@@ -22,7 +22,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private lastMode: string = 'icPreviewD';
 
-    private lastLevel: number =  -1;
+    private lastLevel: number = -1;
 
     private elPreview: HTMLElement | undefined = undefined;
 
@@ -79,15 +79,15 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
-    
+
         if (visible && !reinit && this.menu.setIconActive) {
             this.menu.setIconActive(this.lastMode);
-            
-        } else if (visible && reinit && this.elPreview && this.menu.setIconActive && this.lastLevel == this.level) { 
+
+        } else if (visible && reinit && this.elPreview && this.menu.setIconActive && this.lastLevel == this.level) {
             this.menu.setIconActive(this.lastMode);
-            
+
         } if (this.elPreview) {
-    
+
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
         }
@@ -100,14 +100,16 @@ export class ServicePreview100554 extends ServiceBase {
 
         mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
 
-        mls.events.addEventListener([2, 3], ['DSStyleChanged'], async (ev) => {
+        mls.events.addEventListener([3], ['DSStyleChanged', 'DSColorChanged', 'DSCustomChanged', 'DSTYPOChanged'], async (ev) => {
 
             const rc: any = JSON.parse(ev.desc as any);
             if (
                 rc.emitter === 'right' ||
                 rc.emitter === 'right-get' ||
                 (rc.emitter === 'left' && rc.helper)) return;
-            this.onReloader();
+
+            this.onStyleChanged();
+            // this.onReloader();
 
         });
 
@@ -121,6 +123,13 @@ export class ServicePreview100554 extends ServiceBase {
             this.onServiceClick(true, false);
             mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
         }, 500);
+    }
+
+    private onStyleChanged() {
+        if (this.elPreview) {
+            this.lastLevel = this.level;
+            this.elPreview.setAttribute('stylechanged', 'true');
+        }
     }
 
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
@@ -180,8 +189,8 @@ export class ServicePreview100554 extends ServiceBase {
             if (!tag) return false;
 
             const file = convertTagToFileName(tag.toLocaleLowerCase());
-            
-        
+
+
             this.htmlAbout = `  
                 <h3>About this Component</h3>
                 <ul>
@@ -190,7 +199,7 @@ export class ServicePreview100554 extends ServiceBase {
                     <li>Level: 2 </li>                    
                 </ul>`
                 ;
-            
+
             if (this.menu.setMenuActive && this.htmlAbout) this.menu.setMenuActive('opAboutTag');
 
         } catch (e) {
