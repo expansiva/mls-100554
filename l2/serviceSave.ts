@@ -413,7 +413,7 @@ export class ServiceSave extends ServiceBase {
         let span = `<span style="font-size: 12px; color: #7678a6; margin-left: 5px;" class="fa ${this.oIcon[item.status].icon}" title="${this.oIcon[item.status].title}"></span>`;
 
         if (item.hasError && item.status !== 'deleted') {
-            span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px;" class="fa fa-bug" title="Error"></span>';
+            span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px; height: 16px;" class="fa fa-bug" title="Error"></span>';
             disabled = true;
         }
 
