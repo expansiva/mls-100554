@@ -6,7 +6,7 @@ import { messages } from './_100554_collabMessagesPt';
 // teste 1
 @customElement('ateste-100554')
 export class SimpleGreeting extends LitElement {
-    static styles = css`p { color: red }`;
+    static styles = css`p { color: blue }`;
 
     @property()
     name: string = messages.todayIs(new Date(Date.now()));
