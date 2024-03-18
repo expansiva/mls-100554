@@ -21,7 +21,7 @@ export async function injectStyle(model: mls.l2.editor.IMFile, dsIndex: number):
     return;
 }
 
-function getCssWithoutTag(css: string, tag: string): string {
+export function getCssWithoutTag(css: string, tag: string): string {
     const originalString = css;
     const regex = /(\w+-\d+)\.(\w+)\s+/;
     let modifiedString = originalString.replace(regex, ':host(.$2) ');

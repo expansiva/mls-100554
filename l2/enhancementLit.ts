@@ -4,8 +4,8 @@ import { getPropierties } from './_100554_propiertiesLit'
 import { getComponentDependencies } from './_100554_dependenciesLit'
 import { validateTagName, validateRender } from './_100554_validateLit'
 import { setCodeLens } from './_100554_codeLensLit'
-import { injectStyle, MLS_GETDEFAULTDESIGNSYSTEM } from './_100554_processCssLit'
-
+import { injectStyle, getCssWithoutTag } from './_100554_processCssLit'
+import {  css, LitElement} from 'lit';
 
 export const description = "Use this enhancement for model using lit - a simple and fast web component.\nRef: https://lit.dev/"
 
@@ -56,6 +56,12 @@ export const requires: mls.l2.editor.IRequire[] = [
     }
 ];
 
+export const setStaticCss = async (el: LitElement, newCss: string) => {
+    if (!el) return;
+    const cssWithoutTag = getCssWithoutTag(newCss, el.tagName.toLowerCase());
+    (el.constructor as any).styles = css`${cssWithoutTag as any}`;
+    el.requestUpdate();
+}
 
 export const getDefaultHtmlExamplePreview = (model: mls.l2.editor.IMFile): string => {
     const tag = convertFileNameToTag(`_${model.storFile.project}_${model.storFile.shortName}`);
