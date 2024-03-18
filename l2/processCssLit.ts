@@ -1,6 +1,7 @@
 /// <mls shortName="processCssLit" project="100554" enhancement="_blank" />
-				
+
 import { convertFileNameToTag } from './_100554_utilsLit'
+import { css, LitElement } from 'lit';
 
 export const MLS_GETDEFAULTDESIGNSYSTEM = '[[mls_getDefaultDesignSystem]]';
 export async function injectStyle(model: mls.l2.editor.IMFile, dsIndex: number): Promise<void> {
@@ -21,7 +22,14 @@ export async function injectStyle(model: mls.l2.editor.IMFile, dsIndex: number):
     return;
 }
 
-export function getCssWithoutTag(css: string, tag: string): string {
+export function setStylesProcess(newCss: string, el: LitElement, tag: string) {
+    const cssWithoutTag = getCssWithoutTag(newCss, tag);
+    const st = css`${cssWithoutTag as any}`;
+    (el.constructor as any).styles = st;
+    el.requestUpdate();
+}
+
+function getCssWithoutTag(css: string, tag: string): string {
     const originalString = css;
     const regex = /(\w+-\d+)\.(\w+)\s+/;
     let modifiedString = originalString.replace(regex, ':host(.$2) ');
