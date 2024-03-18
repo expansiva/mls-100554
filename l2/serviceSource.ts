@@ -384,9 +384,11 @@ export class ServiceSource100554 extends ServiceBase {
             if (storFile && !storFile.inLocalStorage && storFile.isLocalVersionOutdated)
                 storFile.isLocalVersionOutdated = false;
 
+            this.saveLocalStorageLastOpen(storFile, fileAction.position);
+
             if (!this._ed1) return;
             this.restaureViewState();
-            
+
         };
 
 
@@ -601,7 +603,13 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private showActiveModel(): boolean {
-        const activeModel = mls.l2.editor.editors[this.confE];
+
+        let activeModel = mls.l2.editor.editors[this.confE];
+        if (activeModel && activeModel.project === 0 && activeModel.shortName === 'testFile') {
+            const ret = this.openLastFile(this.level, this.position);
+            if(ret) activeModel = mls.l2.editor.editors[this.confE];
+        }
+
         if (!this._ed1 || !activeModel || !this.menu.getLastMode) return false;
         const changedFile: boolean = this.menu.title !== activeModel.shortName;
         (this.menu.title as IMenuTitle).text = `_${activeModel.project}_${activeModel.shortName}`;
@@ -1140,5 +1148,72 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         return html`
             <mls-editor-100529 ismls2="true"></mls-editor-100529>
         `
+    }
+
+    private saveLocalStorageLastOpen(storFile: mls.stor.IFileInfo, position: string) {
+        try {
+
+            let last = localStorage.getItem('_100554_serviceSource');
+            last = last ? last : '{}';
+            const info = JSON.parse(last);
+            const keyLocal = 'last_' + this.level + '_' + position;
+
+            if (info[keyLocal]) {
+                info[keyLocal].project = storFile.project;
+                info[keyLocal].shortName = storFile.shortName;
+                info[keyLocal].extension = storFile.extension;
+                info[keyLocal].level = storFile.level;
+                info[keyLocal].folder = storFile.folder;
+            } else {
+                info[keyLocal] = {
+                    project: storFile.project,
+                    shortName: storFile.shortName,
+                    extension: storFile.extension,
+                    level: storFile.level,
+                    folder: storFile.folder,
+                }
+            }
+
+            localStorage.setItem('_100554_serviceSource', JSON.stringify(info));
+
+        } catch (e) {
+            localStorage.setItem('_100554_serviceSource', JSON.stringify({}));
+        }
+
+    }
+
+    private openLastFile(level: number, position: string): boolean{
+
+        try {
+
+            let last = localStorage.getItem('_100554_serviceSource');
+            last = last ? last : '{}';
+            const info = JSON.parse(last);
+            const keyLocal = 'last_' + level + '_' + position;
+
+
+            if (!info[keyLocal]) return false;
+
+            const key = mls.l2.editor.getKey(
+                {
+                    project: +info[keyLocal].project,
+                    shortName: info[keyLocal].shortName
+                }
+            );
+            
+            const model = mls.l2.editor.mfiles[key];
+            if(!model) return false
+            
+            mls.l2.editor.editors[this.confE] = model;
+
+            return true;
+            
+
+        } catch (e) {
+
+            return false
+
+        }
+
     }
 }
