@@ -509,7 +509,9 @@ export class ServiceListFiles extends ServiceBase {
             mls.actual[this.level as any].setFullName(`_${file.project}_${file.shortName}`);
             (mls.actual[this.level as any] as any)[this.position as any] = {
                 project: file.project,
-                shortName: file.shortName
+                shortName: file.shortName,
+                extension: file.extension,
+                folder: file.folder,
             } as any;
 
         }
