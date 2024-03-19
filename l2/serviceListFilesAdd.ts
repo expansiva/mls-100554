@@ -138,8 +138,10 @@ export class ServiceListFilesAdd100554 extends LitElement {
                 throw new Error('Please select an type ');
             }
 
+            const nameValue =  name.value.charAt(0).toLowerCase() + name.value.slice(1);
+
             this.showLoader(true);
-            const newName = this.getNewNameAndValid(mls.actual[5].project as any, name.value);
+            const newName = this.getNewNameAndValid(mls.actual[5].project as any, nameValue);
 
             const params = {} as mls.events.IFileAction;
 
@@ -149,7 +151,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
                 throw new Error('Not found file:' + sel.value);
             };
 
-            const ts = await this.createMyTs(fEnh, sel.value, name.value);
+            const ts = await this.createMyTs(fEnh, sel.value, nameValue);
 
             params.action = 'new' as typeof params.action;
             params.level = +this.level;
