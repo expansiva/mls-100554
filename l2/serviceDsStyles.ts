@@ -27,6 +27,8 @@ export class ServiceDsStyles extends ServiceBase {
         if (op === 'opResultCss') return this.showResultCss();
         if (op === 'opStyle') return this.showStyle();
         if (op === 'opStyle2') return this.showStyle2();
+        if (op === 'opView') return this.openRepo();
+
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -36,6 +38,7 @@ export class ServiceDsStyles extends ServiceBase {
         actions: {
             opStyle: 'Styles Geral',
             opResultCss: 'Result CSS',
+            opView: 'View on repository'
         },
         actionDefault: 'opStyle2', // call after close icon clicked
         icons: {},
@@ -109,7 +112,7 @@ export class ServiceDsStyles extends ServiceBase {
         if (visible) {
             this.isComponent = false;
             await this.start1();
-            if(!reinit) this.reinit();
+            if (!reinit) this.reinit();
         } else {
             const params2: IEventsSelectedObj = {
                 service: [],
@@ -160,6 +163,43 @@ export class ServiceDsStyles extends ServiceBase {
         return this.showStyle2();
     }
 
+    private openRepo() {
+        if (!this.dsInstance) return false;
+        let fname = 'definitions';
+        let ffolder = (this.dsInstance as any).methods.getDsCssFilePath();
+        let project = this.dsInstance.project;
+
+        if (this.isComponent && this.selectStyles) {
+
+            const style: mls.l3.IComponentsStyle = this.stylesComponent[+this.selectStyles.value];
+            if (!style) return false;
+            fname = style.stylename;
+            ffolder = (this.dsInstance as any).methods.getDsComponentStyleFilePath(this.componentName);
+            mls.actual[0].setFullName(this.componentName);
+            if (!mls.actual[0].project) return false;
+            project = mls.actual[0].project;
+        }
+
+        const keyToFile = mls.stor.getKeyToFiles(project, 3, fname, ffolder, '.less');
+        const file = mls.stor.files[keyToFile];
+        if (!file) {
+            window.collabMessages.add('Invalid File', 'information');
+            throw new Error('invalid file');
+        }
+        const driver = mls.stor.others.getDefaultDriver(project);
+        if (!driver) {
+            window.collabMessages.add('Driver not found', 'information');
+            throw new Error('Driver not found');
+        }
+        let url = '';
+
+        url = driver.getUrl(file);
+        window.open(url, '_blank');
+        if (this.menu.closeMenu) this.menu.closeMenu();
+        return true;
+    }
+
+
     private showResultCss(): boolean {
 
         if (!this._ed1) return false;
@@ -186,7 +226,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async createEditor() {
-        
+
         if (this._ed1) return;
         if (!this.c2) {
             await this.delay();
