@@ -3,6 +3,7 @@
 
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
+import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 //version = 3
 @customElement('service-source-100554')
@@ -465,16 +466,49 @@ export class ServiceSource100554 extends ServiceBase {
             mls.l2.editor.editors[this.confE] = model1;
 
             this.renameHTMLFile(storFileHTML as mls.stor.IFileInfo, fileAction.newProject as number, fileAction.newshortName as string);
-            this.showActiveModel();
-            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+
+            (mls.actual[this.level] as any)[this.position] = {
+                project: fileAction.newProject,
+                shortName: fileAction.newshortName
+            
+            }
+            
+            fileAction.project = fileAction.newProject as any;
+            fileAction.shortName = fileAction.newshortName as any;
+            fileAction.newProject = undefined as any;
+            fileAction.newshortName = undefined as any;
+            fileAction.action = 'open';
+            ev.desc = JSON.stringify(fileAction);
+            
+            this.onMLSEvents(ev);
+            
+            //this.showActiveModel();
+            //mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
         };
 
         const onClone = async (): Promise<void> => {
             const storFile = getStorFile();
             await this.createModelTS_loading();
             this.activeThisService();
+
             await this.createModelTS_clone(storFile, fileAction.newProject as number, fileAction.newshortName as string);
-            this.showActiveModel();
+            await this.createModelHTML_clone(storFile, fileAction.newProject as number, fileAction.newshortName as string);
+
+
+            (mls.actual[this.level] as any)[this.position] = {
+                project: fileAction.newProject,
+                shortName: fileAction.newshortName
+            
+            }
+
+            fileAction.project = fileAction.newProject as any;
+            fileAction.shortName = fileAction.newshortName as any;
+            fileAction.newProject = undefined as any;
+            fileAction.newshortName = undefined as any;
+            fileAction.action = 'open';
+            ev.desc = JSON.stringify(fileAction);
+            this.onMLSEvents(ev);
+            //this.showActiveModel();
         };
 
         const onUpdatedOnServer = async (): Promise<void> => {
@@ -607,7 +641,7 @@ export class ServiceSource100554 extends ServiceBase {
         let activeModel = mls.l2.editor.editors[this.confE];
         if (activeModel && activeModel.project === 0 && activeModel.shortName === 'testFile') {
             const ret = this.openLastFile(this.level, this.position);
-            if(ret) activeModel = mls.l2.editor.editors[this.confE];
+            if (ret) activeModel = mls.l2.editor.editors[this.confE];
         }
 
         if (!this._ed1 || !activeModel || !this.menu.getLastMode) return false;
@@ -733,10 +767,73 @@ export class ServiceSource100554 extends ServiceBase {
     private async createModelTS_clone(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string) {
         let model1 = mls.l2.editor.get(storFile);
         if (!model1) model1 = await this.createModelTS2(storFile, false, true);
-        const defaultTS = model1.model.getValue();
+        let defaultTS = model1.model.getValue();
+
+        const baseTag = convertFileNameToTag(`_${storFile.project}_${storFile.shortName}`)
+        const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
+        const regex = new RegExp(baseTag, 'g');
+
+        defaultTS = defaultTS.replace(regex, newTag);
+        defaultTS = this.changeClassName(defaultTS, newProject, newShortName);
+
         model1 = await this.createModelTS1(newShortName, newProject, defaultTS, true);
         mls.common.tripleslash.changeVariable(model1, 'shortName', newShortName);
         mls.common.tripleslash.changeVariable(model1, 'project', newProject.toString());
+    }
+
+    private changeClassName(source: string, project: number, shortname: string): string {
+
+        const regex = /export\s+class\s+(\w+)\s+extends/g;
+        const match = regex.exec(source);
+        const newClassName = shortname.charAt(0).toUpperCase() + shortname.substring(1, shortname.length) + project.toString();
+        if (match) {
+            const originalTag = match[1];
+            const replacedSource = source.replace(originalTag, newClassName);
+            return replacedSource;
+        }
+        return source;
+
+    }
+
+    private async createModelHTML_clone(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string) {
+
+        const { shortName, project } = storFile;
+        const uri = this.getUri(`_${project}_${shortName}`, '.html');
+        let model = monaco.editor.getModel(uri);
+        let cont = '<h1>Edit this</h1>';
+        let key = '';
+
+        if (model) cont = model.getValue();
+        else {
+            key = mls.stor.getKeyToFiles(project, storFile.level, shortName, '', '.html');
+            if(mls.stor.files[key])cont = await mls.stor.files[key].getContent() as any;
+        }
+
+        const baseTag = convertFileNameToTag(`_${storFile.project}_${storFile.shortName}`)
+        const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
+        const regex = new RegExp(baseTag, 'g');
+
+        cont = cont.replace(regex, newTag);
+
+        key = mls.stor.getKeyToFiles(newProject, storFile.level, newShortName, '', '.html');
+
+        let file = mls.stor.files[key];
+
+        if (!file) {
+
+            file = await mls.stor.addOrUpdateFile({ project, level: storFile.level, shortName:newShortName, extension: '.html', versionRef: new Date().toISOString(), folder: '' });
+            file.status = 'new';
+        }
+
+        const fileInfo: mls.stor.IFileInfoValue = {
+            content: cont,
+            contentType: 'string',
+        };
+
+        await mls.stor.localStor.setContent(file, fileInfo);
+
+        await this.getOrCreateModelHTML(newShortName, newProject, file, fileInfo);
+
     }
 
     private async createModelTS1(shortName: string, project: number, defaultTS: string, activateModel: boolean): Promise<mls.l2.editor.IMFile> {
@@ -1182,7 +1279,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     }
 
-    private openLastFile(level: number, position: string): boolean{
+    private openLastFile(level: number, position: string): boolean {
 
         try {
 
@@ -1200,14 +1297,14 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                     shortName: info[keyLocal].shortName
                 }
             );
-            
+
             const model = mls.l2.editor.mfiles[key];
-            if(!model) return false
-            
+            if (!model) return false
+
             mls.l2.editor.editors[this.confE] = model;
 
             return true;
-            
+
 
         } catch (e) {
 

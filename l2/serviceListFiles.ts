@@ -446,22 +446,32 @@ export class ServiceListFiles extends ServiceBase {
         if (!father || !li) return;
 
         const elContentAux = father.querySelector('.elContentAux') as HTMLElement;
+
         const btnActCloneRename = father.querySelector('.btnActCloneRename') as HTMLElement;
+
+        const iptProj = elContentAux.querySelector('.spanPrj input') as HTMLInputElement;
+        const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
+                
         if (!father || !li) return;
 
         li.appendChild(elContentAux);
         elContentAux.style.display = '';
+        iptProj.value = mls.actual[5].project as any;
+        iptName.value = '';
         btnActCloneRename.onclick = async (e2: MouseEvent) => {
     
             try {
 
                 e2.stopPropagation();
-                const iptProj = elContentAux.querySelector('.spanPrj input') as HTMLInputElement;
-                const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
-
+                
                 this.validInputsAux(myfile, { mode: mode, project: iptProj.value, name: iptName.value });
 
                 this.fireEvents(mode, myfile, { project: +iptProj.value, shortName: iptName.value });
+
+                elContentAux.style.display = 'none';
+                const all = this.shadowRoot?.querySelectorAll('.activegpbtnslider');
+
+                Array.from(all as any).forEach((i: any) => i.classList.remove('activegpbtnslider'))
 
             } catch (er: any) {
 
