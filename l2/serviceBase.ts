@@ -1,7 +1,9 @@
 /// <mls shortName="serviceBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { LitElement, adoptStyles } from 'lit';
+import { LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { convertTagToFileName } from './_100554_utilsLit';
+
 
 @customElement('service-base-100554')
 export abstract class ServiceBase extends LitElement {
@@ -34,6 +36,27 @@ export abstract class ServiceBase extends LitElement {
     connectedCallback() {
         super.connectedCallback();
         (this as any)['mlsWidget'] = this;
+        this.serviceContent?.addEventListener('focusin', this.checkFocus.bind(this));
+        this.serviceContent?.addEventListener('mouseenter', this.checkMouse.bind(this));
+    }
+
+    checkFocus() {
+        if (!this.serviceContent) return;
+        if (this.serviceContent.contains(document.activeElement)) {
+            this.setActualServicePosition();
+        }
+    }
+
+    checkMouse() {
+        this.setActualServicePosition();
+    }
+
+    setActualServicePosition() {
+        if (!this.serviceContent || !this.nav3Service) return;
+        const service = this.serviceContent.getAttribute('data-service') || '';
+        const position = this.nav3Service.getAttribute('toolbarposition') || '';
+        mls.setActualPosition(position as any);
+        mls.setActualService(service)
     }
 
     attributeChangedCallback(name: string, oldVal: string, newVal: string) {

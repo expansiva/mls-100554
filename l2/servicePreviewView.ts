@@ -280,7 +280,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     private async init(iframe: HTMLIFrameElement) {
-        try {
+        try {    
             this.setMyFile();
             await this.setHTml(iframe);
             iframe.style.display = '';
