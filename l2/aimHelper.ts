@@ -1,5 +1,6 @@
 /// <mls shortName="aimHelper" project="100554" enhancement="_blank" />
-				
+
+
 export let tasks: cbe.ITaskRoot[] = [];
 let lastReadFromServer: Date | undefined = undefined;
 
@@ -16,7 +17,7 @@ export interface ITaskFinish {
 /**
  * return the result of the prompt
  */
-export async function executePrompt(taskIndex: number): Promise<cbe.ITaskRoot>  {
+export async function executePrompt(taskIndex: number): Promise<cbe.ITaskRoot> {
   if (taskIndex < 0 || taskIndex >= tasks.length) throw new Error(`invalid task index`);
   const project: number = mls.actual[5].project || 0;
   if (project < 1) throw new Error(`invalid project ${project}`);
@@ -61,6 +62,40 @@ export async function readTasksFromServer(filtedBy: cbe.IFilterTask, filter: str
   tasks = rc.tasks;
   for (const task of tasks) {
     if (task.mode !== 'error' &&
-        task.mode !== 'processed') task.mode = 'error';
+      task.mode !== 'processed') task.mode = 'error';
   }
+}
+
+export function getInfoMyService(elBase: HTMLElement): { level: number, position: string, actServiceOp: any } | undefined {
+
+  let ret;
+  try {
+    const shadowRoot = elBase.getRootNode() as any;
+    if (!shadowRoot) return ret;
+
+    const service = shadowRoot.host as any;
+    if (!service || service.tagName !== 'SERVICE-AIM-100554') return ret;
+
+    const op = service.position === 'left' ? 'right' : 'left';
+    let servOp = service.nav3Service;
+    if (!servOp) return ret;
+
+    servOp = servOp.getServiceActive(op);
+
+    if (!servOp) return ret;
+
+    ret = {
+      level: service.level,
+      position: service.position,
+      actServiceOp: servOp
+    }
+
+    return ret;
+
+  } catch (e) {
+
+    return ret;
+
+  }
+
 }
