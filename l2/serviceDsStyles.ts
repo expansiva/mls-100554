@@ -52,7 +52,7 @@ export class ServiceDsStyles extends ServiceBase {
     msize = '';
 
     @property()
-    private isComponent: boolean = false;
+    public isComponent: boolean = false;
 
     @property()
     private stylesComponent: mls.l3.IComponentsStyle[] = [];
@@ -73,7 +73,7 @@ export class ServiceDsStyles extends ServiceBase {
     @query('#service_styles_input_comp_styles')
     private inputAddStyles: HTMLInputElement | undefined;
 
-    private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
+    public _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
     private timeoutChangesEditorStyle: number = 0;
     private timeoutCursorChangesEditorStyle: number = 0;
 
