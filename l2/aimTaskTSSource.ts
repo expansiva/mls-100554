@@ -41,14 +41,14 @@ class AimTaskTSSource extends AimTaskBase {
 
                 const position = info.position === 'left' ? 'right' : 'left';
 
-                if (!(mls.actual[info.level] as any)[position]) {
+                if (!(mls.actual[2] as any)[position]) {
                     reject('No files selected in getFileSource');
                     return;
                 }
 
-                const { project, shortName, extension, folder } = (mls.actual[info.level] as any)[position];
+                const { project, shortName, extension, folder } = (mls.actual[2] as any)[position];
 
-                const key = mls.stor.getKeyToFiles(project, info.level, shortName, folder, extension);
+                const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, extension);
 
                 const file = mls.stor.files[key];
 
