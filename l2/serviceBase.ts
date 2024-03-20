@@ -17,6 +17,8 @@ export abstract class ServiceBase extends LitElement {
     @property({ type: String })
     visible = 'false';
 
+    @property({ type: String }) msize = '';
+
     @state() loading: boolean = false;
 
     get serviceContent() { return this.getNav3ServiceContent(); }
@@ -60,12 +62,18 @@ export abstract class ServiceBase extends LitElement {
     }
 
     attributeChangedCallback(name: string, oldVal: string, newVal: string) {
-        super.attributeChangedCallback(name, oldVal, newVal);
         if (name === 'visible') {
             const visible = newVal === 'true';
             const reinit: boolean = oldVal !== null && visible !== false;
             if (this.onServiceClick && typeof this.onServiceClick === 'function') this.onServiceClick(visible, reinit, this.getNav3ServiceContent())
         }
+
+        if (name === 'msize') {
+            const [width, height, top, left] = this.msize.split(',');
+            if (height) this.style.height = height + 'px';
+        }
+        super.attributeChangedCallback(name, oldVal, newVal);
+
     }
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {

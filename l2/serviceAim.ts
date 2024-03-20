@@ -15,7 +15,6 @@ export class ServiceAim100554 extends ServiceBase {
         this.setEvents();
     }
     
-    @property({ type: String }) msize = '';
     @property() activeTab: ITabType = 'All';
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
 
@@ -137,17 +136,6 @@ export class ServiceAim100554 extends ServiceBase {
         return html`
         <h4 class='title'>Tasks by Reference</h4>
         <div>Showing Jobs for service:  ${getTitleActualReference()}</div>`;
-    }
-
-    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-        console.info({
-            attributeChangedCallback:name
-        })
-        if (name === 'msize') {
-            const [width, height, top, left] = this.msize.split(',');
-            if(height) this.style.height = height + 'px';
-        }
-        super.attributeChangedCallback(name, oldValue, newValue);
     }
 
     actions: ResponseFindActions[] = [];
