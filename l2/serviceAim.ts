@@ -1,20 +1,21 @@
 /// <mls shortName="serviceAim" project="100554" enhancement="_100554_enhancementLitService" groupName="service"/>
-				
+
 import { html, css, unsafeHTML, render, styleMap } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IToolbarChangeEvent } from './_100554_serviceBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { tasks, readTasksFromServer } from './_100554_aimHelper'; 
+import { tasks, readTasksFromServer } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
- 
+
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
 
-    constructor() { 
+    constructor() {
         super();
         this.setEvents();
-    }   
-
+    }
+    
+    @property({ type: String }) msize = '';
     @property() activeTab: ITabType = 'All';
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
 
@@ -30,10 +31,10 @@ export class ServiceAim100554 extends ServiceBase {
             case 'Add':
                 return this.renderAdd();
             default:
-                return html``; 
+                return html``;
         }
     }
-    
+
     public details: IService = {
         icon: '&#xf03a',
         state: 'foreground',
@@ -82,7 +83,7 @@ export class ServiceAim100554 extends ServiceBase {
         updateTitle: undefined
     }
 
-    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void {        
+    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void {
     }
 
     setEvents(): void {
@@ -107,10 +108,10 @@ export class ServiceAim100554 extends ServiceBase {
 
         return html`
         <h4 class='title'>All Tasks</h4>
-        ${tasks.map( (task, index) => renderTask(task, index))}
+        ${tasks.map((task, index) => renderTask(task, index))}
         <h4 class='title'>End</h4>
         `;
-    } 
+    }
 
     renderUser() {
         const getTitleUser = () => {
@@ -121,7 +122,7 @@ export class ServiceAim100554 extends ServiceBase {
         return html`
         <h4 class='title'>User Tasks</h4>
         <div>Showing Jobs for user: ${getTitleUser()} </div>`;
-    }  
+    }
 
     renderRef() {
         const getTitleActualReference = () => {
@@ -138,9 +139,21 @@ export class ServiceAim100554 extends ServiceBase {
         <div>Showing Jobs for service:  ${getTitleActualReference()}</div>`;
     }
 
+    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+        console.info({
+            attributeChangedCallback:name
+        })
+        if (name === 'msize') {
+            const [width, height, top, left] = this.msize.split(',');
+            if(height) this.style.height = height + 'px';
+        }
+        super.attributeChangedCallback(name, oldValue, newValue);
+    }
+
     actions: ResponseFindActions[] = [];
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {
+
         if (!changedProperties.has('activeTab')) return;
         switch (this.activeTab) {
             case 'All':
@@ -158,9 +171,9 @@ export class ServiceAim100554 extends ServiceBase {
             case 'Add':
                 return;
             default:
-                console.error('invalid activeTab:', this.activeTab); 
+                console.error('invalid activeTab:', this.activeTab);
         }
-    }    
+    }
 
     async connectedCallback() {
         super.connectedCallback();
@@ -181,7 +194,7 @@ export class ServiceAim100554 extends ServiceBase {
         if (this.actions.length === 0) return html`<div class="no-actions">No Actions to Add</div>`;
 
         const showListStyle = { display: !this.useContainerAdd ? 'none' : 'grid' };
-        const showContainerStyle = { display: !this.useContainerAdd ? 'block' : 'none' }; 
+        const showContainerStyle = { display: !this.useContainerAdd ? 'block' : 'none' };
 
         return html`
         <div class='addTab'>
@@ -200,7 +213,7 @@ export class ServiceAim100554 extends ServiceBase {
         this.loadAndRenderComponent(webComponentAddHandle, container);
     }
 
-    finishedAddTaskRoot(e: CustomEvent) { 
+    finishedAddTaskRoot(e: CustomEvent) {
         if (e.detail.cancel) {
             this.useContainerAdd = true;
             return;
@@ -210,27 +223,27 @@ export class ServiceAim100554 extends ServiceBase {
     }
 
     async loadAndRenderComponent(widget: string, container: HTMLElement | null | undefined): Promise<void> {
-      if (!widget || !container) {
-          console.error(`invalid call on loadAndRenderComponent: `, !!widget, !!container);
-          return;
-      }
-    try {
-        const componentModule = await import('./' + widget);
-        if (!componentModule) {
-            console.error('widget not exists or invalid:' + widget);
+        if (!widget || !container) {
+            console.error(`invalid call on loadAndRenderComponent: `, !!widget, !!container);
             return;
         }
-        const tagName = convertFileNameToTag(widget);
-        const newTabIndex = ' tabIndex="-1" ';
-        const modeInit: cbe.IMode = "add";
-        const newMode = ' mode="' + modeInit + '"';
-        render(html`${unsafeHTML('<' + tagName + newTabIndex + newMode +'/> ')}`, container);
-        this.useContainerAdd = false;
-    } catch (error) {
-        console.error("Erro ao carregar o componente:" + widget + ", error: ", error);
-        this.useContainerAdd = true;
+        try {
+            const componentModule = await import('./' + widget);
+            if (!componentModule) {
+                console.error('widget not exists or invalid:' + widget);
+                return;
+            }
+            const tagName = convertFileNameToTag(widget);
+            const newTabIndex = ' tabIndex="-1" ';
+            const modeInit: cbe.IMode = "add";
+            const newMode = ' mode="' + modeInit + '"';
+            render(html`${unsafeHTML('<' + tagName + newTabIndex + newMode + '/> ')}`, container);
+            this.useContainerAdd = false;
+        } catch (error) {
+            console.error("Erro ao carregar o componente:" + widget + ", error: ", error);
+            this.useContainerAdd = true;
+        }
     }
-  }
 }
 
 type ITabType = 'All' | 'User' | 'Ref' | 'Add'
