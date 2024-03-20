@@ -80,7 +80,7 @@ export function getInfoMyService(elBase: HTMLElement): { level: number, position
     let servOp = service.nav3Service;
     if (!servOp) return ret;
 
-    servOp = servOp.getServiceActive(op);
+    servOp = servOp.getActiveInstance(op);
 
     if (!servOp) return ret;
 
