@@ -46,6 +46,16 @@ export class ServiceDsStyles extends ServiceBase {
         onClickLink: this.onClickLink,
     }
 
+    public setEditorSource(less:string) {
+        return this.setStyle(less);
+    }
+
+    public getEditorSource() {
+        const model = this._ed1?.getModel();
+        const val = model?.getValue() || '';
+        return val;
+    }
+
     static modelCount = 0;
 
     @property({ type: String })

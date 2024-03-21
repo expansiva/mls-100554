@@ -79,6 +79,16 @@ export class ServiceDsTokens100554 extends ServiceBase {
         this.createEditor();
     }
 
+    public setEditorSource(tokens: string) {
+        // return this.setStyle(less);
+    }
+
+    public getEditorSource() {
+        const model = this._ed1?.getModel();
+        const val = model?.getValue() || '';
+        return val;
+    }
+
     public static modelCount: number;
 
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;

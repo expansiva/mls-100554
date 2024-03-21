@@ -14,7 +14,7 @@ export class ServiceAim100554 extends ServiceBase {
         super();
         this.setEvents();
     }
-    
+
     @property() activeTab: ITabType = 'All';
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
 
@@ -41,7 +41,7 @@ export class ServiceAim100554 extends ServiceBase {
         tooltip: 'AIM Service',
         visible: true,
         widget: '_100554_serviceAim',
-        level: [2]
+        level: [2, 3]
     }
 
     get invertedPosition() { return this.position === 'left' ? 'right' : 'left' };
