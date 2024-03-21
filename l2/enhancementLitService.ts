@@ -8,6 +8,7 @@ import {
     onAfterCompile as onAfterCompileDefault,
     prepareAdd as prepareAddDefault,
     requires as requiresDefault,
+    setStylesProcessed as setStylesProcessedDefault,
     changeTagName
 } from './_100554_enhancementLit';
 
@@ -17,7 +18,7 @@ export const description = "Use this enhancement for create a service collab usi
 
 export const getExample = (project: number, shortname: string): string => {
     let newExample = example;
-    newExample = changeTagName(newExample,convertFileNameToTag(`_${project}_${shortname}`));
+    newExample = changeTagName(newExample, convertFileNameToTag(`_${project}_${shortname}`));
     newExample = changeClassName(newExample, project, shortname);
     newExample = changeWidget(newExample, project, shortname);
     return newExample;
@@ -97,6 +98,10 @@ export const getPromptDefault = (): string => {
 
 export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
     return onAfterCompileDefault(mfile);
+}
+
+export const setStylesProcessed = async (newCss: string, el: HTMLElement, tag: string): Promise<void> => {
+    return setStylesProcessedDefault(newCss, el, tag);
 }
 
 const changeClassName = (source: string, project: number, shortname: string): string => {
