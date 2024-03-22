@@ -1,0 +1,163 @@
+/// <mls shortName="aimActionUpdateLit" project="100554" enhancement="_100554_enhancementLit" />
+				
+import { html, TemplateResult } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
+import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
+import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
+
+const myName = '_100554_aimActionUpdateLit';
+
+@customElement('aim-action-update-lit-100554')
+export class AimActionUpdateLit extends AimActionBase {
+
+    @query('textarea')
+    textarea: HTMLTextAreaElement | undefined;
+
+    public getRules(): AimActionRules {
+        return {
+            levels: [2],
+            tags: ["*serviceSource*"]
+        }
+    }
+
+    public assistant = "gpt3_typescript";
+    public title = "Update Lit";
+
+    language = 'english';
+
+    private handleCancel() {
+        this.dispatchEvent(new CustomEvent('add-task', {
+            detail: { cancel: 'true' }, bubbles: true, composed: true 
+        }));
+    }
+
+    private handleAdd(): void {
+        
+        if (this.textarea) {
+
+            (window as any)['aim-action-update-lit-100554'] = this.textarea.value;
+
+        }
+
+        const taskRoot: cbe.ITaskRoot = {
+            mode: 'initializing',
+            title: 'update Lit',
+            widget: myName,
+            children: [ ],
+            trace: [ new Date().toISOString() + ': trask created at ' ]          
+        }
+        tasks.unshift(taskRoot);
+        this.prepareTask1(taskRoot);
+        this.dispatchEvent(new CustomEvent('finished-add-task-root', {
+            detail: taskRoot, bubbles: true, composed: true 
+        }));
+    }
+
+    renderAdd(): TemplateResult { // from abstract
+        return html`
+        <p style="margin-bottom:0rem">Permitir atualizar o lit do file selecionado</p>
+        <br>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <label>Prompt</label>
+          <textarea></textarea>
+        </div>
+        <br>
+        <div class="buttonGroup">
+          <button @click="${this.handleCancel}">Cancelar</button>
+          <button @click="${this.handleAdd}">Confirmar</button>
+        </div>
+    `;
+    }
+
+
+    getPrompt(source: string) {
+
+        let req = '';
+
+        if ((window as any)['aim-action-update-lit-100554']) {
+            req = (window as any)['aim-action-update-lit-100554'];
+            (window as any)['aim-action-update-lit-100554'] = undefined;
+        }
+
+        const prompt = ` 
+        Objective: Usando typescript, lit 3, alterar o código abaixo seguindo as instruções.\n\n
+        Instructions:\n
+        1. Manter a linha 1 (tripe slash) que é de controle\n
+        2. Fazer e manter comentários no código em ingles\n
+        3. ${req}\n\n
+
+        Expected Output Format:\n
+            Retornar o novo source inteiro em um unico bloco\n\n
+
+        Source:\n ${source} \n`;
+        return prompt;
+    }
+
+    prepareTask1(taskRoot: cbe.ITaskRoot): void {
+        // create task to get typescript source from another side
+        this.mode = taskRoot.mode = 'in progress';
+        this.addTaskAndWaitForCompletion(taskRoot, {
+            mode: 'initializing',
+            title: 'get typescript source',
+            widget: '_100554_aimTaskTSSource',
+            trace: [],
+            nextStep: this.prepareTask2.name // danger, loop
+        });
+    }
+
+    prepareTask2(taskFinishResult: ITaskFinish): void {
+        // call LLM on server with prompt
+        const child = taskFinishResult.taskChild;
+        if (taskFinishResult.status === 'error') {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            return;
+        }
+        const source = taskFinishResult.result;
+        if (!source) {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            child.trace.push('invalid finish , must be notify finish with result field');
+            this.requestUpdate();
+            return;
+        }
+        child.mode = 'processed';
+        this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
+            mode: 'initializing',
+            title: 'exec prompt',
+            widget: '_100554_aimTaskExecLLM',
+            agent: this.assistant,
+            prompt: this.getPrompt(source),
+            trace: [],
+            nextStep: this.prepareTask3.name // danger, loop
+        });
+    }
+
+    prepareTask3(taskFinishResult: ITaskFinish): void {
+        // show result
+        const child = taskFinishResult.taskChild;
+        const result: string = child.result || '';
+        if (taskFinishResult.status === 'error' || !result) {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            return;
+        }
+        child.mode = 'processed';
+        this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
+            mode: 'initializing',
+            title: 'result',
+            widget: '_100554_aimTaskResultCode',
+            trace: [],
+            _tempResult: result,
+            nextStep: this.endTasks.name // danger, loop
+        });
+        this.requestUpdate();
+    }
+
+    endTasks(taskFinishResult: ITaskFinish): void {
+        const child = taskFinishResult.taskChild;
+        if (taskFinishResult.status === 'error') child.mode = 'error';
+        else child.mode = 'processed';
+        this.mode = taskFinishResult.taskRoot.mode = child.mode;
+        this.requestUpdate();
+        updateTaskOnServer(taskFinishResult.taskIndex);
+    }
+
+}
