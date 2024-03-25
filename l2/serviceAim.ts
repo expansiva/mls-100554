@@ -3,9 +3,10 @@
 import { html, css, unsafeHTML, render, styleMap } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IToolbarChangeEvent } from './_100554_serviceBase';
-import { convertFileNameToTag } from './_100554_utilsLit';
+import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { tasks, readTasksFromServer } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
+
 
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
@@ -17,6 +18,8 @@ export class ServiceAim100554 extends ServiceBase {
 
     @property() activeTab: ITabType = 'All';
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
+    @property({ reflect: true }) actualServiceOpName: string = '';
+    actualServiceOpLevel: number = 0;
 
     render() {
         if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
@@ -82,20 +85,41 @@ export class ServiceAim100554 extends ServiceBase {
         updateTitle: undefined
     }
 
-    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void {
+    async onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+        if (!visible || !reinit) return;
+        await this.setActions();
+        this.requestUpdate();
     }
 
     setEvents(): void {
-        mls.events.addListener(this.level, 'ToolBarSelected', (ev) => this.onToolbarSelectChange(ev));
+        mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected'], (ev) => this.onToolbarSelectChange(ev));
     }
 
     onToolbarSelectChange(ev: mls.events.IEvent) {
+
         if (!ev.desc) return;
         const data: IToolbarChangeEvent = JSON.parse(ev.desc);
-        if (data.level !== this.level) return;
         if (data.position === this.position) return;
-        // if (this.activeTab !== 'Service') return;
+
+        this.actualServiceOpLevel = data.level;
+        this.actualServiceOpName = data.to;
+
+        if (data.level !== this.level) return;
         this.requestUpdate();
+    }
+
+    sortKey(arr: cbe.ITaskRoot[]) {
+        function getKey(key: string): number {
+            if (!key) return -1;
+            const parts = key.split('/');
+            if (parts.length < 3) return -1;
+            const lastPart = parts.pop();
+            if (!lastPart) return -1;
+            const index = Number.parseInt(lastPart);
+            return index;
+        }
+        arr.sort((a: any, b: any) => getKey(b.key) - getKey(a.key));
+        return arr;
     }
 
     renderAll() {
@@ -104,23 +128,38 @@ export class ServiceAim100554 extends ServiceBase {
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}" />`;
             return html`${unsafeHTML(sHtml)}`;
         }
+        const orderned = this.sortKey(tasks);
 
         return html`
         <h4 class='title'>All Tasks</h4>
-        ${tasks.map((task, index) => renderTask(task, index))}
+        ${orderned.map((task, index) => renderTask(task, index))}
         <h4 class='title'>End</h4>
         `;
     }
 
     renderUser() {
+
+        const userName = localStorage.getItem('loginUser');
+        function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
+            if (taskRoot.userName !== userName) return;
+            const actionName = convertFileNameToTag(taskRoot.widget);
+            const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
+            return html`${unsafeHTML(sHtml)}`;
+        }
+        const orderned = this.sortKey(tasks);
+        return html`
+        <h4 class='title'>User: ${userName} </h4>
+            ${orderned.map((task, index) => renderTask(task, index))}
+        <h4 class='title'>End</h4>
+        `;
+        /*
         const getTitleUser = () => {
             const userName = localStorage['loginUser'];
             return html`${userName}`;
         }
-
         return html`
         <h4 class='title'>User Tasks</h4>
-        <div>Showing Jobs for user: ${getTitleUser()} </div>`;
+        <div>Showing Jobs for user: ${getTitleUser()} </div>`;*/
     }
 
     renderRef() {
@@ -165,13 +204,54 @@ export class ServiceAim100554 extends ServiceBase {
 
     async connectedCallback() {
         super.connectedCallback();
-        this.actions = await findActions([2], ['_100554_ServiceSource']); // todo: select cf context
+        if (!this.nav3Service) { // for preview test
+            this.actualServiceOpName = '_100554_ServiceSource';
+            this.actualServiceOpLevel = 2;
+        }
+        await this.setActions();
         this.requestUpdate();
     }
 
+    async attributeChangedCallback(prop: string, oldValue: string, newValue: string) {
+        super.attributeChangedCallback(prop, oldValue, newValue);
+        if (prop === 'actualserviceopname' && oldValue !== newValue) {
+            await this.setActions();
+            this.requestUpdate();
+        }
+    }
+
+    private async setActions() {
+        this.actions = await this.getActionsByContext();
+    }
+
+    private async getActionsByContext(): Promise<ResponseFindActions[]> {
+
+        if (!this.actualServiceOpName || this.actualServiceOpLevel !== this.level) {
+            const activeInstance = this.nav3Service?.getActiveInstance(this.invertedPosition);
+            if (!activeInstance || !(activeInstance instanceof ServiceBase)) {
+                return [];
+            }
+            const tag = activeInstance.tagName;
+            const fileName = convertTagToFileName(tag.toLowerCase());
+            this.actualServiceOpLevel = activeInstance.level;
+
+            this.actualServiceOpName = fileName;
+
+        }
+
+        const act = await findActions([this.level], [this.actualServiceOpName]);
+        return act;
+    }
+
     renderAdd() {
+
+        let filteredActions: ResponseFindActions[] = [];
+
+        if (!this.nav3Service) filteredActions = this.actions; // for preview test
+        else filteredActions = this.actions.filter((item) => item.tagsValid === true && item.levelsValid);
+
         const renderItems = () => {
-            return this.actions.map((action, index) => html`
+            return filteredActions.map((action, index) => html`
                 <div class="ActionItem" @click=${() => this.onAddTask(action, index)}>
                     <div>${action.title}</div>
                     <div>${action.project} - ${action.shortName}</div>
@@ -179,18 +259,28 @@ export class ServiceAim100554 extends ServiceBase {
             `);
         }
 
-        if (this.actions.length === 0) return html`<div class="no-actions">No Actions to Add</div>`;
+        // if (filteredActions.length === 0) return html`<div class="no-actions">No Actions to Add</div>`;
 
         const showListStyle = { display: !this.useContainerAdd ? 'none' : 'grid' };
         const showContainerStyle = { display: !this.useContainerAdd ? 'block' : 'none' };
 
         return html`
-        <div class='addTab'>
-          <h4 class='title'>Select Action to Add</h4>
+        <div class='addTab' >
+          <h4 class='title'>Select Action to Add : ${this.actualServiceOpName}</h4>
           <div class='ActionItemContainer'  style=${styleMap(showListStyle)}>
-            ${renderItems()}
+            ${filteredActions.length === 0
+                ? html`<div class="no-actions" style="color: #fff;">No Actions to Add</div>`
+                : renderItems()
+            }
           </div>
-          <div id='componentContainer' class='addContainer' style=${styleMap(showContainerStyle)} @finished-add-task-root=${this.finishedAddTaskRoot}></div> 
+          <div
+            id='componentContainer'
+            class='addContainer'
+            style=${styleMap(showContainerStyle)} 
+            @add-task=${this.finishedAddTaskRoot}
+            @finished-add-task-root=${this.finishedAddTaskRoot}
+          >
+          </div> 
         </div>
         `;
     }
@@ -202,6 +292,7 @@ export class ServiceAim100554 extends ServiceBase {
     }
 
     finishedAddTaskRoot(e: CustomEvent) {
+
         if (e.detail.cancel) {
             this.useContainerAdd = true;
             return;

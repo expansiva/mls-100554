@@ -71,6 +71,7 @@ export abstract class AimActionBase extends AimBase {
                 && child.mode !== 'error'
                 && child.nextStep) this.prepareNextStep(child);
             const taskName = convertFileNameToTag(child.widget);
+            
             const sHtml = `<${taskName} mode="${child.mode}" taskindex="${this.taskIndex}" childindex="${index}" />`
             return html`${unsafeHTML(sHtml)}`;
         }
@@ -79,11 +80,12 @@ export abstract class AimActionBase extends AimBase {
         const cost: number = taskRoot.cost || 0;
         return html`
             <details>
-                <summary style="height: 30px;"> ${this.renderToolbar()} ${this.title} $${cost}</summary>
+                <summary> ${this.renderToolbar()} ${this.title} $${cost}</summary>
                 ${taskRoot.children.map((child, index) => renderChild(child, index))}
-                <div style='margin-bottom: 5em;' />
             </details>
         `;
+
+        // <div style='margin-bottom: 5em;' />
     }
 
     async loadDynamicWidget(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild, widget: string): Promise<void> {
@@ -100,7 +102,7 @@ export abstract class AimActionBase extends AimBase {
         if (await tryLoad() === false) {
             child.trace.push(`Error on load widget ${widget}`);
             taskRoot.mode = child.mode = 'error';
-            this.requestUpdate();
+            // this.requestUpdate(); // looping here
         }
     }
 

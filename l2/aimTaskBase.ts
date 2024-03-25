@@ -42,7 +42,7 @@ export abstract class AimTaskBase extends AimBase {
 
         return html`
       <details>
-        <summary style="height: 30px;"> ${this.renderToolbar()} ${this.taskChild?.title}</summary>
+        <summary> ${this.renderToolbar()} ${this.taskChild?.title}</summary>
           ${this.renderBody(this.taskRoot, this.taskChild)}
       </details>
     `;
@@ -88,7 +88,7 @@ export abstract class AimTaskBase extends AimBase {
         return html`
       <details>
         <summary>${title}</summary>
-        <div style='margin: 10px'>${unsafeHTML(body.replace(/\n/g, '<br>'))}</div> 
+        <div>${unsafeHTML(body.replace(/\n/g, '<br>'))}</div> 
       </details>
     `;
     }

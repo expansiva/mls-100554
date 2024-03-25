@@ -36,8 +36,8 @@ export class AimTaskResultLess extends AimTaskBase {
         return html`
         <details open>
             <summary>${title}</summary>
-            <button @click=${this.onAccept}>Accept</button>
             <div style='margin: 10px'>
+                <button @click=${this.onAccept}>Accept</button>
                 <collab-show-code-snippet-100554 language="less"></collab-show-code-snippet-100554>
             </div> 
         </details>
