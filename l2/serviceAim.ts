@@ -8,7 +8,7 @@ import { tasks, readTasksFromServer } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
 
 @customElement('service-aim-100554')
-export class ServiceAim100554 extends ServiceBase { 
+export class ServiceAim100554 extends ServiceBase {
 
     constructor() {
         super();
@@ -117,11 +117,17 @@ export class ServiceAim100554 extends ServiceBase {
             const index = Number.parseInt(lastPart);
             return index;
         }
-        arr.sort((a: any, b: any) => getKey(b.key) - getKey(a.key));
-        return arr;
+
+        const inProcess = arr.filter(item => item.mode === 'in progress');
+        const processed = arr.filter(item => item.mode !== 'in progress');
+        processed.sort((a: any, b: any) => getKey(b.key) - getKey(a.key));
+
+        const sortedArray = inProcess.concat(processed);
+        return sortedArray;
     }
 
     renderAll() {
+
         function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}" />`;
@@ -151,7 +157,7 @@ export class ServiceAim100554 extends ServiceBase {
             ${orderned.map((task, index) => renderTask(task, index))}
         <h4 class='title'>End</h4>
         `;
-        
+
     }
 
     renderRef() {
