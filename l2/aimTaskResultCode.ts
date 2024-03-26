@@ -3,8 +3,7 @@
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
-import { initCollabShowCodeSnippet100554, CollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet';
-
+import { initCollabShowCodeSnippet100554, CollabShowCodeSnippet100554} from './_100554_collabShowCodeSnippet';
 import { getInfoMyService } from './_100554_aimHelper';
 
 @customElement('aim-task-result-code-100554')
@@ -18,7 +17,6 @@ export class AimTaskResultCode extends AimTaskBase {
     constructor() {
         super();
         initCollabShowCodeSnippet100554();
-
     }
 
     public onInitializing(): void { // from abstract
@@ -28,7 +26,7 @@ export class AimTaskResultCode extends AimTaskBase {
     renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
         const title = child.title;
         const body = child._tempResult || '';
-        this.result = body;
+        this.result = this.extractScript(body);
         return html`
         <details open>
             <summary>${title}- Code</summary>
@@ -36,7 +34,7 @@ export class AimTaskResultCode extends AimTaskBase {
             <collab-show-code-snippet-100554 withAccept="true" .onAccept=${this.onAccept.bind(this)}>
             </collab-show-code-snippet-100554>
             </div> 
-        </details>        
+        </details>
         `;
     }
 
@@ -47,6 +45,25 @@ export class AimTaskResultCode extends AimTaskBase {
         if (info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554') return;
         info.actServiceOp._ed1.getModel().setValue(this.result)
         
+    }
+
+    private extractScript(src: string) {
+        const regex = /```typescript([\s\S]+?)```/g;
+        const matches = src.match(regex);
+        const contents = [];
+
+        let ret = src;
+
+        if (matches) {
+            for (const m of matches) {
+                const conteudo = m.replace(/```typescript|```/g, '').trim();
+                contents.push(conteudo);
+            }
+
+            ret = contents[0];
+        }
+
+        return ret;
     }
 
     firstUpdated(a:any) {

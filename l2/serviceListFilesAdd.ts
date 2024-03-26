@@ -138,10 +138,13 @@ export class ServiceListFilesAdd100554 extends LitElement {
                 throw new Error('Please select an type ');
             }
 
-            const nameValue =  name.value.charAt(0).toLowerCase() + name.value.slice(1);
+            //const nameValue = name.value.charAt(0).toLowerCase() + name.value.slice(1);
+
+            const nameValue = name.value;
 
             this.showLoader(true);
             const newName = this.getNewNameAndValid(mls.actual[5].project as any, nameValue);
+
 
             const params = {} as mls.events.IFileAction;
 
@@ -171,10 +174,13 @@ export class ServiceListFilesAdd100554 extends LitElement {
             this.saveLocalHistory(params.project, params.shortName, params.extension, params.folder);
         } catch (e: any) {
 
-            console.info(e);
-            this.showLoader(false);
-            this.error = e.message;
-            (this.father as any).setError(e.message);
+            setTimeout(() => {
+                this.showLoader(false);
+                this.error = e.message;
+                (this.father as any).setError(e.message);
+            }, 200);
+            //console.info(e);
+
 
         }
 
@@ -322,10 +328,24 @@ export class ServiceListFilesAdd100554 extends LitElement {
         if (obj.shortName === '') return false;
 
         if (obj.shortName.length === 0 || obj.shortName.length > 255) return false;
+
         const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+
         if (invalidCharacters.test(obj.shortName)) return false;
+
+
         const key = mls.stor.getKeyToFiles(obj.project, obj.level, obj.shortName, obj.folder, obj.extension);
-        return !mls.stor.files[key];
+
+        let find = false;
+        const keys = Object.keys(mls.stor.files);
+        for (const k of keys) {
+
+            if (key.toLocaleLowerCase() === k.toLocaleLowerCase()) find = true;
+
+        }
+
+
+        return !mls.stor.files[key] && !find;
 
     }
 
