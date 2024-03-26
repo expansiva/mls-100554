@@ -403,6 +403,7 @@ export class ServicePreviewView extends LitElement {
             const s = document.createElement('script') as HTMLScriptElement;
             s.textContent = `
 				window['mls'] = window['mls']  ? window['mls']  : parent.mls ? parent.mls : top['mls'];
+				window['latest'] = window['latest']  ? window['latest']  : parent.latest ? parent.latest : top['latest'];
 				window['Quill'] = window['Quill']  ? window['Quill']  : parent.Quill ? parent.Quill : top['Quill'];
 				window['l2_html'] = window['l2_html']  ? window['l2_html']  : parent.l2_html ? parent.l2_html : top['l2_html'];
                 window['monaco'] = window['monaco']  ? window['monaco']  : parent.monaco ? parent.monaco : top['monaco'];

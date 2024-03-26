@@ -46,7 +46,7 @@ export class ServiceDsStyles extends ServiceBase {
         onClickLink: this.onClickLink,
     }
 
-    public setEditorSource(less:string) {
+    public setEditorSource(less: string) {
         return this.setStyle(less);
     }
 
@@ -54,6 +54,21 @@ export class ServiceDsStyles extends ServiceBase {
         const model = this._ed1?.getModel();
         const val = model?.getValue() || '';
         return val;
+    }
+
+    public getEditorComponentSource() {
+        const model = this._ed1?.getModel();
+        let val = model?.getValue() || '';
+        val = this.removeTokensForSource(val);
+        return val;
+    }
+
+    public getActualRef() {
+        if (this.isComponent && this.selectStyles && this.dsInstance) {
+            const selectStyle = this.stylesComponent[+this.selectStyles.value]
+            return this.dsInstance.dsindex.toString() + this.componentName + '.' + selectStyle.stylename;
+        }
+        return ''
     }
 
     static modelCount = 0;
@@ -555,10 +570,27 @@ export class ServiceDsStyles extends ServiceBase {
         let textByRange = styleLess;
         const content = `${textByRange.trim()}\n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
         const model = this._ed1.getModel();
+
+
         if (!model) return;
-        const range = new monaco.Range(0, 0, model.getLineCount() + 1, 0);
-        this._ed1.updateOptions({ readOnly: false });
-        this._ed1.executeEdits('style', [{ range, text: content.trim() }]);
+        const fullRange = model.getFullModelRange();
+
+        const lines = content.trim().split('\n');
+        const operations = [{
+            range: fullRange,
+            text: '',
+            forceMoveMarkers: true
+        }, {
+            range: { startLineNumber: 1, startColumn: 1 },
+            text: lines.join('\n'),
+            forceMoveMarkers: true
+        }];
+
+        model.pushEditOperations([], operations as any, () => []);
+
+        // const range = new monaco.Range(0, 0, model.getLineCount() + 1, 0);
+        // this._ed1.updateOptions({ readOnly: false });
+        // this._ed1.executeEdits('style', [{ range, text: content.trim() }]);
         this._ed1.setScrollPosition({ scrollTop: 0 });
         const position = new monaco.Position(0, 0);
         this._ed1.setPosition(position);
@@ -674,10 +706,8 @@ export class ServiceDsStyles extends ServiceBase {
             origemLevel: 3
         };
 
-        if (!isGet) {
-            const regex = /\/\/Start Less Tokens[\s\S]*?\/\/End Less Tokens/g;
-            rc.less = less.replace(regex, '');
-        }
+        if (!isGet) rc.less = this.removeTokensForSource(rc.less);
+
         if (!this.isComponent && !isGet) {
             if (!this.dsInstance) return;
             const cssItem = this.dsInstance.css.list['definitions'];
@@ -699,6 +729,11 @@ export class ServiceDsStyles extends ServiceBase {
         }
         else this.isEventAdd = false;
 
+    }
+
+    private removeTokensForSource(src: string) {
+        const regex = /\/\/Start Less Tokens[\s\S]*?\/\/End Less Tokens/g;
+        return src.replace(regex, '');
     }
 
     private async onAfterAdd() {

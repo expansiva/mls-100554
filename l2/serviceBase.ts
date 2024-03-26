@@ -32,14 +32,18 @@ export abstract class ServiceBase extends LitElement {
     abstract details: IService;
 
     abstract menu: IMenu;
-
+    
     abstract onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void;
+
+    getActualRef(): string  {
+        return this.nav3Service?.getAttribute('data-service') || '';
+    }
 
     connectedCallback() {
         super.connectedCallback();
         (this as any)['mlsWidget'] = this;
         this.serviceContent?.addEventListener('focusin', this.checkFocus.bind(this));
-        this.serviceContent?.addEventListener('mouseenter', this.checkMouse.bind(this));
+        // this.serviceContent?.addEventListener('mouseenter', this.checkMouse.bind(this));
     }
 
     checkFocus() {

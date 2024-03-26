@@ -6,7 +6,7 @@ import { AimTaskBase } from "./_100554_aimTaskBase";
 import { ServiceDsStyles } from "_100554_serviceDsStyles";
 
 @customElement('aim-task-ds-styles-100554')
-class AimTaskDsStyles extends AimTaskBase {
+export class AimTaskDsStyles extends AimTaskBase {
 
     public onInitializing(): void { // from abstract
         this.getSource();
@@ -22,7 +22,7 @@ class AimTaskDsStyles extends AimTaskBase {
 
     }
 
-    private getStyle(): Promise<string> {
+    getStyle(): Promise<string> {
 
         return new Promise<string>(async (resolve, reject) => {
             try {
@@ -36,6 +36,7 @@ class AimTaskDsStyles extends AimTaskBase {
                 if (activeServiceOp.tagName !== 'SERVICE-DS-STYLES-100554') reject('100554_ServiceDsStyles is not active in level 3');
                 if (!activeServiceOp.isComponent) reject('100554_ServiceDsStyles is in globalCss mode, please open component style');
                 const val = activeServiceOp.getEditorSource();
+                this.taskChild.ref = activeServiceOp.getActualRef() || '';
                 resolve(val);
 
             } catch (e: any) {
