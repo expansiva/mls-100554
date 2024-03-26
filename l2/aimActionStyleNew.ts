@@ -72,10 +72,11 @@ export class AimActionStyleNew extends AimActionBase {
 Objective: Criar um novo css em LESS.
 \n
 \n
-Instructions:\n
+System:\n
 1. Usando less, CSS, criar um novo estilo conforme modelo abaixo, e sugestões do usuário \n
-2. Criar um Less isolado, utilizando os tokens conforme modelo abaixo
-3. ${user}\n\n
+2. Criar um Less isolado, utilizando os tokens conforme modelo abaixo\n
+User:\n
+1. ${user}\n\n
 \n
 \n
 Expected Output Format:

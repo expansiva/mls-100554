@@ -73,10 +73,11 @@ export class AimActionTokensNew extends AimActionBase {
 Objective: Criar um conjunto de tokens em LESS.
 \n
 \n
-Instructions:\n
+System:\n
 1. Usando less, CSS, criar um novo conjunto de tokens less, baseado nos tokens existentes \n
-2. Criar os tokens conforme o modelo abaixo, mantendo as chaves e alterando os valores
-3. ${user}\n\n
+2. Criar os tokens conforme o modelo abaixo, mantendo as chaves e alterando os valores \n\n
+User:\n
+1. ${user}
 \n
 \n
 Expected Output Format:
