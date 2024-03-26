@@ -2,7 +2,7 @@
 
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { collab_check, collab_copy } from './_100554_collabIcons'
+import { collab_check, collab_copy, collab_double_check } from './_100554_collabIcons'
 
 export function initCollabShowCodeSnippet100554() {
   return true;
@@ -12,17 +12,20 @@ export class CollabShowCodeSnippet100554 extends LitElement {
 
   @property({ type: String, reflect: true }) language = 'typescript';
 
+  @property({ type: Boolean, reflect:true }) withCopy = true;
+
+  @property({ type: Boolean, reflect: true }) withAccept = false;
+
   @property({ type: Boolean }) coping = false;
+
+  @property({ type: Boolean }) accepting = false;
 
   @query('.code')
   codeBlock: HTMLElement | undefined
-  text = `  set textIn(text: string) {
-    this.text = text;
-    if (!this.codeBlock) return;
-    this.waitForLoadIfNeeded(() => {
-      this.setCode();
-    });
-  }`;
+
+  text = ``;
+
+  onAccept: Function | undefined = ()=>{ console.info('not implement')};
 
   set textIn(text: string) {
     this.text = text;
@@ -84,24 +87,62 @@ export class CollabShowCodeSnippet100554 extends LitElement {
     }, 3000)
   }
 
+  private onAcceptClick() {
+    if (this.onAccept && typeof this.onAccept === 'function') {
+      this.accepting = true;
+      this.onAccept();
+      setTimeout(() => {
+        this.accepting = false;
+      }, 3000)
+    }
+  }
+
   render() {
     return html`
        <div class="actions">
             <span class="language">${this.language}</span>
-            <div @click=${this.onCopyClick} class="cp copy" style="display:${this.coping ? 'none' : 'flex'}">
-            <div>
-              ${collab_copy}
+            <div class="actions-list">
+             ${this.withAccept ?
+        this.renderWithAccept() : ''
+      }
+             ${this.withCopy ?
+        this.renderWithCopy() : ''
+      }
             </div>
-              <span>Copy</span>
-            </div>
-            <div class="cp copied" style="display:${this.coping ? 'flex' : 'none'}">
-              ${collab_check}
-              <span>Copied</span>
-            </div>
-
        </div>
+
        <pre><code class="code"></code></pre>
     `;
+  }
+
+  private renderWithCopy() {
+    return html`
+      <div @click=${this.onCopyClick} class="action-item" style="display:${this.coping ? 'none' : 'flex'}">
+        <div>
+          ${collab_copy}
+        </div>
+        <span>Copy</span>
+    </div>
+    <div class="action-item copied" style="display:${this.coping ? 'flex' : 'none'}">
+      ${collab_check}
+      <span>Copied</span>
+    </div>
+    `
+  }
+
+  private renderWithAccept() {
+    return html`
+      <div @click=${this.onAcceptClick} class="action-item" style="display:${this.accepting ? 'none' : 'flex'}">
+        <div>
+          ${collab_check}
+        </div>
+        <span>Accept</span>
+    </div>
+    <div class="action-item accepted" style="display:${this.accepting ? 'flex' : 'none'}">
+      ${collab_double_check}
+      <span>Accepted</span>
+    </div>
+    `
   }
 
   static styles = css`
@@ -216,16 +257,28 @@ export class CollabShowCodeSnippet100554 extends LitElement {
         align-items:center;
         padding:0 1rem; 
         color:#fff;
+        .actions-list{
+          display:flex;
+          gap:1rem;
+        }
       }
       .language {
         flex:1;
       }
-      .cp{
+      
+      .action-item{
         display:flex; 
         align-items:center;
-      }
-      .copy {
+        justify-content: center;
         cursor:pointer;
+        min-width: 70px;
+      }
+      .accepted{
+        cursor:default;
+
+      }
+      .copied {
+        cursor:default;
       }
     `;
 

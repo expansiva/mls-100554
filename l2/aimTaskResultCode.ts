@@ -31,8 +31,7 @@ export class AimTaskResultCode extends AimTaskBase {
         <details open>
             <summary>${title}- Code</summary>
             <div style='margin: 10px'>
-            <button @click=${this.onAccept}>Accept</button>
-            <collab-show-code-snippet-100554>
+            <collab-show-code-snippet-100554 withAccept="true" .onAccept=${this.onAccept.bind(this)}>
             </collab-show-code-snippet-100554>
             </div> 
         </details>
