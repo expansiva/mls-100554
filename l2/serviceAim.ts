@@ -1,6 +1,6 @@
 /// <mls shortName="serviceAim" project="100554" enhancement="_100554_enhancementLitService" groupName="service"/>
 
-import { html, css, unsafeHTML, render, styleMap } from 'lit';
+import { html, css, unsafeHTML, render, styleMap, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IToolbarChangeEvent } from './_100554_serviceBase';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
@@ -118,12 +118,22 @@ export class ServiceAim100554 extends ServiceBase {
             return index;
         }
 
-        const inProcess = arr.filter(item => item.mode === 'in progress');
-        const processed = arr.filter(item => item.mode !== 'in progress');
-        processed.sort((a: any, b: any) => getKey(b.key) - getKey(a.key));
+        function sort(a: cbe.ITaskRoot, b: cbe.ITaskRoot) {
+            if (a.mode === "in progress" && b.mode !== "in progress") {
+                return -1;
+            } else if (a.mode !== "in progress" && b.mode === "in progress") {
+                return 1; // Coloca 'in process' depois de outros elementos
+            }
+            else { 
+                return getKey(b.key as string) - getKey(a.key as string)
+            }
+        }
 
-        const sortedArray = inProcess.concat(processed);
-        return sortedArray;
+        return arr.sort(sort);
+
+        //return arr.sort((a: any, b: any) => getKey(b.key) - getKey(a.key));
+
+    
     }
 
     renderAll() {
@@ -135,11 +145,19 @@ export class ServiceAim100554 extends ServiceBase {
         }
         const orderned = this.sortKey(tasks);
 
+
         return html`
         <h4 class='title'>All Tasks</h4>
-        ${orderned.map((task, index) => renderTask(task, index))}
+            ${repeat(
+            orderned,
+            ((task: cbe.ITaskRoot, index: number) => index) as any,
+            ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
+        )}
         <h4 class='title'>End</h4>
         `;
+
+        // ${orderned.map((task, index) => renderTask(task, index))}
+
     }
 
     renderUser() {
