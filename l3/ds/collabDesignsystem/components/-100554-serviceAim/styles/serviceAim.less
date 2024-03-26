@@ -6,6 +6,7 @@ service-aim-100554 { //don't change this line
         overflow: auto;
     }
     
+    
     .addTab {
       height: 100%;
       background-image: linear-gradient(to bottom, #23376a, #600965); 
@@ -16,59 +17,19 @@ service-aim-100554 { //don't change this line
       background-image: linear-gradient(to bottom, #23376a, #600965);
       color: antiquewhite;
     }
-    
     details { 
         font-size: 16px; 
-        padding-left:  10px;
-        padding-top: .3rem;
-        padding-bottom: 0.2rem;
-        >summary {
-            text-transform: capitalize;
-            font-size: 14px;
-        }
-        &[open] {
-            margin-bottom: 2rem;
-            padding-bottom: .5rem;
-
-        }
-        // margin: 10px; 
-        details > * {
-            padding-left: 30px;
-        }
-
-        [childindex]{
-            summary{
-                margin-top: 1rem;
-
-            }
-        }
-        details {
-            margin:0;
-        }  
+        margin: 10px; 
     }
-
-    [mode="error"]{
-        .buttonIcon[title="Error"]{
-            color: @error-color;
-        }
-    }
-
-    [mode="processed"]{
-        .buttonIcon{
-            color: @success-color;
-        }
-    }
-
     button {
         padding: 1.3em;//_100554_serviceDsStyleSpacing
         border: 4px solid transparent;//_100554_serviceDsStyleBorder
     }
     summary { cursor: pointer; }
     .toolbar {
-        display: inline-flex;
-        margin-left: 0.5rem;
-        margin-right: 0.5rem;
-        gap: 1rem;
+        align-items: center;
+        margin-left: 20px;
+        margin-right: 20px;
     }
     .buttonGroup {
         display: flex;
@@ -76,10 +37,11 @@ service-aim-100554 { //don't change this line
         gap: 2em;
     }    
     .buttonIcon {
-      cursor: pointer;
+      cursor: point;
       height: 26px;
-      // width: 26px;
-      display: inline-flex;
+      width: 26px;
+      font: normal normal normal 16px/1;
+      display: inline-block;
       border: none;
       background-color: transparent;
       text-decoration: none;
@@ -99,7 +61,6 @@ service-aim-100554 { //don't change this line
         padding: 1em;
     }
     .ActionItem {
-        cursor: pointer;
         height: 3em;
         width: 20em;
         background-color: #f3e5f5;
@@ -125,7 +86,7 @@ service-aim-100554 { //don't change this line
     }
     
     .title { 
-        color: #fff; 
+        color: #18061c; 
         background-image: linear-gradient(to right, #a077c5, #7764bf, #4A90E2); 
         text-align: center; 
         margin: 0; 
@@ -188,4 +149,6 @@ service-aim-100554 { //don't change this line
         display: none;
     }
 }
+
+
 

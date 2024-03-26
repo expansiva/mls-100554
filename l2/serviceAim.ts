@@ -12,7 +12,7 @@ import { findActions, ResponseFindActions } from './_100554_aimActionBase';
 export class ServiceAim100554 extends ServiceBase {
 
     constructor() {
-        super();
+        super(); 
         this.setEvents();
     }
 
