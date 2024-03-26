@@ -7,12 +7,11 @@ import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { tasks, readTasksFromServer } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
 
-
 @customElement('service-aim-100554')
-export class ServiceAim100554 extends ServiceBase {
+export class ServiceAim100554 extends ServiceBase { 
 
     constructor() {
-        super(); 
+        super();
         this.setEvents();
     }
 
@@ -152,14 +151,7 @@ export class ServiceAim100554 extends ServiceBase {
             ${orderned.map((task, index) => renderTask(task, index))}
         <h4 class='title'>End</h4>
         `;
-        /*
-        const getTitleUser = () => {
-            const userName = localStorage['loginUser'];
-            return html`${userName}`;
-        }
-        return html`
-        <h4 class='title'>User Tasks</h4>
-        <div>Showing Jobs for user: ${getTitleUser()} </div>`;*/
+        
     }
 
     renderRef() {

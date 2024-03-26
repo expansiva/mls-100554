@@ -76,12 +76,14 @@ export abstract class AimTaskBase extends AimBase {
     renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
         const promptTitle = `prompt len=${child.prompt?.length}, tokens=${child.promptTokens}`;
         let resultTitle = 'no result yeat';
-        if (child.result) resultTitle = `result len=${child.result.length}, tokens=${child.resultTokens}`;
+
+        if (child.result)resultTitle = `result len=${child.result.length}, tokens=${child.resultTokens}`;
+
         return html`
-      ${this.renderDetails(promptTitle, child.prompt || '')}
-      ${this.renderDetails(resultTitle, child.result || '')}
-      ${this.renderTraceList('trace', child)}
-    `;
+            ${child.prompt ? this.renderDetails(promptTitle, child.prompt) : ''}
+            ${child.result ? this.renderDetails(resultTitle, child.result) : ''}
+            ${child ? this.renderTraceList('trace', child) : ''}
+        `;
     }
 
     renderDetails(title: string, body: string): TemplateResult {

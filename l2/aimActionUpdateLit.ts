@@ -2,7 +2,7 @@
 				
 import { html, TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
+import { tasks, ITaskFinish, updateTaskOnServer, getInfoMyService } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 
 const myName = '_100554_aimActionUpdateLit';
@@ -81,11 +81,11 @@ export class AimActionUpdateLit extends AimActionBase {
 
         const prompt = ` 
         Objective: Usando typescript, lit 3, alterar o código abaixo seguindo as instruções.\n\n
-        Instructions:\n
+        System:\n
         1. Manter a linha 1 (tripe slash) que é de controle\n
-        2. Fazer e manter comentários no código em ingles\n
-        3. ${req}\n\n
-
+        2. Fazer e manter comentários no código em ingles\n\n
+        User:\n
+        1. ${req}\n\n
         Expected Output Format:\n
             Retornar o novo source inteiro em um unico bloco\n\n
 
@@ -100,6 +100,7 @@ export class AimActionUpdateLit extends AimActionBase {
             mode: 'initializing',
             title: 'get typescript source',
             widget: '_100554_aimTaskTSSource',
+            ref: mls.actual[2].getFullName(),
             trace: [],
             nextStep: this.prepareTask2.name // danger, loop
         });
@@ -126,6 +127,7 @@ export class AimActionUpdateLit extends AimActionBase {
             widget: '_100554_aimTaskExecLLM',
             agent: this.assistant,
             prompt: this.getPrompt(source),
+            ref: mls.actual[2].getFullName(),
             trace: [],
             nextStep: this.prepareTask3.name // danger, loop
         });
@@ -144,6 +146,7 @@ export class AimActionUpdateLit extends AimActionBase {
             mode: 'initializing',
             title: 'result',
             widget: '_100554_aimTaskResultCode',
+            ref: mls.actual[2].getFullName(),
             trace: [],
             _tempResult: result,
             nextStep: this.endTasks.name // danger, loop

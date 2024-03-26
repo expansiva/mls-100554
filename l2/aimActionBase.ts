@@ -64,6 +64,26 @@ export abstract class AimActionBase extends AimBase {
         this.childThis = this;
     }
 
+    private getPromptUser(task: cbe.ITaskRoot): string {
+
+        let ret = '';
+
+        if (task.children.length <= 0) return ret;
+
+        const child = task.children.find((i: cbe.ITaskChild) => i.widget === '_100554_aimTaskExecLLM');
+
+        if (!child || !child.prompt) return ret;
+
+        const regex = /User:(.*?)(?=\n\n\n|$)/s;
+        const match = child.prompt.match(regex);
+
+        if (match && match.length > 0) {
+            ret = match[1].trim();
+        }
+        return ret;
+
+    }
+
     renderTaskRoot(): TemplateResult {
         const renderChild = (child: cbe.ITaskChild, index: number) => {
             this.loadDynamicWidget(taskRoot, child, child.widget);
@@ -78,9 +98,35 @@ export abstract class AimActionBase extends AimBase {
         if (this.taskIndex < 0 || this.taskIndex >= tasks.length) return html`invalid task index`;
         const taskRoot = tasks[this.taskIndex];
         const cost: number = taskRoot.cost || 0;
+        const promptUser = this.getPromptUser(taskRoot);
         return html`
             <details>
-                <summary> ${this.renderToolbar()} ${this.title} $${cost}</summary>
+                <summary>
+
+                    <div style=" display: inline-flex; align-items: center; gap:.7rem">
+    
+                        ${this.renderToolbar()} 
+                        
+                        <span style=" overflow:hidden; width:100px; text-overflow:ellipsis;  white-space: nowrap; display:inline-block">
+                            ${this.title}
+                        </span>
+
+                        ${
+                            !!promptUser ? html`<div style=" overflow:hidden; width:200px; text-overflow:ellipsis;  white-space: nowrap; display:inline-block"> ${this.iconPrompt} ${promptUser} </div>` : ''
+                        }
+
+                        <div> 
+                            ${this.iconUser}
+                            ${taskRoot.userName}
+                        </div> 
+
+                        <div> 
+                            ${this.iconMoney}
+                            ${cost}
+                        </div> 
+                    </div>
+                    
+                </summary>
                 ${taskRoot.children.map((child, index) => renderChild(child, index))}
             </details>
         `;
