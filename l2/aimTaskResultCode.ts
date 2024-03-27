@@ -43,7 +43,7 @@ export class AimTaskResultCode extends AimTaskBase {
         <details @click=${this.onToogleDetails}>
             <summary>${title}- Diff</summary>
             <div style='margin-top: 10px;height:400px;'>
-            <collab-show-code-diff-100554>
+            <collab-show-code-diff-100554 alias="100554_aimTaskResultCode">
             </collab-show-code-diff-100554>
             </div>
         </details>

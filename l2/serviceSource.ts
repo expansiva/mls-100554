@@ -542,7 +542,7 @@ export class ServiceSource100554 extends ServiceBase {
                 }
 
                 if (needMsg) {
-                    window.collabMessages.add("Files changed in server , please use F5 to reload", 'information');
+                    window.collabMessages.add("Files changed in server , please use F5 to reload", 'information', {autoClose:false,clearOnClose: false});
                 }
 
             } catch (e) {
