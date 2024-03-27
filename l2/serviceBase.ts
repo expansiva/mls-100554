@@ -43,7 +43,6 @@ export abstract class ServiceBase extends LitElement {
         super.connectedCallback();
         (this as any)['mlsWidget'] = this;
         this.serviceContent?.addEventListener('focusin', this.checkFocus.bind(this));
-        // this.serviceContent?.addEventListener('mouseenter', this.checkMouse.bind(this));
     }
 
     checkFocus() {
