@@ -85,8 +85,21 @@ export class ServiceDsTokens100554 extends ServiceBase {
     public async setEditorSource(tokens: string, tokensType: string) {
 
         if (!this.models[tokensType]) return;
-        const colorModel: monaco.editor.ITextModel = this.models[tokensType];
-        colorModel.setValue(tokens);
+        const model: monaco.editor.ITextModel = this.models[tokensType];
+        const fullRange = model.getFullModelRange();
+        const lines = tokens.trim().split('\n');
+        const operations = [{
+            range: fullRange,
+            text: '',
+            forceMoveMarkers: true
+        }, {
+            range: { startLineNumber: 1, startColumn: 1 },
+            text: lines.join('\n'),
+            forceMoveMarkers: true
+        }];
+
+        model.pushEditOperations([], operations as any, () => []);
+
         return;
 
     }
