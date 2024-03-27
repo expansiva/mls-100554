@@ -1,5 +1,5 @@
 /// <mls shortName="aimActionUpdateLit" project="100554" enhancement="_100554_enhancementLit" />
-				
+
 import { html, TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { tasks, ITaskFinish, updateTaskOnServer, getInfoMyService } from './_100554_aimHelper';
@@ -27,12 +27,12 @@ export class AimActionUpdateLit extends AimActionBase {
 
     private handleCancel() {
         this.dispatchEvent(new CustomEvent('add-task', {
-            detail: { cancel: 'true' }, bubbles: true, composed: true 
+            detail: { cancel: 'true' }, bubbles: true, composed: true
         }));
     }
 
     private handleAdd(): void {
-        
+
         if (this.textarea) {
 
             (window as any)['aim-action-update-lit-100554'] = this.textarea.value;
@@ -43,13 +43,13 @@ export class AimActionUpdateLit extends AimActionBase {
             mode: 'initializing',
             title: 'update Lit',
             widget: myName,
-            children: [ ],
-            trace: [ new Date().toISOString() + ': trask created at ' ]          
+            children: [],
+            trace: [new Date().toISOString() + ': trask created at ']
         }
         tasks.unshift(taskRoot);
         this.prepareTask1(taskRoot);
         this.dispatchEvent(new CustomEvent('finished-add-task-root', {
-            detail: taskRoot, bubbles: true, composed: true 
+            detail: taskRoot, bubbles: true, composed: true
         }));
     }
 
@@ -68,7 +68,6 @@ export class AimActionUpdateLit extends AimActionBase {
         </div>
     `;
     }
-
 
     getPrompt(source: string) {
 
@@ -100,7 +99,6 @@ export class AimActionUpdateLit extends AimActionBase {
             mode: 'initializing',
             title: 'get typescript source',
             widget: '_100554_aimTaskTSSource',
-            ref: mls.actual[2].getFullName(),
             trace: [],
             nextStep: this.prepareTask2.name // danger, loop
         });
@@ -127,7 +125,6 @@ export class AimActionUpdateLit extends AimActionBase {
             widget: '_100554_aimTaskExecLLM',
             agent: this.assistant,
             prompt: this.getPrompt(source),
-            ref: mls.actual[2].getFullName(),
             trace: [],
             nextStep: this.prepareTask3.name // danger, loop
         });
@@ -146,7 +143,6 @@ export class AimActionUpdateLit extends AimActionBase {
             mode: 'initializing',
             title: 'result',
             widget: '_100554_aimTaskResultCode',
-            ref: mls.actual[2].getFullName(),
             trace: [],
             _tempResult: result,
             nextStep: this.endTasks.name // danger, loop

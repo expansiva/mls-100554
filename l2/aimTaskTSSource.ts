@@ -34,7 +34,7 @@ class AimTaskTSSource extends AimTaskBase {
             try {
 
                 const info = getInfoMyService(this);
-                if (!info) {
+                if (!info || ( info.actServiceOp && info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554')) {
                     reject('Not found info in getFileSource');
                     return;
                 }
@@ -58,6 +58,7 @@ class AimTaskTSSource extends AimTaskBase {
                 }
 
                 const ret = await file.getContent();
+                this.taskChild.ref = info.actServiceOp.getActualRef();
                 resolve(ret as any);
                 
             } catch (e:any) {

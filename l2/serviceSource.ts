@@ -470,18 +470,18 @@ export class ServiceSource100554 extends ServiceBase {
             (mls.actual[this.level] as any)[this.position] = {
                 project: fileAction.newProject,
                 shortName: fileAction.newshortName
-            
+
             }
-            
+
             fileAction.project = fileAction.newProject as any;
             fileAction.shortName = fileAction.newshortName as any;
             fileAction.newProject = undefined as any;
             fileAction.newshortName = undefined as any;
             fileAction.action = 'open';
             ev.desc = JSON.stringify(fileAction);
-            
+
             this.onMLSEvents(ev);
-            
+
             //this.showActiveModel();
             //mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
         };
@@ -498,7 +498,7 @@ export class ServiceSource100554 extends ServiceBase {
             (mls.actual[this.level] as any)[this.position] = {
                 project: fileAction.newProject,
                 shortName: fileAction.newshortName
-            
+
             }
 
             fileAction.project = fileAction.newProject as any;
@@ -806,7 +806,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (model) cont = model.getValue();
         else {
             key = mls.stor.getKeyToFiles(project, storFile.level, shortName, '', '.html');
-            if(mls.stor.files[key])cont = await mls.stor.files[key].getContent() as any;
+            if (mls.stor.files[key]) cont = await mls.stor.files[key].getContent() as any;
         }
 
         const baseTag = convertFileNameToTag(`_${storFile.project}_${storFile.shortName}`)
@@ -821,7 +821,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (!file) {
 
-            file = await mls.stor.addOrUpdateFile({ project, level: storFile.level, shortName:newShortName, extension: '.html', versionRef: new Date().toISOString(), folder: '' });
+            file = await mls.stor.addOrUpdateFile({ project, level: storFile.level, shortName: newShortName, extension: '.html', versionRef: new Date().toISOString(), folder: '' });
             file.status = 'new';
         }
 
@@ -1309,6 +1309,31 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         } catch (e) {
 
             return false
+
+        }
+
+    }
+
+    public getActualRef(): string {
+
+        try {
+
+            let ret = '';
+
+            if (!mls.actual[2] || !(mls.actual[2] as any)[this.position]) return ret;
+            
+            const actual = (mls.actual[2] as any)[this.position];
+            const ext = this.menu.lastIcon === 'icTs' ? '.ts' : '.html';
+
+            if (!actual) return ret;
+
+            ret = mls.stor.getKeyToFiles(actual.project, 2, actual.shortName, actual.folder, ext);
+
+            return ret;
+
+        } catch (e) {
+
+            return '';
 
         }
 

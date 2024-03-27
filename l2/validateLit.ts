@@ -23,7 +23,7 @@ export function validateTagName(mfile: mls.l2.editor.IMFile): boolean {
             if (!decoratorInfo || decoratorInfo.decoratorName !== decoratorToCheck) return;
 
             let correctTagName = convertFileNameToTag(`_${mfile.project}_${mfile.shortName}`);
-            if(correctTagName.startsWith('-')) correctTagName = correctTagName.substring(1) // santiago
+            
             if (correctTagName !== decoratorInfo.tagName) {
                 rc = true;
                 setErrorOnModel(mfile.model, _decorator.line + 1, decoratorToCheck.length + 3, _decorator.text.length + 1, `Invalid web component tag name, the correct definition is: ${correctTagName}`, monaco.MarkerSeverity.Error);

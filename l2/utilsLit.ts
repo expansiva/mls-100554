@@ -20,6 +20,8 @@ export function convertFileNameToTag(widget: string) {
         const convertedSrc = rest.replace(/([A-Z])/g, '-$1').toLowerCase();
         widget = `${convertedSrc}-${number}`;
     }
+
+    if(widget.startsWith('-')) widget = widget.substring(1) // santiago
     return widget;
 }
 

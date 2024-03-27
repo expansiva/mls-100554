@@ -3,7 +3,8 @@
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
-import { initCollabShowCodeSnippet100554, CollabShowCodeSnippet100554} from './_100554_collabShowCodeSnippet';
+import { initCollabShowCodeSnippet100554, CollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet';
+import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
 import { getInfoMyService } from './_100554_aimHelper';
 
 @customElement('aim-task-result-code-100554')
@@ -12,11 +13,15 @@ export class AimTaskResultCode extends AimTaskBase {
     @query('collab-show-code-snippet-100554')
     codeSnippet: CollabShowCodeSnippet100554 | undefined;
 
+    @query('collab-show-code-diff-100554')
+    codeDif: CollabShowCodeDiff | undefined;
+
     private result: string = '';
 
     constructor() {
         super();
         initCollabShowCodeSnippet100554();
+        initCollabShowCodeDiff100554();
     }
 
     public onInitializing(): void { // from abstract
@@ -31,9 +36,16 @@ export class AimTaskResultCode extends AimTaskBase {
         <details open>
             <summary>${title}- Code</summary>
             <div style='margin: 10px'>
-            <collab-show-code-snippet-100554 withAccept="true" .onAccept=${this.onAccept.bind(this)}>
-            </collab-show-code-snippet-100554>
+                <collab-show-code-snippet-100554 withAccept="true" .onAccept=${this.onAccept.bind(this)}>
+                </collab-show-code-snippet-100554>
             </div> 
+        </details>
+        <details @click=${this.onToogleDetails}>
+            <summary>${title}- Diff</summary>
+            <div style='margin-top: 10px;height:400px;'>
+            <collab-show-code-diff-100554>
+            </collab-show-code-diff-100554>
+            </div>
         </details>
         `;
     }
@@ -44,7 +56,33 @@ export class AimTaskResultCode extends AimTaskBase {
 
         if (info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554') return;
         info.actServiceOp._ed1.getModel().setValue(this.result)
-        
+
+    }
+
+    private onToogleDetails(event: MouseEvent) {
+
+        let detailsElement = event.target as HTMLDetailsElement;
+        detailsElement = detailsElement.closest('details') as HTMLDetailsElement;
+        if (!detailsElement || !this.codeDif) return;
+        if (!detailsElement.open) {
+            const info = getInfoMyService(this);
+            if (!info || !info.actServiceOp) return;
+
+            let origem = '';
+
+            if (info.actServiceOp.tagName === 'SERVICE-SOURCE-100554') {
+
+                origem = info.actServiceOp._ed1.getModel().getValue();
+
+            };
+
+            this.codeDif.setInitialHistories(origem, this.result);
+
+        }
+
+
+
+
     }
 
     private extractScript(src: string) {
@@ -66,7 +104,7 @@ export class AimTaskResultCode extends AimTaskBase {
         return ret;
     }
 
-    firstUpdated(a:any) {
+    firstUpdated(a: any) {
         super.firstUpdated(a);
         if (this.codeSnippet) this.codeSnippet.textIn = this.result;
     }
