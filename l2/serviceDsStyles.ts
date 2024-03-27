@@ -64,11 +64,21 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     public getActualRef() {
-        if (this.isComponent && this.selectStyles && this.dsInstance) {
-            const selectStyle = this.stylesComponent[+this.selectStyles.value]
-            return this.dsInstance.dsindex.toString() + this.componentName + '.' + selectStyle.stylename;
+        if (!this.dsInstance) return '';
+        if (this.isComponent && this.selectStyles) {
+            const selectStyle = this.stylesComponent[+this.selectStyles.value];
+            const folder = (this.dsInstance as any)['getDsComponentStyleFilePath'](this.componentName);
+            mls.actual[0].setFullName(this.componentName);
+            const { project, path } = mls.actual[0];
+            if (project === undefined || !path) return ''
+            const key = mls.stor.getKeyToFiles(project, 3, selectStyle.stylename, folder, '.less');
+            return key;
         }
-        return ''
+
+        const folderGlobal = (this.dsInstance as any)['getDsCssFilePath']();
+        const key = mls.stor.getKeyToFiles(this.dsInstance.project, 3, 'definitions', folderGlobal, '.less');
+        return key;
+
     }
 
     static modelCount = 0;
