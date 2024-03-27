@@ -70,7 +70,7 @@ export class AimTaskResultLess extends AimTaskBase {
         <details @click=${this.onToogleDetails}>
             <summary>${title}- Diff</summary>
             <div style='margin-top: 10px;height:400px;'>
-            <collab-show-code-diff-100554 editorType="less">
+            <collab-show-code-diff-100554 editorType="less" alias="100554_aimTaskResultLess">
             </collab-show-code-diff-100554>
             </div> 
         </details>
