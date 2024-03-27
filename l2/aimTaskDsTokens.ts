@@ -33,6 +33,7 @@ class AimTaskDsTokens extends AimTaskBase {
                 const activeServiceOp: ServiceDsTokens100554 = info.actServiceOp;
                 if (activeServiceOp.tagName !== 'SERVICE-DS-TOKENS-100554') reject('100554_ServiceDsTokens is not active in level 3');
                 const val = activeServiceOp.getEditorSource();
+                this.taskChild.ref = activeServiceOp.getActualRef() || '';
                 resolve(val);
 
             } catch (e: any) {

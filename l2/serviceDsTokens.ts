@@ -57,7 +57,6 @@ export class ServiceDsTokens100554 extends ServiceBase {
         updateTitle: undefined
     }
 
-
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         this._onServiceClick(visible, reinit, el)
     }
@@ -79,8 +78,17 @@ export class ServiceDsTokens100554 extends ServiceBase {
         this.createEditor();
     }
 
-    public setEditorSource(tokens: string) {
-        // return this.setStyle(less);
+    public getActualRef() {
+        return `_100554_serviceDsTokens_${this.actualTypeTokens}`
+    }
+
+    public async setEditorSource(tokens: string, tokensType: string) {
+
+        if (!this.models[tokensType]) return;
+        const colorModel: monaco.editor.ITextModel = this.models[tokensType];
+        colorModel.setValue(tokens);
+        return;
+
     }
 
     public getEditorSource() {
@@ -130,6 +138,8 @@ export class ServiceDsTokens100554 extends ServiceBase {
     private tokensColors: mls.l3.ITokenInfo[] = [];
     private tokensTypo: mls.l3.ITokenInfo[] = [];
     private tokensCustom: mls.l3.ITokenInfo[] = [];
+
+    private actualTypeTokens: string = 'color';
 
     private async getTokens() {
 
@@ -199,6 +209,9 @@ export class ServiceDsTokens100554 extends ServiceBase {
     }
 
     private async showResume2() {
+
+        this.actualTypeTokens = 'resume';
+
         const { resumeTokens } = await this.getTokens();
         this.setInitialModels(resumeTokens, 'resume');
         if (!this._ed1) return true;
@@ -208,6 +221,8 @@ export class ServiceDsTokens100554 extends ServiceBase {
     }
 
     private showCustom(): boolean {
+
+        this.actualTypeTokens = 'custom';
         if (this.menu.setMode) this.menu.setMode('editor');
         if (!this._ed1) return true;
 
@@ -227,6 +242,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
     private showTypography(): boolean {
 
+        this.actualTypeTokens = 'typography'
         if (this.menu.setMode) this.menu.setMode('editor');
         if (!this._ed1) return true;
 
@@ -249,6 +265,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
     private showColors2(): boolean {
 
+        this.actualTypeTokens = 'color';
         this.setTokens().then(() => {
 
             if (!this._ed1) return true;

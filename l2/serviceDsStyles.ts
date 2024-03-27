@@ -74,11 +74,9 @@ export class ServiceDsStyles extends ServiceBase {
             const key = mls.stor.getKeyToFiles(project, 3, selectStyle.stylename, folder, '.less');
             return key;
         }
-
         const folderGlobal = (this.dsInstance as any)['getDsCssFilePath']();
         const key = mls.stor.getKeyToFiles(this.dsInstance.project, 3, 'definitions', folderGlobal, '.less');
         return key;
-
     }
 
     static modelCount = 0;
