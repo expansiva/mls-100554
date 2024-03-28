@@ -165,6 +165,7 @@ export class ServiceAim100554 extends ServiceBase {
         const userName = localStorage.getItem('loginUser');
         function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
             if (taskRoot.userName !== userName) return;
+
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
             return html`${unsafeHTML(sHtml)}`;
@@ -179,7 +180,38 @@ export class ServiceAim100554 extends ServiceBase {
     }
 
     renderRef() {
-        const getTitleActualReference = () => {
+
+        let refOpr = '';
+        if (this.nav3Service) {
+
+            const pos = this.position === 'left' ? 'right' : 'left';
+            const op = this.nav3Service.getActiveInstance(pos);
+
+            if (op) {
+                refOpr = op.getActualRef();
+            }
+            
+        }
+
+        function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
+
+            let hasRef = taskRoot.children.filter((c) => c.ref === refOpr);
+            if (!hasRef || hasRef.length <= 0) return;
+
+            const actionName = convertFileNameToTag(taskRoot.widget);
+            const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
+            return html`${unsafeHTML(sHtml)}`;
+        }
+
+        const orderned = this.sortKey(tasks);
+
+        return html`
+            <h4 class='title'>Tasks by Reference </h4>
+                ${refOpr !== '' ? orderned.map((task, index) => renderTask(task, index)) : html`<h4>Not found reference</h4>`}
+            <h4 class='title'>End</h4>
+        `;
+
+        /*const getTitleActualReference = () => {
             const serviceActive = this.nav3Service?.getActiveInstance(this.invertedPosition);
             if (!serviceActive ||
                 !serviceActive.details ||
@@ -190,7 +222,7 @@ export class ServiceAim100554 extends ServiceBase {
 
         return html`
         <h4 class='title'>Tasks by Reference</h4>
-        <div>Showing Jobs for service:  ${getTitleActualReference()}</div>`;
+        <div>Showing Jobs for service:  ${getTitleActualReference()}</div>`;*/
     }
 
     actions: ResponseFindActions[] = [];
