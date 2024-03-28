@@ -174,7 +174,12 @@ export class ServiceAim100554 extends ServiceBase {
         const orderned = this.sortKey(tasks);
         return html`
         <h4 class='title'>User: ${userName} </h4>
-            ${orderned.map((task, index) => renderTask(task, index))}
+            ${repeat(
+                orderned,
+                ((task: cbe.ITaskRoot, index: number) => index) as any,
+                ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
+            )}
+            
         `;
 
     }
@@ -201,7 +206,7 @@ export class ServiceAim100554 extends ServiceBase {
         }
 
         let orderned = this.sortKey(tasks);
-
+        if(refOpr.length <= 0 ) refOpr = '***notFoundService---'
         orderned = orderned.filter((i) => {
             let hasRef = i.children.filter((c) => c.ref === refOpr);
             if (!hasRef || hasRef.length <= 0) return false;
@@ -210,7 +215,11 @@ export class ServiceAim100554 extends ServiceBase {
 
         return html`
             <h4 class='title'>Tasks by Reference </h4>
-                ${orderned.length > 0 ? orderned.map((task, index) => renderTask(task, index)) : html`<h4>Not found reference</h4>`}
+                ${orderned.length > 0 ? repeat(
+                orderned,
+                ((task: cbe.ITaskRoot, index: number) => index) as any,
+                ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
+            ) : html`<h4>Not found reference</h4>`}
         `;
 
         /*const getTitleActualReference = () => {
