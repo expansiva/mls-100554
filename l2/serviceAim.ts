@@ -187,7 +187,7 @@ export class ServiceAim100554 extends ServiceBase {
             const pos = this.position === 'left' ? 'right' : 'left';
             const op = this.nav3Service.getActiveInstance(pos);
 
-            if (op) {
+            if (op && op.getActualRef) {
                 refOpr = op.getActualRef();
             }
             
