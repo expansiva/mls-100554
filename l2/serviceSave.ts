@@ -345,7 +345,12 @@ export class ServiceSave extends ServiceBase {
             for (const fKey of filesKeys) {
 
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
-                if ((!file.inLocalStorage && file.status === 'nochange') || file.status === 'nochange' || file.project === 0 || file.project !== mls.actual[5].project) continue;
+                if (
+                    /*(!file.inLocalStorage && file.status === 'nochange') ||
+                    file.status === 'nochange' ||*/
+                    !file.inLocalStorage ||
+                    file.project === 0 ||
+                    file.project !== mls.actual[5].project) continue;
 
                 const pj = file.project;
                 const level = file.level;
@@ -395,7 +400,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private oIcon = {
-        nochange: { icon: 'fa-nochange', title: 'Local' },
+        nochange: { icon: 'fa-file-pen', title: 'Edited' },
         changed: { icon: 'fa-file-pen', title: 'Edited' },
         renamed: { icon: 'fa-clone', title: 'Renamed' },
         deleted: { icon: 'fa-xmark', title: 'Deleted' },

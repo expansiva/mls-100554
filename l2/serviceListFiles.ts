@@ -94,8 +94,6 @@ export class ServiceListFiles extends ServiceBase {
             return;
         }
         setTimeout(() => {
-            /*const el = this.shadowRoot?.querySelector('#listUpdateFiles') as HTMLElement;
-            if (!el) return;*/
 
             if (!(window as any).updateFile) {
 
@@ -115,23 +113,13 @@ export class ServiceListFiles extends ServiceBase {
                 break;
             }
 
-            /*const params = {} as mls.events.IFileAction;
-
-            params.action = 'updatedOnServer';
-            params.level = 2;
-            params.project = mls.actual[5].project as number;
-            params.position = 'left';
-
-            mls.events.fire([2], ['FileAction'], JSON.stringify(params), 600);*/
-
             mls.events.fireFileAction('updatedOnServer', info, 'left', undefined, undefined, undefined, undefined, 600);
-
-            //el.click();
 
         }, 5000)
     }
 
     private showAdd() {
+        this.inFilter = false;
         this.mode = 'add';
         this.menu.setMode
         return true;
