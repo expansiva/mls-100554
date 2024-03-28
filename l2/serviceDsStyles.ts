@@ -653,6 +653,7 @@ export class ServiceDsStyles extends ServiceBase {
         this._ed1.setScrollPosition({ scrollTop: 0 });
         const position = new monaco.Position(0, 0);
         this._ed1.setPosition(position);
+        this.onEditorChange(false);
 
     }
 
