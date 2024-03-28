@@ -62,7 +62,7 @@ export class AimActionStyleNew extends AimActionBase {
 
     private prompts = [
         'Adicionar uma animação de entrada',
-        'Adicionar uma personalização no overflow, deixando mais minimalista',
+        'Adicionar uma personalização no scrollbar, deixando mais minimalista',
     ]
 
     renderAdd(): TemplateResult { // from abstract

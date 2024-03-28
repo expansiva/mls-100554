@@ -38,12 +38,19 @@ export class AimTaskResultTokens extends AimTaskBase {
     renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
         const title = child.title;
         const body = child._tempResult || '';
-        this.result = this.extractLess(body)[0] || '';
+
+        const { contentLess, contentsAfterLess, contentsBeforeLess } = this.extractBlocks(body);
+
+        this.result = contentLess;
+
+
         return html`
         <details open>
             <summary>${title}</summary>
             <div style='margin: 10px'>
+                <div>${contentsBeforeLess}</div>
                 <collab-show-code-snippet-100554 language="less" withAccept="true" .onAccept=${this.onAccept.bind(this)}></collab-show-code-snippet-100554>
+                <div>${contentsAfterLess}</div>
             </div>
         </details>
             
@@ -52,6 +59,7 @@ export class AimTaskResultTokens extends AimTaskBase {
             <div style='margin-top: 10px;height:400px;'>
             <collab-show-code-diff-100554 editorType="less" alias="100554_aimTaskResultTokens">
             </collab-show-code-diff-100554>
+
             </div> 
         </details>
 
@@ -75,7 +83,7 @@ export class AimTaskResultTokens extends AimTaskBase {
             return;
         };
         const value = activeOpService.getEditorSource();
-        this.codeDiff.setInitialHistories(value, this.result);
+        this.codeDiff.setInitialHistories(value.trim(), this.result.trim());
     }
 
     private getActiveOpServiceIfIsValid() {
@@ -108,23 +116,23 @@ export class AimTaskResultTokens extends AimTaskBase {
 
         const tokensType = taskWithRef.ref.split('_').pop() || '';
         activeOpService.setEditorSource(this.result, tokensType);
-        
+
     }
 
-    private extractLess(src: string) {
-        const regex = /```less([\s\S]+?)```/g;
+    private extractBlocks(src: string) {
+        const regex = /^(.*?)```less(.*)```(.*)/s;
         const matches = src.match(regex);
-        const contents = [];
-
+        let contentLess = '';
+        let contentsBeforeLess = '';
+        let contentsAfterLess = '';
         if (matches) {
-            for (const m of matches) {
-                const conteudo = m.replace(/```less|```/g, '').trim();
-                contents.push(conteudo);
-            }
+            contentsBeforeLess = matches[1] || '';
+            contentLess = matches[2] || '';
+            contentsAfterLess = matches[3] || '';
         }
-
-        return contents;
+        return { contentLess, contentsAfterLess, contentsBeforeLess }
     }
+
 
 
 }

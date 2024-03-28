@@ -42,7 +42,7 @@ export class AimTaskResultLess extends AimTaskBase {
             return;
         };
         const value = activeOpService.getEditorComponentSource();
-        this.codeDiff.setInitialHistories(value, this.result);
+        this.codeDiff.setInitialHistories(value.trim(), this.result.trim());
     }
 
     private onToogleDetails(event: Event) {
@@ -58,13 +58,17 @@ export class AimTaskResultLess extends AimTaskBase {
 
         const title = child.title;
         const body = child._tempResult || '';
-        this.result = this.extractLess(body)[0] || '';
+        const { contentLess, contentsAfterLess, contentsBeforeLess } = this.extractBlocks(body);
+        this.result = contentLess;
+
         return html`
         <details open>
             <summary>${title}</summary>
+            <div>${contentsBeforeLess}</div>
             <div style='margin: 10px'>
                 <collab-show-code-snippet-100554 language="less" withAccept="true" .onAccept=${this.onAccept.bind(this)}></collab-show-code-snippet-100554>
             </div> 
+            <div>${contentsAfterLess}</div>
         </details>
 
         <details @click=${this.onToogleDetails}>
@@ -109,6 +113,21 @@ export class AimTaskResultLess extends AimTaskBase {
         if (!activeServiceOp.isComponent) return undefined;
         return activeServiceOp;
     }
+
+    private extractBlocks(src: string) {
+        const regex = /^(.*?)```less(.*)```(.*)/s;
+        const matches = src.match(regex);
+        let contentLess = '';
+        let contentsBeforeLess = '';
+        let contentsAfterLess = '';
+        if (matches) {
+            contentsBeforeLess = matches[1] || '';
+            contentLess = matches[2] || '';
+            contentsAfterLess = matches[3] || '';
+        }
+        return { contentLess, contentsAfterLess, contentsBeforeLess }
+    }
+
 
     private extractLess(src: string) {
         const regex = /```less([\s\S]+?)```/g;
