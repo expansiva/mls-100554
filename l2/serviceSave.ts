@@ -547,7 +547,7 @@ export class ServiceSave extends ServiceBase {
         array.forEach((i) => {
 
             ret.push({
-                name: `l${i.level}/${i.folder}${i.shortName}${i.extension}`,
+                name: `l${i.level}/${i.folder ? i.folder + '/' : ''}${i.shortName}${i.extension}`,
                 version: i.versionRef,
                 file: i
             })
