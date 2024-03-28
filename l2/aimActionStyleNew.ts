@@ -49,11 +49,43 @@ export class AimActionStyleNew extends AimActionBase {
         }));
     }
 
+
+    private onSuggestClick(e: MouseEvent) {
+        if (!this.textarea) return;
+        let text: string = '';
+        const target = e.target as HTMLElement;
+        const txtEl = target.querySelector('span');
+        if (!txtEl) text = target.innerText;
+        else text = txtEl.innerText;
+        this.textarea.value = text;
+    }
+
+    private prompts = [
+        'Adicionar uma animação de entrada',
+        'Adicionar uma personalização no overflow, deixando mais minimalista',
+    ]
+
     renderAdd(): TemplateResult { // from abstract
         return html`
-        <p> irá verificar os tokens e css e criar um novo css </p>
-        <textarea rows="15" style="width:100%"></textarea>
-        <br>
+        <p> Irá verificar os tokens e criar um novo conjunto de tokens </p>
+
+        <div>
+            <label>Sugestão:</label>
+            <div class="prompt-suggestion">
+                ${this.prompts.map((prompt) => html`
+                    <span @click=${this.onSuggestClick}>
+                        <span >${prompt}</span>
+                    </span>
+                `)}
+            
+            </div>
+        <div>
+
+        <div>
+            <label>Prompt:</label>
+            <textarea rows="5" placeholder="Digite aqui seu prompt" style="width:100%"></textarea>
+        </div>
+
         <div class="buttonGroup">
           <button @click="${this.handleCancel}">Cancelar</button>
           <button @click="${this.handleAdd}">Confirmar</button>

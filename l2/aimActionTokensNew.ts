@@ -50,10 +50,43 @@ export class AimActionTokensNew extends AimActionBase {
         }));
     }
 
+    private onSuggestClick(e: MouseEvent) {
+        if (!this.textarea) return;
+        let text: string = '';
+        const target = e.target as HTMLElement;
+        const txtEl = target.querySelector('span');
+        if (!txtEl) text = target.innerText;
+        else text = txtEl.innerText;
+        this.textarea.value = text;
+    }
+
+    private prompts = [
+       'Criar um conjunto de tokens com tema minimalista',
+       'Criar um conjunto de tokens com tema retro',
+       'Criar um conjunto de tokens com cores mais vibrantes',
+       'Criar um conjunto de tokens com cores neutras',
+    ]
+
     renderAdd(): TemplateResult { // from abstract
         return html`
-        <p> irá verificar os tokens e criar um novo conjunto de tokens </p>
-        <textarea rows="15" style="width:100%"></textarea>
+        <p> Irá verificar os tokens e criar um novo conjunto de tokens </p>
+
+        <div>
+            <label>Sugestão:</label>
+            <div class="prompt-suggestion">
+                ${this.prompts.map((prompt)=> html`
+                    <span @click=${this.onSuggestClick}>
+                        <span >${prompt}</span>
+                    </span>
+                `)}
+            
+            </div>
+        <div>
+
+        <div>
+            <label>Prompt:</label>
+            <textarea rows="5" placeholder="Digite aqui seu prompt" style="width:100%"></textarea>
+        </div>
         <br>
         <div class="buttonGroup">
           <button @click="${this.handleCancel}">Cancelar</button>

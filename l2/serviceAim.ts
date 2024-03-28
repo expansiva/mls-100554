@@ -10,10 +10,12 @@ import { findActions, ResponseFindActions } from './_100554_aimActionBase';
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
 
+
     constructor() {
         super();
         this.setEvents();
     }
+
 
     @property() activeTab: ITabType = 'All';
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
@@ -60,10 +62,12 @@ export class ServiceAim100554 extends ServiceBase {
         return false;
     }
 
+
     public onClickIcon = (op: string): void => {
         if (this.activeTab === op) return;
         this.activeTab = op as ITabType;
     }
+
 
     public menu: IMenu = {
         title: 'AIM Service',
@@ -153,10 +157,7 @@ export class ServiceAim100554 extends ServiceBase {
             ((task: cbe.ITaskRoot, index: number) => index) as any,
             ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
         )}
-        <h4 class='title'>End</h4>
         `;
-
-        // ${orderned.map((task, index) => renderTask(task, index))}
 
     }
 
@@ -174,7 +175,6 @@ export class ServiceAim100554 extends ServiceBase {
         return html`
         <h4 class='title'>User: ${userName} </h4>
             ${orderned.map((task, index) => renderTask(task, index))}
-        <h4 class='title'>End</h4>
         `;
 
     }
@@ -211,7 +211,6 @@ export class ServiceAim100554 extends ServiceBase {
         return html`
             <h4 class='title'>Tasks by Reference </h4>
                 ${orderned.length > 0 ? orderned.map((task, index) => renderTask(task, index)) : html`<h4>Not found reference</h4>`}
-            <h4 class='title'>End</h4>
         `;
 
         /*const getTitleActualReference = () => {
