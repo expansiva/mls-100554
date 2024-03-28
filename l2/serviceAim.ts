@@ -195,19 +195,22 @@ export class ServiceAim100554 extends ServiceBase {
 
         function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
 
-            let hasRef = taskRoot.children.filter((c) => c.ref === refOpr);
-            if (!hasRef || hasRef.length <= 0) return;
-
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
             return html`${unsafeHTML(sHtml)}`;
         }
 
-        const orderned = this.sortKey(tasks);
+        let orderned = this.sortKey(tasks);
+
+        orderned = orderned.filter((i) => {
+            let hasRef = i.children.filter((c) => c.ref === refOpr);
+            if (!hasRef || hasRef.length <= 0) return false;
+            return true
+        });
 
         return html`
             <h4 class='title'>Tasks by Reference </h4>
-                ${refOpr !== '' ? orderned.map((task, index) => renderTask(task, index)) : html`<h4>Not found reference</h4>`}
+                ${orderned.length > 0 ? orderned.map((task, index) => renderTask(task, index)) : html`<h4>Not found reference</h4>`}
             <h4 class='title'>End</h4>
         `;
 
