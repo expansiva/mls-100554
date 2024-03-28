@@ -128,7 +128,7 @@ export class ServiceAim100554 extends ServiceBase {
             } else if (a.mode !== "in progress" && b.mode === "in progress") {
                 return 1; // Coloca 'in process' depois de outros elementos
             }
-            else { 
+            else {
                 return getKey(b.key as string) - getKey(a.key as string)
             }
         }
@@ -137,7 +137,7 @@ export class ServiceAim100554 extends ServiceBase {
 
         //return arr.sort((a: any, b: any) => getKey(b.key) - getKey(a.key));
 
-    
+
     }
 
     renderAll() {
@@ -175,10 +175,10 @@ export class ServiceAim100554 extends ServiceBase {
         return html`
         <h4 class='title'>User: ${userName} </h4>
             ${repeat(
-                orderned,
-                ((task: cbe.ITaskRoot, index: number) => index) as any,
-                ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
-            )}
+            orderned,
+            ((task: cbe.ITaskRoot, index: number) => index) as any,
+            ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
+        )}
             
         `;
 
@@ -195,10 +195,12 @@ export class ServiceAim100554 extends ServiceBase {
             if (op && op.getActualRef) {
                 refOpr = op.getActualRef();
             }
-            
+
         }
 
         function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
+            let hasRef = taskRoot.children.filter((c) => c.ref === refOpr);
+            if (!hasRef || hasRef.length <= 0) return ;
 
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
@@ -206,8 +208,9 @@ export class ServiceAim100554 extends ServiceBase {
         }
 
         let orderned = this.sortKey(tasks);
-        if(refOpr.length <= 0 ) refOpr = '***notFoundService---'
-        orderned = orderned.filter((i) => {
+        if (refOpr.length <= 0) refOpr = '***notFoundService---';
+
+        const verifyOrderned = orderned.filter((i) => {
             let hasRef = i.children.filter((c) => c.ref === refOpr);
             if (!hasRef || hasRef.length <= 0) return false;
             return true
@@ -215,25 +218,12 @@ export class ServiceAim100554 extends ServiceBase {
 
         return html`
             <h4 class='title'>Tasks by Reference </h4>
-                ${orderned.length > 0 ? repeat(
-                orderned,
-                ((task: cbe.ITaskRoot, index: number) => index) as any,
-                ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
-            ) : html`<h4>Not found reference</h4>`}
+                ${verifyOrderned.length > 0 ? repeat(
+            orderned,
+            ((task: cbe.ITaskRoot, index: number) => index) as any,
+            ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
+        ) : html`<h4>Not found reference</h4>`}
         `;
-
-        /*const getTitleActualReference = () => {
-            const serviceActive = this.nav3Service?.getActiveInstance(this.invertedPosition);
-            if (!serviceActive ||
-                !serviceActive.details ||
-                !serviceActive.details.tooltip) return html
-                    `<div>No service selected in position ${this.invertedPosition} </div>`;
-            return html`${serviceActive.details.tooltip}`
-        }
-
-        return html`
-        <h4 class='title'>Tasks by Reference</h4>
-        <div>Showing Jobs for service:  ${getTitleActualReference()}</div>`;*/
     }
 
     actions: ResponseFindActions[] = [];
