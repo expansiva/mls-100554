@@ -46,8 +46,8 @@ export class ServiceDsStyles extends ServiceBase {
         onClickLink: this.onClickLink,
     }
 
-    public setEditorSource(less: string) {
-        return this.setStyle(less);
+    public async setEditorSource(less: string) {
+        await this.setStyle(less);
     }
 
     public getEditorSource() {
@@ -67,14 +67,14 @@ export class ServiceDsStyles extends ServiceBase {
         if (!this.dsInstance) return '';
         if (this.isComponent && this.selectStyles) {
             const selectStyle = this.stylesComponent[+this.selectStyles.value];
-            const folder = (this.dsInstance as any)['getDsComponentStyleFilePath'](this.componentName);
+            const folder = (this.dsInstance as any).methods['getDsComponentStyleFilePath'](this.componentName);
             mls.actual[0].setFullName(this.componentName);
             const { project, path } = mls.actual[0];
             if (project === undefined || !path) return ''
             const key = mls.stor.getKeyToFiles(project, 3, selectStyle.stylename, folder, '.less');
             return key;
         }
-        const folderGlobal = (this.dsInstance as any)['getDsCssFilePath']();
+        const folderGlobal = (this.dsInstance as any).methods['getDsCssFilePath']();
         const key = mls.stor.getKeyToFiles(this.dsInstance.project, 3, 'definitions', folderGlobal, '.less');
         return key;
     }
@@ -121,10 +121,7 @@ export class ServiceDsStyles extends ServiceBase {
         content: ''
     }
 
-    private models: IModels = {
-        style: undefined,
-        results: undefined
-    }
+    private models: IModels = {}
 
     private defaultServices: IDefaultServices = {
         componentStyle: '',
@@ -180,8 +177,8 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private init() {
-        this.setInitialModels('', 'style');
-        this.setInitialModels('', 'results');
+        //this.getModelOrCreate('', 'style');
+        this.getModelOrCreate('', 'results');
         this.setEvents();
     }
 
@@ -268,6 +265,38 @@ export class ServiceDsStyles extends ServiceBase {
         }
 
         this._ed1 = monaco.editor.create(this.c2, mls.editor.conf['style_config'] as monaco.editor.IEditorOptions);
+        this._ed1.onDidChangeCursorPosition((e) => {
+
+            if (!this._ed1) return;
+            const modelStyle = this.getActualModel();
+            if(!modelStyle) return;
+
+            const actualModel = this._ed1.getModel();
+            if (!modelStyle || actualModel !== modelStyle) return;
+            const { lineNumber } = e.position;
+
+            const content = modelStyle.getLineContent(lineNumber);
+            const isReadOnlyArea = this.isReadOnlyArea(lineNumber);
+            this._ed1.updateOptions({ readOnly: isReadOnlyArea });
+
+            if (isReadOnlyArea) {
+
+                const serviceDef = this.isComponent ? this.defaultServices.componentStyle : this.defaultServices.globalStyle;
+                const params = this.getParamsServices();
+                mls.events.fire([this.level], ['DSStyleUnSelected'], JSON.stringify(params), 0);
+                this.openServiceHelper(serviceDef);
+                this.lastEditorInfo.content = content;
+                this.lastEditorInfo.line = lineNumber;
+                return;
+
+            }
+
+            if (this.timeoutCursorChangesEditorStyle) clearTimeout(this.timeoutCursorChangesEditorStyle);
+            this.timeoutCursorChangesEditorStyle = setTimeout(() => {
+                this.onCursorChange(lineNumber, content);
+            }, 500);
+
+        });
         (this.c2 as any)['mlsEditor'] = this._ed1;
     }
 
@@ -276,19 +305,12 @@ export class ServiceDsStyles extends ServiceBase {
         return monaco.Uri.parse(`file://server/${shortFN}_${ServiceDsStyles.modelCount}.ts`);
     }
 
-    private setInitialModels(src: string, model: string) {
-        const uri = this.getUri('l3_styles');
-        this.models[model] = monaco.editor.getModel(uri) as monaco.editor.ITextModel;
-        if (this.models[model]) this.models[model]?.setValue(src);
-        else this.models[model] = monaco.editor.createModel(src, 'less', uri);
-        this.setModelAPI();
-    }
-
     private isEventAdd: boolean = false;
 
-    private setModelAPI() {
+    private setModelAPI(model: monaco.editor.ITextModel | IMonacoModelStyle | undefined) {
 
-        const modelStyle = this.models['style'] as IMonacoModelStyle;
+        if (!model) return;
+        const modelStyle = model as IMonacoModelStyle;
 
         modelStyle.add = (text: string, lineNumber: number, refLine: number) => {
             let lineToChange = lineNumber;
@@ -571,37 +593,67 @@ export class ServiceDsStyles extends ServiceBase {
 
     }
 
+    private getModelOrCreate(modelName: string, value: string): IMonacoModelStyle | undefined {
+        let mod = this.models[modelName];
+        if (!modelName) return undefined;
+        if (!mod) {
+            const uri = this.getUri('l3_styles');
+            this.models[modelName] = monaco.editor.createModel(value, 'less', uri) as IMonacoModelStyle;
+            const model = this.models[modelName];
+            this.setModelAPI(model);
+            model.onDidChangeContent((event) => {
+                if (this.timeoutChangesEditorStyle) clearTimeout(this.timeoutChangesEditorStyle);
+                this.timeoutChangesEditorStyle = setTimeout(() => {
+                    this.onEditorChange(false);
+                }, 1000);
+            });
+
+        }
+        return this.models[modelName];
+    }
+
+    private getModelComponentKey() {
+        if (!this.selectStyles) return;
+        const s = this.stylesComponent[+this.selectStyles.value];
+        const modelKey = this.componentName + '_' + s.stylename;
+        return modelKey;
+    }
+
+    private getActualModel() :IMonacoModelStyle | undefined{
+        if (this.isComponent) {
+            const modelKey = this.getModelComponentKey();
+            if (!modelKey) return;
+            return this.models[modelKey];
+        } 
+        return this.models['style'];
+    }
+
     private async setStyle(styleLess: string) {
+
         if (!this._ed1) return;
         this.isSetStyle = true;
         const lessTokens = await this.getTokens();
         let textByRange = styleLess;
         const content = `${textByRange.trim()}\n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
-        const model = this._ed1.getModel();
 
+        let model: IMonacoModelStyle | undefined;
+
+        if (this.isComponent) {
+            const modelKey = this.getModelComponentKey();
+            if (!modelKey) return;
+            model = this.getModelOrCreate(modelKey, content);
+        } else model = this.getModelOrCreate('style', content);
 
         if (!model) return;
-        const fullRange = model.getFullModelRange();
+        this._ed1.setModel(model);
 
-        const lines = content.trim().split('\n');
-        const operations = [{
-            range: fullRange,
-            text: '',
-            forceMoveMarkers: true
-        }, {
-            range: { startLineNumber: 1, startColumn: 1 },
-            text: lines.join('\n'),
-            forceMoveMarkers: true
-        }];
-
-        model.pushEditOperations([], operations as any, () => []);
-
-        // const range = new monaco.Range(0, 0, model.getLineCount() + 1, 0);
-        // this._ed1.updateOptions({ readOnly: false });
-        // this._ed1.executeEdits('style', [{ range, text: content.trim() }]);
+        const range = new monaco.Range(0, 0, model.getLineCount() + 1, 0);
+        this._ed1.updateOptions({ readOnly: false });
+        this._ed1.executeEdits('style', [{ range, text: content.trim() }]);
         this._ed1.setScrollPosition({ scrollTop: 0 });
         const position = new monaco.Position(0, 0);
         this._ed1.setPosition(position);
+
     }
 
     private getIntervalLinesReadOnly(): { start: number | undefined, end: number | undefined } | undefined {
@@ -609,7 +661,6 @@ export class ServiceDsStyles extends ServiceBase {
         if (!this._ed1) return;
         const model = this._ed1.getModel();
         if (!model) return;
-
         const [startLine] = model.findMatches(`//Start Less Tokens`, true, false, false, null, true);
         const [endLine] = model.findMatches(`//End Less Tokens`, true, false, false, null, true);
         return {
@@ -619,7 +670,8 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private changeEditor(lines: IBlockLessLine[], helper: string) {
-        const modelStyle = this.models['style'] as IMonacoModelStyle;
+        const modelStyle = this.getActualModel();
+        if(!modelStyle) return;
         lines.forEach((line) => {
             modelStyle.changeBlock(line.key, line.value, helper);
         });
@@ -639,58 +691,14 @@ export class ServiceDsStyles extends ServiceBase {
 
         if (!this._ed1) return false;
 
-        // if (!this.isComponent && this.c3) this.c3.style.display = 'none';
         this.serviceContent?.layout();
-
-        this._ed1.setModel(this.models['style'] as monaco.editor.ITextModel);
-        const modelStyle = this.models['style'] as IMonacoModelStyle;
-
         this._ed1.updateOptions({ readOnly: false });
-
         this.getStyle().then((styleGlobal) => {
             if (this.isComponent) return;
             this.setStyle(styleGlobal);
         });
-
-        this._ed1.onDidChangeCursorPosition((e) => {
-
-            if (!this._ed1) return;
-            const actualModel = this._ed1.getModel();
-            if (actualModel !== this.models['style']) return;
-            const { lineNumber } = e.position;
-            const content = modelStyle.getLineContent(lineNumber);
-            const isReadOnlyArea = this.isReadOnlyArea(lineNumber);
-            this._ed1.updateOptions({ readOnly: isReadOnlyArea });
-
-            if (isReadOnlyArea) {
-
-                const serviceDef = this.isComponent ? this.defaultServices.componentStyle : this.defaultServices.globalStyle;
-                const params = this.getParamsServices();
-                mls.events.fire([this.level], ['DSStyleUnSelected'], JSON.stringify(params), 0);
-                this.openServiceHelper(serviceDef);
-                this.lastEditorInfo.content = content;
-                this.lastEditorInfo.line = lineNumber;
-                return;
-
-            }
-
-            if (this.timeoutCursorChangesEditorStyle) clearTimeout(this.timeoutCursorChangesEditorStyle);
-            this.timeoutCursorChangesEditorStyle = setTimeout(() => {
-                this.onCursorChange(lineNumber, content);
-            }, 500);
-
-        });
-
-
-        this._ed1.getModel()?.onDidChangeContent((event) => {
-            if (this.timeoutChangesEditorStyle) clearTimeout(this.timeoutChangesEditorStyle);
-            this.timeoutChangesEditorStyle = setTimeout(() => {
-                this.onEditorChange(false);
-            }, 1000);
-
-        });
-
         return true;
+
     }
 
     private async onEditorChange(isGet: boolean) {
@@ -701,9 +709,10 @@ export class ServiceDsStyles extends ServiceBase {
             return;
         }
 
-        const modelStyle = this.models['style'] as IMonacoModelStyle;
-        const value = modelStyle.getLessBlock();
-        const less = modelStyle.getValue().trim();
+        const model = this.getActualModel();
+        if(!model) return;
+        const value = model.getLessBlock();
+        const less = model.getValue().trim();
         const rc: IEditorChangedEventsObj = {
             emitter: 'left',
             helper: this.rightServiceOpened || this.getServiceRightOpened(),
@@ -752,6 +761,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async onChangeEditorIfComponent(params: IEditorChangedEventsObj): Promise<string> {
+
         if (!this.selectStyles) return '';
 
         const style: mls.l3.IComponentsStyle = this.stylesComponent[+this.selectStyles.value];
@@ -781,7 +791,7 @@ export class ServiceDsStyles extends ServiceBase {
             const regex = new RegExp(searchString, 'g');
             const modifiedString = mfile.compilerResults['cacheVersion'].replace(regex, replacementString);
             mfile.compilerResults['cacheVersion'] = modifiedString + 'css' + Math.floor(Math.random() * (1000 - 9999999 + 1)) + 9999999;
-            await mls.stor.cache['AddMfileIfNeed'](mfile);
+            if (mfile.compilerResults.prodJS) await mls.stor.cache.AddMfileIfNeed(mfile);
         }
 
         return params.less;
@@ -824,7 +834,8 @@ export class ServiceDsStyles extends ServiceBase {
         let lineStartInvalid: number = 0;
 
         const lines = less.split('\n');
-        const modelStyle = this.models['style'] as IMonacoModelStyle;
+        const modelStyle = this.getActualModel();
+        if (!modelStyle) return false;
 
         for (let i = 0; i <= lines.length - 1; i++) {
             let line = lines[i];
@@ -932,7 +943,8 @@ export class ServiceDsStyles extends ServiceBase {
 
     private onCursorChange(lineNumber: number, content: string) {
 
-        const modelStyle = this.models['style'] as IMonacoModelStyle;
+        const modelStyle = this.getActualModel();
+        if (!modelStyle) return;
         if (lineNumber === this.lastEditorInfo.line && content === this.lastEditorInfo.content) return;
         this.lastEditorInfo.content = content;
         this.lastEditorInfo.line = lineNumber;
@@ -1281,7 +1293,8 @@ export class ServiceDsStyles extends ServiceBase {
     `
 }
 
-type IModels = Record<string, IMonacoModelStyle | monaco.editor.ITextModel | undefined>
+type IModels = Record<string, IMonacoModelStyle>
+
 interface IDefaultServices {
     globalStyle: string,
     componentStyle: string,

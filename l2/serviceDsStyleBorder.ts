@@ -95,9 +95,6 @@ export class ServiceDsStyleBorder extends ServiceBase {
     private onstylechanged(desc: string) {
 
         const obj: IEventsObj = JSON.parse(desc);
-        console.info({
-            obj
-        })
         if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
             this.setValues(obj.value);
