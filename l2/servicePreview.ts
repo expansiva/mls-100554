@@ -90,6 +90,8 @@ export class ServicePreview100554 extends ServiceBase {
 
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
+        } else {
+            this.preview(this.lastMode);
         }
     }
 

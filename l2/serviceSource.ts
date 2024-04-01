@@ -1303,6 +1303,14 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
             mls.l2.editor.editors[this.confE] = model;
 
+            mls.actual[this.level].setFullName(`_${info[keyLocal].project}_${info[keyLocal].shortName}`);
+            (mls.actual[this.level] as any)[position] = {
+                project: model.storFile.project ,
+                shortName: model.storFile.shortName,
+                extension: model.storFile.extension,
+                folder: model.storFile.folder
+            }
+
             return true;
 
 
