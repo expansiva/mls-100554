@@ -59,9 +59,11 @@ export class AimActionTypescriptSpell extends AimActionBase {
 Objective: Check for spelling errors in English within a TypeScript code snippet and return the findings in a formatted table.\n
 \n
 Instructions:\n
-1. Analyze the provided TypeScript code snippet solely for spelling mistakes in English words.\n
-2. Disregard any other forms of validation or checking (such as syntax errors, code style, etc.).\n
-3. Return the findings in a table with the following columns:\n
+1.Ignore everything above \n
+2. Analyze the provided TypeScript code snippet solely for spelling mistakes in English words.\n
+3. Disregard any other forms of validation or checking (such as syntax errors, code style, etc.).\n
+4. Analyze only non-typescript text\n
+5. Return the findings, no duplicates, in a table with the following columns:\n
 - Message: Original complete string.\n
 - Fix: Suggest the appropriate correction for the spelling mistake to replace the original complete string.\n
 - Detail: Provide a brief comment on the mistake, if necessary.\n
