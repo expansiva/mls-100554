@@ -42,7 +42,7 @@ export class ServiceAim100554 extends ServiceBase {
         icon: '&#xf03a',
         state: 'foreground',
         position: 'all',
-        tooltip: 'AIM Service',
+        tooltip: 'AI',
         visible: true,
         widget: '_100554_serviceAim',
         level: [2, 3]
@@ -70,7 +70,7 @@ export class ServiceAim100554 extends ServiceBase {
 
 
     public menu: IMenu = {
-        title: 'AIM Service',
+        title: 'AI',
         actions: {
         },
         icons: {
@@ -115,18 +115,16 @@ export class ServiceAim100554 extends ServiceBase {
         function getKey(key: string): number {
             if (!key) return -1;
             const parts = key.split('/');
-            if (parts.length < 3) return -1;
-            const lastPart = parts.pop();
-            if (!lastPart) return -1;
-            const index = Number.parseInt(lastPart);
-            return index;
+            if (parts.length !== 3) return -1;
+            const index = Number.parseInt(parts[2]);
+            return Number.isNaN(index) ? -1 : index;
         }
 
         function sort(a: cbe.ITaskRoot, b: cbe.ITaskRoot) {
             if (a.mode === "in progress" && b.mode !== "in progress") {
                 return -1;
             } else if (a.mode !== "in progress" && b.mode === "in progress") {
-                return 1; // Coloca 'in process' depois de outros elementos
+                return 1;
             }
             else {
                 return getKey(b.key as string) - getKey(a.key as string)
@@ -134,10 +132,6 @@ export class ServiceAim100554 extends ServiceBase {
         }
 
         return arr.sort(sort);
-
-        //return arr.sort((a: any, b: any) => getKey(b.key) - getKey(a.key));
-
-
     }
 
     renderAll() {
@@ -148,7 +142,6 @@ export class ServiceAim100554 extends ServiceBase {
             return html`${unsafeHTML(sHtml)}`;
         }
         const orderned = this.sortKey(tasks);
-
 
         return html`
         <h4 class='title'>All Tasks</h4>
@@ -178,10 +171,9 @@ export class ServiceAim100554 extends ServiceBase {
             orderned,
             ((task: cbe.ITaskRoot, index: number) => index) as any,
             ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
-        )}
-            
+        )}            
         `;
-
+        
     }
 
     renderRef() {

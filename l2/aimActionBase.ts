@@ -97,6 +97,7 @@ export abstract class AimActionBase extends AimBase {
         }
         if (this.taskIndex < 0 || this.taskIndex >= tasks.length) return html`invalid task index`;
         const taskRoot = tasks[this.taskIndex];
+        const index: number = Number(taskRoot.key?.split('/').pop()) || 0;
         const cost: number = taskRoot.cost || 0;
         const promptUser = this.getPromptUser(taskRoot);
         return html`
@@ -107,23 +108,26 @@ export abstract class AimActionBase extends AimBase {
     
                         ${this.renderToolbar()} 
                         
-                        <span style=" overflow:hidden; width:100px; text-overflow:ellipsis;  white-space: nowrap; display:inline-block">
+                        <span> 
+                            ${this.iconMoney} ${cost.toFixed(4)}
+                        </span>
+
+                        <span>
+                            ${index.toString().padStart(5, '0')}
+                        </span>
+
+                        <span style=" overflow:hidden; width:10em; text-overflow:ellipsis;  white-space: nowrap; display:inline-block">
                             ${this.title}
                         </span>
 
                         ${
-                            !!promptUser ? html`<div style=" overflow:hidden; width:200px; text-overflow:ellipsis;  white-space: nowrap; display:inline-block"> ${this.iconPrompt} ${promptUser} </div>` : ''
+                            !!promptUser ? html`<span style=" overflow:hidden; width:20em; text-overflow:ellipsis;  white-space: nowrap; display:inline-block"> ${this.iconPrompt} ${promptUser} </span>` : ''
                         }
 
-                        <div> 
-                            ${this.iconUser}
-                            ${taskRoot.userName}
-                        </div> 
+                        <span> 
+                            ${this.iconUser} ${taskRoot.userName}
+                        </span> 
 
-                        <div> 
-                            ${this.iconMoney}
-                            ${cost}
-                        </div> 
                     </div>
                     
                 </summary>
