@@ -54,8 +54,8 @@ export class AimActionStyleNew extends AimActionBase {
         this.mode = lastTask.mode;
         root.mode = lastTask.mode;
         this.requestUpdate();
-        this.setResultInEditor(result, root);
-        updateTaskOnServer(this.taskIndex);
+        const added = this.setResultInEditor(result, root);
+        if (added) updateTaskOnServer(this.taskIndex);
     }
 
     private handleTaskReject() {
@@ -94,14 +94,15 @@ export class AimActionStyleNew extends AimActionBase {
         const activeOpService = getActiveOpServiceIfIsValid(this);
         if (!activeOpService) {
             window.collabMessages.add('The service in the opposite position does not refer to this action', 'error')
-            return;
+            return false;
         };
         const isValid = isValidRef(root, activeOpService);
         if (!isValid) {
             window.collabMessages.add(`Invalid Ref`, 'error')
-            return;
+            return false;
         };
         activeOpService.setEditorSource(value);
+        return true;
     }
 
     private onSuggestClick(e: MouseEvent) {
