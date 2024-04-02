@@ -96,6 +96,7 @@ export class ServiceAim100554 extends ServiceBase {
 
     setEvents(): void {
         mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected'], (ev) => this.onToolbarSelectChange(ev));
+        this.addEventListener('refresh-request', this.handleRefreshRequest);
     }
 
     onToolbarSelectChange(ev: mls.events.IEvent) {
@@ -226,14 +227,12 @@ export class ServiceAim100554 extends ServiceBase {
         switch (this.activeTab) {
             case 'All':
                 readTasksFromServer('all', '')
-                    .then(value => {
-                        this.requestUpdate();
-                    });
+                    .then(() => this.sendRefreshRequest());
+                return;
             case 'User':
                 readTasksFromServer('byUser', '')
-                    .then(value => {
-                        this.requestUpdate();
-                    });
+                    .then(() => this.sendRefreshRequest());
+                return;
             case 'Ref':
                 return;
             case 'Add':
@@ -241,6 +240,15 @@ export class ServiceAim100554 extends ServiceBase {
             default:
                 console.error('invalid activeTab:', this.activeTab);
         }
+    }
+
+    sendRefreshRequest() {
+        const event = new CustomEvent('refresh-request', { bubbles: true, composed: true });
+        this.dispatchEvent(event);
+    }
+
+    handleRefreshRequest() {
+        this.requestUpdate();
     }
 
     async connectedCallback() {
