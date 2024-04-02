@@ -21,14 +21,9 @@ export function initCollabShowCodeDiff100554() {
 @customElement('collab-show-code-diff-100554')
 export class CollabShowCodeDiff extends LitElement {
 
-    constructor() {
-        super();
-        this.loadCSS();
-    }
-
     static monaco_css: string = '';
     static inLoadingCss: boolean = false;
-    static loadingPromise:Promise<string>;
+    static loadingPromise: Promise<string>;
 
     @property({ type: String }) msize = '400.00,420.00,106.00,0';
 
@@ -208,8 +203,11 @@ export class CollabShowCodeDiff extends LitElement {
         return cssText;
     }
 
+    private styleElement: HTMLStyleElement | undefined;
+
     async loadCSS() {
 
+        if (this.styleElement) return;
         let cssText: string = '';
 
         if (CollabShowCodeDiff.monaco_css) cssText = CollabShowCodeDiff.monaco_css;
@@ -223,10 +221,13 @@ export class CollabShowCodeDiff extends LitElement {
             CollabShowCodeDiff.inLoadingCss = false;
         }
 
-        const styleElement = document.createElement('style');
-        styleElement.innerHTML = CollabShowCodeDiff.monaco_css;
-        this.shadowRoot?.appendChild(styleElement);
+        if (!cssText) return;
+        this.styleElement = document.createElement('style');
+        this.styleElement.innerHTML = CollabShowCodeDiff.monaco_css;
+        this.shadowRoot?.appendChild(this.styleElement);
     }
+
+    
 
 
     private renderWithCopy() {
@@ -304,6 +305,7 @@ export class CollabShowCodeDiff extends LitElement {
     }
 
     firstUpdated() {
+        this.loadCSS();
         this.dispatchEvent(new CustomEvent('show-diff-ready'));
     }
 
