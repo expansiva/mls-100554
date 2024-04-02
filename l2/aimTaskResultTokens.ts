@@ -54,15 +54,6 @@ export class AimTaskResultTokens extends AimTaskBase {
             </div>
         </details>
             
-        <details @click=${this.onToogleDetails}>
-            <summary>${title}- Diff</summary>
-            <div style='margin-top: 10px;height:400px;'>
-            <collab-show-code-diff-100554 editorType="less" alias="100554_aimTaskResultTokens">
-            </collab-show-code-diff-100554>
-
-            </div> 
-        </details>
-
         `;
     }
 
@@ -79,11 +70,11 @@ export class AimTaskResultTokens extends AimTaskBase {
         if (!this.codeDiff) return;
         const activeOpService = this.getActiveOpServiceIfIsValid();
         if (!activeOpService) {
-            this.codeDiff.setInitialHistories('', this.result);
+            // this.codeDiff.setInitialHistories('', this.result);
             return;
         };
         const value = activeOpService.getEditorSource();
-        this.codeDiff.setInitialHistories(value.trim(), this.result.trim());
+        // this.codeDiff.setInitialHistories(value.trim(), this.result.trim());
     }
 
     private getActiveOpServiceIfIsValid() {

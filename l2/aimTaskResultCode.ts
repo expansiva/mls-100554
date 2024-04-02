@@ -40,13 +40,6 @@ export class AimTaskResultCode extends AimTaskBase {
                 </collab-show-code-snippet-100554>
             </div> 
         </details>
-        <details @click=${this.onToogleDetails}>
-            <summary>${title}- Diff</summary>
-            <div style='margin-top: 10px;height:400px;'>
-            <collab-show-code-diff-100554 alias="100554_aimTaskResultCode">
-            </collab-show-code-diff-100554>
-            </div>
-        </details>
         `;
     }
 
@@ -71,12 +64,10 @@ export class AimTaskResultCode extends AimTaskBase {
             let origem = '';
 
             if (info.actServiceOp.tagName === 'SERVICE-SOURCE-100554') {
-
                 origem = info.actServiceOp._ed1.getModel().getValue();
-
             };
 
-            this.codeDif.setInitialHistories(origem, this.result);
+            // this.codeDif.setInitialHistories(origem, this.result);
 
         }
 
