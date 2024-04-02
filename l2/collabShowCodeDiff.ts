@@ -5,12 +5,9 @@ import { customElement, property, query } from 'lit/decorators.js';
 import {
     collab_check,
     collab_copy,
-    collab_double_check,
     collab_repeat,
     collab_thumbs_down,
-    collab_thumbs_down_solid,
     collab_thumbs_up,
-    collab_thumbs_up_solid
 } from './_100554_collabIcons'
 
 
@@ -167,7 +164,7 @@ export class CollabShowCodeDiff extends LitElement {
     }
 
     private onRejectClick() {
-        if (this.onReject && typeof this.onReject === 'function') {    
+        if (this.onReject && typeof this.onReject === 'function') {
             this.onReject();
         }
     }
@@ -265,7 +262,7 @@ export class CollabShowCodeDiff extends LitElement {
 
     private renderShowDiff() {
         return html`
-            <div>
+            <div class="${!this.withDiff ? 'disabled' : ''}">
                 <input @change=${this.handleChangeDiff} id="diff_check" type="checkbox"></input>
                 <label for="diff_check"> With Diff<label>
             </div>
@@ -283,8 +280,8 @@ export class CollabShowCodeDiff extends LitElement {
                     <span class="language">${this.language}</span>
                 
                     <div class="actions-list">
-                        ${this.withDiff ? this.renderShowDiff() : ''}
-                        ${this.renderWithAccept() }
+                        ${this.renderShowDiff()}
+                        ${this.renderWithAccept()}
                         ${this.renderReject()}
                         ${this.renderTryAgain()}
                         ${this.withCopy ? this.renderWithCopy() : ''}
