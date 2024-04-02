@@ -53,7 +53,8 @@ export async function readTasksFromServer(filtedBy: cbe.IFilterTask, filter: str
   tasks = rc.tasks;
   for (const task of tasks) {
     if (task.mode !== 'error' &&
-      task.mode !== 'processed') task.mode = 'error';
+      task.mode !== 'processed' &&
+      task.mode !== 'waiting for user') task.mode = 'error';
   }
 }
 
@@ -92,28 +93,11 @@ export function getInfoMyService(elBase: HTMLElement): { level: number, position
 }
 
 export interface ITaskFinish {
-  status: 'ok' | 'error' | 'userEvent',
+  status: 'ok' | 'error' | 'rejected' | 'userEvent',
   taskIndex: number,
   childIndex: number,
   result: string, // result or error message
+  newPrompt?: string,
   taskRoot: cbe.ITaskRoot,
   taskChild: cbe.ITaskChild
-}
-
-export interface ITryAgainEvent extends Event {
-  detail: ITryAgainEventDetail
-}
-
-export interface IAcceptEvent extends Event {
-  detail: IAcceptEventDetail
-}
-
-export interface IAcceptEventDetail {
-  root: cbe.ITaskRoot
-  result: string,
-}
-
-export interface ITryAgainEventDetail {
-  root: cbe.ITaskRoot
-  prompt: string,
 }

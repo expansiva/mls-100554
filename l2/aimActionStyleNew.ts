@@ -4,18 +4,13 @@ import { html, TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
-import { getInfoMyService, ITryAgainEvent, IAcceptEvent } from "./_100554_aimHelper";
+import { getInfoMyService } from "./_100554_aimHelper";
 import { ServiceDsStyles } from "_100554_serviceDsStyles";
 
 const myName = '_100554_aimActionStyleNew';
 
 @customElement('aim-action-style-new-100554')
 export class AimActionStyleNew extends AimActionBase {
-
-    constructor() {
-        super();
-        this.setEvents();
-    }
 
     public getRules(): AimActionRules {
         return {
@@ -32,35 +27,6 @@ export class AimActionStyleNew extends AimActionBase {
     textarea: HTMLTextAreaElement | undefined;
 
     language = 'english';
-
-    private setEvents() {
-        this.addEventListener('task-rejected', this.handleTaskReject.bind(this));
-        this.addEventListener('task-try-again', this.handleTaskTryAgain.bind(this));
-        this.addEventListener('task-accepted', this.handleTaskAccept.bind(this));
-    }
-
-    private handleTaskTryAgain(event: Event) {
-
-        const ev = event as ITryAgainEvent;
-        // const { root, prompt } = ev.detail;
-        // this.prepareTaskTryAgain(root, prompt);
-    }
-
-    private handleTaskAccept(event: Event) {
-        const ev = event as IAcceptEvent;
-        const { root, result } = ev.detail;
-        const lastTask = root.children[root.children.length - 1];
-        lastTask.mode = 'processed';
-        this.mode = lastTask.mode;
-        root.mode = lastTask.mode;
-        this.requestUpdate();
-        const added = this.setResultInEditor(result, root);
-        if (added) updateTaskOnServer(this.taskIndex);
-    }
-
-    private handleTaskReject() {
-        console.info('Task rejected');
-    }
 
     private handleCancel() {
         this.dispatchEvent(new CustomEvent('add-task', {
@@ -169,40 +135,6 @@ export class AimActionStyleNew extends AimActionBase {
     }
 
 
-
-    prepareTaskTryAgain(taskRoot: cbe.ITaskRoot, userPrompt: string): void {
-
-
-        this.mode = taskRoot.mode = 'in progress';
-        const lastTask = taskRoot.children[taskRoot.children.length - 1];
-
-        const source = lastTask._tempResult;
-        if (!source) {
-            this.mode = taskRoot.mode = lastTask.mode = 'error';
-            lastTask.trace.push('invalid finish , must be notify finish with result field');
-            this.requestUpdate();
-            return;
-        }
-
-        lastTask.mode = 'processed';
-
-        this.addTaskAndWaitForCompletion(taskRoot, {
-            mode: 'initializing',
-            title: 'exec prompt',
-            widget: '_100554_aimTaskExecLLM',
-            agent: this.assistant,
-            prompt: this.getPrompt(source, userPrompt),
-            trace: [],
-            nextStep: this.prepareTask3.name // danger, loop
-        });
-
-        // updateTaskOnServer(this.taskIndex);
-
-
-
-
-    }
-
     prepareTask1(taskRoot: cbe.ITaskRoot): void {
         // create task to get typescript source from another side
         this.mode = taskRoot.mode = 'in progress';
@@ -266,20 +198,57 @@ export class AimActionStyleNew extends AimActionBase {
             widget: '_100554_aimTaskResultLess',
             trace: [],
             _tempResult: result,
-            nextStep: this.endTasks.name // danger, loop
+            nextStep: this.prepareTask4.name // danger, loop
         });
 
-        this.requestUpdate();
+        // this.requestUpdate();
+    }
+
+    prepareTask4(taskFinishResult: ITaskFinish): void {
+
+        console.info(taskFinishResult)
+
+        const child = taskFinishResult.taskChild;
+        if (taskFinishResult.status === "ok" || taskFinishResult.status === "error" || taskFinishResult.status === "rejected") {
+            return this.endTasks(taskFinishResult);
+        }
+                if (taskFinishResult.status !== "userEvent") throw new Error('Event not prepared');
+        if (taskFinishResult.taskRoot.children.length > 20) throw new Error('Maximum task exceted');
+        if (!taskFinishResult.newPrompt) throw new Error('Prompt invalid');
+
+        const source = taskFinishResult.result;
+        if (!source) {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            child.trace.push('invalid finish , must be notify finish with result field');
+            this.requestUpdate();
+            return;
+        }
+
+        child.mode = 'processed';
+
+        this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
+            mode: 'initializing',
+            title: 'exec prompt',
+            widget: '_100554_aimTaskExecLLM',
+            agent: this.assistant,
+            prompt: this.getPrompt(source, taskFinishResult.newPrompt),
+            trace: [],
+            nextStep: this.prepareTask3.name // looping exec prompt
+        });
+
     }
 
     endTasks(taskFinishResult: ITaskFinish): void {
 
-        const child = taskFinishResult.taskChild;
-        if (taskFinishResult.status === 'error') child.mode = 'error';
-        else if (taskFinishResult.status === 'userEvent') child.mode = 'waiting for user';
-        else child.mode = 'processed';
+        const { taskChild, taskRoot, status, result } = taskFinishResult;
+        if (status === 'error') taskChild.mode = 'error';
+        else if (status === 'rejected') taskChild.mode = 'processed';
+        else if (status === 'ok') {
+            taskChild.mode = 'processed';
+            this.setResultInEditor(result || '', taskRoot);
+        }
 
-        this.mode = taskFinishResult.taskRoot.mode = child.mode;
+        this.mode = taskFinishResult.taskRoot.mode = taskChild.mode;
         this.requestUpdate();
         updateTaskOnServer(taskFinishResult.taskIndex);
     }

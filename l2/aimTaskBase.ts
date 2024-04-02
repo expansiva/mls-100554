@@ -17,11 +17,11 @@ export abstract class AimTaskBase extends AimBase {
         trace: ['invalid task index on AimTaskBase']
     };
     public taskChild: cbe.ITaskChild = {
-                    mode: 'error',
-                    title: 'invalid child index: ' + this.childIndex,
-                    widget: '',
-                    trace: ['invalid child index on AimTaskBase']
-                }
+        mode: 'error',
+        title: 'invalid child index: ' + this.childIndex,
+        widget: '',
+        trace: ['invalid child index on AimTaskBase']
+    }
 
     createRenderRoot() {
         return this; // dont use shadow root
@@ -56,7 +56,7 @@ export abstract class AimTaskBase extends AimBase {
                 widget: '',
                 children: [],
                 trace: ['invalid task index on AimTaskBase']
-            }            
+            }
         } else {
             this.taskRoot = tasks[this.taskIndex];
             if (this.childIndex < 0 || this.childIndex >= this.taskRoot.children.length) {
@@ -77,7 +77,7 @@ export abstract class AimTaskBase extends AimBase {
         const promptTitle = `prompt len=${child.prompt?.length}, tokens=${child.promptTokens}`;
         let resultTitle = 'no result yeat';
 
-        if (child.result)resultTitle = `result len=${child.result.length}, tokens=${child.resultTokens}`;
+        if (child.result) resultTitle = `result len=${child.result.length}, tokens=${child.resultTokens}`;
 
         return html`
             ${child.prompt ? this.renderDetails(promptTitle, child.prompt) : ''}
@@ -129,16 +129,16 @@ export abstract class AimTaskBase extends AimBase {
         }));
     }
 
-    notifyCompleteByStatus(status: 'ok' | 'error' | 'userEvent', result: string) {
+    notifyCompleteByStatus(status: 'ok' | 'error' | 'rejected' | 'userEvent', result: string, prompt?: string) {
         this.sendFinishedNotification({
             status,
             result,
+            newPrompt: prompt,
             taskIndex: this.taskIndex,
             childIndex: this.childIndex,
             taskRoot: this.taskRoot,
             taskChild: this.taskChild,
         });
     }
-
 
 }

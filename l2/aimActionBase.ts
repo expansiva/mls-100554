@@ -29,9 +29,12 @@ export abstract class AimActionBase extends AimBase {
     public onTaskFinishedEvent(e: any): void {
         if (!e.detail || (e.detail.childIndex < 0) || !e.detail.status) throw new Error('invalid task-finished event, childIndex="' + e.detail?.childIndex + '", status="' + e.detail?.status + '"');
         const st: string = e.detail.status;
-        if (st !== 'ok' && st !== 'error' && st !== 'userEvent') throw new Error('invalid task-finished event, status=' + st);
-        const status: 'ok' | 'error' | 'userEvent' = st;
+        if (st !== 'ok' && st !== 'error' && st !== 'rejected' && st !== 'userEvent') throw new Error('invalid task-finished event, status=' + st);
+
+        const status: 'ok' | 'error' | 'rejected' | 'userEvent' = st;
         const childIndex = e.detail.childIndex;
+        const newPrompt = e.detail.newPrompt;
+
         if (typeof childIndex !== 'number') throw new Error('invalid task-finished event, childIndex=' + childIndex);
         const result = e.detail.result;
         if (typeof result !== 'string') throw new Error('invalid task-finished event, result=' + result);
@@ -39,7 +42,7 @@ export abstract class AimActionBase extends AimBase {
         const taskRoot = tasks[this.taskIndex];
         if (childIndex < 0 || childIndex >= taskRoot.children.length) throw new Error('invalid task-finished event, childIndex=' + childIndex + ', children length=' + taskRoot.children.length);
         const taskChild = taskRoot.children[childIndex];
-        const taskFinishResult: ITaskFinish = { status, taskIndex: this.taskIndex, childIndex, result, taskRoot, taskChild };
+        const taskFinishResult: ITaskFinish = { status, taskIndex: this.taskIndex, childIndex, result, taskRoot, taskChild, newPrompt };
         if (taskChild.mode === 'initializing') taskChild.mode = 'in progress';
         if (!this.childThis) throw new Error('invalid finished event, actionBase is not waiting for this event');
         const oriChildThis = this.childThis;

@@ -5,7 +5,7 @@ import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
 import { getActiveOpServiceIfIsValid, isValidRef } from './_100554_aimActionStyleNew';
-import { ITryAgainEventDetail, IAcceptEventDetail } from "./_100554_aimHelper";
+
 
 @customElement('aim-task-result-less-100554')
 export class AimTaskResultLess extends AimTaskBase {
@@ -31,7 +31,7 @@ export class AimTaskResultLess extends AimTaskBase {
     private result: string = '';
 
     public onInitializing(): void { // from abstract
-        this.notifyCompleteByStatus('userEvent', '');
+
     }
 
     private async setValues() {
@@ -61,7 +61,7 @@ export class AimTaskResultLess extends AimTaskBase {
     }
 
     renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
-
+        
         const body = child._tempResult || '';
         const { contentLess, contentsAfterLess, contentsBeforeLess } = this.extractBlocks(body);
         this.result = contentLess;
@@ -72,11 +72,11 @@ export class AimTaskResultLess extends AimTaskBase {
             <div style='margin: 10px;'>
                 <collab-show-code-diff-100554
                     language="less"
-                    withtryagain
                     .onAccept=${this.onAccept.bind(this)}
                     .onTryAgain=${this.onTryAgain.bind(this)}
                     .onReject=${this.onReject.bind(this)}
                     ${this.withDiff ? 'withdiff' : ''}
+                    ${taskRoot.mode === "waiting for user" ? ' withaccept withreject withtryagain' : ''}
                 ></collab-show-code-diff-100554>
             </div> 
             <div>${contentsAfterLess}</div>
@@ -101,11 +101,6 @@ export class AimTaskResultLess extends AimTaskBase {
         `;
     }
 
-    private getRoot() {
-        const root = this.closest('aim-action-style-new-100554');
-        return root;
-    }
-
     private closeMe() {
         const det = this.querySelector('details');
         if (det) det.open = false;
@@ -116,40 +111,22 @@ export class AimTaskResultLess extends AimTaskBase {
     }
 
     private handleConfirmTryAgain() {
-        const root = this.getRoot();
-        if (!root) return;
+
         let prompt: string = '';
         if (this.textarea) prompt = this.textarea.value;
         this.isTryAgain = false;
-        const detail: ITryAgainEventDetail = {
-            root: this.taskRoot,
-            prompt
-        };
-        root.dispatchEvent(new CustomEvent('task-try-again', {
-            detail, bubbles: true, composed: true
-        }));
+    
+        this.notifyCompleteByStatus('userEvent', this.result, prompt);
         this.closeMe();
     }
 
     private onAccept() {
-        const root = this.getRoot();
-        if (!root) return;
-        const detail: IAcceptEventDetail = {
-            root: this.taskRoot,
-            result: this.result
-        }
-        root.dispatchEvent(new CustomEvent('task-accepted', {
-            detail, bubbles: true, composed: true
-        }));
+        this.notifyCompleteByStatus('ok', this.result);
         this.closeMe();
     }
 
     private onReject() {
-        const root = this.getRoot();
-        if (!root) return;
-        root.dispatchEvent(new CustomEvent('task-rejected', {
-            detail: this.taskRoot, bubbles: true, composed: true
-        }));
+        this.notifyCompleteByStatus('rejected', '');
         this.closeMe();
     }
 

@@ -31,21 +31,15 @@ export class CollabShowCodeDiff extends LitElement {
 
     @property({ type: Boolean, reflect: true }) withCopy = true;
 
-    @property({ type: Boolean, reflect: true }) withAccept = true;
+    @property({ type: Boolean, reflect: true }) withAccept = false;
 
-    @property({ type: Boolean, reflect: true }) withReject = true;
+    @property({ type: Boolean, reflect: true }) withReject = false;
 
     @property({ type: Boolean, reflect: true }) withTryAgain = false;
 
     @property({ type: Boolean, reflect: true }) withDiff = false;
 
     @property({ type: Boolean }) coping = false;
-
-    @property({ type: Boolean }) accepting = false;
-
-    @property({ type: Boolean }) trying = false;
-
-    @property({ type: Boolean }) rejecting = false;
 
     onAccept: Function | undefined = () => { console.info('not implement') };
 
@@ -168,31 +162,19 @@ export class CollabShowCodeDiff extends LitElement {
 
     private onAcceptClick() {
         if (this.onAccept && typeof this.onAccept === 'function') {
-            this.accepting = true;
             this.onAccept();
-            setTimeout(() => {
-                this.accepting = false;
-            }, 3000)
         }
     }
 
     private onRejectClick() {
-        if (this.onReject && typeof this.onReject === 'function') {
-            this.rejecting = true;
+        if (this.onReject && typeof this.onReject === 'function') {    
             this.onReject();
-            setTimeout(() => {
-                this.rejecting = false;
-            }, 3000)
         }
     }
 
     private onTryAgainClick() {
         if (this.onTryAgain && typeof this.onTryAgain === 'function') {
-            this.trying = true;
             this.onTryAgain();
-            setTimeout(() => {
-                this.trying = false;
-            }, 3000)
         }
     }
 
@@ -227,8 +209,6 @@ export class CollabShowCodeDiff extends LitElement {
         this.shadowRoot?.appendChild(this.styleElement);
     }
 
-    
-
 
     private renderWithCopy() {
         return html`
@@ -245,39 +225,27 @@ export class CollabShowCodeDiff extends LitElement {
 
     private renderWithAccept() {
         return html`
-            <div @click=${this.onAcceptClick} class="action-item" style="display:${this.accepting ? 'none' : 'flex'}">
+            <div @click=${this.onAcceptClick} class="action-item ${!this.withAccept ? 'disabled' : ''}">
                 ${collab_thumbs_up}
                 <span>Accept</span>
-            </div>
-            <div class="action-item accepted" style="display:${this.accepting ? 'flex' : 'none'}">
-                ${collab_thumbs_up_solid}
-                <span>Accepted</span>
             </div>
         `
     }
 
     private renderTryAgain() {
         return html`
-            <div @click=${this.onTryAgainClick} class="action-item" style="display:${this.trying ? 'none' : 'flex'}">
+            <div @click=${this.onTryAgainClick} class="action-item ${!this.withTryAgain ? 'disabled' : ''}">
                 ${collab_repeat}
                 <span>Try Again</span>
-            </div>
-            <div class="action-item tried" style="display:${this.trying ? 'flex' : 'none'}">
-                ${collab_double_check}
-                <span>Tried</span>
             </div>
         `
     }
 
     private renderReject() {
         return html`
-            <div @click=${this.onRejectClick} class="action-item" style="display:${this.rejecting ? 'none' : 'flex'}">
+            <div @click=${this.onRejectClick} class="action-item ${!this.withReject ? 'disabled' : ''}">
                 ${collab_thumbs_down}
                 <span>Reject</span>
-            </div>
-            <div class="action-item rejected" style="display:${this.rejecting ? 'flex' : 'none'}">
-                ${collab_thumbs_down_solid}
-                <span>Rejected</span>
             </div>
         `
     }
@@ -316,9 +284,9 @@ export class CollabShowCodeDiff extends LitElement {
                 
                     <div class="actions-list">
                         ${this.withDiff ? this.renderShowDiff() : ''}
-                        ${this.withAccept ? this.renderWithAccept() : ''}
-                        ${this.withReject ? this.renderReject() : ''}
-                        ${this.withTryAgain ? this.renderTryAgain() : ''}
+                        ${this.renderWithAccept() }
+                        ${this.renderReject()}
+                        ${this.renderTryAgain()}
                         ${this.withCopy ? this.renderWithCopy() : ''}
                     </div>
             </div>
@@ -357,8 +325,14 @@ export class CollabShowCodeDiff extends LitElement {
         cursor:pointer;
         min-width: 50px;
       }
-      .accepted, .deleted, .copied, .tried, .rejected{
+      .disabled {
         cursor:default;
+        text-decoration: line-through;
+        pointer-events: none;
+      }
+      .copied{
+        cursor:default;
+        pointer-events: none;
       }
     `;
 
