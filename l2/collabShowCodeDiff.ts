@@ -1,11 +1,23 @@
 /// <mls shortName="collabShowCodeDiff" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, unsafeCSS, LitElement } from 'lit';
+import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import {
+    collab_check,
+    collab_copy,
+    collab_double_check,
+    collab_repeat,
+    collab_thumbs_down,
+    collab_thumbs_down_solid,
+    collab_thumbs_up,
+    collab_thumbs_up_solid
+} from './_100554_collabIcons'
+
 
 export function initCollabShowCodeDiff100554() {
     return true;
 }
+
 @customElement('collab-show-code-diff-100554')
 export class CollabShowCodeDiff extends LitElement {
 
@@ -14,77 +26,338 @@ export class CollabShowCodeDiff extends LitElement {
         this.loadCSS();
     }
 
-    createRenderRoot() {
-        return this;
-    }
+    static monaco_css: string = '';
+    static inLoadingCss: boolean = false;
+    static loadingPromise:Promise<string>;
 
+    @property({ type: String }) msize = '400.00,420.00,106.00,0';
 
-    public static modelCount: number;
+    @property({ type: String, reflect: true }) language = 'typescript';
 
-    @property({ type: String })
-    msize = '400.00,420.00,106.00,0';
+    @property({ type: Boolean, reflect: true }) withCopy = true;
 
-    @property({ type: String })
-    alias = 'diff';
+    @property({ type: Boolean, reflect: true }) withAccept = true;
 
-    @property({ type: String })
-    editorType = 'typescript';
+    @property({ type: Boolean, reflect: true }) withReject = true;
 
-    private _ed1: monaco.editor.IStandaloneDiffEditor | undefined;
+    @property({ type: Boolean, reflect: true }) withTryAgain = false;
+
+    @property({ type: Boolean, reflect: true }) withDiff = false;
+
+    @property({ type: Boolean }) coping = false;
+
+    @property({ type: Boolean }) accepting = false;
+
+    @property({ type: Boolean }) trying = false;
+
+    @property({ type: Boolean }) rejecting = false;
+
+    onAccept: Function | undefined = () => { console.info('not implement') };
+
+    onReject: Function | undefined = () => { console.info('not implement') };
+
+    onTryAgain: Function | undefined = () => { console.info('not implement') };
+
+    private _ed1Diff: monaco.editor.IStandaloneDiffEditor | undefined;
+
+    private _ed1Result: monaco.editor.IStandaloneCodeEditor | undefined;
+
+    private modelResult: monaco.editor.ITextModel | undefined;
+
+    private modelDiffOriginal: monaco.editor.ITextModel | undefined;
+
+    private modelDiffModified: monaco.editor.ITextModel | undefined;
+
+    private actualEditor: 'diff' | 'result' | undefined = 'result';
+
+    public actualTextDiffOriginal: string = '';
+
+    public actualTextDiffModified: string = '';
+
+    public actualTextResult: string = '';
 
     @query('mls-editor-100529')
     private c1: HTMLElement | undefined;
 
-    private createEditor(): void {
-        if (!this.c1 || this._ed1) return;
-        const opt = {
-            automaticLayout: true,
-        };
-        this._ed1 = monaco.editor.createDiffEditor(this.c1, opt);
-        (this.c1 as any)['mlsEditor'] = this._ed1;
+    @query('#diff_check')
+    private inputDiff: HTMLInputElement | undefined;
+
+    public init() {
+        if (this.actualEditor === 'diff') this.setDiffValue(this.actualTextDiffOriginal, this.actualTextDiffModified);
+        else this.setResultValue(this.actualTextResult)
     }
 
-
-    private createOrGetModel(editorType: string, src: string, tp: string) {
-        const uri = this.getUri(`${this.constructor.name}_${this.alias}_${tp}`);
-        let model1 = monaco.editor.getModel(uri);
-        if (!model1) {
-            model1 = monaco.editor.createModel(src, editorType, uri);
+    private createEditorDiff(): void {
+        if (!this.c1 || this._ed1Diff) return;
+        if (this._ed1Result) {
+            this._ed1Result.dispose();
+            this.modelResult?.dispose();
+            this._ed1Result = undefined;
+            this.modelResult = undefined;
         }
-        return model1;
+        const opt: monaco.editor.IDiffEditorOptions = {
+            automaticLayout: true,
+            renderSideBySide: false,
+            readOnly: true
+        };
+        this._ed1Diff = monaco.editor.createDiffEditor(this.c1, opt);
+        (this.c1 as any)['mlsEditor'] = this._ed1Diff;
     }
 
-    private getUri(shortFN: string): monaco.Uri {
-        CollabShowCodeDiff.modelCount = CollabShowCodeDiff.modelCount + 1 || 1;
-        return monaco.Uri.parse(`file://server/${shortFN}_${CollabShowCodeDiff.modelCount}.ts`);
+    private createEditorResult(): void {
+
+        if (!this.c1 || this._ed1Result) return;
+        if (this._ed1Diff) {
+            this._ed1Diff.dispose();
+            this.modelDiffModified?.dispose();
+            this.modelDiffOriginal?.dispose();
+            this._ed1Diff = undefined;
+            this.modelDiffModified = undefined;
+            this.modelDiffOriginal = undefined;
+        }
+        const opt: monaco.editor.IDiffEditorOptions = {
+            automaticLayout: true,
+            readOnly: true
+        };
+        this._ed1Result = monaco.editor.create(this.c1, opt);
+        (this.c1 as any)['mlsEditor'] = this._ed1Result;
     }
 
-    public setInitialHistories(srcOriginal: string, srcModified: string) {
-        this.createEditor();
-        const modelOriginal = this.createOrGetModel(this.editorType, srcOriginal, 'original');
-        const modelModified = this.createOrGetModel(this.editorType, srcModified, 'modified');
-        if (!this._ed1) return;
-        this._ed1.updateOptions({ readOnly: true });
-        this._ed1.setModel({
-            original: modelOriginal,
-            modified: modelModified,
+    private createModelDiff(editorType: string, srcOriginal: string, srcModified: string) {
+        if (!this.modelDiffModified) this.modelDiffModified = monaco.editor.createModel(srcModified, editorType);
+        else this.modelDiffModified.setValue(srcModified);
+
+        if (!this.modelDiffOriginal) this.modelDiffOriginal = monaco.editor.createModel(srcOriginal, editorType);
+        else this.modelDiffOriginal.setValue(srcOriginal);
+
+    }
+
+    private createModelResult(editorType: string, src: string) {
+        if (!this.modelResult) this.modelResult = monaco.editor.createModel(src, editorType);
+        else this.modelResult.setValue(src);
+    }
+
+    private setDiffValue(srcOriginal: string, srcModified: string) {
+        this.createEditorDiff();
+        this.createModelDiff(this.language, srcOriginal, srcModified);
+        if (!this._ed1Diff || !this.modelDiffOriginal || !this.modelDiffModified) return;
+        this._ed1Diff.setModel({
+            original: this.modelDiffOriginal,
+            modified: this.modelDiffModified,
         });
+
+        this.actualTextDiffModified = srcModified;
+        this.actualTextDiffOriginal = srcOriginal
+    }
+
+    private setResultValue(src: string) {
+        this.createEditorResult();
+        this.createModelResult(this.language, src);
+        if (!this._ed1Result || !this.modelResult) return;
+        this._ed1Result.setModel(this.modelResult);
+        this.actualTextResult = src;
     }
 
     private setMsizeEditor() {
         this.c1?.setAttribute('msize', this.msize);
     }
 
-    async loadCSS() {
+    private onCopyClick() {
+        this.coping = true;
+        const value = this.actualEditor && this.actualEditor === 'result' ? this.modelResult?.getValue() : this.modelDiffModified?.getValue()
+        navigator.clipboard.writeText(value || '')
+        setTimeout(() => {
+            this.coping = false;
+        }, 3000)
+    }
+
+    private onAcceptClick() {
+        if (this.onAccept && typeof this.onAccept === 'function') {
+            this.accepting = true;
+            this.onAccept();
+            setTimeout(() => {
+                this.accepting = false;
+            }, 3000)
+        }
+    }
+
+    private onRejectClick() {
+        if (this.onReject && typeof this.onReject === 'function') {
+            this.rejecting = true;
+            this.onReject();
+            setTimeout(() => {
+                this.rejecting = false;
+            }, 3000)
+        }
+    }
+
+    private onTryAgainClick() {
+        if (this.onTryAgain && typeof this.onTryAgain === 'function') {
+            this.trying = true;
+            this.onTryAgain();
+            setTimeout(() => {
+                this.trying = false;
+            }, 3000)
+        }
+    }
+
+    private async getCssMonaco() {
         const cssPath = `../../../monaco/${(window as any).latest?.monaco}/monaco.css`;
         const response = await fetch(cssPath);
         const cssText = await response.text();
+        return cssText;
+    }
+
+    async loadCSS() {
+
+        let cssText: string = '';
+
+        if (CollabShowCodeDiff.monaco_css) cssText = CollabShowCodeDiff.monaco_css;
+        else if (CollabShowCodeDiff.inLoadingCss) {
+            cssText = await CollabShowCodeDiff.loadingPromise;
+        } else {
+            CollabShowCodeDiff.inLoadingCss = true;
+            CollabShowCodeDiff.loadingPromise = this.getCssMonaco();
+            cssText = await CollabShowCodeDiff.loadingPromise;
+            CollabShowCodeDiff.monaco_css = cssText;
+            CollabShowCodeDiff.inLoadingCss = false;
+        }
+
         const styleElement = document.createElement('style');
-        styleElement.innerHTML = cssText;
-        this.appendChild(styleElement);
+        styleElement.innerHTML = CollabShowCodeDiff.monaco_css;
+        this.shadowRoot?.appendChild(styleElement);
+    }
+
+
+    private renderWithCopy() {
+        return html`
+            <div @click=${this.onCopyClick} class="action-item" style="display:${this.coping ? 'none' : 'flex'}">
+                ${collab_copy}
+                <span>Copy</span>
+            </div>
+            <div class="action-item copied" style="display:${this.coping ? 'flex' : 'none'}">
+                ${collab_check}
+                <span>Copied</span>
+            </div>
+            `
+    }
+
+    private renderWithAccept() {
+        return html`
+            <div @click=${this.onAcceptClick} class="action-item" style="display:${this.accepting ? 'none' : 'flex'}">
+                ${collab_thumbs_up}
+                <span>Accept</span>
+            </div>
+            <div class="action-item accepted" style="display:${this.accepting ? 'flex' : 'none'}">
+                ${collab_thumbs_up_solid}
+                <span>Accepted</span>
+            </div>
+        `
+    }
+
+    private renderTryAgain() {
+        return html`
+            <div @click=${this.onTryAgainClick} class="action-item" style="display:${this.trying ? 'none' : 'flex'}">
+                ${collab_repeat}
+                <span>Try Again</span>
+            </div>
+            <div class="action-item tried" style="display:${this.trying ? 'flex' : 'none'}">
+                ${collab_double_check}
+                <span>Tried</span>
+            </div>
+        `
+    }
+
+    private renderReject() {
+        return html`
+            <div @click=${this.onRejectClick} class="action-item" style="display:${this.rejecting ? 'none' : 'flex'}">
+                ${collab_thumbs_down}
+                <span>Reject</span>
+            </div>
+            <div class="action-item rejected" style="display:${this.rejecting ? 'flex' : 'none'}">
+                ${collab_thumbs_down_solid}
+                <span>Rejected</span>
+            </div>
+        `
+    }
+
+    private handleChangeDiff() {
+        if (!this.inputDiff) return;
+        if (this.inputDiff.checked) {
+            this.actualEditor = 'diff';
+            this.createEditorDiff();
+            this.setDiffValue(this.actualTextDiffOriginal, this.actualTextDiffModified);
+        } else {
+            this.actualEditor = 'result';
+            this.createEditorResult();
+            this.setResultValue(this.actualTextResult);
+        }
+    }
+
+    private renderShowDiff() {
+        return html`
+            <div>
+                <input @change=${this.handleChangeDiff} id="diff_check" type="checkbox"></input>
+                <label for="diff_check"> With Diff<label>
+            </div>
+        `
+    }
+
+    firstUpdated() {
+        this.dispatchEvent(new CustomEvent('show-diff-ready'));
     }
 
     render() {
-        return html`<mls-editor-100529 ismls2="true"></mls-editor-100529>`;
+        return html`
+            <div class="actions">
+                    <span class="language">${this.language}</span>
+                
+                    <div class="actions-list">
+                        ${this.withDiff ? this.renderShowDiff() : ''}
+                        ${this.withAccept ? this.renderWithAccept() : ''}
+                        ${this.withReject ? this.renderReject() : ''}
+                        ${this.withTryAgain ? this.renderTryAgain() : ''}
+                        ${this.withCopy ? this.renderWithCopy() : ''}
+                    </div>
+            </div>
+
+            <mls-editor-100529 style="display: block;height:600px;" ismls2="true"></mls-editor-100529>
+    `;
     }
+
+
+    static styles = css`
+      :host{
+        display:block;
+      }
+      .actions{
+        height:30px; 
+        background: #b4b4b4; 
+        display:flex; 
+        align-items:center;
+        padding:0 1rem; 
+        color:#fff;
+        .actions-list{
+          display:flex;
+          gap:1rem;
+        }
+      }
+      .language {
+        flex:1;
+      }
+      
+      .action-item{
+
+        user-select: none;
+        display:flex; 
+        align-items:center;
+        justify-content: center;
+        cursor:pointer;
+        min-width: 50px;
+      }
+      .accepted, .deleted, .copied, .tried, .rejected{
+        cursor:default;
+      }
+    `;
+
 }

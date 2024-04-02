@@ -129,7 +129,7 @@ export abstract class AimTaskBase extends AimBase {
         }));
     }
 
-    notifyCompleteByStatus(status: 'ok' | 'error', result: string) {
+    notifyCompleteByStatus(status: 'ok' | 'error' | 'userEvent', result: string) {
         this.sendFinishedNotification({
             status,
             result,

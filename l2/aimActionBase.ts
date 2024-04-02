@@ -29,8 +29,8 @@ export abstract class AimActionBase extends AimBase {
     public onTaskFinishedEvent(e: any): void {
         if (!e.detail || (e.detail.childIndex < 0) || !e.detail.status) throw new Error('invalid task-finished event, childIndex="' + e.detail?.childIndex + '", status="' + e.detail?.status + '"');
         const st: string = e.detail.status;
-        if (st !== 'ok' && st !== 'error') throw new Error('invalid task-finished event, status=' + st);
-        const status: 'ok' | 'error' = st;
+        if (st !== 'ok' && st !== 'error' && st !== 'userEvent') throw new Error('invalid task-finished event, status=' + st);
+        const status: 'ok' | 'error' | 'userEvent' = st;
         const childIndex = e.detail.childIndex;
         if (typeof childIndex !== 'number') throw new Error('invalid task-finished event, childIndex=' + childIndex);
         const result = e.detail.result;

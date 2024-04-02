@@ -1,117 +1,161 @@
 /// <mls shortName="aimTaskResultLess" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
-import { getInfoMyService } from "./_100554_aimHelper";
-import { initCollabShowCodeSnippet100554, CollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet';
 import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
-import { ServiceDsStyles } from "_100554_serviceDsStyles";
+import { getActiveOpServiceIfIsValid, isValidRef } from './_100554_aimActionStyleNew';
+import { ITryAgainEventDetail, IAcceptEventDetail } from "./_100554_aimHelper";
 
 @customElement('aim-task-result-less-100554')
 export class AimTaskResultLess extends AimTaskBase {
 
     constructor() {
         super();
-        initCollabShowCodeSnippet100554();
         initCollabShowCodeDiff100554();
     }
-
-    @query('collab-show-code-snippet-100554')
-    codeSnippet: CollabShowCodeSnippet100554 | undefined;
 
     @query('collab-show-code-diff-100554')
     codeDiff: CollabShowCodeDiff | undefined;
 
+    @query('#details_result')
+    detailsResult: HTMLDetailsElement | undefined;
+
+    @query('textarea')
+    textarea: HTMLTextAreaElement | undefined;
+
+    @property({ type: Boolean }) withDiff = false;
+
+    @property({ type: Boolean, reflect: true }) isTryAgain = false;
+
     private result: string = '';
 
     public onInitializing(): void { // from abstract
-        this.notifyCompleteByStatus('ok', '');
+        this.notifyCompleteByStatus('userEvent', '');
     }
 
-    firstUpdated(a: any) {
-        super.firstUpdated(a);
-        if (this.codeSnippet) this.codeSnippet.textIn = this.result;
-    }
+    private async setValues() {
 
-    private async setStyleDiff() {
         if (!this.codeDiff) return;
-        const activeOpService = this.getActiveOpServiceIfIsValid();
-        if (!activeOpService) {
-            this.codeDiff.setInitialHistories('', this.result);
-            return;
-        };
+        this.codeDiff.actualTextResult = this.result.trim();
+        this.codeDiff.actualTextDiffModified = this.result.trim();
+        const activeOpService = getActiveOpServiceIfIsValid(this);
+
+        if (!activeOpService) return;
+
+        const isValid = isValidRef(this.taskRoot, activeOpService);
+        this.withDiff = isValid;
+        if (this.withDiff) this.codeDiff.setAttribute('withdiff', 'true');
+
         const value = activeOpService.getEditorComponentSource();
-        this.codeDiff.setInitialHistories(value.trim(), this.result.trim());
+        this.codeDiff.actualTextDiffOriginal = value.trim();
+
+
     }
 
-    private onToogleDetails(event: Event) {
-        let detailsElement = event.target as HTMLDetailsElement;
-        detailsElement = detailsElement.closest('details') as HTMLDetailsElement;
-        if (!detailsElement) return;
-        if (!detailsElement.open) {
-            this.setStyleDiff();
-        }
+    firstUpdated() {
+        this.setValues();
+        this.codeDiff?.addEventListener('show-diff-ready', () => {
+            this.codeDiff?.init();
+        });
     }
 
     renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
 
-        const title = child.title;
         const body = child._tempResult || '';
         const { contentLess, contentsAfterLess, contentsBeforeLess } = this.extractBlocks(body);
         this.result = contentLess;
 
         return html`
-        <details open>
-            <summary>${title}</summary>
+        <div style=${!this.isTryAgain ? 'display: block' : 'display:none'}>
             <div>${contentsBeforeLess}</div>
-            <div style='margin: 10px'>
-                <collab-show-code-snippet-100554 language="less" withAccept="true" .onAccept=${this.onAccept.bind(this)}></collab-show-code-snippet-100554>
+            <div style='margin: 10px;'>
+                <collab-show-code-diff-100554
+                    language="less"
+                    withtryagain
+                    .onAccept=${this.onAccept.bind(this)}
+                    .onTryAgain=${this.onTryAgain.bind(this)}
+                    .onReject=${this.onReject.bind(this)}
+                    ${this.withDiff ? 'withdiff' : ''}
+                ></collab-show-code-diff-100554>
             </div> 
             <div>${contentsAfterLess}</div>
-        </details>
+        </div>
 
-        <details @click=${this.onToogleDetails}>
-            <summary>${title}- Diff</summary>
-            <div style='margin-top: 10px;height:400px;'>
-            <collab-show-code-diff-100554 editorType="less" alias="100554_aimTaskResultLess">
-            </collab-show-code-diff-100554>
+        <div style=${this.isTryAgain ? 'display: block' : 'display:none'}>
+            <div>
+                <div>Por favor digite as mudanças necessárias abaixo.</div>
+                <div style='margin: 10px;'>
+                    <div>
+                        <label>Prompt:</label>
+                        <textarea rows="5" placeholder="Digite aqui seu prompt" style="width:100%"></textarea>
+                    </div>
+                    <br>
+                    <div class="buttonGroup">
+                        <button @click="${this.handleCancelTryAgain}">Cancelar</button>
+                        <button @click="${this.handleConfirmTryAgain}">Confirmar</button>
+                    </div>
+                </div> 
             </div> 
-        </details>
-
+        </div>
         `;
     }
 
-    private onAccept() {
-
-        const activeOpService = this.getActiveOpServiceIfIsValid();
-        if (!activeOpService) {
-            window.collabMessages.add('The service in the opposite position does not refer to this action', 'error')
-            return;
-        };
-        const taskWithRef = this.taskRoot.children.find((task) => task.widget === "_100554_aimTaskDsStyles");
-        if (!taskWithRef || !taskWithRef.ref) {
-            window.collabMessages.add('This action dont have any file ref', 'error')
-            return;
-        };
-
-        const actualRef = activeOpService.getActualRef();
-        if (taskWithRef.ref !== actualRef) {
-            window.collabMessages.add(`The current reference: ${actualRef},  does not match the action reference:${taskWithRef.ref}`
-                , 'error')
-            return;
-        };
-
-        activeOpService.setEditorSource(this.result);
+    private getRoot() {
+        const root = this.closest('aim-action-style-new-100554');
+        return root;
     }
 
-    private getActiveOpServiceIfIsValid() {
-        const info = getInfoMyService(this);
-        if (!info) return undefined;
-        const activeServiceOp: ServiceDsStyles = info.actServiceOp;
-        if (activeServiceOp.tagName !== 'SERVICE-DS-STYLES-100554') return undefined;
-        if (!activeServiceOp.isComponent) return undefined;
-        return activeServiceOp;
+    private closeMe() {
+        const det = this.querySelector('details');
+        if (det) det.open = false;
+    }
+
+    private handleCancelTryAgain() {
+        this.isTryAgain = false;
+    }
+
+    private handleConfirmTryAgain() {
+        const root = this.getRoot();
+        if (!root) return;
+        let prompt: string = '';
+        if (this.textarea) prompt = this.textarea.value;
+        this.isTryAgain = false;
+        const detail: ITryAgainEventDetail = {
+            root: this.taskRoot,
+            prompt
+        };
+        root.dispatchEvent(new CustomEvent('task-try-again', {
+            detail, bubbles: true, composed: true
+        }));
+        this.closeMe();
+    }
+
+    private onAccept() {
+        const root = this.getRoot();
+        if (!root) return;
+        const detail: IAcceptEventDetail = {
+            root: this.taskRoot,
+            result: this.result
+        }
+        root.dispatchEvent(new CustomEvent('task-accepted', {
+            detail, bubbles: true, composed: true
+        }));
+        this.closeMe();
+    }
+
+    private onReject() {
+        const root = this.getRoot();
+        if (!root) return;
+        root.dispatchEvent(new CustomEvent('task-rejected', {
+            detail: this.taskRoot, bubbles: true, composed: true
+        }));
+        this.closeMe();
+    }
+
+    private onTryAgain(e: Event) {
+        if (this.detailsResult) this.detailsResult.open = false;
+        this.isTryAgain = true;
     }
 
     private extractBlocks(src: string) {
@@ -127,22 +171,5 @@ export class AimTaskResultLess extends AimTaskBase {
         }
         return { contentLess, contentsAfterLess, contentsBeforeLess }
     }
-
-
-    private extractLess(src: string) {
-        const regex = /```less([\s\S]+?)```/g;
-        const matches = src.match(regex);
-        const contents = [];
-
-        if (matches) {
-            for (const m of matches) {
-                const conteudo = m.replace(/```less|```/g, '').trim();
-                contents.push(conteudo);
-            }
-        }
-
-        return contents;
-    }
-
 
 }

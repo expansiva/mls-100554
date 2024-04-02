@@ -4,15 +4,6 @@
 export let tasks: cbe.ITaskRoot[] = [];
 let lastReadFromServer: Date | undefined = undefined;
 
-export interface ITaskFinish {
-  status: 'ok' | 'error',
-  taskIndex: number,
-  childIndex: number,
-  result: string, // result or error message
-  taskRoot: cbe.ITaskRoot,
-  taskChild: cbe.ITaskChild
-}
-
 
 /**
  * return the result of the prompt
@@ -98,4 +89,31 @@ export function getInfoMyService(elBase: HTMLElement): { level: number, position
 
   }
 
+}
+
+export interface ITaskFinish {
+  status: 'ok' | 'error' | 'userEvent',
+  taskIndex: number,
+  childIndex: number,
+  result: string, // result or error message
+  taskRoot: cbe.ITaskRoot,
+  taskChild: cbe.ITaskChild
+}
+
+export interface ITryAgainEvent extends Event {
+  detail: ITryAgainEventDetail
+}
+
+export interface IAcceptEvent extends Event {
+  detail: IAcceptEventDetail
+}
+
+export interface IAcceptEventDetail {
+  root: cbe.ITaskRoot
+  result: string,
+}
+
+export interface ITryAgainEventDetail {
+  root: cbe.ITaskRoot
+  prompt: string,
 }
