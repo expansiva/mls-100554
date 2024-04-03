@@ -91,6 +91,53 @@ export function getInfoMyService(elBase: HTMLElement): { level: number, position
   }
 
 }
+export function getUserConfigs(): IAimColums {
+  let configs = getDefaultColumsConfigs();
+  try {
+    const str = localStorage.getItem('serviceAIM');
+    if (!str) return configs;
+    const data = JSON.parse(str);
+    configs = data;
+    return { ...configs };
+  } catch (err: any) {
+    throw new Error(err.message);
+  }
+}
+
+export function saveUserConfigs(obj: IAimColums) {
+  if (!obj) throw new Error('Invalid data')
+  try {
+    const str = localStorage.setItem('serviceAIM', JSON.stringify(obj));
+  } catch (err: any) {
+    throw new Error(err.message);
+  }
+}
+
+function getDefaultColumsConfigs(): IAimColums {
+  return {
+    status: true,
+    cost: true,
+    sequencial: true,
+    countChild: true,
+    title: true,
+    prompt: true,
+    user: true,
+    reference: false,
+    lastUpdateDate: false
+  }
+};
+
+export interface IAimColums {
+  status: boolean,
+  cost: boolean,
+  sequencial: boolean,
+  countChild: boolean,
+  title: boolean,
+  prompt: boolean,
+  user: boolean,
+  reference: boolean,
+  lastUpdateDate: boolean
+}
 
 export interface ITaskFinish {
   status: 'ok' | 'error' | 'rejected' | 'userEvent',

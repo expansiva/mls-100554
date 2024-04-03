@@ -183,6 +183,8 @@ export class AimActionStyleNew extends AimActionBase {
     }
 
     prepareTask3(taskFinishResult: ITaskFinish): void {
+
+        console.info(taskFinishResult)
         // show result
         const child = taskFinishResult.taskChild;
         const result: string = child.result || '';

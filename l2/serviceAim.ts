@@ -4,18 +4,16 @@ import { html, css, unsafeHTML, render, styleMap, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IToolbarChangeEvent } from './_100554_serviceBase';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
-import { tasks, readTasksFromServer } from './_100554_aimHelper';
+import { tasks, readTasksFromServer, getUserConfigs, saveUserConfigs, IAimColums } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
 
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
 
-
     constructor() {
         super();
         this.setEvents();
     }
-
 
     @property() activeTab: ITabType = 'All';
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
@@ -38,6 +36,7 @@ export class ServiceAim100554 extends ServiceBase {
         }
     }
 
+
     public details: IService = {
         icon: '&#xf03a',
         state: 'foreground',
@@ -58,10 +57,10 @@ export class ServiceAim100554 extends ServiceBase {
     static message = `[[mls_DS_messages_local_language]]`; // todo: test
 
     public onClickLink = (op: string): boolean => {
+        if (op === 'opColumns') return this.showConfigColumns();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
-
 
     public onClickIcon = (op: string): void => {
         if (this.activeTab === op) return;
@@ -72,6 +71,7 @@ export class ServiceAim100554 extends ServiceBase {
     public menu: IMenu = {
         title: 'AI',
         actions: {
+            opColumns: 'Columns',
         },
         icons: {
             All: 'All;f560',
@@ -135,6 +135,7 @@ export class ServiceAim100554 extends ServiceBase {
         return arr.sort(sort);
     }
 
+
     renderAll() {
 
         function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
@@ -152,7 +153,6 @@ export class ServiceAim100554 extends ServiceBase {
             ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
         )}
         `;
-
     }
 
     renderUser() {
@@ -174,7 +174,7 @@ export class ServiceAim100554 extends ServiceBase {
             ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
         )}            
         `;
-        
+
     }
 
     renderRef() {
@@ -193,7 +193,7 @@ export class ServiceAim100554 extends ServiceBase {
 
         function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
             let hasRef = taskRoot.children.filter((c) => c.ref === refOpr);
-            if (!hasRef || hasRef.length <= 0) return ;
+            if (!hasRef || hasRef.length <= 0) return;
 
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
@@ -222,8 +222,7 @@ export class ServiceAim100554 extends ServiceBase {
     actions: ResponseFindActions[] = [];
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {
-
-        if (!changedProperties.has('activeTab')) return;
+        if (!changedProperties.has('activeTab') && !changedProperties.has('orderned')) return;
         switch (this.activeTab) {
             case 'All':
                 readTasksFromServer('all', '')
@@ -236,6 +235,8 @@ export class ServiceAim100554 extends ServiceBase {
             case 'Ref':
                 return;
             case 'Add':
+                return;
+            case 'Loading':
                 return;
             default:
                 console.error('invalid activeTab:', this.activeTab);
@@ -283,7 +284,6 @@ export class ServiceAim100554 extends ServiceBase {
             const tag = activeInstance.tagName;
             const fileName = convertTagToFileName(tag.toLowerCase());
             this.actualServiceOpLevel = activeInstance.level;
-
             this.actualServiceOpName = fileName;
 
         }
@@ -307,8 +307,6 @@ export class ServiceAim100554 extends ServiceBase {
                 </div>
             `);
         }
-
-        // if (filteredActions.length === 0) return html`<div class="no-actions">No Actions to Add</div>`;
 
         const showListStyle = { display: !this.useContainerAdd ? 'none' : 'grid' };
         const showContainerStyle = { display: !this.useContainerAdd ? 'block' : 'none' };
@@ -355,6 +353,7 @@ export class ServiceAim100554 extends ServiceBase {
             console.error(`invalid call on loadAndRenderComponent: `, !!widget, !!container);
             return;
         }
+
         try {
             const componentModule = await import('./' + widget);
             if (!componentModule) {
@@ -372,6 +371,74 @@ export class ServiceAim100554 extends ServiceBase {
             this.useContainerAdd = true;
         }
     }
+
+    private stateColumns: IAimColums | undefined;
+
+    renderColums() {
+
+        this.stateColumns = getUserConfigs();
+        const keys = Object.keys(this.stateColumns);
+        return html`
+            Select the columns you want to view
+            <div style="padding:0 1rem;">
+                ${keys.map((key: string) => {
+            const isChecked = (this.stateColumns as any)[key] === true;
+            const isDisabled = key === 'status';
+
+            return html`
+                        <div style="display:flex; align-items:center;">
+                            <input
+                                id="${key}" 
+                                type="checkbox"
+                                ?checked=${isChecked} 
+                                ?disabled=${isDisabled} 
+                                @change=${(event: Event) => this.handleInputChange(event, key)}
+                            ></input>
+                            <label style="cursor:pointer;" for=${key}>${key}</label>
+                        </div>
+                    `
+        }
+        )}
+                <div style="margin-top:1rem;">
+                    <button @click=${this.handleSaveColumnClick.bind(this)}>Save</button>
+                    <button @click=${this.handleCancelColumnClick.bind(this)}>Cancel</button>
+                </div>
+            
+            </div>
+        `
+    }
+
+    private handleInputChange(event: Event, key: string) {
+        const target = event.target as HTMLInputElement
+        const checked = target.checked;
+        if (key === 'status') return;
+        (this.stateColumns as any)[key] = checked;
+    }
+
+    private handleCancelColumnClick() {
+        if (this.menu.closeMenu) this.menu.closeMenu();
+    }
+
+    private handleSaveColumnClick() {
+        if (this.stateColumns) {
+            saveUserConfigs(this.stateColumns);
+            this.activeTab = 'Loading';
+            setTimeout(() => {
+                this.activeTab = 'All';
+                if (this.menu.closeMenu) this.menu.closeMenu();
+            }, 50)
+        }
+    }
+
+    private showConfigColumns(): boolean {
+
+        const div1 = document.createElement('div');
+        div1.style.padding = '1rem';
+        render(this.renderColums(), div1);
+        if (this.menu.setMode) this.menu.setMode('page', div1);
+        return true;
+    }
+
 }
 
-type ITabType = 'All' | 'User' | 'Ref' | 'Add'
+type ITabType = 'All' | 'User' | 'Ref' | 'Add' | 'Loading'

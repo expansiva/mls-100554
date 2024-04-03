@@ -4,7 +4,7 @@ import { html, css, LitElement, unsafeHTML, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { AimBase } from './_100554_aimBase';
-import { tasks, ITaskFinish } from './_100554_aimHelper';
+import { tasks, ITaskFinish, getUserConfigs } from './_100554_aimHelper';
 
 @customElement('aim-action-base-100554')
 export abstract class AimActionBase extends AimBase {
@@ -68,23 +68,16 @@ export abstract class AimActionBase extends AimBase {
     }
 
     private getPromptUser(task: cbe.ITaskRoot): string {
-
         let ret = '';
-
         if (task.children.length <= 0) return ret;
-
         const child = task.children.find((i: cbe.ITaskChild) => i.widget === '_100554_aimTaskExecLLM');
-
         if (!child || !child.prompt) return ret;
-
         const regex = /User:(.*?)(?=\n\n\n|$)/s;
         const match = child.prompt.match(regex);
-
         if (match && match.length > 0) {
             ret = match[1].trim();
         }
         return ret;
-
     }
 
     renderTaskRoot(): TemplateResult {
@@ -94,7 +87,7 @@ export abstract class AimActionBase extends AimBase {
                 && child.mode !== 'error'
                 && child.nextStep) this.prepareNextStep(child);
             const taskName = convertFileNameToTag(child.widget);
-            
+
             const sHtml = `<${taskName} mode="${child.mode}" taskindex="${this.taskIndex}" childindex="${index}" />`
             return html`${unsafeHTML(sHtml)}`;
         }
@@ -103,35 +96,22 @@ export abstract class AimActionBase extends AimBase {
         const index: number = Number(taskRoot.key?.split('/').pop()) || 0;
         const cost: number = taskRoot.cost || 0;
         const promptUser = this.getPromptUser(taskRoot);
+        const configs = getUserConfigs();
         return html`
             <details>
                 <summary>
-
-                    <div style=" display: inline-flex; align-items: center; gap:.7rem">
-    
+                    <div class="action-title">
                         ${this.renderToolbar()} 
-                        
-                        <span> 
-                            ${this.iconMoney} ${cost.toFixed(4)}
-                        </span>
-
-                        <span>
-                            ${index.toString().padStart(5, '0')}
-                        </span>
-
-                        <span style=" overflow:hidden; width:10em; text-overflow:ellipsis;  white-space: nowrap; display:inline-block">
-                            ${this.title}
-                        </span>
-
-                        ${
-                            !!promptUser ? html`<span style=" overflow:hidden; width:20em; text-overflow:ellipsis;  white-space: nowrap; display:inline-block"> ${this.iconPrompt} ${promptUser} </span>` : ''
-                        }
-
-                        <span> 
-                            ${this.iconUser} ${taskRoot.userName}
-                        </span> 
-
+                        ${configs.cost ? html`<span title="Cost" class="ac ac-cost"> ${this.iconMoney} ${cost.toFixed(4)}</span>` : ''}
+                        ${configs.sequencial ? html`<span title="Sequential" class="ac ac-id">${index.toString().padStart(5, '0')}</span>` : ''}
+                        ${configs.countChild ? html`    <span title="Count Child" class="ac ac-count">${this.iconHash} ${taskRoot.children.length}</span>` : ''}
+                        ${configs.title ? html`    <span title="Title" class="ac ac-title">${this.title}</span>` : ''}
+                        ${configs.prompt ? html`    <span title="Prompt" class="ac ac-prompt"> ${this.iconPrompt} ${promptUser || '...'}</span>` : ''}
+                        ${configs.user ? html`<span title="User" class="ac ac-user"> ${this.iconUser} ${taskRoot.userName} </span>` : ''}
+                        ${configs.reference ? html`<span title="Reference" class="ac ac-ref"> ${this.iconRef} in Develpoment </span>     ` : ''}
+                        ${configs.lastUpdateDate ? html`<span title="Last update date " class="ac ac-date"> ${this.iconDate}  02/04/2024, 18:37:19 </span>` : ''}                                         
                     </div>
+
                     
                 </summary>
                 ${taskRoot.children.map((child, index) => renderChild(child, index))}
@@ -232,7 +212,7 @@ export const findActions = async (levelsToVerify: number[], tagsToVerify: string
             }
             const i1 = new module[className]() as AimActionBase; // class instance
             const rules: AimActionRules = i1.getRules();
-            const regexps = rules.tags.map(tag => new RegExp(tag.replace(/\*/g, '.*')));        
+            const regexps = rules.tags.map(tag => new RegExp(tag.replace(/\*/g, '.*')));
             rc.push({
                 shortName: storFile.shortName,
                 project: storFile.project,
@@ -250,4 +230,5 @@ export const findActions = async (levelsToVerify: number[], tagsToVerify: string
 
     return rc;
 }
+
 

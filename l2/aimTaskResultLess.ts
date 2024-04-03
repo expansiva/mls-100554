@@ -54,50 +54,60 @@ export class AimTaskResultLess extends AimTaskBase {
     }
 
     firstUpdated() {
+        // this.setValues();
+        // this.codeDiff?.addEventListener('show-diff-ready', () => {
+        //     this.codeDiff?.init();
+        // });
+    }
+
+    private alreadyInit: boolean = false;
+    handleClick(e: Event) {
+        if (this.alreadyInit) return;
         this.setValues();
-        this.codeDiff?.addEventListener('show-diff-ready', () => {
-            this.codeDiff?.init();
-        });
+        this.codeDiff?.init();
     }
 
     renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
-        
+
         const body = child._tempResult || '';
         const { contentLess, contentsAfterLess, contentsBeforeLess } = this.extractBlocks(body);
         this.result = contentLess;
 
         return html`
-        <div style=${!this.isTryAgain ? 'display: block' : 'display:none'}>
-            <div>${contentsBeforeLess}</div>
-            <div style='margin: 10px;'>
-                <collab-show-code-diff-100554
-                    language="less"
-                    .onAccept=${this.onAccept.bind(this)}
-                    .onTryAgain=${this.onTryAgain.bind(this)}
-                    .onReject=${this.onReject.bind(this)}
-                    ${this.withDiff ? 'withdiff' : ''}
-                    ${taskRoot.mode === "waiting for user" ? ' withaccept withreject withtryagain' : ''}
-                ></collab-show-code-diff-100554>
-            </div> 
-            <div>${contentsAfterLess}</div>
-        </div>
-
-        <div style=${this.isTryAgain ? 'display: block' : 'display:none'}>
-            <div>
-                <div>Por favor digite as mudanças necessárias abaixo.</div>
+        <details @click=${this.handleClick}>
+            <summary>View Less Result</summary>
+            <div style=${!this.isTryAgain ? 'display: block' : 'display:none'}>
+                <div>${contentsBeforeLess}</div>
                 <div style='margin: 10px;'>
-                    <div>
-                        <label>Prompt:</label>
-                        <textarea rows="5" placeholder="Digite aqui seu prompt" style="width:100%"></textarea>
-                    </div>
-                    <br>
-                    <div class="buttonGroup">
-                        <button @click="${this.handleCancelTryAgain}">Cancelar</button>
-                        <button @click="${this.handleConfirmTryAgain}">Confirmar</button>
-                    </div>
+                    <collab-show-code-diff-100554
+                        language="less"
+                        .onAccept=${this.onAccept.bind(this)}
+                        .onTryAgain=${this.onTryAgain.bind(this)}
+                        .onReject=${this.onReject.bind(this)}
+                        ${this.withDiff ? 'withdiff' : ''}
+                        ${taskRoot.mode === "waiting for user" ? ' withaccept withreject withtryagain' : ''}
+                    ></collab-show-code-diff-100554>
                 </div> 
-            </div> 
-        </div>
+                <div>${contentsAfterLess}</div>
+            </div>
+
+            <div style=${this.isTryAgain ? 'display: block' : 'display:none'}>
+                <div>
+                    <div>Por favor digite as mudanças necessárias abaixo.</div>
+                    <div style='margin: 10px;'>
+                        <div>
+                            <label>Prompt:</label>
+                            <textarea rows="5" placeholder="Digite aqui seu prompt" style="width:100%"></textarea>
+                        </div>
+                        <br>
+                        <div class="buttonGroup">
+                            <button @click="${this.handleCancelTryAgain}">Cancelar</button>
+                            <button @click="${this.handleConfirmTryAgain}">Confirmar</button>
+                        </div>
+                    </div> 
+                </div> 
+            </div>
+        </details>
         `;
     }
 
@@ -115,7 +125,7 @@ export class AimTaskResultLess extends AimTaskBase {
         let prompt: string = '';
         if (this.textarea) prompt = this.textarea.value;
         this.isTryAgain = false;
-    
+
         this.notifyCompleteByStatus('userEvent', this.result, prompt);
         this.closeMe();
     }
