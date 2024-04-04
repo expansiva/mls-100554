@@ -80,6 +80,42 @@ export abstract class AimActionBase extends AimBase {
         return ret;
     }
 
+    private getRef(taskRoot: cbe.ITaskRoot): string {
+        let ref: string = '';
+        for (let task of taskRoot.children) {
+            if (task.ref) {
+                ref = task.ref;
+                break;
+            }
+        }
+        return ref;
+    }
+
+    private getLastUpdateDate(taskRoot: cbe.ITaskRoot): string {
+        let lastDate: Date | undefined;
+
+        taskRoot.children.forEach((task) => {
+            task.trace.forEach((trace) => {
+                const dt = this.getLocateDateTimeInTrace(trace);
+                if (dt && !lastDate) lastDate = dt
+                else if (dt && lastDate && dt > lastDate) lastDate = dt
+            })
+        })
+
+        return lastDate ? lastDate.toLocaleString() : '';
+    }
+
+    private getLocateDateTimeInTrace(line: string): Date | undefined {
+        const [isoDatePart, ...descriptionParts] = line.split('Z:');
+        try {
+            const date = new Date(`${isoDatePart}Z`);
+            if (isNaN(date.getTime())) return undefined;
+            return date;
+        } catch (error) {
+            console.error(isoDatePart, error);
+        }
+    }
+
     renderTaskRoot(): TemplateResult {
         const renderChild = (child: cbe.ITaskChild, index: number) => {
             this.loadDynamicWidget(taskRoot, child, child.widget);
@@ -91,12 +127,17 @@ export abstract class AimActionBase extends AimBase {
             const sHtml = `<${taskName} mode="${child.mode}" taskindex="${this.taskIndex}" childindex="${index}" />`
             return html`${unsafeHTML(sHtml)}`;
         }
+
         if (this.taskIndex < 0 || this.taskIndex >= tasks.length) return html`invalid task index`;
+
         const taskRoot = tasks[this.taskIndex];
         const index: number = Number(taskRoot.key?.split('/').pop()) || 0;
         const cost: number = taskRoot.cost || 0;
         const promptUser = this.getPromptUser(taskRoot);
+        const ref = this.getRef(taskRoot);
+        const lastUpdateDate = this.getLastUpdateDate(taskRoot);
         const configs = getUserConfigs();
+
         return html`
             <details>
                 <summary>
@@ -108,8 +149,8 @@ export abstract class AimActionBase extends AimBase {
                         ${configs.title ? html`    <span title="Title" class="ac ac-title">${this.title}</span>` : ''}
                         ${configs.prompt ? html`    <span title="Prompt" class="ac ac-prompt"> ${this.iconPrompt} ${promptUser || '...'}</span>` : ''}
                         ${configs.user ? html`<span title="User" class="ac ac-user"> ${this.iconUser} ${taskRoot.userName} </span>` : ''}
-                        ${configs.reference ? html`<span title="Reference" class="ac ac-ref"> ${this.iconRef} in Develpoment </span>     ` : ''}
-                        ${configs.lastUpdateDate ? html`<span title="Last update date " class="ac ac-date"> ${this.iconDate}  02/04/2024, 18:37:19 </span>` : ''}                                         
+                        ${configs.reference ? html`<span title="Reference" class="ac ac-ref"> ${this.iconRef} ${ref} </span>     ` : ''}
+                        ${configs.lastUpdateDate ? html`<span title="Last update date " class="ac ac-date"> ${this.iconDate}  ${lastUpdateDate} </span>` : ''}                                         
                     </div>
 
                     
