@@ -20,7 +20,7 @@ service-select-ds-100554 {//don't change this line
             flex-direction: column;
             padding-left: 0.5rem;
 
-            li {
+            >li {
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -41,11 +41,20 @@ service-select-ds-100554 {//don't change this line
                     }
                 }
 
-                &:hover {
-                    background: #f7f7f7;
+                details{
+                    width: 100%;
+                    li{
+                        list-style: none;
+                    }
+                    summary{
+                        padding: 0.5rem;
+                        &:hover{
+                            background: #f7f7f7;
+                        }
+                    }
                 }
 
-                &.selected {
+                details>summary.selected {
                     background: #e3e3e3;
                 }
 

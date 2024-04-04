@@ -672,7 +672,7 @@ export class ServicePreviewView extends LitElement {
             less: '',
             isComponent: true,
             widget: `_${info.project}_${info.path}`,
-            helper: '_100529_service_preview',
+            helper: '_100554_servicePreview',
             origemLevel: +this.level
         };
         mls.events.fire(3, 'DSStyleChanged', JSON.stringify(rc), 500);

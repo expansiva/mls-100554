@@ -28,7 +28,6 @@ export class ServiceDsStyles extends ServiceBase {
         if (op === 'opStyle') return this.showStyle();
         if (op === 'opStyle2') return this.showStyle2();
         if (op === 'opView') return this.openRepo();
-
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -113,7 +112,6 @@ export class ServiceDsStyles extends ServiceBase {
     private componentName: string = '';
     private isStyleRename: boolean = false;
     private oldStyleName: string = '';
-    private isSetStyle: boolean = false;
     private rightServiceOpened: string = '';
     private dsInstance: mls.l3.DesignSystemIO | undefined;
     private lastEditorInfo = {
@@ -137,12 +135,13 @@ export class ServiceDsStyles extends ServiceBase {
         this._onServiceClick(visible, reinit, el)
     }
 
-
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-        if (visible) {
+        if (visible && !reinit) {
             this.isComponent = false;
             await this.start1();
-            if (!reinit) this.reinit();
+            // this.reinit();
+            this.checkComponentOpenInL2();
+
         } else {
             const params2: IEventsSelectedObj = {
                 service: [],
@@ -152,11 +151,12 @@ export class ServiceDsStyles extends ServiceBase {
             mls.events.fire([this.level], ['DSStyleUnSelected'], JSON.stringify(params2), 0);
 
         }
-        if (reinit) this.reinit();
+        if (reinit) this.checkComponentOpenInL2();
     }
 
     private async start1() {
         await this.createEditor();
+
         const serviceDef = this.isComponent ? this.defaultServices.componentStyle : this.defaultServices.globalStyle;
         const params: IEventsSelectedObj = {
             service: [serviceDef],
@@ -188,9 +188,42 @@ export class ServiceDsStyles extends ServiceBase {
         });
     }
 
+    private checkComponentOpenInL2() {
+        // if (!this.isComponent) return;
+        const actualL2 = mls.actual[2].getFullName();
+        if (!actualL2) return;
+        if (actualL2 === this.componentName) return;
+        const newCompExist = this.dsInstance?.components.find(actualL2);
+        if (!newCompExist) {
+            this.showStyle();
+            return;
+        }
+
+        const desc: IEditorChangedEventsObj = {
+            emitter: 'right',
+            helper: '_100554_servicePreview',
+            isComponent: true,
+            widget: actualL2,
+            less: '',
+            origemLevel: 3,
+            value: [],
+            selector: ''
+        }
+
+        const params: mls.events.IEvent = {
+            level: 3,
+            type: 'DSStyleChanged',
+            desc: JSON.stringify(desc)
+        }
+
+        this.onDSStyleChanged(params);
+    }
+
     private showStyle(): boolean {
-        if (this.menu.setMode) this.menu.setMode('initial');
-        return this.showStyle2();
+        this.componentName = '';
+        this.isComponent = false;
+        this.reinit();
+        return true;
     }
 
     private openRepo() {
@@ -269,7 +302,7 @@ export class ServiceDsStyles extends ServiceBase {
 
             if (!this._ed1) return;
             const modelStyle = this.getActualModel();
-            if(!modelStyle) return;
+            if (!modelStyle) return;
 
             const actualModel = this._ed1.getModel();
             if (!modelStyle || actualModel !== modelStyle) return;
@@ -601,6 +634,7 @@ export class ServiceDsStyles extends ServiceBase {
             this.models[modelName] = monaco.editor.createModel(value, 'less', uri) as IMonacoModelStyle;
             const model = this.models[modelName];
             this.setModelAPI(model);
+
             model.onDidChangeContent((event) => {
                 if (this.timeoutChangesEditorStyle) clearTimeout(this.timeoutChangesEditorStyle);
                 this.timeoutChangesEditorStyle = setTimeout(() => {
@@ -619,19 +653,18 @@ export class ServiceDsStyles extends ServiceBase {
         return modelKey;
     }
 
-    private getActualModel() :IMonacoModelStyle | undefined{
+    private getActualModel(): IMonacoModelStyle | undefined {
         if (this.isComponent) {
             const modelKey = this.getModelComponentKey();
             if (!modelKey) return;
             return this.models[modelKey];
-        } 
+        }
         return this.models['style'];
     }
 
     private async setStyle(styleLess: string) {
-
+    
         if (!this._ed1) return;
-        this.isSetStyle = true;
         const lessTokens = await this.getTokens();
         let textByRange = styleLess;
         const content = `${textByRange.trim()}\n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
@@ -672,7 +705,7 @@ export class ServiceDsStyles extends ServiceBase {
 
     private changeEditor(lines: IBlockLessLine[], helper: string) {
         const modelStyle = this.getActualModel();
-        if(!modelStyle) return;
+        if (!modelStyle) return;
         lines.forEach((line) => {
             modelStyle.changeBlock(line.key, line.value, helper);
         });
@@ -705,15 +738,13 @@ export class ServiceDsStyles extends ServiceBase {
     private async onEditorChange(isGet: boolean) {
 
         this.clearErrors();
-        if (this.isSetStyle) {
-            this.isSetStyle = false;
-            return;
-        }
-
+    
         const model = this.getActualModel();
-        if(!model) return;
+        if (!model) return;
+
         const value = model.getLessBlock();
         const less = model.getValue().trim();
+
         const rc: IEditorChangedEventsObj = {
             emitter: 'left',
             helper: this.rightServiceOpened || this.getServiceRightOpened(),
@@ -1040,9 +1071,9 @@ export class ServiceDsStyles extends ServiceBase {
             if (!widget) return;
 
             this.componentName = widget;
-            this.start1();
+            await this.start1();
             this.reinit();
-            this.loadStylesComponent(this.componentName);
+            await this.loadStylesComponent(this.componentName);
 
             const params = this.getParamsServices();
             mls.events.fire([this.level], ['DSStyleSelected'], JSON.stringify(params), 0);
