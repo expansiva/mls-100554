@@ -4,6 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initServiceSelectDsAdd } from './_100554_serviceSelectDsAdd'
+import { collab_file, collab_undo, collab_location_dot, collab_unbalanced } from './_100554_collabIcons'
 
 @customElement('service-select-ds-100554')
 export class ServiceSelectDs100554 extends ServiceBase {
@@ -57,10 +58,6 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
-        if (visible && reinit) {
-
-        }
 
     }
 
@@ -154,15 +151,22 @@ export class ServiceSelectDs100554 extends ServiceBase {
         const dsList = mls.l5.ds.list(project);
 
         dsList.forEach((ds) => {
-            const key = mls.stor.getKeyToFiles(project, 3, ds.dsName, `ds/${ds.dsName}`, '.json');
-            const file = mls.stor.files[key];
-            const inLc = file && file.inLocalStorage;
-            const outdated = file && file.isLocalVersionOutdated;
+
+            const filesInDs = Object.entries(mls.stor.files).map((entry) => {
+                const [key, value] = entry;
+                if (key.startsWith(`${project}_3_ds_${ds.dsName}`)) return value;
+            }).filter(value => value !== undefined);
+
+            const inLc = filesInDs.find((file) => (file as mls.stor.IFileInfo).inLocalStorage === true);
+            const outdated = filesInDs.find((file) => (file as mls.stor.IFileInfo).isLocalVersionOutdated === true && (file as mls.stor.IFileInfo).status !== 'new');
+
             const obj: IDSInfo = {
                 dsInfo: ds,
-                inLocalStorage: inLc,
-                outdated,
-            };
+                inLocalStorage: !!inLc,
+                outdated: !!outdated,
+                files: filesInDs as mls.stor.IFileInfo[]
+            }
+
             this.state.ds.push(obj);
         });
 
@@ -235,9 +239,20 @@ export class ServiceSelectDs100554 extends ServiceBase {
         this.fireOpenDetails();
     }
 
+    private async restoreFile(storFile: mls.stor.IFileInfo) {
+        if (storFile.status === 'changed') {
+            storFile.status = 'nochange';
+            if (storFile.isLocalVersionOutdated && storFile.newVersionRefIfOutdated) {
+                storFile.versionRef = storFile.newVersionRefIfOutdated;
+                storFile.isLocalVersionOutdated = false;
+                storFile.newVersionRefIfOutdated = undefined;
+            }
+        }
+        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+        this.requestUpdate();
+    }
 
     render() {
-
         this.init();
         if (this.state.actualProject) {
             let lastDsIndex = this.getLastDsSelectedByProject(this.state.actualProject);
@@ -255,28 +270,59 @@ export class ServiceSelectDs100554 extends ServiceBase {
                 <span style="display:${this.state.ds.length > 0 ? 'none' : 'block'}">No design system in this project, please click add to start a create a new design system.</span>
                 <ul class="serviceListList">
                     ${this.state.ds.map(ds => html`
-                        <li
-                        @click=${(e: MouseEvent) => { e.preventDefault(); this.onItemClick(ds.dsInfo) }}
-                        class= "${ds.dsInfo.dsIndex === this.state?.dsSelected ? 'selected' : ''}"
-                        >
-                            <div>
-                                <span>${ds.dsInfo.dsName + ' (' + ds.dsInfo.dsIndex.toString() + ')'}</span>
-                                <i  class="fa fa-location-dot"
-                                    title="in local storage" 
-                                    style="display:${ds.inLocalStorage ? 'block' : 'none'}">
-                                </i>
-                                <i class="fa fa-unbalanced" 
-                                   title="need conciliation"
-                                   style="display:${ds.outdated ? 'block' : 'none'}">
-                                </i>
-                                <i class="fa fa-rotate-left" 
-                                   title="clear"
-                                   style="display:${ds.inLocalStorage ? 'block' : 'none'}"
-                                   @click=${(e: MouseEvent) => { e.preventDefault(); this.restoreDs(ds.dsInfo) }}
-                                >
-                                </i>
-                            </div>
-                            <span class="fa-solid fa-chevron-right"></span>
+                        <li>
+                            <details>
+                                <summary
+                                class= "${ds.dsInfo.dsIndex === this.state?.dsSelected ? 'selected' : ''}"
+                                @click=${(e: MouseEvent) => { this.onItemClick(ds.dsInfo) }}>
+                                    <span>${ds.dsInfo.dsName + ' (' + ds.dsInfo.dsIndex.toString() + ')'}</span>
+                                    <span style="display:inline-flex;gap:.6rem; align-items:center;">
+                                        <span
+                                            title="in local storage" 
+                                            style="display:${ds.inLocalStorage ? 'block' : 'none'}">
+                                        ${collab_location_dot}
+                                        </span>
+                                        <span
+                                            title="need conciliation"
+                                            style="display:${ds.outdated ? 'block' : 'none'}">
+                                        ${collab_unbalanced}
+                                        </span>
+                                        <span
+                                            title="clear"
+                                            style="margin-left:.5rem;display:${ds.inLocalStorage ? 'block' : 'none'}"
+                                            @click=${(e: MouseEvent) => { e.preventDefault(); this.restoreDs(ds.dsInfo) }}
+                                        >${collab_undo}</span>
+                                    </span>
+
+                                </summary>
+                                <div>
+                                    <ul>
+                                        ${ds.files.filter(f => f.inLocalStorage).map(file => html`
+                                        <li>
+                                            <span>${collab_file} ${file.folder.replace(`ds/${ds.dsInfo.dsName}`, '...') + '/' + file.shortName + file.extension}</span>
+                                            <span>
+                                                <span title="in local storage"> ${collab_location_dot}</span>
+                                                <span title="need conciliation" style="display:${file.isLocalVersionOutdated && file.status !== 'new' ? 'inline-block' : 'none'}">
+                                                    ${collab_unbalanced}
+                                                </span>
+                                                <span
+                                                    style="margin-left:.5rem; display:${file.extension === '.less' || file.extension === '.txt' && file.status !== 'new' ? 'inline-block' : 'none'}"
+                                                    @click=${(e: MouseEvent) => { e.preventDefault(); this.restoreFile(file) }}
+                                                > ${collab_undo}</span>
+                                            </span>
+                                                    
+                                        
+                                        </li>
+
+
+                                        `)}
+                                    
+
+                                    </ul>
+                                <div>
+                                
+                            </details>
+                        
                         </li>
                     `)}
                     
@@ -312,5 +358,6 @@ interface ILastDsSelected {
 interface IDSInfo {
     inLocalStorage: boolean,
     outdated: boolean,
-    dsInfo: mls.l5.IPrjDesignSystem
+    dsInfo: mls.l5.IPrjDesignSystem,
+    files: mls.stor.IFileInfo[]
 }
