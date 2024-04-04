@@ -5,6 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
 
+
 export const initServicePreviewView = '';
 @customElement('service-preview-view-100554')
 export class ServicePreviewView extends LitElement {
@@ -20,6 +21,8 @@ export class ServicePreviewView extends LitElement {
     @property() mode: string = 'd';
 
     @property() level: string = '';
+
+    @property() isDsComponent: boolean = false;
 
     @property() stylechanged: string = '';
 
@@ -44,10 +47,8 @@ export class ServicePreviewView extends LitElement {
     }
 
     render() {
-
         if (this.error !== '') return this.renderError();
         else return this.renderPreview();
-
     }
 
     renderError() {
@@ -55,6 +56,10 @@ export class ServicePreviewView extends LitElement {
     }
 
     renderPreview() {
+
+        this.verifyWC().then((res) => {
+            this.isDsComponent = res;
+        })
         if (this.mode === 'm') {
             this.style.cssText = `
                 width:100%;
@@ -102,13 +107,12 @@ export class ServicePreviewView extends LitElement {
 
     renderEditStyle() {
 
-        if (!this.verifyWC()) return '';
         const cls = this.mode === 'm' ? 'editMobile' : 'editDesktop';
-        return html`
+        return this.isDsComponent ? html`
             <edit-style class="${cls}" title="Edit styles" @click="${this.onStyleEditClick}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:19px; height:19px"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 32C0 14.3 14.3 0 32 0H160c17.7 0 32 14.3 32 32V416c0 53-43 96-96 96s-96-43-96-96V32zM223.6 425.9c.3-3.3 .4-6.6 .4-9.9V154l75.4-75.4c12.5-12.5 32.8-12.5 45.3 0l90.5 90.5c12.5 12.5 12.5 32.8 0 45.3L223.6 425.9zM182.8 512l192-192H480c17.7 0 32 14.3 32 32V480c0 17.7-14.3 32-32 32H182.8zM128 64H64v64h64V64zM64 192v64h64V192H64zM96 440a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"/></svg>
             </edit-style>        
-        `
+        ` : ''
     }
 
     updated(changedProperties: any) {
@@ -280,7 +284,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     private async init(iframe: HTMLIFrameElement) {
-        try {    
+        try {
             this.setMyFile();
             await this.setHTml(iframe);
             iframe.style.display = '';
@@ -563,34 +567,106 @@ export class ServicePreviewView extends LitElement {
         }, 200);
     }
 
-    private infoDS = { project: -1, level: '-1', myDS: undefined as any };
+    private infoDS: IInfoDesignSystem | undefined = {} as IInfoDesignSystem;
 
-    private verifyWC(): boolean {
+    private async verifyWC() {
 
-        if (this.infoDS.project !== mls.actual[5].project) {
-            this.infoDS.level = '-1';
-            this.infoDS.myDS = undefined;
-            this.infoDS.project = mls.actual[5].project as any;
+        const { project } = mls.actual[5];
+        if (!project) throw new Error('No project selected');
+
+        this.infoDS = {
+            ds: mls.l3.getDSInstance(project, 0),
+            level: +this.level,
+            project
         }
 
         let comp;
-        if (this.infoDS.level !== this.level && this.level === '2') {
+        await this.infoDS.ds.init();
 
-            this.infoDS.myDS = mls.l3.getDSInstance(mls.actual[5].project as any, 0);
+        mls.actual[0].setFullName(this.page);
+        const info = mls.actual[0];
+        const compName: string = `_${info.project}_${info.path}`;
 
-        } else if (this.infoDS.level !== this.level) {
+        if (this.infoDS.ds && this.infoDS.ds.components) comp = this.infoDS.ds.components.find(compName);
 
-            this.infoDS.myDS = mls.l3.getDSInstance(mls.actual[5].project as any, mls.actual[3].mode);
-        }
+        console.info({
+            comp
+        })
+        if (comp) return true;
 
-        if (this.infoDS.myDS && this.infoDS.myDS.components) {
+        const isAWebComponent = await this.checkIfIsAWebComponent(compName);
+        console.info({
+            isAWebComponent
+        })
+        
 
-            mls.actual[0].setFullName(this.page);
-            const info = mls.actual[0];
-            comp = this.infoDS.myDS.components.find(`_${info.project}_${info.path}`);
-        }
-
+        if (!isAWebComponent) return false;
+        await this.addComponent(compName, this.infoDS.ds);
         return !!comp;
+
+    }
+
+    private async checkIfIsAWebComponent(widget: string): Promise<boolean> {
+
+
+        mls.actual[0].setFullName(widget);
+        const { project, path } = mls.actual[0];
+        if (!project || !path) return false;
+
+        if (path === 'servicePreviewView') return false;
+
+        const model = mls.l2.editor.get({ project, shortName: path });
+        if (!model) return false;
+        const file: mls.stor.IFileInfo = model.storFile;
+        if (!file) return false;
+        const content = await file.getContent();
+        if (typeof content !== 'string') return false;
+        const regex = /css\`\[\[mls_getDefaultDesignSystem\]\]\`/;
+
+        if (regex.test(content)) return true;
+        return false;
+
+    }
+
+    private async getGroup(widget: string): Promise<string> {
+        const defaultGroup = 'other';
+        mls.actual[0].setFullName(widget);
+        const model = mls.l2.editor.get({ project: mls.actual[0].project as any, shortName: mls.actual[0].path as any });
+        if (!model || !model.compilerResults) return defaultGroup;
+        const { variables } = model.compilerResults.tripleSlashMLS;
+        if (!variables) return defaultGroup;
+        const { groupName } = variables;
+        if (!groupName) return defaultGroup;
+        return groupName;
+    }
+
+    private async addComponent(name: string, ds: mls.l3.DesignSystemIO) {
+
+        if (!name || !ds) return;
+        const group = await this.getGroup(name);
+        const componentName = name;
+        const widget: mls.l3.IComponentInfo = {
+            docPath: '',
+            examples: [],
+            group: group as mls.l3.ComponentsGroups,
+            l4MarketingRef: '',
+            name: componentName,
+            reference: undefined as any,
+            styles: [],
+            tags: [],
+            widgetExampleRef: {
+                path: '',
+                tagname: ''
+            }
+        };
+
+        try {
+            await ds.components.add(widget);
+        } catch (err: any) {
+            const msg = 'Error on add component in design system';
+            this.error = msg;
+            throw new Error('Error on add component in design system');
+        }
 
     }
 
@@ -643,4 +719,10 @@ export class ServicePreviewView extends LitElement {
             background: #666;
         };
     `
+}
+
+interface IInfoDesignSystem {
+    project: number,
+    level: number,
+    ds: mls.l3.DesignSystemIO
 }

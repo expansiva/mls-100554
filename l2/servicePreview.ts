@@ -21,7 +21,7 @@ export class ServicePreview100554 extends ServiceBase {
     @property() error: string = '';
 
     private lastMode: string = 'icPreviewD';
-
+    
     private lastLevel: number = -1;
 
     private elPreview: HTMLElement | undefined = undefined;
@@ -50,7 +50,6 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (op === 'actAddStyle') return this.actAddStyle();
         if (op === 'opAboutTag') return this.opAboutTag();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
@@ -65,7 +64,6 @@ export class ServicePreview100554 extends ServiceBase {
     public menu: IMenu = {
         title: 'Preview',
         actions: {
-            actAddStyle: 'Add Style'
         },
         icons: {
             icPreviewD: 'Desktop;f390',
@@ -219,20 +217,6 @@ export class ServicePreview100554 extends ServiceBase {
 
         const doc = document.createElement('div');
         doc.innerHTML = this.htmlAbout;
-        if (this.menu.setMode) this.menu.setMode('page', doc);
-        return true;
-
-    }
-
-    private actAddStyle() {
-
-        if (!(mls.actual[2] as any).left) return true;
-
-        const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
-        const doc = document.createElement('service-preview-add-style-100554');
-        doc.setAttribute('widget', fullname);
-        doc.setAttribute('level', this.level as any);
-        (doc as any).father = this;
         if (this.menu.setMode) this.menu.setMode('page', doc);
         return true;
 
