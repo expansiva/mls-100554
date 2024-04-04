@@ -188,11 +188,13 @@ export class ServiceDsStyles extends ServiceBase {
         });
     }
 
-    private checkComponentOpenInL2() {
+    private async checkComponentOpenInL2() {
         // if (!this.isComponent) return;
         const actualL2 = mls.actual[2].getFullName();
         if (!actualL2) return;
-        if (actualL2 === this.componentName) return;
+        // if (actualL2 === this.componentName) return; // TODO: se for o mesmo componente, só verificar se teve alteração, se tiver atualizar
+
+        await this.initDsInstance();
         const newCompExist = this.dsInstance?.components.find(actualL2);
         if (!newCompExist) {
             this.showStyle();
@@ -663,7 +665,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async setStyle(styleLess: string) {
-    
+
         if (!this._ed1) return;
         const lessTokens = await this.getTokens();
         let textByRange = styleLess;
@@ -738,7 +740,7 @@ export class ServiceDsStyles extends ServiceBase {
     private async onEditorChange(isGet: boolean) {
 
         this.clearErrors();
-    
+
         const model = this.getActualModel();
         if (!model) return;
 
@@ -1013,12 +1015,18 @@ export class ServiceDsStyles extends ServiceBase {
         return false;
     }
 
-    private async getStyle() {
+    private  async initDsInstance() {
         const { project } = mls.actual[5];
         const { mode } = mls.actual[3];
         if (project === undefined) throw new Error('No project selected!');
         this.dsInstance = mls.l3.getDSInstance(project, mode);
         await this.dsInstance.init();
+    }
+
+    private async getStyle() {
+    
+        await this.initDsInstance();
+        if (!this.dsInstance) return '';
         const cssItem = this.dsInstance.css.list['definitions'];
         if (!cssItem) return '';
         const content = await cssItem.getContent();
