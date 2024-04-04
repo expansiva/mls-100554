@@ -288,7 +288,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
                                         ${collab_unbalanced}
                                         </span>
                                         <span
-                                            title="clear"
+                                            title="undo all"
                                             style="margin-left:.5rem;display:${ds.inLocalStorage ? 'block' : 'none'}"
                                             @click=${(e: MouseEvent) => { e.preventDefault(); this.restoreDs(ds.dsInfo) }}
                                         >${collab_undo}</span>
@@ -306,6 +306,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
                                                     ${collab_unbalanced}
                                                 </span>
                                                 <span
+                                                    title="undo"
                                                     style="margin-left:.5rem; display:${file.extension === '.less' || file.extension === '.txt' && file.status !== 'new' ? 'inline-block' : 'none'}"
                                                     @click=${(e: MouseEvent) => { e.preventDefault(); this.restoreFile(file) }}
                                                 > ${collab_undo}</span>
