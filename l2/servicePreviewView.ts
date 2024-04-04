@@ -588,18 +588,9 @@ export class ServicePreviewView extends LitElement {
         const compName: string = `_${info.project}_${info.path}`;
 
         if (this.infoDS.ds && this.infoDS.ds.components) comp = this.infoDS.ds.components.find(compName);
-
-        console.info({
-            comp
-        })
         if (comp) return true;
 
         const isAWebComponent = await this.checkIfIsAWebComponent(compName);
-        console.info({
-            isAWebComponent
-        })
-        
-
         if (!isAWebComponent) return false;
         await this.addComponent(compName, this.infoDS.ds);
         return !!comp;
