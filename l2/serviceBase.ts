@@ -32,10 +32,10 @@ export abstract class ServiceBase extends LitElement {
     abstract details: IService;
 
     abstract menu: IMenu;
-    
+
     abstract onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void;
 
-    getActualRef(): string  {
+    getActualRef(): string {
         return this.nav3Service?.getAttribute('data-service') || '';
     }
 
@@ -199,9 +199,15 @@ export interface IIconsKeyValue {
     [key: string]: string
 }
 
+export interface IButtonsKeyValue {
+    [key: string]: string
+}
+
 export type IClickLinkCallBack = (op: string) => boolean | undefined;
 export type IClickIconCallBack = (op: string) => void | undefined;
 export type IClickTitleCallBack = (title: string) => void | undefined;
+export type IClickButtonCallBack = (op: string) => boolean;
+
 
 export type ISetMode = (mode: IMode | null, page?: HTMLElement) => void;
 export type IGetLastMode = () => IMode;
@@ -214,11 +220,15 @@ export interface IMenu {
     title: IMenuTitle | string,
     actions: IMenuKeyValue,
     icons: IIconsKeyValue,
+    buttons?: IButtonsKeyValue,
+    
     actionDefault?: string,
     iconDefault?: string,
     onClickTitle?: IClickTitleCallBack,
     onClickLink?: IClickLinkCallBack,
     onClickIcon?: IClickIconCallBack,
+    onClickButton?: IClickButtonCallBack,
+
     setMode?: ISetMode,
     setIconActive?: (op: string) => void,
     setMenuActive?: (op: string) => void,

@@ -5,7 +5,6 @@ import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
 
-
 export const initServicePreviewView = '';
 @customElement('service-preview-view-100554')
 export class ServicePreviewView extends LitElement {
@@ -23,6 +22,8 @@ export class ServicePreviewView extends LitElement {
     @property() level: string = '';
 
     @property() isDsComponent: boolean = false;
+
+    @property() watch: boolean = true;
 
     @property() stylechanged: string = '';
 
@@ -57,6 +58,8 @@ export class ServicePreviewView extends LitElement {
 
     renderPreview() {
 
+        this.watch = this.father.watch;
+
         this.verifyWC().then((res) => {
             this.isDsComponent = res;
         })
@@ -81,8 +84,7 @@ export class ServicePreviewView extends LitElement {
                         <label>Height:</label>
                         <input type="number" value="700" @input="${this.changeHeightP}">
                     </div>
-                    ${this.renderEditStyle()}
-                </div> 
+                    </div> 
                 <div class="phone" style="width:${this.widthP}px; height:${this.heightP}px">
                     <div class="phone_mic"></div>
                     <div class="phone_screen">
@@ -100,19 +102,14 @@ export class ServicePreviewView extends LitElement {
                 width: 100%;
                 height: 100%;
             `;
-            return html`${this.renderEditStyle()}<iframe style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview"  @load="${this.load}" ></iframe>`;
+            return html`
+    
+            <iframe
+                style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview"
+                @load="${this.load}" >
+            </iframe>`;
 
         }
-    }
-
-    renderEditStyle() {
-
-        const cls = this.mode === 'm' ? 'editMobile' : 'editDesktop';
-        return this.isDsComponent ? html`
-            <edit-style class="${cls}" title="Edit styles" @click="${this.onStyleEditClick}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:19px; height:19px"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 32C0 14.3 14.3 0 32 0H160c17.7 0 32 14.3 32 32V416c0 53-43 96-96 96s-96-43-96-96V32zM223.6 425.9c.3-3.3 .4-6.6 .4-9.9V154l75.4-75.4c12.5-12.5 32.8-12.5 45.3 0l90.5 90.5c12.5 12.5 12.5 32.8 0 45.3L223.6 425.9zM182.8 512l192-192H480c17.7 0 32 14.3 32 32V480c0 17.7-14.3 32-32 32H182.8zM128 64H64v64h64V64zM64 192v64h64V192H64zM96 440a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"/></svg>
-            </edit-style>        
-        ` : ''
     }
 
     updated(changedProperties: any) {
@@ -129,26 +126,12 @@ export class ServicePreviewView extends LitElement {
             position:relative;
         }
 
-        .editMobile{
-            background: white;
-            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 2px 2px;
-            top: 10px;
-            right: 20px;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .editDesktop{
-            background: white;
-            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 2px 2px;
+        .watchDesktop{
             position: absolute;
-            top: 10px;
-            right: 20px;
+            background: white;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 2px 2px;
+            top: 3px;
+            right: 46px;
             border-radius: 50%;
             width: 30px;
             height: 30px;
@@ -158,9 +141,6 @@ export class ServicePreviewView extends LitElement {
             cursor: pointer;
         }
 
-        edit-style:hover{
-            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 5px 2px;
-        }
         .groupSetMobile{
             display:flex;
             width:300px;
@@ -660,30 +640,6 @@ export class ServicePreviewView extends LitElement {
         }
 
     }
-
-    private async onStyleEditClick() {
-
-        this.father.openService('_100554_serviceDsStyles', 'left', '3');
-        // mls.actual[0].setFullName(this.page);
-        // const info = mls.actual[0];
-
-        // const rc = {
-        //     emitter: 'right',
-        //     less: '',
-        //     isComponent: true,
-        //     widget: `_${info.project}_${info.path}`,
-        //     helper: '_100554_servicePreview',
-        //     origemLevel: +this.level
-        // };
-        // mls.events.fire(3, 'DSStyleChanged', JSON.stringify(rc), 500);
-
-    }
-
-    private showError(err: string) {
-        if (!this.father) return;
-        this.father.setError(err);
-    }
-
 
     private myMsg = {
         pageNotDefined: 'Page not defined',

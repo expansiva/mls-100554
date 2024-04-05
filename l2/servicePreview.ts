@@ -20,8 +20,10 @@ export class ServicePreview100554 extends ServiceBase {
 
     @property() error: string = '';
 
+    @property() watch: boolean = true;
+
     private lastMode: string = 'icPreviewD';
-    
+
     private lastLevel: number = -1;
 
     private elPreview: HTMLElement | undefined = undefined;
@@ -61,6 +63,25 @@ export class ServicePreview100554 extends ServiceBase {
         if (op === 'icPreviewM') this.preview('m');
     }
 
+    public onClickButton = (op: string): boolean => {
+        if (op === 'btWatch') return this.toogleWatch();
+        if (op === 'btEditStyle') return this.editStyles();
+        else throw new Error('Invalid option')
+    }
+
+    private toogleWatch(): boolean {
+        this.watch = !this.watch;
+        if (this.watch) {
+            this.onReloader();
+        }
+        return this.watch;
+    }
+
+    private editStyles(): boolean {
+        this.openService('_100554_serviceDsStyles', 'left', 3);
+        return true;
+    }
+
     public menu: IMenu = {
         title: 'Preview',
         actions: {
@@ -69,11 +90,17 @@ export class ServicePreview100554 extends ServiceBase {
             icPreviewD: 'Desktop;f390',
             icPreviewM: 'Mobile;f3cf'
         },
+        buttons: {
+            btEditStyle: 'Edit Styles;f0d0',
+            btWatch: 'Watch;f04c;f04b',
+        },
         actionDefault: '', // call after close icon clicked
         iconDefault: 'icPreviewD',
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon
+        onClickIcon: this.onClickIcon,
+        onClickButton: this.onClickButton
+
     }
 
     onServiceClick(visible: boolean, reinit: boolean) {
@@ -108,7 +135,7 @@ export class ServicePreview100554 extends ServiceBase {
                 rc.emitter === 'right-get' ||
                 (rc.emitter === 'left' && rc.helper)) return;
 
-            this.onStyleChanged();
+            if (this.watch) this.onStyleChanged();
             // this.onReloader();
 
         });
@@ -149,7 +176,7 @@ export class ServicePreview100554 extends ServiceBase {
                 !eventsValid.includes(fileAction.action)
             ) return;
 
-            this.onReloader();
+            if (this.watch) this.onReloader();
 
         } catch (e) {
 

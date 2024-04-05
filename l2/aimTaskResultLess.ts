@@ -28,9 +28,16 @@ export class AimTaskResultLess extends AimTaskBase {
 
     @property({ type: Boolean, reflect: true }) isTryAgain = false;
 
+    @property({ type: String, reflect: true }) modeInternal: cbe.IMode = 'waiting for user';
+
+
     private result: string = '';
 
     public onInitializing(): void { // from abstract
+
+        if (this.taskChild.mode !== 'error' && this.taskChild.mode !== 'processed') {
+            this.modeInternal = this.taskRoot.mode = this.taskChild.mode = 'waiting for user';
+        }
 
     }
 
@@ -47,6 +54,12 @@ export class AimTaskResultLess extends AimTaskBase {
         this.withDiff = isValid;
         if (this.withDiff) this.codeDiff.setAttribute('withdiff', 'true');
 
+        if (this.modeInternal === 'waiting for user') {
+            this.codeDiff.setAttribute('withaccept', 'true');
+            this.codeDiff.setAttribute('withreject', 'true');
+            this.codeDiff.setAttribute('withtryagain', 'true');
+        }
+
         const value = activeOpService.getEditorComponentSource();
         this.codeDiff.actualTextDiffOriginal = value.trim();
 
@@ -61,10 +74,11 @@ export class AimTaskResultLess extends AimTaskBase {
     }
 
     private alreadyInit: boolean = false;
-    handleClick(e: Event) {
+    handleClick(e: Event) {    
         if (this.alreadyInit) return;
         this.setValues();
         this.codeDiff?.init();
+        this.alreadyInit = true;
     }
 
     renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
@@ -84,8 +98,7 @@ export class AimTaskResultLess extends AimTaskBase {
                         .onAccept=${this.onAccept.bind(this)}
                         .onTryAgain=${this.onTryAgain.bind(this)}
                         .onReject=${this.onReject.bind(this)}
-                        ${this.withDiff ? 'withdiff' : ''}
-                        ${taskRoot.mode === "waiting for user" ? ' withaccept withreject withtryagain' : ''}
+                        ${this.withDiff ? 'withdiff' : ''}      
                     ></collab-show-code-diff-100554>
                 </div> 
                 <div>${contentsAfterLess}</div>
