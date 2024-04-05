@@ -111,6 +111,7 @@ export class ServiceDsStyles extends ServiceBase {
 
     private componentName: string = '';
     private isStyleRename: boolean = false;
+    private isSetStyle: boolean = false;
     private oldStyleName: string = '';
     private rightServiceOpened: string = '';
     private dsInstance: mls.l3.DesignSystemIO | undefined;
@@ -136,22 +137,26 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+
+        if (reinit) {
+            this.checkComponentOpenInL2();
+            return;
+        }
+
         if (visible && !reinit) {
             this.isComponent = false;
             await this.start1();
-            // this.reinit();
             this.checkComponentOpenInL2();
-
-        } else {
-            const params2: IEventsSelectedObj = {
-                service: [],
-                isComponent: this.isComponent,
-                component: this.componentName
-            };
-            mls.events.fire([this.level], ['DSStyleUnSelected'], JSON.stringify(params2), 0);
-
+            return;
         }
-        if (reinit) this.checkComponentOpenInL2();
+
+        const params2: IEventsSelectedObj = {
+            service: [],
+            isComponent: this.isComponent,
+            component: this.componentName
+        };
+        mls.events.fire([this.level], ['DSStyleUnSelected'], JSON.stringify(params2), 0);
+
     }
 
     private async start1() {
@@ -218,6 +223,8 @@ export class ServiceDsStyles extends ServiceBase {
             desc: JSON.stringify(desc)
         }
 
+        this.isSetStyle = true;
+        this.isEventAdd = true;
         this.onDSStyleChanged(params);
     }
 
@@ -271,7 +278,7 @@ export class ServiceDsStyles extends ServiceBase {
         const modelResults = this.models['results'] as IMonacoModelStyle;
         this._ed1.setModel(modelResults);
         if (this.menu.setMode) this.menu.setMode('editor');
-        // if (this.c3) this.c3.style.display = 'none';
+
         this.serviceContent?.layout();
         this._ed1.updateOptions({ readOnly: true });
 
@@ -684,7 +691,7 @@ export class ServiceDsStyles extends ServiceBase {
 
         const range = new monaco.Range(0, 0, model.getLineCount() + 1, 0);
         this._ed1.updateOptions({ readOnly: false });
-        this._ed1.executeEdits('style', [{ range, text: content.trim() }]);
+        // this._ed1.executeEdits('style', [{ range, text: content.trim() }]);
         this._ed1.setScrollPosition({ scrollTop: 0 });
         const position = new monaco.Position(0, 0);
         this._ed1.setPosition(position);
@@ -738,6 +745,13 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async onEditorChange(isGet: boolean) {
+
+        console.info('onEditorChange')
+
+        if (this.isSetStyle) {
+            this.isSetStyle = false;
+            return;
+        }
 
         this.clearErrors();
 
@@ -1015,7 +1029,7 @@ export class ServiceDsStyles extends ServiceBase {
         return false;
     }
 
-    private  async initDsInstance() {
+    private async initDsInstance() {
         const { project } = mls.actual[5];
         const { mode } = mls.actual[3];
         if (project === undefined) throw new Error('No project selected!');
@@ -1024,7 +1038,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async getStyle() {
-    
+
         await this.initDsInstance();
         if (!this.dsInstance) return '';
         const cssItem = this.dsInstance.css.list['definitions'];
@@ -1061,7 +1075,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async onDSStyleChanged(obj: mls.events.IEvent) {
-
+    
         if (!obj.desc) return;
         const desc: IEditorChangedEventsObj = JSON.parse(obj.desc);
         if (desc.emitter === 'left') return;
@@ -1079,16 +1093,14 @@ export class ServiceDsStyles extends ServiceBase {
             if (!widget) return;
 
             this.componentName = widget;
-            await this.start1();
-            this.reinit();
             await this.loadStylesComponent(this.componentName);
 
             const params = this.getParamsServices();
             mls.events.fire([this.level], ['DSStyleSelected'], JSON.stringify(params), 0);
             this.openService(this.defaultServices.componentStyle, 'right', 3)
-
             return;
         }
+
 
         this.changeEditor(desc.value, desc.helper);
 
@@ -1182,6 +1194,9 @@ export class ServiceDsStyles extends ServiceBase {
 
         const style = this.stylesComponent[+this.selectStyles.value];
         const less = await style.getStyleLessIO();
+
+        this.isSetStyle = true;
+        this.isEventAdd = true;
         this.onChangeWidgetStyle(less);
     }
 

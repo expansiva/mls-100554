@@ -664,18 +664,18 @@ export class ServicePreviewView extends LitElement {
     private async onStyleEditClick() {
 
         this.father.openService('_100554_serviceDsStyles', 'left', '3');
-        mls.actual[0].setFullName(this.page);
-        const info = mls.actual[0];
+        // mls.actual[0].setFullName(this.page);
+        // const info = mls.actual[0];
 
-        const rc = {
-            emitter: 'right',
-            less: '',
-            isComponent: true,
-            widget: `_${info.project}_${info.path}`,
-            helper: '_100554_servicePreview',
-            origemLevel: +this.level
-        };
-        mls.events.fire(3, 'DSStyleChanged', JSON.stringify(rc), 500);
+        // const rc = {
+        //     emitter: 'right',
+        //     less: '',
+        //     isComponent: true,
+        //     widget: `_${info.project}_${info.path}`,
+        //     helper: '_100554_servicePreview',
+        //     origemLevel: +this.level
+        // };
+        // mls.events.fire(3, 'DSStyleChanged', JSON.stringify(rc), 500);
 
     }
 
