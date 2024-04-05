@@ -197,9 +197,19 @@ export class ServiceDsStyles extends ServiceBase {
         // if (!this.isComponent) return;
         const actualL2 = mls.actual[2].getFullName();
         if (!actualL2) return;
-        // if (actualL2 === this.componentName) return; // TODO: se for o mesmo componente, só verificar se teve alteração, se tiver atualizar
+
+        const { project, path } = mls.actual[2];
+        if (!project || !path) return;
 
         await this.initDsInstance();
+        if (!this.dsInstance) return;
+
+        const folderFileLess = (this.dsInstance as any).methods['getDsComponentStyleFilePath'](actualL2);
+        const key = mls.stor.getKeyToFiles(project, 3, path, folderFileLess, '.less');
+        const file = mls.stor.files[key];
+
+        if (actualL2 === this.componentName && file && file.status === 'changed') return; 
+
         const newCompExist = this.dsInstance?.components.find(actualL2);
         if (!newCompExist) {
             this.showStyle();
@@ -739,7 +749,6 @@ export class ServiceDsStyles extends ServiceBase {
         this.serviceContent?.layout();
         this._ed1.updateOptions({ readOnly: false });
         this.getStyle().then((styleGlobal) => {
-            console.info(styleGlobal)
             if (this.isComponent) return;
             this.setStyle(styleGlobal);
         });
@@ -748,8 +757,6 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async onEditorChange(isGet: boolean) {
-
-        console.info('onEditorChange')
 
         if (this.isSetStyle) {
             this.isSetStyle = false;
@@ -1041,13 +1048,11 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async getStyle() {
-
         await this.initDsInstance();
         if (!this.dsInstance) return '';
         const cssItem = this.dsInstance.css.list['definitions'];
         if (!cssItem) return '';
         const content = await cssItem.getContent();
-        console.info({content})
         return content;
     }
 
@@ -1079,7 +1084,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async onDSStyleChanged(obj: mls.events.IEvent) {
-    
+
         if (!obj.desc) return;
         const desc: IEditorChangedEventsObj = JSON.parse(obj.desc);
         if (desc.emitter === 'left') return;
