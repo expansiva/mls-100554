@@ -307,7 +307,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
                                                 </span>
                                                 <span
                                                     title="undo"
-                                                    style="margin-left:.5rem; display:${file.extension === '.less' || file.extension === '.txt' && file.status !== 'new' ? 'inline-block' : 'none'}"
+                                                    style="margin-left:.5rem; display:${(file.extension === '.less' || file.extension === '.txt') && file.status !== 'new' ? 'inline-block' : 'none'}"
                                                     @click=${(e: MouseEvent) => { e.preventDefault(); this.restoreFile(file) }}
                                                 > ${collab_undo}</span>
                                             </span>
