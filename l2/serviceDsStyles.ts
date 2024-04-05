@@ -651,6 +651,8 @@ export class ServiceDsStyles extends ServiceBase {
                 }, 1000);
             });
 
+        } else {
+            mod.setValue(value);
         }
         return this.models[modelName];
     }
@@ -737,6 +739,7 @@ export class ServiceDsStyles extends ServiceBase {
         this.serviceContent?.layout();
         this._ed1.updateOptions({ readOnly: false });
         this.getStyle().then((styleGlobal) => {
+            console.info(styleGlobal)
             if (this.isComponent) return;
             this.setStyle(styleGlobal);
         });
@@ -1044,6 +1047,7 @@ export class ServiceDsStyles extends ServiceBase {
         const cssItem = this.dsInstance.css.list['definitions'];
         if (!cssItem) return '';
         const content = await cssItem.getContent();
+        console.info({content})
         return content;
     }
 
