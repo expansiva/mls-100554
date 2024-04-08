@@ -1,123 +1,106 @@
 /// <mls shortName="serviceListFilesAdd" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, LitElement, repeat } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
+import { convertFileNameToTag } from './_100554_utilsLit'
 
 export const initServiceListFilesAdd = () => {
 
 }
+
 @customElement('service-list-files-add-100554')
 export class ServiceListFilesAdd100554 extends LitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    private myDefinitions: any = {};
-
-    @property() arEnhacements: { text: string, value: string }[] = [];
-
     @property() level: number = -1;
-
     @property() error: string = '';
-
     @property() position: string = '';
-
     @property() father: HTMLElement | undefined;
+    @property() templates: ITemplateDetails[] = [];
+    @property({ type: Boolean, }) loading: boolean = true;
 
-    connectedCallback() {
+    @query('#iptShortName') inputShortName: HTMLInputElement | undefined;
+
+    private enhancementModules: IEnhancementModules | undefined = {};
+
+    async connectedCallback() {
         super.connectedCallback();
-        this.init();
+        this.getTemplates();
+        this.loading = false;
     }
 
     render() {
+        const { project } = mls.actual[5];
         return html`
-            ${this.renderDefinition()}
-            ${this.renderInfo()}
+            ${project ? this.renderAdd(project as number)
+                : html`Please select a project first!`
+            }
         `;
     }
 
-    renderDefinition() {
+    renderAdd(project: number) {
 
         return html`
-        <sectionListAddDef>
-            <div class="grpInputServiceListNewFile">
-                <label>${this.myMsg.project}:</label>
-                <input type="text" disabled value="${mls.actual[5].project?.toString()}"/>
+            <div class="section-add">
+                <div class="row-form">
+                    <div>
+                        <label>${this.messages.labelProject}:</label>
+                        <input type="text" disabled value="${project.toString()}"/>
+                    </div>
+                    <div>
+                        <label>${this.messages.labelShortName}:</label>
+                        <input type="text" id="iptShortName"/>
+                        <span>${this.error}</span>
+                    </div>
+                </div>
+                <hr>
+                <div class="row-form">
+                    <div>
+                        <label>${this.messages.labelType}</label> <button class="btn-cancel" @click="${this.clickCancel}">${this.messages.btnCancel}</button>
+                         ${this.loading
+                ? html`<p>Loading...</p>`
+                : this.renderTemplates()
+            }
+                    </div>
+                </div>
             </div>
-            <div class="grpInputServiceListNewFile">
-                <label>${this.myMsg.shortName}:</label>
-                <input type="text" id="iptShortName"/>
-                <span>${this.error}</span>
-            </div>
-            <div class="grpInputServiceListNewFile">
-                <label>${this.myMsg.type}:</label>
-                <select style="height:100px" multiple="multiple" @change="${this.changeEnhancement}">
-                    <option value="blank">Blank</option>
-                    ${repeat(
-            this.arEnhacements,
-            ((item: any) => item.value) as any,
-            ((i: any, index: any) => {
 
-                return this.renderOpt(i)
-
-            }) as any
-        )}
-                </select>
-            </div>
-            <div class="grpInputServiceListNewFile">
-                <label>${this.myMsg.group}:</label>
-                <input value="other" type="text" id="iptGroup"/>
-            </div>
-            <div class="grpButtonServiceListNewFile">
-                <button class="btnCancelServiceListNewFile" @click="${this.clickCancel}">${this.myMsg.cancel}</button>
-                <button class="btnAddServiceListNewFile" @click="${this.add}">${this.myMsg.add}</button>
-            </div>
-        </sectionListAddDef>
         `
     }
 
-    renderInfo() {
+
+    renderTemplates() {
 
         return html`
-        <sectionListInfoDef>
-            <fieldset>
-                <legend>${this.myMsg.description}:</legend>
-                <div id="fsDescServiceListNewFile" style="height:120px"></div>
-            </fieldset>
-            <fieldset>
-                <legend>${this.myMsg.example}:</legend>
-                <textarea id="fsExServiceListNewFile" disabled style="width:100%;" rows="5" ></textarea>
-            </fieldset>
-        </sectionListInfoDef>
-        
+            <div class="template-container">
+                ${this.templates.map((template) => {
+            return html`
+                        <div  class="template-item" @click=${() => { this.add(template) }}>
+                            <div class="template-item-content">
+                                <div class="template-item-title">${template.title}</div>
+                                <div class="template-item-body">
+                                    ${template.description.split('\n').map((paragraph) => html`
+                                        <p>${paragraph}</p>
+                                    `)}
+                                </div>
+                                <div class="template-item-tags">
+                                        Tags: ${template.tags.join(', ')}
+                                </div>
+                            </div>
+                        </div>
+                    `
+        })}
+            </div>
         `
 
-    }
-
-    renderOpt(opt: { text: string, value: string }) {
-        return html`<option value="${opt.value}"> ${opt.text}</option>`
     }
 
     //--------------- IMPLEMENTS----------------
 
-    private async init() {
-
-        try {
-            this.updateMyMessages();
-            this.setEnhacement();
-
-        } catch (e) {
-
-            this.showLoader(false);
-
-        }
-
-
-    }
-
-    private showLoader(loader: boolean): void {
-        if (!this.father) return
-        (this.father as any).loading = loader;
-
+    private async getTemplates() {
+        const temp = await this.getAllEnhacementsTemplates();
+        this.templates = [...temp];
     }
 
     private clickCancel(): void {
@@ -125,36 +108,36 @@ export class ServiceListFilesAdd100554 extends LitElement {
         (this.father as any).mode = 'list';
     }
 
-    private async add() {
+    private showLoader(loader: boolean): void {
+        if (!this.father) return
+        (this.father as any).loading = loader;
+    }
+
+    private async add(template: ITemplateDetails) {
 
         try {
 
             if (!this.shadowRoot) return;
+            if (!this.inputShortName) return;
+            const { project } = mls.actual[5];
+            if (!project) throw new Error('No project selected');
+            if (!this.enhancementModules) throw new Error('No modules enhancement loaded');
 
-            const sel = this.shadowRoot.querySelector('select') as HTMLSelectElement;
-            const name = this.shadowRoot.querySelector('#iptShortName') as HTMLInputElement;
-
-            if (sel.value === "") {
-                throw new Error('Please select an type ');
-            }
-
-            //const nameValue = name.value.charAt(0).toLowerCase() + name.value.slice(1);
-
-            const nameValue = name.value;
-
+            const name = this.inputShortName.value
             this.showLoader(true);
-            const newName = this.getNewNameAndValid(mls.actual[5].project as any, nameValue);
 
-
+            const newName = this.getNewNameAndValid(project as number, name);
             const params = {} as mls.events.IFileAction;
 
-            const fEnh = mls.stor.files[sel.value];
-            if (!fEnh && sel.value !== 'blank') {
+            if (!template.enhancementKey) throw new Error('No enhancementKey in template');
+            const fEnh = this.enhancementModules[template.enhancementKey];
+
+            if (!fEnh) {
                 this.showLoader(false);
-                throw new Error('Not found file:' + sel.value);
+                throw new Error('No enhancement founded');
             };
 
-            const ts = await this.createMyTs(fEnh, sel.value, nameValue);
+            const ts = this.createContentNewFile(fEnh, template.example, name);
 
             params.action = 'new' as typeof params.action;
             params.level = +this.level;
@@ -164,71 +147,33 @@ export class ServiceListFilesAdd100554 extends LitElement {
             params.newshortName = newName;
             params.folder = '';
             params.newfolder = '';
-            params.newEnhancement = fEnh ? `_${fEnh.project}_${fEnh.shortName}` : '_blank';
+            params.newEnhancement = fEnh ? `_${fEnh.storFile.project}_${fEnh.storFile.shortName}` : '_blank';
             params.extension = '.ts';
             params.newTSSource = ts;
-
             await this.fireComunication(params);
             this.showLoader(false);
-
             this.saveLocalHistory(params.project, params.shortName, params.extension, params.folder);
-        } catch (e: any) {
 
+        } catch (e: any) {
             setTimeout(() => {
                 this.showLoader(false);
                 this.error = e.message;
                 (this.father as any).setError(e.message);
             }, 200);
-            //console.info(e);
-
-
         }
-
     }
 
-    private createMyTs(fEnh: mls.stor.IFileInfo, enhaName: string, name: string): Promise<string> {
+    private createContentNewFile(enhecementModule: IEnhancementModule, template: string, name: string): string {
+        let ret = '';
+        const grp = 'other'
+        const { project } = mls.actual[5];
+        let newExample = template;
+        newExample = this.changeTagName(newExample, convertFileNameToTag(`_${project}_${name}`));
+        newExample = this.changeClassName(newExample, project as number, name);
+        newExample = this.changeWidget(newExample, project as number, name);
 
-        return new Promise<string>((resolve, reject) => {
-
-            if (!this.shadowRoot) {
-                resolve('');
-                return;
-            }
-
-            const iptGroup = this.shadowRoot.querySelector('#iptGroup') as HTMLInputElement;
-
-            if (!fEnh || !this.myDefinitions || !this.myDefinitions[enhaName] || !iptGroup) {
-                resolve('');
-                return;
-            }
-
-            const mFEnh = mls.l2.editor.get({ project: fEnh.project, shortName: fEnh.shortName });
-            if (!mFEnh) {
-                resolve('');
-                return;
-            }
-
-            const mmodule = this.myDefinitions[enhaName];
-            let ret = '';
-
-            let grp = iptGroup.value;
-            grp = !grp ? 'other' : grp;
-
-            const { project } = mls.actual[5]
-
-
-            const exampleEnhancement = mmodule.getExample ? mmodule.getExample(project, name) : mmodule.example;
-            ret = `/// <mls shortName="${name}" project="${project}" enhancement="_${fEnh.project}_${fEnh.shortName}" groupName="${grp}" />\n${exampleEnhancement}\n`;
-
-            // ret = this.changeTagName(ret, this.convertFileNameToTag(`_${project}_${name}`));
-            // ret = this.changeClassName(ret, project as number, name);
-            // ret = this.changeWidget(ret, project as number, name);
-
-            resolve(ret);
-
-
-        });
-
+        ret = `/// <mls shortName="${name}" project="${project}" enhancement="_${enhecementModule.storFile.project}_${enhecementModule.storFile.shortName}" groupName="${grp}" />\n${newExample}\n`;
+        return ret;
     }
 
     private saveLocalHistory(project: number, shortName: string, extension: string, folder: string): void {
@@ -237,273 +182,193 @@ export class ServiceListFilesAdd100554 extends LitElement {
         const res: any[] = info ? JSON.parse(info) : [];
         let idx = -1;
         res.forEach((i: any, index) => {
-
             if (i.project !== project || i.shortName !== shortName) return;
             idx = index;
-
         });
 
-        if (idx >= 0) {
-            res.splice(idx, 1);
-        }
-
+        if (idx >= 0) res.splice(idx, 1);
         res.unshift({ project, shortName, extension, folder });
         if (res.length > 10) res.length = 10;
         localStorage.setItem('mlsInfoHistoryL' + this.level, JSON.stringify(res));
 
     }
 
-    private changeClassName(source: string, project: number, shortname: string) {
-        const regex = /export\s+class\s+(\w+)\s+extends/g;
-        const match = regex.exec(source);
-        const newClassName = shortname.charAt(0).toUpperCase() + shortname.substring(1, shortname.length) + project.toString();
-        if (match) {
-            const originalTag = match[1];
-            const replacedSource = source.replace(originalTag, newClassName);
-            return replacedSource;
-        }
-        return source;
-    }
-
-    private changeWidget(source: string, project: number, shortname: string) {
-        const regex = /widget:\s*'([^']+)'/g;
-        const match = regex.exec(source);
-        const newWidget = `_${project.toString()}_${shortname}`;
-        if (match) {
-            const originalTag = match[1];
-            const replacedSource = source.replace(originalTag, newWidget);
-            return replacedSource;
-        }
-        return source;
-    }
-
-    private changeTagName(source: string, tagName: string): string {
-
-        const regex = /@customElement\(['"](.+?)['"]\)/;
-        const match = source.match(regex);
-
-        if (match) {
-            const originalTag = match[1];
-            const replacedSource = source.replace(originalTag, tagName);
-            return replacedSource;
-        }
-
-        return source;
-
-    }
-
-    private convertFileNameToTag(widget: string) {
-
-        const regex = /_([0-9]+)_?(.*)/;
-        const match = widget.match(regex);
-        if (match) {
-            const [, number, rest] = match;
-            const convertedSrc = rest.replace(/([A-Z])/g, '-$1').toLowerCase();
-            widget = `${convertedSrc}-${number}`;
-        }
-        return widget;
-
-    }
-
     private getNewNameAndValid(prj: number, name: string): string {
-
-        if (name === '' || !name || name === null) {
-
-            throw new Error('Invalid name ');
-
-        }
-
-        if (!this.isValidNewName({ shortName: name, project: prj, level: +this.level, folder: '', extension: '.ts' })) {
-
-            throw new Error('Invalid name ');
-
-        }
-
+        if (name === '' || !name || name === null) throw new Error('Invalid name ');
+        const isValidName = this.isValidNewName({
+            shortName: name,
+            project: prj,
+            level: +this.level,
+            folder: '',
+            extension: '.ts'
+        });
+        if (!isValidName) throw new Error('Invalid name ');
         return name;
-
     }
 
     private isValidNewName(obj: { shortName: string, project: number, level: number, extension: string, folder: string }): boolean {
 
         if (obj.shortName === '') return false;
-
         if (obj.shortName.length === 0 || obj.shortName.length > 255) return false;
-
         const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
-
         if (invalidCharacters.test(obj.shortName)) return false;
 
-
         const key = mls.stor.getKeyToFiles(obj.project, obj.level, obj.shortName, obj.folder, obj.extension);
-
         let find = false;
         const keys = Object.keys(mls.stor.files);
         for (const k of keys) {
-
             if (key.toLocaleLowerCase() === k.toLocaleLowerCase()) find = true;
-
         }
-
-
         return !mls.stor.files[key] && !find;
 
     }
 
-    private setEnhacement(): void {
+    private changeClassName(source: string, project: number, shortname: string): string {
+        const newClassName = shortname.charAt(0).toUpperCase() + shortname.substring(1, shortname.length) + project.toString();
+        const outputString = source.replace(/\[className\]/g, newClassName);
+        return outputString;
+    }
 
-        const array: { text: string, value: string }[] = [];
+    private changeWidget(source: string, project: number, shortname: string): string {
+        const newWidget = `_${project.toString()}_${shortname}`;
+        const outputString = source.replace(/\[widgetName\]/g, newWidget);
+        return outputString;
+    }
+
+    private changeTagName(source: string, tagName: string): string {
+        const outputString = source.replace(/\[tagName\]/g, tagName);
+        return outputString;
+    }
+
+    private getEnhacementsDetails(): IEnhancementDetails[] {
+
+        const array: IEnhancementDetails[] = [];
         const keys = Object.keys(mls.stor.files);
         keys.forEach((i) => {
-
             const f = mls.stor.files[i];
             if (f.level !== +this.level || !f.shortName.startsWith('enhancement') || f.extension !== '.ts') return;
-
-            const opt = {
-                text: `${f.project}_${f.shortName}`,
+            const opt: IEnhancementDetails = {
+                key: `${f.project}_${f.shortName}`,
                 value: i
             }
-
             array.push(opt);
-
         });
 
-        this.arEnhacements = [...array];
-
+        mls.l2.enhancement.getEnhancementDetails
+        return [...array];
     }
 
-    private changeEnhancement(e: MouseEvent): void {
+    private async getAllEnhacementsTemplates() {
 
-        const func = async (e: MouseEvent) => {
+        let templates: ITemplateDetails[] = [];
+        const enhancementDetails = this.getEnhacementsDetails();
+        this.enhancementModules = await this.getEnhacementsInstancies(enhancementDetails);
 
-            try {
+        if (!this.enhancementModules) return templates;
 
-                e.stopPropagation();
-                const el = e.target as HTMLSelectElement;
-                if (!el || !this.shadowRoot) return;
+        Object.entries(this.enhancementModules).map((entry) => {
+            const [entryKey, entryValue] = entry;
 
-                const desc = this.shadowRoot.querySelector('#fsDescServiceListNewFile') as HTMLTextAreaElement;
+            if (!((entryValue.instance as any).getAddNewFileDetails)) return;
+            const temp: ITemplateDetails[] = (entryValue.instance as any).getAddNewFileDetails();
 
-                const ex = this.shadowRoot.querySelector('#fsExServiceListNewFile') as HTMLTextAreaElement;
+            temp.forEach((t) => t.enhancementKey = entryKey);
+            templates = [...templates, ...temp]
+        });
 
-                desc.innerHTML = '';
-                ex.value = '';
 
-                if (this.myDefinitions[el.value]) {
+        return templates;
+    }
 
-                    desc.innerHTML = this.myDefinitions[el.value].description;
-                    ex.value = this.myDefinitions[el.value].example;
-                    return;
 
-                }
 
-                const f = mls.stor.files[el.value];
-                if (!f) return;
 
-                const mfile = mls.l2.editor.get({ project: f.project, shortName: f.shortName });
+    private async getEnhacementsInstancies(enhancementDetails: IEnhancementDetails[]) {
 
-                if (!mfile) {
+        const enhancementModules: IEnhancementModules = {};
 
-                    if (this.isFire < 5) {
-                        await this.loadMyMFiles(el.value, f.project, e);
+        for await (let details of enhancementDetails) {
+            const { value, key } = details;
+            const storFile = mls.stor.files[value];
+            console.info(storFile)
+            if (!storFile) return;
 
-                    }
-                    return;
+            const { project, shortName } = storFile;
+            const mfile = mls.l2.editor.get({ project, shortName });
+            // if (!mfile) {
+            //     await this.loadMyMFiles(value, project);
+            // }
 
-                }
-
-                this.isFire = 0;
-
-                const obj = await mls.l2.enhancement.getEnhancementModule(mfile);
-                if (!obj) return;
-
-                desc.innerHTML = obj.description;
-                ex.value = obj.example;
-                this.myDefinitions[el.value] = obj;
-
-            } catch (e) {
-                console.info(e);
+            if (!mfile) throw new Error('Error on load mfile')
+            const enhancementModule = await mls.l2.enhancement.getEnhancementModule(mfile);
+            if (!enhancementModule) return;
+            enhancementModules[key] = {
+                instance: enhancementModule,
+                storFile: storFile
             }
-
-        };
-
-        func(e);
-
-    }
-
-    private isFire = 0;
-
-    private async loadMyMFiles(key: string, project: number, e: MouseEvent) {
-
-        console.info('tentou carregar mfiles');
-        if (this.isFire === 0) {
-
-            const params = {} as mls.events.IFileAction;
-
-            const fEnh = mls.stor.files[key];
-            if (!fEnh) return;
-
-            params.action = 'preLoadProject' as typeof params.action;
-            params.level = +this.level;
-            params.project = project;
-            params.newProject = project;
-
-            this.fireComunication(params);
-
-        } else {
-
-            const sleep = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-            await sleep(300);
-
         }
-
-        this.isFire += 1;
-
-        if (this.isFire < 5) {
-            this.changeEnhancement(e);
-        }
-
+        
+        return enhancementModules;
     }
 
     private async fireComunication(obj: any) {
         obj.position = this.position;
         mls.actual[this.level].setFullName('_' + obj.project + '_' + obj.shortName);
 
-
         (mls.actual[this.level as any] as any)[this.position as any] = {
             project: obj.project,
             shortName: obj.shortName
         } as any;
 
-
         await mls.events.fire([+this.level as any], ['FileAction'], JSON.stringify(obj), 0);
     }
 
-    private updateMyMessages() {
 
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.project) this.myMsg.project = m.project;
-        if (m.shortName) this.myMsg.shortName = m.shortName;
-        if (m.type) this.myMsg.type = m.type;
-        if (m.group) this.myMsg.group = m.group;
-        if (m.cancel) this.myMsg.cancel = m.cancel;
-        if (m.add) this.myMsg.add = m.add;
-        if (m.description) this.myMsg.description = m.description;
-        if (m.example) this.myMsg.example = m.example;
-
+    private async loadMyMFiles(key: string, project: number) {
+        const params = {} as mls.events.IFileAction;
+        const fEnh = mls.stor.files[key];
+        if (!fEnh) return;
+        params.action = 'preLoadProject' as typeof params.action;
+        params.level = +this.level;
+        params.project = project;
+        params.newProject = project;
+        console.info('Preload project init');
+        await this.fireComunication(params);
+        console.info('Preload project finish');
     }
 
-    private myMsg = {
-        project: 'Project',
-        shortName: 'Short Name',
-        type: 'Type',
-        group: 'Group',
-        cancel: 'Cancel',
-        add: 'Add',
-        description: 'Description',
-        example: 'Example'
+
+    messages = {
+        "labelProject": "Project",
+        "labelShortName": "Shortname",
+        "labelType": "Please select a template below or click",
+        "btnAdd": "Add",
+        "btnCancel": "cancel"
     }
 
 }
+
+interface IEnhancementModules {
+    [key: string]: IEnhancementModule
+}
+
+interface IEnhancementModule {
+    storFile: mls.stor.IFileInfo,
+    instance: mls.l2.enhancement.IEnhancementInstance
+}
+
+interface IEnhancementDetails {
+    key: string,
+    value: string
+}
+
+interface ITemplateDetails {
+    title: string,
+    description: string,
+    tags: string[],
+    example: string,
+    aimActionSuggest: string,
+    enhancementKey?: string,
+}
+
 

@@ -8,27 +8,34 @@ import { injectStyle, getCssWithoutTag } from './_100554_processCssLit'
 
 export const description = "Use this enhancement for model using lit - a simple and fast web component.\nRef: https://lit.dev/"
 
-export const getExample = (project: number, shortname: string): string => {
-    let newExample = example;
-    newExample = changeTagName(newExample, convertFileNameToTag(`_${project}_${shortname}`));
-    return newExample;
-}
+export const example = ``;
 
-export const example = `
-    import { html, css, LitElement } from 'lit'; 
-    import { customElement, property } from 'lit/decorators.js';
+export const getAddNewFileDetails = () =>{
+    return [
+        {
+            title: "Criar um web component em lit",
+            description: "o corpo do card, ex 'Criar um web component em lit 3 ,que será utilizado em páginas.\n O Lit é um framework para criar web componentes rápidos e com atualizações dinâmicas sem ter que repintar toda a tela.\n Após criar o arquivo use a inteligência artificial para preparar o web component.",
+            tags: ["lit", "html", "component"],
+            example: `
+            import { html, css, LitElement } from 'lit'; 
+            import { customElement, property } from 'lit/decorators.js';
 
-    @customElement('litteste-100554')
-    export class SimpleGreeting extends LitElement {
-        static styles = css\`p { color: red }\`;
+            @customElement('[tagName]')
+            export class [className] extends LitElement {
+                
+                static styles = css\`[[mls_getDefaultDesignSystem]]\`;
+   
+                @property() 
+                name: string = 'Somebody';
 
-        @property() 
-        name: string = 'Somebody';
-
-        render() {
-            return html\`<p> Hello, \${ this.name } !</p>\`;
+                render() {
+                    return html\`<p> Hello, \${ this.name } !</p>\`;
+                }
+            }`,
+            aimActionSuggest: ""
         }
-    }`;
+    ]
+}
 
 export const requires: mls.l2.editor.IRequire[] = [
     {
@@ -75,22 +82,6 @@ export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.en
     })
 }
 
-export const prepareAdd = (prompt: string): { sourceTS: string, aiHeader: string, aiBody: string, aiDelimiter: string } => {
-    const aiHeader = `
-        typescript, crie e me mostre em apenas um codigo um web componente baseado no lit element, que inicia com:::
-        import { html, css, LitElement } from 'lit'; 
-        import { customElement, property } from 'lit/decorators.js';
-
-        @customElement('litteste-100554')
-        export class SimpleGreeting extends LitElement {
-
-        ::: e com as funcionalidades:::`;
-    const aiBody = prompt;
-    const aiDelimiter = ':::';
-    const sourceTS = '';
-    const ret = { sourceTS, aiHeader, aiBody, aiDelimiter }
-    return ret;
-}
 
 export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
     try {
@@ -111,12 +102,9 @@ export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> 
     }
 };
 
-export const getPromptDefault = (): string => {
-    return `
-    Propriedade: O componente aceitará uma propriedade 'name'.
-
-    Funcionalidade: O componente web exibirá um cabeçalho h1 estilizado em azul. O conteúdo do cabeçalho será uma mensagem de saudação que lê 'Olá,' seguido pelo valor da propriedade 'name'. Por exemplo, se a propriedade 'name' estiver definida como 'João', a mensagem exibida será 'Olá, João!'.`;
-}
+ export const getPromptDefault = (): string => {
+     return ``;
+ }
 
 export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
     await injectStyle(mfile, 0);
@@ -136,15 +124,4 @@ function createStyleSheet(cssString: string, defaultView: Window) {
     const sheet = (new (defaultView as any).CSSStyleSheet() as any);
     sheet.replaceSync(cssString);
     return sheet;
-}
-
-export const changeTagName = (source: string, tagName: string): string => {
-    const regex = /@customElement\(['"](.+?)['"]\)/;
-    const match = source.match(regex);
-    if (match) {
-        const originalTag = match[1];
-        const replacedSource = source.replace(originalTag, tagName);
-        return replacedSource;
-    }
-    return source;
 }
