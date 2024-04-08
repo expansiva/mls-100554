@@ -158,7 +158,6 @@ export class ServiceListFilesAdd100554 extends LitElement {
             setTimeout(() => {
                 this.showLoader(false);
                 this.error = e.message;
-                (this.father as any).setError(e.message);
             }, 200);
         }
     }
