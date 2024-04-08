@@ -26,7 +26,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
     async connectedCallback() {
         super.connectedCallback();
-        this.getTemplates();
+        await this.getTemplates();
         this.loading = false;
     }
 
@@ -58,10 +58,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
                 <div class="row-form">
                     <div>
                         <label>${this.messages.labelType}</label> <button class="btn-cancel" @click="${this.clickCancel}">${this.messages.btnCancel}</button>
-                         ${this.loading
-                ? html`<p>Loading...</p>`
-                : this.renderTemplates()
-            }
+                         ${this.renderTemplates()}
                     </div>
                 </div>
             </div>
@@ -74,7 +71,10 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
         return html`
             <div class="template-container">
-                ${this.templates.map((template) => {
+             ${this.loading
+                ? html`<p>Loading...</p>`
+                :
+                this.templates.map((template) => {
             return html`
                         <div  class="template-item" @click=${() => { this.add(template) }}>
                             <div class="template-item-content">
@@ -292,19 +292,25 @@ export class ServiceListFilesAdd100554 extends LitElement {
             if (!storFile) return;
             const { project, shortName } = storFile;
             const mfile = mls.l2.editor.get({ project, shortName });
-            // if (!mfile) {
-            //     await this.loadMyMFiles(value, project);
-            // }
+            if (!mfile) {
+                await this.loadMyMFiles(value, project);
+            }
 
             if (!mfile) throw new Error('Error on load mfile')
-            const enhancementModule = await mls.l2.enhancement.getEnhancementModule(mfile);
-            if (!enhancementModule) return;
+            let enhancementModule = await mls.l2.enhancement.getEnhancementModule(mfile);
+            if (!enhancementModule) {
+                await this.loadMyMFiles(value, project);
+                enhancementModule = await mls.l2.enhancement.getEnhancementModule(mfile);
+            };
+
+            if (!enhancementModule) throw new Error('Error on load enhancementModule')
+
             enhancementModules[key] = {
                 instance: enhancementModule,
                 storFile: storFile
             }
         }
-        
+
         return enhancementModules;
     }
 
