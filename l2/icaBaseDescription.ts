@@ -34,7 +34,7 @@ export const icaDescriptions: icaBase.FormComponent[] = [
 
   // definition final group (3 itens 'a / b / c')
   // Input
-  { group: "Forms / Input / Number", description: "Permite ao usuário inserir valores numéricos, com suporte a limites mínimo e máximo." },
+  { group: "Forms / Input / Number", description: "Permite ao usuário inserir valores numéricos, com suporte a limites mínimo e máximo.", prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinação de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usuários digitem um número diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mínimo e máximo pré-definido. Se o usuário inserir um número inválido, uma mensagem de erro vermelha deve aparecer abaixo do componente." },
   { group: "Forms / Input / String", description: "Campo para texto livre, podendo configurar validações como tamanho máximo e expressões regulares." },
   { group: "Forms / Input / Boolean", description: "Componente para escolha binária, como switches ou checkboxes, ideal para configurações de sim/não." },
   { group: "Forms / Input / Date", description: "Seletor de datas, com opções de configuração para limitar períodos." },
@@ -208,7 +208,7 @@ export function getDescriptionsFinalGroup(root: string, subGroup: string): strin
   return Array.from(rc);
 }
 
-export function getDescription(root: string, subGroup: string | null, finalGroup: string | null): string {
+export function getFormComponentsDescription(root: string, subGroup: string | null, finalGroup: string | null): string {
   let len = 3;
   if (subGroup === null) len = 1;
   else if (finalGroup === null) len = 2;
@@ -218,6 +218,17 @@ export function getDescription(root: string, subGroup: string | null, finalGroup
       parts[0].trim() === root &&
       (subGroup === null || parts[1].trim() === subGroup) &&
       (finalGroup === null || parts[2].trim() === finalGroup)) return component.description;
+  };
+  return "";
+}
+
+export function getFormComponentsPrompt(root: string, subGroup: string, finalGroup: string): string {
+  for (const component of icaDescriptions) {
+    const parts = component.group.split('/');
+    if (parts.length === 3 &&
+      parts[0].trim() === root &&
+      parts[1].trim() === subGroup &&
+      parts[2].trim() === finalGroup) return component.prompt || "";
   };
   return "";
 }

@@ -1,8 +1,9 @@
 /// <mls shortName="icaBase" project="100554" enhancement="_blank" />
 				
 export type FormComponent = {
-  group: string;
-  description: string;
+    group: string;
+    description: string;
+    prompt?: string;
 };
 
 export type AttributeDefinition = {
