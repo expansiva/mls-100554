@@ -124,8 +124,6 @@ export class ServiceListFilesAdd100554 extends LitElement {
             if (!this.enhancementModules) throw new Error('No modules enhancement loaded');
 
             const name = this.inputShortName.value
-            this.showLoader(true);
-
             const newName = this.getNewNameAndValid(project as number, name);
             const params = {} as mls.events.IFileAction;
 
@@ -136,6 +134,8 @@ export class ServiceListFilesAdd100554 extends LitElement {
                 this.showLoader(false);
                 throw new Error('No enhancement founded');
             };
+
+            this.showLoader(true);
 
             const ts = this.createContentNewFile(fEnh, template.example, name);
 
