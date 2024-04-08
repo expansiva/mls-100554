@@ -17,7 +17,7 @@ export const getAddNewFileDetails = () => {
     return [
         {
             title: "Criar um service em lit",
-            description: "o corpo do card, ex 'Criar um web component em lit 3 ,que será utilizado em páginas.\n O Lit é um framework para criar web componentes rápidos e com atualizações dinâmicas sem ter que repintar toda a tela.\n Após criar o arquivo use a inteligência artificial para preparar o web component.",
+            description: "Criar um service em lit 3 ,que será utilizado no sistema collab.\n O Lit é um framework para criar web componentes rápidos e com atualizações dinâmicas sem ter que repintar toda a tela.\n Após criar o arquivo use a inteligência artificial para preparar o web component.",
             tags: ["lit", "internal", "service"],
             example: `
             import { html, css } from 'lit';

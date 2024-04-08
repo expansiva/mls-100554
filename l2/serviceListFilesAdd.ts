@@ -290,9 +290,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
         for await (let details of enhancementDetails) {
             const { value, key } = details;
             const storFile = mls.stor.files[value];
-            console.info(storFile)
             if (!storFile) return;
-
             const { project, shortName } = storFile;
             const mfile = mls.l2.editor.get({ project, shortName });
             // if (!mfile) {
@@ -332,11 +330,8 @@ export class ServiceListFilesAdd100554 extends LitElement {
         params.level = +this.level;
         params.project = project;
         params.newProject = project;
-        console.info('Preload project init');
         await this.fireComunication(params);
-        console.info('Preload project finish');
     }
-
 
     messages = {
         "labelProject": "Project",
