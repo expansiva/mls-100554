@@ -2,7 +2,7 @@
 
 import * as icaBase from "./_100554_icaBase";
 
-export const icaDescriptions: icaBase.FormComponent[] = [
+const icaDescriptions: icaBase.FormComponent[] = [
   // definition principal group 
   { group: "Forms", description: "Componentes para criação e manipulação de formulários, permitindo a entrada de dados pelo usuário de forma estruturada." },
   { group: "Navigation", description: "Componentes projetados para facilitar a movimentação do usuário pela aplicação, englobando tanto a navegação entre diferentes páginas quanto a manipulação de conteúdo dentro de uma mesma página." },
@@ -34,7 +34,7 @@ export const icaDescriptions: icaBase.FormComponent[] = [
 
   // definition final group (3 itens 'a / b / c')
   // Input
-  { group: "Forms / Input / Number", description: "Permite ao usuário inserir valores numéricos, com suporte a limites mínimo e máximo.", prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinação de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usuários digitem um número diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mínimo e máximo pré-definido. Se o usuário inserir um número inválido, uma mensagem de erro vermelha deve aparecer abaixo do componente." },
+  { group: "Forms / Input / Number", description: "Permite ao usuário inserir valores numéricos, com suporte a limites mínimo e máximo.", prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinação de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usuários digitem um número diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mínimo e máximo pré-definido. Se o usuário inserir um número inválido, uma mensagem de erro vermelha deve aparecer abaixo do componente.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxvalue,minvalue,step,placeholder,pattern,errormessage,autofocus" },
   { group: "Forms / Input / String", description: "Campo para texto livre, podendo configurar validações como tamanho máximo e expressões regulares." },
   { group: "Forms / Input / Boolean", description: "Componente para escolha binária, como switches ou checkboxes, ideal para configurações de sim/não." },
   { group: "Forms / Input / Date", description: "Seletor de datas, com opções de configuração para limitar períodos." },
@@ -164,20 +164,20 @@ export const icaDescriptions: icaBase.FormComponent[] = [
 ];
 
 export const attributeDefinitions: icaBase.AttributeDefinition[] = [
-  { path: "Forms / Input / Number @hint", lit: "@property({ type: String }) hint: string = '${hint}'; // An optional descriptive hint for the field" },
-  { path: "Forms / Input / Number @label", lit: "@property({ type: String }) label: string = '${label}'; // A label to identify this field" },
-  { path: "Forms / Input / Number @required", lit: "@property({ type: Boolean }) required: boolean = ${required}; // Whether the field is required or optional" },
-  { path: "Forms / Input / Number @disabled", lit: "@property({ type: Boolean }) disabled: boolean = ${disabled}; // Whether the field is ready for input or disabled" },
-  { path: "Forms / Input / Number @databind", lit: "@property({ type: String }) databind: string = '${databind}'; // The path in the global JSON to view or change data" },
-  { path: "Forms / Input / Number @searchdatabind", lit: "@property({ type: String }) searchdatabind: string = '${searchdatabind}'; // Optional path in the global JSON for a list of options" },
-  { path: "Forms / Input / Number @widget", lit: "@property({ type: String }) widget: string = '${widget}'; // The widget selected in this group/subgroup" },
-  { path: "Forms / Input / Number @maxvalue", lit: "@property({ type: Number }) maxvalue: number = ${maxvalue}; // Maximum value restriction for the input" },
-  { path: "Forms / Input / Number @minvalue", lit: "@property({ type: Number }) minvalue: number = ${minvalue}; // Minimum value restriction for the input" },
-  { path: "Forms / Input / Number @step", lit: "@property({ type: Number }) step: number = ${step}; // The step increment between values" },
-  { path: "Forms / Input / Number @placeholder", lit: "@property({ type: String }) placeholder: string = '${placeholder}'; // Placeholder text for the input field" },
-  { path: "Forms / Input / Number @pattern", lit: "@property({ type: String }) pattern: string = '${pattern}'; // A regular expression that the input's value must match" },
-  { path: "Forms / Input / Number @errormessage", lit: "@property({ type: String }) errormessage: string = '${errormessage}'; // Custom error message to display when input validation fails" },
-  { path: "Forms / Input / Number @autofocus", lit: "@property({ type: Boolean }) autofocus: boolean = ${autofocus}; // Whether the field should be automatically focused on page load" },
+  { path: "hint", lit: "@property({ type: String }) hint: string = '${hint}'; // An optional descriptive hint for the field" },
+  { path: "label", lit: "@property({ type: String }) label: string = '${label}'; // A label to identify this field" },
+  { path: "required", lit: "@property({ type: Boolean }) required: boolean = false; // Whether the field is required or optional" },
+  { path: "disabled", lit: "@property({ type: Boolean }) disabled: boolean = false; // Whether the field is ready for input or disabled" },
+  { path: "databind", lit: "@property({ type: String }) databind: string = ''; // The path in the global JSON to view or change data" },
+  { path: "searchdatabind", lit: "@property({ type: String }) searchdatabind: string = ''; // Optional path in the global JSON for a list of options" },
+  { path: "widget", lit: "@property({ type: String }) widget: string = ''; // The widget selected in this group/subgroup" },
+  { path: "maxvalue", lit: "@property({ type: Number }) maxvalue: number | undefined = undefined; // Maximum value restriction for the input" },
+  { path: "minvalue", lit: "@property({ type: Number }) minvalue: number | undefined = undefined; // Minimum value restriction for the input" },
+  { path: "step", lit: "@property({ type: Number }) step: number | undefined = undefined; // The step increment between values" },
+  { path: "placeholder", lit: "@property({ type: String }) placeholder: string = ''; // Placeholder text for the input field" },
+  { path: "pattern", lit: "@property({ type: String }) pattern: string = ''; // A regular expression that the input's value must match" },
+  { path: "errormessage", lit: "@property({ type: String }) errormessage: string = ''; // Custom error message to display when input validation fails" },
+  { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean = false; // Whether the field should be automatically focused on page load" },
   
 ];
 
@@ -233,14 +233,25 @@ export function getFormComponentsPrompt(root: string, subGroup: string, finalGro
   return "";
 }
 
-export function getAttributeDefinitions(root: string, subGroup: string, finalGroup: string): string[] {
-  const rc = new Set<string>();
-  for (const att of attributeDefinitions) {
-    const parts = att.path.split('@')[0].split('/');
-    if (parts.length >= 3 &&
+export function getFormComponentsAttributes(root: string, subGroup: string, finalGroup: string): string {
+  for (const component of icaDescriptions) {
+    const parts = component.group.split('/');
+    if (parts.length === 3 &&
       parts[0].trim() === root &&
       parts[1].trim() === subGroup &&
-      parts[2].trim() === finalGroup) rc.add(att.lit);
+      parts[2].trim() === finalGroup) return component.attributes || "";
+  };
+  return "";
+}
+
+export function getAttributeDefinitions(root: string, subGroup: string, finalGroup: string): string[] {
+  const rc = new Set<string>();
+  const atts = getFormComponentsAttributes(root, subGroup, finalGroup);
+  if (!atts) return [];
+  for (const att of atts) {
+    const obj1 = attributeDefinitions.find(def => def.path === att);
+    if (obj1) rc.add(obj1.lit)
+    else rc.add('// ' + att + ' dont exists')
   };
   return Array.from(rc);
 }
