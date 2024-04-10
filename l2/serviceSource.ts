@@ -215,6 +215,9 @@ export class ServiceSource100554 extends ServiceBase {
         ServiceSource100554.projectsLoaded.push(project);
         const promises: Promise<mls.l2.editor.IMFile>[] = [];
         const keys: string[] = Object.keys(mls.stor.files);
+
+        if ((window as any)['traceLivecicle']) console.info('creating: files model ', project);
+
         for (const key of keys) {
             const storFile = mls.stor.files[key];
             if (storFile.project === project
@@ -227,6 +230,8 @@ export class ServiceSource100554 extends ServiceBase {
         if (mls.istrace) console.time('creating models');
         await Promise.all(promises);
         if (mls.istrace) console.timeEnd('creating models');
+
+        if ((window as any)['traceLivecicle']) console.info('firing: mls.l2.editor.compileAllProjectIfNeed ', project);
         if (needCompile) await mls.l2.editor.compileAllProjectIfNeed(project, true);
     }
 
@@ -542,7 +547,7 @@ export class ServiceSource100554 extends ServiceBase {
                 }
 
                 if (needMsg) {
-                    window.collabMessages.add("Files changed in server , please use F5 to reload", 'information', {autoClose:false,clearOnClose: false});
+                    window.collabMessages.add("Files changed in server , please use F5 to reload", 'information', { autoClose: false, clearOnClose: false });
                 }
 
             } catch (e) {
@@ -582,7 +587,7 @@ export class ServiceSource100554 extends ServiceBase {
     private async updateModelStatus(model1: mls.l2.editor.IMFile, changed: boolean): Promise<void> {
         if (model1.project === 0) changed = true; // always in localstorage
         model1.changed = changed;
-
+        
         const cr: mls.l2.editor.ICompilerResult = await mls.l2.editor.getCompilerResultTS({ project: model1.project, shortName: model1.shortName }, true);
         let hasError = cr.errors.length > 0;
         model1.error = hasError;
@@ -1305,7 +1310,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
             mls.actual[this.level].setFullName(`_${info[keyLocal].project}_${info[keyLocal].shortName}`);
             (mls.actual[this.level] as any)[position] = {
-                project: model.storFile.project ,
+                project: model.storFile.project,
                 shortName: model.storFile.shortName,
                 extension: model.storFile.extension,
                 folder: model.storFile.folder
@@ -1329,7 +1334,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             let ret = '';
 
             if (!mls.actual[2] || !(mls.actual[2] as any)[this.position]) return ret;
-            
+
             const actual = (mls.actual[2] as any)[this.position];
             const ext = this.menu.lastIcon === 'icTs' ? '.ts' : '.html';
 
