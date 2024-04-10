@@ -35,13 +35,13 @@ const icaDescriptions: icaBase.FormComponent[] = [
   // definition final group (3 itens 'a / b / c')
   // Input
   { group: "Forms / Input / Number", description: "Permite ao usuário inserir valores numéricos, com suporte a limites mínimo e máximo.", prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinação de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usuários digitem um número diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mínimo e máximo pré-definido. Se o usuário inserir um número inválido, uma mensagem de erro vermelha deve aparecer abaixo do componente.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxvalue,minvalue,step,placeholder,pattern,errormessage,autofocus" },
-  { group: "Forms / Input / String", description: "Campo para texto livre, podendo configurar validações como tamanho máximo e expressões regulares." },
-  { group: "Forms / Input / Boolean", description: "Componente para escolha binária, como switches ou checkboxes, ideal para configurações de sim/não." },
-  { group: "Forms / Input / Date", description: "Seletor de datas, com opções de configuração para limitar períodos." },
-  { group: "Forms / Input / Time", description: "Permite ao usuário selecionar um horário, com suporte a diferentes formatos de hora." },
-  { group: "Forms / Input / Date Range", description: "Componente para seleção de intervalos de datas, útil para filtros de períodos." },
-  { group: "Forms / Input / Select One", description: "Seletor para uma única opção dentre várias, podendo ser apresentado como dropdown, combobox, etc." },
-  { group: "Forms / Input / MultiSelect", description: "Permite a seleção de múltiplas opções, ideal para filtros ou configurações avançadas." },
+  { group: "Forms / Input / String", description: "Campo para texto livre, podendo configurar validações como tamanho máximo e expressões regulares.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxlength,minlength,placeholder,pattern,errormessage,autofocus" },
+  { group: "Forms / Input / Boolean", description: "Componente para escolha binária, como switches ou checkboxes, ideal para configurações de sim/não.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,autofocus" },
+  { group: "Forms / Input / Date", description: "Seletor de datas, com opções de configuração para limitar períodos.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,minvalue,maxvalue,placeholder,pattern,errormessage,autofocus" },
+  { group: "Forms / Input / Time", description: "Permite ao usuário selecionar um horário, com suporte a diferentes formatos de hora.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,minvalue,maxvalue,placeholder,pattern,errormessage,autofocus" },
+  { group: "Forms / Input / Date Range", description: "Componente para seleção de intervalos de datas, útil para filtros de períodos.", attributes: "hint,label,required,disabled,startdatabind,enddatabind,minvalue,maxvalue,placeholder,pattern,errormessage,autofocus" },
+  { group: "Forms / Input / Select One", description: "Seletor para uma única opção dentre várias, podendo ser apresentado como dropdown, combobox, etc.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,placeholder,errormessage,autofocus" },
+  { group: "Forms / Input / MultiSelect", description: "Permite a seleção de múltiplas opções, ideal para filtros ou configurações avançadas.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,errormessage,autofocus,databindtype" },
   { group: "Forms / Input / Color", description: "Seletor de cores, com suporte a diferentes formatos de cor (RGB, HEX, etc.)." },
   { group: "Forms / Input / Editor", description: "Editor de texto rico, permitindo formatação básica (negrito, itálico) e inserção de elementos como listas e tabelas." },
   { group: "Forms / Input / Feedback", description: "Para rating, ou joinha (aprovação ou não aprovação), permitindo ao usuário expressar opiniões de forma simples." },
@@ -163,12 +163,15 @@ const icaDescriptions: icaBase.FormComponent[] = [
 
 ];
 
-export const attributeDefinitions: icaBase.AttributeDefinition[] = [
+const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "hint", lit: "@property({ type: String }) hint: string = '${hint}'; // An optional descriptive hint for the field" },
   { path: "label", lit: "@property({ type: String }) label: string = '${label}'; // A label to identify this field" },
   { path: "required", lit: "@property({ type: Boolean }) required: boolean = false; // Whether the field is required or optional" },
   { path: "disabled", lit: "@property({ type: Boolean }) disabled: boolean = false; // Whether the field is ready for input or disabled" },
   { path: "databind", lit: "@property({ type: String }) databind: string = ''; // The path in the global JSON to view or change data" },
+  { path: "databindtype", lit: "@property({ type: String }) databindtype: 'string' | 'number' | 'object' |'array' | undefined = undefined; // Only accept databinds with this type, or undefined" },
+  { path: "startdatabind", lit: "@property({ type: String }) startdatabind: string = ''; // The path in the global JSON to view or change data" },
+  { path: "enddatabind", lit: "@property({ type: String }) enddatabind: string = ''; // The path in the global JSON to view or change data" },
   { path: "searchdatabind", lit: "@property({ type: String }) searchdatabind: string = ''; // Optional path in the global JSON for a list of options" },
   { path: "widget", lit: "@property({ type: String }) widget: string = ''; // The widget selected in this group/subgroup" },
   { path: "maxvalue", lit: "@property({ type: Number }) maxvalue: number | undefined = undefined; // Maximum value restriction for the input" },
@@ -178,7 +181,8 @@ export const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "pattern", lit: "@property({ type: String }) pattern: string = ''; // A regular expression that the input's value must match" },
   { path: "errormessage", lit: "@property({ type: String }) errormessage: string = ''; // Custom error message to display when input validation fails" },
   { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean = false; // Whether the field should be automatically focused on page load" },
-  
+  { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined = undefined; // Maximum length restriction for the input" },
+  { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined = undefined; // Minimum length restriction for the input" },
 ];
 
 export function getDescriptionsRootGroup(): string[] {
@@ -246,13 +250,11 @@ export function getFormComponentsAttributes(root: string, subGroup: string, fina
 
 export function getAttributeDefinitions(root: string, subGroup: string, finalGroup: string): string[] {
   const rc = new Set<string>();
-  const atts = getFormComponentsAttributes(root, subGroup, finalGroup);
+  const atts: string = getFormComponentsAttributes(root, subGroup, finalGroup);
   if (!atts) return [];
-  for (const att of atts) {
-    const obj1 = attributeDefinitions.find(def => def.path === att);
-    if (obj1) rc.add(obj1.lit)
-    else rc.add('// ' + att + ' dont exists')
-  };
+  const obj1 = attributeDefinitions.find(def => def.path === atts);
+  if (obj1) rc.add(obj1.lit)
+  else rc.add('// ' + atts + ' dont exists')
   return Array.from(rc);
 }
 
