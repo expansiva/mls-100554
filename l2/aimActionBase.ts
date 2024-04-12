@@ -27,7 +27,9 @@ export abstract class AimActionBase extends AimBase {
     }
 
     public onTaskFinishedEvent(e: any): void {
+        
         if (!e.detail || (e.detail.childIndex < 0) || !e.detail.status) throw new Error('invalid task-finished event, childIndex="' + e.detail?.childIndex + '", status="' + e.detail?.status + '"');
+
         const st: string = e.detail.status;
         if (st !== 'ok' && st !== 'error' && st !== 'rejected' && st !== 'userEvent') throw new Error('invalid task-finished event, status=' + st);
 
@@ -39,7 +41,9 @@ export abstract class AimActionBase extends AimBase {
         const result = e.detail.result;
         if (typeof result !== 'string') throw new Error('invalid task-finished event, result=' + result);
         if (this.taskIndex < 0 || this.taskIndex >= tasks.length) throw new Error('invalid task-finished event, taskIndex=' + this.taskIndex + ', tasks length=' + tasks.length);
+
         const taskRoot = tasks[this.taskIndex];
+
         if (childIndex < 0 || childIndex >= taskRoot.children.length) throw new Error('invalid task-finished event, childIndex=' + childIndex + ', children length=' + taskRoot.children.length);
         const taskChild = taskRoot.children[childIndex];
         const taskFinishResult: ITaskFinish = { status, taskIndex: this.taskIndex, childIndex, result, taskRoot, taskChild, newPrompt };
@@ -57,6 +61,7 @@ export abstract class AimActionBase extends AimBase {
     addTaskAndWaitForCompletion = (taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild): void => {
         this.prepareNextStep(child);
         taskRoot.children.push(child);
+        tasks[this.taskIndex] = taskRoot;
     }
 
     prepareNextStep = (child: cbe.ITaskChild): void => {

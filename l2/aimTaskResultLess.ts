@@ -66,15 +66,8 @@ export class AimTaskResultLess extends AimTaskBase {
 
     }
 
-    firstUpdated() {
-        // this.setValues();
-        // this.codeDiff?.addEventListener('show-diff-ready', () => {
-        //     this.codeDiff?.init();
-        // });
-    }
-
     private alreadyInit: boolean = false;
-    handleClick(e: Event) {    
+    handleClick(e: Event) {
         if (this.alreadyInit) return;
         this.setValues();
         this.codeDiff?.init();
@@ -138,18 +131,23 @@ export class AimTaskResultLess extends AimTaskBase {
         let prompt: string = '';
         if (this.textarea) prompt = this.textarea.value;
         this.isTryAgain = false;
-
         this.notifyCompleteByStatus('userEvent', this.result, prompt);
         this.closeMe();
     }
 
     private onAccept() {
         this.notifyCompleteByStatus('ok', this.result);
+        this.codeDiff?.removeAttribute('withaccept');
+        this.codeDiff?.removeAttribute('withreject');
+        this.codeDiff?.removeAttribute('withtryagain');
         this.closeMe();
     }
 
     private onReject() {
         this.notifyCompleteByStatus('rejected', '');
+        this.codeDiff?.removeAttribute('withaccept');
+        this.codeDiff?.removeAttribute('withreject');
+        this.codeDiff?.removeAttribute('withtryagain');
         this.closeMe();
     }
 

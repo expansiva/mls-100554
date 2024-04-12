@@ -12,6 +12,7 @@ export async function executePrompt(taskIndex: number): Promise<cbe.ITaskRoot> {
   if (taskIndex < 0 || taskIndex >= tasks.length) throw new Error(`invalid task index`);
   const project: number = mls.actual[5].project || 0;
   if (project < 1) throw new Error(`invalid project ${project}`);
+
   const taskRoot = { ...tasks[taskIndex] }; // get copy
   let tasksToExecute = 0;
   for (const child of taskRoot.children) {
@@ -22,7 +23,25 @@ export async function executePrompt(taskIndex: number): Promise<cbe.ITaskRoot> {
   if (tasksToExecute < 1 || tasksToExecute > 3) throw new Error(`invalid tasks to execute, tasksToExecute=${tasksToExecute}`);
   const resp = await mls.api.cbeAiTask(project, taskRoot, 'execute LLM');
   if (resp.msg !== "ok") throw new Error("error on api prompt: " + resp.msg);
-  if (resp.task) tasks[taskIndex] = { ...tasks[taskIndex], ...resp.task };
+
+
+  // Bloco anterior
+  //if (resp.task) tasks[taskIndex] = { ...tasks[taskIndex], ...resp.task };
+  //return resp.task;
+
+
+  //Bloco adicionado
+  if (resp.task) {
+
+    const taskRespRoot = (resp.task as cbe.ITaskRoot)
+    const taskResp = taskRespRoot.children.pop() as cbe.ITaskChild;
+    const taskChildIndex = tasks[taskIndex].children.length - 1;
+    tasks[taskIndex].children[taskChildIndex] = { ...tasks[taskIndex].children[taskChildIndex], ...taskResp }
+    tasks[taskIndex].cost = taskRespRoot.cost;
+    tasks[taskIndex].key = taskRespRoot.key;
+    tasks[taskIndex].userName = taskRespRoot.userName;
+  }
+  
   return resp.task;
 }
 

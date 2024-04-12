@@ -14,12 +14,18 @@ export class AimTaskExecLLM extends AimTaskBase {
 
     senderToServer(taskRoot: cbe.ITaskRoot) {
         this.taskChild.trace.push(new Date().toISOString() + ': sending to server');
+
+        delete this.taskRoot.cost; // alterado aq
+        delete this.taskRoot.key; // alterado aq
+
         executePrompt(this.taskIndex)
             .then((value: cbe.ITaskRoot) => {
                 if (!value) throw new Error('invalid task retorned');
+
                 this.taskChild.trace.push(new Date().toISOString() + ': received from server, len=' + (JSON.stringify(taskRoot)).length);
                 this.taskChild.mode = taskRoot.mode = 'processed';
                 this.notifyCompleteByStatus('ok', '');
+                
                 return;
             }).catch((reason: Error) => {
                 this.taskChild.trace.push(new Date().toISOString() + ': error on executePrompt: ' + reason.message || '?');

@@ -136,6 +136,7 @@ export class AimActionStyleNew extends AimActionBase {
 
 
     prepareTask1(taskRoot: cbe.ITaskRoot): void {
+
         // create task to get typescript source from another side
         this.mode = taskRoot.mode = 'in progress';
         this.addTaskAndWaitForCompletion(taskRoot, {
@@ -149,6 +150,7 @@ export class AimActionStyleNew extends AimActionBase {
     }
 
     prepareTask2(taskFinishResult: ITaskFinish): void {
+
         // call LLM on server with prompt
         const child = taskFinishResult.taskChild;
         if (taskFinishResult.status === 'error') {
@@ -180,12 +182,13 @@ export class AimActionStyleNew extends AimActionBase {
             trace: [],
             nextStep: this.prepareTask3.name // danger, loop
         });
+
+        this.requestUpdate();
+
     }
 
     prepareTask3(taskFinishResult: ITaskFinish): void {
 
-        console.info(taskFinishResult)
-        // show result
         const child = taskFinishResult.taskChild;
         const result: string = child.result || '';
         if (taskFinishResult.status === 'error' || !result) {
@@ -203,18 +206,17 @@ export class AimActionStyleNew extends AimActionBase {
             nextStep: this.prepareTask4.name // danger, loop
         });
 
-        // this.requestUpdate();
+        this.requestUpdate();
+
     }
 
-    prepareTask4(taskFinishResult: ITaskFinish): void {
-
-        console.info(taskFinishResult)
+    prepareTask4(taskFinishResult: ITaskFinish) {
 
         const child = taskFinishResult.taskChild;
         if (taskFinishResult.status === "ok" || taskFinishResult.status === "error" || taskFinishResult.status === "rejected") {
             return this.endTasks(taskFinishResult);
         }
-                if (taskFinishResult.status !== "userEvent") throw new Error('Event not prepared');
+        if (taskFinishResult.status !== "userEvent") throw new Error('Event not prepared');
         if (taskFinishResult.taskRoot.children.length > 20) throw new Error('Maximum task exceted');
         if (!taskFinishResult.newPrompt) throw new Error('Prompt invalid');
 
@@ -233,7 +235,7 @@ export class AimActionStyleNew extends AimActionBase {
             title: 'exec prompt',
             widget: '_100554_aimTaskExecLLM',
             agent: this.assistant,
-            prompt: this.getPrompt(source, taskFinishResult.newPrompt),
+            prompt: this.getPrompt(source, taskFinishResult.newPrompt as string),
             trace: [],
             nextStep: this.prepareTask3.name // looping exec prompt
         });
@@ -252,6 +254,7 @@ export class AimActionStyleNew extends AimActionBase {
 
         this.mode = taskFinishResult.taskRoot.mode = taskChild.mode;
         this.requestUpdate();
+        console.info(taskFinishResult)
         updateTaskOnServer(taskFinishResult.taskIndex);
     }
 
