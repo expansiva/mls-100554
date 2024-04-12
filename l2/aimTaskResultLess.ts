@@ -137,17 +137,13 @@ export class AimTaskResultLess extends AimTaskBase {
 
     private onAccept() {
         this.notifyCompleteByStatus('ok', this.result);
-        this.codeDiff?.removeAttribute('withaccept');
-        this.codeDiff?.removeAttribute('withreject');
-        this.codeDiff?.removeAttribute('withtryagain');
+        this.modeInternal = 'processed';
         this.closeMe();
     }
 
     private onReject() {
         this.notifyCompleteByStatus('rejected', '');
-        this.codeDiff?.removeAttribute('withaccept');
-        this.codeDiff?.removeAttribute('withreject');
-        this.codeDiff?.removeAttribute('withtryagain');
+        this.modeInternal = 'processed';
         this.closeMe();
     }
 
