@@ -1,0 +1,162 @@
+/// <mls shortName="wcInputNumberWithButtons" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+import { html, ifDefined, css } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+import { IcaFormsInputNumber } from './_100554_icaFormsInputNumber';
+
+@customElement('wc-input-number-with-buttons-100554')
+export class WCInputNumber extends IcaFormsInputNumber {
+
+    static styles = css`
+    :host {
+        display: block;
+    }
+
+    div{
+        display:flex;
+        gap: .3rem;
+    }
+
+    button {
+        width:40px;
+        cursor: pointer;
+        border:none;
+    }
+
+    .input_control {
+        display: block;
+        width:50px;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border-radius: 0.25rem;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        outline:none;
+        text-align:center;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield; /* Firefox */
+    }
+    .form_error_message{
+        color: red;
+    }
+    `
+
+    @property({ type: String }) name: string = '';
+
+    @property({ type: String }) label: string = ':';
+
+    @property({ type: String }) widget: string = '';
+
+    @property({ type: String }) pattern: string = '';
+
+    @property({ type: String }) errormessage: string = '';
+
+    @property({ type: Number }) maxvalue: number | undefined;
+
+    @property({ type: Number }) minvalue: number | undefined;
+
+    @property({ type: Number }) step: number | undefined;
+
+    @property({ type: Number }) value: number = 0;
+
+    @property({ type: Boolean }) required: boolean = false;
+
+    @property({ type: Boolean }) disabled: boolean = false;
+
+    @property({ type: Boolean }) readonly: boolean = false;
+
+    @property({ type: Boolean }) autofocus: boolean = false;
+
+    @property({ type: String }) hint: string = '';
+
+    @property({ type: String }) inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = 'none';
+
+    @query('input[type="number"]') input: HTMLInputElement | undefined;
+
+    error: string = '';
+
+    render() {
+        return html`
+        <label class="form-control-label" for="input">
+          ${this.label}
+        </label>
+
+        <div>
+            <button @click=${this.handleMinusClick}> - </button>
+            <input
+                id="input"
+                class="input_control"
+                type="number"
+                name=${ifDefined(this.name)}
+                ?disabled=${this.disabled}
+                ?readonly=${this.readonly}
+                ?required=${this.required}
+                min=${ifDefined(this.minvalue)}    
+                max=${ifDefined(this.maxvalue)}
+                step=${ifDefined(this.step as number)}
+                .value=${this.value}
+                ?autofocus=${this.autofocus}
+                pattern=${ifDefined(this.pattern)}
+                inputmode=${ifDefined(this.inputmode)}
+                @input=${this.handleChange}
+            />
+            <button @click=${this.handlePlusClick} > + </button>
+        </div>
+
+
+        <div class="form_error_message">${this.error}</div>
+        `;
+    }
+
+
+    private handleMinusClick() {
+        if (!this.input) return;
+        let newval = +this.input.value - 1
+        if (!isNaN(newval) && (this.minvalue === undefined || (newval >= this.minvalue))){
+            this.value = newval;
+        }
+    }
+
+    private handlePlusClick() {
+        if (!this.input) return;
+        let newval = +this.input.value + 1
+        if (!isNaN(newval) && (this.maxvalue === undefined || (newval <= this.maxvalue))){
+            this.value = newval;
+        }
+
+    }
+
+    private handleChange() {
+        if (!this.input) return;
+        let newval = +this.input.value;
+        this.checkNewVal(newval);
+    }
+
+    private checkNewVal(value: number) {
+        if (!isNaN(value)
+            && (this.minvalue === undefined || (value >= this.minvalue))
+            && (this.maxvalue === undefined || (value <= this.maxvalue))
+        ) {
+            this.value = value;
+            this.error = '';
+            this.requestUpdate();
+        } else {
+            this.error = this.errormessage;
+            this.requestUpdate();
+        }
+    }
+}

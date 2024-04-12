@@ -12,7 +12,7 @@ export function initIcaSelectGroup() {
     return true;
 }
 @customElement('ica-select-group-100554')
-export class IcaSelectGroup100554 extends LitElement {
+export class IcaSelectGroup extends LitElement {
 
     private rootBread: string = '';
 
@@ -37,6 +37,12 @@ export class IcaSelectGroup100554 extends LitElement {
              }
         });
         this.dispatchEvent(customEvent);
+    }
+
+    clear() {
+        this.actualGroups = [];
+        this.actualBreadCrumb = [this.rootBread = this.messages.selectICA];
+        this.actualMode = 'root';
     }
 
     render() {
