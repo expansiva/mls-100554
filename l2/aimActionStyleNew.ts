@@ -254,7 +254,6 @@ export class AimActionStyleNew extends AimActionBase {
 
         this.mode = taskFinishResult.taskRoot.mode = taskChild.mode;
         this.requestUpdate();
-        console.info(taskFinishResult)
         updateTaskOnServer(taskFinishResult.taskIndex);
     }
 

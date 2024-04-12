@@ -29,7 +29,6 @@ export async function executePrompt(taskIndex: number): Promise<cbe.ITaskRoot> {
   //if (resp.task) tasks[taskIndex] = { ...tasks[taskIndex], ...resp.task };
   //return resp.task;
 
-
   //Bloco adicionado
   if (resp.task) {
 
@@ -37,11 +36,11 @@ export async function executePrompt(taskIndex: number): Promise<cbe.ITaskRoot> {
     const taskResp = taskRespRoot.children.pop() as cbe.ITaskChild;
     const taskChildIndex = tasks[taskIndex].children.length - 1;
     tasks[taskIndex].children[taskChildIndex] = { ...tasks[taskIndex].children[taskChildIndex], ...taskResp }
-    tasks[taskIndex].cost = taskRespRoot.cost;
+    tasks[taskIndex].cost = taskRespRoot.cost ;
     tasks[taskIndex].key = taskRespRoot.key;
     tasks[taskIndex].userName = taskRespRoot.userName;
   }
-  
+
   return resp.task;
 }
 

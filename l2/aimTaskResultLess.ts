@@ -28,8 +28,7 @@ export class AimTaskResultLess extends AimTaskBase {
 
     @property({ type: Boolean, reflect: true }) isTryAgain = false;
 
-    @property({ type: String, reflect: true }) modeInternal: cbe.IMode = 'waiting for user';
-
+    @property({ type: String, reflect: true }) modeInternal: cbe.IMode | undefined;
 
     private result: string = '';
 
@@ -38,6 +37,8 @@ export class AimTaskResultLess extends AimTaskBase {
         if (this.taskChild.mode !== 'error' && this.taskChild.mode !== 'processed') {
             this.modeInternal = this.taskRoot.mode = this.taskChild.mode = 'waiting for user';
         }
+
+        this.openMe();
 
     }
 
@@ -68,8 +69,8 @@ export class AimTaskResultLess extends AimTaskBase {
 
     private alreadyInit: boolean = false;
     handleClick(e: Event) {
-        if (this.alreadyInit) return;
         this.setValues();
+        if (this.alreadyInit) return;
         this.codeDiff?.init();
         this.alreadyInit = true;
     }
@@ -121,6 +122,12 @@ export class AimTaskResultLess extends AimTaskBase {
         const det = this.querySelector('details');
         if (det) det.open = false;
     }
+
+    private openMe() {
+        const det = this.closest('details');
+        if (det) det.open = true;
+    }
+
 
     private handleCancelTryAgain() {
         this.isTryAgain = false;
