@@ -216,7 +216,7 @@ export class ServiceSource100554 extends ServiceBase {
         const promises: Promise<mls.l2.editor.IMFile>[] = [];
         const keys: string[] = Object.keys(mls.stor.files);
 
-        if ((window as any)['traceLivecicle']) console.info('creating: files model ', project);
+        if (window.traceLivecicle) console.info('creating: files model ', project);
 
         for (const key of keys) {
             const storFile = mls.stor.files[key];
@@ -231,7 +231,7 @@ export class ServiceSource100554 extends ServiceBase {
         await Promise.all(promises);
         if (mls.istrace) console.timeEnd('creating models');
 
-        if ((window as any)['traceLivecicle']) console.info('firing: mls.l2.editor.compileAllProjectIfNeed ', project);
+        if (window.traceLivecicle) console.info('firing: mls.l2.editor.compileAllProjectIfNeed ', project);
         if (needCompile) await mls.l2.editor.compileAllProjectIfNeed(project, true);
     }
 
