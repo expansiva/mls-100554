@@ -15,7 +15,7 @@ export class AimTaskExecLLM extends AimTaskBase {
     senderToServer(taskRoot: cbe.ITaskRoot) {
         this.taskChild.trace.push(new Date().toISOString() + ': sending to server');
 
-        delete this.taskRoot.key; // alterado aq
+        // delete this.taskRoot.key; // alterado aq
 
         executePrompt(this.taskIndex)
             .then((value: cbe.ITaskRoot) => {
