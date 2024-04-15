@@ -101,15 +101,13 @@ export class ServiceAim100554 extends ServiceBase {
     }
 
     onToolbarSelectChange(ev: mls.events.IEvent) {
-
+        if (mls.istrace) console.log('serviceAim, toolbarSelected', ev);
         if (!ev.desc) return;
         const data: IToolbarChangeEvent = JSON.parse(ev.desc);
-        if (data.position === this.position) return;
-
+        if (mls.istrace) console.log(`serviceAim, ${data.position}, ${this.position}`);
+        if (data.position !== this.position || data.level !== this.level) return;
         this.actualServiceOpLevel = data.level;
         this.actualServiceOpName = data.to;
-
-        if (data.level !== this.level) return;
         this.requestUpdate();
     }
 
@@ -145,12 +143,13 @@ export class ServiceAim100554 extends ServiceBase {
             return html`${unsafeHTML(sHtml)}`;
         }
         const orderned = this.sortKey(tasks);
+        if (mls.istrace) console.log(`serviceAim, renderAll`);
 
         return html`
-        <h4 class='title'>All Tasks</h4>
+        <h4 class='title'>All Tasks, last (${tasks.length})</h4>
             ${repeat(
             orderned,
-            ((task: cbe.ITaskRoot, index: number) => index) as any,
+            ((task: cbe.ITaskRoot, index: number) => task.key) as any,
             ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
         )}
         `;
