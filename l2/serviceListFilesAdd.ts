@@ -75,7 +75,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
                 ? html`<p>Loading...</p>`
                 :
                 this.templates.map((template) => {
-            return html`
+                    return html`
                         <div  class="template-item" @click=${() => { this.add(template) }}>
                             <div class="template-item-content">
                                 <div class="template-item-title">${template.title}</div>
@@ -90,7 +90,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
                             </div>
                         </div>
                     `
-        })}
+                })}
             </div>
         `
 
@@ -150,6 +150,13 @@ export class ServiceListFilesAdd100554 extends LitElement {
             params.newEnhancement = fEnh ? `_${fEnh.storFile.project}_${fEnh.storFile.shortName}` : '_blank';
             params.extension = '.ts';
             params.newTSSource = ts;
+    
+            mls.actual[this.level].setFullName('_' + params.project + '_' + params.shortName);
+            (mls.actual[this.level as any] as any)[this.position as any] = {
+                project: params.project,
+                shortName: params.shortName
+            } as any;
+
             await this.fireComunication(params);
             this.showLoader(false);
             this.saveLocalHistory(params.project, params.shortName, params.extension, params.folder);
@@ -315,14 +322,8 @@ export class ServiceListFilesAdd100554 extends LitElement {
     }
 
     private async fireComunication(obj: any) {
+
         obj.position = this.position;
-        mls.actual[this.level].setFullName('_' + obj.project + '_' + obj.shortName);
-
-        (mls.actual[this.level as any] as any)[this.position as any] = {
-            project: obj.project,
-            shortName: obj.shortName
-        } as any;
-
         await mls.events.fire([+this.level as any], ['FileAction'], JSON.stringify(obj), 0);
     }
 
