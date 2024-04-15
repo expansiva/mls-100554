@@ -229,7 +229,6 @@ export class AimActionStyleNew extends AimActionBase {
         }
 
         child.mode = 'processed';
-
         this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
             title: 'exec prompt',
