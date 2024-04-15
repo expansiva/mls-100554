@@ -3,6 +3,8 @@
 
 import { IcaFormsInput } from './_100554_icaFormsInput';
 
+export * from './_100554_icaFormsInput';
+
 export abstract class IcaFormsInputNumber extends IcaFormsInput {
     
     abstract maxvalue: number | undefined; // Maximum value restriction for the input" },

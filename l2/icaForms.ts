@@ -5,6 +5,6 @@ import { LitElement } from 'lit';
 
 export  abstract class IcaForms extends LitElement {
 
-    abstract widget: string; // The widget selected in this group/subgroup"
+    abstract widget: string | undefined; // The widget selected in this group/subgroup"
 
 }

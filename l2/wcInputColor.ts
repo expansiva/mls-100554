@@ -1,10 +1,11 @@
-/// <mls shortName="wcInputText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="wcInputColor" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
 import { html, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaFormsInputString, IAutoCapitalizeOptions, IAutoCorrectOptions, IInputMode } from './_100554_icaFormsInputString';
+import { IcaFormsInputColor, IInputColorFormat, IInputMode } from './_100554_icaFormsInputColor';
 
-@customElement('wc-input-text-100554')
-export class WcInputText100554 extends IcaFormsInputString {
+@customElement('wc-input-color-100554')
+export class WcInputColor extends IcaFormsInputColor {
 
     static styles = css`
     :host {
@@ -13,9 +14,8 @@ export class WcInputText100554 extends IcaFormsInputString {
     
     .input_control {
         display: block;
-        width:100%;
-        padding: 0.375rem 0.75rem;
         font-size: 1rem;
+        cursor:pointer;
         font-weight: 400;
         line-height: 1.5;
         color: #212529;
@@ -49,18 +49,6 @@ export class WcInputText100554 extends IcaFormsInputString {
 
     @property({ type: String }) value: string = '';
 
-    @property({ type: String }) placeholder: string | undefined;
-
-    @property({ type: String }) autocorrect: IAutoCorrectOptions | undefined;
-
-    @property({ type: String }) autoCapitalize: IAutoCapitalizeOptions | undefined;
-
-    @property({ type: String }) autocomplete: string | undefined;
-
-    @property({ type: Number }) maxlength: number | undefined = undefined;
-
-    @property({ type: Number }) minlength: number | undefined = undefined;
-
     @property({ type: Boolean }) required: boolean = false;
 
     @property({ type: Boolean }) disabled: boolean = false;
@@ -70,6 +58,8 @@ export class WcInputText100554 extends IcaFormsInputString {
     @property({ type: Boolean }) autofocus: boolean = false;
 
     @property({ type: String }) hint: string | undefined;
+
+    @property({ type: String }) format: IInputColorFormat = 'hex';
 
     @property({ type: String }) inputmode: IInputMode | undefined;
 
@@ -85,26 +75,19 @@ export class WcInputText100554 extends IcaFormsInputString {
 
         <input
             class="input_control"
-            type="text"
+            type="color"
             name=${ifDefined(this.name)}
             ?disabled=${this.disabled}
             ?readonly=${this.readonly}
             ?required=${this.required}
-            maxlength=${ifDefined(this.minlength)}    
-            minlength=${ifDefined(this.maxlength)}
-            autocapitalize=${ifDefined(this.autoCapitalize)}
-            autocomplete=${ifDefined(this.autocomplete)}
-            autocorrect=${ifDefined(this.autocorrect)}
-            placeholder=${ifDefined(this.placeholder)}
             .value=${this.value}
             ?autofocus=${this.autofocus}
-            pattern=${ifDefined(this.pattern)}
-            inputmode=${ifDefined(this.inputmode)}
-        
+            pattern=${ifDefined(this.pattern)}  
         />
         <small class="form_hint">${this.hint}</small>
         <div class="form_error_message">${this.error}</div>
         `;
     }
+
 
 }
