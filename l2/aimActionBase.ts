@@ -59,6 +59,7 @@ export abstract class AimActionBase extends AimBase {
     }
 
     addTaskAndWaitForCompletion = (taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild): void => {
+        if (taskRoot.mode === 'error' || child.mode === 'error') return;
         this.prepareNextStep(child);
         taskRoot.children.push(child);
         tasks[this.taskIndex] = taskRoot;
