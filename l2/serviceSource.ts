@@ -336,6 +336,7 @@ export class ServiceSource100554 extends ServiceBase {
         }
     }
 
+    private isNewFile: boolean = false;
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
         if (ev.level !== this.level || (ev.type !== 'FileAction')) return;
@@ -359,6 +360,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         const onNew = async (): Promise<void> => {
 
+            this.isNewFile = true;
             this.activeThisService();
             this.closeMenu();
             const newTSSource = fileAction.newTSSource
@@ -367,6 +369,7 @@ export class ServiceSource100554 extends ServiceBase {
             await this.createModelTS1(fileAction.newshortName as string, fileAction.newProject as number,
                 newTSSource, true);
             this.showActiveModel();
+            this.isNewFile = false;
         };
 
         const onOpen = async (): Promise<void> => {
@@ -644,7 +647,7 @@ export class ServiceSource100554 extends ServiceBase {
     private showActiveModel(): boolean {
 
         let activeModel = mls.l2.editor.editors[this.confE];
-        if (activeModel && activeModel.project === 0 && activeModel.shortName === 'testFile') {
+        if (activeModel && activeModel.project === 0 && activeModel.shortName === 'testFile' && !this.isNewFile) {
             const ret = this.openLastFile(this.level, this.position);
             if (ret) activeModel = mls.l2.editor.editors[this.confE];
         }
@@ -1292,7 +1295,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             last = last ? last : '{}';
             const info = JSON.parse(last);
             const keyLocal = 'last_' + level + '_' + position;
-
 
             if (!info[keyLocal]) return false;
 
