@@ -97,6 +97,9 @@ export abstract class AimTaskBase extends AimBase {
 
     renderTraceList(title: string, child: cbe.ITaskChild) {
         const traceString = JSON.stringify(child, null, 2);
+        const root = { ...this.taskRoot }
+        root.children = []
+        const traceRootString = JSON.stringify(root, null, 2);
         return html`
       <details>
         <summary>${title}</summary>
@@ -105,6 +108,8 @@ export abstract class AimTaskBase extends AimBase {
         </ul>
         <p>Trace Object:</p>
         <pre>${traceString}</pre>
+        <p>Trace root Object:</p>
+        <pre>${traceRootString}</pre>
       </details>
     `;
     }
