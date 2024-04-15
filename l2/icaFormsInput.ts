@@ -22,6 +22,8 @@ export abstract class IcaFormsInput extends IcaForms {
 
     abstract name:string; //  The name of the input, submitted as a name/value pair with form data.
 
-    abstract inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url'; //Tells the browser what type of data will be entered by the user, allowing it to display the appropriate virtual keyboard on supportive devices.
+    abstract inputmode: IInputMode | undefined ; //Tells the browser what type of data will be entered by the user, allowing it to display the appropriate virtual keyboard on supportive devices.
 
 }
+
+export type IInputMode = 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url'
