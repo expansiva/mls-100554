@@ -11,6 +11,9 @@ import { initIcaSelectGroup, IcaSelectGroup } from './_100554_icaSelectGroup';
 
 const myName = '_100554_aimActionAddIca';
 
+export const templateInitStr = "**completion_str**";
+export const templateFinalStr = "**completion_end**";
+
 @customElement('aim-action-add-ica-100554')
 export class AimActionAddIca extends AimActionBase {
 
@@ -146,11 +149,11 @@ export class AimActionAddIca extends AimActionBase {
         // `;
 
         const prompt = `
-System: Using typescript and lit 3, complete text between --completion_str-- and --completion_end--, using the source below.
+System: Using typescript and lit 3, complete text between ${templateInitStr} and ${templateFinalStr}, using the source below.
 
 User: ${user}
 
-Expected Output Format: Return the newly created component in the TS language, in a single block. Code comments should be in English, but keep existing comments.
+Expected Output: Please return the complete TypeScript component for Lit 3, that meets all the specified functionality. Include all necessary properties and methods, and ensure that the component is functional within a Lit 3 application environment.
 
 Source: ${source}
 `

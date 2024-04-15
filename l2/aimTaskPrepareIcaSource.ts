@@ -4,7 +4,8 @@ import { customElement } from 'lit/decorators.js';
 import { getInfoMyService } from "./_100554_aimHelper";
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { convertFileNameToTag } from "./_100554_utilsLit";
-import { getAttributeDefinitionsLit } from './_100554_icaBaseDescription'
+import { getAttributeDefinitionsLit } from './_100554_icaBaseDescription';
+import { templateInitStr, templateFinalStr } from './_100554_aimActionAddIca';
 
 @customElement('aim-task-prepare-ica-source-100554')
 export class AimTaskPrepareIcaSource extends AimTaskBase {
@@ -79,10 +80,10 @@ export class ${className} extends ${extend} {
     
     ${props.join('\n')}   
                         
-    // **completion_str**
+    // ${templateInitStr}
         render() {
     }
-    // **completion_end**
+    // ${templateFinalStr}
 }
 `
 

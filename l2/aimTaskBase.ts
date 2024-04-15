@@ -90,7 +90,7 @@ export abstract class AimTaskBase extends AimBase {
         return html`
       <details>
         <summary>${title}</summary>
-        <pre>${body}</pre> 
+        <pre style="white-space: break-spaces;">${body}</pre> 
       </details>
     `;
     }
