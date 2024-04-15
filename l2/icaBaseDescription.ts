@@ -34,7 +34,10 @@ const icaDescriptions: icaBase.FormComponent[] = [
 
   // definition final group (3 itens 'a / b / c')
   // Input
-  { group: "Forms / Input / Number", description: "Permite ao usuário inserir valores numéricos, com suporte a limites mínimo e máximo.", prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinação de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usuários digitem um número diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mínimo e máximo pré-definido. Se o usuário inserir um número inválido, uma mensagem de erro vermelha deve aparecer abaixo do componente.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxvalue,minvalue,step,placeholder,pattern,errormessage,autofocus" },
+  { group: "Forms / Input / Number", 
+    description: "Permite ao usuário inserir valores numéricos, com suporte a limites mínimo e máximo.", 
+    prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinação de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usuários digitem um número diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mínimo e máximo pré-definido. Se o usuário inserir um número inválido, uma mensagem de erro vermelha deve aparecer abaixo do componente.",
+    attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxvalue,minvalue,step,placeholder,pattern,errormessage,autofocus" },
   { group: "Forms / Input / String", description: "Campo para texto livre, podendo configurar validações como tamanho máximo e expressões regulares.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxlength,minlength,placeholder,pattern,errormessage,autofocus" },
   { group: "Forms / Input / Boolean", description: "Componente para escolha binária, como switches ou checkboxes, ideal para configurações de sim/não.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,autofocus" },
   { group: "Forms / Input / Date", description: "Seletor de datas, com opções de configuração para limitar períodos.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,minvalue,maxvalue,placeholder,pattern,errormessage,autofocus" },
@@ -257,5 +260,16 @@ export function getAttributeDefinitions(root: string, subGroup: string, finalGro
   else rc.add('// ' + atts + ' dont exists')
   return Array.from(rc);
 }
+
+export function getAttributeDefinitionsLit(root: string, subGroup: string, finalGroup: string): string[] {
+  const rc = new Set<string>();
+  const attrs = getFormComponentsAttributes(root, subGroup, finalGroup)
+  for (const att of attrs.split(',')) {
+    const def = attributeDefinitions.find((item) => item.path === att);
+    if(def) rc.add(def.lit);
+  };
+  return Array.from(rc);
+}
+
 
 

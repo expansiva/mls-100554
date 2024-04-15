@@ -90,7 +90,7 @@ export abstract class AimTaskBase extends AimBase {
         return html`
       <details>
         <summary>${title}</summary>
-        <div>${unsafeHTML(body.replace(/\n/g, '<br>'))}</div> 
+        <pre>${body}</pre> 
       </details>
     `;
     }

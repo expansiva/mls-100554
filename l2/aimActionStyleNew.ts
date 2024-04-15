@@ -256,6 +256,25 @@ export class AimActionStyleNew extends AimActionBase {
         updateTaskOnServer(taskFinishResult.taskIndex);
     }
 
+
+    messages = {
+        "prompt_title": "Create a new css in LESS.",
+
+        "prompt_system_1": "Use LESS to craft a new style based on the source provided below, incorporating user suggestions.",
+        "prompt_system_2": "Develop an isolated LESS file, employing tokens as outlined in the model below.",
+        "prompt_system_3": "Use LESS to craft a new style based on the source provided below, incorporating user suggestions.",
+
+
+
+        "template_title": "Irá verificar o grupo selecionado e criar um novo componente Lit",
+        "textarea_placelholder": "Entre com o prompt aqui",
+        "btn_cancel": "Cancelar",
+        "btn_confirm": "Confirmar",
+
+
+    }
+
+
 }
 
 
