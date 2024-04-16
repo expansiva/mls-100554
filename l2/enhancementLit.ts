@@ -17,21 +17,21 @@ export const getAddNewFileDetails = () =>{
             description: "Criar um web component em lit 3 ,que será utilizado em páginas.\n O Lit é um framework para criar web componentes rápidos e com atualizações dinâmicas sem ter que repintar toda a tela.\n Após criar o arquivo use a inteligência artificial para preparar o web component.",
             tags: ["lit", "html", "component"],
             example: `
-            import { html, css, LitElement } from 'lit'; 
-            import { customElement, property } from 'lit/decorators.js';
+import { html, css, LitElement } from 'lit'; 
+import { customElement, property } from 'lit/decorators.js';
 
-            @customElement('[tagName]')
-            export class [className] extends LitElement {
-                
-                static styles = css\`[[mls_getDefaultDesignSystem]]\`;
-   
-                @property() 
-                name: string = 'Somebody';
+@customElement('[tagName]')
+export class [className] extends LitElement {
+    
+    static styles = css\`[[mls_getDefaultDesignSystem]]\`;
 
-                render() {
-                    return html\`<p> Hello, \${ this.name } !</p>\`;
-                }
-            }`,
+    @property() 
+    name: string = 'Somebody';
+
+    render() {
+        return html\`<p> Hello, \${ this.name } !</p>\`;
+    }
+}`,
             aimActionSuggest: ""
         }
     ]
