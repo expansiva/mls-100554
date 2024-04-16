@@ -116,21 +116,19 @@ export class AimActionStyleNew extends AimActionBase {
     private getPrompt(source: string, user: string) {
 
         const prompt = `
-            Objective: Criar um novo css em LESS.
-            \n
-            \n
-            System:\n
-            1. Use LESS to craft a new style based on the source provided below, incorporating user suggestions.
-            2 .Develop an isolated LESS file, employing tokens as outlined in the model below.
-            User:\n
-            1. ${user}\n\n
-            \n
-            \n
-            Expected Output Format:
-            \n
-            \n
-            Return the newly created CSS in the LESS language, in a single block without the token listing. Code comments should be in English, but keep existing comments that serve as UI aids.\n
-            \n\n${source}\n`;
+${this.messages.prompt_title}
+
+System:
+1. ${this.messages.prompt_system_1}
+2  ${this.messages.prompt_system_2}
+
+User:
+1. ${user}
+
+${this.messages.prompt_system_3}
+        
+${source}`;
+
         return prompt;
     }
 
@@ -177,6 +175,7 @@ export class AimActionStyleNew extends AimActionBase {
             mode: 'initializing',
             title: 'exec prompt',
             widget: '_100554_aimTaskExecLLM',
+            ref: child.ref,
             agent: this.assistant,
             prompt: this.getPrompt(source, user),
             trace: [],
@@ -201,6 +200,7 @@ export class AimActionStyleNew extends AimActionBase {
             mode: 'initializing',
             title: 'result',
             widget: '_100554_aimTaskResultLess',
+            ref: child.ref,
             trace: [],
             _tempResult: result,
             nextStep: this.prepareTask4.name // danger, loop
@@ -233,6 +233,7 @@ export class AimActionStyleNew extends AimActionBase {
             mode: 'initializing',
             title: 'exec prompt',
             widget: '_100554_aimTaskExecLLM',
+            ref: child.ref,
             agent: this.assistant,
             prompt: this.getPrompt(source, taskFinishResult.newPrompt as string),
             trace: [],
@@ -258,11 +259,12 @@ export class AimActionStyleNew extends AimActionBase {
 
 
     messages = {
-        "prompt_title": "Create a new css in LESS.",
+        "prompt_title": "Objective:Create a new css in LESS.",
 
         "prompt_system_1": "Use LESS to craft a new style based on the source provided below, incorporating user suggestions.",
         "prompt_system_2": "Develop an isolated LESS file, employing tokens as outlined in the model below.",
-        "prompt_system_3": "Use LESS to craft a new style based on the source provided below, incorporating user suggestions.",
+        "prompt_system_3": "Expected Output Format: Return the newly created CSS in the LESS language, in a single block without the token listing. Code comments should be in English, but keep existing comments that serve as UI aids.",
+
 
 
 
