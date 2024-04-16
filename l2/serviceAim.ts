@@ -105,10 +105,10 @@ export class ServiceAim100554 extends ServiceBase {
         if (!ev.desc) return;
         const data: IToolbarChangeEvent = JSON.parse(ev.desc);
         if (mls.istrace) console.log(`serviceAim, ${data.position}, ${this.position}`);
-        if (data.position !== this.position || data.level !== this.level) return;
+        if (data.position === this.position || data.level !== this.level) return;
         this.actualServiceOpLevel = data.level;
         this.actualServiceOpName = data.to;
-        this.requestUpdate();
+        if (this.visible === 'true') this.requestUpdate();
     }
 
     sortKey(arr: cbe.ITaskRoot[]) {
@@ -222,7 +222,7 @@ export class ServiceAim100554 extends ServiceBase {
     actions: ResponseFindActions[] = [];
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {
-        if (!changedProperties.has('activeTab') && !changedProperties.has('orderned')) return;
+        if (!changedProperties.has('activeTab')) return;
         switch (this.activeTab) {
             case 'All':
                 readTasksFromServer('all', '')
