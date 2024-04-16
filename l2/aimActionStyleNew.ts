@@ -88,9 +88,9 @@ export class AimActionStyleNew extends AimActionBase {
 
     renderAdd(): TemplateResult { // from abstract
         return html`
-        <p> Irá verificar os tokens e criar um novo conjunto de tokens </p>
+        <p> ${this.messages.template_title} </p>
         <div>
-            <label>Sugestão:</label>
+            <label>${this.messages.template_suggest}</label>
             <div class="prompt-suggestion">
                 ${this.prompts.map((prompt) => html`
                     <span @click=${this.onSuggestClick}>
@@ -102,12 +102,12 @@ export class AimActionStyleNew extends AimActionBase {
 
         <div>
             <label>Prompt:</label>
-            <textarea rows="5" placeholder="Digite aqui seu prompt" style="width:100%"></textarea>
+            <textarea rows="5" placeholder="${this.messages.textarea_placelholder} style="width:100%"></textarea>
         </div>
 
         <div class="buttonGroup">
-          <button @click="${this.handleCancel}">Cancelar</button>
-          <button @click="${this.handleAdd}">Confirmar</button>
+          <button @click="${this.handleCancel}">${this.messages.btn_cancel}</button>
+          <button @click="${this.handleAdd}">${this.messages.btn_confirm}</button>
         </div>
     `;
     }
@@ -265,14 +265,11 @@ ${source}`;
         "prompt_system_2": "Develop an isolated LESS file, employing tokens as outlined in the model below.",
         "prompt_system_3": "Expected Output Format: Return the newly created CSS in the LESS language, in a single block without the token listing. Code comments should be in English, but keep existing comments that serve as UI aids.",
 
-
-
-
-        "template_title": "Irá verificar o grupo selecionado e criar um novo componente Lit",
-        "textarea_placelholder": "Entre com o prompt aqui",
+        "template_title": "Irá verificar os tokens e criar um novo conjunto de tokens",
+        "template_suggest": "Sugestão:",
+        "textarea_placelholder": "Digite aqui seu prompt",
         "btn_cancel": "Cancelar",
         "btn_confirm": "Confirmar",
-
 
     }
 
