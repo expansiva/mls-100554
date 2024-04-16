@@ -38,7 +38,9 @@ export class AimActionAddIca extends AimActionBase {
 
     @property({ type: Boolean }) showPrompt: boolean = false;
     @property({ type: String }) actualSuggest: string = '';
+    @property({ type: String }) validPrompt: boolean = true;
     @property({ type: Array }) actualAttributes: string[] = [];
+
     actualGroups: string[] = [];
 
 
@@ -56,7 +58,18 @@ export class AimActionAddIca extends AimActionBase {
 
     private handleAdd(): void {
 
-        if (this.textarea) (window as any)['aim-action-add-ica-user'] = this.textarea.value;
+        let txtAreaValue:string = '';
+        if (!this.textarea) return;
+
+        txtAreaValue = this.textarea.value;
+
+        if (txtAreaValue.trim() === this.actualSuggest.trim()) {
+            this.validPrompt = false;
+            this.requestUpdate();
+            return;
+        }
+
+        (window as any)['aim-action-add-ica-user'] = txtAreaValue;
 
         (window as any)['aim-action-add-ica-file-info'] = {
             group: this.actualGroups,
@@ -123,6 +136,7 @@ export class AimActionAddIca extends AimActionBase {
             <button @click="${this.handleCancel}">${this.messages.btn_cancel}</button>
             ${this.showPrompt ? html`<button @click="${this.handleAdd}">${this.messages.btn_confirm}</button>` : ''}
         </div>
+        ${this.validPrompt && html`<div style="color:red;"> ${this.messages.error_prompt}</div>`}
 
             `;
     }
@@ -136,26 +150,44 @@ export class AimActionAddIca extends AimActionBase {
             (window as any)['aim-action-add-ica-user'] = undefined;
         }
 
-        // const prompt = `
-        //     ${this.messages.prompt_title}\n
-        //     ${this.messages.prompt_specifications}:\n
-        //     ${this.messages.prompt_framework}\n
-        //     ${this.messages.prompt_language}\n
-        //     ${this.messages.prompt_user}:\n ${user}\n\n
-        //     ${this.messages.prompt_comments}\n
-        //     ${this.messages.prompt_objective}\n
-        //     ${this.messages.prompt_expected_output}\n\n
-        //     Source: ${source}
-        // `;
+        const prompt2 = `
+-System: 
+Usando Typescript e Lit 3.O. Criar o render de um webcomponent, usando o source fornecido abaixo.
+Do source abaixo deve ser mantido as propriedades, a declaração de imports, e a definção da classe.
+Não implementar nenhum styles css.
+A implementação deverá ocorrer apenas entre a demarcação ${templateInitStr} e ${templateFinalStr} .
+
+-User:
+${user}
+
+-Saida esperada: 
+Um component Lit com sua implementação completa, incluindo render, metodos e eventos, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.
+Todos os metodos e eventos criados, deve ter suas implementações de lógicas definidas, 
+Retornar o código em um único bloco  \`\`\`typescript.
+
+-Source: ${source}
+`
 
         const prompt = `
-System: Using typescript and lit 3, complete text between ${templateInitStr} and ${templateFinalStr}, using the source below.
+-System: 
+Usando Typescript e Lit 3.O. Criar o render de um webcomponent, usando o source fornecido abaixo.
+Do source abaixo deve ser mantido as propriedades, a declaração de imports, e a definição da classe.
+Não implementar nenhum styles css.
+Manter a primeira linha ///
+Completar o source abaixo apenas entre a demarcação ${templateInitStr} e ${templateFinalStr} .
 
-User: ${user}
+-User:
+${user}
 
-Expected Output: Please return the complete TypeScript component for Lit 3, that meets all the specified functionality. Include all necessary properties and methods, and ensure that the component is functional within a Lit 3 application environment.
+-Saida esperada: 
+Um component Lit com sua implementação de renderização completa, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.
 
-Source: ${source}
+Todos as funções devem ser declaradas com um corpo vazio, porém sua implementação de lógica deve ser antecedido um comentários // **implement_here**' e comentários sobre o que o método deve fazer.
+
+Remover os seguintes comentários : // ${templateInitStr} e // ${templateFinalStr} do resultado final .
+Retornar o código em um único bloco  \`\`\`typescript.
+
+-Source: ${source}
 `
 
         return prompt;
@@ -263,6 +295,8 @@ Source: ${source}
         "textarea_placelholder": "Entre com o prompt aqui",
         "btn_cancel": "Cancelar",
         "btn_confirm": "Confirmar",
+        "error_prompt": "Por favor, ajuste o prompt para suas necessidades",
+        
 
 
     }

@@ -62,8 +62,9 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
 
                 const group = data.group.join('');
                 const tagName = convertFileNameToTag(fullName);
-                const className = path.charAt(0).toUpperCase() + path.substring(1, path.length) + project.toString();
-                const extend = `_100554_ica${group}`;
+                const className = path.charAt(0).toUpperCase() + path.substring(1, path.length);
+                const importFile = `_100554_ica${group}`;
+                const extend = `Ica${group}`;
                 const [root, subgroup, finalgroup] = data.group;
                 const props = getAttributeDefinitionsLit(root, subgroup, finalgroup);
 
@@ -72,6 +73,7 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { ${extend} } from './${importFile}';
 
 @customElement('${tagName}')
 export class ${className} extends ${extend} {
@@ -81,8 +83,7 @@ export class ${className} extends ${extend} {
     ${props.join('\n')}   
                         
     // ${templateInitStr}
-        render() {
-    }
+
     // ${templateFinalStr}
 }
 `
