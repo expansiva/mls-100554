@@ -32,7 +32,7 @@ export class [className] extends LitElement {
         return html\`<p> Hello, \${ this.name } !</p>\`;
     }
 }`,
-            aimActionSuggest: ""
+            aimActionSuggest: "_100554_aimActionAddIca"
         }
     ]
 }
