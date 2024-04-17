@@ -1,10 +1,9 @@
 /// <mls shortName="wcInputNumber" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { html, ifDefined, css } from 'lit';
+import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaFormsInputNumber } from './_100554_icaFormsInputNumber';
 
 @customElement('wc-input-number-100554')
-export class WCInputNumber extends IcaFormsInputNumber {
+export class WCInputNumber extends LitElement {
 
     static styles = css`
     :host {

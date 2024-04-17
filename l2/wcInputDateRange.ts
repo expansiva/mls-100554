@@ -1,11 +1,10 @@
 /// <mls shortName="wcInputDateRange" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, ifDefined, css } from 'lit';
+import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaFormsInputDateRange } from './_100554_icaFormsInputDataRange'
 
 @customElement('wc-input-date-range-100554')
-export class WCInputDateRange extends IcaFormsInputDateRange {
+export class WCInputDateRange extends LitElement {
 
     static styles = css`
     :host {
