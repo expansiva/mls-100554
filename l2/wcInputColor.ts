@@ -1,11 +1,10 @@
 /// <mls shortName="wcInputColor" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, ifDefined, css } from 'lit';
+import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaFormsInputColor, IInputColorFormat, IInputMode } from './_100554_icaFormsInputColor';
 
 @customElement('wc-input-color-100554')
-export class WcInputColor extends IcaFormsInputColor {
+export class WcInputColor extends LitElement {
 
     static styles = css`
     :host {
@@ -58,10 +57,6 @@ export class WcInputColor extends IcaFormsInputColor {
     @property({ type: Boolean }) autofocus: boolean = false;
 
     @property({ type: String }) hint: string | undefined;
-
-    @property({ type: String }) format: IInputColorFormat = 'hex';
-
-    @property({ type: String }) inputmode: IInputMode | undefined;
 
     @query('.input_control') input: HTMLInputElement | undefined;
 

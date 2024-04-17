@@ -1,10 +1,10 @@
 /// <mls shortName="wcInputText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { html, ifDefined, css } from 'lit';
+import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaFormsInputString, IAutoCapitalizeOptions, IAutoCorrectOptions, IInputMode } from './_100554_icaFormsInputString';
+
 
 @customElement('wc-input-text-100554')
-export class WcInputText100554 extends IcaFormsInputString {
+export class WcInputText100554 extends LitElement {
 
     static styles = css`
     :host {
@@ -51,10 +51,6 @@ export class WcInputText100554 extends IcaFormsInputString {
 
     @property({ type: String }) placeholder: string | undefined;
 
-    @property({ type: String }) autocorrect: IAutoCorrectOptions | undefined;
-
-    @property({ type: String }) autoCapitalize: IAutoCapitalizeOptions | undefined;
-
     @property({ type: String }) autocomplete: string | undefined;
 
     @property({ type: Number }) maxlength: number | undefined = undefined;
@@ -70,8 +66,6 @@ export class WcInputText100554 extends IcaFormsInputString {
     @property({ type: Boolean }) autofocus: boolean = false;
 
     @property({ type: String }) hint: string | undefined;
-
-    @property({ type: String }) inputmode: IInputMode | undefined;
 
     @query('.input_control') input: HTMLInputElement | undefined;
 
@@ -92,14 +86,13 @@ export class WcInputText100554 extends IcaFormsInputString {
             ?required=${this.required}
             maxlength=${ifDefined(this.minlength)}    
             minlength=${ifDefined(this.maxlength)}
-            autocapitalize=${ifDefined(this.autoCapitalize)}
             autocomplete=${ifDefined(this.autocomplete)}
-            autocorrect=${ifDefined(this.autocorrect)}
+
             placeholder=${ifDefined(this.placeholder)}
             .value=${this.value}
             ?autofocus=${this.autofocus}
             pattern=${ifDefined(this.pattern)}
-            inputmode=${ifDefined(this.inputmode)}
+
         
         />
         <small class="form_hint">${this.hint}</small>
