@@ -201,10 +201,14 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
         if (project !== 100554) return '';
         let parts = this.splitStringByUppercase(name);
-        if (parts.length !== 3) return '';
+        if (parts.length < 3) return '';
 
         parts = parts.map((part) => this.capitalizeFirstLetter(part));
-        let [root, subgroup, finalgroup] = parts;
+
+        let root, subgroup, finalgroup = ''
+        root = parts.shift() as string;
+        subgroup = parts.shift() as string;
+        finalgroup = parts.join(' ') as string;
 
         const desc = getFormComponentsDescription(root, subgroup, finalgroup);
         if (!desc) return '';
@@ -230,9 +234,32 @@ export class ServiceListFilesAdd100554 extends LitElement {
             return cleanedLine;
         });
 
-        const className = `Ica${root}${subgroup}${finalgroup}`;
+        const fg = finalgroup.replace(/\s/g, '');
+        const className = `Ica${root}${subgroup}${fg}`;
         const extend = 'IcaLitElement';
         const extendFile = './_100554_icaLitElement';
+
+        const interfaces = new Map();
+
+        res.forEach((str: string, index: number) => {
+            const matches = str.match(/abstract (\w+): ('.*?'(?: \| '.*?')*)/);
+            if (matches && matches.length >= 3) {
+                const propName = matches[1];
+                const types = matches[2].match(/'[^']+'/g);
+                if (types && types.length > 1) {
+                    const interfaceName = `I${propName.charAt(0).toUpperCase() + propName.slice(1)}`;
+                    interfaces.set(interfaceName, types);
+                    res[index] = `abstract ${propName}: ${interfaceName} | undefined; // ${matches.input}`;
+                }
+            }
+        });
+
+        let interfaceString = '';
+        interfaces.forEach((types, interfaceName) => {
+            interfaceString += `export type ${interfaceName} = ${types.join(' | ')};\n`;
+        });
+
+
         const temp = `
 import { ${extend} } from '${extendFile}';
 
@@ -241,6 +268,8 @@ export abstract class ${className} extends ${extend} {
     ${res.join('\n\t')}
 
 }
+
+${[interfaceString].join('\n')}
 `
         return temp;
 
@@ -350,9 +379,6 @@ export abstract class ${className} extends ${extend} {
 
         return templates;
     }
-
-
-
 
     private async getEnhacementsInstancies(enhancementDetails: IEnhancementDetails[]) {
 

@@ -8,13 +8,13 @@ const icaDescriptions: icaBase.FormComponent[] = [
   { group: "Navigation", description: "Componentes projetados para facilitar a movimentação do usuário pela aplicação, englobando tanto a navegação entre diferentes páginas quanto a manipulação de conteúdo dentro de uma mesma página." },
   { group: "Apresentation", description: "Componentes projetados para apresentar conteúdo estático em diferentes formatos, como texto, imagens, vídeos, sons e gráficos." },
   { group: "Layout", description: "Define a estrutura e a organização visual dos elementos na interface do usuário. Engloba componentes e técnicas para arranjar o conteúdo de forma lógica e esteticamente agradável, melhorando a experiência do usuário ao navegar e interagir com a aplicação." },
-  {group: "Blocks", description: "Agrupa componentes complexos que encapsulam funcionalidades específicas e são compostos por múltiplos elementos. Esses blocos são projetados para oferecer recursos interativos avançados, como calendários, visualizadores de documentos e sistemas de agendamento, enriquecendo a experiência do usuário com funcionalidades integradas e personalizáveis." },  
+  { group: "Blocks", description: "Agrupa componentes complexos que encapsulam funcionalidades específicas e são compostos por múltiplos elementos. Esses blocos são projetados para oferecer recursos interativos avançados, como calendários, visualizadores de documentos e sistemas de agendamento, enriquecendo a experiência do usuário com funcionalidades integradas e personalizáveis." },
 
   // definition sub group 1 (2 itens 'a / b')
   { group: "Forms / Input", description: "Campos de entrada para coleta de informações do usuário, incluindo texto, números, datas, seleções e mais." },
   { group: "Forms / Records", description: "Visualizadores de registros para apresentar dados ao usuário em diferentes formatos como tabelas, listas, cartões e mapas geográficos." },
   { group: "Forms / Tree", description: "Componentes para visualização e edição de dados em estrutura hierárquica, como árvores de dados, breadcrumbs adaptados e mapas mentais." },
-   { group: "Forms / Submit", description: "Componentes focados na finalização de interações do usuário com formulários. Inclui botões para submeter, cancelar ou limpar formulários, bem como mecanismos para enviar dados para sistemas externos. Essencial para facilitar ações conclusivas dentro de formulários, garantindo uma interface clara e eficiente para coleta de dados e outras ações relacionadas. Considerações especiais para feedback ao usuário e questões de segurança e privacidade são fundamentais neste grupo." },
+  { group: "Forms / Submit", description: "Componentes focados na finalização de interações do usuário com formulários. Inclui botões para submeter, cancelar ou limpar formulários, bem como mecanismos para enviar dados para sistemas externos. Essencial para facilitar ações conclusivas dentro de formulários, garantindo uma interface clara e eficiente para coleta de dados e outras ações relacionadas. Considerações especiais para feedback ao usuário e questões de segurança e privacidade são fundamentais neste grupo." },
   { group: "Navigation / Links", description: "Conjunto de componentes focados na navegação entre páginas ou recursos, seja dentro da própria aplicação ou para sites externos. Inclui menus, botões, links diretos e âncoras para navegação interna." },
   { group: "Navigation / Content", description: "Componentes especializados na apresentação e interação com diferentes tipos de conteúdo dentro de uma página, como tabs, accordions e popups, permitindo uma experiência de usuário mais dinâmica e interativa." },
   { group: "Apresentation / Text", description: "Componentes para apresentação de conteúdo textual, incluindo textos simples, banners, citações e textos ricos." },
@@ -34,11 +34,13 @@ const icaDescriptions: icaBase.FormComponent[] = [
 
   // definition final group (3 itens 'a / b / c')
   // Input
-  { group: "Forms / Input / Number", 
-    description: "Permite ao usuário inserir valores numéricos, com suporte a limites mínimo e máximo.", 
+  {
+    group: "Forms / Input / Number",
+    description: "Permite ao usuário inserir valores numéricos, com suporte a limites mínimo e máximo.",
     prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinação de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usuários digitem um número diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mínimo e máximo pré-definido. Se o usuário inserir um número inválido, uma mensagem de erro vermelha deve aparecer abaixo do componente.",
-    attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxvalue,minvalue,step,placeholder,pattern,errormessage,autofocus" },
-  { group: "Forms / Input / String", description: "Campo para texto livre, podendo configurar validações como tamanho máximo e expressões regulares.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxlength,minlength,placeholder,pattern,errormessage,autofocus" },
+    attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxvalue,minvalue,step,placeholder,pattern,errormessage,autofocus"
+  },
+  { group: "Forms / Input / String", description: "Campo para texto livre, podendo configurar validações como tamanho máximo e expressões regulares.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxlength,minlength,placeholder,pattern,errormessage,autofocus,autoCapitalize,autocorrect" },
   { group: "Forms / Input / Boolean", description: "Componente para escolha binária, como switches ou checkboxes, ideal para configurações de sim/não.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,autofocus" },
   { group: "Forms / Input / Date", description: "Seletor de datas, com opções de configuração para limitar períodos.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,minvalue,maxvalue,placeholder,pattern,errormessage,autofocus" },
   { group: "Forms / Input / Time", description: "Permite ao usuário selecionar um horário, com suporte a diferentes formatos de hora.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,minvalue,maxvalue,placeholder,pattern,errormessage,autofocus" },
@@ -155,12 +157,12 @@ const icaDescriptions: icaBase.FormComponent[] = [
   { group: "Blocks / Viewer / PDF Viewer", description: "Componente para visualizar documentos PDF dentro da aplicação. Permite aos usuários ler e interagir com conteúdo PDF diretamente na interface, sem necessidade de downloads ou aplicativos externos." },
   { group: "Blocks / Viewer / Spreadsheet Viewer", description: "Visualizador de planilhas que suporta formatos como Excel. Facilita a visualização e manipulação de dados de planilhas dentro da aplicação, permitindo análises e revisões diretas." },
   { group: "Blocks / Viewer / Document Viewer", description: "Permite a visualização de vários formatos de documentos, como Word, PowerPoint e PDF, integrando uma visão de conteúdo rico sem a necessidade de software adicional." },
-  
+
   // Plugins
   { group: "Blocks / Plugins / Calendar", description: "Plugin de calendário que oferece visualizações e interações com eventos e agendas. Integra-se com sistemas externos para sincronização e gerenciamento de eventos." },
   { group: "Blocks / Plugins / Schedule", description: "Componente para planejamento e visualização de agendas pessoais ou profissionais. Permite aos usuários organizar e visualizar compromissos, tarefas e eventos em um layout claro e interativo." },
   { group: "Blocks / Plugins / External API", description: "Facilita a integração com APIs externas para buscar ou enviar dados. Ideal para funcionalidades como visualizar condições climáticas, cotações de ações ou atualizações de redes sociais diretamente na aplicação." },
-  
+
   // Projects
   { group: "Blocks / Projects / Pages", description: "Permite a incorporação de páginas inteiras ou componentes específicos dentro da aplicação atual. Útil para integrar funcionalidades ou informações adicionais sem a necessidade de navegação externa." },
 
@@ -186,6 +188,8 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean = false; // Whether the field should be automatically focused on page load" },
   { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined = undefined; // Maximum length restriction for the input" },
   { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined = undefined; // Minimum length restriction for the input" },
+  { path: "autoCapitalize", lit: "@property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = undefined; // Controls whether and how text input is automatically capitalized as it is entered by the user." },
+  { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on' = undefined; // Indicates whether the browser's autocorrect feature is on or off." },
 ];
 
 export function getDescriptionsRootGroup(): string[] {
@@ -266,7 +270,7 @@ export function getAttributeDefinitionsLit(root: string, subGroup: string, final
   const attrs = getFormComponentsAttributes(root, subGroup, finalGroup)
   for (const att of attrs.split(',')) {
     const def = attributeDefinitions.find((item) => item.path === att);
-    if(def) rc.add(def.lit);
+    if (def) rc.add(def.lit);
   };
   return Array.from(rc);
 }
