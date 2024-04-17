@@ -3,9 +3,10 @@
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
+import { ServiceBase } from './_100554_serviceBase';
+import { getAttributeDefinitionsLit, getFormComponentsDescription } from './_100554_icaBaseDescription';
 
 export const initServiceListFilesAdd = () => {
-
 }
 
 @customElement('service-list-files-add-100554')
@@ -16,7 +17,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
     @property() level: number = -1;
     @property() error: string = '';
     @property() position: string = '';
-    @property() father: HTMLElement | undefined;
+    @property() father?: ServiceBase | undefined;
     @property() templates: ITemplateDetails[] = [];
     @property({ type: Boolean, }) loading: boolean = true;
 
@@ -137,7 +138,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
             this.showLoader(true);
 
-            const ts = this.createContentNewFile(fEnh, template.example, name);
+            const ts = this.createContentNewFile(fEnh, template.example, name, project);
 
             params.action = 'new' as typeof params.action;
             params.level = +this.level;
@@ -150,7 +151,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
             params.newEnhancement = fEnh ? `_${fEnh.storFile.project}_${fEnh.storFile.shortName}` : '_blank';
             params.extension = '.ts';
             params.newTSSource = ts;
-    
+
             mls.actual[this.level].setFullName('_' + params.project + '_' + params.shortName);
             (mls.actual[this.level as any] as any)[this.position as any] = {
                 project: params.project,
@@ -158,6 +159,15 @@ export class ServiceListFilesAdd100554 extends LitElement {
             } as any;
 
             await this.fireComunication(params);
+            const posInv = this.position === 'left' ? 'right' : 'left';
+            if (template.aimActionSuggest) {
+                this.father?.openService('_100554_serviceAim', posInv, 2);
+                const opInstance = this.father?.nav3Service?.getActiveInstance(posInv);
+                if (opInstance) {
+                    opInstance.setAttribute('actiontoopen', template.aimActionSuggest)
+                }
+            }
+
             this.showLoader(false);
             this.saveLocalHistory(params.project, params.shortName, params.extension, params.folder);
 
@@ -169,18 +179,73 @@ export class ServiceListFilesAdd100554 extends LitElement {
         }
     }
 
-    private createContentNewFile(enhecementModule: IEnhancementModule, template: string, name: string): string {
+    private createContentNewFile(enhecementModule: IEnhancementModule, template: string, name: string, project: number): string {
         let ret = '';
         const grp = 'other'
-        const { project } = mls.actual[5];
-        let newExample = template;
-        newExample = this.changeTagName(newExample, convertFileNameToTag(`_${project}_${name}`));
-        newExample = this.changeClassName(newExample, project as number, name);
-        newExample = this.changeWidget(newExample, project as number, name);
+
+        let newExample = '';
+
+        newExample = this.checkIfAsIcaAndCreateIfNeeded(name, project);
+        if (!newExample) {
+            newExample = template;
+            newExample = this.changeTagName(newExample, convertFileNameToTag(`_${project}_${name}`));
+            newExample = this.changeClassName(newExample, project as number, name);
+            newExample = this.changeWidget(newExample, project as number, name);
+        }
 
         ret = `/// <mls shortName="${name}" project="${project}" enhancement="_${enhecementModule.storFile.project}_${enhecementModule.storFile.shortName}" groupName="${grp}" />\n${newExample}\n`;
         return ret;
     }
+
+    private checkIfAsIcaAndCreateIfNeeded(name: string, project: number) {
+
+        if (project !== 100554) return '';
+        let parts = this.splitStringByUppercase(name);
+        if (parts.length !== 3) return '';
+
+        parts = parts.map((part) => this.capitalizeFirstLetter(part));
+        let [root, subgroup, finalgroup] = parts;
+
+        const desc = getFormComponentsDescription(root, subgroup, finalgroup);
+        if (!desc) return '';
+
+        return this.createTemplateIca(root, subgroup, finalgroup);
+    }
+
+    private splitStringByUppercase(str: string) {
+        return str.split(/(?=[A-Z])/);
+    }
+
+    private capitalizeFirstLetter(str: string) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    private createTemplateIca(root: string, subgroup: string, finalgroup: string) {
+
+        const props = getAttributeDefinitionsLit(root, subgroup, finalgroup);
+        const res = props.map(line => {
+            let cleanedLine = line.replace(/@property\(\{.*\}\)\s*/, ''); // Remove "@property({...}) "
+            cleanedLine = cleanedLine.replace(/=.+?;/, ';'); // Remove tudo após o "=" até o próximo ";"
+            cleanedLine = 'abstract ' + cleanedLine;
+            return cleanedLine;
+        });
+
+        const className = `Ica${root}${subgroup}${finalgroup}`;
+        const extend = 'IcaLitElement';
+        const extendFile = './_100554_icaLitElement';
+        const temp = `
+import { ${extend} } from '${extendFile}';
+
+export abstract class ${className} extends ${extend} {
+    
+    ${res.join('\n\t')}
+
+}
+`
+        return temp;
+
+    }
+
 
     private saveLocalHistory(project: number, shortName: string, extension: string, folder: string): void {
 
@@ -325,6 +390,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
         obj.position = this.position;
         await mls.events.fire([+this.level as any], ['FileAction'], JSON.stringify(obj), 0);
+
     }
 
 

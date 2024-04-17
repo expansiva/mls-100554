@@ -14,15 +14,17 @@ export class ServiceAim100554 extends ServiceBase {
         super();
         this.setEvents();
     }
-    
+
 
     @property() activeTab: ITabType = 'All';
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
+    @property({ reflect: true }) actionToOpen: string = '';
     @property({ reflect: true }) actualServiceOpName: string = '';
     actualServiceOpLevel: number = 0;
 
     render() {
         if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
+        if (this.actionToOpen) this.activeTab = 'Add'
         switch (this.activeTab) {
             case 'All':
                 return this.renderAll();
@@ -31,7 +33,11 @@ export class ServiceAim100554 extends ServiceBase {
             case 'Ref':
                 return this.renderRef();
             case 'Add':
-                return this.renderAdd();
+                const renderAddResult = this.renderAdd();
+                Promise.resolve().then(() => {
+                    this.checkIfHasActionToOpen();
+                });
+                return renderAddResult;
             default:
                 return html``;
         }
@@ -222,6 +228,7 @@ export class ServiceAim100554 extends ServiceBase {
     actions: ResponseFindActions[] = [];
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {
+
         if (!changedProperties.has('activeTab')) return;
         switch (this.activeTab) {
             case 'All':
@@ -242,6 +249,8 @@ export class ServiceAim100554 extends ServiceBase {
                 console.error('invalid activeTab:', this.activeTab);
         }
     }
+
+
 
     sendRefreshRequest() {
         const event = new CustomEvent('refresh-request', { bubbles: true, composed: true });
@@ -268,6 +277,11 @@ export class ServiceAim100554 extends ServiceBase {
             await this.setActions();
             this.requestUpdate();
         }
+        // if (prop === 'actiontoopen' && newValue && oldValue !== newValue) {
+        //     console.info('attributeChangedCallback', newValue)
+        //     this.activeTab = 'Add';
+        //     this.requestUpdate();
+        // }
     }
 
     private async setActions() {
@@ -300,12 +314,15 @@ export class ServiceAim100554 extends ServiceBase {
         else filteredActions = this.actions.filter((item) => item.tagsValid === true && item.levelsValid);
 
         const renderItems = () => {
-            return filteredActions.map((action, index) => html`
-                <div class="ActionItem" @click=${() => this.onAddTask(action, index)}>
+            return filteredActions.map((action, index) => {
+                const dataAction = `_${action.project}_${action.shortName}`;
+                return html`
+                <div data-action=${dataAction} class="ActionItem" @click=${() => this.onAddTask(action, index)}>
                     <div>${action.title}</div>
                     <div>${action.project} - ${action.shortName}</div>
                 </div>
-            `);
+            `
+            })
         }
 
         const showListStyle = { display: !this.useContainerAdd ? 'none' : 'grid' };
@@ -330,6 +347,7 @@ export class ServiceAim100554 extends ServiceBase {
           </div> 
         </div>
         `;
+
     }
 
     onAddTask(action: ResponseFindActions, index: number) {
@@ -439,6 +457,15 @@ export class ServiceAim100554 extends ServiceBase {
         return true;
     }
 
+    private checkIfHasActionToOpen() {
+        if (!this.actionToOpen) return;
+        setTimeout(() => {
+            const action = this.shadowRoot?.querySelector(`.ActionItem[data-action="${this.actionToOpen}"]`) as HTMLElement;
+            if (action) action.click();
+            this.actionToOpen = '';
+        }, 100)
+
+    }
 }
 
 type ITabType = 'All' | 'User' | 'Ref' | 'Add' | 'Loading'

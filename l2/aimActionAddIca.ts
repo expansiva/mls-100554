@@ -58,6 +58,8 @@ export class AimActionAddIca extends AimActionBase {
 
     private handleAdd(): void {
 
+        this.validPrompt = true;
+
         let txtAreaValue:string = '';
         if (!this.textarea) return;
 
@@ -136,7 +138,7 @@ export class AimActionAddIca extends AimActionBase {
             <button @click="${this.handleCancel}">${this.messages.btn_cancel}</button>
             ${this.showPrompt ? html`<button @click="${this.handleAdd}">${this.messages.btn_confirm}</button>` : ''}
         </div>
-        ${this.validPrompt && html`<div style="color:red;"> ${this.messages.error_prompt}</div>`}
+        ${!this.validPrompt ? html`<div style="color:red;"> ${this.messages.error_prompt}</div>` : ''}
 
             `;
     }

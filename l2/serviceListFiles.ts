@@ -63,6 +63,7 @@ export class ServiceListFiles extends ServiceBase {
 
     public onClickLink = (op: string): boolean => {
         //if (this.menu.setMode) this.onServiceClick(true, true);
+
         return false;
     }
 

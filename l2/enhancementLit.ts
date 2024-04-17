@@ -13,6 +13,13 @@ export const example = ``;
 export const getAddNewFileDetails = () =>{
     return [
         {
+            title: "Criar um arquivo em branco",
+            description: "Criar um arquivo em branco em lit 3.",
+            tags: ["lit", "html", "component"],
+            example: ``,
+            aimActionSuggest: ""
+        },
+        {
             title: "Criar um web component em lit",
             description: "Criar um web component em lit 3 ,que será utilizado em páginas.\n O Lit é um framework para criar web componentes rápidos e com atualizações dinâmicas sem ter que repintar toda a tela.\n Após criar o arquivo use a inteligência artificial para preparar o web component.",
             tags: ["lit", "html", "component"],
