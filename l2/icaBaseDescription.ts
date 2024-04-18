@@ -38,7 +38,7 @@ const icaDescriptions: icaBase.FormComponent[] = [
     group: "Forms / Input / Number",
     description: "Permite ao usuário inserir valores numéricos, com suporte a limites mínimo e máximo.",
     prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinação de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usuários digitem um número diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mínimo e máximo pré-definido. Se o usuário inserir um número inválido, uma mensagem de erro vermelha deve aparecer abaixo do componente.",
-    attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxvalue,minvalue,step,placeholder,pattern,errormessage,autofocus"
+    attributes: "hint,label,required,disabled,value,widget,maxvalue,minvalue,step,placeholder,pattern,errormessage,autofocus"
   },
   { group: "Forms / Input / String", description: "Campo para texto livre, podendo configurar validações como tamanho máximo e expressões regulares.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxlength,minlength,placeholder,pattern,errormessage,autofocus,autoCapitalize,autocorrect" },
   { group: "Forms / Input / Boolean", description: "Componente para escolha binária, como switches ou checkboxes, ideal para configurações de sim/não.", attributes: "hint,label,required,disabled,databind,searchdatabind,widget,autofocus" },
@@ -169,8 +169,8 @@ const icaDescriptions: icaBase.FormComponent[] = [
 ];
 
 const attributeDefinitions: icaBase.AttributeDefinition[] = [
-  { path: "hint", lit: "@property({ type: String }) hint: string = '${hint}'; // An optional descriptive hint for the field" },
-  { path: "label", lit: "@property({ type: String }) label: string = '${label}'; // A label to identify this field" },
+  { path: "hint", lit: "@property({ type: String }) hint: string | undefined; // An optional descriptive hint for the field" },
+  { path: "label", lit: "@property({ type: String }) label: string | undefined; // A label to identify this field" },
   { path: "required", lit: "@property({ type: Boolean }) required: boolean = false; // Whether the field is required or optional" },
   { path: "disabled", lit: "@property({ type: Boolean }) disabled: boolean = false; // Whether the field is ready for input or disabled" },
   { path: "databind", lit: "@property({ type: String }) databind: string = ''; // The path in the global JSON to view or change data" },
@@ -182,14 +182,15 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "maxvalue", lit: "@property({ type: Number }) maxvalue: number | undefined = undefined; // Maximum value restriction for the input" },
   { path: "minvalue", lit: "@property({ type: Number }) minvalue: number | undefined = undefined; // Minimum value restriction for the input" },
   { path: "step", lit: "@property({ type: Number }) step: number | undefined = undefined; // The step increment between values" },
-  { path: "placeholder", lit: "@property({ type: String }) placeholder: string = ''; // Placeholder text for the input field" },
-  { path: "pattern", lit: "@property({ type: String }) pattern: string = ''; // A regular expression that the input's value must match" },
-  { path: "errormessage", lit: "@property({ type: String }) errormessage: string = ''; // Custom error message to display when input validation fails" },
+  { path: "placeholder", lit: "@property({ type: String }) placeholder: string| undefined; // Placeholder text for the input field" },
+  { path: "pattern", lit: "@property({ type: String }) pattern: string| undefined; // A regular expression that the input's value must match" },
+  { path: "errormessage", lit: "@property({ type: String }) errormessage: string| undefined; // Custom error message to display when input validation fails" },
   { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean = false; // Whether the field should be automatically focused on page load" },
   { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined = undefined; // Maximum length restriction for the input" },
   { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined = undefined; // Minimum length restriction for the input" },
   { path: "autoCapitalize", lit: "@property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = undefined; // Controls whether and how text input is automatically capitalized as it is entered by the user." },
   { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on' = undefined; // Indicates whether the browser's autocorrect feature is on or off." },
+    { path: "value", lit: "@property({ type: String }) value: string | undefined; // Indicates whether the browser's autocorrect feature is on or off." },
 ];
 
 export function getDescriptionsRootGroup(): string[] {

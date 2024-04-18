@@ -7,10 +7,10 @@ import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 import { getInfoMyService } from "./_100554_aimHelper";
 import { getFormComponentsPrompt, getAttributeDefinitions } from './_100554_icaBaseDescription';
 import { initIcaSelectGroup, IcaSelectGroup } from './_100554_icaSelectGroup';
-
+import { ServiceBase } from './_100554_serviceBase';
+import { ServiceSource100554 } from './_100554_serviceSource';
 
 const myName = '_100554_aimActionAddIca';
-
 export const templateInitStr = "**completion_str**";
 export const templateFinalStr = "**completion_end**";
 
@@ -60,7 +60,7 @@ export class AimActionAddIca extends AimActionBase {
 
         this.validPrompt = true;
 
-        let txtAreaValue:string = '';
+        let txtAreaValue: string = '';
         if (!this.textarea) return;
 
         txtAreaValue = this.textarea.value;
@@ -143,39 +143,14 @@ export class AimActionAddIca extends AimActionBase {
             `;
     }
 
-    private getPrompt(source: string) {
+    private getPrompt(source: string, user: string) {
 
-        let user = '';
-
-        if ((window as any)['aim-action-add-ica-user']) {
-            user = (window as any)['aim-action-add-ica-user'];
-            (window as any)['aim-action-add-ica-user'] = undefined;
-        }
-
-        const prompt2 = `
--System: 
-Usando Typescript e Lit 3.O. Criar o render de um webcomponent, usando o source fornecido abaixo.
-Do source abaixo deve ser mantido as propriedades, a declaração de imports, e a definção da classe.
-Não implementar nenhum styles css.
-A implementação deverá ocorrer apenas entre a demarcação ${templateInitStr} e ${templateFinalStr} .
-
--User:
-${user}
-
--Saida esperada: 
-Um component Lit com sua implementação completa, incluindo render, metodos e eventos, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.
-Todos os metodos e eventos criados, deve ter suas implementações de lógicas definidas, 
-Retornar o código em um único bloco  \`\`\`typescript.
-
--Source: ${source}
-`
-
-        const prompt = `
+        const promptInitial = `
 -System: 
 Usando Typescript e Lit 3.O. Criar o render de um webcomponent, usando o source fornecido abaixo.
 Do source abaixo deve ser mantido as propriedades, a declaração de imports, e a definição da classe.
 Não implementar nenhum styles css.
-Manter a primeira linha ///
+Sempre manter a primeira linha /// <mls
 Completar o source abaixo apenas entre a demarcação ${templateInitStr} e ${templateFinalStr} .
 
 -User:
@@ -184,14 +159,33 @@ ${user}
 -Saida esperada: 
 Um component Lit com sua implementação de renderização completa, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.
 
-Todos as funções devem ser declaradas com um corpo vazio, porém sua implementação de lógica deve ser antecedido um comentários // **implement_here**' e comentários sobre o que o método deve fazer.
+Todos as funções devem ser declaradas com um corpo vazio, porém sua implementação de lógica deve ser antecedido um comentários // **implement_here**' e comentários sobre o que o método deve fazer. Segue exemplo:
+minhaFunçao(){
+    **implement_here**
+}
 
 Remover os seguintes comentários : // ${templateInitStr} e // ${templateFinalStr} do resultado final .
 Retornar o código em um único bloco  \`\`\`typescript.
+Remover os comentários na função quando implementada.
 
 -Source: ${source}
 `
 
+        return promptInitial;
+    }
+
+    private getPromptHTML(source: string) {
+        const prompt = `
+-System: 
+Usando Typescript e Lit 3.O analisar o source do web component abaixo e gerar um html de use cases.
+Não é necessario declarar as tags html, body, head. 
+Somente uma seção com o use cases.
+
+-Saida esperada: 
+Retornar o código em um único bloco  \`\`\`html.
+
+-Source: ${source}
+ .`
         return prompt;
     }
 
@@ -230,16 +224,26 @@ Retornar o código em um único bloco  \`\`\`typescript.
         }
         child.mode = 'processed';
 
+        let user = '';
+
+        if ((window as any)['aim-action-add-ica-user']) {
+            user = (window as any)['aim-action-add-ica-user'];
+            (window as any)['aim-action-add-ica-user'] = undefined;
+        }
+
         this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
             title: 'exec prompt',
             widget: '_100554_aimTaskExecLLM',
             ref: child.ref,
             agent: this.assistant,
-            prompt: this.getPrompt(source),
+            prompt: this.getPrompt(source, user),
             trace: [],
             nextStep: this.prepareTask3.name // danger, loop
         });
+
+        this.requestUpdate();
+
     }
 
     prepareTask3(taskFinishResult: ITaskFinish): void {
@@ -253,27 +257,83 @@ Retornar o código em um único bloco  \`\`\`typescript.
         }
 
         child.mode = 'processed';
+
         this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
             title: 'result',
-            widget: '_100554_aimTaskResultCode',
+            widget: '_100554_aimTaskResultAddIca',
+            ref: child.ref,
             trace: [],
-            _tempResult: result,
-            nextStep: this.endTasks.name // danger, loop
+            result: result,
+            nextStep: this.prepareTask4.name // danger, loop
         });
 
         this.requestUpdate();
     }
 
+    prepareTask4(taskFinishResult: ITaskFinish) {
+
+        const child = taskFinishResult.taskChild;
+        if (taskFinishResult.status === "ok" || taskFinishResult.status === "error" || taskFinishResult.status === "rejected") {
+            return this.endTasks(taskFinishResult);
+        }
+        if (taskFinishResult.status !== "userEvent") throw new Error('Event not prepared');
+        if (taskFinishResult.taskRoot.children.length > 20) throw new Error('Maximum task exceted');
+        if (!taskFinishResult.newPrompt) throw new Error('Prompt invalid');
+
+        const source = taskFinishResult.result;
+        if (!source) {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            child.trace.push('invalid finish , must be notify finish with result field');
+            this.requestUpdate();
+            return;
+        }
+
+        if (taskFinishResult.newPrompt === '[html]') {
+            child.mode = 'processed';
+            this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
+                mode: 'initializing',
+                title: 'exec prompt',
+                widget: '_100554_aimTaskExecLLM',
+                ref: child.ref,
+                agent: this.assistant,
+                prompt: this.getPromptHTML(source),
+                trace: [],
+                result: source,
+                nextStep: this.endTasks.name // looping exec prompt
+            });
+
+            return;
+        }
+
+        child.mode = 'processed';
+        this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
+            mode: 'initializing',
+            title: 'exec prompt',
+            widget: '_100554_aimTaskExecLLM',
+            ref: child.ref,
+            agent: this.assistant,
+            prompt: this.getPrompt(source, taskFinishResult.newPrompt as string),
+            trace: [],
+            nextStep: this.prepareTask3.name // looping exec prompt
+        });
+
+    }
+
 
     endTasks(taskFinishResult: ITaskFinish): void {
-
         const { taskChild, taskRoot, status, result } = taskFinishResult;
         if (status === 'error') taskChild.mode = 'error';
         else if (status === 'rejected') taskChild.mode = 'processed';
         else if (status === 'ok') {
             taskChild.mode = 'processed';
-            // this.setResultInEditor(result || '', taskRoot);
+            if (taskChild.widget === '_100554_aimTaskExecLLM') {
+                const res = taskRoot.children.filter((ch) => ch.widget === '_100554_aimTaskResultAddIca');
+                const lastRes = res.pop();
+                const result = lastRes ? lastRes.result : '';
+                if (!result) return;
+                this.setResultInEditor(this.extractTS(result), this.extractHTML(taskChild.result || ''));
+            } else this.setResultInEditor(result);
         }
 
         this.mode = taskFinishResult.taskRoot.mode = taskChild.mode;
@@ -281,26 +341,87 @@ Retornar o código em um único bloco  \`\`\`typescript.
         updateTaskOnServer(taskFinishResult.taskIndex);
     }
 
-    messages = {
-        "prompt_title": "Create a well-typed web component using TypeScript and Lit 3 according to the requirements provided. This component should be crafted for an experienced developer, emphasizing clarity and efficiency in the code. There is no need for extensive explanations, but ensure any in-code comments are written in English. The component should integrate the specified properties and adhere to the user's request as outlined.",
+    private setResultInEditor(value: string, valueHTML?: string) {
 
-        "prompt_specifications": "Specifications",
-        "prompt_framework": "Framework: Utilize Lit 3 for the component development, leveraging its reactive update cycle and efficient rendering capabilities.",
-        "prompt_language": "Language: The component must be written in TypeScript, ensuring strong typing for properties, functions, and any other relevant constructs. This will enhance code quality and maintainability.",
-        "prompt_property": "Properties: Using properties with according with source below",
-        "prompt_user": "User",
-        "prompt_comments": "Comments: Ensure all comments within the code are concise and written in English. These should guide the developer through any complex logic or important considerations without overburdening the code with unnecessary explanations.",
-        "prompt_objective": "The goal is to design a component that not only meets the functional requirements but also aligns with best practices in web development, offering scalability, ease of integration, and a user-friendly interface.",
-        "prompt_expected_output": "Expected output format: Return the newly created component in the TS language, in a single block. Code comments should be in English, but keep existing comments",
+        const activeOpService = getActiveOpServiceIfIsValid(this) as ServiceSource100554;
+        if (!activeOpService) {
+            window.collabMessages.add('The service in the opposite position does not refer to this action', 'error')
+            return false;
+        };
+
+        if (value) activeOpService.setEditorValue(value);
+        if (valueHTML) activeOpService.setEditorHTMLValue(valueHTML);
+        return true;
+    }
+
+    private extractHTML(src: string) {
+        const regex = /```html([\s\S]+?)```/g;
+        const matches = src.match(regex);
+        const contents = [];
+        let ret = src;
+        if (matches) {
+            for (const m of matches) {
+                const conteudo = m.replace(/```html|```/g, '').trim();
+                contents.push(conteudo);
+            }
+            ret = contents[0];
+        }
+        return ret;
+    }
+
+    private extractTS(src: string) {
+        const regex = /```typescript([\s\S]+?)```/g;
+        const matches = src.match(regex);
+        const contents = [];
+        let ret = src;
+        if (matches) {
+            for (const m of matches) {
+                const conteudo = m.replace(/```typescript|```/g, '').trim();
+                contents.push(conteudo);
+            }
+            ret = contents[0];
+        }
+        return ret;
+    }
+
+    messages = {
+        "prompt_ts_title_1": "Usando Typescript e Lit 3.O. Criar o render de um webcomponent, usando o source fornecido abaixo.",
+        "prompt_ts_title_2": "Do source abaixo deve ser mantido as propriedades, a declaração de imports, e a definição da classe.",
+        "prompt_ts_title_3": "Não implementar nenhum styles css.",
+        "prompt_ts_title_4": "Sempre manter a primeira linha /// <mls",
+        "prompt_ts_title_5": "Completar o source abaixo apenas entre a demarcação:",
+
+        "prompt_ts_output_1": "Um component Lit com sua implementação de renderização completa, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.",
+        "prompt_ts_output_2": "Um component Lit com sua implementação de renderização completa, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.",
+        "prompt_ts_output_3": "Todos as funções devem ser declaradas com um corpo vazio, porém sua implementação de lógica deve ser antecedido um comentários // **implement_here**' e comentários sobre o que o método deve fazer. Segue exemplo:",
+        "prompt_ts_output_4": "Remover os seguintes comentários do resultado final:",
+        "prompt_ts_output_5": "Retornar o código em um único bloco  \`\`\`typescript",
+        "prompt_ts_output_6": "Remover os comentários na função quando implementada.",
+
 
         "template_title": "Irá verificar o grupo selecionado e criar um novo componente Lit",
         "textarea_placelholder": "Entre com o prompt aqui",
         "btn_cancel": "Cancelar",
         "btn_confirm": "Confirmar",
         "error_prompt": "Por favor, ajuste o prompt para suas necessidades",
-        
+
 
 
     }
 
+}
+
+export function isValidRef(taskRoot: cbe.ITaskRoot, activeOpService: ServiceBase) {
+    const actualRef = activeOpService.getActualRef();
+    const taskWithRef = taskRoot.children.find((task) => task.widget === "aimTaskPrepareIcaSource");
+    if (!taskWithRef) return false;
+    return taskWithRef.ref === actualRef;
+}
+
+export function getActiveOpServiceIfIsValid(el: HTMLElement) {
+    const info = getInfoMyService(el);
+    if (!info) return undefined;
+    const activeServiceOp: ServiceBase = info.actServiceOp;
+    if (activeServiceOp.tagName !== 'SERVICE-SOURCE-100554') return undefined;
+    return activeServiceOp;
 }

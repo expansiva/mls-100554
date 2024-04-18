@@ -15,7 +15,6 @@ export class ServiceAim100554 extends ServiceBase {
         this.setEvents();
     }
 
-
     @property() activeTab: ITabType = 'All';
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
     @property({ reflect: true }) actionToOpen: string = '';
@@ -55,10 +54,6 @@ export class ServiceAim100554 extends ServiceBase {
     }
 
     get invertedPosition() { return this.position === 'left' ? 'right' : 'left' };
-
-    // createRenderRoot() {
-    //     return this; // dont use shadow root
-    // }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
     static message = `[[mls_DS_messages_local_language]]`; // todo: test
@@ -242,6 +237,7 @@ export class ServiceAim100554 extends ServiceBase {
             case 'Ref':
                 return;
             case 'Add':
+
                 return;
             case 'Loading':
                 return;
@@ -267,6 +263,7 @@ export class ServiceAim100554 extends ServiceBase {
             this.actualServiceOpName = '_100554_ServiceSource';
             this.actualServiceOpLevel = 2;
         }
+        await readTasksFromServer('all', '')
         await this.setActions();
         this.requestUpdate();
     }
@@ -277,11 +274,6 @@ export class ServiceAim100554 extends ServiceBase {
             await this.setActions();
             this.requestUpdate();
         }
-        // if (prop === 'actiontoopen' && newValue && oldValue !== newValue) {
-        //     console.info('attributeChangedCallback', newValue)
-        //     this.activeTab = 'Add';
-        //     this.requestUpdate();
-        // }
     }
 
     private async setActions() {

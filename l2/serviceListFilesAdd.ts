@@ -200,12 +200,16 @@ export class ServiceListFilesAdd100554 extends LitElement {
     private checkIfAsIcaAndCreateIfNeeded(name: string, project: number) {
 
         if (project !== 100554) return '';
+        if (!name.startsWith('ica')) return '';
+
         let parts = this.splitStringByUppercase(name);
-        if (parts.length < 3) return '';
+        if (parts.length < 4) return '';
 
         parts = parts.map((part) => this.capitalizeFirstLetter(part));
 
-        let root, subgroup, finalgroup = ''
+        let ica, root, subgroup, finalgroup = ''
+
+        ica = parts.shift() as string;
         root = parts.shift() as string;
         subgroup = parts.shift() as string;
         finalgroup = parts.join(' ') as string;

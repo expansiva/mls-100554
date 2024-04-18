@@ -16,6 +16,8 @@ export class ServiceSave extends ServiceBase {
         super();
         this.setEvents();
     }
+    
+    
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
@@ -348,7 +350,7 @@ export class ServiceSave extends ServiceBase {
                 if (
                     /*(!file.inLocalStorage && file.status === 'nochange') ||
                     file.status === 'nochange' ||*/
-                    !file.inLocalStorage ||
+                    (!file.inLocalStorage && file.status !== 'deleted') ||
                     file.project === 0 ||
                     file.project !== mls.actual[5].project) continue;
 

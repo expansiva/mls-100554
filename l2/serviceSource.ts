@@ -96,6 +96,31 @@ export class ServiceSource100554 extends ServiceBase {
         this.c2?.setAttribute('msize', this.msize);
     }
 
+    public getEditorValue() {
+        if (!this._ed1) return '';
+        const model = this._ed1.getModel();
+        if (!model) return '';
+        return model.getValue();
+    }
+
+    public setEditorValue(val: string) {
+        if (!this._ed1) return false;
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const uri = this.getUri(`_${project}_${shortName}`, '.ts');
+        let model = monaco.editor.getModel(uri);
+        if (!model) return false;
+        return model.setValue(val);
+    }
+
+    public setEditorHTMLValue(val: string) {
+        if (!this._ed1) return false;
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const uri = this.getUri(`_${project}_${shortName}`, '.html');
+        let model = monaco.editor.getModel(uri);
+        if (!model) return false;
+        return model.setValue(val);
+    }
+
     @query('mls-editor-100529')
     private c2: HTMLElement | undefined;
 
@@ -368,6 +393,7 @@ export class ServiceSource100554 extends ServiceBase {
 				\n// typescript new file\n`;
             await this.createModelTS1(fileAction.newshortName as string, fileAction.newProject as number,
                 newTSSource, true);
+            await this.createOrShowModelHTML(false);
             this.showActiveModel();
             this.isNewFile = false;
         };
@@ -590,7 +616,7 @@ export class ServiceSource100554 extends ServiceBase {
     private async updateModelStatus(model1: mls.l2.editor.IMFile, changed: boolean): Promise<void> {
         if (model1.project === 0) changed = true; // always in localstorage
         model1.changed = changed;
-        
+
         const cr: mls.l2.editor.ICompilerResult = await mls.l2.editor.getCompilerResultTS({ project: model1.project, shortName: model1.shortName }, true);
         let hasError = cr.errors.length > 0;
         model1.error = hasError;
