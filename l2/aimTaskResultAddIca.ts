@@ -7,7 +7,6 @@ import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_coll
 import { getActiveOpServiceIfIsValid, isValidRef } from './_100554_aimActionAddIca';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
-
 @customElement('aim-task-result-add-ica-100554')
 export class AimTaskResulAddIca extends AimTaskBase {
 
@@ -40,7 +39,6 @@ export class AimTaskResulAddIca extends AimTaskBase {
         if (this.taskChild.mode !== 'error' && this.taskChild.mode !== 'processed') {
             this.modeInternal = this.taskRoot.mode = this.taskChild.mode = 'waiting for user';
         }
-
         this.openMe();
 
     }
@@ -81,11 +79,9 @@ export class AimTaskResulAddIca extends AimTaskBase {
         const { contentTS, contentsAfterTS, contentsBeforeTS } = this.extractBlocks(body);
         this.result = contentTS;
 
-        const methodsToImplements = this.getFcToImplements(this.result);
-
         return html`
         <details @click=${this.handleClick}>
-            <summary>View TS Result</summary>
+            <summary>${this.messages.title_result}</summary>
             <div style=${(!this.isTryAgain && !this.isAccept) ? 'display: block' : 'display:none'}>
                 <div>${contentsBeforeTS}</div>
                 <div style='margin: 10px;'>
@@ -98,33 +94,48 @@ export class AimTaskResulAddIca extends AimTaskBase {
                 </div> 
                 <div>${contentsAfterTS}</div>
             </div>
+            ${this.isAccept ? this.renderAccept(): ''}
+            ${this.isTryAgain ? this.renderTryAgain(): ''}
 
-            <div style=${this.isAccept ? 'display: block' : 'display:none'}>
+
+        </details>
+        `;
+    }
+
+    private renderAccept() {
+        return html`
+            <div>
                 <div>
-                    <div>Deseja gerar o .HTML para o componente ?</div>
+                    <div>${this.messages.accept_answer}</div>
                     <div style='margin: 10px;'>
-                        
                         <div class="buttonGroup">
-                            <button @click="${this.handleCancelAcceptHTML}">Não</button>
-                            <button @click="${this.handleConfirmAcceptHTML}">Sim</button>
+                            <button @click="${this.handleCancelAcceptHTML}">${this.messages.btn_no}</button>
+                            <button @click="${this.handleConfirmAcceptHTML}">${this.messages.btn_yes}</button>
                         </div>
                     </div> 
                 </div> 
             </div>
+        `
+    }
 
-            <div style=${this.isTryAgain ? 'display: block' : 'display:none'}>
+    private renderTryAgain() {
+        const methodsToImplements = this.getFcToImplements(this.result);
+        return html`
+            <div>
                 <div>
-                    <ul>
-                        ${methodsToImplements.map((met) => html`
-                            <li>${met}</li>
+                    <label>${this.messages.tryagain_title_1}</label>
+                    <div class="prompt-suggestion">
+                        ${methodsToImplements.map((prompt) => html`
+                            <span @click=${this.onSuggestClick}>
+                                <span >${prompt}</span>
+                            </span>
                         `)}
-                    </ul>
-                    <div>Por favor digite as mudanças necessárias abaixo.</div>
-
+                    </div>
+                    <div>${this.messages.tryagain_title_2}</div>
                     <div style='margin: 10px;'>
                         <div>
                             <label>Prompt:</label>
-                            <textarea rows="5" placeholder="Digite aqui seu prompt" style="width:100%"></textarea>
+                            <textarea rows="5" placeholder=${this.messages.tryagain_placeholder} style="width:100%"></textarea>
                         </div>
                         <br>
                         <div class="buttonGroup">
@@ -134,8 +145,29 @@ export class AimTaskResulAddIca extends AimTaskBase {
                     </div> 
                 </div> 
             </div>
-        </details>
-        `;
+            `
+    }
+
+    messages = {
+        "title_result": "Ver typescript resultado",
+        "tryagain_title_1": "Métodos para implementar",
+        "tryagain_title_2": "Por favor digite as mudanças necessárias abaixo.",
+        "tryagain_placeholder": "Digite aqui seu prompt.",
+        "accept_answer": "Deseja gerar o .HTML para o componente ?",
+        "btn_confirmar": "Confirmar",
+        "btn_cancelar": "Cancelar",
+        "btn_yes": "Sim",
+        "btn_no": "Não",
+    }
+
+    private onSuggestClick(e: MouseEvent) {
+        if (!this.textarea) return;
+        let text: string = '';
+        const target = e.target as HTMLElement;
+        const txtEl = target.querySelector('span');
+        if (!txtEl) text = target.innerText;
+        else text = txtEl.innerText;
+        this.textarea.value = 'implement  ' + text;
     }
 
     private getFcToImplements(result: string) {
@@ -149,8 +181,13 @@ export class AimTaskResulAddIca extends AimTaskBase {
                 if (i < 0) continue;
                 const fcLine = lines[previLine];
                 const regex = /^\s*(\w+)\s*\(/;
+                const regex2 = /(?:private\s+)?(\b\w+\b)\s*\(/g;
                 const match = regex.exec(fcLine);
-                const fcName = match ? match[1] : null;
+                let fcName = match ? match[1] : null;
+                if(!fcName){
+                    const match2 = regex2.exec(fcLine);
+                    fcName = match2 ? match2[1] : null;
+                }
                 if (fcName) methods.push(fcName);
             }
         };
