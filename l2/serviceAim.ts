@@ -237,7 +237,7 @@ export class ServiceAim100554 extends ServiceBase {
             case 'Ref':
                 return;
             case 'Add':
-
+                this.setActions().then(() => this.sendRefreshRequest());
                 return;
             case 'Loading':
                 return;
@@ -245,7 +245,6 @@ export class ServiceAim100554 extends ServiceBase {
                 console.error('invalid activeTab:', this.activeTab);
         }
     }
-
 
 
     sendRefreshRequest() {
@@ -263,9 +262,10 @@ export class ServiceAim100554 extends ServiceBase {
             this.actualServiceOpName = '_100554_ServiceSource';
             this.actualServiceOpLevel = 2;
         }
-        await readTasksFromServer('all', '')
+        await readTasksFromServer('all', '').then(() => {
+            this.requestUpdate();
+        });
         await this.setActions();
-        this.requestUpdate();
     }
 
     async attributeChangedCallback(prop: string, oldValue: string, newValue: string) {
