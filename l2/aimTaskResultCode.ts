@@ -46,34 +46,8 @@ export class AimTaskResultCode extends AimTaskBase {
     private onAccept() {
         const info = getInfoMyService(this);
         if (!info || !info.actServiceOp) return;
-
         if (info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554') return;
-        info.actServiceOp._ed1.getModel().setValue(this.result)
-
-    }
-
-    private onToogleDetails(event: MouseEvent) {
-
-        let detailsElement = event.target as HTMLDetailsElement;
-        detailsElement = detailsElement.closest('details') as HTMLDetailsElement;
-        if (!detailsElement || !this.codeDif) return;
-        if (!detailsElement.open) {
-            const info = getInfoMyService(this);
-            if (!info || !info.actServiceOp) return;
-
-            let origem = '';
-
-            if (info.actServiceOp.tagName === 'SERVICE-SOURCE-100554') {
-                origem = info.actServiceOp._ed1.getModel().getValue();
-            };
-
-            // this.codeDif.setInitialHistories(origem, this.result);
-
-        }
-
-
-
-
+        info.actServiceOp.setEditorValue(this.result);
     }
 
     private extractScript(src: string) {

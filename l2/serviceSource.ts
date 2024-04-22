@@ -109,7 +109,8 @@ export class ServiceSource100554 extends ServiceBase {
         const uri = this.getUri(`_${project}_${shortName}`, '.ts');
         let model = monaco.editor.getModel(uri);
         if (!model) return false;
-        return model.setValue(val);
+        // model.setValue(val);
+        this.setValueInModeKeepingUndo(model, val);
     }
 
     public setEditorHTMLValue(val: string) {
@@ -118,7 +119,8 @@ export class ServiceSource100554 extends ServiceBase {
         const uri = this.getUri(`_${project}_${shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
         if (!model) return false;
-        return model.setValue(val);
+        // return model.setValue(val);
+        this.setValueInModeKeepingUndo(model, val);
     }
 
     @query('mls-editor-100529')
@@ -146,6 +148,25 @@ export class ServiceSource100554 extends ServiceBase {
         if (!activeModel) return;
         const viewState = (activeModel as any)[`${this.position}_viewState`];
         if (viewState) this._ed1.restoreViewState(viewState);
+    }
+
+    private setValueInModeKeepingUndo(model: monaco.editor.ITextModel, val: string) {
+        const fullRange = model.getFullModelRange();
+        const novoTexto = val;
+        const linhas = novoTexto.split('\n');
+
+        const operations = [{
+            range: fullRange,
+            text: '',
+            forceMoveMarkers: true
+        }, {
+            range: { startLineNumber: 1, startColumn: 1 },
+            text: linhas.join('\n'),
+            forceMoveMarkers: true
+        }];
+
+        model.pushEditOperations([], operations as any, () => []);
+        this._ed1?.setPosition({ lineNumber: 1, column: 1 });
     }
 
     private openRepo() {
