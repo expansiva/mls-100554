@@ -459,8 +459,8 @@ Analise  o prompt do usuario abaixo, e classifique se está de acordo com o conte
 O retorno deve ser um objeto Json, no seguinte modelo: 
  {
     "isPromptValid": "yes" | "no" | "more information"
-    "list":["do somenthing", "expect this"], // retornar lista de sujestões para melhorar o prompt em caso de 'more information'o - opcional
-    "olderPrompt": "", // retornar prompt enviado pelo usuario - opcional
+    "list":["do somenthing", "expect this"], // retornar lista de sujestões para melhorar o prompt em caso de 'more information' - opcional
+    "olderPrompt": "", // retornar prompt enviado pelo usuario em caso de 'more information' - opcional
  }
 
 isPromptValid:
