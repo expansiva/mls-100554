@@ -81,7 +81,9 @@ export class AimActionAddIca extends AimActionBase {
             trace: [new Date().toISOString() + ': trask created at ']
         }
         tasks.unshift(this.taskRoot);
-        this.prepareTask1(this.taskRoot);
+
+        //this.prepareTask1(this.taskRoot);
+        this.prepareCheckTask1(this.taskRoot);
         this.dispatchEvent(new CustomEvent('finished-add-task-root', {
             detail: this.taskRoot, bubbles: true, composed: true
         }));
@@ -132,24 +134,83 @@ export class AimActionAddIca extends AimActionBase {
             `;
     }
 
-    prepareTask1(taskRoot: cbe.ITaskRoot): void {
+    prepareCheckTask1(taskRoot: cbe.ITaskRoot): void {
 
+        this.mode = taskRoot.mode = 'in progress';
+
+        let user = '';
+        if ((window as any)['aim-action-add-ica-user']) user = (window as any)['aim-action-add-ica-user'];
+        
+        this.addTaskAndWaitForCompletion(taskRoot, {
+            mode: 'initializing',
+            title: 'verify prompt',
+            widget: '_100554_aimTaskExecLLM',
+            agent: this.assistant,
+            ref: 'testeRef',
+            prompt: this.getPromptCheckPrompt(user),
+            trace: [],
+            nextStep: this.prepareCheckTask2.name // danger, loop
+        });
+
+        this.requestUpdate();
+    }
+
+    prepareCheckTask2(taskFinishResult: ITaskFinish): void {
+
+        const child = taskFinishResult.taskChild;
+        const result: string = child.result || '';
+        if (taskFinishResult.status === 'error' || !result) {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            return;
+        }
+
+        child.mode = 'processed';
+
+        this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
+            mode: 'initializing',
+            title: 'improve prompt',
+            widget: '_100554_aimTaskResultAddIcaPrompt',
+            result: child.result,
+            trace: [],
+            nextStep: this.prepareTask1.name // danger, loop
+        });
+
+        this.requestUpdate();
+
+    }
+
+    prepareTask1(taskFinishResult: ITaskFinish): void {
+
+        const child = taskFinishResult.taskChild;
+        if (taskFinishResult.status === 'error') {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            return;
+        }
+
+        child.mode = 'processed';
         let obj = {};
         if ((window as any)['aim-action-add-ica-file-info']) {
             obj = (window as any)['aim-action-add-ica-file-info'];
             (window as any)['aim-action-add-ica-file-info'] = undefined;
         }
 
-        this.mode = taskRoot.mode = 'in progress';
-        this.addTaskAndWaitForCompletion(taskRoot, {
+        if (taskFinishResult.status === 'userEvent' && taskFinishResult.newPrompt) {
+            (window as any)['aim-action-add-ica-user'] = taskFinishResult.newPrompt;
+        }
+
+        // this.mode = taskFinishResult.taskRoot.mode = 'in progress';
+
+        child.mode = 'processed';
+        this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
             title: 'prepare source',
             widget: '_100554_aimTaskPrepareIcaSource',
             prompt: JSON.stringify(obj),
             trace: [],
-            nextStep: this.prepareTask2.name // danger, loop
+            nextStep: this.prepareTask2.name  // danger, loop
         });
     }
+
 
     prepareTask2(taskFinishResult: ITaskFinish): void {
 
@@ -325,11 +386,9 @@ export class AimActionAddIca extends AimActionBase {
     private getPrompt(source: string, user: string) {
 
         const promptInitial = `
--System: 
-${this.messages.prompt_ts_title_1}
--User:
-${user}
+### system ###: 
 
+${this.messages.prompt_ts_title_1}
 -Saida esperada: 
 1. ${this.messages.prompt_ts_output_1}
 2. ${this.messages.prompt_ts_output_2}
@@ -345,6 +404,10 @@ minhaFunçao(){
 
 9. ${this.messages.prompt_ts_output_9}
 
+### user ###:
+
+${user}
+
 -Source: ${source}
 `
         return promptInitial;
@@ -353,10 +416,8 @@ minhaFunçao(){
     private getPrompt2(source: string, user: string) {
 
         const promptInitial = `
--System: 
+### system ###: 
 ${this.messages.prompt_fc_title_1}
--User:
-${user}
 
 -Saida esperada: 
 1. ${this.messages.prompt_fc_output_1}
@@ -369,6 +430,9 @@ ${user}
 9. ${this.messages.prompt_ts_output_9}
 10. ${this.messages.prompt_fc_output_2}
 
+### user ###:
+${user}
+
 -Source: ${source}
 `
         return promptInitial;
@@ -376,7 +440,7 @@ ${user}
 
     private getPromptHTML(source: string) {
         const prompt = `
--System: 
+### system ###: 
 ${this.messages.prompt_html_title}
 
 -Saida esperada: 
@@ -384,6 +448,37 @@ ${this.messages.prompt_html_output}
 
 -Source: ${source}
  .`
+        return prompt;
+    }
+
+    private getPromptCheckPrompt(promptUser: string) {
+        const prompt = `
+### system ###
+Analise  o prompt do usuario abaixo, e classifique se está de acordo com o contexto abaixo e retorne sua classificação.
+
+O retorno deve ser um objeto Json, no seguinte modelo: 
+ {
+    "isPromptValid": "yes" | "no" | "more information"
+    "list":["do somenthing", "expect this"], // retornar lista de sujestões para melhorar o prompt em caso de 'more information'o - opcional
+    "olderPrompt": "", // retornar prompt enviado pelo usuario - opcional
+ }
+
+isPromptValid:
+- 'yes' => se o prompt estiver dentro do contexto.
+- 'more information' => se o prompt estiver dentro do contexto porém não atender alguns dos requisitos do contexto
+- 'no'  => se o prompt estiver fora de contexto.
+
+Contexto:
+Os web components serão usados em navegadores modernos, e nesta etapa focaremos apenas no corpo principal do TypeScript, sem CSS.
+Requisitos:
+1. definição de qual tipo de componente.
+2. definição o que o componente deve fazer.
+3. definições inicias do uso de quais propriedades.
+4. definições comportamentos específicos.
+
+### user ###
+${promptUser} 
+ `
         return prompt;
     }
 

@@ -139,8 +139,8 @@ export class AimTaskResulAddIca extends AimTaskBase {
                         </div>
                         <br>
                         <div class="buttonGroup">
-                            <button @click="${this.handleCancelTryAgain}">Cancelar</button>
-                            <button @click="${this.handleConfirmTryAgain}">Confirmar</button>
+                            <button @click="${this.handleCancelTryAgain}">${this.messages.btn_cancelar}</button>
+                            <button @click="${this.handleConfirmTryAgain}">${this.messages.btn_confirmar}</button>
                         </div>
                     </div> 
                 </div> 

@@ -110,7 +110,7 @@ export class ServiceSource100554 extends ServiceBase {
         let model = monaco.editor.getModel(uri);
         if (!model) return false;
         // model.setValue(val);
-        this.setValueInModeKeepingUndo(model, val);
+        this.setValueInModeKeepingUndo(model, val, true);
     }
 
     public setEditorHTMLValue(val: string) {
@@ -120,7 +120,7 @@ export class ServiceSource100554 extends ServiceBase {
         let model = monaco.editor.getModel(uri);
         if (!model) return false;
         // return model.setValue(val);
-        this.setValueInModeKeepingUndo(model, val);
+        this.setValueInModeKeepingUndo(model, val, false);
     }
 
     @query('mls-editor-100529')
@@ -150,23 +150,29 @@ export class ServiceSource100554 extends ServiceBase {
         if (viewState) this._ed1.restoreViewState(viewState);
     }
 
-    private setValueInModeKeepingUndo(model: monaco.editor.ITextModel, val: string) {
-        const fullRange = model.getFullModelRange();
-        const novoTexto = val;
-        const linhas = novoTexto.split('\n');
+    private setValueInModeKeepingUndo(model: monaco.editor.ITextModel, val: string, checkFirstLine: boolean) {
+        let fullRange = model.getFullModelRange();
+        let newText = val;
 
+        if (checkFirstLine && !(val.trim().startsWith('/// <mls shortName'))) {
+            const firstLine = model.getLineContent(1);
+            newText = firstLine + '\n' + newText;
+        }
+
+        const lines = newText.split('\n');
         const operations = [{
             range: fullRange,
             text: '',
             forceMoveMarkers: true
         }, {
             range: { startLineNumber: 1, startColumn: 1 },
-            text: linhas.join('\n'),
+            text: lines.join('\n'),
             forceMoveMarkers: true
         }];
 
         model.pushEditOperations([], operations as any, () => []);
         this._ed1?.setPosition({ lineNumber: 1, column: 1 });
+
     }
 
     private openRepo() {
