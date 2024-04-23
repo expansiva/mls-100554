@@ -6,9 +6,6 @@ import { validateTagName, validateRender } from './_100554_validateLit'
 import { setCodeLens } from './_100554_codeLensLit'
 import { injectStyle, getCssWithoutTag } from './_100554_processCssLit'
 
-export const description = "Use this enhancement for model using lit - a simple and fast web component.\nRef: https://lit.dev/"
-
-export const example = ``;
 
 export const getAddNewFileDetails = () =>{
     return [
@@ -109,9 +106,6 @@ export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> 
     }
 };
 
- export const getPromptDefault = (): string => {
-     return ``;
- }
 
 export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
     await injectStyle(mfile, 0);

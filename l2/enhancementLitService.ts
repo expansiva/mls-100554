@@ -2,16 +2,11 @@
 import {
     getDesignDetails as getDesignDetailsDefault,
     getDefaultHtmlExamplePreview as getDefaultHtmlExamplePreviewDefault,
-    getPromptDefault as getPromptDefaultDefault,
     onAfterChange as onAfterChangeDefault,
     onAfterCompile as onAfterCompileDefault,
     requires as requiresDefault,
     setStylesProcessed as setStylesProcessedDefault,
 } from './_100554_enhancementLit';
-
-export const description = "Use this enhancement for create a service collab using lit"
-
-export const example = ``;
 
 export const getAddNewFileDetails = () => {
     return [
@@ -86,10 +81,6 @@ export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.en
 export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
     return onAfterChangeDefault(mfile);
 };
-
-export const getPromptDefault = (): string => {
-    return getPromptDefaultDefault();
-}
 
 export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
     return onAfterCompileDefault(mfile);
