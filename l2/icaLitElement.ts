@@ -10,14 +10,14 @@ const state1 = new IcaState();
 
 // Declare a global state structure
 interface GlobalState {
-    [key: string]: any;
+  [key: string]: any;
 }
 
 // Extend the Window interface
 declare global {
-    interface Window {
-        globalState: GlobalState;
-    }
+  interface Window {
+    globalState: GlobalState;
+  }
 }
 
 /**
@@ -52,30 +52,32 @@ function setPathValue(obj: { [key: string]: any }, path: string, value: any): vo
  * Custom decorator to bind properties either to static data or dynamically from CollabState.
  * @param options - Property options including type and default value.
  */
-function propertyDataSource(options?: PropertyDeclaration) {
+export function propertyDataSource(options?: PropertyDeclaration) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (proto: IcaLitElement, propName: PropertyKey): any => {
+  return (proto: any, propName: PropertyKey): any => {
     // Define a Lit property with provided options.
     property(options)(proto, propName);
     // const { type } = options;
     const key = String(propName);
-    if (proto.hasOwnProperty('stateKeys')) proto.stateKeys.add(key);    
 
     Object.defineProperty(proto, propName, {
       get() {
+
         const attrValue = this.getAttribute(key);
         if (attrValue && attrValue.includes('{{') && attrValue.includes('}}')) {
           const stateKey = attrValue.replace(/[{{}}]/g, '').trim();
           return getPathValue(window.globalState, stateKey);
         }
         // Default to internal property value
-        return this[`_${key}`];           
+        return this[`_${key}`];
       },
       set(value) {
+
         if (typeof value === 'string' && value.startsWith('{{') && value.endsWith('}}')) {
           // initialization ex selectedvalue="{{globalState.users[0].sex}}"
           // dynamic data from json
           const stateKey = value.replace(/[{{}}]/g, '').trim();
+          if (this.hasOwnProperty('stateKeys')) this.stateKeys.add(key + ';' + stateKey);
           this[`_${key}`] = getPathValue(window.globalState, stateKey);
         } else if (typeof value === 'string' && ((value.startsWith('[') || value.startsWith('{')) && (value.endsWith(']') || value.endsWith('}')))) {
           // initialization ex options="[{ key: 'm', value: 'male' }, { key: 'f', value: 'female' }, { key: 'o', value: 'other' }]"
@@ -86,10 +88,11 @@ function propertyDataSource(options?: PropertyDeclaration) {
           // Update both internal property value and globalState if necessary and notify state changes
           if (this.hasAttribute(key) && this.getAttribute(key).includes('{{') && this.getAttribute(key).includes('}}')) {
             const dynamicKey = this.getAttribute(key).replace(/[{{}}]/g, '').trim();
-            state1.setState(dynamicKey, value); // Notify state changes
             setPathValue(window.globalState, dynamicKey, value); // change in json
+            this[`_${key}`] = value;
+            state1.setState(key + ';' + dynamicKey, value); // Notify state changes
           }
-          this[`_${key}`] = value;
+          else this[`_${key}`] = value;
         }
         this.requestUpdate();
       }
@@ -123,7 +126,7 @@ export class IcaLitElement extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    if (isTrace) console.info(`connectedCallback, subscribe fields: ${this.stateKeys}`);
+    if (isTrace) console.info(`connectedCallback, subscribe fields: ${Array.from(this.stateKeys)}`);
     state1.subscribe(Array.from(this.stateKeys), this);
   }
 
@@ -138,16 +141,19 @@ export class IcaLitElement extends LitElement {
    * @param value - The new value of the state.
    */
   handleIcaStateChange(key: string, value: any): void {
+
     function isEqual(newValue: any, oldValue: any) {
       return JSON.stringify(newValue) === JSON.stringify(oldValue);
     }
 
-    if (!this.stateKeys.has(key)) return;
-    const ob1: {[key: string]: any} = this;
-    const propValue: any = ob1[`_${key}`];
-    if (ob1.hasAttribute(key) && !isEqual(value, propValue)) {
-      ob1[key] = value; // Ensure this triggers the setter with potential side effects
+    const propName: string = key.split(';')[0];
+    const ob1: { [key: string]: any } = this;
+    if (!ob1.hasAttribute(propName) || (!this.stateKeys.has(key))) return;
+    const propValue: any = ob1[`_${propName}`];
+    if (!isEqual(value, propValue)) {
+      ob1[`_${propName}`] = value; // Ensure this triggers the setter with potential side effects
+      this.requestUpdate();
     }
-  }  
+  }
 
 }
