@@ -1,9 +1,11 @@
 /// <mls shortName="wcInputNumberWithButtons" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { IcaFormsInputNumber } from './_100554_icaFormsInputNumber';
+import { propertyDataSource } from './_100554_icaLitElement';
 
 @customElement('wc-input-number-with-buttons-100554')
-export class WCInputNumber extends LitElement {
+export class WCInputNumber extends IcaFormsInputNumber {
 
     static styles = css`
     :host {
@@ -53,16 +55,19 @@ export class WCInputNumber extends LitElement {
         color: red;
     }
     `
+   @propertyDataSource({ type: String }) datasource: number | undefined;
 
-    @property({ type: String }) name: string = '';
+    @property({ type: String }) name: string | undefined;
 
-    @property({ type: String }) label: string = ':';
+    @property({ type: String }) placeholder: string | undefined;
+
+    @property({ type: String }) label: string | undefined;
 
     @property({ type: String }) widget: string = '';
 
-    @property({ type: String }) pattern: string = '';
+    @property({ type: String }) pattern: string | undefined;
 
-    @property({ type: String }) errormessage: string = '';
+    @property({ type: String }) errormessage: string | undefined;
 
     @property({ type: Number }) maxvalue: number | undefined;
 
@@ -107,7 +112,7 @@ export class WCInputNumber extends LitElement {
                 min=${ifDefined(this.minvalue)}    
                 max=${ifDefined(this.maxvalue)}
                 step=${ifDefined(this.step as number)}
-                .value=${this.value}
+                .value=${this.datasource}
                 ?autofocus=${this.autofocus}
                 pattern=${ifDefined(this.pattern)}
                 inputmode=${ifDefined(this.inputmode)}
@@ -123,10 +128,12 @@ export class WCInputNumber extends LitElement {
 
 
     private handleMinusClick() {
+
         if (!this.input) return;
         let newval = +this.input.value - 1
         if (!isNaN(newval) && (this.minvalue === undefined || (newval >= this.minvalue))){
             this.value = newval;
+            this.datasource = newval;
         }
     }
 
@@ -135,6 +142,7 @@ export class WCInputNumber extends LitElement {
         let newval = +this.input.value + 1
         if (!isNaN(newval) && (this.maxvalue === undefined || (newval <= this.maxvalue))){
             this.value = newval;
+            this.datasource = newval;
         }
 
     }
@@ -151,10 +159,11 @@ export class WCInputNumber extends LitElement {
             && (this.maxvalue === undefined || (value <= this.maxvalue))
         ) {
             this.value = value;
+            this.datasource = value;
             this.error = '';
             this.requestUpdate();
         } else {
-            this.error = this.errormessage;
+            this.error = this.errormessage || '';
             this.requestUpdate();
         }
     }

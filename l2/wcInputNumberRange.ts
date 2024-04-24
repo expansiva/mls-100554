@@ -2,9 +2,10 @@
 
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-
+import { IcaFormsInputNumber } from './_100554_icaFormsInputNumber';
+import { propertyDataSource } from './_100554_icaLitElement';
 @customElement('wc-input-number-range-100554')
-export class WCInputNumber extends LitElement {
+export class WCInputNumber extends IcaFormsInputNumber {
 
     static styles = css`
     :host {
@@ -40,15 +41,19 @@ export class WCInputNumber extends LitElement {
     }
     `
 
-    @property({ type: String }) name: string = '';
+    @propertyDataSource({ type: String }) datasource: number | undefined;
 
-    @property({ type: String }) label: string = ':';
+    @property({ type: String }) name: string | undefined;
+
+    @property({ type: String }) placeholder: string | undefined;
+
+    @property({ type: String }) label: string | undefined;
 
     @property({ type: String }) widget: string = '';
 
-    @property({ type: String }) pattern: string = '';
+    @property({ type: String }) pattern: string | undefined;
 
-    @property({ type: String }) errormessage: string = '';
+    @property({ type: String }) errormessage: string | undefined;
 
     @property({ type: Number }) maxvalue: number | undefined;
 
@@ -89,7 +94,7 @@ export class WCInputNumber extends LitElement {
             min=${ifDefined(this.minvalue)}    
             max=${ifDefined(this.maxvalue)}
             step=${ifDefined(this.step as number)}
-            .value=${this.value.toString()}
+            .value=${this.datasource}
             @input=${this.handleSliderChange}
         />
 
@@ -104,7 +109,7 @@ export class WCInputNumber extends LitElement {
             min=${ifDefined(this.minvalue)}    
             max=${ifDefined(this.maxvalue)}
             step=${ifDefined(this.step as number)}
-            .value=${this.value}
+            .value=${this.datasource}
             ?autofocus=${this.autofocus}
             pattern=${ifDefined(this.pattern)}
             inputmode=${ifDefined(this.inputmode)}
@@ -118,22 +123,24 @@ export class WCInputNumber extends LitElement {
     private handleSliderChange(event: Event) {
         const sliderElement = event.target as HTMLInputElement;
         this.value = Number(sliderElement.value);
+        this.datasource = this.value;
     }
 
     private handleChange() {
         if (!this.input) return;
         let newval = +this.input.value;
-        
+
         if (!isNaN(newval)
             && (this.minvalue === undefined || (newval >= this.minvalue))
             && (this.maxvalue === undefined || (newval <= this.maxvalue))
         ) {
             if (this.range) this.range.value = newval.toString();
             this.value = newval;
+            this.datasource = newval;
             this.error = '';
             this.requestUpdate();
         } else {
-            this.error = this.errormessage;
+            this.error = this.errormessage || '';
             this.requestUpdate();
         }
     }

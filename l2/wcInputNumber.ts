@@ -2,7 +2,7 @@
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputNumber } from './_100554_icaFormsInputNumber';
-import { propertyDataSource, OptionItem } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_icaLitElement';
 @customElement('wc-input-number-100554')
 export class WCInputNumber extends IcaFormsInputNumber {
 
