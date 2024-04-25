@@ -59,7 +59,8 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
                     return;
                 }
 
-                const group = data.group.join('');
+                const regexRemoveSpaces = /\s+/g;
+                const group = (data.group.join('')).replace(regexRemoveSpaces, '');
                 const tagName = convertFileNameToTag(fullName);
                 const className = path.charAt(0).toUpperCase() + path.substring(1, path.length);
                 const importFile = `_100554_ica${group}`;
@@ -72,6 +73,7 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { propertyDataSource } from './_100554_icaLitElement';
 import { ${extend} } from './${importFile}';
 
 @customElement('${tagName}')
