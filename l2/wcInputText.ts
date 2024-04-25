@@ -1,10 +1,11 @@
 /// <mls shortName="wcInputText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-
+import { IcaFormsInputString } from './_100554_icaFormsInputString';
+import { propertyDataSource } from './_100554_icaLitElement';
 
 @customElement('wc-input-text-100554')
-export class WcInputText100554 extends LitElement {
+export class WcInputText100554 extends IcaFormsInputString {
 
     static styles = css`
     :host {
@@ -36,12 +37,13 @@ export class WcInputText100554 extends LitElement {
         color: red;
     }
     `
+    @propertyDataSource({ type: String }) datasource: string | undefined;
 
     @property({ type: String }) name: string | undefined;
 
     @property({ type: String }) label: string | undefined;
 
-    @property({ type: String }) widget: string | undefined;
+    @property({ type: String }) widget: string = '';
 
     @property({ type: String }) pattern: string | undefined;
 
@@ -67,6 +69,10 @@ export class WcInputText100554 extends LitElement {
 
     @property({ type: String }) hint: string | undefined;
 
+    @property({ type: String }) autocorrect: 'off' | 'on' | undefined = undefined;
+
+    @property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined = undefined; 
+
     @query('.input_control') input: HTMLInputElement | undefined;
 
     error: string = '';
@@ -89,15 +95,22 @@ export class WcInputText100554 extends LitElement {
             autocomplete=${ifDefined(this.autocomplete)}
 
             placeholder=${ifDefined(this.placeholder)}
-            .value=${this.value}
+            .value=${this.datasource || ''}
             ?autofocus=${this.autofocus}
             pattern=${ifDefined(this.pattern)}
+            @input=${this.handleChange}
 
         
         />
         <small class="form_hint">${this.hint}</small>
         <div class="form_error_message">${this.error}</div>
         `;
+    }
+
+    handleChange(event: Event) {
+        const selectElement = event.target as HTMLSelectElement;
+        this.value = selectElement.value;
+        this.datasource = selectElement.value;
     }
 
 }

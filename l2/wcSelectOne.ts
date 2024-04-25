@@ -11,7 +11,7 @@ window.globalState = {
     },
     users: [{
         name: 'Wagner',
-        age: 62,
+        age: 63,
         city: 'SP',
         sex: 'm'
     },
@@ -60,13 +60,13 @@ export class WcSelectOne extends IcaFormsInputSelectOne {
 
     @propertyDataSource() options: OptionItem[] | undefined;
 
-    @propertyDataSource({ type: String }) selectedvalue: string | undefined = 'masculino';
+    @propertyDataSource() selectedvalue: string | undefined;
 
-    @propertyDataSource({ type: String }) username: string | undefined;
+    @propertyDataSource() username: string | undefined;
 
     render() {
         return html`
-        <label>O usuario ${this.username} é ${this.selectedvalue}<label>
+        <label>O usuario ${this.username} é ${this.options && this.selectedvalue && this.options.find((item)=> item.key === this.selectedvalue)?.value}<label>
         <br>
         <select
             class="select_control" 
@@ -84,7 +84,7 @@ export class WcSelectOne extends IcaFormsInputSelectOne {
         if (this.options) {
             return html`
                 ${this.options.map((opt: OptionItem) => {
-                return html`<option value=${opt.value}>${opt.value}</option>`
+                return html`<option value=${opt.key}>${opt.value}</option>`
             })}
         `;
         }
