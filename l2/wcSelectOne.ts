@@ -5,25 +5,6 @@ import { customElement, property } from 'lit/decorators.js';
 import { IcaFormsInputSelectOne } from './_100554_icaFormsInputSelectOne';
 import { propertyDataSource, OptionItem } from './_100554_icaLitElement';
 
-window.globalState = {
-    tables: {
-        sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }]
-    },
-    users: [{
-        name: 'Wagner',
-        age: 63,
-        city: 'SP',
-        sex: 'm'
-    },
-    {
-        name: 'Guilherme',
-        age: 28,
-        city: 'SP',
-        sex: 'm'
-    }]
-};
-
-
 @customElement('wc-select-one-100554')
 export class WcSelectOne extends IcaFormsInputSelectOne {
 
@@ -53,10 +34,6 @@ export class WcSelectOne extends IcaFormsInputSelectOne {
     @property({ type: String }) label: string | undefined; 
     @property({ type: Boolean }) required: boolean = false;
     @property({ type: Boolean }) disabled: boolean = false; 
-
-    // @property() opt: OptionItem[] = [];
-
-    //@propertyDataSource() options: string | undefined;
 
     @propertyDataSource() options: OptionItem[] | undefined;
 

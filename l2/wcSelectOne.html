@@ -1,38 +1,5 @@
 
 
-<h3>Exemplos Dinamicos</h3>
-
 <div style="padding: 1rem; display:flex; gap:4rem;">
-
-    <wc-select-one-100554 options="{{ tables.sex }}" selectedvalue="{{users[0].sex}}" username="{{users[0].name}}"  ></wc-select-one-100554>
-    <wc-input-text-100554 label="Usuario"  datasource="{{users[0].name}}" ></wc-input-text-100554>
-
-    <wc-input-number-100554 label="Idade:" datasource="{{users[0].age}}" errormessage="Idade Invalida" minvalue="0" maxvalue="100"></wc-input-number-100554>
-</div>
-<hr>
-
-<div style="padding: 1rem; display:flex; gap:4rem;">
-    <wc-select-one-100554 options="{{ tables.sex }}" selectedvalue="{{users[0].sex}}" username="{{users[0].name}}" ></wc-select-one-100554>
-    <wc-input-number-with-buttons-100554 label="Idade:" datasource="{{users[0].age}}" errormessage="Idade Invalida" minvalue="0" maxvalue="100"></wc-input-number-with-buttons-100554>
-</div>
-
-<hr>
-
-<div style="padding: 1rem; display:flex; gap:4rem;">
-    <wc-select-one-100554 options="{{ tables.sex }}" selectedvalue="{{users[0].sex}}" username="{{users[0].name}}" ></wc-select-one-100554>
-    <wc-input-number-range-100554 label="Idade:" datasource="{{users[0].age}}" errormessage="Idade Invalida" minvalue="0" maxvalue="100"></wc-input-number-range-100554>
-</div>
-
-<hr>
-
-<div style="padding: 1rem; display:flex; gap:4rem;">
-    <wc-select-one-100554 options='[{ "key": "m", "value": "masculino" }, { "key": "f", "value": "feminino" }]'' selectedvalue="{{users[1].sex}}" username="{{users[1].name}}" ></wc-select-one-100554>
-    <wc-input-number-100554 label="Idade:" datasource="{{users[1].age}}" errormessage="Idade Invalida" minvalue="0" maxvalue="100"></wc-input-number-100554>
-</div>
-
-<hr>
-
-<h3>Exemplos Estatico</h3>
-<div style="padding: 1rem; display:flex; gap:4rem;">
-    <wc-select-one-100554 options='[{ "key": "m", "value": "masculino" }, { "key": "f", "value": "feminino" },{ "key": "o", "value": "outros" }]'></wc-select-one-100554>
+    <wc-select-one-100554 label="Sexo:" options='[{ "key": "m", "value": "masculino" }, { "key": "f", "value": "feminino" },{ "key": "o", "value": "outros" }]'></wc-select-one-100554>
 </div>
