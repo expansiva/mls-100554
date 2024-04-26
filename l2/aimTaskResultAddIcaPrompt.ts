@@ -89,7 +89,7 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
 
         return html`
         <span>${this.messages.tryagain_title_5}</span>
-        <pre>
+        <pre style="white-space: pre-line;">
             ${str}
         </pre>
     `
