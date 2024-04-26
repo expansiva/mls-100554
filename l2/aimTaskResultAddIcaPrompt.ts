@@ -9,6 +9,8 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
 
     private result: number | undefined;
 
+    @property({ type: String, reflect: true }) modeInternal: cbe.IMode | undefined;
+
     @property() hasError: boolean = false;
 
     @query('textarea')
@@ -17,7 +19,7 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
     public onInitializing(): void { // from abstract
 
         if (this.taskChild.mode !== 'error' && this.taskChild.mode !== 'processed') {
-            this.taskRoot.mode = this.taskChild.mode = 'waiting for user';
+            this.modeInternal = this.taskRoot.mode = this.taskChild.mode = 'waiting for user';
         }
 
         if (!this.taskChild.result) {
@@ -47,6 +49,7 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
 
         const body = child.result || '';
         this.result = this.getResult(body);
+        if(this.modeInternal !== 'waiting for user') return html `<div>Already processed!</div>`
         return html`
          <div>
              ${this.result === 0
