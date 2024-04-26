@@ -67,7 +67,11 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
                         : this.messages.tryagain_title_3
                     } </label>
 
-                         <textarea rows="5" placeholder=${this.messages.tryagain_placeholder} style="width:100%"></textarea .value=${(window as any)['aim-action-add-ica-user'] || ''}>
+                         <textarea
+                         rows="5"
+                         placeholder=${this.messages.tryagain_placeholder} 
+                         .value="${(window as any)['aim-action-add-ica-user'] || ''}"
+                         style="width:100%"></textarea >
                          ${this.hasError ? html`<small style="color:red;"> ${this.messages.error_message}</small>` : ''}
                      </div>
                      <br>
@@ -83,19 +87,12 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
 
     private renderListSuggestions(str: string) {
 
-        const regex = /- (.+)/g;
-        const matches = str.match(regex);
-
-        if (matches) {
-            return html`
-             <span>${this.messages.tryagain_title_5}</span>
-             <ol>
-             ${matches.map((m) => html`<li>${m}</li>`)}
-             </ol>
-         `
-        } else {
-            return html``
-        }
+        return html`
+        <span>${this.messages.tryagain_title_5}</span>
+        <pre>
+            ${str}
+        </pre>
+    `
     }
 
     private closeMe() {
