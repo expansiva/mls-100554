@@ -67,7 +67,7 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
                         : this.messages.tryagain_title_3
                     } </label>
 
-                         <textarea rows="5" placeholder=${this.messages.tryagain_placeholder} style="width:100%"></textarea>
+                         <textarea rows="5" placeholder=${this.messages.tryagain_placeholder} style="width:100%"></textarea .value=${(window as any)['aim-action-add-ica-user'] || ''}>
                          ${this.hasError ? html`<small style="color:red;"> ${this.messages.error_message}</small>` : ''}
                      </div>
                      <br>
