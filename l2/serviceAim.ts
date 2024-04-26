@@ -19,9 +19,12 @@ export class ServiceAim100554 extends ServiceBase {
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
     @property({ reflect: true }) actionToOpen: string = '';
     @property({ reflect: true }) actualServiceOpName: string = '';
+    @property() isloading: boolean = true;
+
     actualServiceOpLevel: number = 0;
 
     render() {
+
         if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
         if (this.actionToOpen) this.activeTab = 'Add'
         switch (this.activeTab) {
@@ -69,7 +72,6 @@ export class ServiceAim100554 extends ServiceBase {
         this.activeTab = op as ITabType;
     }
 
-
     public menu: IMenu = {
         title: 'AI',
         actions: {
@@ -102,7 +104,9 @@ export class ServiceAim100554 extends ServiceBase {
     }
 
     onToolbarSelectChange(ev: mls.events.IEvent) {
+
         if (mls.istrace) console.log('serviceAim, toolbarSelected', ev);
+        if (this.activeTab !== 'Add') return;
         if (!ev.desc) return;
         const data: IToolbarChangeEvent = JSON.parse(ev.desc);
         if (mls.istrace) console.log(`serviceAim, ${data.position}, ${this.position}`);
@@ -138,14 +142,16 @@ export class ServiceAim100554 extends ServiceBase {
 
     renderAll() {
 
-        function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
+        const renderTask = (taskRoot: cbe.ITaskRoot, index: number) => {
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}" />`;
             return html`${unsafeHTML(sHtml)}`;
         }
+
         const orderned = this.sortKey(tasks);
         if (mls.istrace) console.log(`serviceAim, renderAll`);
 
+        if (this.isloading) return html`<span>Loading...</span>`
         return html`
         <h4 class='title'>All Tasks, last (${tasks.length})</h4>
             ${repeat(
@@ -182,20 +188,14 @@ export class ServiceAim100554 extends ServiceBase {
 
         let refOpr = '';
         if (this.nav3Service) {
-
             const pos = this.position === 'left' ? 'right' : 'left';
             const op = this.nav3Service.getActiveInstance(pos);
-
-            if (op && op.getActualRef) {
-                refOpr = op.getActualRef();
-            }
-
+            if (op && op.getActualRef) refOpr = op.getActualRef();
         }
 
         function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
             let hasRef = taskRoot.children.filter((c) => c.ref === refOpr);
             if (!hasRef || hasRef.length <= 0) return;
-
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
             return html`${unsafeHTML(sHtml)}`;
@@ -227,12 +227,12 @@ export class ServiceAim100554 extends ServiceBase {
         if (!changedProperties.has('activeTab')) return;
         switch (this.activeTab) {
             case 'All':
-                readTasksFromServer('all', '')
-                    .then(() => this.sendRefreshRequest());
+                // readTasksFromServer('all', '')
+                //     .then(() => this.sendRefreshRequest());
                 return;
             case 'User':
-                readTasksFromServer('byUser', '')
-                    .then(() => this.sendRefreshRequest());
+                // readTasksFromServer('byUser', '')
+                //     .then(() => this.sendRefreshRequest());
                 return;
             case 'Ref':
                 return;
@@ -258,14 +258,27 @@ export class ServiceAim100554 extends ServiceBase {
 
     async connectedCallback() {
         super.connectedCallback();
+
         if (!this.nav3Service) { // for preview test
             this.actualServiceOpName = '_100554_ServiceSource';
             this.actualServiceOpLevel = 2;
         }
-        await readTasksFromServer('all', '').then(() => {
+
+        await readTasksFromServer('all', '').then(async () => {
+            await this.setActions();
+            const widgetsDistincts = new Set<string>();
+            tasks.forEach(task => {
+                widgetsDistincts.add(task.widget);
+            });
+            const arrayWidgets: string[] = Array.from(widgetsDistincts);
+            for await (let widget of arrayWidgets) {
+                await this.loadComponentModule(widget);
+            }
+
+            this.isloading = false;
             this.requestUpdate();
         });
-        await this.setActions();
+
     }
 
     async attributeChangedCallback(prop: string, oldValue: string, newValue: string) {
@@ -365,7 +378,7 @@ export class ServiceAim100554 extends ServiceBase {
         }
 
         try {
-            const componentModule = await import('./' + widget);
+            const componentModule = await this.loadComponentModule(widget);
             if (!componentModule) {
                 console.error('widget not exists or invalid:' + widget);
                 return;
@@ -380,6 +393,11 @@ export class ServiceAim100554 extends ServiceBase {
             console.error("Erro ao carregar o componente:" + widget + ", error: ", error);
             this.useContainerAdd = true;
         }
+    }
+
+    private async loadComponentModule(widget: string) {
+        const componentModule = await import('./' + widget);
+        return componentModule;
     }
 
     private stateColumns: IAimColums | undefined;

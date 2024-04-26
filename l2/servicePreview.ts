@@ -254,6 +254,9 @@ export class ServicePreview100554 extends ServiceBase {
         if (!(mls.actual[2] as any).left) return true;
 
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
+
+        this.menu.title = 'Preview: ' + fullname;
+        if (this.menu.updateTitle) this.menu.updateTitle();
         const doc = document.createElement('service-preview-view-100554');
         doc.setAttribute('page', fullname);
         doc.setAttribute('level', this.level as any);

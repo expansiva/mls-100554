@@ -17,7 +17,7 @@ export abstract class ServiceBase extends LitElement {
     @property({ type: String })
     visible = 'false';
 
-    @property({ type: String }) msize = '';
+    @property({ type: String, noAccessor: true }) msize = '';
 
     @state() loading: boolean = false;
 
@@ -221,7 +221,7 @@ export interface IMenu {
     actions: IMenuKeyValue,
     icons: IIconsKeyValue,
     buttons?: IButtonsKeyValue,
-    
+
     actionDefault?: string,
     iconDefault?: string,
     onClickTitle?: IClickTitleCallBack,

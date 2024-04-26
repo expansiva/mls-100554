@@ -490,7 +490,7 @@ export class ServicePreviewView extends LitElement {
             style.textContent = css + ' \n' + cls;
             style.id = this.getIdStyle();
             ifr.contentDocument.body.className = 'scroll-custom';
-            ifr.contentDocument.body.style.height = 'calc(100vh - 40px)';
+            // ifr.contentDocument.body.style.height = 'calc(100vh - 40px)';
             ifr.contentDocument.body.style.width = '98%';
             ifr.contentDocument.body.appendChild(style);
         } catch (e: any) {

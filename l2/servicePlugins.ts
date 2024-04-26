@@ -236,7 +236,6 @@ export class ServicePlugins extends ServiceBase {
     renderHeader() {
         return html` <div>${this.currentScenario === 'list' ?
             html`
-                <ateste-100554></ateste-100554>
                 <div class="header">
                     <div>
                         <button @click="${this.installPluginClicked}">Install Plugin</button>
