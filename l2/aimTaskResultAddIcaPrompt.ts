@@ -49,7 +49,7 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
 
         const body = child.result || '';
         this.result = this.getResult(body);
-        if(this.modeInternal !== 'waiting for user') return html `<div>Already processed!</div>`
+        if (this.modeInternal !== 'waiting for user') return html`<div>${this.messages.tryagain_processed}</div>`
         return html`
          <div>
              ${this.result === 0
@@ -90,7 +90,7 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
             return html`
              <span>${this.messages.tryagain_title_5}</span>
              <ol>
-             ${matches.map((m)=> html `<li>${m}</li>`)}
+             ${matches.map((m) => html`<li>${m}</li>`)}
              </ol>
          `
         } else {
@@ -138,6 +138,8 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
         "error_message": "O prompt deve ser preenchido.",
 
         "tryagain_placeholder": "Digite aqui seu prompt.",
+        "tryagain_processed": "Prompt já validado.",
+
         "btn_confirmar": "Confirmar",
         "btn_cancelar": "Cancelar",
 

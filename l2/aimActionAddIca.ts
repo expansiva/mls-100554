@@ -454,10 +454,10 @@ ${this.messages.prompt_html_output}
     private getPromptCheckPrompt(promptUser: string) {
         const prompt = `
         ### system ### 
-Analise o prompt abaixo e retorne:
+Analise o prompt do usuário e retorne:
 
-- 'sim' se o prompt estiver dentro do contexto,
-- 'não' se o prompt estiver fora de contexto,
+- 'sim' se o prompt estiver dentro do contexto, e for suficiente para a próxima etapa.
+- 'não' se o prompt for para qualquer outra coisa que não for a geração de um web component.
 - 'forneça mais informações' se o prompt estiver dentro do contexto e precisar de mais informações importantes neste primeiro passo.
 
 contexto: Todos os web components devem ser desenvolvidos utilizando TypeScript e Lit 3. Os componentes serão usados em navegadores modernos, e nesta etapa focaremos apenas no corpo principal do TypeScript, sem CSS.
