@@ -7,7 +7,7 @@ import { AimTaskBase } from "./_100554_aimTaskBase";
 @customElement('aim-task-result-add-ica-prompt-100554')
 export class AimTaskResulAddIcaPrompt extends AimTaskBase {
 
-    private result: IPromptValid | undefined;
+    private result: number | undefined;
 
     @property() hasError: boolean = false;
 
@@ -26,8 +26,9 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
             return;
         }
 
-        this.result = this.getResultJson(this.taskChild.result);
-        if (this.result.isPromptValid === 'yes') {
+        this.result = this.getResult(this.taskChild.result);
+
+        if (this.result === 0) {
             this.notifyCompleteByStatus('ok', '');
             return;
         }
@@ -35,73 +36,63 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
         this.openMe();
     }
 
-    private getResultJson(str: string) {
-
-        let json: IPromptValid = {
-            isPromptValid: "yes",
-            list: [],
-            olderPrompt: ''
-        }
-        try {
-            const regex = /{[^{}]*}/;
-            const match = str.match(regex);
-            if (match) {
-                const json2 = JSON.parse(match[0]);
-                json = { ...json, ...json2 }
-            }
-
-        } catch (err: any) {
-            throw new Error(err.message);
-        }
-        return json;
-
+    private getResult(str: string) {
+        const firstStr = str.substring(0, 24).toLowerCase();
+        if (firstStr.startsWith('sim')) return 0;
+        if (firstStr.startsWith('nao')) return 1;
+        if (firstStr.startsWith('forneça mais informações')) return 2;
     }
 
     renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
 
         const body = child.result || '';
-        this.result = this.getResultJson(body);
-
+        this.result = this.getResult(body);
         return html`
-        <div>
-            ${this.result.isPromptValid === 'yes'
+         <div>
+             ${this.result === 0
                 ? html`<span>${this.messages.tryagain_title_2}</span>`
                 : html`
 
-                    ${this.result.isPromptValid === 'more information'
-                        ? this.renderListSuggestions()
+                     ${this.result === 2
+                        ? this.renderListSuggestions(body)
                         : ''
                     }
-                    
-                    <div style='margin: 10px;'>
-                        <label>${this.result.isPromptValid === "more information"
+
+                     <div style='margin: 10px;'>
+                         <label>${this.result === 2
                         ? this.messages.tryagain_title_4
                         : this.messages.tryagain_title_3
                     } </label>
 
-                        <textarea rows="5" placeholder=${this.messages.tryagain_placeholder} .value=${this.result.olderPrompt} style="width:100%"></textarea>
-                        ${this.hasError ? html`<small style="color:red;"> ${this.messages.error_message}</small>` : ''}
-                    </div>
-                    <br>
-                    <div class="buttonGroup">
-                        <button @click="${this.handleCancelTryAgain}">${this.messages.btn_cancelar}</button>
-                        <button @click="${this.handleConfirmTryAgain}">${this.messages.btn_confirmar}</button>
-                    </div>
-            `
+                         <textarea rows="5" placeholder=${this.messages.tryagain_placeholder} style="width:100%"></textarea>
+                         ${this.hasError ? html`<small style="color:red;"> ${this.messages.error_message}</small>` : ''}
+                     </div>
+                     <br>
+                     <div class="buttonGroup">
+                         <button @click="${this.handleCancelTryAgain}">${this.messages.btn_cancelar}</button>
+                         <button @click="${this.handleConfirmTryAgain}">${this.messages.btn_confirmar}</button>
+                     </div>
+             `
             }            
-        </div> 
-        `
+         </div> 
+         `
     }
 
-    private renderListSuggestions() {
-        let suggestions: string[] = [];
-        if (this.result && this.result.isPromptValid === 'more information') suggestions = this.result.list;
-        return html`
-            <span>${this.messages.tryagain_title_5}</span>
-            <ol>
-                ${suggestions.map((item) => html`<li>${item}</li>`)}
-            </ol>    
-        `
+    private renderListSuggestions(str: string) {
+
+        const regex = /- (.+)/g;
+        const matches = str.match(regex);
+
+        if (matches) {
+            return html`
+             <span>${this.messages.tryagain_title_5}</span>
+             <ol>
+             ${matches.map((m)=> html `<li>${m}</li>`)}
+             </ol>
+         `
+        } else {
+            return html``
+        }
     }
 
     private closeMe() {

@@ -140,7 +140,7 @@ export class AimActionAddIca extends AimActionBase {
 
         let user = '';
         if ((window as any)['aim-action-add-ica-user']) user = (window as any)['aim-action-add-ica-user'];
-        
+
         this.addTaskAndWaitForCompletion(taskRoot, {
             mode: 'initializing',
             title: 'verify prompt',
@@ -453,31 +453,22 @@ ${this.messages.prompt_html_output}
 
     private getPromptCheckPrompt(promptUser: string) {
         const prompt = `
-### system ###
-Analise  o prompt do usuario abaixo, e classifique se está de acordo com o contexto abaixo e retorne sua classificação.
+        ### system ### 
+Analise o prompt abaixo e retorne:
 
-O retorno deve ser um objeto Json, no seguinte modelo: 
- {
-    "isPromptValid": "yes" | "no" | "more information"
-    "list":["do somenthing", "expect this"], // retornar lista de sujestões para melhorar o prompt em caso de 'more information' - opcional
-    "olderPrompt": "", // retornar prompt enviado pelo usuario em caso de 'more information' - opcional
- }
+- 'sim' se o prompt estiver dentro do contexto,
+- 'não' se o prompt estiver fora de contexto,
+- 'forneça mais informações' se o prompt estiver dentro do contexto e precisar de mais informações importantes neste primeiro passo.
 
-isPromptValid:
-- 'yes' => se o prompt estiver dentro do contexto.
-- 'more information' => se o prompt estiver dentro do contexto porém não atender alguns dos requisitos do contexto
-- 'no'  => se o prompt estiver fora de contexto.
+contexto: Todos os web components devem ser desenvolvidos utilizando TypeScript e Lit 3. Os componentes serão usados em navegadores modernos, e nesta etapa focaremos apenas no corpo principal do TypeScript, sem CSS.
 
-Contexto:
-Os web components serão usados em navegadores modernos, e nesta etapa focaremos apenas no corpo principal do TypeScript, sem CSS.
-Requisitos:
-1. definição de qual tipo de componente.
-2. definição o que o componente deve fazer.
-3. definições inicias do uso de quais propriedades.
-4. definições comportamentos específicos.
+condição especial: Após retornar 'forneça mais informações', gere uma lista de 1 a 3 itens das informações necessárias para o contexto.
+
+Ao adotar esta descrição de contexto, qualquer usuário que interaja com o sistema já estará ciente de que o desenvolvimento deve ser feito usando TypeScript e Lit 3, e poderá se concentrar em especificar outros aspectos do web component que está sendo proposto. Isso simplifica a interação do usuário com o sistema e permite um foco maior nos detalhes funcionais e técnicos específicos de cada componente.
+Não retorne explicações ou comentários , somente 'sim' ou 'não' ou 'forneça mais informações' (com uma lista complementar) 
 
 ### user ###
-${promptUser} 
+${promptUser}
  `
         return prompt;
     }
