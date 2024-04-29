@@ -1,11 +1,10 @@
 /// <mls shortName="serviceSource" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
-
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
-//version = 3
+
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
 
@@ -19,6 +18,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     @property({ type: String })
     msize = '';
+
     createRenderRoot() {
         return this;
     }
@@ -64,7 +64,6 @@ export class ServiceSource100554 extends ServiceBase {
             opMonacoReset: 'Editor - reset',
             opHistory: 'History',
             opView: 'View on repository',
-
         },
         icons: {
             icTs: 'Typescript;f121',
@@ -109,7 +108,6 @@ export class ServiceSource100554 extends ServiceBase {
         const uri = this.getUri(`_${project}_${shortName}`, '.ts');
         let model = monaco.editor.getModel(uri);
         if (!model) return false;
-        // model.setValue(val);
         this.setValueInModeKeepingUndo(model, val, true);
     }
 
@@ -119,7 +117,6 @@ export class ServiceSource100554 extends ServiceBase {
         const uri = this.getUri(`_${project}_${shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
         if (!model) return false;
-        // return model.setValue(val);
         this.setValueInModeKeepingUndo(model, val, false);
     }
 
@@ -411,206 +408,45 @@ export class ServiceSource100554 extends ServiceBase {
         };
 
         const onNew = async (): Promise<void> => {
-
-            this.isNewFile = true;
-            this.activeThisService();
-            this.closeMenu();
-            const newTSSource = fileAction.newTSSource
-                || `/// <mls shortName="${fileAction.newshortName}" project="${fileAction.newProject}" enhancement="${fileAction.newEnhancement}" />
-				\n// typescript new file\n`;
-            await this.createModelTS1(fileAction.newshortName as string, fileAction.newProject as number,
-                newTSSource, true);
-            await this.createOrShowModelHTML(false);
-            this.showActiveModel();
-            this.isNewFile = false;
+            await this.newFiles(
+                fileAction.newshortName as string,
+                fileAction.newProject as number,
+                fileAction.newEnhancement as string,
+                fileAction.newTSSource as string
+            );
         };
 
         const onOpen = async (): Promise<void> => {
-            await this.createModelTS_loading();
-            this.activeThisService();
-            this.closeMenu();
             const storFile = getStorFile();
-            const fileModel = mls.l2.editor.get(storFile);
-            if (!fileModel) {
-                await this.createModelTS2(storFile, true, true);
-                this.showActiveModel();
-                await this.readAllProjectTypescriptAndCompile(storFile.project, storFile.shortName, true).then(async () => {
-                    await this.createOrShowModelHTML(false);
-                });
-            } else {
-                mls.l2.editor.editors[this.confE] = fileModel;
-                mls.l2.editor.forceModelUpdate(fileModel.model);
-                await this.createOrShowModelHTML(false);
-                this.showActiveModel();
-            }
-            if (storFile && !storFile.inLocalStorage && storFile.isLocalVersionOutdated)
-                storFile.isLocalVersionOutdated = false;
-
-            this.saveLocalStorageLastOpen(storFile, fileAction.position);
-
-            if (!this._ed1) return;
-            this.restaureViewState();
-
+            const storFileHTML: mls.stor.IFileInfo | undefined = getStorFileHTML();
+            await this.openFiles(storFileHTML, storFile, fileAction.position);
         };
-
 
         const onDelete = async (): Promise<void> => {
             const storFile = getStorFile();
             const storFileHTML: mls.stor.IFileInfo | undefined = getStorFileHTML();
-
-            if (storFile.status === 'new') {
-                this.deleteFile(storFile);
-            } else storFile.status = 'deleted';
-
-            if (storFileHTML) {
-                if (storFileHTML.status === 'new') {
-                    this.deleteFile(storFileHTML);
-                } else storFileHTML.status = 'deleted';
-            }
-
-            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+            await this.deleteFiles(storFileHTML, storFile);
         };
 
         const onUndo = async (): Promise<void> => {
-
             const storFile = getStorFile();
-            const storFileHTML: mls.stor.IFileInfo | undefined = getStorFileHTML();
-
-            if (storFile.status === 'deleted') {
-                storFile.status = 'changed';
-                if (storFileHTML) storFileHTML.status = 'changed';
-                mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
-                return;
-            }
-
-            if (storFile.status === 'renamed') {
-                throw new Error('not implemented');
-            }
-
-            // clear memory changes and localstor changes
-            const imFile = mls.l2.editor.editors[this.confE];
-            if (imFile.project === storFile.project && imFile.shortName === storFile.shortName) await this.createModelTS_testFile(); // show test file
-            mls.l2.editor.remove(storFile);
-            this.removeEventsModelTS(storFile);
-            await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-            if (storFile.status === 'new') {
-                delete mls.stor.files[keyFiles];
-                mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
-                return;
-            }
-            if (storFile.status === 'changed') {
-                storFile.status = 'nochange';
-                if (storFile.isLocalVersionOutdated && storFile.newVersionRefIfOutdated) {
-                    storFile.versionRef = storFile.newVersionRefIfOutdated;
-                    storFile.isLocalVersionOutdated = false;
-                    storFile.newVersionRefIfOutdated = undefined;
-                }
-            } else {
-                storFile.status = 'changed';
-            }
-            await this.createModelTS2(storFile, false, true);
-            await this.undoHTMLFile(storFileHTML as mls.stor.IFileInfo, keyFilesHTML);
-            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+            const storFileHTML = getStorFileHTML();
+            await this.undoFiles(storFileHTML, storFile, keyFilesHTML, keyFiles);
         };
 
         const onRename = async (): Promise<void> => {
-
             const storFile = getStorFile();
             const storFileHTML = getStorFileHTML();
-
-            await this.createModelTS_loading();
-            this.activeThisService();
-            let model1 = mls.l2.editor.get(storFile);
-            if (!model1) model1 = await this.createModelTS2(storFile, false, true);
-            this.renameTSFile(model1, storFile, fileAction.newProject as number, fileAction.newshortName as string);
-
-            mls.l2.editor.editors[this.confE] = model1;
-
-            this.renameHTMLFile(storFileHTML as mls.stor.IFileInfo, fileAction.newProject as number, fileAction.newshortName as string);
-
-            (mls.actual[this.level] as any)[this.position] = {
-                project: fileAction.newProject,
-                shortName: fileAction.newshortName
-
-            }
-
-            fileAction.project = fileAction.newProject as any;
-            fileAction.shortName = fileAction.newshortName as any;
-            fileAction.newProject = undefined as any;
-            fileAction.newshortName = undefined as any;
-            fileAction.action = 'open';
-            ev.desc = JSON.stringify(fileAction);
-
-            this.onMLSEvents(ev);
-
-            //this.showActiveModel();
-            //mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+            await this.renameFiles(storFileHTML, storFile, fileAction.newProject as number, fileAction.newshortName as string, fileAction);
         };
 
         const onClone = async (): Promise<void> => {
             const storFile = getStorFile();
-            await this.createModelTS_loading();
-            this.activeThisService();
-
-            await this.createModelTS_clone(storFile, fileAction.newProject as number, fileAction.newshortName as string);
-            await this.createModelHTML_clone(storFile, fileAction.newProject as number, fileAction.newshortName as string);
-
-
-            (mls.actual[this.level] as any)[this.position] = {
-                project: fileAction.newProject,
-                shortName: fileAction.newshortName
-
-            }
-
-            fileAction.project = fileAction.newProject as any;
-            fileAction.shortName = fileAction.newshortName as any;
-            fileAction.newProject = undefined as any;
-            fileAction.newshortName = undefined as any;
-            fileAction.action = 'open';
-            ev.desc = JSON.stringify(fileAction);
-            this.onMLSEvents(ev);
-            //this.showActiveModel();
+            await this.cloneFiles(storFile, fileAction.newProject as number, fileAction.newshortName as string, fileAction);
         };
 
         const onUpdatedOnServer = async (): Promise<void> => {
-
-            try {
-
-                const keys = Object.keys(mls.stor.files);
-                const arr: mls.stor.IFileInfo[] = [];
-                let needMsg = false;
-
-                keys.forEach((key) => {
-
-                    const f = mls.stor.files[key];
-                    if (!f) return;
-                    if (f.inLocalStorage || !f.isLocalVersionOutdated) return;
-                    arr.push(f);
-
-                });
-
-                console.info(arr);
-                await mls.l2.editor.compileAllProjectIfNeed(mls.actual[5].project as number, true, false);
-                for await (const storFile of arr) {
-
-                    mls.l2.editor.remove(storFile);
-                    this.removeEventsModelTS(storFile);
-                    await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-                    await this.createModelTS2(storFile, false, true);
-                    if (storFile.project === 100554) needMsg = true;
-
-
-                }
-
-                if (needMsg) {
-                    window.collabMessages.add("Files changed in server , please use F5 to reload", 'information', { autoClose: false, clearOnClose: false });
-                }
-
-            } catch (e) {
-                console.info('Erro service source: onUpdatedOnServer')
-            }
-
-
+            await this.updatedOnServer();
         };
 
         if (mls.istrace) console.time('onAction_' + fileAction.action + '_' + fileAction.position);
@@ -629,6 +465,210 @@ export class ServiceSource100554 extends ServiceBase {
             }
         }
         if (mls.istrace) console.timeEnd('onAction_' + fileAction.action + '_' + fileAction.position);
+    }
+
+    private async deleteFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo) {
+        for await (let storFile of [storFileHTML, storFileTS]) {
+            if (!storFile) continue;
+            if (storFile.status === 'new') this.deleteFile(storFile);
+            else storFile.status = 'deleted';
+            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+        }
+    }
+
+    private async cloneFiles(storFileTS: mls.stor.IFileInfo, newProject: number, newShortName: string, oldFileAction: mls.events.IFileAction) {
+        await this.createModelTS_loading();
+        this.activeThisService();
+        await this.createModelTS_clone(storFileTS, newProject, newShortName);
+        await this.createModelHTML_clone(storFileTS, newProject, newShortName);
+
+        (mls.actual[this.level] as any)[this.position] = {
+            project: newProject,
+            shortName: newShortName
+        }
+
+        const fileAction: mls.events.IFileAction = {
+            ...oldFileAction,
+            project: newProject,
+            shortName: newShortName,
+            action: 'open',
+            newProject: undefined,
+            newshortName: undefined,
+        }
+
+        const ev: mls.events.IEvent = {
+            level: this.level,
+            type: 'FileAction',
+            desc: JSON.stringify(fileAction)
+        }
+
+        this.onMLSEvents(ev);
+    }
+
+    private async newFiles(newShortName: string, newProject: number, newEnhancement: string, tsSource: string) {
+
+        this.isNewFile = true;
+        this.activeThisService();
+        this.closeMenu();
+        const newTSSource = tsSource
+            || `/// <mls shortName="${newShortName}" project="${newProject}" enhancement="${newEnhancement}" />
+				\n// typescript new file\n`;
+        await this.createModelTS1(newShortName as string, newProject as number,
+            newTSSource, true);
+        await this.createOrShowModelHTML(false);
+        this.showActiveModel();
+        this.isNewFile = false;
+    }
+
+    private async openFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, position: 'left' | 'right') {
+
+        await this.createModelTS_loading();
+        this.activeThisService();
+        this.closeMenu();
+        const fileModel = mls.l2.editor.get(storFileTS);
+        if (!fileModel) {
+            await this.createModelTS2(storFileTS, true, true);
+            this.showActiveModel();
+            await this.readAllProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true).then(async () => {
+                await this.createOrShowModelHTML(false);
+            });
+        } else {
+            mls.l2.editor.editors[this.confE] = fileModel;
+            mls.l2.editor.forceModelUpdate(fileModel.model);
+            await this.createOrShowModelHTML(false);
+            this.showActiveModel();
+        }
+        if (storFileTS && !storFileTS.inLocalStorage && storFileTS.isLocalVersionOutdated)
+            storFileTS.isLocalVersionOutdated = false;
+
+        if (storFileHTML && !storFileHTML.inLocalStorage && storFileHTML.isLocalVersionOutdated)
+            storFileHTML.isLocalVersionOutdated = false;
+
+        this.saveLocalStorageLastOpen(storFileTS, position);
+        if (!this._ed1) return;
+        this.restaureViewState();
+    }
+
+
+    private async renameFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, newProject: number, newShortName: string, oldFileAction: mls.events.IFileAction) {
+
+        await this.createModelTS_loading();
+        this.activeThisService();
+        let model1 = mls.l2.editor.get(storFileTS);
+        if (!model1) model1 = await this.createModelTS2(storFileTS, false, true);
+        this.renameTSFile(model1, storFileTS, newProject, newShortName);
+
+        mls.l2.editor.editors[this.confE] = model1;
+        this.renameHTMLFile(storFileHTML as mls.stor.IFileInfo, newProject, newShortName);
+
+        (mls.actual[this.level] as any)[this.position] = {
+            project: newProject,
+            shortName: newShortName
+        }
+
+        const fileAction: mls.events.IFileAction = {
+            ...oldFileAction,
+            project: newProject,
+            shortName: newShortName,
+            action: 'open',
+            newProject: undefined,
+            newshortName: undefined,
+        }
+
+        const ev: mls.events.IEvent = {
+            level: this.level,
+            type: 'FileAction',
+            desc: JSON.stringify(fileAction)
+        }
+        this.onMLSEvents(ev);
+    }
+
+    private async updatedOnServer() {
+        try {
+
+            const keys = Object.keys(mls.stor.files);
+            const arr: mls.stor.IFileInfo[] = [];
+            let needMsg = false;
+            keys.forEach((key) => {
+                const f = mls.stor.files[key];
+                if (!f) return;
+                if (f.inLocalStorage || !f.isLocalVersionOutdated) return;
+                arr.push(f);
+            });
+
+            console.info(arr);
+            await mls.l2.editor.compileAllProjectIfNeed(mls.actual[5].project as number, true, false);
+            for await (const storFile of arr) {
+                mls.l2.editor.remove(storFile);
+                this.removeEventsModelTS(storFile);
+                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+                await this.createModelTS2(storFile, false, true);
+                if (storFile.project === 100554) needMsg = true;
+            }
+
+            if (needMsg) {
+                window.collabMessages.add("Files changed in server , please use F5 to reload", 'information', { autoClose: false, clearOnClose: false });
+            }
+
+        } catch (e) {
+            console.info('Erro service source: onUpdatedOnServer')
+        }
+    }
+
+
+    private async undoFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, keyFileHTML: string, keyFileTS: string) {
+
+        for await (let data of [{ storFile: storFileHTML, keyFiles: keyFileHTML }, { storFile: storFileTS, keyFiles: keyFileTS }]) {
+
+            if (!data.storFile) continue;
+            if (data.storFile.status === 'deleted') {
+                data.storFile.status = 'changed';
+                mls.events.fireFileAction('statusOrErrorChanged', data.storFile, this.position);
+                continue;
+            }
+
+            if (data.storFile.status === 'renamed') {
+                throw new Error('not implemented');
+            }
+
+            if (data.storFile.extension === '.ts') {
+                // clear memory changes and localstor changes
+                const imFile = mls.l2.editor.editors[this.confE];
+                if (imFile.project === data.storFile.project && imFile.shortName === data.storFile.shortName) await this.createModelTS_testFile(); // show test file
+                mls.l2.editor.remove(data.storFile);
+                this.removeEventsModelTS(data.storFile);
+            }
+
+            await mls.stor.localStor.setContent(data.storFile, { contentType: 'string', content: null });
+            if (data.storFile.status === 'new') {
+                delete mls.stor.files[data.keyFiles];
+                mls.events.fireFileAction('statusOrErrorChanged', data.storFile, this.position);
+                continue;
+            }
+
+            if (data.storFile.status === 'changed') {
+                data.storFile.status = 'nochange';
+                if (data.storFile.isLocalVersionOutdated && data.storFile.newVersionRefIfOutdated) {
+                    data.storFile.versionRef = data.storFile.newVersionRefIfOutdated;
+                    data.storFile.isLocalVersionOutdated = false;
+                    data.storFile.newVersionRefIfOutdated = undefined;
+                }
+            } else {
+                data.storFile.status = 'changed';
+            }
+
+            if (data.storFile.extension === '.ts') await this.createModelTS2(data.storFile, false, true);
+            else {
+                const uri = this.getUri(`_${data.storFile.project}_${data.storFile.shortName}`, '.html');
+                const model = monaco.editor.getModel(uri);
+                if (model) model.dispose();
+                await this.createOrShowModelHTML(false);
+            }
+
+            mls.events.fireFileAction('statusOrErrorChanged', data.storFile, this.position);
+
+        };
+
     }
 
     private activeThisService(): void {
@@ -1152,7 +1192,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (!src) src = "";
         const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src as string).toString(16);
         (model as any)['originalCRC'] = originalCRC;
-
+        console.info({ src })
         if (src) model.setValue(src);
         if (open && this._ed1) this._ed1.setModel(model);
         return storFileHTML;
@@ -1246,28 +1286,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     }
 
-    private async undoHTMLFile(storFileHTML: mls.stor.IFileInfo, keyFiles: string) {
 
-        await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: null });
-        const uri = this.getUri(`_${storFileHTML.project}_${storFileHTML.shortName}`, '.html');
-        const model = monaco.editor.getModel(uri);
-        if (model) model.dispose();
-
-        if (storFileHTML.status === 'new') {
-            delete mls.stor.files[keyFiles];
-            return;
-        }
-        if (storFileHTML.status === 'changed') {
-            storFileHTML.status = 'nochange';
-            if (storFileHTML.isLocalVersionOutdated && storFileHTML.newVersionRefIfOutdated) {
-                storFileHTML.versionRef = storFileHTML.newVersionRefIfOutdated;
-                storFileHTML.isLocalVersionOutdated = false;
-                storFileHTML.newVersionRefIfOutdated = undefined;
-            }
-        } else {
-            storFileHTML.status = 'changed';
-        }
-    }
 
     private getValueInfoHTML = async (activeModel: monaco.editor.ITextModel, originalShortName: string, originalProject: number, originalCRC: string): Promise<mls.stor.IFileInfoValue> => {
         const rc: mls.stor.IFileInfoValue = {
@@ -1343,12 +1362,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     private openLastFile(level: number, position: string): boolean {
 
         try {
-
             let last = localStorage.getItem('_100554_serviceSource');
             last = last ? last : '{}';
             const info = JSON.parse(last);
             const keyLocal = 'last_' + level + '_' + position;
-
             if (!info[keyLocal]) return false;
 
             const key = mls.l2.editor.getKey(
@@ -1362,7 +1379,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (!model) return false
 
             mls.l2.editor.editors[this.confE] = model;
-
             mls.actual[this.level].setFullName(`_${info[keyLocal].project}_${info[keyLocal].shortName}`);
             (mls.actual[this.level] as any)[position] = {
                 project: model.storFile.project,
@@ -1373,11 +1389,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
             return true;
 
-
         } catch (e) {
-
-            return false
-
+            return false;
         }
 
     }
@@ -1385,24 +1398,16 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     public getActualRef(): string {
 
         try {
-
             let ret = '';
-
             if (!mls.actual[2] || !(mls.actual[2] as any)[this.position]) return ret;
-
             const actual = (mls.actual[2] as any)[this.position];
             const ext = this.menu.lastIcon === 'icTs' ? '.ts' : '.html';
-
             if (!actual) return ret;
-
             ret = mls.stor.getKeyToFiles(actual.project, 2, actual.shortName, actual.folder, ext);
-
             return ret;
 
         } catch (e) {
-
             return '';
-
         }
 
     }
