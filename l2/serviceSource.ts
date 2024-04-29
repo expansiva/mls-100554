@@ -596,7 +596,6 @@ export class ServiceSource100554 extends ServiceBase {
                 arr.push(f);
             });
 
-            console.info(arr);
             await mls.l2.editor.compileAllProjectIfNeed(mls.actual[5].project as number, true, false);
             for await (const storFile of arr) {
                 mls.l2.editor.remove(storFile);
@@ -1192,7 +1191,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (!src) src = "";
         const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src as string).toString(16);
         (model as any)['originalCRC'] = originalCRC;
-        console.info({ src })
         if (src) model.setValue(src);
         if (open && this._ed1) this._ed1.setModel(model);
         return storFileHTML;
