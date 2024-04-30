@@ -23,7 +23,7 @@ export class AimActionTypescriptSpell extends AimActionBase {
 
     private handleCancel() {
         this.dispatchEvent(new CustomEvent('add-task', {
-            detail: { cancel: 'true' }, bubbles: true, composed: true 
+            detail: { cancel: 'true' }, bubbles: true, composed: true
         }));
     }
 
@@ -32,29 +32,29 @@ export class AimActionTypescriptSpell extends AimActionBase {
             mode: 'initializing',
             title: 'verify typescript spell / language',
             widget: myName,
-            children: [ ],
-            trace: [ new Date().toISOString() + ': trask created at ' ]          
+            children: [],
+            trace: [new Date().toISOString() + ': trask created at ']
         }
         tasks.unshift(taskRoot);
         this.prepareTask1(taskRoot);
         this.dispatchEvent(new CustomEvent('finished-add-task-root', {
-            detail: taskRoot, bubbles: true, composed: true 
+            detail: taskRoot, bubbles: true, composed: true
         }));
     }
 
     renderAdd(): TemplateResult { // from abstract
         return html`
-        <p> irá verificar o typescript e procurar por erros de gramática em ingles </p>
+        <p> ${this.messages.template_title}</p>
         <br>
         <div class="buttonGroup">
-          <button @click="${this.handleCancel}">Cancelar</button>
-          <button @click="${this.handleAdd}">Confirmar</button>
+          <button @click="${this.handleCancel}">${this.messages.btn_cancel}</button>
+          <button @click="${this.handleAdd}">${this.messages.btn_confirm}</button>
         </div>
     `;
     }
 
 
-    getPrompt(source: string) {
+    getPrompt2(source: string) {
         const prompt = `
 Objective: Check for spelling errors in English within a TypeScript code snippet and return the findings in a formatted table.\n
 \n
@@ -74,6 +74,14 @@ The output should be clearly formatted as a table for easy reading.\n
 Each spelling mistake should be listed on its own line within the table.\n
 Don't return others comments, return only the table.
 \n\n${source}\n`;
+        return prompt;
+    }
+
+        getPrompt(source: string) {
+        const prompt = `
+${this.messages.prompt_message}
+
+${source}\n`;
         return prompt;
     }
 
@@ -142,6 +150,14 @@ Don't return others comments, return only the table.
         this.mode = taskFinishResult.taskRoot.mode = child.mode;
         this.requestUpdate();
         updateTaskOnServer(taskFinishResult.taskIndex);
+    }
+
+
+    messages = {
+        "template_title": "Irá verificar o typescript e procurar por erros de gramática em ingles",
+        "prompt_message": "Identifique todas as strings literais no seguinte código TypeScript que devem ser preparadas para internacionalização.  Não retornar explicações, apenas retorne uma 'tabela' com as colunas: texto, language (portugues | ingles | ...).",
+        "btn_cancel": "Cancelar",
+        "btn_confirm": "Confirmar",
     }
 
 }

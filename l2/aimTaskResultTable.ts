@@ -18,7 +18,7 @@ export class AimTaskResultTable extends AimTaskBase {
         return html`
         <details open>
             <summary>${title}</summary>
-            <div style='margin: 10px'>${this.renderTable2(this.parseTable(body))}</div> 
+            <div style='margin: 10px'>${this.renderTable2(this.parseTable2(body))}</div> 
         </details>
         `;
     }
@@ -36,7 +36,17 @@ export class AimTaskResultTable extends AimTaskBase {
         return tab1;
     }
 
+    parseTable2(body: string) {
+        const regex = /\|/g;
+        const lines = body.split('\n');
+        const linesWithValues = lines.filter(line => line.trim() !== '');
+        const table = linesWithValues.map(line => line.split(regex));
+        const tableWithNoEspaces = table.map(line => line.map(cel => cel.trim()));
+        return tableWithNoEspaces;
+    }
+
     renderTable2(tab1: string[][]) {
+
         if (tab1.length < 2) return html`invalid table`;
         return html`
         <table class="tb">
