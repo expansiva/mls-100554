@@ -8,6 +8,60 @@ import { PropertyDeclaration } from '_100554_litReactiveElement';
 const isTrace = false;
 const state1 = new IcaState();
 
+/**
+ * Custom decorator to bind properties to multiple data sources dynamically.
+ * @param options - Property options including type and default value.
+ */
+export function propertyCompositeDataSource(options?: PropertyDeclaration) {
+
+  return (proto: any, propName: PropertyKey): any => {
+    // Define a Lit property with provided options.
+    property(options)(proto, propName);
+    const key = String(propName);
+
+    Object.defineProperty(proto, propName, {
+      get() {
+        // Check if attribute contains template literals
+        const attrValue = this.getAttribute(key);
+        if (attrValue && attrValue.includes('{{')) {
+          return this.parseCompositeData(attrValue);
+        }
+        // Default to internal property value
+        return this[`_${key}`];
+      },
+      set(value) {
+        if (typeof value === 'string' && value.includes('{{')) {
+          // Handle template literals for dynamic data binding
+          this[`_${key}`] = this.parseCompositeData(value, true);
+          if (!window.globalStateManagment) window.globalStateManagment = state1;
+
+        } else {
+          // Handle static values
+          this[`_${key}`] = value;
+        }
+        this.requestUpdate();
+      }
+    });
+
+    // Method to parse composite data from template literals
+    proto.parseCompositeData = function (templateStr: string, add: boolean = false) {
+      const pattern = /\{\{(.*?)\}\}/g;
+      let match;
+      let composedData = templateStr;
+      
+      while ((match = pattern.exec(templateStr))) {
+        const stateKey = match[1].trim();
+        if (add && this.hasOwnProperty('stateKeys')) this.stateKeys.add(key + ';' + stateKey);
+        const resolvedValue = state1.getState(stateKey) || '';
+        composedData = composedData.replace(match[0], resolvedValue);
+      }
+
+      return composedData;
+    };
+  };
+}
+
+
 
 
 /**
@@ -41,7 +95,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           const stateKey = value.replace(/[{{}}]/g, '').trim();
           if (this.hasOwnProperty('stateKeys')) this.stateKeys.add(key + ';' + stateKey);
           this[`_${key}`] = state1.getState(stateKey);
-          if(!window.globalStateManagment) window.globalStateManagment = state1;
+          if (!window.globalStateManagment) window.globalStateManagment = state1;
         } else if (typeof value === 'string' && ((value.startsWith('[') || value.startsWith('{')) && (value.endsWith(']') || value.endsWith('}')))) {
           // initialization ex options="[{ key: 'm', value: 'male' }, { key: 'f', value: 'female' }, { key: 'o', value: 'other' }]"
           // Parse JSON string for static data
