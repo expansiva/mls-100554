@@ -1,9 +1,4 @@
 /// <mls shortName="servicePreview" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": ["service-preview-view-100554"]
- * }
- */
 
 // version = 1
 
@@ -13,6 +8,7 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { convertTagToFileName } from './_100554_utilsLit'
 import { initServicePreviewView } from './_100554_servicePreviewView';
 import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
+
 @customElement('service-preview-100554')
 export class ServicePreview100554 extends ServiceBase {
 
@@ -53,6 +49,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opAboutTag') return this.opAboutTag();
+        if (op === 'opVariations') return this.onOpVariationsClick();
+
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -66,7 +64,13 @@ export class ServicePreview100554 extends ServiceBase {
     public onClickButton = (op: string): boolean => {
         if (op === 'btWatch') return this.toogleWatch();
         if (op === 'btEditStyle') return this.editStyles();
+        if (op === 'btVariations') return this.onBtVariationsClick();
         else throw new Error('Invalid option')
+    }
+
+    private onBtVariationsClick() {
+        if (this.menu.setMenuActive) this.menu.setMenuActive('opVariations');
+        return true;
     }
 
     private toogleWatch(): boolean {
@@ -85,14 +89,16 @@ export class ServicePreview100554 extends ServiceBase {
     public menu: IMenu = {
         title: 'Preview',
         actions: {
+            opVariations: 'Variations',
         },
         icons: {
             icPreviewD: 'Desktop;f390',
             icPreviewM: 'Mobile;f3cf'
         },
         buttons: {
+            btVariations: 'Variations;f1ab',
             btEditStyle: 'Edit Styles;f0d0',
-            btWatch: 'Watch;f04c;f04b',
+            btWatch: 'Pause Preview;Update Preview;f04c;f04b',
         },
         actionDefault: '', // call after close icon clicked
         iconDefault: 'icPreviewD',
@@ -241,10 +247,23 @@ export class ServicePreview100554 extends ServiceBase {
 
     private htmlAbout = '';
     private opAboutTag() {
-
         const doc = document.createElement('div');
         doc.innerHTML = this.htmlAbout;
         if (this.menu.setMode) this.menu.setMode('page', doc);
+        return true;
+    }
+
+    private onOpVariationsClick() {
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+        const label = document.createElement('label');
+        label.innerHTML = 'Variation:'
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.value = '0';
+        div.appendChild(label);
+        div.appendChild(input);
+        if (this.menu.setMode) this.menu.setMode('page', div);
         return true;
 
     }
