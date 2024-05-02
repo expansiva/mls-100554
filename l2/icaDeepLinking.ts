@@ -13,6 +13,7 @@ export class IcaDeepLinking100554 extends IcaLitElement {
 
     @property() trace: string[] = [];
 
+    @property() develpoment: boolean = false;
 
     exec(params: Set<IUrlParams>) {
         this.trace.push(`Find elements in page`);
@@ -105,7 +106,7 @@ export class IcaDeepLinking100554 extends IcaLitElement {
       <details>
         <summary>Trace</summary>
         <div style="margin-left:2rem;">
-            <pre style="white-space: pre-line;">
+            <pre style="white-space: pre-line;font-size: 12px;">
                 ${this.trace.join('\n')}
             </pre>
         </div>
@@ -147,11 +148,15 @@ export class IcaDeepLinking100554 extends IcaLitElement {
         }
     }
 
-    render() {
+    renderOptional() {
         return html`
-      ${this.createPrompt()}
-      ${this.createDetailsIcon()}
-    `;
+            ${this.createPrompt()}
+            ${this.createDetailsIcon()}
+        `
+    }
+
+    render() {
+        return html`${this.develpoment ? this.renderOptional() : '' }`;
     }
 
 }
