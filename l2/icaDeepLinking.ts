@@ -17,10 +17,10 @@ export class IcaDeepLinking100554 extends IcaLitElement {
 
     exec(params: Set<IUrlParams>) {
         this.trace.push(`Find elements in page`);
-        this.findElementsInPage(params);
+        this.findAndChangeElementsInPage(params);
     }
 
-    private findElementsInPage(params: Set<IUrlParams>) {
+    private findAndChangeElementsInPage(params: Set<IUrlParams>) {
         const allElements = document.querySelectorAll('*');
         const pathToChange = this.findParameterReferences(allElements, Array.from(params));
         for (let changes of pathToChange) {
