@@ -260,7 +260,13 @@ export class ServicePreview100554 extends ServiceBase {
         label.innerHTML = 'Variation:'
         const input = document.createElement('input');
         input.type = 'number';
-        input.value = '0';
+        input.value = window.globalVariation?.toString() || '0';
+
+        input.onchange = () => {
+            window.globalVariation = +input.value;
+            if (this.menu.closeMenu) this.menu.closeMenu();
+            // this.preview(this.lastMode);
+        };
         div.appendChild(label);
         div.appendChild(input);
         if (this.menu.setMode) this.menu.setMode('page', div);
