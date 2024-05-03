@@ -11,7 +11,8 @@ interface GlobalState {
 declare global {
   interface Window {
     globalState: GlobalState;
-    globalStateManagment:IcaState;
+    globalStateManagment: IcaState;
+    globalVariation: number
   }
 }
 

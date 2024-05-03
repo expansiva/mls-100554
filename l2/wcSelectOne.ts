@@ -8,7 +8,7 @@ import { propertyDataSource, propertyCompositeDataSource, OptionItem } from './_
 @customElement('wc-select-one-100554')
 export class WcSelectOne extends IcaFormsInputSelectOne {
 
-        static styles = css`
+    static styles = css`
     :host {
         display: block;
     }
@@ -30,11 +30,11 @@ export class WcSelectOne extends IcaFormsInputSelectOne {
     }
     `
 
-    @property({ type: String }) hint: string | undefined; 
+    @propertyCompositeDataSource({ type: String }) hint: string | undefined;
     @property({ type: Boolean }) required: boolean = false;
-    @property({ type: Boolean }) disabled: boolean = false; 
-    
-    @propertyCompositeDataSource({ type: String }) label: string | undefined; 
+    @property({ type: Boolean }) disabled: boolean = false;
+
+    @propertyCompositeDataSource({ type: String }) label: string | undefined;
     @propertyDataSource() options: OptionItem[] | undefined;
     @propertyDataSource() selectedvalue: string | undefined;
 
@@ -51,6 +51,7 @@ export class WcSelectOne extends IcaFormsInputSelectOne {
         >
             ${this.renderOpt()}
         </select>
+        <small> ${this.hint || ''}</small>
     `;
     }
 

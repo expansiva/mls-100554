@@ -10,7 +10,6 @@ export class IcaTestPage100554 extends LitElement {
     }`;
 
     render() {
-
         window.globalState = {
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }]
@@ -28,26 +27,8 @@ export class IcaTestPage100554 extends LitElement {
                 sex: 'm'
             }]
         };
-
         return html``;
 
-        return html`
-
-        <div>
-            <h3>Exemplos dinamicos no Render</h3>
-            ${window.globalState.users.map((user: IUser, index: number) => {
-                return html`
-            <div style="padding: 1rem; display:flex; gap:4rem;">
-                <wc-select-one-100554 label="Sexo" options="{{ tables.sex }}" selectedvalue="{{users[${index}].sex}}" username="{{users[${index}].name}}"  ></wc-select-one-100554>
-                <wc-input-text-100554 label="Usuario"  datasource="{{users[${index}].name}}" ></wc-input-text-100554>
-                <wc-input-number-with-buttons-100554 label="Idade:" datasource="{{users[${index}].age}}" errormessage="Idade Invalida" minvalue="0" maxvalue="100"></wc-input-number-with-buttons-100554>
-            </div>
-
-         `
-        })}
-        </div>
-        
-        `;
     }
 }
 

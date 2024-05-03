@@ -1,9 +1,8 @@
 /// <mls shortName="icaLitElement" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { LitElement } from 'lit';
+import { LitElement, PropertyDeclaration } from 'lit';
 import { property } from 'lit/decorators.js';
 import { IcaState } from './_100554_icaState';
-import { PropertyDeclaration } from '_100554_litReactiveElement';
 
 const isTrace = false;
 const state1 = new IcaState();
@@ -22,7 +21,7 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
     Object.defineProperty(proto, propName, {
       get() {
         // Check if attribute contains template literals
-        const attrValue = this.getAttribute(key);
+        const attrValue = this.getAttributeValueWithVariation(key);
         if (attrValue && attrValue.includes('{{')) {
           return this.parseCompositeData(attrValue);
         }
@@ -37,7 +36,7 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
 
         } else {
           // Handle static values
-          this[`_${key}`] = value;
+          this[`_${key}`] = this.getAttributeValueWithVariation(key);
         }
         this.requestUpdate();
       }
@@ -48,21 +47,22 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
       const pattern = /\{\{(.*?)\}\}/g;
       let match;
       let composedData = templateStr;
-      
+
       while ((match = pattern.exec(templateStr))) {
         const stateKey = match[1].trim();
         if (add && this.hasOwnProperty('stateKeys')) this.stateKeys.add(key + ';' + stateKey);
         const resolvedValue = state1.getState(stateKey) || '';
         composedData = composedData.replace(match[0], resolvedValue);
       }
-
       return composedData;
     };
+
+    proto.getAttributeValueWithVariation = function (key: string) {
+      return getAttributeValueWithVariation(key, this);
+    }
+
   };
 }
-
-
-
 
 /**
  * Custom decorator to bind properties either to static data or dynamically from CollabState.
@@ -79,7 +79,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
     Object.defineProperty(proto, propName, {
       get() {
 
-        const attrValue = this.getAttribute(key);
+        const attrValue = this.getAttributeValueWithVariation(key);
         if (attrValue && attrValue.includes('{{') && attrValue.includes('}}')) {
           const stateKey = attrValue.replace(/[{{}}]/g, '').trim();
           return state1.getState(stateKey);
@@ -113,7 +113,28 @@ export function propertyDataSource(options?: PropertyDeclaration) {
         this.requestUpdate();
       }
     });
+
+    proto.getAttributeValueWithVariation = function (key: string) {
+      return getAttributeValueWithVariation(key, this);
+    }
+
   };
+}
+
+/**
+ * Retrieves an attribute value based on the variation.
+ * 
+ * @param key - The key of the attribute.
+ * @param proto - The prototype object containing the attribute.
+ * @returns The value of the attribute, considering the variation, or the default value if no variation is found.
+ */
+function getAttributeValueWithVariation(key: string, proto:any) {
+  const actualVariation = window.globalVariation || 0;
+  const defaultValue = proto.getAttribute(key);
+  if (actualVariation === 0) return defaultValue;
+  const keyVariation = `${key}-${actualVariation}`;
+  const variationValue = proto.getAttribute(keyVariation);
+  return variationValue || defaultValue;
 }
 
 export interface OptionItem {
