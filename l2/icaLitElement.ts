@@ -108,7 +108,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             this[`_${key}`] = value;
             state1.setState(dynamicKey, value); // Notify state changes
           }
-          else this[`_${key}`] = value;
+          else this[`_${key}`] = this.getAttributeValueWithVariation(key);;
         }
         this.requestUpdate();
       }
