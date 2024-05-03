@@ -206,8 +206,7 @@ export interface IButtonsKeyValue {
 export type IClickLinkCallBack = (op: string) => boolean | undefined;
 export type IClickIconCallBack = (op: string) => void | undefined;
 export type IClickTitleCallBack = (title: string) => void | undefined;
-export type IClickButtonCallBack = (op: string) => boolean;
-
+export type IClickButtonCallBack = (op: string, opMenu?:string) => boolean;
 
 export type ISetMode = (mode: IMode | null, page?: HTMLElement) => void;
 export type IGetLastMode = () => IMode;
