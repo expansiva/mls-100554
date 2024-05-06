@@ -26,9 +26,10 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
           return this.parseCompositeData(attrValue);
         }
         // Default to internal property value
-        return this[`_${key}`];
+        return attrValue; 
       },
       set(value) {
+
         if (typeof value === 'string' && value.includes('{{')) {
           // Handle template literals for dynamic data binding
           this[`_${key}`] = this.parseCompositeData(value, true);
@@ -36,7 +37,7 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
 
         } else {
           // Handle static values
-          this[`_${key}`] = this.getAttributeValueWithVariation(key);
+          this[`_${key}`] = value;
         }
         this.requestUpdate();
       }
@@ -85,7 +86,8 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           return state1.getState(stateKey);
         }
         // Default to internal property value
-        return this[`_${key}`];
+        if (typeof this[`_${key}`] === 'object' || Array.isArray(this[`_${key}`])) return this[`_${key}`];
+        return attrValue;
       },
       set(value) {
 
@@ -108,7 +110,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             this[`_${key}`] = value;
             state1.setState(dynamicKey, value); // Notify state changes
           }
-          else this[`_${key}`] = this.getAttributeValueWithVariation(key);;
+          else this[`_${key}`] = value;
         }
         this.requestUpdate();
       }
@@ -128,8 +130,8 @@ export function propertyDataSource(options?: PropertyDeclaration) {
  * @param proto - The prototype object containing the attribute.
  * @returns The value of the attribute, considering the variation, or the default value if no variation is found.
  */
-function getAttributeValueWithVariation(key: string, proto:any) {
-  const actualVariation = window.globalVariation || 0;
+function getAttributeValueWithVariation(key: string, proto: any) {
+  const actualVariation = proto.globalVariation || 0;
   const defaultValue = proto.getAttribute(key);
   if (actualVariation === 0) return defaultValue;
   const keyVariation = `${key}-${actualVariation}`;
@@ -158,6 +160,8 @@ export interface OptionItem {
  * Base class for all components that need to interact with the shared state.
  */
 export class IcaLitElement extends LitElement {
+
+  @property({ type: Number }) globalVariation: number = window.globalVariation || 0;
 
   stateKeys: Set<string> = new Set<string>();
 
@@ -194,6 +198,13 @@ export class IcaLitElement extends LitElement {
       }
     })
 
+  }
+
+  protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
+    super.updated(changedProperties);
+    if (changedProperties.has('globalVariation')) {
+      this.requestUpdate();
+    }
   }
 
 }

@@ -8,7 +8,8 @@ export class IcaTestPage100554 extends LitElement {
     static styles = css`:host {
         display: flex;
     }`;
-    
+
+
     render() {
         window.globalState = {
             tables: {
@@ -31,7 +32,6 @@ export class IcaTestPage100554 extends LitElement {
 
     }
 }
-
 
 interface IUser {
     name: string,

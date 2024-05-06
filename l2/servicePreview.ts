@@ -8,6 +8,7 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { convertTagToFileName } from './_100554_utilsLit'
 import { initServicePreviewView } from './_100554_servicePreviewView';
 import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
+import { IcaLitElement } from './_100554_icaLitElement';
 
 @customElement('service-preview-100554')
 export class ServicePreview100554 extends ServiceBase {
@@ -59,7 +60,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (op === 'icPreviewM') this.preview('m');
     }
 
-    public onClickButton = (op: string, opMenu?:string): boolean => {
+    public onClickButton = (op: string, opMenu?: string): boolean => {
         if (op === 'btWatch') return this.toogleWatch();
         if (op === 'btEditStyle') return this.editStyles();
         if (op === 'btVariations') return this.onBtVariationsClick(opMenu);
@@ -70,7 +71,9 @@ export class ServicePreview100554 extends ServiceBase {
         if (!opMenu) return true;
         const variation = opMenu.substring(0, 1);
         window.globalVariation = !isNaN(+variation) ? +variation : 0;
-        this.preview(this.lastMode);
+        if (window.top) window.top.window.globalVariation = !isNaN(+variation) ? +variation : 0;
+        this.requestUpdateAllIcaComponentsInPage();
+        // this.preview(this.lastMode);
         return true;
     }
 
@@ -270,6 +273,25 @@ export class ServicePreview100554 extends ServiceBase {
         this.elPreview = doc;
         if (this.menu.setMode) this.menu.setMode('page', doc);
         return true;
+
+    }
+
+    private requestUpdateAllIcaComponentsInPage() {
+
+        const elements = this.previousElementSibling
+            ?.querySelector('service-preview-view-100554')
+            ?.shadowRoot
+            ?.querySelector('iframe')
+            ?.contentDocument
+            ?.querySelectorAll('*')
+
+        if (!elements) return;
+
+        elements.forEach((el) => {
+            if (el.tagName.split('-').length > 1 && (el as IcaLitElement).globalVariation !== undefined) {
+                (el as IcaLitElement).globalVariation = window.globalVariation;
+            }
+        })
 
     }
 
