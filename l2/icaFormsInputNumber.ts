@@ -1,25 +1,37 @@
 /// <mls shortName="icaFormsInputNumber" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElement } from './_100554_icaLitElement';
+import { customElement } from 'lit/decorators.js';
+import { IActionLevels } from './_100554_icaGlobal';
+import { IcaLitElementBase, IAllowCommand } from './_100554_icaLitElementBase';
 
-export abstract class IcaFormsInputNumber extends IcaLitElement {
-    
-    abstract hint: string | undefined; // An optional descriptive hint for the field
-	abstract label: string | undefined; // A label to identify this field
-	abstract datasource: number | undefined; // A label to identify this field
-	abstract required: boolean ; // Whether the field is required or optional
-	abstract disabled: boolean ; // Whether the field is ready for input or disabled
-	abstract value: number | undefined; // Indicates whether the browser's autocorrect feature is on or off.
-	abstract widget: string ; // The widget selected in this group/subgroup
-	abstract maxvalue: number | undefined ; // Maximum value restriction for the input
-	abstract minvalue: number | undefined ; // Minimum value restriction for the input
-	abstract step: number | undefined ; // The step increment between values
-	abstract placeholder: string| undefined; // Placeholder text for the input field
-	abstract pattern: string| undefined; // A regular expression that the input's value must match
-	abstract errormessage: string| undefined; // Custom error message to display when input validation fails
-	abstract autofocus: boolean ; // Whether the field should be automatically focused on page load
+@customElement('ica-forms-input-number-100554')
+export abstract class IcaFormsInputNumber extends IcaLitElementBase {
+
+    public mySymbol = 'fa-table-columns';
+
+    public actions: IActionLevels = { '1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': [] }
+
+    public async setActions(level: string) {
+        if (level === '4') {
+            await this.importAction('_100554_wcdToolboxItemActionMove', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionGroup', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, this.level as any);
+        }
+        return;
+    }
+
+    public changeStateHtml(html: string): void {
+
+    }
+
+    public allowCommand(cmd: string, scope: HTMLElement, target: HTMLElement): IAllowCommand {
+        return { inside: false, before: false, after: false };
+    }
+
+    private commandMove(scope: HTMLElement, target: HTMLElement): IAllowCommand {
+        return { inside: false, before: false, after: false };
+    }
 
 }
-
 
 

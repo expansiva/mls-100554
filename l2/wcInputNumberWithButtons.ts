@@ -1,11 +1,11 @@
 /// <mls shortName="wcInputNumberWithButtons" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaFormsInputNumber } from './_100554_icaFormsInputNumber';
-import { propertyDataSource } from './_100554_icaLitElement';
+import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
+import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
 
 @customElement('wc-input-number-with-buttons-100554')
-export class WCInputNumber extends IcaFormsInputNumber {
+export class WCInputNumber extends IcaFormsInputNumberBase {
 
     static styles = css`
     :host {
@@ -61,7 +61,7 @@ export class WCInputNumber extends IcaFormsInputNumber {
 
     @property({ type: String }) placeholder: string | undefined;
 
-    @property({ type: String }) label: string | undefined;
+    @propertyCompositeDataSource({ type: String }) label: string | undefined;
 
     @property({ type: String }) widget: string = '';
 

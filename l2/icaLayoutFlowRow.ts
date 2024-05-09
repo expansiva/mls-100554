@@ -1,12 +1,11 @@
 /// <mls shortName="icaLayoutFlowRow" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { customElement } from 'lit/decorators.js';
-import { IAllowCommand } from './_100554_icaLitElement';
-import { IcaLayoutFlowRowBase } from './_100554_icaLayoutFlowRowBase'
 import { IActionLevels } from './_100554_icaGlobal';
+import { IcaLitElementBase, IAllowCommand } from './_100554_icaLitElementBase';
 
 @customElement('ica-layout-flow-row-100554')
-export abstract class IcaLayoutFlowRow extends IcaLayoutFlowRowBase {
+export abstract class IcaLayoutFlowRow extends IcaLitElementBase {
 
     public mySymbol = 'fa-server';
 

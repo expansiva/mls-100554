@@ -1,6 +1,8 @@
 /// <mls shortName="icaLitElementBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { CollabLitElement, collabState } from './_100554_collabLitElement';
+import { collabState } from './_100554_collabLitElement';
+import { IcaLitElement } from './_100554_icaLitElement';
+
 import * as icaGlobal from './_100554_icaGlobal';
 import * as states from './_100554_icaCollabStore';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
@@ -8,7 +10,8 @@ import { initWCDToolbox, WCDToolbox } from './_100554_wcdToolbox'
 import { html, unsafeHTML } from 'lit';
 import { property } from 'lit/decorators.js';
 
-export abstract class IcaLitElementBase extends CollabLitElement implements IcaLitElementBaseMethods {
+
+export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitElementBaseMethods {
 
     constructor() {
         super();

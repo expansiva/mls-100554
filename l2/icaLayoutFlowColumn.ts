@@ -1,12 +1,11 @@
 /// <mls shortName="icaLayoutFlowColumn" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { customElement } from 'lit/decorators.js';
-import { IAllowCommand } from './_100554_icaLitElement';
-import { IcaLayoutFlowColumnBase } from './_100554_icaLayoutFlowColumnBase'
+import { IcaLitElementBase, IAllowCommand } from './_100554_icaLitElementBase';
 import { IActionLevels } from './_100554_icaGlobal';
 
 @customElement('ica-layout-flow-column-100554')
-export class IcaLayoutFlowColumn extends IcaLayoutFlowColumnBase {
+export class IcaLayoutFlowColumn extends IcaLitElementBase {
 
     public mySymbol = 'fa-table-columns';
 

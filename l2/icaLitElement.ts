@@ -1,19 +1,17 @@
 /// <mls shortName="icaLitElement" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-
 import { property } from 'lit/decorators.js';
 import { state1 } from './_100554_icaDecorators';
-import { IcaLitElementBase } from './_100554_icaLitElementBase'
+import { CollabLitElement } from './_100554_collabLitElement';
 
 export * from './_100554_icaDecorators';
-export * from './_100554_icaLitElementBase'
 
 const isTrace = false;
 
 /**
  * Base class for all components that need to interact with the shared state.
  */
-export abstract class IcaLitElement extends IcaLitElementBase {
+export abstract class IcaLitElement extends CollabLitElement {
 
   @property({ type: Number }) globalVariation: number = window.globalVariation || 0;
 

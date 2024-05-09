@@ -11,7 +11,7 @@ export class WcRow100554 extends IcaLayoutFlowRow {
 
     render() {
         return html`
-        <div style="heigth=100%; width:auto; background:red;">
+        <div style="heigth=100%; width:auto; display:flex; gap:1rem;">
            <slot></slot>
         </div>`; 
     }

@@ -8,7 +8,7 @@ import { IcaLayoutFlowColumn } from './_100554_icaLayoutFlowColumn';
 export class WcColumn100554 extends IcaLayoutFlowColumn {
     render() {
         return html`
-        <div style="heigth=100%; width:auto; background:yellow;">
+        <div>
              <slot></slot>
         </div>`
     }
