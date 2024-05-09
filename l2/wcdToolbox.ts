@@ -3,11 +3,15 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { IActionsToolbox, IActionsToolboxMenu } from './_100554_fcaGlobal';
+import { IActionsToolbox, IActionsToolboxMenu } from './_100554_icaGlobal';
 import { ServiceBase } from './_100554_serviceBase';
-import * as states from './_100554_fcaCollabStore';
+import * as states from './_100554_icaCollabStore';
 
 //version 4
+
+export function initWCDToolbox(){
+    return true;
+}
 
 @customElement('wcd-toolbox-100554')
 export class WCDToolbox extends CollabLitElement {

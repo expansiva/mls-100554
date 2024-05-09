@@ -2,7 +2,7 @@
 
 import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IActionsToolbox } from './_100554_fcaGlobal';
+import { IActionsToolbox } from './_100554_icaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
 
 //version 4

@@ -3,9 +3,9 @@
 declare var Quill: any;
 import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IActionsToolbox } from './_100554_fcaGlobal';
+import { IActionsToolbox } from './_100554_icaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
-import { FcaLitElementBase } from './_100554_fcaLitElementBase'; 
+import { IcaLitElementBase } from './_100554_icaLitElementBase'; 
 
 //version 4
 @customElement('wcd-toolbox-item-action-edit-quill-100554')
@@ -16,7 +16,7 @@ export class WCDToolboxItemActionQuill extends LitElement {
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
-    public elFCA: FcaLitElementBase | undefined;
+    public elFCA: IcaLitElementBase | undefined;
     private elExternal: HTMLElement | undefined;
 
     createRenderRoot() {

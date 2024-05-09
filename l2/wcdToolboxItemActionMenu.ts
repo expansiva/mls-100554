@@ -1,13 +1,13 @@
 /// <mls shortName="wcdToolboxItemActionMenu" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IActionsToolbox } from './_100554_fcaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
+import * as icaGlobal from './_100554_icaGlobal';
 
 //version 4
 
-export const getTemplate = (mode: string = '', position: string = ''): IActionsToolbox => {
+export const getTemplate = (mode: string = '', position: string = ''): icaGlobal.IActionsToolbox => {
 
-    let ret: IActionsToolbox = templateActionMenu.menu as IActionsToolbox;
+    let ret: icaGlobal.IActionsToolbox = templateActionMenu.menu as icaGlobal.IActionsToolbox;
     ret.menuItens = [];
     ret.menuSubItens = [];
     if (position !== '') ret.position = position as any;
@@ -16,7 +16,7 @@ export const getTemplate = (mode: string = '', position: string = ''): IActionsT
         ret.menuSubItens.push(templateActionMenuSub.goToFirstChild);
         ret.menuSubItens.push(templateActionMenuSub.removeMe);
     }
-    return ret as IActionsToolbox;
+    return ret as icaGlobal.IActionsToolbox;
 
 }
 
@@ -49,11 +49,11 @@ const templateActionMenuSub = {
                 if (!parent) return;
                 const tag = parent.tagName.toLowerCase();
 
-                if (!tag.startsWith('fca-')) {
+                if (!tag.startsWith(`${icaGlobal.PREFIX}-`)) {
 
                     goToParent(parent);
 
-                } else if (tag.startsWith('fca-')) {
+                } else if (tag.startsWith(`${icaGlobal.PREFIX}-`)) {
 
                     parent.click();
 
@@ -79,11 +79,11 @@ const templateActionMenuSub = {
                 if (!child) return;
                 const tag = child.tagName.toLowerCase();
 
-                if (!tag.startsWith('fca-')) {
+                if (!tag.startsWith(`${icaGlobal.PREFIX}-`)) {
 
                     goToFirstChild(father, child);
 
-                } else if (tag.startsWith('fca-')) {
+                } else if (tag.startsWith(`${icaGlobal.PREFIX}-`)) {
 
                     father.setAttribute('renderType', 'edit');
                     setTimeout(() => {
@@ -109,11 +109,11 @@ const templateActionMenuSub = {
                 if (!parent) return;
                 const tag = parent.tagName.toLowerCase();
 
-                if (!tag.startsWith('fca-')) {
+                if (!tag.startsWith(`${icaGlobal.PREFIX}-`)) {
 
                     goToParent(parent);
 
-                } else if (tag.startsWith('fca-')) {
+                } else if (tag.startsWith(`${icaGlobal.PREFIX}-`)) {
 
                     return parent;
 
