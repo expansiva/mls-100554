@@ -44,8 +44,9 @@ const templateActionMenuSub = {
         onclick: (e: MouseEvent, wc: WCDToolbox) => {
 
             const goToParent = (el: HTMLElement) => {
-
-                const parent = el.parentElement;
+                
+                let parent = el.parentElement;
+                if (!parent) parent = el.getRootNode() ? (el.getRootNode() as any).host : null;
                 if (!parent) return;
                 const tag = parent.tagName.toLowerCase();
 
@@ -75,9 +76,11 @@ const templateActionMenuSub = {
                 if (el.children.length === 0) return;
                 const findNextIca = (childrens: Element[]): HTMLElement => {
                     const child = childrens.find((item => item.tagName.toLowerCase().startsWith(`${icaGlobal.PREFIX}-`)));
+
                     if (!child) {
                         for (let ch of childrens) {
-                            let next = findNextIca(Array.from(ch.children));
+                            const arrChildren = (Array.from(ch.shadowRoot ? ch.shadowRoot.children : ch.children));
+                            let next = findNextIca(arrChildren);
                             if (!next) continue;
                             return next;
                         }
@@ -85,14 +88,15 @@ const templateActionMenuSub = {
                     return child as HTMLElement;
                 };
 
-                const nextIca = findNextIca(Array.from(el.children));
+                const arrChildren = (Array.from(el.shadowRoot ? el.shadowRoot.children : el.children));
+                const nextIca = findNextIca(arrChildren);
                 if (nextIca) {
                     nextIca.setAttribute('renderType', 'edit');
                     setTimeout(() => {
                         nextIca.click();
                     }, 100);
                 }
-            
+
             }
 
             goToFirstChild(wc.parentElement as HTMLElement, wc.parentElement as HTMLElement);
