@@ -164,11 +164,10 @@ export class WCDToolbox extends CollabLitElement {
     }
 
     private renderActions(arr: IActionsToolbox[]): void {
-
+        if (!arr) return;
         if (!this.shadowRoot) return;
 
         let lastHelper: HTMLElement | undefined;
-
         const allItens = this.shadowRoot.querySelectorAll('*');
         allItens.forEach((i: Element) => {
             if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-aux-background') return;
