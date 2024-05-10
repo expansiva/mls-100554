@@ -2,10 +2,16 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLayoutFlowColumn } from './_100554_icaLayoutFlowColumn';
+import { IcaLayoutFlowColumnBase } from './_100554_icaLayoutFlowColumnBase';
 
 @customElement('wc-column-100554')
-export class WcColumn100554 extends IcaLayoutFlowColumn {
+export class WcColumn extends IcaLayoutFlowColumnBase {
+
+    static styles = css`
+    :host {
+        display: block;
+    }`
+
     render() {
         return html`
         <div>

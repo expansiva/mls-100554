@@ -84,6 +84,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     }
 
     public changeStateStyle(style: {}): void {
+        debugger
         if (!this.styleElMain || !style) return;
         const el = this.querySelector(`${this.widget}:first-child`) as HTMLElement
         if (el) {
@@ -120,7 +121,9 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             e.stopPropagation();
             if ((e.target as HTMLElement).tagName.startsWith('WCD-')) return;
 
-            const all = document.querySelectorAll('*[renderType]');
+            // const all = document.querySelectorAll('*[renderType]');
+            const all = this.findElementsStartingWithIca();
+
             Array.from(all).forEach((i) => {
                 const wcd = i.querySelector('wcd-toolbox-100554');
                 if (wcd) wcd.remove();
@@ -134,10 +137,9 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             }
 
             this.onclick = undefined as any;
-
             if (!this.isLoadMyAction[this.level as any] || this.isLoadMyAction[this.level as any] === false) {
-                await this.setActions(this.level as any);
                 this.isLoadMyAction[this.level as any] = true;
+                await this.setActions(this.level as any);
             }
 
             this.setAttribute('renderType', 'editactive');
@@ -148,17 +150,42 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
     }
 
+    private findElementsStartingWithIca(): Element[] {
+        let elements: Element[] = [];
+        // Function to traverse shadow DOM
+        function traverseShadowRoot(element: Element) {
+            if (element.tagName.toLowerCase().startsWith('ica')) {
+                elements.push(element);
+                return;
+            }
+
+            if (element.shadowRoot) {
+                element.shadowRoot.querySelectorAll('*').forEach((item) => {
+                    traverseShadowRoot(item);
+                })
+            } else {
+                const children = Array.from(element.children);
+                if (children.length > 0) {
+                    children.forEach(child => traverseShadowRoot(child));
+                }
+            }
+        }
+
+        document.body.querySelectorAll('*').forEach((item) => {
+            traverseShadowRoot(item);
+        });
+        return elements;
+    }
+
     shouldUpdate(changedProperties: Map<string, string>): boolean {
 
         // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = não executa o render().
         const oldValue = changedProperties.get('renderType');
         if (oldValue === 'editactive' && this.renderType !== 'editactive') {
-            //verifico se é um wc que esta saindo do estado de active para edit nesse caso tem que limpar o state
             super.setCollabState(states.CHANGESTATE, '');
 
         } else if (changedProperties.get('changeState') !== undefined && this.changeState) {
-            // aviso da alteração do state
-            this.doChangeState(this.changeState);
+            // this.doChangeState(this.changeState);
             return false;
         }
 
@@ -272,7 +299,10 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
                 widgetElement.appendChild(child);
             });
 
-            const slots = Array.from(widgetElement.querySelectorAll(`slot`));
+            const slots = widgetElement.shadowRoot ?
+                Array.from(widgetElement.shadowRoot.querySelectorAll(`slot`)) :
+                Array.from(widgetElement.querySelectorAll(`slot`))
+
             if (!slots || slots.length === 0) return;
             const slotWithoutName = slots.find((slot) => !slot.getAttribute('name'));
 
@@ -297,6 +327,8 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     }
 
     render() {
+
+        this.style.display = 'block';
 
         const attrs = this.getAttributes();
         let code = `
