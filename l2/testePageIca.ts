@@ -2,16 +2,13 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-
 @customElement('teste-page-ica-100554')
 export class IcaTestPage100554 extends LitElement {
-    
 
     static styles = css`:host {
         display: flex;
-    }`;
-
-    
+    }`;    
+        
     render() {
         window.globalState = {
             tables: {

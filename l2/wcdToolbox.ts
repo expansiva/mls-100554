@@ -9,7 +9,7 @@ import * as states from './_100554_icaCollabStore';
 
 //version 4
 
-export function initWCDToolbox(){
+export function initWCDToolbox() {
     return true;
 }
 
@@ -98,7 +98,7 @@ export class WCDToolbox extends CollabLitElement {
             if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-aux-background') return;
             if ((i as any).beforeRemove) (i as any).beforeRemove();
         });
-        
+
     }
 
     public backNavigationScenaryOutdoor(): void {
@@ -156,9 +156,7 @@ export class WCDToolbox extends CollabLitElement {
         else this.renderActions(act);
 
         this.updateBackgroundAuxSize();
-
         if (this.elMain && updataSize === 'size') this.updateSize(this.elMain, this, true);
-
         if (this.elMain && updataSize === 'padding') this.updateBaseNoPadding(this.elMain, this);
 
     }
@@ -431,7 +429,6 @@ export class WCDToolbox extends CollabLitElement {
             elChange.style.display = 'none';
             return
         }
-
         const display = elChange.style.display;
         elChange.style.display = 'none!important';
 
@@ -439,7 +436,7 @@ export class WCDToolbox extends CollabLitElement {
 
         const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom, paddingLeft, paddingRight, fontSize } = window.getComputedStyle(elBase);
 
-        let { width, height} = elBase.getBoundingClientRect();
+        let { width, height } = elBase.getBoundingClientRect();
 
         const heightori = height;
         let left = 0;
@@ -455,10 +452,10 @@ export class WCDToolbox extends CollabLitElement {
 
         height = Math.max(ad3(height, marginTop, marginBottom), ad3(0, paddingTop, paddingBottom));
 
-        
+
         elChange.style.left = `${(left - 1) < 0 ? 0 : (left - 1)}px`;
         elChange.style.top = `${top - 1}px`;
-        
+
         elChange.style.width = `${width + 2}px`;
         elChange.style.height = `${height + 2}px`;
         elChange.style.display = display;
@@ -469,45 +466,45 @@ export class WCDToolbox extends CollabLitElement {
         elChange.style.position = 'absolute';
 
         if ((elBase.style.height && paddingTop) || (paddingTop && paddingBottom)) {
-            elChange.style.top = '-'+(parseInt(paddingTop, 10) + parseInt(fontSize, 10)) + 'px';
-        } else if (paddingTop !== '0px') elChange.style.top = '-'+(heightori - 6) + 'px';
+            elChange.style.top = '-' + (parseInt(paddingTop, 10) + parseInt(fontSize, 10)) + 'px';
+        } else if (paddingTop !== '0px') elChange.style.top = '-' + (heightori - 6) + 'px';
 
         if (paddingLeft !== '0px') elChange.style.left = '-' + parseInt(paddingLeft, 10) + 'px';
-        
+
     }
 
     public updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean): void {
 
-
         if (!elBase) return;
         setTimeout(() => {
+
             const display = elChange.style.display;
             elChange.style.display = 'none!important';
 
-            const ad3 = (n1: number, s1: string, s2: string): number => n1 + parseInt(s1, 10) + parseInt(s2, 10);
+            const icaBase = elBase.parentElement;
+            if (!icaBase) return;
 
+            const ad3 = (n1: number, s1: string, s2: string): number => n1 + parseInt(s1, 10) + parseInt(s2, 10);
             const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom, paddingLeft, paddingRight } = window.getComputedStyle(elBase);
 
-            let { width, height, y, x } = elBase.getBoundingClientRect();
+            let { width, height, y } = elBase.getBoundingClientRect();
+            let topIca = icaBase.getBoundingClientRect().top;
+
 
             let left = 0;
             let top = 0;
             left -= parseInt(marginLeft, 10);
-            top -= parseInt(marginTop, 10);
-            //top = x - height;
-            if (top > 0) top = 0;
-
+            top -=  parseInt(marginTop, 10);
             width = Math.max(ad3(width, marginLeft, marginRight), ad3(0, paddingLeft, paddingRight));
 
             if (width > elBase.ownerDocument.body.clientWidth) width -= 3;
-
             height = Math.max(ad3(height, marginTop, marginBottom), ad3(0, paddingTop, paddingBottom));
 
             const grandFahter = elBase.parentElement && elBase.parentElement.parentElement ? elBase.parentElement.parentElement : undefined;
 
             if (grandFahter) {
                 const display = window.getComputedStyle(grandFahter).display;
-                if (['flex'].includes(display) && elBase.parentElement ) {
+                if (['flex'].includes(display) && elBase.parentElement) {
 
                     const fTop = elBase.parentElement.getClientRects()[0].top;
                     const bTop = elBase.getClientRects()[0].top;
