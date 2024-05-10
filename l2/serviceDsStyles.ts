@@ -3,6 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { convertFileNameToTag } from './_100554_utilsLit';
 
 @customElement('service-ds-styles-100554')
 export class ServiceDsStyles extends ServiceBase {
@@ -105,6 +106,13 @@ export class ServiceDsStyles extends ServiceBase {
     @query('#service_styles_input_comp_styles')
     private inputAddStyles: HTMLInputElement | undefined;
 
+    @query('.container-open-helper')
+    private containerHelpers: HTMLDivElement | undefined;
+
+    @query('.helper')
+    private helperDiv: HTMLDivElement | undefined;
+
+
     public _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
     private timeoutChangesEditorStyle: number = 0;
     private timeoutCursorChangesEditorStyle: number = 0;
@@ -146,7 +154,7 @@ export class ServiceDsStyles extends ServiceBase {
         if (visible && !reinit) {
             this.isComponent = false;
             await this.start1();
-            this.checkComponentOpenInL2();
+            await this.checkComponentOpenInL2();
             return;
         }
 
@@ -196,10 +204,16 @@ export class ServiceDsStyles extends ServiceBase {
     private async checkComponentOpenInL2() {
         // if (!this.isComponent) return;
         const actualL2 = mls.actual[2].getFullName();
-        if (!actualL2) return;
+        if (!actualL2) {
+            this.showStyle();
+            return;
+        }
 
         const { project, path } = mls.actual[2];
-        if (!project || !path) return;
+        if (!project || !path) {
+            this.showStyle();
+            return;
+        };
 
         await this.initDsInstance();
         if (!this.dsInstance) return;
@@ -208,13 +222,13 @@ export class ServiceDsStyles extends ServiceBase {
         const key = mls.stor.getKeyToFiles(project, 3, path, folderFileLess, '.less');
         const file = mls.stor.files[key];
 
-        if (actualL2 === this.componentName && file && file.status === 'changed') return; 
+        if (actualL2 === this.componentName && file && file.status === 'changed') return;
 
         const newCompExist = this.dsInstance?.components.find(actualL2);
         if (!newCompExist) {
             this.showStyle();
             return;
-        }
+        };
 
         const desc: IEditorChangedEventsObj = {
             emitter: 'right',
@@ -233,6 +247,7 @@ export class ServiceDsStyles extends ServiceBase {
             desc: JSON.stringify(desc)
         }
 
+        this.isComponent = true;
         this.isSetStyle = true;
         this.isEventAdd = true;
         this.onDSStyleChanged(params);
@@ -315,8 +330,13 @@ export class ServiceDsStyles extends ServiceBase {
             this.createEditor();
             return;
         }
-
-        this._ed1 = monaco.editor.create(this.c2, mls.editor.conf['style_config'] as monaco.editor.IEditorOptions);
+        //mls.editor.conf['style_config'] as monaco.editor.IEditorOptions
+        this._ed1 = monaco.editor.create(this.c2, {
+            language: 'less',
+            minimap: {
+                enabled: false // Desativa o minimap
+            }
+        });
         this._ed1.onDidChangeCursorPosition((e) => {
 
             if (!this._ed1) return;
@@ -1293,12 +1313,39 @@ export class ServiceDsStyles extends ServiceBase {
         this.c2?.setAttribute('msize', this.msize);
     }
 
+    @property() isHelperContainerOpen: boolean = false;
+
+
+    private async handleOpenHelperClick() {
+        if (!this.containerHelpers) return;
+        if (this.isHelperContainerOpen) {
+            this.containerHelpers.classList.remove('open');
+            this.isHelperContainerOpen = false;
+        } else {
+            this.containerHelpers.classList.add('open');
+            if (this.helperDiv && this.helperDiv.children.length === 0) {
+                await import('./' + '_100554_serviceDsStyleBorder');
+                const tagName = convertFileNameToTag('_100554_serviceDsStyleBorder');
+                const el = document.createElement(tagName);
+                this.helperDiv.appendChild(el);
+            }
+            this.isHelperContainerOpen = true;
+        }
+    }
+
     render() {
+        this.style.position = 'relative';
+        this.style.display = 'block';
+
         return html`
             <style>${this.myStyle}</style>
-            <div class="styles-if-component"
-                style=${this.isComponent ? "display:'';" : "display:none"}
-            >
+            <div class="container-open-helper">
+                <div class="toogle" @click=${this.handleOpenHelperClick}> 
+                    <i class="${this.isHelperContainerOpen ? 'fa fa-chevron-right' : 'fa fa-chevron-left'}"></i>
+                </div>
+                <div class="helper"></div>
+            </div>
+            <div class="styles-if-component" style=${this.isComponent ? "display:'';" : "display:none"}>
                 <select 
                     id="service_styles_select_comp_styles"
                     .selectedIndex=${this.firstStyleIndex}
@@ -1329,6 +1376,43 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private myStyle = `
+
+        .container-open-helper{
+            height: 100%;
+            position: absolute;
+            top: 0;
+            background: #f6f6f6;
+            right: 0;
+            width: 0;
+            z-index: 9999;
+            transition: width 0.5s ease;
+        }
+        .container-open-helper.open{
+            width: 40%;
+        }
+        .container-open-helper.open .helper{
+            opacity: 1;
+        }
+        .container-open-helper .helper{
+            opacity: 0.1;
+            overflow:hidden;
+        }
+        .container-open-helper .toogle{
+            position: absolute;
+            width: 30px;
+            height: 80px;
+            background: #f6f6f6;
+            top: 50%;
+            left: -30px;
+            z-index: 9999;
+            transform: translate(0%, -50%);
+            border-top-left-radius: 5px;
+            cursor: pointer;
+            border-bottom-left-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
         .styles-if-component {
             padding: 6px;
             display: flex;
