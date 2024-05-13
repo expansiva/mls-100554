@@ -130,11 +130,20 @@ export function propertyDataSource(options?: PropertyDeclaration) {
  * @returns The value of the attribute, considering the variation, or the default value if no variation is found.
  */
 function getAttributeValueWithVariation(key: string, proto: any) {
+
+  const htmlLang = document.documentElement.lang;
+  const lang = htmlLang.toLowerCase();
+
   const actualVariation = proto.globalVariation || 0;
+  const languageByVariation = lang;
+  const languageByVariationSimilar = languageByVariation.split('-')[0];
+  
   const defaultValue = proto.getAttribute(key);
   if (actualVariation === 0) return defaultValue;
-  const keyVariation = `${key}-${actualVariation}`;
-  const variationValue = proto.getAttribute(keyVariation);
+  const keyVariation = `${key}-${languageByVariation}`;
+  const keyVariationSimilar = `${key}-${languageByVariationSimilar}`;
+  let variationValue = proto.getAttribute(keyVariation);
+  if(!variationValue) variationValue = proto.getAttribute(keyVariationSimilar);
   return variationValue || defaultValue;
 }
 

@@ -295,6 +295,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     private requestUpdateAllIcaComponentsInPage() {
 
+        console.info('requestUpdateAllIcaComponentsInPage')
+
         const elements = this.previousElementSibling
             ?.querySelector('service-preview-view-100554')
             ?.shadowRoot

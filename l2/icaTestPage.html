@@ -1,4 +1,5 @@
-<ica-deep-linking-100554 develpoment="true" url="https://exemplo.com/user/123?name=Guilherme&age=22&color=green"></ica-deep-linking-100554>
+<ica-deep-linking-100554 develpoment="true" url="https://exemplo.com/user/123?name=Guilherme&age=22&color=green">
+</ica-deep-linking-100554>
 
 <ica-test-page-100554></ica-test-page-100554>
 <h3>Exemplos Dinamicos no HTML</h3>
@@ -6,35 +7,42 @@
 <div style="padding: 1rem; display:flex; gap:4rem;">
 
     <wc-select-one-100554 
-        label="O usuario {{users[0].name}} tem {{users[0].age}} anos e mora em {{users[0].city}}"
-        label-1="The user {{users[0].name}} is {{users[0].age}} years old and lives in {{users[0].city}}."
-        hint="Selecione o sexo do usuario"
-        hint-1="Select the user's gender"
-        options="{{ tables.sex }}" 
-        selectedvalue="{{users[0].sex}}" 
-    ></wc-select-one-100554>
-    <wc-input-text-100554 label="Usuario"  datasource="{{users[0].name}}" ></wc-input-text-100554>
-    <wc-input-text-100554 label="Cidade"  datasource="{{users[0].city}}" ></wc-input-text-100554>
-    <wc-input-number-100554 label="Idade:" datasource="{{users[0].age}}" errormessage="Idade Invalida" minvalue="0" maxvalue="100"></wc-input-number-100554>
+        label-pt="O usuario {{users[0].name}} tem {{users[0].age}} anos e mora em {{users[0].city}}"
+        label="The user {{users[0].name}} is {{users[0].age}} years old and lives in {{users[0].city}}."
+        hint-pt-BR="Selecione o sexo do usuario" 
+        hint="Select the user's gender"
+        options="{{ tables.sex }}"
+        selectedvalue="{{users[0].sex}}
+    "> </wc-select-one-100554>
+    
+    <wc-input-text-100554 label="Usuario" datasource="{{users[0].name}}"></wc-input-text-100554>
+    <wc-input-text-100554 label="Cidade" datasource="{{users[0].city}}"></wc-input-text-100554>
+    <wc-input-number-100554 label="Idade:" datasource="{{users[0].age}}" errormessage="Idade Invalida" minvalue="0"
+        maxvalue="100"></wc-input-number-100554>
 </div>
 <hr>
 
 
 <div style="padding: 1rem; display:flex; gap:4rem;">
-    <wc-select-one-100554 options="{{ tables.sex }}" selectedvalue="{{users[0].sex}}" label="Sexo" ></wc-select-one-100554>
-    <wc-input-number-with-buttons-100554 label="Idade:" datasource="{{users[0].age}}" errormessage="Idade Invalida" minvalue="0" maxvalue="100"></wc-input-number-with-buttons-100554>
+    <wc-select-one-100554 options="{{ tables.sex }}" selectedvalue="{{users[0].sex}}" label="Sexo">
+    </wc-select-one-100554>
+    <wc-input-number-with-buttons-100554 label="Idade:" datasource="{{users[0].age}}" errormessage="Idade Invalida"
+        minvalue="0" maxvalue="100"></wc-input-number-with-buttons-100554>
 </div>
 
 <hr>
 
 <div style="padding: 1rem; display:flex; gap:4rem;">
-    <wc-select-one-100554 options="{{ tables.sex }}" selectedvalue="{{users[0].sex}}" label="Sexo" ></wc-select-one-100554>
-    <wc-input-number-range-100554 label="Idade:" datasource="{{users[0].age}}" errormessage="Idade Invalida" minvalue="0" maxvalue="100"></wc-input-number-range-100554>
+    <wc-select-one-100554 options="{{ tables.sex }}" selectedvalue="{{users[0].sex}}" label="Sexo">
+    </wc-select-one-100554>
+    <wc-input-number-range-100554 label="Idade:" datasource="{{users[0].age}}" errormessage="Idade Invalida"
+        minvalue="0" maxvalue="100"></wc-input-number-range-100554>
 </div>
 
 
 <h3>Exemplos Estatico</h3>
 <div style="padding: 1rem; display:flex; gap:4rem;">
-    <wc-select-one-100554 options='[{ "key": "m", "value": "masculino" }, { "key": "f", "value": "feminino" },{ "key": "o", "value": "outros" }]'></wc-select-one-100554>
+    <wc-select-one-100554
+        options='[{ "key": "m", "value": "masculino" }, { "key": "f", "value": "feminino" },{ "key": "o", "value": "outros" }]'>
+    </wc-select-one-100554>
 </div>
-
