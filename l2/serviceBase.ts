@@ -1,9 +1,10 @@
 /// <mls shortName="serviceBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { LitElement } from 'lit';
+import { CollabState } from './_100554_collabState';
 import { customElement, property, state } from 'lit/decorators.js';
 
-
+const state1 = new CollabState();
 @customElement('service-base-100554')
 export abstract class ServiceBase extends LitElement {
 
