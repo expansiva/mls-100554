@@ -1,12 +1,11 @@
 /// <mls shortName="serviceBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { LitElement } from 'lit';
-import { CollabState } from './_100554_collabState';
+import { CollabLitElement } from './_100554_collabLitElement';
 import { customElement, property, state } from 'lit/decorators.js';
 
-const state1 = new CollabState();
 @customElement('service-base-100554')
-export abstract class ServiceBase extends LitElement {
+export abstract class ServiceBase extends CollabLitElement {
 
     // @property({ type: Number, reflect: true })
     get level(): mls.events.Level { return +(this.getAttribute('level') || 7) as mls.events.Level };
