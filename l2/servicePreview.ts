@@ -67,13 +67,30 @@ export class ServicePreview100554 extends ServiceBase {
         else throw new Error('Invalid option')
     }
 
+    private objVariations: any = {
+        0: 'en-US',
+        1: 'pt-BR'
+    }
+
+    private getIframePreviewHTML(): HTMLHtmlElement | undefined {
+        const htmlEl = this.previousElementSibling
+            ?.querySelector('service-preview-view-100554')
+            ?.shadowRoot
+            ?.querySelector('iframe')
+            ?.contentDocument
+            ?.querySelector('html') as HTMLHtmlElement;
+
+        return htmlEl;
+    }
+
     private onBtVariationsClick(opMenu: string | undefined) {
         if (!opMenu) return true;
+        const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         const variation = opMenu.substring(0, 1);
+        if (htmlEl) htmlEl.lang = this.objVariations[variation];
         window.globalVariation = !isNaN(+variation) ? +variation : 0;
         if (window.top) window.top.window.globalVariation = !isNaN(+variation) ? +variation : 0;
         this.requestUpdateAllIcaComponentsInPage();
-        // this.preview(this.lastMode);
         return true;
     }
 
@@ -99,7 +116,7 @@ export class ServicePreview100554 extends ServiceBase {
             icPreviewM: 'Mobile;f3cf'
         },
         buttons: {
-            btVariations: 'Variations;f1ab:menu:0 - Default,1 - English',
+            btVariations: 'Variations;f1ab:menu:0 - Default,1 - Portugues',
             btEditStyle: 'Edit Styles;f0d0',
             btWatch: 'Pause Preview;Update Preview;f04c;f04b',
         },
