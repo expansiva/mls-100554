@@ -1,12 +1,10 @@
 /// <mls shortName="serviceBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { LitElement } from 'lit';
+import { IcaLitElement } from './_100554_icaLitElement';
 import { customElement, property, state } from 'lit/decorators.js';
-import { convertTagToFileName } from './_100554_utilsLit';
-
 
 @customElement('service-base-100554')
-export abstract class ServiceBase extends LitElement {
+export abstract class ServiceBase extends IcaLitElement {
 
     // @property({ type: Number, reflect: true })
     get level(): mls.events.Level { return +(this.getAttribute('level') || 7) as mls.events.Level };
