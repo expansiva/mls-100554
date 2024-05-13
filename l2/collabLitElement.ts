@@ -1,6 +1,7 @@
 /// <mls shortName="collabLitElement" project="100554" enhancement="_blank" />
 
 import { LitElement } from 'lit';
+import { property } from 'lit/decorators.js';
 import { CollabState } from './_100554_collabState';
 
 const isTrace = false;
@@ -60,6 +61,9 @@ export function collabState(customKey?: string): PropertyDecorator {
  * Class extending LitElement with CollabState functionality.
  */
 export class CollabLitElement extends LitElement {
+
+  @property({ type: Number }) globalVariation: number = window.globalVariation || 0;
+
   /**
    * Update shared state.
    * @param key - The state key to update.
@@ -73,6 +77,14 @@ export class CollabLitElement extends LitElement {
     super.requestUpdate()
   }
 
+
+  protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
+    super.updated(changedProperties);
+    if (changedProperties.has('globalVariation')) {
+      this.requestUpdate();
+    }
+  }
+
   getMessage(messages: any): any {
     const htmlLang = document.documentElement.lang;
     const lang = htmlLang.toLowerCase();
@@ -80,7 +92,7 @@ export class CollabLitElement extends LitElement {
     if (messages.hasOwnProperty(lang)) {
       return messages[lang];
     }
-    
+
     const similarLang = Object.keys(messages).find(key => lang.indexOf(key) > -1);
     if (similarLang) {
       return messages[similarLang];

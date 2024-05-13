@@ -1,6 +1,5 @@
 /// <mls shortName="icaLitElement" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { property } from 'lit/decorators.js';
 import { state1 } from './_100554_icaDecorators';
 import { CollabLitElement } from './_100554_collabLitElement';
 
@@ -13,7 +12,6 @@ const isTrace = false;
  */
 export abstract class IcaLitElement extends CollabLitElement {
 
-  @property({ type: Number }) globalVariation: number = window.globalVariation || 0;
 
   stateKeys: Set<string> = new Set<string>();
 
@@ -50,13 +48,6 @@ export abstract class IcaLitElement extends CollabLitElement {
       }
     })
 
-  }
-
-  protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
-    super.updated(changedProperties);
-    if (changedProperties.has('globalVariation')) {
-      this.requestUpdate();
-    }
   }
 
 }
