@@ -268,6 +268,10 @@ export class ServicePreviewView extends LitElement {
             this.setMyFile();
             await this.setHTml(iframe);
             iframe.style.display = '';
+            
+            const html = iframe.contentDocument?.querySelector('html');
+            if (html) html.lang = 'en-US';
+
             this.showLoader(false);
         } catch (e: any) {
             this.error = e.message;
