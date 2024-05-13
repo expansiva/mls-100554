@@ -4,20 +4,42 @@ import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+    updateChanges: 'Atualizar alterações',
+    comments: 'Comentários',
+    update: 'Atualizar',
+    fileChanges: 'Alterações de arquivos',
+    noItemsToSave: 'Nenhum item para salvar'
+}
+
+const message_en = {
+    updateChanges: 'Update Changes',
+    comments: 'Comments',
+    update: 'Update',
+    fileChanges: 'File Changes',
+    noItemsToSave: 'No items to save'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    en: message_en,
+    pt: message_pt
+}
+
 @customElement('service-save-100554')
 export class ServiceSave extends ServiceBase {
+
+    private myMessage: MessageType = this.getMessage(messages);
 
     @property() itens: any = undefined;
 
     @property() error: string = '';
 
     constructor() {
-
         super();
         this.setEvents();
     }
-    
-    
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
@@ -124,6 +146,8 @@ export class ServiceSave extends ServiceBase {
 
     render() {
 
+        this.myMessage = this.getMessage(messages);
+
         if (this.error !== '') {
 
             setTimeout(() => this.error = '', 3000);
@@ -139,7 +163,7 @@ export class ServiceSave extends ServiceBase {
     renderHeader() {
         return html`
             <i class="fa fa-floppy-disk"></i>
-            <span>${this.myMsg.updateChanges}</span>    
+            <span>${this.myMessage.updateChanges}</span>    
         
         `
     }
@@ -148,7 +172,7 @@ export class ServiceSave extends ServiceBase {
     renderNoItens() {
         return html`
             <sectionnosave>
-                <span>${this.myMsg.noItemsToSave}</span> 
+                <span>${this.myMessage.noItemsToSave}</span> 
             </sectionnosave>  
         
         `
@@ -161,14 +185,14 @@ export class ServiceSave extends ServiceBase {
             <sectionsave>
                 <div id="Save_menu_action" style="display:flex;">
                     <div style="width:100%;" >
-                        <h4 class="mt-3">${this.myMsg.comments}:</h4>
+                        <h4 class="mt-3">${this.myMessage.comments}:</h4>
                         <textarea id="commitMessage" class="form-control" style="width:95%;" rows="2" maxlength="50"></textarea>
                     </div>
                     <div id="div_btn_save" class="text-right" style="width:79px; display: flex; align-items: self-end;">
-                        <button id="btn_save" class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMsg.update}</button>
+                        <button id="btn_save" class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
                     </div>
                 </div>
-                <h4 class="mt-3" data-mlsline="23">${this.myMsg.fileChanges}</h4>
+                <h4 class="mt-3" data-mlsline="23">${this.myMessage.fileChanges}</h4>
                 <ul>
                     ${repeat(
             keys,
@@ -325,7 +349,6 @@ export class ServiceSave extends ServiceBase {
     private async init() {
 
         this.showLoader(true);
-        this.updateMyMessages();
         await this.setInfos();
         this.showLoader(false);
 
@@ -751,26 +774,6 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.updateChanges) this.myMsg.updateChanges = m.updateChanges;
-        if (m.comments) this.myMsg.comments = m.comments;
-        if (m.update) this.myMsg.update = m.update;
-        if (m.fileChanges) this.myMsg.fileChanges = m.fileChanges;
-        if (m.noItemsToSave) this.myMsg.noItemsToSave = m.noItemsToSave;
-
-    }
-
-    private myMsg = {
-        updateChanges: 'Update Changes',
-        comments: 'Comments',
-        update: 'Update',
-        fileChanges: 'File Changes',
-        noItemsToSave: 'No items to save'
-    }
 
 }
 

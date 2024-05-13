@@ -13,6 +13,9 @@ const message_pt = {
     selectadd: 'por favor selecione abaixo para adicionar',
     allTasksLast: 'Todas as tarefas, últimas',
     user: 'Usuário',
+    all: 'Todos',
+    ref: 'Ref',
+    add: 'Adicionar',
     notFoundReference: 'Referência não encontrada',
     tasksByReference: 'Tarefas por referência',
     noActionsToAdd: 'Nenhuma ação para adicionar',
@@ -23,6 +26,9 @@ const message_en = {
     selectadd: 'please select below to add',
     allTasksLast: 'All Tasks, last',
     user: 'User',
+    all: 'All',
+    ref: 'Ref',
+    add: 'Add',
     notFoundReference: 'Not found reference',
     tasksByReference: 'Tasks by reference',
     noActionsToAdd: 'No Actions to Add',
@@ -109,10 +115,10 @@ export class ServiceAim100554 extends ServiceBase {
             opColumns: 'Columns',
         },
         icons: {
-            All: 'All;f560',
-            User: 'User;f007',
-            Ref: 'Ref;f15b',
-            Add: 'Add;2b'
+            All: `${this.myMessage.all};f560`,
+            User: `${this.myMessage.user};f007`,
+            Ref: `${this.myMessage.ref};f15b`,
+            Add: `${this.myMessage.add};2b`
         },
         actionDefault: '', // call after close icon clicked
         iconDefault: 'All',
