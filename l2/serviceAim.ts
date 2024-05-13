@@ -10,6 +10,8 @@ import { findActions, ResponseFindActions } from './_100554_aimActionBase';
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
 
+    private myMessage: MessageType = this.getMessage(messages) ;
+
     constructor() {
         super();
         this.setEvents();
@@ -59,7 +61,7 @@ export class ServiceAim100554 extends ServiceBase {
     get invertedPosition() { return this.position === 'left' ? 'right' : 'left' };
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-    static message = `[[mls_DS_messages_local_language]]`; // todo: test
+    //static message = `[[mls_DS_messages_local_language]]`; // todo: test
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opColumns') return this.showConfigColumns();
@@ -151,9 +153,9 @@ export class ServiceAim100554 extends ServiceBase {
         const orderned = this.sortKey(tasks);
         if (mls.istrace) console.log(`serviceAim, renderAll`);
 
-        if (this.isloading) return html`<span>Loading...</span>`
+        if (this.isloading) return html`<span>${this.myMessage.loading}</span>`
         return html`
-        <h4 class='title'>All Tasks, last (${tasks.length})</h4>
+        <h4 class='title'>${this.myMessage.allTasksLast} (${tasks.length})</h4>
             ${repeat(
             orderned,
             ((task: cbe.ITaskRoot, index: number) => task.key) as any,
@@ -174,7 +176,7 @@ export class ServiceAim100554 extends ServiceBase {
         }
         const orderned = this.sortKey(tasks);
         return html`
-        <h4 class='title'>User: ${userName} </h4>
+        <h4 class='title'>${this.myMessage.user}: ${userName} </h4>
             ${repeat(
             orderned,
             ((task: cbe.ITaskRoot, index: number) => index) as any,
@@ -211,12 +213,12 @@ export class ServiceAim100554 extends ServiceBase {
         });
 
         return html`
-            <h4 class='title'>Tasks by Reference </h4>
+            <h4 class='title'>${this.myMessage.tasksByReference} </h4>
                 ${verifyOrderned.length > 0 ? repeat(
             orderned,
             ((task: cbe.ITaskRoot, index: number) => index) as any,
             ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
-        ) : html`<h4>Not found reference</h4>`}
+        ) : html`<h4>${this.myMessage.notFoundReference}</h4>`}
         `;
     }
 
@@ -335,10 +337,10 @@ export class ServiceAim100554 extends ServiceBase {
 
         return html`
         <div class='addTab' >
-          <h4 class='title'>Select Action to Add : ${this.actualServiceOpName}</h4>
+          <h4 class='title'>${this.myMessage.selectadd} : ${this.actualServiceOpName}</h4>
           <div class='ActionItemContainer'  style=${styleMap(showListStyle)}>
             ${filteredActions.length === 0
-                ? html`<div class="no-actions" style="color: #fff;">No Actions to Add</div>`
+                ? html`<div class="no-actions" style="color: #fff;">${this.myMessage.noActionsToAdd}</div>`
                 : renderItems()
             }
           </div>
@@ -407,7 +409,7 @@ export class ServiceAim100554 extends ServiceBase {
         this.stateColumns = getUserConfigs();
         const keys = Object.keys(this.stateColumns);
         return html`
-            Select the columns you want to view
+            ${this.myMessage.selectColumnsYouWant}
             <div style="padding:0 1rem;">
                 ${keys.map((key: string) => {
             const isChecked = (this.stateColumns as any)[key] === true;
@@ -479,3 +481,31 @@ export class ServiceAim100554 extends ServiceBase {
 }
 
 type ITabType = 'All' | 'User' | 'Ref' | 'Add' | 'Loading'
+
+const message_pt = {
+    loading: 'Carregando...',
+    selectadd: 'por favor selecione abaixo para adicionar',
+    allTasksLast: 'Todas as tarefas, por último',
+    user: 'Usuário',
+    notFoundReference: 'Referência não encontrada',
+    tasksByReference: 'Tarefas por referência',
+    noActionsToAdd: 'Nenhuma ação para adicionar',
+    selectColumnsYouWant: 'Selecione as colunas que deseja visualizar'
+}
+const message_en = {
+    loading: 'Loading...',
+    selectadd: 'please select below to add',
+    allTasksLast: 'All Tasks, last',
+    user: 'User',
+    notFoundReference: 'Not found reference',
+    tasksByReference: 'Tasks by reference',
+    noActionsToAdd: 'No Actions to Add',
+    selectColumnsYouWant:'Select the columns you want to view'
+}
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    en: message_en,
+    pt: message_pt
+}
+
