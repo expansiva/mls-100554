@@ -263,14 +263,19 @@ export class ServicePreviewView extends LitElement {
         this.init(iframe);
     }
 
+    private objVariations: any = {
+        0: 'en-US',
+        1: 'pt-BR'
+    }
+
     private async init(iframe: HTMLIFrameElement) {
         try {
             this.setMyFile();
             await this.setHTml(iframe);
             iframe.style.display = '';
-            
+
             const html = iframe.contentDocument?.querySelector('html');
-            if (html) html.lang = 'en-US';
+            if (html) html.lang = this.objVariations[window.globalVariation] || 'en-US';
 
             this.showLoader(false);
         } catch (e: any) {
