@@ -7,6 +7,33 @@ import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { tasks, readTasksFromServer, getUserConfigs, saveUserConfigs, IAimColums } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
 
+
+const message_pt = {
+    loading: 'Carregando...',
+    selectadd: 'por favor selecione abaixo para adicionar',
+    allTasksLast: 'Todas as tarefas, por último',
+    user: 'Usuário',
+    notFoundReference: 'Referência não encontrada',
+    tasksByReference: 'Tarefas por referência',
+    noActionsToAdd: 'Nenhuma ação para adicionar',
+    selectColumnsYouWant: 'Selecione as colunas que deseja visualizar'
+}
+const message_en = {
+    loading: 'Loading...',
+    selectadd: 'please select below to add',
+    allTasksLast: 'All Tasks, last',
+    user: 'User',
+    notFoundReference: 'Not found reference',
+    tasksByReference: 'Tasks by reference',
+    noActionsToAdd: 'No Actions to Add',
+    selectColumnsYouWant:'Select the columns you want to view'
+}
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    en: message_en,
+    pt: message_pt
+}
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
 
@@ -481,31 +508,3 @@ export class ServiceAim100554 extends ServiceBase {
 }
 
 type ITabType = 'All' | 'User' | 'Ref' | 'Add' | 'Loading'
-
-const message_pt = {
-    loading: 'Carregando...',
-    selectadd: 'por favor selecione abaixo para adicionar',
-    allTasksLast: 'Todas as tarefas, por último',
-    user: 'Usuário',
-    notFoundReference: 'Referência não encontrada',
-    tasksByReference: 'Tarefas por referência',
-    noActionsToAdd: 'Nenhuma ação para adicionar',
-    selectColumnsYouWant: 'Selecione as colunas que deseja visualizar'
-}
-const message_en = {
-    loading: 'Loading...',
-    selectadd: 'please select below to add',
-    allTasksLast: 'All Tasks, last',
-    user: 'User',
-    notFoundReference: 'Not found reference',
-    tasksByReference: 'Tasks by reference',
-    noActionsToAdd: 'No Actions to Add',
-    selectColumnsYouWant:'Select the columns you want to view'
-}
-type MessageType = typeof message_en;
-
-const messages: { [key: string]: MessageType } = {
-    en: message_en,
-    pt: message_pt
-}
-

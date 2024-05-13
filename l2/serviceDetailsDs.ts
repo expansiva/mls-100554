@@ -4,8 +4,44 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+    resume: 'Resumo',
+    name: 'Nome',
+    createdBy: 'Criado por',
+    lastUpdated:'Última atualização',
+    lastUpdatedBy: 'Última atualização por',
+    documentation: 'Documentação',
+    tokens:'Tokens',
+    assets: 'Ativos',
+    components: 'Componentes',
+    style:'Estilo'
+}
+
+const message_en = {
+    resume: 'Resume',
+    name: 'Name',
+    createdBy: 'Created By',
+    lastUpdated:'Last Updated',
+    lastUpdatedBy: 'Last updated by',
+    documentation: 'Documentation',
+    tokens:'Tokens',
+    assets: 'Assets',
+    components: 'Components',
+    style:'Style'
+    
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    en: message_en,
+    pt: message_pt
+}
+
 @customElement('service-details-ds-100554')
 export class ServiceDetailsDs100554 extends ServiceBase {
+
+    private myMessage: MessageType = this.getMessage(messages) ;
 
     constructor() {
         super();
@@ -154,51 +190,51 @@ export class ServiceDetailsDs100554 extends ServiceBase {
         return html`
             <div class="mls-ds-resume">
                 <details open="open">
-                    <summary>Resume</summary>
+                    <summary>${this.myMessage.resume}</summary>
                     <ul>
                         <li>
                             <i class="fa fa-file-signature"></i>
-                            <span>Name:</span>
+                            <span>${this.myMessage.name}:</span>
                             <span>${this.state.name}</span>
                         </li>
                         <li>
                             <i class="fa fa-user"></i>
-                            <span>Created By:</span>
+                            <span>${this.myMessage.createdBy}:</span>
                             <span>${this.state.createdBy}</span>
                         </li>
                         <li>
                             <i class="fa fa-calendar-days"></i>
-                            <span>Last Updated:</span>
+                            <span>${this.myMessage.lastUpdated}:</span>
                             <span>${this.state.lastUpdated}</span>
                         </li>
                         <li>
                             <i class="fa fa-regular fa-user"></i>
-                            <span>Last Updated By:</span>
+                            <span>${this.myMessage.lastUpdatedBy}:</span>
                             <span>${this.state.lastUpdatedBy}</span>
                         </li>
                         <li>
                             <i class="fa fa-book"></i>
-                            <span>Documentation:</span>
+                            <span>${this.myMessage.documentation}:</span>
                             <a href="#"  @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100554_serviceDsDocList') }}> ${this.state.documentation} docs </a>
                         </li>
                         <li>
                             <i class="fa fa-list-check"></i>
-                            <span>Tokens:</span>
+                            <span>${this.myMessage.tokens}:</span>
                             <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100554_serviceDsTokens') }}>${this.state.tokens} tokens</a>
                         </li>
                         <li>
                             <i class="fa fa-folder-tree"></i>
-                            <span>Assets:</span>
+                            <span>${this.myMessage.assets}:</span>
                             <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_assets') }}>${this.state.assets} assets </a>
                         </li>
                         <li>
                             <i class="fa fa-cubes"></i>
-                            <span>Components:</span>
+                            <span>${this.myMessage.components}:</span>
                             <a href="#"" @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100554_serviceDsComponentsList') }}>${this.state.components} components </a>
                         </li>
                         <li>
                             <i class="fa fa-pen-nib"></i>
-                            <span>Style:</span>
+                            <span>${this.myMessage.style}:</span>
                             <a href="#""  @click=${(e: MouseEvent) => { e.preventDefault(); this.onLinkClick('_100529_service_styles') }}>${this.state.style} lines</a>
                         </li>
                     </ul>
@@ -220,4 +256,3 @@ interface IState {
     style: number | undefined,
 
 }
-
