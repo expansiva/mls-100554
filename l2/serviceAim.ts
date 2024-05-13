@@ -54,6 +54,8 @@ export class ServiceAim100554 extends ServiceBase {
 
     render() {
 
+        this.myMessage = this.getMessage(messages);
+
         if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
         if (this.actionToOpen) this.activeTab = 'Add'
         switch (this.activeTab) {
@@ -252,7 +254,7 @@ export class ServiceAim100554 extends ServiceBase {
     actions: ResponseFindActions[] = [];
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {
-
+        super.update(changedProperties);
         if (!changedProperties.has('activeTab')) return;
         switch (this.activeTab) {
             case 'All':
