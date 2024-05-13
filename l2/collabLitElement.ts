@@ -1,6 +1,6 @@
 /// <mls shortName="collabLitElement" project="100554" enhancement="_blank" />
-				
-import { LitElement } from 'lit'; 
+
+import { LitElement } from 'lit';
 import { CollabState } from './_100554_collabState';
 
 const isTrace = false;
@@ -16,7 +16,7 @@ export function collabState(customKey?: string): PropertyDecorator {
 
     const { connectedCallback, disconnectedCallback } = proto as any;
 
-    (proto as any).connectedCallback = function() {
+    (proto as any).connectedCallback = function () {
       if (isTrace) console.log('connectedCallback, key=' + key);
       connectedCallback?.call(this);
       state1.subscribe(key, this);
@@ -24,7 +24,7 @@ export function collabState(customKey?: string): PropertyDecorator {
       // this[propertyKey] = value !== undefined ? value : this[propertyKey];
     };
 
-    (proto as any).disconnectedCallback = function() {
+    (proto as any).disconnectedCallback = function () {
       if (isTrace) console.log('disconnectedCallback, key=' + key);
       disconnectedCallback?.call(this);
       state1.unsubscribe(key, this);
@@ -71,6 +71,23 @@ export class CollabLitElement extends LitElement {
 
   collabRequestUpdate() {
     super.requestUpdate()
+  }
+
+  getMessage(messages: any): any {
+    const htmlLang = document.documentElement.lang;
+    const lang = htmlLang.toLowerCase();
+
+    if (messages.hasOwnProperty(lang)) {
+      return messages[lang];
+    }
+    
+    const similarLang = Object.keys(messages).find(key => lang.indexOf(key) > -1);
+    if (similarLang) {
+      return messages[similarLang];
+    }
+
+    const firstKey = Object.keys(messages)[0];
+    return messages[firstKey] || '';
   }
 }
 

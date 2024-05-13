@@ -13,7 +13,6 @@ declare global {
     globalState: GlobalState;
     globalStateManagment: IcaState;
     globalVariation: number;
-    globalLanguage: string;
   }
 }
 
