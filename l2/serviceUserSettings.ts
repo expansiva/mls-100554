@@ -26,11 +26,6 @@ export class ServiceUserSettings100554 extends ServiceBase {
 
     private myMessage: MessageType = this.getMessage(messages);
 
-    constructor() {
-        super();
-        this.setMessages();
-    }
-
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
@@ -72,14 +67,6 @@ export class ServiceUserSettings100554 extends ServiceBase {
         }
     }
 
-    private async setMessages() {
-        this.getUserSettings();
-        const defaultLang = this.getUserDefault();
-        const lang = this.actualLanguage === 'default' ? defaultLang : this.actualLanguage;
-        const htmlEl = document.documentElement;
-        if (htmlEl) htmlEl.lang = lang;
-    }
-
     private getUserSettings() {
         const userSettings = localStorage.getItem('userSettings');
         if (!userSettings) {
@@ -107,14 +94,14 @@ export class ServiceUserSettings100554 extends ServiceBase {
     }
 
     private getNavigatorLanguage() {
-        const lg = navigator.language ? navigator.language.split('-')[0] : '';
+        const lg = navigator.language ? navigator.language : '';
         return lg;
     };
 
     private getUserDefault(): ILanguage {
         const navigatorLanguage = this.getNavigatorLanguage();
-        const acceptLanguages = ['en', 'pt'];
-        const defaultLang = acceptLanguages.includes(navigatorLanguage) ? navigatorLanguage : 'en';
+        const acceptLanguages = ['en-US', 'pt-BR'];
+        const defaultLang = acceptLanguages.includes(navigatorLanguage) ? navigatorLanguage : 'en-US';
         return defaultLang as ILanguage;
     }
 
@@ -125,26 +112,20 @@ export class ServiceUserSettings100554 extends ServiceBase {
         location.reload();
     }
 
-    private msg = {
-        languageLabel: 'Linguagens',
-        alterarLabel: 'Alterar',
-    }
-
     render() {
-
         this.myMessage = this.getMessage(messages);
         this.getUserSettings();
         return html`
         <section>
             <details> 
-                <summary>${this.msg.languageLabel}</summary>
+                <summary>${this.myMessage.languageLabel}</summary>
                 <div>
                     <select style="width:200px" .value=${this.actualLanguage} class="select-language">
                         <option value="default">Default</option>
                         <option value="pt-BR">pt-BR</option>
                         <option value="en-US">en-US</option>
                     </select>
-                    <button style="margin-top:1rem" @click=${this.handleChanceLanguageClick}>${this.msg.alterarLabel}</button>
+                    <button style="margin-top:1rem" @click=${this.handleChanceLanguageClick}>${this.myMessage.alterarLabel}</button>
                 </div>
             </details>
         </section>
