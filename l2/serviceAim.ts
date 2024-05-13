@@ -11,7 +11,7 @@ import { findActions, ResponseFindActions } from './_100554_aimActionBase';
 const message_pt = {
     loading: 'Carregando...',
     selectadd: 'por favor selecione abaixo para adicionar',
-    allTasksLast: 'Todas as tarefas, por último',
+    allTasksLast: 'Todas as tarefas, últimas',
     user: 'Usuário',
     notFoundReference: 'Referência não encontrada',
     tasksByReference: 'Tarefas por referência',
