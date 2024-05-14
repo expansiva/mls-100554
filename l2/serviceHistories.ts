@@ -4,9 +4,28 @@ import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+    loading: 'Carregando...',
+    noHistoriesSelected: 'Nenhum historico selecionado',
+}
+
+const message_en = {
+    loading: 'Loading...',
+    noHistoriesSelected: 'No histories selected',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-histories-100554')
 export class ServiceHistories100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     constructor() {
         super();
         mls.events.addEventListener([2], ['HistoriesSelected' as any], (ev) => this.onSelectHistories(ev));
@@ -167,8 +186,8 @@ export class ServiceHistories100554 extends ServiceBase {
 
         if (visible) {
             this.createEditor();
-            this.setInitialHistories('Loading...', 'Loading...');
-            if (!this.fileInfo) this.setInitialHistories('No histories selected', 'No histories selected');
+            this.setInitialHistories(this.msg.loading, this.msg.loading);
+            if (!this.fileInfo) this.setInitialHistories(this.msg.noHistoriesSelected, this.msg.noHistoriesSelected);
             setTimeout(() => {
                 if (el && typeof el.layout === 'function') el.layout();
             }, 100)
@@ -184,6 +203,10 @@ export class ServiceHistories100554 extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html`
             <mls-editor-100529 ismls2="true"></mls-editor-100529>
         `
