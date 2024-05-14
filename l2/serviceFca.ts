@@ -4,10 +4,25 @@ import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initCollabFCATree } from './_100554_collabFcaTree';
-//teste
+
+const message_pt = {
+}
+
+const message_en = {
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-fca-100554')
 export class ServiceFca100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     static styles = css``
 
     @property()
@@ -101,7 +116,7 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     renderProperties() {
-        return html`<div>In develpoment: Properties</div>`;
+        return html`<div>In development: Properties</div>`;
     }
 
     renderStyles() {
@@ -109,7 +124,7 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     renderAnimation() {
-        return html`<div>In develpoment: Animation</div>`;
+        return html`<div>In development: Animation</div>`;
     }
 
     renderAboutFCA() {
