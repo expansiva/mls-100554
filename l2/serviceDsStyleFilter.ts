@@ -11,9 +11,43 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 
+const message_pt = {
+    loading: 'Carregando...',
+    grayscale: 'Tons de cinza',
+    blur: 'Desfoque',
+    sepia: 'Sepia',
+    saturate: 'Saturar',
+    opacity: 'Opacidade',
+    brightness: 'Brilho',
+    contrast: 'Contraste',
+    hueRotate: 'Rotação de matiz',
+    invert: 'Inverter',
+}
+
+const message_en = {
+    loading: 'Loading...',
+    grayscale: 'Grayscale',
+    blur: 'Blur',
+    sepia: 'Sepia',
+    saturate: 'Saturate',
+    opacity: 'Opacity',
+    brightness: 'Brightness',
+    contrast: 'Contrast',
+    hueRotate: 'Hue-rotate',
+    invert: 'Invert',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
 @customElement('service-ds-style-filter-100554')
 export class ServiceDsStyleFilter extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     private filter = {
         grayscale: '',
         blur: '',
@@ -143,15 +177,16 @@ export class ServiceDsStyleFilter extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.updateMyMessages();
-
-
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html` ${this.opened ?
             html`${this.renderFilter()}${this.renderGallery()}` :
-            html`Loading...`
+            html`${this.msg.loading}`
             } 
         `;
     }
@@ -161,39 +196,39 @@ export class ServiceDsStyleFilter extends ServiceBase {
         return html`
             <div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.grayscale}</span>
+                    <span>${this.msg.grayscale}</span>
                     <collab-ds-input-range-100554 prop="grayscale" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.blur}</span>
+                    <span>${this.msg.blur}</span>
                     <collab-ds-input-range-100554 prop="blur" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.sepia}</span>
+                    <span>${this.msg.sepia}</span>
                     <collab-ds-input-range-100554 prop="sepia" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.saturate}</span>
+                    <span>${this.msg.saturate}</span>
                     <collab-ds-input-range-100554 prop="saturate" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.opacity}</span>
+                    <span>${this.msg.opacity}</span>
                     <collab-ds-input-range-100554 prop="opacity" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.brightness}</span>
+                    <span>${this.msg.brightness}</span>
                     <collab-ds-input-range-100554 prop="brightness" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.contrast}</span>
+                    <span>${this.msg.contrast}</span>
                     <collab-ds-input-range-100554 prop="contrast" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.hueRotate}</span>
+                    <span>${this.msg.hueRotate}</span>
                     <collab-ds-input-range-100554 prop="huerotate" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.invert}</span>
+                    <span>${this.msg.invert}</span>
                     <collab-ds-input-range-100554 prop="invert" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
             </div>
@@ -396,34 +431,6 @@ export class ServiceDsStyleFilter extends ServiceBase {
 
     ];
 
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.grayscale) this.myMsg.grayscale = m.grayscale;
-        if (m.blur) this.myMsg.blur = m.blur;
-        if (m.sepia) this.myMsg.sepia = m.sepia;
-        if (m.saturate) this.myMsg.saturate = m.saturate;
-        if (m.opacity) this.myMsg.opacity = m.opacity;
-        if (m.brightness) this.myMsg.brightness = m.brightness;
-        if (m.contrast) this.myMsg.contrast = m.contrast;
-        if (m.hueRotate) this.myMsg.hueRotate = m.hueRotate;
-        if (m.invert) this.myMsg.invert = m.invert;
-
-    }
-
-    private myMsg = {
-        grayscale: 'Grayscale',
-        blur: 'Blur',
-        sepia: 'Sepia',
-        saturate: 'Saturate',
-        opacity: 'Opacity',
-        brightness: 'Brightness',
-        contrast: 'Contrast',
-        hueRotate: 'Hue-rotate',
-        invert: 'Invert',
-    }
 }
 
 interface ICursorChangeEventsObj {

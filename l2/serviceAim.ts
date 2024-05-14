@@ -67,7 +67,7 @@ export class ServiceAim100554 extends ServiceBase {
     render() {
      
         const lang = this.getMessageKey(messages);
-        this.myMessage = messages[lang]
+        this.myMessage = messages[lang];
 
         if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
         if (this.actionToOpen) this.activeTab = 'Add'
