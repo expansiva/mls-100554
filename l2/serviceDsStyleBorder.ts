@@ -12,9 +12,44 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
 
+const message_pt = {
+    border: 'Borda',
+    top: 'Topo',
+    left: 'Esquerda',
+    bottom: 'Baixo',
+    right: 'Direita',
+    borderRadius: 'Raio da borda',
+    topLeft: 'Topo/Esquerda',
+    topRight: 'Topo/Direita',
+    bottomLeft: 'Baixo/Esquerda',
+    bottomRight: 'Baixo/Direita',
+}
+
+const message_en = {
+    border: 'Border',
+    top: 'Top',
+    left: 'Left',
+    bottom: 'Bottom',
+    right: 'Right',
+    borderRadius: 'Border Radius',
+    topLeft: 'Top/Left',
+    topRight: 'Top/Right',
+    bottomLeft: 'Bottom/Left',
+    bottomRight: 'Bottom/Right',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-style-border-100554')
 export class ServiceDsStyleBorder extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     private myUpp = false;
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -157,57 +192,58 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.updateMyMessages();
-
-
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang]
+
         return html`${this.renderBorder()}${this.renderRadius()}${this.renderGallery()}`;
     }
 
     renderBorder() {
         return html`
             <div>
-                <h5 style="display:flex; gap:1.5rem" >${this.myMsg.border}<input type="checkbox" prop="border"></h5>
+                <h5 style="display:flex; gap:1.5rem" >${this.msg.border}<input type="checkbox" prop="border"></h5>
                 <div class="groupEdit">
-                    <span>${this.myMsg.top}</span>
+                    <span>${this.msg.top}</span>
                     <collab-ds-input-select-color-100554 prop="border-top" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.left}</span>
+                    <span>${this.msg.left}</span>
                     <collab-ds-input-select-color-100554 prop="border-left" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>   
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.bottom}</span>
+                    <span>${this.msg.bottom}</span>
                     <collab-ds-input-select-color-100554 prop="border-bottom" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.right}</span>
+                    <span>${this.msg.right}</span>
                     <collab-ds-input-select-color-100554 prop="border-right" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
                 </div>
             </div>
         `
     }
-
+ 
     renderRadius() {
         return html`
             <div>
-                <h5 style="display:flex; gap:1.5rem" >${this.myMsg.borderRadius}<input type="checkbox" prop="radius"></h5>
+                <h5 style="display:flex; gap:1.5rem" >${this.msg.borderRadius}<input type="checkbox" prop="radius"></h5>
                 <div class="groupEdit">
-                    <span>${this.myMsg.topLeft}</span>
+                    <span>${this.msg.topLeft}</span>
                     <collab-ds-input-range-100554 prop="border-top-left-radius" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.topRight}</span>
+                    <span>${this.msg.topRight}</span>
                     <collab-ds-input-range-100554 prop="border-top-right-radius" value="0px" .arraySelect=${this.tpMeasures} group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>    
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.bottomLeft}</span>
+                    <span>${this.msg.bottomLeft}</span>
                     <collab-ds-input-range-100554 prop="border-bottom-left-radius" value="0px" .arraySelect=${this.tpMeasures} group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.bottomRight}</span>
+                    <span>${this.msg.bottomRight}</span>
                     <collab-ds-input-range-100554 prop="border-bottom-right-radius" value="0px" .arraySelect=${this.tpMeasures} group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
                 </div>
                 
@@ -343,37 +379,6 @@ export class ServiceDsStyleBorder extends ServiceBase {
             this.loading = loader;
         }, 200);
 
-    }
-
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.border) this.myMsg.border = m.border;
-        if (m.top) this.myMsg.top = m.top;
-        if (m.left) this.myMsg.left = m.left;
-        if (m.bottom) this.myMsg.bottom = m.bottom;
-        if (m.right) this.myMsg.right = m.right;
-        if (m.borderRadius) this.myMsg.borderRadius = m.borderRadius;
-        if (m.topLeft) this.myMsg.topLeft = m.topLeft;
-        if (m.topRight) this.myMsg.topRight = m.topRight;
-        if (m.bottomLeft) this.myMsg.bottomLeft = m.bottomLeft;
-        if (m.bottomRight) this.myMsg.bottomRight = m.bottomRight;
-
-    }
-
-    private myMsg = {
-        border: 'Border',
-        top: 'Top',
-        left: 'Left',
-        bottom: 'Bottom',
-        right: 'Right',
-        borderRadius: 'Border Radius',
-        topLeft: 'Top/Left',
-        topRight: 'Top/Right',
-        bottomLeft: 'Bottom/Left',
-        bottomRight: 'Bottom/Right',
     }
 
     private clickGallery(e: MouseEvent): void {
