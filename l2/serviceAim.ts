@@ -37,13 +37,13 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    en: message_en,
-    pt: message_pt
+    'en-US': message_en,
+    'pt-BR': message_pt
 }
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
 
-    private myMessage: MessageType = this.getMessage(messages) ;
+    private myMessage: MessageType = messages['en-US'] ;
 
     constructor() {
         super();
@@ -60,7 +60,8 @@ export class ServiceAim100554 extends ServiceBase {
 
     render() {
 
-        this.myMessage = this.getMessage(messages);
+        const lang = this.getMessageKey(messages);
+        this.myMessage = messages[lang]
 
         if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
         if (this.actionToOpen) this.activeTab = 'Add'
