@@ -11,9 +11,36 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 
+const message_pt = {
+    margin: 'Margem',
+    padding: 'Preenchimento',
+    top: 'Topo',
+    left: 'Esquerda',
+    bottom: 'Inferior',
+    right: 'Direita',
+}
+
+const message_en = {
+    margin: 'Margin',
+    padding: 'Padding',
+    top: 'Top',
+    left: 'Left',
+    bottom: 'Bottom',
+    right: 'Right',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-style-spacing-100554')
 export class ServiceDsStyleSpacing extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     private myUpp = false;
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -151,33 +178,33 @@ export class ServiceDsStyleSpacing extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.updateMyMessages();
-
-
     }
 
     render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html`${this.renderMargin()}${this.renderPadding()}`;
     }
 
     renderMargin() {
         return html`
             <div>
-                <h5 style="display:flex; gap:1.5rem" >${this.myMsg.margin}<input type="checkbox" prop="margin"></h5>
+                <h5 style="display:flex; gap:1.5rem" >${this.msg.margin}<input type="checkbox" prop="margin"></h5>
                 <div class="groupEdit">
-                    <span>${this.myMsg.top}</span>
+                    <span>${this.msg.top}</span>
                     <collab-ds-input-range-100554 prop="margin-top" value="0px" .arraySelect=${this.tpMeasures} group="margin" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.left}</span>
+                    <span>${this.msg.left}</span>
                     <collab-ds-input-range-100554 prop="margin-left" value="0px" .arraySelect=${this.tpMeasures} group="margin" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>    
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.bottom}</span>
+                    <span>${this.msg.bottom}</span>
                     <collab-ds-input-range-100554 prop="margin-bottom" value="0px" .arraySelect=${this.tpMeasures} group="margin" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.right}</span>
+                    <span>${this.msg.right}</span>
                     <collab-ds-input-range-100554 prop="margin-right" value="0px" .arraySelect=${this.tpMeasures} group="margin" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
                 </div>
             </div>
@@ -187,21 +214,21 @@ export class ServiceDsStyleSpacing extends ServiceBase {
     renderPadding() {
         return html`
             <div>
-                <h5 style="display:flex; gap:1.5rem" >${this.myMsg.padding}<input type="checkbox" prop="padding"></h5>
+                <h5 style="display:flex; gap:1.5rem" >${this.msg.padding}<input type="checkbox" prop="padding"></h5>
                 <div class="groupEdit">
-                    <span>${this.myMsg.top}</span>
+                    <span>${this.msg.top}</span>
                     <collab-ds-input-range-100554 prop="padding-top" value="0px" .arraySelect=${this.tpMeasures} group="padding" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.left}</span>
+                    <span>${this.msg.left}</span>
                     <collab-ds-input-range-100554 prop="padding-left" value="0px" .arraySelect=${this.tpMeasures} group="padding" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>    
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.bottom}</span>
+                    <span>${this.msg.bottom}</span>
                     <collab-ds-input-range-100554 prop="padding-bottom" value="0px" .arraySelect=${this.tpMeasures} group="padding" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.right}</span>
+                    <span>${this.msg.right}</span>
                     <collab-ds-input-range-100554 prop="padding-right" value="0px" .arraySelect=${this.tpMeasures} group="padding" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554> 
                 </div>
             </div>
@@ -318,28 +345,6 @@ export class ServiceDsStyleSpacing extends ServiceBase {
 
     }
 
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.margin) this.myMsg.margin = m.margin;
-        if (m.padding) this.myMsg.padding = m.padding;
-        if (m.top) this.myMsg.top = m.top;
-        if (m.left) this.myMsg.left = m.left;
-        if (m.bottom) this.myMsg.bottom = m.bottom;
-        if (m.right) this.myMsg.right = m.right;
-
-    }
-
-    private myMsg = {
-        margin: 'Margin',
-        padding: 'Padding',
-        top: 'Top',
-        left: 'Left',
-        bottom: 'Bottom',
-        right: 'Right',
-    }
 }
 
 interface ICursorChangeEventsObj {
