@@ -10,9 +10,40 @@ import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+    display: 'Exibição',
+    flexDirection: 'Direção flexível',
+    flexWrap: 'Envoltório flexível',
+    justifyContent: 'Justificar conteúdo',
+    alignItems: 'Alinhar itens',
+    alignContent: 'Alinhar conteúdo',
+    alignSelf: 'Alinhar-se',
+    order: 'Ordem'
+}
+
+const message_en = {
+    display: 'Display',
+    flexDirection: 'Flex direction',
+    flexWrap: 'Flex wrap',
+    justifyContent: 'Justify content',
+    alignItems: 'Align items',
+    alignContent: 'Align content',
+    alignSelf: 'Align self',
+    order: 'Order'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-style-flex-100554')
 export class ServiceDsStyleFlex extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     private myUpp = false;
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -143,12 +174,13 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.updateMyMessages();
-
-
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html`${this.renderFlex()}${this.renderFlexItem()}${this.renderGallery()}`;
     }
 
@@ -157,7 +189,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
             <div>
                 <h5>Flex</h5>
                 <div class="groupEdit">
-                    <span>${this.myMsg.display}</span>
+                    <span>${this.msg.display}</span>
                     <select @change="${() => this.onChangeProp("display")}" style="width:150px" prop="display">
                         <option value=""></option>
                         <option value="flex">Flex</option>
@@ -165,7 +197,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                     </select>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.flexDirection}</span>
+                    <span>${this.msg.flexDirection}</span>
                     <select @change="${() => this.onChangeProp("flex-direction")}" style="width:150px" prop="flex-direction">
                         <option value=""></option>
                         <option value="row">Row</option>
@@ -175,7 +207,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                     </select>   
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.flexWrap}</span>
+                    <span>${this.msg.flexWrap}</span>
                     <select @change="${() => this.onChangeProp("flex-wrap")}" style="width:150px" prop="flex-wrap">
                         <option value=""></option>
                         <option value="nowrap">Nowrap</option>
@@ -184,7 +216,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                     </select>  
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.justifyContent}</span>
+                    <span>${this.msg.justifyContent}</span>
                     <select @change="${() => this.onChangeProp("justify-content")}" style="width:150px" prop="justify-content">
                         <option value=""></option>
                         <option value="flex-start">Flex start</option>
@@ -195,7 +227,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                     </select>  
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.alignItems}</span>
+                    <span>${this.msg.alignItems}</span>
                     <select @change="${() => this.onChangeProp("align-items")}" style="width:150px" prop="align-items">
                         <option value=""></option>
                         <option value="flex-start">Flex start</option>
@@ -206,7 +238,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                     </select>  
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.alignContent}</span>
+                    <span>${this.msg.alignContent}</span>
                     <select @change="${() => this.onChangeProp("align-content")}" style="width:150px" prop="align-content">
                         <option value=""></option>
                         <option value="flex-start">Flex start</option>
@@ -227,7 +259,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
             <div>
                 <h5>Flex-Item</h5>
                 <div class="groupEdit">
-                    <span>${this.myMsg.alignSelf}</span>
+                    <span>${this.msg.alignSelf}</span>
                     <select @change="${() => this.onChangeProp("align-self")}" style="width:150px" prop="align-self">
                         <option value=""></option>
                         <option value="auto">auto</option>
@@ -239,7 +271,7 @@ export class ServiceDsStyleFlex extends ServiceBase {
                     </select>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.order}</span>
+                    <span>${this.msg.order}</span>
                     <select @change="${() => this.onChangeProp("order")}" style="width:150px" prop="order">
                         <option value=""></option>
                         <option value="1">1</option>
@@ -381,32 +413,6 @@ export class ServiceDsStyleFlex extends ServiceBase {
 
     ];
 
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.display) this.myMsg.display = m.display;
-        if (m.flexDirection) this.myMsg.flexDirection = m.flexDirection;
-        if (m.flexWrap) this.myMsg.flexWrap = m.flexWrap;
-        if (m.justifyContent) this.myMsg.justifyContent = m.justifyContent;
-        if (m.alignItems) this.myMsg.alignItems = m.alignItems;
-        if (m.alignContent) this.myMsg.alignContent = m.alignContent;
-        if (m.alignSelf) this.myMsg.alignSelf = m.alignSelf;
-        if (m.order) this.myMsg.order = m.order;
-
-    }
-
-    private myMsg = {
-        display: 'Display',
-        flexDirection: 'Flex direction',
-        flexWrap: 'Flex wrap',
-        justifyContent: 'Justify content',
-        alignItems: 'Align items',
-        alignContent: 'Align content',
-        alignSelf: 'Align self',
-        order: 'Order'
-    }
 }
 
 interface ICursorChangeEventsObj {
