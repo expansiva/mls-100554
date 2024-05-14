@@ -4,9 +4,62 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+    installPlugin: 'Instalar plugin',
+    createNewPlugin: 'Criar novo plugin',
+    backList: 'Voltar à lista',
+    noPluginsInstalled: 'Nenhum plugin instalado',
+    desactivate: 'Desativar',
+    activate: 'Ativar',
+    delete: 'Excluir',
+    reference: 'Referência',
+    noPluginsAvaliables: 'Nenhum plugin disponível',
+    install: 'Instalar',
+    p1: 'O que são plugins?',
+    p2: 'Plugins são trechos de código que incorporam funcionalidades adicionais ao seu projeto. Eles são desenvolvidos para estender e aprimorar as capacidades do seu projeto.',
+    p3: 'Como os plugins funcionam?',
+    p4: 'Quando você instala e ativa um plugin, ele introduz novos recursos ou funcionalidades ao seu projeto. Os plugins podem modificar a maneira como o seu projeto opera, adicionando novas opções de configuração, inteligência artificial, widgets, códigos curtos, entre outras funcionalidades.',
+    p5: 'Onde encontrar plugins?',
+    p6: 'Você pode localizar plugins diretamente no (L5) do seu projeto, na seção de Serviços (Service) chamado "Plugins". Neste local, é possível gerenciar e adicionar novos plugins ao seu projeto.',
+    p7: 'Como criar um plugin?',
+    p8: 'Para criar um plugin...',
+
+}
+
+const message_en = {
+    installPlugin: 'Install plugin',
+    createNewPlugin: 'Create new plugin',
+    backList: 'Back list',
+    noPluginsInstalled: 'No plugins  installed',
+    desactivate: 'Desactivate',
+    activate: 'Activate',
+    delete: 'Delete',
+    reference: 'Reference',
+    noPluginsAvaliables: 'No plugins avaliables',
+    install: 'Install',
+    p1: 'What are plugins?',
+    p2: 'Plugins are snippets of code that incorporate additional functionality into your project. They are developed to extend and enhance your projects capabilities.',
+    p3: 'How do plugins work?',
+    p4: 'When you install and activate a plugin, it introduces new features or functionality to your project. Plugins can modify the way your project operates, adding new configuration options, artificial intelligence, widgets, short codes, among other features.',
+    p5: 'Where to find plugins?',
+    p6: 'You can find plugins directly in (L5) of your project, in the Services section called "Plugins". Here, you can manage and add new plugins to your project.',
+    p7: 'How to create a plugin?',
+    p8: 'To create a plugin...',
+}
+
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-plugins-100554')
 export class ServicePlugins extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     get project(): number { return window['mls'] ? mls.actual[5].project as number : 0 };
@@ -238,8 +291,8 @@ export class ServicePlugins extends ServiceBase {
             html`
                 <div class="header">
                     <div>
-                        <button @click="${this.installPluginClicked}">Install Plugin</button>
-                        <button @click="${this.createNewPluginClicked}">Create New Plugin</button>
+                        <button @click="${this.installPluginClicked}">${this.msg.installPlugin}</button>
+                        <button @click="${this.createNewPluginClicked}">${this.msg.createNewPlugin}</button>
                     </div>
                     <input type="text" placeholder="Search plugin..." @input="${this.searchInputChanged}">
                 </div>
@@ -247,7 +300,7 @@ export class ServicePlugins extends ServiceBase {
             : html`
                     <div class="header">
                         <div>
-                            <button @click="${this.backListClicked}">Back List</button>
+                            <button @click="${this.backListClicked}">${this.msg.backList}Back List</button>
                         </div>
                     </div>
                 `}
@@ -260,7 +313,7 @@ export class ServicePlugins extends ServiceBase {
         const groupedPlugins = this.groupPluginsByCategory(this.userPlugins);
         const sortedCategories = Object.keys(groupedPlugins).sort();
         return html`
-        <h4 style="${sortedCategories.length === 0 ? 'display:block' : 'display:none'}"> No plugins installed!</h4>
+        <h4 style="${sortedCategories.length === 0 ? 'display:block' : 'display:none'}">${this.msg.noPluginsInstalled}</h4>
         <ul class="plugin-list">
             ${sortedCategories.map(category => html`
                 <li class="headerCategory">
@@ -277,15 +330,15 @@ export class ServicePlugins extends ServiceBase {
                                         <h3>${plugin.name}</h3>
                                         <div class="plugin-actions">
                                             ${plugin.status === 'active' ?
-                html`<a  href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.deactivateClicked(plugin) }}">Deactivate</a>` :
-                html`<a  href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.activateClicked(plugin) }}">Activate</a>`
+                html`<a  href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.deactivateClicked(plugin) }}">${this.msg.desactivate}</a>` :
+                html`<a  href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.activateClicked(plugin) }}">${this.msg.activate}</a>`
             }
-                                            <a href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.deleteClicked(plugin) }}">Delete</a>
+                                            <a href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.deleteClicked(plugin) }}">${this.msg.delete}</a>
                                         </div>
                                     </div>
                                     <div class="plugin-info">    
                                         <p>${plugin.description}</p>
-                                        <p><strong>Reference:</strong> ${plugin.ref}</p>
+                                        <p><strong>${this.msg.reference}:</strong> ${plugin.ref}</p>
                                     </div>
                                 </div>
                             `)}
@@ -300,7 +353,7 @@ export class ServicePlugins extends ServiceBase {
         const groupedPlugins = this.groupPluginsByCategory(this.avaliablePlugins);
         const sortedCategories = Object.keys(groupedPlugins).sort();
         return html`
-        <h4 style="${sortedCategories.length === 0 ? 'display:block' : 'display:none'}"> No plugins avaliables!</h4>
+        <h4 style="${sortedCategories.length === 0 ? 'display:block' : 'display:none'}">${this.msg.noPluginsAvaliables}!</h4>
         
         <ul class="plugin-list">
             ${sortedCategories.map(category => html`
@@ -312,12 +365,12 @@ export class ServicePlugins extends ServiceBase {
                                     <div class= "plugin-title">
                                         <h3>${plugin.name}</h3>
                                         <div class="plugin-actions">
-                                            <a href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.addPluginClicked(plugin) }}">Install</a>
+                                            <a href="#" @click="${(e: MouseEvent) => { e.preventDefault(); this.addPluginClicked(plugin) }}">${this.msg.install}</a>
                                         </div>
                                     </div>
                                     <div class="plugin-info">    
                                         <p>${plugin.description}</p>
-                                        <p><strong>Reference:</strong> ${plugin.ref}</p>
+                                        <p><strong>${this.msg.reference}:</strong> ${plugin.ref}</p>
                                     </div>
                                 </div>
                             `)}
@@ -330,16 +383,16 @@ export class ServicePlugins extends ServiceBase {
 
     private renderHelper() {
         return html`
-            <h2>O que são plugins?</h2>
-            <p>Plugins são trechos de código que incorporam funcionalidades adicionais ao seu projeto. Eles são desenvolvidos para estender e aprimorar as capacidades do seu projeto.</p>
-            <h2>Como os plugins funcionam?</h2>
-            <p>Quando você instala e ativa um plugin, ele introduz novos recursos ou funcionalidades ao seu projeto. Os plugins podem modificar a maneira como o seu projeto opera, adicionando novas opções de configuração, inteligência artificial, widgets, códigos curtos, entre outras funcionalidades.</p>
+            <h2>${this.msg.p1}</h2>
+            <p>${this.msg.p2}</p>
+            <h2>${this.msg.p3}</h2>
+            <p>${this.msg.p4}</p>
 
-            <h2>Onde encontrar plugins?</h2>
-            <p>Você pode localizar plugins diretamente no (L5) do seu projeto, na seção de Serviços (Service) chamado "Plugins". Neste local, é possível gerenciar e adicionar novos plugins ao seu projeto.</p>
+            <h2>${this.msg.p5}</h2>
+            <p>${this.msg.p6}</p>
 
-            <h2>Como criar um plugin?</h2>
-            <p>Para criar um plugin...</p>
+            <h2>${this.msg.p7}</h2>
+            <p>${this.msg.p8}</p>
         `
     }
 
@@ -364,6 +417,10 @@ export class ServicePlugins extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html`
             <section>
                 ${this.renderScenario()}
