@@ -9,8 +9,35 @@ import { getAttributeDefinitionsLit, getFormComponentsDescription } from './_100
 export const initServiceListFilesAdd = () => {
 }
 
+const message_pt = {
+    labelProject: "Projeto",
+    labelShortName: "Nome curto",
+    labelType: "Por favor, selecione um modelo abaixo ou clique",
+    btnAdd: "Adicionar",
+    btnCancel: "Cancelar",
+    please: "Por facor selecione um projeto primeiro!"
+}
+
+const message_en = {
+    labelProject: "Project",
+    labelShortName: "Shortname",
+    labelType: "Please select a template below or click",
+    btnAdd: "Add",
+    btnCancel: "cancel",
+    please: "Please select a project first!"
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-list-files-add-100554')
 export class ServiceListFilesAdd100554 extends LitElement {
+
+    private msg: MessageType = messages['en-us'];
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
@@ -32,10 +59,14 @@ export class ServiceListFilesAdd100554 extends LitElement {
     }
 
     render() {
+
+        const lang = this.father?.getMessageKey(messages);
+        this.msg = lang ? messages[lang] : message_en;
+
         const { project } = mls.actual[5];
         return html`
             ${project ? this.renderAdd(project as number)
-                : html`Please select a project first!`
+                : html`${this.msg.please}`
             }
         `;
     }
@@ -46,11 +77,11 @@ export class ServiceListFilesAdd100554 extends LitElement {
             <div class="section-add">
                 <div class="row-form">
                     <div>
-                        <label>${this.messages.labelProject}:</label>
+                        <label>${this.msg.labelProject}:</label>
                         <input type="text" disabled value="${project.toString()}"/>
                     </div>
                     <div>
-                        <label>${this.messages.labelShortName}:</label>
+                        <label>${this.msg.labelShortName}:</label>
                         <input type="text" id="iptShortName"/>
                         <span>${this.error}</span>
                     </div>
@@ -58,7 +89,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
                 <hr>
                 <div class="row-form">
                     <div>
-                        <label>${this.messages.labelType}</label> <button class="btn-cancel" @click="${this.clickCancel}">${this.messages.btnCancel}</button>
+                        <label>${this.msg.labelType}</label> <button class="btn-cancel" @click="${this.clickCancel}">${this.msg.btnCancel}</button>
                          ${this.renderTemplates()}
                     </div>
                 </div>
@@ -434,14 +465,6 @@ ${[interfaceString].join('\n')}
         params.project = project;
         params.newProject = project;
         await this.fireComunication(params);
-    }
-
-    messages = {
-        "labelProject": "Project",
-        "labelShortName": "Shortname",
-        "labelType": "Please select a template below or click",
-        "btnAdd": "Add",
-        "btnCancel": "cancel"
     }
 
 }
