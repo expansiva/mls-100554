@@ -4,9 +4,25 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getJson, IMembersResult } from './_100554_jsDocLib'
 
+const message_pt = {
+    onlyWithJsdocs: 'Apenas com JSDoc'
+}
+
+const message_en = {
+    onlyWithJsdocs: 'Only with JSDoc',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-results-docs-100554')
 export class ServiceResultDocs100554 extends LitElement {
 
+    private msg: MessageType = messages['en-us'] ;
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property()
@@ -67,12 +83,13 @@ export class ServiceResultDocs100554 extends LitElement {
 
 
     render() {
+
         return html`
             <div class="docs_container">
                 <div class="doc-menu" style="min-width: 200px; overflow: auto;">
                     <div class="check-container">
                         <input id="service_results_docs_check" type="checkbox">
-                        <label for="service_results_docs_check">Only with JSDoc</label>
+                        <label for="service_results_docs_check">${this.msg.onlyWithJsdocs}</label>
                     </div>
                     <div>
                         ${this.data.map(groups => html`
