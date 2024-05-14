@@ -4,9 +4,41 @@ import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+    noProjectSelected: 'Nenhum projeto selecionado!',
+    resume: 'Resumo',
+    name: 'Nome',
+    projectDriver: 'Driver do Projeto',
+    projectURL: 'URL do Projeto',
+    designSystems: 'Sistemas de Design',
+    files: 'Arquivos',
+    keyGithub: 'Chave do GitHub'
+}
+
+const message_en = {
+    noProjectSelected: 'No project selected!',
+    resume: 'Resume',
+    name: 'Name',
+    projectDriver: 'ProjectDriver',
+    projectURL: 'ProjectURL',
+    designSystems: 'DesignSystems',
+    files: 'Files',
+    keyGithub: 'Key Github',
+    
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-project-details-100554')
 export class ServiceProjectDetails100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     constructor() {
         super();
         mls.events.addListener(5, 'ProjectSelected', (ev) => this.onProjectSelected(ev));
@@ -89,22 +121,26 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         this.getLastProject();
         return html`
             ${!this.actualProjectDetails
                 ?
-                html`<h4> No project selected!</h4>`
+                html`<h4> ${this.msg.noProjectSelected}</h4>`
                 :
                 html`
                 <section class="section-details">
                     <details open>
-                        <summary>Resume</summary>
+                        <summary>${this.msg.resume}</summary>
                         <ul>
-                            <li>Name: ${this.actualProjectDetails.name}</li>
-                            <li>ProjectDriver: ${this.actualProjectDetails.projectDriver}</li>
-                            <li>ProjectURL: ${this.actualProjectDetails.projectURL}</li>
-                            <li>DesignSystems: ${this.actualProjectDetails.designSystems}</li>
-                            <li>Files: ${this.actualProjectDetails.files}</li>
+                            <li>${this.msg.name}: ${this.actualProjectDetails.name}</li>
+                            <li>${this.msg.projectDriver}: ${this.actualProjectDetails.projectDriver}</li>
+                            <li>${this.msg.projectURL}: ${this.actualProjectDetails.projectURL}</li>
+                            <li>${this.msg.designSystems}: ${this.actualProjectDetails.designSystems}</li>
+                            <li>${this.msg.files}: ${this.actualProjectDetails.files}</li>
                         </ul>
                     </details>
                 </section>
@@ -112,7 +148,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                     style=${this.actualProjectDetails.projectDriver === 'github' ? 'display: block' : 'display:none'} 
                     class="section-config-github">
                     <div>
-                        <label>Key Github</label>
+                        <label>${this.msg.keyGithub}</label>
                         <textarea .value=${this.actualKeyGitHub} @input="${this.handleInputChangeKey}"></textarea rows=4>
                         <button @click=${this.handleChangeKey}>Alterar</button>
                     </div>
