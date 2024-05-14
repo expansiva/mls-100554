@@ -88,16 +88,9 @@ export class CollabLitElement extends LitElement {
   getMessageKey(messages: any): string {
     const htmlLang = document.documentElement.lang;
     const lang = htmlLang.toLowerCase();
-
-    if (messages.hasOwnProperty(lang)) {
-      return lang;
-    }
-
+    if (messages.hasOwnProperty(lang)) return lang;
     const similarLang = Object.keys(messages).find(key => lang.indexOf(key) > -1);
-    if (similarLang) {
-      return similarLang;
-    }
-
+    if (similarLang) return similarLang;
     const firstKey = Object.keys(messages)[0];
     return firstKey;
   }
