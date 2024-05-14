@@ -4,8 +4,36 @@ import { html, repeat, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 export const initServicePreviewAddStyle = '';
+
+const message_pt = {
+    groupAndSubgroup: 'Grupo e subgrupo',
+    tagsForSearch: 'Tags para busca',
+    exInputList: 'ex: entrada, lista',
+    addInDesingSystem: 'Adicionar no Sistema de Design',
+    thisComponentAlreadyHasStyleAdded: 'Este componente já tem estilo adicionado',
+    notAdded: 'Este componente não é adicionado no Design System, adicione abaixo'
+}
+
+const message_en = {
+    groupAndSubgroup: 'Group and subgroup',
+    tagsForSearch: 'Tags for search',
+    exInputList: 'ex: input,list',
+    addInDesingSystem: 'Add in Desing System',
+    thisComponentAlreadyHasStyleAdded: 'This component already has style added',
+    notAdded: 'This component is not added in Design System, please add below'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-preview-add-style-100554')
 export class ServicePreviewAddStyle extends LitElement {
+
+    private msg: MessageType = messages['en-us'];
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
@@ -27,11 +55,13 @@ export class ServicePreviewAddStyle extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        this.updateMyMessages();
         this.init();
     }
 
     render() {
+
+        const lang = this.father.getMessageKey(messages);
+        this.msg = lang ? messages[lang] : message_en;
 
         if (this.styleAlready) return this.renderStyleAlreadyr();
         else return this.renderAdd();
@@ -39,28 +69,28 @@ export class ServicePreviewAddStyle extends LitElement {
     }
 
     renderStyleAlreadyr() {
-        return html`<h3>${this.myMsg.thisComponentAlreadyHasStyleAdded}</h3>`
+        return html`<h3>${this.msg.thisComponentAlreadyHasStyleAdded}</h3>`
     }
 
     renderAdd() {
         return html`
             <div>
-                <h4 style="text-align:center">This component is not added in Design System, please add below</h4>
-                <span>${this.myMsg.groupAndSubgroup}</span>
+                <h4 style="text-align:center">${this.msg.notAdded}</h4>
+                <span>${this.msg.groupAndSubgroup}</span>
                 <input type="text" class="inputGroup" .value="${this.groupName}"></input>
             </div>
             <div style="display:flex; flex-direction: column;">
-                <span>${this.myMsg.tagsForSearch}</span>
+                <span>${this.msg.tagsForSearch}</span>
                 <mls-input-tags>
                     ${repeat(this.tags, ((item: string) => item) as any,
             ((vl: string, index: number) => this.renderItemTag(vl, index)) as any
         )}
                     <input type="text" @keydown="${this.addInputTag}"></input>
                 </mls-input-tags>
-                <span style="font-size:.8rem; color: #595959;">${this.myMsg.exInputList}</span>
+                <span style="font-size:.8rem; color: #595959;">${this.msg.exInputList}</span>
             </div>
             <div style="display:flex; justify-content:center;">
-                <button @click="${this.addComponent}">${this.myMsg.addInDesingSystem}</button>
+                <button @click="${this.addComponent}">${this.msg.addInDesingSystem}</button>
             </div>
             <h3 style="color:red">${this.error}</h3>
         `;
@@ -229,28 +259,6 @@ export class ServicePreviewAddStyle extends LitElement {
             this.showLoader(false);
         }
 
-    }
-
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.groupAndSubgroup) this.myMsg.groupAndSubgroup = m.groupAndSubgroup;
-        if (m.tagsForSearch) this.myMsg.tagsForSearch = m.tagsForSearch;
-        if (m.exInputList) this.myMsg.exInputList = m.exInputList;
-        if (m.addInDesingSystem) this.myMsg.addInDesingSystem = m.addInDesingSystem;
-        if (m.thisComponentAlreadyHasStyleAdded) this.myMsg.thisComponentAlreadyHasStyleAdded = m.thisComponentAlreadyHasStyleAdded;
-
-
-    }
-
-    private myMsg = {
-        groupAndSubgroup: 'Group and subgroup',
-        tagsForSearch: 'Tags for search',
-        exInputList: 'ex: input,list',
-        addInDesingSystem: 'Add in Desing System',
-        thisComponentAlreadyHasStyleAdded: 'This component already has style added'
     }
 
 }
