@@ -19,7 +19,9 @@ const message_pt = {
     notFoundReference: 'Referência não encontrada',
     tasksByReference: 'Tarefas por referência',
     noActionsToAdd: 'Nenhuma ação para adicionar',
-    selectColumnsYouWant: 'Selecione as colunas que deseja visualizar'
+    selectColumnsYouWant: 'Selecione as colunas que deseja visualizar',
+    save: 'Salvar',
+    cancel: 'Cancelar'
 }
 const message_en = {
     loading: 'Loading...',
@@ -32,7 +34,9 @@ const message_en = {
     notFoundReference: 'Not found reference',
     tasksByReference: 'Tasks by reference',
     noActionsToAdd: 'No Actions to Add',
-    selectColumnsYouWant:'Select the columns you want to view'
+    selectColumnsYouWant:'Select the columns you want to view',
+    save: 'Save',
+    cancel: 'Cancel'
 }
 type MessageType = typeof message_en;
 
@@ -466,8 +470,8 @@ export class ServiceAim100554 extends ServiceBase {
         }
         )}
                 <div style="margin-top:1rem;">
-                    <button @click=${this.handleSaveColumnClick.bind(this)}>Save</button>
-                    <button @click=${this.handleCancelColumnClick.bind(this)}>Cancel</button>
+                    <button @click=${this.handleSaveColumnClick.bind(this)}>${this.myMessage.save}</button>
+                    <button @click=${this.handleCancelColumnClick.bind(this)}>${this.myMessage.cancel}</button>
                 </div>
             
             </div>
