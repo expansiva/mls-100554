@@ -7,9 +7,33 @@ import { initEditorQuillDocs, EditorQuillDocs100554 } from './_100554_editorQuil
 import { IDocData } from './_100554_serviceDsDocList'
 import { collab_plus, collab_trash } from './_100554_collabIcons'
 
+
+
+const message_pt = {
+    noDocumentationSelected: 'Nenhum documento selecionado',
+    addChild: 'Adicionar filho',
+    removeThis: 'Remover este',
+    
+}
+
+const message_en = {
+    noDocumentationSelected: 'No documentation selected',
+    addChild: 'Add child',
+    removeThis: 'Remove this',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-doc-view-100554')
 export class ServiceDsDocView100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     constructor() {
         super();
         initEditorQuillDocs();
@@ -130,20 +154,24 @@ export class ServiceDsDocView100554 extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang]
+
         return html`
             ${!this.doc ?
                 html`
-                <h4> No documentation selected!</h4>
+                <h4>${this.msg.noDocumentationSelected}!</h4>
                 ` :
                 html`
                 <div style="padding: 1rem;">
                     <div style="display:flex; gap:1rem; justify-content: center;">
                         <button class="btn-docs" @click=${() => { this.fireComunication('Add') }}>
-                            <span>Add Child</span>
+                            <span>${this.msg.addChild}</span>
                             ${collab_plus}
                         </button>
                         <button class="btn-docs" @click=${() => { this.fireComunication('Delete') }}>
-                            <span>Remove this</span>
+                            <span>${this.msg.removeThis}</span>
                             ${collab_trash}
                         </button>
                     </div>
