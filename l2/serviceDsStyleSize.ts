@@ -9,9 +9,43 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
+
+const message_pt = {
+    width: 'Largura',
+    maxWidth: 'Largura máxima',
+    minWidth: 'Largura mínima',
+    height: 'Altura',
+    maxHeight: 'Altura máxima',
+    minHeight: 'Altura mínima',
+    overflow: 'Overflow',
+    overflowX: 'Overflow-x',
+    overflowY: 'Overflow-y'
+}
+
+const message_en = {
+    width: 'Width',
+    maxWidth: 'Max Width',
+    minWidth: 'Min Width',
+    height: 'Height',
+    maxHeight: 'Max Height',
+    minHeight: 'Min Height',
+    overflow: 'Overflow',
+    overflowX: 'Overflow-x',
+    overflowY: 'Overflow-y'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-style-size-100554')
 export class ServiceDsStyleSize extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     private myUpp = false;
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -162,12 +196,13 @@ export class ServiceDsStyleSize extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.updateMyMessages();
-
-
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         if (this.error) return html`<h3 style="color:red">${this.error}</h3>`;
         return this.renderBody();
     }
@@ -184,17 +219,17 @@ export class ServiceDsStyleSize extends ServiceBase {
 
         return html`
             <div>
-                <h5>${this.myMsg.width}</h5>
+                <h5>${this.msg.width}</h5>
                 <div class="groupEdit">
-                    <span>${this.myMsg.width}</span>
+                    <span>${this.msg.width}</span>
                     <collab-ds-input-range-100554 prop="width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.maxWidth}</span>
+                    <span>${this.msg.maxWidth}</span>
                     <collab-ds-input-range-100554 prop="max-width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>    
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.minWidth}</span>
+                    <span>${this.msg.minWidth}</span>
                     <collab-ds-input-range-100554 prop="min-width" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
             </div>
@@ -206,17 +241,17 @@ export class ServiceDsStyleSize extends ServiceBase {
 
         return html`
             <div>
-                <h5>${this.myMsg.height}</h5>
+                <h5>${this.msg.height}</h5>
                 <div class="groupEdit">
-                    <span>${this.myMsg.height}</span>
+                    <span>${this.msg.height}</span>
                     <collab-ds-input-range-100554 prop="height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.maxHeight}</span>
+                    <span>${this.msg.maxHeight}</span>
                     <collab-ds-input-range-100554 prop="max-height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.minHeight}</span>
+                    <span>${this.msg.minHeight}</span>
                     <collab-ds-input-range-100554 prop="min-height" value="0px" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
             </div>
@@ -228,13 +263,13 @@ export class ServiceDsStyleSize extends ServiceBase {
 
         return html`
             <div>
-                <h5>${this.myMsg.overflow}</h5>
+                <h5>${this.msg.overflow}</h5>
                 <div class="groupEdit">
-                    <span>${this.myMsg.overflow}</span>
+                    <span>${this.msg.overflow}</span>
                     <input type="checkbox" prop="overflow"></input>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.overflowX}</span>
+                    <span>${this.msg.overflowX}</span>
                     <select @change="${(e: MouseEvent) => this.onChangeProp2('overflow-x')}" prop="overflow-x" group="overflow">
                         <option value="none">none</option>
                         <option value="auto">auto</option>
@@ -249,7 +284,7 @@ export class ServiceDsStyleSize extends ServiceBase {
                     </select>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.overflowY}</span>
+                    <span>${this.msg.overflowY}</span>
                     <select @change="${this.onChangeProp2}" prop="overflow-y" group="overflow">
                         <option value="none">none</option>
                         <option value="auto">auto</option>
@@ -344,34 +379,6 @@ export class ServiceDsStyleSize extends ServiceBase {
 
     }
 
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.width) this.myMsg.width = m.width;
-        if (m.maxWidth) this.myMsg.maxWidth = m.maxWidth;
-        if (m.minWidth) this.myMsg.minWidth = m.minWidth;
-        if (m.height) this.myMsg.height = m.height;
-        if (m.maxHeight) this.myMsg.maxHeight = m.maxHeight;
-        if (m.minHeight) this.myMsg.minHeight = m.minHeight;
-        if (m.overflow) this.myMsg.overflow = m.overflow;
-        if (m.overflowX) this.myMsg.overflowX = m.overflowX;
-        if (m.overflowY) this.myMsg.overflowY = m.overflowY;
-
-    }
-
-    private myMsg = {
-        width: 'Width',
-        maxWidth: 'Max Width',
-        minWidth: 'Min Width',
-        height: 'Height',
-        maxHeight: 'Max Height',
-        minHeight: 'Min Height',
-        overflow: 'Overflow',
-        overflowX: 'Overflow-x',
-        overflowY: 'Overflow-y'
-    }
 }
 
 interface ICursorChangeEventsObj {
