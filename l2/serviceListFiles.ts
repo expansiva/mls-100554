@@ -13,9 +13,52 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initServiceListFilesAdd } from './_100554_serviceListFilesAdd';
 
+const message_pt = {
+    updateListVerify: "atualizar lista/verificar",
+    update: "atualizar",
+    addNewFile: "adicionar novo arquivo",
+    filter: "Filtrar",
+    localProject: "Projeto local",
+    totalFiles: "arquivos totais",
+    filesWithErrors: "arquivos com erros",
+    filesInLocalStorage: "arquivos no armazenamento local",
+    filesChangedOnTheServer: "arquivos alterados no servidor",
+    history: "Histórico",
+    undo: "desfazer",
+    clone: "clonar",
+    rename: "renomear",
+    delete: "excluir"
+}
+
+const message_en = {
+    updateListVerify: 'update list/ verify',
+    update: 'update',
+    addNewFile: 'add new file',
+    filter: 'Filter',
+    localProject: 'Local project',
+    totalFiles: 'total files',
+    filesWithErrors: 'files with errors',
+    filesInLocalStorage: 'file in local storage',
+    filesChangedOnTheServer: 'files changed on the server',
+    history: 'History',
+    undo: 'undo',
+    clone: 'clone',
+    rename: 'rename',
+    delete: 'delete',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-list-files-100554')
 export class ServiceListFiles extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     @property() mode: string = 'list';
 
     @property() project: number = 1;
@@ -183,6 +226,10 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         if (this.mode === 'list') {
             return html`
             <div class="contentServiceList scroll-custom">
@@ -210,31 +257,31 @@ export class ServiceListFiles extends ServiceBase {
 
         if (this.info.version > 0) {
 
-            auxV = `<b>[${this.info.version}]</b> <span class="fa fa-unbalanced"></span> <b>${this.myMsg.filesChangedOnTheServer}, </b>`;
+            auxV = `<b>[${this.info.version}]</b> <span class="fa fa-unbalanced"></span> <b>${this.msg.filesChangedOnTheServer}, </b>`;
         }
 
         if (this.info.error > 0) {
 
-            auxE = `<b>[${this.info.error}]</b> <span class="fa fa-bug"></span><b>${this.myMsg.filesWithErrors},</b>`;
+            auxE = `<b>[${this.info.error}]</b> <span class="fa fa-bug"></span><b>${this.msg.filesWithErrors},</b>`;
         }
 
         if (this.info.storage > 0) {
 
-            auxS = `<b>[${this.info.storage}]</b> <span class="fa fa-location-dot"></span> <b>${this.myMsg.filesInLocalStorage}.</b>`;
+            auxS = `<b>[${this.info.storage}]</b> <span class="fa fa-location-dot"></span> <b>${this.msg.filesInLocalStorage}.</b>`;
         }
 
         return html`
         <div class="groupHeader">
             <div class="groupAction"> 
-                <a @click="${this.verifyChangeInList}" id="listUpdateFiles">${this.myMsg.updateListVerify}</a>
-                <a @click="${this.showAdd}">${this.myMsg.addNewFile}</a>
+                <a @click="${this.verifyChangeInList}" id="listUpdateFiles">${this.msg.updateListVerify}</a>
+                <a @click="${this.showAdd}">${this.msg.addNewFile}</a>
             </div>
             <div class="groupFilter">
                 <div class="groupFilterRadio">
                     <input id="radioProjectActual" name="projectFind" type="radio" checked="checked" value="${this.projectLabel}" @click="${this.clickRadioProjectActual}">
                     <label for="radioProjectActual">${this.projectLabel}</label>
                     <input id="radioProjectZero" name="projectFind" type="radio" value="0" @click="${this.clickRadioProject0}">
-                    <label for="radioProjectZero">${this.myMsg.localProject}</label>
+                    <label for="radioProjectZero">${this.msg.localProject}</label>
                 </div>
                 <input type="text" placeholder="Filter" @input="${this.filterLiChange}">
             </div>
@@ -242,7 +289,7 @@ export class ServiceListFiles extends ServiceBase {
                 <span style="margin-right:10px">
                     [${this.info.tot}]
 				    <span class="fa fa-file"></span> 
-                    ${this.myMsg.totalFiles}
+                    ${this.msg.totalFiles}
                 </span>
                 ${auxV ? html`<span .innerHTML="${auxV}" style="margin-right:10px"></span>` : ''}
                 ${auxE ? html`<span .innerHTML="${auxE}" style="margin-right:10px"></span>` : ''}
@@ -258,7 +305,7 @@ export class ServiceListFiles extends ServiceBase {
             ${this.history.length <= 0 ? '' :
                 html`
                     <li class="headerTitle">
-                        ${+this.project === 0 ? `${this.myMsg.history} (All Projects)` : `${this.myMsg.history}`}
+                        ${+this.project === 0 ? `${this.msg.history} (All Projects)` : `${this.msg.history}`}
                     </li>
                     ${repeat(
                     this.history,
@@ -359,10 +406,10 @@ export class ServiceListFiles extends ServiceBase {
             <li @click="${this.clickOptOpen}" style="${style}" .myFile=${file} .nameFilter="${nameFilter}">
                 <div class="elContent">
                     <div class="groupHiddenList" @click="${this.clickGroupHidden}">
-                        <span class="mls-gpbtnslider-item fa fa-undo" title="${this.myMsg.undo}" @click="${this.clickOptUndo}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-clone" title="${this.myMsg.clone}" @click="${this.clickOptClone}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-file-pen" title="${this.myMsg.rename}" @click="${this.clickOptRename}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-trash" title="${this.myMsg.delete}" @click="${this.clickOptDel}"></span>
+                        <span class="mls-gpbtnslider-item fa fa-undo" title="${this.msg.undo}" @click="${this.clickOptUndo}"></span>
+                        <span class="mls-gpbtnslider-item fa fa-clone" title="${this.msg.clone}" @click="${this.clickOptClone}"></span>
+                        <span class="mls-gpbtnslider-item fa fa-file-pen" title="${this.msg.rename}" @click="${this.clickOptRename}"></span>
+                        <span class="mls-gpbtnslider-item fa fa-trash" title="${this.msg.delete}" @click="${this.clickOptDel}"></span>
                     </div>
                     <span class="${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
                     <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>
@@ -541,7 +588,6 @@ export class ServiceListFiles extends ServiceBase {
         this.project = mls.actual[5].project as number;
         this.projectLabel = this.project.toString();
         this.showLoader(true);
-        this.updateMyMessages()
         await this.getFiles();
         this.showLoader(false);
 
@@ -882,47 +928,5 @@ export class ServiceListFiles extends ServiceBase {
         return !mls.stor.files[key];
 
     }
-
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.updateListVerify) this.myMsg.updateListVerify = m.updateListVerify;
-        if (m.update) this.myMsg.update = m.update;
-        if (m.addNewFile) this.myMsg.addNewFile = m.addNewFile;
-        if (m.filter) this.myMsg.filter = m.filter;
-        if (m.localProject) this.myMsg.localProject = m.localProject;
-        if (m.totalFiles) this.myMsg.totalFiles = m.totalFiles;
-        if (m.filesWithErrors) this.myMsg.filesWithErrors = m.filesWithErrors;
-        if (m.filesInLocalStorage) this.myMsg.filesInLocalStorage = m.filesInLocalStorage;
-        if (m.filesChangedOnTheServer) this.myMsg.filesChangedOnTheServer = m.filesChangedOnTheServer;
-        if (m.history) this.myMsg.history = m.history;
-        if (m.undo) this.myMsg.undo = m.undo;
-        if (m.clone) this.myMsg.clone = m.clone;
-        if (m.rename) this.myMsg.rename = m.rename;
-        if (m.delete) this.myMsg.delete = m.delete;
-
-    }
-
-    private myMsg = {
-        updateListVerify: 'update list/ verify',
-        update: 'update',
-        addNewFile: 'add new file',
-        filter: 'Filter',
-        localProject: 'Local project',
-        totalFiles: 'total files',
-        filesWithErrors: 'files with errors',
-        filesInLocalStorage: 'file in local storage',
-        filesChangedOnTheServer: 'files changed on the server',
-        history: 'History',
-        undo: 'undo',
-        clone: 'clone',
-        rename: 'rename',
-        delete: 'delete',
-    }
-
-
-
 
 }
