@@ -8,9 +8,24 @@ import { initCodelensCustomElement } from './_100554_codelensCustomElement';
 import { initCodelensComponentDetails } from './_100554_codelensComponentDetails';
 import { initCodelensServiceDetails } from './_100554_codelensServiceDetails';
 
+const message_pt = {
+    
+}
 
+const message_en = {
+    
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
 @customElement('service-results-100554')
 export class ServiceResults extends ServiceBase {
+
+private msg: MessageType = messages['en-us'] ;
 
     constructor() {
         super();
