@@ -12,9 +12,34 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
 
+const message_pt = {
+    textShadow: 'Sombra do texto',
+    xOffset: 'X Offset',
+    yOffset: 'Y Offset',
+    blur: 'Desfoque',
+    color: 'Cor',
+}
+
+const message_en = {
+    textShadow: 'Text Shadow',
+    xOffset: 'X Offset',
+    yOffset: 'Y Offset',
+    blur: 'Blur',
+    color: 'Color',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-style-tesxtshadow-100554')
 export class ServiceDsStyleTextShadow extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     private myUpp = false;
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -183,32 +208,34 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.updateMyMessages();
-
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html`${this.renderColumn()}${this.renderGallery()}`;
     }
 
     renderColumn() {
         return html`
             <div>
-                <h5>${this.myMsg.textShadow}</h5>
+                <h5>${this.msg.textShadow}</h5>
                 <div class="groupEdit">
-                    <span>${this.myMsg.xOffset}</span>
+                    <span>${this.msg.xOffset}</span>
                     <collab-ds-input-range-100554 prop="x" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.yOffset}</span>
+                    <span>${this.msg.yOffset}</span>
                     <collab-ds-input-range-100554 prop="y" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.blur}</span>
+                    <span>${this.msg.blur}</span>
                     <collab-ds-input-range-100554 prop="blur" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.color}</span>
+                    <span>${this.msg.color}</span>
                     <collab-ds-input-select-color-100554 prop="color" useInput="false" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
                 </div>
                 
@@ -350,26 +377,6 @@ export class ServiceDsStyleTextShadow extends ServiceBase {
 
     ];
 
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.textShadow) this.myMsg.textShadow = m.textShadow;
-        if (m.xOffset) this.myMsg.xOffset = m.xOffset;
-        if (m.yOffset) this.myMsg.yOffset = m.yOffset;
-        if (m.blur) this.myMsg.blur = m.blur;
-        if (m.color) this.myMsg.color = m.color;
-
-    }
-
-    private myMsg = {
-        textShadow: 'Text Shadow',
-        xOffset: 'X Offset',
-        yOffset: 'Y Offset',
-        blur: 'Blur',
-        color: 'Color',
-    }
 }
 
 interface ICursorChangeEventsObj {
