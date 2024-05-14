@@ -10,9 +10,24 @@ import { initServicePreviewView } from './_100554_servicePreviewView';
 import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
 import { IcaLitElement } from './_100554_icaLitElement';
 
+const message_pt = {
+}
+
+const message_en = {
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-preview-100554')
 export class ServicePreview100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     @property() itens: any = undefined;
 
     @property() error: string = '';
@@ -230,6 +245,10 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html``;
     }
 
