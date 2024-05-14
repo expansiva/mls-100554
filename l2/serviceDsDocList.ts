@@ -5,8 +5,27 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_plus, collab_chevron_right } from './_100554_collabIcons'
 
+const message_pt = {
+    loading: 'Carregando...',
+    add: 'Adicionar'
+}
+
+const message_en = {
+    loading: 'Loading...',
+    add: 'Add'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
 @customElement('service-ds-doc-list-100554')
 export class ServiceDsDocList100554 extends ServiceBase {
+
+    private msg: MessageType = messages['en-us'];
+    
     constructor() {
         super();
         this.setEvents();
@@ -261,10 +280,13 @@ export class ServiceDsDocList100554 extends ServiceBase {
 
     render() {
 
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang]
+
         return html`
             <div>
                 ${this.loading
-                ? html`<p>Loading...</p>`
+                ? html`<p>${this.msg.loading}</p>`
                 : html`
                 <div>
                     <div class="list-docs-container">
@@ -272,7 +294,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
                     </div>
                     <div class="list-docs-actions">
                         <button @click=${() => { this.addNewDoc(); }}>
-                            <span>Add</span>
+                            <span>${this.msg.add}</span>
                             ${collab_plus}
                         </button>
                     </div>

@@ -23,6 +23,7 @@ const message_pt = {
     save: 'Salvar',
     cancel: 'Cancelar'
 }
+
 const message_en = {
     loading: 'Loading...',
     selectadd: 'please select below to add',
@@ -38,6 +39,7 @@ const message_en = {
     save: 'Save',
     cancel: 'Cancel'
 }
+
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
