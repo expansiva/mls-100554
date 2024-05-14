@@ -98,6 +98,8 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     private fileInfo: mls.stor.IFileInfo | undefined;
 
+    private template:string = `(window as any)["project_config"] = {};`
+
     private showStart() {
         return true;
     }
@@ -140,7 +142,7 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     private setInitialConfig(value: string) {
 
-        const newValue = value || `(window as any)["project_config"] = {};`
+        const newValue = value || this.template;
         this.model = this.createOrGetModel('typescript', newValue);
         if (!this.model || !this._ed1) return;
         this._ed1.setModel(this.model);
@@ -161,7 +163,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private async createConfigFile(project: number, shortName: string) {
-        const content = '';
+        const content = this.template;
         const params = {
             project,
             level: 5,
@@ -220,8 +222,13 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     firstUpdated() {
+
         this.createEditor();
         this.loadProjectConfigs();
+    }
+
+       createRenderRoot() {
+        return this;
     }
 
     updated(changedProperties: any) {
