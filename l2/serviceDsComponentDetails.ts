@@ -6,9 +6,35 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { IEventDSWidgetsChangedParams } from './_100554_serviceDsComponentsList';
 import { initCollabInputTag, CollabInputTag } from './_100554_collabInputTag';
 
+const message_pt = {
+    noComponentSelected: 'Nenhum componente selecionado',
+    component: 'Componente',
+    editStyle: 'Editar estilo',
+    removeComponent: 'Remover componente',
+    group: 'Grupo',
+    tags: 'Tags',
+}
+
+const message_en = {
+    noComponentSelected: 'No component selected',
+    component: 'Component',
+    editStyle: 'Edit style',
+    removeComponent: 'Remove component',
+    group: 'Group',
+    tags: 'Tags',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
 @customElement('service-ds-component-details-100554')
 export class ServiceDsComponentDetails100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     constructor() {
         super();
         mls.events.addListener(3, 'DSWidgetsChanged', (ev) => this.onDsWidgetsChanged(ev));
@@ -154,26 +180,30 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang]
+
         return html`
         ${!this.state
                 ?
-                html`<h4> No component selected!</h4>`
+                html`<h4>${this.msg.noComponentSelected}!</h4>`
                 :
                 html`
                 <section>
-                    <p> Component: ${this.state?.name}</p>
+                    <p> ${this.msg.component}: ${this.state?.name}</p>
                     <div class="actions">
-                        <button class="edit" @click=${() => this.onEditStyleClick()}>Edit Style</button>
-                        <button class="remove" @click=${() => this.removeComponent()}>Remove Component</button>
+                        <button class="edit" @click=${() => this.onEditStyleClick()}>${this.msg.editStyle}</button>
+                        <button class="remove" @click=${() => this.removeComponent()}>${this.msg.removeComponent}</button>
                     </div>
 
                     <div>
-                        <label>Group:</label>
+                        <label>${this.msg.group}:</label>
                         <br>
                         <input .value=${this.group} @input="${this.handleInputChangeGroup}"></input>
                     </div>
                     <div>
-                        <label>Tags:</label>
+                        <label>${this.msg.tags}:</label>
                         <collab-input-tag-100554 .onValueChanged=${(value: string) => { this.handleInputChangeTags(value) }} .value=${this.state.tags.join(',')}></collab-input-tag-100554>
                     </div>
                 <section>
