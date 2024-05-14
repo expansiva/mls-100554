@@ -4,8 +4,41 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+    themes: 'Temas',
+    deleteThisTheme: 'Deletar este tema',
+    updateThisTheme: 'Atualizar este tema',
+    revertTokensToOriginal: 'Reverter tokens para o original',
+    addTheme: 'Adicionar tema',
+    themeName: 'Nome do tema',
+    description: 'Descrição',
+    confirm: 'Confirmar',
+    cancel: 'Cancelar'
+
+}
+
+const message_en = {
+    themes: 'Themes',
+    deleteThisTheme: 'Delete this theme',
+    updateThisTheme: 'Update this theme',
+    revertTokensToOriginal: 'Revert tokens to original',
+    addTheme: 'Add theme',
+    themeName: 'Theme name',
+    description: 'Description',
+    confirm: 'Confirm',
+    cancel: 'Cancel'
+}
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
 @customElement('service-ds-colors-100554')
 export class ServiceDsColors100554 extends ServiceBase {
+
+    private msg: MessageType = messages['en-us'];
+    
     constructor() {
         super();
         this.setEvents();
@@ -454,14 +487,17 @@ export class ServiceDsColors100554 extends ServiceBase {
     }
 
     render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang]
+
         return html`
             <div class="service_tokens_color">
                 <fieldset>
-                    <legend>Themes</legend>
+                    <legend>${this.msg.themes}</legend>
                     <div class="header">
                         <div class="row-primary ${this.showAddContainer ? 'disabled' : ''}">
                             <div>
-                                <label>Themes</label>
+                                <label>${this.msg.themes}</label>
                                 <select id="select_theme" @change=${(e: MouseEvent) => { this.onChangeTheme(e) }}>
                                     ${this.themeList.map(theme => html`
                                         <option value="${theme}">${this.keysName[theme] || theme}</option>
@@ -476,31 +512,31 @@ export class ServiceDsColors100554 extends ServiceBase {
                                 @click=${() => { this.handleAddThemeClick(); }}>
                                     <i class="fa fa-plus"></i>
                                 </div>
-                                <div id="service_color_update" data-tooltip="Delete this theme" class="action-item" @click=${() => { this.updateTheme() }} >
+                                <div id="service_color_update" data-tooltip="${this.msg.deleteThisTheme}" class="action-item" @click=${() => { this.updateTheme() }} >
                                     <i class="fa fa-floppy-disk"></i>
                                 </div>
-                                <div id="service_color_delete" data-tooltip="Update this theme" class="action-item" @click=${() => { this.deleteTheme(); }}>
+                                <div id="service_color_delete" data-tooltip="${this.msg.updateThisTheme}" class="action-item" @click=${() => { this.deleteTheme(); }}>
                                     <i class="fa fa-trash"></i>
                                 </div>
-                                <div id="service_color_revert" data-tooltip="Revert tokens to original" class="action-item" @click=${() => { this.revertTokensColors(); }}>
+                                <div id="service_color_revert" data-tooltip="${this.msg.revertTokensToOriginal}" class="action-item" @click=${() => { this.revertTokensColors(); }}>
                                     <i class="fa fa-undo"></i>
                                 </div>
                             </div>
                         </div>
                         <div class="row-form" style="${this.showAddContainer ? 'display:block' : 'display:none;'}">
                             <fieldset>
-                                <legend>Add Theme</legend>
-                                <label>Theme Name:</label>
+                                <legend>${this.msg.addTheme}</legend>
+                                <label>${this.msg.themeName}:</label>
                                 <input id="service_color_inp_themename">
-                                <label>Description:</label>
+                                <label>${this.msg.description}:</label>
                                 <textarea id="service_color_inp_themedesc" maxlength="200"></textarea>
                             </fieldset>
                             <div>
                                 <div id="service_color_confirm" class="action-item" @click=${() => { this.onConfirmAction() }}>
-                                    <i class="fa fa-check" title="Confirm"></i>
+                                    <i class="fa fa-check" title="${this.msg.confirm}"></i>
                                 </div>
                                 <div id="service_color_cancel" class="action-item" @click=${() => { this.onCancelAction(); }}>
-                                    <i class="fa fa-xmark" title="Cancel"></i>
+                                    <i class="fa fa-xmark" title="${this.msg.cancel}"></i>
                                 </div>
                             </div>
                         </div>
