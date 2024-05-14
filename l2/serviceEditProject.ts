@@ -31,7 +31,7 @@ const message_en = {
     notFoundReference: 'Not found reference',
     tasksByReference: 'Tasks by reference',
     noActionsToAdd: 'No Actions to Add',
-    selectColumnsYouWant:'Select the columns you want to view',
+    selectColumnsYouWant: 'Select the columns you want to view',
     save: 'Save',
     cancel: 'Cancel'
 }
@@ -47,7 +47,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceEditProject100554 extends ServiceBase {
 
     private msg: MessageType = messages['en-us'];
-    
+
     public static modelCount: number;
 
     public details: IService = {
@@ -80,8 +80,6 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (visible) {
-            this.createEditor();
-            this.loadProjectConfigs();
             setTimeout(() => {
                 if (el && typeof el.layout === 'function') el.layout();
             }, 100)
@@ -126,6 +124,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private async getFileContent(file: mls.stor.IFileInfo) {
+        if (!file)  throw new Error('No file find');
         let src: string | Blob | null | undefined;
         const info: mls.stor.IFileInfoValue | null = file.getValueInfo ? await file.getValueInfo() : null;
         const haveInfo: boolean | null = info && !!info.content;
@@ -141,7 +140,7 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     private setInitialConfig(value: string) {
 
-        const newValue = `mls["project_config"] = ${value};`
+        const newValue = value || `(window as any)["project_config"] = {};`
         this.model = this.createOrGetModel('typescript', newValue);
         if (!this.model || !this._ed1) return;
         this._ed1.setModel(this.model);
@@ -162,7 +161,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private async createConfigFile(project: number, shortName: string) {
-        const content = '{}';
+        const content = '';
         const params = {
             project,
             level: 5,
@@ -184,14 +183,45 @@ export class ServiceEditProject100554 extends ServiceBase {
         if (!this.fileInfo) return;
         const uri = this.getUri(`${this.constructor.name}_${this.fileInfo.project}}`);
         let model1 = monaco.editor.getModel(uri);
-        if (!model1) model1 = monaco.editor.createModel(src, editorType, uri);
+        if (!model1) {
+            model1 = monaco.editor.createModel(src, editorType, uri);
+            this.setEventsModel(model1);
+        }
 
         return model1;
+    }
+
+    private timeoutChangesEditorStyle: number = 0;
+
+    private setEventsModel(model: monaco.editor.ITextModel) {
+
+        model.onDidChangeContent((event) => {
+            if (this.timeoutChangesEditorStyle) clearTimeout(this.timeoutChangesEditorStyle);
+            this.timeoutChangesEditorStyle = setTimeout(() => {
+                this.onEditorChange();
+            }, 1000);
+        });
+    }
+
+    private async onEditorChange() {
+        if (!this.model || !this.fileInfo) return;
+        const val = this.model.getValue();
+        let project_config_declaration: string = '';
+        const regex = /\(window\s+as\s+any\)\["project_config"\]\s*=\s*({[\s\S]*?});/;
+        const match = val.match(regex);
+        if (match) project_config_declaration = match[0];
+        eval(project_config_declaration.replace('(window as any)', 'window'));
+        await mls.stor.localStor.setContent(this.fileInfo, { contentType: 'string', content: project_config_declaration });
     }
 
     private getUri(shortFN: string): monaco.Uri {
         ServiceEditProject100554.modelCount = ServiceEditProject100554.modelCount + 1 || 1;
         return monaco.Uri.parse(`file://server/${shortFN}_${ServiceEditProject100554.modelCount}.ts`);
+    }
+
+    firstUpdated() {
+        this.createEditor();
+        this.loadProjectConfigs();
     }
 
     updated(changedProperties: any) {
