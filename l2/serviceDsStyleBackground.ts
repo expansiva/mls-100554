@@ -10,9 +10,40 @@ import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+    gallery: 'Galeria',
+    background: 'Background',
+    angle: 'Anglo',
+    color: 'Cor',
+    transparency: 'Transparencia',
+    stop: 'Parar',
+    add: 'Add',
+    del: 'Del'
+}
+
+
+const message_en = {
+    gallery: 'Gallery',
+    background: 'Background',
+    angle: 'Angle',
+    color: 'Color',
+    transparency: 'Transparency',
+    stop: 'Stop',
+    add: 'Add',
+    del: 'Del'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
 @customElement('service-ds-style-background-100554')
 export class ServiceDsStyleBackground extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     private myUpp = false;
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -146,6 +177,10 @@ export class ServiceDsStyleBackground extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang]
+
         return html`<div class="container">${this.renderBody()}</div>`;
     }
 
@@ -160,7 +195,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
                     ${this.renderItens()}
                 </div>
                 <div class="showConfig" style="border-left: 1px solid #dfe1e6;" >
-                    <h4 style="text-align:center;margin-bottom:1rem">Gallery</h4>
+                    <h4 style="text-align:center;margin-bottom:1rem">${this.msg.gallery }</h4>
                     ${this.renderGallery()}
                 </div>
             </div>
@@ -173,7 +208,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
         if (this.info.tp === 'background') {
             return html`
                 <div class="showConfigItem">
-                    <div class="active" style="border: 1px solid #d0cccc; font-size: 80%; padding: 0.2rem; border-radius: 5px; width:130px; text-align:center; cursor:pointer">Background</div>
+                    <div class="active" style="border: 1px solid #d0cccc; font-size: 80%; padding: 0.2rem; border-radius: 5px; width:130px; text-align:center; cursor:pointer">${this.msg.background }</div>
                 </div>
             `
         } else if (this.info.tp !== '') {
@@ -198,7 +233,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
 
         return html`
             <div class="showConfigItem" style="flex-direction:row;  margin-bottom:10px">
-                <span style="width:50px;text-align:center;font-size:80%; color:#6d6d6d;">Angle:</span>
+                <span style="width:50px;text-align:center;font-size:80%; color:#6d6d6d;">${this.msg.angle}:</span>
                 <input type="number" style="width:50px;text-align:center;font-size:80%; color:#6d6d6d; " .value=${this.onlyNumber(this.info.aux)} prop="aux" @input="${(e: InputEvent) => this.onChangeAux('aux')}"/>
             </div>
         `
@@ -209,10 +244,10 @@ export class ServiceDsStyleBackground extends ServiceBase {
         return html`
             <div class="showConfigItem">
                 <div style="display:flex; gap:.5rem; font-size:80%; color:#6d6d6d;margin-bottom:.5rem">
-                    <div style="width:50px;text-align:center; ">Color</div> 
-                    <div style="width:132px;text-align:center;">Transparency</div> 
-                    <div style="width:60px;text-align:center;" >Stop</div>
-                    <div style="width:50px;text-align:center; cursor:pointer" @click="${this.add}">Add</div>
+                    <div style="width:50px;text-align:center; ">${this.msg.color }</div> 
+                    <div style="width:132px;text-align:center;">${this.msg.transparency }</div> 
+                    <div style="width:60px;text-align:center;" >${this.msg.stop }</div>
+                    <div style="width:50px;text-align:center; cursor:pointer" @click="${this.add}">${this.msg.add }</div>
                 </div>  
                 ${repeat(this.info.itens, ((key: any) => key.value) as any,
             ((i: any, index: any) => {
@@ -221,7 +256,7 @@ export class ServiceDsStyleBackground extends ServiceBase {
                             <input type="color" .value="${i.value}" style="width:50px" prop="color" index="${index}" @change="${(e: InputEvent) => this.onChangeProp(index)}"/> 
                             <input type="range" min="0" max="100" .value="${i.transp}" style="width:132px" prop="transp" index="${index}" @input="${(e: InputEvent) => this.onChangeProp(index)}"/> 
                             <input type="number" style="width:50px" min="0" max="100" .value="${i.stop}" prop="stop" index="${index}" @input="${(e: InputEvent) => this.onChangeProp(index)}"></input>
-                            <div style="width:50px;text-align:center;font-size:80%; color:#6d6d6d;cursor:pointer" @click="${(e: any) => this.del(index)}">Del</div>
+                            <div style="width:50px;text-align:center;font-size:80%; color:#6d6d6d;cursor:pointer" @click="${(e: any) => this.del(index)}">${this.msg.del }</div>
                         </div>    
                     `;
             }) as any
