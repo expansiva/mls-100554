@@ -11,9 +11,38 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 
+const message_pt = {
+    scaleX: 'Escala x',
+    scaleY: 'Escala y',
+    skewX: 'Inclinar x',
+    skewY: 'Inclinar Y',
+    translateX: 'Traduzir x',
+    translateY: 'Traduzir y',
+    rotate: 'Girar',
+}
+
+const message_en = {
+    scaleX: 'Scale x',
+    scaleY: 'Scale y',
+    skewX: 'Skew x',
+    skewY: 'Skew Y',
+    translateX: 'Translate x',
+    translateY: 'Translate y',
+    rotate: 'Rotate',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-style-transform-100554')
 export class ServiceDsStyleTransform extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     private filter = {
         scaleX: '',
         scaleY: '',
@@ -140,11 +169,12 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.updateMyMessages();
-
     }
 
     render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html`${this.renderTransform()}${this.renderGallery()}`;
     }
 
@@ -153,31 +183,31 @@ export class ServiceDsStyleTransform extends ServiceBase {
         return html`
             <div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.scaleX}</span>
+                    <span>${this.msg.scaleX}</span>
                     <collab-ds-input-range-100554 prop="scaleX" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.scaleY}</span>
+                    <span>${this.msg.scaleY}</span>
                     <collab-ds-input-range-100554 prop="scaleY" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.skewX}</span>
+                    <span>${this.msg.skewX}</span>
                     <collab-ds-input-range-100554 prop="skewX" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.skewY}</span>
+                    <span>${this.msg.skewY}</span>
                     <collab-ds-input-range-100554 prop="skewY" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.translateX}</span>
+                    <span>${this.msg.translateX}</span>
                     <collab-ds-input-range-100554 prop="translateX" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.translateY}</span>
+                    <span>${this.msg.translateY}</span>
                     <collab-ds-input-range-100554 prop="translateY" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.rotate}</span>
+                    <span>${this.msg.rotate}</span>
                     <collab-ds-input-range-100554 prop="rotate" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e.detail)}"></collab-ds-input-range-100554>
                 </div>
             </div>
@@ -394,30 +424,6 @@ export class ServiceDsStyleTransform extends ServiceBase {
 
     ];
 
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.scaleX) this.myMsg.scaleX = m.scaleX;
-        if (m.scaleY) this.myMsg.scaleY = m.scaleY;
-        if (m.skewX) this.myMsg.skewX = m.skewX;
-        if (m.skewY) this.myMsg.skewY = m.skewY;
-        if (m.translateX) this.myMsg.translateX = m.translateX;
-        if (m.translateY) this.myMsg.translateY = m.translateY;
-        if (m.rotate) this.myMsg.rotate = m.rotate;
-
-    }
-
-    private myMsg = {
-        scaleX: 'Scale x',
-        scaleY: 'Scale y',
-        skewX: 'Skew x',
-        skewY: 'Skew Y',
-        translateX: 'Translate x',
-        translateY: 'Translate y',
-        rotate: 'Rotate',
-    }
 }
 
 interface ICursorChangeEventsObj {
