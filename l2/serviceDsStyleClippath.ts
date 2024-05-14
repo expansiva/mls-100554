@@ -10,9 +10,24 @@ import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+}
+
+const message_en = {
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-style-clippath-100554')
 export class ServiceDsStyleClippath extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() error: string = '';
@@ -117,7 +132,7 @@ export class ServiceDsStyleClippath extends ServiceBase {
     render() {
         return html`${this.renderGallery()}`;
     }
-
+ 
     renderGallery() {
 
         return html`
