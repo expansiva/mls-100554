@@ -4,9 +4,24 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+}
+
+const message_en = {
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-notification-100554')
 export class ServiceNotification100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
