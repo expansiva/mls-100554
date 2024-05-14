@@ -12,8 +12,35 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
 
+const message_pt = {
+    columnsCount: 'Contagem de coluna',
+    columnsWidth: 'Largura das colunas',
+    columnsGap: 'Lacuna de colunas',
+    columnsRule: 'Regra de Coluna',
+    columnSpan: 'Espanço da coluna',
+    breakInside: 'Quebre por dentro'
+}
+
+const message_en = {
+    columnsCount: 'Columns Count',
+    columnsWidth: 'Columns Width',
+    columnsGap: 'Columns Gap',
+    columnsRule: 'Columns Rule',
+    columnSpan: 'Column Span',
+    breakInside: 'Break Inside'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-style-column-100554')
 export class ServiceDsStyleColumn extends ServiceBase {
+
+    private msg: MessageType = messages['en-us'] ;
 
     private myUpp = false;
 
@@ -147,12 +174,12 @@ export class ServiceDsStyleColumn extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.updateMyMessages();
-
-
     }
 
     render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang]
+
         return html`${this.renderColumn()}${this.renderGallery()}`;
     }
 
@@ -161,23 +188,23 @@ export class ServiceDsStyleColumn extends ServiceBase {
             <div>
                 
                 <div class="groupEdit">
-                    <span>${this.myMsg.columnsCount}</span>
+                    <span>${this.msg.columnsCount}</span>
                     <collab-ds-input-range-100554 prop="column-count" value="0px" useSelect="false" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.columnsWidth}</span>
+                    <span>${this.msg.columnsWidth}</span>
                     <collab-ds-input-range-100554 prop="column-width" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.columnsGap}</span>
+                    <span>${this.msg.columnsGap}</span>
                     <collab-ds-input-range-100554 prop="column-gap" value="0px" .arraySelect=${this.tpMeasures}  @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.columnsRule}</span>
+                    <span>${this.msg.columnsRule}</span>
                     <collab-ds-input-select-color-100554 prop="column-rule" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-select-color-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.columnSpan}</span>
+                    <span>${this.msg.columnSpan}</span>
                     <select @change="${() => this.onChangeProp2("column-span")}" style="width:150px" prop="column-span">
                         <option value=""></option>
                         <option value="row">Row</option>
@@ -187,7 +214,7 @@ export class ServiceDsStyleColumn extends ServiceBase {
                     </select>   
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.breakInside}</span>
+                    <span>${this.msg.breakInside}</span>
                     <select @change="${() => this.onChangeProp2("break-inside")}" style="width:150px" prop="break-inside">
                         <option value=""></option>
                         <option value="none">none</option>
@@ -318,28 +345,6 @@ export class ServiceDsStyleColumn extends ServiceBase {
 
     ];
 
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.columnsCount) this.myMsg.columnsCount = m.columnsCount;
-        if (m.columnsWidth) this.myMsg.columnsWidth = m.columnsWidth;
-        if (m.columnsGap) this.myMsg.columnsGap = m.columnsGap;
-        if (m.columnsRule) this.myMsg.columnsRule = m.columnsRule;
-        if (m.columnSpan) this.myMsg.columnSpan = m.columnSpan;
-        if (m.breakInside) this.myMsg.breakInside = m.breakInside;
-
-    }
-
-    private myMsg = {
-        columnsCount: 'Columns Count',
-        columnsWidth: 'Columns Width',
-        columnsGap: 'Columns Gap',
-        columnsRule: 'Columns Rule',
-        columnSpan: 'Column Span',
-        breakInside: 'Break Inside'
-    }
 }
 
 interface ICursorChangeEventsObj {
