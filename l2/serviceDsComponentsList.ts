@@ -5,9 +5,23 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_cubes, collab_caret_righttv } from './_100554_collabIcons'
 
+const message_pt = {
+}
+
+const message_en = {
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
 @customElement('service-ds-components-list-100554')
 export class ServiceDsComponentsList100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+     
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() itens: IServiceComponents[] = [];
