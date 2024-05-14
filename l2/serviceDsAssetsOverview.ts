@@ -6,8 +6,34 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { IAssetsEventSelectedParams, IAssetsEventChangedParams } from './_100554_serviceDsAssets'
 import { initCollabInputTag } from './_100554_collabInputTag';
 
+
+const message_pt = {
+    folder: 'Pastas',
+    inLocalStorage: 'Em local',
+    description: 'Descrição',
+    tags: 'Tags',
+    deleteFile: 'Deletar Arquivo',
+}
+
+const message_en = {
+    folder: 'Folder',
+    inLocalStorage: 'In local storage',
+    description: 'Description',
+    tags: 'Tags',
+    deleteFile: 'Delete file',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
 @customElement('service-ds-assets-overview-100554')
 export class ServiceDsAssetsOverview100554 extends ServiceBase {
+
+    private msg: MessageType = messages['en-us'];
+
     constructor() {
         super();
         this.setEvents();
@@ -202,6 +228,10 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang]
+
         return html`
         <div class="service_assets_overview" >
             <details open="open" >
@@ -209,22 +239,22 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
                 <ul >
                     <li >
                         <i class="fa-solid fa-folder" ></i>
-                        <span >Folder:</span>
+                        <span >${this.msg.folder}:</span>
                         <span>${this.state.folder}</span>
                     </li>
                     <li ">
                         <i class="fa-solid fa-database" "></i>
-                        <span ">In Local Storage:</span>
+                        <span ">${this.msg.inLocalStorage}:</span>
                         <span>${this.state.inLocalStorage}</span>
                     </li>
                 </ul>
                 <div class="ds_assets_ds_container" style="display:${this.state.multiple ? "none;" : ""}" >
-                    <label>Description:</label>
+                    <label>${this.msg.description}:</label>
                     <textarea rows="5" @input=${(e: MouseEvent) => { this.handleKeyUp(e) }} .value="${this.state.description}"></textarea>
-                    <label>Tags:</label>
+                    <label>${this.msg.tags}:</label>
                     <collab-input-tag-100554 .value=${this.state.tags} .onValueChanged=${(value: string) => { this.handleValueChanged(value) }} ></collab-input-tag-100554>
                     <div class="actions">
-                        <button @click=${() => { this.handleDelete(); }}>Delete File</button>
+                        <button @click=${() => { this.handleDelete(); }}>${this.msg.deleteFile}</button>
                     </div>
                 </div>
             </details>
