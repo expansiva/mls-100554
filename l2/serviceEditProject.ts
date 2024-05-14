@@ -4,9 +4,50 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+const message_pt = {
+    loading: 'Carregando...',
+    selectadd: 'por favor selecione abaixo para adicionar',
+    allTasksLast: 'Todas as tarefas, últimas',
+    user: 'Usuário',
+    all: 'Todos',
+    ref: 'Ref',
+    add: 'Adicionar',
+    notFoundReference: 'Referência não encontrada',
+    tasksByReference: 'Tarefas por referência',
+    noActionsToAdd: 'Nenhuma ação para adicionar',
+    selectColumnsYouWant: 'Selecione as colunas que deseja visualizar',
+    save: 'Salvar',
+    cancel: 'Cancelar'
+}
+
+const message_en = {
+    loading: 'Loading...',
+    selectadd: 'please select below to add',
+    allTasksLast: 'All Tasks, last',
+    user: 'User',
+    all: 'All',
+    ref: 'Ref',
+    add: 'Add',
+    notFoundReference: 'Not found reference',
+    tasksByReference: 'Tasks by reference',
+    noActionsToAdd: 'No Actions to Add',
+    selectColumnsYouWant:'Select the columns you want to view',
+    save: 'Save',
+    cancel: 'Cancel'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-edit-project-100554')
 export class ServiceEditProject100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     public static modelCount: number;
 
     public details: IService = {
