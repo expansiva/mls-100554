@@ -5,9 +5,24 @@ import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
 
+const message_pt = {
+}
+
+const message_en = {
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-styles-100554')
 export class ServiceDsStyles extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     constructor() {
         super();
         this.init();
