@@ -6,9 +6,37 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { initCollabInputTag, CollabInputTag } from './_100554_collabInputTag';
 
 
+const message_pt = {
+    loading: 'Carregando...',
+    cancel: 'Cancelar',
+    confirm: 'Confirmar',
+    description: 'Descrição',
+    name: 'Nome',
+    versionRef: 'Versão',
+    addNewFile: 'Aidcionar um novo arquivo'
+    
+}
+const message_en = {
+    loading: 'Loading...',
+    cancel: 'Cancelar',
+    confirm: 'Confirm',
+    description: 'Description',
+    name: 'Name',
+    versionRef: 'Version Ref',
+    addNewFile: 'Add new file'
+}
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-assets-100554')
 export class ServiceDsAssets100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+    
     constructor() {
         super();
         this.setEvents();
@@ -449,8 +477,8 @@ export class ServiceDsAssets100554 extends ServiceBase {
                             <input id="checkAll" type="checkbox" @change=${(ev: MouseEvent) => { this.onCheckAllChange(ev); }}></input>
                         </th>
                         <th>#</th>
-                        <th>Name</th>
-                        <th>versionRef</th>
+                        <th>${this.msg.name}</th>
+                        <th>${this.msg.versionRef}</th>
                     </tr>
                     
                 </thead>
@@ -482,7 +510,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
                 <button
                     style="display:${this.isAddMode ? 'none' : 'block'}"
                     @click=${() => { this.onAddNewFileClick(); }}>
-                Add new file
+                ${this.msg.addNewFile}
                 </button>
             </div>
 
@@ -495,21 +523,25 @@ export class ServiceDsAssets100554 extends ServiceBase {
                         `
         })}
                 </select>
-                <textarea class="txtDesc" placeholder="Description"></textarea>
+                <textarea class="txtDesc" placeholder="${this.msg.description}"></textarea>
                 <collab-input-tag-100554></collab-input-tag-100554>
                 <div class="add-container-actions ${this.isAddMode ? 'visible' : ''}">
-                    <button @click=${() => { this.onActionAddConfirm(); }}>Confirm</button>
-                    <button @click=${() => { this.onActionAddCancel(); }}>Cancel</button>
+                    <button @click=${() => { this.onActionAddConfirm(); }}>${ this.msg.confirm}</button>
+                    <button @click=${() => { this.onActionAddCancel(); }}>${ this.msg.cancel}</button>
                 </div>
             </div>
         `
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang]
+
         return html`
             <div>
                 ${this.loading
-                ? html`<p>Loading...</p>`
+                ? html`<p>${this.msg.loading}</p>`
                 : html`
                     <div class="assets-container">
                         <div class="assets-tree">
