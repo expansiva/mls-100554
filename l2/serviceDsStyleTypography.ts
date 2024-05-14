@@ -12,8 +12,49 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
 
+const message_pt = {
+    color: 'Cor',
+    fontFamily: 'Família de fontes',
+    fontWeight: 'Peso da fonte',
+    fontStyle: 'Estilo da fonte',
+    fontSize: 'Tamanho da fonte',
+    letterSpacing: 'Espaçamento entre letras',
+    wordSpacing: 'Espaçamento entre palavras',
+    lineHeight: 'Altura da linha',
+    textAlign: 'Alinhar texto',
+    variant: 'Variante',
+    transform: 'Transformar',
+    decoration: 'Decoração',
+    textOverflow: 'Text-overflow',
+}
+
+const message_en = {
+    color: 'Color',
+    fontFamily: 'Font Family',
+    fontWeight: 'Font Weight',
+    fontStyle: 'Font Style',
+    fontSize: 'Font Size',
+    letterSpacing: 'Letter Spacing',
+    wordSpacing: 'Word Spacing',
+    lineHeight: 'Line Height',
+    textAlign: 'Text align',
+    variant: 'Variant',
+    transform: 'Transform',
+    decoration: 'Decoration',
+    textOverflow: 'Text-overflow',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-ds-style-typography-100554')
 export class ServiceDsStyleTypography extends ServiceBase {
+
+    private msg: MessageType = messages['en-us'];
 
     private myUpp = false;
 
@@ -99,7 +140,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
         if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
 
             this.setValues(obj.value);
-            
+
         }
 
     }
@@ -148,20 +189,21 @@ export class ServiceDsStyleTypography extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.updateMyMessages();
-
-
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html`
             <div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.color}</span>
+                    <span>${this.msg.color}</span>
                     <input type="color" prop="color" @change="${(e: any) => this.onChangeProp2('color')}"></input>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.fontFamily}</span>
+                    <span>${this.msg.fontFamily}</span>
                     <select style="width:160px" prop="font-family" @change="${(e: any) => this.onChangeProp2('font-family')}">
                         <option value=""></option>
                         <option value="COURIER">Courier</option>
@@ -171,7 +213,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                     </select>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.fontWeight}</span>
+                    <span>${this.msg.fontWeight}</span>
                     <select style="width:160px" prop="font-weight" @change="${(e: any) => this.onChangeProp2('font-weight')}">
                         <option value=""></option>
                         <option value="100">100</option>
@@ -186,7 +228,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                     </select>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.fontStyle}</span>
+                    <span>${this.msg.fontStyle}</span>
                     <select style="width:160px" prop="font-style" @change="${(e: any) => this.onChangeProp2('font-style')}">
                         <option value=""></option>
                         <option value="NULL">null</option>
@@ -195,23 +237,23 @@ export class ServiceDsStyleTypography extends ServiceBase {
                     </select>
                 </div> 
                 <div class="groupEdit">
-                    <span>${this.myMsg.fontSize}</span>
+                    <span>${this.msg.fontSize}</span>
                     <collab-ds-input-range-100554 prop="font-size" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit"> 
-                    <span>${this.myMsg.letterSpacing}</span>
+                    <span>${this.msg.letterSpacing}</span>
                     <collab-ds-input-range-100554 prop="letter-spacing" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit"> 
-                    <span>${this.myMsg.wordSpacing}</span>
+                    <span>${this.msg.wordSpacing}</span>
                     <collab-ds-input-range-100554 prop="word-spacing" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit"> 
-                    <span>${this.myMsg.lineHeight}</span>
+                    <span>${this.msg.lineHeight}</span>
                     <collab-ds-input-range-100554 prop="line-height" value="0px" .arraySelect=${this.tpMeasures}  group="radius" @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.textAlign}</span>
+                    <span>${this.msg.textAlign}</span>
                     <select style="width:160px" prop="text-align" @change="${(e: any) => this.onChangeProp2('text-align')}">
                         <option value=""></option>
                         <option value="CENTER">center</option>
@@ -227,7 +269,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                     </select>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.variant}</span>
+                    <span>${this.msg.variant}</span>
                     <select style="width:160px" prop="variant" @change="${(e: any) => this.onChangeProp2('variant')}">
                         <option value=""></option>
                         <option value="NORMAL">normal</option>
@@ -235,7 +277,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                     </select>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.transform}</span>
+                    <span>${this.msg.transform}</span>
                     <select style="width:160px" prop="transform" @change="${(e: any) => this.onChangeProp2('transform')}">
                         <option value=""></option>
                         <option value="UPPERCASE">uppercase</option>
@@ -244,7 +286,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                     </select>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.decoration}</span>
+                    <span>${this.msg.decoration}</span>
                     <select style="width:160px" prop="decoration" @change="${(e: any) => this.onChangeProp2('decoration')}">
                         <option value=""></option>
                         <option value="NORMAL">normal</option>
@@ -254,7 +296,7 @@ export class ServiceDsStyleTypography extends ServiceBase {
                     </select>
                 </div>
                 <div class="groupEdit">
-                    <span>${this.myMsg.textOverflow}</span>
+                    <span>${this.msg.textOverflow}</span>
                     <select style="width:160px" prop="text-overflow" @change="${(e: any) => this.onChangeProp2('text-overflow')}">
                         <option value=""></option>
                         <option value="ELLIPSIS">ellipsis</option>
@@ -319,43 +361,6 @@ export class ServiceDsStyleTypography extends ServiceBase {
             this.loading = loader;
         }, 200);
 
-    }
-
-    private updateMyMessages() {
-
-        if (!window['message' as any]) return;
-        const m = window['message' as any] as any;
-
-        if (m.color) this.myMsg.color = m.color;
-        if (m.fontFamily) this.myMsg.fontFamily = m.fontFamily;
-        if (m.fontWeight) this.myMsg.fontWeight = m.fontWeight;
-        if (m.fontStyle) this.myMsg.fontStyle = m.fontStyle;
-        if (m.fontSize) this.myMsg.fontSize = m.fontSize;
-        if (m.letterSpacing) this.myMsg.letterSpacing = m.letterSpacing;
-        if (m.wordSpacing) this.myMsg.wordSpacing = m.wordSpacing;
-        if (m.lineHeight) this.myMsg.lineHeight = m.lineHeight;
-        if (m.textAlign) this.myMsg.textAlign = m.textAlign;
-        if (m.variant) this.myMsg.variant = m.variant;
-        if (m.transform) this.myMsg.transform = m.transform;
-        if (m.decoration) this.myMsg.decoration = m.decoration;
-        if (m.textOverflow) this.myMsg.textOverflow = m.textOverflow;
-
-    }
-
-    private myMsg = {
-        color: 'Color',
-        fontFamily: 'Font Family',
-        fontWeight: 'Font Weight',
-        fontStyle: 'Font Style',
-        fontSize: 'Font Size',
-        letterSpacing: 'Letter Spacing',
-        wordSpacing: 'Word Spacing',
-        lineHeight: 'Line Height',
-        textAlign: 'Text align',
-        variant: 'Variant',
-        transform: 'Transform',
-        decoration: 'Decoration',
-        textOverflow: 'Text-overflow',
     }
 
 }
