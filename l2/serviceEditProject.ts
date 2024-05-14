@@ -98,7 +98,7 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     private fileInfo: mls.stor.IFileInfo | undefined;
 
-    private template:string = `(window as any)["project_config"] = {};`
+    private template: string = `(window as any)["project_config"]`
 
     private showStart() {
         return true;
@@ -126,7 +126,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private async getFileContent(file: mls.stor.IFileInfo) {
-        if (!file)  throw new Error('No file find');
+        if (!file) throw new Error('No file find');
         let src: string | Blob | null | undefined;
         const info: mls.stor.IFileInfoValue | null = file.getValueInfo ? await file.getValueInfo() : null;
         const haveInfo: boolean | null = info && !!info.content;
@@ -136,13 +136,13 @@ export class ServiceEditProject100554 extends ServiceBase {
             if (!src) console.log('error on getContent, src is null');
         }
         if (src instanceof Blob) throw new Error('html file must be string');
-        if (!src) src = "";
+        if (!src) src = '{}';
         return src;
     }
 
     private setInitialConfig(value: string) {
 
-        const newValue = value || this.template;
+        const newValue = this.template + ' = ' + value;
         this.model = this.createOrGetModel('typescript', newValue);
         if (!this.model || !this._ed1) return;
         this._ed1.setModel(this.model);
@@ -163,7 +163,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private async createConfigFile(project: number, shortName: string) {
-        const content = this.template;
+        const content = '{}';
         const params = {
             project,
             level: 5,
@@ -209,11 +209,15 @@ export class ServiceEditProject100554 extends ServiceBase {
         if (!this.model || !this.fileInfo) return;
         const val = this.model.getValue();
         let project_config_declaration: string = '';
-        const regex = /\(window\s+as\s+any\)\["project_config"\]\s*=\s*({[\s\S]*?});/;
+        const regex = /\(window\s+as\s+any\)\["project_config"\]\s*=\s*({[\s\S]*?})/;
         const match = val.match(regex);
         if (match) project_config_declaration = match[0];
-        eval(project_config_declaration.replace('(window as any)', 'window'));
-        await mls.stor.localStor.setContent(this.fileInfo, { contentType: 'string', content: project_config_declaration });
+        // eval(project_config_declaration.replace('(window as any)', 'window'));
+
+        await mls.stor.localStor.setContent(this.fileInfo, {
+            contentType: 'string',
+            content: project_config_declaration.replace('(window as any)["project_config"] =', '')
+        });
     }
 
     private getUri(shortFN: string): monaco.Uri {
@@ -227,7 +231,7 @@ export class ServiceEditProject100554 extends ServiceBase {
         this.loadProjectConfigs();
     }
 
-       createRenderRoot() {
+    createRenderRoot() {
         return this;
     }
 
