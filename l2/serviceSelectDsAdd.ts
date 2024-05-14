@@ -7,9 +7,43 @@ import { ServiceBase } from './_100554_serviceBase';
 export const initServiceSelectDsAdd = () =>{
     return true;
 }
+
+const message_pt = {
+    addNew: 'Adicionar um novo sistema de design',
+    p1: 'Aqui você pode criar um novo sistema de design selecionando um sistema de design padrão vazio ou selecionando um modelo.',
+    empty: 'Vazio',
+    templates: 'Modelos',
+    next: 'Próximo',
+    project: 'Projeto',
+    resume: 'Resumo',
+    name: 'Nome',
+    create: 'Criar Sistema de Design'
+}
+
+const message_en = {
+    addNew: 'Add a new design system',
+    p1: 'Here you can create a new design system selecting empty default design system or select a template.',
+    empty: 'Empty',
+    templates: 'Templates',
+    next: 'Next',
+    project: 'Project',
+    resume: 'Resume',
+    name: 'Name',
+    create: 'Create Design System',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-select-ds-add-100554')
 export class ServiceSelectDsAdd100554 extends LitElement {
 
+    private msg: MessageType = messages['en-us'];
+    
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property()
@@ -169,8 +203,8 @@ export class ServiceSelectDsAdd100554 extends LitElement {
     renderSc1() {
         return html`
             <section id="service_selectds_section_1">
-                    <h1>Add a new design system</h1>
-                    <h4>Here you can create a new design system selecting empty default design system or select a template.</h4>
+                    <h1>${this.msg.addNew}</h1>
+                    <h4>${this.msg.p1}</h4>
                     <div class="ds-type-select">
                         <div class="ds-type-select-item ${classMap({ active: this.mode === 'default' })}">
                             <input
@@ -187,7 +221,7 @@ export class ServiceSelectDsAdd100554 extends LitElement {
                                     </g> 
                                 </svg>
                             </div>
-                            <span >Empty</span>
+                            <span >${this.msg.empty}</span>
                         </div>
                         <div class="ds-type-select-item ${classMap({ active: this.mode === 'template' })}" >
                             <input 
@@ -202,12 +236,12 @@ export class ServiceSelectDsAdd100554 extends LitElement {
                                     <path d="M3 10V16C3 17.6569 4.34315 19 6 19M18 5C18 3.34315 16.6569 2 15 2H11C7.22876 2 5.34315 2 4.17157 3.17157C3.51839 3.82475 3.22937 4.69989 3.10149 6" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"></path> 
                                 </svg>
                             </div>
-                            <span >Templates</span>
+                            <span >${this.msg.templates}</span>
                         </div>
                     </div>
                     <hr >
                     <div class="next-action" >
-                        <button @click=${(e: MouseEvent) => { e.preventDefault(); this.onBtnNext1Click() }} >Next</button>
+                        <button @click=${(e: MouseEvent) => { e.preventDefault(); this.onBtnNext1Click() }} >${this.msg.next}</button>
                     </div>
                 </section>`
     }
@@ -216,18 +250,18 @@ export class ServiceSelectDsAdd100554 extends LitElement {
         return html`
             <section>
                 <div >
-                    <label >Templates:</label>
+                    <label >${this.msg.templates}:</label>
                     <div >
                         <select @change=${(e: MouseEvent) => { this.fireEvent(+(e.target as HTMLSelectElement).value) }}> 
                             ${this.state.dsAvaliables.map((ds, index) => html`
-                                <option value=${index}>Project: ${ds.project} Name: ${ds.name}</option>
+                                <option value=${index}>${this.msg.project}: ${ds.project} Name: ${ds.name}</option>
                             `)}
                             </select>
                     </div>
                 </div>
                 <hr >
                 <div >
-                    <button @click=${(e: MouseEvent) => { e.preventDefault(); this.onBtnNext2Click() }}>Next</button>
+                    <button @click=${(e: MouseEvent) => { e.preventDefault(); this.onBtnNext2Click() }}>${this.msg.next}</button>
                 </div>
             </section>
         `
@@ -237,18 +271,18 @@ export class ServiceSelectDsAdd100554 extends LitElement {
         return html`
             <section >
                 <div>
-                    <label >Resume:</label>
+                    <label >${this.msg.resume}:</label>
                     <ul >
                         <li>Project: ${this.state.project}</li>
                         <li>Template: ${this.state.copyFrom.project + '_' + this.state.copyFrom.name}</li>
                     </ul>
-                    <label>Name:</label>
+                    <label>${this.msg.name}:</label>
                     <div>
                         <input id="l5_ds_add_input_name" >
                     </div>
                     <hr >
                     <div >
-                        <button @click=${(e: MouseEvent) => { e.preventDefault(); this.onBtnNext3Click() }}>Create Design System </button>
+                        <button @click=${(e: MouseEvent) => { e.preventDefault(); this.onBtnNext3Click() }}>${this.msg.create} </button>
                     </div>
                 </div>
             </section>
