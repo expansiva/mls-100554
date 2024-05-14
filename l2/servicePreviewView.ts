@@ -6,9 +6,35 @@ import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
 
 export const initServicePreviewView = '';
+
+const message_pt = {
+    pageNotDefined: 'Página não definida',
+    notFoundStorfile: 'Arquivo não encontrado',
+    configure: 'Configure seu HTML pela opção do editor!',
+    width: 'Largura',
+    height: 'Altura'
+}
+
+const message_en = {
+    pageNotDefined: 'Page not defined',
+    notFoundStorfile: 'Not found storfile',
+    configure: 'Configure your html by editor option!',
+    width: 'Width',
+    height: 'Height',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-preview-view-100554')
 export class ServicePreviewView extends LitElement {
 
+    private msg: MessageType = messages['en-us'];
+    
     private file: mls.stor.IFileInfo | undefined = undefined;
 
     private mfile: mls.l2.editor.IMFile | undefined = undefined;
@@ -48,6 +74,11 @@ export class ServicePreviewView extends LitElement {
     }
 
     render() {
+
+        const lang = this.father && this.father.getMessageKey ? this.father.getMessageKey(messages) : 'en-us';
+        this.msg = messages[lang];
+
+
         if (this.error !== '') return this.renderError();
         else return this.renderPreview();
     }
@@ -77,11 +108,11 @@ export class ServicePreviewView extends LitElement {
                 
                 <div class="groupSetMobile">
                     <div>
-                        <label>Width:</label>
+                        <label>${this.msg.width}:</label>
                         <input type="number" value="300" @input="${this.changeWidthP}">
                     </div>
                     <div>
-                        <label>Height:</label>
+                        <label>${this.msg.height}:</label>
                         <input type="number" value="700" @input="${this.changeHeightP}">
                     </div>
                     </div> 
@@ -286,7 +317,7 @@ export class ServicePreviewView extends LitElement {
 
     private setMyFile(): void {
 
-        if (!this.page || this.page === '') throw new Error(this.myMsg.pageNotDefined);
+        if (!this.page || this.page === '') throw new Error(this.msg.pageNotDefined);
         mls.actual[0].setFullName(this.page);
         const info = mls.actual[0];
 
@@ -304,8 +335,8 @@ export class ServicePreviewView extends LitElement {
         }
         );
 
-        if (!mls.stor.files[key]) throw new Error(this.myMsg.notFoundStorfile + ': ' + key);
-        if (!mls.l2.editor.mfiles[mkey]) throw new Error(this.myMsg.notFoundStorfile + ' mfile: ' + mkey);
+        if (!mls.stor.files[key]) throw new Error(this.msg.notFoundStorfile + ': ' + key);
+        if (!mls.l2.editor.mfiles[mkey]) throw new Error(this.msg.notFoundStorfile + ' mfile: ' + mkey);
         this.file = mls.stor.files[key];
         this.mfile = mls.l2.editor.mfiles[mkey];
     }
@@ -337,7 +368,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     private async getFileContent(): Promise<string> {
-        let txt = '<h3>Configure your html by editor option!</h3>';
+        let txt = '<h3>'+this.msg.configure+'</h3>';
 
         if (this.file && this.file.getValueInfo)
             txt = (await this.file.getValueInfo()).content as string;
@@ -649,11 +680,6 @@ export class ServicePreviewView extends LitElement {
             throw new Error('Error on add component in design system');
         }
 
-    }
-
-    private myMsg = {
-        pageNotDefined: 'Page not defined',
-        notFoundStorfile: 'Not found storfile',
     }
 
     private scrollMobile = `
