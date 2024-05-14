@@ -201,8 +201,9 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
         if (project !== 100554) return '';
         if (!name.startsWith('ica')) return '';
+        if (!name.endsWith('Base')) return '';
 
-        let parts = this.splitStringByUppercase(name);
+        let parts = this.splitStringByUppercase(name.substring(0, name.length - 4));
         if (parts.length < 4) return '';
 
         parts = parts.map((part) => this.capitalizeFirstLetter(part));
@@ -239,7 +240,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
         });
 
         const fg = finalgroup.replace(/\s/g, '');
-        const className = `Ica${root}${subgroup}${fg}`;
+        const className = `Ica${root}${subgroup}${fg}Base`;
         const extend = 'IcaLitElement';
         const extendFile = './_100554_icaLitElement';
 
