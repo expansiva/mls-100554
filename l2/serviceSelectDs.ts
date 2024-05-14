@@ -6,9 +6,28 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { initServiceSelectDsAdd } from './_100554_serviceSelectDsAdd'
 import { collab_file, collab_undo, collab_location_dot, collab_unbalanced } from './_100554_collabIcons'
 
+const message_pt = {
+    noDesignSystem: 'Nenhum sistema de design neste projeto, por favor clique em adicionar para começar a criar um novo sistema de design.',
+    addNew: 'Adicionar novo sistema de design'
+}
+
+const message_en = {
+    noDesignSystem: 'No design system in this project, please click add to start a create a new design system.',
+    addNew: 'Add new design system ',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('service-select-ds-100554')
 export class ServiceSelectDs100554 extends ServiceBase {
 
+    private msg: MessageType = messages['en-us'];
+     
     constructor() {
         super();
         initServiceSelectDsAdd();
@@ -253,6 +272,10 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         this.init();
         if (this.state.actualProject) {
             let lastDsIndex = this.getLastDsSelectedByProject(this.state.actualProject);
@@ -267,7 +290,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
                 <input type="text" placeholder="Filter">
             </div>
             <div class="serviceListDs">
-                <span style="display:${this.state.ds.length > 0 ? 'none' : 'block'}">No design system in this project, please click add to start a create a new design system.</span>
+                <span style="display:${this.state.ds.length > 0 ? 'none' : 'block'}">${this.msg.noDesignSystem}</span>
                 <ul class="serviceListList">
                     ${this.state.ds.map(ds => html`
                         <li>
@@ -330,7 +353,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
                 </ul>
             </div>
             <div class="serviceListAddDs">
-                <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.openAdd() }}> Add new design system </a>
+                <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.openAdd() }}> ${this.msg.addNew}</a>
             </div>
         </div>`;
     }
