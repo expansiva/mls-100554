@@ -41,13 +41,13 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-US': message_en,
-    'pt-BR': message_pt
+    'en-us': message_en,
+    'pt-br': message_pt
 }
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
 
-    private myMessage: MessageType = messages['en-US'] ;
+    private myMessage: MessageType = messages['en-us'] ;
 
     constructor() {
         super();
@@ -63,7 +63,7 @@ export class ServiceAim100554 extends ServiceBase {
     actualServiceOpLevel: number = 0;
 
     render() {
-
+     
         const lang = this.getMessageKey(messages);
         this.myMessage = messages[lang]
 

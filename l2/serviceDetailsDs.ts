@@ -34,14 +34,14 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    en: message_en,
-    pt: message_pt
+    'en-us': message_en,
+    'pt-br': message_pt
 }
 
 @customElement('service-details-ds-100554')
 export class ServiceDetailsDs100554 extends ServiceBase {
 
-    private myMessage: MessageType = this.getMessage(messages) ;
+    private myMessage: MessageType = messages['en-us'] ;
 
     constructor() {
         super();
@@ -186,6 +186,8 @@ export class ServiceDetailsDs100554 extends ServiceBase {
     }
 
     render() {
+        const lang = this.getMessageKey(messages);
+        this.myMessage = messages[lang]
         this.init();
         return html`
             <div class="mls-ds-resume">

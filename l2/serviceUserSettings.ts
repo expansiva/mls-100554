@@ -17,14 +17,14 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    en: message_en,
-    pt: message_pt
+    'en-us': message_en,
+    'en-br': message_pt
 }
 
 @customElement('service-user-settings-100554')
 export class ServiceUserSettings100554 extends ServiceBase {
 
-    private myMessage: MessageType = this.getMessage(messages);
+    private myMessage: MessageType = messages['en-us'];
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
@@ -113,7 +113,8 @@ export class ServiceUserSettings100554 extends ServiceBase {
     }
 
     render() {
-        this.myMessage = this.getMessage(messages);
+        const lang = this.getMessageKey(messages);
+        this.myMessage = messages[lang]
         this.getUserSettings();
         return html`
         <section>

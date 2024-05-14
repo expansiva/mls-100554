@@ -23,14 +23,14 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-US': message_en,
-    'pt-BR': message_pt
+    'en-us': message_en,
+    'pt-br': message_pt
 }
 
 @customElement('service-save-100554')
 export class ServiceSave extends ServiceBase {
 
-    private myMessage: MessageType = messages['en-US'];
+    private myMessage: MessageType = messages['en-us'];
 
     @property() itens: any = undefined;
 
