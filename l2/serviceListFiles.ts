@@ -895,7 +895,9 @@ export class ServiceListFiles extends ServiceBase {
             for (let i = res.length - 1; i >= 0; i--) {
                 if (res.length <= 10) break;
                 const key = mls.stor.getKeyToFiles(res[i].project, this.level, res[i].shortName, res[i].folder, res[i].extension);
-                if (mls.stor.files[key] && mls.stor.files[key].status === 'nochange' && mls.stor.files[key].shortName !== file.shortName ) {
+                if (!mls.stor.files[key]) {
+                    res.splice(i, 1);
+                }else if (mls.stor.files[key] && mls.stor.files[key].status === 'nochange' && mls.stor.files[key].shortName !== file.shortName) {
                     res.splice(i, 1);
                 }
             }
