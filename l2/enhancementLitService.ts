@@ -8,11 +8,30 @@ import {
     setStylesProcessed as setStylesProcessedDefault,
 } from './_100554_enhancementLit';
 
+const message_pt = {
+    title: 'Criar um service em lit',
+    description: "Criar um service em lit 3 ,que será utilizado no sistema collab.\n O Lit é um framework para criar web componentes rápidos e com atualizações dinâmicas sem ter que repintar toda a tela.\n Após criar o arquivo use a inteligência artificial para preparar o web component."
+}
+
+const message_en = {
+    title: 'Create a service in Lit',
+    description: "Create a service in Lit 3, which will be used in the collab system.\n Lit is a framework for creating fast web components with dynamic updates without repainting the entire screen.\n After creating the file, use artificial intelligence to prepare the web component."
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
+const msg: MessageType = messages['en-us'] ;
+
 export const getAddNewFileDetails = () => {
     return [
         {
-            title: "Criar um service em lit",
-            description: "Criar um service em lit 3 ,que será utilizado no sistema collab.\n O Lit é um framework para criar web componentes rápidos e com atualizações dinâmicas sem ter que repintar toda a tela.\n Após criar o arquivo use a inteligência artificial para preparar o web component.",
+            title: msg.title,
+            description: msg.description,
             tags: ["lit", "internal", "service"],
             example: `
             import { html, css } from 'lit';
