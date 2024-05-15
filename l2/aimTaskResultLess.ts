@@ -6,9 +6,31 @@ import { AimTaskBase } from "./_100554_aimTaskBase";
 import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
 import { getActiveOpServiceIfIsValid, isValidRef } from './_100554_aimActionStyleNew';
 
+const message_pt = {
+    title: 'View Less Result',
+    p1: 'Por favor digite as mudanças necessárias abaixo.',
+    cancel: 'Cancelar',
+    confirm: 'Confirmar'
+}
+
+const message_en = {
+    title: 'Ver Resultado do Less',
+    p1: 'Por favor, digite as mudanças necessárias abaixo.',
+    cancel: 'Cancelar',
+    confirm: 'Confirmar'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
 
 @customElement('aim-task-result-less-100554')
 export class AimTaskResultLess extends AimTaskBase {
+
+    private msg: MessageType = messages['en-us'] ;
 
     constructor() {
         super();
@@ -83,7 +105,7 @@ export class AimTaskResultLess extends AimTaskBase {
 
         return html`
         <details @click=${this.handleClick}>
-            <summary>View Less Result</summary>
+            <summary>${this.msg.title}</summary>
             <div style=${!this.isTryAgain ? 'display: block' : 'display:none'}>
                 <div>${contentsBeforeLess}</div>
                 <div style='margin: 10px;'>
@@ -100,7 +122,7 @@ export class AimTaskResultLess extends AimTaskBase {
 
             <div style=${this.isTryAgain ? 'display: block' : 'display:none'}>
                 <div>
-                    <div>Por favor digite as mudanças necessárias abaixo.</div>
+                    <div>${this.msg.p1}</div>
                     <div style='margin: 10px;'>
                         <div>
                             <label>Prompt:</label>
@@ -108,8 +130,8 @@ export class AimTaskResultLess extends AimTaskBase {
                         </div>
                         <br>
                         <div class="buttonGroup">
-                            <button @click="${this.handleCancelTryAgain}">Cancelar</button>
-                            <button @click="${this.handleConfirmTryAgain}">Confirmar</button>
+                            <button @click="${this.handleCancelTryAgain}">${this.msg.cancel}</button>
+                            <button @click="${this.handleConfirmTryAgain}">${this.msg.confirm}</button>
                         </div>
                     </div> 
                 </div> 
