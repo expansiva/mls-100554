@@ -9,8 +9,43 @@ import { ServiceDsStyles } from "_100554_serviceDsStyles";
 
 const myName = '_100554_aimActionStyleNew';
 
+const message_pt = {
+    prompt_title: "Objetivo:Criar um novo CSS em LESS.",
+    prompt_system_1: "Use LESS para criar um novo estilo baseado na fonte fornecida abaixo, incorporando sugestões do usuário.",
+    prompt_system_2: "Desenvolva um arquivo LESS isolado, empregando tokens conforme descrito no modelo abaixo.",
+    prompt_system_3: "Formato de Saída Esperado: Retorne o CSS recém-criado na linguagem LESS, em um único bloco sem a listagem de tokens. Comentários de código devem estar em inglês, mas mantenha comentários existentes que sirvam como auxiliares de UI.",
+
+    template_title: "Irá verificar os tokens e criar um novo conjunto de tokens",
+    template_suggest: "Sugestão:",
+    textarea_placelholder: "Digite aqui seu prompt",
+    btn_cancel: "Cancelar",
+    btn_confirm: "Confirmar",
+
+}
+
+const message_en = {
+    prompt_title: "Objective:Create a new css in LESS.",
+    prompt_system_1: "Use LESS to craft a new style based on the source provided below, incorporating user suggestions.",
+    prompt_system_2: "Develop an isolated LESS file, employing tokens as outlined in the model below.",
+    prompt_system_3: "Expected Output Format: Return the newly created CSS in the LESS language, in a single block without the token listing. Code comments should be in English, but keep existing comments that serve as UI aids.",
+    template_title: "Will check the tokens and create a new set of tokens",
+    template_suggest: "Suggestion:",
+    textarea_placelholder: "Type your prompt here",
+    btn_cancel: "Cancel",
+    btn_confirm: "Confirm"
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('aim-action-style-new-100554')
 export class AimActionStyleNew extends AimActionBase {
+
+    private msg: MessageType = messages['en-us'];
 
     public getRules(): AimActionRules {
         return {
@@ -88,9 +123,9 @@ export class AimActionStyleNew extends AimActionBase {
 
     renderAdd(): TemplateResult { // from abstract
         return html`
-        <p> ${this.messages.template_title} </p>
+        <p> ${this.msg.template_title} </p>
         <div>
-            <label>${this.messages.template_suggest}</label>
+            <label>${this.msg.template_suggest}</label>
             <div class="prompt-suggestion">
                 ${this.prompts.map((prompt) => html`
                     <span @click=${this.onSuggestClick}>
@@ -102,12 +137,12 @@ export class AimActionStyleNew extends AimActionBase {
 
         <div>
             <label>Prompt:</label>
-            <textarea rows="5" placeholder="${this.messages.textarea_placelholder} style="width:100%"></textarea>
+            <textarea rows="5" placeholder="${this.msg.textarea_placelholder} style="width:100%"></textarea>
         </div>
 
         <div class="buttonGroup">
-          <button @click="${this.handleCancel}">${this.messages.btn_cancel}</button>
-          <button @click="${this.handleAdd}">${this.messages.btn_confirm}</button>
+          <button @click="${this.handleCancel}">${this.msg.btn_cancel}</button>
+          <button @click="${this.handleAdd}">${this.msg.btn_confirm}</button>
         </div>
     `;
     }
@@ -116,16 +151,16 @@ export class AimActionStyleNew extends AimActionBase {
     private getPrompt(source: string, user: string) {
 
         const prompt = `
-${this.messages.prompt_title}
+${this.msg.prompt_title}
 
 System:
-1. ${this.messages.prompt_system_1}
-2  ${this.messages.prompt_system_2}
+1. ${this.msg.prompt_system_1}
+2  ${this.msg.prompt_system_2}
 
 User:
 1. ${user}
 
-${this.messages.prompt_system_3}
+${this.msg.prompt_system_3}
         
 ${source}`;
 
@@ -256,23 +291,6 @@ ${source}`;
         this.requestUpdate();
         updateTaskOnServer(taskFinishResult.taskIndex);
     }
-
-
-    messages = {
-        "prompt_title": "Objective:Create a new css in LESS.",
-
-        "prompt_system_1": "Use LESS to craft a new style based on the source provided below, incorporating user suggestions.",
-        "prompt_system_2": "Develop an isolated LESS file, employing tokens as outlined in the model below.",
-        "prompt_system_3": "Expected Output Format: Return the newly created CSS in the LESS language, in a single block without the token listing. Code comments should be in English, but keep existing comments that serve as UI aids.",
-
-        "template_title": "Irá verificar os tokens e criar um novo conjunto de tokens",
-        "template_suggest": "Sugestão:",
-        "textarea_placelholder": "Digite aqui seu prompt",
-        "btn_cancel": "Cancelar",
-        "btn_confirm": "Confirmar",
-
-    }
-
 
 }
 
