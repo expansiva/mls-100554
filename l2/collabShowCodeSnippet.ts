@@ -7,12 +7,36 @@ import { collab_check, collab_copy, collab_double_check } from './_100554_collab
 export function initCollabShowCodeSnippet100554() {
   return true;
 }
+
+const message_pt = {
+  copy: 'Copiar',
+  copied: 'Copiado',
+  accept: 'Aceitar',
+  accepted: 'Aceito'
+}
+
+const message_en = {
+  copy: 'Copy',
+  copied: 'Copied',
+  accept: 'Accept',
+  accepted: 'Accepted'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+  'en-us': message_en,
+  'pt-br': message_pt
+}
+
 @customElement('collab-show-code-snippet-100554')
 export class CollabShowCodeSnippet100554 extends LitElement {
 
+  private msg: MessageType = messages['en-us'];
+
   @property({ type: String, reflect: true }) language = 'typescript';
 
-  @property({ type: Boolean, reflect:true }) withCopy = true;
+  @property({ type: Boolean, reflect: true }) withCopy = true;
 
   @property({ type: Boolean, reflect: true }) withAccept = false;
 
@@ -25,7 +49,7 @@ export class CollabShowCodeSnippet100554 extends LitElement {
 
   text = ``;
 
-  onAccept: Function | undefined = ()=>{ console.info('not implement')};
+  onAccept: Function | undefined = () => { console.info('not implement') };
 
   set textIn(text: string) {
     this.text = text;
@@ -98,6 +122,10 @@ export class CollabShowCodeSnippet100554 extends LitElement {
   }
 
   render() {
+
+    //const lang = this.getMessageKey(messages);
+    //this.myMessage = messages[lang];
+
     return html`
        <div class="actions">
             <span class="language">${this.language}</span>
@@ -121,11 +149,11 @@ export class CollabShowCodeSnippet100554 extends LitElement {
         <div>
           ${collab_copy}
         </div>
-        <span>Copy</span>
+        <span>${this.msg.copy}</span>
     </div>
     <div class="action-item copied" style="display:${this.coping ? 'flex' : 'none'}">
       ${collab_check}
-      <span>Copied</span>
+      <span>${this.msg.copied}</span>
     </div>
     `
   }
@@ -136,11 +164,11 @@ export class CollabShowCodeSnippet100554 extends LitElement {
         <div>
           ${collab_check}
         </div>
-        <span>Accept</span>
+        <span>${this.msg.accept}</span>
     </div>
     <div class="action-item accepted" style="display:${this.accepting ? 'flex' : 'none'}">
       ${collab_double_check}
-      <span>Accepted</span>
+      <span>${this.msg.accepted}Accepted</span>
     </div>
     `
   }
