@@ -17,8 +17,8 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-us': message_en,
-    'en-br': message_pt
+    'en': message_en,
+    'pt': message_pt
 }
 
 @customElement('service-user-settings-100554')
