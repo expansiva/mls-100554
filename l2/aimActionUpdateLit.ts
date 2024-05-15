@@ -7,8 +7,32 @@ import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 
 const myName = '_100554_aimActionUpdateLit';
 
+const message_pt = {
+    title: 'Permitir atualizar o lit do file selecionado',
+    prompt: 'Prompt',
+    cancel: 'Cancelar',
+    confirm: 'Confirmar'
+    
+}
+
+const message_en = {
+    title: 'Allow updating the lit of the selected file',
+    prompt: 'Prompt',
+    cancel: 'Cancel',
+    confirm: 'Confirm'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('aim-action-update-lit-100554')
 export class AimActionUpdateLit extends AimActionBase {
+
+    private msg: MessageType = messages['en-us'] ;
 
     @query('textarea')
     textarea: HTMLTextAreaElement | undefined;
@@ -55,16 +79,16 @@ export class AimActionUpdateLit extends AimActionBase {
 
     renderAdd(): TemplateResult { // from abstract
         return html`
-        <p style="margin-bottom:0rem">Permitir atualizar o lit do file selecionado</p>
+        <p style="margin-bottom:0rem">${this.msg.title}</p>
         <br>
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-          <label>Prompt</label>
+          <label>${this.msg.prompt}</label>
           <textarea></textarea>
         </div>
         <br>
         <div class="buttonGroup">
-          <button @click="${this.handleCancel}">Cancelar</button>
-          <button @click="${this.handleAdd}">Confirmar</button>
+          <button @click="${this.handleCancel}">${this.msg.cancel}</button>
+          <button @click="${this.handleAdd}">${this.msg.confirm}</button>
         </div>
     `;
     }
