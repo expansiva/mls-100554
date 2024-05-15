@@ -4,36 +4,46 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+interface Variation {
+    type: string;
+    enabled: boolean;
+    subdomain: string;
+    designSystem: string;
+    variation: number;
+}
+
+interface Language {
+    language: string;
+    path: string;
+    variations: Variation[];
+}
+
+interface DesignSystem {
+    dsIndex: string;
+    dsName: string;
+    widgetIOName: string;
+}
+
+interface ProjectConfig {
+    name: string;
+    projectDriver: string;
+    projectURL: string;
+    designSystems: DesignSystem[];
+    languages: Language[];
+}
+
+declare global {
+    interface Window {
+        project_config: ProjectConfig
+    }
+}
+
 const message_pt = {
     loading: 'Carregando...',
-    selectadd: 'por favor selecione abaixo para adicionar',
-    allTasksLast: 'Todas as tarefas, últimas',
-    user: 'Usuário',
-    all: 'Todos',
-    ref: 'Ref',
-    add: 'Adicionar',
-    notFoundReference: 'Referência não encontrada',
-    tasksByReference: 'Tarefas por referência',
-    noActionsToAdd: 'Nenhuma ação para adicionar',
-    selectColumnsYouWant: 'Selecione as colunas que deseja visualizar',
-    save: 'Salvar',
-    cancel: 'Cancelar'
 }
 
 const message_en = {
     loading: 'Loading...',
-    selectadd: 'please select below to add',
-    allTasksLast: 'All Tasks, last',
-    user: 'User',
-    all: 'All',
-    ref: 'Ref',
-    add: 'Add',
-    notFoundReference: 'Not found reference',
-    tasksByReference: 'Tasks by reference',
-    noActionsToAdd: 'No Actions to Add',
-    selectColumnsYouWant: 'Select the columns you want to view',
-    save: 'Save',
-    cancel: 'Cancel'
 }
 
 type MessageType = typeof message_en;
@@ -98,7 +108,7 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     private fileInfo: mls.stor.IFileInfo | undefined;
 
-    private template: string = `(window as any)["project_config"]`
+    private template: string = `window.project_config`
 
     private showStart() {
         return true;
@@ -208,16 +218,17 @@ export class ServiceEditProject100554 extends ServiceBase {
     private async onEditorChange() {
         if (!this.model || !this.fileInfo) return;
         const val = this.model.getValue();
-        let project_config_declaration: string = '';
-        const regex = /\(window\s+as\s+any\)\["project_config"\]\s*=\s*({[\s\S]*?})/;
-        const match = val.match(regex);
-        if (match) project_config_declaration = match[0];
-        // eval(project_config_declaration.replace('(window as any)', 'window'));
+        const that = this;
+        (async function scope() {
+            eval(val); // eslint-disable-line no-eval
+            if (window.project_config && typeof window.project_config === 'object') {
+                await mls.stor.localStor.setContent(that.fileInfo, {
+                    contentType: 'string',
+                    content: JSON.stringify(window.project_config, null, 2)
+                });
+            }
+        }).call(this);
 
-        await mls.stor.localStor.setContent(this.fileInfo, {
-            contentType: 'string',
-            content: project_config_declaration.replace('(window as any)["project_config"] =', '')
-        });
     }
 
     private getUri(shortFN: string): monaco.Uri {
@@ -226,7 +237,6 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     firstUpdated() {
-
         this.createEditor();
         this.loadProjectConfigs();
     }
