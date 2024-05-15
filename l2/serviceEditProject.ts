@@ -26,8 +26,8 @@ interface DesignSystem {
 
 interface ProjectConfig {
     name: string;
-    projectDriver: string;
-    projectURL: string;
+    projectDriver?: string;
+    projectURL?: string;
     designSystems: DesignSystem[];
     languages: Language[];
 }
@@ -40,10 +40,12 @@ declare global {
 
 const message_pt = {
     loading: 'Carregando...',
+    menu_title: 'Configuração do projeto'
 }
 
 const message_en = {
     loading: 'Loading...',
+    menu_title: 'Project Configs'
 }
 
 type MessageType = typeof message_en;
@@ -77,7 +79,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Project Configs',
+        title: this.msg.menu_title,
         actions: {
         },
         icons: {},
@@ -173,7 +175,13 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private async createConfigFile(project: number, shortName: string) {
-        const content = '{}';
+        const det = mls.l5.getProjectDetails(project);
+        const newConfig: ProjectConfig = {
+            name: det.name,
+            designSystems: [],
+            languages: []
+        }
+        const content = JSON.stringify(newConfig);
         const params = {
             project,
             level: 5,

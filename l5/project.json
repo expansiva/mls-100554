@@ -1,0 +1,40 @@
+{
+  "name": "collab_workspace",
+  "projectDriver": "github",
+  "projectURL": "/main/expansiva/mls-100554/",
+  "designSystems": [
+    {
+      "dsIndex": "0",
+      "dsName": "collabDesignsystem",
+      "widgetIOName": "_100529_config_ds_default"
+    }
+  ],
+  "languages": [
+    {
+      "language": "pt-BR",
+      "path": "/",
+      "variations": [
+        {
+          "type": "master",
+          "enabled": true,
+          "subdomain": "",
+          "designSystem": "",
+          "variation": 0
+        }
+      ]
+    },
+    {
+      "language": "en-US",
+      "path": "/",
+      "variations": [
+        {
+          "type": "master",
+          "enabled": true,
+          "subdomain": "",
+          "designSystem": "",
+          "variation": 0
+        }
+      ]
+    }
+  ]
+}
