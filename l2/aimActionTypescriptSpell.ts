@@ -7,8 +7,31 @@ import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 
 const myName = '_100554_aimActionTypescriptSpell';
 
+const message_pt = {
+    template_title: "Irá verificar o typescript e procurar por erros de gramática em ingles",
+    prompt_message: "Identifique todas as strings literais no seguinte código TypeScript que devem ser preparadas para internacionalização.  Não retornar explicações, apenas retorne uma 'tabela' com as colunas: texto, language (portugues | ingles | ...).",
+    btn_cancel: "Cancelar",
+    btn_confirm: "Confirmar",
+}
+
+const message_en = {
+    template_title: "Will check the TypeScript and look for grammar errors in English",
+    prompt_message: "Identify all string literals in the following TypeScript code that should be prepared for internationalization. Do not return explanations, just return a 'table' with the columns: text, language (portuguese | english | ...).",
+    btn_cancel: "Cancel",
+    btn_confirm: "Confirm"
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('aim-action-typescript-spell-100554')
 export class AimActionTypescriptSpell extends AimActionBase {
+
+    private msg: MessageType = messages['en-us'];
 
     public getRules(): AimActionRules {
         return {
@@ -44,11 +67,11 @@ export class AimActionTypescriptSpell extends AimActionBase {
 
     renderAdd(): TemplateResult { // from abstract
         return html`
-        <p> ${this.messages.template_title}</p>
+        <p> ${this.msg.template_title}</p>
         <br>
         <div class="buttonGroup">
-          <button @click="${this.handleCancel}">${this.messages.btn_cancel}</button>
-          <button @click="${this.handleAdd}">${this.messages.btn_confirm}</button>
+          <button @click="${this.handleCancel}">${this.msg.btn_cancel}</button>
+          <button @click="${this.handleAdd}">${this.msg.btn_confirm}</button>
         </div>
     `;
     }
@@ -77,9 +100,9 @@ Don't return others comments, return only the table.
         return prompt;
     }
 
-        getPrompt(source: string) {
+    getPrompt(source: string) {
         const prompt = `
-${this.messages.prompt_message}
+${this.msg.prompt_message}
 
 ${source}\n`;
         return prompt;
@@ -150,14 +173,6 @@ ${source}\n`;
         this.mode = taskFinishResult.taskRoot.mode = child.mode;
         this.requestUpdate();
         updateTaskOnServer(taskFinishResult.taskIndex);
-    }
-
-
-    messages = {
-        "template_title": "Irá verificar o typescript e procurar por erros de gramática em ingles",
-        "prompt_message": "Identifique todas as strings literais no seguinte código TypeScript que devem ser preparadas para internacionalização.  Não retornar explicações, apenas retorne uma 'tabela' com as colunas: texto, language (portugues | ingles | ...).",
-        "btn_cancel": "Cancelar",
-        "btn_confirm": "Confirmar",
     }
 
 }
