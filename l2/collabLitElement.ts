@@ -86,12 +86,14 @@ export class CollabLitElement extends LitElement {
   }
 
   getMessageKey(messages: any): string {
-    const htmlLang = document.documentElement.lang;
-    const lang = htmlLang.toLowerCase();
+    const keys = Object.keys(messages);
+    if (!keys || keys.length < 1) throw new Error('Error Message not valid for international');
+    const firstKey = keys[0];
+    const lang = (document.documentElement.lang || '').toLowerCase();
+    if (!lang) return firstKey;
     if (messages.hasOwnProperty(lang)) return lang;
-    const similarLang = Object.keys(messages).find(key => lang.indexOf(key) > -1);
+    const similarLang = keys.find((key: string) => lang.substring(0, 2) === key);
     if (similarLang) return similarLang;
-    const firstKey = Object.keys(messages)[0];
     return firstKey;
   }
 }
