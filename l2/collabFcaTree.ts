@@ -7,8 +7,27 @@ import { ServiceBase } from './_100554_serviceBase';
 
 export const initCollabFCATree = '';
 
+const message_pt = {
+    noItens: 'Nenhum item ICA foi encontrado!'
+}
+
+const message_en = {
+    noItens: 'No ICA items were found!',
+    
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('collab-fca-tree-100554')
 export class CollabFCATree extends LitElement {
+
+    private msg: MessageType = messages['en-us'];
+    
     public myParent: ServiceBase | undefined;
 
     constructor() {
@@ -23,9 +42,12 @@ export class CollabFCATree extends LitElement {
 
     render() {
 
+        const lang = this.myParent ? this.myParent.getMessageKey(messages) : 'en-us';
+        this.msg = messages[lang];
+
         const ar = this.getFCAComponents();
         if (ar && ar.length > 0) return this.createNavigation(ar);
-        return html`<h3 style="padding:1rem">No FCA items were found!<h3>`;
+        return html`<h3 style="padding:1rem">${this.msg.noItens}<h3>`;
     }
 
     createNavigation(array: IInfoElCholdren[]) {
