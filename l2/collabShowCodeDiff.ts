@@ -15,8 +15,35 @@ export function initCollabShowCodeDiff100554() {
     return true;
 }
 
+const message_pt = {
+    diff: 'Com Diferença',
+    reject: 'Rejeitar',
+    tryAgain: 'Tentar Novamente',
+    accept: 'Aceitar',
+    copy: 'Copiar',
+    copied: 'Copiado'
+}
+
+const message_en = {
+    diff: 'With Diff',
+    reject: 'Reject',
+    tryAgain: 'Try Again',
+    accept: 'Accept',
+    copy: 'Copy',
+    copied: 'Copied'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('collab-show-code-diff-100554')
 export class CollabShowCodeDiff extends LitElement {
+
+    private msg: MessageType = messages['en-us'];
 
     static monaco_css: string = '';
     static inLoadingCss: boolean = false;
@@ -211,11 +238,11 @@ export class CollabShowCodeDiff extends LitElement {
         return html`
             <div @click=${this.onCopyClick} class="action-item" style="display:${this.coping ? 'none' : 'flex'}">
                 ${collab_copy}
-                <span>Copy</span>
+                <span>${this.msg.copy}</span>
             </div>
             <div class="action-item copied" style="display:${this.coping ? 'flex' : 'none'}">
                 ${collab_check}
-                <span>Copied</span>
+                <span>${this.msg.copied}</span>
             </div>
             `
     }
@@ -224,7 +251,7 @@ export class CollabShowCodeDiff extends LitElement {
         return html`
             <div @click=${this.onAcceptClick} class="action-item ${!this.withAccept ? 'disabled' : ''}">
                 ${collab_thumbs_up}
-                <span>Accept</span>
+                <span>${this.msg.accept}</span>
             </div>
         `
     }
@@ -233,7 +260,7 @@ export class CollabShowCodeDiff extends LitElement {
         return html`
             <div @click=${this.onTryAgainClick} class="action-item ${!this.withTryAgain ? 'disabled' : ''}">
                 ${collab_repeat}
-                <span>Try Again</span>
+                <span>${this.msg.tryAgain}</span>
             </div>
         `
     }
@@ -242,7 +269,7 @@ export class CollabShowCodeDiff extends LitElement {
         return html`
             <div @click=${this.onRejectClick} class="action-item ${!this.withReject ? 'disabled' : ''}">
                 ${collab_thumbs_down}
-                <span>Reject</span>
+                <span>${this.msg.reject}</span>
             </div>
         `
     }
@@ -264,7 +291,7 @@ export class CollabShowCodeDiff extends LitElement {
         return html`
             <div class="${!this.withDiff ? 'disabled' : ''}">
                 <input @change=${this.handleChangeDiff} id="diff_check" type="checkbox"></input>
-                <label for="diff_check"> With Diff<label>
+                <label for="diff_check">${this.msg.diff}<label>
             </div>
         `
     }
@@ -275,6 +302,10 @@ export class CollabShowCodeDiff extends LitElement {
     }
 
     render() {
+
+        //const lang = this.getMessageKey(messages);
+        //this.myMessage = messages[lang];
+
         return html`
             <div class="actions">
                     <span class="language">${this.language}</span>
