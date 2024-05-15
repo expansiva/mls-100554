@@ -63,7 +63,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     public static modelCount: number;
 
     public details: IService = {
-        icon: '&#xf15b',
+        icon: '&#xf085',
         state: 'foreground',
         position: 'right',
         tooltip: 'Service Edit Project',
@@ -93,7 +93,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (visible) {
             setTimeout(() => {
-                if (el && typeof el.layout === 'function') el.layout();
+                this.setMsizeEditor();
             }, 100)
         }
     }
@@ -226,6 +226,8 @@ export class ServiceEditProject100554 extends ServiceBase {
     private async onEditorChange() {
         if (!this.model || !this.fileInfo) return;
         const val = this.model.getValue();
+        const errors = monaco.editor.getModelMarkers(({ resource: this.model.uri }));
+        if (errors && errors.length > 0) return;
         const that = this;
         (async function scope() {
             eval(val); // eslint-disable-line no-eval
