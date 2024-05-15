@@ -1,7 +1,8 @@
 /// <mls shortName="codelensCustomElement" project="100554" enhancement="_100554_enhancementLit" groupName="internal" />
 
-import { html, css, LitElement, unsafeHTML } from 'lit';
+import { html, css, unsafeHTML } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 export function initCodelensCustomElement() {
     return true;
@@ -27,7 +28,7 @@ const messages: { [key: string]: MessageType } = {
 }
 
 @customElement('codelens-custom-element-100554')
-export class CodeLensCustomElement100554 extends LitElement {
+export class CodeLensCustomElement100554 extends CollabLitElement {
 
     private msg: MessageType = messages['en-us'];
     
@@ -47,8 +48,8 @@ export class CodeLensCustomElement100554 extends LitElement {
     `
     render() {
 
-        //const lang = this.getMessageKey(messages);
-        //this.myMessage = messages[lang];
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
         
         return html`
         <h1> @customElement</h1>
