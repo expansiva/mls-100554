@@ -3,9 +3,32 @@
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+const message_pt = {
+    addService: 'Adicionar Serviço',
+    back: 'Voltar',
+    hidden: 'Oculto',
+    style: 'Estilo'
+}
+
+const message_en = {
+    addService: 'Add Service',
+    back: 'Back',
+    hidden: 'Hidden',
+    style: 'Style'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('collab-config-service-100554')
 export class CollabConfig100554 extends LitElement {
 
+    private msg: MessageType = messages['en-us'];
+    
     @property({ type: String }) currentScenario: 'list' | 'add' = 'list';
 
     @property({ type: String }) error: string = '';
@@ -21,6 +44,9 @@ export class CollabConfig100554 extends LitElement {
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     render() {
+
+        //const lang = this.getMessageKey(messages);
+        //this.myMessage = messages[lang];
 
         this.style.height = '100%';
         return html`
@@ -51,10 +77,10 @@ export class CollabConfig100554 extends LitElement {
             
             ${this.currentScenario === 'list' ?
                 html`
-                    <button @click="${this.goToScenaryAdd}">Add Service</button>
+                    <button @click="${this.goToScenaryAdd}">${this.msg.addService}</button>
                 `
                 : html`
-                    <button @click="${this.goToScenaryList}">Back</button>
+                    <button @click="${this.goToScenaryList}">${this.msg.back}</button>
                 `
             }
             ${this.error ?
@@ -136,7 +162,7 @@ export class CollabConfig100554 extends LitElement {
                             <div>#${index + 1}</div>
                             <div>
                                 ${service.tooltip}
-                                <span class="badge" style="display:${service.visible ? 'none' : 'inline-block'}">hidden<span>
+                                <span class="badge" style="display:${service.visible ? 'none' : 'inline-block'}">${this.msg.hidden}<span>
                             </div>
                         </div>
                         <div class="groupInfos" style="justify-content:end;display:flex; gap:1rem;">
@@ -145,7 +171,7 @@ export class CollabConfig100554 extends LitElement {
                                 <span class="groupHidden" style="display:none">
                                     <a myIndex="${index}" @click="${this.desactiveService}">Desactivate</a>
                                     <span style="margin: 0px 1rem">|</span>
-                                    <label>Style</label>
+                                    <label>${this.msg.style}</label>
                                     <select  myIndex="${index}" @change="${this.changeClassName}"> 
                                         <option value="" ?selected="${service && !['separator-left', 'separator-right'].includes(service.classname as any)}"></option>
                                         <option value="separator-left" ?selected="${service.classname === 'separator-left'}">separator-left</option>
