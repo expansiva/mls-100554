@@ -7,8 +7,41 @@ import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_coll
 import { getActiveOpServiceIfIsValid, isValidRef } from './_100554_aimActionAddIca';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
+const message_pt = {
+    title_result: "Ver typescript resultado",
+    tryagain_title_1: "Métodos para implementar",
+    tryagain_title_2: "Por favor digite as mudanças necessárias abaixo.",
+    tryagain_placeholder: "Digite aqui seu prompt.",
+    accept_answer: "Deseja gerar o .HTML para o componente ?",
+    btn_confirmar: "Confirmar",
+    btn_cancelar: "Cancelar",
+    btn_yes: "Sim",
+    btn_no: "Não",
+}
+
+const message_en = {
+    title_result: "View TypeScript Result",
+    tryagain_title_1: "Methods to implement",
+    tryagain_title_2: "Please type the necessary changes below.",
+    tryagain_placeholder: "Type your prompt here.",
+    accept_answer: "Do you want to generate the .HTML for the component?",
+    btn_confirmar: "Confirm",
+    btn_cancelar: "Cancel",
+    btn_yes: "Yes",
+    btn_no: "No"
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('aim-task-result-add-ica-100554')
 export class AimTaskResulAddIca extends AimTaskBase {
+
+    private msg: MessageType = messages['en-us'];
 
     constructor() {
         super();
@@ -81,7 +114,7 @@ export class AimTaskResulAddIca extends AimTaskBase {
 
         return html`
         <details @click=${this.handleClick}>
-            <summary>${this.messages.title_result}</summary>
+            <summary>${this.msg.title_result}</summary>
             <div style=${(!this.isTryAgain && !this.isAccept) ? 'display: block' : 'display:none'}>
                 <div>${contentsBeforeTS}</div>
                 <div style='margin: 10px;'>
@@ -94,8 +127,8 @@ export class AimTaskResulAddIca extends AimTaskBase {
                 </div> 
                 <div>${contentsAfterTS}</div>
             </div>
-            ${this.isAccept ? this.renderAccept(): ''}
-            ${this.isTryAgain ? this.renderTryAgain(): ''}
+            ${this.isAccept ? this.renderAccept() : ''}
+            ${this.isTryAgain ? this.renderTryAgain() : ''}
 
 
         </details>
@@ -106,11 +139,11 @@ export class AimTaskResulAddIca extends AimTaskBase {
         return html`
             <div>
                 <div>
-                    <div>${this.messages.accept_answer}</div>
+                    <div>${this.msg.accept_answer}</div>
                     <div style='margin: 10px;'>
                         <div class="buttonGroup">
-                            <button @click="${this.handleCancelAcceptHTML}">${this.messages.btn_no}</button>
-                            <button @click="${this.handleConfirmAcceptHTML}">${this.messages.btn_yes}</button>
+                            <button @click="${this.handleCancelAcceptHTML}">${this.msg.btn_no}</button>
+                            <button @click="${this.handleConfirmAcceptHTML}">${this.msg.btn_yes}</button>
                         </div>
                     </div> 
                 </div> 
@@ -123,7 +156,7 @@ export class AimTaskResulAddIca extends AimTaskBase {
         return html`
             <div>
                 <div>
-                    <label>${this.messages.tryagain_title_1}</label>
+                    <label>${this.msg.tryagain_title_1}</label>
                     <div class="prompt-suggestion">
                         ${methodsToImplements.map((prompt) => html`
                             <span @click=${this.onSuggestClick}>
@@ -131,33 +164,21 @@ export class AimTaskResulAddIca extends AimTaskBase {
                             </span>
                         `)}
                     </div>
-                    <div>${this.messages.tryagain_title_2}</div>
+                    <div>${this.msg.tryagain_title_2}</div>
                     <div style='margin: 10px;'>
                         <div>
                             <label>Prompt:</label>
-                            <textarea rows="5" placeholder=${this.messages.tryagain_placeholder} style="width:100%"></textarea>
+                            <textarea rows="5" placeholder=${this.msg.tryagain_placeholder} style="width:100%"></textarea>
                         </div>
                         <br>
                         <div class="buttonGroup">
-                            <button @click="${this.handleCancelTryAgain}">${this.messages.btn_cancelar}</button>
-                            <button @click="${this.handleConfirmTryAgain}">${this.messages.btn_confirmar}</button>
+                            <button @click="${this.handleCancelTryAgain}">${this.msg.btn_cancelar}</button>
+                            <button @click="${this.handleConfirmTryAgain}">${this.msg.btn_confirmar}</button>
                         </div>
                     </div> 
                 </div> 
             </div>
             `
-    }
-
-    messages = {
-        "title_result": "Ver typescript resultado",
-        "tryagain_title_1": "Métodos para implementar",
-        "tryagain_title_2": "Por favor digite as mudanças necessárias abaixo.",
-        "tryagain_placeholder": "Digite aqui seu prompt.",
-        "accept_answer": "Deseja gerar o .HTML para o componente ?",
-        "btn_confirmar": "Confirmar",
-        "btn_cancelar": "Cancelar",
-        "btn_yes": "Sim",
-        "btn_no": "Não",
     }
 
     private onSuggestClick(e: MouseEvent) {
@@ -184,7 +205,7 @@ export class AimTaskResulAddIca extends AimTaskBase {
                 const regex2 = /(?:private\s+)?(\b\w+\b)\s*\(/g;
                 const match = regex.exec(fcLine);
                 let fcName = match ? match[1] : null;
-                if(!fcName){
+                if (!fcName) {
                     const match2 = regex2.exec(fcLine);
                     fcName = match2 ? match2[1] : null;
                 }
