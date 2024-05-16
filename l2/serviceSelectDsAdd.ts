@@ -3,6 +3,7 @@
 import { html, css, LitElement, classMap } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase } from './_100554_serviceBase';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 export const initServiceSelectDsAdd = () =>{
     return true;
@@ -40,7 +41,7 @@ const messages: { [key: string]: MessageType } = {
 }
 
 @customElement('service-select-ds-add-100554')
-export class ServiceSelectDsAdd100554 extends LitElement {
+export class ServiceSelectDsAdd100554 extends CollabLitElement {
 
     private msg: MessageType = messages['en-us'];
     
@@ -291,6 +292,10 @@ export class ServiceSelectDsAdd100554 extends LitElement {
 
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         this.state.project = mls.actual[5].project;
         this.state.dsAvaliables = this.getDsAvaliable();
         return html`

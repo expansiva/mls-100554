@@ -9,6 +9,7 @@ import {
     collab_thumbs_down,
     collab_thumbs_up,
 } from './_100554_collabIcons'
+import { CollabLitElement } from './_100554_collabLitElement';
 
 
 export function initCollabShowCodeDiff100554() {
@@ -41,7 +42,7 @@ const messages: { [key: string]: MessageType } = {
 }
 
 @customElement('collab-show-code-diff-100554')
-export class CollabShowCodeDiff extends LitElement {
+export class CollabShowCodeDiff extends CollabLitElement {
 
     private msg: MessageType = messages['en-us'];
 
@@ -303,8 +304,8 @@ export class CollabShowCodeDiff extends LitElement {
 
     render() {
 
-        //const lang = this.getMessageKey(messages);
-        //this.myMessage = messages[lang];
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
 
         return html`
             <div class="actions">

@@ -2,6 +2,7 @@
 
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 export function initCodelensComponentDetails() {
     return true;
@@ -25,7 +26,7 @@ const messages: { [key: string]: MessageType } = {
 }
 
 @customElement('codelens-component-details-100554')
-export class CodeLensComponentDetails100554 extends LitElement {
+export class CodeLensComponentDetails100554 extends CollabLitElement {
 
     private msg: MessageType = messages['en-us'];
     
@@ -52,8 +53,8 @@ export class CodeLensComponentDetails100554 extends LitElement {
     `
     render() {
 
-        //const lang = this.getMessageKey(messages);
-        //this.msg = messages[lang];
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
 
         return html`
         <h1> mlsComponentDetails</h1>

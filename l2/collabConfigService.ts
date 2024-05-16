@@ -2,6 +2,7 @@
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 const message_pt = {
     addService: 'Adicionar Serviço',
@@ -25,7 +26,7 @@ const messages: { [key: string]: MessageType } = {
 }
 
 @customElement('collab-config-service-100554')
-export class CollabConfig100554 extends LitElement {
+export class CollabConfig100554 extends CollabLitElement {
 
     private msg: MessageType = messages['en-us'];
     
@@ -45,8 +46,8 @@ export class CollabConfig100554 extends LitElement {
 
     render() {
 
-        //const lang = this.getMessageKey(messages);
-        //this.myMessage = messages[lang];
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
 
         this.style.height = '100%';
         return html`
