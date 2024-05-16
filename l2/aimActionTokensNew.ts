@@ -6,10 +6,37 @@ import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 
 const myName = '_100554_aimActionTokensNew';
+// start internationalization
+const message_pt = {
+    title: 'verifica os tokens e cria um novo conjunto de tokens',
+    prompt: 'Prompt',
+    suggest: "Sugestão",
+    placeholder: "Digite aqui seu prompt",
+    cancel: 'Cancelar',
+    confirm: 'Confirmar'
+}
 
+const message_en = {
+    title: 'verify tokens and create a new set',
+    suggest: "Suggest",
+    prompt: 'Prompt',
+    placeholder: "Enter your prompt here",
+    cancel: 'Cancel',
+    confirm: 'Confirm'
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+// end internationalization
 
 @customElement('aim-action-tokens-new-100554')
 export class AimActionTokensNew extends AimActionBase {
+
+    private msg: MessageType = messages['en-us'];
 
     public getRules(): AimActionRules {
         return {
@@ -25,6 +52,12 @@ export class AimActionTokensNew extends AimActionBase {
 
     language = 'english';
 
+    render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        return super.render();
+    }
+
     private handleCancel() {
         this.dispatchEvent(new CustomEvent('add-task', {
             detail: { cancel: 'true' }, bubbles: true, composed: true
@@ -33,14 +66,12 @@ export class AimActionTokensNew extends AimActionBase {
 
     private handleAdd(): void {
 
-        if (this.textarea) {
-            (window as any)['aim-action-tokens-new-100554'] = this.textarea.value;
-        }
         const taskRoot: cbe.ITaskRoot = {
             mode: 'initializing',
-            title: 'verify tokens and create a new set',
+            title: this.msg.title,
             widget: myName,
             children: [],
+            args: this.textarea?.value || '',
             trace: [new Date().toISOString() + ': trask created at ']
         }
         tasks.unshift(taskRoot);
@@ -61,20 +92,20 @@ export class AimActionTokensNew extends AimActionBase {
     }
 
     private prompts = [
-       'Criar um conjunto de tokens com tema minimalista',
-       'Criar um conjunto de tokens com tema retro',
-       'Criar um conjunto de tokens com cores mais vibrantes',
-       'Criar um conjunto de tokens com cores neutras',
+        'Criar um conjunto de tokens com tema minimalista',
+        'Criar um conjunto de tokens com tema retro',
+        'Criar um conjunto de tokens com cores mais vibrantes',
+        'Criar um conjunto de tokens com cores neutras',
     ]
 
     renderAdd(): TemplateResult { // from abstract
         return html`
-        <p> Irá verificar os tokens e criar um novo conjunto de tokens </p>
+        <p> ${this.msg.title} </p>
 
         <div>
-            <label>Sugestão:</label>
+            <label>${this.msg.suggest}</label>
             <div class="prompt-suggestion">
-                ${this.prompts.map((prompt)=> html`
+                ${this.prompts.map((prompt) => html`
                     <span @click=${this.onSuggestClick}>
                         <span >${prompt}</span>
                     </span>
@@ -85,23 +116,18 @@ export class AimActionTokensNew extends AimActionBase {
 
         <div>
             <label>Prompt:</label>
-            <textarea rows="5" placeholder="Digite aqui seu prompt" style="width:100%"></textarea>
+            <textarea rows="5" placeholder="${this.msg.placeholder}" style="width:100%"></textarea>
         </div>
         <br>
         <div class="buttonGroup">
-          <button @click="${this.handleCancel}">Cancelar</button>
-          <button @click="${this.handleAdd}">Confirmar</button>
+          <button @click="${this.handleCancel}">${this.msg.cancel}</button>
+          <button @click="${this.handleAdd}">${this.msg.confirm}</button>
         </div>
     `;
     }
 
 
-    getPrompt(source: string) {
-        let user = '';
-        if ((window as any)['aim-action-tokens-new-100554']) {
-            user = (window as any)['aim-action-tokens-new-100554'];
-            (window as any)['aim-action-tokens-new-100554'] = undefined;
-        }
+    getPrompt(source: string, user: string) {
         const prompt = `
 Objective: Criar um conjunto de tokens em LESS.
 \n
@@ -154,7 +180,7 @@ Retorna o novo conjunto de tokens em LESS, em um único bloco, sem comentários no
             title: 'exec prompt',
             widget: '_100554_aimTaskExecLLM',
             agent: this.assistant,
-            prompt: this.getPrompt(source),
+            prompt: this.getPrompt(source, taskFinishResult.taskRoot.args || ''),
             trace: [],
             nextStep: this.prepareTask3.name // danger, loop
         });

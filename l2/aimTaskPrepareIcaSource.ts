@@ -5,6 +5,7 @@ import { getInfoMyService } from "./_100554_aimHelper";
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { convertFileNameToTag } from "./_100554_utilsLit";
 import { getAttributeDefinitionsLit } from './_100554_icaBaseDescription';
+import { IArgsAddIca } from './_100554_aimActionAddIca'
 
 @customElement('aim-task-prepare-ica-source-100554')
 export class AimTaskPrepareIcaSource extends AimTaskBase {
@@ -14,9 +15,14 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
     }
 
     getSource() {
-        const prompt = this.taskChild.prompt;
-        if (!prompt) this.notifyCompleteByStatus('error', 'Invalid data in prompt');
-        const obj: IDataFileIcaNew = JSON.parse(prompt as string);
+
+        const promp: string | undefined= this.taskChild.prompt;
+        if (!promp) {
+            this.notifyCompleteByStatus('error', 'Invalid data in prompt');
+            return;
+        }
+        const obj: IArgsAddIca = JSON.parse(promp);
+
         this._getSource(obj).then((ret: string) => {
             const result = ret;
             this.notifyCompleteByStatus('ok', result);
@@ -25,7 +31,7 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
         });
     }
 
-    private _getSource(data: IDataFileIcaNew): Promise<string> {
+    private _getSource(data: IArgsAddIca): Promise<string> {
 
         return new Promise<string>(async (resolve, reject) => {
             try {
@@ -96,9 +102,4 @@ export class ${className} extends ${extend} {
 
         });
     }
-}
-
-interface IDataFileIcaNew {
-    group: string[]
-    attr: string[]
 }
