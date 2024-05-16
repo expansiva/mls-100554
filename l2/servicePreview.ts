@@ -11,9 +11,15 @@ import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
 import { IcaLitElement } from './_100554_icaLitElement';
 
 const message_pt = {
+    variations: 'Variação',
+    editStyle: 'Editar estilo',
+    pause: 'Parar preview'
 }
 
 const message_en = {
+    variations: 'Variation',
+    editStyle: 'Edit style',
+    pause: 'Pause preview'
 }
 
 type MessageType = typeof message_en;
@@ -131,9 +137,9 @@ export class ServicePreview100554 extends ServiceBase {
             icPreviewM: 'Mobile;f3cf'
         },
         buttons: {
-            btVariations: 'Variations;f1ab:menu:0 - Default,1 - Portugues',
-            btEditStyle: 'Edit Styles;f0d0',
-            btWatch: 'Pause Preview;Update Preview;f04c;f04b',
+            btVariations: this.msg.variations + ';f1ab:menu:0 - Default,1 - Portugues',
+            btEditStyle: this.msg.editStyle + ';f0d0',
+            btWatch: this.msg.pause + ';Update Preview;f04c;f04b',
         },
         actionDefault: '', // call after close icon clicked
         iconDefault: 'icPreviewD',
