@@ -2,6 +2,8 @@
 
 import { customElement } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
+import { ITaskRootArgs } from "./_100554_aimActionVerifyInternationalization";
+
 
 @customElement('aim-task-get-source-language-typescript-100554')
 export class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
@@ -12,12 +14,19 @@ export class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
 
     getSource() {
 
-        const shortName: string = '';
+        if (!this.taskRoot.args) {
+            this.notifyCompleteByStatus('error', 'Invalid Args');
+            return;
+        }
+
+        const data: ITaskRootArgs = JSON.parse(this.taskRoot.args as string);
+        const shortName: string = data.fileName;
+
         this._getSource(shortName).then((ret: ISourceTypescriptData) => {
             const result = ret;
             this.notifyCompleteByStatus('ok', JSON.stringify(result));
         }).catch((e: any) => {
-            this.notifyCompleteByStatus('error', e);
+            this.notifyCompleteByStatus('error', e.message.toString());
         });
     }
 
@@ -31,7 +40,7 @@ export class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
 
     }
 
-    private getDataInternalization(sourceComplete: string): ISourceTypescriptData {
+    public getDataInternalization(sourceComplete: string): ISourceTypescriptData {
 
         const regex = /\/\/ start internationalization([\s\S]+?)\/\/ end internationalization/;
         const match = sourceComplete.match(regex);
@@ -70,7 +79,7 @@ export interface IInternalizationsDetails {
     startLine: number,
     endLine: number,
     source: string,
-    languages:string[]
+    languages: string[]
 }
 
 export interface ISourceTypescriptData {

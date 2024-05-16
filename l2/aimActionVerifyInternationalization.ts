@@ -2,8 +2,9 @@
 
 import { html, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
+import { tasks, ITaskFinish, updateTaskOnServer, getInfoMyService } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
+
 import { ISourceTypescriptData } from './_100554_aimTaskGetSourceLanguageTypescript';
 
 const myName = '_100554_aimActionVerifyInternationalization';
@@ -41,11 +42,11 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     public assistant = "gpt3_typescript";
     public title = "Check Internationalization";
 
-    render() {
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
-        return super.render();
-    }
+    // render() {
+    //     const lang = this.getMessageKey(messages);
+    //     this.msg = messages[lang];
+    //     return super.render();
+    // }
 
     language = 'english';
 
@@ -56,12 +57,24 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     }
 
     private handleAdd(): void {
-        debugger
+
+        const info = getInfoMyService(this);
+        if (!info || (info.actServiceOp && info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554')) {
+            throw new Error('Invalid service opposite side');
+        }
+        const position = info.position === 'left' ? 'right' : 'left';
+        if (!(mls.actual[2] as any)[position]) throw new Error('Invalid File in mls.actual[2]')
+        const { project, shortName } = (mls.actual[2] as any)[position];
+        const ref: ITaskRootArgs = {
+            fileName: `_${project}_${shortName}`
+        }
+
         const taskRoot: cbe.ITaskRoot = {
             mode: 'initializing',
             title: this.msg.action_title,
             widget: myName,
             children: [],
+            args: JSON.stringify(ref),
             trace: [new Date().toISOString() + ': trask created at ']
         }
         tasks.unshift(taskRoot);
@@ -83,14 +96,16 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     }
 
     getPrompt(source: string) {
-        const prompt = `verificar o source abaixo e retornar apenas uma tabela com os textos que devem ser internacionalizados.
-Não retornar explicações.
+        const prompt = `verificar o source abaixo as strings entre ("") ('') (\`\`) que devem ser internacionalizadas. 
+        Não retornar explicações, apenas retorne uma 'tabela' com as colunas: texto.
+        Não retornar linhas com textos duplicados na tabela
 
 Source: ${source}`;
         return prompt;
     }
 
     prepareTask1(taskRoot: cbe.ITaskRoot): void {
+
         // create task to get typescript source from another side
         this.mode = taskRoot.mode = 'in progress';
         this.addTaskAndWaitForCompletion(taskRoot, {
@@ -103,6 +118,7 @@ Source: ${source}`;
     }
 
     prepareTask2(taskFinishResult: ITaskFinish): void {
+
         // call LLM on server with prompt
         const child = taskFinishResult.taskChild;
         if (taskFinishResult.status === 'error') {
@@ -111,7 +127,6 @@ Source: ${source}`;
         }
 
         const data: ISourceTypescriptData = JSON.parse(taskFinishResult.result);
-        console.info(data);
         if (!data.source) {
             this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
             child.trace.push('invalid finish , must be notify finish with result field');
@@ -119,11 +134,12 @@ Source: ${source}`;
             return;
         }
         child.mode = 'processed';
-        
+
         this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
             title: 'exec prompt',
             widget: '_100554_aimTaskExecLLM',
+            ref: child.ref,
             agent: this.assistant,
             prompt: this.getPrompt(data.source),
             trace: [],
@@ -143,6 +159,7 @@ Source: ${source}`;
         this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
             title: 'result',
+            ref: child.ref,
             widget: '_100554_aimTaskResultTable',
             trace: [],
             _tempResult: result,
@@ -160,4 +177,8 @@ Source: ${source}`;
         updateTaskOnServer(taskFinishResult.taskIndex);
     }
 
+}
+
+export interface ITaskRootArgs {
+    fileName: string
 }

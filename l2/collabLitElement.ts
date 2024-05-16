@@ -77,10 +77,9 @@ export class CollabLitElement extends LitElement {
     super.requestUpdate()
   }
 
-
   protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
     super.updated(changedProperties);
-    if (changedProperties.has('globalVariation')) {
+    if (changedProperties.has('globalVariation') && changedProperties.get('globalVariation') !== undefined) {
       this.requestUpdate();
     }
   }
