@@ -11,6 +11,7 @@ import { ServiceSource100554 } from './_100554_serviceSource';
 
 const myName = '_100554_aimActionAddIca';
 
+// start internationalization
 const message_pt = {
     prompt_ts_title_1: "Usando Typescript e Lit 3.O. Criar o render de um webcomponent, usando o source fornecido abaixo.",
     prompt_ts_output_1: "Um component Lit com sua implementação de renderização completa, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.",
@@ -66,14 +67,15 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
+    'en-us': message_en,
+    'pt-br': message_pt
 }
+// end internationalization
 
 @customElement('aim-action-add-ica-100554')
 export class AimActionAddIca extends AimActionBase {
 
-    private msg: MessageType = messages['en'] ;
+    private msg: MessageType = messages['en-us'];
 
     constructor() {
         super();
@@ -127,18 +129,18 @@ export class AimActionAddIca extends AimActionBase {
             return;
         }
 
-        (window as any)['aim-action-add-ica-user'] = txtAreaValue;
-
-        (window as any)['aim-action-add-ica-file-info'] = {
+        const args: IArgsAddIca = {
+            prompt: this.textarea.value,
             group: this.actualGroups,
             attr: this.actualAttributes,
-        };
+        }
 
         this.taskRoot = {
             mode: 'initializing',
             title: 'verify group and create new component',
             widget: myName,
             children: [],
+            args: JSON.stringify(args),
             trace: [new Date().toISOString() + ': trask created at ']
         }
         tasks.unshift(this.taskRoot);
@@ -201,9 +203,12 @@ export class AimActionAddIca extends AimActionBase {
     prepareCheckTask1(taskRoot: cbe.ITaskRoot): void {
 
         this.mode = taskRoot.mode = 'in progress';
-
-        let user = '';
-        if ((window as any)['aim-action-add-ica-user']) user = (window as any)['aim-action-add-ica-user'];
+        if (!taskRoot.args) {
+            this.mode = taskRoot.mode = 'error';
+            taskRoot.trace.push('invalid taskroot args');
+            return;
+        }
+        const args: IArgsAddIca = JSON.parse(taskRoot.args);
 
         this.addTaskAndWaitForCompletion(taskRoot, {
             mode: 'initializing',
@@ -211,7 +216,7 @@ export class AimActionAddIca extends AimActionBase {
             widget: '_100554_aimTaskExecLLM',
             agent: this.assistant,
             ref: 'testeRef',
-            prompt: this.getPromptCheckPrompt(user),
+            prompt: this.getPromptCheckPrompt(args.prompt),
             trace: [],
             nextStep: this.prepareCheckTask2.name // danger, loop
         });
@@ -229,7 +234,6 @@ export class AimActionAddIca extends AimActionBase {
         }
 
         child.mode = 'processed';
-
         this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
             title: 'improve prompt',
@@ -238,7 +242,6 @@ export class AimActionAddIca extends AimActionBase {
             trace: [],
             nextStep: this.prepareTask1.name // danger, loop
         });
-
         this.requestUpdate();
 
     }
@@ -251,25 +254,23 @@ export class AimActionAddIca extends AimActionBase {
             return;
         }
 
-        child.mode = 'processed';
-        let obj = {};
-        if ((window as any)['aim-action-add-ica-file-info']) {
-            obj = (window as any)['aim-action-add-ica-file-info'];
-            (window as any)['aim-action-add-ica-file-info'] = undefined;
+        if (!taskFinishResult.taskRoot.args) {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            child.trace.push('invalid taskroot args');
+            return;
         }
+        const args: IArgsAddIca = JSON.parse(taskFinishResult.taskRoot.args);
 
         if (taskFinishResult.status === 'userEvent' && taskFinishResult.newPrompt) {
-            (window as any)['aim-action-add-ica-user'] = taskFinishResult.newPrompt;
+            args.prompt = taskFinishResult.newPrompt;
         }
-
-        // this.mode = taskFinishResult.taskRoot.mode = 'in progress';
 
         child.mode = 'processed';
         this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
             title: 'prepare source',
             widget: '_100554_aimTaskPrepareIcaSource',
-            prompt: JSON.stringify(obj),
+            prompt: JSON.stringify(args),
             trace: [],
             nextStep: this.prepareTask2.name  // danger, loop
         });
@@ -290,14 +291,14 @@ export class AimActionAddIca extends AimActionBase {
             this.requestUpdate();
             return;
         }
-        child.mode = 'processed';
 
-        let user = '';
-
-        if ((window as any)['aim-action-add-ica-user']) {
-            user = (window as any)['aim-action-add-ica-user'];
-            (window as any)['aim-action-add-ica-user'] = undefined;
+        if (!taskFinishResult.taskRoot.args) {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            child.trace.push('invalid taskroot args');
+            return;
         }
+        const args: IArgsAddIca = JSON.parse(taskFinishResult.taskRoot.args);
+        child.mode = 'processed';
 
         this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
@@ -305,7 +306,7 @@ export class AimActionAddIca extends AimActionBase {
             widget: '_100554_aimTaskExecLLM',
             ref: child.ref,
             agent: this.assistant,
-            prompt: this.getPrompt(source, user),
+            prompt: this.getPrompt(source, args.prompt),
             trace: [],
             nextStep: this.prepareTask3.name // danger, loop
         });
@@ -552,4 +553,10 @@ export function getActiveOpServiceIfIsValid(el: HTMLElement) {
     const activeServiceOp: ServiceSource100554 = info.actServiceOp;
     if (activeServiceOp.tagName !== 'SERVICE-SOURCE-100554') return undefined;
     return activeServiceOp;
+}
+
+export interface IArgsAddIca {
+    prompt: string,
+    group: string[],
+    attr: string[],
 }

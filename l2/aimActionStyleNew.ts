@@ -9,6 +9,7 @@ import { ServiceDsStyles } from "_100554_serviceDsStyles";
 
 const myName = '_100554_aimActionStyleNew';
 
+// start internationalization
 const message_pt = {
     prompt_title: "Objetivo:Criar um novo CSS em LESS.",
     prompt_system_1: "Use LESS para criar um novo estilo baseado na fonte fornecida abaixo, incorporando sugestões do usuário.",
@@ -38,14 +39,15 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
+    'en-us': message_en,
+    'pt-br': message_pt
 }
+// end internationalization
 
 @customElement('aim-action-style-new-100554')
 export class AimActionStyleNew extends AimActionBase {
 
-    private msg: MessageType = messages['en'];
+    private msg: MessageType = messages['en-us'];
 
     public getRules(): AimActionRules {
         return {
@@ -73,14 +75,12 @@ export class AimActionStyleNew extends AimActionBase {
 
     private handleAdd(): void {
 
-        if (this.textarea) {
-            (window as any)['aim-action-style-new-100554'] = this.textarea.value;
-        }
         this.taskRoot = {
             mode: 'initializing',
             title: 'verify css and create',
             widget: myName,
             children: [],
+            args: this.textarea?.value || '',
             trace: [new Date().toISOString() + ': trask created at ']
         }
         tasks.unshift(this.taskRoot);
@@ -203,20 +203,13 @@ ${source}`;
         }
 
         child.mode = 'processed';
-
-        let user = '';
-        if ((window as any)['aim-action-style-new-100554']) {
-            user = (window as any)['aim-action-style-new-100554'];
-            (window as any)['aim-action-style-new-100554'] = undefined;
-        }
-
         this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
             title: 'exec prompt',
             widget: '_100554_aimTaskExecLLM',
             ref: child.ref,
             agent: this.assistant,
-            prompt: this.getPrompt(source, user),
+            prompt: this.getPrompt(source, taskFinishResult.taskRoot.args || ''),
             trace: [],
             nextStep: this.prepareTask3.name // danger, loop
         });

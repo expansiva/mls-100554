@@ -4,9 +4,10 @@ import { html } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
-import { getActiveOpServiceIfIsValid, isValidRef } from './_100554_aimActionAddIca';
+import { getActiveOpServiceIfIsValid } from './_100554_aimActionAddIca';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
+// start internationalization
 const message_pt = {
     title_result: "Ver typescript resultado",
     tryagain_title_1: "Métodos para implementar",
@@ -34,14 +35,15 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
+    'en-us': message_en,
+    'pt-br': message_pt
 }
+// end internationalization
 
 @customElement('aim-task-result-add-ica-100554')
 export class AimTaskResulAddIca extends AimTaskBase {
 
-    private msg: MessageType = messages['en'];
+    private msg: MessageType = messages['en-us'];
 
     constructor() {
         super();

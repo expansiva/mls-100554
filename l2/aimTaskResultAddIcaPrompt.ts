@@ -4,6 +4,7 @@ import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
 
+// start internationalization
 const message_pt = {
     tryagain_title_2: "O prompt é valido",
     tryagain_title_3: "O prompt enviado esta fora de contexto por favor digite um prompt referente a criação de um web component",
@@ -35,14 +36,15 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
+    'en-us': message_en,
+    'pt-br': message_pt
 }
+// end internationalization
 
 @customElement('aim-task-result-add-ica-prompt-100554')
 export class AimTaskResulAddIcaPrompt extends AimTaskBase {
 
-    private msg: MessageType = messages['en'];
+    private msg: MessageType = messages['en-us'];
 
     private result: number | undefined;
 
@@ -87,6 +89,8 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
 
+        let prompt = taskRoot.args ? JSON.parse(taskRoot.args).prompt : ''
+        
         const body = child.result || '';
         this.result = this.getResult(body);
         if (this.modeInternal !== 'waiting for user') return html`<div>${this.msg.tryagain_processed}</div>`
@@ -110,7 +114,7 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
                          <textarea
                          rows="5"
                          placeholder=${this.msg.tryagain_placeholder} 
-                         .value="${(window as any)['aim-action-add-ica-user'] || ''}"
+                         .value="${prompt}"
                          style="width:100%"></textarea >
                          ${this.hasError ? html`<small style="color:red;"> ${this.msg.error_message}</small>` : ''}
                      </div>
@@ -166,11 +170,5 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
         this.notifyCompleteByStatus('userEvent', '', prompt);
         this.closeMe();
     }
-
 }
 
-interface IPromptValid {
-    isPromptValid: "yes" | "no" | "more information",
-    list: string[],
-    olderPrompt: string,
-}

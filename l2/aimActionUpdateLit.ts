@@ -7,12 +7,12 @@ import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 
 const myName = '_100554_aimActionUpdateLit';
 
+// start internationalization
 const message_pt = {
     title: 'Permitir atualizar o lit do file selecionado',
     prompt: 'Prompt',
     cancel: 'Cancelar',
     confirm: 'Confirmar'
-    
 }
 
 const message_en = {
@@ -25,14 +25,15 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
+    'en-us': message_en,
+    'pt-br': message_pt
 }
+// end internationalization
 
 @customElement('aim-action-update-lit-100554')
 export class AimActionUpdateLit extends AimActionBase {
 
-    private msg: MessageType = messages['en'] ;
+    private msg: MessageType = messages['en-us'];
 
     @query('textarea')
     textarea: HTMLTextAreaElement | undefined;
@@ -49,6 +50,12 @@ export class AimActionUpdateLit extends AimActionBase {
 
     language = 'english';
 
+    render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        return super.render();
+    }
+
     private handleCancel() {
         this.dispatchEvent(new CustomEvent('add-task', {
             detail: { cancel: 'true' }, bubbles: true, composed: true
@@ -57,17 +64,12 @@ export class AimActionUpdateLit extends AimActionBase {
 
     private handleAdd(): void {
 
-        if (this.textarea) {
-
-            (window as any)['aim-action-update-lit-100554'] = this.textarea.value;
-
-        }
-
         const taskRoot: cbe.ITaskRoot = {
             mode: 'initializing',
             title: 'update Lit',
             widget: myName,
             children: [],
+            args: this.textarea?.value || '',
             trace: [new Date().toISOString() + ': trask created at ']
         }
         tasks.unshift(taskRoot);
@@ -78,9 +80,6 @@ export class AimActionUpdateLit extends AimActionBase {
     }
 
     renderAdd(): TemplateResult { // from abstract
-
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
 
         return html`
         <p style="margin-bottom:0rem">${this.msg.title}</p>
@@ -97,14 +96,7 @@ export class AimActionUpdateLit extends AimActionBase {
     `;
     }
 
-    getPrompt(source: string) {
-
-        let req = '';
-
-        if ((window as any)['aim-action-update-lit-100554']) {
-            req = (window as any)['aim-action-update-lit-100554'];
-            (window as any)['aim-action-update-lit-100554'] = undefined;
-        }
+    getPrompt(source: string, user: string) {
 
         const prompt = ` 
         Objective: Usando typescript, lit 3, alterar o código abaixo seguindo as instruções.\n\n
@@ -112,7 +104,7 @@ export class AimActionUpdateLit extends AimActionBase {
         1. Manter a linha 1 (tripe slash) que é de controle\n
         2. Fazer e manter comentários no código em ingles\n\n
         User:\n
-        1. ${req}\n\n
+        1. ${user}\n\n
         Expected Output Format:\n
             Retornar o novo source inteiro em um unico bloco\n\n
 
@@ -152,7 +144,7 @@ export class AimActionUpdateLit extends AimActionBase {
             title: 'exec prompt',
             widget: '_100554_aimTaskExecLLM',
             agent: this.assistant,
-            prompt: this.getPrompt(source),
+            prompt: this.getPrompt(source, taskFinishResult.taskRoot.args || ''),
             trace: [],
             nextStep: this.prepareTask3.name // danger, loop
         });
