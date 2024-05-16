@@ -4,7 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
 
 @customElement('aim-task-get-source-language-typescript-100554')
-export class AimTaskPrepareInternationalizationSource extends AimTaskBase {
+export class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
 
     public onInitializing(): void { // from abstract
         this.getSource();

@@ -6,7 +6,7 @@ import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 import { ISourceTypescriptData } from './_100554_aimTaskGetSourceLanguageTypescript';
 
-const myName = '_100554_aimActionInternationalization';
+const myName = '_100554_aimActionVerifyInternationalization';
 
 const message_pt = {
     "action_title": "verificar textos para internacionalização",
@@ -28,7 +28,7 @@ const messages: { [key: string]: MessageType } = {
 }
 
 @customElement('aim-action-verify-internationalization-100554')
-export class AimActionInternationalization extends AimActionBase {
+export class AimActionVerifyInternationalization extends AimActionBase {
 
     private msg: MessageType = messages['en-us'];
 
@@ -47,6 +47,8 @@ export class AimActionInternationalization extends AimActionBase {
         return super.render();
     }
 
+    language = 'english';
+
     private handleCancel() {
         this.dispatchEvent(new CustomEvent('add-task', {
             detail: { cancel: 'true' }, bubbles: true, composed: true
@@ -54,6 +56,7 @@ export class AimActionInternationalization extends AimActionBase {
     }
 
     private handleAdd(): void {
+        debugger
         const taskRoot: cbe.ITaskRoot = {
             mode: 'initializing',
             title: this.msg.action_title,
