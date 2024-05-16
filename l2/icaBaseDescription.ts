@@ -140,7 +140,7 @@ const message_pt = {
   dBPSchedule: "Componente para planejamento e visualização de agendas pessoais ou profissionais. Permite aos usuários organizar e visualizar compromissos, tarefas e eventos em um layout claro e interativo.",
   dBPExternal: "Facilita a integração com APIs externas para buscar ou enviar dados. Ideal para funcionalidades como visualizar condições climáticas, cotações de ações ou atualizações de redes sociais diretamente na aplicação.",
 
-  dBPPages:"Permite a incorporação de páginas inteiras ou componentes específicos dentro da aplicação atual. Útil para integrar funcionalidades ou informações adicionais sem a necessidade de navegação externa."
+  dBPPages: "Permite a incorporação de páginas inteiras ou componentes específicos dentro da aplicação atual. Útil para integrar funcionalidades ou informações adicionais sem a necessidade de navegação externa."
 
 
 }
@@ -295,16 +295,16 @@ const messages: { [key: string]: MessageType } = {
 }
 
 const getMessageKey = (messages: any): string => {
-    const keys = Object.keys(messages);
-    if (!keys || keys.length < 1) throw new Error('Error Message not valid for international');
-    const firstKey = keys[0];
-    const lang = (document.documentElement.lang || '').toLowerCase();
-    if (!lang) return firstKey;
-    if (messages.hasOwnProperty(lang)) return lang;
-    const similarLang = keys.find((key: string) => lang.substring(0, 2) === key);
-    if (similarLang) return similarLang;
-    return firstKey;
-  }
+  const keys = Object.keys(messages);
+  if (!keys || keys.length < 1) throw new Error('Error Message not valid for international');
+  const firstKey = keys[0];
+  const lang = (document.documentElement.lang || '').toLowerCase();
+  if (!lang) return firstKey;
+  if (messages.hasOwnProperty(lang)) return lang;
+  const similarLang = keys.find((key: string) => lang.substring(0, 2) === key);
+  if (similarLang) return similarLang;
+  return firstKey;
+}
 
 const lang = getMessageKey(messages);
 const msg: MessageType = messages[lang];
@@ -472,8 +472,8 @@ const icaDescriptions: icaBase.FormComponent[] = [
 
   // Plugins
   { group: "Blocks / Plugins / Calendar", description: msg.dBPCalendar },
-  { group: "Blocks / Plugins / Schedule", description:  msg.dBPSchedule },
-  { group: "Blocks / Plugins / External API", description:  msg.dBPExternal },
+  { group: "Blocks / Plugins / Schedule", description: msg.dBPSchedule },
+  { group: "Blocks / Plugins / External API", description: msg.dBPExternal },
 
   // Projects
   { group: "Blocks / Projects / Pages", description: msg.dBPPages },

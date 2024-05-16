@@ -11,8 +11,69 @@ import { ServiceSource100554 } from './_100554_serviceSource';
 
 const myName = '_100554_aimActionAddIca';
 
+const message_pt = {
+    prompt_ts_title_1: "Usando Typescript e Lit 3.O. Criar o render de um webcomponent, usando o source fornecido abaixo.",
+    prompt_ts_output_1: "Um component Lit com sua implementação de renderização completa, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.",
+    prompt_ts_output_2: "Não remover a primeira linha /// <mls",
+    prompt_ts_output_3: "Nao alterar definição da classe",
+    prompt_ts_output_4: "Nao alterar extends da classe",
+    prompt_ts_output_5: "Não alterar imports",
+    prompt_ts_output_6: "Nao altere as propriedades iniciais",
+    prompt_ts_output_7: "Não implementar nenhum styles css.",
+    prompt_ts_output_8: "As funções não implementadas devem ser declaradas com um corpo vazio, e dentro da função deve adicionar um comentários // **implement_here**' e comentários sobre o que o método deve fazer. Segue exemplo:",
+    prompt_ts_output_9: "Retornar o código em um único bloco  \`\`\`typescript.",
+
+    prompt_html_title: "Usando Typescript e Lit 3.O analisar o source do web component abaixo e gerar um html de use cases. Não é necessario declarar as tags html, body, head. Somente uma seção com o use cases.",
+    prompt_html_output: "Remover os comentários nas funções quando implementadas.",
+
+    prompt_fc_title_1: "Usando Typescript e Lit 3.O. Criar a função especificada pelo usuario, utilizando o source abaixo",
+    prompt_fc_output_1: "O component Lit com a implementação da função completa e alterações solicitadas, seguindo todas as especificações do usuario.",
+    prompt_fc_output_2: "Remover os comentários nas funções quando implementadas.",
+
+    template_title: "Irá verificar o grupo selecionado e criar um novo componente Lit",
+    textarea_placelholder: "Entre com o prompt aqui",
+    btn_cancel: "Cancelar",
+    btn_confirm: "Confirmar",
+    error_prompt: "Por favor, ajuste o prompt para suas necessidades",
+}
+
+const message_en = {
+    prompt_ts_title_1: "Using Typescript and Lit 3.0. Create the rendering of a web component, using the provided source below.",
+    prompt_ts_output_1: "A Lit component with its complete rendering implementation, following all user specifications and using the provided properties.",
+    prompt_ts_output_2: "Do not remove the first line /// <mls",
+    prompt_ts_output_3: "Do not change the class definition",
+    prompt_ts_output_4: "Do not change the class extends",
+    prompt_ts_output_5: "Do not change imports",
+    prompt_ts_output_6: "Do not change initial properties",
+    prompt_ts_output_7: "Do not implement any CSS styles.",
+    prompt_ts_output_8: "Unimplemented functions should be declared with an empty body, and within the function add a comment // implement_here' and comments about what the method should do. Example follows:",
+    prompt_ts_output_9: "Return the code in a single block ```typescript.",
+
+    prompt_html_title: "Using Typescript and Lit 3.0, analyze the source of the web component below and generate an HTML of use cases. It is not necessary to declare the html, body, head tags. Only one section with the use cases.",
+    prompt_html_output: "Remove comments in functions when implemented.",
+
+    prompt_fc_title_1: "Using Typescript and Lit 3.0. Create the function specified by the user, using the source below",
+    prompt_fc_output_1: "The Lit component with the complete function implementation and requested changes, following all user specifications.",
+    prompt_fc_output_2: "Remove comments in functions when implemented.",
+
+    template_title: "Will check the selected group and create a new Lit component",
+    textarea_placelholder: "Enter your prompt here",
+    btn_cancel: "Cancel",
+    btn_confirm: "Confirm",
+    error_prompt: "Please adjust the prompt to your needs"
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+
 @customElement('aim-action-add-ica-100554')
 export class AimActionAddIca extends AimActionBase {
+
+    private msg: MessageType = messages['en-us'] ;
 
     constructor() {
         super();
@@ -112,24 +173,27 @@ export class AimActionAddIca extends AimActionBase {
 
     renderAdd(): TemplateResult { // from abstract
 
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html`
-        <p> ${this.messages.template_title}</p>
+        <p> ${this.msg.template_title}</p>
         <ica-select-group-100554 @selection-changed=${this.onGroupChanged} ></ica-select-group-100554>
 
         ${this.showPrompt
                 ? html` 
             <div>
                 <label><b>Prompt:</b></label>
-                <textarea .value=${this.actualSuggest} rows="5" placeholder=${this.messages.textarea_placelholder} style="width:100%"></textarea>
+                <textarea .value=${this.actualSuggest} rows="5" placeholder=${this.msg.textarea_placelholder} style="width:100%"></textarea>
             </div>
 
         `
                 : ''}
         <div class="buttonGroup">
-            <button @click="${this.handleCancel}">${this.messages.btn_cancel}</button>
-            ${this.showPrompt ? html`<button @click="${this.handleAdd}">${this.messages.btn_confirm}</button>` : ''}
+            <button @click="${this.handleCancel}">${this.msg.btn_cancel}</button>
+            ${this.showPrompt ? html`<button @click="${this.handleAdd}">${this.msg.btn_confirm}</button>` : ''}
         </div>
-        ${!this.validPrompt ? html`<div style="color:red;"> ${this.messages.error_prompt}</div>` : ''}
+        ${!this.validPrompt ? html`<div style="color:red;"> ${this.msg.error_prompt}</div>` : ''}
 
             `;
     }
@@ -388,21 +452,21 @@ export class AimActionAddIca extends AimActionBase {
         const promptInitial = `
 ### system ###: 
 
-${this.messages.prompt_ts_title_1}
+${this.msg.prompt_ts_title_1}
 -Saida esperada: 
-1. ${this.messages.prompt_ts_output_1}
-2. ${this.messages.prompt_ts_output_2}
-3. ${this.messages.prompt_ts_output_3}
-4. ${this.messages.prompt_ts_output_4}
-5. ${this.messages.prompt_ts_output_5}
-6. ${this.messages.prompt_ts_output_6}
-7. ${this.messages.prompt_ts_output_7}
-8. ${this.messages.prompt_ts_output_8}
+1. ${this.msg.prompt_ts_output_1}
+2. ${this.msg.prompt_ts_output_2}
+3. ${this.msg.prompt_ts_output_3}
+4. ${this.msg.prompt_ts_output_4}
+5. ${this.msg.prompt_ts_output_5}
+6. ${this.msg.prompt_ts_output_6}
+7. ${this.msg.prompt_ts_output_7}
+8. ${this.msg.prompt_ts_output_8}
 minhaFunçao(){
     // **implement_here**
 }
 
-9. ${this.messages.prompt_ts_output_9}
+9. ${this.msg.prompt_ts_output_9}
 
 ### user ###:
 
@@ -417,18 +481,18 @@ ${user}
 
         const promptInitial = `
 ### system ###: 
-${this.messages.prompt_fc_title_1}
+${this.msg.prompt_fc_title_1}
 
 -Saida esperada: 
-1. ${this.messages.prompt_fc_output_1}
-2. ${this.messages.prompt_ts_output_2}
-3. ${this.messages.prompt_ts_output_3}
-4. ${this.messages.prompt_ts_output_4}
-5. ${this.messages.prompt_ts_output_5}
-6. ${this.messages.prompt_ts_output_6}
-7. ${this.messages.prompt_ts_output_7}
-9. ${this.messages.prompt_ts_output_9}
-10. ${this.messages.prompt_fc_output_2}
+1. ${this.msg.prompt_fc_output_1}
+2. ${this.msg.prompt_ts_output_2}
+3. ${this.msg.prompt_ts_output_3}
+4. ${this.msg.prompt_ts_output_4}
+5. ${this.msg.prompt_ts_output_5}
+6. ${this.msg.prompt_ts_output_6}
+7. ${this.msg.prompt_ts_output_7}
+9. ${this.msg.prompt_ts_output_9}
+10. ${this.msg.prompt_fc_output_2}
 
 ### user ###:
 ${user}
@@ -441,10 +505,10 @@ ${user}
     private getPromptHTML(source: string) {
         const prompt = `
 ### system ###: 
-${this.messages.prompt_html_title}
+${this.msg.prompt_html_title}
 
 -Saida esperada: 
-${this.messages.prompt_html_output}
+${this.msg.prompt_html_output}
 
 -Source: ${source}
  .`
@@ -472,33 +536,6 @@ ${promptUser}
  `
         return prompt;
     }
-
-    messages = {
-        "prompt_ts_title_1": "Usando Typescript e Lit 3.O. Criar o render de um webcomponent, usando o source fornecido abaixo.",
-        "prompt_ts_output_1": "Um component Lit com sua implementação de renderização completa, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.",
-        "prompt_ts_output_2": "Não remover a primeira linha /// <mls",
-        "prompt_ts_output_3": "Nao alterar definição da classe",
-        "prompt_ts_output_4": "Nao alterar extends da classe",
-        "prompt_ts_output_5": "Não alterar imports",
-        "prompt_ts_output_6": "Nao altere as propriedades iniciais",
-        "prompt_ts_output_7": "Não implementar nenhum styles css.",
-        "prompt_ts_output_8": "As funções não implementadas devem ser declaradas com um corpo vazio, e dentro da função deve adicionar um comentários // **implement_here**' e comentários sobre o que o método deve fazer. Segue exemplo:",
-        "prompt_ts_output_9": "Retornar o código em um único bloco  \`\`\`typescript.",
-
-        "prompt_html_title": "Usando Typescript e Lit 3.O analisar o source do web component abaixo e gerar um html de use cases. Não é necessario declarar as tags html, body, head. Somente uma seção com o use cases.",
-        "prompt_html_output": "Remover os comentários nas funções quando implementadas.",
-
-        "prompt_fc_title_1": "Usando Typescript e Lit 3.O. Criar a função especificada pelo usuario, utilizando o source abaixo",
-        "prompt_fc_output_1": "O component Lit com a implementação da função completa e alterações solicitadas, seguindo todas as especificações do usuario.",
-        "prompt_fc_output_2": "Remover os comentários nas funções quando implementadas.",
-
-        "template_title": "Irá verificar o grupo selecionado e criar um novo componente Lit",
-        "textarea_placelholder": "Entre com o prompt aqui",
-        "btn_cancel": "Cancelar",
-        "btn_confirm": "Confirmar",
-        "error_prompt": "Por favor, ajuste o prompt para suas necessidades",
-    }
-
 
 }
 
