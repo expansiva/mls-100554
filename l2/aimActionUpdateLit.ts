@@ -78,6 +78,10 @@ export class AimActionUpdateLit extends AimActionBase {
     }
 
     renderAdd(): TemplateResult { // from abstract
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html`
         <p style="margin-bottom:0rem">${this.msg.title}</p>
         <br>

@@ -99,6 +99,9 @@ export class AimTaskResultLess extends AimTaskBase {
 
     renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
 
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         const body = child._tempResult || '';
         const { contentLess, contentsAfterLess, contentsBeforeLess } = this.extractBlocks(body);
         this.result = contentLess;

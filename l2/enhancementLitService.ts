@@ -25,7 +25,20 @@ const messages: { [key: string]: MessageType } = {
     'pt-br': message_pt
 }
 
-const msg: MessageType = messages['en-us'] ;
+const getMessageKey = (messages: any): string => {
+  const keys = Object.keys(messages);
+  if (!keys || keys.length < 1) throw new Error('Error Message not valid for international');
+  const firstKey = keys[0];
+  const lang = (document.documentElement.lang || '').toLowerCase();
+  if (!lang) return firstKey;
+  if (messages.hasOwnProperty(lang)) return lang;
+  const similarLang = keys.find((key: string) => lang.substring(0, 2) === key);
+  if (similarLang) return similarLang;
+  return firstKey;
+}
+
+const lang = getMessageKey(messages)
+const msg: MessageType = messages[lang] ;
 
 export const getAddNewFileDetails = () => {
     return [

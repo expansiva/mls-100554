@@ -84,6 +84,9 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
 
     renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
 
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         const body = child.result || '';
         this.result = this.getResult(body);
         if (this.modeInternal !== 'waiting for user') return html`<div>${this.msg.tryagain_processed}</div>`
