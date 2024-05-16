@@ -4,6 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
+// start internationalization
 const message_pt = {
     installPlugin: 'Instalar plugin',
     createNewPlugin: 'Criar novo plugin',
@@ -54,6 +55,7 @@ const messages: { [key: string]: MessageType } = {
     'en-us': message_en,
     'pt-br': message_pt
 }
+// end internationalization
 
 @customElement('service-plugins-100554')
 export class ServicePlugins extends ServiceBase {

@@ -4,7 +4,6 @@ import { customElement } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { ITaskRootArgs } from "./_100554_aimActionVerifyInternationalization";
 
-
 @customElement('aim-task-get-source-language-typescript-100554')
 export class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
 
@@ -26,17 +25,18 @@ export class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
             const result = ret;
             this.notifyCompleteByStatus('ok', JSON.stringify(result));
         }).catch((e: any) => {
-            this.notifyCompleteByStatus('error', e.message.toString());
+            this.notifyCompleteByStatus('error', e);
         });
     }
 
-    private async _getSource(shortName: string): Promise<ISourceTypescriptData> {
-
-        const mfile = mls.l2.editor.mfiles[shortName];
-        if (!mfile) throw new Error(`No mfile find for file: ${shortName}`);
-        const value = mfile.model.getValue();
-        const data = this.getDataInternalization(value);
-        return data;
+    private _getSource(shortName: string): Promise<ISourceTypescriptData> {
+        return new Promise<ISourceTypescriptData>(async (resolve, reject) => {
+            const mfile = mls.l2.editor.mfiles[shortName];
+            if (!mfile) reject(`No mfile find for file: ${shortName}`);
+            const value = mfile.model.getValue();
+            const data = this.getDataInternalization(value);
+            resolve(data);
+        })
 
     }
 

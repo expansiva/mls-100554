@@ -4,11 +4,11 @@ import { html, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { tasks, ITaskFinish, updateTaskOnServer, getInfoMyService } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
-
 import { ISourceTypescriptData } from './_100554_aimTaskGetSourceLanguageTypescript';
 
 const myName = '_100554_aimActionVerifyInternationalization';
 
+// start internationalization
 const message_pt = {
     "action_title": "verificar textos para internacionalização",
     "btn_cancel": "Cancelar",
@@ -27,6 +27,7 @@ const messages: { [key: string]: MessageType } = {
     'en-us': message_en,
     'pt-br': message_pt
 }
+// end internationalization
 
 @customElement('aim-action-verify-internationalization-100554')
 export class AimActionVerifyInternationalization extends AimActionBase {
@@ -42,11 +43,11 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     public assistant = "gpt3_typescript";
     public title = "Check Internationalization";
 
-    // render() {
-    //     const lang = this.getMessageKey(messages);
-    //     this.msg = messages[lang];
-    //     return super.render();
-    // }
+    render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        return super.render();
+    }
 
     language = 'english';
 
@@ -129,7 +130,7 @@ Source: ${source}`;
         const data: ISourceTypescriptData = JSON.parse(taskFinishResult.result);
         if (!data.source) {
             this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
-            child.trace.push('invalid finish , must be notify finish with result field');
+            child.trace.push('invalid finish , no internationalization find in this file');
             this.requestUpdate();
             return;
         }
