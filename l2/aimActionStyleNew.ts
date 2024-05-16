@@ -122,6 +122,10 @@ export class AimActionStyleNew extends AimActionBase {
     ]
 
     renderAdd(): TemplateResult { // from abstract
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         return html`
         <p> ${this.msg.template_title} </p>
         <div>
