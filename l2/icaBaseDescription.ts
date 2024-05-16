@@ -349,15 +349,15 @@ const icaDescriptions: icaBase.FormComponent[] = [
     group: "Forms / Input / Number",
     description: msg.dFINumber,
     prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinação de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usuários digitem um número diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mínimo e máximo pré-definido. Se o usuário inserir um número inválido, uma mensagem de erro vermelha deve aparecer abaixo do componente.",
-    attributes: "hint,label,required,disabled,value,widget,maxvalue,minvalue,step,placeholder,pattern,errormessage,autofocus"
+    attributes: "name,datasource,placeholder,label,pattern,errormessage,maxvalue,minvalue,step,required,disabled,readonly,autofocus,hint,inputmode"
   },
-  { group: "Forms / Input / String", description: msg.dFIString, attributes: "hint,label,required,disabled,databind,searchdatabind,widget,maxlength,minlength,placeholder,pattern,errormessage,autofocus,autoCapitalize,autocorrect" },
-  { group: "Forms / Input / Boolean", description: msg.dFIBoolean, attributes: "hint,label,required,disabled,databind,searchdatabind,widget,autofocus" },
-  { group: "Forms / Input / Date", description: msg.dFIDate, attributes: "hint,label,required,disabled,databind,searchdatabind,widget,minvalue,maxvalue,placeholder,pattern,errormessage,autofocus" },
-  { group: "Forms / Input / Time", description: msg.dFITime, attributes: "hint,label,required,disabled,databind,searchdatabind,widget,minvalue,maxvalue,placeholder,pattern,errormessage,autofocus" },
-  { group: "Forms / Input / Date Range", description: msg.dFIDateRange, attributes: "hint,label,required,disabled,startdatabind,enddatabind,minvalue,maxvalue,placeholder,pattern,errormessage,autofocus" },
-  { group: "Forms / Input / Select One", description: msg.dFISelectOne, attributes: "hint,label,required,disabled,databind,searchdatabind,widget,placeholder,errormessage,autofocus" },
-  { group: "Forms / Input / MultiSelect", description: msg.dFIMultSelect, attributes: "hint,label,required,disabled,databind,searchdatabind,widget,errormessage,autofocus,databindtype" },
+  { group: "Forms / Input / String", description: msg.dFIString, attributes: "name,hint,label,required,disabled,readonly,maxlength,minlength,placeholder,pattern,errormessage,autofocus,autoCapitalize,autocorrect,autocomplete, datasource" },
+  { group: "Forms / Input / Boolean", description: msg.dFIBoolean },
+  { group: "Forms / Input / Date", description: msg.dFIDate },
+  { group: "Forms / Input / Time", description: msg.dFITime },
+  { group: "Forms / Input / Date Range", description: msg.dFIDateRange },
+  { group: "Forms / Input / Select One", description: msg.dFISelectOne, attributes: "hint,label,required,disabled,options,selectedvalue" },
+  { group: "Forms / Input / MultiSelect", description: msg.dFIMultSelect },
   { group: "Forms / Input / Color", description: msg.dFIColor },
   { group: "Forms / Input / Editor", description: msg.dFIEditor },
   { group: "Forms / Input / Feedback", description: msg.dFIFeedBack },
@@ -481,28 +481,29 @@ const icaDescriptions: icaBase.FormComponent[] = [
 ];
 
 const attributeDefinitions: icaBase.AttributeDefinition[] = [
-  { path: "hint", lit: "@property({ type: String }) hint: string | undefined; // An optional descriptive hint for the field" },
-  { path: "label", lit: "@property({ type: String }) label: string | undefined; // A label to identify this field" },
+
+  { path: "name", lit: "@property({ type: String }) name: string | undefined;" },
+  { path: "hint", lit: "@property({ type: String }) hint: string | undefined; // An optional descriptive hint for the field", variations: true },
+  { path: "label", lit: "@property({ type: String }) label: string | undefined; // A label to identify this field", variations: true },
   { path: "required", lit: "@property({ type: Boolean }) required: boolean = false; // Whether the field is required or optional" },
   { path: "disabled", lit: "@property({ type: Boolean }) disabled: boolean = false; // Whether the field is ready for input or disabled" },
-  { path: "databind", lit: "@property({ type: String }) databind: string = ''; // The path in the global JSON to view or change data" },
-  { path: "databindtype", lit: "@property({ type: String }) databindtype: 'string' | 'number' | 'object' |'array' | undefined = undefined; // Only accept databinds with this type, or undefined" },
-  { path: "startdatabind", lit: "@property({ type: String }) startdatabind: string = ''; // The path in the global JSON to view or change data" },
-  { path: "enddatabind", lit: "@property({ type: String }) enddatabind: string = ''; // The path in the global JSON to view or change data" },
-  { path: "searchdatabind", lit: "@property({ type: String }) searchdatabind: string = ''; // Optional path in the global JSON for a list of options" },
-  { path: "widget", lit: "@property({ type: String }) widget: string = ''; // The widget selected in this group/subgroup" },
   { path: "maxvalue", lit: "@property({ type: Number }) maxvalue: number | undefined = undefined; // Maximum value restriction for the input" },
   { path: "minvalue", lit: "@property({ type: Number }) minvalue: number | undefined = undefined; // Minimum value restriction for the input" },
   { path: "step", lit: "@property({ type: Number }) step: number | undefined = undefined; // The step increment between values" },
-  { path: "placeholder", lit: "@property({ type: String }) placeholder: string| undefined; // Placeholder text for the input field" },
+  { path: "placeholder", lit: "@property({ type: String }) placeholder: string| undefined; // Placeholder text for the input field", variations: true },
   { path: "pattern", lit: "@property({ type: String }) pattern: string| undefined; // A regular expression that the input's value must match" },
-  { path: "errormessage", lit: "@property({ type: String }) errormessage: string| undefined; // Custom error message to display when input validation fails" },
+  { path: "errormessage", lit: "@property({ type: String }) errormessage: string| undefined; // Custom error message to display when input validation fails", variations: true },
   { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean = false; // Whether the field should be automatically focused on page load" },
   { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined = undefined; // Maximum length restriction for the input" },
   { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined = undefined; // Minimum length restriction for the input" },
   { path: "autoCapitalize", lit: "@property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = undefined; // Controls whether and how text input is automatically capitalized as it is entered by the user." },
   { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on' = undefined; // Indicates whether the browser's autocorrect feature is on or off." },
-  { path: "value", lit: "@property({ type: String }) value: string | undefined; // Indicates whether the browser's autocorrect feature is on or off." },
+  { path: "autocomplete", lit: "@property({ type: String }) autocomplete: string | undefined;" },
+  { path: "value", lit: "@property({ type: String }) value: string | undefined;", variations: true },
+  { path: "options", lit: "@property() options: OptionItem[] | undefined; // Optional path in the global JSON or a valid JSON for a list of options " },
+  { path: "selectedvalue", lit: "@property() selectedvalue: string | undefined;" },
+  { path: "inputmode", lit: " @property({ type: String }) inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = 'none';" },
+
 ];
 
 export function getDescriptionsRootGroup(): string[] {
@@ -588,6 +589,8 @@ export function getAttributeDefinitionsLit(root: string, subGroup: string, final
   return Array.from(rc);
 }
 
-
-
-
+export function checkAttributteHasVariation(attribute: string): boolean {
+  const attr = attributeDefinitions.find((attr) => attr.path === attribute);
+  if (!attr) return false;
+  return attr.variations === true;
+}

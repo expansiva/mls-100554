@@ -10,5 +10,6 @@ export type FormComponent = {
 export type AttributeDefinition = {
   path: string;
   lit: string;
+  variations?: boolean
 };
 
