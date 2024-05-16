@@ -28,14 +28,14 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-us': message_en,
-    'pt-br': message_pt
+    'en': message_en,
+    'pt': message_pt
 }
 
 @customElement('service-ds-assets-100554')
 export class ServiceDsAssets100554 extends ServiceBase {
 
-    private msg: MessageType = messages['en-us'];
+    private msg: MessageType = messages['en'];
     
     constructor() {
         super();
