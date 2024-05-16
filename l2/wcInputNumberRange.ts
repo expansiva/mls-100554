@@ -50,8 +50,6 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
 
     @propertyCompositeDataSource({ type: String }) label: string | undefined;
 
-    @property({ type: String }) widget: string = '';
-
     @property({ type: String }) pattern: string | undefined;
 
     @property({ type: String }) errormessage: string | undefined;
@@ -61,8 +59,6 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
     @property({ type: Number }) minvalue: number | undefined;
 
     @property({ type: Number }) step: number | undefined;
-
-    @property({ type: Number }) value: number = 0;
 
     @property({ type: Boolean }) required: boolean = false;
 
@@ -123,8 +119,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
 
     private handleSliderChange(event: Event) {
         const sliderElement = event.target as HTMLInputElement;
-        this.value = Number(sliderElement.value);
-        this.datasource = this.value;
+        this.datasource =  Number(sliderElement.value);
     }
 
     private handleChange() {
@@ -136,7 +131,6 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
             && (this.maxvalue === undefined || (newval <= this.maxvalue))
         ) {
             if (this.range) this.range.value = newval.toString();
-            this.value = newval;
             this.datasource = newval;
             this.error = '';
             this.requestUpdate();

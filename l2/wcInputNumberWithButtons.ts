@@ -63,8 +63,6 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
 
     @propertyCompositeDataSource({ type: String }) label: string | undefined;
 
-    @property({ type: String }) widget: string = '';
-
     @property({ type: String }) pattern: string | undefined;
 
     @property({ type: String }) errormessage: string | undefined;
@@ -74,8 +72,6 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
     @property({ type: Number }) minvalue: number | undefined;
 
     @property({ type: Number }) step: number | undefined;
-
-    @property({ type: Number }) value: number = 0;
 
     @property({ type: Boolean }) required: boolean = false;
 
@@ -132,7 +128,6 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
         if (!this.input) return;
         let newval = +this.input.value - 1
         if (!isNaN(newval) && (this.minvalue === undefined || (newval >= this.minvalue))){
-            this.value = newval;
             this.datasource = newval;
         }
     }
@@ -141,7 +136,6 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
         if (!this.input) return;
         let newval = +this.input.value + 1
         if (!isNaN(newval) && (this.maxvalue === undefined || (newval <= this.maxvalue))){
-            this.value = newval;
             this.datasource = newval;
         }
 
@@ -158,7 +152,6 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
             && (this.minvalue === undefined || (value >= this.minvalue))
             && (this.maxvalue === undefined || (value <= this.maxvalue))
         ) {
-            this.value = value;
             this.datasource = value;
             this.error = '';
             this.requestUpdate();

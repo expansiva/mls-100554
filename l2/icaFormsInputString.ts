@@ -9,7 +9,6 @@ export abstract class IcaFormsInputString extends IcaLitElement {
 	abstract required: boolean ; // Whether the field is required or optional
 	abstract disabled: boolean ; // Whether the field is ready for input or disabled
 	abstract datasource: string | undefined; // A label to identify this field
-	abstract widget: string ; // The widget selected in this group/subgroup
 	abstract maxlength: number | undefined ; // Maximum length restriction for the input
 	abstract minlength: number | undefined ; // Minimum length restriction for the input
 	abstract placeholder: string| undefined; // Placeholder text for the input field

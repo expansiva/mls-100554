@@ -33,7 +33,6 @@ export class WcSelectOne extends IcaFormsInputSelectOne {
     @propertyDataSource({ type: String }) hint: string | undefined;
     @property({ type: Boolean }) required: boolean = false;
     @property({ type: Boolean }) disabled: boolean = false;
-
     @propertyCompositeDataSource({ type: String }) label: string | undefined;
     @propertyDataSource() options: OptionItem[] | undefined;
     @propertyDataSource() selectedvalue: string | undefined;

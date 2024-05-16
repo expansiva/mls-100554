@@ -9,8 +9,6 @@ export abstract class IcaFormsInputNumberBase extends IcaLitElement {
 	abstract datasource: number | undefined; // A label to identify this field
 	abstract required: boolean; // Whether the field is required or optional
 	abstract disabled: boolean; // Whether the field is ready for input or disabled
-	abstract value: number | undefined; // Indicates whether the browser's autocorrect feature is on or off.
-	abstract widget: string; // The widget selected in this group/subgroup
 	abstract maxvalue: number | undefined; // Maximum value restriction for the input
 	abstract minvalue: number | undefined; // Minimum value restriction for the input
 	abstract step: number | undefined; // The step increment between values

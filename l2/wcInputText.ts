@@ -1,5 +1,5 @@
 /// <mls shortName="wcInputText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { html, LitElement, ifDefined, css } from 'lit';
+import { html, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputString } from './_100554_icaFormsInputString';
 import { propertyDataSource } from './_100554_icaLitElement';
@@ -43,13 +43,9 @@ export class WcInputText100554 extends IcaFormsInputString {
 
     @property({ type: String }) label: string | undefined;
 
-    @property({ type: String }) widget: string = '';
-
     @property({ type: String }) pattern: string | undefined;
 
     @property({ type: String }) errormessage: string | undefined;
-
-    @property({ type: String }) value: string = '';
 
     @property({ type: String }) placeholder: string | undefined;
 
@@ -93,7 +89,6 @@ export class WcInputText100554 extends IcaFormsInputString {
             maxlength=${ifDefined(this.minlength)}    
             minlength=${ifDefined(this.maxlength)}
             autocomplete=${ifDefined(this.autocomplete)}
-
             placeholder=${ifDefined(this.placeholder)}
             .value=${this.datasource || ''}
             ?autofocus=${this.autofocus}
@@ -109,7 +104,6 @@ export class WcInputText100554 extends IcaFormsInputString {
 
     handleChange(event: Event) {
         const selectElement = event.target as HTMLSelectElement;
-        this.value = selectElement.value;
         this.datasource = selectElement.value;
     }
 
