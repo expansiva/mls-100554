@@ -25,14 +25,14 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-us': message_en,
-    'pt-br': message_pt
+    'en': message_en,
+    'pt': message_pt
 }
 
 @customElement('aim-action-update-lit-100554')
 export class AimActionUpdateLit extends AimActionBase {
 
-    private msg: MessageType = messages['en-us'] ;
+    private msg: MessageType = messages['en'] ;
 
     @query('textarea')
     textarea: HTMLTextAreaElement | undefined;
