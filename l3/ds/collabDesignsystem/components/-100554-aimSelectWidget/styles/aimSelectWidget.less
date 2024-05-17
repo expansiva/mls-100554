@@ -1,0 +1,54 @@
+aim-select-widget-100554 {
+    //don't change this line 
+
+    .select-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, 20em);
+        gap: 1px;
+
+        .select-grid-item {
+            padding: 5px;
+            display: flex;
+            cursor: pointer;
+            label {
+                cursor: pointer;
+                max-width: 15em;
+                text-overflow: ellipsis;
+                font-size: @font-size-16;
+            }
+        }
+    }
+
+    .select-btn{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .select-check-all{
+            display: flex;
+            gap: .2rem;
+            label{
+                cursor: pointer;
+            }
+        }
+        .select-btn-group{
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .select-clear-all {
+            display: flex;
+            align-items: center;
+            gap: .2rem;
+        }
+        .select-btn-actions {
+            display: flex;
+            gap: 1rem;
+
+            button {
+                min-width: 10em;
+            }
+        }
+    }
+
+}
+

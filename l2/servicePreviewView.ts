@@ -291,6 +291,12 @@ export class ServicePreviewView extends LitElement {
     private load(): void {
         if (!this.shadowRoot) return;
         const iframe = this.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
+        const head = iframe.contentDocument?.querySelector('head');
+        if (head) {
+            const base = document.createElement('base');
+            base.href = document.baseURI;
+            head.appendChild(base);
+        }
         this.init(iframe);
     }
 
@@ -301,6 +307,8 @@ export class ServicePreviewView extends LitElement {
 
     private async init(iframe: HTMLIFrameElement) {
         try {
+
+            
             this.setMyFile();
             await this.setHTml(iframe);
             iframe.style.display = '';

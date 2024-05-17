@@ -42,7 +42,7 @@ export class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
 
     public getDataInternalization(sourceComplete: string): ISourceTypescriptData {
 
-        const regex = /\/\/ start internationalization([\s\S]+?)\/\/ end internationalization/;
+        const regex = /\/\/\/ **collab_i18n_start*([\s\S]+?)\/\/\/ **collab_i18n_end**/;
         const match = sourceComplete.match(regex);
 
         let internalization: IInternalizationsDetails | undefined = undefined;
