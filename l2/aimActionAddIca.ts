@@ -11,7 +11,7 @@ import { ServiceSource100554 } from './_100554_serviceSource';
 
 const myName = '_100554_aimActionAddIca';
 
-// start internationalization
+/// **collab_i18n_start**
 const message_pt = {
     prompt_ts_title_1: "Usando Typescript e Lit 3.O. Criar o render de um webcomponent, usando o source fornecido abaixo.",
     prompt_ts_output_1: "Um component Lit com sua implementação de renderização completa, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.",
@@ -70,7 +70,7 @@ const messages: { [key: string]: MessageType } = {
     'en-us': message_en,
     'pt-br': message_pt
 }
-// end internationalization
+/// **collab_i18n_end**
 
 @customElement('aim-action-add-ica-100554')
 export class AimActionAddIca extends AimActionBase {

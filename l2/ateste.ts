@@ -5,14 +5,20 @@ import { customElement, property } from 'lit/decorators.js';
 // teste 4
 @customElement('ateste-100554')
 export class SimpleGreeting extends LitElement {
-    static styles = css`p { color: red }`; 
+    static styles = css`p { color: red }`;
 
     @property()
     name: string = new Date(Date.now()).toString();
 
-    render() {
-        return html`<p>  ${this.name} !</p>`;
+    handleConfirm(e: CustomEvent) {
+
+        console.info(e.detail)
+
     }
 
-    
+    render() {
+        return html`<aim-select-widget-100554 @select-widget-confirm=${this.handleConfirm}> </aim-select-widget-100554>`;
+    }
+
+
 }

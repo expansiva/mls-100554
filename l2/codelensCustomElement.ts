@@ -8,6 +8,7 @@ export function initCodelensCustomElement() {
     return true;
 }
 
+/// **collab_i18n_start**
 const message_pt = {
     p1: 'É um recurso poderoso fornecido pelo Lit, uma biblioteca JavaScript para construir interfaces de usuário web eficientes e reativas. É usado para definir e registrar elementos personalizados com a API customElements do navegador. Elementos personalizados permitem que você crie componentes reutilizáveis e autocontidos que podem ser usados como elementos HTML padrão dentro de sua aplicação web.  Uso Para criar um elemento personalizado usando o decorador @customElement no Lit, você precisa definir uma classe que estende LitElement, a classe base fornecida pelo Lit. Esta classe encapsulará o comportamento, a renderização e a lógica de atualização para o seu elemento personalizado.',
     usage: 'Uso',
@@ -26,7 +27,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-
+/// **collab_i18n_end**
 @customElement('codelens-custom-element-100554')
 export class CodeLensCustomElement100554 extends CollabLitElement {
 

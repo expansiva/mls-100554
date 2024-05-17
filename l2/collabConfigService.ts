@@ -4,6 +4,7 @@ import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 
+/// **collab_i18n_start**
 const message_pt = {
     addService: 'Adicionar Serviço',
     back: 'Voltar',
@@ -24,6 +25,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('collab-config-service-100554')
 export class CollabConfig100554 extends CollabLitElement {

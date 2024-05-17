@@ -6,6 +6,7 @@ import { AimTaskBase } from "./_100554_aimTaskBase";
 import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
 import { getActiveOpServiceIfIsValid, isValidRef } from './_100554_aimActionStyleNew';
 
+/// **collab_i18n_start**
 const message_pt = {
     title: 'View Less Result',
     p1: 'Por favor digite as mudanças necessárias abaixo.',
@@ -26,6 +27,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('aim-task-result-less-100554')
 export class AimTaskResultLess extends AimTaskBase {

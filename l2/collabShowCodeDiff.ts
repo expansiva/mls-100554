@@ -15,7 +15,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 export function initCollabShowCodeDiff100554() {
     return true;
 }
-
+/// **collab_i18n_start**
 const message_pt = {
     diff: 'Com Diferença',
     reject: 'Rejeitar',
@@ -40,7 +40,7 @@ const messages: { [key: string]: MessageType } = {
     'en-us': message_en,
     'pt-br': message_pt
 }
-
+/// **collab_i18n_end**
 @customElement('collab-show-code-diff-100554')
 export class CollabShowCodeDiff extends CollabLitElement {
 

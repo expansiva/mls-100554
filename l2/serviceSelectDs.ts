@@ -6,6 +6,7 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { initServiceSelectDsAdd } from './_100554_serviceSelectDsAdd'
 import { collab_file, collab_undo, collab_location_dot, collab_unbalanced } from './_100554_collabIcons'
 
+/// **collab_i18n_start**
 const message_pt = {
     noDesignSystem: 'Nenhum sistema de design neste projeto, por favor clique em adicionar para começar a criar um novo sistema de design.',
     addNew: 'Adicionar novo sistema de design'
@@ -22,6 +23,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('service-select-ds-100554')
 export class ServiceSelectDs100554 extends ServiceBase {

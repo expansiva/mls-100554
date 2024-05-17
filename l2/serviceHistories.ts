@@ -4,6 +4,7 @@ import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+/// **collab_i18n_start**
 const message_pt = {
     loading: 'Carregando...',
     noHistoriesSelected: 'Nenhum historico selecionado',
@@ -20,6 +21,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('service-histories-100554')
 export class ServiceHistories100554 extends ServiceBase {

@@ -6,6 +6,7 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { IEventDSWidgetsChangedParams } from './_100554_serviceDsComponentsList';
 import { initCollabInputTag, CollabInputTag } from './_100554_collabInputTag';
 
+/// **collab_i18n_start**
 const message_pt = {
     noComponentSelected: 'Nenhum componente selecionado',
     component: 'Componente',
@@ -30,6 +31,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 @customElement('service-ds-component-details-100554')
 export class ServiceDsComponentDetails100554 extends ServiceBase {
 

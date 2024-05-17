@@ -7,7 +7,7 @@ import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_coll
 import { getActiveOpServiceIfIsValid } from './_100554_aimActionAddIca';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
-// start internationalization
+/// **collab_i18n_start**
 const message_pt = {
     title_result: "Ver typescript resultado",
     tryagain_title_1: "Métodos para implementar",
@@ -38,7 +38,7 @@ const messages: { [key: string]: MessageType } = {
     'en-us': message_en,
     'pt-br': message_pt
 }
-// end internationalization
+/// **collab_i18n_end**
 
 @customElement('aim-task-result-add-ica-100554')
 export class AimTaskResulAddIca extends AimTaskBase {

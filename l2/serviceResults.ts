@@ -8,6 +8,7 @@ import { initCodelensCustomElement } from './_100554_codelensCustomElement';
 import { initCodelensComponentDetails } from './_100554_codelensComponentDetails';
 import { initCodelensServiceDetails } from './_100554_codelensServiceDetails';
 
+/// **collab_i18n_start**
 const message_pt = {
     
 }
@@ -22,6 +23,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 @customElement('service-results-100554')
 export class ServiceResults extends ServiceBase {
 

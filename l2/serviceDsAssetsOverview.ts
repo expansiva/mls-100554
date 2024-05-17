@@ -6,7 +6,7 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { IAssetsEventSelectedParams, IAssetsEventChangedParams } from './_100554_serviceDsAssets'
 import { initCollabInputTag } from './_100554_collabInputTag';
 
-
+/// **collab_i18n_start**
 const message_pt = {
     folder: 'Pastas',
     inLocalStorage: 'Em local',
@@ -29,6 +29,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 @customElement('service-ds-assets-overview-100554')
 export class ServiceDsAssetsOverview100554 extends ServiceBase {
 

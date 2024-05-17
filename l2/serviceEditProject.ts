@@ -38,6 +38,7 @@ declare global {
     }
 }
 
+/// **collab_i18n_start**
 const message_pt = {
     loading: 'Carregando...',
     menu_title: 'Configuração do projeto'
@@ -54,6 +55,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('service-edit-project-100554')
 export class ServiceEditProject100554 extends ServiceBase {

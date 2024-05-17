@@ -4,6 +4,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getJson, IMembersResult } from './_100554_jsDocLib'
 
+/// **collab_i18n_start**
 const message_pt = {
     onlyWithJsdocs: 'Apenas com JSDoc'
 }
@@ -18,7 +19,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-
+/// **collab_i18n_end**
 @customElement('service-results-docs-100554')
 export class ServiceResultDocs100554 extends LitElement {
 

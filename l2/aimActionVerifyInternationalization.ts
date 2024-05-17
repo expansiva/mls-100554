@@ -8,7 +8,7 @@ import { ISourceTypescriptData } from './_100554_aimTaskGetSourceLanguageTypescr
 
 const myName = '_100554_aimActionVerifyInternationalization';
 
-// start internationalization
+/// **collab_i18n_start**
 const message_pt = {
     "action_title": "verificar textos para internacionalização",
     "btn_cancel": "Cancelar",
@@ -27,7 +27,7 @@ const messages: { [key: string]: MessageType } = {
     'en-us': message_en,
     'pt-br': message_pt
 }
-// end internationalization
+/// **collab_i18n_end**
 
 @customElement('aim-action-verify-internationalization-100554')
 export class AimActionVerifyInternationalization extends AimActionBase {

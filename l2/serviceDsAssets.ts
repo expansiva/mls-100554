@@ -5,7 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initCollabInputTag, CollabInputTag } from './_100554_collabInputTag';
 
-
+/// **collab_i18n_start**
 const message_pt = {
     loading: 'Carregando...',
     cancel: 'Cancelar',
@@ -31,7 +31,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-
+/// **collab_i18n_end**
 @customElement('service-ds-assets-100554')
 export class ServiceDsAssets100554 extends ServiceBase {
 

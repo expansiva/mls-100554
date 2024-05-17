@@ -9,6 +9,7 @@ import { getAttributeDefinitionsLit, getFormComponentsDescription } from './_100
 export const initServiceListFilesAdd = () => {
 }
 
+/// **collab_i18n_start**
 const message_pt = {
     labelProject: "Projeto",
     labelShortName: "Nome curto",
@@ -33,6 +34,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('service-list-files-add-100554')
 export class ServiceListFilesAdd100554 extends LitElement {

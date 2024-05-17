@@ -8,7 +8,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 export function initCollabShowCodeSnippet100554() {
   return true;
 }
-
+/// **collab_i18n_start**
 const message_pt = {
   copy: 'Copiar',
   copied: 'Copiado',
@@ -29,6 +29,7 @@ const messages: { [key: string]: MessageType } = {
   'en-us': message_en,
   'pt-br': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('collab-show-code-snippet-100554')
 export class CollabShowCodeSnippet100554 extends CollabLitElement {

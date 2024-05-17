@@ -4,6 +4,7 @@ import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
+/// **collab_i18n_start**
 const message_pt = {
     updateChanges: 'Atualizar alterações',
     comments: 'Comentários',
@@ -26,7 +27,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-
+/// **collab_i18n_end**
 @customElement('service-save-100554')
 export class ServiceSave extends ServiceBase {
 

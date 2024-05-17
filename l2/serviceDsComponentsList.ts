@@ -3,8 +3,9 @@
 import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { collab_cubes, collab_caret_righttv } from './_100554_collabIcons'
+import { collab_cubes, collab_caret_righttv } from './_100554_collabIcons';
 
+/// **collab_i18n_start**
 const message_pt = {
 }
 
@@ -17,6 +18,8 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
+
 @customElement('service-ds-components-list-100554')
 export class ServiceDsComponentsList100554 extends ServiceBase {
 

@@ -4,6 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+/// **collab_i18n_start**
 const message_pt = {
     languageLabel: 'Linguagens',
     alterarLabel: 'Alterar',
@@ -20,6 +21,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('service-user-settings-100554')
 export class ServiceUserSettings100554 extends ServiceBase {

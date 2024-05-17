@@ -9,6 +9,7 @@ export const initServiceSelectDsAdd = () =>{
     return true;
 }
 
+/// **collab_i18n_start**
 const message_pt = {
     addNew: 'Adicionar um novo sistema de design',
     p1: 'Aqui você pode criar um novo sistema de design selecionando um sistema de design padrão vazio ou selecionando um modelo.',
@@ -39,6 +40,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('service-select-ds-add-100554')
 export class ServiceSelectDsAdd100554 extends CollabLitElement {

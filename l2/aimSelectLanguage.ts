@@ -5,7 +5,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 import { collab_ban } from './_100554_collabIcons';
 import { ICollabLanguage, languages } from './_100554_collabLanguages'
 
-// start internationalization
+/// **collab_i18n_start**
 const message_pt = {
     "btn_cancel": "Cancelar",
     "btn_confirm": "Confirmar",
@@ -27,7 +27,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-// end internationalization
+/// **collab_i18n_end**
 
 @customElement('aim-select-language-100554')
 export class AimSelectWidget100554 extends CollabLitElement {

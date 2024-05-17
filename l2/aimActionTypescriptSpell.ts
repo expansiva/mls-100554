@@ -7,6 +7,7 @@ import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 
 const myName = '_100554_aimActionTypescriptSpell';
 
+/// **collab_i18n_start**
 const message_pt = {
     template_title: "Irá verificar o typescript e procurar por erros de gramática em ingles",
     prompt_message: "Identifique todas as strings literais no seguinte código TypeScript que devem ser preparadas para internacionalização.  Não retornar explicações, apenas retorne uma 'tabela' com as colunas: texto, language (portugues | ingles | ...).",
@@ -27,7 +28,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-
+/// **collab_i18n_end**
 @customElement('aim-action-typescript-spell-100554')
 export class AimActionTypescriptSpell extends AimActionBase {
 

@@ -13,6 +13,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initServiceListFilesAdd } from './_100554_serviceListFilesAdd';
 
+/// **collab_i18n_start**
 const message_pt = {
     updateListVerify: "atualizar lista/verificar",
     update: "atualizar",
@@ -53,6 +54,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('service-list-files-100554')
 export class ServiceListFiles extends ServiceBase {

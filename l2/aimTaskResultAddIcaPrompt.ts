@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
 
-// start internationalization
+/// **collab_i18n_start**
 const message_pt = {
     tryagain_title_2: "O prompt é valido",
     tryagain_title_3: "O prompt enviado esta fora de contexto por favor digite um prompt referente a criação de um web component",
@@ -39,7 +39,7 @@ const messages: { [key: string]: MessageType } = {
     'en-us': message_en,
     'pt-br': message_pt
 }
-// end internationalization
+/// **collab_i18n_end**
 
 @customElement('aim-task-result-add-ica-prompt-100554')
 export class AimTaskResulAddIcaPrompt extends AimTaskBase {

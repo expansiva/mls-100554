@@ -8,6 +8,7 @@ export function initCodelensComponentDetails() {
     return true;
 }
 
+/// **collab_i18n_start**
 const message_pt = {
     usage: 'Uso',
     p1: 'O parâmetro mlsComponentDetails é usado para determinar se há dependências em quaisquer componentes da web. Esta definição é importante para o funcionamento/compilação adequada do componente.<br> Para fazer esta definição, use JsDoc no início do arquivo, configurando a tag mlsComponentDetails.'
@@ -24,7 +25,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-
+/// **collab_i18n_end**
 @customElement('codelens-component-details-100554')
 export class CodeLensComponentDetails100554 extends CollabLitElement {
 

@@ -6,7 +6,7 @@ import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 
 const myName = '_100554_aimActionTokensNew';
-// start internationalization
+/// **collab_i18n_start**
 const message_pt = {
     title: 'verifica os tokens e cria um novo conjunto de tokens',
     prompt: 'Prompt',
@@ -31,7 +31,7 @@ const messages: { [key: string]: MessageType } = {
     'en-us': message_en,
     'pt-br': message_pt
 }
-// end internationalization
+/// **collab_i18n_end**
 
 @customElement('aim-action-tokens-new-100554')
 export class AimActionTokensNew extends AimActionBase {

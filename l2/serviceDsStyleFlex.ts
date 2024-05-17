@@ -10,6 +10,7 @@ import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
+/// **collab_i18n_start**
 const message_pt = {
     display: 'Exibição',
     flexDirection: 'Direção flexível',
@@ -38,6 +39,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('service-ds-style-flex-100554')
 export class ServiceDsStyleFlex extends ServiceBase {

@@ -7,7 +7,7 @@ import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { tasks, readTasksFromServer, getUserConfigs, saveUserConfigs, IAimColums } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
 
-
+/// **collab_i18n_start**
 const message_pt = {
     loading: 'Carregando...',
     selectadd: 'por favor selecione abaixo para adicionar',
@@ -46,6 +46,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
 

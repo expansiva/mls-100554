@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
-// start internationalization
+/// **collab_i18n_start**
 const message_pt = {
     resume: 'Resumo',
     name: 'Nome',
@@ -38,7 +38,7 @@ const messages: { [key: string]: MessageType } = {
     'en-us': message_en,
     'pt-br': message_pt
 }
-// end internationalization
+/// **collab_i18n_end**
 
 @customElement('service-details-ds-100554')
 export class ServiceDetailsDs100554 extends ServiceBase {

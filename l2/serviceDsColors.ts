@@ -4,6 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+/// **collab_i18n_start**
 const message_pt = {
     themes: 'Temas',
     deleteThisTheme: 'Deletar este tema',
@@ -34,6 +35,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 @customElement('service-ds-colors-100554')
 export class ServiceDsColors100554 extends ServiceBase {
 

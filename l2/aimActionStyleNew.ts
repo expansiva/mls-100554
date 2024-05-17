@@ -9,7 +9,7 @@ import { ServiceDsStyles } from "_100554_serviceDsStyles";
 
 const myName = '_100554_aimActionStyleNew';
 
-// start internationalization
+/// **collab_i18n_start**
 const message_pt = {
     prompt_title: "Objetivo:Criar um novo CSS em LESS.",
     prompt_system_1: "Use LESS para criar um novo estilo baseado na fonte fornecida abaixo, incorporando sugestões do usuário.",
@@ -42,7 +42,7 @@ const messages: { [key: string]: MessageType } = {
     'en-us': message_en,
     'pt-br': message_pt
 }
-// end internationalization
+/// **collab_i18n_end**
 
 @customElement('aim-action-style-new-100554')
 export class AimActionStyleNew extends AimActionBase {

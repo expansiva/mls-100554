@@ -8,12 +8,11 @@ import { IDocData } from './_100554_serviceDsDocList'
 import { collab_plus, collab_trash } from './_100554_collabIcons'
 
 
-
+/// **collab_i18n_start**
 const message_pt = {
     noDocumentationSelected: 'Nenhum documento selecionado',
     addChild: 'Adicionar filho',
     removeThis: 'Remover este',
-    
 }
 
 const message_en = {
@@ -28,6 +27,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('service-ds-doc-view-100554')
 export class ServiceDsDocView100554 extends ServiceBase {

@@ -5,6 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initCollabFCATree } from './_100554_collabFcaTree';
 
+/// **collab_i18n_start**
 const message_pt = {
 }
 
@@ -17,6 +18,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
 @customElement('service-fca-100554')
 export class ServiceFca100554 extends ServiceBase {
