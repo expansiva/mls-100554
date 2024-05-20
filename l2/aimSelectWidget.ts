@@ -1,7 +1,7 @@
 /// <mls shortName="aimSelectWidget" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, query, queryAll } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { collab_ban } from './_100554_collabIcons';
 
@@ -10,14 +10,18 @@ const message_pt = {
     "btn_cancel": "Cancelar",
     "btn_confirm": "Confirmar",
     "label_select_all": "Selecionar todos",
-    "clear_all": "Limpar seleção"
+    "clear_all": "Limpar seleção",
+    "btn_search": "Pesquisar",
+    "search_placeHolder": "Digite o nome do arquivo"
 }
 
 const message_en = {
     "btn_cancel": "Cancel",
     "btn_confirm": "Confirm",
     "label_select_all": "Select all",
-    "clear_all": "Clear selection"
+    "clear_all": "Clear selection",
+    "btn_search": "Search",
+    "search_placeHolder": "Enter filename"
 }
 
 type MessageType = typeof message_en;
@@ -28,6 +32,9 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
+export function initAimSelectWidget100554(){
+    return true;
+}
 @customElement('aim-select-widget-100554')
 export class AimSelectWidget100554 extends CollabLitElement {
 
@@ -43,6 +50,8 @@ export class AimSelectWidget100554 extends CollabLitElement {
     }
 
     @query('.select-grid') listcontainer: HTMLElement | undefined
+    @query('input[type="search"]') inpSearch: HTMLInputElement | undefined
+    @queryAll('.select-grid-item') gridItems: HTMLElement[] | undefined
 
     getFilesNames() {
         const { project } = mls.actual[5];
@@ -50,6 +59,26 @@ export class AimSelectWidget100554 extends CollabLitElement {
         const filesInProject = Object.keys(mls.stor.files).filter((key) => key.startsWith(`${project}_2`) && key.endsWith('.ts'))
 
         return filesInProject.map((item) => item.substring(9, item.length - 3));
+    }
+
+    private handleSearch() {
+        if (!this.gridItems || !this.inpSearch) return;
+        const searchTerm = this.inpSearch.value.toLowerCase();
+
+        this.gridItems.forEach(item => {
+            item.classList.remove('selected');
+            const label = item.querySelector('label');
+            if (label) {
+                const labelText = label.textContent?.toLowerCase() || '';
+                if (labelText.includes(searchTerm)) {
+                    label.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    item.classList.add('selected');
+                    setTimeout(() => {
+                        item.classList.remove('selected');
+                    }, 10000);
+                }
+            }
+        });
     }
 
     private handleSelectAll(e: MouseEvent) {
@@ -101,6 +130,10 @@ export class AimSelectWidget100554 extends CollabLitElement {
                     <button @click=${this.handleConfirm}>${this.msg.btn_confirm}</button>
                     <button  @click=${this.handleCancel}>${this.msg.btn_cancel}</button>
                 </div>
+            </div>
+            <div class="select-search">
+                <input type="search"> </input>
+                <button @click=${this.handleSearch}>${this.msg.btn_search}</button>
             </div>
             <hr>
 

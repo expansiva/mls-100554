@@ -5,6 +5,7 @@ import { customElement } from 'lit/decorators.js';
 import { tasks, ITaskFinish, updateTaskOnServer, getInfoMyService } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 import { ISourceTypescriptData } from './_100554_aimTaskGetSourceLanguageTypescript';
+import { initAimSelectWidget100554 } from './_100554_aimSelectWidget';
 
 const myName = '_100554_aimActionVerifyInternationalization';
 
@@ -32,18 +33,26 @@ const messages: { [key: string]: MessageType } = {
 @customElement('aim-action-verify-internationalization-100554')
 export class AimActionVerifyInternationalization extends AimActionBase {
 
+    constructor() {
+        super();
+        initAimSelectWidget100554();
+    }
+
     private msg: MessageType = messages['en'];
 
     public getRules(): AimActionRules {
         return {
-            levels: [2],
-            tags: ["*serviceSource*"]
+            levels: [2, 5],
+            tags: ["*serviceSource*", "*"]
         }
     }
     public assistant = "gpt3_typescript";
     public title = "Check Internationalization";
 
+    private info: { level: number, position: string, actServiceOp: any } | undefined;
+
     render() {
+        this.info = getInfoMyService(this);
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         return super.render();
@@ -57,15 +66,26 @@ export class AimActionVerifyInternationalization extends AimActionBase {
         }));
     }
 
-    private handleAdd(): void {
+    private handleAddL5(e: CustomEvent): void {
+        const files: string[] = e.detail;
+        const { project } = mls.actual[5];
+        if (!project) throw new Error('Invalid project');
+        for (const file of files) {
+            this.addTask(project, file);
+        }
+    }
 
-        const info = getInfoMyService(this);
-        if (!info || (info.actServiceOp && info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554')) {
+    private handleAdd(): void {
+        if (!this.info || (this.info.actServiceOp && this.info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554')) {
             throw new Error('Invalid service opposite side');
         }
-        const position = info.position === 'left' ? 'right' : 'left';
+        const position = this.info.position === 'left' ? 'right' : 'left';
         if (!(mls.actual[2] as any)[position]) throw new Error('Invalid File in mls.actual[2]')
         const { project, shortName } = (mls.actual[2] as any)[position];
+        this.addTask(project, shortName);
+    }
+
+    addTask(project: number, shortName: string) {
         const ref: ITaskRootArgs = {
             fileName: `_${project}_${shortName}`
         }
@@ -86,13 +106,30 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     }
 
     renderAdd(): TemplateResult { // from abstract
+
+        if (!this.info) throw new Error('Invalid Service Info');
+        const level = this.info.level;
+        if (![2, 5].includes(level)) throw new Error('Invalid level');
+
         return html`
-        <p> ${this.msg.action_title}</p>
-        <br>
-        <div class="buttonGroup">
-          <button @click="${this.handleCancel}">${this.msg.btn_cancel}</button>
-          <button @click="${this.handleAdd}">${this.msg.btn_confirm}</button>
-        </div>
+        ${level === 2
+                ? html`
+                <p> ${this.msg.action_title}</p>
+                <br>
+                <div class="buttonGroup">
+                <button @click="${this.handleCancel}">${this.msg.btn_cancel}</button>
+                <button @click="${this.handleAdd}">${this.msg.btn_confirm}</button>
+                </div>
+            `: html`
+                <aim-select-widget-100554
+                    @select-widget-confirm=${this.handleAddL5}
+                    @select-widget-cancel=${this.handleCancel}
+
+                ></aim-select-widget-100554>
+            `
+
+            }
+
     `;
     }
 
