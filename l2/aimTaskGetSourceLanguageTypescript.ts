@@ -5,19 +5,17 @@ import { AimTaskBase } from "./_100554_aimTaskBase";
 import { ITaskRootArgs } from "./_100554_aimActionVerifyInternationalization";
 
 @customElement('aim-task-get-source-language-typescript-100554')
-export class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
+class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
 
     public onInitializing(): void { // from abstract
         this.getSource();
     }
 
     getSource() {
-
         if (!this.taskRoot.args) {
             this.notifyCompleteByStatus('error', 'Invalid Args');
             return;
         }
-
         const data: ITaskRootArgs = JSON.parse(this.taskRoot.args as string);
         const shortName: string = data.fileName;
 
@@ -41,8 +39,9 @@ export class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
     }
 
     public getDataInternalization(sourceComplete: string): ISourceTypescriptData {
+        
+        const regex = ''
 
-        const regex = /\/\/\/ **collab_i18n_start*([\s\S]+?)\/\/\/ **collab_i18n_end**/;
         const match = sourceComplete.match(regex);
 
         let internalization: IInternalizationsDetails | undefined = undefined;
@@ -69,6 +68,10 @@ export class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
                 languages
             }
             source = beforeMatch + "\n" + afterMatch;
+        }
+
+        if (!internalization) {
+            source = sourceComplete
         }
 
         return { internalization, source, sourceComplete };

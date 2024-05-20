@@ -24,15 +24,15 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-us': message_en,
-    'pt-br': message_pt
+    'en': message_en,
+    'pt': message_pt
 }
 /// **collab_i18n_end**
 
 @customElement('aim-action-verify-internationalization-100554')
 export class AimActionVerifyInternationalization extends AimActionBase {
 
-    private msg: MessageType = messages['en-us'];
+    private msg: MessageType = messages['en'];
 
     public getRules(): AimActionRules {
         return {
