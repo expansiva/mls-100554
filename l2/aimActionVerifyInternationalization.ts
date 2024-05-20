@@ -43,7 +43,7 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     public getRules(): AimActionRules {
         return {
             levels: [2, 5],
-            tags: ["*serviceSource*", "*"]
+            tags: ["*serviceSource*", "*servicePlugins*"]
         }
     }
     public assistant = "gpt3_typescript";
