@@ -16,6 +16,28 @@ aim-select-widget-100554 {
                 text-overflow: ellipsis;
                 font-size: @font-size-16;
             }
+            &.selected {
+                background: @grey-color-light;
+                animation: backgroundFadeIn 5s ease-in-out;
+            }
+        }
+    }
+
+    
+    .select-search {
+
+        margin-top: 2rem;
+        display: flex;
+        gap: .6em;
+        border-left: 1px solid @grey-color-dark;
+        padding-left: 1rem;
+
+        input {
+            width: 100%;
+        }
+
+        button {
+            width: 10em;
         }
     }
 
@@ -23,6 +45,8 @@ aim-select-widget-100554 {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        padding-left: 1rem;
+
         .select-check-all{
             display: flex;
             gap: .2rem;
