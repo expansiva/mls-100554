@@ -79,7 +79,7 @@ export class AimActionVerifyInternationalization extends AimActionBase {
             trace: [new Date().toISOString() + ': trask created at ']
         }
         tasks.unshift(taskRoot);
-        this.prepareTask1(taskRoot);
+        this.prepareTask1(taskRoot, ref.fileName);
         this.dispatchEvent(new CustomEvent('finished-add-task-root', {
             detail: taskRoot, bubbles: true, composed: true
         }));
@@ -97,15 +97,16 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     }
 
     getPrompt(source: string) {
-        const prompt = `verificar o source abaixo as strings entre ("") ('') (\`\`) que devem ser internacionalizadas. 
-        Não retornar explicações, apenas retorne uma 'tabela' com as colunas: texto.
-        Não retornar linhas com textos duplicados na tabela
+        const prompt = `Analisar o source abaixo e retornar uma 'tabela' com as colunas: texto, todas as strings que devem ser internacionalizadas(mensagens de erro, mensagens informativas, textos de interface do usuário, etc..). 
+
+        *Ignorar variáveis, urls. 
+        *Não retornar explicações
 
 Source: ${source}`;
         return prompt;
     }
 
-    prepareTask1(taskRoot: cbe.ITaskRoot): void {
+    prepareTask1(taskRoot: cbe.ITaskRoot, ref: string): void {
 
         // create task to get typescript source from another side
         this.mode = taskRoot.mode = 'in progress';
@@ -113,6 +114,7 @@ Source: ${source}`;
             mode: 'initializing',
             title: 'get typescript source',
             widget: '_100554_aimTaskGetSourceLanguageTypescript',
+            ref,
             trace: [],
             nextStep: this.prepareTask2.name // danger, loop
         });

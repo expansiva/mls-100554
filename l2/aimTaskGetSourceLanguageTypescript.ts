@@ -38,42 +38,48 @@ class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
 
     }
 
-    public getDataInternalization(sourceComplete: string): ISourceTypescriptData {
-        
-        const regex = /\/\/\/ \*\*collab_i18n_start\*\*(.*?)\/\/\/ \*\*collab_i18n_end\*\*/gs
-        const match = sourceComplete.match(regex);
-
+    public getDataInternalization(sourceComplete: string) {
+        const regex = /\/\/\/ \*\*collab_i18n_start\*\*([\s\S]*?)\/\/\/ \*\*collab_i18n_end\*\*/g;
+        let match;
+        let remainingText = sourceComplete;
         let internalization: IInternalizationsDetails | undefined = undefined;
-        let source: string = '';
-        if (match && match.index) {
-            const internationalizationText = match[1].trim();
 
-            const languages = Object.keys(internationalizationText.match(/message_[a-z]{2}/g)?.reduce((acc: any, curr: string) => {
-                const language = curr.split('_')[1];
-                acc[language] = true;
-                return acc;
-            }, {}) || {});
+        match = regex.exec(sourceComplete)
+        if (match) {
+            const start = match.index;
+            const end = regex.lastIndex;
 
-            const startIndex = sourceComplete.substring(0, match.index).split('\n').length;
-            const blankLinesBefore = sourceComplete.substring(0, match.index).match(/\n\s*\n/g);
-            const blankLinesBeforeCount = blankLinesBefore ? blankLinesBefore.length : 0;
-            const endIndex = startIndex + internationalizationText.split('\n').length + blankLinesBeforeCount;
-            const beforeMatch = sourceComplete.substring(0, match.index).trim();
-            const afterMatch = sourceComplete.substring(match.index + match[0].length).trim();
+            const beforeBlock = sourceComplete.slice(0, start);
+            const block = match[0];
+            const afterBlock = sourceComplete.slice(end);
+            const startLine = (beforeBlock.match(/\n/g) || []).length + 1;
+            const endLine = startLine + (block.match(/\n/g) || []).length;
+            const languages = this.extractLanguages(match[1]);
+
             internalization = {
-                endLine: endIndex,
-                source: internationalizationText,
-                startLine: startIndex,
+                source: match[1].trim(),
+                startLine,
+                endLine,
                 languages
             }
-            source = beforeMatch + "\n" + afterMatch;
+            remainingText = remainingText.replace(block, '');
         }
 
-        if (!internalization) {
-            source = sourceComplete
-        }
+        return {
+            internalization,
+            source: remainingText.trim(),
+            sourceComplete
+        };
+    }
 
-        return { internalization, source, sourceComplete };
+    private extractLanguages(text: string): string[] {
+        const regex = /message_([a-zA-Z]+)/g;
+        let match;
+        const languages: Set<string> = new Set();
+        while ((match = regex.exec(text)) !== null) {
+            languages.add(match[1]);
+        }
+        return Array.from(languages);
     }
 }
 
