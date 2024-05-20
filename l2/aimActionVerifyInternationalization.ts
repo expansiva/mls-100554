@@ -134,12 +134,10 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     }
 
     getPrompt(source: string) {
-        const prompt = `Analisar o source abaixo e retornar uma 'tabela' com as colunas: texto, todas as strings que devem ser internacionalizadas(mensagens de erro, mensagens informativas, textos de interface do usuário, etc..). 
-
-        *Ignorar variáveis, urls. 
-        *Não retornar explicações
-
-Source: ${source}`;
+        const prompt = `Identify all contextualized interface presentation text in the following TypeScript code that should be prepared for internationalization(i18n). Do not return explanations, just return a 'table' with the columns: text
+        
+${source}
+ `;
         return prompt;
     }
 
