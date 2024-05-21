@@ -1,6 +1,6 @@
 /// <mls shortName="aimSelectLanguage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, css } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, query, queryAll, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { collab_ban } from './_100554_collabIcons';
 import { ICollabLanguage, languages } from './_100554_collabLanguages'
@@ -10,15 +10,18 @@ const message_pt = {
     "btn_cancel": "Cancelar",
     "btn_confirm": "Confirmar",
     "label_select_all": "Selecionar todos",
-    "clear_all": "Limpar seleção"
+    "clear_all": "Limpar seleção",
+    "btn_search": "Pesquisar",
+    "search_placeHolder": "Digite a linguagem"
 }
 
 const message_en = {
     "btn_cancel": "Cancel",
     "btn_confirm": "Confirm",
     "label_select_all": "Select all",
-    "clear_all": "Clear selection"
-
+    "clear_all": "Clear selection",
+    "btn_search": "Search",
+    "search_placeHolder": "Enter language"
 }
 
 type MessageType = typeof message_en;
@@ -29,8 +32,13 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
+
+export function initAimSelectLanguage100554() {
+    return true;
+}
+
 @customElement('aim-select-language-100554')
-export class AimSelectWidget100554 extends CollabLitElement {
+export class AimSelectLanguage100554 extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
 
@@ -43,10 +51,32 @@ export class AimSelectWidget100554 extends CollabLitElement {
         return values;
     }
 
+    @property() defaultValue: ICollabLanguage[] = [];
     @query('.select-grid') listcontainer: HTMLElement | undefined
+    @query('input[type="search"]') inpSearch: HTMLInputElement | undefined
+    @queryAll('.select-grid-item') gridItems: HTMLElement[] | undefined
 
-    getLanguages():ICollabLanguage[] {
+    getLanguages(): ICollabLanguage[] {
         return languages.sort((a, b) => a.name.localeCompare(b.name, 'pt', { sensitivity: 'base' }));
+    }
+
+    private handleSearch() {
+        if (!this.gridItems || !this.inpSearch) return;
+        const searchTerm = this.inpSearch.value.toLowerCase();
+        this.gridItems.forEach(item => {
+            item.classList.remove('selected');
+            const label = item.querySelector('label');
+            if (label) {
+                const labelText = label.textContent?.toLowerCase() || '';
+                if (labelText.includes(searchTerm)) {
+                    label.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    item.classList.add('selected');
+                    setTimeout(() => {
+                        item.classList.remove('selected');
+                    }, 10000);
+                }
+            }
+        });
     }
 
     private handleSelectAll(e: MouseEvent) {
@@ -99,17 +129,17 @@ export class AimSelectWidget100554 extends CollabLitElement {
                     <button  @click=${this.handleCancel}>${this.msg.btn_cancel}</button>
                 </div>
             </div>
+            <div class="select-search">
+                <input type="search"> </input>
+                <button @click=${this.handleSearch}>${this.msg.btn_search}</button>
+            </div>
             <hr>
-
             <div class="select-grid">
                 ${languages.map((lang) => {
             return html`
-            
-        
                     <div class="select-grid-item">
-                        <input id="sl_${lang.code}" .langObj=${lang} type="checkbox"></input>
-                        <div class="flags ${lang.code}"></div>
-                        <label for="sl_${lang.code}">${lang.name}</label>
+                        <input id="sl_${lang.code}" .langObj=${lang} type="checkbox" ?checked=${!!this.defaultValue.find((item) => item.code === lang.code)}></input>
+                        <label for="sl_${lang.code}">${lang.name}(${lang.code})</label>
                     </div>
                     `
         })}
