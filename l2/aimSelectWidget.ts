@@ -1,7 +1,7 @@
 /// <mls shortName="aimSelectWidget" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css } from 'lit';
-import { customElement, query, queryAll } from 'lit/decorators.js';
+import { customElement, query, queryAll, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { collab_ban } from './_100554_collabIcons';
 
@@ -32,7 +32,7 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-export function initAimSelectWidget100554(){
+export function initAimSelectWidget100554() {
     return true;
 }
 @customElement('aim-select-widget-100554')
@@ -49,6 +49,7 @@ export class AimSelectWidget100554 extends CollabLitElement {
         return values;
     }
 
+    @property() defaultValue: string[] = [];
     @query('.select-grid') listcontainer: HTMLElement | undefined
     @query('input[type="search"]') inpSearch: HTMLInputElement | undefined
     @queryAll('.select-grid-item') gridItems: HTMLElement[] | undefined
@@ -141,7 +142,7 @@ export class AimSelectWidget100554 extends CollabLitElement {
                 ${files.map((filename) => {
             return html`
                     <div class="select-grid-item">
-                        <input id="sl_${filename}" .file=${filename} type="checkbox"></input>
+                        <input id="sl_${filename}" .file=${filename} type="checkbox" ?checked=${!!this.defaultValue.find((item) => item === filename)} ></input>
                         <label for="sl_${filename}">${filename}</label>
                     </div>
                     `

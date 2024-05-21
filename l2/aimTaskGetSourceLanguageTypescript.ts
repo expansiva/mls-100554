@@ -32,58 +32,58 @@ class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
             const mfile = mls.l2.editor.mfiles[shortName];
             if (!mfile) reject(`No mfile find for file: ${shortName}`);
             const value = mfile.model.getValue();
-            const data = this.getDataInternalization(value);
+            const data = getDataInternationalization(value);
             resolve(data);
         })
 
     }
-
-    public getDataInternalization(sourceComplete: string) {
-        const regex = /\/\/\/ \*\*collab_i18n_start\*\*([\s\S]*?)\/\/\/ \*\*collab_i18n_end\*\*/g;
-        let match;
-        let remainingText = sourceComplete;
-        let internalization: IInternalizationsDetails | undefined = undefined;
-
-        match = regex.exec(sourceComplete)
-        if (match) {
-            const start = match.index;
-            const end = regex.lastIndex;
-
-            const beforeBlock = sourceComplete.slice(0, start);
-            const block = match[0];
-            const afterBlock = sourceComplete.slice(end);
-            const startLine = (beforeBlock.match(/\n/g) || []).length + 1;
-            const endLine = startLine + (block.match(/\n/g) || []).length;
-            const languages = this.extractLanguages(match[1]);
-
-            internalization = {
-                source: match[1].trim(),
-                startLine,
-                endLine,
-                languages
-            }
-            remainingText = remainingText.replace(block, '');
-        }
-
-        return {
-            internalization,
-            source: remainingText.trim(),
-            sourceComplete
-        };
-    }
-
-    private extractLanguages(text: string): string[] {
-        const regex = /message_([a-zA-Z]+)/g;
-        let match;
-        const languages: Set<string> = new Set();
-        while ((match = regex.exec(text)) !== null) {
-            languages.add(match[1]);
-        }
-        return Array.from(languages);
-    }
 }
 
-export interface IInternalizationsDetails {
+export function getDataInternationalization(sourceComplete: string) {
+    const regex = /\/\/\/ \*\*collab_i18n_start\*\*([\s\S]*?)\/\/\/ \*\*collab_i18n_end\*\*/g;
+    let match;
+    let remainingText = sourceComplete;
+    let internationalization: IInternationalizationsDetails | undefined = undefined;
+
+    match = regex.exec(sourceComplete)
+    if (match) {
+        const start = match.index;
+        const end = regex.lastIndex;
+
+        const beforeBlock = sourceComplete.slice(0, start);
+        const block = match[0];
+        const afterBlock = sourceComplete.slice(end);
+        const startLine = (beforeBlock.match(/\n/g) || []).length + 1;
+        const endLine = startLine + (block.match(/\n/g) || []).length;
+        const languages = extractLanguages(match[1]);
+
+        internationalization = {
+            source: match[1].trim(),
+            startLine,
+            endLine,
+            languages
+        }
+        remainingText = remainingText.replace(block, '');
+    }
+
+    return {
+        internationalization,
+        source: remainingText.trim(),
+        sourceComplete
+    };
+}
+
+function extractLanguages(text: string): string[] {
+    const regex = /message_([a-zA-Z]+)/g;
+    let match;
+    const languages: Set<string> = new Set();
+    while ((match = regex.exec(text)) !== null) {
+        languages.add(match[1]);
+    }
+    return Array.from(languages);
+}
+
+export interface IInternationalizationsDetails {
     startLine: number,
     endLine: number,
     source: string,
@@ -92,6 +92,6 @@ export interface IInternalizationsDetails {
 
 export interface ISourceTypescriptData {
     source: string,
-    internalization: IInternalizationsDetails | undefined,
+    internationalization: IInternationalizationsDetails | undefined,
     sourceComplete: string
 }
