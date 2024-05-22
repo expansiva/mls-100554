@@ -4,12 +4,12 @@ aim-select-language-100554 {
         display: grid;
         grid-template-columns: repeat(auto-fill, 20em);
         gap: 1px;
-
+        overflow: auto;
         .select-grid-item {
             padding: 5px;
             display: flex;
             cursor: pointer;
-            overflow-y: auto;
+            height: 20px;
             label {
                 cursor: pointer;
                 max-width: 15em;
@@ -32,9 +32,7 @@ aim-select-language-100554 {
         margin-top: 2rem;
         display: flex;
         gap: .6em;
-        border-left: 1px solid @grey-color-dark;
         padding-left: 1rem;
-
         input {
             width: 100%;
         }
