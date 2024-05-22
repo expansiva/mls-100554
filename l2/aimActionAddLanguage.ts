@@ -7,7 +7,7 @@ import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 import { initAimSelectWidget100554 } from './_100554_aimSelectWidget';
 import { initAimSelectLanguage100554 } from './_100554_aimSelectLanguage';
 import { ICollabLanguage } from './_100554_collabLanguages';
-import { getDataInternationalization, IInternationalizationsDetails } from './_100554_aimTaskGetSourceLanguageTypescript';
+import { ITaskFileInfo, ITaskRootArgsInitial } from './_100554_aimAddLanguageBase';
 
 const myName = '_100554_aimActionAddLanguage';
 
@@ -122,15 +122,6 @@ export class AimActionAddLanguage extends AimActionBase {
         this.onlyLanguageDontConfigured = inp.checked;
     }
 
-    private allElementsPresent(arrayA: string[], arrayB: string[]): boolean {
-        for (const element of arrayA) {
-            if (!arrayB.includes(element)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private async handleAdd() {
 
         if (this.level === 2) {
@@ -157,61 +148,30 @@ export class AimActionAddLanguage extends AimActionBase {
         if (!project) throw new Error('Invalid project');
 
         for (const widget of this.widgets) {
-            this.prepareInfoFile(project, widget).then((infoFile) => {
-                this.addTask(infoFile);
-            });
+            this.addTask(project, widget);
         }
 
     }
 
-    private async prepareInfoFile(project: number, widget: string) {
+    addTask(project: number, fileName: string) {
 
-        const fileName = `_${project}_${widget}`
-        const infoFile: ITaskFileInfo = {
+        const args: ITaskRootArgsInitial = {
+            project,
             fileName,
-            checkHtml: false,
-            checkTs: true,
             languages: this.languages,
-            html: '',
-            detailsi18n: undefined
+            onlyLanguageDontConfigured: this.onlyLanguageDontConfigured
         };
-
-        const mfile = mls.l2.editor.mfiles[fileName];
-        if (!mfile) infoFile.checkTs = false;
-        const valueTs = mfile.model.getValue() || '';
-        if (!valueTs) infoFile.checkTs = false;
-
-        const details = getDataInternationalization(valueTs);
-        if (!details.internationalization || !details.internationalization.source || details.internationalization.languages.length === 0) infoFile.checkTs = false;
-        if (this.onlyLanguageDontConfigured && this.allElementsPresent(this.languages.map((lang) => lang.code), details.internationalization?.languages || [])) infoFile.checkTs = false;
-
-        infoFile.detailsi18n = details.internationalization;
-        return infoFile;
-    }
-
-
-    addTask(infoFile: ITaskFileInfo) {
-
-        if (!infoFile.checkHtml && !infoFile.checkTs) {
-            this.dispatchEvent(new CustomEvent('finished-add-task-root', {
-                detail: undefined, bubbles: true, composed: true
-            }));
-            return;
-        }
 
         const taskRoot: cbe.ITaskRoot = {
             mode: 'initializing',
             title: this.msg.action_title,
             widget: myName,
             children: [],
-            args: JSON.stringify(infoFile),
+            args: JSON.stringify(args),
             trace: [new Date().toISOString() + ': trask created at ']
         }
         tasks.unshift(taskRoot);
-
-        if (infoFile.checkTs) this.prepareTaskPromptTs(taskRoot);
-        else {//TODO Task Html
-        }
+        this.prepareTask1(taskRoot, fileName, project);
 
         this.dispatchEvent(new CustomEvent('finished-add-task-root', {
             detail: taskRoot, bubbles: true, composed: true
@@ -279,20 +239,59 @@ ${source}
         return prompt;
     }
 
-
-    prepareTaskPromptTs(taskRoot: cbe.ITaskRoot): void {
+    prepareTask1(taskRoot: cbe.ITaskRoot, fileName: string, project: number) {
 
         this.mode = taskRoot.mode = 'in progress';
-        if (!taskRoot.args) throw new Error('Invalid taskroot args');
-        const infoFile: ITaskFileInfo = JSON.parse(taskRoot.args);
+        const ref = `_${project}_${fileName}`;
 
         this.addTaskAndWaitForCompletion(taskRoot, {
             mode: 'initializing',
+            title: 'get info',
+            widget: '_100554_aimTaskGetSourceLanguages',
+            ref,
+            trace: [],
+            nextStep: this.prepareTaskPromptTs.name // danger, loop
+        });
+    }
+
+    prepareTaskPromptTs(taskFinishResult: ITaskFinish): void {
+
+        const child = taskFinishResult.taskChild;
+        const result: string = taskFinishResult.result || '';
+
+        if (taskFinishResult.status === 'error') {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            return;
+        }
+        if (!result) {
+            child.trace.push(new Date().toISOString() + ': no result find in task child');
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            this.requestUpdate();
+            return;
+        }
+
+        child.mode = 'processed';
+        const args: ITaskFileInfo = JSON.parse(result);
+        taskFinishResult.taskRoot.args = JSON.stringify(args);
+
+        if (!args.checkHtml && !args.checkTs) {
+            child.trace.push(new Date().toISOString() + ': no html/ts avaliable to add language');
+            this.requestUpdate();
+            return;
+        }
+
+        if (!args.checkTs) {
+            // chamar task check html
+            return;
+        }
+
+        this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
+            mode: 'initializing',
             title: 'exec prompt',
             widget: '_100554_aimTaskExecLLM',
-            ref: infoFile.fileName + '.ts',
+            ref: child.ref + '.ts',
             agent: this.assistant,
-            prompt: this.getPromptTs(infoFile.detailsi18n?.source as string, infoFile.languages),
+            prompt: this.getPromptTs(args.detailsi18n?.source as string, args.languages),
             trace: [],
             nextStep: this.prepareTaskResultTs.name // danger, loop
         });
@@ -357,15 +356,3 @@ ${source}
 
 type IScenaries = 'main' | 'selectLanguage' | 'selectWidget';
 
-export interface ITaskRootArgs {
-    fileName: string
-}
-
-export interface ITaskFileInfo {
-    fileName: string,
-    checkHtml: boolean,
-    checkTs: boolean,
-    detailsi18n: IInternationalizationsDetails | undefined,
-    html: string,
-    languages: ICollabLanguage[]
-}
