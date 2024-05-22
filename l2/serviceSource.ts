@@ -276,6 +276,7 @@ export class ServiceSource100554 extends ServiceBase {
                 promises.push(this.createModelTS2(storFile, false, false));
             }
         }
+
         if (mls.istrace) console.time('creating models');
         await Promise.all(promises);
         if (mls.istrace) console.timeEnd('creating models');
@@ -1006,6 +1007,13 @@ export class ServiceSource100554 extends ServiceBase {
         };
         mls.l2.editor.add(model1);
         this.addEventsModelTS(storFile, model1);
+
+        const keyFileHtml = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.html');
+        const storFileHtml = mls.stor.files[keyFileHtml];
+        if (storFileHtml) {
+            await this.getOrCreateModelHTML(storFile.shortName, storFile.project, storFileHtml);
+        }
+
         if (compile) {
             await this.updateModelStatus(model1, false);
         }
@@ -1166,7 +1174,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private async createOrShowModelHTML(open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
 
-        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        let shortName: string = '';
+        let project: number = 0;
+        const conf = mls.l2.editor.editors[this.confE];
+        shortName = conf.shortName;
+        project = conf.project;
+
         const uri = this.getUri(`_${project}_${shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
 
@@ -1178,6 +1191,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
 
         if (!model) model = await this.getOrCreateModelHTML(shortName, project, storFileHTML, fileInfo);
+        let mfile = mls.l2.editor.get({ project, shortName });
+        if (mfile) (mfile as any).modelHTML = model;
+
         let src: string | Blob | null | undefined;
 
         const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
@@ -1215,12 +1231,15 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private async getOrCreateModelHTML(shortName: string, project: number, storFileHTML: mls.stor.IFileInfo, fileInfo?: mls.stor.IFileInfoValue): Promise<monaco.editor.ITextModel> {
-
+        let mfile = mls.l2.editor.get({ project, shortName });
         const uri = this.getUri(`_${project}_${shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
         if (model) return model;
         const content = fileInfo ? fileInfo.content : await storFileHTML.getContent();
         model = monaco.editor.createModel(content as string, 'html', uri);
+
+        if (mfile) (mfile as any)['modelHTML'] = model;
+
         (model as any)['position'] = this.position;
         (storFileHTML as any)['originalCRC'] = storFileHTML.inLocalStorage ? 'undefined' : mls.common.crc.crc32(model.getValue()).toString(16);
         if (storFileHTML.status === 'renamed' && fileInfo) {
@@ -1283,8 +1302,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }, 500);
 
     }
-
-
 
     private getValueInfoHTML = async (activeModel: monaco.editor.ITextModel, originalShortName: string, originalProject: number, originalCRC: string): Promise<mls.stor.IFileInfoValue> => {
         const rc: mls.stor.IFileInfoValue = {

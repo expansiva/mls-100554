@@ -428,11 +428,16 @@ export class ServiceAim100554 extends ServiceBase {
                 console.error('widget not exists or invalid:' + widget);
                 return;
             }
+            
             const tagName = convertFileNameToTag(widget);
             const newTabIndex = ' tabIndex="-1" ';
+                
+            const msizeH = this.msize.split(',')[1];
+            const height = ` height= "${Number.parseFloat(msizeH) - 95}"`;
             const modeInit: cbe.IMode = "add";
             const newMode = ' mode="' + modeInit + '"';
-            render(html`${unsafeHTML('<' + tagName + newTabIndex + newMode + '/> ')}`, container);
+            
+            render(html`${unsafeHTML('<' + tagName + newTabIndex + newMode + height + '/> ')}`, container);
             this.useContainerAdd = false;
         } catch (error) {
             console.error("Erro ao carregar o componente:" + widget + ", error: ", error);
