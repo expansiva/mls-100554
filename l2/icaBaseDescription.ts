@@ -594,3 +594,4 @@ export function checkAttributteHasVariation(attribute: string): boolean {
   if (!attr) return false;
   return attr.variations === true;
 }
+

@@ -239,6 +239,26 @@ ${source}
         return prompt;
     }
 
+    getPromptHTML(source: string, tags: string[], attrs: string[], languages: ICollabLanguage[]) {
+        const langs = languages.map((lang) => `${lang.name}(${lang.code})`);
+        const prompt = `Please modify the HTML below to add the ${langs.join(';')} language to properties where changes are permitted. 
+
+The properties that must be modified are :  ${attrs.join(',')}
+Elements that must be modified: ${tags.join(',')}
+
+If a property is not specified, it defaults to the original language.
+
+For example, label-pt="xxx" label="xxx".
+Do not return explanations.
+Return a single block  \`\`\`html 
+
+Here is the HTML code: 
+
+${source}
+ `;
+        return prompt;
+    }
+
     prepareTask1(taskRoot: cbe.ITaskRoot, fileName: string, project: number) {
 
         this.mode = taskRoot.mode = 'in progress';
@@ -272,16 +292,18 @@ ${source}
 
         child.mode = 'processed';
         const args: ITaskFileInfo = JSON.parse(result);
+        console.info(args);
         taskFinishResult.taskRoot.args = JSON.stringify(args);
 
         if (!args.checkHtml && !args.checkTs) {
             child.trace.push(new Date().toISOString() + ': no html/ts avaliable to add language');
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
             this.requestUpdate();
             return;
         }
 
         if (!args.checkTs) {
-            // chamar task check html
+            this.prepareTaskPromptHTML(taskFinishResult);
             return;
         }
 
@@ -335,12 +357,82 @@ ${source}
 
     }
 
-    prepareTaskPromptHTML(taskRoot: cbe.ITaskRoot): void {
+    prepareTaskPromptHTML(taskFinishResult: ITaskFinish): void {
 
+        const child = taskFinishResult.taskChild;
+        const result: string = taskFinishResult.result || '';
+
+        if (taskFinishResult.status === 'error') {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            return;
+        }
+        if (!result) {
+            child.trace.push(new Date().toISOString() + ': no result find in task child');
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            this.requestUpdate();
+            return;
+        }
+
+        child.mode = 'processed';
+        const args: ITaskFileInfo = JSON.parse(result);
+        taskFinishResult.taskRoot.args = JSON.stringify(args);
+
+        if (!args.checkHtml) {
+            child.trace.push(new Date().toISOString() + ': no html avaliable to add language');
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            this.requestUpdate();
+            return;
+        }
+
+        this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
+            mode: 'initializing',
+            title: 'exec prompt',
+            widget: '_100554_aimTaskExecLLM',
+            ref: child.ref + '.ts',
+            agent: this.assistant,
+            prompt: this.getPromptHTML(args.html, args.htmlTags, args.attributesHTML, args.languages),
+            trace: [],
+            nextStep: this.prepareTaskResultHTML.name // danger, loop
+        });
     }
 
-    prepareTaskResultHTML(taskRoot: cbe.ITaskRoot, infoFile: ITaskFileInfo): void {
+    prepareTaskResultHTML(taskFinishResult: ITaskFinish): void {
 
+        const child = taskFinishResult.taskChild;
+        const result: string = child.result || '';
+
+        if (taskFinishResult.status === 'error') {
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            return;
+        }
+
+        if (!taskFinishResult.taskRoot.args) {
+            child.trace.push(new Date().toISOString() + ': taskroot args is missing');
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            this.requestUpdate();
+            return;
+        }
+
+        if (!child.result) {
+            child.trace.push(new Date().toISOString() + ': no result in task');
+            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
+            this.requestUpdate();
+            return;
+        }
+
+        const infoFile: ITaskFileInfo = JSON.parse(taskFinishResult.taskRoot.args);
+        child.mode = 'processed';
+
+        this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
+            mode: 'initializing',
+            title: 'add language in html source',
+            widget: '_100554_aimTaskResultLanguageHtml',
+            ref: infoFile.fileName,
+            trace: [],
+            _tempResult: result,
+            nextStep: this.endTasks.name
+        });
+        
     }
 
     endTasks(taskFinishResult: ITaskFinish): void {

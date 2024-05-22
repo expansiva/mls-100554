@@ -35,7 +35,7 @@ const message_en = {
     notFoundReference: 'Not found reference',
     tasksByReference: 'Tasks by reference',
     noActionsToAdd: 'No Actions to Add',
-    selectColumnsYouWant:'Select the columns you want to view',
+    selectColumnsYouWant: 'Select the columns you want to view',
     save: 'Save',
     cancel: 'Cancel'
 }
@@ -50,7 +50,7 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
 
-    private myMessage: MessageType = messages['en'] ;
+    private myMessage: MessageType = messages['en'];
 
     constructor() {
         super();
@@ -66,7 +66,7 @@ export class ServiceAim100554 extends ServiceBase {
     actualServiceOpLevel: number = 0;
 
     render() {
-     
+
         const lang = this.getMessageKey(messages);
         this.myMessage = messages[lang];
 
@@ -98,7 +98,7 @@ export class ServiceAim100554 extends ServiceBase {
         tooltip: 'AI',
         visible: true,
         widget: '_100554_serviceAim',
-        level: [2, 3]
+        level: [2, 3, 5]
     }
 
     get invertedPosition() { return this.position === 'left' ? 'right' : 'left' };

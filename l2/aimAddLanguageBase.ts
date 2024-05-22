@@ -16,6 +16,8 @@ export interface ITaskFileInfo {
     checkTs: boolean,
     detailsi18n: IInternationalizationsDetails | undefined,
     html: string,
+    attributesHTML: string[],
+    htmlTags: string[],
     languages: ICollabLanguage[],
     onlyLanguageDontConfigured: boolean
 }
