@@ -68,6 +68,7 @@ export class AimTaskGetSourceLanguages extends AimTaskBase {
 
             infoFile.html = valueHTML;
             const rc = this.prepareHTMLInfo(valueHTML);
+            if (rc.components.length === 0) infoFile.checkHtml = false;
             infoFile.htmlTags = rc.components;
             infoFile.attributesHTML = rc.attrs;
         }
