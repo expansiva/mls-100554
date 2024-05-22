@@ -41,7 +41,7 @@ export class WcInputText100554 extends IcaFormsInputString {
 
     @property({ type: String }) name: string | undefined;
 
-    @property({ type: String }) label: string | undefined;
+    @propertyDataSource({ type: String }) label: string | undefined;
 
     @property({ type: String }) pattern: string | undefined;
 
@@ -63,7 +63,7 @@ export class WcInputText100554 extends IcaFormsInputString {
 
     @property({ type: Boolean }) autofocus: boolean = false;
 
-    @property({ type: String }) hint: string | undefined;
+    @propertyDataSource({ type: String }) hint: string | undefined;
 
     @property({ type: String }) autocorrect: 'off' | 'on' | undefined = undefined;
 

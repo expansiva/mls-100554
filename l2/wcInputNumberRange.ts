@@ -68,7 +68,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
 
     @property({ type: Boolean }) autofocus: boolean = false;
 
-    @property({ type: String }) hint: string = '';
+    @propertyCompositeDataSource({ type: String }) hint: string = '';
 
     @property({ type: String }) inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = 'none';
 

@@ -48,7 +48,6 @@ const message_en = {
     p8: 'To create a plugin...',
 }
 
-
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
@@ -61,7 +60,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServicePlugins extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     get project(): number { return window['mls'] ? mls.actual[5].project as number : 0 };
@@ -75,7 +74,7 @@ export class ServicePlugins extends ServiceBase {
     @property({ type: Number }) lastPluginIdAdd: number = -1;
 
     @property({ type: String }) currentScenario: IScenaries = 'list';
-        
+
     public details: IService = {
         icon: '&#xf1e6',
         state: 'foreground',
@@ -95,7 +94,7 @@ export class ServicePlugins extends ServiceBase {
     public menu: IMenu = {
         title: 'Plugins',
         actions: {
-            
+
         },
         icons: {},
         actionDefault: 'opPlugins', // call after close icon clicked

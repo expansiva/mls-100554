@@ -91,8 +91,11 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private objVariations: any = {
-        0: 'en-US',
-        1: 'pt-BR'
+        0: 'en',
+        1: 'pt',
+        2: 'es',
+        3: 'ru'
+
     }
 
     private getIframePreviewHTML(): HTMLHtmlElement | undefined {
@@ -139,7 +142,7 @@ export class ServicePreview100554 extends ServiceBase {
             icPreviewM: 'Mobile;f3cf'
         },
         buttons: {
-            btVariations: this.msg.variations + ';f1ab:menu:0 - Default,1 - Portugues',
+            btVariations: this.msg.variations + ';f1ab:menu:0 - Default,1 - Portugues,2 - Espanhol,3 - Russo',
             btEditStyle: this.msg.editStyle + ';f0d0',
             btWatch: this.msg.pause + ';Update Preview;f04c;f04b',
         },
