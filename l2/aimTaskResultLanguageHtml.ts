@@ -20,6 +20,13 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
         }
         const args: ITaskFileInfo = JSON.parse(taskRoot.args);
 
+        const mfile = mls.l2.editor.mfiles[args.fileName];
+        if (!mfile && !((mfile as any).modelHTML)) {
+            this.taskChild.trace.push(new Date().toISOString() + ': no mfile find to this file');
+            this.notifyCompleteByStatus('error', '');
+            return;
+        }
+
         const result = this.taskChild._tempResult;
         if (!result) {
             this.taskChild.trace.push(new Date().toISOString() + ': no result find is taskchild');
@@ -27,7 +34,19 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
             return;
         }
 
-        console.info(result);
+        const html = this.extractHtml(result);
+        const model = (mfile as any).modelHTML;
+        const startLineNumber = 1;
+        const startColumn = 1;
+        const endLineNumber = model.getLineCount();
+        const endColumn = model.getLineMaxColumn(endLineNumber);
+        const newText = html;
+        const editOperation = {
+            range: new monaco.Range(startLineNumber, startColumn, endLineNumber, endColumn),
+            text: newText,
+            forceMoveMarkers: true
+        };
+        model.pushEditOperations([], [editOperation], () => null);
         this.notifyCompleteByStatus('ok', '');
 
     }
@@ -41,7 +60,7 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
 
         if (matches) {
             for (const m of matches) {
-                const conteudo = m.replace(/```typescript|```/g, '').trim();
+                const conteudo = m.replace(/```html|```/g, '').trim();
                 contents.push(conteudo);
             }
 

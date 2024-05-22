@@ -49,6 +49,7 @@ export class AimSelectWidget100554 extends CollabLitElement {
         return values;
     }
 
+    @property({ type: Number }) height: number = 700;
     @property() defaultValue: string[] = [];
     @query('.select-grid') listcontainer: HTMLElement | undefined
     @query('input[type="search"]') inpSearch: HTMLInputElement | undefined
@@ -110,35 +111,41 @@ export class AimSelectWidget100554 extends CollabLitElement {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         const files = this.getFilesNames();
+
+        this.style.display = 'block';
+        this.style.height = this.height + 'px';
+
         return html`
         <div> 
-            <div class="select-btn">
-                <div class="select-btn-group">
-                    <div class="select-check-all">
-                        <button>
-                            <input id="select-check-all" type="checkbox" @change=${this.handleSelectAll}></input>
-                            <label for="select-check-all">${this.msg.label_select_all}</label>
-                        </button>
+            <div>
+                <div class="select-btn">
+                    <div class="select-btn-group">
+                        <div class="select-check-all">
+                            <button>
+                                <input id="select-check-all" type="checkbox" @change=${this.handleSelectAll}></input>
+                                <label for="select-check-all">${this.msg.label_select_all}</label>
+                            </button>
+                        </div>
+                        <div class="select-clear-all">
+                            <button @click=${this.handleClearAll}>
+                                <div>${collab_ban}</div>
+                                <span>${this.msg.clear_all}</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="select-clear-all">
-                        <button @click=${this.handleClearAll}>
-                            <div>${collab_ban}</div>
-                            <span>${this.msg.clear_all}</span>
-                        </button>
+                    <div class="select-btn-actions">
+                        <button @click=${this.handleConfirm}>${this.msg.btn_confirm}</button>
+                        <button  @click=${this.handleCancel}>${this.msg.btn_cancel}</button>
                     </div>
                 </div>
-                <div class="select-btn-actions">
-                    <button @click=${this.handleConfirm}>${this.msg.btn_confirm}</button>
-                    <button  @click=${this.handleCancel}>${this.msg.btn_cancel}</button>
+                <div class="select-search">
+                    <input type="search"> </input>
+                    <button @click=${this.handleSearch}>${this.msg.btn_search}</button>
                 </div>
-            </div>
-            <div class="select-search">
-                <input type="search"> </input>
-                <button @click=${this.handleSearch}>${this.msg.btn_search}</button>
             </div>
             <hr>
 
-            <div class="select-grid">
+            <div class="select-grid" style="height:calc(${this.height + 'px'} - 140px);">
                 ${files.map((filename) => {
             return html`
                     <div class="select-grid-item">

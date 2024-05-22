@@ -25,6 +25,7 @@ const message_pt = {
     "label_checkbox": "Somente criar action se não existir a linguagem selecionada.",
     "message_error_1": "Por favor, selecione um widget para continuar",
     "message_error_2": "Por favor, selecione uma linguagem para continuar",
+    "info": "Configurações"
 }
 
 const message_en = {
@@ -40,7 +41,7 @@ const message_en = {
     "label_checkbox": "Only create the action if the selected language does not exist.",
     "message_error_1": "Please select a widget first!",
     "message_error_2": "Please select a language first!",
-
+    "info": "Config"
 }
 
 type MessageType = typeof message_en;
@@ -62,10 +63,10 @@ export class AimActionAddLanguage extends AimActionBase {
 
     @property({ type: String }) currentScenario: IScenaries = 'main';
     @property({ type: Number }) level: number = 0;
+    @property({ type: Number }) height: number = 0;
     @property({ type: Array }) widgets: string[] = [];
     @property({ type: Array }) languages: ICollabLanguage[] = [];
     @property({ type: Boolean }) onlyLanguageDontConfigured: boolean = false;
-
 
     private msg: MessageType = messages['en'];
 
@@ -135,7 +136,7 @@ export class AimActionAddLanguage extends AimActionBase {
         }
 
         if (this.widgets.length === 0) {
-            window.collabMessages.add(this.msg.message_error_1, 'error');
+            window.collabMessages.add(this.msg.message_error_1, 'error', { autoClose: true, timeToClose: 3000 });
             return;
         }
 
@@ -182,6 +183,8 @@ export class AimActionAddLanguage extends AimActionBase {
 
         if (!this.info) throw new Error('Invalid Service Info');
         if (![2, 5].includes(this.level)) throw new Error('Invalid level');
+        this.style.height = this.height + 'px';
+        this.style.display = 'block';
 
         return html`
                 ${this.currentScenario === 'main' ? html`
@@ -192,20 +195,24 @@ export class AimActionAddLanguage extends AimActionBase {
                         <label for="check-config">${this.msg.label_checkbox}</label>
                     </div>
                     <div>
-                        <div style=${this.level === 2 ? 'display:none;' : 'display:block;'}>
-                            <span>${this.msg.file} ${this.widgets.length === 1 ? this.widgets[0] : this.widgets.length + ' ' + this.msg.filesSelected}</span>
-                            <a href="#" @click=${(e: MouseEvent) => this.changeScenario(e, 'selectWidget')}> ${this.msg.anchorSelectWidget} </a>
-                        </div>
-                        <div>
-                            <span>${this.msg.language} ${this.languages.length === 1 ? this.languages[0].name + '(' + this.languages[0].code + ')' : this.languages.length + ' ' + this.msg.languagesSelected}</span>
-                            <a href="#" @click=${(e: MouseEvent) => this.changeScenario(e, 'selectLanguage')} > ${this.msg.anchorSelectLanguage} </a>
-                        </div>
+                        <fieldset>
+                            <legend>${this.msg.info}</legend>
+                            <div style=${this.level === 2 ? 'display:none;' : 'display:block;'}>
+                                <span>${this.msg.file} ${this.widgets.length === 1 ? this.widgets[0] : this.widgets.length + ' ' + this.msg.filesSelected}</span>
+                                <a href="#" @click=${(e: MouseEvent) => this.changeScenario(e, 'selectWidget')}> ${this.msg.anchorSelectWidget} </a>
+                            </div>
+                            <div>
+                                <span>${this.msg.language} ${this.languages.length === 1 ? this.languages[0].name + '(' + this.languages[0].code + ')' : this.languages.length + ' ' + this.msg.languagesSelected}</span>
+                                <a href="#" @click=${(e: MouseEvent) => this.changeScenario(e, 'selectLanguage')} > ${this.msg.anchorSelectLanguage} </a>
+                            </div>
+                        </fieldset>
                     </div>
                 `: ''}
 
                 ${this.currentScenario === 'selectLanguage' ? html`
                     <div>
                         <aim-select-language-100554
+                            height=${this.height}
                             .defaultValue=${this.languages}
                             @select-language-confirm=${this.handleSelectLanguageConfirm} 
                             @select-language-cancel=${this.handleCancel2}>
@@ -216,16 +223,19 @@ export class AimActionAddLanguage extends AimActionBase {
 
                 ${this.currentScenario === 'selectWidget' ? html`
                     <aim-select-widget-100554
+                        height=${this.height}
                         .defaultValue=${this.widgets}
                         @select-widget-confirm=${this.handleSelectWidgetConfirm} 
                         @select-widget-cancel=${this.handleCancel2}>
                     </aim-select-widget-100554>
                 `: ''}
-                
-                <div class="buttonGroup">
-                    <button @click="${this.handleCancel}">${this.msg.btn_cancel}</button>
-                    <button @click="${this.handleAdd}">${this.msg.btn_confirm}</button>
-                </div>
+
+                ${this.currentScenario === 'main' ? html`    
+                    <div class="buttonGroup" style="margin-top:1rem;">
+                        <button @click="${this.handleCancel}">${this.msg.btn_cancel}</button>
+                        <button @click="${this.handleAdd}">${this.msg.btn_confirm}</button>
+                    </div>
+                `: ''}
     `;
     }
 
@@ -241,18 +251,19 @@ ${source}
 
     getPromptHTML(source: string, tags: string[], attrs: string[], languages: ICollabLanguage[]) {
         const langs = languages.map((lang) => `${lang.name}(${lang.code})`);
-        const prompt = `Please modify the HTML below to add the ${langs.join(';')} language to properties where changes are permitted. 
+        const prompt = `Please modify the HTML below in the tags:  (${tags.join(';')}), to add the languages: ${langs.join(';')} to only properties where changes are permitted: (${attrs.join(';')})
 
-The properties that must be modified are :  ${attrs.join(',')}
-Elements that must be modified: ${tags.join(',')}
+Instructions:
+*Do not remove or modify any existing attributes in any html tags, only add news.
+*Add only attribute variations to attributes that exist in the tag.
+*If any attribute does not contain the language, it means that it is the default, and should not be modified.
+*If in any element you do not find any language already added. Follow the pattern language_attribute = "xxx"
 
-If a property is not specified, it defaults to the original language.
-
-For example, label-pt="xxx" label="xxx".
 Do not return explanations.
 Return a single block  \`\`\`html 
 
 Here is the HTML code: 
+
 
 ${source}
  `;
@@ -432,7 +443,7 @@ ${source}
             _tempResult: result,
             nextStep: this.endTasks.name
         });
-        
+
     }
 
     endTasks(taskFinishResult: ITaskFinish): void {
