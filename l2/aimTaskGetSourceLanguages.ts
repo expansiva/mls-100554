@@ -66,11 +66,13 @@ export class AimTaskGetSourceLanguages extends AimTaskBase {
                 return infoFile;
             }
 
-            infoFile.html = valueHTML;
             const rc = this.prepareHTMLInfo(valueHTML);
             if (rc.components.length === 0) infoFile.checkHtml = false;
             infoFile.htmlTags = rc.components;
             infoFile.attributesHTML = rc.attrs;
+            const preparedHtml = this.parseHtmlString(valueHTML, infoFile.htmlTags, infoFile.attributesHTML, infoFile.languages);
+            infoFile.html = preparedHtml;
+
         }
 
         return infoFile;
@@ -133,8 +135,59 @@ export class AimTaskGetSourceLanguages extends AimTaskBase {
         traverseElement(tempElement);
         return data;
     }
-}
 
+    private parseHtmlString(htmlString: string, tagsToProcess: string[], propsToProcess: string[], languages: ICollabLanguage[]): string {
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlString, 'text/html');
+        const elements = doc.body.children;
+
+        function containsAnyAttributes(element: Element, attrs: string[]): boolean {
+            for (const attr of attrs) {
+                if (element.hasAttribute(attr)) return true;
+            }
+            return false;
+        }
+
+        function addAttributesForEachLanguage(element: Element, attrs: string[], languages: ICollabLanguage[]) {
+            for (const attr of attrs) {
+                if (element.hasAttribute(attr)) {
+                    for (const lang of languages) {
+                        const attrWithLanguage = `${attr}-${lang.code}`;
+                        const elementAlreadyHasAttr = element.hasAttribute(attrWithLanguage);
+                        if (!elementAlreadyHasAttr) element.setAttribute(attrWithLanguage, '');
+                    }
+                }
+            }
+        }
+
+        function traverse(element: Element) {
+            const tagName = element.tagName.toLowerCase();
+            const elementContainsAnyAttributes = containsAnyAttributes(element, propsToProcess);
+            const needProcessTag = tagsToProcess.includes(tagName);
+            if (needProcessTag && elementContainsAnyAttributes) {
+                addAttributesForEachLanguage(element, propsToProcess, languages);
+            }
+
+            if (element.children.length > 0) {
+                for (let i = 0; i < element.children.length; i++) {
+                    const child = element.children[i] as Element;
+                    traverse(child);
+                }
+            }
+        }
+
+        function decodeHTMLEntities(str: string) {
+            return str.replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+        }
+
+        for (let i = 0; i < elements.length; i++) {
+            traverse(elements[i] as Element);
+        }
+        return doc.body.innerHTML;
+    }
+
+}
 
 interface ComponentData {
     components: string[];

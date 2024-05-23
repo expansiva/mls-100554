@@ -22,10 +22,10 @@ const message_pt = {
     "anchorSelectLanguage": "selecionar linguagens...",
     "file": "Arquivo:",
     "language": "Linguagem:",
-    "label_checkbox": "Somente criar action se n„o existir a linguagem selecionada.",
+    "label_checkbox": "Somente criar action se n√£o existir a linguagem selecionada.",
     "message_error_1": "Por favor, selecione um widget para continuar",
     "message_error_2": "Por favor, selecione uma linguagem para continuar",
-    "info": "ConfiguraÁıes"
+    "info": "Configura√ß√µes"
 }
 
 const message_en = {
@@ -242,14 +242,14 @@ export class AimActionAddLanguage extends AimActionBase {
     getPromptTs(source: string, languages: ICollabLanguage[]) {
 
         const langs = languages.map((lang) => `${lang.name}(${lang.code})`);
-        const prompt = `adicionar as linguagens: ${langs.join(';')}  no cÛdigo abaixo. Manter as linguagens existentes. N„o retornar explicaÁıes. Retornar um ˙nico bloco \`\`\`typescript
+        const prompt = `adicionar as linguagens: ${langs.join(';')}  no c√≥digo abaixo. Manter as linguagens existentes. N√£o retornar explica√ß√µes. Retornar um √∫nico bloco \`\`\`typescript
 
 ${source}
  `;
         return prompt;
     }
 
-    getPromptHTML(source: string, tags: string[], attrs: string[], languages: ICollabLanguage[]) {
+    getPromptHTML2(source: string, tags: string[], attrs: string[], languages: ICollabLanguage[]) {
         const langs = languages.map((lang) => `${lang.name}(${lang.code})`);
         const prompt = `Please modify the HTML below in the tags:  (${tags.join(';')}), to add the languages: ${langs.join(';')} to only properties where changes are permitted: (${attrs.join(';')})
 
@@ -264,6 +264,22 @@ Return a single block  \`\`\`html
 
 Here is the HTML code: 
 
+
+${source}
+ `;
+        return prompt;
+    }
+
+    getPromptHTML(source: string, tags: string[], attrs: string[], languages: ICollabLanguage[]) {
+        const langs = languages.map((lang) => `${lang.name}(${lang.code})`);
+        const prompt = `Complete todos os atributos vazios com os valores correspondente nas linguages : ${langs.join(';')}.
+
+Por favor, n√£o adicione novos atributos nem modifique atributos que j√° possuem valores. Apenas preencha os atributos que est√£o explicitamente vazios.
+
+N√£o retornar explica√ß√µes.
+Retorne somente o c√≥digo html em um bloco   \`\`\`html 
+
+Aqui esta o codigo HTML: 
 
 ${source}
  `;

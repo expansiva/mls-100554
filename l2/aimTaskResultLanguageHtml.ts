@@ -1,11 +1,20 @@
 /// <mls shortName="aimTaskResultLanguageHtml" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-
-import { customElement } from 'lit/decorators.js';
+import { html } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { ITaskFileInfo } from "./_100554_aimAddLanguageBase";
+import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
 
 @customElement('aim-task-result-language-html-100554')
 export class AimTaskResultLanguageTypescript extends AimTaskBase {
+
+    constructor() {
+        super();
+        initCollabShowCodeDiff100554();
+    }
+
+    @query('collab-show-code-diff-100554')
+    codeDiff: CollabShowCodeDiff | undefined;
 
     public onInitializing(): void { // from abstract
         this.changeFile(this.taskRoot);
@@ -35,7 +44,10 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
         }
 
         const html = this.extractHtml(result);
-        const model = (mfile as any).modelHTML;
+
+        const model:monaco.editor.ITextModel = (mfile as any).modelHTML;
+        this.original = model.getValue();
+
         const startLineNumber = 1;
         const startColumn = 1;
         const endLineNumber = model.getLineCount();
@@ -68,6 +80,50 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
         }
 
         return ret;
+    }
+
+
+    private result: string = '';
+    private original: string = '';
+
+    private alreadyInit: boolean = false;
+    handleClick(taskRoot: cbe.ITaskRoot) {
+        this.setValues(taskRoot);
+        if (this.alreadyInit) return;
+        this.codeDiff?.init();
+        this.alreadyInit = true;
+    }
+
+    private async setValues(taskRoot: cbe.ITaskRoot) {
+
+        if (!taskRoot.args) return;
+        const args: ITaskFileInfo = JSON.parse(taskRoot.args);
+
+        if (!this.codeDiff) return;
+        this.codeDiff.actualTextResult = this.result.trim();
+        this.codeDiff.actualTextDiffModified = this.result.trim();
+        this.codeDiff.actualTextDiffOriginal = args.html;
+    }
+
+    renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
+
+        const body = child._tempResult || '';
+        const h = this.extractHtml(body);
+        this.result = h;
+
+        return html`
+        <details @click=${()=> this.handleClick(taskRoot)}>
+            <summary>Result</summary>
+            <div>
+                <div style='margin: 10px;'>
+                    <collab-show-code-diff-100554
+                        language="html"
+                        withdiff  
+                    ></collab-show-code-diff-100554>
+                </div> 
+            </div>
+        </details>
+        `;
     }
 
 
