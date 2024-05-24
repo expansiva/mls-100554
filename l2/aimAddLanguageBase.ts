@@ -18,6 +18,7 @@ export interface ITaskFileInfo {
     html: string,
     attributesHTML: string[],
     htmlTags: string[],
+    attributesHTMLWithLanguages:string[],
     languages: ICollabLanguage[],
     onlyLanguageDontConfigured: boolean
 }

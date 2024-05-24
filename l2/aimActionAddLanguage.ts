@@ -270,10 +270,10 @@ ${source}
         return prompt;
     }
 
-    getPromptHTML(source: string, tags: string[], attrs: string[], languages: ICollabLanguage[]) {
+    getPromptHTML(source: string, attributesHTMLWithLanguages: string[], languages: ICollabLanguage[]) {
         const langs = languages.map((lang) => `${lang.name}(${lang.code})`);
-        const prompt = `Complete todos os atributos vazios com os valores correspondente nas linguages : ${langs.join(';')}.
-
+        const prompt = `Complete os atributos: ${attributesHTMLWithLanguages.join(';')} que estão vazios, com os valores traduzidos de acordo com as seguintes linguagens: ${langs.join(';')}.
+        
 Por favor, não adicione novos atributos nem modifique atributos que já possuem valores. Apenas preencha os atributos que estão explicitamente vazios.
 
 Não retornar explicações.
@@ -417,7 +417,7 @@ ${source}
             widget: '_100554_aimTaskExecLLM',
             ref: child.ref + '.ts',
             agent: this.assistant,
-            prompt: this.getPromptHTML(args.html, args.htmlTags, args.attributesHTML, args.languages),
+            prompt: this.getPromptHTML(args.html, args.attributesHTMLWithLanguages, args.languages),
             trace: [],
             nextStep: this.prepareTaskResultHTML.name // danger, loop
         });

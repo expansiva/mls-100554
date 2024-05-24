@@ -42,6 +42,7 @@ export class AimTaskGetSourceLanguages extends AimTaskBase {
             html: '',
             detailsi18n: undefined,
             attributesHTML: [],
+            attributesHTMLWithLanguages: [],
             htmlTags: [],
             onlyLanguageDontConfigured: args.onlyLanguageDontConfigured
         };
@@ -71,8 +72,8 @@ export class AimTaskGetSourceLanguages extends AimTaskBase {
             infoFile.htmlTags = rc.components;
             infoFile.attributesHTML = rc.attrs;
             const preparedHtml = this.parseHtmlString(valueHTML, infoFile.htmlTags, infoFile.attributesHTML, infoFile.languages);
-            infoFile.html = preparedHtml;
-
+            infoFile.html = preparedHtml.text;
+            infoFile.attributesHTMLWithLanguages = preparedHtml.attributesHTMLWithLanguages;
         }
 
         return infoFile;
@@ -136,11 +137,12 @@ export class AimTaskGetSourceLanguages extends AimTaskBase {
         return data;
     }
 
-    private parseHtmlString(htmlString: string, tagsToProcess: string[], propsToProcess: string[], languages: ICollabLanguage[]): string {
+    private parseHtmlString(htmlString: string, tagsToProcess: string[], propsToProcess: string[], languages: ICollabLanguage[]) {
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlString, 'text/html');
         const elements = doc.body.children;
+        const attributesHTMLWithLanguages: Set<string> = new Set();
 
         function containsAnyAttributes(element: Element, attrs: string[]): boolean {
             for (const attr of attrs) {
@@ -155,7 +157,10 @@ export class AimTaskGetSourceLanguages extends AimTaskBase {
                     for (const lang of languages) {
                         const attrWithLanguage = `${attr}-${lang.code}`;
                         const elementAlreadyHasAttr = element.hasAttribute(attrWithLanguage);
-                        if (!elementAlreadyHasAttr) element.setAttribute(attrWithLanguage, '');
+                        if (!elementAlreadyHasAttr) {
+                            element.setAttribute(attrWithLanguage, '');
+                            attributesHTMLWithLanguages.add(attrWithLanguage);
+                        }
                     }
                 }
             }
@@ -184,7 +189,7 @@ export class AimTaskGetSourceLanguages extends AimTaskBase {
         for (let i = 0; i < elements.length; i++) {
             traverse(elements[i] as Element);
         }
-        return doc.body.innerHTML;
+        return { text: doc.body.innerHTML, attributesHTMLWithLanguages: Array.from(attributesHTMLWithLanguages) };
     }
 
 }
