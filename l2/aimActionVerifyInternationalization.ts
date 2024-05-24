@@ -11,7 +11,7 @@ const myName = '_100554_aimActionVerifyInternationalization';
 
 /// **collab_i18n_start**
 const message_pt = {
-    "action_title": "verificar textos para internacionalização",
+    "action_title": "verificar textos para internacionalizaÃ§Ã£o",
     "btn_cancel": "Cancelar",
     "btn_confirm": "Confirmar",
 }
@@ -134,7 +134,7 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     }
 
     getPrompt(source: string) {
-        const prompt = `Identify all contextualized interface presentation text in the following TypeScript code that should be prepared for internationalization(i18n). Do not return explanations, just return a 'table' with the columns: text
+        const prompt = `Identify the texts that need to be prepared for internationalization (i18n). Do not provide explanations, only return a 'table' with the columns: text.
         
 ${source}
  `;

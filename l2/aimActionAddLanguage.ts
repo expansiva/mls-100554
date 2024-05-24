@@ -249,27 +249,6 @@ ${source}
         return prompt;
     }
 
-    getPromptHTML2(source: string, tags: string[], attrs: string[], languages: ICollabLanguage[]) {
-        const langs = languages.map((lang) => `${lang.name}(${lang.code})`);
-        const prompt = `Please modify the HTML below in the tags:  (${tags.join(';')}), to add the languages: ${langs.join(';')} to only properties where changes are permitted: (${attrs.join(';')})
-
-Instructions:
-*Do not remove or modify any existing attributes in any html tags, only add news.
-*Add only attribute variations to attributes that exist in the tag.
-*If any attribute does not contain the language, it means that it is the default, and should not be modified.
-*If in any element you do not find any language already added. Follow the pattern language_attribute = "xxx"
-
-Do not return explanations.
-Return a single block  \`\`\`html 
-
-Here is the HTML code: 
-
-
-${source}
- `;
-        return prompt;
-    }
-
     getPromptHTML(source: string, attributesHTMLWithLanguages: string[], languages: ICollabLanguage[]) {
         const langs = languages.map((lang) => `${lang.name}(${lang.code})`);
         const prompt = `Complete os atributos: ${attributesHTMLWithLanguages.join(';')} que estão vazios, com os valores traduzidos de acordo com as seguintes linguagens: ${langs.join(';')}.
