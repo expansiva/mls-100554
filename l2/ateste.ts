@@ -8,7 +8,7 @@ const message_ru = { installPlugin: 'Установить плагин', createN
 
 @customElement('ateste-100554')
 export class SimpleGreeting extends LitElement {
-    static styles = css`p { color: blue }`;
+    static styles = css`p { color: green }`;
 
     @property()
     name: string = new Date(Date.now()).toString();
