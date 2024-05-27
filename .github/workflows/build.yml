@@ -3,10 +3,10 @@ name: Build TypeScript
 on:
   push:
     branches:
-      - master  # ou a branch que você deseja monitorar
+      - main  # ou a branch que você deseja monitorar
   pull_request:
     branches:
-      - master  # ou a branch que você deseja monitorar
+      - main  # ou a branch que você deseja monitorar
 
 jobs:
   build:
