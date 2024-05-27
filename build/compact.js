@@ -6,37 +6,6 @@ const projectRoot = path.resolve(__dirname, '..');
 const sourceDir = path.join(projectRoot, 'preBuild');
 const outputZip = path.join(projectRoot, 'dist.zip');
 
-/*async function deleteAllFilesInDirectory(directoryPath) {
-    try {
-        const files = await fs.promises.readdir(directoryPath);
-
-        for (const file of files) {
-            const filePath = path.join(directoryPath, file);
-            const stat = await fs.promises.stat(filePath);
-
-            if (stat.isFile()) {
-                await fs.promises.unlink(filePath);
-                console.log(`Deleted file: ${filePath}`);
-            } else if (stat.isDirectory()) {
-                // Recursively delete files in subdirectories (optional)
-                await deleteAllFilesInDirectory(filePath);
-                await fs.rmdir(filePath, (err) => {
-                    if (err) {
-                        console.error(`Error removing directory: ${err}`);
-                    } else {
-                        console.log(`Directory removed: ${filePath}`);
-                    }
-                });
-            }
-        }
-
-        console.log(`All files in directory ${directoryPath} have been deleted.`);
-    } catch (err) {
-        console.error(`Error deleting files in directory ${directoryPath}:`, err);
-    }
-}*/
-
-
 async function zipDirectory(source, out) {
     const zip = new AdmZip();
 
@@ -68,4 +37,23 @@ async function zipDirectory(source, out) {
     
 }
 
-zipDirectory(sourceDir, outputZip);
+// Função para garantir que o diretório de destino existe
+function ensureDirectoryExists(dir) {
+    return new Promise((resolve, reject) => {
+      fs.mkdir(dir, { recursive: true }, (err) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+  }
+
+async function exec(sourceDir, outputZip){
+
+    const destinationFilePath = path.join(projectRoot, 'dist');
+    await ensureDirectoryExists(destinationFilePath);
+    await zipDirectory(sourceDir, outputZip);
+}
+
+exec(sourceDir, outputZip);
