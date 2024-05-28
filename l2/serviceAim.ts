@@ -185,17 +185,24 @@ export class ServiceAim100554 extends ServiceBase {
     }
 
 
+    verifyFileExist(widget: string) {
+        mls.actual[0].setFullName(widget)
+        const actionProject = mls.actual[0].project;
+        const actionWidget = mls.actual[0].path;
+        if (!actionWidget || !actionProject) return false;
+        const keyToFile = mls.stor.getKeyToFiles(actionProject, 2, actionWidget, '', '.ts');
+        const file = mls.stor.files[keyToFile];
+        if (!file) return false;
+        return true;
+    }
+
+
     renderAll() {
 
         const renderTask = (taskRoot: cbe.ITaskRoot, index: number) => {
             const actionName = convertFileNameToTag(taskRoot.widget);
-            mls.actual[0].setFullName(taskRoot.widget)
-            const actionProject = mls.actual[0].project;
-            const actionWidget = mls.actual[0].path;
-            if (!actionWidget || !actionProject) return html``;
-            const keyToFile = mls.stor.getKeyToFiles(actionProject, 2, actionWidget, '', '.ts');
-            const file = mls.stor.files[keyToFile];
-            if (!file) return html``;
+            const existFile = this.verifyFileExist(taskRoot.widget);
+            if (!existFile) return;
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}" />`;
             return html`${unsafeHTML(sHtml)}`;
         }
@@ -217,13 +224,15 @@ export class ServiceAim100554 extends ServiceBase {
     renderUser() {
 
         const userName = localStorage.getItem('loginUser');
-        function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
+        const renderTask = (taskRoot: cbe.ITaskRoot, index: number) => {
             if (taskRoot.userName !== userName) return;
-
+            const existFile = this.verifyFileExist(taskRoot.widget);
+            if (!existFile) return;
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
             return html`${unsafeHTML(sHtml)}`;
         }
+
         const orderned = this.sortKey(tasks);
         return html`
         <h4 class='title'>${this.myMessage.user}: ${userName} </h4>
@@ -245,9 +254,11 @@ export class ServiceAim100554 extends ServiceBase {
             if (op && op.getActualRef) refOpr = op.getActualRef();
         }
 
-        function renderTask(taskRoot: cbe.ITaskRoot, index: number) {
+        const renderTask = (taskRoot: cbe.ITaskRoot, index: number) => {
             let hasRef = taskRoot.children.filter((c) => c.ref === refOpr);
             if (!hasRef || hasRef.length <= 0) return;
+            const existFile = this.verifyFileExist(taskRoot.widget);
+            if (!existFile) return;
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
             return html`${unsafeHTML(sHtml)}`;
