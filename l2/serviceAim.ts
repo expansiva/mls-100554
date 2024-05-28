@@ -11,14 +11,14 @@ import { findActions, ResponseFindActions } from './_100554_aimActionBase';
 const message_pt = {
     loading: 'Carregando...',
     selectadd: 'por favor selecione abaixo para adicionar',
-    allTasksLast: 'Todas as tarefas, últimas',
-    user: 'Usuário',
+    allTasksLast: 'Todas as tarefas, Ãºltimas',
+    user: 'UsuÃ¡rio',
     all: 'Todos',
     ref: 'Ref',
     add: 'Adicionar',
-    notFoundReference: 'Referência não encontrada',
-    tasksByReference: 'Tarefas por referência',
-    noActionsToAdd: 'Nenhuma ação para adicionar',
+    notFoundReference: 'ReferÃªncia nÃ£o encontrada',
+    tasksByReference: 'Tarefas por referÃªncia',
+    noActionsToAdd: 'Nenhuma aÃ§Ã£o para adicionar',
     selectColumnsYouWant: 'Selecione as colunas que deseja visualizar',
     save: 'Salvar',
     cancel: 'Cancelar'
@@ -98,7 +98,7 @@ export class ServiceAim100554 extends ServiceBase {
         tooltip: 'AI',
         visible: true,
         widget: '_100554_serviceAim',
-        level: [2, 3, 5]
+        level: [0, 2, 3, 5]
     }
 
     get invertedPosition() { return this.position === 'left' ? 'right' : 'left' };
@@ -189,6 +189,13 @@ export class ServiceAim100554 extends ServiceBase {
 
         const renderTask = (taskRoot: cbe.ITaskRoot, index: number) => {
             const actionName = convertFileNameToTag(taskRoot.widget);
+            mls.actual[0].setFullName(taskRoot.widget)
+            const actionProject = mls.actual[0].project;
+            const actionWidget = mls.actual[0].path;
+            if (!actionWidget || !actionProject) return html``;
+            const keyToFile = mls.stor.getKeyToFiles(actionProject, 2, actionWidget, '', '.ts');
+            const file = mls.stor.files[keyToFile];
+            if (!file) return html``;
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}" />`;
             return html`${unsafeHTML(sHtml)}`;
         }
@@ -428,15 +435,15 @@ export class ServiceAim100554 extends ServiceBase {
                 console.error('widget not exists or invalid:' + widget);
                 return;
             }
-            
+
             const tagName = convertFileNameToTag(widget);
             const newTabIndex = ' tabIndex="-1" ';
-                
+
             const msizeH = this.msize.split(',')[1];
             const height = ` height= "${Number.parseFloat(msizeH) - 95}"`;
             const modeInit: cbe.IMode = "add";
             const newMode = ' mode="' + modeInit + '"';
-            
+
             render(html`${unsafeHTML('<' + tagName + newTabIndex + newMode + height + '/> ')}`, container);
             this.useContainerAdd = false;
         } catch (error) {

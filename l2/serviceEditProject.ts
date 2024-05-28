@@ -242,36 +242,3 @@ export class ServiceEditProject100554 extends ServiceBase {
         `
     }
 }
-
-
-
-const FILEPROJECTCONFIG = 'project';
-
-async function getProjectConf(projectID: number): Promise<mls.l5.ProjectConfig> {
-    if (!projectID) throw new Error('Invalid project');
-    const keyToFile = mls.stor.getKeyToFiles(projectID, 5, FILEPROJECTCONFIG, '', '.json');
-    const file = mls.stor.files[keyToFile];
-    if (!file) throw new Error('No file project config');
-    const src: string | Blob | null | undefined = await file.getContent();
-    if (src instanceof Blob) throw new Error('config file must be string');
-    if (!src) throw new Error('Invalid value of config');
-
-    try {
-        const config = JSON.parse(src);
-        return config;
-    } catch (err: any) {
-        throw new Error(err);
-    }
-}
-
-async function updateProjectConf(projectID: number, config: mls.l5.ProjectConfig): Promise<void> {
-    if (!projectID) throw new Error('Invalid project');
-    const keyToFile = mls.stor.getKeyToFiles(projectID, 5, FILEPROJECTCONFIG, '', '.json');
-    const file = mls.stor.files[keyToFile];
-    if (!file) throw new Error('No file project config');
-
-    await mls.stor.localStor.setContent(file, {
-        contentType: 'string',
-        content: JSON.stringify(config, null, 2)
-    });
-}
