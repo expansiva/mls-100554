@@ -335,7 +335,11 @@ export class ServiceAim100554 extends ServiceBase {
             });
             const arrayWidgets: string[] = Array.from(widgetsDistincts);
             for await (let widget of arrayWidgets) {
-                await this.loadComponentModule(widget);
+                try {
+                    await this.loadComponentModule(widget);
+                } catch (e) {
+                    console.log('action don exists: ' + widget);
+                }
             }
 
             this.isloading = false;
