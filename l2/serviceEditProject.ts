@@ -4,44 +4,16 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
-interface Variation {
-    type: string;
-    enabled: boolean;
-    subdomain: string;
-    designSystem: string;
-    variation: number;
-}
-
-interface Language {
-    language: string;
-    path: string;
-    variations: Variation[];
-}
-
-interface DesignSystem {
-    dsIndex: string;
-    dsName: string;
-    widgetIOName: string;
-}
-
-interface ProjectConfig {
-    name: string;
-    projectDriver?: string;
-    projectURL?: string;
-    designSystems: DesignSystem[];
-    languages: Language[];
-}
-
 declare global {
     interface Window {
-        project_config: ProjectConfig
+        project_config: mls.l5.ProjectConfig
     }
 }
 
 /// **collab_i18n_start**
 const message_pt = {
     loading: 'Carregando...',
-    menu_title: 'Configuração do projeto'
+    menu_title: 'ConfiguraÃ§Ã£o do projeto'
 }
 
 const message_en = {
@@ -178,7 +150,7 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     private async createConfigFile(project: number, shortName: string) {
         const det = mls.l5.getProjectDetails(project);
-        const newConfig: ProjectConfig = {
+        const newConfig: mls.l5.ProjectConfig = {
             name: det.name,
             designSystems: [],
             languages: []
@@ -269,4 +241,37 @@ export class ServiceEditProject100554 extends ServiceBase {
             <mls-editor-100529 ismls2="true"></mls-editor-100529>
         `
     }
+}
+
+
+
+const FILEPROJECTCONFIG = 'project';
+
+async function getProjectConf(projectID: number): Promise<mls.l5.ProjectConfig> {
+    if (!projectID) throw new Error('Invalid project');
+    const keyToFile = mls.stor.getKeyToFiles(projectID, 5, FILEPROJECTCONFIG, '', '.json');
+    const file = mls.stor.files[keyToFile];
+    if (!file) throw new Error('No file project config');
+    const src: string | Blob | null | undefined = await file.getContent();
+    if (src instanceof Blob) throw new Error('config file must be string');
+    if (!src) throw new Error('Invalid value of config');
+
+    try {
+        const config = JSON.parse(src);
+        return config;
+    } catch (err: any) {
+        throw new Error(err);
+    }
+}
+
+async function updateProjectConf(projectID: number, config: mls.l5.ProjectConfig): Promise<void> {
+    if (!projectID) throw new Error('Invalid project');
+    const keyToFile = mls.stor.getKeyToFiles(projectID, 5, FILEPROJECTCONFIG, '', '.json');
+    const file = mls.stor.files[keyToFile];
+    if (!file) throw new Error('No file project config');
+
+    await mls.stor.localStor.setContent(file, {
+        contentType: 'string',
+        content: JSON.stringify(config, null, 2)
+    });
 }
