@@ -87,7 +87,7 @@ export class CollabShowCodeSnippet100554 extends CollabLitElement {
         elapsedTime += interval;
         setTimeout(checkVariable, interval);
       } else {
-        console.error(`Error on load highlight.js. please tyy again`);
+        console.error(`Error on load highlight.js. please try again`);
       }
     };
     checkVariable();
@@ -100,9 +100,16 @@ export class CollabShowCodeSnippet100554 extends CollabLitElement {
     this.codeBlock.innerHTML = '';
     this.codeBlock.removeAttribute('data-highlighted');
     this.codeBlock.classList.add('language-' + this.language);
-    const res = (window as any).hljs.highlight(this.text, { language: this.language });
-    (window as any).hljs.highlightElement(this.codeBlock, { language: this.language });
-    this.codeBlock.innerHTML = res.value;
+    const val = this.innerHTML;
+    this.text = val;
+    const that = this;
+    this.waitForLoadIfNeeded(() => {
+      const res = (window as any).hljs.highlight(val, { language: that.language });
+      (window as any).hljs.highlightElement(that.codeBlock, { language: that.language });
+      if (!that.codeBlock) return;
+      that.codeBlock.innerHTML = res.value;
+    });
+
   }
 
   private onCopyClick() {
@@ -123,10 +130,15 @@ export class CollabShowCodeSnippet100554 extends CollabLitElement {
     }
   }
 
+  firstUpdated() {
+    this.setCode();
+  }
+
   render() {
 
     const lang = this.getMessageKey(messages);
     this.msg = messages[lang];
+
 
     return html`
        <div class="actions">

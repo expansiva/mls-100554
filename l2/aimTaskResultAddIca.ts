@@ -10,14 +10,14 @@ import { ServiceSource100554 } from './_100554_serviceSource';
 /// **collab_i18n_start**
 const message_pt = {
     title_result: "Ver typescript resultado",
-    tryagain_title_1: "MÈtodos para implementar",
-    tryagain_title_2: "Por favor digite as mudanÁas necess·rias abaixo.",
+    tryagain_title_1: "M√©todos para implementar",
+    tryagain_title_2: "Por favor digite as mudan√ßas necess√°rias abaixo.",
     tryagain_placeholder: "Digite aqui seu prompt.",
     accept_answer: "Deseja gerar o .HTML para o componente ?",
     btn_confirmar: "Confirmar",
     btn_cancelar: "Cancelar",
     btn_yes: "Sim",
-    btn_no: "N„o",
+    btn_no: "N√£o",
 }
 
 const message_en = {
@@ -35,15 +35,15 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-us': message_en,
-    'pt-br': message_pt
+    'en': message_en,
+    'pt': message_pt
 }
 /// **collab_i18n_end**
 
 @customElement('aim-task-result-add-ica-100554')
 export class AimTaskResulAddIca extends AimTaskBase {
 
-    private msg: MessageType = messages['en-us'];
+    private msg: MessageType = messages['en'];
 
     constructor() {
         super();
