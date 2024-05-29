@@ -161,7 +161,9 @@ export class ServiceSave extends ServiceBase {
 
         }
         return html` ${this.itens
-            ? html`<sectionsaveheader> ${this.renderHeader()} </sectionsaveheader>${this.renderItens()}` : this.renderNoItens()}
+            ? html`<sectionsaveheader> ${this.renderHeader()} </sectionsaveheader>
+            ${this.renderPullRequest()}
+            ${this.renderItens()}` : this.renderNoItens()}
             
         `
     }
@@ -169,7 +171,7 @@ export class ServiceSave extends ServiceBase {
     renderPullRequest() {
         if (!this.usePullRequest) return html``;
         return html`
-            <div style="display:flex; justify-content:center; align-items:center; gap:.5rem">
+            <div style="display:flex; justify-content:center; align-items:center; gap:.5rem; margin-top:.5rem">
                 <b style="font-size:.9rem">${this.myMessage.msgPullRequest}</b>
                 <button style="color: #fff; background-color: #007bff; border-color: #007bff; font-size: .9rem;"> Pull request</button>
             </div>
@@ -188,7 +190,6 @@ export class ServiceSave extends ServiceBase {
     renderNoItens() {
         return html`
             <sectionnosave>
-                ${this.renderPullRequest()}
                 <span>${this.myMessage.noItemsToSave}</span> 
             </sectionnosave>  
         
@@ -200,7 +201,6 @@ export class ServiceSave extends ServiceBase {
         const keys = Object.keys(this.itens);
         return html`
             <sectionsave>
-                ${this.renderPullRequest()}
                 <div id="Save_menu_action" style="display:flex;">
                     <div style="width:100%;" >
                         <h4 class="mt-3">${this.myMessage.comments}:</h4>
@@ -383,6 +383,9 @@ export class ServiceSave extends ServiceBase {
     private async verifyUsePRAndCreate() {
 
         const prj = mls.actual[5].project || 0
+
+        if (prj <= 0) return
+        
         const info = await mls.l5.getProjectConf(prj);
 
         if (info.projectSaveMode !== 'pullRequest') return
@@ -398,7 +401,9 @@ export class ServiceSave extends ServiceBase {
             return;
         }
 
+        console.info('Criou branch' + prj);
         await this.createBranch(prj);
+        this.setInfoLH(user, prj);
 
     }
 
