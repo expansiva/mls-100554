@@ -9,8 +9,8 @@ const myName = '_100554_aimActionTypescriptSpell';
 
 /// **collab_i18n_start**
 const message_pt = {
-    template_title: "Ir· verificar o typescript e procurar por erros de gram·tica em ingles",
-    prompt_message: "Identifique todas as strings literais no seguinte cÛdigo TypeScript que devem ser preparadas para internacionalizaÁ„o.  N„o retornar explicaÁıes, apenas retorne uma 'tabela' com as colunas: texto, language (portugues | ingles | ...).",
+    template_title: "Ir√° verificar o typescript e procurar por erros de gram√°tica em ingles",
+    prompt_message: "Identifique todas as strings literais no seguinte c√≥digo TypeScript que devem ser preparadas para internacionaliza√ß√£o.  N√£o retornar explica√ß√µes, apenas retorne uma 'tabela' com as colunas: texto, language (portugues | ingles | ...).",
     btn_cancel: "Cancelar",
     btn_confirm: "Confirmar",
 }
@@ -34,12 +34,13 @@ export class AimActionTypescriptSpell extends AimActionBase {
 
     private msg: MessageType = messages['en'];
 
-    public getRules(): AimActionRules {
-        return {
-            levels: [2],
+    public getRules(): AimActionRules[] {
+        return [{
+            level: 2,
             tags: ["*serviceSource*"]
-        }
+        }]
     }
+
     public assistant = "gpt3_typescript";
     public title = "Spell Check";
 

@@ -355,7 +355,7 @@ export class ServiceAim100554 extends ServiceBase {
 
         }
 
-        const act = await findActions([this.level], [this.actualServiceOpName]);
+        const act = await findActions(this.level, [this.actualServiceOpName]);
         return act;
     }
 

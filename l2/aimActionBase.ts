@@ -14,7 +14,7 @@ export abstract class AimActionBase extends AimBase {
         this.addEventListener('task-finished', this.onTaskFinishedEvent);
     }
 
-    public abstract getRules(): AimActionRules;
+    public abstract getRules(): AimActionRules[];
     public abstract assistant: string;
     public abstract title: string; /** ex: "Spell Check" */
     public abstract renderAdd(): TemplateResult;
@@ -27,7 +27,7 @@ export abstract class AimActionBase extends AimBase {
     }
 
     public onTaskFinishedEvent(e: any): void {
-        
+
         if (!e.detail || (e.detail.childIndex < 0) || !e.detail.status) throw new Error('invalid task-finished event, childIndex="' + e.detail?.childIndex + '", status="' + e.detail?.status + '"');
 
         const st: string = e.detail.status;
@@ -216,12 +216,12 @@ function verifyCyclicLoop(functionName: string): void {
 
 /**
  * Rules to active this action
- * @param levels levels this Action is active, ex: [2]
+ * @param levels levels this Action is active, ex: [{level:2, tags: ["*serviceXYZ*"]}]
  * @param tags tags this Action is active, ex: "typescript"
  */
 export interface AimActionRules {
-    levels: number[];
-    tags: string[];
+    level: number,
+    tags: string[]
 }
 
 export interface ResponseFindActions {
@@ -235,7 +235,7 @@ export interface ResponseFindActions {
 /**
  * find all Actions cf rules
  */
-export const findActions = async (levelsToVerify: number[], tagsToVerify: string[]): Promise<ResponseFindActions[]> => {
+export const findActions = async (levelToVerify: number, tagsToVerify: string[]): Promise<ResponseFindActions[]> => {
     const rc: ResponseFindActions[] = [];
     const keys = Object.keys(mls.stor.files)
         .filter(key => key.endsWith('.ts') &&
@@ -258,23 +258,25 @@ export const findActions = async (levelsToVerify: number[], tagsToVerify: string
                 continue;
             }
             const i1 = new module[className]() as AimActionBase; // class instance
-            const rules: AimActionRules = i1.getRules();
-            const regexps = rules.tags.map(tag => new RegExp(tag.replace(/\*/g, '.*')));
+            const rules: AimActionRules[] = i1.getRules();
+            const ruleByLevel = rules.find((r) => r.level === levelToVerify);
+            const regexps = ruleByLevel?.tags.map(tag => new RegExp(tag.replace(/\*/g, '.*')));
             rc.push({
                 shortName: storFile.shortName,
                 project: storFile.project,
                 title: i1.title || '?',
-                levelsValid: levelsToVerify.some(level => rules.levels.includes(level)),
-                tagsValid: tagsToVerify
-                    .some(tagToVerify => regexps
-                        .some(regexp => regexp.test(tagToVerify)))
+                levelsValid: !!ruleByLevel,
+                tagsValid: regexps ? tagsToVerify
+                    .some(tagToVerify => (regexps as RegExp[])
+                        .some(regexp => regexp.test(tagToVerify))) : false
             });
+
         }
         catch (err: any) {
             console.error(`error, aim action invalid, abend: ${fnKey}: ${err?.message}`);
         }
-    }
 
+    }
     return rc;
 }
 

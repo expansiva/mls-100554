@@ -12,12 +12,12 @@ const myName = '_100554_aimActionStyleNew';
 /// **collab_i18n_start**
 const message_pt = {
     prompt_title: "Objetivo:Criar um novo CSS em LESS.",
-    prompt_system_1: "Use LESS para criar um novo estilo baseado na fonte fornecida abaixo, incorporando sugestıes do usu·rio.",
+    prompt_system_1: "Use LESS para criar um novo estilo baseado na fonte fornecida abaixo, incorporando sugest√µes do usu√°rio.",
     prompt_system_2: "Desenvolva um arquivo LESS isolado, empregando tokens conforme descrito no modelo abaixo.",
-    prompt_system_3: "Formato de SaÌda Esperado: Retorne o CSS recÈm-criado na linguagem LESS, em um ˙nico bloco sem a listagem de tokens. Coment·rios de cÛdigo devem estar em inglÍs, mas mantenha coment·rios existentes que sirvam como auxiliares de UI.",
+    prompt_system_3: "Formato de Sa√≠da Esperado: Retorne o CSS rec√©m-criado na linguagem LESS, em um √∫nico bloco sem a listagem de tokens. Coment√°rios de c√≥digo devem estar em ingl√™s, mas mantenha coment√°rios existentes que sirvam como auxiliares de UI.",
 
-    template_title: "Ir· verificar os tokens e criar um novo conjunto de tokens",
-    template_suggest: "Sugest„o:",
+    template_title: "Ir√° verificar os tokens e criar um novo conjunto de tokens",
+    template_suggest: "Sugest√£o:",
     textarea_placelholder: "Digite aqui seu prompt",
     btn_cancel: "Cancelar",
     btn_confirm: "Confirmar",
@@ -39,21 +39,21 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-us': message_en,
-    'pt-br': message_pt
+    'en': message_en,
+    'pt': message_pt
 }
 /// **collab_i18n_end**
 
 @customElement('aim-action-style-new-100554')
 export class AimActionStyleNew extends AimActionBase {
 
-    private msg: MessageType = messages['en-us'];
+    private msg: MessageType = messages['en'];
 
-    public getRules(): AimActionRules {
-        return {
-            levels: [3],
+    public getRules(): AimActionRules[] {
+        return [{
+            level: 3,
             tags: ["*serviceDsStyle*"]
-        }
+        }]
     }
 
     public assistant = "gpt3_less";
@@ -117,8 +117,8 @@ export class AimActionStyleNew extends AimActionBase {
     }
 
     private prompts = [
-        'Adicionar uma animaÁ„o de entrada',
-        'Adicionar uma personalizaÁ„o no scrollbar, deixando mais minimalista',
+        'Adicionar uma anima√ß√£o de entrada',
+        'Adicionar uma personaliza√ß√£o no scrollbar, deixando mais minimalista',
     ]
 
     renderAdd(): TemplateResult { // from abstract

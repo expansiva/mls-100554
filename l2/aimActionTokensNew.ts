@@ -10,7 +10,7 @@ const myName = '_100554_aimActionTokensNew';
 const message_pt = {
     title: 'verifica os tokens e cria um novo conjunto de tokens',
     prompt: 'Prompt',
-    suggest: "Sugest„o",
+    suggest: "Sugest√£o",
     placeholder: "Digite aqui seu prompt",
     cancel: 'Cancelar',
     confirm: 'Confirmar'
@@ -28,22 +28,23 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-us': message_en,
-    'pt-br': message_pt
+    'en': message_en,
+    'pt': message_pt
 }
 /// **collab_i18n_end**
 
 @customElement('aim-action-tokens-new-100554')
 export class AimActionTokensNew extends AimActionBase {
 
-    private msg: MessageType = messages['en-us'];
+    private msg: MessageType = messages['en'];
 
-    public getRules(): AimActionRules {
-        return {
-            levels: [3],
+    public getRules(): AimActionRules[] {
+        return [{
+            level: 3,
             tags: ["*serviceDsTokens*"]
-        }
+        }]
     }
+
     public assistant = "gpt3_typescript";
     public title = "New Tokens";
 
@@ -142,7 +143,7 @@ User:\n
 Expected Output Format:
 \n
 \n
-Retorna o novo conjunto de tokens em LESS, em um ˙nico bloco, sem coment·rios novos no cÛdigo, e manter coment·rios existentes que servem como auxiliar na UI.\n
+Retorna o novo conjunto de tokens em LESS, em um √∫nico bloco, sem coment√°rios novos no c√≥digo, e manter coment√°rios existentes que servem como auxiliar na UI.\n
 
 \n\n${source}\n`;
         return prompt;

@@ -35,11 +35,11 @@ export class AimActionUserPrompt extends AimActionBase {
 
     private msg: MessageType = messages['en'];
 
-    public getRules(): AimActionRules {
-        return {
-            levels: [5],
-            tags: ["*servicePlugins*"]
-        }
+    public getRules():AimActionRules[] {
+        return [{
+            level: 5,
+            tags: ["*"]
+        }]
     }
 
     public assistant = "gpt3_typescript";

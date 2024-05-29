@@ -25,24 +25,24 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-us': message_en,
-    'pt-br': message_pt
+    'en': message_en,
+    'pt': message_pt
 }
 /// **collab_i18n_end**
 
 @customElement('aim-action-update-lit-100554')
 export class AimActionUpdateLit extends AimActionBase {
 
-    private msg: MessageType = messages['en-us'];
+    private msg: MessageType = messages['en'];
 
     @query('textarea')
     textarea: HTMLTextAreaElement | undefined;
 
-    public getRules(): AimActionRules {
-        return {
-            levels: [2],
+    public getRules(): AimActionRules[] {
+        return [{
+            level: 2,
             tags: ["*serviceSource*"]
-        }
+        }]
     }
 
     public assistant = "gpt3_typescript";
@@ -99,10 +99,10 @@ export class AimActionUpdateLit extends AimActionBase {
     getPrompt(source: string, user: string) {
 
         const prompt = ` 
-        Objective: Usando typescript, lit 3, alterar o código abaixo seguindo as instruções.\n\n
+        Objective: Usando typescript, lit 3, alterar o cÃ³digo abaixo seguindo as instruÃ§Ãµes.\n\n
         System:\n
-        1. Manter a linha 1 (tripe slash) que é de controle\n
-        2. Fazer e manter comentários no código em ingles\n\n
+        1. Manter a linha 1 (tripe slash) que Ã© de controle\n
+        2. Fazer e manter comentÃ¡rios no cÃ³digo em ingles\n\n
         User:\n
         1. ${user}\n\n
         Expected Output Format:\n

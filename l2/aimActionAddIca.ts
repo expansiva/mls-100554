@@ -14,24 +14,24 @@ const myName = '_100554_aimActionAddIca';
 /// **collab_i18n_start**
 const message_pt = {
     prompt_ts_title_1: "Usando Typescript e Lit 3.O. Criar o render de um webcomponent, usando o source fornecido abaixo.",
-    prompt_ts_output_1: "Um component Lit com sua implementação de renderização completa, seguindo todas as especificações do usuario e utilizando as propriedades fornecidas.",
-    prompt_ts_output_2: "Não remover a primeira linha /// <mls",
-    prompt_ts_output_3: "Nao alterar definição da classe",
+    prompt_ts_output_1: "Um component Lit com sua implementaÃ§Ã£o de renderizaÃ§Ã£o completa, seguindo todas as especificaÃ§Ãµes do usuario e utilizando as propriedades fornecidas.",
+    prompt_ts_output_2: "NÃ£o remover a primeira linha /// <mls",
+    prompt_ts_output_3: "Nao alterar definiÃ§Ã£o da classe",
     prompt_ts_output_4: "Nao alterar extends da classe",
-    prompt_ts_output_5: "Não alterar imports",
+    prompt_ts_output_5: "NÃ£o alterar imports",
     prompt_ts_output_6: "Nao altere as propriedades iniciais",
-    prompt_ts_output_7: "Não implementar nenhum styles css.",
-    prompt_ts_output_8: "As funções não implementadas devem ser declaradas com um corpo vazio, e dentro da função deve adicionar um comentários // **implement_here**' e comentários sobre o que o método deve fazer. Segue exemplo:",
-    prompt_ts_output_9: "Retornar o código em um único bloco  \`\`\`typescript.",
+    prompt_ts_output_7: "NÃ£o implementar nenhum styles css.",
+    prompt_ts_output_8: "As funÃ§Ãµes nÃ£o implementadas devem ser declaradas com um corpo vazio, e dentro da funÃ§Ã£o deve adicionar um comentÃ¡rios // **implement_here**' e comentÃ¡rios sobre o que o mÃ©todo deve fazer. Segue exemplo:",
+    prompt_ts_output_9: "Retornar o cÃ³digo em um Ãºnico bloco  \`\`\`typescript.",
 
-    prompt_html_title: "Usando Typescript e Lit 3.O analisar o source do web component abaixo e gerar um html de use cases. Não é necessario declarar as tags html, body, head. Somente uma seção com o use cases.",
-    prompt_html_output: "Remover os comentários nas funções quando implementadas.",
+    prompt_html_title: "Usando Typescript e Lit 3.O analisar o source do web component abaixo e gerar um html de use cases. NÃ£o Ã© necessario declarar as tags html, body, head. Somente uma seÃ§Ã£o com o use cases.",
+    prompt_html_output: "Remover os comentÃ¡rios nas funÃ§Ãµes quando implementadas.",
 
-    prompt_fc_title_1: "Usando Typescript e Lit 3.O. Criar a função especificada pelo usuario, utilizando o source abaixo",
-    prompt_fc_output_1: "O component Lit com a implementação da função completa e alterações solicitadas, seguindo todas as especificações do usuario.",
-    prompt_fc_output_2: "Remover os comentários nas funções quando implementadas.",
+    prompt_fc_title_1: "Usando Typescript e Lit 3.O. Criar a funÃ§Ã£o especificada pelo usuario, utilizando o source abaixo",
+    prompt_fc_output_1: "O component Lit com a implementaÃ§Ã£o da funÃ§Ã£o completa e alteraÃ§Ãµes solicitadas, seguindo todas as especificaÃ§Ãµes do usuario.",
+    prompt_fc_output_2: "Remover os comentÃ¡rios nas funÃ§Ãµes quando implementadas.",
 
-    template_title: "Irá verificar o grupo selecionado e criar um novo componente Lit",
+    template_title: "IrÃ¡ verificar o grupo selecionado e criar um novo componente Lit",
     textarea_placelholder: "Entre com o prompt aqui",
     btn_cancel: "Cancelar",
     btn_confirm: "Confirmar",
@@ -67,26 +67,26 @@ const message_en = {
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
-    'en-us': message_en,
-    'pt-br': message_pt
+    'en': message_en,
+    'pt': message_pt
 }
 /// **collab_i18n_end**
 
 @customElement('aim-action-add-ica-100554')
 export class AimActionAddIca extends AimActionBase {
 
-    private msg: MessageType = messages['en-us'];
+    private msg: MessageType = messages['en'];
 
     constructor() {
         super();
         initIcaSelectGroup();
     }
 
-    public getRules(): AimActionRules {
-        return {
-            levels: [2],
+    public getRules(): AimActionRules[] {
+        return [{
+            level: 2,
             tags: ["*serviceSource*"]
-        }
+        }]
     }
 
     public assistant = "gpt3_typescript";
@@ -463,7 +463,7 @@ ${this.msg.prompt_ts_title_1}
 6. ${this.msg.prompt_ts_output_6}
 7. ${this.msg.prompt_ts_output_7}
 8. ${this.msg.prompt_ts_output_8}
-minhaFunçao(){
+minhaFunÃ§ao(){
     // **implement_here**
 }
 
@@ -519,18 +519,18 @@ ${this.msg.prompt_html_output}
     private getPromptCheckPrompt(promptUser: string) {
         const prompt = `
         ### system ### 
-Analise o prompt do usuário e retorne:
+Analise o prompt do usuÃ¡rio e retorne:
 
-- 'sim' se o prompt estiver dentro do contexto, e for suficiente para a próxima etapa.
-- 'não' se o prompt for para qualquer outra coisa que não for a geração de um web component.
-- 'forneça mais informações' se o prompt estiver dentro do contexto e precisar de mais informações importantes neste primeiro passo.
+- 'sim' se o prompt estiver dentro do contexto, e for suficiente para a prÃ³xima etapa.
+- 'nÃ£o' se o prompt for para qualquer outra coisa que nÃ£o for a geraÃ§Ã£o de um web component.
+- 'forneÃ§a mais informaÃ§Ãµes' se o prompt estiver dentro do contexto e precisar de mais informaÃ§Ãµes importantes neste primeiro passo.
 
-contexto: Todos os web components devem ser desenvolvidos utilizando TypeScript e Lit 3. Os componentes serão usados em navegadores modernos, e nesta etapa focaremos apenas no corpo principal do TypeScript, sem CSS.
+contexto: Todos os web components devem ser desenvolvidos utilizando TypeScript e Lit 3. Os componentes serÃ£o usados em navegadores modernos, e nesta etapa focaremos apenas no corpo principal do TypeScript, sem CSS.
 
-condição especial: Após retornar 'forneça mais informações', gere uma lista de 1 a 3 itens das informações necessárias para o contexto.
+condiÃ§Ã£o especial: ApÃ³s retornar 'forneÃ§a mais informaÃ§Ãµes', gere uma lista de 1 a 3 itens das informaÃ§Ãµes necessÃ¡rias para o contexto.
 
-Ao adotar esta descrição de contexto, qualquer usuário que interaja com o sistema já estará ciente de que o desenvolvimento deve ser feito usando TypeScript e Lit 3, e poderá se concentrar em especificar outros aspectos do web component que está sendo proposto. Isso simplifica a interação do usuário com o sistema e permite um foco maior nos detalhes funcionais e técnicos específicos de cada componente.
-Não retorne explicações ou comentários , somente 'sim' ou 'não' ou 'forneça mais informações' (com uma lista complementar) 
+Ao adotar esta descriÃ§Ã£o de contexto, qualquer usuÃ¡rio que interaja com o sistema jÃ¡ estarÃ¡ ciente de que o desenvolvimento deve ser feito usando TypeScript e Lit 3, e poderÃ¡ se concentrar em especificar outros aspectos do web component que estÃ¡ sendo proposto. Isso simplifica a interaÃ§Ã£o do usuÃ¡rio com o sistema e permite um foco maior nos detalhes funcionais e tÃ©cnicos especÃ­ficos de cada componente.
+NÃ£o retorne explicaÃ§Ãµes ou comentÃ¡rios , somente 'sim' ou 'nÃ£o' ou 'forneÃ§a mais informaÃ§Ãµes' (com uma lista complementar) 
 
 ### user ###
 ${promptUser}

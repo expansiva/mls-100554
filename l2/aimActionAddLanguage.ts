@@ -70,12 +70,17 @@ export class AimActionAddLanguage extends AimActionBase {
 
     private msg: MessageType = messages['en'];
 
-    public getRules(): AimActionRules {
-        return {
-            levels: [2, 5],
-            tags: ["*serviceSource*", "*servicePlugins*"]
-        }
+    public getRules(): AimActionRules[] {
+        return [{
+            level: 2,
+            tags: ["*serviceSource*"]
+        },
+        {
+            level: 5,
+            tags: ["*"]
+        }]
     }
+
     public assistant = "gpt3_typescript";
     public title = "Add Language";
 
