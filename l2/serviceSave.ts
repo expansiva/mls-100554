@@ -160,12 +160,23 @@ export class ServiceSave extends ServiceBase {
             return html`${this.error}`;
 
         }
-        return html` ${this.itens
-            ? html`<sectionsaveheader> ${this.renderHeader()} </sectionsaveheader>
-            ${this.renderPullRequest()}
-            ${this.renderItens()}` : this.renderNoItens()}
+
+        if (this.itens) {
+
+            return html`
+                <sectionsaveheader> ${this.renderHeader()} </sectionsaveheader>
+                ${this.renderPullRequest()}
+                ${this.renderItens()}
+            `;
             
-        `
+        } else {
+
+            return html`
+                ${this.renderPullRequest()} 
+                ${this.renderNoItens()}
+            `
+            
+        }
     }
 
     renderPullRequest() {
@@ -403,6 +414,7 @@ export class ServiceSave extends ServiceBase {
         if (!user) throw new Error('Not found userName');
 
         if (lH[user] && lH[user].includes(prj)) {
+            this.requestUpdate()
             return;
         }
 
