@@ -35,7 +35,7 @@ export class ServiceSave extends ServiceBase {
 
     private myMessage: MessageType = messages['en'];
 
-    @property() usePullRequest = false;
+    private usePullRequest = false;
 
     @property() itens: any = undefined;
 
@@ -390,7 +390,10 @@ export class ServiceSave extends ServiceBase {
         
         const info = await mls.l5.getProjectConf(prj);
 
-        if (info.projectSaveMode !== 'pullRequest') return
+        if (info.projectSaveMode !== 'pullRequest') {
+            this.requestUpdate()
+            return
+        }
 
         this.usePullRequest = true;
 
@@ -405,6 +408,7 @@ export class ServiceSave extends ServiceBase {
 
         await this.createBranch(prj);
         this.setInfoLH(user, prj);
+        this.requestUpdate()
 
     }
 
