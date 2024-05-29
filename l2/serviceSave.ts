@@ -35,7 +35,7 @@ export class ServiceSave extends ServiceBase {
 
     private myMessage: MessageType = messages['en'];
 
-    private usePullRequest = false;
+    @property() usePullRequest = false;
 
     @property() itens: any = undefined;
 
@@ -382,6 +382,8 @@ export class ServiceSave extends ServiceBase {
     // santiago
     private async verifyUsePRAndCreate() {
 
+        this.usePullRequest = false;
+
         const prj = mls.actual[5].project || 0
 
         if (prj <= 0) return
@@ -401,7 +403,6 @@ export class ServiceSave extends ServiceBase {
             return;
         }
 
-        console.info('Criou branch' + prj);
         await this.createBranch(prj);
         this.setInfoLH(user, prj);
 
@@ -412,10 +413,11 @@ export class ServiceSave extends ServiceBase {
         try {
 
             const driver = mls.stor.others.getDefaultDriver(prj) as any;
-            if (!driver || !driver.getBranchUserName || !driver.createNewBranch) return;
+            if (!driver || !driver.getBranchUserName || !driver.createNewBranch || !driver.verifyExistBranch) return;
 
             const uB = driver.getBranchUserName();
-            await driver.createNewBranch(prj, uB);
+            const exist = await driver.verifyExistBranch(prj, uB);
+            if(!exist) await driver.createNewBranch(prj, uB);
 
         } catch (e) {
             console.info(e);
