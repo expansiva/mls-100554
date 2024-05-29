@@ -6,11 +6,12 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
 /// **collab_i18n_start**
 const message_pt = {
-    updateChanges: 'Atualizar altera��es',
-    comments: 'Coment�rios',
+    updateChanges: 'Atualizar alterações',
+    comments: 'Comentários',
     update: 'Atualizar',
-    fileChanges: 'Altera��es de arquivos',
-    noItemsToSave: 'Nenhum item para salvar'
+    fileChanges: 'Alterações de arquivos',
+    noItemsToSave: 'Nenhum item para salvar',
+    msgPullRequest: 'Este projeto utiliza pull requests, todas as alterações serão salvas no branch do seu usuário, para criar um pull request clique no botão'
 }
 
 const message_en = {
@@ -18,7 +19,8 @@ const message_en = {
     comments: 'Comments',
     update: 'Update',
     fileChanges: 'File Changes',
-    noItemsToSave: 'No items to save'
+    noItemsToSave: 'No items to save',
+    msgPullRequest: 'This project uses pull requests, all changes will be saved in your user\'s branch, to create a pull request click the button'
 }
 
 type MessageType = typeof message_en;
@@ -32,6 +34,8 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceSave extends ServiceBase {
 
     private myMessage: MessageType = messages['en'];
+
+    private usePullRequest = false;
 
     @property() itens: any = undefined;
 
@@ -162,6 +166,16 @@ export class ServiceSave extends ServiceBase {
         `
     }
 
+    renderPullRequest() {
+        if (!this.usePullRequest) return html``;
+        return html`
+            <div style="display:flex; justify-content:center; align-items:center; gap:.5rem">
+                <b style="font-size:.9rem">${this.myMessage.msgPullRequest}</b>
+                <button style="color: #fff; background-color: #007bff; border-color: #007bff; font-size: .9rem;"> Pull request</button>
+            </div>
+        `
+    }
+
     renderHeader() {
         return html`
             <i class="fa fa-floppy-disk"></i>
@@ -185,6 +199,7 @@ export class ServiceSave extends ServiceBase {
         const keys = Object.keys(this.itens);
         return html`
             <sectionsave>
+                ${this.renderPullRequest()}
                 <div id="Save_menu_action" style="display:flex;">
                     <div style="width:100%;" >
                         <h4 class="mt-3">${this.myMessage.comments}:</h4>
@@ -351,6 +366,7 @@ export class ServiceSave extends ServiceBase {
     private async init() {
 
         this.showLoader(true);
+        await this.verifyUsePRAndCreate(); // santiago
         await this.setInfos();
         this.showLoader(false);
 
@@ -361,6 +377,68 @@ export class ServiceSave extends ServiceBase {
         this.loading = loader;
 
     }
+
+    // santiago
+    private async verifyUsePRAndCreate() {
+
+        const prj = mls.actual[5].project || 0
+        const info = await mls.l5.getProjectConf(prj);
+
+        if (info.projectSaveMode !== 'pullRequest') return
+
+        this.usePullRequest = true;
+
+        const user = localStorage.getItem('loginUser');
+        const lH = this.getInfoLH();
+
+        if (!user) throw new Error('Not found userName');
+
+        if (lH[user] && lH[user].includes(prj)) {
+            return;
+        }
+
+        await this.createBranch(prj);
+
+    }
+
+    private async createBranch(prj:number) {
+
+        try {
+
+            const driver = mls.stor.others.getDefaultDriver(prj) as any;
+            if (!driver || !driver.getBranchUserName || !driver.createNewBranch) return;
+
+            const uB = driver.getBranchUserName();
+            await driver.createNewBranch(prj, uB);
+
+        } catch (e) {
+            console.info(e);
+        }
+
+
+    }
+
+    private getInfoLH(): any {
+        const lh = localStorage.getItem('branchCreated');
+        if (!lh) return {};
+
+        return JSON.parse(lh);
+    }
+
+    private setInfoLH(key: string, project: number) {
+
+        const lh = localStorage.getItem('branchCreated');
+        let info: any = {};
+        if (lh) info = JSON.parse(lh)
+
+        if (info[key]) info[key].push(project);
+        else info[key] = [project];
+
+        localStorage.setItem('branchCreated', JSON.stringify(info));
+
+    }
+
+    // end santiago
 
     private async setInfos() {
 
@@ -602,7 +680,7 @@ export class ServiceSave extends ServiceBase {
                 file[0].file.isLocalVersionOutdated = false;
                 file[0].file.newVersionRefIfOutdated = undefined;
                 await mls.stor.localStor.setContent(file[0].file, { contentType: 'string', content: null });
-                
+
             }
 
         });
@@ -682,7 +760,7 @@ export class ServiceSave extends ServiceBase {
                     if (!fl || fl.status === 'new') return;
                     fl.status = 'deleted';
                     ar.push(fl);
-                    
+
                 }
             }
         })
@@ -697,7 +775,7 @@ export class ServiceSave extends ServiceBase {
 
             let versionBLock = 0;
             const arrSet: mls.stor.IFileInfo[] = [];
-        
+
             ar.forEach((i) => {
 
                 if (i.isLocalVersionOutdated && !['new', 'deleted'].includes(i.status)) {
