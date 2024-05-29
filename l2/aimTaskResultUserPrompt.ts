@@ -8,18 +8,14 @@ import { initCollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet
 /// **collab_i18n_start**
 const message_pt = {
     tryagain_placeholder: "Digite aqui seu prompt.",
-    btn_confirmar: "Confirmar",
-    btn_cancelar: "Cancelar",
-    btn_yes: "Sim",
-    btn_no: "Não",
+    btn_confirmar: "Enviar novo prompt",
+    btn_ok: "Finalizar",
 }
 
 const message_en = {
     tryagain_placeholder: "Type your prompt here.",
-    btn_confirmar: "Confirm",
-    btn_cancelar: "Cancel",
-    btn_yes: "Yes",
-    btn_no: "No"
+    btn_confirmar: "Send new prompt",
+    btn_ok: "Close",
 }
 
 type MessageType = typeof message_en;
@@ -94,7 +90,7 @@ export class AimTaskResulUserPrompt extends AimTaskBase {
                     </div>
                     <br>
                     <div class="buttonGroup">
-                        <button @click="${this.handleCancel}">${this.msg.btn_cancelar}</button>
+                        <button @click="${this.handleCancel}">${this.msg.btn_ok}</button>
                         <button @click="${this.handleConfirm}">${this.msg.btn_confirmar}</button>
                     </div>
                 </div> 
