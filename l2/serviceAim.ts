@@ -104,7 +104,6 @@ export class ServiceAim100554 extends ServiceBase {
     get invertedPosition() { return this.position === 'left' ? 'right' : 'left' };
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-    //static message = `[[mls_DS_messages_local_language]]`; // todo: test
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opColumns') return this.showConfigColumns();
@@ -155,7 +154,10 @@ export class ServiceAim100554 extends ServiceBase {
         if (!ev.desc) return;
         const data: IToolbarChangeEvent = JSON.parse(ev.desc);
         if (mls.istrace) console.log(`serviceAim, ${data.position}, ${this.position}`);
-        if (data.position === this.position || data.level !== this.level) return;
+        if (data.position === this.position || data.level !== this.level) {
+            this.useContainerAdd = true;
+            return;
+        }
         this.actualServiceOpLevel = data.level;
         this.actualServiceOpName = data.to;
         if (this.visible === 'true') this.requestUpdate();
