@@ -11,7 +11,12 @@ const message_pt = {
     update: 'Atualizar',
     fileChanges: 'Alterações de arquivos',
     noItemsToSave: 'Nenhum item para salvar',
-    msgPullRequest: 'Este projeto utiliza pull requests, todas as alterações serão salvas no branch do seu usuário, para criar um pull request clique no botão'
+    msgPullRequest: 'Este projeto utiliza pull requests, todas as alterações serão salvas no branch do seu usuário, para criar um pull request clique no botão',
+    createPullRequest: "Criar pull request",
+    create: 'Criar',
+    cancel: 'Cancelar',
+    title: 'Titulo',
+    errorCreatePull: 'Erro ao tentar criar pull request'
 }
 
 const message_en = {
@@ -20,7 +25,12 @@ const message_en = {
     update: 'Update',
     fileChanges: 'File Changes',
     noItemsToSave: 'No items to save',
-    msgPullRequest: 'This project uses pull requests, all changes will be saved in your user\'s branch, to create a pull request click the button'
+    msgPullRequest: 'This project uses pull requests, all changes will be saved in your user\'s branch, to create a pull request click the button',
+    createPullRequest: "Create pull request",
+    create: 'Create',
+    cancel: 'Cancel',
+    title: 'Title',
+    errorCreatePull: 'Error when trying to create pull request'
 }
 
 type MessageType = typeof message_en;
@@ -36,6 +46,8 @@ export class ServiceSave extends ServiceBase {
     private myMessage: MessageType = messages['en'];
 
     private usePullRequest = false;
+
+    private modePullRequest = false;
 
     @property() itens: any = undefined;
 
@@ -144,7 +156,7 @@ export class ServiceSave extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.init();
+        this.init(); 
     }
 
 
@@ -161,22 +173,46 @@ export class ServiceSave extends ServiceBase {
 
         }
 
-        if (this.itens) {
+        if (this.modePullRequest) {
+
+            return this.renderPullRequestMode();
+
+        } else if (this.itens) {
 
             return html`
                 <sectionsaveheader> ${this.renderHeader()} </sectionsaveheader>
                 ${this.renderPullRequest()}
                 ${this.renderItens()}
             `;
-            
+
         } else {
 
             return html`
                 ${this.renderPullRequest()} 
                 ${this.renderNoItens()}
             `
-            
+
         }
+    }
+
+    renderPullRequestMode() {
+        return html`
+            <div style="display:flex; justify-content:center; align-items:center; gap:.5rem; margin-top:.5rem">
+                <b style="font-size:.9rem">${this.myMessage.createPullRequest}</b>
+            </div>
+            <div id="blockPullRequest">
+                <div style="width:100%;" >
+                    <h4 class="mt-3">${this.myMessage.title}:</h4>
+                    <input type="text" style="width:95%;"></input>
+                    <h4 class="mt-3">${this.myMessage.comments}:</h4>
+                    <textarea class="form-control" style="width:95%;" rows="2" maxlength="50"></textarea>
+                </div>
+                <div style="width:79px; display: flex; align-items: self-end; gap:.5rem; margin-top:.5rem">
+                    <button style="color: #fff; background-color: #007bff; border-color: #007bff; font-size: .9rem;" @click="${this.onCreatePullRequest}">${this.myMessage.create}</button>
+                    <button style="color: #fff; background-color: #ff0000; border-color: #007bff; font-size: .9rem;" @click="${this.onCancelPullRequest}">${this.myMessage.cancel}</button>
+                </div>
+            </div>
+        `
     }
 
     renderPullRequest() {
@@ -184,7 +220,7 @@ export class ServiceSave extends ServiceBase {
         return html`
             <div style="display:flex; justify-content:center; align-items:center; gap:.5rem; margin-top:.5rem">
                 <b style="font-size:.9rem">${this.myMessage.msgPullRequest}</b>
-                <button style="color: #fff; background-color: #007bff; border-color: #007bff; font-size: .9rem;"> Pull request</button>
+                <button style="color: #fff; background-color: #007bff; border-color: #007bff; font-size: .9rem;" @click="${this.onGoToPullRequest}"> Pull request</button>
             </div>
         `
     }
@@ -205,7 +241,7 @@ export class ServiceSave extends ServiceBase {
             </sectionnosave>  
         
         `
-    } 
+    }
 
     renderItens() {
 
@@ -398,7 +434,7 @@ export class ServiceSave extends ServiceBase {
         const prj = mls.actual[5].project || 0
 
         if (prj <= 0) return
-        
+
         const info = await mls.l5.getProjectConf(prj);
 
         if (info.projectSaveMode !== 'pullRequest') {
@@ -424,7 +460,7 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private async createBranch(prj:number) {
+    private async createBranch(prj: number) {
 
         try {
 
@@ -433,10 +469,13 @@ export class ServiceSave extends ServiceBase {
 
             const uB = driver.getBranchUserName();
             const exist = await driver.verifyExistBranch(prj, uB);
-            if(!exist) await driver.createNewBranch(prj, uB);
+            if (!exist) await driver.createNewBranch(prj, uB);
 
-        } catch (e) {
+        } catch (e:any) {
             console.info(e);
+            this.error = e.message;
+            throw new Error(e.message);
+            
         }
 
 
@@ -723,6 +762,84 @@ export class ServiceSave extends ServiceBase {
         } catch (e: any) {
             console.info('Error save verifyVersionBlock:' + e.message);
         }
+
+    }
+
+    private async onCreatePullRequest(e: MouseEvent) {
+
+        try {
+
+            e.stopPropagation();
+            const el = e.target as HTMLButtonElement;
+            if (!el) return;
+
+            const prj = mls.actual[5].project || 0
+
+            if (prj <= 0) return
+
+            const father = el.closest('#blockPullRequest') as HTMLDivElement;
+            if (!father) return;
+
+            this.showLoader(true);
+
+            const txt = father.querySelector('textarea');
+            const tt = father.querySelector('input')
+            const dt = new Date().toISOString().substring(0, 10);
+            const u = localStorage.getItem('loginUser');
+            let msg = txt ? txt.value : '';
+            let title = tt ? tt.value : '';
+            if (!msg) msg = `Pull request created by ${u} on ${dt}`;
+            if (!title) title = `Pull request on ${dt}`;
+
+            setTimeout(async () => {
+
+                try {
+
+                    const driver = mls.stor.others.getDefaultDriver(prj) as any;
+                    if (!driver || !driver.createPullRequest) {
+                        this.modePullRequest = false;
+                        this.requestUpdate();
+                        this.showLoader(false);
+                        return;
+                    }
+                    const ret = await driver.createPullRequest(prj, title, msg);
+
+                    if (!ret) this.error = this.myMessage.errorCreatePull
+                    this.modePullRequest = false;
+                    this.requestUpdate();
+                    this.showLoader(false);
+
+                } catch (e: any) {
+                    this.error = e.message;
+                    this.showLoader(false);
+                }
+
+            }, 500);
+
+        } catch (e) {
+
+            console.info('Error onCreatePullRequest');
+
+        }
+
+
+    }
+
+    private async onGoToPullRequest(e: MouseEvent) {
+
+        this.modePullRequest = true;
+        this.requestUpdate();
+        this.showLoader(false);
+
+
+    }
+
+    private async onCancelPullRequest(e: MouseEvent) {
+
+        this.modePullRequest = false;
+        this.requestUpdate();
+        this.showLoader(false);
+
 
     }
 
