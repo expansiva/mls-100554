@@ -725,7 +725,7 @@ export class ServiceSource100554 extends ServiceBase {
         mls.common.tripleslash.changeVariable(model1, 'shortName', newShortName);
         mls.common.tripleslash.changeVariable(model1, 'project', newProject.toString());
         if (storFile.status === 'new') return;
-        storFile.status = 'renamed'; // poderia ficar na funÁ„o 
+        storFile.status = 'renamed'; // poderia ficar na fun√ß√£o 
         // setTimeout(() => {
         // 	storFile.status = 'renamed';
         // }, 600); // after change editor, status change to 'changed'
@@ -733,7 +733,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     private isNewNameValid(newShortName: string): boolean {
         if (newShortName.length === 0 || newShortName.length > 255) return false;
-        const invalidCharacters = /[_\/{}\t\[\]\*$@#=\-+!|?,<>=.;^~∫∞""''``·‡‚„ÈËÍÌÔÛÙıˆ˙ÁÒ¡¿¬√…»Õœ”‘’÷⁄«—]/;
+        const invalidCharacters = /[_\/{}\t\[\]\*$@#=\-+!|?,<>=.;^~¬∫¬∞""''``√°√†√¢√£√©√®√™√≠√Ø√≥√¥√µ√∂√∫√ß√±√Å√Ä√Ç√É√â√à√ç√è√ì√î√ï√ñ√ö√á√ë]/;
         return (!invalidCharacters.test(newShortName));
     }
 
@@ -1190,24 +1190,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             storFileHTML = mls.stor.files[key];
         }
 
-        if (!model) model = await this.getOrCreateModelHTML(shortName, project, storFileHTML, fileInfo);
-        let mfile = mls.l2.editor.get({ project, shortName });
-        if (mfile) (mfile as any).modelHTML = model;
-
-        let src: string | Blob | null | undefined;
-
-        const info: mls.stor.IFileInfoValue | null = storFileHTML.getValueInfo ? await storFileHTML.getValueInfo() : null;
-        const haveInfo: boolean | null = info && !!info.content;
-        src = haveInfo ? info?.content : "";
-        if (!src) {
-            src = await storFileHTML.getContent();
-            if (!src) console.log('error on getContent, src is null');
+        if (!model) {
+            model = await this.getOrCreateModelHTML(shortName, project, storFileHTML, fileInfo);
+            let mfile = mls.l2.editor.get({ project, shortName });
+            if (mfile) (mfile as any).modelHTML = model;
         }
-        if (src instanceof Blob) throw new Error('html file must be string');
-        if (!src) src = "";
-        const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src as string).toString(16);
-        (model as any)['originalCRC'] = originalCRC;
-        if (src) model.setValue(src);
+
         if (open && this._ed1) this._ed1.setModel(model);
         return storFileHTML;
     }
@@ -1239,8 +1227,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         model = monaco.editor.createModel(content as string, 'html', uri);
 
         if (mfile) (mfile as any)['modelHTML'] = model;
-
         (model as any)['position'] = this.position;
+        const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
+        (model as any)['originalCRC'] = originalCRC;
+
         (storFileHTML as any)['originalCRC'] = storFileHTML.inLocalStorage ? 'undefined' : mls.common.crc.crc32(model.getValue()).toString(16);
         if (storFileHTML.status === 'renamed' && fileInfo) {
             this.setEventsModelHTML(model, storFileHTML, fileInfo.originalShortName as string, fileInfo.originalProject as number);
