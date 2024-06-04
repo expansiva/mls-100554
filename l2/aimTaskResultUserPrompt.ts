@@ -59,7 +59,6 @@ export class AimTaskResulUserPrompt extends AimTaskBase {
         this.result = body;
 
         const chat = this.prepareChat(taskRoot);
-
         return html`
             <div>
                 ${chat.map((item) => {

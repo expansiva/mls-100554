@@ -53,7 +53,10 @@ export abstract class AimActionBase extends AimBase {
         this.childThis = null;
         if (!taskChild.nextStep) throw new Error('please define nextStep');
         const nextStep: Function | undefined = oriChildThis[taskChild.nextStep];
-        if (typeof nextStep !== 'function') throw new Error('nextStep must be a function');
+        if (typeof nextStep !== 'function') {
+            console.error('nextStep must be a function');
+            return;
+        }
         nextStep.call(oriChildThis, taskFinishResult); // execute dynamic function
         oriChildThis.requestUpdate();
     }
@@ -68,12 +71,15 @@ export abstract class AimActionBase extends AimBase {
     prepareNextStep = (child: cbe.ITaskChild): void => {
         if (!child.nextStep) throw new Error('please define nextStep');
         const nextStep: Function | undefined = (this as any)[child.nextStep];
-        if (typeof nextStep !== 'function') throw new Error('nextStep must be a function');
+        if (typeof nextStep !== 'function') {
+            console.error('nextStep must be a function');
+            return;
+        }
         verifyCyclicLoop(child.nextStep);
         this.childThis = this;
     }
 
-    private getPromptUser(task: cbe.ITaskRoot): string {
+    getPromptUser(task: cbe.ITaskRoot): string {
         let ret = '';
         if (task.children.length <= 0) return ret;
         const child = task.children.find((i: cbe.ITaskChild) => i.widget === '_100554_aimTaskExecLLM');
@@ -86,7 +92,7 @@ export abstract class AimActionBase extends AimBase {
         return ret;
     }
 
-    private getRef(taskRoot: cbe.ITaskRoot): string {
+    getRef(taskRoot: cbe.ITaskRoot): string {
         let ref: string = '';
         for (let task of taskRoot.children) {
             if (task.ref) {
@@ -97,7 +103,7 @@ export abstract class AimActionBase extends AimBase {
         return ref;
     }
 
-    private getLastUpdateDate(taskRoot: cbe.ITaskRoot): string {
+    getLastUpdateDate(taskRoot: cbe.ITaskRoot): string {
         let lastDate: Date | undefined;
 
         taskRoot.children.forEach((task) => {
