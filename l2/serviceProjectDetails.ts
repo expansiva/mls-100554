@@ -1,8 +1,9 @@
 /// <mls shortName="serviceProjectDetails" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
 import { html, css, repeat, unsafeHTML } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { customElement, property, queryAll, query } from 'lit/decorators.js';
+import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
+import { collab_chevron_right, collab_eye, collab_eye_slash } from './_100554_collabIcons';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -11,9 +12,15 @@ const message_pt = {
     name: 'Nome',
     projectDriver: 'Driver do Projeto',
     projectURL: 'URL do Projeto',
-    designSystems: 'Sistemas de Design',
+    designSystems: 'Design systems',
     files: 'Arquivos',
-    keyGithub: 'Chave do GitHub'
+    keyGithub: 'Chave do GitHub',
+    project: 'Projeto',
+    noProject: 'Nenhum projeto selecionado, por favor selecione.',
+    selectProject: 'Selecione o projeto',
+    btnChange: 'Alterar',
+    addProject: 'Novo projeto',
+    placeholderFilter: 'Filtro'
 }
 
 const message_en = {
@@ -22,10 +29,15 @@ const message_en = {
     name: 'Name',
     projectDriver: 'ProjectDriver',
     projectURL: 'ProjectURL',
-    designSystems: 'DesignSystems',
+    designSystems: 'Design systems',
     files: 'Files',
     keyGithub: 'Key Github',
-
+    project: 'Project',
+    noProject: 'No project selected, please select',
+    selectProject: 'Select project',
+    btnChange: 'Change',
+    addProject: 'New project',
+    placeholderFilter: 'Filter'
 }
 
 type MessageType = typeof message_en;
@@ -46,7 +58,6 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     constructor() {
         super();
         mls.events.addListener(5, 'ProjectSelected', (ev) => this.onProjectSelected(ev));
-
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -54,7 +65,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     public details: IService = {
         icon: '&#xf15b',
         state: 'foreground',
-        position: 'right',
+        position: 'left',
         tooltip: 'Project Details',
         visible: true,
         widget: '_100554_serviceProjectDetails',
@@ -66,8 +77,16 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         return false;
     }
 
+    public onClickTitle = () => {
+        this.changeScenario('select');
+    }
+
+
     public menu: IMenu = {
-        title: 'Project',
+        title: {
+            icon: '&#xf053',
+            text: ''
+        },
         actions: {
         },
         icons: {},
@@ -75,33 +94,48 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
         getLastMode: undefined,
-        updateTitle: undefined
+        updateTitle: undefined,
+        onClickTitle: this.onClickTitle
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
     }
 
-    @property()
-    private actualProjectDetails: IProjectDetails | undefined;
+    @property() name: string | undefined;
+    @property() projectDriver: string | undefined;
+    @property() projectURL: string | undefined;
+    @property() designSystems: number | undefined;
+    @property() files: number | undefined;
+    @property() actualKeyGitHub: string | null | undefined;
+    @property() state: IServiceList = { history: [], orgs: [], projectSelected: undefined };
+    @property() lastPrjId: string | null | undefined;
+    @property({ type: String }) currentScenario: IScenaries = 'details';
 
-    @property()
-    private actualKeyGitHub: string | null | undefined;
+    @queryAll('.serviceListProjects .serviceListList li') list: NodeListOf<HTMLElement> | undefined;
+    @queryAll('.serviceListProjects .serviceListTitle') titleList: NodeListOf<HTMLElement> | undefined;
+    @query('.l5-project-list-history') historieEl: HTMLElement | undefined;
+
+    changeScenario(scenario: IScenaries) {
+        this.currentScenario = scenario
+    }
+
 
     private async getDetailsProject(project: number) {
-        //const details = mls.l5.getProjectSettings(project);
-        const details = await mls.l5.getProjectConf(project);
-        if (!this.actualProjectDetails) this.actualProjectDetails = {} as IProjectDetails;
-        this.actualProjectDetails.designSystems = details.designSystems ? details.designSystems.length : 0;
-        this.actualProjectDetails.name = details.name;
-        this.actualProjectDetails.projectDriver = details.projectDriver;
-        this.actualProjectDetails.projectURL = details.projectURL;
-        this.actualProjectDetails.files = Object.keys(mls.stor.files).filter((item => item.startsWith(project.toString()))).length;
+        let details;
+        try {
+            details = await mls.l5.getProjectConf(project);
+        }
+        catch (err) {
+            details = mls.l5.getProjectSettings(project);
+        }
 
+        this.designSystems = details.designSystems ? details.designSystems.length : 0;
+        this.name = details.name;
+        this.projectDriver = details.projectDriver;
+        this.projectURL = details.projectURL;
+        this.files = Object.keys(mls.stor.files).filter((item => item.startsWith(project.toString()))).length;
         this.actualKeyGitHub = localStorage?.getItem('keyGitHub');
-
-        this.requestUpdate();
-
     }
 
     private onProjectSelected(ev: mls.events.IEvent) {
@@ -111,8 +145,8 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     }
 
     private getLastProject() {
-        const lastPrjId = localStorage.getItem('l5-last-project');
-        if (lastPrjId) this.getDetailsProject(+lastPrjId);
+        this.lastPrjId = localStorage.getItem('l5-last-project');
+        return this.lastPrjId;
     }
 
     private handleChangeKey() {
@@ -125,14 +159,35 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         this.actualKeyGitHub = value;
     }
 
-    render() {
+    renderScenario() {
+        switch (this.currentScenario) {
+            case 'details':
+                return html`
+                    ${this.renderDetails()}
+                `
+            case 'select':
+                return html`
+                    ${this.renderSelectProject()}
+                `
+        }
+    }
 
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
+    renderDetails() {
 
-        this.getLastProject();
+        console.info('passei renderDetails ')
+
+        if (this.lastPrjId) this.getDetailsProject(+this.lastPrjId);
+        else {
+            this.changeScenario('select');
+            return;
+        }
+
+        (this.menu.title as IMenuTitle).text = this.msg.project + ' : ' + this.lastPrjId;
+        (this.menu.title as IMenuTitle).icon = '&#xf053';
+
+        if (this.menu.updateTitle) this.menu.updateTitle();
         return html`
-            ${!this.actualProjectDetails
+            ${!this.lastPrjId
                 ?
                 html`<h4> ${this.msg.noProjectSelected}</h4>`
                 :
@@ -141,24 +196,24 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                     <details open>
                         <summary>${this.msg.resume}</summary>
                         <ul>
-                            <li>${this.msg.name}: ${this.actualProjectDetails.name}</li>
-                            <li>${this.msg.projectDriver}: ${this.actualProjectDetails.projectDriver}</li>
-                            <li>${this.msg.projectURL}: ${this.actualProjectDetails.projectURL}</li>
-                            <li>${this.msg.designSystems}: ${this.actualProjectDetails.designSystems}</li>
-                            <li>${this.msg.files}: ${this.actualProjectDetails.files}</li>
+                            <li>${this.msg.name}: ${this.name}</li>
+                            <li>${this.msg.projectDriver}: ${this.projectDriver}</li>
+                            <li>${this.msg.projectURL}: ${this.projectURL}</li>
+                            <li>${this.msg.designSystems}: ${this.designSystems}</li>
+                            <li>${this.msg.files}: ${this.files}</li>
                         </ul>
                     </details>
                 </section>
                 <section
-                    style=${this.actualProjectDetails.projectDriver === 'github' ? 'display: block' : 'display:none'} 
+                    style=${this.projectDriver === 'github' ? 'display: block' : 'display:none'} 
                     class="section-config-github">
                     <div>
                         <label>${this.msg.keyGithub}</label>
                         <div class="cls_key">
                             <input .value=${this.showString(this.actualKeyGitHub, this.showKey)} @input="${this.handleInputChangeKey}"></input rows=4>
-                            <button @click="${this.clickShowEye}">${this.showKey ?unsafeHTML(this.iconEye) : unsafeHTML(this.iconEyeClose)}</button>
+                            <button @click="${this.clickShowEye}">${this.showKey ? collab_eye : collab_eye_slash}</button>
                         </div>
-                        <button @click=${this.handleChangeKey}>Alterar</button>
+                        <button @click=${this.handleChangeKey}>${this.msg.btnChange}</button>
                     </div>
                 </section>
                 <section class="cls_tree_branch">
@@ -201,38 +256,211 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         `
     }
 
-    private clickShowEye(e: MouseEvent) {
+    renderSelectProject() {
+        (this.menu.title as IMenuTitle).text = this.msg.selectProject;
+        (this.menu.title as IMenuTitle).icon = '';
+        if (this.menu.updateTitle) this.menu.updateTitle();
 
+        this.getOrgsAndProjects();
+        this.state.history = this.loadHistory();
+        return html`
+            <div class="scroll-custom l5-project-list">
+                <div class="filter-container" style="display:flex">
+                    <input style="width:calc(100% - 160px)" type="text" placeholder="Filter" @input=${this._filterProjects}>
+                    <button style="margin-left:5px; width:150px;" onclick="alert('in development')" >Add new Project</button>
+                </div>
+                <div class="l5-project-list-history" style="${this.state.history.length === 0 ? 'display:none' : 'display: block'}">
+                    <div class="serviceListTitle">History</div>
+                    <ul class="serviceListList">
+                        ${this.state.history.map((his) => html`
+                            <li class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} @click=${() => { this.onHistoryClick(his) }}>
+                                <div>
+                                    <span>${his.name + ' (' + his.project.toString() + ')'}</span>
+                                </div>
+                                <span>${collab_chevron_right}</span>
+                            </li>
+                        `)}
+                    </ul>
+                </div>
+                <div class="serviceListProjects">
+                    ${this.state.orgs.map((org) => {
+            return html`
+                            <div class="serviceListTitle">${org.key}</div>
+                            <ul class="serviceListList">
+                                ${org.projects.map((prj) => html`
+                                <li class=${this.lastPrjId && +this.lastPrjId === prj.id ? "selected" : ""} @click=${() => this.onProjectClick(prj)}>
+                                    <div>
+                                        <span>${prj.name + ' (' + prj.id.toString() + ')'}</span>
+                                    </div>
+                                <span>${collab_chevron_right}</span>
+                                </li>
+                            `)}
+                            </ul>
+                            `
+        })}
+                
+                </div>
+            </div>
+        `
+    }
+
+    render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        this.getLastProject();
+        return html`
+            <section>
+                ${this.renderScenario()}
+            </section>
+        `
+    }
+
+    private async onProjectClick(item: any) {
+        this.setProjectActual(item.id);
+        this.setOrgActual(item.id);
+        this.addOnHistory(item);
+        this._fireEventProjectSelected(item.id);
+        this.changeScenario('details');
+        await this.loadProjectActual(item.id);
+    }
+
+    private async onHistoryClick(item: IHistory) {
+        this.setProjectActual(item.project);
+        this.setOrgActual(item.project);
+        this._fireEventProjectSelected(item.project);
+        this.changeScenario('details');
+        await this.loadProjectActual(item.project);
+    }
+
+    private async loadProjectActual(project: number) {
+        await mls.stor.server.loadProjectInfoIfNeeded(project);
+    }
+
+    private setOrgActual(project: number) {
+        const orgIndex = mls.l5.getProjectOrgIndex(project);
+        mls.l5.setActualOrg(orgIndex);
+    }
+
+    private setProjectActual(project: number) {
+        mls.actual[5].project = project;
+        this.state.projectSelected = project;
+        localStorage.setItem('l5-last-project', project.toString());
+    }
+
+    private addOnHistory(item: any) {
+        const indexInHistory = this.state.history.findIndex((his) => his.name === item.name && his.project === item.id);
+        if (indexInHistory > -1) this.state.history.splice(indexInHistory, 1);
+        const historyItem: IHistory = {
+            project: item.id,
+            name: item.name
+        };
+        this.state.history.unshift(historyItem);
+        if (this.state.history.length > 9) this.state.history.pop();
+        localStorage.setItem('l5-projects-history', JSON.stringify(this.state.history));
+    }
+
+    private filterTimeout: number = 0;
+    private _filterProjects(ev: InputEvent): void {
+        const filterText = (ev.target as HTMLInputElement).value;
+        clearTimeout(this.filterTimeout);
+        this.filterTimeout = setTimeout(() => {
+            if (filterText) {
+                this.titleList?.forEach((item) => { item.style.display = 'none'; });
+                if (this.historieEl) this.historieEl.style.display = 'none';
+            } else {
+                this.titleList?.forEach((item) => { item.style.display = ''; });
+                if (this.historieEl) this.historieEl.style.display = 'block';
+            }
+            this.list?.forEach((li: HTMLElement) => {
+                li.style.display = '';
+                const text = li.querySelector('span')?.innerText;
+                if (text && text.toLowerCase().indexOf(filterText.toLowerCase()) < 0) li.style.display = 'none';
+            });
+        }, 100);
+    }
+
+    private _fireEventProjectSelected(project: number) {
+        const params: IParamsEvent = {
+            emitter: 'left',
+            value: project
+        };
+        mls.events.fire(5, ['ProjectSelected'], JSON.stringify(params));
+    }
+
+    private clearState() {
+        this.state.history = [];
+        this.state.orgs = [];
+    }
+
+    private loadHistory(): IHistory[] {
+        const lcHistory = localStorage.getItem('l5-projects-history');
+        let rc: IHistory[] = [];
+        if (!lcHistory) return rc;
+        try {
+            rc = JSON.parse(lcHistory);
+        } catch (err) {
+            throw new Error('Error on load l5 project history');
+        }
+        return rc;
+    }
+
+    private getOrgsAndProjects() {
+
+        this.clearState();
+        Object.keys(mls.stor.orgs).forEach((org, index) => {
+            const { name, description, created_at, projects } = mls.stor.orgs[org].sett;
+            const prj: any[] = [];
+            projects.forEach((p: any) => {
+                try {
+                    const json = JSON.parse(p.value);
+                    if (
+                        !json.l5_actionPrjSettings ||
+                        !json.l5_actionPrjSettings.projectDriver ||
+                        json.l5_actionPrjSettings.projectDriver === 'mls') return;
+                    prj.push(p);
+
+                } catch (e) {
+                    //console.info('Erro to parse' + p.name);
+                }
+            });
+
+            if (prj.length <= 0) return;
+
+            const obj: IStateOrg = {
+                name,
+                created_at,
+                description,
+                key: org,
+                projects: prj
+            };
+
+            this.state.orgs.push(obj);
+
+        });
+    }
+
+
+    private clickShowEye(e: MouseEvent) {
         e.stopPropagation();
         if (this.showKey) this.showKey = false;
         else this.showKey = true;
-
         this.requestUpdate();
-
     }
 
     private showString(input: string | null | undefined, show: boolean) {
-
         if (!input) return '';
-
         if (show) return input
         else return this.maskString(input);
-
     }
 
-    private maskString(input:string) {
+    private maskString(input: string) {
         return '*'.repeat(input.length);
     }
 
-    private iconEye = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"/></svg>
-    `;
-
-    private iconEyeClose = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"/></svg>
-    `;
-
 }
+
+type IScenaries = 'details' | 'select' | 'add';
 
 interface IProjectSelectedParams {
     emitter: 'left' | 'right',
@@ -240,9 +468,29 @@ interface IProjectSelectedParams {
 }
 
 export interface IProjectDetails {
-    name: string,
-    projectDriver: string,
-    projectURL: string,
-    designSystems: number,
-    files: number,
+
 }
+
+interface IStateOrg {
+    key: string,
+    name: string,
+    created_at: string,
+    description: string,
+    projects: any[]
+}
+
+interface IServiceList {
+    history: IHistory[],
+    orgs: IStateOrg[],
+    projectSelected: number | undefined
+}
+
+interface IHistory {
+    project: number,
+    name: string
+}
+interface IParamsEvent {
+    emitter: 'right' | 'left',
+    value: number
+}
+
