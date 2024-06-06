@@ -5,7 +5,7 @@ const esbuild = require('esbuild');
 //const ts = require('typescript');
 
 // Função de configuração esbuild
-async function build() {
+async function compile() {
   try {
     await esbuild.build({
       entryPoints: ['l2/**/*.ts'],
@@ -69,11 +69,11 @@ async function build() {
   });
 }*/
 
-async function exec() {
+async function funcCompile() {
   //const projectRoot = path.resolve(__dirname, '..');
   //const sourceDir = path.join(projectRoot, 'dist/dist.zip');
   //await deleteZipFileSync(sourceDir);
-  build();
+  compile();
 }
 
-exec();
+funcCompile();
