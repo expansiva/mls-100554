@@ -1,0 +1,43 @@
+collab-log-line-100554 { //don't change this line 
+ 	:host{
+        font-family: @font-family-primary;
+    }
+    :host>div {    
+        display: flex;
+        align-items: center;
+        gap: .125rem;
+        padding: .2rem;
+        font-size: @font-size-16;
+        >div{
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    [status= "inprogress"] {
+        >div{
+            animation: rotate 1s linear infinite;
+        }
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    }
+    [status= "error"]{
+        svg {
+            fill: @error-color;
+        }
+    }
+
+    [status= "finish"]{
+        svg {
+            fill: @success-color;
+        }
+    }
+     
+}
+

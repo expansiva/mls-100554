@@ -1,0 +1,166 @@
+collab-new-project-100554 { //don't change this line 
+ 	.add-container {
+      padding: 1rem;
+      position: relative;
+      margin-right: auto;
+      input,
+      select {
+         width: 100%;
+      }
+
+      label{
+         font-size: @font-size-12;
+      }
+
+      input {
+         display: block;
+         width: 100%;
+         padding: .375rem .75rem;
+         font-size: 1rem;
+         line-height: 1.5;
+         color: #495057;
+         background-color: #fff;
+         background-clip: padding-box;
+         border: 1px solid #ced4da;
+         border-radius: .25rem;
+         transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+         margin: 0;
+         box-sizing: border-box;
+      }
+
+      select {
+         display: block;
+         padding: .375rem 2.25rem .375rem .75rem;
+         font-size: 1rem;
+         font-weight: 400;
+         line-height: 1.5;
+         color: #212529;
+         background-color: #fff;
+         background-position: right .75rem center;
+         background-size: 16px 12px;
+         border: 1px solid #ced4da;
+         border-radius: .25rem;
+         transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+         box-sizing: border-box;
+         text-transform: none;
+         margin: 0;
+         word-wrap: normal;
+      }
+
+      .form-disabled{
+         pointer-events: none;
+         opacity: .5;
+      }
+
+      .cards-update-mode {
+         margin-top: 2rem;
+         display: flex;
+         flex-wrap: wrap;
+         gap: 3rem;
+
+         .card-update-mode {
+            background-color: @grey-color-lighter;
+            cursor: pointer;
+            border-radius: 10px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+            padding: 1rem .5rem;
+            border: 1px solid @grey-color-light;
+            font-size: @font-size-16;
+            >input {
+               cursor: pointer;
+               width: 30px;
+            }
+
+            .card-update-mode-title {
+               font-weight: @font-weight-bold;
+            }
+
+            &:hover {
+               background-color: @grey-color-light;
+
+            }
+         }
+      }
+      small.error{
+        color: @error-color;
+        font-size: @font-size-12;
+      }
+      .orgs-select{
+         display: flex;
+         gap: 1rem;
+      }
+      .step{
+         &:not(:first-child){
+            margin-top:@space-48;
+         }
+         h5{
+            background-color: @grey-color-lighter;
+            padding: @space-8;
+            border-radius: 5px;
+         }
+         small{
+            font-size: @font-size-16;
+         }
+      }
+      .actions-btn{
+         margin-top: @space-48;
+         display: flex;
+         justify-content: center;
+         button{
+            width: 300px;
+         }
+      }
+      .logs-container{
+         min-height: 200px;
+         margin-top: 2rem;
+         background: #fcfcfc;
+         padding: 2rem;
+         border-radius: 20px;
+      }
+      .msg-loading{
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         font-size: @font-size-12;
+         flex-direction: column;
+         margin-top: 1rem;
+         >div{
+            margin-left: 1rem;
+         }
+         .dot {
+            width: 8px;
+            height: 8px;
+            margin: 0 2px;
+            background-color: #333;
+            border-radius: 50%;
+            opacity: 0;
+            animation: fade 1.5s infinite;
+            display: inline-block;
+        }
+        .dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes fade {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+      }
+   }
+}
+

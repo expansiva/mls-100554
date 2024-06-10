@@ -1,9 +1,13 @@
 /// <mls shortName="serviceProjectDetails" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
-import { html, css, repeat, unsafeHTML } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, queryAll, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
-import { collab_chevron_right, collab_eye, collab_eye_slash } from './_100554_collabIcons';
+import {
+    collab_chevron_right,
+    collab_eye,
+    collab_eye_slash,
+} from './_100554_collabIcons';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -19,8 +23,29 @@ const message_pt = {
     noProject: 'Nenhum projeto selecionado, por favor selecione.',
     selectProject: 'Selecione o projeto',
     btnChange: 'Alterar',
+    btnAddNewProject: 'Adicionar novo projeto',
+    btnCreateProject: 'Criar projeto',
+    btnRefreshOrg: 'Atualizar',
+    btnOpenProject: 'Abrir projeto',
     addProject: 'Novo projeto',
-    placeholderFilter: 'Filtro'
+    placeholderFilter: 'Filtro',
+    push: 'Permite que os desenvolvedores façam push diretamente para a branch principal.',
+    pullRequest: 'Exige que todas as mudanças sejam feitas através de Pull Requests, permitindo revisões de código e aprovação antes da integração na branch principal.',
+    projectNameLabel: 'Nome do projeto',
+    driverNameLabel: 'Driver',
+    organizationLabel: 'Organização',
+    visibilityLabel: 'Visibilidade do projeto',
+    visibilityPublicOption: 'Público - Qualquer pessoa pode ver este repositório.',
+    visibilityPrivateOption: 'Privado - Você escolhe quem pode ver.',
+    teamLabel: 'Time',
+    loadingAddText1: 'Buscando informações do usuário',
+    loadingAddText2: 'Buscando organizações do usuário',
+    step1Title: 'Passo 1',
+    step2Title: 'Passo 2',
+    step3Title: 'Passo 3',
+    step1Msg: 'Escolha o driver para carregar suas organizações existentes.',
+    step2Msg: 'Agora selecione a organização e o modo de atualização.',
+    step3Msg: 'Finalmente, selecione a equipe e a visibilidade do projeto.'
 }
 
 const message_en = {
@@ -36,8 +61,29 @@ const message_en = {
     noProject: 'No project selected, please select',
     selectProject: 'Select project',
     btnChange: 'Change',
+    btnAddNewProject: 'Add new Project',
+    btnCreateProject: 'Create project',
+    btnRefreshOrg: 'Refresh',
+    btnOpenProject: 'Open project',
     addProject: 'New project',
-    placeholderFilter: 'Filter'
+    placeholderFilter: 'Filter',
+    push: 'Allows developers to push directly to the main branch.',
+    pullRequest: 'Requires all changes to be made through Pull Requests, allowing code reviews and approval before integration into the main branch.',
+    projectNameLabel: 'Project name',
+    driverNameLabel: 'Driver',
+    organizationLabel: 'Organization',
+    visibilityLabel: 'Project visibility',
+    visibilityPublicOption: 'Public - Anyone can see this repository.',
+    visibilityPrivateOption: 'Private - You choose who can see.',
+    teamLabel: 'Team',
+    loadingAddText1: 'Loading user informations',
+    loadingAddText2: 'Loading user organizations',
+    step1Title: 'Step 1',
+    step2Title: 'Step 2',
+    step3Title: 'Step 3',
+    step1Msg: 'Choose the driver to load your existing organizations.',
+    step2Msg: 'Now select the organization and the update mode.',
+    step3Msg: 'Finally select the team and the visibility of the project.',
 }
 
 type MessageType = typeof message_en;
@@ -81,7 +127,6 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         this.changeScenario('select');
     }
 
-
     public menu: IMenu = {
         title: {
             icon: '&#xf053',
@@ -106,20 +151,22 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     @property() projectDriver: string | undefined;
     @property() projectURL: string | undefined;
     @property() designSystems: number | undefined;
+    @property() projectCreated: boolean = false;
     @property() files: number | undefined;
     @property() actualKeyGitHub: string | null | undefined;
     @property() state: IServiceList = { history: [], orgs: [], projectSelected: undefined };
     @property() lastPrjId: string | null | undefined;
     @property({ type: String }) currentScenario: IScenaries = 'details';
 
+
     @queryAll('.serviceListProjects .serviceListList li') list: NodeListOf<HTMLElement> | undefined;
     @queryAll('.serviceListProjects .serviceListTitle') titleList: NodeListOf<HTMLElement> | undefined;
     @query('.l5-project-list-history') historieEl: HTMLElement | undefined;
+    @query('#button-see-project') buttonSeePrj: HTMLButtonElement | undefined;
 
-    changeScenario(scenario: IScenaries) {
+    private changeScenario(scenario: IScenaries) {
         this.currentScenario = scenario
     }
-
 
     private async getDetailsProject(project: number) {
         let details;
@@ -159,6 +206,17 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         this.actualKeyGitHub = value;
     }
 
+    render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        this.getLastProject();
+        return html`
+            <section>
+                ${this.renderScenario()}
+            </section>
+        `
+    }
+
     renderScenario() {
         switch (this.currentScenario) {
             case 'details':
@@ -169,12 +227,14 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                 return html`
                     ${this.renderSelectProject()}
                 `
+            case 'add':
+                return html`
+                    ${this.renderAdd()}
+                `
         }
     }
 
     renderDetails() {
-
-        console.info('passei renderDetails ')
 
         if (this.lastPrjId) this.getDetailsProject(+this.lastPrjId);
         else {
@@ -184,8 +244,8 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
         (this.menu.title as IMenuTitle).text = this.msg.project + ' : ' + this.lastPrjId;
         (this.menu.title as IMenuTitle).icon = '&#xf053';
-
         if (this.menu.updateTitle) this.menu.updateTitle();
+
         return html`
             ${!this.lastPrjId
                 ?
@@ -267,7 +327,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
             <div class="scroll-custom l5-project-list">
                 <div class="filter-container" style="display:flex">
                     <input style="width:calc(100% - 160px)" type="text" placeholder="Filter" @input=${this._filterProjects}>
-                    <button style="margin-left:5px; width:150px;" onclick="alert('in development')" >Add new Project</button>
+                    <button style="margin-left:5px; width:150px;" @click=${this.onAddNewProjectClick}>${this.msg.btnAddNewProject}</button>
                 </div>
                 <div class="l5-project-list-history" style="${this.state.history.length === 0 ? 'display:none' : 'display: block'}">
                     <div class="serviceListTitle">History</div>
@@ -304,16 +364,38 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         `
     }
 
-    render() {
 
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
-        this.getLastProject();
+    renderAdd() {
+        (this.menu.title as IMenuTitle).text = this.msg.addProject;
+        (this.menu.title as IMenuTitle).icon = '';
+        if (this.menu.updateTitle) this.menu.updateTitle();
         return html`
-            <section>
-                ${this.renderScenario()}
-            </section>
+        <collab-new-project-100554 @collab-new-project=${this.onProjectCreated}></collab-new-project-100554>
+        <div style="display:flex; justify-content:center;">
+            ${this.projectCreated ? html`<button id="button-see-project" @click=${this.onSeeProjectClick}>${this.msg.btnOpenProject}</button>` : ''}
+        </div>
         `
+    }
+
+    private projectCreatedNumber: number = 100554;
+    private async onProjectCreated(ev: CustomEvent) {
+        this.projectCreated = true;
+        setTimeout(() => {
+            if (this.buttonSeePrj) this.buttonSeePrj.scrollIntoView();
+        }, 150);
+    }
+
+    private async onSeeProjectClick() {
+        this.setProjectActual(this.projectCreatedNumber);
+        this._fireEventProjectSelected(this.projectCreatedNumber);
+        this.changeScenario('details');
+        await this.loadProjectActual(this.projectCreatedNumber);
+    }
+
+    // LIST
+
+    private onAddNewProjectClick() {
+        this.changeScenario('add');
     }
 
     private async onProjectClick(item: any) {
@@ -494,3 +576,9 @@ interface IParamsEvent {
     value: number
 }
 
+interface IOrg {
+    name: string,
+    id: string,
+    avatarUrl: string,
+    visibility: string
+}
