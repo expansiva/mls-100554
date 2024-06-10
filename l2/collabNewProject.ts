@@ -34,6 +34,7 @@ const message_pt = {
     log_init: "Processando",
     log_error: "Erro",
     log_ok: "Concluido",
+    log_0: "Verificando repositório",
     log_1: "Criando repositório",
     log_2: "Criando arquivo de validação",
     log_3: "Criando projeto no collab.codes",
@@ -41,6 +42,8 @@ const message_pt = {
     log_5: "Renomeando projeto",
     log_6: "Criando arquivo de configuração",
     log_7: "Projeto criado com sucesso!",
+    log_error_03: "Por favor espere, outro usuário esta utilizando o repositório.",
+    log_error_04: "Existe um repositório, mas não foi possível validar o usuário",
 }
 
 const message_en = {
@@ -67,6 +70,7 @@ const message_en = {
     log_init: "Processing",
     log_error: "Error",
     log_ok: "Completed",
+    log_0: "Verify repository",
     log_1: "Creating repository",
     log_2: "Creating validation file",
     log_3: "Creating project on collab.codes",
@@ -74,6 +78,8 @@ const message_en = {
     log_5: "Renaming project",
     log_6: "Creating configuration file",
     log_7: "Project created successfully!",
+    log_error_03: "Please wait, another user is creating; ",
+    log_error_04: " There is a repository, but I was unable to validate the user",
 
 }
 
@@ -91,7 +97,7 @@ export class CollabNewProject extends CollabLitElement {
     private msg: MessageType = messages['en'];
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    NEWFILENAME = 'mls-new';
+    NEWREPONAME = 'mls-new';
     VALIDADEFILE = 'validate.json';
 
     @property() driverSelected: boolean = false;
@@ -235,7 +241,9 @@ export class CollabNewProject extends CollabLitElement {
                                     </div>
 
                                     <div class="actions-btn">
-                                        <button @click=${this.onCreateProjectClick}>${this.msg.btnCreateProject}</button>
+                                        <button @click=${this.onCreateProjectClick}>
+                                            ${this.msg.btnCreateProject}
+                                        </button>
                                     </div>
                                 
                                 `: html``}
@@ -320,6 +328,11 @@ export class CollabNewProject extends CollabLitElement {
         await new Promise((resolve) => setTimeout(resolve, time));
     }
 
+    private async delay2() {
+        return new Promise((resolve, reject) => {
+            resolve('01');
+        })
+    }
     private async delayOk() {
         return new Promise((resolve, reject) => {
             resolve('Simulate ok');
@@ -363,12 +376,18 @@ export class CollabNewProject extends CollabLitElement {
 
     private PROJECTFIXED = 100570;
 
+    private checkIsValidProjectName(name: string): boolean {
+        if (!name || name.length <= 3) return false;
+        const projectNameRegex = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+        return projectNameRegex.test(name);
+    }
+
     private async onCreateProjectClick(e: MouseEvent) {
         e.preventDefault();
         this.logs = [];
         this.toogleForm(true);
 
-        if (!this.newProjectName) {
+        if (!this.checkIsValidProjectName(this.newProjectName)) {
             this.toogleForm(false);
             this.isValidProjectName = false;
             this.inputProjectName?.focus();
@@ -380,12 +399,27 @@ export class CollabNewProject extends CollabLitElement {
         const userNameCollab = this.getLoginUser();
 
         try {
-            await this.tryItem(async () => await this.delay(2000), `${this.msg.log_1} ${this.NEWFILENAME} `);
-            await this.tryItem(async () => await this.delay(2000), `${this.msg.log_2} ${this.VALIDADEFILE} `);
-            await this.tryItem(async () => await this.delay(2000), `${this.msg.log_3}`);
+            const rc = await this.tryItem(async () => await this.delay2(), this.msg.log_0);
+
+            if (rc === ECheckRepo.RepositoryInvalid || rc === ECheckRepo.RepositoryInUse) {
+                const obj: any = {
+                    '03': this.msg.log_error_03,
+                    '04': this.msg.log_error_04,
+                }
+                this.addLog({ pre: this.msg.log_error, log: obj[rc], status: "error" });
+                this.toogleForm(false);
+                return;
+            }
+
+            if (rc === ECheckRepo.RepositoryNonexistent) {
+                await this.tryItem(async () => await this.delay(2000), `${this.msg.log_1} ${this.NEWREPONAME} `);
+                await this.tryItem(async () => await this.delay(2000), `${this.msg.log_2} ${this.VALIDADEFILE} `);
+            }
+
             await this.tryItem(async () => await this.delay(2000), `${this.msg.log_4}`);
             await this.tryItem(async () => await this.delay(2000), `${this.msg.log_5}`);
             await this.tryItem(async () => await this.delay(2000), `${this.msg.log_6}`);
+
         } catch (err: any) {
             this.toogleForm(false);
             return;
@@ -397,15 +431,32 @@ export class CollabNewProject extends CollabLitElement {
         }));
 
 
-        return;
-        try {
-            await this.tryItem(async () =>
-                await this.instanceDriver.createRepository(this.login, this.NEWFILENAME, this.orgName, 'new project in collab.codes', 'PUBLIC')
-                , `${this.msg.log_1} ${this.NEWFILENAME} `);
 
-            await this.tryItem(async () =>
-                await this.instanceDriver.createFileInRepo(this.orgName, this.NEWFILENAME, this.VALIDADEFILE, `{ "users": [ "${userNameCollab}" ] }`)
-                , `${this.msg.log_2} ${this.VALIDADEFILE} `);
+        return;
+
+        try {
+            const rc = await this.tryItem(async () => await this.instanceDriver.verifyRepositoryNew(this.login, this.NEWREPONAME, userNameCollab)
+                ,   `${this.msg.log_0} ${this.NEWREPONAME}`);
+
+            if (rc === ECheckRepo.RepositoryInvalid || rc === ECheckRepo.RepositoryInUse) {
+                const obj: any = {
+                    '03': this.msg.log_error_03,
+                    '04': this.msg.log_error_04,
+                }
+                this.addLog({ pre: this.msg.log_error, log: obj[rc], status: "error" });
+                this.toogleForm(false);
+                return;
+            }
+
+            if (rc === ECheckRepo.RepositoryNonexistent) {
+                await this.tryItem(async () =>
+                    await this.instanceDriver.createRepository(this.login, this.NEWREPONAME, this.orgName, 'new project in collab.codes', 'PUBLIC')
+                    , `${this.msg.log_1} ${this.NEWREPONAME} `);
+
+                await this.tryItem(async () =>
+                    await this.instanceDriver.createFileInRepo(this.orgName, this.NEWREPONAME, this.VALIDADEFILE, `{ "users": [ "${userNameCollab}" ] }`)
+                    , `${this.msg.log_2} ${this.VALIDADEFILE} `);
+            }
 
             await this.tryItem(async () =>
                 await mls.api.cbeSaveNewPrj(
@@ -426,11 +477,11 @@ export class CollabNewProject extends CollabLitElement {
                 , `${this.msg.log_3}`);
 
             if (this.newProjectVisibility === 'private') await this.tryItem(async () =>
-                await this.instanceDriver.alterVisibility(this.orgName, this.NEWFILENAME, 'PRIVATE')
+                await this.instanceDriver.alterVisibility(this.orgName, this.NEWREPONAME, 'PRIVATE')
                 , `${this.msg.log_4}`);
 
             await this.tryItem(async () =>
-                await this.instanceDriver.renameRepository(this.orgName, this.NEWFILENAME, `mls-${this.PROJECTFIXED}`)
+                await this.instanceDriver.renameRepository(this.orgName, this.NEWREPONAME, `mls-${this.PROJECTFIXED}`)
                 , `${this.msg.log_5}`);
 
             await this.tryItem(async () => { await this.delay(2000); }, `${this.msg.log_6}`);
@@ -490,6 +541,17 @@ export class CollabNewProject extends CollabLitElement {
     }
 
 }
+
+enum ECheckRepo {
+    'RepositoryNonexistent' = '01',
+    'RepositoryAlreadyExist' = '02',
+    'RepositoryInUse' = '03',
+    'RepositoryInvalid' = '04'
+}
+// 01: free to create the repository
+// 02: The repository already exists for the user, you can reuse it
+// 03: Please wait, another user is creating; 
+// 04: There is a repository, but I was unable to validate the user
 
 interface ILogs {
     pre: string,

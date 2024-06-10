@@ -51,10 +51,6 @@ export abstract class ServiceBase extends CollabLitElement {
         }
     }
 
-    checkMouse() {
-        this.setActualServicePosition();
-    }
-
     setActualServicePosition() {
         if (!this.serviceContent || !this.nav3Service) return;
         const service = this.serviceContent.getAttribute('data-service') || '';
@@ -124,8 +120,6 @@ export abstract class ServiceBase extends CollabLitElement {
     openService(service: string, position: 'left' | 'right', level: number) {
         let page = this.closest('collab-page');
         if (!page) return;
-
-
         const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
         if (!toolbar) return;
         if (this.level !== level) {
@@ -136,7 +130,12 @@ export abstract class ServiceBase extends CollabLitElement {
         const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
         if (item) item.click();
         return;
+    }
 
+    setFullScreen(level: number, position: 'right' | 'left' | 'default') {
+        const spliter = this.getSplitter();
+        if (!spliter) return;
+        spliter.setFullScreen(level, position)
     }
 
     selectLevel(level: number) {
@@ -179,6 +178,11 @@ export abstract class ServiceBase extends CollabLitElement {
         return tooltip;
     }
 
+    private getSplitter() {
+        const tooltip = this.closest('collab-spliter') as ISpliterElement | null;
+        return tooltip;
+    }
+
     private getServiceItemNav(): IMlsNav2Item | null {
         const toolbar = this.getMlsNav2();
         if (!toolbar) return null;
@@ -205,7 +209,7 @@ export interface IButtonsKeyValue {
 export type IClickLinkCallBack = (op: string) => boolean | undefined;
 export type IClickIconCallBack = (op: string) => void | undefined;
 export type IClickTitleCallBack = (title: string) => void | undefined;
-export type IClickButtonCallBack = (op: string, opMenu?:string) => boolean;
+export type IClickButtonCallBack = (op: string, opMenu?: string) => boolean;
 
 export type ISetMode = (mode: IMode | null, page?: HTMLElement) => void;
 export type IGetLastMode = () => IMode;
@@ -247,6 +251,10 @@ export interface IToolbarContent extends HTMLElement {
 
 export interface ITooltipElement extends HTMLElement {
     tooltip: (el: HTMLElement) => void
+}
+
+export interface ISpliterElement extends HTMLElement {
+    setFullScreen: (level: number, position: 'right' | 'left' | 'default') => void
 }
 
 export interface IMlsNav2 extends HTMLElement {

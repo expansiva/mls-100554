@@ -235,7 +235,9 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     }
 
     renderDetails() {
-
+        
+        this.projectCreated = false;
+    
         if (this.lastPrjId) this.getDetailsProject(+this.lastPrjId);
         else {
             this.changeScenario('select');
@@ -390,10 +392,10 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         this._fireEventProjectSelected(this.projectCreatedNumber);
         this.changeScenario('details');
         await this.loadProjectActual(this.projectCreatedNumber);
+        this.projectCreated = false;
     }
 
     // LIST
-
     private onAddNewProjectClick() {
         this.changeScenario('add');
     }
