@@ -208,7 +208,7 @@ export class ServiceSaveAddBRanch extends LitElement {
             this.mode = 'list';
             ipt.value = '';
             load.style.display = 'none';
-            this.requestUpdate();
+            this.getInfosRepo();
 
         } catch (e:any) {
             this.error = 'Erro: ' + e.message;
