@@ -8,20 +8,20 @@ import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 const message_pt = {
     installPlugin: 'Instalar plugin',
     createNewPlugin: 'Criar novo plugin',
-    backList: 'Voltar à lista',
+    backList: 'Voltar Ã  lista',
     noPluginsInstalled: 'Nenhum plugin instalado',
     desactivate: 'Desativar',
     activate: 'Ativar',
     delete: 'Excluir',
-    reference: 'Referência',
-    noPluginsAvaliables: 'Nenhum plugin disponível',
+    reference: 'ReferÃªncia',
+    noPluginsAvaliables: 'Nenhum plugin disponÃ­vel',
     install: 'Instalar',
-    p1: 'O que são plugins?',
-    p2: 'Plugins são trechos de código que incorporam funcionalidades adicionais ao seu projeto. Eles são desenvolvidos para estender e aprimorar as capacidades do seu projeto.',
+    p1: 'O que sÃ£o plugins?',
+    p2: 'Plugins sÃ£o trechos de cÃ³digo que incorporam funcionalidades adicionais ao seu projeto. Eles sÃ£o desenvolvidos para estender e aprimorar as capacidades do seu projeto.',
     p3: 'Como os plugins funcionam?',
-    p4: 'Quando você instala e ativa um plugin, ele introduz novos recursos ou funcionalidades ao seu projeto. Os plugins podem modificar a maneira como o seu projeto opera, adicionando novas opções de configuração, inteligência artificial, widgets, códigos curtos, entre outras funcionalidades.',
+    p4: 'Quando vocÃª instala e ativa um plugin, ele introduz novos recursos ou funcionalidades ao seu projeto. Os plugins podem modificar a maneira como o seu projeto opera, adicionando novas opÃ§Ãµes de configuraÃ§Ã£o, inteligÃªncia artificial, widgets, cÃ³digos curtos, entre outras funcionalidades.',
     p5: 'Onde encontrar plugins?',
-    p6: 'Você pode localizar plugins diretamente no (L5) do seu projeto, na seção de Serviços (Service) chamado "Plugins". Neste local, é possível gerenciar e adicionar novos plugins ao seu projeto.',
+    p6: 'VocÃª pode localizar plugins diretamente no (L5) do seu projeto, na seÃ§Ã£o de ServiÃ§os (Service) chamado "Plugins". Neste local, Ã© possÃ­vel gerenciar e adicionar novos plugins ao seu projeto.',
     p7: 'Como criar um plugin?',
     p8: 'Para criar um plugin...',
 
@@ -108,11 +108,11 @@ export class ServicePlugins extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (visible && reinit) {
-            this.userPlugins = this.getUserPluginsByProject(this.project);
-            this.avaliablePlugins = this.getAvaliablePlugins(this.project);
-            this.currentScenario = 'list'
-        }
+        // if (visible && reinit) {
+        //     this.userPlugins = this.getUserPluginsByProject(this.project);
+        //     this.avaliablePlugins = this.getAvaliablePlugins(this.project);
+        //     this.currentScenario = 'list'
+        // }
     }
 
     getExamplesPlugins(): Plugin[] {
@@ -153,10 +153,12 @@ export class ServicePlugins extends ServiceBase {
     }
 
     backListClicked() {
+        this.setFullScreen(this.level, 'default');
         this.changeScenario('list');
     }
 
     installPluginClicked() {
+        this.setFullScreen(this.level, this.position);
         this.changeScenario('add');
     }
 
@@ -301,7 +303,7 @@ export class ServicePlugins extends ServiceBase {
             : html`
                     <div class="header">
                         <div>
-                            <button @click="${this.backListClicked}">${this.msg.backList}Back List</button>
+                            <button @click="${this.backListClicked}">${this.msg.backList}</button>
                         </div>
                     </div>
                 `}
