@@ -22,7 +22,7 @@ export class ServiceSaveAddBRanch extends LitElement {
 
     private driver: mls.stor.others.DriverIOBase | undefined;
 
-    private mode: string = 'add';
+    private mode: string = 'list';
 
     // -------------  WEBCOMPONENT -------------
 
