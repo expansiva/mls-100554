@@ -105,7 +105,8 @@ export class ServiceSave extends ServiceBase {
         const el = document.createElement('save-add-branch-100554');
         (el as any).callBack = (obj: any) => {
             this.branch = obj.name;
-            if(this.menu.setMenuActive)this.menu.setMenuActive('initial') 
+            if (this.menu.setMenuActive) this.menu.setMenuActive('initial');
+            this.requestUpdate(); 
         };
 
         div.appendChild(el);
@@ -431,8 +432,6 @@ export class ServiceSave extends ServiceBase {
     }
 
     private async initInfoProject() {
-
-        if (!!this.owner && !!this.branch && !!this.repo) return;
 
         const prj = mls.actual[5].project;
         if (!prj) return;
