@@ -113,6 +113,30 @@ collab-new-project-100554 { //don't change this line
             width: 300px;
          }
       }
+
+      .progress{
+         display: flex;
+         height: 1rem;
+         overflow: hidden;
+         font-size: .75rem;
+         background-color: @grey-color-light;
+         border-radius: .25rem;
+         transition: width .6s ease;
+         margin-bottom: 1rem;
+         
+         >div{
+            background-color: @success-color;
+            &:not(&.finished){
+               animation: progress-bar-stripes 1s linear infinite;
+               background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+               background-size: 1rem 1rem;
+            }
+            &.error{
+               background-color: @error-color;
+               opacity: .7;
+            }
+         }
+      }
       .logs-container{
          min-height: 200px;
          margin-top: 2rem;
@@ -158,6 +182,14 @@ collab-new-project-100554 { //don't change this line
             }
             50% {
                 opacity: 1;
+            }
+        }
+         @keyframes progress-bar-stripes {
+            0% {
+               background-position: 1rem 0;
+            }
+            100% {
+               background-position: 0 0;
             }
         }
       }

@@ -382,6 +382,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     private projectCreatedNumber: number = 100554;
     private async onProjectCreated(ev: CustomEvent) {
         this.projectCreated = true;
+        this.projectCreatedNumber = ev.detail;
         setTimeout(() => {
             if (this.buttonSeePrj) this.buttonSeePrj.scrollIntoView();
         }, 150);

@@ -119,6 +119,8 @@ export class CollabNewProject extends CollabLitElement {
     @query('.step2') step2: HTMLDivElement | undefined;
     @query('.step3') step3: HTMLDivElement | undefined;
 
+    @query('.progress-line') progress: HTMLDivElement | undefined;
+
     newProjectName: string = '';
     newProjectNumber: number = 0;
     newProjectTeam: string = 'admin';
@@ -254,7 +256,11 @@ export class CollabNewProject extends CollabLitElement {
                 </form>
 
                 ${this.logs.length > 0 ? html`
+            
                     <div class="logs-container">
+                        <div class="progress">
+                            <div class="progress-line"></div>
+                        </div>
                         ${this.logs.map((log) => html`<collab-log-line-100554 status=${log.status} text=${log.pre}:${log.log}></collab-log-line-100554>`)}
                     </div>` : ''
             }
@@ -370,8 +376,26 @@ export class CollabNewProject extends CollabLitElement {
         } catch (err: any) {
             const msg = log + ':' + err.message;
             this.changeStatusLastLog('error', msg);
+            this.setProgressError(true);
             throw new Error(err.message);
         }
+    }
+
+    private setProgress(nr: number) {
+        if (!this.progress) return;
+        this.progress.style.width = Math.ceil(nr) + '%';
+    }
+
+    private setProgressError(enabled: boolean) {
+        if (!this.progress) return;
+        if (enabled) this.progress.classList.add('error')
+        else this.progress.classList.remove('error')
+    }
+
+    private setProgressFinished(finished: boolean) {
+        if (!this.progress) return;
+        if (finished) this.progress.classList.add('finished')
+        else this.progress.classList.remove('finished')
     }
 
     private PROJECTFIXED = 100570;
@@ -398,45 +422,21 @@ export class CollabNewProject extends CollabLitElement {
         this.isValidProjectName = true;
         const userNameCollab = this.getLoginUser();
 
-        try {
-            const rc = await this.tryItem(async () => await this.delay2(), this.msg.log_0);
-
-            if (rc === ECheckRepo.RepositoryInvalid || rc === ECheckRepo.RepositoryInUse) {
-                const obj: any = {
-                    '03': this.msg.log_error_03,
-                    '04': this.msg.log_error_04,
-                }
-                this.addLog({ pre: this.msg.log_error, log: obj[rc], status: "error" });
-                this.toogleForm(false);
-                return;
-            }
-
-            if (rc === ECheckRepo.RepositoryNonexistent) {
-                await this.tryItem(async () => await this.delay(2000), `${this.msg.log_1} ${this.NEWREPONAME} `);
-                await this.tryItem(async () => await this.delay(2000), `${this.msg.log_2} ${this.VALIDADEFILE} `);
-            }
-
-            await this.tryItem(async () => await this.delay(2000), `${this.msg.log_4}`);
-            await this.tryItem(async () => await this.delay(2000), `${this.msg.log_5}`);
-            await this.tryItem(async () => await this.delay(2000), `${this.msg.log_6}`);
-
-        } catch (err: any) {
-            this.toogleForm(false);
-            return;
-        }
-
-        this.addLog({ pre: this.msg.log_ok, log: this.msg.log_7, status: "finish" });
-        this.dispatchEvent(new CustomEvent('collab-new-project', {
-            detail: this.PROJECTFIXED, bubbles: true, composed: true
-        }));
-
-
-
+        this.simulate();
         return;
 
+
         try {
-            const rc = await this.tryItem(async () => await this.instanceDriver.verifyRepositoryNew(this.login, this.NEWREPONAME, userNameCollab)
-                ,   `${this.msg.log_0} ${this.NEWREPONAME}`);
+            let percent = 16.6;
+            let newPercent = 0;
+            this.setProgressError(false);
+            this.setProgressFinished(false);
+            this.setProgress(newPercent);
+
+            const rc = await this.tryItem(async () => await this.instanceDriver.verifyRepositoryNew(this.login, this.NEWREPONAME, userNameCollab), `${this.msg.log_0} ${this.NEWREPONAME}`);
+            if (rc === ECheckRepo.RepositoryAlreadyExist) percent = 25;
+            newPercent += percent;
+            this.setProgress(newPercent);
 
             if (rc === ECheckRepo.RepositoryInvalid || rc === ECheckRepo.RepositoryInUse) {
                 const obj: any = {
@@ -449,16 +449,16 @@ export class CollabNewProject extends CollabLitElement {
             }
 
             if (rc === ECheckRepo.RepositoryNonexistent) {
-                await this.tryItem(async () =>
-                    await this.instanceDriver.createRepository(this.login, this.NEWREPONAME, this.orgName, 'new project in collab.codes', 'PUBLIC')
-                    , `${this.msg.log_1} ${this.NEWREPONAME} `);
+                await this.tryItem(async () => await this.instanceDriver.createRepository(this.login, this.NEWREPONAME, this.orgName, 'new project in collab.codes', 'PUBLIC'), `${this.msg.log_1} ${this.NEWREPONAME} `);
+                newPercent += percent;
+                this.setProgress(newPercent);
 
-                await this.tryItem(async () =>
-                    await this.instanceDriver.createFileInRepo(this.orgName, this.NEWREPONAME, this.VALIDADEFILE, `{ "users": [ "${userNameCollab}" ] }`)
-                    , `${this.msg.log_2} ${this.VALIDADEFILE} `);
+                await this.tryItem(async () => await this.instanceDriver.createFileInRepo(this.orgName, this.NEWREPONAME, this.VALIDADEFILE, `{ "users": [ "${userNameCollab}" ] }`), `${this.msg.log_2} ${this.VALIDADEFILE} `);
+                newPercent += percent;
+                this.setProgress(newPercent);
             }
 
-            await this.tryItem(async () =>
+            const newProjectId = await this.tryItem(async () =>
                 await mls.api.cbeSaveNewPrj(
                     {
                         orgName: this.orgName,
@@ -476,21 +476,94 @@ export class CollabNewProject extends CollabLitElement {
                     })
                 , `${this.msg.log_3}`);
 
-            if (this.newProjectVisibility === 'private') await this.tryItem(async () =>
-                await this.instanceDriver.alterVisibility(this.orgName, this.NEWREPONAME, 'PRIVATE')
-                , `${this.msg.log_4}`);
+            newPercent += percent;
+            this.setProgress(newPercent);
 
-            await this.tryItem(async () =>
-                await this.instanceDriver.renameRepository(this.orgName, this.NEWREPONAME, `mls-${this.PROJECTFIXED}`)
-                , `${this.msg.log_5}`);
+            if (this.newProjectVisibility === 'private') await this.tryItem(async () => await this.instanceDriver.alterVisibility(this.orgName, this.NEWREPONAME, 'PRIVATE'), `${this.msg.log_4}`);
+            newPercent += percent;
+            this.setProgress(newPercent);
 
-            await this.tryItem(async () => { await this.delay(2000); }, `${this.msg.log_6}`);
+            const newProjectName = `mls-${newProjectId}`;
+            await this.tryItem(async () => await this.instanceDriver.renameRepository(this.orgName, this.NEWREPONAME, newProjectName), `${this.msg.log_5}`);
+            newPercent += percent;
+            this.setProgress(newPercent);
+
+            const newUrlProject = `${this.urls[this.driverName]}main/${this.orgName}/${newProjectName}/`
+            await this.tryItem(async () => { await this.createConfigFile(newProjectId, this.newProjectName, this.driverName, newUrlProject, this.newProjectUpdateMode); }, `${this.msg.log_6}`);
+            newPercent += percent;
+            this.setProgress(newPercent);
 
         } catch (err: any) {
             this.toogleForm(false);
-        } finally {
-            this.toogleForm(false);
         }
+
+        this.addLog({ pre: this.msg.log_ok, log: this.msg.log_7, status: "finish" });
+        this.setProgressFinished(true);
+
+        this.dispatchEvent(new CustomEvent('collab-new-project', {
+            detail: this.newProjectNumber, bubbles: true, composed: true
+        }));
+
+    }
+
+    private async simulate() {
+        try {
+            let percent = 16.6;
+            let newPercent = 0;
+            this.setProgressError(false);
+            this.setProgressFinished(false);
+            this.setProgress(newPercent);
+            const rc = await this.tryItem(async () => await this.delay2(), this.msg.log_0);
+            if (rc === ECheckRepo.RepositoryAlreadyExist) percent = 25;
+
+            newPercent += percent;
+            this.setProgress(newPercent);
+
+            if (rc === ECheckRepo.RepositoryInvalid || rc === ECheckRepo.RepositoryInUse) {
+                const obj: any = {
+                    '03': this.msg.log_error_03,
+                    '04': this.msg.log_error_04,
+                }
+                this.addLog({ pre: this.msg.log_error, log: obj[rc], status: "error" });
+                this.setProgressError(true);
+                this.toogleForm(false);
+                return;
+            }
+
+            if (rc === ECheckRepo.RepositoryNonexistent) {
+                await this.tryItem(async () => await this.delay(2000), `${this.msg.log_1} ${this.NEWREPONAME} `);
+                newPercent += percent;
+                this.setProgress(newPercent);
+
+                await this.tryItem(async () => await this.delay(2000), `${this.msg.log_2} ${this.VALIDADEFILE} `);
+                newPercent += percent;
+                this.setProgress(newPercent);
+            }
+
+            await this.tryItem(async () => await this.delay(2000), `${this.msg.log_4}`);
+            newPercent += percent;
+            this.setProgress(newPercent);
+
+            await this.tryItem(async () => await this.delay(200), `${this.msg.log_5}`);
+            newPercent += percent;
+            this.setProgress(newPercent);
+
+            await this.tryItem(async () => await this.delay(2000), `${this.msg.log_6}`);
+            newPercent += percent;
+            this.setProgress(newPercent);
+
+        } catch (err: any) {
+            this.toogleForm(false);
+            return;
+        }
+
+        this.addLog({ pre: this.msg.log_ok, log: this.msg.log_7, status: "finish" });
+        this.setProgressFinished(true);
+
+        this.dispatchEvent(new CustomEvent('collab-new-project', {
+            detail: this.PROJECTFIXED, bubbles: true, composed: true
+        }));
+
     }
 
 
@@ -530,7 +603,8 @@ export class CollabNewProject extends CollabLitElement {
         this.newProjectUpdateMode = opt;
     }
 
-    private async onRefreshOrgsClick() {
+    private async onRefreshOrgsClick(ev: MouseEvent) {
+        ev.preventDefault();
         this.actualOrgs = await this.getOrgsByUser(this.login);
         this.requestUpdate();
     }
