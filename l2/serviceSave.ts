@@ -1,9 +1,13 @@
 /// <mls shortName="serviceSave" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
+import { collab_branch, collab_plus } from './_100554_collabIcons';
+import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
 
+initServiceSaveaddBranch();
 /// **collab_i18n_start**
 const message_pt = {
     updateChanges: 'Atualizar alterações',
@@ -45,9 +49,10 @@ export class ServiceSave extends ServiceBase {
 
     private myMessage: MessageType = messages['en'];
 
-    private usePullRequest = false;
-
-    private modePullRequest = false;
+    private usePullRequest = false; 
+    private owner: string = '';
+    private repo: string = '';
+    private branch: string = '';
 
     @property() itens: any = undefined;
 
@@ -72,6 +77,7 @@ export class ServiceSave extends ServiceBase {
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opSave') return this.showInitial();
+        if (op === 'opBranch') return this.showBranche();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -79,6 +85,7 @@ export class ServiceSave extends ServiceBase {
     public menu: IMenu = {
         title: 'Save',
         actions: {
+            opBranch: 'teste'
         },
         icons: {},
         actionDefault: 'opSave', // call after close icon clicked
@@ -87,6 +94,23 @@ export class ServiceSave extends ServiceBase {
     }
 
     private showInitial(): boolean {
+        return true;
+    }
+
+    private showBranche(): boolean {
+        this.menu.title = 'Branchs';
+        if (this.menu.updateTitle) this.menu.updateTitle();
+        
+        const div = document.createElement('div');
+        const el = document.createElement('save-add-branch-100554');
+        (el as any).callBack = (obj: any) => {
+            this.branch = obj.name;
+            if(this.menu.setMenuActive)this.menu.setMenuActive('initial') 
+        };
+
+        div.appendChild(el);
+        
+        if (this.menu.setMode) this.menu.setMode('page', div);
         return true;
     }
 
@@ -106,7 +130,7 @@ export class ServiceSave extends ServiceBase {
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
-        this.verifyExitFileChanged();
+        this.verifyExitFileChanged(); 
 
     }
 
@@ -173,66 +197,51 @@ export class ServiceSave extends ServiceBase {
 
         }
 
-        if (this.modePullRequest) {
-
-            return this.renderPullRequestMode();
-
-        } else if (this.itens) {
+        if (this.itens) {
 
             return html`
-                <sectionsaveheader> ${this.renderHeader()} </sectionsaveheader>
-                ${this.renderPullRequest()}
+                ${this.renderHeader()}
                 ${this.renderItens()}
             `;
 
         } else {
 
             return html`
-                ${this.renderPullRequest()} 
                 ${this.renderNoItens()}
             `
 
         }
     }
 
-    renderPullRequestMode() {
-        return html`
-            <div style="display:flex; justify-content:center; align-items:center; gap:.5rem; margin-top:.5rem">
-                <b style="font-size:.9rem">${this.myMessage.createPullRequest}</b>
-            </div>
-            <div id="blockPullRequest">
-                <div style="width:100%;" >
-                    <h4 class="mt-3">${this.myMessage.title}:</h4>
-                    <input type="text" style="width:95%;"></input>
-                    <h4 class="mt-3">${this.myMessage.comments}:</h4>
-                    <textarea class="form-control" style="width:95%;" rows="2" maxlength="50"></textarea>
-                </div>
-                <div style="width:79px; display: flex; align-items: self-end; gap:.5rem; margin-top:.5rem">
-                    <button style="color: #fff; background-color: #007bff; border-color: #007bff; font-size: .9rem;" @click="${this.onCreatePullRequest}">${this.myMessage.create}</button>
-                    <button style="color: #fff; background-color: #ff0000; border-color: #007bff; font-size: .9rem;" @click="${this.onCancelPullRequest}">${this.myMessage.cancel}</button>
-                </div>
-            </div>
-        `
-    }
-
-    renderPullRequest() {
-        if (!this.usePullRequest) return html``;
-        return html`
-            <div style="display:flex; justify-content:center; align-items:center; gap:.5rem; margin-top:.5rem">
-                <b style="font-size:.9rem">${this.myMessage.msgPullRequest}</b>
-                <button style="color: #fff; background-color: #007bff; border-color: #007bff; font-size: .9rem;" @click="${this.onGoToPullRequest}"> Pull request</button>
-            </div>
-        `
-    }
-
     renderHeader() {
         return html`
-            <i class="fa fa-floppy-disk"></i>
-            <span>${this.myMessage.updateChanges}</span>    
-        
+            <div style="display:flex; gap:1rem; font-size:.95rem; border-bottom: 1px solid #e2e1e1; padding-bottom: .5rem; position: relative">
+
+                <div>
+                    <span style="font-weight:600">Owner:</span>
+                    <span>${this.owner}</span> 
+                </div>
+                <div>
+                    <span style="font-weight:600">Repo:</span>
+                    <span>${this.repo}</span> 
+                </div>
+                <div>
+                    <span style="font-weight:600">Branch:</span>
+                    <span>${this.branch}</span> 
+                </div>
+
+                <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { if(this.menu.setMenuActive)this.menu.setMenuActive('opBranch') }}">
+                    ${collab_branch} Change
+                </button>
+
+                <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; background: #007bff; color: #fff; position: absolute; right: 0px;">
+                    <svg width="16" height="16" fill="#fff" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"></path></svg>
+                    Pull request
+                </button>
+
+            </div>
         `
     }
-
 
     renderNoItens() {
         return html`
@@ -414,10 +423,28 @@ export class ServiceSave extends ServiceBase {
     private async init() {
 
         this.showLoader(true);
+        await this.initInfoProject();
         await this.verifyUsePRAndCreate(); // santiago
         await this.setInfos();
         this.showLoader(false);
 
+    }
+
+    private async initInfoProject() {
+
+        if (!!this.owner && !!this.branch && !!this.repo) return;
+
+        const prj = mls.actual[5].project;
+        if (!prj) return;
+
+        const info = await mls.l5.getProjectConf(prj);
+
+        let str = info.projectURL.split('/');
+        str = str.filter((item: string) => item.trim() !== "");
+
+        this.branch = str[0];
+        this.owner = str[1];
+        this.repo = str[2];
     }
 
     private showLoader(loader: boolean): void {
@@ -764,85 +791,7 @@ export class ServiceSave extends ServiceBase {
         }
 
     }
-
-    private async onCreatePullRequest(e: MouseEvent) {
-
-        try {
-
-            e.stopPropagation();
-            const el = e.target as HTMLButtonElement;
-            if (!el) return;
-
-            const prj = mls.actual[5].project || 0
-
-            if (prj <= 0) return
-
-            const father = el.closest('#blockPullRequest') as HTMLDivElement;
-            if (!father) return;
-
-            this.showLoader(true);
-
-            const txt = father.querySelector('textarea');
-            const tt = father.querySelector('input')
-            const dt = new Date().toISOString().substring(0, 10);
-            const u = localStorage.getItem('loginUser');
-            let msg = txt ? txt.value : '';
-            let title = tt ? tt.value : '';
-            if (!msg) msg = `Pull request created by ${u} on ${dt}`;
-            if (!title) title = `Pull request on ${dt}`;
-
-            setTimeout(async () => {
-
-                try {
-
-                    const driver = mls.stor.others.getDefaultDriver(prj) as any;
-                    if (!driver || !driver.createPullRequest) {
-                        this.modePullRequest = false;
-                        this.requestUpdate();
-                        this.showLoader(false);
-                        return;
-                    }
-                    const ret = await driver.createPullRequest(prj, title, msg);
-
-                    if (!ret) this.error = this.myMessage.errorCreatePull
-                    this.modePullRequest = false;
-                    this.requestUpdate();
-                    this.showLoader(false);
-
-                } catch (e: any) {
-                    this.error = e.message;
-                    this.showLoader(false);
-                }
-
-            }, 500);
-
-        } catch (e) {
-
-            console.info('Error onCreatePullRequest');
-
-        }
-
-
-    }
-
-    private async onGoToPullRequest(e: MouseEvent) {
-
-        this.modePullRequest = true;
-        this.requestUpdate();
-        this.showLoader(false);
-
-
-    }
-
-    private async onCancelPullRequest(e: MouseEvent) {
-
-        this.modePullRequest = false;
-        this.requestUpdate();
-        this.showLoader(false);
-
-
-    }
-
+    
     private async onSave(e: MouseEvent) {
 
         try {
