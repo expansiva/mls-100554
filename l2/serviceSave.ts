@@ -49,7 +49,6 @@ export class ServiceSave extends ServiceBase {
 
     private myMessage: MessageType = messages['en'];
 
-    private usePullRequest = false; 
     private owner: string = '';
     private repo: string = '';
     private branch: string = '';
@@ -425,7 +424,6 @@ export class ServiceSave extends ServiceBase {
 
         this.showLoader(true);
         await this.initInfoProject();
-        await this.verifyUsePRAndCreate(); // santiago
         await this.setInfos();
         this.showLoader(false);
 
@@ -451,83 +449,6 @@ export class ServiceSave extends ServiceBase {
         this.loading = loader;
 
     }
-
-    // santiago
-    private async verifyUsePRAndCreate() {
-
-        this.usePullRequest = false;
-
-        const prj = mls.actual[5].project || 0
-
-        if (prj <= 0) return
-
-        const info = await mls.l5.getProjectConf(prj);
-
-        if (info.projectSaveMode !== 'pullRequest') {
-            this.requestUpdate()
-            return
-        }
-
-        this.usePullRequest = true;
-
-        const user = localStorage.getItem('loginUser');
-        const lH = this.getInfoLH();
-
-        if (!user) throw new Error('Not found userName');
-
-        if (lH[user] && lH[user].includes(prj)) {
-            this.requestUpdate()
-            return;
-        }
-
-        await this.createBranch(prj);
-        this.setInfoLH(user, prj);
-        this.requestUpdate()
-
-    }
-
-    private async createBranch(prj: number) {
-
-        try {
-
-            const driver = mls.stor.others.getDefaultDriver(prj) as any;
-            if (!driver || !driver.getBranchUserName || !driver.createNewBranch || !driver.verifyExistBranch) return;
-
-            const uB = driver.getBranchUserName();
-            const exist = await driver.verifyExistBranch(prj, uB);
-            if (!exist) await driver.createNewBranch(prj, uB);
-
-        } catch (e:any) {
-            console.info(e);
-            this.error = e.message;
-            throw new Error(e.message);
-            
-        }
-
-
-    }
-
-    private getInfoLH(): any {
-        const lh = localStorage.getItem('branchCreated');
-        if (!lh) return {};
-
-        return JSON.parse(lh);
-    }
-
-    private setInfoLH(key: string, project: number) {
-
-        const lh = localStorage.getItem('branchCreated');
-        let info: any = {};
-        if (lh) info = JSON.parse(lh)
-
-        if (info[key]) info[key].push(project);
-        else info[key] = [project];
-
-        localStorage.setItem('branchCreated', JSON.stringify(info));
-
-    }
-
-    // end santiago
 
     private async setInfos() {
 
@@ -811,6 +732,7 @@ export class ServiceSave extends ServiceBase {
 
                 try {
 
+                    this.setLocalHIstoryCurrentInfoDriver();
                     await this.verifyVersionBlock(array);
                     await this.onSavenew(array, msg);
                     await this.setInfos();
@@ -830,6 +752,25 @@ export class ServiceSave extends ServiceBase {
 
         }
 
+
+    }
+
+    private setLocalHIstoryCurrentInfoDriver(): void {
+
+        const prj = mls.actual[5].project;
+        if (!prj) throw new Error('Not found project actual');
+
+        let str = localStorage.getItem('InfoCurrentDriver');
+        if (!str) str = '{}';
+
+        const info: any = JSON.parse(str);
+        info[prj] = {
+            owner: this.owner,
+            repo: this.repo,
+            branch: this.branch,
+        }
+
+        localStorage.setItem('InfoCurrentDriver', JSON.stringify(info));
 
     }
 
