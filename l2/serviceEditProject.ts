@@ -32,6 +32,11 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-edit-project-100554')
 export class ServiceEditProject100554 extends ServiceBase {
 
+    constructor() {
+        super();
+        this.setEvents();
+    }
+
     private msg: MessageType = messages['en'];
 
     public static modelCount: number;
@@ -70,6 +75,18 @@ export class ServiceEditProject100554 extends ServiceBase {
                 this.setMsizeEditor();
             }, 100)
         }
+        if (reinit) {
+            const { project } = mls.actual[5];
+            this.refreshIfNeeded(project);
+        }
+    }
+
+    setEvents() {
+        mls.events.addEventListener([5], ['ProjectSelected'], (ev) => {
+            if (!ev.desc) return;
+            const desc: IProjectSelectEvent = JSON.parse(ev.desc);
+            this.refreshIfNeeded(desc.value);
+        });
     }
 
     @property({ type: String })
@@ -84,10 +101,18 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     private fileInfo: mls.stor.IFileInfo | undefined;
 
+    private lastProject: number | undefined;
+
     private template: string = `window.project_config`
 
     private showStart() {
         return true;
+    }
+
+    private refreshIfNeeded(project: number | undefined) {
+        if (this.lastProject !== project) {
+            this.loadProjectConfigs();
+        }
     }
 
     private setMsizeEditor() {
@@ -136,6 +161,7 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     private async getFileOrCreate(): Promise<mls.stor.IFileInfo> {
         const { project } = mls.actual[5];
+        this.lastProject = project;
         const shortName = 'project';
         if (project === undefined) throw new Error('No project selected!')
         const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', '.json');
@@ -154,6 +180,10 @@ export class ServiceEditProject100554 extends ServiceBase {
             name: det.name,
             designSystems: [],
             languages: []
+        }
+
+        const a: mls.l5.ProjectConfig = {
+
         }
         const content = JSON.stringify(newConfig);
         const params = {
@@ -241,4 +271,9 @@ export class ServiceEditProject100554 extends ServiceBase {
             <mls-editor-100529 ismls2="true"></mls-editor-100529>
         `
     }
+}
+
+interface IProjectSelectEvent {
+    emitter: 'right' | 'left',
+    value: number
 }
