@@ -128,7 +128,7 @@ export class CollabNewProject extends CollabLitElement {
     newProjectUpdateMode: string = 'push';
     driverName: string = '';
     orgName: string = '';
-    instanceDriver: any;
+    instanceDriver: mls.stor.others.DriverIOBase | undefined;
     login: string = '';
 
     private drivers: any = {
@@ -320,6 +320,7 @@ export class CollabNewProject extends CollabLitElement {
     }
 
     private async getOrgsByUser(user: string) {
+
         if (!this.instanceDriver) throw new Error('Invalid driver instance');
         const orgs: IOrg[] = await this.instanceDriver.getOrganizations(user);
         orgs.unshift({ id: user, name: user, avatarUrl: '', visibility: 'public' });
@@ -336,7 +337,7 @@ export class CollabNewProject extends CollabLitElement {
 
     private async delay2() {
         return new Promise((resolve, reject) => {
-            resolve('01');
+            resolve('free');
         })
     }
     private async delayOk() {
@@ -420,7 +421,8 @@ export class CollabNewProject extends CollabLitElement {
         }
 
         this.isValidProjectName = true;
-        const userNameCollab = this.getLoginUser();
+        const userNameCollab: string = this.getLoginUser() as string;
+        if (!userNameCollab) return;
 
         this.simulate();
         return;
@@ -433,27 +435,27 @@ export class CollabNewProject extends CollabLitElement {
             this.setProgressFinished(false);
             this.setProgress(newPercent);
 
-            const rc = await this.tryItem(async () => await this.instanceDriver.verifyRepositoryNew(this.login, this.NEWREPONAME, userNameCollab), `${this.msg.log_0} ${this.NEWREPONAME}`);
-            if (rc === ECheckRepo.RepositoryAlreadyExist) percent = 25;
+            const rc = await this.tryItem(async () => await this.instanceDriver?.verifyRepositoryNew(this.login, this.NEWREPONAME, userNameCollab), `${this.msg.log_0} ${this.NEWREPONAME}`);
+            if (rc === 'reuse') percent = 25;
             newPercent += percent;
             this.setProgress(newPercent);
 
-            if (rc === ECheckRepo.RepositoryInvalid || rc === ECheckRepo.RepositoryInUse) {
+            if (rc === 'error' || rc === 'wait') {
                 const obj: any = {
-                    '03': this.msg.log_error_03,
-                    '04': this.msg.log_error_04,
+                    'wait': this.msg.log_error_03,
+                    'error': this.msg.log_error_04,
                 }
                 this.addLog({ pre: this.msg.log_error, log: obj[rc], status: "error" });
                 this.toogleForm(false);
                 return;
             }
 
-            if (rc === ECheckRepo.RepositoryNonexistent) {
-                await this.tryItem(async () => await this.instanceDriver.createRepository(this.login, this.NEWREPONAME, this.orgName, 'new project in collab.codes', 'PUBLIC'), `${this.msg.log_1} ${this.NEWREPONAME} `);
+            if (rc === 'free') {
+                await this.tryItem(async () => await this.instanceDriver?.createRepository(this.login, this.NEWREPONAME, this.orgName, 'new project in collab.codes', 'PUBLIC'), `${this.msg.log_1} ${this.NEWREPONAME} `);
                 newPercent += percent;
                 this.setProgress(newPercent);
 
-                await this.tryItem(async () => await this.instanceDriver.createFileInRepo(this.orgName, this.NEWREPONAME, this.VALIDADEFILE, `{ "users": [ "${userNameCollab}" ] }`), `${this.msg.log_2} ${this.VALIDADEFILE} `);
+                await this.tryItem(async () => await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, this.VALIDADEFILE, `{ "users": [ "${userNameCollab}" ] }`), `${this.msg.log_2} ${this.VALIDADEFILE} `);
                 newPercent += percent;
                 this.setProgress(newPercent);
             }
@@ -479,12 +481,12 @@ export class CollabNewProject extends CollabLitElement {
             newPercent += percent;
             this.setProgress(newPercent);
 
-            if (this.newProjectVisibility === 'private') await this.tryItem(async () => await this.instanceDriver.alterVisibility(this.orgName, this.NEWREPONAME, 'PRIVATE'), `${this.msg.log_4}`);
+            if (this.newProjectVisibility === 'private') await this.tryItem(async () => await this.instanceDriver?.changeVisibility(this.orgName, this.NEWREPONAME, 'PRIVATE'), `${this.msg.log_4}`);
             newPercent += percent;
             this.setProgress(newPercent);
 
             const newProjectName = `mls-${newProjectId}`;
-            await this.tryItem(async () => await this.instanceDriver.renameRepository(this.orgName, this.NEWREPONAME, newProjectName), `${this.msg.log_5}`);
+            await this.tryItem(async () => await this.instanceDriver?.renameRepository(this.orgName, this.NEWREPONAME, newProjectName), `${this.msg.log_5}`);
             newPercent += percent;
             this.setProgress(newPercent);
 
@@ -514,15 +516,15 @@ export class CollabNewProject extends CollabLitElement {
             this.setProgressFinished(false);
             this.setProgress(newPercent);
             const rc = await this.tryItem(async () => await this.delay2(), this.msg.log_0);
-            if (rc === ECheckRepo.RepositoryAlreadyExist) percent = 25;
+            if (rc === 'reuse') percent = 25;
 
             newPercent += percent;
             this.setProgress(newPercent);
 
-            if (rc === ECheckRepo.RepositoryInvalid || rc === ECheckRepo.RepositoryInUse) {
+            if (rc === 'error' || rc === 'wait') {
                 const obj: any = {
-                    '03': this.msg.log_error_03,
-                    '04': this.msg.log_error_04,
+                    'wait': this.msg.log_error_03,
+                    'error': this.msg.log_error_04,
                 }
                 this.addLog({ pre: this.msg.log_error, log: obj[rc], status: "error" });
                 this.setProgressError(true);
@@ -530,7 +532,7 @@ export class CollabNewProject extends CollabLitElement {
                 return;
             }
 
-            if (rc === ECheckRepo.RepositoryNonexistent) {
+            if (rc === 'free') {
                 await this.tryItem(async () => await this.delay(2000), `${this.msg.log_1} ${this.NEWREPONAME} `);
                 newPercent += percent;
                 this.setProgress(newPercent);
@@ -568,7 +570,7 @@ export class CollabNewProject extends CollabLitElement {
 
 
     private async createConfigFile(project: number, name: string, projectDriver: string, projectURL: string, projectSaveMode: string) {
-        const newConfig: mls.l5.ProjectConfig = {
+        const newConfig: any = {
             name,
             projectDriver,
             projectURL,
@@ -615,17 +617,6 @@ export class CollabNewProject extends CollabLitElement {
     }
 
 }
-
-enum ECheckRepo {
-    'RepositoryNonexistent' = '01',
-    'RepositoryAlreadyExist' = '02',
-    'RepositoryInUse' = '03',
-    'RepositoryInvalid' = '04'
-}
-// 01: free to create the repository
-// 02: The repository already exists for the user, you can reuse it
-// 03: Please wait, another user is creating; 
-// 04: There is a repository, but I was unable to validate the user
 
 interface ILogs {
     pre: string,

@@ -235,9 +235,9 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     }
 
     renderDetails() {
-        
+
         this.projectCreated = false;
-    
+
         if (this.lastPrjId) this.getDetailsProject(+this.lastPrjId);
         else {
             this.changeScenario('select');

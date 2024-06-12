@@ -6,7 +6,7 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 
 declare global {
     interface Window {
-        project_config: mls.l5.ProjectConfig
+        project_config: any
     }
 }
 
@@ -81,7 +81,7 @@ export class ServiceEditProject100554 extends ServiceBase {
         }
     }
 
-    setEvents() {
+    async setEvents() {
         mls.events.addEventListener([5], ['ProjectSelected'], (ev) => {
             if (!ev.desc) return;
             const desc: IProjectSelectEvent = JSON.parse(ev.desc);
@@ -176,15 +176,12 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     private async createConfigFile(project: number, shortName: string) {
         const det = mls.l5.getProjectDetails(project);
-        const newConfig: mls.l5.ProjectConfig = {
+        const newConfig: any = {
             name: det.name,
             designSystems: [],
             languages: []
         }
 
-        const a: mls.l5.ProjectConfig = {
-
-        }
         const content = JSON.stringify(newConfig);
         const params = {
             project,
