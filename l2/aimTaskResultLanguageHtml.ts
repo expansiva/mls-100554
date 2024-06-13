@@ -20,7 +20,7 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
         this.changeFile(this.taskRoot);
     }
 
-    changeFile(taskRoot: cbe.ITaskRoot) {
+    changeFile(taskRoot: mls.cbe.ITaskRoot) {
 
         if (!taskRoot.args) {
             this.taskChild.trace.push(new Date().toISOString() + ': taskroot args is missing');
@@ -45,7 +45,7 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
 
         const html = this.extractHtml(result);
 
-        const model:monaco.editor.ITextModel = (mfile as any).modelHTML;
+        const model: monaco.editor.ITextModel = (mfile as any).modelHTML;
         this.original = model.getValue();
 
         const startLineNumber = 1;
@@ -87,14 +87,14 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
     private original: string = '';
 
     private alreadyInit: boolean = false;
-    handleClick(taskRoot: cbe.ITaskRoot) {
+    handleClick(taskRoot: mls.cbe.ITaskRoot) {
         this.setValues(taskRoot);
         if (this.alreadyInit) return;
         this.codeDiff?.init();
         this.alreadyInit = true;
     }
 
-    private async setValues(taskRoot: cbe.ITaskRoot) {
+    private async setValues(taskRoot: mls.cbe.ITaskRoot) {
 
         if (!taskRoot.args) return;
         const args: ITaskFileInfo = JSON.parse(taskRoot.args);
@@ -105,14 +105,14 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
         this.codeDiff.actualTextDiffOriginal = args.html;
     }
 
-    renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
+    renderBody(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild) {
 
         const body = child._tempResult || '';
         const h = this.extractHtml(body);
         this.result = h;
 
         return html`
-        <details @click=${()=> this.handleClick(taskRoot)}>
+        <details @click=${() => this.handleClick(taskRoot)}>
             <summary>Result</summary>
             <div>
                 <div style='margin: 10px;'>

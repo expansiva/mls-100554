@@ -10,7 +10,10 @@ export class IcaTestPage100554 extends LitElement {
     }`;    
 
         
+        
     render() {
+
+        
         window.globalState = {
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }]

@@ -53,7 +53,7 @@ export class AimActionTypescriptSpell extends AimActionBase {
     }
 
     private handleAdd(): void {
-        const taskRoot: cbe.ITaskRoot = {
+        const taskRoot: mls.cbe.ITaskRoot = {
             mode: 'initializing',
             title: 'verify typescript spell / language',
             widget: myName,
@@ -114,7 +114,7 @@ ${source}\n`;
         return prompt;
     }
 
-    prepareTask1(taskRoot: cbe.ITaskRoot): void {
+    prepareTask1(taskRoot: mls.cbe.ITaskRoot): void {
         // create task to get typescript source from another side
         this.mode = taskRoot.mode = 'in progress';
         this.addTaskAndWaitForCompletion(taskRoot, {

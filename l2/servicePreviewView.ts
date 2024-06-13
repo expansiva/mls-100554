@@ -9,9 +9,9 @@ export const initServicePreviewView = '';
 
 /// **collab_i18n_start**
 const message_pt = {
-    pageNotDefined: 'P·gina n„o definida',
-    notFoundStorfile: 'Arquivo n„o encontrado',
-    configure: 'Configure seu HTML pela opÁ„o do editor!',
+    pageNotDefined: 'P√°gina n√£o definida',
+    notFoundStorfile: 'Arquivo n√£o encontrado',
+    configure: 'Configure seu HTML pela op√ß√£o do editor!',
     width: 'Largura',
     height: 'Altura'
 }
@@ -654,7 +654,7 @@ export class ServicePreviewView extends LitElement {
         const defaultGroup = 'other';
         mls.actual[0].setFullName(widget);
         const model = mls.l2.editor.get({ project: mls.actual[0].project as any, shortName: mls.actual[0].path as any });
-        if (!model || !model.compilerResults) return defaultGroup;
+        if (!model || !model.compilerResults || !model.compilerResults.tripleSlashMLS) return defaultGroup;
         const { variables } = model.compilerResults.tripleSlashMLS;
         if (!variables) return defaultGroup;
         const { groupName } = variables;

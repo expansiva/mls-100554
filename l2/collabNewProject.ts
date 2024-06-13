@@ -104,7 +104,7 @@ export class CollabNewProject extends CollabLitElement {
     @property() orgSelected: boolean = false;
     @property() loadingAdd1Msg: string = '';
     @property() orgsLoaded: boolean = false;
-    @property() actualOrgs: IOrg[] = [];
+    @property() actualOrgs: mls.stor.others.IOrg[] = [];
     @property() actualTeams: string[] = [];
     @property() isValidProjectName: boolean = true;
     @property() errorDriver: string = '';
@@ -322,7 +322,7 @@ export class CollabNewProject extends CollabLitElement {
     private async getOrgsByUser(user: string) {
 
         if (!this.instanceDriver) throw new Error('Invalid driver instance');
-        const orgs: IOrg[] = await this.instanceDriver.getOrganizations(user);
+        const orgs: mls.stor.others.IOrg[] = await this.instanceDriver.getOrganizations(user);
         orgs.unshift({ id: user, name: user, avatarUrl: '', visibility: 'public' });
         return orgs;
     }
@@ -427,7 +427,6 @@ export class CollabNewProject extends CollabLitElement {
         this.simulate();
         return;
 
-
         try {
             let percent = 16.6;
             let newPercent = 0;
@@ -467,13 +466,18 @@ export class CollabNewProject extends CollabLitElement {
                         info: {
                             project: this.newProjectNumber,
                             projectDriver: this.drivers[this.driverName],
-                            projectURL: `${this.urls[this.driverName]}main/${this.orgName}/mls-new/`
+                            projectURL: `${this.urls[this.driverName]}main/${this.orgName}/mls-new/`,
+                            projectDependencies: []
                         },
                         settings: {
                             id: 0,
                             name: this.newProjectName,
                             owner: userNameCollab,
-                            userAuth: this.newProjectVisibility
+                            userAuth: this.newProjectVisibility as any,
+                            archived_at: '',
+                            created_at: '',
+                            prj_dependencies: [],
+                            value: ''
                         }
                     })
                 , `${this.msg.log_3}`);
@@ -589,6 +593,7 @@ export class CollabNewProject extends CollabLitElement {
             folder: ''
         };
         const file = await mls.stor.addOrUpdateFile(params);
+        if (!file) return;
         file.status = 'new';
         const fileInfo: mls.stor.IFileInfoValue = {
             content,
@@ -624,9 +629,3 @@ interface ILogs {
     status: string
 }
 
-interface IOrg {
-    name: string,
-    id: string,
-    avatarUrl: string,
-    visibility: string
-}

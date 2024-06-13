@@ -7,7 +7,7 @@ import { CollabLitElement, collabState } from './_100554_collabLitElement';
 @customElement('aim-base-100554')
 export class AimBase extends CollabLitElement {
 
-  @property({ type: String, reflect: true }) public mode: cbe.IMode = 'error';
+  @property({ type: String, reflect: true }) public mode: mls.cbe.IMode = 'error';
   @property({ type: Number }) public taskIndex = -1;
 
   createRenderRoot() {
@@ -23,7 +23,7 @@ export class AimBase extends CollabLitElement {
       case 'error': return this.renderToolBarError();
       case 'processed': return this.renderToolBarProcessed();
       case 'canceled': return this.renderToolBarCanceled();
-      default: return html``; // Retorna vazio para modos n„o reconhecidos
+      default: return html``; // Retorna vazio para modos n√£o reconhecidos
     }
   }
 

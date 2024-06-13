@@ -9,14 +9,14 @@ import { AimBase } from "./_100554_aimBase";
 export abstract class AimTaskBase extends AimBase {
 
     @property({ type: Number }) public childIndex = -1;
-    public taskRoot: cbe.ITaskRoot = {
+    public taskRoot: mls.cbe.ITaskRoot = {
         mode: 'error',
         title: 'invalid task index: ' + this.taskIndex,
         widget: '',
         children: [],
         trace: ['invalid task index on AimTaskBase']
     };
-    public taskChild: cbe.ITaskChild = {
+    public taskChild: mls.cbe.ITaskChild = {
         mode: 'error',
         title: 'invalid child index: ' + this.childIndex,
         widget: '',
@@ -73,7 +73,7 @@ export abstract class AimTaskBase extends AimBase {
         }
     }
 
-    renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
+    renderBody(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild) {
         const promptTitle = `prompt len=${child.prompt?.length}, tokens=${child.promptTokens}`;
         let resultTitle = 'no result yeat';
 
@@ -95,7 +95,7 @@ export abstract class AimTaskBase extends AimBase {
     `;
     }
 
-    renderTraceList(title: string, child: cbe.ITaskChild) {
+    renderTraceList(title: string, child: mls.cbe.ITaskChild) {
         const traceString = JSON.stringify(child, null, 2);
         const root = { ...this.taskRoot }
         root.children = []

@@ -12,7 +12,7 @@ export class AimTaskResultTable extends AimTaskBase {
         this.notifyCompleteByStatus('ok', '');
     }
 
-    renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
+    renderBody(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild) {
         const title = child.title;
         const body = child._tempResult || '';
         return html`

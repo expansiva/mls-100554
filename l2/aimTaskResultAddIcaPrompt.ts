@@ -6,14 +6,14 @@ import { AimTaskBase } from "./_100554_aimTaskBase";
 
 /// **collab_i18n_start**
 const message_pt = {
-    tryagain_title_2: "O prompt È valido",
-    tryagain_title_3: "O prompt enviado esta fora de contexto por favor digite um prompt referente a criaÁ„o de um web component",
-    tryagain_title_4: "O prompt precisa ser melhorado, por favor digite as mudanÁas necess·rias abaixo.",
-    tryagain_title_5: "Segue abaixo algumas sugestıes para melhorar o seu prompt",
+    tryagain_title_2: "O prompt √© valido",
+    tryagain_title_3: "O prompt enviado esta fora de contexto por favor digite um prompt referente a cria√ß√£o de um web component",
+    tryagain_title_4: "O prompt precisa ser melhorado, por favor digite as mudan√ßas necess√°rias abaixo.",
+    tryagain_title_5: "Segue abaixo algumas sugest√µes para melhorar o seu prompt",
     error_message: "O prompt deve ser preenchido.",
 
     tryagain_placeholder: "Digite aqui seu prompt.",
-    tryagain_processed: "Prompt j· validado.",
+    tryagain_processed: "Prompt j√° validado.",
 
     btn_confirmar: "Confirmar",
     btn_cancelar: "Cancelar",
@@ -48,7 +48,7 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
 
     private result: number | undefined;
 
-    @property({ type: String, reflect: true }) modeInternal: cbe.IMode | undefined;
+    @property({ type: String, reflect: true }) modeInternal: mls.cbe.IMode | undefined;
 
     @property() hasError: boolean = false;
 
@@ -81,16 +81,16 @@ export class AimTaskResulAddIcaPrompt extends AimTaskBase {
         const firstStr = str.substring(0, 24).toLowerCase();
         if (firstStr.startsWith('sim')) return 0;
         if (firstStr.startsWith('nao')) return 1;
-        if (firstStr.startsWith('forneÁa mais informaÁıes')) return 2;
+        if (firstStr.startsWith('forne√ßa mais informa√ß√µes')) return 2;
     }
 
-    renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
+    renderBody(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild) {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
 
         let prompt = taskRoot.args ? JSON.parse(taskRoot.args).prompt : ''
-        
+
         const body = child.result || '';
         this.result = this.getResult(body);
         if (this.modeInternal !== 'waiting for user') return html`<div>${this.msg.tryagain_processed}</div>`

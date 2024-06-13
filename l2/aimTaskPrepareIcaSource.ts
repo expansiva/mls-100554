@@ -54,11 +54,12 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
                 }
 
                 const tps = mfile.compilerResults?.tripleSlashMLS;
-                if (!mfile) {
+                if (!tps) {
                     reject('Not found tripleSlashMLS in mfile compilerResults');
                     return;
                 }
 
+                
                 const activeServiceOp = info.actServiceOp;
                 if (activeServiceOp.tagName !== 'SERVICE-SOURCE-100554') {
                     reject('100554_ServiceSource is not active in level 2');

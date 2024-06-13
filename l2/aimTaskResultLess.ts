@@ -9,14 +9,14 @@ import { getActiveOpServiceIfIsValid, isValidRef } from './_100554_aimActionStyl
 /// **collab_i18n_start**
 const message_pt = {
     title: 'View Less Result',
-    p1: 'Por favor digite as mudanÁas necess·rias abaixo.',
+    p1: 'Por favor digite as mudan√ßas necess√°rias abaixo.',
     cancel: 'Cancelar',
     confirm: 'Confirmar'
 }
 
 const message_en = {
     title: 'Ver Resultado do Less',
-    p1: 'Por favor, digite as mudanÁas necess·rias abaixo.',
+    p1: 'Por favor, digite as mudan√ßas necess√°rias abaixo.',
     cancel: 'Cancelar',
     confirm: 'Confirmar'
 }
@@ -32,7 +32,7 @@ const messages: { [key: string]: MessageType } = {
 @customElement('aim-task-result-less-100554')
 export class AimTaskResultLess extends AimTaskBase {
 
-    private msg: MessageType = messages['en'] ;
+    private msg: MessageType = messages['en'];
 
     constructor() {
         super();
@@ -52,7 +52,7 @@ export class AimTaskResultLess extends AimTaskBase {
 
     @property({ type: Boolean, reflect: true }) isTryAgain = false;
 
-    @property({ type: String, reflect: true }) modeInternal: cbe.IMode | undefined;
+    @property({ type: String, reflect: true }) modeInternal: mls.cbe.IMode | undefined;
 
     private result: string = '';
 
@@ -99,7 +99,7 @@ export class AimTaskResultLess extends AimTaskBase {
         this.alreadyInit = true;
     }
 
-    renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
+    renderBody(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild) {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];

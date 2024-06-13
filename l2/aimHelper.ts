@@ -1,14 +1,14 @@
 /// <mls shortName="aimHelper" project="100554" enhancement="_blank" />
 
 
-export let tasks: cbe.ITaskRoot[] = [];
+export let tasks: mls.cbe.ITaskRoot[] = [];
 let lastReadFromServer: Date | undefined = undefined;
 
 
 /**
  * return the result of the prompt
  */
-export async function executePrompt(taskIndex: number): Promise<cbe.ITaskRoot> {
+export async function executePrompt(taskIndex: number): Promise<mls.cbe.ITaskRoot> {
   if (taskIndex < 0 || taskIndex >= tasks.length) throw new Error(`invalid task index`);
   const project: number = mls.actual[5].project || 0;
   if (project < 1) throw new Error(`invalid project ${project}`);
@@ -29,7 +29,7 @@ export async function executePrompt(taskIndex: number): Promise<cbe.ITaskRoot> {
 
 }
 
-export async function updateTaskOnServer(taskIndex: number): Promise<cbe.ITaskRoot> {
+export async function updateTaskOnServer(taskIndex: number): Promise<mls.cbe.ITaskRoot> {
   if (taskIndex < 0 || taskIndex >= tasks.length) throw new Error(`invalid task index`);
   const project: number = mls.actual[5].project || 0;
   if (project < 1) throw new Error(`invalid project ${project}`);
@@ -41,7 +41,7 @@ export async function updateTaskOnServer(taskIndex: number): Promise<cbe.ITaskRo
 }
 
 const timeToWait = 5 * 60 * 1000; // 5 minutes , in ms
-export async function readTasksFromServer(filtedBy: cbe.IFilterTask, filter: string) {
+export async function readTasksFromServer(filtedBy: mls.cbe.IFilterTask, filter: string) {
   if (lastReadFromServer) {
     // compare and don't read again for last seconds
     const timeSinceLastRead = new Date().getTime() - lastReadFromServer.getTime();
@@ -148,6 +148,6 @@ export interface ITaskFinish {
   childIndex: number,
   result: string, // result or error message
   newPrompt?: string,
-  taskRoot: cbe.ITaskRoot,
-  taskChild: cbe.ITaskChild
+  taskRoot: mls.cbe.ITaskRoot,
+  taskChild: mls.cbe.ITaskChild
 }

@@ -397,7 +397,7 @@ private msg: MessageType = messages['en'] ;
         const div1 = document.createElement('div');
         div1.style.padding = '2rem';
 
-        if (this.assistantArgs && this.assistantArgs.codeLenCommand) {
+        if (this.assistantArgs && this.assistantArgs.codeLenCommand && this.assistantArgs.codeLenCommand.refs) {
             const el = document.createElement(this.assistantArgs.codeLenCommand.refs)
             div1.appendChild(el)
         }

@@ -59,12 +59,12 @@ export class AimActionUserPrompt extends AimActionBase {
 
     public assistant = "gpt3_typescript";
     public title = "User Prompt";
-    private taskRoot: cbe.ITaskRoot | undefined;
+    private taskRoot: mls.cbe.ITaskRoot | undefined;
 
     @query('textarea.add') textareaAdd: HTMLTextAreaElement | undefined;
     @query('textarea.prompt') textareaPrompt: HTMLTextAreaElement | undefined;
 
-    @property({ type: String, reflect: true }) modeInternal: cbe.IMode | undefined;
+    @property({ type: String, reflect: true }) modeInternal: mls.cbe.IMode | undefined;
     @property() isLoading: boolean = false;
 
     render() {
@@ -75,7 +75,7 @@ export class AimActionUserPrompt extends AimActionBase {
     }
 
     renderTaskRoot(): TemplateResult {
-        const renderChild = (child: cbe.ITaskChild, index: number) => {
+        const renderChild = (child: mls.cbe.ITaskChild, index: number) => {
             this.loadDynamicWidget(taskRoot, child, child.widget);
             if (child.mode !== 'processed'
                 && child.mode !== 'error'
@@ -113,7 +113,7 @@ export class AimActionUserPrompt extends AimActionBase {
                 </summary>
                 <details>
                     <summary>${this.msg.tasks}</summary>
-                    ${taskRoot.children.map((child, index) => renderChild(child, index))}
+                    ${taskRoot.children.map((child: mls.cbe.ITaskChild, index:number) => renderChild(child, index))}
                 </details>
                 <div style="padding: 1rem 3rem;background: #fcfcfc;">
                     ${this.renderResult()} 
@@ -173,7 +173,7 @@ export class AimActionUserPrompt extends AimActionBase {
         `;
     }
 
-    private prepareChat(taskRoot: cbe.ITaskRoot): IChat[] {
+    private prepareChat(taskRoot: mls.cbe.ITaskRoot): IChat[] {
 
         const rc: IChat[] = [];
         for (let i = 0; i < taskRoot.children.length; i++) {
@@ -267,7 +267,7 @@ export class AimActionUserPrompt extends AimActionBase {
 
     }
 
-    prepareTask1(taskRoot: cbe.ITaskRoot): void {
+    prepareTask1(taskRoot: mls.cbe.ITaskRoot): void {
 
         this.mode = taskRoot.mode = 'in progress';
         this.isLoading = true;

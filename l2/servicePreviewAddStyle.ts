@@ -11,8 +11,8 @@ const message_pt = {
     tagsForSearch: 'Tags para busca',
     exInputList: 'ex: entrada, lista',
     addInDesingSystem: 'Adicionar no Sistema de Design',
-    thisComponentAlreadyHasStyleAdded: 'Este componente j· tem estilo adicionado',
-    notAdded: 'Este componente n„o È adicionado no Design System, adicione abaixo'
+    thisComponentAlreadyHasStyleAdded: 'Este componente j√° tem estilo adicionado',
+    notAdded: 'Este componente n√£o √© adicionado no Design System, adicione abaixo'
 }
 
 const message_en = {
@@ -143,7 +143,7 @@ export class ServicePreviewAddStyle extends LitElement {
         const model = mls.l2.editor.get({ project: mls.actual[0].project as any, shortName: mls.actual[0].path as any });
 
         if (!model || !model.compilerResults) return;
-
+        if (!model.compilerResults.tripleSlashMLS) return;
         const { variables } = model.compilerResults.tripleSlashMLS;
         if (!variables) return;
 

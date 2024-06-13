@@ -6,7 +6,7 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 
 declare global {
     interface Window {
-        project_config: any
+        project_config: mls.l5_common.ProjectConfig
     }
 }
 
@@ -35,6 +35,8 @@ export class ServiceEditProject100554 extends ServiceBase {
     constructor() {
         super();
         this.setEvents();
+
+
     }
 
     private msg: MessageType = messages['en'];
@@ -87,6 +89,8 @@ export class ServiceEditProject100554 extends ServiceBase {
             const desc: IProjectSelectEvent = JSON.parse(ev.desc);
             this.refreshIfNeeded(desc.value);
         });
+
+
     }
 
     @property({ type: String })
@@ -175,9 +179,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private async createConfigFile(project: number, shortName: string) {
-        const det = mls.l5.getProjectDetails(project);
-        const newConfig: any = {
-            name: det.name,
+        const newConfig: mls.l5_common.ProjectConfig = {
             designSystems: [],
             languages: []
         }
@@ -192,6 +194,7 @@ export class ServiceEditProject100554 extends ServiceBase {
             folder: ''
         };
         const file = await mls.stor.addOrUpdateFile(params);
+        if (!file) return;
         file.status = 'new';
         const fileInfo: mls.stor.IFileInfoValue = {
             content,
@@ -233,6 +236,7 @@ export class ServiceEditProject100554 extends ServiceBase {
         (async function scope() {
             eval(val); // eslint-disable-line no-eval
             if (window.project_config && typeof window.project_config === 'object') {
+                if (!that.fileInfo) return;
                 await mls.stor.localStor.setContent(that.fileInfo, {
                     contentType: 'string',
                     content: JSON.stringify(window.project_config, null, 2)

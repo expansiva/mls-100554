@@ -71,7 +71,7 @@ export class AimActionStyleNew extends AimActionBase {
         }));
     }
 
-    private taskRoot: cbe.ITaskRoot | undefined;
+    private taskRoot: mls.cbe.ITaskRoot | undefined;
 
     private handleAdd(): void {
 
@@ -90,7 +90,7 @@ export class AimActionStyleNew extends AimActionBase {
         }));
     }
 
-    private setResultInEditor(value: string, root: cbe.ITaskRoot) {
+    private setResultInEditor(value: string, root: mls.cbe.ITaskRoot) {
 
         const activeOpService = getActiveOpServiceIfIsValid(this);
         if (!activeOpService) {
@@ -172,7 +172,7 @@ ${source}`;
     }
 
 
-    prepareTask1(taskRoot: cbe.ITaskRoot): void {
+    prepareTask1(taskRoot: mls.cbe.ITaskRoot): void {
 
         // create task to get typescript source from another side
         this.mode = taskRoot.mode = 'in progress';
@@ -292,7 +292,7 @@ ${source}`;
 }
 
 
-export function isValidRef(taskRoot: cbe.ITaskRoot, activeOpService: ServiceDsStyles) {
+export function isValidRef(taskRoot: mls.cbe.ITaskRoot, activeOpService: ServiceDsStyles) {
     const actualRef = activeOpService.getActualRef();
     const taskWithRef = taskRoot.children.find((task) => task.widget === "_100554_aimTaskDsStyles");
     if (!taskWithRef) return false;

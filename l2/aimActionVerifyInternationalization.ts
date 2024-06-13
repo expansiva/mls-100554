@@ -95,7 +95,7 @@ export class AimActionVerifyInternationalization extends AimActionBase {
             fileName: `_${project}_${shortName}`
         }
 
-        const taskRoot: cbe.ITaskRoot = {
+        const taskRoot: mls.cbe.ITaskRoot = {
             mode: 'initializing',
             title: this.msg.action_title,
             widget: myName,
@@ -146,7 +146,7 @@ ${source}
         return prompt;
     }
 
-    prepareTask1(taskRoot: cbe.ITaskRoot, ref: string): void {
+    prepareTask1(taskRoot: mls.cbe.ITaskRoot, ref: string): void {
 
         // create task to get typescript source from another side
         this.mode = taskRoot.mode = 'in progress';

@@ -12,10 +12,10 @@ export const initServiceSelectDsAdd = () =>{
 /// **collab_i18n_start**
 const message_pt = {
     addNew: 'Adicionar um novo sistema de design',
-    p1: 'Aqui você pode criar um novo sistema de design selecionando um sistema de design padrão vazio ou selecionando um modelo.',
+    p1: 'Aqui vocÃª pode criar um novo sistema de design selecionando um sistema de design padrÃ£o vazio ou selecionando um modelo.',
     empty: 'Vazio',
     templates: 'Modelos',
-    next: 'Próximo',
+    next: 'PrÃ³ximo',
     project: 'Projeto',
     resume: 'Resumo',
     name: 'Nome',
@@ -147,7 +147,7 @@ export class ServiceSelectDsAdd100554 extends CollabLitElement {
         const projects: number[] = this.getProjectsInMemory();
         const rc: IDs[] = [];
         projects.forEach((prj) => {
-            const dsByPrj: mls.l5.IPrjDesignSystem[] = mls.l5['getProjectDesingSystems'](prj);
+            const dsByPrj: mls.l5_common.IPrjDesignSystem[] = mls.l5['getProjectDesingSystems'](prj);
             dsByPrj.forEach((info) => {
                 rc.push({
                     dsindex: info.dsIndex,

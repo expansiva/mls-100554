@@ -8,7 +8,7 @@ import { collab_file, collab_undo, collab_location_dot, collab_unbalanced } from
 
 /// **collab_i18n_start**
 const message_pt = {
-    noDesignSystem: 'Nenhum sistema de design neste projeto, por favor clique em adicionar para começar a criar um novo sistema de design.',
+    noDesignSystem: 'Nenhum sistema de design neste projeto, por favor clique em adicionar para comeÃ§ar a criar um novo sistema de design.',
     addNew: 'Adicionar novo sistema de design'
 }
 
@@ -208,7 +208,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
         if (this.menu.setMenuActive) this.menu.setMenuActive('opAdd')
     }
 
-    private async onItemClick(item: mls.l5.IPrjDesignSystem) {
+    private async onItemClick(item: mls.l5_common.IPrjDesignSystem) {
         this.loading = true;
         this.serviceContent?.setAttribute('error', '');
 
@@ -226,7 +226,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
 
-    public async restoreDs(item: mls.l5.IPrjDesignSystem) {
+    public async restoreDs(item: mls.l5_common.IPrjDesignSystem) {
         if (!this.state.actualProject) return;
         const ds = mls.l3.getDSInstance(this.state.actualProject, item.dsIndex);
         this.loading = true;
@@ -374,7 +374,7 @@ interface IState {
 }
 
 interface IHistory {
-    [key: number]: mls.l5.IPrjDesignSystem[]
+    [key: number]: mls.l5_common.IPrjDesignSystem[]
 }
 
 interface ILastDsSelected {
@@ -384,6 +384,6 @@ interface ILastDsSelected {
 interface IDSInfo {
     inLocalStorage: boolean,
     outdated: boolean,
-    dsInfo: mls.l5.IPrjDesignSystem,
+    dsInfo: mls.l5_common.IPrjDesignSystem,
     files: mls.stor.IFileInfo[]
 }

@@ -61,14 +61,14 @@ export abstract class AimActionBase extends AimBase {
         oriChildThis.requestUpdate();
     }
 
-    addTaskAndWaitForCompletion = (taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild): void => {
+    addTaskAndWaitForCompletion = (taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild): void => {
         if (taskRoot.mode === 'error' || child.mode === 'error') return;
         this.prepareNextStep(child);
         taskRoot.children.push(child);
         tasks[this.taskIndex] = taskRoot;
     }
 
-    prepareNextStep = (child: cbe.ITaskChild): void => {
+    prepareNextStep = (child: mls.cbe.ITaskChild): void => {
         if (!child.nextStep) throw new Error('please define nextStep');
         const nextStep: Function | undefined = (this as any)[child.nextStep];
         if (typeof nextStep !== 'function') {
@@ -79,10 +79,10 @@ export abstract class AimActionBase extends AimBase {
         this.childThis = this;
     }
 
-    getPromptUser(task: cbe.ITaskRoot): string {
+    getPromptUser(task: mls.cbe.ITaskRoot): string {
         let ret = '';
         if (task.children.length <= 0) return ret;
-        const child = task.children.find((i: cbe.ITaskChild) => i.widget === '_100554_aimTaskExecLLM');
+        const child = task.children.find((i: mls.cbe.ITaskChild) => i.widget === '_100554_aimTaskExecLLM');
         if (!child || !child.prompt) return ret;
         const regex = /User:(.*?)(?=\n\n\n|$)/s;
         const match = child.prompt.match(regex);
@@ -92,7 +92,7 @@ export abstract class AimActionBase extends AimBase {
         return ret;
     }
 
-    getRef(taskRoot: cbe.ITaskRoot): string {
+    getRef(taskRoot: mls.cbe.ITaskRoot): string {
         let ref: string = '';
         for (let task of taskRoot.children) {
             if (task.ref) {
@@ -103,7 +103,7 @@ export abstract class AimActionBase extends AimBase {
         return ref;
     }
 
-    getLastUpdateDate(taskRoot: cbe.ITaskRoot): string {
+    getLastUpdateDate(taskRoot: mls.cbe.ITaskRoot): string {
         let lastDate: Date | undefined;
 
         taskRoot.children.forEach((task) => {
@@ -129,7 +129,7 @@ export abstract class AimActionBase extends AimBase {
     }
 
     renderTaskRoot(): TemplateResult {
-        const renderChild = (child: cbe.ITaskChild, index: number) => {
+        const renderChild = (child: mls.cbe.ITaskChild, index: number) => {
             this.loadDynamicWidget(taskRoot, child, child.widget);
             if (child.mode !== 'processed'
                 && child.mode !== 'error'
@@ -167,14 +167,14 @@ export abstract class AimActionBase extends AimBase {
 
                     
                 </summary>
-                ${taskRoot.children.map((child, index) => renderChild(child, index))}
+                ${taskRoot.children.map((child: mls.cbe.ITaskChild, index:number) => renderChild(child, index))}
             </details>
         `;
 
         // <div style='margin-bottom: 5em;' />
     }
 
-    async loadDynamicWidget(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild, widget: string): Promise<void> {
+    async loadDynamicWidget(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild, widget: string): Promise<void> {
         const tryLoad = async (): Promise<boolean> => {
             if (!widget) return false;
             try {

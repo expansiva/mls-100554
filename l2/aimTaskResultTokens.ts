@@ -35,7 +35,7 @@ export class AimTaskResultTokens extends AimTaskBase {
         if (this.codeSnippet) this.codeSnippet.textIn = this.result;
     }
 
-    renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
+    renderBody(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild) {
         const title = child.title;
         const body = child._tempResult || '';
 

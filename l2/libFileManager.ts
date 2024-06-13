@@ -210,7 +210,7 @@ async function _renameFileWithModel(file: { project: number, shortName: string, 
 
     if (!model1) throw new Error('Error renameFile: not found mfile');
 
-    // Não esta preparado para o .html;
+    // NÃ£o esta preparado para o .html;
     renameFileWithModel2(model1, storFile, file.newProject, file.newShortName);
 
     return;
@@ -259,7 +259,7 @@ function renameFileWithModel2(model1: mls.l2.editor.IMFile, storFile: mls.stor.I
 
     if (storFile.status === 'new') return;
 
-    storFile.status = 'renamed'; // poderia ficar na função 
+    storFile.status = 'renamed'; // poderia ficar na funÃ§Ã£o 
     // setTimeout(() => {
     // 	storFile.status = 'renamed';
     // }, 600); // after change editor, status change to 'changed'
@@ -275,12 +275,13 @@ async function createFileAndModel(src: string, file: { project: number, shortNam
 
     const key = mls.stor.getKeyToFiles(file.project, level, file.shortName, '', file.extension);
 
-    let storFile = mls.stor.files[key];
+    let storFile: mls.stor.IFileInfo | undefined = mls.stor.files[key];
 
     if (storFile && file.project !== 0) throw new Error('Error on createFileAndModel, model already exists: ' + key);
 
     if (!storFile) {
         storFile = await mls.stor.addOrUpdateFile({ project: file.project, level, shortName: file.shortName, extension: file.extension, versionRef: new Date().toISOString(), folder: '' });
+        if (!storFile) throw new Error('Invalid storFile')
         storFile.status = 'new';
     }
 
@@ -387,7 +388,7 @@ function addEventsModel(storFile: mls.stor.IFileInfo, model1: mls.l2.editor.IMFi
 
 function isNewNameValid(newShortName: string): boolean {
     if (newShortName.length === 0 || newShortName.length > 255) return false;
-    const invalidCharacters = /[_\/{}\t\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+    const invalidCharacters = /[_\/{}\t\[\]\*$@#=\-+!|?,<>=.;^~ÂºÂ°""''``Ã¡Ã Ã¢Ã£Ã©Ã¨ÃªÃ­Ã¯Ã³Ã´ÃµÃ¶ÃºÃ§Ã±ÃÃ€Ã‚ÃƒÃ‰ÃˆÃÃÃ“Ã”Ã•Ã–ÃšÃ‡Ã‘]/;
     return (!invalidCharacters.test(newShortName));
 }
 
@@ -481,6 +482,8 @@ async function updateModelStatus(model1: mls.l2.editor.IMFile, changed: boolean)
         if (enhancementInstance) await enhancementInstance.onAfterChange(model1);
         hasError = storFile.hasError;
     }
+
+    if (!cr.tripleSlashMLS) throw new Error('No tripleSlashMLS finded');
 
     await changeStatusFile(model1, storFile, cr.tripleSlashMLS?.variables, hasError);
 

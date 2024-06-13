@@ -163,7 +163,7 @@ export class ServiceAim100554 extends ServiceBase {
         if (this.visible === 'true') this.requestUpdate();
     }
 
-    sortKey(arr: cbe.ITaskRoot[]) {
+    sortKey(arr: mls.cbe.ITaskRoot[]) {
         function getKey(key: string): number {
             if (!key) return -1;
             const parts = key.split('/');
@@ -172,7 +172,7 @@ export class ServiceAim100554 extends ServiceBase {
             return Number.isNaN(index) ? -1 : index;
         }
 
-        function sort(a: cbe.ITaskRoot, b: cbe.ITaskRoot) {
+        function sort(a: mls.cbe.ITaskRoot, b: mls.cbe.ITaskRoot) {
             if (a.mode === "in progress" && b.mode !== "in progress") {
                 return -1;
             } else if (a.mode !== "in progress" && b.mode === "in progress") {
@@ -188,7 +188,7 @@ export class ServiceAim100554 extends ServiceBase {
 
     renderAll() {
 
-        const renderTask = (taskRoot: cbe.ITaskRoot, index: number) => {
+        const renderTask = (taskRoot: mls.cbe.ITaskRoot, index: number) => {
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}" />`;
             return html`${unsafeHTML(sHtml)}`;
@@ -202,8 +202,8 @@ export class ServiceAim100554 extends ServiceBase {
         <h4 class='title'>${this.myMessage.allTasksLast} (${tasks.length})</h4>
             ${repeat(
             orderned,
-            ((task: cbe.ITaskRoot, index: number) => task.key) as any,
-            ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
+            ((task: mls.cbe.ITaskRoot, index: number) => task.key) as any,
+            ((task: mls.cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
         )}
         `;
     }
@@ -211,7 +211,7 @@ export class ServiceAim100554 extends ServiceBase {
     renderUser() {
 
         const userName = localStorage.getItem('loginUser');
-        const renderTask = (taskRoot: cbe.ITaskRoot, index: number) => {
+        const renderTask = (taskRoot: mls.cbe.ITaskRoot, index: number) => {
             if (taskRoot.userName !== userName) return;
             const actionName = convertFileNameToTag(taskRoot.widget);
             const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
@@ -223,8 +223,8 @@ export class ServiceAim100554 extends ServiceBase {
         <h4 class='title'>${this.myMessage.user}: ${userName} </h4>
             ${repeat(
             orderned,
-            ((task: cbe.ITaskRoot, index: number) => index) as any,
-            ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
+            ((task: mls.cbe.ITaskRoot, index: number) => index) as any,
+            ((task: mls.cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
         )}            
         `;
 
@@ -239,7 +239,7 @@ export class ServiceAim100554 extends ServiceBase {
             if (op && op.getActualRef) refOpr = op.getActualRef();
         }
 
-        const renderTask = (taskRoot: cbe.ITaskRoot, index: number) => {
+        const renderTask = (taskRoot: mls.cbe.ITaskRoot, index: number) => {
             let hasRef = taskRoot.children.filter((c) => c.ref === refOpr);
             if (!hasRef || hasRef.length <= 0) return;
             const actionName = convertFileNameToTag(taskRoot.widget);
@@ -260,8 +260,8 @@ export class ServiceAim100554 extends ServiceBase {
             <h4 class='title'>${this.myMessage.tasksByReference} </h4>
                 ${verifyOrderned.length > 0 ? repeat(
             orderned,
-            ((task: cbe.ITaskRoot, index: number) => index) as any,
-            ((task: cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
+            ((task: mls.cbe.ITaskRoot, index: number) => index) as any,
+            ((task: mls.cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
         ) : html`<h4>${this.myMessage.notFoundReference}</h4>`}
         `;
     }
@@ -439,7 +439,7 @@ export class ServiceAim100554 extends ServiceBase {
 
             const msizeH = this.msize.split(',')[1];
             const height = ` height= "${Number.parseFloat(msizeH) - 95}"`;
-            const modeInit: cbe.IMode = "add";
+            const modeInit: mls.cbe.IMode = "add";
             const newMode = ' mode="' + modeInit + '"';
 
             render(html`${unsafeHTML('<' + tagName + newTabIndex + newMode + height + '/> ')}`, container);

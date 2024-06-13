@@ -39,7 +39,7 @@ export class AimTaskResulUserPrompt extends AimTaskBase {
     @query('textarea')
     textarea: HTMLTextAreaElement | undefined;
 
-    @property({ type: String, reflect: true }) modeInternal: cbe.IMode | undefined;
+    @property({ type: String, reflect: true }) modeInternal: mls.cbe.IMode | undefined;
 
     private result: string = '';
 
@@ -52,7 +52,7 @@ export class AimTaskResulUserPrompt extends AimTaskBase {
 
     }
 
-    renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
+    renderBody(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild) {
 
         this.modeInternal = this.taskRoot.mode;
         const body = child.result || '';
@@ -101,7 +101,7 @@ export class AimTaskResulUserPrompt extends AimTaskBase {
         `;
     }
 
-    private prepareChat(taskRoot: cbe.ITaskRoot): IChat[] {
+    private prepareChat(taskRoot: mls.cbe.ITaskRoot): IChat[] {
 
         const rc: IChat[] = [];
         for (let i = 0; i < taskRoot.children.length; i++) {

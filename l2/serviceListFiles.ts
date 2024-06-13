@@ -24,7 +24,7 @@ const message_pt = {
     filesWithErrors: "arquivos com erros",
     filesInLocalStorage: "arquivos no armazenamento local",
     filesChangedOnTheServer: "arquivos alterados no servidor",
-    history: "Histórico",
+    history: "HistÃ³rico",
     undo: "desfazer",
     clone: "clonar",
     rename: "renomear",
@@ -158,6 +158,8 @@ export class ServiceListFiles extends ServiceBase {
                 if (info.project !== mls.actual[5].project) continue;
                 break;
             }
+
+            if (!info) return;
 
             mls.events.fireFileAction('updatedOnServer', info, 'left', undefined, undefined, undefined, undefined, 600);
 
@@ -924,7 +926,7 @@ export class ServiceListFiles extends ServiceBase {
 
         if (action.name.length === 0 || action.name.length > 255) return false;
 
-        const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+        const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~ÂºÂ°""''``Ã¡Ã Ã¢Ã£Ã©Ã¨ÃªÃ­Ã¯Ã³Ã´ÃµÃ¶ÃºÃ§Ã±ÃÃ€Ã‚ÃƒÃ‰ÃˆÃÃÃ“Ã”Ã•Ã–ÃšÃ‡Ã‘]/;
         if (invalidCharacters.test(action.name)) return false;
 
         const key = mls.stor.getKeyToFiles(+action.project, this.level as any, action.name, file.folder, file.extension);

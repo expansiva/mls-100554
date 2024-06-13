@@ -11,7 +11,7 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
         this.changeFile(this.taskRoot);
     }
 
-    changeFile(taskRoot: cbe.ITaskRoot) {
+    changeFile(taskRoot: mls.cbe.ITaskRoot) {
 
         if (!taskRoot.args) {
             this.taskChild.trace.push(new Date().toISOString() + ': taskroot args is missing');

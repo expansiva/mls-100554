@@ -164,19 +164,12 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     @query('.l5-project-list-history') historieEl: HTMLElement | undefined;
     @query('#button-see-project') buttonSeePrj: HTMLButtonElement | undefined;
 
-    private changeScenario(scenario: IScenaries) {
-        this.currentScenario = scenario
+    private async changeScenario(scenario: IScenaries) {
+        this.currentScenario = scenario;
     }
 
     private async getDetailsProject(project: number) {
-        let details;
-        try {
-            details = await mls.l5.getProjectConf(project);
-        }
-        catch (err) {
-            details = mls.l5.getProjectSettings(project);
-        }
-
+        let details = mls.l5.getProjectSettings(project);
         this.designSystems = details.designSystems ? details.designSystems.length : 0;
         this.name = details.name;
         this.projectDriver = details.projectDriver;
@@ -577,11 +570,4 @@ interface IHistory {
 interface IParamsEvent {
     emitter: 'right' | 'left',
     value: number
-}
-
-interface IOrg {
-    name: string,
-    id: string,
-    avatarUrl: string,
-    visibility: string
 }

@@ -168,7 +168,7 @@ export class AimActionAddLanguage extends AimActionBase {
             onlyLanguageDontConfigured: this.onlyLanguageDontConfigured
         };
 
-        const taskRoot: cbe.ITaskRoot = {
+        const taskRoot: mls.cbe.ITaskRoot = {
             mode: 'initializing',
             title: this.msg.action_title,
             widget: myName,
@@ -270,7 +270,7 @@ ${source}
         return prompt;
     }
 
-    prepareTask1(taskRoot: cbe.ITaskRoot, fileName: string, project: number) {
+    prepareTask1(taskRoot: mls.cbe.ITaskRoot, fileName: string, project: number) {
 
         this.mode = taskRoot.mode = 'in progress';
         const ref = `_${project}_${fileName}`;

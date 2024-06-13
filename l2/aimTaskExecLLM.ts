@@ -12,11 +12,11 @@ export class AimTaskExecLLM extends AimTaskBase {
         this.senderToServer(this.taskRoot);
     }
 
-    senderToServer(taskRoot: cbe.ITaskRoot) {
+    senderToServer(taskRoot: mls.cbe.ITaskRoot) {
         this.taskChild.trace.push(new Date().toISOString() + ': sending to server');
 
         executePrompt(this.taskIndex)
-            .then((value: cbe.ITaskRoot) => {
+            .then((value: mls.cbe.ITaskRoot) => {
                 if (!value) throw new Error('invalid task retorned');
 
                 this.taskChild.trace.push(new Date().toISOString() + ': received from server, len=' + (JSON.stringify(taskRoot)).length);

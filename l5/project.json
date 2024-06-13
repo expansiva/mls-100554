@@ -1,7 +1,4 @@
 {
-  "name": "collab_workspaces",
-  "projectDriver": "github",
-  "projectURL": "/main/expansiva/mls-100554/",
   "designSystems": [
     {
       "dsIndex": "0",

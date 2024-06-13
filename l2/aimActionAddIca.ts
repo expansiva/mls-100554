@@ -104,7 +104,7 @@ export class AimActionAddIca extends AimActionBase {
     actualGroups: string[] = [];
     language = 'english';
 
-    private taskRoot: cbe.ITaskRoot | undefined;
+    private taskRoot: mls.cbe.ITaskRoot | undefined;
 
     private handleCancel() {
         this.clear();
@@ -200,7 +200,7 @@ export class AimActionAddIca extends AimActionBase {
             `;
     }
 
-    prepareCheckTask1(taskRoot: cbe.ITaskRoot): void {
+    prepareCheckTask1(taskRoot: mls.cbe.ITaskRoot): void {
 
         this.mode = taskRoot.mode = 'in progress';
         if (!taskRoot.args) {
@@ -387,12 +387,14 @@ export class AimActionAddIca extends AimActionBase {
 
     endTasks(taskFinishResult: ITaskFinish): void {
         const { taskChild, taskRoot, status, result } = taskFinishResult;
+
+
         if (status === 'error') taskChild.mode = 'error';
         else if (status === 'rejected') taskChild.mode = 'processed';
         else if (status === 'ok') {
             taskChild.mode = 'processed';
             if (taskChild.widget === '_100554_aimTaskExecLLM') {
-                const res = taskRoot.children.filter((ch) => ch.widget === '_100554_aimTaskResultAddIca');
+                const res = taskRoot.children.filter((ch: mls.cbe.ITaskChild) => ch.widget === '_100554_aimTaskResultAddIca');
                 const lastRes = res.pop();
                 const result = lastRes ? lastRes.result : '';
                 if (!result) return;
@@ -540,7 +542,7 @@ ${promptUser}
 
 }
 
-export function isValidRef(taskRoot: cbe.ITaskRoot, activeOpService: ServiceSource100554) {
+export function isValidRef(taskRoot: mls.cbe.ITaskRoot, activeOpService: ServiceSource100554) {
     const actualRef = activeOpService.getActualRef();
     const taskWithRef = taskRoot.children.find((task) => task.widget === "aimTaskPrepareIcaSource");
     if (!taskWithRef) return false;

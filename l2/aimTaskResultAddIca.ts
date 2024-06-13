@@ -65,7 +65,7 @@ export class AimTaskResulAddIca extends AimTaskBase {
 
     @property({ type: Boolean, reflect: true }) isAccept = false;
 
-    @property({ type: String, reflect: true }) modeInternal: cbe.IMode | undefined;
+    @property({ type: String, reflect: true }) modeInternal: mls.cbe.IMode | undefined;
 
     private result: string = '';
 
@@ -108,7 +108,7 @@ export class AimTaskResulAddIca extends AimTaskBase {
         this.alreadyInit = true;
     }
 
-    renderBody(taskRoot: cbe.ITaskRoot, child: cbe.ITaskChild) {
+    renderBody(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild) {
 
         const body = child.result || '';
         const { contentTS, contentsAfterTS, contentsBeforeTS } = this.extractBlocks(body);

@@ -10,11 +10,11 @@ const message_pt = {
     loading: 'Carregando...',
     cancel: 'Cancelar',
     confirm: 'Confirmar',
-    description: 'DescriÁ„o',
+    description: 'Descri√ß√£o',
     name: 'Nome',
-    versionRef: 'Vers„o',
+    versionRef: 'Vers√£o',
     addNewFile: 'Aidcionar um novo arquivo'
-    
+
 }
 const message_en = {
     loading: 'Loading...',
@@ -36,7 +36,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceDsAssets100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    
+
     constructor() {
         super();
         this.setEvents();
@@ -417,7 +417,8 @@ export class ServiceDsAssets100554 extends ServiceBase {
 
         const content = file;
         const path = this.actualPath;
-        await this.dsInstance.assets.add(path, file.name, tags, description, assetType, content, undefined);
+
+        await this.dsInstance.assets.add({ path, shortname: file.name, tags, description, assetType, content });
         // await this.prepareFiles();
         this.updateActualFiles(this.actualPath);
         this.isAddMode = false;
@@ -485,11 +486,11 @@ export class ServiceDsAssets100554 extends ServiceBase {
                 <tbody>
 
                 ${repeat(this.actualFiles, ((key: any) => key) as any,
-                    ((k: any, index: any) => {
-                        const extWithoutDot: string = k.extension.substring(1, k.extension.length);
-                        const extension = this.objIcons[extWithoutDot];
-                        const typeFileIcon = extension || this.objIcons['none'];
-                        return html`
+            ((k: any, index: any) => {
+                const extWithoutDot: string = k.extension.substring(1, k.extension.length);
+                const extension = this.objIcons[extWithoutDot];
+                const typeFileIcon = extension || this.objIcons['none'];
+                return html`
                             <tr @click=${(e: MouseEvent) => { this.onFileClick(e, k) }}>
                                 <td>
                                     <input type="checkbox"></input>
@@ -501,9 +502,9 @@ export class ServiceDsAssets100554 extends ServiceBase {
                                 <td>${k.versionRef}</td>
                             </tr>
                         `
-                    }) as any
+            }) as any
 
-                )}
+        )}
                 </tbody>
             </table>
             <div class="actions" style="display:${this.treeController.isNodeReadOnly ? 'none' : ''}">
@@ -526,8 +527,8 @@ export class ServiceDsAssets100554 extends ServiceBase {
                 <textarea class="txtDesc" placeholder="${this.msg.description}"></textarea>
                 <collab-input-tag-100554></collab-input-tag-100554>
                 <div class="add-container-actions ${this.isAddMode ? 'visible' : ''}">
-                    <button @click=${() => { this.onActionAddConfirm(); }}>${ this.msg.confirm}</button>
-                    <button @click=${() => { this.onActionAddCancel(); }}>${ this.msg.cancel}</button>
+                    <button @click=${() => { this.onActionAddConfirm(); }}>${this.msg.confirm}</button>
+                    <button @click=${() => { this.onActionAddCancel(); }}>${this.msg.cancel}</button>
                 </div>
             </div>
         `
