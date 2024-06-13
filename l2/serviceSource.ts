@@ -696,10 +696,11 @@ export class ServiceSource100554 extends ServiceBase {
             if (enhancementInstance) await enhancementInstance.onAfterChange(model1);
             hasError = storFile.hasError;
         }
+    
         await this.changeStatusFile(model1, storFile, cr.tripleSlashMLS?.variables, hasError);
     }
 
-    private async changeStatusFile(model1: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, variables: mls.common.tripleslash.ITripleSlashVariables, hasError: boolean): Promise<void> {
+    private async changeStatusFile(model1: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, variables: mls.common.tripleslash.ITripleSlashVariables | undefined, hasError: boolean): Promise<void> {
         if (!storFile) return; // new file dont have storFile ???
         const oldStatus = storFile.status;
         storFile.hasError = hasError;
@@ -913,16 +914,13 @@ export class ServiceSource100554 extends ServiceBase {
         const baseTag = convertFileNameToTag(`_${storFile.project}_${storFile.shortName}`)
         const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
         const regex = new RegExp(baseTag, 'g');
-
         cont = cont.replace(regex, newTag);
-
         key = mls.stor.getKeyToFiles(newProject, storFile.level, newShortName, '', '.html');
-
-        let file = mls.stor.files[key];
+        let file: mls.stor.IFileInfo | undefined = mls.stor.files[key];
 
         if (!file) {
-
             file = await mls.stor.addOrUpdateFile({ project, level: storFile.level, shortName: newShortName, extension: '.html', versionRef: new Date().toISOString(), folder: '' });
+            if (!file) throw new Error('Invalid storFile');
             file.status = 'new';
         }
 
@@ -943,10 +941,11 @@ export class ServiceSource100554 extends ServiceBase {
         const extension = '.ts';
         if (project > 1) await mls.stor.server.loadProjectInfoIfNeeded(project);
         const key = mls.stor.getKeyToFiles(project, level, shortName, '', extension);
-        let storFile = mls.stor.files[key];
+        let storFile: mls.stor.IFileInfo | undefined = mls.stor.files[key];
         // if (storFile && project !== 0) throw new Error('Error on createModelTS1, model already exists: ' + key);
         if (!storFile) {
             storFile = await mls.stor.addOrUpdateFile({ project, level, shortName, extension, versionRef: new Date().toISOString(), folder: '' });
+            if (!storFile) throw new Error('Invalid storFile');
             storFile.status = 'new';
         }
         let model1 = mls.l2.editor.get({ project, shortName });
@@ -1039,12 +1038,14 @@ export class ServiceSource100554 extends ServiceBase {
         const project = 0;
         const extension = '.ts';
         const storFile = await mls.stor.addOrUpdateFile({ project, level, shortName, extension, versionRef: new Date().toISOString(), folder: '' });
-        const uri = this.getUri(shortName, extension);
+        if (!storFile) throw new Error('Invalid storFile');
 
+        const uri = this.getUri(shortName, extension);
         const model = monaco.editor.getModel(uri);
         if (model) {
             this.mConfEditor = model;
         } else this.mConfEditor = monaco.editor.createModel(src, 'typescript', uri);
+
 
         mls.l2.editor.add({
             changed: false,
@@ -1132,8 +1133,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (internalIndex < 0) {
                 // load and define theme
                 name2 = 'mytheme';
-                const path = (mls as any)['baseMonaco'] + '../themes/' + mls.editor.themeName + '.json';
-                mls.api.get(path, {}, (data: string) => {
+                const path = mls.baseMonaco + '../themes/' + mls.editor.themeName + '.json';
+                mls.api.base.get(path, {}, (data: string) => {
                     const json = JSON.parse(data);
                     monaco.editor.defineTheme(name2, json);
                     monaco.editor.setTheme(name2);
@@ -1210,6 +1211,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             folder: ''
         };
         const file = await mls.stor.addOrUpdateFile(params);
+        if (!file) throw new Error('Invalid storFile');
         file.status = 'new';
         const fileInfo: mls.stor.IFileInfoValue = {
             content,
