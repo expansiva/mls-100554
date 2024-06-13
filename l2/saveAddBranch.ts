@@ -228,7 +228,7 @@ export class ServiceSaveAddBRanch extends LitElement {
         const prj = mls.actual[5].project;
         if (!prj) throw new Error('Project invalid');
 
-        await this.driver.createNewBranch(this.owner, this.repo, name);
+        await this.driver.createNewBranch({owner: this.owner, repo:this.repo, branch:this.branch, newBranch:name});
         
     }
 
@@ -237,7 +237,7 @@ export class ServiceSaveAddBRanch extends LitElement {
         if (!this.driver) return;
 
         const ret = await this.driver.listBranches(this.owner, this.repo);
-
+this.driver.verifyRepositoryNew
         this.branchMain = ret;
         this.requestUpdate();
     }
