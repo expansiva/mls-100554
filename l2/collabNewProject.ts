@@ -125,7 +125,7 @@ export class CollabNewProject extends CollabLitElement {
     newProjectNumber: number = 0;
     newProjectTeam: string = 'admin';
     newProjectVisibility: string = 'public';
-    newProjectUpdateMode: string = 'push';
+    newProjectUpdateMode: string = 'pullRequest';
     driverName: string = '';
     orgName: string = '';
     instanceDriver: mls.stor.others.DriverIOBase | undefined;
@@ -188,8 +188,8 @@ export class CollabNewProject extends CollabLitElement {
                                     <hr>
                                 </div>
                                 <div class="cards-update-mode">
-                                    <div class="card-update-mode" @click=${(ev: MouseEvent) => this.onCardClick('push', ev)}>
-                                        <input name="update_mode" type="radio" checked></input>
+                                    <div style="display:none" class="card-update-mode" @click=${(ev: MouseEvent) => this.onCardClick('push', ev)}>
+                                        <input name="update_mode" type="radio" ></input>
                                         <div>
                                             <div class="card-update-mode-title">
                                                 <span>${collab_commit}</span>
@@ -199,7 +199,7 @@ export class CollabNewProject extends CollabLitElement {
                                         </div>
                                     </div>
                                     <div class="card-update-mode" @click=${(ev: MouseEvent) => this.onCardClick('pullRequest', ev)}>
-                                        <input name="update_mode" type="radio"></input>
+                                        <input name="update_mode" type="radio" checked></input>
                                         <div>
                                             <div class="card-update-mode-title">
                                                 <span>${collab_pull_request}</span>
@@ -495,7 +495,7 @@ export class CollabNewProject extends CollabLitElement {
             this.setProgress(newPercent);
 
             const newUrlProject = `${this.urls[this.driverName]}main/${this.orgName}/${newProjectName}/`
-            await this.tryItem(async () => { await this.createConfigFile(newProjectId, this.newProjectName, this.driverName, newUrlProject, this.newProjectUpdateMode); }, `${this.msg.log_6}`);
+            await this.tryItem(async () => { await this.createConfigFile(newProjectId); }, `${this.msg.log_6}`);
             newPercent += percent;
             this.setProgress(newPercent);
 
@@ -573,12 +573,8 @@ export class CollabNewProject extends CollabLitElement {
     }
 
 
-    private async createConfigFile(project: number, name: string, projectDriver: string, projectURL: string, projectSaveMode: string) {
-        const newConfig: any = {
-            name,
-            projectDriver,
-            projectURL,
-            projectSaveMode,
+    private async createConfigFile(project: number) {
+        const newConfig: mls.l5_common.ProjectConfig = {
             designSystems: [],
             languages: []
         };
