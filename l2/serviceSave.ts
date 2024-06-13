@@ -434,7 +434,7 @@ export class ServiceSave extends ServiceBase {
         const prj = mls.actual[5].project;
         if (!prj) return;
 
-        const info = await mls.l5.getProjectConf(prj);
+        const info = mls.l5.getProjectSettings(prj);
 
         let str = info.projectURL.split('/');
         str = str.filter((item: string) => item.trim() !== "");

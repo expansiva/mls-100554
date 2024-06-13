@@ -158,7 +158,7 @@ export class ServiceSaveAddBRanch extends LitElement {
         if (!this.driver)
             this.driver = mls.stor.others.getDefaultDriver(prj);
 
-        const info = await mls.l5.getProjectConf(prj);
+        const info = mls.l5.getProjectSettings(prj);
 
         let str = info.projectURL.split('/');
         str = str.filter((item: string) => item.trim() !== "");
