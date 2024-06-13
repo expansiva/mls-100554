@@ -443,7 +443,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
             this.actualKeyDriver = localStorage?.getItem((this.keyLocalHistory as any)[details.projectDriver]);
         } 
 
-        await this.setInfoInitial();
+        //await this.setInfoInitial();
         
     }
 
