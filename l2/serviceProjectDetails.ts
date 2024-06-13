@@ -1,13 +1,10 @@
 /// <mls shortName="serviceProjectDetails" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
-import { html, css } from 'lit';
+import { html, css, repeat } from 'lit';
 import { customElement, property, queryAll, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
-import {
-    collab_chevron_right,
-    collab_eye,
-    collab_eye_slash,
-} from './_100554_collabIcons';
+import * as icons from './_100554_collabIcons';
+
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -101,6 +98,23 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     private showKey: boolean = false;
 
+    @property() name: string | undefined;
+    @property() projectDriver: string | undefined;
+    @property() projectURL: string | undefined;
+    @property() designSystems: number | undefined;
+    @property() projectCreated: boolean = false;
+    @property() files: number | undefined;
+    @property() actualKeyDriver: string | null | undefined;
+    @property() state: IServiceList = { history: [], orgs: [], projectSelected: undefined };
+    @property() lastPrjId: string | null | undefined;
+    @property({ type: String }) currentScenario: IScenaries = 'details';
+
+
+    @queryAll('.serviceListProjects .serviceListList li') list: NodeListOf<HTMLElement> | undefined;
+    @queryAll('.serviceListProjects .serviceListTitle') titleList: NodeListOf<HTMLElement> | undefined;
+    @query('.l5-project-list-history') historieEl: HTMLElement | undefined;
+    @query('#button-see-project') buttonSeePrj: HTMLButtonElement | undefined;
+
     constructor() {
         super();
         mls.events.addListener(5, 'ProjectSelected', (ev) => this.onProjectSelected(ev));
@@ -108,6 +122,8 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
+
+    //------------ SERVICE -------------------
     public details: IService = {
         icon: '&#xf15b',
         state: 'foreground',
@@ -147,57 +163,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     }
 
-    @property() name: string | undefined;
-    @property() projectDriver: string | undefined;
-    @property() projectURL: string | undefined;
-    @property() designSystems: number | undefined;
-    @property() projectCreated: boolean = false;
-    @property() files: number | undefined;
-    @property() actualKeyGitHub: string | null | undefined;
-    @property() state: IServiceList = { history: [], orgs: [], projectSelected: undefined };
-    @property() lastPrjId: string | null | undefined;
-    @property({ type: String }) currentScenario: IScenaries = 'details';
-
-
-    @queryAll('.serviceListProjects .serviceListList li') list: NodeListOf<HTMLElement> | undefined;
-    @queryAll('.serviceListProjects .serviceListTitle') titleList: NodeListOf<HTMLElement> | undefined;
-    @query('.l5-project-list-history') historieEl: HTMLElement | undefined;
-    @query('#button-see-project') buttonSeePrj: HTMLButtonElement | undefined;
-
-    private async changeScenario(scenario: IScenaries) {
-        this.currentScenario = scenario;
-    }
-
-    private async getDetailsProject(project: number) {
-        let details = mls.l5.getProjectSettings(project);
-        this.designSystems = details.designSystems ? details.designSystems.length : 0;
-        this.name = details.name;
-        this.projectDriver = details.projectDriver;
-        this.projectURL = details.projectURL;
-        this.files = Object.keys(mls.stor.files).filter((item => item.startsWith(project.toString()))).length;
-        this.actualKeyGitHub = localStorage?.getItem('keyGitHub');
-    }
-
-    private onProjectSelected(ev: mls.events.IEvent) {
-        if (!ev.desc) return;
-        const data: IProjectSelectedParams = JSON.parse(ev.desc);
-        this.getDetailsProject(data.value);
-    }
-
-    private getLastProject() {
-        this.lastPrjId = localStorage.getItem('l5-last-project');
-        return this.lastPrjId;
-    }
-
-    private handleChangeKey() {
-        if (this.actualKeyGitHub) {
-            localStorage?.setItem('keyGitHub', this.actualKeyGitHub as string);
-        }
-    }
-
-    private handleInputChangeKey(value: string) {
-        this.actualKeyGitHub = value;
-    }
+    //---------- WEBCOMPONENT----------------------
 
     render() {
         const lang = this.getMessageKey(messages);
@@ -248,66 +214,99 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                 :
                 html`
                 <section class="section-details">
-                    <details open>
-                        <summary>${this.msg.resume}</summary>
-                        <ul>
-                            <li>${this.msg.name}: ${this.name}</li>
-                            <li>${this.msg.projectDriver}: ${this.projectDriver}</li>
-                            <li>${this.msg.projectURL}: ${this.projectURL}</li>
-                            <li>${this.msg.designSystems}: ${this.designSystems}</li>
-                            <li>${this.msg.files}: ${this.files}</li>
-                        </ul>
+                    <h4>${this.msg.resume}</h4>
+                    <ul class="listInfo">
+                        <li>
+                            <b>${icons.collab_file}${this.msg.name}:</b> 
+                            ${this.name}
+                        </li>
+                        <li style="display:flex">
+                            <div style="width:18px">${icons.collab_gear}</div>
+                            <b>${this.msg.projectDriver}:</b> 
+                            ${this.projectDriver}
+                        </li>
+                        <li>
+                            <b>
+                                ${icons.collab_folder_tree}
+                                ${this.msg.projectURL}:
+                            </b>
+                            ${this.projectURL}
+                        </li>
+                        <li>
+                            <b>${icons.collab_book}${this.msg.designSystems}:</b> 
+                            ${this.designSystems}
+                        </li>
+                        <li>
+                            <b>
+                                ${icons.collab_file_signature}
+                                ${this.msg.files}:
+                            </b>
+                            ${this.files}
+                        </li>
+                    </ul>
+
+                    <details>
+                        <summary>Config:</summary>
+                        ${this.renderConfigKey()}
                     </details>
-                </section>
-                <section
-                    style=${this.projectDriver === 'github' ? 'display: block' : 'display:none'} 
-                    class="section-config-github">
-                    <div>
-                        <label>${this.msg.keyGithub}</label>
-                        <div class="cls_key">
-                            <input .value=${this.showString(this.actualKeyGitHub, this.showKey)} @input="${this.handleInputChangeKey}"></input rows=4>
-                            <button @click="${this.clickShowEye}">${this.showKey ? collab_eye : collab_eye_slash}</button>
-                        </div>
-                        <button @click=${this.handleChangeKey}>${this.msg.btnChange}</button>
-                    </div>
-                </section>
-                <section class="cls_tree_branch">
+
                     ${this.renderCreateTreeFork()}
                 </section>
+                
+                
                 `
             }`
+    }
+
+    private renderConfigKey() {
+        if (!this.projectDriver && !(this.keyLocalHistory as any)[this.projectDriver as any]) return html``
+
+        return html`
+            <div class="section-config-github">
+                <label>${(this.keyLocalHistory as any)[this.projectDriver as any]}</label>
+                <div class="cls_key">
+                    <input .value=${this.showString(this.actualKeyDriver, this.showKey)} @input="${this.handleInputChangeKey}"></input rows=4>
+                    <button @click="${this.clickShowEye}">${this.showKey ? icons.collab_eye : icons.collab_eye_slash}</button>
+                </div>
+                <button @click=${this.handleChangeKey}>${this.msg.btnChange}</button>
+            </div>
+            `
     }
 
     private renderCreateTreeFork() {
         return html`
             <details>
                 <summary>Branchs:</summary>
-                <ul>
-                    <li>
-                        owner
-                        <ul>
-                            <li>
-                                <a href="">expansiva</a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                <ul>
-                    <li>
-                        user
-                        <ul>
-                            <li>
-                                santiagoExpansiva
-                                <ul>
-                                    <li>
-                                        <a href="">mls-20001</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+                <div class="grp_show_branches">
+                    ${this.renderBranchs()}
+                </div>
             </details>
+        `
+    }
+
+    renderBranchs() {
+        return html`
+        <ul>
+            ${repeat(this.branchMain, ((key: any) => key) as any,
+            ((item: any, index: any) => {
+
+                return this.renderItem(item, index);
+
+            }) as any
+        )}
+        </ul>`;
+    }
+
+    renderItem(obj: { name: string }, index: number) {
+        return html`
+            <li .info=${obj}>
+                <input type="radio" id="item-${index}" name="optBranch" value="${obj.name}">
+                <label for="item-${index}">
+                    ${obj.name}
+                </label>
+            
+            </li>
+        
         `
     }
 
@@ -332,7 +331,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                                 <div>
                                     <span>${his.name + ' (' + his.project.toString() + ')'}</span>
                                 </div>
-                                <span>${collab_chevron_right}</span>
+                                <span>${icons.collab_chevron_right}</span>
                             </li>
                         `)}
                     </ul>
@@ -347,7 +346,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                                     <div>
                                         <span>${prj.name + ' (' + prj.id.toString() + ')'}</span>
                                     </div>
-                                <span>${collab_chevron_right}</span>
+                                <span>${icons.collab_chevron_right}</span>
                                 </li>
                             `)}
                             </ul>
@@ -372,6 +371,104 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         `
     }
 
+    //------------- IMPLEMENTATION-----------------------
+
+    private keyLocalHistory = {
+        github: 'keyGitHub',
+        gitlab: 'keyGitLab'
+    }
+
+    //-- braches
+    private branchMain: { name: string }[] = [];
+
+    private driver: mls.stor.others.DriverIOBase | undefined;
+    private branch: string = '';
+    private owner: string = '';
+    private repo: string = '';
+
+    private async setInfoInitial() {
+
+        if (!(this.keyLocalHistory as any)[this.projectDriver as any]) {
+            this.branchMain = [];
+            return;
+        }
+        
+        const prj = mls.actual[5].project;
+        if (!prj) return;
+
+        if (!this.driver)
+            this.driver = mls.stor.others.getDefaultDriver(prj);
+
+        const info = mls.l5.getProjectSettings(prj);
+
+        let str = info.projectURL.split('/');
+        str = str.filter((item: string) => item.trim() !== "");
+
+        this.branch = str[0];
+        this.owner = str[1];
+        this.repo = str[2];
+
+        this.getInfosRepo();
+    }
+
+    private async getInfosRepo() {
+
+        if (!this.driver) {
+            this.branchMain = [];
+            return;
+        }
+
+        const ret = await this.driver.listBranches(this.owner, this.repo);
+
+        this.branchMain = ret;
+        this.requestUpdate()
+    }
+
+    //--
+
+    private async changeScenario(scenario: IScenaries) {
+        this.currentScenario = scenario;
+    }
+
+    private async getDetailsProject(project: number) {
+
+        let details = mls.l5.getProjectSettings(project);
+        this.designSystems = details.designSystems ? details.designSystems.length : 0;
+        this.name = details.name;
+        this.projectDriver = details.projectDriver;
+        this.projectURL = details.projectURL;
+        this.files = Object.keys(mls.stor.files).filter((item => item.startsWith(project.toString()))).length;
+
+        if ((this.keyLocalHistory as any)[details.projectDriver] ) {
+            this.actualKeyDriver = localStorage?.getItem((this.keyLocalHistory as any)[details.projectDriver]);
+        } 
+
+        await this.setInfoInitial();
+        
+    }
+
+    private onProjectSelected(ev: mls.events.IEvent) {
+        if (!ev.desc) return;
+        const data: IProjectSelectedParams = JSON.parse(ev.desc);
+        this.getDetailsProject(data.value);
+    }
+
+    private getLastProject() {
+        this.lastPrjId = localStorage.getItem('l5-last-project');
+        return this.lastPrjId;
+    }
+
+    private handleChangeKey() {
+        if (this.actualKeyDriver && this.projectDriver && (this.keyLocalHistory as any)[this.projectDriver]) {
+            localStorage?.setItem((this.keyLocalHistory as any)[this.projectDriver], this.actualKeyDriver as string);
+        }
+    }
+
+    private handleInputChangeKey(value: string) {
+        this.actualKeyDriver = value;
+    }
+
+    
     private projectCreatedNumber: number = 100554;
     private async onProjectCreated(ev: CustomEvent) {
         this.projectCreated = true;

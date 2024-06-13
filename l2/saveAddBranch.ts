@@ -237,7 +237,7 @@ export class ServiceSaveAddBRanch extends LitElement {
         if (!this.driver) return;
 
         const ret = await this.driver.listBranches(this.owner, this.repo);
-this.driver.verifyRepositoryNew
+
         this.branchMain = ret;
         this.requestUpdate();
     }
