@@ -746,8 +746,10 @@ export class ServiceSave extends ServiceBase {
 
             }, 500);
 
-        } catch (e) {
+        } catch (e:any) {
 
+            this.error = e.message;
+            this.showLoader(false);
             console.info('Error onSave');
 
         }
