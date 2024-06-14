@@ -379,36 +379,41 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     }
 
     //-- braches
-    private branchMain: { name: string }[] = [];
 
+    @property() branchMain: { name: string }[] = [];
     private driver: mls.stor.others.DriverIOBase | undefined;
     private branch: string = '';
     private owner: string = '';
     private repo: string = '';
+    private isFecthBranchs: string = '';
+    private isTimeout = false;
 
     private async setInfoInitial() {
 
-        if (!(this.keyLocalHistory as any)[this.projectDriver as any]) {
-            this.branchMain = [];
-            return;
-        }
-        
-        const prj = mls.actual[5].project;
-        if (!prj) return;
+        if (this.isTimeout || this.lastPrjId === this.isFecthBranchs) return;
 
-        if (!this.driver)
-            this.driver = mls.stor.others.getDefaultDriver(prj);
+        this.isTimeout = true;
+        setTimeout(() => {
 
-        const info = mls.l5.getProjectSettings(prj);
+            const prj = mls.actual[5].project;
+            if (!prj) return;
 
-        let str = info.projectURL.split('/');
-        str = str.filter((item: string) => item.trim() !== "");
+            if (!this.driver || this.driver.shortName !== this.projectDriver)
+                this.driver = mls.stor.others.getDefaultDriver(prj);
 
-        this.branch = str[0];
-        this.owner = str[1];
-        this.repo = str[2];
+            const info = mls.l5.getProjectSettings(prj);
 
-        this.getInfosRepo();
+            let str = info.projectURL.split('/');
+            str = str.filter((item: string) => item.trim() !== "");
+
+            this.branch = str[0];
+            this.owner = str[1];
+            this.repo = str[2];
+
+            this.getInfosRepo();
+
+        }, 500)
+
     }
 
     private async getInfosRepo() {
@@ -420,8 +425,9 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
         const ret = await this.driver.listBranches(this.owner, this.repo);
 
+        this.isFecthBranchs = this.lastPrjId as string;
         this.branchMain = ret;
-        this.requestUpdate()
+        this.isTimeout = false;
     }
 
     //--
@@ -434,23 +440,26 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
         let details = mls.l5.getProjectSettings(project);
         this.designSystems = details.designSystems ? details.designSystems.length : 0;
+
         this.name = details.name;
         this.projectDriver = details.projectDriver;
         this.projectURL = details.projectURL;
         this.files = Object.keys(mls.stor.files).filter((item => item.startsWith(project.toString()))).length;
 
-        if ((this.keyLocalHistory as any)[details.projectDriver] ) {
+        if ((this.keyLocalHistory as any)[details.projectDriver]) {
             this.actualKeyDriver = localStorage?.getItem((this.keyLocalHistory as any)[details.projectDriver]);
-        } 
+        }
 
-        //await this.setInfoInitial();
-        
+        await this.setInfoInitial()
+
+
     }
 
     private onProjectSelected(ev: mls.events.IEvent) {
         if (!ev.desc) return;
         const data: IProjectSelectedParams = JSON.parse(ev.desc);
         this.getDetailsProject(data.value);
+
     }
 
     private getLastProject() {
@@ -468,7 +477,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         this.actualKeyDriver = value;
     }
 
-    
+
     private projectCreatedNumber: number = 100554;
     private async onProjectCreated(ev: CustomEvent) {
         this.projectCreated = true;
@@ -510,6 +519,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     private async loadProjectActual(project: number) {
         await mls.stor.server.loadProjectInfoIfNeeded(project);
+
     }
 
     private setOrgActual(project: number) {
