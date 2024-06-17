@@ -18,6 +18,8 @@ export class ServiceSaveAddBRanch extends LitElement {
     private branch: string = '';
     private branchMain: { name: string }[] = [];
 
+    private listForks: mls.stor.others.IFork[] = []
+
     private error: string = '';
 
     private driver: mls.stor.others.DriverIOBase | undefined;
@@ -73,6 +75,7 @@ export class ServiceSaveAddBRanch extends LitElement {
                     </button>
                 </div>
                 ${this.renderBranchs()}
+                ${this.renderForks()}
             </div>
         `;
     }
@@ -136,12 +139,42 @@ export class ServiceSaveAddBRanch extends LitElement {
         </ul>`;
     }
 
+    renderForks() {
+
+        if (this.listForks.length <= 0) return html``;
+        
+        return html`
+        <h4>Forks</h4>
+        <ul>
+            ${repeat(this.listForks, ((key: any) => key) as any,
+            ((item: any, index: any) => {
+
+                return this.renderItemFork(item, index);
+
+            }) as any
+        )}
+        </ul>`;
+    }
+
     renderItem(obj: { name: string }, index: number) {
         return html`
             <li @click="${this.setItem}" .info=${obj}>
                 <input type="radio" id="item-${index}" name="optBranch" value="${obj.name}">
                 <label for="item-${index}">
                     ${obj.name}
+                </label>
+            
+            </li>
+        
+        `
+    }
+
+    renderItemFork(obj: mls.stor.others.IFork, index: number) {
+        return html`
+            <li @click="${this.setItemFork}" .info=${obj}>
+                <input type="radio" id="item-${index}" name="optFork" value="${obj.nameWithOwner}">
+                <label for="item-${index}">
+                    ${obj.nameWithOwner}
                 </label>
             
             </li>
@@ -237,12 +270,29 @@ export class ServiceSaveAddBRanch extends LitElement {
         if (!this.driver) return;
 
         const ret = await this.driver.listBranches(this.owner, this.repo);
+        const fork = await this.driver.listForks(this.owner, this.repo);
 
+        this.listForks = fork;
         this.branchMain = ret;
         this.requestUpdate();
     }
 
     private setItem(e: MouseEvent) {
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        const el = e.target as HTMLElement;
+        if (!el) return;
+
+        const li = el.closest('li') as any;
+        if (!li) return;
+
+        if (!this.callBack) return;
+        this.callBack(li.info);
+    }
+
+    private setItemFork(e: MouseEvent) {
 
         e.stopPropagation();
         e.preventDefault();

@@ -20,7 +20,10 @@ const message_pt = {
     create: 'Criar',
     cancel: 'Cancelar',
     title: 'Titulo',
-    errorCreatePull: 'Erro ao tentar criar pull request'
+    errorCreatePull: 'Erro ao tentar criar pull request',
+    msgBlockAll: 'Você não tem acesso a este repositorio, por fvor entre em contato com o admin do projeto',
+    msgBlock: 'Você não tem acesso de escrita neste repositorio, caso deseje criar um fork clique no botão abaixo',
+
 }
 
 const message_en = {
@@ -34,7 +37,9 @@ const message_en = {
     create: 'Create',
     cancel: 'Cancel',
     title: 'Title',
-    errorCreatePull: 'Error when trying to create pull request'
+    errorCreatePull: 'Error when trying to create pull request',
+    msgBlockAll: 'You do not have access to this repository, please contact the project admin',
+    msgBlock: 'You do not have write access to this repository, if you wish to create a fork click the button below',
 }
 
 type MessageType = typeof message_en;
@@ -53,9 +58,11 @@ export class ServiceSave extends ServiceBase {
     private repo: string = '';
     private branch: string = '';
 
-    @property() itens: any = undefined;
+    private scenery: string = 'save';
 
+    @property() itens: any = undefined;
     @property() error: string = '';
+
 
     constructor() {
         super();
@@ -84,7 +91,7 @@ export class ServiceSave extends ServiceBase {
     public menu: IMenu = {
         title: 'Save',
         actions: {
-            opBranch: 'teste'
+            opBranch: ''
         },
         icons: {},
         actionDefault: 'opSave', // call after close icon clicked
@@ -99,17 +106,24 @@ export class ServiceSave extends ServiceBase {
     private showBranche(): boolean {
         this.menu.title = 'Branchs';
         if (this.menu.updateTitle) this.menu.updateTitle();
-        
+
         const div = document.createElement('div');
         const el = document.createElement('save-add-branch-100554');
         (el as any).callBack = (obj: any) => {
-            this.branch = obj.name;
+            if (obj.nameWithOwner) {
+                const ret = obj.nameWithOwner.split('/');
+                this.owner = ret[0];
+                this.repo = ret[1];
+                this.branch = obj.defaultBranchRef.name
+            } else {
+                this.branch = obj.name;
+            } 
             if (this.menu.setMenuActive) this.menu.setMenuActive('initial');
-            this.requestUpdate(); 
+            this.requestUpdate();
         };
 
         div.appendChild(el);
-        
+
         if (this.menu.setMode) this.menu.setMode('page', div);
         return true;
     }
@@ -130,7 +144,7 @@ export class ServiceSave extends ServiceBase {
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
-        this.verifyExitFileChanged(); 
+        this.verifyExitFileChanged();
 
     }
 
@@ -141,6 +155,7 @@ export class ServiceSave extends ServiceBase {
 
         if (!['changed', 'delete', 'new', 'rename'].includes(fileAction.action)) return;
 
+        this.scenery = 'save';
         if (this.isServiceVisible()) {
             this.init();
         }
@@ -180,7 +195,7 @@ export class ServiceSave extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.init(); 
+        this.init();
     }
 
 
@@ -197,6 +212,10 @@ export class ServiceSave extends ServiceBase {
 
         }
 
+        if (this.scenery !== 'save') {
+            return this.renderBlockScenery();
+        }
+
         if (this.itens) {
 
             return html`
@@ -211,6 +230,27 @@ export class ServiceSave extends ServiceBase {
             `
 
         }
+    }
+
+    renderBlockScenery() {
+
+        if (this.scenery === 'blockAll') {
+
+            return html`
+            <h4 style="margin-top:1rem; text-align:center">${this.myMessage.msgBlockAll}</h4>
+            
+        `;
+
+        }
+        return html`
+            <h4 style="margin-top:1rem; text-align:center">${this.myMessage.msgBlock}</h4>
+            <div style=" display: flex; justify-content: center; align-items: center; margin-top:1rem">
+                <button @click="${this.createFork}" style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 10px; height: 30px; background: #007bff; color: #fff;">
+                    <svg width="16" height="16" fill="#fff" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"></path></svg>
+                    Fork
+                </button>
+            </div>
+        `;
     }
 
     renderHeader() {
@@ -230,7 +270,7 @@ export class ServiceSave extends ServiceBase {
                     <span>${this.branch}</span> 
                 </div>
 
-                <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { if(this.menu.setMenuActive)this.menu.setMenuActive('opBranch') }}">
+                <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { if (this.menu.setMenuActive) this.menu.setMenuActive('opBranch') }}">
                     ${collab_branch} Change
                 </button>
 
@@ -420,10 +460,13 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private async init() {
+    //-------- IMPLEMENTATION --------
+
+    private async init(isSetInfoProject:boolean = true) {
 
         this.showLoader(true);
-        await this.initInfoProject();
+        this.scenery = 'save';
+        if(isSetInfoProject) await this.initInfoProject();
         await this.setInfos();
         this.showLoader(false);
 
@@ -711,7 +754,46 @@ export class ServiceSave extends ServiceBase {
         }
 
     }
-    
+
+    private async createFork(e: MouseEvent) {
+
+        try {
+
+            e.stopPropagation();
+
+            const prj = mls.actual[5].project;
+            if (!prj) throw new Error('Not found project actual');
+
+            this.showLoader(true);
+
+            const info = this.getLocalHIstoryCurrentInfoDriver();
+            const driver = mls.stor.others.getDefaultDriver(prj);
+
+            if (!info || !info.login) {
+                const user = await driver.getUserInfo();
+                info.login = user.login;
+                this.setLocalHIstoryCurrentInfoDriver(user.login);
+            }
+
+            const ret = await driver.createFork(info.login, info.repo, info.owner, info.login);
+
+            if (!ret) throw new Error('Error create fork');
+
+            this.owner = info.login;
+            this.repo = info.repo;
+            this.branch = 'main';
+            this.setLocalHIstoryCurrentInfoDriver();
+            this.init(false)
+            
+        } catch (e: any) {
+
+            this.error = e.message;
+            this.showLoader(false);
+            console.info('Error onCreateFork');
+
+        }
+    }
+
     private async onSave(e: MouseEvent) {
 
         try {
@@ -733,6 +815,20 @@ export class ServiceSave extends ServiceBase {
                 try {
 
                     this.setLocalHIstoryCurrentInfoDriver();
+                    const p = await this.veriFyPermission();
+
+                    if (p.read && !p.write) {
+                        this.scenery = 'block';
+                        this.showLoader(false);
+                        this.requestUpdate();
+                        return;
+                    } else if (!p.read && !p.write) {
+                        this.scenery = 'blockAll';
+                        this.showLoader(false);
+                        this.requestUpdate();
+                        return;
+                    }
+
                     await this.verifyVersionBlock(array);
                     await this.onSavenew(array, msg);
                     await this.setInfos();
@@ -746,7 +842,7 @@ export class ServiceSave extends ServiceBase {
 
             }, 500);
 
-        } catch (e:any) {
+        } catch (e: any) {
 
             this.error = e.message;
             this.showLoader(false);
@@ -757,7 +853,35 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private setLocalHIstoryCurrentInfoDriver(): void {
+    private async veriFyPermission(): Promise<IPermission> {
+
+        try {
+
+            const prj = mls.actual[5].project;
+            if (!prj) throw new Error('Not found project actual');
+
+            const info = this.getLocalHIstoryCurrentInfoDriver();
+            const driver = mls.stor.others.getDefaultDriver(prj)
+            if (!info || !info.login) {
+                const user = await driver.getUserInfo();
+                info.login = user.login;
+                this.setLocalHIstoryCurrentInfoDriver(user.login);
+            }
+
+            const p = (driver as any).verifyPermission(info.owner, info.repo, info.login) as IPermission;
+
+            return p;
+
+        } catch (e: any) {
+
+            throw new Error(e.message);
+
+        }
+
+
+    }
+
+    private setLocalHIstoryCurrentInfoDriver(user: string | undefined = undefined): void {
 
         const prj = mls.actual[5].project;
         if (!prj) throw new Error('Not found project actual');
@@ -770,9 +894,25 @@ export class ServiceSave extends ServiceBase {
             owner: this.owner,
             repo: this.repo,
             branch: this.branch,
+            login: user ? user : info.login
         }
 
         localStorage.setItem('InfoCurrentDriver', JSON.stringify(info));
+
+    }
+
+    private getLocalHIstoryCurrentInfoDriver(): { owner: string, repo: string, branch: string, login: string } {
+
+        const prj = mls.actual[5].project;
+        if (!prj) throw new Error('Not found project actual');
+
+        let str = localStorage.getItem('InfoCurrentDriver');
+        if (!str) str = '{}';
+
+        const info: any = JSON.parse(str);
+        if (info[prj]) return info[prj]
+
+        return {} as any;
 
     }
 
@@ -887,6 +1027,13 @@ export class ServiceSave extends ServiceBase {
     }
 
 
+}
+
+interface IPermission {
+    write: boolean,
+    read: boolean,
+    create: boolean,
+    delete: boolean,
 }
 
 interface Iitem {
