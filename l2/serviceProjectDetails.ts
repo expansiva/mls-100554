@@ -288,12 +288,21 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         return html`
         <ul>
             ${repeat(this.branchMain, ((key: any) => key) as any,
-            ((item: any, index: any) => {
+                ((item: any, index: any) => {
 
-                return this.renderItem(item, index);
+                    return this.renderItem(item, index);
 
-            }) as any
+                }) as any
+            
         )}
+            ${repeat(this.listForks, ((key: any) => key) as any,
+                ((item: any, index: any) => {
+
+                    return this.renderItemForks(item, index);
+
+                }) as any
+            
+            )}
         </ul>`;
     }
 
@@ -303,6 +312,19 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                 <input type="radio" id="item-${index}" name="optBranch" value="${obj.name}">
                 <label for="item-${index}">
                     ${obj.name}
+                </label>
+            
+            </li>
+        
+        `
+    }
+
+    renderItemForks(obj: mls.stor.others.IFork, index: number) {
+        return html`
+            <li .info=${obj}>
+                <input type="radio" id="itemf-${index}" name="optBranch" value="${obj.nameWithOwner}">
+                <label for="itemf-${index}">
+                    ${obj.nameWithOwner}
                 </label>
             
             </li>
@@ -380,6 +402,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     //-- braches
 
+    private listForks: mls.stor.others.IFork[] = []
     @property() branchMain: { name: string }[] = [];
     private driver: mls.stor.others.DriverIOBase | undefined;
     private branch: string = '';
@@ -420,12 +443,15 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
         if (!this.driver) {
             this.branchMain = [];
+            this.listForks = [];
             return;
         }
 
         const ret = await this.driver.listBranches(this.owner, this.repo);
+        const forks = await this.driver.listForks(this.owner, this.repo);
 
         this.isFecthBranchs = this.lastPrjId as string;
+        this.listForks = forks;
         this.branchMain = ret;
         this.isTimeout = false;
     }
