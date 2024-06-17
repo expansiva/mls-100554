@@ -8,11 +8,13 @@ export class IcaTestPage100554 extends LitElement {
     static styles = css`:host {
         display: flex;
     }`;
+
     
     render() {
         window.globalState = {
             tables: {
-                sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }]
+                sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
+                events: [{ key: 'click', value: 'click', description: 'evento onclick' }, { key: 'blur', value: 'blur', description: 'evento onblur' }, { key: 'change', value: 'change', description: 'evento onchange' }],
             },
             users: [{
                 name: 'Wagner',
