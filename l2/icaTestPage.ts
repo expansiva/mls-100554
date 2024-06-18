@@ -9,9 +9,10 @@ export class IcaTestPage100554 extends LitElement {
         display: flex;
     }`;
 
-    
+
     render() {
         window.globalState = {
+            wcdAddEventSelected : '',
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
                 events: [{ key: 'click', value: 'click', description: 'evento onclick' }, { key: 'blur', value: 'blur', description: 'evento onblur' }, { key: 'change', value: 'change', description: 'evento onchange' }],

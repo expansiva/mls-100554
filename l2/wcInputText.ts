@@ -2,7 +2,7 @@
 import { html, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputString } from './_100554_icaFormsInputString';
-import { propertyDataSource } from './_100554_icaLitElement';
+import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
 
 @customElement('wc-input-text-100554')
 export class WcInputText100554 extends IcaFormsInputString {
@@ -37,7 +37,7 @@ export class WcInputText100554 extends IcaFormsInputString {
         color: red;
     }
     `
-    @propertyDataSource({ type: String }) datasource: string | undefined;
+    @propertyCompositeDataSource({ type: String }) datasource: string | undefined;
 
     @property({ type: String }) name: string | undefined;
 
