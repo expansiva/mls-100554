@@ -255,7 +255,7 @@ export class ServicePreviewView extends LitElement {
     private changeLevelFca(el: HTMLElement): void {
 
         let tagEl = el.tagName.toLowerCase();
-        if (tagEl.startsWith('fca-')) {
+        if (tagEl.startsWith('ica-')) {
             el.setAttribute('level', this.level);
         }
 

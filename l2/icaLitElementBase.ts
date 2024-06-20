@@ -79,12 +79,18 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             this.addWCDToolbox();
         }
 
+        const l = changedProperties.get('level');
+        if (l) {
+            const els = this.findElementsStartingWithIca();
+            els.forEach((el) => { el.setAttribute('level', this.level as any) });
+        }
+
         this.performPreSlotAllocationOperations();
 
     }
 
     public changeStateStyle(style: {}): void {
-        debugger
+
         if (!this.styleElMain || !style) return;
         const el = this.querySelector(`${this.widget}:first-child`) as HTMLElement
         if (el) {
@@ -179,7 +185,8 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
     shouldUpdate(changedProperties: Map<string, string>): boolean {
 
-        // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = não executa o render().
+        // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = nÃ£o executa o render().
+
         const oldValue = changedProperties.get('renderType');
         if (oldValue === 'editactive' && this.renderType !== 'editactive') {
             super.setCollabState(states.CHANGESTATE, '');
@@ -188,7 +195,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             // this.doChangeState(this.changeState);
             return false;
         }
-
+    
         if (changedProperties.get('level') && !this.isLoadMyAction[this.level as any] && this.renderType === 'editactive') {
             this.auxSetMyActions();
         }
@@ -201,6 +208,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         await this.setActions(this.level as any);
         this.isLoadMyAction[this.level as any] = true;
         this.renderType = 'edit';
+
         setTimeout(() => { this.click(); }, 200);
 
     }
