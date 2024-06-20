@@ -34,29 +34,103 @@ export abstract class ServiceBase extends CollabLitElement {
 
     abstract onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void;
 
-    getActualRef(): string {
+    public getActualRef(): string {
         return this.nav3Service?.getAttribute('data-service') || '';
     }
 
+    public setError(error: string): void {
+        const nav3Service = this.getNav3Service();
+        if (!nav3Service) return;
+        (nav3Service as any)['serviceBind'] = this.details.widget;
+        nav3Service.setAttribute('error', error);
+    }
+
+    public toogleBadge(show: boolean, serviceName: string) {
+        const mlsNav2 = this.getMlsNav2();
+        if (!mlsNav2) {
+            console.error('Function toogleBadge: mls-nav-2 dont exist');
+            return;
+        }
+        mlsNav2.toogleBadge(show, serviceName);
+    }
+
+    public openMe() {
+        const itemService = this.serviceItemNav;
+        if (itemService) itemService.click();
+    }
+
+    public showNav2Item(show: boolean) {
+        const itemService = this.serviceItemNav as IMlsNav2Item;
+        if (itemService && itemService.show) itemService.show(show);
+    }
+
+    public openService(service: string, position: 'left' | 'right', level: number) {
+        let page = this.closest('collab-page');
+        if (!page) return;
+        const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
+        if (!toolbar) return;
+        if (this.level !== level) {
+            (toolbar as any).state[level][position] = service;
+            this.selectLevel(level);
+            return;
+        }
+        const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
+        if (item) item.click();
+        return;
+    }
+
+    public setFullScreen(level: number, position: 'right' | 'left' | 'default') {
+        const spliter = this.getSplitter();
+        if (!spliter) return;
+        spliter.setFullScreen(level, position)
+    }
+
+    public selectLevel(level: number) {
+
+        const page = this.closest('collab-page');
+        const nav = page?.querySelector('collab-nav-1') as HTMLElement;
+
+        const objIndex = {
+            0: 7,
+            1: 6,
+            2: 5,
+            3: 4,
+            4: 3,
+            5: 2,
+            6: 1,
+            7: 0,
+
+        } as any;
+        if (!nav) return;
+        nav.setAttribute('tabindexactive', objIndex[level]);
+    }
+
+    public addScenario(page: string) {
+        const nav3 = this.getNav3ServiceMenu();
+        if (!nav3) return;
+        let scenarios = nav3.getAttribute('scenarios')
+        if (!scenarios) scenarios = page;
+        else scenarios = `${scenarios},${page}`;
+        nav3.setAttribute('scenarios', scenarios);
+    }
+
+    public removeScenario(page: string) {
+        const nav3 = this.getNav3ServiceMenu();
+        if (!nav3) return;
+        let scenarios = nav3.getAttribute('scenarios')
+        if (!scenarios) return;
+        const arrayScenarios = scenarios.split(',');
+        const newArrayScenarios = arrayScenarios.filter(element => element !== page);
+        if (newArrayScenarios.length === 0) nav3.removeAttribute('scenarios');
+        else nav3.setAttribute('scenarios', newArrayScenarios.join(','));
+    }
+
+
+    // Internal
     connectedCallback() {
         super.connectedCallback();
         (this as any)['mlsWidget'] = this;
         this.serviceContent?.addEventListener('focusin', this.checkFocus.bind(this));
-    }
-
-    checkFocus() {
-        if (!this.serviceContent) return;
-        if (this.serviceContent.contains(document.activeElement)) {
-            this.setActualServicePosition();
-        }
-    }
-
-    setActualServicePosition() {
-        if (!this.serviceContent || !this.nav3Service) return;
-        const service = this.serviceContent.getAttribute('data-service') || '';
-        const position = this.nav3Service.getAttribute('toolbarposition') || '';
-        mls.setActualPosition(position as any);
-        mls.setActualService(service)
     }
 
     attributeChangedCallback(name: string, oldVal: string, newVal: string) {
@@ -91,71 +165,19 @@ export abstract class ServiceBase extends CollabLitElement {
         }
     }
 
-    setError(error: string): void {
-        const nav3Service = this.getNav3Service();
-        if (!nav3Service) return;
-        (nav3Service as any)['serviceBind'] = this.details.widget;
-        nav3Service.setAttribute('error', error);
-    }
-
-    toogleBadge(show: boolean, serviceName: string) {
-        const mlsNav2 = this.getMlsNav2();
-        if (!mlsNav2) {
-            console.error('Function toogleBadge: mls-nav-2 dont exist');
-            return;
+    private checkFocus() {
+        if (!this.serviceContent) return;
+        if (this.serviceContent.contains(document.activeElement)) {
+            this.setActualServicePosition();
         }
-        mlsNav2.toogleBadge(show, serviceName);
     }
 
-    openMe() {
-        const itemService = this.serviceItemNav;
-        if (itemService) itemService.click();
-    }
-
-    showNav2Item(show: boolean) {
-        const itemService = this.serviceItemNav as IMlsNav2Item;
-        if (itemService && itemService.show) itemService.show(show);
-    }
-
-    openService(service: string, position: 'left' | 'right', level: number) {
-        let page = this.closest('collab-page');
-        if (!page) return;
-        const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
-        if (!toolbar) return;
-        if (this.level !== level) {
-            (toolbar as any).state[level][position] = service;
-            this.selectLevel(level);
-            return;
-        }
-        const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
-        if (item) item.click();
-        return;
-    }
-
-    setFullScreen(level: number, position: 'right' | 'left' | 'default') {
-        const spliter = this.getSplitter();
-        if (!spliter) return;
-        spliter.setFullScreen(level, position)
-    }
-
-    selectLevel(level: number) {
-
-        const page = this.closest('collab-page');
-        const nav = page?.querySelector('collab-nav-1') as HTMLElement;
-
-        const objIndex = {
-            0: 7,
-            1: 6,
-            2: 5,
-            3: 4,
-            4: 3,
-            5: 2,
-            6: 1,
-            7: 0,
-
-        } as any;
-        if (!nav) return;
-        nav.setAttribute('tabindexactive', objIndex[level]);
+    private setActualServicePosition() {
+        if (!this.serviceContent || !this.nav3Service) return;
+        const service = this.serviceContent.getAttribute('data-service') || '';
+        const position = this.nav3Service.getAttribute('toolbarposition') || '';
+        mls.setActualPosition(position as any);
+        mls.setActualService(service)
     }
 
     private getMlsNav2(): IMlsNav2 | null {
@@ -171,6 +193,13 @@ export abstract class ServiceBase extends CollabLitElement {
     private getNav3Service() {
         const parentToolbarContent = this.closest('collab-nav-3') as IMlsNav3 | null;
         return parentToolbarContent;
+    }
+
+    private getNav3ServiceMenu() {
+        const content = this.getNav3ServiceContent();
+        if (!content) return null;
+        const nav3Menu = content.querySelector('mls-nav3-100529') as HTMLElement | null;
+        return nav3Menu;
     }
 
     private getTooltip() {
