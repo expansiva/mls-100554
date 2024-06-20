@@ -125,6 +125,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
             //When clicking on an "edit" item I return the old "editactive" to "edit" and set the new "editactive"
             e.stopPropagation();
+
             if ((e.target as HTMLElement).tagName.startsWith('WCD-')) return;
 
             // const all = document.querySelectorAll('*[renderType]');
@@ -148,11 +149,34 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
                 await this.setActions(this.level as any);
             }
 
+            this.selectOnHTML();
             this.setAttribute('renderType', 'editactive');
             if (this.level !== '4') return;
             mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
             mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
         }
+
+    }
+
+    private selectOnHTML(): void {
+
+        if (this.level !== '2') return;
+        const id = this.id;
+        if (!id) return;
+
+        const infoL2 = (mls.actual[2] as any).left as any;
+        const name = mls.l2.editor.getKey({ project: infoL2.project, shortName: infoL2.shortName });
+
+        const mfile = mls.l2.editor.mfiles[name];
+        if (!mfile || !(mfile as any).modelHTML) return;
+
+        const model = (mfile as any).modelHTML;
+        const line = model.findMatches(`id="${id}"`, false, false, false, null, true);
+        if (!line || !line[0]) return;
+
+        const {startLineNumber} = line[0].range;
+
+        mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectLine", "line":${startLineNumber}}`);
 
     }
 

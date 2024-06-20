@@ -10,6 +10,8 @@ export class ServiceSource100554 extends ServiceBase {
 
     constructor() {
         super();
+
+        mls.events.addListener(2, 'WidgetAction', this.onWidgetActionEvents.bind(this));
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
         mls.events.addListener(2, 'ProjectLoaded', (ev) => this.onProjectLoadedEvents(ev));
@@ -386,6 +388,34 @@ export class ServiceSource100554 extends ServiceBase {
         }
     }
 
+    private onWidgetActionEvents(ev: mls.events.IEvent) {
+
+        if (ev.level !== this.level) return;
+        if (!ev.desc) return;
+
+        const json = JSON.parse(ev.desc);
+
+        if (json.op !== 'SelectLine') return;
+
+        this.selectLineinHTML(json.line);
+
+
+    }
+
+    private selectLineinHTML(line: number) {
+
+        if (this.menu.lastIcon !== 'icHTML' || !this._ed1) return;
+
+        const model = this._ed1?.getModel();
+        if (!model) return;
+        const cont = model.getLineContent(line);
+        const range = new monaco.Range(line, 1, line, cont.length + 1);
+
+        this._ed1.setSelection(range)
+        this._ed1.revealLineInCenter(line);
+
+    }
+
     private isNewFile: boolean = false;
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
@@ -696,7 +726,7 @@ export class ServiceSource100554 extends ServiceBase {
             if (enhancementInstance) await enhancementInstance.onAfterChange(model1);
             hasError = storFile.hasError;
         }
-    
+
         await this.changeStatusFile(model1, storFile, cr.tripleSlashMLS?.variables, hasError);
     }
 
@@ -795,6 +825,28 @@ export class ServiceSource100554 extends ServiceBase {
                 if (this.menu.lastIcon === 'icHTML') return;
                 mls.editor.setActiveInstance(this.level, this.position);
             });
+
+
+            this._ed1.onDidChangeCursorPosition((e) => {
+
+                if (!this._ed1 || this.menu.lastIcon !== 'icHTML') return;
+
+                const model = this._ed1.getModel();
+                const position = e.position;
+
+                if (!model) return;
+
+                const lineContent = model.getLineContent(position.lineNumber);
+
+                // Verifica se a linha contém '<ica-' e 'id="'
+                if (lineContent.includes('<ica-') && lineContent.includes('id="')) {
+                    const idValue = this.extractIdValue(lineContent);
+                    if (idValue) {
+                        console.log(idValue);
+                        mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectWidget", "id":"${idValue}"}`);
+                    }
+                }
+            });
         };
 
         if (!this.c2) return;
@@ -809,6 +861,12 @@ export class ServiceSource100554 extends ServiceBase {
         this.createModelConf('// loading ...'); // model 
         // global routines dont need this._ed1
         await this.createModelTS_testFile();
+    }
+
+    private extractIdValue(line: string): string | null {
+        const idRegex = /id="([^"]*)"/;
+        const match = line.match(idRegex);
+        return match ? match[1] : null;
     }
 
     private loadMonacoConfigurations() {
@@ -1253,6 +1311,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         );
 
         if (model) model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelHTMLChange(e, storFileHTML, model));
+
     }
 
     private _onChangedContentHTML: number | undefined = undefined;

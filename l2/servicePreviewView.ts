@@ -62,9 +62,79 @@ export class ServicePreviewView extends LitElement {
     @property() widthP: string = '300';
     @property() heightP: string = '600';
 
+    private setEventsCollab(): void {
+        mls.events.addListener(2, 'WidgetAction', this.onWidgetActionEvents.bind(this));
+    }
+
+    private onWidgetActionEvents(ev: mls.events.IEvent) {
+
+        if (ev.level.toString() !== this.level) return;
+        if (!ev.desc) return;
+
+        const json = JSON.parse(ev.desc);
+
+        if (json.op !== 'SelectWidget') return;
+
+        this.selectIdinPreview(json.id);
+
+
+    }
+
+    private selectIdinPreview(id: string):void {
+
+        if (!id || !this.shadowRoot) return;
+        const iframe = this.shadowRoot.querySelector('iframe');
+
+        if (!iframe || !iframe.contentDocument) return;
+
+        const el = this.findElementsStartingWithIca(id) as HTMLElement;
+
+        if (!el) return;
+
+        el.click();
+
+    }
+
+    private findElementsStartingWithIca(id: string): Element | undefined {
+
+        if (!id || !this.shadowRoot) return undefined;
+        const iframe = this.shadowRoot.querySelector('iframe');
+
+        if (!iframe || !iframe.contentDocument) return undefined;
+
+        const doc = iframe.contentDocument;
+
+        let elements: Element[] = [];
+        // Function to traverse shadow DOM
+        function traverseShadowRoot(element: Element) {
+            if (element.tagName.toLowerCase().startsWith('ica')) {
+                elements.push(element);
+                return;
+            }
+
+            if (element.shadowRoot) {
+                element.shadowRoot.querySelectorAll('*').forEach((item) => {
+                    traverseShadowRoot(item);
+                })
+            } else {
+                const children = Array.from(element.children);
+                if (children.length > 0) {
+                    children.forEach(child => traverseShadowRoot(child));
+                }
+            }
+        }
+
+        doc.body.querySelectorAll('*').forEach((item) => {
+            traverseShadowRoot(item);
+        });
+
+        const ret = elements.find((el) => el.id === id);
+        return ret as HTMLElement;
+    }
 
     connectedCallback() {
         super.connectedCallback();
+        this.setEventsCollab();
     }
 
     attributeChangedCallback(name: string, oldVal: string, newVal: string) {
