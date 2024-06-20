@@ -105,16 +105,17 @@ export abstract class ServiceBase extends CollabLitElement {
         nav.setAttribute('tabindexactive', objIndex[level]);
     }
 
-    public addScenario(page: string) {
+    public addScenario(page: string, fullscreen: boolean = false) {
         const nav3 = this.getNav3ServiceMenu();
         if (!nav3) return;
         let scenarios = nav3.getAttribute('scenarios')
         if (!scenarios) scenarios = page;
         else scenarios = `${scenarios},${page}`;
         nav3.setAttribute('scenarios', scenarios);
+        if (fullscreen) this.setFullScreen(this.level, this.position);
     }
 
-    public removeScenario(page: string) {
+    public removeScenario(page: string, fullscreen?: boolean) {
         const nav3 = this.getNav3ServiceMenu();
         if (!nav3) return;
         let scenarios = nav3.getAttribute('scenarios')
@@ -123,6 +124,8 @@ export abstract class ServiceBase extends CollabLitElement {
         const newArrayScenarios = arrayScenarios.filter(element => element !== page);
         if (newArrayScenarios.length === 0) nav3.removeAttribute('scenarios');
         else nav3.setAttribute('scenarios', newArrayScenarios.join(','));
+        if (fullscreen) this.setFullScreen(this.level, this.position);
+        else if (fullscreen === false) this.setFullScreen(this.level, 'default');
     }
 
 
