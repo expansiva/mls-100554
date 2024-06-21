@@ -1,4 +1,4 @@
-/// <mls shortName="collabFcaTree" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="collabIcaTree" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -6,7 +6,7 @@ import { convertTagToFileName } from './_100554_utilsLit';
 import { ServiceBase } from './_100554_serviceBase';
 import { CollabLitElement } from './_100554_collabLitElement';
 
-export const initCollabFCATree = '';
+export const initCollabICATree = '';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -25,7 +25,7 @@ const messages: { [key: string]: MessageType } = {
     'pt': message_pt
 }
 /// **collab_i18n_end**
-@customElement('collab-fca-tree-100554')
+@customElement('collab-ica-tree-100554')
 export class CollabFCATree extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
@@ -74,7 +74,7 @@ export class CollabFCATree extends CollabLitElement {
         const name = convertTagToFileName(item.el.tagName.toLocaleLowerCase());
         const cls = (item.el as any).renderType === 'editactive' ? 'activeBranch' : '';
 
-        if (this.idLastClick === name + idx) { // Verifico se preciso forçar um click
+        if (this.idLastClick === name + idx) { // Verifico se preciso forÃ§ar um click
 
             setTimeout(() => {
 
