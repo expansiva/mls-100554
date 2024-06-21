@@ -1,4 +1,4 @@
-/// <mls shortName="serviceFca" project="100554" enhancement="_100554_enhancementLitService" groupName="service" />
+/// <mls shortName="serviceIca" project="100554" enhancement="_100554_enhancementLitService" groupName="service" />
 
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -20,7 +20,7 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-@customElement('service-fca-100554')
+@customElement('service-ica-100554')
 export class ServiceFca100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
@@ -28,7 +28,7 @@ export class ServiceFca100554 extends ServiceBase {
     static styles = css``
 
     @property()
-    activeTab: ITabType = 'AboutFCA';
+    activeTab: ITabType = 'AboutICA';
 
     constructor() {
         super();
@@ -40,9 +40,9 @@ export class ServiceFca100554 extends ServiceBase {
         icon: '&#xf2db',
         state: 'background',
         position: 'left',
-        tooltip: 'Service FCA',
+        tooltip: 'Service ICA',
         visible: true,
-        widget: '_100554_serviceFca',
+        widget: '_100554_serviceIca',
         level: [4]
     }
 
@@ -55,7 +55,7 @@ export class ServiceFca100554 extends ServiceBase {
         actions: {
         },
         icons: {
-            AboutFCA: 'About FCA;3f',
+            AboutICA: 'About ICA;3f',
             Navigation: 'Navigation;f041',
             Properties: 'Properties;f0ce',
             Styles: 'Styles;f5ad',
@@ -105,8 +105,8 @@ export class ServiceFca100554 extends ServiceBase {
                 return this.renderStyles();
             case 'Animation':
                 return this.renderAnimation();
-            case 'AboutFCA':
-                return this.renderAboutFCA();
+            case 'AboutICA':
+                return this.renderAboutICA();
             default:
                 return html``;
         }
@@ -129,8 +129,8 @@ export class ServiceFca100554 extends ServiceBase {
         return html`<div>In development: Animation</div>`;
     }
 
-    renderAboutFCA() {
-        return html`<div>In develpoment: AboutFCA</div>`;
+    renderAboutICA() {
+        return html`<div>In develpoment: AboutICA</div>`;
     }
 
     //------------IMPLEMENTATION------------------
@@ -164,7 +164,7 @@ export class ServiceFca100554 extends ServiceBase {
 
 }
 
-export type ITabType = 'Navigation' | 'Properties' | 'Styles' | 'Animation' | 'AboutFCA'
+export type ITabType = 'Navigation' | 'Properties' | 'Styles' | 'Animation' | 'AboutICA'
 
 export interface IWCDParams {
     level: number,
