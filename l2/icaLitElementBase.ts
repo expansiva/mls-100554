@@ -82,7 +82,14 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         const l = changedProperties.get('level');
         if (l) {
             const els = this.findElementsStartingWithIca();
-            els.forEach((el) => { el.setAttribute('level', this.level as any) });
+            els.forEach((el) => {
+                el.setAttribute('level', this.level as any);
+                if (this.level === '7') {
+                    const wcd = el.querySelector('wcd-toolbox-100554');
+                    if (wcd) wcd.remove();
+                    el.setAttribute('renderType', 'edit')
+                }
+            });
         }
 
         this.performPreSlotAllocationOperations();
@@ -137,6 +144,8 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
                 i.setAttribute('renderType', 'edit')
             });
 
+            if (this.level === '7') return;
+
             const inGroup = this.closest(`*[${icaGlobal.ATTRGROUP}]`) as HTMLElement;
             if (inGroup && inGroup !== this && inGroup.getAttribute(`${icaGlobal.ATTRGROUP}`) === 'true') {
                 inGroup.click();
@@ -174,7 +183,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         const line = model.findMatches(`id="${id}"`, false, false, false, null, true);
         if (!line || !line[0]) return;
 
-        const {startLineNumber} = line[0].range;
+        const { startLineNumber } = line[0].range;
 
         mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectLine", "line":${startLineNumber}}`);
 
@@ -219,7 +228,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             // this.doChangeState(this.changeState);
             return false;
         }
-    
+
         if (changedProperties.get('level') && !this.isLoadMyAction[this.level as any] && this.renderType === 'editactive') {
             this.auxSetMyActions();
         }
