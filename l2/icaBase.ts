@@ -5,11 +5,17 @@ export type FormComponent = {
   description: string;
   prompt?: string;
   attributes?: string; 
+  events?:string;
 };
 
 export type AttributeDefinition = {
   path: string;
   lit: string;
   variations?: boolean
+};
+
+export type EventsDefinition = {
+  name: string;
+  desc: string;
 };
 

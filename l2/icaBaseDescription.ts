@@ -1,146 +1,153 @@
 /// <mls shortName="icaBaseDescription" project="100554" enhancement="_blank" />
 
 import * as icaBase from "./_100554_icaBase";
+import { getMessageKey } from "./_100554_collabLitElement";
+
 
 const message_pt = {
-  dForms: "Componentes para criaÁ„o e manipulaÁ„o de formul·rios, permitindo a entrada de dados pelo usu·rio de forma estruturada.",
-  dNavigation: "Componentes projetados para facilitar a movimentaÁ„o do usu·rio pela aplicaÁ„o, englobando tanto a navegaÁ„o entre diferentes p·ginas quanto a manipulaÁ„o de conte˙do dentro de uma mesma p·gina.",
-  dApresentation: "Componentes projetados para apresentar conte˙do est·tico em diferentes formatos, como texto, imagens, vÌdeos, sons e gr·ficos.",
-  dLayout: "Define a estrutura e a organizaÁ„o visual dos elementos na interface do usu·rio. Engloba componentes e tÈcnicas para arranjar o conte˙do de forma lÛgica e esteticamente agrad·vel, melhorando a experiÍncia do usu·rio ao navegar e interagir com a aplicaÁ„o.",
-  dBlocks: "Agrupa componentes complexos que encapsulam funcionalidades especÌficas e s„o compostos por m˙ltiplos elementos. Esses blocos s„o projetados para oferecer recursos interativos avanÁados, como calend·rios, visualizadores de documentos e sistemas de agendamento, enriquecendo a experiÍncia do usu·rio com funcionalidades integradas e personaliz·veis.",
+  dForms: "Componentes para cria√ß√£o e manipula√ß√£o de formul√°rios, permitindo a entrada de dados pelo usu√°rio de forma estruturada.",
+  dNavigation: "Componentes projetados para facilitar a movimenta√ß√£o do usu√°rio pela aplica√ß√£o, englobando tanto a navega√ß√£o entre diferentes p√°ginas quanto a manipula√ß√£o de conte√∫do dentro de uma mesma p√°gina.",
+  dApresentation: "Componentes projetados para apresentar conte√∫do est√°tico em diferentes formatos, como texto, imagens, v√≠deos, sons e gr√°ficos.",
+  dLayout: "Define a estrutura e a organiza√ß√£o visual dos elementos na interface do usu√°rio. Engloba componentes e t√©cnicas para arranjar o conte√∫do de forma l√≥gica e esteticamente agrad√°vel, melhorando a experi√™ncia do usu√°rio ao navegar e interagir com a aplica√ß√£o.",
+  dBlocks: "Agrupa componentes complexos que encapsulam funcionalidades espec√≠ficas e s√£o compostos por m√∫ltiplos elementos. Esses blocos s√£o projetados para oferecer recursos interativos avan√ßados, como calend√°rios, visualizadores de documentos e sistemas de agendamento, enriquecendo a experi√™ncia do usu√°rio com funcionalidades integradas e personaliz√°veis.",
 
   // definition sub group 1 (2 itens 'a / b')
-  dFInput: "Campos de entrada para coleta de informaÁıes do usu·rio, incluindo texto, n˙meros, datas, seleÁıes e mais.",
-  dFRecords: "Visualizadores de registros para apresentar dados ao usu·rio em diferentes formatos como tabelas, listas, cartıes e mapas geogr·ficos.",
-  dFTree: "Componentes para visualizaÁ„o e ediÁ„o de dados em estrutura hier·rquica, como ·rvores de dados, breadcrumbs adaptados e mapas mentais.",
-  dFSubmit: "Componentes focados na finalizaÁ„o de interaÁıes do usu·rio com formul·rios. Inclui botıes para submeter, cancelar ou limpar formul·rios, bem como mecanismos para enviar dados para sistemas externos. Essencial para facilitar aÁıes conclusivas dentro de formul·rios, garantindo uma interface clara e eficiente para coleta de dados e outras aÁıes relacionadas. ConsideraÁıes especiais para feedback ao usu·rio e questıes de seguranÁa e privacidade s„o fundamentais neste grupo.",
+  dFInput: "Campos de entrada para coleta de informa√ß√µes do usu√°rio, incluindo texto, n√∫meros, datas, sele√ß√µes e mais.",
+  dFRecords: "Visualizadores de registros para apresentar dados ao usu√°rio em diferentes formatos como tabelas, listas, cart√µes e mapas geogr√°ficos.",
+  dFTree: "Componentes para visualiza√ß√£o e edi√ß√£o de dados em estrutura hier√°rquica, como √°rvores de dados, breadcrumbs adaptados e mapas mentais.",
+  dFSubmit: "Componentes focados na finaliza√ß√£o de intera√ß√µes do usu√°rio com formul√°rios. Inclui bot√µes para submeter, cancelar ou limpar formul√°rios, bem como mecanismos para enviar dados para sistemas externos. Essencial para facilitar a√ß√µes conclusivas dentro de formul√°rios, garantindo uma interface clara e eficiente para coleta de dados e outras a√ß√µes relacionadas. Considera√ß√µes especiais para feedback ao usu√°rio e quest√µes de seguran√ßa e privacidade s√£o fundamentais neste grupo.",
 
-  dNLinks: "Conjunto de componentes focados na navegaÁ„o entre p·ginas ou recursos, seja dentro da prÛpria aplicaÁ„o ou para sites externos. Inclui menus, botıes, links diretos e ‚ncoras para navegaÁ„o interna.",
-  dNContent: "Componentes especializados na apresentaÁ„o e interaÁ„o com diferentes tipos de conte˙do dentro de uma p·gina, como tabs, accordions e popups, permitindo uma experiÍncia de usu·rio mais din‚mica e interativa.",
+  dNLinks: "Conjunto de componentes focados na navega√ß√£o entre p√°ginas ou recursos, seja dentro da pr√≥pria aplica√ß√£o ou para sites externos. Inclui menus, bot√µes, links diretos e √¢ncoras para navega√ß√£o interna.",
+  dNContent: "Componentes especializados na apresenta√ß√£o e intera√ß√£o com diferentes tipos de conte√∫do dentro de uma p√°gina, como tabs, accordions e popups, permitindo uma experi√™ncia de usu√°rio mais din√¢mica e interativa.",
 
-  dAText: "Componentes para apresentaÁ„o de conte˙do textual, incluindo textos simples, banners, citaÁıes e textos ricos.",
-  dAImages: "Componentes para apresentar imagens, Ìcones, avatares, galerias, carrossÈis, sliders e mapas.",
-  dAVideos: "Componentes para incorporar vÌdeos, apresentar vÌdeos imagem (como GIFs ou vÌdeos animados) e listas de reproduÁ„o de vÌdeo.",
-  dASound: "Componentes para reproduÁ„o de sons, incluindo players de ·udio, efeitos sonoros e players de podcast.",
-  dACharts: "Componentes para exibir gr·ficos em 2D ou 3D, facilitando a visualizaÁ„o de dados.",
-  dAAnimations: "AnimaÁıes para enriquecer a interaÁ„o do usu·rio, incluindo carregamentos, cliques e animaÁıes JavaScript.",
-  dAEmbeds: "Componentes para incorporar conte˙dos de redes sociais, como posts e feeds.",
-  dAMessages: "Componentes destinados a fornecer feedback ao usu·rio atravÈs de mensagens, alertas e notificaÁıes. Inclui desde toasts e snackbars, que oferecem feedback breve e direto, atÈ alertas modais e notificaÁıes mais persistentes. Ideal para informar os usu·rios sobre o resultado de aÁıes, avisos importantes, ou novas mensagens recebidas. Esses componentes s„o projetados para serem intuitivos e minimamente intrusivos, garantindo uma comunicaÁ„o eficaz sem prejudicar a experiÍncia do usu·rio.",
+  dAText: "Componentes para apresenta√ß√£o de conte√∫do textual, incluindo textos simples, banners, cita√ß√µes e textos ricos.",
+  dAImages: "Componentes para apresentar imagens, √≠cones, avatares, galerias, carross√©is, sliders e mapas.",
+  dAVideos: "Componentes para incorporar v√≠deos, apresentar v√≠deos imagem (como GIFs ou v√≠deos animados) e listas de reprodu√ß√£o de v√≠deo.",
+  dASound: "Componentes para reprodu√ß√£o de sons, incluindo players de √°udio, efeitos sonoros e players de podcast.",
+  dACharts: "Componentes para exibir gr√°ficos em 2D ou 3D, facilitando a visualiza√ß√£o de dados.",
+  dAAnimations: "Anima√ß√µes para enriquecer a intera√ß√£o do usu√°rio, incluindo carregamentos, cliques e anima√ß√µes JavaScript.",
+  dAEmbeds: "Componentes para incorporar conte√∫dos de redes sociais, como posts e feeds.",
+  dAMessages: "Componentes destinados a fornecer feedback ao usu√°rio atrav√©s de mensagens, alertas e notifica√ß√µes. Inclui desde toasts e snackbars, que oferecem feedback breve e direto, at√© alertas modais e notifica√ß√µes mais persistentes. Ideal para informar os usu√°rios sobre o resultado de a√ß√µes, avisos importantes, ou novas mensagens recebidas. Esses componentes s√£o projetados para serem intuitivos e minimamente intrusivos, garantindo uma comunica√ß√£o eficaz sem prejudicar a experi√™ncia do usu√°rio.",
 
-  dLFlow: "Componentes e tÈcnicas focados na disposiÁ„o sequencial ou estruturada do conte˙do, como seÁıes, grupos, linhas, colunas e grades. Inclui abordagens adaptativas e responsivas para garantir uma apresentaÁ„o Ûtima em diferentes dispositivos e tamanhos de tela.",
-  dLGroup: "Ferramentas e componentes dedicados a agrupar elementos relacionados para destacar informaÁıes ou organizar o conte˙do de forma coesa. Inclui tabelas para dados tabulares e cartıes para representaÁıes visuais compactas de informaÁıes.",
+  dLFlow: "Componentes e t√©cnicas focados na disposi√ß√£o sequencial ou estruturada do conte√∫do, como se√ß√µes, grupos, linhas, colunas e grades. Inclui abordagens adaptativas e responsivas para garantir uma apresenta√ß√£o √≥tima em diferentes dispositivos e tamanhos de tela.",
+  dLGroup: "Ferramentas e componentes dedicados a agrupar elementos relacionados para destacar informa√ß√µes ou organizar o conte√∫do de forma coesa. Inclui tabelas para dados tabulares e cart√µes para representa√ß√µes visuais compactas de informa√ß√µes.",
 
-  dBView: "Subgrupo dedicado a componentes para visualizaÁ„o de conte˙do, como documentos PDF, planilhas, e outros formatos de arquivo. Permite aos usu·rios acessar e interagir com uma variedade de dados diretamente dentro da aplicaÁ„o.",
-  dBPlugins: "Inclui componentes de terceiros integr·veis, oferecendo funcionalidades adicionais prontas para uso. Estende as capacidades da aplicaÁ„o com soluÁıes especializadas, como mapas, an·lises, e widgets de mÌdia social.",
-  dBProjects: "Agrupa componentes internos customizados, como p·ginas de pesquisa e visualizaÁıes de detalhes especÌficos. Esses blocos s„o projetados para complementar a aplicaÁ„o com funcionalidades especÌficas e visıes detalhadas de dados ou processos.",
+  dBView: "Subgrupo dedicado a componentes para visualiza√ß√£o de conte√∫do, como documentos PDF, planilhas, e outros formatos de arquivo. Permite aos usu√°rios acessar e interagir com uma variedade de dados diretamente dentro da aplica√ß√£o.",
+  dBPlugins: "Inclui componentes de terceiros integr√°veis, oferecendo funcionalidades adicionais prontas para uso. Estende as capacidades da aplica√ß√£o com solu√ß√µes especializadas, como mapas, an√°lises, e widgets de m√≠dia social.",
+  dBProjects: "Agrupa componentes internos customizados, como p√°ginas de pesquisa e visualiza√ß√µes de detalhes espec√≠ficos. Esses blocos s√£o projetados para complementar a aplica√ß√£o com funcionalidades espec√≠ficas e vis√µes detalhadas de dados ou processos.",
 
   // definition final group (3 itens 'a / b / c')
-  dFINumber: "Permite ao usu·rio inserir valores numÈricos, com suporte a limites mÌnimo e m·ximo.",
-  dFIString: "Campo para texto livre, podendo configurar validaÁıes como tamanho m·ximo e expressıes regulares.",
-  dFIBoolean: "Componente para escolha bin·ria, como switches ou checkboxes, ideal para configuraÁıes de sim/n„o.",
-  dFIDate: "Seletor de datas, com opÁıes de configuraÁ„o para limitar perÌodos.",
-  dFITime: "Permite ao usu·rio selecionar um hor·rio, com suporte a diferentes formatos de hora.",
-  dFIDateRange: "Componente para seleÁ„o de intervalos de datas, ˙til para filtros de perÌodos.",
-  dFISelectOne: "Seletor para uma ˙nica opÁ„o dentre v·rias, podendo ser apresentado como dropdown, combobox, etc.",
-  dFIMultSelect: "Permite a seleÁ„o de m˙ltiplas opÁıes, ideal para filtros ou configuraÁıes avanÁadas.",
+  dFINumber: "Permite ao usu√°rio inserir valores num√©ricos, com suporte a limites m√≠nimo e m√°ximo.",
+  dFIString: "Campo para texto livre, podendo configurar valida√ß√µes como tamanho m√°ximo e express√µes regulares.",
+  dFIBoolean: "Componente para escolha bin√°ria, como switches ou checkboxes, ideal para configura√ß√µes de sim/n√£o.",
+  dFIDate: "Seletor de datas, com op√ß√µes de configura√ß√£o para limitar per√≠odos.",
+  dFITime: "Permite ao usu√°rio selecionar um hor√°rio, com suporte a diferentes formatos de hora.",
+  dFIDateRange: "Componente para sele√ß√£o de intervalos de datas, √∫til para filtros de per√≠odos.",
+  dFISelectOne: "Seletor para uma √∫nica op√ß√£o dentre v√°rias, podendo ser apresentado como dropdown, combobox, etc.",
+  dFIMultSelect: "Permite a sele√ß√£o de m√∫ltiplas op√ß√µes, ideal para filtros ou configura√ß√µes avan√ßadas.",
   dFIColor: "Seletor de cores, com suporte a diferentes formatos de cor (RGB, HEX, etc.).",
-  dFIEditor: "Editor de texto rico, permitindo formataÁ„o b·sica (negrito, it·lico) e inserÁ„o de elementos como listas e tabelas.",
-  dFIFeedBack: "Para rating, ou joinha (aprovaÁ„o ou n„o aprovaÁ„o), permitindo ao usu·rio expressar opiniıes de forma simples.",
-  dFIFile: "Para anexar um arquivo, com suporte a arrastar e soltar e visualizaÁ„o de progresso de upload.",
+  dFIEditor: "Editor de texto rico, permitindo formata√ß√£o b√°sica (negrito, it√°lico) e inser√ß√£o de elementos como listas e tabelas.",
+  dFIFeedBack: "Para rating, ou joinha (aprova√ß√£o ou n√£o aprova√ß√£o), permitindo ao usu√°rio expressar opini√µes de forma simples.",
+  dFIFile: "Para anexar um arquivo, com suporte a arrastar e soltar e visualiza√ß√£o de progresso de upload.",
 
-  dFRTable: "Exibe dados em formato de tabela, com suporte a ordenaÁ„o e filtragem.",
-  dFRList: "Lista de itens, customiz·vel para exibir informaÁıes resumidas ou detalhadas.",
-  dFRTimeline: "Apresenta eventos ou registros em linha do tempo, facilitando a visualizaÁ„o de sequÍncias ou histÛricos.",
-  dFRCards: "Dados apresentados em cartıes, ideal para resumos visuais com imagens ou Ìcones.",
-  dFRMap: "Exibe informaÁıes geogr·ficas em um mapa, suportando marcadores e regiıes personalizadas.",
-  dFRPagination: "Tabela de dados com paginaÁ„o, para gerenciar grandes conjuntos de dados sem sobrecarregar a interface.",
-  dFRInfinity: "Tabela que carrega mais dados automaticamente conforme o usu·rio rola a p·gina, para uma navegaÁ„o fluida em grandes conjuntos de dados.",
+  dFRTable: "Exibe dados em formato de tabela, com suporte a ordena√ß√£o e filtragem.",
+  dFRList: "Lista de itens, customiz√°vel para exibir informa√ß√µes resumidas ou detalhadas.",
+  dFRTimeline: "Apresenta eventos ou registros em linha do tempo, facilitando a visualiza√ß√£o de sequ√™ncias ou hist√≥ricos.",
+  dFRCards: "Dados apresentados em cart√µes, ideal para resumos visuais com imagens ou √≠cones.",
+  dFRMap: "Exibe informa√ß√µes geogr√°ficas em um mapa, suportando marcadores e regi√µes personalizadas.",
+  dFRPagination: "Tabela de dados com pagina√ß√£o, para gerenciar grandes conjuntos de dados sem sobrecarregar a interface.",
+  dFRInfinity: "Tabela que carrega mais dados automaticamente conforme o usu√°rio rola a p√°gina, para uma navega√ß√£o fluida em grandes conjuntos de dados.",
 
-  dFTView: "Estrutura hier·rquica de dados que permite expans„o e contraÁ„o de nÛs, ˙til para categorias ou estruturas organizacionais.",
-  dFTBreadcrumbs: "SequÍncia hier·rquica de links que representam a navegaÁ„o ou localizaÁ„o atual do usu·rio, aqui adaptada para ediÁ„o de estruturas hier·rquicas.",
-  dFTDropdown: "Dropdowns aninhados que permitem a seleÁ„o em m˙ltiplos nÌveis de uma hierarquia.",
-  dFTAccordions: "Acordions aninhados para organizar conte˙do ou categorias em m˙ltiplas camadas, facilitando a navegaÁ„o em estruturas complexas.",
-  dFTTags: "Conjunto de tags ou palavras-chave que representam frequÍncia ou import‚ncia, permitindo ediÁ„o e organizaÁ„o din‚mica.",
-  dFTMap: "Mapa mental para organizaÁ„o e visualizaÁ„o de ideias ou conceitos em estrutura radial, facilitando a ediÁ„o e expans„o de conceitos relacionados.",
+  dFTView: "Estrutura hier√°rquica de dados que permite expans√£o e contra√ß√£o de n√≥s, √∫til para categorias ou estruturas organizacionais.",
+  dFTBreadcrumbs: "Sequ√™ncia hier√°rquica de links que representam a navega√ß√£o ou localiza√ß√£o atual do usu√°rio, aqui adaptada para edi√ß√£o de estruturas hier√°rquicas.",
+  dFTDropdown: "Dropdowns aninhados que permitem a sele√ß√£o em m√∫ltiplos n√≠veis de uma hierarquia.",
+  dFTAccordions: "Acordions aninhados para organizar conte√∫do ou categorias em m√∫ltiplas camadas, facilitando a navega√ß√£o em estruturas complexas.",
+  dFTTags: "Conjunto de tags ou palavras-chave que representam frequ√™ncia ou import√¢ncia, permitindo edi√ß√£o e organiza√ß√£o din√¢mica.",
+  dFTMap: "Mapa mental para organiza√ß√£o e visualiza√ß√£o de ideias ou conceitos em estrutura radial, facilitando a edi√ß√£o e expans√£o de conceitos relacionados.",
 
-  dFSSubmit: "Bot„o para submeter o formul·rio. Ao ser clicado, coleta e envia os dados do formul·rio para o servidor ou manipulador designado. Essencial para finalizar a entrada de dados pelo usu·rio.",
-  dFSCancel: "Bot„o para cancelar a operaÁ„o do formul·rio, permitindo ao usu·rio interromper sua aÁ„o e, geralmente, voltar ao estado ou tela anterior. Ajuda a garantir uma navegaÁ„o segura sem submiss„o de dados.",
-  dFSClear: "Bot„o para limpar todos os campos do formul·rio, removendo as entradas do usu·rio. ⁄til em formul·rios longos ou complexos onde o reinÌcio pode ser necess·rio.",
-  dFSSend: "Mecanismo para enviar dados do formul·rio para um sistema ou site externo. Utilizado para integraÁıes com APIs de terceiros ou para coletar informaÁıes em diferentes plataformas. Deve garantir a seguranÁa e a privacidade dos dados do usu·rio.",
+  dFSSubmit: "Bot√£o para submeter o formul√°rio. Ao ser clicado, coleta e envia os dados do formul√°rio para o servidor ou manipulador designado. Essencial para finalizar a entrada de dados pelo usu√°rio.",
+  dFSCancel: "Bot√£o para cancelar a opera√ß√£o do formul√°rio, permitindo ao usu√°rio interromper sua a√ß√£o e, geralmente, voltar ao estado ou tela anterior. Ajuda a garantir uma navega√ß√£o segura sem submiss√£o de dados.",
+  dFSClear: "Bot√£o para limpar todos os campos do formul√°rio, removendo as entradas do usu√°rio. √ötil em formul√°rios longos ou complexos onde o rein√≠cio pode ser necess√°rio.",
+  dFSSend: "Mecanismo para enviar dados do formul√°rio para um sistema ou site externo. Utilizado para integra√ß√µes com APIs de terceiros ou para coletar informa√ß√µes em diferentes plataformas. Deve garantir a seguran√ßa e a privacidade dos dados do usu√°rio.",
 
-  dNLMenus: "Menus que oferecem navegaÁ„o principal atravÈs da aplicaÁ„o ou para sites externos. Suportam estruturas hier·rquicas para organizar as opÁıes de navegaÁ„o.",
-  dNLButtons: "Botıes utilizados para aÁıes de navegaÁ„o, como submeter formul·rios ou redirecionar para outras p·ginas internas ou externas.",
-  dNLLinks: "Links para navegaÁ„o direta entre p·ginas da aplicaÁ„o ou para recursos externos, com suporte a abertura em nova aba dependendo do contexto (target).",
-  dNLBreadcrumbs: "Caminhos de navegaÁ„o hier·rquicos que indicam a localizaÁ„o atual do usu·rio dentro da aplicaÁ„o e facilitam o retorno a nÌveis anteriores.",
-  dNLAnchors: "¬ncoras que permitem a navegaÁ„o interna em uma p·gina, direcionando o usu·rio para seÁıes especÌficas sem recarregar a p·gina.",
+  dNLMenus: "Menus que oferecem navega√ß√£o principal atrav√©s da aplica√ß√£o ou para sites externos. Suportam estruturas hier√°rquicas para organizar as op√ß√µes de navega√ß√£o.",
+  dNLButtons: "Bot√µes utilizados para a√ß√µes de navega√ß√£o, como submeter formul√°rios ou redirecionar para outras p√°ginas internas ou externas.",
+  dNLLinks: "Links para navega√ß√£o direta entre p√°ginas da aplica√ß√£o ou para recursos externos, com suporte a abertura em nova aba dependendo do contexto (target).",
+  dNLBreadcrumbs: "Caminhos de navega√ß√£o hier√°rquicos que indicam a localiza√ß√£o atual do usu√°rio dentro da aplica√ß√£o e facilitam o retorno a n√≠veis anteriores.",
+  dNLAnchors: "√Çncoras que permitem a navega√ß√£o interna em uma p√°gina, direcionando o usu√°rio para se√ß√µes espec√≠ficas sem recarregar a p√°gina.",
 
-  dNCTab: "Abas que organizam conte˙do relacionado em seÁıes separadas, permitindo a troca entre elas sem recarregar a p·gina.",
-  dNCScenary: "Componentes que guiam o usu·rio atravÈs de cen·rios ou passos sequenciais dentro de uma mesma p·gina, ideal para tutoriais ou configuraÁıes passo a passo.",
-  dNCStepper: "Indicadores de passo (steppers) que mostram progresso atravÈs de uma sequÍncia de passos, ˙teis para processos de m˙ltiplas etapas como checkouts ou formul·rios longos.",
-  dNCToolbar: "Barras de ferramentas que oferecem acesso r·pido a aÁıes e ferramentas frequentemente usadas, podendo ser parte da navegaÁ„o de conte˙do ou aÁ„o.",
-  dNCAccordion: "Acordeıes que permitem a expans„o e contraÁ„o de seÁıes de conte˙do, organizando grandes quantidades de informaÁ„o em um espaÁo compacto.",
-  dNCPopup: "Popups que fornecem informaÁıes adicionais, mensagens ou conte˙do interativo, aparecendo sobre o conte˙do existente sem redirecionar o usu·rio.",
-  dNCScrollspy: "Um componente que atualiza links de navegaÁ„o baseados na rolagem, indicando qual seÁ„o do conte˙do est· atualmente visÌvel na tela.",
+  dNCTab: "Abas que organizam conte√∫do relacionado em se√ß√µes separadas, permitindo a troca entre elas sem recarregar a p√°gina.",
+  dNCScenary: "Componentes que guiam o usu√°rio atrav√©s de cen√°rios ou passos sequenciais dentro de uma mesma p√°gina, ideal para tutoriais ou configura√ß√µes passo a passo.",
+  dNCStepper: "Indicadores de passo (steppers) que mostram progresso atrav√©s de uma sequ√™ncia de passos, √∫teis para processos de m√∫ltiplas etapas como checkouts ou formul√°rios longos.",
+  dNCToolbar: "Barras de ferramentas que oferecem acesso r√°pido a a√ß√µes e ferramentas frequentemente usadas, podendo ser parte da navega√ß√£o de conte√∫do ou a√ß√£o.",
+  dNCAccordion: "Acorde√µes que permitem a expans√£o e contra√ß√£o de se√ß√µes de conte√∫do, organizando grandes quantidades de informa√ß√£o em um espa√ßo compacto.",
+  dNCPopup: "Popups que fornecem informa√ß√µes adicionais, mensagens ou conte√∫do interativo, aparecendo sobre o conte√∫do existente sem redirecionar o usu√°rio.",
+  dNCScrollspy: "Um componente que atualiza links de navega√ß√£o baseados na rolagem, indicando qual se√ß√£o do conte√∫do est√° atualmente vis√≠vel na tela.",
 
   dATText: "Para apresentar blocos de texto simples.",
   dATBanner: "Para exibir banners promocionais ou informativos.",
-  dATQuote: "Para destacar citaÁıes ou depoimentos.",
-  dATRich: "Para apresentar texto com formataÁ„o rica.",
+  dATQuote: "Para destacar cita√ß√µes ou depoimentos.",
+  dATRich: "Para apresentar texto com formata√ß√£o rica.",
 
   dAIImages: "Para apresentar imagens individuais ou em grupo.",
-  dAIIcons: "Para exibir Ìcones representativos.",
-  dAIAvatar: "Para mostrar avatares de usu·rios ou personagens.",
-  dAIGallery: "Para exibir coleÁıes de imagens em formato de galeria.",
+  dAIIcons: "Para exibir √≠cones representativos.",
+  dAIAvatar: "Para mostrar avatares de usu√°rios ou personagens.",
+  dAIGallery: "Para exibir cole√ß√µes de imagens em formato de galeria.",
   dAICarousel: "Para apresentar imagens em um carrossel rotativo.",
   dAISliders: "Para mostrar imagens ou banners em um slider.",
-  dAIMaps: "Para exibir mapas est·ticos ou interativos.",
+  dAIMaps: "Para exibir mapas est√°ticos ou interativos.",
 
-  dAVEmbedded: "Para incorporar vÌdeos de plataformas externas.",
-  dAVImage: "Para mostrar vÌdeos em formato de imagem, como GIFs ou vÌdeos animados.",
-  dAVVideo: "Para listar vÌdeos em uma sequÍncia ou coleÁ„o.",
+  dAVEmbedded: "Para incorporar v√≠deos de plataformas externas.",
+  dAVImage: "Para mostrar v√≠deos em formato de imagem, como GIFs ou v√≠deos animados.",
+  dAVVideo: "Para listar v√≠deos em uma sequ√™ncia ou cole√ß√£o.",
 
-  dASPlayer: "Para reproduzir arquivos de ·udio ou m˙sica.",
-  dASSound: "Para executar efeitos sonoros em aÁıes especÌficas.",
-  dASPodcast: "Para reproduzir episÛdios de podcast.",
+  dASPlayer: "Para reproduzir arquivos de √°udio ou m√∫sica.",
+  dASSound: "Para executar efeitos sonoros em a√ß√µes espec√≠ficas.",
+  dASPodcast: "Para reproduzir epis√≥dios de podcast.",
 
-  dAC2d: "Para exibir gr·ficos bidimensionais.",
-  dAC3d: "Para mostrar gr·ficos tridimensionais.",
+  dAC2d: "Para exibir gr√°ficos bidimensionais.",
+  dAC3d: "Para mostrar gr√°ficos tridimensionais.",
 
-  dAALoading: "AnimaÁıes que indicam carregamento de conte˙do.",
-  dAAClick: "AnimaÁıes ativadas por cliques ou interaÁıes do usu·rio.",
-  dAAJava: "AnimaÁıes complexas criadas com JavaScript.",
-  dAAIndicators: "Componentes projetados para informar o usu·rio sobre o estado ou progresso de uma operaÁ„o. Inclui barras de progresso, indicadores de carregamento, luzes de status e outros elementos visuais que comunicam informaÁıes essenciais de forma clara e concisa. Esses componentes s„o fundamentais para melhorar a experiÍncia do usu·rio, fornecendo feedback visual imediato sobre as aÁıes em andamento.",
+  dAALoading: "Anima√ß√µes que indicam carregamento de conte√∫do.",
+  dAAClick: "Anima√ß√µes ativadas por cliques ou intera√ß√µes do usu√°rio.",
+  dAAJava: "Anima√ß√µes complexas criadas com JavaScript.",
+  dAAIndicators: "Componentes projetados para informar o usu√°rio sobre o estado ou progresso de uma opera√ß√£o. Inclui barras de progresso, indicadores de carregamento, luzes de status e outros elementos visuais que comunicam informa√ß√µes essenciais de forma clara e concisa. Esses componentes s√£o fundamentais para melhorar a experi√™ncia do usu√°rio, fornecendo feedback visual imediato sobre as a√ß√µes em andamento.",
 
-  dAEPost: "Para incorporar posts de redes sociais diretamente na p·gina.",
-  dAEFeed: "Para mostrar feeds ao vivo de redes sociais na aplicaÁ„o.",
+  dAEPost: "Para incorporar posts de redes sociais diretamente na p√°gina.",
+  dAEFeed: "Para mostrar feeds ao vivo de redes sociais na aplica√ß√£o.",
 
-  dAMToast: "Mensagens breves que aparecem e desaparecem automaticamente, ideais para feedback de aÁıes n„o intrusivas.",
-  dAMAlert: "Alertas s„o notificaÁıes importantes que requerem a atenÁ„o do usu·rio, podendo ser usadas para erros crÌticos, avisos ou confirmaÁıes.",
-  dAMSneackbar: "Snackbars fornecem mensagens breves com a opÁ„o de uma aÁ„o pelo usu·rio, como desfazer uma aÁ„o ou fechar a mensagem.",
-  dAMModal: "Modais s„o janelas que aparecem em cima do conte˙do da p·gina para comunicar mensagens importantes ou exigir uma aÁ„o do usu·rio antes de prosseguir.",
-  dAMNotification: "NotificaÁıes s„o mensagens que podem ser enviadas a usu·rios mesmo quando n„o est„o ativamente usando a aplicaÁ„o, ˙teis para atualizaÁıes importantes ou lembretes.",
-  dAMBadges: "Badges indicam status ou contam itens, como mensagens n„o lidas ou notificaÁıes, geralmente sobrepostos a Ìcones ou botıes.",
+  dAMToast: "Mensagens breves que aparecem e desaparecem automaticamente, ideais para feedback de a√ß√µes n√£o intrusivas.",
+  dAMAlert: "Alertas s√£o notifica√ß√µes importantes que requerem a aten√ß√£o do usu√°rio, podendo ser usadas para erros cr√≠ticos, avisos ou confirma√ß√µes.",
+  dAMSneackbar: "Snackbars fornecem mensagens breves com a op√ß√£o de uma a√ß√£o pelo usu√°rio, como desfazer uma a√ß√£o ou fechar a mensagem.",
+  dAMModal: "Modais s√£o janelas que aparecem em cima do conte√∫do da p√°gina para comunicar mensagens importantes ou exigir uma a√ß√£o do usu√°rio antes de prosseguir.",
+  dAMNotification: "Notifica√ß√µes s√£o mensagens que podem ser enviadas a usu√°rios mesmo quando n√£o est√£o ativamente usando a aplica√ß√£o, √∫teis para atualiza√ß√µes importantes ou lembretes.",
+  dAMBadges: "Badges indicam status ou contam itens, como mensagens n√£o lidas ou notifica√ß√µes, geralmente sobrepostos a √≠cones ou bot√µes.",
 
-  dLFSection: "Divide o conte˙do em seÁıes lÛgicas e distintas, facilitando a organizaÁ„o e a compreens„o pelo usu·rio.",
-  dLFGroup: "Agrupa elementos relacionados, promovendo uma visualizaÁ„o organizada e coesa do conte˙do.",
-  dLFRow: "Organiza itens em uma sequÍncia horizontal, ideal para listar elementos que compartilham um contexto.",
-  dLFColumn: "Organiza itens em uma sequÍncia vertical, suportando estruturas hier·rquicas ou listagens ordenadas.",
-  dLFGrid: "Apresenta coleÁıes de itens em uma estrutura bidimensional, facilitando a comparaÁ„o e visualizaÁ„o.",
+  dLFSection: "Divide o conte√∫do em se√ß√µes l√≥gicas e distintas, facilitando a organiza√ß√£o e a compreens√£o pelo usu√°rio.",
+  dLFGroup: "Agrupa elementos relacionados, promovendo uma visualiza√ß√£o organizada e coesa do conte√∫do.",
+  dLFRow: "Organiza itens em uma sequ√™ncia horizontal, ideal para listar elementos que compartilham um contexto.",
+  dLFColumn: "Organiza itens em uma sequ√™ncia vertical, suportando estruturas hier√°rquicas ou listagens ordenadas.",
+  dLFGrid: "Apresenta cole√ß√µes de itens em uma estrutura bidimensional, facilitando a compara√ß√£o e visualiza√ß√£o.",
   dLFAdaptive: "Layouts que se ajustam dinamicamente ao tamanho do dispositivo, mantendo a acessibilidade e a usabilidade.",
-  dLFSplit: "Divide a tela em ·reas distintas para interaÁ„o simult‚nea com diferentes conte˙dos.",
+  dLFSplit: "Divide a tela em √°reas distintas para intera√ß√£o simult√¢nea com diferentes conte√∫dos.",
 
-  dLGTable: "Apresenta dados em formato tabular, permitindo f·cil an·lise e comparaÁ„o de informaÁıes.",
-  dLGCards: "Destaca conjuntos de informaÁıes ou itens individuais em formato de cartıes, oferecendo uma vis„o geral acessÌvel.",
+  dLGTable: "Apresenta dados em formato tabular, permitindo f√°cil an√°lise e compara√ß√£o de informa√ß√µes.",
+  dLGCards: "Destaca conjuntos de informa√ß√µes ou itens individuais em formato de cart√µes, oferecendo uma vis√£o geral acess√≠vel.",
 
-  dBVPdf: "Componente para visualizar documentos PDF dentro da aplicaÁ„o. Permite aos usu·rios ler e interagir com conte˙do PDF diretamente na interface, sem necessidade de downloads ou aplicativos externos.",
-  dBVViwer: "Visualizador de planilhas que suporta formatos como Excel. Facilita a visualizaÁ„o e manipulaÁ„o de dados de planilhas dentro da aplicaÁ„o, permitindo an·lises e revisıes diretas.",
-  dBVDocument: "Permite a visualizaÁ„o de v·rios formatos de documentos, como Word, PowerPoint e PDF, integrando uma vis„o de conte˙do rico sem a necessidade de software adicional.",
+  dBVPdf: "Componente para visualizar documentos PDF dentro da aplica√ß√£o. Permite aos usu√°rios ler e interagir com conte√∫do PDF diretamente na interface, sem necessidade de downloads ou aplicativos externos.",
+  dBVViwer: "Visualizador de planilhas que suporta formatos como Excel. Facilita a visualiza√ß√£o e manipula√ß√£o de dados de planilhas dentro da aplica√ß√£o, permitindo an√°lises e revis√µes diretas.",
+  dBVDocument: "Permite a visualiza√ß√£o de v√°rios formatos de documentos, como Word, PowerPoint e PDF, integrando uma vis√£o de conte√∫do rico sem a necessidade de software adicional.",
 
-  dBPCalendar: "Plugin de calend·rio que oferece visualizaÁıes e interaÁıes com eventos e agendas. Integra-se com sistemas externos para sincronizaÁ„o e gerenciamento de eventos.",
-  dBPSchedule: "Componente para planejamento e visualizaÁ„o de agendas pessoais ou profissionais. Permite aos usu·rios organizar e visualizar compromissos, tarefas e eventos em um layout claro e interativo.",
-  dBPExternal: "Facilita a integraÁ„o com APIs externas para buscar ou enviar dados. Ideal para funcionalidades como visualizar condiÁıes clim·ticas, cotaÁıes de aÁıes ou atualizaÁıes de redes sociais diretamente na aplicaÁ„o.",
+  dBPCalendar: "Plugin de calend√°rio que oferece visualiza√ß√µes e intera√ß√µes com eventos e agendas. Integra-se com sistemas externos para sincroniza√ß√£o e gerenciamento de eventos.",
+  dBPSchedule: "Componente para planejamento e visualiza√ß√£o de agendas pessoais ou profissionais. Permite aos usu√°rios organizar e visualizar compromissos, tarefas e eventos em um layout claro e interativo.",
+  dBPExternal: "Facilita a integra√ß√£o com APIs externas para buscar ou enviar dados. Ideal para funcionalidades como visualizar condi√ß√µes clim√°ticas, cota√ß√µes de a√ß√µes ou atualiza√ß√µes de redes sociais diretamente na aplica√ß√£o.",
 
-  dBPPages: "Permite a incorporaÁ„o de p·ginas inteiras ou componentes especÌficos dentro da aplicaÁ„o atual. ⁄til para integrar funcionalidades ou informaÁıes adicionais sem a necessidade de navegaÁ„o externa."
+  dBPPages: "Permite a incorpora√ß√£o de p√°ginas inteiras ou componentes espec√≠ficos dentro da aplica√ß√£o atual. √ötil para integrar funcionalidades ou informa√ß√µes adicionais sem a necessidade de navega√ß√£o externa.",
+
+  eventDescChange: "Esse evento √© disparado quando o valor do campo de entrada √© alterado e o usu√°rio sai do campo (por exemplo, clicando fora ou pressionando a tecla Enter). √â √∫til para detectar quando o valor final de um campo foi definido.",
+  eventDescInput: "Esse evento √© disparado imediatamente quando o valor do campo de entrada √© alterado, enquanto o usu√°rio est√° digitando. Ele √© √∫til para valida√ß√µes e atualiza√ß√µes em tempo real do valor inserido.",
+  eventDescFocus: "Esse evento √© disparado quando o campo de entrada recebe o foco, ou seja, quando o usu√°rio clica no campo ou navega at√© ele usando o teclado. Ele pode ser usado para executar a√ß√µes quando o campo √© ativado, como destacar o campo ou exibir uma dica de preenchimento.",
+  eventDescBlur: "Esse evento √© disparado quando o campo de entrada perde o foco, ou seja, quando o usu√°rio clica fora do campo ou navega para outro elemento. Ele pode ser usado para validar o valor do campo ou para esconder dicas de preenchimento.",
 
 
 }
@@ -283,7 +290,12 @@ const message_en = {
   dBPSchedule: "Component for planning and viewing personal or professional schedules. Allows users to organize and view appointments, tasks, and events in a clear and interactive layout.",
   dBPExternal: "Facilitates integration with external APIs to fetch or send data. Ideal for features such as viewing weather conditions, stock quotes, or social media updates directly in the application.",
 
-  dBPPages: "Allows the embedding of entire pages or specific components within the current application. Useful for integrating additional functionality or information without the need for external navigation."
+  dBPPages: "Allows the embedding of entire pages or specific components within the current application. Useful for integrating additional functionality or information without the need for external navigation.",
+
+  eventDescChange: "This event is triggered when the value of the input field is changed and the user leaves the field (for example, by clicking outside or pressing the Enter key). It is useful for detecting when the final value of a field has been set.",
+  eventDescInput: "This event is triggered immediately when the value of the input field is changed, while the user is typing. It is useful for real-time validations and updates of the entered value.",
+  eventDescFocus: "This event is triggered when the input field receives focus, that is, when the user clicks on the field or navigates to it using the keyboard. It can be used to perform actions when the field is activated, such as highlighting the field or displaying a filling tip.",
+  eventDescBlur: "This event is triggered when the input field loses focus, that is, when the user clicks outside the field or navigates to another element. It can be used to validate the field value or to hide filling tips.",
 
 }
 
@@ -294,20 +306,8 @@ const messages: { [key: string]: MessageType } = {
   'pt-br': message_pt
 }
 
-const getMessageKey = (messages: any): string => {
-  const keys = Object.keys(messages);
-  if (!keys || keys.length < 1) throw new Error('Error Message not valid for international');
-  const firstKey = keys[0];
-  const lang = (document.documentElement.lang || '').toLowerCase();
-  if (!lang) return firstKey;
-  if (messages.hasOwnProperty(lang)) return lang;
-  const similarLang = keys.find((key: string) => lang.substring(0, 2) === key);
-  if (similarLang) return similarLang;
-  return firstKey;
-}
-
 const lang = getMessageKey(messages);
-const msg: MessageType = messages[lang];
+let msg: MessageType = messages[lang];
 
 const icaDescriptions: icaBase.FormComponent[] = [
   // definition principal group 
@@ -348,8 +348,9 @@ const icaDescriptions: icaBase.FormComponent[] = [
   {
     group: "Forms / Input / Number",
     description: msg.dFINumber,
-    prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinaÁ„o de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usu·rios digitem um n˙mero diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mÌnimo e m·ximo prÈ-definido. Se o usu·rio inserir um n˙mero inv·lido, uma mensagem de erro vermelha deve aparecer abaixo do componente.",
-    attributes: "name,datasource,placeholder,label,pattern,errormessage,maxvalue,minvalue,step,required,disabled,readonly,autofocus,hint,inputmode"
+    prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combina√ß√£o de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usu√°rios digitem um n√∫mero diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo m√≠nimo e m√°ximo pr√©-definido. Se o usu√°rio inserir um n√∫mero inv√°lido, uma mensagem de erro vermelha deve aparecer abaixo do componente.",
+    attributes: "name,datasource,placeholder,label,pattern,errormessage,maxvalue,minvalue,step,required,disabled,readonly,autofocus,hint,inputmode",
+    events: "change,input,focus,blur"
   },
   { group: "Forms / Input / String", description: msg.dFIString, attributes: "name,hint,label,required,disabled,readonly,maxlength,minlength,placeholder,pattern,errormessage,autofocus,autoCapitalize,autocorrect,autocomplete, datasource" },
   { group: "Forms / Input / Boolean", description: msg.dFIBoolean },
@@ -481,7 +482,6 @@ const icaDescriptions: icaBase.FormComponent[] = [
 ];
 
 const attributeDefinitions: icaBase.AttributeDefinition[] = [
-
   { path: "name", lit: "@property({ type: String }) name: string | undefined;" },
   { path: "hint", lit: "@property({ type: String }) hint: string | undefined; // An optional descriptive hint for the field", variations: true },
   { path: "label", lit: "@property({ type: String }) label: string | undefined; // A label to identify this field", variations: true },
@@ -503,8 +503,15 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "options", lit: "@property() options: OptionItem[] | undefined; // Optional path in the global JSON or a valid JSON for a list of options " },
   { path: "selectedvalue", lit: "@property() selectedvalue: string | undefined;" },
   { path: "inputmode", lit: " @property({ type: String }) inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = 'none';" },
-
 ];
+
+const eventsDefinitions: icaBase.EventsDefinition[] = [
+  { name: "change", desc: msg.eventDescChange },
+  { name: "input", desc: msg.eventDescInput },
+  { name: "blur", desc: msg.eventDescBlur },
+  { name: "focus", desc: msg.eventDescFocus },
+];
+
 
 export function getDescriptionsRootGroup(): string[] {
   const rootGroups = new Set<string>();
@@ -593,5 +600,22 @@ export function checkAttributteHasVariation(attribute: string): boolean {
   const attr = attributeDefinitions.find((attr) => attr.path === attribute);
   if (!attr) return false;
   return attr.variations === true;
+}
+
+export function getFormComponentsEvents(root: string, subGroup: string, finalGroup: string): string {
+  for (const component of icaDescriptions) {
+    const parts = component.group.split('/');
+    if (parts.length === 3 &&
+      parts[0].trim() === root &&
+      parts[1].trim() === subGroup &&
+      parts[2].trim() === finalGroup) return component.events || "";
+  };
+  return "";
+}
+
+export function getEventDescription(event: string): string {
+  const eventInfo = eventsDefinitions.find((ev) => ev.name === event);
+  if (!eventInfo) return '';
+  return eventInfo.desc;
 }
 
