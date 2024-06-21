@@ -94,7 +94,7 @@ export class CollabFCATree extends CollabLitElement {
         return html`
             <li>
                 <div id="${name + idx}" .info=${item} @mouseover="${this.mouseOver}" @mouseleave="${this.mouseLeave}" class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
-                    <info-item><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${name}</info-item>
+                    <info-item @click="${this.selectItemPreview}" .info=${item}><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${name}</info-item>
                     <div class="dragDropcontainer">
                         <span class="dbefore fa fa-arrow-up"></span>
                         <span class="din fa fa-arrow-turn-down"></span>
@@ -121,6 +121,20 @@ export class CollabFCATree extends CollabLitElement {
 
     //-------- IMPLEMENTATION --------------
 
+    private selectItemPreview(e: MouseEvent) {
+
+        e.stopPropagation();
+        let el = e.target as HTMLElement;
+
+        if (el.tagName.toLocaleLowerCase() !== 'info-item') {
+            el = el.closest('info-item') as HTMLElement;
+        }
+
+        const info = (el as any).info as IInfoElCholdren;
+        if (!info || !info.el || !info.el.id) return;
+        
+        mls.events.fire(4, 'WidgetAction' as any, `{"op":"SelectWidget", "id":"${info.el.id}"}`);
+    }
     public forceUpdate(): void {
         this.requestUpdate();
 
@@ -176,14 +190,23 @@ export class CollabFCATree extends CollabLitElement {
 
 
                 if (element.shadowRoot) {
-                    element.shadowRoot.querySelectorAll('*').forEach((item) => {
-                        reentrance(info ? info.children : array, item as HTMLElement);
-                    })
-                } else {
-                    const children = Array.from(element.children);
-                    if (children.length > 0) {
-                        children.forEach(child => reentrance(info ? info.children : array, child as HTMLElement));
+
+                    const children = Array.from(element.shadowRoot.children);
+
+                    for (let i = 0; i < children.length; i++){
+                        const child = children[i] as HTMLElement;
+                        reentrance(info ? info.children : array, child as HTMLElement)
                     }
+                    
+                } else {
+
+                    const children = Array.from(element.children);
+
+                    for (let i = 0; i < children.length; i++){
+                        const child = children[i] as HTMLElement;
+                        reentrance(info ? info.children : array, child as HTMLElement)
+                    }
+                    
                 }
 
             }
@@ -505,48 +528,48 @@ export class CollabFCATree extends CollabLitElement {
 
 
     private myCss = `
-        collab-fca-tree-100554{
+        collab-ica-tree-100554{
             padding: 1rem;
             display:block;
         }
-        collab-fca-tree-100554 ul {
+        collab-ica-tree-100554 ul {
             list-style: none;
             padding: 0px 0rem 0rem .5rem;
             border-left: 1px solid #d4d4d4;
         }
 
-        collab-fca-tree-100554 ul li {
+        collab-ica-tree-100554 ul li {
             position: relative;
             user-select:none;
 
         }
 
-        collab-fca-tree-100554 ul li .header {
+        collab-ica-tree-100554 ul li .header {
             padding: .4rem;
             cursor: pointer;
         }
 
-        collab-fca-tree-100554 ul li .header:hover {
+        collab-ica-tree-100554 ul li .header:hover {
             border: 1px solid #d4d4d4;
 
         }
 
-        collab-fca-tree-100554 ul li .header .dragDropcontainer {
+        collab-ica-tree-100554 ul li .header .dragDropcontainer {
             display:none;
             gap:0.5rem;
         }
 
-        collab-fca-tree-100554 ul li .header.overdragdrop {
+        collab-ica-tree-100554 ul li .header.overdragdrop {
             display: flex!important;
             justify-content: space-between;
         }
 
-        collab-fca-tree-100554 ul li .header.overdragdrop .dragDropcontainer {
+        collab-ica-tree-100554 ul li .header.overdragdrop .dragDropcontainer {
             display:flex;
             gap:0.5rem;
         }
 
-        collab-fca-tree-100554 ul li .header .dragDropcontainer span {
+        collab-ica-tree-100554 ul li .header .dragDropcontainer span {
             display: none;
             justify-content: center;
             align-items: center;
@@ -554,19 +577,19 @@ export class CollabFCATree extends CollabLitElement {
             heigth:20px;
         }
 
-        collab-fca-tree-100554 ul li .header .dragDropcontainer.b .dbefore {
+        collab-ica-tree-100554 ul li .header .dragDropcontainer.b .dbefore {
             display: flex!important;
         }
 
-        collab-fca-tree-100554 ul li .header .dragDropcontainer.i .din {
+        collab-ica-tree-100554 ul li .header .dragDropcontainer.i .din {
             display: flex!important;
         }
 
-        collab-fca-tree-100554 ul li .header .dragDropcontainer.a .dAfter {
+        collab-ica-tree-100554 ul li .header .dragDropcontainer.a .dAfter {
             display: flex!important;
         }
 
-        collab-fca-tree-100554 ul li div.activeBranch{
+        collab-ica-tree-100554 ul li div.activeBranch{
             border: 1px solid #d4d4d4;
             display: flex;
             justify-content: space-between;
@@ -575,7 +598,7 @@ export class CollabFCATree extends CollabLitElement {
             background: #f8f8f8;
         }
 
-        collab-fca-tree-100554 ul li:before {
+        collab-ica-tree-100554 ul li:before {
             content: ' ';
             position: absolute;
             width: 7px;
@@ -585,7 +608,7 @@ export class CollabFCATree extends CollabLitElement {
             left: -8px;
         }
 
-        collab-fca-tree-100554 .groupHiddenList {
+        collab-ica-tree-100554 .groupHiddenList {
             border-radius: 4px;
             padding: .3rem;
             transition: all 0.5s;
@@ -596,13 +619,13 @@ export class CollabFCATree extends CollabLitElement {
             
         }
 
-        collab-fca-tree-100554 ul li div.activeBranch .groupHiddenList{
+        collab-ica-tree-100554 ul li div.activeBranch .groupHiddenList{
             display: flex;
             align-items: center;
             position: relative;
         }
 
-        collab-fca-tree-100554 .groupHiddenList::after {
+        collab-ica-tree-100554 .groupHiddenList::after {
             content: ' ';
             width: 23px;
             height: 19px;
@@ -613,7 +636,7 @@ export class CollabFCATree extends CollabLitElement {
             background-position-y: center;
         }
 
-        collab-fca-tree-100554 .groupHiddenList .mls-gpbtnslider-item {
+        collab-ica-tree-100554 .groupHiddenList .mls-gpbtnslider-item {
             display: none;
             transition: 0.5s;
             margin-left: 1rem;
@@ -622,17 +645,17 @@ export class CollabFCATree extends CollabLitElement {
             line-height: normal;
         }
 
-        collab-fca-tree-100554 .groupHiddenList .mls-gpbtnslider-item:hover {
+        collab-ica-tree-100554 .groupHiddenList .mls-gpbtnslider-item:hover {
             color: #1a83ff;
         }
         
 
-        collab-fca-tree-100554 .groupHiddenList.activegpbtnslider {
+        collab-ica-tree-100554 .groupHiddenList.activegpbtnslider {
             padding-right: 24px;
             padding-left: 8px;
         }
 
-        collab-fca-tree-100554 .groupHiddenList.activegpbtnslider .mls-gpbtnslider-item {
+        collab-ica-tree-100554 .groupHiddenList.activegpbtnslider .mls-gpbtnslider-item {
             display: inherit;
             text-align: center;
             float: left;

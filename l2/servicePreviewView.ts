@@ -64,6 +64,7 @@ export class ServicePreviewView extends LitElement {
 
     private setEventsCollab(): void {
         mls.events.addListener(2, 'WidgetAction', this.onWidgetActionEvents.bind(this));
+        mls.events.addListener(4, 'WidgetAction', this.onWidgetActionEvents.bind(this));
     }
 
     private onWidgetActionEvents(ev: mls.events.IEvent) {
