@@ -15,7 +15,7 @@ const message_pt = {
 
 const message_en = {
     noItens: 'No ICA items were found!',
-    
+
 }
 
 type MessageType = typeof message_en;
@@ -29,7 +29,7 @@ const messages: { [key: string]: MessageType } = {
 export class CollabFCATree extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
-    
+
     public myParent: ServiceBase | undefined;
 
     constructor() {
@@ -47,7 +47,7 @@ export class CollabFCATree extends CollabLitElement {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
 
-        const ar = this.getFCAComponents();
+        const ar = this.getICAComponents();
         if (ar && ar.length > 0) return this.createNavigation(ar);
         return html`<h3 style="padding:1rem">${this.msg.noItens}<h3>`;
     }
@@ -142,7 +142,7 @@ export class CollabFCATree extends CollabLitElement {
 
     }
 
-    private getFCAComponents(): IInfoElCholdren[] {
+    private getICAComponents(): IInfoElCholdren[] {
 
         this.setServicePreview();
 
@@ -160,34 +160,42 @@ export class CollabFCATree extends CollabLitElement {
         const scope = iframe.contentDocument?.body;
         if (!scope) return ret;
 
-        const reentrance = (array: IInfoElCholdren[], el: HTMLElement | HTMLElement) => {
+        const reentrance = (array: IInfoElCholdren[], element: HTMLElement) => {
 
-            const tag = el.tagName.toLowerCase();
             let info: IInfoElCholdren | undefined;
-            if (tag.startsWith('fca-')) {
+            if (element.tagName.toLowerCase().startsWith('ica')) {
 
-                info = { el: el as HTMLElement, children: [] as any };
+                info = { el: element as HTMLElement, children: [] as any };
                 array.push(info);
 
             }
 
-            const isGroup = el.getAttribute('isFCAGroup');
+            const isGroup = element.getAttribute('isFCAGroup');
 
             if (!isGroup || isGroup === 'false') {
-                Array.from(el.children).forEach(i => {
-                    reentrance(info ? info.children : array, i as HTMLElement);
-                })
+
+
+                if (element.shadowRoot) {
+                    element.shadowRoot.querySelectorAll('*').forEach((item) => {
+                        reentrance(info ? info.children : array, item as HTMLElement);
+                    })
+                } else {
+                    const children = Array.from(element.children);
+                    if (children.length > 0) {
+                        children.forEach(child => reentrance(info ? info.children : array, child as HTMLElement));
+                    }
+                }
+
             }
 
         }
 
-        Array.from(scope.children).forEach(i => {
-            reentrance(ret, i as HTMLElement);
-        })
-
+        reentrance(ret, scope);
+        
         return ret;
 
     }
+    
 
     private idLastClick: string = '';
     private selectItem(e: MouseEvent, item: IInfoElCholdren): void {
@@ -353,12 +361,12 @@ export class CollabFCATree extends CollabLitElement {
                     el.ondragstart = () => { };
                     el.ondragenter = () => { };
                     el.ondragover = () => { };
-                    el.ondragleave = () => { };                    
+                    el.ondragleave = () => { };
 
                     const elbefore = el.querySelector('.dbefore') as HTMLElement;
                     const elafter = el.querySelector('.dAfter') as HTMLElement;
                     const elinn = el.querySelector('.din') as HTMLElement;
-                    
+
                     if (elbefore) {
                         elbefore.removeAttribute('draggable');
                         elbefore.ondrop = (e: MouseEvent) => { };
