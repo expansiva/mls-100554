@@ -3,7 +3,7 @@
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { initCollabFCATree } from './_100554_collabFcaTree';
+import { initCollabICATree } from './_100554_collabIcaTree';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -32,7 +32,7 @@ export class ServiceFca100554 extends ServiceBase {
 
     constructor() {
         super();
-        initCollabFCATree;
+        initCollabICATree;
         this.setEvents();
     }
 
@@ -114,7 +114,7 @@ export class ServiceFca100554 extends ServiceBase {
 
     renderNavigation() {
 
-        return html`<collab-fca-tree-100554 .myParent=${this}></collab-fca-tree-100554>`;
+        return html`<collab-ica-tree-100554 .myParent=${this}></collab-ica-tree-100554>`;
     }
 
     renderProperties() {
