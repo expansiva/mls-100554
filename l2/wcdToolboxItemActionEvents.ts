@@ -22,7 +22,11 @@ const templateActionEvents = {
         format: '',
         title: '',
         iconSvg: '',
-        onclick: undefined,
+        onclick: (e: MouseEvent, wc: WCDToolbox) => {
+            if (wc.level === '2') {
+                mls.events.fire(2, 'WidgetAction' as any, `{"op":"OpenScenario", "widget":"_100554_scenarioInsertEventOrChange", "attrs": [{"attr":"opt", "value":"${e.detail}"}]}`);
+            }
+        },
         menuItens: [],
         menuSubItens: [],
         widget: 'collab-select-one-with-description-100554',

@@ -395,9 +395,11 @@ export class ServiceSource100554 extends ServiceBase {
 
         const json = JSON.parse(ev.desc);
 
-        if (json.op !== 'SelectLine') return;
-
-        this.selectLineinHTML(json.line);
+        if (json.op === 'SelectLine'){
+            this.selectLineinHTML(json.line);
+        } else if (json.op === 'OpenScenario') {
+            this.addScenario(json.widget);
+        }
 
 
     }
