@@ -94,7 +94,7 @@ export class CollabFCATree extends CollabLitElement {
         return html`
             <li>
                 <div id="${name + idx}" .info=${item} @mouseover="${this.mouseOver}" @mouseleave="${this.mouseLeave}" class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
-                    <info-item @click="${this.selectItemPreview}" .info=${item}><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${name}</info-item>
+                    <info-item .info=${item}><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${name}</info-item>
                     <div class="dragDropcontainer">
                         <span class="dbefore fa fa-arrow-up"></span>
                         <span class="din fa fa-arrow-turn-down"></span>
@@ -121,20 +121,6 @@ export class CollabFCATree extends CollabLitElement {
 
     //-------- IMPLEMENTATION --------------
 
-    private selectItemPreview(e: MouseEvent) {
-
-        e.stopPropagation();
-        let el = e.target as HTMLElement;
-
-        if (el.tagName.toLocaleLowerCase() !== 'info-item') {
-            el = el.closest('info-item') as HTMLElement;
-        }
-
-        const info = (el as any).info as IInfoElCholdren;
-        if (!info || !info.el || !info.el.id) return;
-        
-        mls.events.fire(4, 'WidgetAction' as any, `{"op":"SelectWidget", "id":"${info.el.id}"}`);
-    }
     public forceUpdate(): void {
         this.requestUpdate();
 
