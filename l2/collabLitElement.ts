@@ -101,3 +101,7 @@ export function getMessageKey(messages: any): string {
   return firstKey;
 }
 
+export interface IScenaryDetails {
+    description: string,
+    html: HTMLElement
+}
