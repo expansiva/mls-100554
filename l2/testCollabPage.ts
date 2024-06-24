@@ -30,8 +30,12 @@ export class TestCollabPage100554 extends CollabPageElement {
         return html``;
     }
 
-    handleClick2() {
-        console.log('Click handler for element with ID 2');
+    handleClickinput2Desktop() {
+        console.log('Click handler desktop for element with ID 2');
+    }
+
+    handleClickinput2Mobile() {
+        console.log('Click handler mobile for element with ID 2');
     }
 
 }

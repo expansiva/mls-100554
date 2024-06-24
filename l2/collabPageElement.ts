@@ -34,7 +34,7 @@ export abstract class CollabPageElement extends CollabLitElement {
     }
 
     getVariationDevice(): IDevice {
-        const device = (document.documentElement.getAttribute('variation') || 'desktop').toLowerCase();
+        const device = (document.documentElement.getAttribute('data-device') || 'desktop').toLowerCase();
         return device as IDevice;
     }
 

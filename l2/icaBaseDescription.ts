@@ -3,7 +3,7 @@
 import * as icaBase from "./_100554_icaBase";
 import { getMessageKey } from "./_100554_collabLitElement";
 
-
+/// **collab_i18n_start**
 const message_pt = {
   dForms: "Componentes para criação e manipulação de formulários, permitindo a entrada de dados pelo usuário de forma estruturada.",
   dNavigation: "Componentes projetados para facilitar a movimentação do usuário pela aplicação, englobando tanto a navegação entre diferentes páginas quanto a manipulação de conteúdo dentro de uma mesma página.",
@@ -178,6 +178,9 @@ const message_pt = {
 
   eventDescBreadClick: " Este evento é disparado quando um item do breadcrumb é clicado pelo usuário. Pode ser usado para capturar interações com itens específicos do breadcrumb.",
 
+  eventDescDropdownChange: "Este evento é disparado quando há uma mudança no valor selecionado do dropdown. Pode ser usado para atualizar dados relacionados à seleção do usuário.",
+
+
 }
 
 const message_en = {
@@ -351,7 +354,7 @@ const message_en = {
   eventDescTreeSelectionChange: "This event is triggered when there is a change in the selection of tree nodes, either by click, keyboard, or another selection method.",
 
   eventDescBreadClick: "This event is triggered when a breadcrumb item is clicked by the user. It can be used to capture interactions with specific breadcrumb items.",
-
+  eventDescDropdownChange: "This event is triggered when there is a change in the selected value of the dropdown. It can be used to update data related to user selection."
 }
 
 type MessageType = typeof message_en;
@@ -360,6 +363,7 @@ const messages: { [key: string]: MessageType } = {
   'en-us': message_en,
   'pt-br': message_pt
 }
+/// **collab_i18n_end**
 
 const lang = getMessageKey(messages);
 let msg: MessageType = messages[lang];
@@ -512,7 +516,11 @@ const icaDescriptions: icaBase.FormComponent[] = [
     description: msg.dFTBreadcrumbs,
     events: "item-click"
   },
-  { group: "Forms / Tree / Nested Dropdown", description: msg.dFTDropdown },
+  {
+    group: "Forms / Tree / Nested Dropdown",
+    description: msg.dFTDropdown,
+    events: "change,blur,focus"
+  },
   { group: "Forms / Tree / Nested Accordions", description: msg.dFTAccordions },
   { group: "Forms / Tree / Tag Cloud", description: msg.dFTTags },
   { group: "Forms / Tree / Mind Map", description: msg.dFTMap },
@@ -672,8 +680,7 @@ const eventsDefinitions: icaBase.EventsDefinition[] = [
   { name: "selection-change", group: ["Forms / Tree / Tree View"], desc: msg.eventDescTreeSelectionChange },
 
   { name: "item-click", group: ["Forms / Tree / Breadcrumb"], desc: msg.eventDescBreadClick },
-
-
+  { name: "change", group: ["Forms / Tree / Nested Dropdown"], desc: msg.eventDescDropdownChange },
 
 ];
 
