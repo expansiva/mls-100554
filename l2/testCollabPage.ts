@@ -29,7 +29,7 @@ export class TestCollabPage100554 extends CollabPageElement {
 
         return html``;
     }
-
+    
     handleClickinput2Desktop() {
         console.log('Click handler desktop for element with ID 2');
     }

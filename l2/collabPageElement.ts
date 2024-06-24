@@ -10,7 +10,8 @@ export abstract class CollabPageElement extends CollabLitElement {
     }
 
     setupEventListeners() {
-        const device = this.getVariationDevice();
+        let device: string = this.getVariationDevice();
+        if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1);
         const elements = this.querySelectorAll('[data-event]');
         const that = this as any;
         elements.forEach(element => {
