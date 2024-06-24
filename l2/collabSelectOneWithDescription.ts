@@ -6,6 +6,8 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 import { IcaLitElement } from './_100554_icaLitElement';
 import { collab_plus } from './_100554_collabIcons';
 
+export const initCollabSelectOneWithDescription = '';
+
 /// **collab_i18n_start**
 const message_pt = {
     defaultMsg: 'Passe o mouse sobre as opções para saber mais.',

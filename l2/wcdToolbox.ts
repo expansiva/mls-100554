@@ -5,6 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IActionsToolbox, IActionsToolboxMenu } from './_100554_icaGlobal';
 import { ServiceBase } from './_100554_serviceBase';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import * as states from './_100554_icaCollabStore';
 
 //version 4
@@ -71,7 +72,7 @@ export class WCDToolbox extends CollabLitElement {
     }
 
     shouldUpdate(changedProperties: Map<string, string>): boolean {
-        // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = não executa o render().
+        // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = nÃ£o executa o render().
 
         if (changedProperties.get('level')) {
             this.lastHelper = '';
@@ -187,6 +188,9 @@ export class WCDToolbox extends CollabLitElement {
                     break;
                 case 'action':
                     this.addAction(i);
+                    break;
+                case 'event':
+                    this.addEvent(i);
                     break;
                 default: '';
             }
@@ -418,6 +422,47 @@ export class WCDToolbox extends CollabLitElement {
 
     }
 
+    private addEvent(act: IActionsToolbox): void {
+
+        if (!this.elMain || !this.shadowRoot || !act.widget) return undefined;
+
+        const el = document.createElement(act.widget);
+        const ica = this.parentElement as any;
+
+        el.className = `${act.position} f-${act.format}`;
+        (el as any).myParent = this;
+        (el as any).elMain = this.elMain;
+        (el as any).elFCA = ica;
+
+        if (ica && ica.getMyEvents && ica.getDefinitionFromEvent) {
+
+            const events = ica.getMyEvents() as string;
+            const opt: any[] = [];
+
+            events.split(',').forEach((ev: string) => {
+
+                const info = {
+                    key: ev.trim(),
+                    value: ev.trim(),
+                    description: ica.getDefinitionFromEvent(ev.trim())
+                }
+                opt.push(info)
+
+            });
+
+            (el as any).options = opt;
+
+        }
+
+        el.style.cursor = act.cursor as string;
+
+        if (act.onclick) {
+            el.addEventListener('select-change', (e) => { if (act.onclick) act.onclick(e, this) });
+        }
+        this.shadowRoot.appendChild(el);
+
+    }
+
     public updateBackgroundAuxSize(tp: 'show' | 'hide' = 'hide'): void {
 
         if (!this.shadowRoot) return;
@@ -495,7 +540,7 @@ export class WCDToolbox extends CollabLitElement {
             let left = 0;
             let top = 0;
             left -= parseInt(marginLeft, 10);
-            top -=  parseInt(marginTop, 10);
+            top -= parseInt(marginTop, 10);
             width = Math.max(ad3(width, marginLeft, marginRight), ad3(0, paddingLeft, paddingRight));
 
             if (width > elBase.ownerDocument.body.clientWidth) width -= 3;

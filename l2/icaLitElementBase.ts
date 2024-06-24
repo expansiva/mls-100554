@@ -9,6 +9,7 @@ import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { initWCDToolbox, WCDToolbox } from './_100554_wcdToolbox'
 import { html, unsafeHTML } from 'lit';
 import { property } from 'lit/decorators.js';
+import * as myDefinition from './_100554_icaBaseDescription';
 
 
 export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitElementBaseMethods {
@@ -394,6 +395,36 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
         return attributes;
     }
+
+    private myInfos: { root: string, subGroup: string, finalGroup: string } | undefined;
+    getMyInfos(): { root: string , subGroup: string , finalGroup: string  } {
+
+        // Remove os caracteres iniciais e finais não desejados
+        let cleanedInput = this.tagName.toLocaleLowerCase().replace(/^ica-|-\d+$/g, '');
+
+        // Divide a string em partes usando '-'
+        let parts = cleanedInput.split('-');
+
+        // Retorna o objeto mapeando as partes apropriadas
+        return {
+            root: parts[0] || '',
+            subGroup: parts[1] || '',
+            finalGroup: parts[2] || ''
+        };
+    }
+
+    getMyEvents(): string{
+
+        if (!this.myInfos) this.myInfos = this.getMyInfos();
+        return myDefinition.getFormComponentsEvents(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup);
+        
+    }
+
+    getDefinitionFromEvent(event:string): string{
+        if (!this.myInfos) this.myInfos = this.getMyInfos();
+        return myDefinition.getEventDescription(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup, event);
+    }
+
 
 }
 
