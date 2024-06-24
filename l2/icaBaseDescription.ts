@@ -148,6 +148,29 @@ const message_pt = {
   eventDescInput: "Esse evento é disparado imediatamente quando o valor do campo de entrada é alterado, enquanto o usuário está digitando. Ele é útil para validações e atualizações em tempo real do valor inserido.",
   eventDescFocus: "Esse evento é disparado quando o campo de entrada recebe o foco, ou seja, quando o usuário clica no campo ou navega até ele usando o teclado. Ele pode ser usado para executar ações quando o campo é ativado, como destacar o campo ou exibir uma dica de preenchimento.",
   eventDescBlur: "Esse evento é disparado quando o campo de entrada perde o foco, ou seja, quando o usuário clica fora do campo ou navega para outro elemento. Ele pode ser usado para validar o valor do campo ou para esconder dicas de preenchimento.",
+  eventDescInvalid: "Esse evento é disparado quando um elemento que pode ser enviado foi verificado quanto à validade e não atende às suas restrições.",
+  eventDescMouseLeave: "O evento é disparado quando um dispositivo de apontamento (geralmente um mouse) se move sobre para fora do elemento",
+  eventDescMouseEnter: "O evento é disparado quando um dispositivo de apontamento (geralmente um mouse) se move sobre um elemento (para dentro do mesmo).",
+  eventDescLoad: "O evento de load é disparado quando um recurso e seus recursos dependentes terminaram de carregar.",
+
+
+
+  eventDescTableRowClick: "Evento disparado quando uma linha da tabela é clicada. É útil para permitir a seleção de linhas ou para exibir detalhes adicionais da linha.",
+  eventDescTableCellClick: "Evento disparado quando uma célula específica da tabela é clicada. Pode ser usado para interações mais granulares com dados da tabela.",
+  eventDescTableSort: "Evento disparado quando uma coluna da tabela é ordenada. Útil para permitir que a página reordene ou atualize os dados exibidos na tabela.",
+  eventDescTableFilter: "Evento disparado quando filtros na tabela são aplicados ou removidos. Pode ser usado para atualizar a exibição dos dados conforme os critérios de filtragem selecionados.",
+  eventDescTablePagination: "Evento disparado quando a página atual da tabela é alterada. Essencial para tabelas com muitos dados, permitindo a navegação entre páginas de resultados.",
+  eventDescTableLoadMore: "Este evento é disparado quando mais dados são carregados na tabela, geralmente quando o usuário rola até o final da tabela ou quando é acionado um botão para carregar mais dados.",
+  eventDescListItemSelected: "Este evento pode ser disparado quando um item da lista é selecionado pelo usuário. É útil para interações onde o usuário precisa saber qual item foi escolhido.",
+  eventDescTimelineItemSelected: "Este evento é disparado quando um item da linha do tempo é clicado pelo usuário. Pode ser usado para capturar interações com itens específicos da linha do tempo.",
+
+  eventDescMapLoad: "Este evento é disparado quando o mapa é carregado e está pronto para ser interagido pelo usuário.",
+  eventDescMapClick: "Este evento é disparado quando o usuário clica em qualquer parte do mapa. Pode ser usado para capturar cliques para interações específicas, como exibir informações adicionais sobre uma localização.",
+  eventDescMapDragStart: "Este evento é disparado quando o usuário começa a arrastar o mapa. Pode ser útil para preparar ações ou atualizações de interface enquanto o mapa está sendo movido.",
+  eventDescMapDragEnd: "Este evento é disparado quando o usuário termina de arrastar o mapa. Pode ser usado para finalizar ações de atualização de interface ou para ajustar a visualização do mapa após o movimento.",
+  eventDescMapZoom: "Este evento é disparado quando o nível de zoom do mapa é alterado. Pode ser útil para atualizar conteúdo relacionado à visualização do mapa.",
+  eventDescMapResize: "Este evento é disparado quando o tamanho do mapa é alterado, seja por redimensionamento da janela do navegador ou outras ações que afetem o espaço disponível para o mapa.",
+  eventDescMapError: "Este evento é disparado quando ocorre um erro durante o carregamento ou processamento do mapa. Pode ser útil para lidar com falhas na exibição ou interação com o mapa.",
 
 
 }
@@ -296,6 +319,27 @@ const message_en = {
   eventDescInput: "This event is triggered immediately when the value of the input field is changed, while the user is typing. It is useful for real-time validations and updates of the entered value.",
   eventDescFocus: "This event is triggered when the input field receives focus, that is, when the user clicks on the field or navigates to it using the keyboard. It can be used to perform actions when the field is activated, such as highlighting the field or displaying a filling tip.",
   eventDescBlur: "This event is triggered when the input field loses focus, that is, when the user clicks outside the field or navigates to another element. It can be used to validate the field value or to hide filling tips.",
+  eventDescInvalid: "This event is triggered when a submittable element has been checked for validity and doesn't satisfy its constraints.",
+  eventDescMouseLeave: "The event is triggered when a pointing device (typically a mouse) moves out of the element.",
+  eventDescMouseEnter: "The event is triggered when a pointing device (typically a mouse) moves over an element (into it).",
+
+  eventDescTableRowClick: "Event triggered when a table row is clicked. Useful for enabling row selection or displaying additional details of the row.",
+  eventDescTableCellClick: "Event triggered when a specific cell in the table is clicked. Can be used for more granular interactions with table data.",
+  eventDescTableSort: "Event triggered when a table column is sorted. Useful for allowing the page to reorder or update the displayed data in the table.",
+  eventDescTableFilter: "Event triggered when filters in the table are applied or removed. Can be used to update the data display based on selected filtering criteria.",
+  eventDescTablePagination: "Event triggered when the current page of the table is changed. Essential for tables with large datasets, allowing navigation between result pages.",
+  eventDescTableLoadMore: "This event is triggered when more data is loaded into the table, typically when the user scrolls to the bottom of the table or when a button is clicked to load more data.",
+
+  eventDescListItemSelected: "This event can be triggered when a list item is selected by the user. It's useful for interactions where the user needs to know which item was chosen.",
+  eventDescTimelineItemSelected: "This event is triggered when a timeline item is clicked by the user. It can be used to capture interactions with specific timeline items.",
+
+  eventDescMapLoad: "This event is triggered when the map is loaded and ready for user interaction.",
+  eventDescMapClick: "This event is triggered when the user clicks anywhere on the map. It can be used to capture clicks for specific interactions, such as displaying additional information about a location.",
+  eventDescMapDragStart: "This event is triggered when the user starts dragging the map. It can be useful for preparing actions or interface updates while the map is being moved.",
+  eventDescMapDragEnd: "This event is triggered when the user finishes dragging the map. It can be used to finalize interface update actions or to adjust the map view after movement.",
+  eventDescMapZoom: "This event is triggered when the map zoom level is changed. It can be useful for updating content related to the map view.",
+  eventDescMapResize: "This event is triggered when the map size is changed, either by resizing the browser window or other actions affecting the available space for the map.",
+  eventDescMapError: "This event is triggered when an error occurs during map loading or processing. It can be useful for handling display failures or interaction issues with the map."
 
 }
 
@@ -352,27 +396,99 @@ const icaDescriptions: icaBase.FormComponent[] = [
     attributes: "name,datasource,placeholder,label,pattern,errormessage,maxvalue,minvalue,step,required,disabled,readonly,autofocus,hint,inputmode",
     events: "change,input,focus,blur"
   },
-  { group: "Forms / Input / String", description: msg.dFIString, attributes: "name,hint,label,required,disabled,readonly,maxlength,minlength,placeholder,pattern,errormessage,autofocus,autoCapitalize,autocorrect,autocomplete, datasource" },
-  { group: "Forms / Input / Boolean", description: msg.dFIBoolean },
-  { group: "Forms / Input / Date", description: msg.dFIDate },
-  { group: "Forms / Input / Time", description: msg.dFITime },
-  { group: "Forms / Input / Date Range", description: msg.dFIDateRange },
-  { group: "Forms / Input / Select One", description: msg.dFISelectOne, attributes: "hint,label,required,disabled,options,selectedvalue" },
-  { group: "Forms / Input / MultiSelect", description: msg.dFIMultSelect },
-  { group: "Forms / Input / Color", description: msg.dFIColor },
-  { group: "Forms / Input / Editor", description: msg.dFIEditor },
-  { group: "Forms / Input / Feedback", description: msg.dFIFeedBack },
-  { group: "Forms / Input / File", description: msg.dFIFile },
+  {
+    group: "Forms / Input / String",
+    description: msg.dFIString,
+    attributes: "name,hint,label,required,disabled,readonly,maxlength,minlength,placeholder,pattern,errormessage,autofocus,autoCapitalize,autocorrect,autocomplete, datasource",
+    events: "change,input,focus,blur,invalid"
+  },
+  {
+    group: "Forms / Input / Boolean",
+    description: msg.dFIBoolean,
+    events: "change,focus,blur"
+  },
+  {
+    group: "Forms / Input / Date",
+    description: msg.dFIDate,
+    events: "change,input,focus,blur,invalid"
+  },
+  {
+    group: "Forms / Input / Time",
+    description: msg.dFITime,
+    events: "change,input,focus,blur,invalid"
+  },
+  {
+    group: "Forms / Input / Date Range",
+    description: msg.dFIDateRange,
+    events: "change,input,focus,blur,invalid"
+  },
+  {
+    group: "Forms / Input / Select One",
+    description: msg.dFISelectOne,
+    attributes: "hint,label,required,disabled,options,selectedvalue",
+    events: "change,focus,blur"
+  },
+  {
+    group: "Forms / Input / MultiSelect",
+    description: msg.dFIMultSelect,
+    events: "change,focus,blur"
+  },
+  {
+    group: "Forms / Input / Color",
+    description: msg.dFIColor,
+    events: "change,input,focus,blur,invalid"
+  },
+  {
+    group: "Forms / Input / Editor",
+    description: msg.dFIEditor,
+    events: "change,input,focus,blur"
+  },
+  {
+    group: "Forms / Input / Feedback",
+    description: msg.dFIFeedBack
+  },
+  {
+    group: "Forms / Input / File",
+    description: msg.dFIFile,
+    events: "change,focus,blur"
+  },
 
   // Records
-  { group: "Forms / Records / Table", description: msg.dFRTable },
-  { group: "Forms / Records / Table", description: msg.dFRTable },
-  { group: "Forms / Records / List", description: msg.dFRList },
-  { group: "Forms / Records / Timeline", description: msg.dFRTimeline },
-  { group: "Forms / Records / Cards", description: msg.dFRCards },
-  { group: "Forms / Records / Map (Geo)", description: msg.dFRMap },
-  { group: "Forms / Records / Table with Pagination", description: msg.dFRPagination },
-  { group: "Forms / Records / Table with Infinite Scroll", description: msg.dFRInfinity },
+  {
+    group: "Forms / Records / Table",
+    description: msg.dFRTable,
+    events: "row-click,cell-click,sort,filter"
+  },
+  {
+    group: "Forms / Records / List",
+    description: msg.dFRList,
+    events: 'item-selected,focus'
+  },
+  {
+    group: "Forms / Records / Timeline",
+    description: msg.dFRTimeline,
+    events: 'item-selected,focus'
+  },
+  {
+    group: "Forms / Records / Cards",
+    description: msg.dFRCards,
+    events: 'click, mouseenter,mouseleave'
+  },
+  {
+    group: "Forms / Records / Map (Geo)",
+    description: msg.dFRMap,
+    events: "click,load,dragstart,dragend,zoom,resize,error"
+  },
+  {
+    group: "Forms / Records / Table with Pagination",
+    description: msg.dFRPagination,
+    events: "row-click,cell-click,sort,filter,pagination"
+  },
+  {
+    group: "Forms / Records / Table with Infinite Scroll",
+    description: msg.dFRInfinity,
+    events: "row-click,cell-click,sort,filter,loadmore"
+  },
 
   // Tree
   { group: "Forms / Tree / Tree View", description: msg.dFTView },
@@ -510,6 +626,31 @@ const eventsDefinitions: icaBase.EventsDefinition[] = [
   { name: "input", desc: msg.eventDescInput },
   { name: "blur", desc: msg.eventDescBlur },
   { name: "focus", desc: msg.eventDescFocus },
+  { name: "invalid", desc: msg.eventDescInvalid },
+  { name: "mouseleave", desc: msg.eventDescMouseLeave },
+  { name: "mouseenter", desc: msg.eventDescMouseEnter },
+
+  { name: "row-click", group: ["Forms / Records / Table", "Forms / Records / Table with Pagination", "Forms / Records / Table with Infinite Scroll"], desc: msg.eventDescTableRowClick },
+  { name: "cell-click", group: ["Forms / Records / Table", "Forms / Records / Table with Pagination", "Forms / Records / Table with Infinite Scroll"], desc: msg.eventDescTableCellClick },
+  { name: "sort", group: ["Forms / Records / Table", "Forms / Records / Table with Pagination", "Forms / Records / Table with Infinite Scroll"], desc: msg.eventDescTableSort },
+  { name: "filter", group: ["Forms / Records / Table", "Forms / Records / Table with Pagination", "Forms / Records / Table with Infinite Scroll"], desc: msg.eventDescTableFilter },
+  { name: "pagination", group: ["Forms / Records / Table", "Forms / Records / Table with Pagination", "Forms / Records / Table with Infinite Scroll"], desc: msg.eventDescTablePagination },
+  { name: "loadmore", group: ["Forms / Records / Table with Infinite Scroll"], desc: msg.eventDescTableLoadMore },
+
+  { name: "item-selected", group: ["Forms / Records / List"], desc: msg.eventDescListItemSelected },
+  { name: "item-selected", group: ["Forms / Records / Timeline"], desc: msg.eventDescTimelineItemSelected },
+
+  { name: "load", group: ["Forms / Records / Map (Geo)"], desc: msg.eventDescMapLoad },
+  { name: "click", group: ["Forms / Records / Map (Geo)"], desc: msg.eventDescMapClick },
+  { name: "dragstart", group: ["Forms / Records / Map (Geo)"], desc: msg.eventDescMapDragStart },
+  { name: "dragend", group: ["Forms / Records / Map (Geo)"], desc: msg.eventDescMapDragEnd },
+  { name: "zoom", group: ["Forms / Records / Map (Geo)"], desc: msg.eventDescMapZoom },
+  { name: "resize", group: ["Forms / Records / Map (Geo)"], desc: msg.eventDescMapResize },
+  { name: "error", group: ["Forms / Records / Map (Geo)"], desc: msg.eventDescMapError },
+
+
+
+
 ];
 
 
@@ -613,7 +754,26 @@ export function getFormComponentsEvents(root: string, subGroup: string, finalGro
   return "";
 }
 
-export function getEventDescription(event: string): string {
+export function getEventDescription(root: string, subGroup: string, finalGroup: string, event: string): string {
+
+  let desc: string = '';
+
+  for (const event of eventsDefinitions) {
+    if (!event.group) continue;
+    for (const group of event.group) {
+      const parts = group.split('/');
+      if (parts.length === 3 &&
+        parts[0].trim() === root &&
+        parts[1].trim() === subGroup &&
+        parts[2].trim() === finalGroup) {
+        desc = event.desc || "";
+        break;
+      }
+    }
+    if (desc) break;
+  };
+
+  if (desc) return desc;
   const eventInfo = eventsDefinitions.find((ev) => ev.name === event);
   if (!eventInfo) return '';
   return eventInfo.desc;

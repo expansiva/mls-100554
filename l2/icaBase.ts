@@ -17,5 +17,6 @@ export type AttributeDefinition = {
 export type EventsDefinition = {
   name: string;
   desc: string;
+  group?: string[];
 };
 
