@@ -172,6 +172,11 @@ const message_pt = {
   eventDescMapResize: "Este evento é disparado quando o tamanho do mapa é alterado, seja por redimensionamento da janela do navegador ou outras ações que afetem o espaço disponível para o mapa.",
   eventDescMapError: "Este evento é disparado quando ocorre um erro durante o carregamento ou processamento do mapa. Pode ser útil para lidar com falhas na exibição ou interação com o mapa.",
 
+  eventDescTreeClick: "Este evento é disparado quando um nó (item) da árvore é clicado pelo usuário. Pode ser usado para capturar interações com nós específicos da árvore.",
+  eventDescTreeToggle: "Este evento é disparado quando o usuário expande ou recolhe um nó da árvore. Pode ser útil para carregar dinamicamente subnós ou para atualizar a interface de usuário relacionada à expansão/recuo de nós.",
+  eventDescTreeSelectionChange: "Este evento é disparado quando há uma mudança na seleção de nós da árvore, seja por clique, teclado ou outro método de seleção.",
+
+  eventDescBreadClick: " Este evento é disparado quando um item do breadcrumb é clicado pelo usuário. Pode ser usado para capturar interações com itens específicos do breadcrumb.",
 
 }
 
@@ -339,7 +344,13 @@ const message_en = {
   eventDescMapDragEnd: "This event is triggered when the user finishes dragging the map. It can be used to finalize interface update actions or to adjust the map view after movement.",
   eventDescMapZoom: "This event is triggered when the map zoom level is changed. It can be useful for updating content related to the map view.",
   eventDescMapResize: "This event is triggered when the map size is changed, either by resizing the browser window or other actions affecting the available space for the map.",
-  eventDescMapError: "This event is triggered when an error occurs during map loading or processing. It can be useful for handling display failures or interaction issues with the map."
+  eventDescMapError: "This event is triggered when an error occurs during map loading or processing. It can be useful for handling display failures or interaction issues with the map.",
+
+  eventDescTreeClick: "This event is triggered when a node (item) in the tree is clicked by the user. It can be used to capture interactions with specific tree nodes.",
+  eventDescTreeToggle: "This event is triggered when the user expands or collapses a node in the tree. It can be useful for dynamically loading child nodes or updating the user interface related to node expansion/collapse.",
+  eventDescTreeSelectionChange: "This event is triggered when there is a change in the selection of tree nodes, either by click, keyboard, or another selection method.",
+
+  eventDescBreadClick: "This event is triggered when a breadcrumb item is clicked by the user. It can be used to capture interactions with specific breadcrumb items.",
 
 }
 
@@ -491,8 +502,16 @@ const icaDescriptions: icaBase.FormComponent[] = [
   },
 
   // Tree
-  { group: "Forms / Tree / Tree View", description: msg.dFTView },
-  { group: "Forms / Tree / Breadcrumbs", description: msg.dFTBreadcrumbs },
+  {
+    group: "Forms / Tree / Tree View",
+    description: msg.dFTView,
+    events: "tree-click,tree-toggle,selection-change"
+  },
+  {
+    group: "Forms / Tree / Breadcrumbs",
+    description: msg.dFTBreadcrumbs,
+    events: "item-click"
+  },
   { group: "Forms / Tree / Nested Dropdown", description: msg.dFTDropdown },
   { group: "Forms / Tree / Nested Accordions", description: msg.dFTAccordions },
   { group: "Forms / Tree / Tag Cloud", description: msg.dFTTags },
@@ -648,6 +667,11 @@ const eventsDefinitions: icaBase.EventsDefinition[] = [
   { name: "resize", group: ["Forms / Records / Map (Geo)"], desc: msg.eventDescMapResize },
   { name: "error", group: ["Forms / Records / Map (Geo)"], desc: msg.eventDescMapError },
 
+  { name: "tree-click", group: ["Forms / Tree / Tree View"], desc: msg.eventDescTreeClick },
+  { name: "tree-toggle", group: ["Forms / Tree / Tree View"], desc: msg.eventDescTreeToggle },
+  { name: "selection-change", group: ["Forms / Tree / Tree View"], desc: msg.eventDescTreeSelectionChange },
+
+  { name: "item-click", group: ["Forms / Tree / Breadcrumb"], desc: msg.eventDescBreadClick },
 
 
 
@@ -763,9 +787,9 @@ export function getEventDescription(root: string, subGroup: string, finalGroup: 
     for (const group of event.group) {
       const parts = group.split('/');
       if (parts.length === 3 &&
-        parts[0].trim() === root &&
-        parts[1].trim() === subGroup &&
-        parts[2].trim() === finalGroup) {
+        parts[0].trim().toLowerCase() === root.toLowerCase() &&
+        parts[1].trim().toLowerCase() === subGroup.toLowerCase() &&
+        parts[2].trim().toLowerCase() === finalGroup.toLowerCase()) {
         desc = event.desc || "";
         break;
       }
