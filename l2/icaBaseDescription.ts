@@ -771,9 +771,9 @@ export function getFormComponentsEvents(root: string, subGroup: string, finalGro
   for (const component of icaDescriptions) {
     const parts = component.group.split('/');
     if (parts.length === 3 &&
-      parts[0].trim() === root &&
-      parts[1].trim() === subGroup &&
-      parts[2].trim() === finalGroup) return component.events || "";
+      parts[0].trim().toLowerCase() === root.toLowerCase() &&
+      parts[1].trim().toLowerCase() === subGroup.toLowerCase() &&
+      parts[2].trim().toLowerCase() === finalGroup.toLowerCase()) return component.events || "";
   };
   return "";
 }
