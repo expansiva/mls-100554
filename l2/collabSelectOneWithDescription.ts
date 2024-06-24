@@ -132,6 +132,9 @@ export class CollabSelectOneWithDescription100554 extends IcaLitElement {
 
     handleChange(value: string) {
         this.selectedvalue = value;
+        this.dispatchEvent(new CustomEvent('select-change', {
+            detail: value, bubbles: true, composed: true
+        }));
         this.toogle();
     }
 
@@ -187,7 +190,7 @@ export class CollabSelectOneWithDescription100554 extends IcaLitElement {
 
         if (spaceBelow >= popupHeight) this.select_container.style.top = `${30}px`;
         else this.select_container.style.top = `-${popupHeight + 5}px`;
-    
+
         if (spaceRight >= popupWidth) this.select_container.style.left = `${5}px`;
         else this.select_container.style.right = `${5}px`;
     }
