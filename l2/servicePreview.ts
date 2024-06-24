@@ -12,7 +12,7 @@ import { IcaLitElement } from './_100554_icaLitElement';
 
 /// **collab_i18n_start**
 const message_pt = {
-    variations: 'Variação',
+    variations: 'VariaÃ§Ã£o',
     editStyle: 'Editar estilo',
     pause: 'Parar preview'
 }
@@ -35,7 +35,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServicePreview100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    
+
     @property() itens: any = undefined;
 
     @property() error: string = '';
@@ -79,8 +79,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onClickIcon = (op: string): void => {
         this.lastMode = op;
-        if (op === 'icPreviewD') this.preview('d');
-        if (op === 'icPreviewM') this.preview('m');
+        if (op === 'icPreviewD') this.preview('desktop');
+        if (op === 'icPreviewM') this.preview('mobile');
     }
 
     public onClickButton = (op: string, opMenu?: string): boolean => {
@@ -324,7 +324,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private requestUpdateAllIcaComponentsInPage() {
-        
+
         const elements = this.previousElementSibling
             ?.querySelector('service-preview-view-100554')
             ?.shadowRoot

@@ -45,7 +45,7 @@ export class ServicePreviewView extends LitElement {
 
     @property() page: string = '';
 
-    @property() mode: string = 'd';
+    @property() mode: string = 'desktop';
 
     @property() level: string = '';
 
@@ -166,7 +166,7 @@ export class ServicePreviewView extends LitElement {
         this.verifyWC().then((res) => {
             this.isDsComponent = res;
         })
-        if (this.mode === 'm') {
+        if (this.mode === 'mobile') {
             this.style.cssText = `
                 width:100%;
                 height:100vh;
@@ -380,7 +380,7 @@ export class ServicePreviewView extends LitElement {
     private async init(iframe: HTMLIFrameElement) {
         try {
 
-            
+            this.setDevice(iframe);
             this.setMyFile();
             await this.setHTml(iframe);
             iframe.style.display = '';
@@ -393,6 +393,10 @@ export class ServicePreviewView extends LitElement {
             this.error = e.message;
             this.showLoader(false);
         }
+    }
+
+    private setDevice(iframe: HTMLIFrameElement) {
+        if (iframe.contentDocument) iframe.contentDocument.documentElement.setAttribute('data-device', this.mode);
     }
 
     private setMyFile(): void {
@@ -605,7 +609,7 @@ export class ServicePreviewView extends LitElement {
             if (!ifr.contentDocument) return;
             this.removeOlderStyle(ifr);
             let cls = '';
-            if (this.mode === 'm') cls = this.scrollMobile;
+            if (this.mode === 'mobile') cls = this.scrollMobile;
             const css = info.css.join(' \n');
             const style = document.createElement('style');
             style.textContent = css + ' \n' + cls;
