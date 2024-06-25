@@ -27,7 +27,7 @@ const templateActionEvents = {
 
                 if (!(e as any).elICA || !(e as any).elICA.id) return;
 
-                mls.events.fire(2, 'WidgetAction' as any, `{"op":"OpenScenario", "widget":"_100554_scenarioInsertEventOrChange", "attrs": [{"attr":"opt", "value":"${e.detail}", "id":"${(e as any).elICA.id}"}]}`);
+                mls.events.fire(2, 'WidgetAction' as any, `{"op":"OpenScenario", "widget":"_100554_scenarioInsertEventOrChange", "value":"${e.detail}", "id":"${(e as any).elICA.id}"}`);
             }
         },
         menuItens: [],

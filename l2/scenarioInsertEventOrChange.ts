@@ -108,7 +108,7 @@ export class ScenarioInsertEventOrChange extends LitElement {
             return;
         }
 
-        this.myInfos = (window as any).infoScenarioInsertOrCreateEvent;
+        this.myInfos = Object.assign({},(window as any).infoScenarioInsertOrCreateEvent);
 
         delete (window as any).infoScenarioInsertOrCreateEvent;
 

@@ -479,7 +479,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (json.op === 'SelectLine') {
             this.selectLineinHTML(json.line);
         } else if (json.op === 'OpenScenario') {
-            (window as any).infoScenarioInsertOrCreateEvent = { id: json.id, value: json.event }
+            (window as any).infoScenarioInsertOrCreateEvent = { id: json.id, value: json.value }
             this.addScenario(json.widget);
         }
     }
