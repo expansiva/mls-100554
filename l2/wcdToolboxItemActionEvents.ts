@@ -24,7 +24,10 @@ const templateActionEvents = {
         iconSvg: '',
         onclick: (e: MouseEvent, wc: WCDToolbox) => {
             if (wc.level === '2') {
-                mls.events.fire(2, 'WidgetAction' as any, `{"op":"OpenScenario", "widget":"_100554_scenarioInsertEventOrChange", "attrs": [{"attr":"opt", "value":"${e.detail}"}]}`);
+
+                if (!(e as any).elICA || !(e as any).elICA.id) return;
+
+                mls.events.fire(2, 'WidgetAction' as any, `{"op":"OpenScenario", "widget":"_100554_scenarioInsertEventOrChange", "attrs": [{"attr":"opt", "value":"${e.detail}", "id":"${(e as any).elICA.id}"}]}`);
             }
         },
         menuItens: [],

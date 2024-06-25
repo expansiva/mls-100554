@@ -434,7 +434,7 @@ export class WCDToolbox extends CollabLitElement {
         (el as any).elMain = this.elMain;
         (el as any).elFCA = ica;
 
-        if (ica && ica.getMyEvents && ica.getDefinitionFromEvent) {
+        if (ica && ica.id && ica.getMyEvents && ica.getDefinitionFromEvent) {
 
             const events = ica.getMyEvents() as string;
             const opt: any[] = [];
@@ -452,12 +452,25 @@ export class WCDToolbox extends CollabLitElement {
 
             (el as any).options = opt;
 
+        } else if (ica && !ica.id) {
+
+            const opt: any[] = [];
+            opt.push({
+                key: 'id',
+                value: 'id',
+                description: 'Please set id in element for create events'
+            });
+
+            (el as any).options = opt;
         }
 
         el.style.cursor = act.cursor as string;
 
         if (act.onclick) {
-            el.addEventListener('select-change', (e) => { if (act.onclick) act.onclick(e, this) });
+            el.addEventListener('select-change', (e) => {
+                (e as any).elICA = ica ;
+                if (act.onclick) act.onclick(e, this)
+            });
         }
         this.shadowRoot.appendChild(el);
 
