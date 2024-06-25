@@ -206,10 +206,11 @@ export class ServicePreviewView extends LitElement {
                 height: 100%;
             `;
             return html`
-    
+            
             <iframe
                 style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview"
                 @load="${this.load}" >
+            
             </iframe>`;
 
         }
@@ -361,6 +362,7 @@ export class ServicePreviewView extends LitElement {
         return mModule;
     }
     private load(): void {
+        this.showLoader(true);
         if (!this.shadowRoot) return;
         const iframe = this.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
         const head = iframe.contentDocument?.querySelector('head');
@@ -387,7 +389,6 @@ export class ServicePreviewView extends LitElement {
 
             const html = iframe.contentDocument?.querySelector('html');
             if (html) html.lang = this.objVariations[window.globalVariation] || 'en-US';
-
             this.showLoader(false);
         } catch (e: any) {
             this.error = e.message;
