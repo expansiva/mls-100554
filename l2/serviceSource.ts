@@ -113,6 +113,57 @@ export class ServiceSource100554 extends ServiceBase {
         this.setValueInModeKeepingUndo(model, val, true);
     }
 
+    public setEditorValueByLineTs(val: string, line: number) {
+        if (!this._ed1) return false;
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const uri = this.getUri(`_${project}_${shortName}`, '.ts');
+        if (this.menu.setIconActive) this.menu.setIconActive('icTs');
+        let model = monaco.editor.getModel(uri);
+        if (!model) return false;
+        this.setValueInModelInSpecificLine(val, line);
+    }
+
+    public setEditorValueByLineHtml(val: string, line: number) {
+        if (!this._ed1) return false;
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const uri = this.getUri(`_${project}_${shortName}`, '.html');
+        if (this.menu.setIconActive) this.menu.setIconActive('icHTML');
+        let model = monaco.editor.getModel(uri);
+        if (!model) return false;
+        this.setValueInModelInSpecificLine(val, line);
+    }
+
+    public replaceEditorLineHTML(val: string, line: number) {
+        if (!this._ed1) return false;
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const uri = this.getUri(`_${project}_${shortName}`, '.html');
+        if (this.menu.setIconActive) this.menu.setIconActive('icHTML');
+        let model = monaco.editor.getModel(uri);
+        if (!model) return false;
+        this.replaceLineValueInModelInSpecificLine(val, line);
+    }
+
+    public searchLineByStringTs(search: string): number | undefined {
+        if (!this._ed1) return;
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const uri = this.getUri(`_${project}_${shortName}`, '.ts');
+        let model = monaco.editor.getModel(uri);
+        if (!model) return;
+        const matches = model.findMatches(search, false, false, false, null, true);
+        if (!matches || matches.length === 0) return;
+        return matches[0].range.startLineNumber;
+    }
+
+    public goToLine(line: number) {
+        if (!this._ed1) return;
+        const model = this._ed1.getModel();
+        if (!model) return;
+        const content = model.getLineContent(line);
+        const range = new monaco.Range(line, 1, line, content.length + 1);
+        this._ed1.setSelection(range);
+        this._ed1.revealLineInCenter(line);
+    }
+
     public setEditorHTMLValue(val: string) {
         if (!this._ed1) return false;
         const { shortName, project } = mls.l2.editor.editors[this.confE];
@@ -120,6 +171,62 @@ export class ServiceSource100554 extends ServiceBase {
         let model = monaco.editor.getModel(uri);
         if (!model) return false;
         this.setValueInModeKeepingUndo(model, val, false);
+    }
+
+    private setValueInModeKeepingUndo(model: monaco.editor.ITextModel, val: string, checkFirstLine: boolean) {
+        let fullRange = model.getFullModelRange();
+        let newText = val;
+        if (checkFirstLine && !(val.trim().startsWith('/// <mls shortName'))) {
+            const firstLine = model.getLineContent(1);
+            newText = firstLine + '\n' + newText;
+        }
+        const lines = newText.split('\n');
+        const operations = [{
+            range: fullRange,
+            text: '',
+            forceMoveMarkers: true
+        }, {
+            range: { startLineNumber: 1, startColumn: 1 },
+            text: lines.join('\n'),
+            forceMoveMarkers: true
+        }];
+
+        model.pushEditOperations([], operations as any, () => []);
+        this._ed1?.setPosition({ lineNumber: 1, column: 1 });
+    }
+
+    private setValueInModelInSpecificLine(content: string, line: number) {
+        if (!this._ed1) return;
+        this._ed1.executeEdits('my-source', [
+            {
+                range: new monaco.Range(line, 1, line, 1),
+                text: `${content}\n`,
+                forceMoveMarkers: true
+            }
+        ]);
+        this._ed1.revealLine(line);
+        this.formatMonaco();
+    }
+
+    private replaceLineValueInModelInSpecificLine(content: string, line: number) {
+        if (!this._ed1) return;
+        const model = this._ed1.getModel();
+        if (!model) return;
+        const lineLength = model.getLineLength(5);
+        this._ed1.executeEdits('my-source', [
+            {
+                range: new monaco.Range(line, 1, line, lineLength + 1),
+                text: content,
+                forceMoveMarkers: true
+            }
+        ]);
+        this._ed1.revealLine(line);
+        this.formatMonaco();
+    }
+
+    private formatMonaco() {
+        if (!this._ed1) return;
+        this._ed1.trigger('anyString', 'editor.action.formatDocument', null);
     }
 
     @query('mls-editor-100529')
@@ -149,30 +256,6 @@ export class ServiceSource100554 extends ServiceBase {
         if (viewState) this._ed1.restoreViewState(viewState);
     }
 
-    private setValueInModeKeepingUndo(model: monaco.editor.ITextModel, val: string, checkFirstLine: boolean) {
-        let fullRange = model.getFullModelRange();
-        let newText = val;
-
-        if (checkFirstLine && !(val.trim().startsWith('/// <mls shortName'))) {
-            const firstLine = model.getLineContent(1);
-            newText = firstLine + '\n' + newText;
-        }
-
-        const lines = newText.split('\n');
-        const operations = [{
-            range: fullRange,
-            text: '',
-            forceMoveMarkers: true
-        }, {
-            range: { startLineNumber: 1, startColumn: 1 },
-            text: lines.join('\n'),
-            forceMoveMarkers: true
-        }];
-
-        model.pushEditOperations([], operations as any, () => []);
-        this._ed1?.setPosition({ lineNumber: 1, column: 1 });
-
-    }
 
     private openRepo() {
         const { shortName, project } = mls.l2.editor.editors[this.confE];
@@ -392,30 +475,18 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (ev.level !== this.level) return;
         if (!ev.desc) return;
-
         const json = JSON.parse(ev.desc);
-
-        if (json.op === 'SelectLine'){
+        if (json.op === 'SelectLine') {
             this.selectLineinHTML(json.line);
         } else if (json.op === 'OpenScenario') {
+            (window as any).infoScenarioInsertOrCreateEvent = { id: json.id, value: json.event }
             this.addScenario(json.widget);
         }
-
-
     }
 
     private selectLineinHTML(line: number) {
-
         if (this.menu.lastIcon !== 'icHTML' || !this._ed1) return;
-
-        const model = this._ed1?.getModel();
-        if (!model) return;
-        const cont = model.getLineContent(line);
-        const range = new monaco.Range(line, 1, line, cont.length + 1);
-
-        this._ed1.setSelection(range)
-        this._ed1.revealLineInCenter(line);
-
+        this.goToLine(line);
     }
 
     private isNewFile: boolean = false;
