@@ -49,4 +49,14 @@ export abstract class CollabPageElement extends CollabLitElement {
 
 }
 
+export function getEventName(eventName: string, elementId?: string, device?: IDevice) {
+    const handlerGeneric = `handle${eventName.charAt(0).toUpperCase() + eventName.slice(1)}`;
+    if (!elementId) return handlerGeneric;
+    const handlerSpecificID = `${handlerGeneric}${elementId}`;
+    if (!device) return handlerSpecificID;
+    if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1) as IDevice;
+    const handlerSpecificDevice = `${handlerSpecificID}${device}`
+    return handlerSpecificDevice;
+}
+    
 export type IDevice = 'desktop' | 'mobile' | 'others'
