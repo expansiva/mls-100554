@@ -1581,6 +1581,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             case 'CreateOrSetEvent':
                 this.createOrSetEvent(json);
                 break;
+            case 'CreateOrSetEventPR':
+                this.createOrSetEventPR(json);
+                break;
             default:
                 console.info('Erro: opção invalida');
 
@@ -1640,6 +1643,50 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             setTimeout(() => {
 
                 const str = `private ${nameFc}(){\n//Edit here your event ${json.event} code\n\n}`;
+
+                const line = this.searchLineByStringTs('/// **collab_events_start**');
+                if (!line) throw new Error('Not found collab_events_start');
+
+                this.setEditorValueByLineTs(str, line + 1);
+
+            }, 500)
+
+
+        }
+
+        this.closeScenario();
+
+    }
+
+    private createOrSetEventPR(json: any) {
+
+        //{"op":"CreateOrSetEvent", "id":"test", "event":"click", "device":"desktop", "func":""}
+
+        let isExistEVentInHTML = this.isEventExist(json.id, json.event);
+        let isExistEVentInTS = false;
+        const nameFc = getEventName(json.event, json.id, json.device);
+        if (isExistEVentInHTML) {
+
+            const line = this.searchLineByStringTs(nameFc);
+            if (line && this.menu.setIconActive) {
+
+                isExistEVentInTS = true;
+                this.menu.setIconActive('icTs');
+                this.goToLine(line);
+
+            }
+
+        }
+
+        if (!isExistEVentInTS) {
+
+            if (!isExistEVentInHTML) {
+                this.setEventInHTml(json.id, json.event);
+            }
+
+            setTimeout(() => {
+
+                const str = `private ${nameFc}${json.func}`;
 
                 const line = this.searchLineByStringTs('/// **collab_events_start**');
                 if (!line) throw new Error('Not found collab_events_start');
