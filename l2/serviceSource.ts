@@ -4,6 +4,7 @@ import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
+import { getEventName } from './_100554_collabPageElement'
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -97,6 +98,8 @@ export class ServiceSource100554 extends ServiceBase {
         this.c2?.setAttribute('msize', this.msize);
     }
 
+    //---------- Handling Editor --------
+
     public getEditorValue() {
         if (!this._ed1) return '';
         const model = this._ed1.getModel();
@@ -121,6 +124,7 @@ export class ServiceSource100554 extends ServiceBase {
         let model = monaco.editor.getModel(uri);
         if (!model) return false;
         this.setValueInModelInSpecificLine(val, line);
+
     }
 
     public setEditorValueByLineHtml(val: string, line: number) {
@@ -173,6 +177,15 @@ export class ServiceSource100554 extends ServiceBase {
         this.setValueInModeKeepingUndo(model, val, false);
     }
 
+    public getEditorHTMLValue(): string {
+        if (!this._ed1) return '';
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const uri = this.getUri(`_${project}_${shortName}`, '.html');
+        let model = monaco.editor.getModel(uri);
+        if (!model) return '';
+        return model.getValue();
+    }
+
     private setValueInModeKeepingUndo(model: monaco.editor.ITextModel, val: string, checkFirstLine: boolean) {
         let fullRange = model.getFullModelRange();
         let newText = val;
@@ -204,7 +217,7 @@ export class ServiceSource100554 extends ServiceBase {
                 forceMoveMarkers: true
             }
         ]);
-        this._ed1.revealLine(line);
+        this._ed1.revealLineInCenter(line);
         this.formatMonaco();
     }
 
@@ -228,6 +241,8 @@ export class ServiceSource100554 extends ServiceBase {
         if (!this._ed1) return;
         this._ed1.trigger('anyString', 'editor.action.formatDocument', null);
     }
+
+    //---------------------------------------------
 
     @query('mls-editor-100529')
     private c2: HTMLElement | undefined;
@@ -471,23 +486,7 @@ export class ServiceSource100554 extends ServiceBase {
         }
     }
 
-    private onWidgetActionEvents(ev: mls.events.IEvent) {
 
-        if (ev.level !== this.level) return;
-        if (!ev.desc) return;
-        const json = JSON.parse(ev.desc);
-        if (json.op === 'SelectLine') {
-            this.selectLineinHTML(json.line);
-        } else if (json.op === 'OpenScenario') {
-            (window as any).infoScenarioInsertOrCreateEvent = { id: json.id, value: json.value }
-            this.addScenario(json.widget);
-        }
-    }
-
-    private selectLineinHTML(line: number) {
-        if (this.menu.lastIcon !== 'icHTML' || !this._ed1) return;
-        this.goToLine(line);
-    }
 
     private isNewFile: boolean = false;
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
@@ -890,6 +889,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     }
 
+    private timeHtmlChangeCursor: number = 0;
     private async initMonaco_Editor(): Promise<void> {
 
         const addEventsEditor = () => {
@@ -902,6 +902,8 @@ export class ServiceSource100554 extends ServiceBase {
 
             this._ed1.onDidChangeCursorPosition((e) => {
 
+                clearTimeout(this.timeHtmlChangeCursor);
+
                 if (!this._ed1 || this.menu.lastIcon !== 'icHTML') return;
 
                 const model = this._ed1.getModel();
@@ -909,16 +911,20 @@ export class ServiceSource100554 extends ServiceBase {
 
                 if (!model) return;
 
-                const lineContent = model.getLineContent(position.lineNumber);
+                this.timeHtmlChangeCursor = setTimeout(() => {
 
-                // Verifica se a linha contém '<ica-' e 'id="'
-                if (lineContent.includes('<ica-') && lineContent.includes('id="')) {
-                    const idValue = this.extractIdValue(lineContent);
-                    if (idValue) {
-                        console.log(idValue);
-                        mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectWidget", "id":"${idValue}"}`);
+                    const lineContent = model.getLineContent(position.lineNumber);
+
+                    // Verifica se a linha contém '<ica-' e 'id="'
+                    if (lineContent.includes('<ica-') && lineContent.includes('id="')) {
+                        const idValue = this.extractIdValue(lineContent);
+                        if (idValue) {
+                            mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectWidget", "id":"${idValue}"}`);
+                        }
                     }
-                }
+
+                }, 500)
+
             });
         };
 
@@ -1550,4 +1556,154 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
 
     }
+
+
+    //--------------WidgetAction--------------
+
+    private lastScenario = '';
+    private onWidgetActionEvents(ev: mls.events.IEvent) {
+
+        if (this.position === 'right') return;
+        if (ev.level !== this.level) return;
+        if (!ev.desc) return;
+
+        const json = JSON.parse(ev.desc);
+
+        switch (json.op) {
+            case 'SelectWidget':
+                break;
+            case 'SelectLine':
+                this.selectLineinHTML(json.line);
+                break;
+            case 'OpenScenario':
+                this.openScenario(json);
+                break;
+            case 'CreateOrSetEvent':
+                this.createOrSetEvent(json);
+                break;
+            default:
+                console.info('Erro: opção invalida');
+
+        }
+
+    }
+
+    private selectLineinHTML(line: number) {
+        if (this.menu.lastIcon !== 'icHTML' || !this._ed1) return;
+        this.goToLine(line);
+    }
+
+    private openScenario(json: any) {
+
+        (window as any).infoScenarioInsertOrCreateEvent = {
+            id: json.id,
+            value: json.value
+        };
+
+        this.lastScenario = json.widget;
+        this.addScenario(json.widget);
+
+    }
+
+    private closeScenario() {
+
+        if (!this.lastScenario) return;
+        this.removeScenario(this.lastScenario);
+
+    }
+
+    private createOrSetEvent(json: any) {
+
+        //{"op":"CreateOrSetEvent", "id":"test", "event":"click", "device":"desktop"}
+        let isExistEVentInHTML = this.isEventExist(json.id, json.event);
+        let isExistEVentInTS = false;
+        const nameFc = getEventName(json.event, json.id, json.device);
+        if (isExistEVentInHTML) {
+
+            const line = this.searchLineByStringTs(nameFc);
+            if (line && this.menu.setIconActive) {
+
+                isExistEVentInTS = true;
+                this.menu.setIconActive('icTs');
+                this.goToLine(line);
+
+            }
+
+        }
+
+        if (!isExistEVentInTS) {
+
+            if (!isExistEVentInHTML) {
+                this.setEventInHTml(json.id, json.event);
+            }
+
+            setTimeout(() => {
+
+                const str = `private ${nameFc}(){\n//Edit here your event ${json.event} code\n\n}`;
+
+                const line = this.searchLineByStringTs('/// **collab_events_start**');
+                if (!line) throw new Error('Not found collab_events_start');
+
+                this.setEditorValueByLineTs(str, line + 1);
+
+            }, 500)
+
+
+        }
+
+        this.closeScenario();
+
+    }
+
+    private isEventExist(id: string, event: string): boolean {
+
+        let isExist = false;
+
+        const strHtml = this.getEditorHTMLValue();
+        const html = document.createElement('div');
+        html.innerHTML = strHtml;
+
+        const el = html.querySelector('#' + id) as HTMLElement;
+        if (el && el.dataset && el.dataset.event) {
+            const events = el.dataset.event.split(' ');
+            isExist = events.includes(event);
+        }
+
+        return isExist
+
+    }
+
+    private setEventInHTml(id: string, event: string) {
+
+        const strHtml = this.getEditorHTMLValue();
+        const html = document.createElement('div');
+        html.innerHTML = strHtml;
+
+        const el = html.querySelector('#' + id) as HTMLElement;
+        if (!el) return;
+        if (el.dataset && el.dataset.event) {
+
+            const events = el.dataset.event.split(' ');
+            if (!events.includes(event)) {
+                events.push(event);
+                el.dataset.event = events.join(' ');
+            }
+
+        } else {
+
+            el.setAttribute('data-event', event);
+
+        }
+
+        if (!this._ed1) return;
+        const { shortName, project } = mls.l2.editor.editors[this.confE];
+        const uri = this.getUri(`_${project}_${shortName}`, '.html');
+        if (this.menu.setIconActive) this.menu.setIconActive('icHTML');
+        let model = monaco.editor.getModel(uri);
+        if (!model) return;
+        model.setValue(html.innerHTML);
+
+    }
+
+    //----------------------------------------
 }

@@ -18,23 +18,27 @@ export const initCollabSelectOneWithDescription = '';
 /// **collab_i18n_start**
 const message_pt = {
     defaultMsg: 'Em desenvolvimento inserir ou alterar Eventos',
+    event: 'Evento: ',
     noIten: 'Nenhum elemento selecionado!',
     helpYou: 'Como podemos te ajudar?',
     card1: 'Faça você mesmo',
     card1Desc: 'Codifique manualmente e desenvolva o seu próprio evento.',
     card2: 'Rotinas pré-prontas',
     card2Desc: 'Utilize rotinas pré-prontas para facilitar o desenvolvimento do seu evento.',
+    scnearioDevice: 'Para qual dispositivo o evento será criado?',
 
 }
 
 const message_en = {
     defaultMsg: 'In development insert or change Events',
+    event: 'Event: ',
     noIten: 'No elements selected!',
     helpYou: 'How can we help you?',
     card1: 'Do it yourself',
     card1Desc: 'Manually code and develop your own event.',
     card2: 'Pre-ready routines',
-    card2Desc: 'Use pre-made routines to facilitate the development of your event.'
+    card2Desc: 'Use pre-made routines to facilitate the development of your event.',
+    scnearioDevice: 'For which device will the event be created?',
 }
 
 type MessageType = typeof message_en;
@@ -49,7 +53,8 @@ export class ScenarioInsertEventOrChange extends LitElement {
 
     private msg: MessageType = messages['en'];
 
-    private myInfos:{id:string, event:string} | undefined
+    private myInfos: { id: string, value: string } | undefined;
+    private scenario:string | undefined
 
     //---------- COMPONENT---------
 
@@ -61,10 +66,23 @@ export class ScenarioInsertEventOrChange extends LitElement {
 
     render() {
 
-        if (!this.myInfos) {
+        if (!this.myInfos && !this.scenario) {
             return this.renderNoSelected();
         }
-        return html`${this.renderScenarioHowDo()}`;
+
+        if (this.scenario === 'init') {
+            return html`
+                <div style="padding:1rem">
+                    ${this.renderScenarioHowDo()}
+                </div>
+            `;
+        } if (this.scenario === 'yourSelf') {
+            return html`
+                <div style="padding:1rem">
+                    ${this.renderYourSelfDevice()}
+                </div>
+            `;
+        }
     }
 
     renderNoSelected() {
@@ -73,11 +91,14 @@ export class ScenarioInsertEventOrChange extends LitElement {
 
     renderScenarioHowDo(){
         return html`
+            <h4 class="header">
+                ${this.msg.event} ${this.myInfos ? this.myInfos.value : ''}
+            </h4>
             <div class="scenarioHowDo">
                 <h3 style="text-align:center">${this.msg.helpYou
                 }</h3>
                 <div class="container">
-                    <div class="card">
+                    <div class="card" @click="${this.goToYS}">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M246.9 23.7C242.3 6.6 224.8-3.5 207.7 1.1s-27.2 22.1-22.6 39.2L238 237.8c2.5 9.2-4.5 18.2-14 18.2c-6.4 0-12-4.2-13.9-10.3L166.6 102.7c-5.1-16.9-23-26.4-39.9-21.3s-26.4 23-21.3 39.9l62.8 206.4c2.4 7.9-7.2 13.8-13.2 8.1L99.6 283c-16-15.2-41.3-14.6-56.6 1.4s-14.6 41.3 1.4 56.6L156.8 448c43.1 41.1 100.4 64 160 64h10.9 8.2c.1 0 .1-.1 .1-.1s.1-.1 .1-.1c58.3-3.5 108.6-43.2 125.3-99.7l81.2-275c5-16.9-4.7-34.7-21.6-39.8s-34.7 4.7-39.8 21.6L443.5 247.1c-1.6 5.3-6.4 8.9-12 8.9c-7.9 0-13.8-7.3-12.2-15.1l36-170.3c3.7-17.3-7.4-34.3-24.7-37.9s-34.3 7.4-37.9 24.7L355.1 235.1c-2.6 12.2-13.3 20.9-25.8 20.9c-11.9 0-22.4-8-25.4-19.5l-57-212.8z"/></svg>
                         <h2>${this.msg.card1}</h2>
                         <p>${this.msg.card1Desc}</p>
@@ -91,7 +112,40 @@ export class ScenarioInsertEventOrChange extends LitElement {
             </div>
         
         `
-}
+    }
+
+    renderYourSelfDevice() {
+
+        return html`
+            <div class="header">
+                <span title="back" @click="${this.goToInit}" style="width:10px; position: absolute; left: 20px; top: 0px; cursor:pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="fill:white" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>
+                </span>
+                <h4 class="margin:0px">
+                    ${this.msg.event} ${this.myInfos ? this.myInfos.value : ''}
+                </h4>
+            </div>
+            
+            <div class="scenarioHowDo">
+                
+                <h3 style="text-align:center">
+                    ${this.msg.scnearioDevice}
+                </h3>
+                <div class="container">
+                    <div class="card" @click="${this.selectedDesktop}">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 96c0-35.3 28.7-64 64-64H512c35.3 0 64 28.7 64 64V352H512V96H128V352H64V96zM0 403.2C0 392.6 8.6 384 19.2 384H620.8c10.6 0 19.2 8.6 19.2 19.2c0 42.4-34.4 76.8-76.8 76.8H76.8C34.4 480 0 445.6 0 403.2zM281 209l-31 31 31 31c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-48-48c-9.4-9.4-9.4-24.6 0-33.9l48-48c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9zM393 175l48 48c9.4 9.4 9.4 24.6 0 33.9l-48 48c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l31-31-31-31c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0z"/></svg>
+                        <h2>Desktop</h2>
+                    </div>
+                    <div class="card"  @click="${this.selectedMobile}">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M16 64C16 28.7 44.7 0 80 0H304c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H80c-35.3 0-64-28.7-64-64V64zM224 448a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM304 64H80V384H304V64z"/></svg>
+                        <h2>Mobile</h2>
+                    </div>
+                </div>
+            </div>
+        
+        `
+        
+    }
 
     //------------IMPLEMETNATION---------
 
@@ -101,7 +155,7 @@ export class ScenarioInsertEventOrChange extends LitElement {
 
     private setInfos() {
 
-        //(window as any).infoScenarioInsertOrCreateEvent = { id: 'teste', event: 'click' };
+        //(window as any).infoScenarioInsertOrCreateEvent = { id: 'teste', value: 'click' };
 
         if (!(window as any).infoScenarioInsertOrCreateEvent) {
             this.requestUpdate();
@@ -112,13 +166,56 @@ export class ScenarioInsertEventOrChange extends LitElement {
 
         delete (window as any).infoScenarioInsertOrCreateEvent;
 
+        this.scenario = 'init';
         this.requestUpdate();
 
+    }
+
+    private selectedDesktop() {
+
+        if (!this.myInfos) return;
+
+        mls.events.fire(2, 'WidgetAction' as any, `{"op":"CreateOrSetEvent", "id":"${this.myInfos.id}", "event":"${this.myInfos.value}", "device":"desktop"}`);
+
+    }
+
+    private selectedMobile() {
+
+        if (!this.myInfos) return;
+
+        mls.events.fire(2, 'WidgetAction' as any, `{"op":"CreateOrSetEvent", "id":"${this.myInfos.id}", "event":"${this.myInfos.value}", "device":"mobile"}`);
+
+    }
+
+    private goToYS() {
+        this.scenario = 'yourSelf';
+        this.requestUpdate();
+    }
+
+    private goToInit() {
+        this.scenario = 'init';
+        this.requestUpdate();
     }
 
     //---------------CSS----------------
 
     static styles = css`
+        .header{
+            text-align: center;
+            background: #37369b;
+            color: white;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 0px;
+            margin-bottom: 0px;
+            position:relative;
+        }
+
+        .scenarioHowDo{
+            border:1px solid #37369b;
+        }
 
         .scenarioHowDo .container {
             display: flex;
@@ -138,7 +235,7 @@ export class ScenarioInsertEventOrChange extends LitElement {
         }
 
         .scenarioHowDo .card:hover {
-            box-shadow: 0 5px 9px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 9px #37369b87;
         }
 
         .scenarioHowDo .card svg {
