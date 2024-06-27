@@ -122,43 +122,43 @@ const message_pt = {
   dBPExternal: "Facilita a integração com APIs externas para buscar ou enviar dados. Ideal para funcionalidades como visualizar condições climáticas, cotações de ações ou atualizações de redes sociais diretamente na aplicação.",
   dBPPages: "Permite a incorporação de páginas inteiras ou componentes específicos dentro da aplicação atual. Útil para integrar funcionalidades ou informações adicionais sem a necessidade de navegação externa.",
 
-  eventDescClick: "Esse evento é disparado quando o elemento é clicado",
-  eventDescDoubleClick: "Esse evento é disparado quando o elemento é clicado duas vezes",
-  eventDescSubmit: "Este evento é disparado quando um formulário é submetido. Normalmente, o evento submit é acionado pelo próprio formulário, mas o botão de submit pode desencadear esse evento.",
-  eventDescChange: "Esse evento é disparado quando o valor do campo de entrada é alterado e o usuário sai do campo (por exemplo, clicando fora ou pressionando a tecla Enter). É útil para detectar quando o valor final de um campo foi definido.",
-  eventDescInput: "Esse evento é disparado imediatamente quando o valor do campo de entrada é alterado, enquanto o usuário está digitando. Ele é útil para validações e atualizações em tempo real do valor inserido.",
-  eventDescFocus: "Esse evento é disparado quando o campo de entrada recebe o foco, ou seja, quando o usuário clica no campo ou navega até ele usando o teclado. Ele pode ser usado para executar ações quando o campo é ativado, como destacar o campo ou exibir uma dica de preenchimento.",
-  eventDescBlur: "Esse evento é disparado quando o campo de entrada perde o foco, ou seja, quando o usuário clica fora do campo ou navega para outro elemento. Ele pode ser usado para validar o valor do campo ou para esconder dicas de preenchimento.",
-  eventDescInvalid: "Esse evento é disparado quando um elemento que pode ser enviado foi verificado quanto à validade e não atende às suas restrições.",
-  eventDescMouseLeave: "O evento é disparado quando um dispositivo de apontamento (geralmente um mouse) se move sobre para fora do elemento",
-  eventDescMouseEnter: "O evento é disparado quando um dispositivo de apontamento (geralmente um mouse) se move sobre um elemento (para dentro do mesmo).",
+  eventDescClick: "Evento é disparado quando o elemento é clicado",
+  eventDescDoubleClick: "Evento é disparado quando o elemento é clicado duas vezes",
+  eventDescSubmit: "Este evento é disparado quando um formulário é submetido. Normalmente, o evento submit é acionado pelo próprio formulário, mas o botão de submit pode desencadear Evento.",
+  eventDescChange: "Evento é disparado quando o valor do campo de entrada é alterado e o usuário sai do campo (por exemplo, clicando fora ou pressionando a tecla Enter). É útil para detectar quando o valor final de um campo foi definido.",
+  eventDescInput: "Evento é disparado imediatamente quando o valor do campo de entrada é alterado, enquanto o usuário está digitando. Ele é útil para validações e atualizações em tempo real do valor inserido.",
+  eventDescFocus: "Evento é disparado quando o campo de entrada recebe o foco, ou seja, quando o usuário clica no campo ou navega até ele usando o teclado. Ele pode ser usado para executar ações quando o campo é ativado, como destacar o campo ou exibir uma dica de preenchimento.",
+  eventDescBlur: "Evento é disparado quando o campo de entrada perde o foco, ou seja, quando o usuário clica fora do campo ou navega para outro elemento. Ele pode ser usado para validar o valor do campo ou para esconder dicas de preenchimento.",
+  eventDescInvalid: "Evento é disparado quando um elemento que pode ser enviado foi verificado quanto à validade e não atende às suas restrições.",
+  eventDescMouseLeave: "Evento é disparado quando um dispositivo de apontamento (geralmente um mouse) se move sobre para fora do elemento",
+  eventDescMouseEnter: "Evento é disparado quando um dispositivo de apontamento (geralmente um mouse) se move sobre um elemento (para dentro do mesmo).",
   eventDescScroll: "Evento acionado quando ocorre um scroll na página.",
-  eventDescLoad: "O evento de load é disparado quando um recurso e seus recursos dependentes terminaram de carregar.",
+  eventDescLoad: "Evento é disparado quando um recurso e seus recursos dependentes terminaram de carregar.",
   eventDescTableRowClick: "Evento disparado quando uma linha da tabela é clicada. É útil para permitir a seleção de linhas ou para exibir detalhes adicionais da linha.",
   eventDescTableCellClick: "Evento disparado quando uma célula específica da tabela é clicada. Pode ser usado para interações mais granulares com dados da tabela.",
   eventDescTableSort: "Evento disparado quando uma coluna da tabela é ordenada. Útil para permitir que a página reordene ou atualize os dados exibidos na tabela.",
   eventDescTableFilter: "Evento disparado quando filtros na tabela são aplicados ou removidos. Pode ser usado para atualizar a exibição dos dados conforme os critérios de filtragem selecionados.",
   eventDescTablePagination: "Evento disparado quando a página atual da tabela é alterada. Essencial para tabelas com muitos dados, permitindo a navegação entre páginas de resultados.",
-  eventDescTableLoadMore: "Este evento é disparado quando mais dados são carregados na tabela, geralmente quando o usuário rola até o final da tabela ou quando é acionado um botão para carregar mais dados.",
-  eventDescListItemSelected: "Este evento pode ser disparado quando um item da lista é selecionado pelo usuário. É útil para interações onde o usuário precisa saber qual item foi escolhido.",
-  eventDescTimelineItemSelected: "Este evento é disparado quando um item da linha do tempo é clicado pelo usuário. Pode ser usado para capturar interações com itens específicos da linha do tempo.",
-  eventDescMapLoad: "Este evento é disparado quando o mapa é carregado e está pronto para ser interagido pelo usuário.",
-  eventDescMapClick: "Este evento é disparado quando o usuário clica em qualquer parte do mapa. Pode ser usado para capturar cliques para interações específicas, como exibir informações adicionais sobre uma localização.",
-  eventDescMapDragStart: "Este evento é disparado quando o usuário começa a arrastar o mapa. Pode ser útil para preparar ações ou atualizações de interface enquanto o mapa está sendo movido.",
-  eventDescMapDragEnd: "Este evento é disparado quando o usuário termina de arrastar o mapa. Pode ser usado para finalizar ações de atualização de interface ou para ajustar a visualização do mapa após o movimento.",
-  eventDescMapZoom: "Este evento é disparado quando o nível de zoom do mapa é alterado. Pode ser útil para atualizar conteúdo relacionado à visualização do mapa.",
-  eventDescMapResize: "Este evento é disparado quando o tamanho do mapa é alterado, seja por redimensionamento da janela do navegador ou outras ações que afetem o espaço disponível para o mapa.",
-  eventDescMapError: "Este evento é disparado quando ocorre um erro durante o carregamento ou processamento do mapa. Pode ser útil para lidar com falhas na exibição ou interação com o mapa.",
-  eventDescTreeClick: "Este evento é disparado quando um nó (item) da árvore é clicado pelo usuário. Pode ser usado para capturar interações com nós específicos da árvore.",
-  eventDescTreeToggle: "Este evento é disparado quando o usuário expande ou recolhe um nó da árvore. Pode ser útil para carregar dinamicamente subnós ou para atualizar a interface de usuário relacionada à expansão/recuo de nós.",
-  eventDescTreeSelectionChange: "Este evento é disparado quando há uma mudança na seleção de nós da árvore, seja por clique, teclado ou outro método de seleção.",
-  eventDescDropdownChange: "Este evento é disparado quando há uma mudança no valor selecionado do dropdown. Pode ser usado para atualizar dados relacionados à seleção do usuário.",
-  eventDescAccordionToogle: "Esse evento é disparado quando uma seção do accordion é expandida ou recolhida. O evento pode incluir informações sobre qual seção foi afetada e seu estado atual (expandido ou recolhido).",
-  eventDescMenuSelect: "Este evento pode ser acionado quando um item do menu é selecionado pelo usuário. É fundamental para determinar qual opção o usuário escolheu.",
-  eventDescMenuOpen: "Este evento é acionado quando o menu é aberto. Pode ser útil para realizar animações ou outras ações quando o menu é exibido.",
-  eventDescMenuClose: "Este evento ocorre quando o menu é fechado. Também pode ser usado para animações ou para limpar estados",
-  eventDescBreadcrumbClick: " Este evento deve ser disparado quando um usuário clica em um item do breadcrumb. A página pode usar este evento para navegar para a seção correspondente.",
-  eventDescTabScenerieChanged: " Este evento deve ser disparado um tab/cenário for selecionado.",
+  eventDescTableLoadMore: "Evento é disparado quando mais dados são carregados na tabela, geralmente quando o usuário rola até o final da tabela ou quando é acionado um botão para carregar mais dados.",
+  eventDescListItemSelected: "Evento pode ser disparado quando um item da lista é selecionado pelo usuário. É útil para interações onde o usuário precisa saber qual item foi escolhido.",
+  eventDescTimelineItemSelected: "Evento é disparado quando um item da linha do tempo é clicado pelo usuário. Pode ser usado para capturar interações com itens específicos da linha do tempo.",
+  eventDescMapLoad: "Evento é disparado quando o mapa é carregado e está pronto para ser interagido pelo usuário.",
+  eventDescMapClick: "Evento é disparado quando o usuário clica em qualquer parte do mapa. Pode ser usado para capturar cliques para interações específicas, como exibir informações adicionais sobre uma localização.",
+  eventDescMapDragStart: "Evento é disparado quando o usuário começa a arrastar o mapa. Pode ser útil para preparar ações ou atualizações de interface enquanto o mapa está sendo movido.",
+  eventDescMapDragEnd: "Evento é disparado quando o usuário termina de arrastar o mapa. Pode ser usado para finalizar ações de atualização de interface ou para ajustar a visualização do mapa após o movimento.",
+  eventDescMapZoom: "Evento é disparado quando o nível de zoom do mapa é alterado. Pode ser útil para atualizar conteúdo relacionado à visualização do mapa.",
+  eventDescMapResize: "Evento é disparado quando o tamanho do mapa é alterado, seja por redimensionamento da janela do navegador ou outras ações que afetem o espaço disponível para o mapa.",
+  eventDescMapError: "Evento é disparado quando ocorre um erro durante o carregamento ou processamento do mapa. Pode ser útil para lidar com falhas na exibição ou interação com o mapa.",
+  eventDescTreeClick: "Evento é disparado quando um nó (item) da árvore é clicado pelo usuário. Pode ser usado para capturar interações com nós específicos da árvore.",
+  eventDescTreeToggle: "Evento é disparado quando o usuário expande ou recolhe um nó da árvore. Pode ser útil para carregar dinamicamente subnós ou para atualizar a interface de usuário relacionada à expansão/recuo de nós.",
+  eventDescTreeSelectionChange: "Evento é disparado quando há uma mudança na seleção de nós da árvore, seja por clique, teclado ou outro método de seleção.",
+  eventDescDropdownChange: "Evento é disparado quando há uma mudança no valor selecionado do dropdown. Pode ser usado para atualizar dados relacionados à seleção do usuário.",
+  eventDescAccordionToogle: "Evento é disparado quando uma seção do accordion é expandida ou recolhida. O evento pode incluir informações sobre qual seção foi afetada e seu estado atual (expandido ou recolhido).",
+  eventDescMenuSelect: "Evento pode ser acionado quando um item do menu é selecionado pelo usuário. É fundamental para determinar qual opção o usuário escolheu.",
+  eventDescMenuOpen: "Evento é acionado quando o menu é aberto. Pode ser útil para realizar animações ou outras ações quando o menu é exibido.",
+  eventDescMenuClose: "Evento ocorre quando o menu é fechado. Também pode ser usado para animações ou para limpar estados",
+  eventDescBreadcrumbClick: "Evento disparado quando um usuário clica em um item do breadcrumb. A página pode usar este evento para navegar para a seção correspondente.",
+  eventDescTabScenerieChanged: "Evento disparado quando um tab/cenário for selecionado.",
   eventDescAccordionOpen: "Emitido quando um painel do Accordion é aberto.",
   eventDescAccordionClose: "Emitido quando um painel do Accordion é fechado.",
   eventDescAccordionChange: "Emitido quando o estado de abertura/fechamento de um painel muda.",
@@ -177,8 +177,15 @@ const message_pt = {
   eventDescMidiaPlay: "Evento disparado quando a mídia começa a ser reproduzido.",
   eventDescMidiaPause: "Evento disparado  quando a mídia é pausado.",
   eventDescMidiaEnded: "Evento disparado quando a mídia chega ao fim.",
-
-
+  eventDescDocLoad: " Evento disparado quando o documento é carregado e pronto para visualização.",
+  eventDescCalendarChange: "Evento disparado quando a data selecionada muda. Este é um dos eventos mais importantes, pois indica que o usuário escolheu uma nova data.",
+  eventDescCalendarMonthChange: "Evento disparado quando o usuário navega para um mês diferente. Isso pode ser útil para carregar eventos ou dados adicionais conforme o usuário navega pelo calendário",
+  eventDescCalendarYearChange: "Evento disparado quando o usuário navega para um ano diferente. Isso pode ser útil para carregar eventos ou dados adicionais conforme o usuário navega pelo calendário",
+  eventDescCalendarOpen: "Evento disparado quando o calendário é aberto",
+  eventDescCalendarClose: "Evento disparado quando o calendário é fechado.",
+  eventDescApreMessageOpen: "Evento disparado quando o elemento de messagem é exibido",
+  eventDescApreMessageClose: "Evento disparado quando o elemento de messagem é fechado.",
+  eventDescApreMessageDismiss: "Evento disparado quando o elemento é descartado pelo usuário.",
 }
 
 const message_en = {
@@ -299,45 +306,45 @@ const message_en = {
   dBPExternal: "Facilitates integration with external APIs to fetch or send data. Ideal for features such as viewing weather conditions, stock quotes, or social media updates directly in the application.",
   dBPPages: "Allows the embedding of entire pages or specific components within the current application. Useful for integrating additional functionality or information without the need for external navigation.",
 
-  eventDescClick: "This event is triggered when the element is clicked",
-  eventDescDoubleClick: "This event is triggered when the element is clicked twice",
-  eventDescSubmit: "This event is triggered when a form is submitted. Typically, the submit event is fired by the form itself, but the submit button can also trigger this event.",
-  eventDescChange: "This event is triggered when the value of the input field is changed and the user leaves the field (for example, by clicking outside or pressing the Enter key). It is useful for detecting when the final value of a field has been set.",
-  eventDescInput: "This event is triggered immediately when the value of the input field is changed, while the user is typing. It is useful for real-time validations and updates of the entered value.",
-  eventDescFocus: "This event is triggered when the input field receives focus, that is, when the user clicks on the field or navigates to it using the keyboard. It can be used to perform actions when the field is activated, such as highlighting the field or displaying a filling tip.",
-  eventDescBlur: "This event is triggered when the input field loses focus, that is, when the user clicks outside the field or navigates to another element. It can be used to validate the field value or to hide filling tips.",
-  eventDescInvalid: "This event is triggered when a submittable element has been checked for validity and doesn't satisfy its constraints.",
-  eventDescMouseLeave: "The event is triggered when a pointing device (typically a mouse) moves out of the element.",
-  eventDescMouseEnter: "The event is triggered when a pointing device (typically a mouse) moves over an element (into it).",
+  eventDescClick: "Event is triggered when the element is clicked",
+  eventDescDoubleClick: "Event is triggered when the element is clicked twice",
+  eventDescSubmit: "Event is triggered when a form is submitted. Typically, the submit event is fired by the form itself, but the submit button can also trigger this event.",
+  eventDescChange: "Event is triggered when the value of the input field is changed and the user leaves the field (for example, by clicking outside or pressing the Enter key). It is useful for detecting when the final value of a field has been set.",
+  eventDescInput: "Event is triggered immediately when the value of the input field is changed, while the user is typing. It is useful for real-time validations and updates of the entered value.",
+  eventDescFocus: "Event is triggered when the input field receives focus, that is, when the user clicks on the field or navigates to it using the keyboard. It can be used to perform actions when the field is activated, such as highlighting the field or displaying a filling tip.",
+  eventDescBlur: "Event is triggered when the input field loses focus, that is, when the user clicks outside the field or navigates to another element. It can be used to validate the field value or to hide filling tips.",
+  eventDescInvalid: "Event is triggered when a submittable element has been checked for validity and doesn't satisfy its constraints.",
+  eventDescMouseLeave: "Event is triggered when a pointing device (typically a mouse) moves out of the element.",
+  eventDescMouseEnter: "Event is triggered when a pointing device (typically a mouse) moves over an element (into it).",
   eventDescScroll: "Event triggered when a scroll occurs on the page.",
   eventDescTableRowClick: "Event triggered when a table row is clicked. Useful for enabling row selection or displaying additional details of the row.",
   eventDescTableCellClick: "Event triggered when a specific cell in the table is clicked. Can be used for more granular interactions with table data.",
   eventDescTableSort: "Event triggered when a table column is sorted. Useful for allowing the page to reorder or update the displayed data in the table.",
   eventDescTableFilter: "Event triggered when filters in the table are applied or removed. Can be used to update the data display based on selected filtering criteria.",
   eventDescTablePagination: "Event triggered when the current page of the table is changed. Essential for tables with large datasets, allowing navigation between result pages.",
-  eventDescTableLoadMore: "This event is triggered when more data is loaded into the table, typically when the user scrolls to the bottom of the table or when a button is clicked to load more data.",
-  eventDescListItemSelected: "This event can be triggered when a list item is selected by the user. It's useful for interactions where the user needs to know which item was chosen.",
-  eventDescTimelineItemSelected: "This event is triggered when a timeline item is clicked by the user. It can be used to capture interactions with specific timeline items.",
-  eventDescMapLoad: "This event is triggered when the map is loaded and ready for user interaction.",
-  eventDescMapClick: "This event is triggered when the user clicks anywhere on the map. It can be used to capture clicks for specific interactions, such as displaying additional information about a location.",
-  eventDescMapDragStart: "This event is triggered when the user starts dragging the map. It can be useful for preparing actions or interface updates while the map is being moved.",
-  eventDescMapDragEnd: "This event is triggered when the user finishes dragging the map. It can be used to finalize interface update actions or to adjust the map view after movement.",
-  eventDescMapZoom: "This event is triggered when the map zoom level is changed. It can be useful for updating content related to the map view.",
-  eventDescMapResize: "This event is triggered when the map size is changed, either by resizing the browser window or other actions affecting the available space for the map.",
-  eventDescMapError: "This event is triggered when an error occurs during map loading or processing. It can be useful for handling display failures or interaction issues with the map.",
-  eventDescTreeClick: "This event is triggered when a node (item) in the tree is clicked by the user. It can be used to capture interactions with specific tree nodes.",
-  eventDescTreeToggle: "This event is triggered when the user expands or collapses a node in the tree. It can be useful for dynamically loading child nodes or updating the user interface related to node expansion/collapse.",
-  eventDescTreeSelectionChange: "This event is triggered when there is a change in the selection of tree nodes, either by click, keyboard, or another selection method.",
-  eventDescDropdownChange: "This event is triggered when there is a change in the selected value of the dropdown. It can be used to update data related to user selection.",
-  eventDescAccordionToogle: "This event is triggered when a section of the accordion is expanded or collapsed. The event can include information about which section was affected and its current state (expanded or collapsed).",
-  eventDescMenuSelect: "This event can be triggered when a menu item is selected by the user. It is essential for determining which option the user chose.",
-  eventDescMenuOpen: "This event is triggered when the menu is opened. It can be useful for performing animations or other actions when the menu is displayed.",
-  eventDescMenuClose: "This event occurs when the menu is closed. It can also be used for animations or to clear states.",
-  eventDescBreadcrumbClick: "This event should be triggered when a user clicks on a breadcrumb item. The page can use this event to navigate to the corresponding section.",
-  eventDescTabScenerieChanged: "This event should be triggered when a tab/scenary is selected.",
-  eventDescAccordionOpen: "Triggered when an Accordion panel is opened.",
-  eventDescAccordionClose: "Triggered when an Accordion panel is closed.",
-  eventDescAccordionChange: "Triggered when the open/close state of an Accordion panel changes.",
+  eventDescTableLoadMore: "Event is triggered when more data is loaded into the table, typically when the user scrolls to the bottom of the table or when a button is clicked to load more data.",
+  eventDescListItemSelected: "Event is triggered when a list item is selected by the user. It's useful for interactions where the user needs to know which item was chosen.",
+  eventDescTimelineItemSelected: "Event is triggered when a timeline item is clicked by the user. It can be used to capture interactions with specific timeline items.",
+  eventDescMapLoad: "Event is triggered when the map is loaded and ready for user interaction.",
+  eventDescMapClick: "Event is triggered when the user clicks anywhere on the map. It can be used to capture clicks for specific interactions, such as displaying additional information about a location.",
+  eventDescMapDragStart: "Event is triggered when the user starts dragging the map. It can be useful for preparing actions or interface updates while the map is being moved.",
+  eventDescMapDragEnd: "Event is triggered when the user finishes dragging the map. It can be used to finalize interface update actions or to adjust the map view after movement.",
+  eventDescMapZoom: "Event is triggered when the map zoom level is changed. It can be useful for updating content related to the map view.",
+  eventDescMapResize: "Event is triggered when the map size is changed, either by resizing the browser window or other actions affecting the available space for the map.",
+  eventDescMapError: "Event is triggered when an error occurs during map loading or processing. It can be useful for handling display failures or interaction issues with the map.",
+  eventDescTreeClick: "Event is triggered when a node (item) in the tree is clicked by the user. It can be used to capture interactions with specific tree nodes.",
+  eventDescTreeToggle: "Event is triggered when the user expands or collapses a node in the tree. It can be useful for dynamically loading child nodes or updating the user interface related to node expansion/collapse.",
+  eventDescTreeSelectionChange: "Event is triggered when there is a change in the selection of tree nodes, either by click, keyboard, or another selection method.",
+  eventDescDropdownChange: "Event is triggered when there is a change in the selected value of the dropdown. It can be used to update data related to user selection.",
+  eventDescAccordionToogle: "Event is triggered when a section of the accordion is expanded or collapsed. The event can include information about which section was affected and its current state (expanded or collapsed).",
+  eventDescMenuSelect: "Event istriggered when a menu item is selected by the user. It is essential for determining which option the user chose.",
+  eventDescMenuOpen: "Event is triggered when the menu is opened. It can be useful for performing animations or other actions when the menu is displayed.",
+  eventDescMenuClose: "Event occurs when the menu is closed. It can also be used for animations or to clear states.",
+  eventDescBreadcrumbClick: "Event is triggered when a user clicks on a breadcrumb item. The page can use this event to navigate to the corresponding section.",
+  eventDescTabScenerieChanged: "Event is triggered when a tab/scenary is selected.",
+  eventDescAccordionOpen: "Event triggered when an Accordion panel is opened.",
+  eventDescAccordionClose: "Event triggered when an Accordion panel is closed.",
+  eventDescAccordionChange: "Event triggered when the open/close state of an Accordion panel changes.",
   eventDescPopupOpen: "Event triggered when the popup is opened.",
   eventDescPopupClose: "Event triggered when the popup is closed.",
   eventDescPopupConfirm: "Event triggered when the user confirms an action within the popup.",
@@ -353,6 +360,15 @@ const message_en = {
   eventDescMidiaPlay: "Event triggered when the midia starts playing.",
   eventDescMidiaPause: "Event triggered when the midia is paused.",
   eventDescMidiaEnded: "Event triggered when the midia ends.",
+  eventDescDocLoad: "Event triggered when the document is loaded and ready for viewing.",
+  eventDescCalendarChange: "Event triggered when the selected date changes. This is one of the most important events as it indicates that the user has chosen a new date.",
+  eventDescCalendarMonthChange: "Event triggered when the user navigates to a different month. This can be useful for loading additional events or data as the user navigates through the calendar.",
+  eventDescCalendarYearChange: "Event triggered when the user navigates to a different year. This can be useful for loading additional events or data as the user navigates through the calendar.",
+  eventDescCalendarOpen: "Event triggered when the calendar is opened.",
+  eventDescCalendarClose: "Event triggered when the calendar is closed.",
+  eventDescApreMessageOpen: "Event triggered when the message element is displayed.",
+  eventDescApreMessageClose: "Event triggered when the message element is closed.",
+  eventDescApreMessageDismiss: "Event triggered when the message element is dismissed by the user."
 }
 
 type MessageType = typeof message_en;
@@ -458,7 +474,8 @@ const icaDescriptions: icaBase.FormComponent[] = [
   },
   {
     group: "Forms / Input / Feedback",
-    description: msg.dFIFeedBack
+    description: msg.dFIFeedBack,
+    events: "change,input,focus,blur"
   },
   {
     group: "Forms / Input / File",
@@ -721,12 +738,32 @@ const icaDescriptions: icaBase.FormComponent[] = [
 
 
   // Messages
-  { group: "Apresentation / Messages / Toast", description: msg.dAMToast },
-  { group: "Apresentation / Messages / Alert", description: msg.dAMAlert },
+  {
+    group: "Apresentation / Messages / Toast",
+    description: msg.dAMToast,
+    events: "open,close,dismiss"
+  },
+  {
+    group: "Apresentation / Messages / Alert",
+    description: msg.dAMAlert,
+    events: "open,close,dismiss"
+  },
   { group: "Apresentation / Messages / Snackbar", description: msg.dAMSneackbar },
-  { group: "Apresentation / Messages / Modal", description: msg.dAMModal },
-  { group: "Apresentation / Messages / Notification", description: msg.dAMNotification },
-  { group: "Apresentation / Messages / Badge", description: msg.dAMBadges },
+  {
+    group: "Apresentation / Messages / Modal",
+    description: msg.dAMModal,
+    events: "open,close,dismiss"
+  },
+  {
+    group: "Apresentation / Messages / Notification",
+    description: msg.dAMNotification,
+    events: "open,close,dismiss"
+  },
+  {
+    group: "Apresentation / Messages / Badge",
+    description: msg.dAMBadges,
+    events: "click"
+  },
 
   // Flow
   {
@@ -778,13 +815,33 @@ const icaDescriptions: icaBase.FormComponent[] = [
   },
 
   // Viewer
-  { group: "Blocks / Viewer / PDF Viewer", description: msg.dBVPdf },
-  { group: "Blocks / Viewer / Spreadsheet Viewer", description: msg.dBVViwer },
-  { group: "Blocks / Viewer / Document Viewer", description: msg.dBVDocument },
+  {
+    group: "Blocks / Viewer / PDF Viewer",
+    description: msg.dBVPdf,
+    events: "load,click"
+  },
+  {
+    group: "Blocks / Viewer / Spreadsheet Viewer",
+    description: msg.dBVViwer,
+    events: "load,click"
+  },
+  {
+    group: "Blocks / Viewer / Document Viewer",
+    description: msg.dBVDocument,
+    events: "load,click"
+  },
 
   // Plugins
-  { group: "Blocks / Plugins / Calendar", description: msg.dBPCalendar },
-  { group: "Blocks / Plugins / Schedule", description: msg.dBPSchedule },
+  {
+    group: "Blocks / Plugins / Calendar",
+    description: msg.dBPCalendar,
+    events: "change,month-change,year-change,open,close,hover"
+  },
+  {
+    group: "Blocks / Plugins / Schedule",
+    description: msg.dBPSchedule,
+    events: "click"
+  },
   { group: "Blocks / Plugins / External API", description: msg.dBPExternal },
 
   // Projects
@@ -871,10 +928,17 @@ const eventsDefinitions: icaBase.EventsDefinition[] = [
   { name: "play", group: ["Apresentation / Video / Embedded Video", "Apresentation / Video / Image Video", "Apresentation / Video / Video Playlis", "Apresentation / Sound / Player", "Apresentation / Sound / Sound Effects", "Apresentation / Sound / Podcast Player"], desc: msg.eventDescCarouselEnd },
   { name: "pause", group: ["Apresentation / Video / Embedded Video", "Apresentation / Video / Image Video", "Apresentation / Video / Video Playlis", "Apresentation / Sound / Player", "Apresentation / Sound / Sound Effects", "Apresentation / Sound / Podcast Player"], desc: msg.eventDescCarouselEnd },
   { name: "ended", group: ["Apresentation / Video / Embedded Video", "Apresentation / Video / Image Video", "Apresentation / Video / Video Playlis", "Apresentation / Sound / Player", "Apresentation / Sound / Sound Effects", "Apresentation / Sound / Podcast Player"], desc: msg.eventDescCarouselEnd },
+  { name: "load", group: ["Blocks / Viewer / PDF Viewer", "Blocks / Viewer / Spreadsheet Viewer", "Blocks / Viewer / Document Viewer"], desc: msg.eventDescDocLoad },
+  { name: "change", group: ["Blocks / Plugins / Calendar"], desc: msg.eventDescCalendarChange },
+  { name: "month-change", group: ["Blocks / Plugins / Calendar"], desc: msg.eventDescCalendarMonthChange },
+  { name: "year-change", group: ["Blocks / Plugins / Calendar"], desc: msg.eventDescCalendarYearChange },
+  { name: "open", group: ["Blocks / Plugins / Calendar"], desc: msg.eventDescCalendarOpen },
+  { name: "close", group: ["Blocks / Plugins / Calendar"], desc: msg.eventDescCalendarClose },
+  { name: "open", group: ["Apresentation / Messages / Toast", "Apresentation / Messages / Alert", "Apresentation / Messages / Snackbar", "Apresentation / Messages / Modal", "Apresentation / Messages / Notification"], desc: msg.eventDescApreMessageOpen },
+  { name: "close", group: ["Apresentation / Messages / Toast", "Apresentation / Messages / Alert", "Apresentation / Messages / Snackbar", "Apresentation / Messages / Modal", "Apresentation / Messages / Notification"], desc: msg.eventDescApreMessageClose },
+  { name: "dismiss", group: ["Apresentation / Messages / Toast", "Apresentation / Messages / Alert", "Apresentation / Messages / Snackbar", "Apresentation / Messages / Modal", "Apresentation / Messages / Notification"], desc: msg.eventDescApreMessageDismiss },
 
 ];
-
-
 
 export function getDescriptionsRootGroup(): string[] {
   const rootGroups = new Set<string>();
