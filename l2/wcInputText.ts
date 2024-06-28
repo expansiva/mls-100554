@@ -1,11 +1,11 @@
 /// <mls shortName="wcInputText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaFormsInputString } from './_100554_icaFormsInputString';
+import { IcaFormsInputStringBase } from './_100554_icaFormsInputStringBase';
 import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
 
 @customElement('wc-input-text-100554')
-export class WcInputText100554 extends IcaFormsInputString {
+export class WcInputText100554 extends IcaFormsInputStringBase {
 
     static styles = css`
     :host {
@@ -103,8 +103,8 @@ export class WcInputText100554 extends IcaFormsInputString {
     }
 
     handleChange(event: Event) {
-        const selectElement = event.target as HTMLSelectElement;
-        this.datasource = selectElement.value;
+        const input = event.target as HTMLInputElement;
+        this.datasource = input.value;
     }
 
 }

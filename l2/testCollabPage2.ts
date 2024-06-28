@@ -1,14 +1,13 @@
-/// <mls shortName="testCollabPage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="testCollabPage2" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement} from 'lit';
+import { html, css } from 'lit';
 import { CollabPageElement, getEventName } from './_100554_collabPageElement'
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('test-collab-page-100554')
-export class TestCollabPage100554 extends LitElement {
+@customElement('test-collab-page2-100554')
+export class TestCollabPage2100554 extends CollabPageElement {
 
     render() {
-        console.info(getEventName('click', 'input2', 'mobile'))
         window.globalState = {
             wcdAddEventSelected: '',
             tables: {
@@ -32,11 +31,7 @@ export class TestCollabPage100554 extends LitElement {
     }
 
     handleClickinput2Desktop() {
-        console.log('Click handler desktop for element with ID 2 in page collabPage');
+        console.log('Click handler desktop for element with ID 2 in page collabPage2');
     }
-
-    // handleClickinput2Mobile() {
-    //     console.log('Click handler mobile for element with ID 2');
-    // }
 
 }

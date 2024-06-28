@@ -8,3 +8,4 @@ export function _100554_testScenario1_getScenaryDetails(): IScenaryDetails {
         html
     }
 }
+
