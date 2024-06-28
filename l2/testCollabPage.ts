@@ -5,9 +5,10 @@ import { CollabPageElement, getEventName } from './_100554_collabPageElement'
 import { customElement, property } from 'lit/decorators.js';
 
 @customElement('test-collab-page-100554')
-export class TestCollabPage100554 extends LitElement {
+export class TestCollabPage100554 extends CollabPageElement {
 
     render() {
+        
         console.info(getEventName('click', 'input2', 'mobile'))
         window.globalState = {
             wcdAddEventSelected: '',

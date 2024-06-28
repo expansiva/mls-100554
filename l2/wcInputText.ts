@@ -37,7 +37,7 @@ export class WcInputText100554 extends IcaFormsInputStringBase {
         color: red;
     }
     `
-    @propertyCompositeDataSource({ type: String }) datasource: string | undefined;
+    @propertyDataSource({ type: String }) datasource: string | undefined;
 
     @property({ type: String }) name: string | undefined;
 
