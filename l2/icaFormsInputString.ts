@@ -19,7 +19,6 @@ export abstract class IcaFormsInputNumber extends IcaLitElementBase {
         }
         if (level === '2') {
             await this.importAction('_100554_wcdToolboxItemActionEvents', this.actions, this.level as any);
-            
         }
         return;
     }

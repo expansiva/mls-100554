@@ -2,11 +2,11 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaFormsInputSelectOne } from './_100554_icaFormsInputSelectOne';
+import { IcaFormsInputSelectOneBase } from './_100554_icaFormsInputSelectOneBase';
 import { propertyDataSource, propertyCompositeDataSource, OptionItem } from './_100554_icaLitElement';
 
 @customElement('wc-select-one-100554')
-export class WcSelectOne extends IcaFormsInputSelectOne {
+export class WcSelectOne extends IcaFormsInputSelectOneBase {
 
     static styles = css`
     :host {
@@ -39,7 +39,7 @@ export class WcSelectOne extends IcaFormsInputSelectOne {
 
     render() {
         return html`
-        <label>${this.label}<label>
+        <label>${this.label}</label>
         <br>
         <select
             class="select_control" 

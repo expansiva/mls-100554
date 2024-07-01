@@ -36,7 +36,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServicePreviewView extends LitElement {
 
     private msg: MessageType = messages['en'];
-    
+
     private file: mls.stor.IFileInfo | undefined = undefined;
 
     private mfile: mls.l2.editor.IMFile | undefined = undefined;
@@ -70,28 +70,34 @@ export class ServicePreviewView extends LitElement {
 
         if (ev.level.toString() !== this.level) return;
         if (!ev.desc) return;
-
         const json = JSON.parse(ev.desc);
-
         if (json.op !== 'SelectWidget') return;
 
-        this.selectIdinPreview(json.id);
+        this.selectIdinPreview(json.id, json.origin);
 
 
     }
 
-    private selectIdinPreview(id: string):void {
+    private selectIdinPreview(id: string, origin: 'editor' | 'preview'): void {
 
         if (!id || !this.shadowRoot) return;
         const iframe = this.shadowRoot.querySelector('iframe');
-
         if (!iframe || !iframe.contentDocument) return;
 
-        const el = this.findElementsStartingWithIca(id) as HTMLElement;
+        if (origin !== 'editor') return;
 
+        const el = this.findElementsStartingWithIca(id) as HTMLElement;
         if (!el) return;
 
-        el.click();
+        const ev = new CustomEvent('click', {
+            detail: {
+                origin,
+            }
+        });
+        
+        el.dispatchEvent(ev);
+
+        // el.click();
 
     }
 
@@ -453,7 +459,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     private async getFileContent(): Promise<string> {
-        let txt = '<h3>'+this.msg.configure+'</h3>';
+        let txt = '<h3>' + this.msg.configure + '</h3>';
 
         if (this.file && this.file.getValueInfo)
             txt = (await this.file.getValueInfo()).content as string;

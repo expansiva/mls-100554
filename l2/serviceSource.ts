@@ -890,6 +890,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private timeHtmlChangeCursor: number = 0;
+    private lastIdSelected: string | null = null;
     private async initMonaco_Editor(): Promise<void> {
 
         const addEventsEditor = () => {
@@ -918,8 +919,12 @@ export class ServiceSource100554 extends ServiceBase {
                     // Verifica se a linha contém '<ica-' e 'id="'
                     if (lineContent.includes('<ica-') && lineContent.includes('id="')) {
                         const idValue = this.extractIdValue(lineContent);
-                        if (idValue) {
-                            mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectWidget", "id":"${idValue}"}`);
+                        if(this.lastIdSelected === idValue) return;
+                        this.lastIdSelected = idValue;
+                        if (idValue && this.lastOrigin === 'editor') {
+                            mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectWidget", "id":"${idValue}", "origin":"editor"}`);
+                        } else {
+                            this.lastOrigin = 'editor';
                         }
                     }
 
@@ -1561,6 +1566,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     //--------------WidgetAction--------------
 
     private lastScenario = '';
+    private lastOrigin = 'editor';
     private onWidgetActionEvents(ev: mls.events.IEvent) {
 
         if (this.position === 'right') return;
@@ -1573,7 +1579,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             case 'SelectWidget':
                 break;
             case 'SelectLine':
-                this.selectLineinHTML(json.line);
+                this.selectLineinHTML(json.line, json.origin);
                 break;
             case 'OpenScenario':
                 this.openScenario(json);
@@ -1591,8 +1597,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     }
 
-    private selectLineinHTML(line: number) {
+    private selectLineinHTML(line: number, origin: 'preview' | 'editor') {
         if (this.menu.lastIcon !== 'icHTML' || !this._ed1) return;
+        this.lastOrigin = origin;
+        if(origin === 'editor') return;
         this.goToLine(line);
     }
 

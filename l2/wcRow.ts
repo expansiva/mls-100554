@@ -9,13 +9,14 @@ export class WcRow extends IcaLayoutFlowRowBase {
 
     static styles = css`
         :host {
-            margin-top:5rem;
+            margin-top:.5rem;
             display: block;
             height: 100%;
+            width:100%;
         }
         :host>div{
-            heigth=100%; 
-            width:auto; 
+            heigth:100%; 
+            width:100%; 
             display:flex; 
             gap:1rem;
         }

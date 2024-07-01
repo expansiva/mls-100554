@@ -1,0 +1,26 @@
+<test-page-ica-full-100554>
+    <ica-layout-flow-row-100554 id="row-1" rendertype="edit" level="2" widget="wc-row-100554">
+        <ica-layout-flow-column-100554  id="row-1-1" rendertype="edit" level="2" widget="wc-column-100554">
+            <ica-forms-input-string-100554 id="input-str-1" rendertype="edit" level="2" widget="wc-input-text-100554" label="Nome:"
+             datasource="{{newUser.name}}">
+            </ica-forms-input-string-100554>
+        </ica-layout-flow-column-100554>
+    </ica-layout-flow-row-100554>
+    
+    <ica-layout-flow-row-100554 id="row-2" rendertype="edit" level="2" widget="wc-row-100554">
+        <ica-layout-flow-column-100554  id="row-2-1" rendertype="edit" level="2" widget="wc-column-100554">
+            <ica-forms-input-number-100554 id="input-number-1" rendertype="edit" level="2" widget="wc-input-number-with-buttons-100554" label="Idade:"
+                errormessage="Idade Invalida" minvalue="0" maxvalue="100" datasource="{{newUser.age}}">
+            </ica-forms-input-number-100554>
+        </ica-layout-flow-column-100554>
+        <ica-layout-flow-column-100554 id="row-2-2" rendertype="edit" level="2" widget="wc-column-100554">
+            <ica-forms-input-select-one-100554 id="select-one-1" rendertype="edit" level="2" widget="wc-select-one-100554" label="Sexo"
+        hint="Selecione o sexo do usuario" options="{{ tables.sex }}" selectedvalue="{{newUser.sex}}">
+            </ica-forms-input-select-one-100554>
+        </ica-layout-flow-column-100554>
+    </ica-layout-flow-row-100554>
+</test-page-ica-full-100554>
+
+
+
+

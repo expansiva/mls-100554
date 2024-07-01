@@ -10,6 +10,7 @@ export class WcColumn extends IcaLayoutFlowColumnBase {
     static styles = css`
     :host {
         display: block;
+        width:100%;
     }`
 
     render() {

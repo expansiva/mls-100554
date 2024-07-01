@@ -14,7 +14,7 @@ export class WcInputText100554 extends IcaFormsInputStringBase {
     
     .input_control {
         display: block;
-        width:100%;
+        width:calc(100% - 1.5rem - 1px);
         padding: 0.375rem 0.75rem;
         font-size: 1rem;
         font-weight: 400;

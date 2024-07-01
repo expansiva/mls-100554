@@ -25,7 +25,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
 
     .input_control {
         display: block;
-        width:50px;
+        width: 100%;
         padding: 0.375rem 0.75rem;
         font-size: 1rem;
         font-weight: 400;

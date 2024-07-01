@@ -7,7 +7,7 @@ import * as icaGlobal from './_100554_icaGlobal';
 import * as states from './_100554_icaCollabStore';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { initWCDToolbox, WCDToolbox } from './_100554_wcdToolbox'
-import { html, unsafeHTML } from 'lit';
+import { html, unsafeHTML, css } from 'lit';
 import { property } from 'lit/decorators.js';
 import * as myDefinition from './_100554_icaBaseDescription';
 
@@ -45,9 +45,10 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     public styleel: string | undefined = '';
 
     public internalInnerHTML = '';
-
     private isLoadMyAction: any = {};
+
     private lastWidget: string = '';
+
     private styleElMain: CSSStyleDeclaration | undefined = undefined;
 
     createRenderRoot() {
@@ -71,7 +72,9 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
         if (this.lastWidget !== this.widget) {
             this.lastWidget = this.widget as string;
-            this.updateStyleDisplay();
+            customElements.whenDefined(this.lastWidget).then(() => {
+                this.updateStyleDisplay();
+            });
         }
         if (this.renderType === 'edit') {
             this.setEventsIfRenderTypeEdit();
@@ -110,13 +113,15 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     }
 
     private addWCDToolbox() {
+        if (!this.widget || !this.level) return;
         const wcd: WCDToolbox = document.createElement('wcd-toolbox-100554') as WCDToolbox;
-        if (this.level) wcd.setAttribute('level', this.level.toString());
-        if (this.widget) wcd.setAttribute('widget', this.widget);
+        wcd.setAttribute('level', this.level.toString());
+        wcd.setAttribute('widget', this.widget);
         let act = (this.actions as any)[this.level as any];
         if (!act) act = [];
         wcd.actions = act;
         this.appendChild(wcd);
+
     }
 
     private updateStyleDisplay() {
@@ -130,6 +135,8 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     private setEventsIfRenderTypeEdit() {
 
         this.onclick = async (e: MouseEvent) => {
+
+            const origin = (e.detail as any).origin;
 
             //When clicking on an "edit" item I return the old "editactive" to "edit" and set the new "editactive"
             e.stopPropagation();
@@ -159,7 +166,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
                 await this.setActions(this.level as any);
             }
 
-            this.selectOnHTML();
+            if (origin !== "editor") this.selectOnHTML();
             this.setAttribute('renderType', 'editactive');
             if (this.level !== '4') return;
             mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
@@ -186,7 +193,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
         const { startLineNumber } = line[0].range;
 
-        mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectLine", "line":${startLineNumber}}`);
+        mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectLine", "line":${startLineNumber}, "origin":"preview"}`);
 
     }
 
@@ -371,6 +378,8 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     render() {
 
         this.style.display = 'block';
+        if (!this.style.width) this.style.width = 'inherit';
+        if (!this.style.height) this.style.height = 'inherit';
 
         const attrs = this.getAttributes();
         let code = `
@@ -397,7 +406,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     }
 
     private myInfos: { root: string, subGroup: string, finalGroup: string } | undefined;
-    getMyInfos(): { root: string , subGroup: string , finalGroup: string  } {
+    getMyInfos(): { root: string, subGroup: string, finalGroup: string } {
 
         // Remove os caracteres iniciais e finais não desejados
         let cleanedInput = this.tagName.toLocaleLowerCase().replace(/^ica-|-\d+$/g, '');
@@ -413,14 +422,12 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         };
     }
 
-    getMyEvents(): string{
-
+    getMyEvents(): string {
         if (!this.myInfos) this.myInfos = this.getMyInfos();
         return myDefinition.getFormComponentsEvents(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup);
-        
     }
 
-    getDefinitionFromEvent(event:string): string{
+    getDefinitionFromEvent(event: string): string {
         if (!this.myInfos) this.myInfos = this.getMyInfos();
         return myDefinition.getEventDescription(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup, event);
     }
