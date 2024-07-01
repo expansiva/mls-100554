@@ -1033,9 +1033,9 @@ export function getFormComponentsEvents(root: string, subGroup: string, finalGro
   for (const component of icaDescriptions) {
     const parts = component.group.split('/');
     if (parts.length === 3 &&
-      parts[0].trim().toLowerCase() === root.toLowerCase() &&
-      parts[1].trim().toLowerCase() === subGroup.toLowerCase() &&
-      parts[2].trim().toLowerCase() === finalGroup.toLowerCase()) return component.events || "";
+      parts[0].trim().toLowerCase() === (root).toLowerCase() &&
+      parts[1].trim().toLowerCase() === (subGroup).toLowerCase() &&
+      parts[2].trim().toLowerCase() === (finalGroup).toLowerCase()) return component.events || "";
   };
   return "";
 }
@@ -1049,9 +1049,9 @@ export function getEventDescription(root: string, subGroup: string, finalGroup: 
     for (const group of event.group) {
       const parts = group.split('/');
       if (parts.length === 3 &&
-        parts[0].trim().toLowerCase() === root.toLowerCase() &&
-        parts[1].trim().toLowerCase() === subGroup.toLowerCase() &&
-        parts[2].trim().toLowerCase() === finalGroup.toLowerCase()) {
+        parts[0].trim().toLowerCase() === (root).toLowerCase() &&
+        parts[1].trim().toLowerCase() === (subGroup).toLowerCase() &&
+        parts[2].trim().toLowerCase() === (finalGroup).toLowerCase()) {
         desc = event.desc || "";
         break;
       }
@@ -1064,4 +1064,3 @@ export function getEventDescription(root: string, subGroup: string, finalGroup: 
   if (!eventInfo) return '';
   return eventInfo.desc;
 }
-
