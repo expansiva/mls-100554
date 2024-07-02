@@ -872,7 +872,7 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "options", lit: "@property() options: OptionItem[] | undefined; // Optional path in the global JSON or a valid JSON for a list of options " },
   { path: "selectedvalue", lit: "@property() selectedvalue: string | undefined;" },
   { path: "inputmode", lit: " @property({ type: String }) inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = 'none';" },
-  { path: "title", lit: "@property({ type: String }) title: string | undefined;" },
+  { path: "title", lit: "@property({ type: String }) title: string;" },
   { path: "icon", lit: "@property({ type: String }) icon: string | undefined;" },
   { path: "form", lit: "@property({ type: String }) form: string | undefined; // The form element that the button is associated with (it is the owning form)." },
   { path: "text", lit: "@property({ type: String }) text: string | undefined;" },
