@@ -15,9 +15,8 @@ export class WcColumn extends IcaLayoutFlowColumnBase {
 
     render() {
         return html`
-        <div>
-             <slot></slot>
-        </div>`
+        <slot></slot>
+        `
     }
 
 }

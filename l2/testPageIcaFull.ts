@@ -18,7 +18,26 @@ export class TestPageICAFull extends CollabPageElement {
                 city: '',
                 sex: ''
             },
+
+            aux: {
+                sum: 0,
+            }
+
         };
         return html``;
     }
+
+
+    /// **collab_events_start**
+    handleClickbtnSomarDesktop() {
+        window.globalStateManagment.setState('aux.sum', window.globalState.aux.sum + 1);
+    }
+
+    handleClickbtnSubtrairDesktop() {
+        window.globalStateManagment.setState('aux.sum', window.globalState.aux.sum - 1);
+    }
+
+
+
 }
+

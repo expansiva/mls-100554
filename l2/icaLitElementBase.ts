@@ -69,14 +69,16 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
     protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
         super.updated(changedProperties);
-
+      
         if (this.lastWidget !== this.widget) {
             this.lastWidget = this.widget as string;
+
             customElements.whenDefined(this.lastWidget).then(() => {
                 this.updateStyleDisplay();
             });
         }
         if (this.renderType === 'edit') {
+            if (this.resizeObserver) this.resizeObserver.disconnect();
             this.setEventsIfRenderTypeEdit();
         }
         if (this.renderType === 'editactive') {
@@ -112,8 +114,11 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
     }
 
+    private resizeObserver: ResizeObserver | undefined;
+
     private addWCDToolbox() {
         if (!this.widget || !this.level) return;
+
         const wcd: WCDToolbox = document.createElement('wcd-toolbox-100554') as WCDToolbox;
         wcd.setAttribute('level', this.level.toString());
         wcd.setAttribute('widget', this.widget);
@@ -122,6 +127,15 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         wcd.actions = act;
         this.appendChild(wcd);
 
+        if (this.resizeObserver) this.resizeObserver.disconnect();
+        this.resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (!wcd) return;
+                wcd.updateSize(this, wcd, true);
+            }
+        });
+
+        this.resizeObserver.observe(this);
     }
 
     private updateStyleDisplay() {
@@ -136,14 +150,13 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
         this.onclick = async (e: MouseEvent) => {
 
+
             const origin = (e.detail as any).origin;
 
             //When clicking on an "edit" item I return the old "editactive" to "edit" and set the new "editactive"
             e.stopPropagation();
 
             if ((e.target as HTMLElement).tagName.startsWith('WCD-')) return;
-
-            // const all = document.querySelectorAll('*[renderType]');
             const all = this.findElementsStartingWithIca();
 
             Array.from(all).forEach((i) => {
@@ -183,14 +196,12 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
         const infoL2 = (mls.actual[2] as any).left as any;
         const name = mls.l2.editor.getKey({ project: infoL2.project, shortName: infoL2.shortName });
-
         const mfile = mls.l2.editor.mfiles[name];
         if (!mfile || !(mfile as any).modelHTML) return;
 
         const model = (mfile as any).modelHTML;
         const line = model.findMatches(`id="${id}"`, false, false, false, null, true);
         if (!line || !line[0]) return;
-
         const { startLineNumber } = line[0].range;
 
         mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectLine", "line":${startLineNumber}, "origin":"preview"}`);
@@ -219,6 +230,34 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
 
         document.body.querySelectorAll('*').forEach((item) => {
+            traverseShadowRoot(item);
+        });
+        return elements;
+    }
+
+    private findAllElementsExceptIca(): Element[] {
+        let elements: Element[] = [];
+        // Function to traverse shadow DOM
+        function traverseShadowRoot(element: Element) {
+            if (element.tagName.toLowerCase() === 'style' || element.tagName.toLowerCase() === 'script') return;
+            if (!element.tagName.toLowerCase().startsWith('ica')) {
+                elements.push(element);
+                return;
+            }
+
+            if (element.shadowRoot) {
+                element.shadowRoot.querySelectorAll('*').forEach((item) => {
+                    traverseShadowRoot(item);
+                })
+            } else {
+                const children = Array.from(element.children);
+                if (children.length > 0) {
+                    children.forEach(child => traverseShadowRoot(child));
+                }
+            }
+        }
+
+        this.querySelectorAll('*').forEach((item) => {
             traverseShadowRoot(item);
         });
         return elements;
@@ -411,11 +450,11 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         // Remove os caracteres iniciais e finais não desejados
         let cleanedInput = this.tagName.toLocaleLowerCase().replace(/^ica-|-\d+$/g, '');
 
-        let root:string, subgroup:string, finalgroup:string;
+        let root: string, subgroup: string, finalgroup: string;
 
         // Divide a string em partes usando '-'
         let parts = cleanedInput.split('-');
-        if(parts.length < 3) throw new Error('Invalid ica tag name');
+        if (parts.length < 3) throw new Error('Invalid ica tag name');
 
         root = parts.shift() as string;
         subgroup = parts.shift() as string;
