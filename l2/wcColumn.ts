@@ -11,6 +11,7 @@ export class WcColumn extends IcaLayoutFlowColumnBase {
     :host {
         display: block;
         width:100%;
+        flex: 1;
     }`
 
     render() {
