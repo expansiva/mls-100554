@@ -8,6 +8,402 @@ import { ServiceBase } from './_100554_serviceBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import * as states from './_100554_icaCollabStore';
 
+export function initWCDToolbox() {
+    return true;
+}
+
+@customElement('wcd-toolbox-100554')
+export class WCDToolbox extends CollabLitElement { 
+
+    // ------------ PROPERTIES ------------------
+
+    @property({ type: String, reflect: true })
+    public level: string | undefined;
+
+    @property({ type: String, reflect: true })
+    private widget: string | undefined;
+
+    private elMain: HTMLElement | undefined; // component from ica render
+
+    private elICA: HTMLElement | undefined; // ica base to wcd
+
+    public actions: IActionsToolbox[] = [];
+
+    get lastHelper() {
+        if (!this.elICA) return '';
+        return (this.elICA as any)['lasthelper'];
+    }
+
+    set lastHelper(helper: string) {
+        if (!this.elICA) return;
+        (this.elICA as any)['lasthelper'] = helper;
+    }
+
+    // ------------ COMPONENT-------------------
+
+    firstUpdated() {
+
+        if (!this.elMain) return;
+        //this.renderActions(this.actions);
+        this.updateSize(this.elMain, this, true);
+        this.setAttribute('title', this.elMain.tagName);
+
+    }
+
+    //---------------IMPLEMENTATION----------------
+
+    public updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean): void {
+
+        if (!elBase) return;
+        setTimeout(() => {
+
+            const display = elChange.style.display;
+            elChange.style.display = 'none!important';
+
+            const icaBase = elBase.parentElement;
+            if (!icaBase) return;
+
+            const ad3 = (n1: number, s1: string, s2: string): number => n1 + parseInt(s1, 10) + parseInt(s2, 10);
+            const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom, paddingLeft, paddingRight } = window.getComputedStyle(elBase);
+
+            let { width, height, y } = elBase.getBoundingClientRect();
+            let topIca = icaBase.getBoundingClientRect().top;
+
+
+            let left = 0;
+            let top = 0;
+            left -= parseInt(marginLeft, 10);
+            top -= parseInt(marginTop, 10);
+            width = Math.max(ad3(width, marginLeft, marginRight), ad3(0, paddingLeft, paddingRight));
+
+            if (width > elBase.ownerDocument.body.clientWidth) width -= 3;
+            height = Math.max(ad3(height, marginTop, marginBottom), ad3(0, paddingTop, paddingBottom));
+
+            const grandFahter = elBase.parentElement && elBase.parentElement.parentElement ? elBase.parentElement.parentElement : undefined;
+
+            if (grandFahter) {
+                const display = window.getComputedStyle(grandFahter).display;
+                if (['flex'].includes(display) && elBase.parentElement) {
+
+                    const fTop = elBase.parentElement.getClientRects()[0].top;
+                    const bTop = elBase.getClientRects()[0].top;
+                    top = fTop - bTop;
+                    top = top < 0 ? top * -1 : top;
+                }
+            }
+
+            if (changePosition) {
+                elChange.style.left = `${(left - 1) < 0 ? 0 : (left - 1)}px`;
+                elChange.style.top = `${top - 1}px`;
+            }
+
+            elChange.style.width = `${width + 2}px`;
+            elChange.style.height = `${height + 2}px`;
+            elChange.style.display = display;
+
+        }, 50);
+
+    }
+
+
+    //--------------CSS--------------------
+
+    static styles = css`
+        :host{
+            display:block;
+            border:1px solid #d3cece;
+            position:absolute;
+            user-select:none;
+            z-index:9999;
+            background: #c8c8c8c2; 
+        }
+
+        :host(:hover){
+            border:1px solid purple!important;
+        }
+
+        .itensFcaToolbox:hover{
+            background:purple;
+        }
+
+        .fcaButtonAction{
+            cursor:pointer;
+        }
+
+        .fcaBackButton{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:-2rem;
+            right:0px
+        }
+
+        .p-l1{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:-6px;
+            left:-6px
+        }
+
+        .p-l2{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:50%;
+            left:-6px;
+            transform: translateY(-50%);
+        }
+
+        .p-l3{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            bottom:-6px;
+            left:-6px;
+        }
+
+        .p-l4{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            bottom:-2rem;
+            left:0px;
+        }
+
+        .p-l5{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:50%;
+            left:-23px;
+            transform: translateY(-50%);
+        }
+
+        .p-m1{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:-6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .p-m2{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .p-m3{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            bottom:-6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .p-m4{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            bottom:-2rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .p-r1{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:-6px;
+            right:-6px
+        }
+
+        .p-r2{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:50%;
+            right:-6px;
+            transform: translateY(-50%);
+        }
+
+        .p-r3{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            bottom:-6px;
+            right:-6px;
+        }
+
+        .p-r4{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            bottom:-2rem;
+            right:-6px;
+        }
+
+        .f-circle{
+            width:10px;
+            height:10px;
+            background:#fff;
+            border-radius:50%;
+            box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);
+        }
+        
+
+        .f-square{
+            width:23px;
+            height:7px;
+            background:#fff;
+            border-radius:3px;
+            box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);
+        }
+
+        .p-l1.f-square{
+            top:-4px;
+            left:-4px
+        }
+
+        .p-l2.f-square{
+            top:50%;
+            left:-4px;
+            width:7px;
+            height:23px;
+        }
+
+        .p-l3.f-square{
+            bottom:-4px;
+            left:-4px;
+        }
+
+        .p-m1.f-square{
+            top:-4px;
+            width:23px;
+            height:7px;
+        }
+
+        .p-m2.f-square{
+            width:23px;
+            height:7px;
+        }
+
+        .p-m3.f-square{
+            bottom:-4px;
+            width:23px;
+            height:7px;
+        }
+
+        .p-r1.f-square{
+            top:-4px;
+            right:-4px
+        }
+
+        .p-r2.f-square{
+            right:-4px;
+            width:7px;
+            height:23px;
+        }
+
+        .p-r3.f-square{
+            bottom:-4px;
+            right:-4px;
+        }
+
+        wcd-toolbox-menu.p-m1{
+            top:-30px
+        }
+
+        wcd-toolbox-menu.p-m3{
+            bottom:-30px
+        }
+
+        wcd-toolbox-menu{
+            display:block;
+            height:17px;
+            border:1px solid #d3cece;
+            padding:.2rem;
+            border-radius:5px;
+            position:relative;
+            background:#fff;
+            
+        }
+
+        wcd-toolbox-menu-container{
+            display:block;
+            position:relative;
+        }
+
+        wcd-toolbox-itemmenu{
+            display:flex;
+            height:20px;
+            gap:.3rem;
+            
+        }
+
+        wcd-toolbox-itemmenu a{
+            display: flex!important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size:13px;
+            width:18px;
+            height:18px;
+        }
+
+        wcd-toolbox-itemmenu a:hover{
+            background:#e1e1e1;
+        }
+
+        wcd-toolbox-submenu{
+            position:absolute;
+            top:19px;
+            left:80%;
+            display:flex;
+            flex-direction: column;
+            gap:.3rem;
+            min-width: 150px;
+            min-height: 50px;
+            padding:.5rem;
+            border:1px solid #d3cece;
+            background:#fff;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            border-top-right-radius: 10px;
+            box-shadow: 0px 1px 4px 1px #e1e1e1;
+        }
+
+        wcd-toolbox-submenu a {
+            font-size:13px;
+            display:flex;
+            gap:.3rem;
+            align-items: center;
+            padding:.1rem;
+        }
+
+        wcd-toolbox-submenu a:hover {
+            background:#e1e1e1;
+        }
+
+
+    `;
+
+}
+/*
+import { html, css } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { CollabLitElement } from './_100554_collabLitElement';
+import { IActionsToolbox, IActionsToolboxMenu } from './_100554_icaGlobal';
+import { ServiceBase } from './_100554_serviceBase';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import * as states from './_100554_icaCollabStore';
+
 //version 4
 
 export function initWCDToolbox() {
@@ -647,7 +1043,7 @@ export class WCDToolbox extends CollabLitElement {
             position:absolute;
             user-select:none;
             z-index:9999;
-            background: #c8c8c8c2; /*#edededc2;*/
+            background: #c8c8c8c2; 
         }
 
         :host(:hover){
@@ -938,4 +1334,4 @@ const templateAbout = {
         if (bd.service && bd.service.setAboutTag) bd.service.setAboutTag(wc.title.toLocaleLowerCase())
 
     }
-}
+}*/
