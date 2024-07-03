@@ -69,7 +69,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
     protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
         super.updated(changedProperties);
-      
+
         if (this.lastWidget !== this.widget) {
             this.lastWidget = this.widget as string;
 
@@ -79,24 +79,24 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
         if (this.renderType === 'edit') {
             if (this.resizeObserver) this.resizeObserver.disconnect();
-            this.setEventsIfRenderTypeEdit();
+            // this.setEventsIfRenderTypeEdit();
         }
         if (this.renderType === 'editactive') {
-            this.addWCDToolbox();
+            //this.addWCDToolbox();
         }
 
-        const l = changedProperties.get('level');
-        if (l) {
-            const els = this.findElementsStartingWithIca();
-            els.forEach((el) => {
-                el.setAttribute('level', this.level as any);
-                if (this.level === '7') {
-                    const wcd = el.querySelector('wcd-toolbox-100554');
-                    if (wcd) wcd.remove();
-                    el.setAttribute('renderType', 'edit')
-                }
-            });
-        }
+        // const l = changedProperties.get('level');
+        // if (l) {
+        //     const els = this.findElementsStartingWithIca();
+        //     els.forEach((el) => {
+        //         el.setAttribute('level', this.level as any);
+        //         if (this.level === '7') {
+        //             const wcd = el.querySelector('wcd-toolbox-100554');
+        //             if (wcd) wcd.remove();
+        //             el.setAttribute('renderType', 'edit')
+        //         }
+        //     });
+        // }
 
         this.performPreSlotAllocationOperations();
 
@@ -230,34 +230,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
 
         document.body.querySelectorAll('*').forEach((item) => {
-            traverseShadowRoot(item);
-        });
-        return elements;
-    }
-
-    private findAllElementsExceptIca(): Element[] {
-        let elements: Element[] = [];
-        // Function to traverse shadow DOM
-        function traverseShadowRoot(element: Element) {
-            if (element.tagName.toLowerCase() === 'style' || element.tagName.toLowerCase() === 'script') return;
-            if (!element.tagName.toLowerCase().startsWith('ica')) {
-                elements.push(element);
-                return;
-            }
-
-            if (element.shadowRoot) {
-                element.shadowRoot.querySelectorAll('*').forEach((item) => {
-                    traverseShadowRoot(item);
-                })
-            } else {
-                const children = Array.from(element.children);
-                if (children.length > 0) {
-                    children.forEach(child => traverseShadowRoot(child));
-                }
-            }
-        }
-
-        this.querySelectorAll('*').forEach((item) => {
             traverseShadowRoot(item);
         });
         return elements;

@@ -7,7 +7,7 @@ import { customElement } from 'lit/decorators.js';
 @customElement('test-page-ica-full-100554')
 export class TestPageICAFull extends CollabPageElement {
 
-    render() {
+    initPage() {
         window.globalState = {
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
@@ -18,25 +18,20 @@ export class TestPageICAFull extends CollabPageElement {
                 city: '',
                 sex: ''
             },
-
-            aux: {
-                sum: 0,
-            }
+            sum: 0,
 
         };
-        return html``;
     }
 
-
+    
     /// **collab_events_start**
     handleClickbtnSomarDesktop() {
-        window.globalStateManagment.setState('aux.sum', window.globalState.aux.sum + 1);
+        window.globalStateManagment.setState('sum', window.globalState.sum + 1);
     }
 
     handleClickbtnSubtrairDesktop() {
-        window.globalStateManagment.setState('aux.sum', window.globalState.aux.sum - 1);
+        window.globalStateManagment.setState('sum', window.globalState.sum - 1);
     }
-
 
 
 }

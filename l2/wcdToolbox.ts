@@ -25,7 +25,7 @@ export class WCDToolbox extends CollabLitElement {
 
     private elMain: HTMLElement | undefined; // component from ica render
 
-    private elICA: HTMLElement | undefined; // ica base to wcd
+    public elICA: HTMLElement | undefined; // ica base to wcd
 
     public actions: IActionsToolbox[] = [];
 
@@ -40,6 +40,16 @@ export class WCDToolbox extends CollabLitElement {
     }
 
     // ------------ COMPONENT-------------------
+
+    connectedCallback(){
+        super.connectedCallback();
+        if(!this.elICA) return;
+        const widgetName = this.elICA.getAttribute('widget');
+        if(!widgetName) return;        
+        const widget = this.elICA.querySelector(widgetName);
+        if(!widget) return;
+        this.elMain = widget as HTMLElement;
+    }
 
     firstUpdated() {
 
