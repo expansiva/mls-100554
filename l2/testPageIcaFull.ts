@@ -22,7 +22,6 @@ export class TestPageICAFull extends CollabPageElement {
 
         };
     }
-
     
     /// **collab_events_start**
     handleClickbtnSomarDesktop() {

@@ -1,7 +1,7 @@
 /// <mls shortName="wcdToolbox" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IActionsToolbox, IActionsToolboxMenu } from './_100554_icaGlobal';
 import { ServiceBase } from './_100554_serviceBase';
@@ -13,9 +13,11 @@ export function initWCDToolbox() {
 }
 
 @customElement('wcd-toolbox-100554')
-export class WCDToolbox extends CollabLitElement { 
+export class WCDToolbox extends CollabLitElement {
 
     // ------------ PROPERTIES ------------------
+
+    @query('wcd-toolbox-title') titleEl: HTMLElement | undefined;
 
     @property({ type: String, reflect: true })
     public level: string | undefined;
@@ -41,27 +43,41 @@ export class WCDToolbox extends CollabLitElement {
 
     // ------------ COMPONENT-------------------
 
-    connectedCallback(){
+    connectedCallback() {
         super.connectedCallback();
-        if(!this.elICA) return;
+        if (!this.elICA) return;
         const widgetName = this.elICA.getAttribute('widget');
-        if(!widgetName) return;        
+        if (!widgetName) return;
         const widget = this.elICA.querySelector(widgetName);
-        if(!widget) return;
+        if (!widget) return;
         this.elMain = widget as HTMLElement;
+        this.setAttribute('widget', widget.tagName.toLowerCase())
+    }
+
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this.resizeObserver) this.resizeObserver.disconnect();
     }
 
     firstUpdated() {
-
         if (!this.elMain) return;
         //this.renderActions(this.actions);
         this.updateSize(this.elMain, this, true);
-        this.setAttribute('title', this.elMain.tagName);
+        this.initObserverResize();
+        this.calculateTitlePosition();
+    }
 
+    render() {
+        return html`
+         <wcd-toolbox-aux-background></wcd-toolbox-aux-background>
+         <wcd-toolbox-title>${this.widget}</wcd-toolbox-title>
+        `;
     }
 
     //---------------IMPLEMENTATION----------------
 
+    private resizeObserver: ResizeObserver | undefined;
     public updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean): void {
 
         if (!elBase) return;
@@ -115,6 +131,35 @@ export class WCDToolbox extends CollabLitElement {
 
     }
 
+    private initObserverResize() {
+        if (!this.elICA) return;
+        if (this.resizeObserver) this.resizeObserver.disconnect();
+        this.resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (!this.elMain) return;
+                this.updateSize(this.elMain, this, true);
+            }
+        });
+        this.resizeObserver.observe(this.elICA);
+    }
+
+    private calculateTitlePosition() {
+        if (!this.widget || !this.parentElement) return;
+        const widget = this.elMain;
+        if (!widget || !this.titleEl) return;
+        const selectBoxRect = widget.getBoundingClientRect();
+        this.titleEl.style.display = 'block';
+        const popupWidth = this.titleEl.offsetWidth;
+        this.titleEl.style.display = '';
+        this.titleEl.style.left = '';
+        this.titleEl.style.top = '';
+        this.titleEl.style.bottom = '';
+        const spaceRight = window.innerWidth - selectBoxRect.right;
+        if (spaceRight >= popupWidth) this.titleEl.style.left = `${-1}px`;
+        else this.titleEl.style.right = `${-1}px`;
+    }
+
+
 
     //--------------CSS--------------------
 
@@ -130,6 +175,12 @@ export class WCDToolbox extends CollabLitElement {
 
         :host(:hover){
             border:1px solid purple!important;
+        }
+
+        :host(:not(.action-open):hover){
+            wcd-toolbox-title{
+                display:block;
+            }
         }
 
         .itensFcaToolbox:hover{
@@ -399,6 +450,25 @@ export class WCDToolbox extends CollabLitElement {
 
         wcd-toolbox-submenu a:hover {
             background:#e1e1e1;
+        }
+
+        wcd-toolbox-title {
+            display:none;
+            position: absolute;
+            background: #4c4c4c;
+            color: #fff;
+            font-size: 11px;
+            text-transform: lowercase;
+            padding: 0 .5rem;
+            height: 14px;
+            bottom: -14px;
+            right: -1px;
+            border-bottom-right-radius: 5px;
+            border-bottom-left-radius: 5px;
+            font-weight: normal;
+            letter-spacing: -.5px;
+            font-family: monospace;
+            width: max-content;
         }
 
 

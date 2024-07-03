@@ -12,6 +12,7 @@ export abstract class CollabPageElement extends CollabLitElement {
     @property({ type: String, reflect: true }) level: string = mls.actualLevel.toString() || '7';
 
     private overlay: HTMLElement | undefined;
+    private resizeObserver: ResizeObserver | undefined;
 
     connectedCallback() {
         super.connectedCallback();
@@ -48,10 +49,6 @@ export abstract class CollabPageElement extends CollabLitElement {
         return device as IDevice;
     }
 
-    createRenderRoot() {
-        return this; // dont use shadow root
-    }
-
     firstUpdated(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         setTimeout(() => {
@@ -67,12 +64,19 @@ export abstract class CollabPageElement extends CollabLitElement {
         }
     }
 
+    createRenderRoot() {
+        return this; // dont use shadow root
+    }
+
+    render() {
+        this.style.position = 'relative';
+        return html``;
+    }
+
     private checkToAddOverlay() {
         if (this.overlay) this.overlay.remove();
         this.createOverlay();
     }
-
-    private resizeObserver: ResizeObserver | undefined;
 
     private createOverlay() {
         this.overlay = document.createElement('wcd-overlay') as HTMLElement;
@@ -81,13 +85,9 @@ export abstract class CollabPageElement extends CollabLitElement {
         this.overlay.style.height = '100%';
         this.overlay.style.zIndex = '9999';
         this.overlay.style.top = '0';
-        this.overlay.onclick = (e: MouseEvent) => {
-            /// this.onClickOverlay(e)
-        };
 
         if (this.resizeObserver) this.resizeObserver.disconnect();
         this.resizeObserver = new ResizeObserver(entries => {
-            console.info(entries)
             for (let entry of entries) {
                 this.updateSizeOverlayItems();
             }
@@ -127,6 +127,7 @@ export abstract class CollabPageElement extends CollabLitElement {
         const icaOverlayItem = document.createElement('wcd-overlay-item') as IWCDOverlayItem;
         icaOverlayItem.setAttribute('widget', icaInfo.element.tagName.toLowerCase());
         icaOverlayItem.info = icaInfo;
+        (icaInfo.element as any).overlayRef = icaOverlayItem;
         icaOverlayItem.style.position = 'absolute';
         icaOverlayItem.style.width = pos.width;
         icaOverlayItem.style.height = pos.height;
@@ -134,30 +135,50 @@ export abstract class CollabPageElement extends CollabLitElement {
         icaOverlayItem.style.top = pos.top;
         icaOverlayItem.style.left = pos.left;
 
-        icaOverlayItem.onmouseover = () => {
-            const items = Array.from(content.children) as IWCDOverlayItem[];
-            items.forEach((item) => {
-                item.style.opacity = '';
-                item.style.background = '';
-            });
-            icaOverlayItem.style.background = '#d3e3fd';
-            icaOverlayItem.style.opacity = '.3'
-
+        icaOverlayItem.onmouseover = (e) => {
+            this.onIcaOverlayItemOver(e, icaOverlayItem);
         }
 
-        icaOverlayItem.onclick = (e)=>{
-            e.stopPropagation();
-            if(!this.overlay) return;
-            const wcds = this.overlay.querySelectorAll('wcd-toolbox-100554');
-            wcds.forEach((wc) => wc.remove());
-            const wcd = document.createElement('wcd-toolbox-100554') as WCDToolbox;
-            wcd.elICA = icaOverlayItem.info.element;
-            icaOverlayItem.appendChild(wcd);
+        icaOverlayItem.onmouseleave = (e) => {
+            this.onIcaOverlayItemLeave(e, icaOverlayItem);
+        }
+
+        icaOverlayItem.onclick = (e) => {
+            this.onIcaOverlayItemClick(e, icaOverlayItem);
         };
-        
 
         content.appendChild(icaOverlayItem)
 
+    }
+
+    private onIcaOverlayItemLeave(e: MouseEvent, icaOverlayItem: IWCDOverlayItem) {
+        icaOverlayItem.style.opacity = '';
+        icaOverlayItem.style.background = '';
+    }
+
+    private onIcaOverlayItemOver(e: MouseEvent, icaOverlayItem: IWCDOverlayItem) {
+        icaOverlayItem.style.background = '#d3e3fd';
+        icaOverlayItem.style.opacity = '.3'
+    }
+
+    private onIcaOverlayItemClick(e: MouseEvent, icaOverlayItem: IWCDOverlayItem) {
+        e.stopPropagation();
+        if (!this.overlay) return;
+
+        const origin = (e.detail as any).origin;
+
+        const wcds = this.overlay.querySelectorAll('wcd-toolbox-100554');
+        wcds.forEach((wc) => wc.remove());
+        const wcd = document.createElement('wcd-toolbox-100554') as WCDToolbox;
+        wcd.elICA = icaOverlayItem.info.element;
+        icaOverlayItem.appendChild(wcd);
+
+    
+        if (origin !== "editor") this.selectOnHTML(icaOverlayItem);
+
+        // if (this.level !== '4') return;
+        // mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
+        // mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
     }
 
     private getPosition(icaInfo: IICADepths, boundingPage: DOMRect) {
@@ -184,49 +205,6 @@ export abstract class CollabPageElement extends CollabLitElement {
             height: `${height}px`
         }
     }
-
-    private onClickOverlay(e: MouseEvent) {
-        const elements = this.ownerDocument.elementsFromPoint(e.clientX, e.clientY);
-        const mostDepth = elements[1];
-        if (!mostDepth) return;
-        const allIcas = this.findAllElementsIca(mostDepth as HTMLElement);
-        const finalEl = this.findMostDeepElementFromPoint(allIcas, e.clientX, e.clientY);
-        this.actualSelected = finalEl;
-        console.info(this.actualSelected);
-        // const parent = this.findClosestIcaParent(this.actualSelected as Element);
-        // console.info(parent);
-    }
-
-    private findMostDeepElementFromPoint(arr: IICADepths[], clientX: number, clientY: number) {
-
-        function isBetween(nr: number, min: number, max: number) {
-            return nr >= min && nr <= max;
-        }
-
-        function findMaxDepthElement(elements: IICADepths[]): IICADepths | null {
-            if (elements.length === 0) return null;
-            return elements.reduce((max, current) => {
-                return current.depth > max.depth ? current : max;
-            });
-        }
-
-        const res: IICADepths[] = [];
-        arr.forEach((ica) => {
-            const { x, y, height, width } = ica.element.getBoundingClientRect();
-            const isBtwX = isBetween(clientX, x, x + width);
-            const isBtwY = isBetween(clientY, y, y + height);
-            if (isBtwY && isBtwX) {
-                res.push(ica);
-            }
-        });
-
-        const mostDepth = findMaxDepthElement(res);
-        if (!mostDepth) return null;
-        else return mostDepth.element;
-
-    }
-
-    private actualSelected: HTMLElement | null = null;
 
     private findAllElementsIca(el: HTMLElement): IICADepths[] {
         let elements: IICADepths[] = [];
@@ -256,43 +234,31 @@ export abstract class CollabPageElement extends CollabLitElement {
             traverseShadowRoot(item as HTMLElement, 0); // Inicializar com profundidade 0
         });
 
-        // if (el.parentElement && el.parentElement.tagName.toLowerCase().startsWith('ica')) elements.unshift({ element: el.parentElement, depth: 0 });
-
         return elements;
     }
 
-    private findClosestIcaParent(element: Element): Element | null {
-        let elToSearch: Element | ShadowRoot = element;
+    private selectOnHTML(el:IWCDOverlayItem): void {
 
-        function traverseParents(currentElement: Element | null): Element | null {
-            if (!currentElement) return null;
+        if (this.level !== '2') return;
+        if(!el.info.element) return;
+        const id = el.info.element.id;
+        if (!id) return;
 
-            if (currentElement.tagName.toLowerCase().startsWith('ica')) {
-                return currentElement;
-            } else {
-                if (currentElement.parentElement) {
-                    return traverseParents(currentElement.parentElement);
-                } else {
-                    const parentNode = currentElement.parentNode;
-                    if (parentNode && parentNode.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
-                        const hostElement = (parentNode as ShadowRoot).host;
-                        if (hostElement instanceof Element) {
-                            return traverseParents(hostElement);
-                        }
-                    }
-                }
-            }
-            return null;
-        }
+        const infoL2 = (mls.actual[2] as any).left as any;
+        const name = mls.l2.editor.getKey({ project: infoL2.project, shortName: infoL2.shortName });
+        const mfile = mls.l2.editor.mfiles[name];
+        if (!mfile || !(mfile as any).modelHTML) return;
 
-        if (element.shadowRoot) elToSearch = element.shadowRoot;
-        return traverseParents(element.parentElement);
+        const model = (mfile as any).modelHTML;
+        const line = model.findMatches(`id="${id}"`, false, false, false, null, true);
+        if (!line || !line[0]) return;
+        const { startLineNumber } = line[0].range;
+
+        mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectLine", "line":${startLineNumber}, "origin":"preview"}`);
+
     }
 
-    render() {
-        this.style.position = 'relative';
-        return html``;
-    }
+
 
 
 }

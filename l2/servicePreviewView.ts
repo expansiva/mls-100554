@@ -96,7 +96,9 @@ export class ServicePreviewView extends LitElement {
             }
         });
 
-        el.dispatchEvent(ev);
+        const ov = (el as any).overlayRef;
+        if(!ov) return;
+        ov.dispatchEvent(ev);
 
         // el.click();
 
