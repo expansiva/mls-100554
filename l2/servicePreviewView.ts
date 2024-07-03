@@ -4,6 +4,7 @@ import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
+import { CollabPageElement } from './_100554_collabPageElement'
 
 export const initServicePreviewView = '';
 
@@ -94,7 +95,7 @@ export class ServicePreviewView extends LitElement {
                 origin,
             }
         });
-        
+
         el.dispatchEvent(ev);
 
         // el.click();
@@ -331,8 +332,10 @@ export class ServicePreviewView extends LitElement {
 
     private changeLevelFca(el: HTMLElement): void {
 
+
+        const isPage = (el as any).isPage
         let tagEl = el.tagName.toLowerCase();
-        if (tagEl.startsWith('ica-')) {
+        if (tagEl.startsWith('ica-') || isPage) {
             el.setAttribute('level', this.level);
         }
 
