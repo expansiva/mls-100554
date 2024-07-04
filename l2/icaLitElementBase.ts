@@ -66,6 +66,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         const tempeEl = document.createElement('span');
         tempeEl.style.cssText = this.styleel ? this.styleel : '';
         this.styleElMain = tempeEl.style;
+
     }
 
     protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
@@ -78,7 +79,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             });
         }
 
-        this.performPreSlotAllocationOperations();
 
     }
 

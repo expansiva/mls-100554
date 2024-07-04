@@ -1,6 +1,7 @@
 /// <mls shortName="icaTestPage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { getFormComponentsEvents, getEventDescription, getFormComponentsDescription } from './_100554_icaBaseDescription'
 
 @customElement('ica-test-page-100554')
 export class IcaTestPage100554 extends LitElement {
@@ -9,10 +10,10 @@ export class IcaTestPage100554 extends LitElement {
         display: flex;
     }`;
 
-
     render() {
+        console.info(getFormComponentsEvents('forms', 'input', 'number'));
         window.globalState = {
-            wcdAddEventSelected : '',
+            wcdAddEventSelected: '',
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
                 events: [{ key: 'click', value: 'click', description: 'evento onclick' }, { key: 'blur', value: 'blur', description: 'evento onblur' }, { key: 'change', value: 'change', description: 'evento onchange' }],
@@ -30,6 +31,7 @@ export class IcaTestPage100554 extends LitElement {
                 sex: 'm'
             }]
         };
+
         return html``;
 
     }
