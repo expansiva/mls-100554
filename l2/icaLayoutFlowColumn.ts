@@ -13,9 +13,12 @@ export class IcaLayoutFlowColumn extends IcaLitElementBase {
 
     public async setActions(level: string) {
         if (level === '4') {
-            await this.importAction('_100554_wcdToolboxItemActionMove', this.actions, this.level as any);
-            await this.importAction('_100554_wcdToolboxItemActionGroup', this.actions, this.level as any);
-            await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionMargin', this.actions, level);
+            await this.importAction('_100554_wcdToolboxItemActionPadding', this.actions, level);
+            await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, level);
+        }
+        if (level === '2') {
+            await this.importAction('_100554_wcdToolboxItemActionEvents', this.actions, level);
         }
         return;
     }

@@ -19,6 +19,7 @@ export class TestPageICAFull extends CollabPageElement {
                 sex: ''
             },
             sum: 0,
+            
         };
     }
 
@@ -30,8 +31,6 @@ export class TestPageICAFull extends CollabPageElement {
     handleClickbtnSubtrairDesktop() {
         window.globalStateManagment.setState('sum', window.globalState.sum - 1);
     }
-
-
 
 }
 

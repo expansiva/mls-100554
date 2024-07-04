@@ -13,12 +13,14 @@ export abstract class IcaFormsSubmitSubmit extends IcaLitElementBase {
 
     public async setActions(level: string) {
         if (level === '4') {
-            await this.importAction('_100554_wcdToolboxItemActionMargin', this.actions, this.level as any);
-            await this.importAction('_100554_wcdToolboxItemActionPadding', this.actions, this.level as any);
-            await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionMargin', this.actions, level as any);
+            await this.importAction('_100554_wcdToolboxItemActionPadding', this.actions, level as any);
+            await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, level as any);
         }
+
+        console.info(JSON.parse(JSON.stringify(this.actions)));
         if (level === '2') {
-            await this.importAction('_100554_wcdToolboxItemActionEvents', this.actions, this.level as any);
+            await this.importAction('_100554_wcdToolboxItemActionEvents', this.actions, level as any);
         }
         return;
     }

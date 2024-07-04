@@ -79,12 +79,14 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             });
         }
 
+        const l = changedProperties.get('level');
+        if (l) this.updateLevelIcas();
+
+        this.performPreSlotAllocationOperations();
 
     }
 
     public changeStateStyle(style: {}): void {
-
-        console.info('changeStateStyle');
 
         if (!this.styleElMain || !style) return;
         const el = this.querySelector(`${this.widget}:first-child`) as HTMLElement
@@ -94,6 +96,39 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             el.style.cssText = this.styleElMain.cssText;
             this.styleel = el.style.cssText
         }
+    }
+
+    private updateLevelIcas() {
+        if (!this.level) return;
+
+        const traverseShadowRoot = (element: HTMLElement) => {
+            if (element.tagName.toLowerCase().startsWith('ica')) {
+                element.setAttribute('level', this.level as any);
+                return;
+            }
+            if (element.shadowRoot) {
+                element.shadowRoot.querySelectorAll('*').forEach((item) => {
+                    if (item.tagName.toLowerCase().startsWith('ica')) {
+                        item.setAttribute('level', this.level as any);
+                    }
+                });
+            } else {
+                const children = Array.from(element.children);
+                if (children.length > 0) {
+                    children.forEach(child => {
+                        if (child.tagName.toLowerCase().startsWith('ica')) {
+                            child.setAttribute('level', this.level as any);
+                        }
+                    });
+                }
+            }
+        }
+
+        if (!this.widget) return;
+        const widgetEl = this.querySelector(this.widget);
+        if (!widgetEl) return;
+        traverseShadowRoot(widgetEl as HTMLElement);
+
     }
 
     private updateStyleDisplay() {

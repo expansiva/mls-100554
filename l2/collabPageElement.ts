@@ -84,8 +84,18 @@ export abstract class CollabPageElement extends CollabLitElement {
     }
 
     private checkToAddOverlay() {
-        if (this.overlay) this.overlay.remove();
+        if (this.overlay) {
+            this.changeOverlayItemsLevel();
+            return;
+        }
         this.createOverlay();
+    }
+
+    private changeOverlayItemsLevel(){
+        if (!this.overlay) return;
+        Array.from(this.overlay.children).forEach((item)=>{
+            item.setAttribute('level', this.level);
+        })
     }
 
     private createOverlay() {
@@ -101,6 +111,7 @@ export abstract class CollabPageElement extends CollabLitElement {
     private createOverlayItem(icaInfo: IICADepths, content: HTMLElement, boundingPage: DOMRect) {
         const icaOverlayItem = document.createElement('ica-page-overlay-item-100554') as IcaPageOverlayItem;
         icaOverlayItem.setAttribute('widget', icaInfo.element.tagName.toLowerCase());
+        icaOverlayItem.setAttribute('level', this.level);
         icaOverlayItem.info = icaInfo;
         icaOverlayItem.boundingPage = boundingPage;
         content.appendChild(icaOverlayItem)
@@ -133,6 +144,8 @@ export abstract class CollabPageElement extends CollabLitElement {
         elToSearch.querySelectorAll('*').forEach((item) => {
             traverseShadowRoot(item as HTMLElement, 0); // Inicializar com profundidade 0
         });
+
+        
 
         return elements;
     }

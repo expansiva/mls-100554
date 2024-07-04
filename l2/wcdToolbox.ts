@@ -127,7 +127,6 @@ export class WCDToolbox extends CollabLitElement {
             if (grandFahter) {
                 const display = window.getComputedStyle(grandFahter).display;
                 if (['flex'].includes(display) && elBase.parentElement) {
-
                     const fTop = elBase.parentElement.getClientRects()[0].top;
                     const bTop = elBase.getClientRects()[0].top;
                     top = fTop - bTop;
@@ -177,14 +176,11 @@ export class WCDToolbox extends CollabLitElement {
     }
 
     private renderActions(arr: IActionsToolbox[]): void {
-        console.info({
-            actions: arr
-        });
 
         if (!arr) return;
         if (!this.shadowRoot) return;
-
         let lastHelper: HTMLElement | undefined;
+
         const allItens = this.shadowRoot.querySelectorAll('*');
         allItens.forEach((i: Element) => {
             if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-aux-background') return;
@@ -195,9 +191,9 @@ export class WCDToolbox extends CollabLitElement {
         arr.forEach((i: IActionsToolbox) => {
 
             switch (i.tp) {
-                // case 'menu':
-                //     this.addMenu(i);
-                //     break;
+                case 'menu':
+                    this.addMenu(i);
+                    break;
                 case 'button':
                     const btnEl = this.addButton(i);
                     if (this.lastHelper === i.title) lastHelper = btnEl;
@@ -208,9 +204,9 @@ export class WCDToolbox extends CollabLitElement {
                 case 'action':
                     this.addAction(i);
                     break;
-                // case 'event':
-                //     this.addEvent(i);
-                //     break;
+                case 'event':
+                    this.addEvent(i);
+                    break;
                 default: '';
             }
 
@@ -225,7 +221,6 @@ export class WCDToolbox extends CollabLitElement {
     private addBackButton(item: IActionsToolbox): void {
 
         if (!this.shadowRoot || !this.parentElement) return;
-
         const el = document.createElement('wcd-toolbox-item-action-backbutton-100554');
         el.innerHTML = '';
         el.className = `${item.position} fcaBackButton`;
@@ -234,7 +229,6 @@ export class WCDToolbox extends CollabLitElement {
         background-size: auto; background-repeat: no-repeat; z-index: 9;`;
 
         el.style.backgroundImage = `url('data:image/svg+xml,${(item.iconSvg as string).replace(/\'/g, '"')}')`
-
         el.onclick = (e: MouseEvent) => {
             e.stopPropagation();
             this.lastHelper = '';
@@ -295,7 +289,6 @@ export class WCDToolbox extends CollabLitElement {
 
     }
 
-
     private addButton(item: IActionsToolbox): HTMLElement | undefined {
 
         if (!item.onclick || !this.shadowRoot || !this.parentElement || !['p-r4', 'p-m4', 'p-l4', 'p-l5'].includes(item.position)) return;
@@ -313,13 +306,11 @@ export class WCDToolbox extends CollabLitElement {
         el.onclick = (e: MouseEvent) => {
             e.stopPropagation();
             e.stopImmediatePropagation();
-
             if (item.onclick) item.onclick(e, this);
             this.lastHelper = item.title as string;
         }
 
         this.shadowRoot.appendChild(el);
-
         setTimeout(() => {
             if (!this.isElementVisible(el)) {
                 el.style.bottom = '0px';
@@ -327,6 +318,52 @@ export class WCDToolbox extends CollabLitElement {
         }, 300)
 
         return el;
+    }
+
+    private addEvent(act: IActionsToolbox): void {
+
+        if (!this.elMain || !this.shadowRoot || !act.widget) return undefined;
+
+        const el = document.createElement(act.widget);
+        const ica = this.parentElement as any;
+        el.className = `${act.position} f-${act.format}`;
+        (el as any).myParent = this;
+        (el as any).elMain = this.elMain;
+        (el as any).elFCA = ica;
+
+        if (ica && ica.id && ica.getMyEvents && ica.getDefinitionFromEvent) {
+
+            const events = ica.getMyEvents() as string;
+            const opt: any[] = [];
+            events.split(',').forEach((ev: string) => {
+                const info = {
+                    key: ev.trim(),
+                    value: ev.trim(),
+                    description: ica.getDefinitionFromEvent(ev.trim())
+                }
+                opt.push(info)
+            });
+
+            (el as any).options = opt;
+
+        } else if (ica && !ica.id) {
+            const opt: any[] = [];
+            opt.push({
+                key: 'id',
+                value: 'id',
+                description: 'Please set id in element for create events'
+            });
+            (el as any).options = opt;
+        }
+
+        el.style.cursor = act.cursor as string;
+        if (act.onclick) {
+            el.addEventListener('select-change', (e) => {
+                (e as any).elICA = ica;
+                if (act.onclick) act.onclick(e, this)
+            });
+        }
+        this.shadowRoot.appendChild(el);
 
     }
 
@@ -338,6 +375,102 @@ export class WCDToolbox extends CollabLitElement {
             rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
             rect.right <= (window.innerWidth || document.documentElement.clientWidth)
         );
+    }
+
+      private addMenu(item: IActionsToolbox): void {
+
+        if (!this.elMain || !this.shadowRoot) return undefined;
+
+        const menuContainer = document.createElement('wcd-toolbox-menu');
+        const container = document.createElement('wcd-toolbox-menu-container');
+        const containerItens = document.createElement('wcd-toolbox-itemmenu');
+        const iSubItens = document.createElement('a');
+        const containerSubItens = document.createElement('wcd-toolbox-submenu');
+
+        menuContainer.className = item.position;
+        menuContainer.appendChild(container);
+
+        containerSubItens.onmouseleave = () => {
+            containerSubItens.style.display = 'none';
+        }
+
+        containerSubItens.onclick = () => {
+            containerSubItens.style.display = 'none';
+        }
+
+        item.menuItens.forEach((i: IActionsToolboxMenu) => {
+
+            if (!i.onclick) return;
+
+            const a = document.createElement('a');
+            const ic = document.createElement('i');
+            ic.title = i.text;
+            ic.style.cssText = `width: 18px; background-position: center; height: 18px; background-size: auto; background-repeat: no-repeat;`;
+            ic.style.backgroundImage = `url('data:image/svg+xml,${(i.iconSvg as string).replace(/\'/g, '"')}')`;
+            a.className = 'menuItensFcaToolbox';
+            a.appendChild(ic);
+            containerItens.appendChild(a);
+            a.onclick = (e) => {
+                e.stopPropagation();
+                i.onclick(e, this);
+            };
+
+        });
+
+        if (!item.menuSubItens.find((i) => i.text === 'About')) item.menuSubItens.push(templateAbout);
+
+        container.appendChild(containerItens);
+        if (item.menuSubItens.length > 0) {
+
+            iSubItens.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>`;
+            iSubItens.onclick = (e) => {
+                e.stopPropagation();
+                containerSubItens.style.display = containerSubItens.style.display === '' ? 'none' : '';
+            };
+
+            iSubItens.setAttribute('title', '');
+            containerItens.appendChild(iSubItens);
+            containerSubItens.style.display = 'none';
+            container.appendChild(containerSubItens);
+
+        }
+
+        item.menuSubItens.forEach((i: IActionsToolboxMenu) => {
+
+            if (!i.onclick) return;
+
+            const a = document.createElement('a');
+            const ic = document.createElement('i');
+            const span = document.createElement('span');
+            span.innerText = i.text;
+            a.title = i.text;
+            ic.style.cssText = `width: 18px; background-position: center; height: 18px; background-size: auto; background-repeat: no-repeat;`;
+            ic.style.backgroundImage = `url('data:image/svg+xml,${(i.iconSvg as string).replace(/\'/g, '"')}')`
+            a.className = 'menuSubItensFcaToolbox';
+            a.appendChild(ic);
+            a.appendChild(span);
+            a.onclick = (e) => {
+                e.stopPropagation();
+                i.onclick(e, this);
+            };
+            containerSubItens.appendChild(a);
+
+        });
+
+        this.shadowRoot.appendChild(menuContainer);
+        setTimeout(() => {
+            if (!this.isElementVisible(menuContainer)) {
+                menuContainer.style.top = '0px';
+                const el = this.shadowRoot?.querySelector('.p-m2');
+                if (el) {
+                    menuContainer.style.left = '0px';
+                    menuContainer.style.transform = 'none';
+                }
+            }
+
+        }, 300)
+        //this.updateSize(this.elMain, this, true);
+
     }
 
     private _getAndSetScenaryOutDoor(op: string): Promise<HTMLElement | undefined> {
@@ -804,6 +937,19 @@ export class WCDToolbox extends CollabLitElement {
     `;
 
 }
+
+const templateAbout = {
+    text: 'About',
+    iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm169.8-90.7c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V250.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1H222.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>',
+    onclick: (e: MouseEvent, wc: WCDToolbox) => {
+
+        const bd = wc.closest('body') as any;
+        if (bd.service && bd.service.setAboutTag) bd.service.setAboutTag(wc.title.toLocaleLowerCase())
+
+    }
+}
+
+
 
 /*
 import { html, css } from 'lit';

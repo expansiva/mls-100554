@@ -12,7 +12,6 @@ export function initIcaPageOverlay(): boolean {
 @customElement('ica-page-overlay-100554')
 export class IcaPageOverlay extends LitElement {
     
-
     private resizeObserver: ResizeObserver | undefined;
 
     createRenderRoot() {

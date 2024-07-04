@@ -15,6 +15,8 @@ export class IcaPageOverlayItem extends LitElement {
 
     @property() widget: string | undefined;
 
+    @property() level: string | undefined;
+
     public boundingPage: DOMRect | undefined;
 
     private overlay: HTMLElement | undefined;
@@ -26,6 +28,13 @@ export class IcaPageOverlayItem extends LitElement {
     firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
         super.firstUpdated(_changedProperties);
         this.setEvents();
+    }
+
+    updated(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('level') && changedProperties.get('level') !== undefined) {
+            this.checkToChangeWCD();
+        }
     }
 
     render() {
@@ -63,33 +72,45 @@ export class IcaPageOverlayItem extends LitElement {
 
     private onIcaOverlayItemOver(e: MouseEvent) {
         const wcd = this.querySelector('wcd-toolbox-100554');
-        if(wcd) return;
+        if (wcd) return;
         this.style.background = '#d3e3fd';
         this.style.opacity = '.3'
     }
 
     private async onIcaOverlayItemClick(e: MouseEvent) {
         e.stopPropagation();
+        const origin = (e.detail as any).origin;
+        await this.addWCDToolbox();
+        if (origin !== "editor") this.selectOnHTML();
 
+        // if (this.level !== '4') return;
+        // mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
+        // mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+    }
+
+    private async addWCDToolbox() {
         if (!this.overlay || !this.info) return;
 
-        const origin = (e.detail as any).origin;
+        this.style.opacity = '';
+        this.style.background = '';
+
         const wcds = this.overlay.querySelectorAll('wcd-toolbox-100554');
         wcds.forEach((wc) => wc.remove());
         const wcd = document.createElement('wcd-toolbox-100554') as WCDToolbox;
         wcd.elICA = this.info.element;
 
         await this.setActions();
-        let act = (this.info.element.actions as any)[this.info.element.level as any];
+        let act = (this.info.element.actions as any)[this.level as any];
+
+        console.info({
+            actions: JSON.parse(JSON.stringify(act)),
+            level: this.level
+        });
+
         if (!act) act = [];
         wcd.actions = act;
 
         this.appendChild(wcd);
-        if (origin !== "editor") this.selectOnHTML();
-
-        // if (this.level !== '4') return;
-        // mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
-        // mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
     }
 
     private selectOnHTML(): void {
@@ -117,9 +138,17 @@ export class IcaPageOverlayItem extends LitElement {
     private async setActions() {
         if (!this.info || !this.info.element) return;
         const el = this.info.element;
-        if(el.isLoadMyAction[el.level as any]) return;
-        await el.setActions(el.level as any);
-        el.isLoadMyAction[el.level as any] = true;
+        if (el.isLoadMyAction[this.level as any]) return;
+        
+        await el.setActions(this.level as any);
+        el.isLoadMyAction[this.level as any] = true;
+    }
+
+    private async checkToChangeWCD() {
+        const wcd = this.querySelector('wcd-toolbox-100554') as WCDToolbox;;
+        if (!wcd) return;
+        if (!this.info || !this.info.element) return;
+        await this.addWCDToolbox();
     }
 
 }
