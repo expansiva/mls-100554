@@ -84,6 +84,11 @@ export abstract class CollabPageElement extends CollabLitElement {
     }
 
     private checkToAddOverlay() {
+        if (this.level === '7') {
+            this.overlay?.remove();
+            this.overlay = undefined;
+            return;
+        }
         if (this.overlay) {
             this.changeOverlayItemsLevel();
             return;
@@ -91,9 +96,9 @@ export abstract class CollabPageElement extends CollabLitElement {
         this.createOverlay();
     }
 
-    private changeOverlayItemsLevel(){
+    private changeOverlayItemsLevel() {
         if (!this.overlay) return;
-        Array.from(this.overlay.children).forEach((item)=>{
+        Array.from(this.overlay.children).forEach((item) => {
             item.setAttribute('level', this.level);
         })
     }
@@ -103,6 +108,7 @@ export abstract class CollabPageElement extends CollabLitElement {
         const boundingPage = this.getBoundingClientRect();
         const icas = this.findAllElementsIca(this);
         icas.forEach((item) => {
+            item.element.setAttribute('level', this.level);
             this.createOverlayItem(item, this.overlay as HTMLElement, boundingPage);
         });
         this.appendChild(this.overlay);
@@ -145,7 +151,7 @@ export abstract class CollabPageElement extends CollabLitElement {
             traverseShadowRoot(item as HTMLElement, 0); // Inicializar com profundidade 0
         });
 
-        
+
 
         return elements;
     }

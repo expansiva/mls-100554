@@ -80,8 +80,10 @@ export class IcaPageOverlayItem extends LitElement {
     private async onIcaOverlayItemClick(e: MouseEvent) {
         e.stopPropagation();
         const origin = (e.detail as any).origin;
-        await this.addWCDToolbox();
+        console.info({origin})
         if (origin !== "editor") this.selectOnHTML();
+
+        await this.addWCDToolbox();
 
         // if (this.level !== '4') return;
         // mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);

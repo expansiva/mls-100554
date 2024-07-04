@@ -97,6 +97,14 @@ export class WCDToolbox extends CollabLitElement {
         return this._setIconsWcdToolbox(act, useSelf, updataSize);
     }
 
+    public updateBaseNoPadding(elBase: HTMLElement, elChange: HTMLElement): void {
+        return this._updateBaseNoPadding(elBase,elChange)
+    }
+    public updateBackgroundAuxSize(tp: 'show' | 'hide' = 'hide'): void {
+        return this._updateBackgroundAuxSize(tp);
+    }
+
+
     //---------------IMPLEMENTATION----------------
 
     private resizeObserver: ResizeObserver | undefined;
