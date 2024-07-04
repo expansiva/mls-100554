@@ -7,7 +7,7 @@ import { customElement, property } from 'lit/decorators.js';
 @customElement('test-collab-page2-100554')
 export class TestCollabPage2100554 extends CollabPageElement {
 
-    render() {
+    initPage() {
         window.globalState = {
             wcdAddEventSelected: '',
             tables: {
