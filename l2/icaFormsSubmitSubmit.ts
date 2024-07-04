@@ -18,7 +18,6 @@ export abstract class IcaFormsSubmitSubmit extends IcaLitElementBase {
             await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, level as any);
         }
 
-        console.info(JSON.parse(JSON.stringify(this.actions)));
         if (level === '2') {
             await this.importAction('_100554_wcdToolboxItemActionEvents', this.actions, level as any);
         }

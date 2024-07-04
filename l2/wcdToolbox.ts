@@ -325,28 +325,28 @@ export class WCDToolbox extends CollabLitElement {
         if (!this.elMain || !this.shadowRoot || !act.widget) return undefined;
 
         const el = document.createElement(act.widget);
-        const ica = this.parentElement as any;
+
         el.className = `${act.position} f-${act.format}`;
         (el as any).myParent = this;
         (el as any).elMain = this.elMain;
-        (el as any).elFCA = ica;
+        (el as any).elICA = this.elICA;
 
-        if (ica && ica.id && ica.getMyEvents && ica.getDefinitionFromEvent) {
+        if (this.elICA && this.elICA.id && this.elICA.getMyEvents && this.elICA.getDefinitionFromEvent) {
 
-            const events = ica.getMyEvents() as string;
+            const events = this.elICA.getMyEvents() as string;
             const opt: any[] = [];
             events.split(',').forEach((ev: string) => {
                 const info = {
                     key: ev.trim(),
                     value: ev.trim(),
-                    description: ica.getDefinitionFromEvent(ev.trim())
+                    description: this.elICA?.getDefinitionFromEvent(ev.trim()) || ''
                 }
-                opt.push(info)
+                opt.push(info);
             });
 
             (el as any).options = opt;
 
-        } else if (ica && !ica.id) {
+        } else if (this.elICA && !this.elICA.id) {
             const opt: any[] = [];
             opt.push({
                 key: 'id',
@@ -359,7 +359,7 @@ export class WCDToolbox extends CollabLitElement {
         el.style.cursor = act.cursor as string;
         if (act.onclick) {
             el.addEventListener('select-change', (e) => {
-                (e as any).elICA = ica;
+                (e as any).elICA = this.elICA;
                 if (act.onclick) act.onclick(e, this)
             });
         }
@@ -377,7 +377,7 @@ export class WCDToolbox extends CollabLitElement {
         );
     }
 
-      private addMenu(item: IActionsToolbox): void {
+    private addMenu(item: IActionsToolbox): void {
 
         if (!this.elMain || !this.shadowRoot) return undefined;
 

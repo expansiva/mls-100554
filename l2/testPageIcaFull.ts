@@ -22,7 +22,7 @@ export class TestPageICAFull extends CollabPageElement {
             
         };
     }
-
+    
     /// **collab_events_start**
     handleClickbtnSomarDesktop() {
         window.globalStateManagment.setState('sum', window.globalState.sum + 1);
@@ -33,4 +33,5 @@ export class TestPageICAFull extends CollabPageElement {
     }
 
 }
+
 

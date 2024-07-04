@@ -2,8 +2,8 @@
 
 import { WCDToolbox } from './_100554_wcdToolbox';
 import * as icaGlobal from './_100554_icaGlobal';
-import {initCollabSelectOneWithDescription} from './_100554_collabSelectOneWithDescription'
-
+import { initCollabSelectOneWithDescription } from './_100554_collabSelectOneWithDescription'
+import { IcaPageOverlayItem } from './_100554_icaPageOverlayItem';
 //version 4
 
 export const getTemplate = (mode: string = '', position: string = ''): icaGlobal.IActionsToolbox => {
@@ -23,11 +23,13 @@ const templateActionEvents = {
         title: '',
         iconSvg: '',
         onclick: (e: MouseEvent, wc: WCDToolbox) => {
-            if (wc.level === '2') {
-
-                if (!(e as any).elICA || !(e as any).elICA.id) return;
-
-                mls.events.fire(2, 'WidgetAction' as any, `{"op":"OpenScenario", "widget":"_100554_scenarioInsertEventOrChange", "value":"${e.detail}", "id":"${(e as any).elICA.id}"}`);
+            debugger;
+            if (wc.level === '2') { 
+                const overlayItem = wc.parentElement as IcaPageOverlayItem;
+                if (!overlayItem) return;
+                const elIca = overlayItem.info?.element;
+                if(!elIca || !elIca.id) return;
+                mls.events.fire(2, 'WidgetAction' as any, `{"op":"OpenScenario", "widget":"_100554_scenarioInsertEventOrChange", "value":"${e.detail}", "id":"${elIca.id}"}`);
             }
         },
         menuItens: [],

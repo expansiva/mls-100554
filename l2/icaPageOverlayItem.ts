@@ -89,7 +89,7 @@ export class IcaPageOverlayItem extends LitElement {
     }
 
     private async addWCDToolbox() {
-        if (!this.overlay || !this.info) return;
+        if (!this.overlay || !this.info || !this.level) return;
 
         this.style.opacity = '';
         this.style.background = '';
@@ -97,16 +97,11 @@ export class IcaPageOverlayItem extends LitElement {
         const wcds = this.overlay.querySelectorAll('wcd-toolbox-100554');
         wcds.forEach((wc) => wc.remove());
         const wcd = document.createElement('wcd-toolbox-100554') as WCDToolbox;
+        wcd.setAttribute('level', this.level);
         wcd.elICA = this.info.element;
 
         await this.setActions();
         let act = (this.info.element.actions as any)[this.level as any];
-
-        console.info({
-            actions: JSON.parse(JSON.stringify(act)),
-            level: this.level
-        });
-
         if (!act) act = [];
         wcd.actions = act;
 
