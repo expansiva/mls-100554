@@ -12,10 +12,10 @@ export abstract class IcaLayoutFlowRow extends IcaLitElementBase {
     public actions: IActionLevels = { '1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': [] }
 
     public async setActions(level: string) {
-        if (level === '4') {
+        if (level === '4' || level === '2') {
             await this.importAction('_100554_wcdToolboxItemActionMargin', this.actions, this.level as any);
-            await this.importAction('_100554_wcdToolboxItemActionPadding', this.actions, this.level as any);
-            await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, this.level as any);
+            // await this.importAction('_100554_wcdToolboxItemActionPadding', this.actions, this.level as any);
+            // await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, this.level as any);
         }
         return;
     }

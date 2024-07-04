@@ -6,7 +6,6 @@ import { IcaLitElement } from './_100554_icaLitElement';
 import * as icaGlobal from './_100554_icaGlobal';
 import * as states from './_100554_icaCollabStore';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
-import { initWCDToolbox, WCDToolbox } from './_100554_wcdToolbox'
 import { html, unsafeHTML, css } from 'lit';
 import { property } from 'lit/decorators.js';
 import * as myDefinition from './_100554_icaBaseDescription';
@@ -16,7 +15,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
     constructor() {
         super();
-        initWCDToolbox();
     }
 
     abstract mySymbol: string;
@@ -24,6 +22,8 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     abstract setActions(level: string): Promise<void>;
     abstract changeStateHtml(info: string): void;
     abstract allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
+
+    public overlayRef: HTMLElement | undefined;
 
     @property({ type: String })
     @collabState(states.CHANGESTATE)
@@ -45,7 +45,8 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     public styleel: string | undefined = '';
 
     public internalInnerHTML = '';
-    private isLoadMyAction: any = {};
+
+    public isLoadMyAction: any = {};
 
     private lastWidget: string = '';
 
@@ -72,37 +73,18 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
         if (this.lastWidget !== this.widget) {
             this.lastWidget = this.widget as string;
-
             customElements.whenDefined(this.lastWidget).then(() => {
                 this.updateStyleDisplay();
             });
         }
-        if (this.renderType === 'edit') {
-            if (this.resizeObserver) this.resizeObserver.disconnect();
-            // this.setEventsIfRenderTypeEdit();
-        }
-        if (this.renderType === 'editactive') {
-            //this.addWCDToolbox();
-        }
-
-        // const l = changedProperties.get('level');
-        // if (l) {
-        //     const els = this.findElementsStartingWithIca();
-        //     els.forEach((el) => {
-        //         el.setAttribute('level', this.level as any);
-        //         if (this.level === '7') {
-        //             const wcd = el.querySelector('wcd-toolbox-100554');
-        //             if (wcd) wcd.remove();
-        //             el.setAttribute('renderType', 'edit')
-        //         }
-        //     });
-        // }
 
         this.performPreSlotAllocationOperations();
 
     }
 
     public changeStateStyle(style: {}): void {
+
+        console.info('changeStateStyle');
 
         if (!this.styleElMain || !style) return;
         const el = this.querySelector(`${this.widget}:first-child`) as HTMLElement
@@ -114,30 +96,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
     }
 
-    private resizeObserver: ResizeObserver | undefined;
-
-    private addWCDToolbox() {
-        if (!this.widget || !this.level) return;
-
-        const wcd: WCDToolbox = document.createElement('wcd-toolbox-100554') as WCDToolbox;
-        wcd.setAttribute('level', this.level.toString());
-        wcd.setAttribute('widget', this.widget);
-        let act = (this.actions as any)[this.level as any];
-        if (!act) act = [];
-        wcd.actions = act;
-        this.appendChild(wcd);
-
-        if (this.resizeObserver) this.resizeObserver.disconnect();
-        this.resizeObserver = new ResizeObserver(entries => {
-            for (let entry of entries) {
-                if (!wcd) return;
-                wcd.updateSize(this, wcd, true);
-            }
-        });
-
-        this.resizeObserver.observe(this);
-    }
-
     private updateStyleDisplay() {
         const el = this.querySelector(this.widget as string);
         if (el) {
@@ -146,124 +104,25 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
     }
 
-    private setEventsIfRenderTypeEdit() {
+    // shouldUpdate(changedProperties: Map<string, string>): boolean {
 
-        this.onclick = async (e: MouseEvent) => {
+    //     // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = não executa o render().
 
+    //     const oldValue = changedProperties.get('renderType');
+    //     if (oldValue === 'editactive' && this.renderType !== 'editactive') {
+    //         super.setCollabState(states.CHANGESTATE, '');
 
-            const origin = (e.detail as any).origin;
+    //     } else if (changedProperties.get('changeState') !== undefined && this.changeState) {
+    //         // this.doChangeState(this.changeState);
+    //         return false;
+    //     }
 
-            //When clicking on an "edit" item I return the old "editactive" to "edit" and set the new "editactive"
-            e.stopPropagation();
+    //     if (changedProperties.get('level') && !this.isLoadMyAction[this.level as any] && this.renderType === 'editactive') {
+    //         this.auxSetMyActions();
+    //     }
+    //     return true;
 
-            if ((e.target as HTMLElement).tagName.startsWith('WCD-')) return;
-            const all = this.findElementsStartingWithIca();
-
-            Array.from(all).forEach((i) => {
-                const wcd = i.querySelector('wcd-toolbox-100554');
-                if (wcd) wcd.remove();
-                i.setAttribute('renderType', 'edit')
-            });
-
-            if (this.level === '7') return;
-
-            const inGroup = this.closest(`*[${icaGlobal.ATTRGROUP}]`) as HTMLElement;
-            if (inGroup && inGroup !== this && inGroup.getAttribute(`${icaGlobal.ATTRGROUP}`) === 'true') {
-                inGroup.click();
-                return;
-            }
-
-            this.onclick = undefined as any;
-            if (!this.isLoadMyAction[this.level as any] || this.isLoadMyAction[this.level as any] === false) {
-                this.isLoadMyAction[this.level as any] = true;
-                await this.setActions(this.level as any);
-            }
-
-            if (origin !== "editor") this.selectOnHTML();
-            this.setAttribute('renderType', 'editactive');
-            if (this.level !== '4') return;
-            mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
-            mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
-        }
-
-    }
-
-    private selectOnHTML(): void {
-
-        if (this.level !== '2') return;
-        const id = this.id;
-        if (!id) return;
-
-        const infoL2 = (mls.actual[2] as any).left as any;
-        const name = mls.l2.editor.getKey({ project: infoL2.project, shortName: infoL2.shortName });
-        const mfile = mls.l2.editor.mfiles[name];
-        if (!mfile || !(mfile as any).modelHTML) return;
-
-        const model = (mfile as any).modelHTML;
-        const line = model.findMatches(`id="${id}"`, false, false, false, null, true);
-        if (!line || !line[0]) return;
-        const { startLineNumber } = line[0].range;
-
-        mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectLine", "line":${startLineNumber}, "origin":"preview"}`);
-
-    }
-
-    private findElementsStartingWithIca(): Element[] {
-        let elements: Element[] = [];
-        // Function to traverse shadow DOM
-        function traverseShadowRoot(element: Element) {
-            if (element.tagName.toLowerCase().startsWith('ica')) {
-                elements.push(element);
-                return;
-            }
-
-            if (element.shadowRoot) {
-                element.shadowRoot.querySelectorAll('*').forEach((item) => {
-                    traverseShadowRoot(item);
-                })
-            } else {
-                const children = Array.from(element.children);
-                if (children.length > 0) {
-                    children.forEach(child => traverseShadowRoot(child));
-                }
-            }
-        }
-
-        document.body.querySelectorAll('*').forEach((item) => {
-            traverseShadowRoot(item);
-        });
-        return elements;
-    }
-
-    shouldUpdate(changedProperties: Map<string, string>): boolean {
-
-        // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = não executa o render().
-
-        const oldValue = changedProperties.get('renderType');
-        if (oldValue === 'editactive' && this.renderType !== 'editactive') {
-            super.setCollabState(states.CHANGESTATE, '');
-
-        } else if (changedProperties.get('changeState') !== undefined && this.changeState) {
-            // this.doChangeState(this.changeState);
-            return false;
-        }
-
-        if (changedProperties.get('level') && !this.isLoadMyAction[this.level as any] && this.renderType === 'editactive') {
-            this.auxSetMyActions();
-        }
-        return true;
-
-    }
-
-    private async auxSetMyActions() {
-
-        await this.setActions(this.level as any);
-        this.isLoadMyAction[this.level as any] = true;
-        this.renderType = 'edit';
-
-        setTimeout(() => { this.click(); }, 200);
-
-    }
+    // }
 
     public async importAction(imports: string, actions: icaGlobal.IActionLevels, level: string, mode: string = '', position: string = '') {
 
@@ -315,31 +174,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         if (!tag.startsWith(`${icaGlobal.PREFIX}-`)) return this.getIcaParent(parent);
         else if (tag.startsWith(`${icaGlobal.PREFIX}-`)) return parent as IcaLitElementBase;
     }
-
-    private doChangeState(js: string): void {
-
-        const info = JSON.parse(js);
-        if (this.renderType === 'editactive') {
-            switch (info.tp) {
-                case "menu":
-                    console.info(info.menu);
-                    break;
-                case "style":
-                    this.changeStateStyle(info.style);
-                    break;
-                case "html":
-                    this.changeStateHtml(info.html);
-                    break;
-                default:
-                    '';
-                    break;
-            }
-        }
-
-        mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
-
-    }
-
 
     async performPreSlotAllocationOperations() {
 
@@ -460,6 +294,7 @@ interface IcaLitElementBaseMethods {
     changeStateStyle(info: {}): void;
     changeStateHtml(info: string): void;
     allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
+
 }
 
 export interface IAllowCommand {
