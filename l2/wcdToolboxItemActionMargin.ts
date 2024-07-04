@@ -4,16 +4,20 @@ import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_icaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
+import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
 //version 4
 @customElement('wcd-toolbox-item-action-margin-100554')
-export class WCDToolboxItemActionMargin extends LitElement {
+export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
 
     @property({ type: String, reflect: true })
     private tpChange: 'top' | 'bottom' | 'left' | 'right' | 'all' | undefined;
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
+    public elFCA: IcaLitElementBase | undefined;
+
     private elExternal: HTMLElement | undefined;
     private startX: number = 0;
     private startY: number = 0;
@@ -58,7 +62,7 @@ export class WCDToolboxItemActionMargin extends LitElement {
         if (!this.elMain) return html``;
         return html`
             <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
-                <p style=" margin-bottom: 5px;">A propriedade <b>margin</b> do CSS define a área de margem nos quatro lados do elemento. </p>
+                <p style=" margin-bottom: 5px;">A propriedade <b>margin</b> do CSS define a Ã¡rea de margem nos quatro lados do elemento. </p>
                 <h4 style="display:flex; gap:1.5rem;margin:0px" >${this.myMsg.margin}<input type="checkbox" prop="margin"></h4>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.myMsg.top}</div>
