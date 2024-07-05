@@ -279,7 +279,7 @@ export class WCDToolbox extends CollabLitElement {
         el.className = `p ${act.position} f-${act.format}`;
         el.myParent = this;
         el.elMain = this.elMain;
-        el.elFCA = this.elICA;
+        el.elICA = this.elICA;
         el.style.cursor = act.cursor as string;
 
         if (act.attrs) {

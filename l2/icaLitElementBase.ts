@@ -319,7 +319,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
     getAttributes() {
 
-        const excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id'];
+        const excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id', icaGlobal.ATTRGROUP];
         const objVariations: any = {
             0: 'en',
             1: 'pt',
@@ -351,7 +351,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         let attributesStr = '';
         attrsByVariation.forEach((item) => attributesStr += `${item.name}="${item.value}"`)
 
-        console.info({ el: this, variation, attributes, attrsByVariation });
+       //  console.info({ el: this, variation, attributes, attrsByVariation });
 
         return attributesStr;
 

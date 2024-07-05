@@ -16,7 +16,7 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
-    public elFCA: IcaLitElementBase | undefined;
+    public elICA: IcaLitElementBase | undefined;
 
     private elExternal: HTMLElement | undefined;
     private startX: number = 0;

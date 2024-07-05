@@ -16,6 +16,8 @@ export abstract class IcaLayoutFlowRow extends IcaLitElementBase {
             await this.importAction('_100554_wcdToolboxItemActionMargin', this.actions, level);
             await this.importAction('_100554_wcdToolboxItemActionPadding', this.actions, level);
             await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, level);
+            await this.importAction('_100554_wcdToolboxItemActionGroup', this.actions, level);
+
         }
         if (level === '2') {
             await this.importAction('_100554_wcdToolboxItemActionEvents', this.actions, level);

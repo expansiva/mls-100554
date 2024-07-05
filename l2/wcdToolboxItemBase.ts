@@ -7,6 +7,6 @@ export abstract class WcdToolboxItemBase extends LitElement {
 
     abstract myParent: WCDToolbox | undefined;
     abstract elMain: HTMLElement | undefined;
-    abstract elFCA: IcaLitElementBase | undefined;
+    abstract elICA: IcaLitElementBase | undefined;
 
 }
