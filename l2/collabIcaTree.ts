@@ -5,6 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { ServiceBase } from './_100554_serviceBase';
 import { CollabLitElement } from './_100554_collabLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
 export const initCollabICATree = '';
 
@@ -165,7 +166,7 @@ export class CollabFCATree extends CollabLitElement {
             let info: IInfoElCholdren | undefined;
             if (element.tagName.toLowerCase().startsWith('ica')) {
 
-                info = { el: element as HTMLElement, children: [] as any };
+                info = { el: element as IcaLitElementBase, children: [] as any };
                 array.push(info);
 
             }
@@ -228,9 +229,9 @@ export class CollabFCATree extends CollabLitElement {
         if (father) {
 
             this.idLastClick = target.id;
-            item.el.click();
+            item.el.overlayRef?.click();
 
-        } else item.el.click();
+        } else item.el.overlayRef?.click();
 
     }
 
@@ -652,6 +653,6 @@ export class CollabFCATree extends CollabLitElement {
 }
 
 interface IInfoElCholdren {
-    el: HTMLElement,
+    el: IcaLitElementBase,
     children: IInfoElCholdren[]
 }
