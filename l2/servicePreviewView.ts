@@ -137,7 +137,8 @@ export class ServicePreviewView extends LitElement {
             traverseShadowRoot(item);
         });
 
-        const ret = elements.find((el) => el.id === id);
+        const newId = `ica_${id}`;
+        const ret = elements.find((el) => el.id === newId);
         return ret as HTMLElement;
     }
 

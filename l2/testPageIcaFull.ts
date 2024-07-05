@@ -8,6 +8,7 @@ import { customElement } from 'lit/decorators.js';
 export class TestPageICAFull extends CollabPageElement {
 
     initPage() {
+    
         window.globalState = {
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
@@ -22,6 +23,8 @@ export class TestPageICAFull extends CollabPageElement {
             
         };
     }
+    
+
     
     /// **collab_events_start**
     handleClickbtnSomarDesktop() {

@@ -64,7 +64,17 @@ export abstract class CollabPageElement extends CollabLitElement {
         setTimeout(() => {
             this.checkToAddOverlay();
         }, 500);
+
+        const icas = this.findAllElementsIca(this);
+        icas.forEach((item) => {
+            const oldId = item.element.id;
+            const icaId = `ica_${item.element.id}`;
+            item.element.setAttribute('id', icaId);
+            item.element.setAttribute('idel', oldId);
+        });
+
         this.initPage();
+
     }
 
     updated(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
@@ -82,6 +92,7 @@ export abstract class CollabPageElement extends CollabLitElement {
         this.style.position = 'relative';
         return html``;
     }
+
 
     private checkToAddOverlay() {
         if (this.level === '7') {

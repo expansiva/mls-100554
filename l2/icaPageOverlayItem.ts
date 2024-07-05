@@ -80,7 +80,6 @@ export class IcaPageOverlayItem extends LitElement {
     private async onIcaOverlayItemClick(e: MouseEvent) {
         e.stopPropagation();
         const origin = (e.detail as any).origin;
-        console.info({origin})
         if (origin !== "editor") this.selectOnHTML();
 
         await this.addWCDToolbox();
@@ -116,7 +115,7 @@ export class IcaPageOverlayItem extends LitElement {
         const level = this.info.element.getAttribute('level');
         if (level !== '2') return;
 
-        const id = this.info.element.id;
+        const id = this.info.element.getAttribute('idel');
         if (!id) return;
         const infoL2 = (mls.actual[2] as any).left as any;
         const name = mls.l2.editor.getKey({ project: infoL2.project, shortName: infoL2.shortName });

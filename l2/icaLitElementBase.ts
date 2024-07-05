@@ -32,6 +32,9 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     @property({ type: String, reflect: true })
     public widget: string | undefined;
 
+    @property({ type: String, reflect: true })
+    public id: string = '';
+
     @property({ type: Boolean, reflect: true })
     public isICAGroup: boolean | undefined;
 
@@ -66,11 +69,17 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         const tempeEl = document.createElement('span');
         tempeEl.style.cssText = this.styleel ? this.styleel : '';
         this.styleElMain = tempeEl.style;
-
+        await this.performPreSlotAllocationOperations();
+        // const icaId = `ica_${this.id}`;
+        // this.setAttribute('id', icaId); // dps do almoço <----------
     }
 
     protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
         super.updated(changedProperties);
+       
+        const hasLevel = changedProperties.has('level');
+        const hasStyleEl = changedProperties.has('styleel');
+        // const hasId = changedProperties.has('id');
 
         if (this.lastWidget !== this.widget) {
             this.lastWidget = this.widget as string;
@@ -79,10 +88,23 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             });
         }
 
-        const l = changedProperties.get('level');
-        if (l) this.updateLevelIcas();
+        // if (hasId) {
+        //     const valId = changedProperties.get('id');
+        //     if (this.id === valId || !valId) return;
+        //     this.updateId(valId as string);
+        // }
 
-        this.performPreSlotAllocationOperations();
+        if (hasLevel) {
+            const valLevel = changedProperties.get('level');
+            if (this.level === valLevel) return;
+            this.updateLevelIcas();
+        }
+
+        if (hasStyleEl) {
+            const valStyleEl = changedProperties.get('styleel');
+            if (this.styleel === valStyleEl) return;
+            this.updateStyleEl();
+        }
 
     }
 
@@ -98,7 +120,22 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
     }
 
+    private updateId(id: string) {
+        if (!this.widget) return;
+        const widgetEl = this.querySelector(this.widget) as HTMLElement;
+        if (!widgetEl) return;
+        widgetEl.id = id;
+    }
+
+    private updateStyleEl() {
+        if (!this.widget) return;
+        const widgetEl = this.querySelector(this.widget) as HTMLElement;
+        if (!widgetEl) return;
+        widgetEl.style.cssText = this.styleel || '';
+    }
+
     private updateLevelIcas() {
+
         if (!this.level) return;
 
         const traverseShadowRoot = (element: HTMLElement) => {
@@ -138,26 +175,37 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             this.style.display = d.display;
         }
     }
+    shouldUpdate(changedProperties: Map<string, string>): boolean {
 
-    // shouldUpdate(changedProperties: Map<string, string>): boolean {
+        if (changedProperties.get('changeState') !== undefined && this.changeState) {
+            this.doChangeState(this.changeState);
+            return false;
+        }
+        return true;
 
-    //     // shouldUpdate determinar se o componente deve ser renderizado novamente true = executa, false = não executa o render().
+    }
 
-    //     const oldValue = changedProperties.get('renderType');
-    //     if (oldValue === 'editactive' && this.renderType !== 'editactive') {
-    //         super.setCollabState(states.CHANGESTATE, '');
+    private doChangeState(js: string): void {
 
-    //     } else if (changedProperties.get('changeState') !== undefined && this.changeState) {
-    //         // this.doChangeState(this.changeState);
-    //         return false;
-    //     }
+        const info = JSON.parse(js);
 
-    //     if (changedProperties.get('level') && !this.isLoadMyAction[this.level as any] && this.renderType === 'editactive') {
-    //         this.auxSetMyActions();
-    //     }
-    //     return true;
+        switch (info.tp) {
+            case "menu":
+                // console.info(info.menu);
+                break;
+            case "style":
+                this.changeStateStyle(info.style);
+                break;
+            case "html":
+                this.changeStateHtml(info.html);
+                break;
+            default:
+                '';
+                break;
+        }
 
-    // }
+        //mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+    }
 
     public async importAction(imports: string, actions: icaGlobal.IActionLevels, level: string, mode: string = '', position: string = '') {
 
@@ -271,19 +319,67 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
     getAttributes() {
 
-        const excludesProps = ['rendertype', 'level', 'widget'];
-        let attributes = '';
+        const excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id'];
+        const objVariations: any = {
+            0: 'en',
+            1: 'pt',
+            2: 'es',
+            3: 'ru'
+        };
+
+        const variation = objVariations[this.globalVariation || 0];
+
+        const attributes = [];
         const attributeNames = this.getAttributeNames();
-        for (const attrName of attributeNames) {
+
+        for (let attrName of attributeNames) {
             if (excludesProps.includes(attrName)) continue;
+
             let attrValue = this.getAttribute(attrName);
-            if (attrName === 'style') attrValue = this.styleel || null;
+            if (attrName === 'idel') attrName = 'id'
+
             if (attrValue !== null) {
-                attributes += `${attrName}="${attrValue}" `;
+                attributes.push({
+                    name: attrName,
+                    value: attrValue
+                })
             }
         }
-        return attributes;
+
+
+        const attrsByVariation = this.filterAttributes(attributes, variation);
+        let attributesStr = '';
+        attrsByVariation.forEach((item) => attributesStr += `${item.name}="${item.value}"`)
+
+        console.info({ el: this, variation, attributes, attrsByVariation });
+
+        return attributesStr;
+
     }
+
+    private filterAttributes(attributes: { name: string, value: string }[], variation: string) {
+
+        const variationSuffix = `-${variation}`; // -en
+        const variationAttributes = attributes.filter(attr => attr.name.endsWith(variationSuffix));
+        const nonVariationAttributes = attributes.filter(attr => {
+            if (attr.name.includes('-')) return false;
+            const split = attr.name.split('-');
+            if(split.length > 1) split.pop();
+            const attrBase = split.join('-');
+            return !attributes.some(a => a.name.startsWith(attrBase) && a !== attr && variationAttributes.includes(a));
+        });
+ 
+        const aux = [...nonVariationAttributes, ...variationAttributes];
+        aux.forEach(attr => {
+            const split = attr.name.split('-');
+            if (split.length > 0) {
+                const language = split.pop();
+                if (language === variation) attr.name = split.join('-');
+            }
+        });
+        return aux;
+    }
+
 
     private myInfos: { root: string, subGroup: string, finalGroup: string } | undefined;
     getMyInfos(): { root: string, subGroup: string, finalGroup: string } {

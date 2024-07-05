@@ -95,7 +95,6 @@ export class ServicePreview100554 extends ServiceBase {
         1: 'pt',
         2: 'es',
         3: 'ru'
-
     }
 
     private getIframePreviewHTML(): HTMLHtmlElement | undefined {

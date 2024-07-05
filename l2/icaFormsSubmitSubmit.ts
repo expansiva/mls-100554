@@ -25,7 +25,11 @@ export abstract class IcaFormsSubmitSubmit extends IcaLitElementBase {
     }
 
     public changeStateHtml(html: string): void {
+        console.info(html);
+    }
 
+    public changeStateStyle(style: string) :void {
+        console.info(style);
     }
 
     public allowCommand(cmd: string, scope: HTMLElement, target: HTMLElement): IAllowCommand {
