@@ -324,13 +324,24 @@ export class ServicePreview100554 extends ServiceBase {
 
     private requestUpdateAllIcaComponentsInPage() {
 
-        const elements = this.previousElementSibling
+        // const elements = this.previousElementSibling
+        //     ?.querySelector('service-preview-view-100554')
+        //     ?.shadowRoot
+        //     ?.querySelector('iframe')
+        //     ?.contentDocument
+        //     ?.querySelectorAll('*')
+
+
+        const body = this.previousElementSibling
             ?.querySelector('service-preview-view-100554')
             ?.shadowRoot
             ?.querySelector('iframe')
             ?.contentDocument
-            ?.querySelectorAll('*')
+            ?.querySelector('body');
 
+
+        if (!body) return;
+        const elements = this.findAllElementsIca(body)
         if (!elements) return;
 
         elements.forEach((el) => {
@@ -339,6 +350,37 @@ export class ServicePreview100554 extends ServiceBase {
             }
         })
 
+    }
+
+
+    private findAllElementsIca(el: HTMLElement): HTMLElement[] {
+        let elements: HTMLElement[] = [];
+        let elToSearch: Element | ShadowRoot = el;
+
+        function traverseShadowRoot(element: HTMLElement) {
+
+            if (element.tagName.toLowerCase().startsWith('ica')) {
+                elements.push(element);
+                return;
+            }
+            if (element.shadowRoot) {
+                element.shadowRoot.querySelectorAll('*').forEach((item) => {
+                    traverseShadowRoot(item as HTMLElement);
+                });
+            } else {
+                const children = Array.from(element.children);
+                if (children.length > 0) {
+                    children.forEach(child => traverseShadowRoot(child as HTMLElement));
+                }
+            }
+        }
+
+        if (el.shadowRoot) elToSearch = el.shadowRoot;
+        elToSearch.querySelectorAll('*').forEach((item) => {
+            traverseShadowRoot(item as HTMLElement);
+        });
+
+        return elements;
     }
 
 }
