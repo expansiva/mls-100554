@@ -1,17 +1,19 @@
 /// <mls shortName="icaPageOverlay" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement } from 'lit';
+import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { IcaPageOverlayItem } from './_100554_icaPageOverlayItem';
 import { getPosition } from './_100554_icaPageOverlayBase';
+import { CollabLitElement } from './_100554_collabLitElement';
+
 
 export function initIcaPageOverlay(): boolean {
     return true;
 }
 
 @customElement('ica-page-overlay-100554')
-export class IcaPageOverlay extends LitElement {
-    
+export class IcaPageOverlay extends CollabLitElement {
+
     private resizeObserver: ResizeObserver | undefined;
 
     createRenderRoot() {
@@ -39,6 +41,13 @@ export class IcaPageOverlay extends LitElement {
         return html``;
     }
 
+    protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
+        super.updated(changedProperties);
+        if (changedProperties.has('globalVariation') && changedProperties.get('globalVariation') !== undefined) {
+            setTimeout(()=>this.updateSizeOverlayItems(), 500);
+        }
+    }
+
     private updateSizeOverlayItems() {
 
         const items = Array.from(this.children) as IcaPageOverlayItem[];
@@ -57,6 +66,5 @@ export class IcaPageOverlay extends LitElement {
             item.style.left = pos.left;
         });
     }
-
 
 }
