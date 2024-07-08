@@ -16,10 +16,6 @@ export class IcaPageOverlay extends CollabLitElement {
 
     private resizeObserver: ResizeObserver | undefined;
 
-    createRenderRoot() {
-        return this; // dont use shadow root
-    }
-
     firstUpdated() {
         if (this.resizeObserver) this.resizeObserver.disconnect();
         this.resizeObserver = new ResizeObserver(entries => {
@@ -30,6 +26,21 @@ export class IcaPageOverlay extends CollabLitElement {
         this.resizeObserver.observe(this);
     }
 
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this.resizeObserver) this.resizeObserver.disconnect();
+    }
+
+    updated(changedProperties: Map<string | number | symbol, unknown>): void {
+        super.updated(changedProperties);
+        if (changedProperties.has('globalVariation') && changedProperties.get('globalVariation') !== undefined) {
+            setTimeout(() => this.updateSizeOverlayItems(), 500);
+        }
+    }
+
+    createRenderRoot() {
+        return this; // dont use shadow root
+    }
 
     render() {
         this.style.display = 'block';
@@ -41,12 +52,6 @@ export class IcaPageOverlay extends CollabLitElement {
         return html``;
     }
 
-    protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
-        super.updated(changedProperties);
-        if (changedProperties.has('globalVariation') && changedProperties.get('globalVariation') !== undefined) {
-            setTimeout(()=>this.updateSizeOverlayItems(), 500);
-        }
-    }
 
     private updateSizeOverlayItems() {
 
