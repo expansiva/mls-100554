@@ -21,6 +21,7 @@ export class IcaPageOverlay extends CollabLitElement {
         this.resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 this.updateSizeOverlayItems();
+                
             }
         });
         this.resizeObserver.observe(this);
@@ -46,15 +47,15 @@ export class IcaPageOverlay extends CollabLitElement {
         this.style.display = 'block';
         this.style.position = 'absolute';
         this.style.width = '100%';
-        this.style.height = '100%';
+        this.style.height = 'calc(100% + 55px)';//'calc(100vh - 50px)';//'100%';
         this.style.zIndex = '9000';
         this.style.top = '0';
         return html``;
     }
 
-
+    
     private updateSizeOverlayItems() {
-
+        
         const items = Array.from(this.children) as IcaPageOverlayItem[];
         const boundingPage = this.getBoundingClientRect();
         items.forEach((item) => {

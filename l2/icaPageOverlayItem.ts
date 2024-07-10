@@ -71,6 +71,9 @@ export class IcaPageOverlayItem extends LitElement {
     }
 
     private onIcaOverlayItemOver(e: MouseEvent) {
+        const wcdOther = this.parentElement?.querySelector('wcd-toolbox-100554');
+        if (wcdOther) return;
+        
         const wcd = this.querySelector('wcd-toolbox-100554');
         if (wcd) return;
         this.style.background = '#d3e3fd';
@@ -84,9 +87,9 @@ export class IcaPageOverlayItem extends LitElement {
 
         await this.addWCDToolbox();
 
-        // if (this.level !== '4') return;
-        // mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
-        // mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+        if (this.level !== '4') return;
+        //mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
+        mls.events.fire(4, 'WCDEventChange' as any, `{"op":"Navigation"}`);
     }
 
     private async addWCDToolbox() {
@@ -96,10 +99,15 @@ export class IcaPageOverlayItem extends LitElement {
         this.style.background = '';
 
         const wcds = this.overlay.querySelectorAll('wcd-toolbox-100554');
-        wcds.forEach((wc) => wc.remove());
+        wcds.forEach((wc) => {
+            const pr = wc.closest('ica-page-overlay-item-100554') as IcaPageOverlayItem;
+            if (pr && pr.info) pr.info.element.setAttribute('renderType', 'edit'); 
+            wc.remove()
+        });
         const wcd = document.createElement('wcd-toolbox-100554') as WCDToolbox;
         wcd.setAttribute('level', this.level);
         wcd.elICA = this.info.element;
+        this.info.element.setAttribute('renderType','editactive')
 
         await this.setActions();
         let act = (this.info.element.actions as any)[this.level as any];

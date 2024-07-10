@@ -155,13 +155,19 @@ export class WCDToolbox extends CollabLitElement {
 
     }
 
+    private timeResize = 0;
     private initObserverResize() {
         if (!this.elICA) return;
+
         if (this.resizeObserver) this.resizeObserver.disconnect();
         this.resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 if (!this.elMain) return;
-                this.updateSize(this.elMain, this, true);
+                clearTimeout(this.timeResize);
+                this.timeResize = setTimeout(() => {
+                    if (!this.elMain) return;
+                    this.updateSize(this.elMain, this, true);
+                }, 500) 
             }
         });
         this.resizeObserver.observe(this.elICA);
@@ -233,8 +239,8 @@ export class WCDToolbox extends CollabLitElement {
         el.innerHTML = '';
         el.className = `${item.position} fcaBackButton`;
         el.title = item.title as string;
-        el.style.cssText = `width: 18px; background-position: center; height: 18px;
-        background-size: auto; background-repeat: no-repeat; z-index: 9;`;
+        el.style.cssText = `width: 18px; background-position: center; height: 18px; background-size: auto; background-repeat: no-repeat; z-index: 9;`;
+        el.style.zIndex = '9999';
 
         el.style.backgroundImage = `url('data:image/svg+xml,${(item.iconSvg as string).replace(/\'/g, '"')}')`
         el.onclick = (e: MouseEvent) => {
@@ -281,6 +287,7 @@ export class WCDToolbox extends CollabLitElement {
         el.elMain = this.elMain;
         el.elICA = this.elICA;
         el.style.cursor = act.cursor as string;
+        el.style.zIndex = '9999';
 
         if (act.attrs) {
             act.attrs.forEach((attr) => {
@@ -305,6 +312,7 @@ export class WCDToolbox extends CollabLitElement {
         el.className = `p ${item.position} fcaButtonAction`;
         el.title = item.title as string;
         el.style.cssText = `width: 18px; height: 18px; background: #fff; display:flex; justify-content: center; align-items:center;`;
+        el.style.zIndex = '9999';
 
         if (item.format === 'circle') {
             el.style.cssText += ' border-radius:50%; box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);'
@@ -338,6 +346,7 @@ export class WCDToolbox extends CollabLitElement {
         (el as any).myParent = this;
         (el as any).elMain = this.elMain;
         (el as any).elICA = this.elICA;
+        el.style.zIndex = '9999';
 
         if (this.elICA && this.elICA.id && this.elICA.getMyEvents && this.elICA.getDefinitionFromEvent) {
 
@@ -397,6 +406,7 @@ export class WCDToolbox extends CollabLitElement {
 
         menuContainer.className = item.position;
         menuContainer.appendChild(container);
+        menuContainer.style.zIndex = '9999';
 
         containerSubItens.onmouseleave = () => {
             containerSubItens.style.display = 'none';
@@ -628,25 +638,26 @@ export class WCDToolbox extends CollabLitElement {
 
 
     //--------------CSS--------------------
+    //z-index:9999;
 
+    /*
+    :host(:not(.action-open):hover){
+            wcd-toolbox-title{
+                display:block;
+            }
+        }
+    :host(:hover){
+            border:1px solid purple!important;
+        }
+        
+    */
     static styles = css`
         :host{
             display:block;
             border:1px solid #d3cece;
             position:absolute;
             user-select:none;
-            z-index:9999;
-            background: #c8c8c8c2; 
-        }
-
-        :host(:hover){
-            border:1px solid purple!important;
-        }
-
-        :host(:not(.action-open):hover){
-            wcd-toolbox-title{
-                display:block;
-            }
+            background: #c8c8c8c2;
         }
 
         .itensFcaToolbox:hover{
@@ -923,7 +934,7 @@ export class WCDToolbox extends CollabLitElement {
         }
 
         wcd-toolbox-title {
-            display:none;
+            display:block;
             position: absolute;
             background: #4c4c4c;
             color: #fff;

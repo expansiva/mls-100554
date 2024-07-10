@@ -114,7 +114,7 @@ export class ServiceFca100554 extends ServiceBase {
 
     renderNavigation() {
 
-        return html`<collab-ica-tree-100554 .myParent=${this}></collab-ica-tree-100554>`;
+        return html`<collab-ica-tree-100554 "scroll-custom" style=" height: calc(100vh - 140px); overflow-y: auto;" .myParent=${this}></collab-ica-tree-100554>`;
     }
 
     renderProperties() {

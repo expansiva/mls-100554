@@ -10,7 +10,6 @@ import { html, unsafeHTML, css } from 'lit';
 import { property } from 'lit/decorators.js';
 import * as myDefinition from './_100554_icaBaseDescription';
 
-
 export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitElementBaseMethods {
 
     constructor() {
@@ -70,8 +69,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         tempeEl.style.cssText = this.styleel ? this.styleel : '';
         this.styleElMain = tempeEl.style;
         await this.performPreSlotAllocationOperations();
-        // const icaId = `ica_${this.id}`;
-        // this.setAttribute('id', icaId); // dps do almoço <----------
+        
     }
 
     protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
@@ -177,7 +175,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     }
     shouldUpdate(changedProperties: Map<string, string>): boolean {
 
-        if (changedProperties.get('changeState') !== undefined && this.changeState) {
+        if (changedProperties.get('changeState') !== undefined && this.changeState && this.renderType === 'editactive') {
             this.doChangeState(this.changeState);
             return false;
         }
