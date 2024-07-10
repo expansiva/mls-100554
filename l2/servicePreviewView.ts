@@ -97,7 +97,7 @@ export class ServicePreviewView extends LitElement {
         });
 
         const ov = (el as any).overlayRef;
-        if(!ov) return;
+        if (!ov) return;
         ov.dispatchEvent(ev);
 
         // el.click();
@@ -778,6 +778,77 @@ export class ServicePreviewView extends LitElement {
         }
 
     }
+
+    public cleanTree(): string {
+
+        let ret = '';
+
+        const iframe = this.shadowRoot?.querySelector('iframe');
+
+        if (!iframe) return '';
+
+        const div = document.createElement('div');
+        const divRet = document.createElement('div');
+        const body = iframe.contentDocument?.body
+        if (!body) return ret;
+        this.cleanTree2(div, body as HTMLElement);
+
+        const clearChildren = (father:HTMLElement, el:HTMLElement) => {
+            let children = [...el.children];
+
+            for (const child of children) {
+                const tagname = child.tagName.toLowerCase();
+                if (tagname.indexOf('-') > 0) {
+                    const clone = child.cloneNode(false);
+                    father.appendChild(clone);
+                    clearChildren(clone as HTMLElement, child as HTMLElement);
+                } else {
+                    clearChildren(father, child as HTMLElement);
+                }
+
+            }
+
+
+        }
+
+        clearChildren(divRet,div)
+
+        return divRet.innerHTML;
+    }
+
+    private cleanTree2(father:HTMLElement, element:HTMLElement):HTMLElement {
+
+        const tagname = element.tagName.toLowerCase();
+        if (tagname.startsWith('ica-')) {
+            let children = [...element.children];
+            for (const child of children) {
+                this.cleanTree2(father, child as HTMLElement);
+            }
+
+        } else {
+            const clone = element.cloneNode(false);
+            father.appendChild(clone);
+            let children = [];
+
+            if (element.shadowRoot) {
+                children = [...element.shadowRoot.children]
+            } else {
+                children = [...element.children]
+            }
+
+            for (const child of children) {
+                this.cleanTree2(clone as HTMLElement, child as HTMLElement);
+            }
+
+        }
+
+        return father;
+    }
+
+
+
+
+
 
     private scrollMobile = `
         .scroll-custom::-webkit-scrollbar {
