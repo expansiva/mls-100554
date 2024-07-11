@@ -1,0 +1,37 @@
+<test-page-ica-full-100554>
+    <ica-layout-flow-row-100554 id="row_1" widget="wc-row-100554">
+        <ica-layout-flow-column-100554 id="row_1_1" widget="wc-column-100554">
+            <ica-forms-input-string-100554 id="inputStr1" widget="wc-input-text-100554" label="Name:" datasource="{{newUser.name}}" data-event="blur input" label-pt="Nome:" label-es="Nombre:">
+            </ica-forms-input-string-100554>
+        </ica-layout-flow-column-100554>
+    </ica-layout-flow-row-100554>
+    <ica-layout-flow-row-100554 id="row_2" widget="wc-row-100554">
+        <ica-layout-flow-column-100554 id="row_2_1" widget="wc-column-100554">
+            <ica-forms-input-number-100554 id="input_number_1" widget="wc-input-number-with-buttons-100554" label="Age:" errormessage="Invalid age" minvalue="0" maxvalue="100" datasource="{{newUser.age}}" label-pt="Idade:" label-es="Edad:" errormessage-pt="Idade inválida" errormessage-es="Edad inválida">
+            </ica-forms-input-number-100554>
+        </ica-layout-flow-column-100554>
+        <ica-layout-flow-column-100554 id="row_2_2" widget="wc-column-100554">
+            <ica-forms-input-select-one-100554 id="select_one_1" widget="wc-select-one-100554" label="Sex" hint="Select user sex" options="{{ tables.sex }}" selectedvalue="{{newUser.sex}}" label-pt="Sexo" label-es="Sexo" hint-pt="Selecione o sexo do usuário" hint-es="Seleccione el sexo del usuario">
+            </ica-forms-input-select-one-100554>
+        </ica-layout-flow-column-100554>
+    </ica-layout-flow-row-100554>
+
+
+    <ica-layout-flow-row-100554 id="row_3" widget="wc-row-100554">
+        <ica-layout-flow-column-100554 style="width:auto;" id="row_3_1" widget="wc-column-100554">
+            <ica-forms-submit-submit-100554 id="btnSubtrair" widget="wc-button-submit-100554" text="Subtract 1" text-pt="Subtrair 1" text-es="Sustraer 1" data-event="click"></ica-forms-submit-submit-100554>
+        </ica-layout-flow-column-100554>
+        <ica-layout-flow-column-100554 style="width:auto;" id="row_3_1" widget="wc-column-100554">
+
+            <ica-forms-input-number-100554 id="inputResult" widget="wc-input-number-100554" datasource="{{sum}}">
+            </ica-forms-input-number-100554>
+        </ica-layout-flow-column-100554>
+        <ica-layout-flow-column-100554 style="width:auto;" id="row_3_1" widget="wc-column-100554">
+            <ica-forms-submit-submit-100554 id="btnSomar" widget="wc-button-submit-100554" text="Sum 1"  text-pt="Somar 1" text-es="Agregar 1" data-event="click"></ica-forms-submit-submit-100554>
+            
+        </ica-layout-flow-column-100554>
+
+    </ica-layout-flow-row-100554>
+
+    <ica-load-page-100554 src="_100554_testCollabPage2"></ica-load-page-100554>
+</test-page-ica-full-100554>

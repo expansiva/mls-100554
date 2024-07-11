@@ -8,27 +8,20 @@ import { customElement, property } from 'lit/decorators.js';
 export class TestCollabPage2100554 extends CollabPageElement {
 
     initPage() {
-        window.globalState = {
-            wcdAddEventSelected: '',
-            tables: {
-                sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
-            },
-            users: [{
-                name: 'Wagner',
-                age: 63,
-                city: 'SP',
-                sex: 'm'
-            },
-            {
-                name: 'Guilherme',
-                age: 28,
-                city: 'SP',
-                sex: 'm'
-            }]
-        };
-
-        return html``;
+        window.globalState.users = [{
+            name: 'Wagner',
+            age: 63,
+            city: 'SP',
+            sex: 'm'
+        },
+        {
+            name: 'Guilherme',
+            age: 28,
+            city: 'SP',
+            sex: 'm'
+        }]
     }
+
 
     handleClickinput2Desktop() {
         console.log('Click handler desktop for element with ID 2 in page collabPage2');
