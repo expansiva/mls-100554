@@ -24,35 +24,6 @@ export abstract class CollabPageElement extends CollabLitElement {
 
     private overlay: HTMLElement | undefined;
 
-    connectedCallback() {
-        super.connectedCallback();
-        this.setupEventListeners();
-    }
-
-    setupEventListeners() {
-        let device: string = this.getVariationDevice();
-        if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1);
-        const elements = this.querySelectorAll('[data-event]');
-        const that = this as any;
-        elements.forEach(element => {
-            const events = element.getAttribute('data-event')?.split(' ') || [];
-            const elementId = element.getAttribute('id');
-            events.forEach(event => {
-                // search por functions name, from specific to generic,
-                // ex: handleClick1Desktop, handleClick1, handleClick
-                const handlerGeneric = `handle${event.charAt(0).toUpperCase() + event.slice(1)}`;
-                const handlerSpecificID = `${handlerGeneric}${elementId}`;
-                const handlerSpecificDevice = `${handlerSpecificID}${device}`
-                if (that[handlerSpecificDevice]) {
-                    element.addEventListener(event, that[handlerSpecificDevice].bind(this));
-                } else if (that[handlerSpecificID]) {
-                    element.addEventListener(event, that[handlerSpecificID].bind(this));
-                } else if (that[handlerGeneric]) {
-                    element.addEventListener(event, that[handlerGeneric].bind(this));
-                }
-            });
-        });
-    }
 
     getVariationDevice(): IDevice {
         const device = (document.documentElement.getAttribute('data-device') || 'desktop').toLowerCase();
@@ -65,7 +36,17 @@ export abstract class CollabPageElement extends CollabLitElement {
             this.checkToAddOverlay();
         }, 500);
 
+        this.setupIds();
+        this.setupEvents();
+        this.initPage();
+
+    }
+
+    setupIds() {
         const icas = this.findAllElementsIca(this);
+        let device: string = this.getVariationDevice();
+        if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1);
+
         icas.forEach((item) => {
             const oldId = item.element.id;
             const icaId = `ica_${item.element.id}`;
@@ -73,7 +54,39 @@ export abstract class CollabPageElement extends CollabLitElement {
             item.element.setAttribute('idel', oldId);
         });
 
-        this.initPage();
+    }
+
+    setupEvents() {
+
+        const allWebComponentsInPage = this.getAllWebComponents(this);
+        let device: string = this.getVariationDevice();
+        if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1);
+
+        allWebComponentsInPage.forEach((el) => {
+
+            const widget = el.tagName.toLowerCase();
+            customElements.whenDefined(widget).then(() => {
+                const events = el.getAttribute('data-event')?.split(' ') || [];
+                if (!events || events.length === 0) return;
+                const elementId = el.getAttribute('idel') || el.getAttribute('id');
+                if (!elementId) return;
+                const that = this as any;
+                events.forEach(event => {
+                    // search por functions name, from specific to generic,
+                    // ex: handleClick1Desktop, handleClick1, handleClick
+                    const handlerGeneric = `handle${event.charAt(0).toUpperCase() + event.slice(1)}`;
+                    const handlerSpecificID = `${handlerGeneric}${elementId}`;
+                    const handlerSpecificDevice = `${handlerSpecificID}${device}`
+                    if (that[handlerSpecificDevice]) {
+                        el.addEventListener(event, that[handlerSpecificDevice].bind(this));
+                    } else if (that[handlerSpecificID]) {
+                        el.addEventListener(event, that[handlerSpecificID].bind(this));
+                    } else if (that[handlerGeneric]) {
+                        el.addEventListener(event, that[handlerGeneric].bind(this));
+                    }
+                });
+            })
+        })
 
     }
 
@@ -166,6 +179,30 @@ export abstract class CollabPageElement extends CollabLitElement {
 
         return elements;
     }
+
+    private getAllWebComponents(root: HTMLElement): HTMLElement[] {
+        const webComponents: HTMLElement[] = [];
+
+        function findWebComponents(node: Node) {
+            if (node instanceof HTMLElement) {
+                const tagName = node.tagName.toLowerCase();
+                if (tagName.split('-').length > 0) {
+                    webComponents.push(node);
+                }
+
+                // Check if the element has a shadow root
+                if (node.shadowRoot) {
+                    node.shadowRoot.childNodes.forEach(childNode => findWebComponents(childNode));
+                }
+            }
+
+            node.childNodes.forEach(childNode => findWebComponents(childNode));
+        }
+
+        findWebComponents(root);
+        return webComponents;
+    }
+
 
 }
 

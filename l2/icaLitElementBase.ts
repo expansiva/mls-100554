@@ -69,12 +69,12 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         tempeEl.style.cssText = this.styleel ? this.styleel : '';
         this.styleElMain = tempeEl.style;
         await this.performPreSlotAllocationOperations();
-        
+
     }
 
     protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
         super.updated(changedProperties);
-       
+
         const hasLevel = changedProperties.has('level');
         const hasStyleEl = changedProperties.has('styleel');
         // const hasId = changedProperties.has('id');
@@ -349,7 +349,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         let attributesStr = '';
         attrsByVariation.forEach((item) => attributesStr += `${item.name}="${item.value}"`)
 
-       //  console.info({ el: this, variation, attributes, attrsByVariation });
+        //  console.info({ el: this, variation, attributes, attrsByVariation });
 
         return attributesStr;
 
@@ -359,15 +359,16 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
         const variationSuffix = `-${variation}`; // -en
         const variationAttributes = attributes.filter(attr => attr.name.endsWith(variationSuffix));
+
         const nonVariationAttributes = attributes.filter(attr => {
-            if (attr.name.includes('-')) return false;
+            if (attr.name.includes('-') && attr.name.endsWith(variationSuffix)) return false;
             const split = attr.name.split('-');
-            if(split.length > 1) split.pop();
+            if (split.length > 1) split.pop();
             const attrBase = split.join('-');
             return !attributes.some(a => a.name.startsWith(attrBase) && a !== attr && variationAttributes.includes(a));
         });
- 
-        const aux = [...nonVariationAttributes, ...variationAttributes];
+
+        let aux = [...nonVariationAttributes, ...variationAttributes];
         aux.forEach(attr => {
             const split = attr.name.split('-');
             if (split.length > 0) {
