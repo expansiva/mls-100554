@@ -4,6 +4,7 @@ import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IActionsToolbox } from './_100554_icaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
 //version 4
 @customElement('wcd-toolbox-item-action-padding-100554')
@@ -14,6 +15,8 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
+    public elICA: IcaLitElementBase | undefined;
+
     private elExternal: HTMLElement | undefined;
     private startX: number = 0;
     private startY: number = 0;
@@ -60,7 +63,7 @@ export class WCDToolboxItemActionPadding extends LitElement {
         if (!this.elMain) return html``;
         return html`
             <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
-                <p style=" margin-bottom: 5px;">A propriedade <b>padding</b> define uma a distância entre o conteúdo de um elemento e suas bordas</p>
+                <p style=" margin-bottom: 5px;">A propriedade <b>padding</b> define uma a distÃ¢ncia entre o conteÃºdo de um elemento e suas bordas</p>
                 <h4 style="display:flex; gap:1.5rem;margin:0px" >${this.myMsg.padding}<input type="checkbox" prop="padding"></h4>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.myMsg.top}</div>
@@ -128,6 +131,7 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
     //-------------------------------------------
 
+    private timeRemoveResize = 0;
     private initDragging(e: MouseEvent): void {
 
         if (!this.elMain || !document.defaultView) return;
@@ -167,7 +171,9 @@ export class WCDToolboxItemActionPadding extends LitElement {
             this.renderOutdoorScenary();
             this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
             this.myParent.updateBackgroundAuxSize('show');
+            
         }
+
 
         const stopDragging = (e: MouseEvent) => {
 
@@ -178,9 +184,17 @@ export class WCDToolboxItemActionPadding extends LitElement {
             document.body.removeEventListener('mousemove', doDragging, false);
             document.body.removeEventListener('mouseup', stopDragging, false);
 
+            clearTimeout(this.timeRemoveResize);
+            this.timeRemoveResize = setTimeout(() => {
+                if (!this.elMain || !this.myParent) return;
+                this.myParent.setAttribute('needResize', '');
+            }, 800);
+
             this.fireEvent();
         }
 
+        if (!this.elMain || !this.myParent) return;
+        this.myParent.setAttribute('needResize', 'false');
         document.body.addEventListener('mousemove', doDragging, false);
         document.body.addEventListener('mouseup', stopDragging, false);
     }

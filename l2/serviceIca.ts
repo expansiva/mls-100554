@@ -71,13 +71,9 @@ export class ServiceFca100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        /*if (!visible && !reinit && this.menu.setIconActive) {
-            this.menu.setIconActive('Navigation');
-        }*/
-
         if (visible && reinit) {
 
-            if (this.activeTab !== 'Navigation') return;
+            //if (this.activeTab !== 'Navigation') return;
             const elTree = this.querySelector('collab-ica-tree-100554');
             if (elTree && (elTree as any).forceUpdate) (elTree as any).forceUpdate();
         }
