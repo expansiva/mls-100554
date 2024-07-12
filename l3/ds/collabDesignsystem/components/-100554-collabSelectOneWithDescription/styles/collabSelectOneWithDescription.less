@@ -1,55 +1,65 @@
-collab-select-one-with-description-100554 { //don't change this line 
- 	:host {
+collab-select-one-with-description-100554 {
+
+    //don't change this line 
+    :host {
         display: block;
-        position:relative;
+        position: relative;
     }
-    .select_container{
+
+    .select_container {
         font-size: 14px;
         transform: translate3d(0px, 0px, 0px);
         box-sizing: content-box;
         border-width: 0px;
         border-style: solid;
-        border-color: rgb(33, 33, 33);
+        border-color: @bg-primary-color-darker;
         border-radius: 4px;
         box-shadow: 0px 12px 24px 8px rgba(0, 0, 0, 0.08), 0px 8px 16px 4px rgba(0, 0, 0, 0.08), 0px 4px 8px 2px rgba(0, 0, 0, 0.08), 0px 2px 6px 0px rgba(0, 0, 0, 0.08), 0px -0.5px 0.5px 0px rgba(0, 0, 0, 0.12) inset, 0px 0.5px 0.5px 0px rgba(255, 255, 255, 0.12) inset;
         overflow: hidden;
-        width:300px;
+        width: 300px;
         position: absolute;
-        background: #ffffff;
-        z-index:9999;
+        background: @bg-primary-color-lighter;
+        color: @text-primary-color;
+        z-index: 9999;
         top: 30px;
-        display:none;
+        display: none;
     }
 
-    .select_toogle{
-        cursor:pointer;
+    .select_toogle {
+        cursor: pointer;
         width: 30px;
-        text-align:center;
+        text-align: center;
         border-radius: 8px;
+        color: @text-primary-color;
+
+        svg {
+            fill: @text-primary-color;
+        }
     }
+
     .select_toogle:hover {
-        background:#f3f3f3;
+        background: @bg-secondary-color-lighter;
     }
 
-    .select_container.open{
-        display:block;
+    .select_container.open {
+        display: block;
     }
 
-    .desc_container{
+    .desc_container {
         padding: 1rem 0;
         font-weight: bold;
-        text-align:center;
+        text-align: center;
     }
 
-    ul{
+    ul {
         list-style: none;
         padding-inline-start: 0px;
-        border-bottom: 1px solid #cecece;
+        border-bottom: 1px solid @grey-color-dark;
         margin: 0;
         padding: .5rem 0;
     }
 
-    ul > li {
+    ul>li {
         outline: 0px;
         cursor: default;
         user-select: none;
@@ -57,8 +67,8 @@ collab-select-one-with-description-100554 { //don't change this line
         padding: 4px 8px;
     }
 
-    ul > li.hover {
-        background: #f3f3f3;
+    ul>li.hover {
+        background: @grey-color-light;
         font-weight: bold;
     }
 }

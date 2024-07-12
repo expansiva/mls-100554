@@ -52,7 +52,8 @@ async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, ht
     const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
     if (!tags.includes(tag)) tags.push(tag);
 
-    tags = await getTagsInTypescript(mfile, tags)
+    tags = await getTagsInTypescript(mfile, tags);
+    const globalCss = await getGlobalCss(mfile);
 
     await loadMyNeedsToCompile(
         tags,
@@ -71,6 +72,7 @@ async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, ht
         importsMap: myImportsMap,
         importsJs: myImports,
         css: myCss,
+        globalCss,
         tokens: myTokens,
         errors: myErrors
     }
@@ -291,6 +293,18 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IM
 
 }
 
+async function getGlobalCss(mfile: mls.l2.editor.IMFile) {
+    try {
+        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
+        const ds = mls.l3.getDSInstance(mfile.project, dsindex);
+        if (!ds) return;
+        const css = await ds.css.getStylesInLess()
+        return css;
+    } catch (e: any) {
+        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
+    }
+}
+
 async function getTokens(myTokens: string[], mfile: mls.l2.editor.IMFile) {
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
@@ -340,6 +354,7 @@ export interface IJSONDependence {
     importsMap: string[],
     importsJs: string[],
     css: string[],
+    globalCss: string | undefined,
     tokens: string[],
     errors: { tag: string, error: string }[]
 }

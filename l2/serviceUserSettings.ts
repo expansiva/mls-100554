@@ -8,11 +8,20 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 const message_pt = {
     languageLabel: 'Linguagens',
     alterarLabel: 'Alterar',
+    themeLabel: 'Tema',
+    themeOptDark: 'Escuro',
+    themeOptLight: 'Claro',
+    themeOptDf: 'Padrão',
 }
 
 const message_en = {
     languageLabel: 'Languages',
     alterarLabel: 'Change',
+    themeLabel: 'Theme',
+    themeOptDark: 'Dark',
+    themeOptLight: 'Light',
+    themeOptDf: 'Default',
+
 }
 
 type MessageType = typeof message_en;
@@ -57,11 +66,12 @@ export class ServiceUserSettings100554 extends ServiceBase {
         updateTitle: undefined
     }
 
-    @property()
-    actualLanguage: ILanguage = 'pt-BR'
+    @property() actualLanguage: ILanguage = 'pt-BR'
+    @property() actualTheme: string = 'Default';
 
-    @query('.select-language')
-    selectLanguage: HTMLSelectElement | undefined
+    @query('.select-language') selectLanguage: HTMLSelectElement | undefined;
+    @query('.select-theme') selectTheme: HTMLSelectElement | undefined;
+
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (visible && reinit) {
@@ -81,6 +91,10 @@ export class ServiceUserSettings100554 extends ServiceBase {
             return;
         }
         this.actualLanguage = data.language as ILanguage;
+        let userTheme = this.getUserTheme();
+        if (!userTheme) userTheme = this.getUserThemeOS();
+        this.actualTheme = userTheme;
+
     }
 
     private setUserLanguage(language: ILanguage) {
@@ -107,11 +121,31 @@ export class ServiceUserSettings100554 extends ServiceBase {
         return defaultLang as ILanguage;
     }
 
-    private handleChanceLanguageClick() {
+    private handleChangeLanguageClick() {
         if (!this.selectLanguage) return;
         const language = this.selectLanguage.value as ILanguage;
         this.setUserLanguage(language);
         location.reload();
+    }
+
+    private handleChangeThemeClick() {
+        if (!this.selectTheme) return;
+        const theme = this.selectTheme.value as ILanguage;
+        this.setUserTheme(theme);
+        location.reload();
+    }
+
+    private setUserTheme(theme: string) {
+        localStorage.setItem('_100554_serviceUserSettings_theme', theme);
+    }
+
+    private getUserTheme() {
+        return localStorage.getItem('_100554_serviceUserSettings_theme');
+    }
+
+    private getUserThemeOS() {
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return isDarkMode ? 'dark' : 'light';
     }
 
     render() {
@@ -128,7 +162,17 @@ export class ServiceUserSettings100554 extends ServiceBase {
                         <option value="pt-BR">pt-BR</option>
                         <option value="en-US">en-US</option>
                     </select>
-                    <button style="margin-top:1rem" @click=${this.handleChanceLanguageClick}>${this.myMessage.alterarLabel}</button>
+                    <button style="margin-top:1rem" @click=${this.handleChangeLanguageClick}>${this.myMessage.alterarLabel}</button>
+                </div>
+            </details>
+            <details> 
+                <summary>${this.myMessage.themeLabel}</summary>
+                <div>
+                    <select style="width:200px" .value=${this.actualTheme} class="select-theme">
+                        <option value="dark">${this.myMessage.themeOptDark}</option>
+                        <option value="light">${this.myMessage.themeOptLight}</option>
+                    </select>
+                    <button style="margin-top:1rem" @click=${this.handleChangeThemeClick}>${this.myMessage.alterarLabel}</button>
                 </div>
             </details>
         </section>

@@ -68,15 +68,11 @@ export class ServicePreviewView extends LitElement {
     }
 
     private onWidgetActionEvents(ev: mls.events.IEvent) {
-
         if (ev.level.toString() !== this.level) return;
         if (!ev.desc) return;
         const json = JSON.parse(ev.desc);
         if (json.op !== 'SelectWidget') return;
-
         this.selectIdinPreview(json.id, json.origin);
-
-
     }
 
     private selectIdinPreview(id: string, origin: 'editor' | 'preview'): void {
@@ -99,8 +95,6 @@ export class ServicePreviewView extends LitElement {
         const ov = (el as any).overlayRef;
         if (!ov) return;
         ov.dispatchEvent(ev);
-
-        // el.click();
 
     }
 
@@ -159,8 +153,6 @@ export class ServicePreviewView extends LitElement {
 
         const lang = this.father && this.father.getMessageKey ? this.father.getMessageKey(messages) : 'en-us';
         this.msg = messages[lang];
-
-
         if (this.error !== '') return this.renderError();
         else return this.renderPreview();
     }
@@ -235,95 +227,6 @@ export class ServicePreviewView extends LitElement {
         }
     }
 
-    static styles = css`
-        :host{
-            position:relative;
-        }
-
-        .watchDesktop{
-            position: absolute;
-            background: white;
-            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 2px 2px;
-            top: 3px;
-            right: 46px;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .groupSetMobile{
-            display:flex;
-            width:300px;
-            gap:.8rem;
-            justify-content: center;
-            align-items: center;
-            margin-bottom:1rem;
-        }
-
-        .groupSetMobile div{
-            display:flex;
-            flex-direction: column;
-            
-        }
-
-        .groupSetMobile label{
-            font-size:.8rem;
-            font-weight:bold;
-        }
-
-        .groupSetMobile input{
-            border:1px solid #cac7c7;
-            outline:none;
-            width:100px;
-            height:20px;
-            border-radius:5px;
-        }
-
-        .phone {
-            z-index: 1;
-            padding: 0 0.5rem;
-            border: 0.25rem solid #404040;
-            border-radius: 1rem;
-            display: flex;
-            flex-direction: column;
-            //box-shadow: 0.5rem 0.5rem rgba(0, 0, 0, 0.3);
-            box-shadow:0px 5px 3px 3px rgba(0, 0, 0, 0.3);
-            background:white;
-        }
-
-        .phone_mic {
-            height: 0.25rem;
-            width: 4rem;
-            margin: 1rem auto;
-            border-radius: 999rem;
-            background-color: #505050;
-        }
-
-        .phone_screen {
-            position: relative;
-            flex: 1 0 auto;
-            border: 1px solid #505050;
-            border-radius:5px;
-        }
-
-        .phone_screen iframe{
-            border-radius:5px;
-        }
-        
-        .phone_button {
-            width: 1.5rem;
-            height: 1.5rem;
-            border: 2px solid #505050;
-            border-radius: 50%;
-            margin: 1rem auto;
-        }
-    
-    `;
-
     //-------- IMPLEMENTS---------
 
     private fireChangeFCA(): void {
@@ -355,6 +258,8 @@ export class ServicePreviewView extends LitElement {
         if (!iframe) return;
         this.mountCSS(ret, iframe);
         this.mountTokens(ret, iframe);
+        this.addGlobalStyle(ret, iframe);
+
         const tag = convertFileNameToTag(`_${this.mfile.project}_${this.mfile.shortName}`);
         const el = iframe.contentDocument?.body.querySelector(tag);
         if (!el) return;
@@ -461,6 +366,7 @@ export class ServicePreviewView extends LitElement {
         this.mountJS(ret, iframe);
         this.mountCSS(ret, iframe);
         this.mountTokens(ret, iframe);
+        this.addGlobalStyle(ret, iframe);
 
     }
 
@@ -617,6 +523,12 @@ export class ServicePreviewView extends LitElement {
         st.forEach((s) => s.remove());
     }
 
+    private removeOlderGlobalStyle(ifr: HTMLIFrameElement) {
+        if (!ifr.contentDocument) return;
+        const st = ifr.contentDocument.body.querySelector(`#css_global`);
+        if(st) st.remove()
+    }
+
     private mountCSS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
         try {
             if (!ifr.contentDocument) return;
@@ -658,6 +570,21 @@ export class ServicePreviewView extends LitElement {
 
         } catch (e: any) {
             console.info('Error mountTokens: ' + e.message);
+        }
+    }
+
+    private addGlobalStyle(info: IJSONDependence, ifr: HTMLIFrameElement): void {
+        try {
+            if (!ifr.contentDocument || !info.globalCss) return;
+            this.removeOlderGlobalStyle(ifr);
+            const css = info.globalCss;
+            const style = document.createElement('style');
+            style.textContent = css;
+            style.id = 'css_global';
+            ifr.contentDocument.body.appendChild(style);
+
+        } catch (e: any) {
+            console.info('Error add global styles: ' + e.message);
         }
     }
 
@@ -793,7 +720,7 @@ export class ServicePreviewView extends LitElement {
         if (!body) return ret;
         this.cleanTree2(div, body as HTMLElement);
 
-        const clearChildren = (father:HTMLElement, el:HTMLElement) => {
+        const clearChildren = (father: HTMLElement, el: HTMLElement) => {
             let children = [...el.children];
 
             for (const child of children) {
@@ -811,12 +738,12 @@ export class ServicePreviewView extends LitElement {
 
         }
 
-        clearChildren(divRet,div)
+        clearChildren(divRet, div)
 
         return divRet.innerHTML;
     }
 
-    private cleanTree2(father:HTMLElement, element:HTMLElement):HTMLElement {
+    private cleanTree2(father: HTMLElement, element: HTMLElement): HTMLElement {
 
         const tagname = element.tagName.toLowerCase();
         if (tagname.startsWith('ica-')) {
@@ -848,7 +775,94 @@ export class ServicePreviewView extends LitElement {
 
 
 
+static styles = css`
+        :host{
+            position:relative;
+        }
 
+        .watchDesktop{
+            position: absolute;
+            background: white;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 2px 2px;
+            top: 3px;
+            right: 46px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .groupSetMobile{
+            display:flex;
+            width:300px;
+            gap:.8rem;
+            justify-content: center;
+            align-items: center;
+            margin-bottom:1rem;
+        }
+
+        .groupSetMobile div{
+            display:flex;
+            flex-direction: column;
+            
+        }
+
+        .groupSetMobile label{
+            font-size:.8rem;
+            font-weight:bold;
+        }
+
+        .groupSetMobile input{
+            border:1px solid #cac7c7;
+            outline:none;
+            width:100px;
+            height:20px;
+            border-radius:5px;
+        }
+
+        .phone {
+            z-index: 1;
+            padding: 0 0.5rem;
+            border: 0.25rem solid #404040;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            //box-shadow: 0.5rem 0.5rem rgba(0, 0, 0, 0.3);
+            box-shadow:0px 5px 3px 3px rgba(0, 0, 0, 0.3);
+            background:white;
+        }
+
+        .phone_mic {
+            height: 0.25rem;
+            width: 4rem;
+            margin: 1rem auto;
+            border-radius: 999rem;
+            background-color: #505050;
+        }
+
+        .phone_screen {
+            position: relative;
+            flex: 1 0 auto;
+            border: 1px solid #505050;
+            border-radius:5px;
+        }
+
+        .phone_screen iframe{
+            border-radius:5px;
+        }
+        
+        .phone_button {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid #505050;
+            border-radius: 50%;
+            margin: 1rem auto;
+        }
+    
+    `;
 
     private scrollMobile = `
         .scroll-custom::-webkit-scrollbar {
