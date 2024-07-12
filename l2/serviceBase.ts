@@ -262,10 +262,10 @@ export interface IMenu {
     onClickLink?: IClickLinkCallBack,
     onClickIcon?: IClickIconCallBack,
     onClickButton?: IClickButtonCallBack,
-
     setMode?: ISetMode,
     setIconActive?: (op: string) => void,
     setMenuActive?: (op: string) => void,
+    selectButton?: (op: string) => void
     closeMenu?: Function,
     getLastMode?: IGetLastMode,
     lastIcon?: string,

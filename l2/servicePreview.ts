@@ -12,15 +12,21 @@ import { IcaLitElement } from './_100554_icaLitElement';
 
 /// **collab_i18n_start**
 const message_pt = {
+    theme: 'Tema',
     variations: 'Variação',
     editStyle: 'Editar estilo',
-    pause: 'Parar preview'
+    pause: 'Parar preview',
+    dark: ' escuro',
+    light: 'Tema claro'
 }
 
 const message_en = {
+    theme: 'Theme',
     variations: 'Variation',
     editStyle: 'Edit style',
-    pause: 'Pause preview'
+    pause: 'Pause preview',
+    dark: 'Theme dark',
+    light: 'Theme light'
 }
 
 type MessageType = typeof message_en;
@@ -42,6 +48,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     @property() watch: boolean = true;
 
+    @property() light: boolean = true;
+
     private lastMode: string = 'icPreviewD';
 
     private lastLevel: number = -1;
@@ -55,6 +63,7 @@ export class ServicePreview100554 extends ServiceBase {
         initServicePreviewView;
         initServicePreviewAddStyle;
         this.setEvents();
+        // this.getTheme();
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -87,6 +96,8 @@ export class ServicePreview100554 extends ServiceBase {
         if (op === 'btWatch') return this.toogleWatch();
         if (op === 'btEditStyle') return this.editStyles();
         if (op === 'btVariations') return this.onBtVariationsClick(opMenu);
+        if (op === 'btTheme') return this.onBtThemeClick();
+
         else throw new Error('Invalid option')
     }
 
@@ -98,6 +109,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private getIframePreviewHTML(): HTMLHtmlElement | undefined {
+
         const htmlEl = this.previousElementSibling
             ?.querySelector('service-preview-view-100554')
             ?.shadowRoot
@@ -106,6 +118,7 @@ export class ServicePreview100554 extends ServiceBase {
             ?.querySelector('html') as HTMLHtmlElement;
 
         return htmlEl;
+
     }
 
     private onBtVariationsClick(opMenu: string | undefined) {
@@ -117,7 +130,21 @@ export class ServicePreview100554 extends ServiceBase {
         if (window.top) window.top.window.globalVariation = !isNaN(+variation) ? +variation : 0;
         this.requestUpdateAllIcaComponentsInPage();
         return true;
+
+
     }
+
+    private onBtThemeClick() {
+        this.light = !this.light;
+        const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
+        if (htmlEl) {
+            if (this.light) htmlEl.removeAttribute('data-theme');
+            else htmlEl.setAttribute('data-theme', 'dark');
+        }
+        this.onStyleChanged();
+        return this.light;
+    }
+
 
     private toogleWatch(): boolean {
         this.watch = !this.watch;
@@ -141,6 +168,7 @@ export class ServicePreview100554 extends ServiceBase {
             icPreviewM: 'Mobile;f3cf'
         },
         buttons: {
+            btTheme: `${this.msg.light};${this.msg.dark};f185;f186`,
             btVariations: this.msg.variations + ';f1ab:menu:0 - Default,1 - Portugues,2 - Espanhol,3 - Russo',
             btEditStyle: this.msg.editStyle + ';f0d0',
             btWatch: this.msg.pause + ';Update Preview;f04c;f04b',
@@ -177,7 +205,6 @@ export class ServicePreview100554 extends ServiceBase {
     private setEvents() {
 
         mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
-
         mls.events.addEventListener([3], ['DSStyleChanged', 'DSColorChanged', 'DSCustomChanged', 'DSTYPOChanged'], async (ev) => {
 
             const rc: any = JSON.parse(ev.desc as any);
@@ -187,7 +214,7 @@ export class ServicePreview100554 extends ServiceBase {
                 (rc.emitter === 'left' && rc.helper)) return;
 
             if (this.watch) this.onStyleChanged();
-            // this.onReloader();
+
 
         });
 
@@ -215,11 +242,8 @@ export class ServicePreview100554 extends ServiceBase {
         try {
 
             if (this.visible === 'false' || !this.visible) return;
-
             if (ev.level !== +this.level || (ev.type !== 'FileAction')) return;
-
             const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
-
             const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new'];
 
             if (
@@ -230,19 +254,15 @@ export class ServicePreview100554 extends ServiceBase {
             if (this.watch) this.onReloader();
 
         } catch (e) {
-
             console.info(e);
-
         }
 
     }
 
     private activeMe(status: string, click: boolean): void {
-
         if (!this.serviceItemNav) return;
         this.serviceItemNav.setAttribute('mode', status);
         if (click) this.serviceItemNav.click();
-
     }
 
     // -------------- COMPONENT ---------------
@@ -255,24 +275,30 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     render() {
-
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-
         return html``;
+    }
+
+    firstUpdated() {
+        const theme = this.getTheme();
+        if (theme === 'dark' && this.menu.selectButton) {
+            this.menu.selectButton('btTheme');
+        }
     }
 
     // -------------- IMPLEMENTS-----------------
 
+    private getTheme() {
+        const theme = localStorage.getItem('_100554_serviceUserSettings_theme') || 'light';
+        return theme;
+    }
+
     public async setAboutTag(tag: string) {
 
         try {
-
             if (!tag) return false;
-
             const file = convertTagToFileName(tag.toLocaleLowerCase());
-
-
             this.htmlAbout = `  
                 <h3>About this Component</h3>
                 <ul>
@@ -283,15 +309,10 @@ export class ServicePreview100554 extends ServiceBase {
                 ;
 
             if (this.menu.setMenuActive && this.htmlAbout) this.menu.setMenuActive('opAboutTag');
-
         } catch (e) {
-
             console.info(e);
             return false;
-
         }
-
-
     }
 
     private htmlAbout = '';
@@ -305,9 +326,7 @@ export class ServicePreview100554 extends ServiceBase {
     private async preview(mode: string) {
 
         if (!(mls.actual[2] as any).left) return true;
-
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
-
         this.menu.title = 'Preview: ' + fullname;
         if (this.menu.updateTitle) this.menu.updateTitle();
         const doc = document.createElement('service-preview-view-100554');
@@ -323,15 +342,6 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private requestUpdateAllIcaComponentsInPage() {
-
-        // const elements = this.previousElementSibling
-        //     ?.querySelector('service-preview-view-100554')
-        //     ?.shadowRoot
-        //     ?.querySelector('iframe')
-        //     ?.contentDocument
-        //     ?.querySelectorAll('*')
-
-
         const body = this.previousElementSibling
             ?.querySelector('service-preview-view-100554')
             ?.shadowRoot
