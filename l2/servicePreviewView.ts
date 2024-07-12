@@ -63,9 +63,118 @@ export class ServicePreviewView extends LitElement {
     @property() widthP: string = '300';
     @property() heightP: string = '600';
 
+    //-----------EVENTS-----------------
+
     private setEventsCollab(): void {
         mls.events.addListener(2, 'WidgetAction', this.onWidgetActionEvents.bind(this));
     }
+
+    //---------COMPONENTS---------------
+
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.setEventsCollab();
+    }
+
+    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
+        if (name === 'stylechanged') {
+            if (newVal === 'true') this.addStyles();
+            return;
+        }
+        super.attributeChangedCallback(name, oldVal, newVal);
+    }
+
+    render() {
+
+        const lang = this.father && this.father.getMessageKey ? this.father.getMessageKey(messages) : 'en-us';
+        this.msg = messages[lang];
+        if (this.error !== '') return this.renderError();
+        else return this.renderPreview();
+    }
+
+    renderError() {
+        return html`<h3 style="color:red">${this.error}</h3>`
+    }
+
+    renderPreview() {
+
+        this.watch = this.father.watch;
+
+        this.verifyWC().then((res) => {
+            this.isDsComponent = res;
+        })
+
+        if (this.mode === 'mobile') {
+            this.style.cssText = `
+                width:100%;
+                height:100vh;
+                min-height:700px;
+                display: flex!important;
+                flex-direction: column;
+                align-items: center;
+                padding-top:.5rem;
+            `;
+            return html` 
+                
+                <div class="groupSetMobile">
+                    <div>
+                        <label>${this.msg.width}:</label>
+                        <input type="number" value="300" @input="${this.changeWidthP}">
+                    </div>
+                    <div>
+                        <label>${this.msg.height}:</label>
+                        <input type="number" value="700" @input="${this.changeHeightP}">
+                    </div>
+                    </div> 
+                <div class="phone" style="width:${this.widthP}px; height:${this.heightP}px">
+                    <div class="phone_mic"></div>
+                    <div class="phone_screen">
+                        <iframe style="width:100%; height:100%; border:none; display:none"  src="/_100554_servicePreview" @load="${this.load}" ></iframe>
+                    </div>
+                    <div class="phone_button"></div>
+                </div>
+                
+            `
+
+        } else {
+
+            this.style.cssText = `
+                display: block;
+                width: 100%;
+                height: 100%;
+            `;
+            return html`
+            
+            <iframe
+                style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview"
+                @load="${this.load}" >
+            
+            </iframe>`;
+
+        }
+    }
+
+    updated(changedProperties: any) {
+        super.updated(changedProperties);
+        if (changedProperties.has('level')) {
+            const oldLevel = changedProperties.get('level');
+            if (!oldLevel) return;
+        
+            if (this.level === '7') {
+                this.fireChangeICA();
+                this.load();
+            } else if (oldLevel === '7') { 
+                this.load();
+                this.fireChangeICA();
+            } else {
+                this.fireChangeICA();
+            }
+            
+        }
+    }
+
+    //-------- IMPLEMENTS---------
 
     private onWidgetActionEvents(ev: mls.events.IEvent) {
         if (ev.level.toString() !== this.level) return;
@@ -136,108 +245,14 @@ export class ServicePreviewView extends LitElement {
         return ret as HTMLElement;
     }
 
-    connectedCallback() {
-        super.connectedCallback();
-        this.setEventsCollab();
-    }
-
-    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
-        if (name === 'stylechanged') {
-            if (newVal === 'true') this.addStyles();
-            return;
-        }
-        super.attributeChangedCallback(name, oldVal, newVal);
-    }
-
-    render() {
-
-        const lang = this.father && this.father.getMessageKey ? this.father.getMessageKey(messages) : 'en-us';
-        this.msg = messages[lang];
-        if (this.error !== '') return this.renderError();
-        else return this.renderPreview();
-    }
-
-    renderError() {
-        return html`<h3 style="color:red">${this.error}</h3>`
-    }
-
-    renderPreview() {
-
-        this.watch = this.father.watch;
-
-        this.verifyWC().then((res) => {
-            this.isDsComponent = res;
-        })
-        if (this.mode === 'mobile') {
-            this.style.cssText = `
-                width:100%;
-                height:100vh;
-                min-height:700px;
-                display: flex!important;
-                flex-direction: column;
-                align-items: center;
-                padding-top:.5rem;
-            `;
-            return html` 
-                
-                <div class="groupSetMobile">
-                    <div>
-                        <label>${this.msg.width}:</label>
-                        <input type="number" value="300" @input="${this.changeWidthP}">
-                    </div>
-                    <div>
-                        <label>${this.msg.height}:</label>
-                        <input type="number" value="700" @input="${this.changeHeightP}">
-                    </div>
-                    </div> 
-                <div class="phone" style="width:${this.widthP}px; height:${this.heightP}px">
-                    <div class="phone_mic"></div>
-                    <div class="phone_screen">
-                        <iframe style="width:100%; height:100%; border:none; display:none"  src="/_100554_servicePreview" @load="${this.load}" ></iframe>
-                    </div>
-                    <div class="phone_button"></div>
-                </div>
-                
-            `
-
-        } else {
-
-            this.style.cssText = `
-                display: block;
-                width: 100%;
-                height: 100%;
-            `;
-            return html`
-            
-            <iframe
-                style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview"
-                @load="${this.load}" >
-            
-            </iframe>`;
-
-        }
-    }
-
-    updated(changedProperties: any) {
-        super.updated(changedProperties);
-        if (changedProperties.has('level')) {
-            const oldLevel = changedProperties.get('level');
-            if (!oldLevel) return;
-            this.fireChangeFCA();
-        }
-    }
-
-    //-------- IMPLEMENTS---------
-
-    private fireChangeFCA(): void {
+    private fireChangeICA(): void {
         if (!this.shadowRoot) return;
         const iframe = this.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
         if (!iframe || !iframe.contentDocument) return;
-        this.changeLevelFca(iframe.contentDocument.body);
+        this.changeLevelIca(iframe.contentDocument.body);
     }
 
-    private changeLevelFca(el: HTMLElement): void {
-
+    private changeLevelIca(el: HTMLElement): void {
 
         const isPage = (el as any).isPage
         let tagEl = el.tagName.toLowerCase();
@@ -246,7 +261,7 @@ export class ServicePreviewView extends LitElement {
         }
 
         for (const i of el.children) {
-            this.changeLevelFca(i as HTMLElement);
+            this.changeLevelIca(i as HTMLElement);
         }
     }
 
@@ -278,6 +293,7 @@ export class ServicePreviewView extends LitElement {
         const mModule = await mls.l2.enhancement.getEnhancementInstance(this.mfile);
         return mModule;
     }
+
     private load(): void {
         this.showLoader(true);
         if (!this.shadowRoot) return;
@@ -300,16 +316,26 @@ export class ServicePreviewView extends LitElement {
         try {
 
             this.setDevice(iframe);
+            this.setTheme(iframe);
             this.setMyFile();
             await this.setHTml(iframe);
             iframe.style.display = '';
 
             const html = iframe.contentDocument?.querySelector('html');
             if (html) html.lang = this.objVariations[window.globalVariation] || 'en-US';
+
             this.showLoader(false);
         } catch (e: any) {
             this.error = e.message;
             this.showLoader(false);
+        }
+    }
+
+    private setTheme(iframe: HTMLIFrameElement) {
+        const isLight = this.father.light;
+        const html = iframe.contentDocument?.querySelector('html');
+        if (!isLight && html) {
+            html.setAttribute('data-theme', 'dark');
         }
     }
 
@@ -348,6 +374,10 @@ export class ServicePreviewView extends LitElement {
 
         if (!iframe.contentDocument || !this.mfile) return;
         let txt = await this.getFileContent();
+
+        if (this.level === '7') {
+            txt = this.cleanTree();
+        }
 
         if (this.lastHTML === txt) {
             const h = this.lastCompiledUrl;
@@ -526,7 +556,7 @@ export class ServicePreviewView extends LitElement {
     private removeOlderGlobalStyle(ifr: HTMLIFrameElement) {
         if (!ifr.contentDocument) return;
         const st = ifr.contentDocument.body.querySelector(`#css_global`);
-        if(st) st.remove()
+        if (st) st.remove()
     }
 
     private mountCSS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
@@ -720,7 +750,7 @@ export class ServicePreviewView extends LitElement {
         if (!body) return ret;
         this.cleanTree2(div, body as HTMLElement);
 
-        const clearChildren = (father: HTMLElement, el: HTMLElement) => {
+        /*const clearChildren = (father: HTMLElement, el: HTMLElement) => {
             let children = [...el.children];
 
             for (const child of children) {
@@ -738,7 +768,8 @@ export class ServicePreviewView extends LitElement {
 
         }
 
-        clearChildren(divRet, div)
+        clearChildren(divRet, div)*/
+        this.cleanTree3(divRet, div);
 
         return divRet.innerHTML;
     }
@@ -772,10 +803,25 @@ export class ServicePreviewView extends LitElement {
         return father;
     }
 
+    private cleanTree3(father: HTMLElement, element: HTMLElement) {
+
+        let children = [...element.children];
+
+        for (const child of children) {
+            const tagname = child.tagName.toLowerCase();
+            if (tagname.indexOf('-') > 0) {
+                const clone = child.cloneNode(false);
+                father.appendChild(clone);
+                this.cleanTree3(clone as HTMLElement, child as HTMLElement);
+            } else {
+                this.cleanTree3(father, child as HTMLElement);
+            }
+
+        }
+    }
 
 
-
-static styles = css`
+    static styles = css`
         :host{
             position:relative;
         }
