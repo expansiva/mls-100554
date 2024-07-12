@@ -670,6 +670,14 @@ export class WCDToolbox extends CollabLitElement {
 
         .fcaButtonAction{
             cursor:pointer;
+            background:var(--bg-primary-color)!important;
+            padding:5px;
+            border-radius:5px;
+            border: 1px solid var(--grey-color-darker);
+        }
+
+        .fcaButtonAction svg{
+            fill:var(--text-primary-color);
         }
 
         .fcaBackButton{
@@ -884,6 +892,7 @@ export class WCDToolbox extends CollabLitElement {
         wcd-toolbox-menu-container{
             display:block;
             position:relative;
+            
         }
 
         wcd-toolbox-itemmenu{
@@ -918,12 +927,13 @@ export class WCDToolbox extends CollabLitElement {
             min-width: 150px;
             min-height: 50px;
             padding:.5rem;
-            border:1px solid #d3cece;
+            border:1px solid var(--bg-primary-color-lighter);
             background:#fff;
             border-bottom-left-radius: 10px;
             border-bottom-right-radius: 10px;
             border-top-right-radius: 10px;
-            box-shadow: 0px 1px 4px 1px #e1e1e1;
+            box-shadow: 0px 1px 4px 1px var(--bg-primary-color-lighter);
+            background:var(--bg-primary-color-lighter)
         }
 
         wcd-toolbox-submenu a {
@@ -936,7 +946,7 @@ export class WCDToolbox extends CollabLitElement {
         }
 
         wcd-toolbox-submenu a:hover {
-            background:#e1e1e1;
+            background:var(--grey-color-light);
         }
 
         wcd-toolbox-title {
