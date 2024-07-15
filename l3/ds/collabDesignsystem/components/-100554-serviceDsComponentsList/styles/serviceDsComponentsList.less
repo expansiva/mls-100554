@@ -6,9 +6,13 @@ service-ds-components-list-100554 { //don't change this line
         overflow-y: auto;
         height: calc(100% - 2rem);
     }
+
+    svg{
+        fill:@text-primary-color;
+     }
+
     
-    
-    ul {
+     ul {
         margin-top:.5rem;
         margin-left: 0;
         padding-left: 0px !important;
@@ -24,18 +28,18 @@ service-ds-components-list-100554 { //don't change this line
     li ul {
         list-style: none;
         user-select: none;
-        border-left: 1px solid #dbd9d9;
+        border-left: 1px solid @text-primary-color;
         margin-left: 0.2rem;
         display: none;
         li{
             padding: .3rem .2rem;
         }
         li:hover, &.selected{
-            background: #f6f6f6 !important;
+            background: @text-primary-color-darker !important;
 
         }
         li.selected{
-            background: #f6f6f6 !important;
+            background: @text-primary-color-darker !important;
         }
     }
 
