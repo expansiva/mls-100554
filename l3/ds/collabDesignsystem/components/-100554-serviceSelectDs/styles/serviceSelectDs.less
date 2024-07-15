@@ -13,6 +13,10 @@ service-select-ds-100554 {//don't change this line
             display: flex;
             justify-content: center;
         }
+        
+        a{
+            color: @active-color;
+        }
 
         .serviceListList {
             display: flex;
@@ -49,13 +53,14 @@ service-select-ds-100554 {//don't change this line
                     summary{
                         padding: 0.5rem;
                         &:hover{
-                            background: #f7f7f7;
+                            background: @bg-primary-color;
                         }
                     }
                 }
 
+
                 details>summary.selected {
-                    background: #e3e3e3;
+                    background:  @bg-primary-color-lighter;
                 }
 
                 .serviceListChanged {
@@ -66,8 +71,9 @@ service-select-ds-100554 {//don't change this line
                     align-items: center;
                 }
 
+         
                 .serviceBugChanged {
-                    color: rgb(169, 3, 3);
+                    color: @error-color;
                     font-size: 13px;
                     display: flex;
                     justify-content: center;
