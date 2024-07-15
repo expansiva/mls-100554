@@ -31,11 +31,11 @@ service-list-files-100554 { //don't change this line
                 cursor: pointer !important;
                 text-decoration: underline;
                 width: 120px;
-                color: #838383;
+                color: @text-primary-color;
                 font-size: .8rem;
 
                 &:hover {
-                    color: blue;
+                    color: @active-color;
                     cursor: pointer !important;
                 }
             }
@@ -53,8 +53,7 @@ service-list-files-100554 { //don't change this line
                 width: 18rem;
 
                 label {
-
-                    color: #838383;
+                    color: @text-primary-color;
                     margin-right: 1rem;
                     cursor: pointer;
                     font-size: .9rem;
@@ -63,7 +62,7 @@ service-list-files-100554 { //don't change this line
 
             input[type=text] {
                 width: calc(100% - 21rem);
-                border: 1px solid #838383;
+                border: 1px solid @text-primary-color;
                 border-radius: 5px;
                 height: 30px;
                 outline: none;
@@ -78,7 +77,7 @@ service-list-files-100554 { //don't change this line
             align-items: center;
             gap: .4rem;
             margin-bottom: 1rem;
-            color: #3f3e3e;
+            color: @text-primary-color;;
 
             span {
                 font-size: .9rem;
@@ -119,7 +118,7 @@ service-list-files-100554 { //don't change this line
             z-index: 10;
 
             &:hover {
-                color: #1a83ff;
+                color: @active-color;
             }
         }
 
@@ -152,7 +151,7 @@ service-list-files-100554 { //don't change this line
 
             .fileDeleted {
                 text-decoration: line-through;
-                color: #7f0000;
+                color: @error-color;
             }
 
             .elContent {
@@ -176,7 +175,7 @@ service-list-files-100554 { //don't change this line
                 }
 
                 input {
-                    border: 1px solid #838383;
+                    border: 1px solid @grey-color;
                     border-radius: 5px;
                     padding-left: 0.3rem;
                     font-size: 13px;
@@ -259,8 +258,8 @@ service-list-files-100554 { //don't change this line
                 }
             }
 
-            &:hover {
-                background: #f7f7f7;
+            &:hover:not(.headerTitle) {
+                background: @bg-primary-color-lighter;
             }
 
         }
