@@ -136,7 +136,11 @@ export class ServiceUserSettings100554 extends ServiceBase {
     }
 
     private setUserTheme(theme: string) {
-        localStorage.setItem('_100554_serviceUserSettings_theme', theme);
+        let theme2 = theme;
+        if (theme === 'default') {
+            theme2 = this.getUserThemeOS();
+        }
+        localStorage.setItem('_100554_serviceUserSettings_theme', theme2);
     }
 
     private getUserTheme() {
@@ -169,6 +173,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
                 <summary>${this.myMessage.themeLabel}</summary>
                 <div>
                     <select style="width:200px" .value=${this.actualTheme} class="select-theme">
+                        <option value="default">${this.myMessage.themeOptDf}</option>
                         <option value="dark">${this.myMessage.themeOptDark}</option>
                         <option value="light">${this.myMessage.themeOptLight}</option>
                     </select>
