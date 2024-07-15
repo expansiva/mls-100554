@@ -67,7 +67,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
     }
 
     @property() actualLanguage: ILanguage = 'pt-BR'
-    @property() actualTheme: string = 'Default';
+    @property() actualTheme: string = 'default';
 
     @query('.select-language') selectLanguage: HTMLSelectElement | undefined;
     @query('.select-theme') selectTheme: HTMLSelectElement | undefined;
@@ -136,11 +136,7 @@ export class ServiceUserSettings100554 extends ServiceBase {
     }
 
     private setUserTheme(theme: string) {
-        let theme2 = theme;
-        if (theme === 'default') {
-            theme2 = this.getUserThemeOS();
-        }
-        localStorage.setItem('_100554_serviceUserSettings_theme', theme2);
+        localStorage.setItem('_100554_serviceUserSettings_theme', theme);
     }
 
     private getUserTheme() {
