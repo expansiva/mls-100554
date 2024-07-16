@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "buildCI": "node -e \"require('mls-ci').init()\""
+    "buildCI": "node -e \"require('mls-ci').runCI()\""
   },
   "author": "",
   "license": "ISC",
