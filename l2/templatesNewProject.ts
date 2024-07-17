@@ -5,20 +5,20 @@ export const template_tsconfig = {
     template: `
     {
         "compilerOptions": {
-            "target": "es2020", // Define a versão do ECMAScript de saída
+            "target": "es2020",
             "module": "ES2020",
-            "esModuleInterop": true, // Habilita a interoperabilidade com módulos ES
-            "outDir": "./preBuild/l2", // Define o diretório de saída para os arquivos compilados
-            "rootDir": "./prel2", // Define o diretório raiz dos arquivos de entrada
-            "strict": true, // Ativa todas as verificações de tipo estritas
+            "esModuleInterop": true,
+            "outDir": "./preBuild/l2",
+            "rootDir": "./prel2",
+            "strict": true,
             "removeComments": false,
             "noUnusedParameters": false,
-            "skipLibCheck": false, // Ignora a verificação de tipo de arquivos de declaração
-            "forceConsistentCasingInFileNames": true, // Impede diferenças de maiúsculas/minúsculas nos nomes dos arquivos
-            "sourceMap": false, // Gera arquivos de mapeamento de origem (.map)
-            "declaration": false, // Desabilita a geração de arquivos .d.ts
-            "experimentalDecorators": true, // Habilita suporte a decoradores
-            "emitDecoratorMetadata": false, // Emite metadados de decorador (opcional, mas útil para alguns frameworks)
+            "skipLibCheck": false,
+            "forceConsistentCasingInFileNames": true,
+            "sourceMap": false,
+            "declaration": false,
+            "experimentalDecorators": true,
+            "emitDecoratorMetadata": false,
             "noImplicitAny": false,
             "strictNullChecks": false,
             "paths": [paths],
@@ -28,14 +28,14 @@ export const template_tsconfig = {
             ]
         },
         "include": [
-            "prel2/**/*", // Inclui todos os arquivos TypeScript no diretório l2
+            "prel2/**/*",
             "monaco.d.ts",
             "mls.d.ts"
         ],
         "exclude": [
-            "node_modules", // Exclui a pasta node_modules
-            "**/*.spec.ts", // Exclui arquivos de teste
-            "l2/*.ts" // Exclui arquivos de teste
+            "node_modules",
+            "**/*.spec.ts",
+            "l2/*.ts"
         ]
     }
     `
