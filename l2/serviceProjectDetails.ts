@@ -4,22 +4,34 @@ import { html, css, repeat } from 'lit';
 import { customElement, property, queryAll, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import * as icons from './_100554_collabIcons';
+import { template_package, template_build, template_tsconfig } from './_100554_templatesNewProject';
+import { collab_spinner_clock } from './_100554_collabIcons';
 
 
 /// **collab_i18n_start**
 const message_pt = {
     noProjectSelected: 'Nenhum projeto selecionado!',
-    resume: 'Resumo',
+    detailsResume: 'Resumo',
+    detailsConnections: 'Conexão',
+    detailsBranchs: 'Branchs',
+    detailsFiles: 'Arquivos',
+    detailsFilesDesc: 'Atualiza os arquivos iniciais do projeto, que irão servir para compilar o projeto inicialmente, estes arquivos são criados automaticamente na criação do projeto',
+    detailsInfo: 'Info',
     name: 'Nome',
-    projectDriver: 'Driver do Projeto',
+    projectDriver: 'Driver',
+    projectOrg: 'Organização',
+    projectOwner: 'Proprietário',
+    projectCreatedAt: 'Criado em',
     projectURL: 'URL do Projeto',
     designSystems: 'Design systems',
+    lastModified: 'Última modificação',
     files: 'Arquivos',
     keyGithub: 'Chave do GitHub',
     project: 'Projeto',
     noProject: 'Nenhum projeto selecionado, por favor selecione.',
     selectProject: 'Selecione o projeto',
     btnChange: 'Alterar',
+    btnUpdate: 'Atualizar',
     btnAddNewProject: 'Adicionar novo projeto',
     btnCreateProject: 'Criar projeto',
     btnRefreshOrg: 'Atualizar',
@@ -47,17 +59,27 @@ const message_pt = {
 
 const message_en = {
     noProjectSelected: 'No project selected!',
-    resume: 'Resume',
+    detailsResume: 'Resume',
+    detailsConnections: 'Connection',
+    detailsBranchs: 'Branchs',
+    detailsFiles: 'Files',
+    detailsFilesDesc: 'Updates the project initial files, which we will use to compile the project initially, these files are created automatically when the project is created',
+    detailsInfo: 'Info',
     name: 'Name',
-    projectDriver: 'ProjectDriver',
-    projectURL: 'ProjectURL',
+    projectDriver: 'Project Driver',
+    projectOrg: 'Organization',
+    projectOwner: 'Owner',
+    projectCreatedAt: 'CreatedAt',
+    projectURL: 'Project URL',
     designSystems: 'Design systems',
+    lastModified: 'Last Modified',
     files: 'Files',
     keyGithub: 'Key Github',
     project: 'Project',
     noProject: 'No project selected, please select',
     selectProject: 'Select project',
     btnChange: 'Change',
+    btnUpdate: 'Update',
     btnAddNewProject: 'Add new Project',
     btnCreateProject: 'Create project',
     btnRefreshOrg: 'Refresh',
@@ -98,8 +120,13 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     private showKey: boolean = false;
 
+    @property() isUpdateFiles: boolean = false;
+
     @property() name: string | undefined;
     @property() projectDriver: string | undefined;
+    @property() projectOrg: string | undefined;
+    @property() projectOwner: string | undefined;
+    @property() projectCreatedAt: string | undefined;
     @property() projectURL: string | undefined;
     @property() designSystems: number | undefined;
     @property() projectCreated: boolean = false;
@@ -193,7 +220,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         }
     }
 
-    renderDetails() {
+    private renderDetails() {
 
         this.projectCreated = false;
 
@@ -214,43 +241,13 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                 :
                 html`
                 <section class="section-details">
-                    <h4>${this.msg.resume}</h4>
-                    <ul class="listInfo">
-                        <li>
-                            <b>${icons.collab_file}${this.msg.name}:</b> 
-                            ${this.name}
-                        </li>
-                        <li style="display:flex">
-                            <div style="width:18px">${icons.collab_gear}</div>
-                            <b>${this.msg.projectDriver}:</b> 
-                            ${this.projectDriver}
-                        </li>
-                        <li>
-                            <b>
-                                ${icons.collab_folder_tree}
-                                ${this.msg.projectURL}:
-                            </b>
-                            ${this.projectURL}
-                        </li>
-                        <li>
-                            <b>${icons.collab_book}${this.msg.designSystems}:</b> 
-                            ${this.designSystems}
-                        </li>
-                        <li>
-                            <b>
-                                ${icons.collab_file_signature}
-                                ${this.msg.files}:
-                            </b>
-                            ${this.files}
-                        </li>
-                    </ul>
-
-                    <details>
-                        <summary>Config:</summary>
-                        ${this.renderConfigKey()}
-                    </details>
-
+                    ${this.renderResume()}
+                    ${this.renderReadme()}
+                    ${this.renderInfo()}
+                    ${this.renderConnections()}
+                    ${this.renderFiles()}
                     ${this.renderCreateTreeFork()}
+                    
                 </section>
                 
                 
@@ -258,29 +255,148 @@ export class ServiceProjectDetails100554 extends ServiceBase {
             }`
     }
 
-    private renderConfigKey() {
+    private renderResume() {
+        return html`
+            <div class="details-card">
+                <details open>
+                    <summary>${this.msg.detailsResume}</summary>
+                    <div>
+                        <ul class="listInfo">
+                            <li style="margin-bottom:1rem;">
+                                <b>${this.msg.lastModified}:</b>
+                                <span style="font-style: italic;-">(In development)</span>
+                            </li>
+                            <li>
+                                <b><span>Total Files:</span></b>
+                                <div>
+                                    <ul>
+                                        <li>
+                                            <b>${icons.collab_book}${this.msg.designSystems}:</b> 
+                                            ${this.designSystems}
+                                        </li>
+                                        <li>
+                                            <b>
+                                                ${icons.collab_file_signature}
+                                                ${this.msg.files}:
+                                            </b>
+                                            ${this.files}
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </li>
+                            
+                        </ul>
+                    </div>
+            </details>
+        </div>
+
+        `
+    }
+
+    private renderConnections() {
         if (!this.projectDriver && !(this.keyLocalHistory as any)[this.projectDriver as any]) return html``
 
         return html`
-            <div class="section-config-github">
-                <label>${(this.keyLocalHistory as any)[this.projectDriver as any]}</label>
-                <div class="cls_key">
-                    <input .value=${this.showString(this.actualKeyDriver, this.showKey)} @input="${this.handleInputChangeKey}"></input rows=4>
-                    <button @click="${this.clickShowEye}">${this.showKey ? icons.collab_eye : icons.collab_eye_slash}</button>
+        <div class="details-card">
+        
+            <details open>
+                <summary>${this.msg.detailsConnections}</summary>
+                <div class="section-config-github">
+                    <label>${(this.keyLocalHistory as any)[this.projectDriver as any]}</label>
+                    <div class="cls_key">
+                        <input .value=${this.showString(this.actualKeyDriver, this.showKey)} @input="${this.handleInputChangeKey}"></input rows=4>
+                        <button @click="${this.clickShowEye}">${this.showKey ? icons.collab_eye : icons.collab_eye_slash}</button>
+                    </div>
+                    <button @click=${this.handleChangeKey}>
+                        ${this.msg.btnChange}                    
+                    </button>
                 </div>
-                <button @click=${this.handleChangeKey}>${this.msg.btnChange}</button>
-            </div>
+            </details>
+        </div>
             `
+    }
+
+    private renderFiles() {
+        return html`
+        <div class="details-card">
+        
+            <details open>
+                <summary>${this.msg.detailsFiles}</summary>
+                <small>${this.msg.detailsFilesDesc}</small>
+                <hr>
+                <button @click=${this.handleUpdateInitialFiles}>
+                    ${this.msg.btnUpdate}
+                    ${this.isUpdateFiles ? html`${collab_spinner_clock}` : ''}
+                </button>
+            
+            </details>
+        </div>
+            `
+    }
+
+    private renderInfo() {
+        return html`
+            <div class="details-card">
+
+                <details open>
+                    <summary>${this.msg.detailsInfo}</summary>
+                    <div>
+                        <ul class="listInfo">
+                            <li>
+                                <b>${this.msg.name}:</b> 
+                                ${this.name}
+                            </li>
+                            <li>
+                                <b>${this.msg.projectOrg}:</b> 
+                                ${this.projectOrg}
+                            </li>
+                                <li>
+                                <b>${this.msg.projectOwner}:</b> 
+                                ${this.projectOwner}
+                            </li>
+                                <li>
+                                <b>${this.msg.projectCreatedAt}:</b> 
+                                ${this.projectCreatedAt}
+                            </li>
+                            <li style="display:flex">
+                                <b>${this.msg.projectDriver}:</b> 
+                                ${this.projectDriver}
+                            </li>
+                            <li>
+                                <b>${this.msg.projectURL}:</b>
+                                ${this.projectURL}
+                            </li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        `
+    }
+
+    private renderReadme() {
+        return html`
+            <div class="details-card">
+                <details open>
+                    <summary>README.md</summary>
+                    <div>
+                    
+                    </div>
+                </details>
+            </div>
+        `
     }
 
     private renderCreateTreeFork() {
         return html`
-            <details>
-                <summary>Branchs:</summary>
-                <div class="grp_show_branches">
-                    ${this.renderBranchs()}
-                </div>
-            </details>
+            <div class="details-card">
+                <details open>
+                    <summary>${this.msg.detailsBranchs}</summary>
+                    <div class="grp_show_branches">
+                        ${this.renderBranchs()}
+                    </div>
+                </details>
+            </div>
         `
     }
 
@@ -288,21 +404,21 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         return html`
         <ul>
             ${repeat(this.branchMain, ((key: any) => key) as any,
-                ((item: any, index: any) => {
+            ((item: any, index: any) => {
 
-                    return this.renderItem(item, index);
+                return this.renderItem(item, index);
 
-                }) as any
-            
+            }) as any
+
         )}
             ${repeat(this.listForks, ((key: any) => key) as any,
-                ((item: any, index: any) => {
+            ((item: any, index: any) => {
 
-                    return this.renderItemForks(item, index);
+                return this.renderItemForks(item, index);
 
-                }) as any
-            
-            )}
+            }) as any
+
+        )}
         </ul>`;
     }
 
@@ -310,7 +426,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         return html`
             <li .info=${obj}>
                 <input type="radio" id="item-${index}" name="optBranch" value="${obj.name}">
-                <label for="item-${index}">
+              <label for="item-${index}">
                     ${obj.name}
                 </label>
             
@@ -323,7 +439,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         return html`
             <li .info=${obj}>
                 <input type="radio" id="itemf-${index}" name="optBranch" value="${obj.nameWithOwner}">
-                <label for="itemf-${index}">
+               <label for="itemf-${index}">
                     ${obj.nameWithOwner}
                 </label>
             
@@ -464,16 +580,26 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     private async getDetailsProject(project: number) {
 
-        let details = mls.l5.getProjectSettings(project);
-        this.designSystems = details.designSystems ? details.designSystems.length : 0;
+        let settings = mls.l5.getProjectSettings(project);
+        let details = mls.l5.getProjectDetails(project);
+        if (!details) return;
 
-        this.name = details.name;
-        this.projectDriver = details.projectDriver;
-        this.projectURL = details.projectURL;
+        this.designSystems = settings.designSystems ? settings.designSystems.length : 0;
+
+        this.name = settings.name;
+        this.projectDriver = settings.projectDriver;
+        this.projectCreatedAt = new Date(details.created_at).toLocaleString();
+        this.projectOwner = details.owner;
+        this.projectDriver = settings.projectDriver;
+        if (mls.l5.actualOrg) {
+            this.projectOrg = Object.keys(mls.stor.orgs)[mls.l5.actualOrg]
+        }
+
+        this.projectURL = settings.projectURL;
         this.files = Object.keys(mls.stor.files).filter((item => item.startsWith(project.toString()))).length;
 
-        if ((this.keyLocalHistory as any)[details.projectDriver]) {
-            this.actualKeyDriver = localStorage?.getItem((this.keyLocalHistory as any)[details.projectDriver]);
+        if ((this.keyLocalHistory as any)[settings.projectDriver]) {
+            this.actualKeyDriver = localStorage?.getItem((this.keyLocalHistory as any)[settings.projectDriver]);
         }
 
         await this.setInfoInitial()
@@ -520,6 +646,150 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         await this.loadProjectActual(this.projectCreatedNumber);
         this.projectCreated = false;
     }
+
+    private async handleUpdateInitialFiles() {
+
+        this.isUpdateFiles = true;
+        const project = mls.actual[5].project;
+        if (!project) {
+            this.isUpdateFiles = false;
+            return;
+        }
+        await this.changePackageFile(project);
+        await this.changeTsConfigFile(project);
+        // await this.changeTsConfigDFile(project);
+        await this.changeBuildFile(project);
+        await this.changeREADMEFile(project);
+        this.isUpdateFiles = false;
+
+    }
+
+    private async changePackageFile(project: number) {
+        const fileName = 'package';
+        const content = template_package.template.replace('[project]', project.toString()).trim();
+
+        const keyToFilePackage = mls.stor.getKeyToFiles(project, 0, fileName, '', template_package.ext);
+        let file = mls.stor.files[keyToFilePackage];
+        if (!file) file = await this.createFile(fileName, template_package.ext, '', content)
+        else {
+            const fileInfo: mls.stor.IFileInfoValue = {
+                content,
+                contentType: 'string',
+            };
+            await mls.stor.localStor.setContent(file, fileInfo);
+        }
+    }
+
+    private async changeTsConfigFile(project: number) {
+        const fileName = 'tsconfig';
+
+        const paths = `
+        {
+            "lit": [
+                "./prel2/_100554_litElement.ts"
+            ],
+            "lit/decorators.js": [
+                "./prel2/_100554_litDecorators.ts"
+            ]
+        }`
+
+        const content = template_tsconfig.template.replace('[paths]', paths.trim()).trim();
+        const keyToFilePackage = mls.stor.getKeyToFiles(project, 0, fileName, '', template_tsconfig.ext);
+
+        let file = mls.stor.files[keyToFilePackage];
+        if (!file) file = await this.createFile(fileName, template_tsconfig.ext, '', content)
+        else {
+            const fileInfo: mls.stor.IFileInfoValue = {
+                content,
+                contentType: 'string',
+            };
+            await mls.stor.localStor.setContent(file, fileInfo);
+        }
+    }
+
+    private async changeBuildFile(project: number) {
+        const fileName = 'build';
+        const content = template_build.template.trim();
+
+        const keyToFilePackage = mls.stor.getKeyToFiles(project, 0, fileName, '.github/workflows', template_build.ext);
+        let file = mls.stor.files[keyToFilePackage];
+        if (!file) file = await this.createFile(fileName, template_build.ext, '.github/workflows', content)
+        else {
+            const fileInfo: mls.stor.IFileInfoValue = {
+                content,
+                contentType: 'string',
+            };
+            await mls.stor.localStor.setContent(file, fileInfo);
+        }
+    }
+
+    private async changeREADMEFile(project: number) {
+        const fileName = 'README';
+        const content = `ReadMe: ${project}`;
+        const keyToFilePackage = mls.stor.getKeyToFiles(project, 0, fileName, '', '.md');
+        let file = mls.stor.files[keyToFilePackage];
+        if (!file) file = await this.createFile(fileName, '.md', '', content);
+        else {
+            const fileInfo: mls.stor.IFileInfoValue = {
+                content,
+                contentType: 'string',
+            };
+            await mls.stor.localStor.setContent(file, fileInfo);
+        }
+    }
+
+    private async createFile(shortName: string, extension: string, folder: string, content: string): Promise<mls.stor.IFileInfo> {
+
+        const project = mls.actual[5].project;
+        if (!project) throw new Error('Invalid project');
+        const params = {
+            project,
+            level: 0,
+            shortName,
+            extension,
+            versionRef: '0',
+            folder
+        };
+
+        const file = await mls.stor.addOrUpdateFile(params);
+        if (!file) throw new Error('Error on create new file');
+
+        file.status = 'new';
+        file.getValueInfo = () => this._getValueInfo(file);
+        const contentType = typeof content === 'string' ? 'string' : 'blob';
+        const fileInfo: mls.stor.IFileInfoValue = {
+            content,
+            contentType,
+        };
+        await mls.stor.localStor.setContent(file, fileInfo);
+        return file;
+    }
+
+    public async _getValueInfo(
+        file: mls.stor.IFileInfo,
+        originalShortName?: string,
+        originalFolder?: string,
+        originalProject?: number,
+        originalCRC?: string,
+    ): Promise<mls.stor.IFileInfoValue> {
+
+        file.inLocalStorage = file.status !== 'nochange';
+        const content = await file.getContent();
+        const contentType = typeof content === 'string' ? 'string' : 'blob';
+        const obj: mls.stor.IFileInfoValue = {
+            content,
+            contentType,
+            originalShortName,
+            originalFolder,
+            originalProject,
+            originalCRC,
+        };
+        return obj;
+    }
+
+
+
+
 
     // LIST
     private onAddNewProjectClick() {

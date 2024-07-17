@@ -6,29 +6,42 @@ service-project-details-100554 {
       display: block;
       height: calc(100% - 55px);
       overflow: auto;
+      background: @bg-primary-color;
+      font-size: @font-size-16;
    }
 
    .section-details {
       padding: 1rem;
+
+      svg{
+         fill: @text-primary-color;
+      }
+      
+
+      .details-card{
+         margin-top: 1rem;
+         border: 1px solid @grey-color-light;
+         padding: 1rem;
+         border-radius: 10px;
+      }
 
       .listInfo{
          list-style: none;
          margin: 0px;
          padding: 0px;
          padding-left: .5rem;
-         padding-bottom: .5rem;
          margin-bottom: 2rem;
-         border-bottom: 1px solid #f6f6f6;
-         li{
-            display: flex;
-            gap: .5rem;
+         ul{
+            list-style: none;
+
          }
       }
 
       details{
-         border-bottom: 1px solid #f6f6f6;
-         padding-bottom: .5rem;
          margin-bottom: 1rem;
+         >div{
+            padding-left: 2rem;
+         }
       }
 
       .section-config-github {
