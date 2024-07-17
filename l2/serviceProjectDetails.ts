@@ -7,7 +7,6 @@ import * as icons from './_100554_collabIcons';
 import { template_package, template_build, template_tsconfig } from './_100554_templatesNewProject';
 import { collab_spinner_clock } from './_100554_collabIcons';
 
-
 /// **collab_i18n_start**
 const message_pt = {
     noProjectSelected: 'Nenhum projeto selecionado!',
@@ -380,7 +379,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                 <details open>
                     <summary>README.md</summary>
                     <div>
-                    
+                        <collab-edit-md-100554></collab-edit-md-100554>
                     </div>
                 </details>
             </div>
