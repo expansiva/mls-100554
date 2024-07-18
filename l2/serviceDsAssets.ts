@@ -4,7 +4,7 @@ import { html, css, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initCollabInputTag, CollabInputTag } from './_100554_collabInputTag';
-import { getDSInstance } from './_100554_libDesignSystem';
+import { getDSInstance, list } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -225,7 +225,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
         this.lastDsIndex = mode;
         await this.initDsInstance(project, mode);
         await mls.stor.server.loadProjectInfoIfNeeded(project);
-        const listDs = mls.l5.ds.list(project);
+        const listDs = await list(project);
         if (!this.dsInstance) return;
         const nameDs = listDs[this.dsInstance.dsindex].dsName;
 

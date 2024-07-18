@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initServiceSelectDsAdd } from './_100554_serviceSelectDsAdd'
 import { collab_file, collab_undo, collab_location_dot, collab_unbalanced } from './_100554_collabIcons'
-import { getDSInstance , IPrjDesignSystem } from './_100554_libDesignSystem';
+import { getDSInstance , IPrjDesignSystem, list } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -113,11 +113,11 @@ export class ServiceSelectDs100554 extends ServiceBase {
         });
     }
 
-    public init() {
+    public async init() {
         this.clearState();
         this.setProjectActual();
         if (!this.state.actualProject) return;
-        this.getDs();
+        await this.getDs();
     }
 
     private clearState() {
@@ -167,10 +167,10 @@ export class ServiceSelectDs100554 extends ServiceBase {
         localStorage.setItem('collab-last-ds-selected', JSON.stringify(list));
     }
 
-    private getDs() {
+    private async getDs() {
         const { project } = mls.actual[5];
         if (!project) throw new Error('Please, select a project');
-        const dsList = mls.l5.ds.list(project);
+        const dsList = await list(project);
 
         dsList.forEach((ds) => {
 
@@ -193,6 +193,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
         });
 
         this.state = this.state;
+        this.requestUpdate();
     }
 
     private _fireEventDsSelected(dsindex: number) {
@@ -236,7 +237,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
         try {
             await ds.init();
             await ds.dispose();
-            this.init();
+            await this.init();
             this.onItemClick(item);
             this.toogleBadge(this.checkIsALocalStorageChanges(), '_100554_serviceSave');
         } catch (err: any) {
@@ -259,6 +260,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         await super.firstUpdated(changedProperties);
         this.fireOpenDetails();
+        this.init();
     }
 
     private async restoreFile(storFile: mls.stor.IFileInfo) {
@@ -274,12 +276,12 @@ export class ServiceSelectDs100554 extends ServiceBase {
         this.requestUpdate();
     }
 
+
+
     render() {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-
-        this.init();
         if (this.state.actualProject) {
             let lastDsIndex = this.getLastDsSelectedByProject(this.state.actualProject);
             if (!lastDsIndex) lastDsIndex = 0;

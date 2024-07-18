@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_plus, collab_chevron_right } from './_100554_collabIcons';
-import { getDSInstance } from './_100554_libDesignSystem';
+import { getDSInstance , list } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -124,9 +124,8 @@ export class ServiceDsDocList100554 extends ServiceBase {
         const { project } = mls.actual[5];
         const { mode } = mls.actual[3];
 
-
         if (project === undefined || mode === undefined) return [];
-        const dss = mls.l5.ds.list(project);
+        const dss = await list(project);
         this.lastDsIndex = mode;
         this.lastProject = project;
         const dsInfo = dss[mode];

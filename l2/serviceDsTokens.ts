@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { getDSInstance } from './_100554_libDesignSystem';
+import { getDSInstance, list as listDs } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -178,7 +178,8 @@ export class ServiceDsTokens100554 extends ServiceBase {
         const { mode } = mls.actual[3];
         if (project === undefined || mode === undefined) throw new Error('No project or design system selected');
 
-        const dss = mls.l5.ds.list(project);
+        const dss = await listDs(project);
+
         const dsInfo = dss[mode];
         if (!dsInfo) return { tokensColors: '', tokensTypo: '', tokensCustom: '', resumeTokens: '' };
 
