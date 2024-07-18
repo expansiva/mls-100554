@@ -5,12 +5,13 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { IAssetsEventSelectedParams, IAssetsEventChangedParams } from './_100554_serviceDsAssets'
 import { initCollabInputTag } from './_100554_collabInputTag';
+import { getDSInstance, list } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
     folder: 'Pastas',
     inLocalStorage: 'Em local',
-    description: 'Descrição',
+    description: 'DescriÃ§Ã£o',
     tags: 'Tags',
     deleteFile: 'Deletar Arquivo',
 }
@@ -172,7 +173,7 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
         const { project } = mls.actual[5];
         const { mode } = mls.actual[3];
         if (project === undefined || mode === undefined) return;
-        this.ds = mls.l3.getDSInstance(project, mode);
+        this.ds = await getDSInstance(project, mode);
         await this.ds.init();
     }
 

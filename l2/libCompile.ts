@@ -1,6 +1,7 @@
 /// <mls shortName="libCompile" project="100554" enhancement="_blank" />
 
 // typescript new file
+import { getDSInstance } from './_100554_libDesignSystem';
 
 export const getDependenciesByHtml = (mfile: mls.l2.editor.IMFile, html: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
@@ -279,7 +280,7 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IM
     try {
 
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-        const ds = mls.l3.getDSInstance(mfile.project, dsindex);
+        const ds = await getDSInstance(mfile.project, dsindex);
         if (!ds) return;
         const css = await ds.components.getCSS(fullName)
         myCss.push(css);
@@ -296,7 +297,7 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IM
 async function getGlobalCss(mfile: mls.l2.editor.IMFile) {
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-        const ds = mls.l3.getDSInstance(mfile.project, dsindex);
+        const ds = await getDSInstance(mfile.project, dsindex);
         if (!ds) return;
         const css = await ds.css.getStylesInLess()
         return css;
@@ -308,7 +309,7 @@ async function getGlobalCss(mfile: mls.l2.editor.IMFile) {
 async function getTokens(myTokens: string[], mfile: mls.l2.editor.IMFile) {
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-        const ds = mls.l3.getDSInstance(mfile.project, dsindex);
+        const ds = await getDSInstance(mfile.project, dsindex);
         if (!ds) return;
         const tokens = await (ds.tokens as any)['getTokensCss']();
         myTokens.push(tokens);

@@ -5,6 +5,7 @@ import { customElement, query, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
+import { getDSInstance } from './_100554_libDesignSystem';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -310,7 +311,7 @@ export class ServiceSource100554 extends ServiceBase {
         scr.src = i2;
         div.appendChild(scr);
 
-        const ds = mls.l3.getDSInstance(100554, 0);
+        const ds = await getDSInstance(100554, 0);
         if (ds) {
             await ds.init();
             ds.components.getCSS('_100554_mlsHistoryList').then((css) => {

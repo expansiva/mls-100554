@@ -549,6 +549,8 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
             const info = mls.l5.getProjectSettings(prj);
 
+            if (!info) return;
+
             let str = info.projectURL.split('/');
             str = str.filter((item: string) => item.trim() !== "");
 
@@ -589,11 +591,11 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
         let settings = mls.l5.getProjectSettings(project);
         let details = mls.l5.getProjectDetails(project);
-        if (!details) return;
+        if (!details || !settings) return;
 
-        this.designSystems = settings.designSystems ? settings.designSystems.length : 0;
+        // this.designSystems = settings.designSystems ? settings.designSystems.length : 0; //TODO: ler arquivo config
 
-        this.name = settings.name;
+        this.name = details.name;
         this.projectDriver = settings.projectDriver;
         this.projectCreatedAt = new Date(details.created_at).toLocaleString();
         this.projectOwner = details.owner;
@@ -656,6 +658,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     private async setReadme() {
 
+        debugger;
         const project = mls.actual[5].project;
         if (!project) {
             return;
@@ -672,7 +675,31 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         if (typeof res !== 'string') return;
         if (!this.mkEditor) return;
         this.mkEditor.text = res;
-        
+        this.mkEditor.cbFinishEdit = this.onChangeMd.bind(this);
+
+    }
+
+    private async onChangeMd() {
+
+        debugger;
+
+        const project = mls.actual[5].project;
+        if (!project) {
+            return;
+        }
+        const fileName = 'README';
+        if (!this.mkEditor) return;
+        const content = this.mkEditor.text;
+        console.info(content);
+        const keyToFilePackage = mls.stor.getKeyToFiles(project, 0, fileName, '', '.md');
+        let file = mls.stor.files[keyToFilePackage];
+        if (!file) return;
+        const fileInfo: mls.stor.IFileInfoValue = {
+            content,
+            contentType: 'string',
+        };
+        await mls.stor.localStor.setContent(file, fileInfo);
+
     }
 
 
@@ -923,10 +950,28 @@ export class ServiceProjectDetails100554 extends ServiceBase {
             projects.forEach((p: any) => {
                 try {
                     const json = JSON.parse(p.value);
-                    if (
+                    let projectDriver = '';
+                    let projectURL = '';
+
+                    if (!json.projectURL && json.l5_actionPrjSettings) {
+
+                        projectDriver = json.l5_actionPrjSettings.projectDriver || '';
+                        projectURL = json.l5_actionPrjSettings.projectURL || '';
+
+                    } else if (json.projectURL) {
+
+                        projectDriver = json.projectDriver || '';
+                        projectURL = json.projectURL || '';
+
+                    }
+
+                    if (!projectDriver || !projectURL || projectDriver === 'mls') return;
+
+                    /*if (
                         !json.l5_actionPrjSettings ||
                         !json.l5_actionPrjSettings.projectDriver ||
-                        json.l5_actionPrjSettings.projectDriver === 'mls') return;
+                        json.l5_actionPrjSettings.projectDriver === 'mls') return;*/
+
                     prj.push(p);
 
                 } catch (e) {

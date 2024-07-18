@@ -4,8 +4,9 @@ import { html, css, LitElement, classMap } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase } from './_100554_serviceBase';
 import { CollabLitElement } from './_100554_collabLitElement';
+import { IPrjDesignSystem, list } from './_100554_libDesignSystem';
 
-export const initServiceSelectDsAdd = () =>{
+export const initServiceSelectDsAdd = () => {
     return true;
 }
 
@@ -46,7 +47,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceSelectDsAdd100554 extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
-    
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property()
@@ -143,11 +144,12 @@ export class ServiceSelectDsAdd100554 extends CollabLitElement {
         }
     }
 
-    getDsAvaliable(): IDs[] {
+    async getDsAvaliable(): Promise<IDs[]> {
         const projects: number[] = this.getProjectsInMemory();
         const rc: IDs[] = [];
-        projects.forEach((prj) => {
-            const dsByPrj: mls.l5_common.IPrjDesignSystem[] = mls.l5['getProjectDesingSystems'](prj);
+
+        for await (let prj of projects) {
+            const dsByPrj: IPrjDesignSystem[] = await list(prj);
             dsByPrj.forEach((info) => {
                 rc.push({
                     dsindex: info.dsIndex,
@@ -156,7 +158,7 @@ export class ServiceSelectDsAdd100554 extends CollabLitElement {
                     widgetIOName: info.widgetIOName
                 });
             });
-        });
+        }
 
         return rc;
     }
@@ -299,7 +301,8 @@ export class ServiceSelectDsAdd100554 extends CollabLitElement {
         this.msg = messages[lang];
 
         this.state.project = mls.actual[5].project;
-        this.state.dsAvaliables = this.getDsAvaliable();
+        // this.state.dsAvaliables = this.getDsAvaliable();
+        this.state.dsAvaliables = [];
         return html`
             <section class="service-selectds-add">
                 ${this.renderScenario()}

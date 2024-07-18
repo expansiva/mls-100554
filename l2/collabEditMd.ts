@@ -34,6 +34,7 @@ export class CollabEditMd extends LitElement {
     get text() { return this.editor.value() || ''; }
 
     set text(src: string) {
+        debugger;
         if (!this.editor) return;
         this.editor.value(src);
     }
@@ -78,7 +79,6 @@ export class CollabEditMd extends LitElement {
         });
 
         this.editor.togglePreview();
-
         this.onOpenedChanged(this.getAttribute('opened') === 'true');
         if (cb) cb();
 
@@ -90,7 +90,6 @@ export class CollabEditMd extends LitElement {
         const isPreviewActive = this.editor.isPreviewActive();
         if (isPreviewActive) this.editor.togglePreview();
         this.onOpenedChanged(true);
-
     }
 
     private onFinishClick() {

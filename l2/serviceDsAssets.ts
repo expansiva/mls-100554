@@ -4,6 +4,7 @@ import { html, css, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initCollabInputTag, CollabInputTag } from './_100554_collabInputTag';
+import { getDSInstance } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -211,7 +212,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
     }
 
     private async initDsInstance(project: number, dsIndex: number) {
-        this.dsInstance = mls.l3.getDSInstance(project, dsIndex);
+        this.dsInstance = await getDSInstance(project, dsIndex);
         await this.dsInstance.init();
     }
 

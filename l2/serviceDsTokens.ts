@@ -3,6 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { getDSInstance } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -181,7 +182,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
         const dsInfo = dss[mode];
         if (!dsInfo) return { tokensColors: '', tokensTypo: '', tokensCustom: '', resumeTokens: '' };
 
-        this.dsInstance = mls.l3.getDSInstance(project, mode);
+        this.dsInstance = await getDSInstance(project, mode);
         await this.dsInstance.init();
 
         const { list } = this.dsInstance.tokens;
@@ -363,7 +364,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
         const tokens = this.getEditorsTokens();
         const colorsTokens = tokens.filter((item) => item.category === 'color');
 
-        (this.dsInstance?.tokens as any)['setTokenList'](tokens); // passar função pra lib
+        (this.dsInstance?.tokens as any)['setTokenList'](tokens); // passar funÃ§Ã£o pra lib
         let params: IEditorChangedEventsObj;
         if (this.isRightChange) {
             this.isRightChange = false;

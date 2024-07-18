@@ -3,15 +3,16 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { getDSInstance, list } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
     resume: 'Resumo',
     name: 'Nome',
     createdBy: 'Criado por',
-    lastUpdated:'Última atualização',
-    lastUpdatedBy: 'Última atualização por',
-    documentation: 'Documentação',
+    lastUpdated:'Ãšltima atualizaÃ§Ã£o',
+    lastUpdatedBy: 'Ãšltima atualizaÃ§Ã£o por',
+    documentation: 'DocumentaÃ§Ã£o',
     tokens:'Tokens',
     assets: 'Ativos',
     components: 'Componentes',
@@ -115,13 +116,13 @@ export class ServiceDetailsDs100554 extends ServiceBase {
         const { mode } = mls.actual[3];
         const { project } = mls.actual[5];
         if (mode === undefined || project === undefined) return;
-        this.ds = mls.l3.getDSInstance(project, mode);
+        this.ds = await getDSInstance(project, mode);
         await this.ds.init();
         this.setResume(project, mode);
     }
 
     private async setResume(project: number, index: number) {
-        const dsInfo = mls.l5.getProjectDesingSystems(project);
+        const dsInfo = await list(project);
         const { dsName } = dsInfo[index];
         if (!this.ds) return;
         this.state.name = dsName;

@@ -5,6 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { IEventDSWidgetsChangedParams } from './_100554_serviceDsComponentsList';
 import { initCollabInputTag, CollabInputTag } from './_100554_collabInputTag';
+import { getDSInstance } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -127,7 +128,7 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
         const { mode } = mls.actual[3];
 
         if (project === undefined || mode === undefined) return;
-        const ds = mls.l3.getDSInstance(project, mode);
+        const ds = await getDSInstance(project, mode);
         await ds.init();
         await ds.components.remove(this.state.name);
         this.state = undefined;
@@ -145,7 +146,7 @@ export class ServiceDsComponentDetails100554 extends ServiceBase {
         const { mode } = mls.actual[3];
 
         if (project === undefined || mode === undefined) return;
-        const ds = mls.l3.getDSInstance(project, mode);
+        const ds = await getDSInstance(project, mode);
         await ds.init();
         await (ds.components as any)['update'](this.state.name, this.state);
         const params: IEventDSWidgetsChangedParams = {

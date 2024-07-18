@@ -10,6 +10,8 @@ import { initServicePreviewView } from './_100554_servicePreviewView';
 import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
 import { IcaLitElement } from './_100554_icaLitElement';
 
+import { getDSInstance } from './_100554_libDesignSystem';
+
 /// **collab_i18n_start**
 const message_pt = {
     theme: 'Tema',
@@ -270,7 +272,7 @@ export class ServicePreview100554 extends ServiceBase {
     async connectedCallback() {
         super.connectedCallback();
         const dsIndex = mls.actual[3].mode && +this.level !== 2 ? mls.actual[3].mode : 0;
-        const ds = mls.l3.getDSInstance(mls.actual[5].project as any, dsIndex);
+        const ds = await getDSInstance(mls.actual[5].project as any, dsIndex);
         await ds.init();
     }
 
@@ -340,7 +342,6 @@ export class ServicePreview100554 extends ServiceBase {
         return true;
 
     }
-
     private requestUpdateAllIcaComponentsInPage() {
         const body = this.previousElementSibling
             ?.querySelector('service-preview-view-100554')

@@ -4,6 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_plus, collab_chevron_right } from './_100554_collabIcons';
+import { getDSInstance } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -132,7 +133,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
         if (!dsInfo) return [];
 
 
-        this.dsInstance = mls.l3.getDSInstance(project, mode);
+        this.dsInstance = await getDSInstance(project, mode);
         await this.dsInstance.init();
         this.list = [];
         const allItems: mls.l3.IDocInfo[] = [];

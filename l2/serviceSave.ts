@@ -4,7 +4,7 @@
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
-import { collab_branch, collab_plus } from './_100554_collabIcons';
+import { collab_branch } from './_100554_collabIcons';
 import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
 
 initServiceSaveaddBranch();
@@ -117,7 +117,7 @@ export class ServiceSave extends ServiceBase {
                 this.branch = obj.defaultBranchRef.name
             } else {
                 this.branch = obj.name;
-            } 
+            }
             if (this.menu.setMenuActive) this.menu.setMenuActive('initial');
             this.requestUpdate();
         };
@@ -462,11 +462,11 @@ export class ServiceSave extends ServiceBase {
 
     //-------- IMPLEMENTATION --------
 
-    private async init(isSetInfoProject:boolean = true) {
+    private async init(isSetInfoProject: boolean = true) {
 
         this.showLoader(true);
         this.scenery = 'save';
-        if(isSetInfoProject) await this.initInfoProject();
+        if (isSetInfoProject) await this.initInfoProject();
         await this.setInfos();
         this.showLoader(false);
 
@@ -477,14 +477,58 @@ export class ServiceSave extends ServiceBase {
         const prj = mls.actual[5].project;
         if (!prj) return;
 
-        const info = mls.l5.getProjectSettings(prj);
+        const info = this.getMyKeysBranch(prj);
+        if (!info) return;
 
-        let str = info.projectURL.split('/');
-        str = str.filter((item: string) => item.trim() !== "");
+        this.branch = info.branch;
+        this.owner = info.owner;
+        this.repo = info.repo;
+    }
 
-        this.branch = str[0];
-        this.owner = str[1];
-        this.repo = str[2];
+    private getMyKeysBranch(project: number): { branch: string, owner: string, repo: string } {
+
+        try {
+
+            if (!mls.stor.projects[project]) throw new Error('Not found projectInfo:' + project);
+
+            const obj = mls.l5.getProjectDetails(project);
+            if (!obj || !obj.value) throw new Error('Error getProjectDetails in:' + project);
+
+            const json = JSON.parse(obj.value);
+            if (!json) throw new Error('Error getProjectDetails .value json in:' + project);
+
+            let info = '';
+
+            if (!json.projectURL && json.l5_actionPrjSettings) {
+
+                info = json.l5_actionPrjSettings.projectURL;
+
+            } else if (json.projectURL) {
+
+                info = json.projectURL;
+
+            } else {
+                throw new Error('Error project info:' + project);
+            }
+
+            if (info.endsWith('/')) {
+                info = info.substring(0, info.length - 1);
+            }
+
+            const array = info.split('/');
+
+            if (array.length < 3) {
+                throw new Error('Insufficient information to progress');
+            }
+
+            return { branch: array[array.length - 3], owner: array[array.length - 2], repo: array[array.length - 1] };
+
+        } catch (e:any) {
+
+            throw new Error('Error get info branch: ' + e.message);
+
+        }
+
     }
 
     private showLoader(loader: boolean): void {
@@ -784,7 +828,7 @@ export class ServiceSave extends ServiceBase {
             this.branch = 'main';
             this.setLocalHIstoryCurrentInfoDriver();
             this.init(false)
-            
+
         } catch (e: any) {
 
             this.error = e.message;

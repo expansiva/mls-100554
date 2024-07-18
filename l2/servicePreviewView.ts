@@ -4,7 +4,7 @@ import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { CollabPageElement } from './_100554_collabPageElement'
+import { getDSInstance } from './_100554_libDesignSystem';
 
 export const initServicePreviewView = '';
 
@@ -160,17 +160,17 @@ export class ServicePreviewView extends LitElement {
         if (changedProperties.has('level')) {
             const oldLevel = changedProperties.get('level');
             if (!oldLevel) return;
-        
+
             if (this.level === '7') {
                 this.fireChangeICA();
                 this.load();
-            } else if (oldLevel === '7') { 
+            } else if (oldLevel === '7') {
                 this.load();
                 this.fireChangeICA();
             } else {
                 this.fireChangeICA();
             }
-            
+
         }
     }
 
@@ -391,7 +391,6 @@ export class ServicePreviewView extends LitElement {
         (iframe.contentDocument.body as any)['service'] = this.father;
 
         const ret = await getDependenciesByHtml(this.mfile, txt, true);
-
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
         this.mountCSS(ret, iframe);
@@ -651,7 +650,7 @@ export class ServicePreviewView extends LitElement {
         if (!project) throw new Error('No project selected');
 
         this.infoDS = {
-            ds: mls.l3.getDSInstance(project, 0),
+            ds: await getDSInstance(project, 0),
             level: +this.level,
             project
         }

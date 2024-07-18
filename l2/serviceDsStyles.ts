@@ -4,6 +4,7 @@ import { html, css } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
+import { getDSInstance } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -1080,7 +1081,7 @@ export class ServiceDsStyles extends ServiceBase {
         const { project } = mls.actual[5];
         const { mode } = mls.actual[3];
         if (project === undefined) throw new Error('No project selected!');
-        this.dsInstance = mls.l3.getDSInstance(project, mode);
+        this.dsInstance = await getDSInstance(project, mode);
         await this.dsInstance.init();
     }
 
@@ -1213,7 +1214,7 @@ export class ServiceDsStyles extends ServiceBase {
 
         this.firstStyleIndex = index || 0;
 
-        const dsInstance = mls.l3.getDSInstance(project, dsindex);
+        const dsInstance = await getDSInstance(project, dsindex);
         await dsInstance.init();
         const comp = await dsInstance.components.find(componentName);
         if (!comp) return;

@@ -5,6 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initServiceSelectDsAdd } from './_100554_serviceSelectDsAdd'
 import { collab_file, collab_undo, collab_location_dot, collab_unbalanced } from './_100554_collabIcons'
+import { getDSInstance , IPrjDesignSystem } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -142,7 +143,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
     private async initDsSelected(dsindex: number) {
         const { project } = mls.actual[5];
         if (!project) return;
-        const dsInstance = mls.l3.getDSInstance(project, dsindex);
+        const dsInstance = await getDSInstance(project, dsindex);
         await dsInstance.init();
     }
 
@@ -208,7 +209,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
         if (this.menu.setMenuActive) this.menu.setMenuActive('opAdd')
     }
 
-    private async onItemClick(item: mls.l5_common.IPrjDesignSystem) {
+    private async onItemClick(item: IPrjDesignSystem) {
         this.loading = true;
         this.serviceContent?.setAttribute('error', '');
 
@@ -226,9 +227,9 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
 
-    public async restoreDs(item: mls.l5_common.IPrjDesignSystem) {
+    public async restoreDs(item:IPrjDesignSystem) {
         if (!this.state.actualProject) return;
-        const ds = mls.l3.getDSInstance(this.state.actualProject, item.dsIndex);
+        const ds = await getDSInstance(this.state.actualProject, item.dsIndex);
         this.loading = true;
         this.setError('');
 
@@ -374,7 +375,7 @@ interface IState {
 }
 
 interface IHistory {
-    [key: number]: mls.l5_common.IPrjDesignSystem[]
+    [key: number]:IPrjDesignSystem[]
 }
 
 interface ILastDsSelected {
@@ -384,6 +385,6 @@ interface ILastDsSelected {
 interface IDSInfo {
     inLocalStorage: boolean,
     outdated: boolean,
-    dsInfo: mls.l5_common.IPrjDesignSystem,
+    dsInfo: IPrjDesignSystem,
     files: mls.stor.IFileInfo[]
 }

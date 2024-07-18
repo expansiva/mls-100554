@@ -2,6 +2,7 @@
 
 import { html, repeat, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { getDSInstance } from './_100554_libDesignSystem';
 
 export const initServicePreviewAddStyle = '';
 
@@ -155,7 +156,7 @@ export class ServicePreviewAddStyle extends LitElement {
 
     private async initds() {
 
-        this.dsInstance = mls.l3.getDSInstance(mls.actual[5].project as any, mls.actual[3].mode);
+        this.dsInstance = await getDSInstance(mls.actual[5].project as any, mls.actual[3].mode);
 
 
     }

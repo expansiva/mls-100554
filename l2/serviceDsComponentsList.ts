@@ -4,6 +4,7 @@ import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_cubes, collab_caret_righttv } from './_100554_collabIcons';
+import { getDSInstance } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -188,7 +189,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
             const { project } = mls.actual[5];
             const { mode } = mls.actual[3];
 
-            this.ds = mls.l3.getDSInstance(project as any, mode);
+            this.ds = await getDSInstance(project as any, mode);
             if (!this.ds) throw new Error('No found getDSInstance:' + mode + ',' + project);
 
             await this.ds.init();

@@ -3,6 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { getDSInstance } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -12,7 +13,7 @@ const message_pt = {
     revertTokensToOriginal: 'Reverter tokens para o original',
     addTheme: 'Adicionar tema',
     themeName: 'Nome do tema',
-    description: 'Descrição',
+    description: 'DescriÃ§Ã£o',
     confirm: 'Confirmar',
     cancel: 'Cancelar'
 
@@ -172,7 +173,7 @@ export class ServiceDsColors100554 extends ServiceBase {
 
         if (project === undefined || mode === undefined) return;
 
-        this.ds = mls.l3.getDSInstance(project, mode);
+        this.ds = await getDSInstance(project, mode);
         if (!this.ds) return;
         await this.ds.init();
         this.getThemes();

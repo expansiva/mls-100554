@@ -80,7 +80,7 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-
+    
     private info = {
         tot: 0,
         version: 0,

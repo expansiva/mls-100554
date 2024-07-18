@@ -1,15 +1,15 @@
 /// <mls shortName="processCssLit" project="100554" enhancement="_blank" />
 
 import { convertFileNameToTag } from './_100554_utilsLit'
+import { getDSInstance } from './_100554_libDesignSystem';
 
 export const MLS_GETDEFAULTDESIGNSYSTEM = '[[mls_getDefaultDesignSystem]]';
-
 
 export async function injectStyle(model: mls.l2.editor.IMFile, dsIndex: number): Promise<void> {
 
     const js = model.compilerResults?.prodJS;
     if (js && js.indexOf(MLS_GETDEFAULTDESIGNSYSTEM) === -1) return;
-    const ds = mls.l3.getDSInstance(model.project, dsIndex);
+    const ds = await getDSInstance(model.project, dsIndex);
     if (!ds) return;
     await ds.init();
     const fileName = `_${model.project}_${model.shortName}`;
