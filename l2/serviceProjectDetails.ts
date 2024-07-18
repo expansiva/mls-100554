@@ -6,6 +6,8 @@ import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_10
 import * as icons from './_100554_collabIcons';
 import { template_package, template_build, template_tsconfig } from './_100554_templatesNewProject';
 import { collab_spinner_clock } from './_100554_collabIcons';
+import { CollabEditMd } from './_100554_collabEditMd';
+
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -13,7 +15,7 @@ const message_pt = {
     detailsResume: 'Resumo',
     detailsConnections: 'Conexão',
     detailsBranchs: 'Branchs',
-    detailsFiles: 'Arquivos',
+    detailsFiles: 'Arquivos Iniciais',
     detailsFilesDesc: 'Atualiza os arquivos iniciais do projeto, que irão servir para compilar o projeto inicialmente, estes arquivos são criados automaticamente na criação do projeto',
     detailsInfo: 'Info',
     name: 'Nome',
@@ -61,7 +63,7 @@ const message_en = {
     detailsResume: 'Resume',
     detailsConnections: 'Connection',
     detailsBranchs: 'Branchs',
-    detailsFiles: 'Files',
+    detailsFiles: 'Files initials',
     detailsFilesDesc: 'Updates the project initial files, which we will use to compile the project initially, these files are created automatically when the project is created',
     detailsInfo: 'Info',
     name: 'Name',
@@ -141,6 +143,9 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     @query('.l5-project-list-history') historieEl: HTMLElement | undefined;
     @query('#button-see-project') buttonSeePrj: HTMLButtonElement | undefined;
 
+    @query('collab-edit-md-100554') mkEditor: CollabEditMd | undefined;
+
+
     constructor() {
         super();
         mls.events.addListener(5, 'ProjectSelected', (ev) => this.onProjectSelected(ev));
@@ -191,6 +196,9 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     //---------- WEBCOMPONENT----------------------
 
+    firstUpdated() {
+        this.setReadme();
+    }
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
@@ -646,6 +654,28 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         this.projectCreated = false;
     }
 
+    private async setReadme() {
+
+        const project = mls.actual[5].project;
+        if (!project) {
+            return;
+        }
+        const fileName = 'README';
+        const keyToFilePackage = mls.stor.getKeyToFiles(project, 0, fileName, '', '.md');
+        let file = mls.stor.files[keyToFilePackage];
+        if (!file) {
+            const content = `ReadMe: ${project}`;
+            file = await this.createFile(fileName, '.md', '', content);
+        }
+
+        const res = await file.getContent();
+        if (typeof res !== 'string') return;
+        if (!this.mkEditor) return;
+        this.mkEditor.text = res;
+        
+    }
+
+
     private async handleUpdateInitialFiles() {
 
         this.isUpdateFiles = true;
@@ -814,7 +844,6 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     private async loadProjectActual(project: number) {
         await mls.stor.server.loadProjectInfoIfNeeded(project);
-
     }
 
     private setOrgActual(project: number) {

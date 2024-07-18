@@ -3,6 +3,8 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
+import { template_package, template_build, template_tsconfig } from './_100554_templatesNewProject';
+
 import {
     collab_pull_request,
     collab_commit,
@@ -42,6 +44,10 @@ const message_pt = {
     log_5: "Renomeando projeto",
     log_6: "Criando arquivo de configuração",
     log_7: "Projeto criado com sucesso!",
+    log_8: "Criando arquivo inicial README.md",
+    log_9: "Criando arquivo inicial package.json",
+    log_10: "Criando arquivo inicial build.yml",
+    log_11: "Criando arquivo inicial tsconfig.json",
     log_error_03: "Por favor espere, outro usuário esta utilizando o repositório.",
     log_error_04: "Existe um repositório, mas não foi possível validar o usuário",
 }
@@ -78,9 +84,12 @@ const message_en = {
     log_5: "Renaming project",
     log_6: "Creating configuration file",
     log_7: "Project created successfully!",
+    log_8: "Creating initial README.md file",
+    log_9: "Creating initial package.json file",
+    log_10: "Creating initial build.yml file",
+    log_11: "Creating initial tsconfig.json file",
     log_error_03: "Please wait, another user is creating; ",
     log_error_04: " There is a repository, but I was unable to validate the user",
-
 }
 
 type MessageType = typeof message_en;
@@ -137,8 +146,8 @@ export class CollabNewProject extends CollabLitElement {
     }
 
     private urls: any = {
-        'github': 'https://github.com/',
-        'gitlab': 'https://gitlab.com/',
+        'GitHub': 'https://github.com/',
+        'GitLab': 'https://gitlab.com/',
     }
 
     render() {
@@ -164,8 +173,8 @@ export class CollabNewProject extends CollabLitElement {
                         <label>${this.msg.driverNameLabel}</label>
                         <select @change=${this.onSelectDriverChange}>
                             <option value=""></option>
-                            <option value="github">gitHub</option>
-                            <option value="gitlab">gitLab</option>
+                            <option value="github">GitHub</option>
+                            <option value="gitlab">GitLab</option>
                         </select>
                         ${!!this.errorDriver ? html`<small class="error"> ${this.errorDriver}</small>` : ''}
 
@@ -331,27 +340,6 @@ export class CollabNewProject extends CollabLitElement {
         this.actualTeams = ['admin']
     }
 
-    private async delay(time: number) {
-        await new Promise((resolve) => setTimeout(resolve, time));
-    }
-
-    private async delay2() {
-        return new Promise((resolve, reject) => {
-            resolve('free');
-        })
-    }
-    private async delayOk() {
-        return new Promise((resolve, reject) => {
-            resolve('Simulate ok');
-        })
-    }
-
-    private async delayError() {
-        return new Promise((resolve, reject) => {
-            reject(new Error('Simulate error'));
-        })
-    }
-
     private addLog(log: ILogs) {
         this.logs.push(log);
         this.requestUpdate();
@@ -372,6 +360,12 @@ export class CollabNewProject extends CollabLitElement {
             this.addLog({ pre: this.msg.log_init, log, status: "inprogress" });
             setTimeout(() => this.logsContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
             const rc = await fc();
+            if (rc && rc.error) {
+                const msg = log + ':' + rc.error;
+                this.changeStatusLastLog('error', msg);
+                this.setProgressError(true);
+                throw new Error(rc.error);
+            }
             this.changeStatusLastLog('finish');
             return rc;
         } catch (err: any) {
@@ -399,7 +393,6 @@ export class CollabNewProject extends CollabLitElement {
         else this.progress.classList.remove('finished')
     }
 
-    private PROJECTFIXED = 100570;
 
     private checkIsValidProjectName(name: string): boolean {
         if (!name || name.length <= 3) return false;
@@ -424,18 +417,15 @@ export class CollabNewProject extends CollabLitElement {
         const userNameCollab: string = this.getLoginUser() as string;
         if (!userNameCollab) return;
 
-        this.simulate();
-        return;
-
         try {
-            let percent = 16.6;
+            let percent = 10; // total de operações: 100/10 -> progress vai subir de 10 em 10%
             let newPercent = 0;
             this.setProgressError(false);
             this.setProgressFinished(false);
             this.setProgress(newPercent);
 
             const rc = await this.tryItem(async () => await this.instanceDriver?.verifyRepositoryNew(this.login, this.NEWREPONAME, userNameCollab), `${this.msg.log_0} ${this.NEWREPONAME}`);
-            if (rc === 'reuse') percent = 25;
+            if (rc === 'reuse') percent = 12, 5;  // nesse caso, diminui o numero de operações para 8, então progress vai subir de 12.5 em 12.5%
             newPercent += percent;
             this.setProgress(newPercent);
 
@@ -467,8 +457,7 @@ export class CollabNewProject extends CollabLitElement {
                             project: this.newProjectNumber,
                             projectDriver: this.drivers[this.driverName],
                             projectURL: `${this.urls[this.driverName]}main/${this.orgName}/mls-new/`,
-                            projectDependencies: []
-                        },
+                        } as any,
                         settings: {
                             id: 0,
                             name: this.newProjectName,
@@ -494,10 +483,26 @@ export class CollabNewProject extends CollabLitElement {
             newPercent += percent;
             this.setProgress(newPercent);
 
-            const newUrlProject = `${this.urls[this.driverName]}main/${this.orgName}/${newProjectName}/`
-            await this.tryItem(async () => { await this.createConfigFile(newProjectId); }, `${this.msg.log_6}`);
+            await this.tryItem(async () => await this.createInitialReadMe(newProjectId), this.msg.log_8);
             newPercent += percent;
             this.setProgress(newPercent);
+
+            await this.tryItem(async () => await this.createInitialBuildFile(newProjectId), this.msg.log_10);
+            newPercent += percent;
+            this.setProgress(newPercent);
+
+            await this.tryItem(async () => await this.createInitialPackageFile(newProjectId), this.msg.log_9);
+            newPercent += percent;
+            this.setProgress(newPercent);
+
+            await this.tryItem(async () => await this.createInitialConfigFile(newProjectId), this.msg.log_11);
+            newPercent += percent;
+            this.setProgress(newPercent);
+
+            // await this.tryItem(async () => { await this.createConfigFile(newProjectId); }, `${this.msg.log_6}`);
+            // newPercent += percent;
+            // this.setProgress(newPercent);
+
 
         } catch (err: any) {
             this.toogleForm(false);
@@ -511,67 +516,6 @@ export class CollabNewProject extends CollabLitElement {
         }));
 
     }
-
-    private async simulate() {
-        try {
-            let percent = 16.6;
-            let newPercent = 0;
-            this.setProgressError(false);
-            this.setProgressFinished(false);
-            this.setProgress(newPercent);
-            const rc = await this.tryItem(async () => await this.delay2(), this.msg.log_0);
-            if (rc === 'reuse') percent = 25;
-
-            newPercent += percent;
-            this.setProgress(newPercent);
-
-            if (rc === 'error' || rc === 'wait') {
-                const obj: any = {
-                    'wait': this.msg.log_error_03,
-                    'error': this.msg.log_error_04,
-                }
-                this.addLog({ pre: this.msg.log_error, log: obj[rc], status: "error" });
-                this.setProgressError(true);
-                this.toogleForm(false);
-                return;
-            }
-
-            if (rc === 'free') {
-                await this.tryItem(async () => await this.delay(2000), `${this.msg.log_1} ${this.NEWREPONAME} `);
-                newPercent += percent;
-                this.setProgress(newPercent);
-
-                await this.tryItem(async () => await this.delay(2000), `${this.msg.log_2} ${this.VALIDADEFILE} `);
-                newPercent += percent;
-                this.setProgress(newPercent);
-            }
-
-            await this.tryItem(async () => await this.delay(2000), `${this.msg.log_4}`);
-            newPercent += percent;
-            this.setProgress(newPercent);
-
-            await this.tryItem(async () => await this.delay(200), `${this.msg.log_5}`);
-            newPercent += percent;
-            this.setProgress(newPercent);
-
-            await this.tryItem(async () => await this.delay(2000), `${this.msg.log_6}`);
-            newPercent += percent;
-            this.setProgress(newPercent);
-
-        } catch (err: any) {
-            this.toogleForm(false);
-            return;
-        }
-
-        this.addLog({ pre: this.msg.log_ok, log: this.msg.log_7, status: "finish" });
-        this.setProgressFinished(true);
-
-        this.dispatchEvent(new CustomEvent('collab-new-project', {
-            detail: this.PROJECTFIXED, bubbles: true, composed: true
-        }));
-
-    }
-
 
     private async createConfigFile(project: number) {
         const newConfig: mls.l5_common.ProjectConfig = {
@@ -598,6 +542,40 @@ export class CollabNewProject extends CollabLitElement {
         await mls.stor.localStor.setContent(file, fileInfo);
     }
 
+
+    private async createInitialReadMe(project: number) {
+        const fileName = 'README.md';
+        const content = `ReadMe: ${project}`;
+        await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
+    }
+
+    private async createInitialBuildFile(project: number) {
+        const fileName = '.github/workflows/build.yml';
+        const content = template_build.template.trim();
+        await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
+    }
+
+    private async createInitialConfigFile(project: number) {
+        const fileName = 'tsconfig.json';
+
+        const paths = `
+        {
+            "lit": [
+                "./prel2/_100554_litElement.ts"
+            ],
+            "lit/decorators.js": [
+                "./prel2/_100554_litDecorators.ts"
+            ]
+        }`
+        const content = template_tsconfig.template.replace('[paths]', paths.trim()).trim();
+        await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
+    }
+
+    private async createInitialPackageFile(project: number) {
+        const fileName = 'package.json';
+        const content = template_package.template.replace('[project]', project.toString()).trim();
+        await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
+    }
 
     private onCardClick(opt: string, ev: MouseEvent) {
         const target = ev.target as HTMLElement;
