@@ -68,48 +68,47 @@ export const template_package = {
 export const template_build = {
     ext: '.yml',
     template: `
-    name: Build TypeScript
+name: Build TypeScript
 
-    on:
+on:
     push:
         branches:
-        - main  # ou a branch que você deseja monitorar
+          - main  # ou a branch que você deseja monitorar
     pull_request:
         branches:
-        - main  # ou a branch que você deseja monitorar
+          - main  # ou a branch que você deseja monitorar
 
-    jobs:
+jobs:
     build:
         runs-on: ubuntu-latest
 
         steps:
         - name: Checkout repository
-        uses: actions/checkout@v4
+          uses: actions/checkout@v4
 
         - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
+          uses: actions/setup-node@v4
+          with:
             node-version: '14'  # ou a versão do Node.js que você está usando
 
         - name: Install dependencies
-        run: npm install
+          run: npm install
 
         - name: Compile CI
-        run: npm run buildCI
+          run: npm run buildCI
 
         - name: Commit compiled files
-        run: |
+          run: |
             git config --global user.name 'github-actions[bot]'
             git config --global user.email 'github-actions[bot]@users.noreply.github.com'
             git add obj
             git commit -m "Compile TypeScript files"
-        env:
+            env:
             GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 
         - name: Push changes
-        run: git push
-        env:
+          run: git push
+          env:
             GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
-
     `
 }
