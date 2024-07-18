@@ -6,6 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { collab_branch } from './_100554_collabIcons';
 import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
+import { getMyKeysBranch } from './_100554_libCommom';
 
 initServiceSaveaddBranch();
 /// **collab_i18n_start**
@@ -477,7 +478,7 @@ export class ServiceSave extends ServiceBase {
         const prj = mls.actual[5].project;
         if (!prj) return;
 
-        const info = this.getMyKeysBranch(prj);
+        const info = getMyKeysBranch(prj);
         if (!info) return;
 
         this.branch = info.branch;
@@ -485,51 +486,6 @@ export class ServiceSave extends ServiceBase {
         this.repo = info.repo;
     }
 
-    private getMyKeysBranch(project: number): { branch: string, owner: string, repo: string } {
-
-        try {
-
-            if (!mls.stor.projects[project]) throw new Error('Not found projectInfo:' + project);
-
-            const obj = mls.l5.getProjectDetails(project);
-            if (!obj || !obj.value) throw new Error('Error getProjectDetails in:' + project);
-
-            const json = JSON.parse(obj.value);
-            if (!json) throw new Error('Error getProjectDetails .value json in:' + project);
-
-            let info = '';
-
-            if (!json.projectURL && json.l5_actionPrjSettings) {
-
-                info = json.l5_actionPrjSettings.projectURL;
-
-            } else if (json.projectURL) {
-
-                info = json.projectURL;
-
-            } else {
-                throw new Error('Error project info:' + project);
-            }
-
-            if (info.endsWith('/')) {
-                info = info.substring(0, info.length - 1);
-            }
-
-            const array = info.split('/');
-
-            if (array.length < 3) {
-                throw new Error('Insufficient information to progress');
-            }
-
-            return { branch: array[array.length - 3], owner: array[array.length - 2], repo: array[array.length - 1] };
-
-        } catch (e:any) {
-
-            throw new Error('Error get info branch: ' + e.message);
-
-        }
-
-    }
 
     private showLoader(loader: boolean): void {
 

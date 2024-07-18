@@ -2,6 +2,7 @@
 
 import { html, css, repeat, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { getMyKeysBranch } from './_100554_libCommom';
 
 export const initServiceSaveaddBranch = () => {
 }
@@ -142,7 +143,7 @@ export class ServiceSaveAddBRanch extends LitElement {
     renderForks() {
 
         if (this.listForks.length <= 0) return html``;
-        
+
         return html`
         <h4>Forks</h4>
         <ul>
@@ -191,19 +192,15 @@ export class ServiceSaveAddBRanch extends LitElement {
         if (!this.driver)
             this.driver = mls.stor.others.getDefaultDriver(prj);
 
-        const info = mls.l5.getProjectSettings(prj);
-
-        let str = info.projectURL.split('/');
-        str = str.filter((item: string) => item.trim() !== "");
-
-        this.branch = str[0];
-        this.owner = str[1];
-        this.repo = str[2];
+        const info = getMyKeysBranch(prj)
+        this.branch = info.branch;
+        this.owner = info.owner;
+        this.repo = info.repo;;
 
         this.getInfosRepo();
     }
 
-    private cancel():void {
+    private cancel(): void {
         this.mode = 'list';
         this.error = '';
         this.requestUpdate();
@@ -214,7 +211,7 @@ export class ServiceSaveAddBRanch extends LitElement {
         this.requestUpdate();
     }
 
-    private async addBranch(e:MouseEvent) {
+    private async addBranch(e: MouseEvent) {
 
         const el = e.target as HTMLElement;
         if (!el) return;
@@ -243,7 +240,7 @@ export class ServiceSaveAddBRanch extends LitElement {
             load.style.display = 'none';
             this.getInfosRepo();
 
-        } catch (e:any) {
+        } catch (e: any) {
             this.error = 'Erro: ' + e.message;
             console.info(e);
             load.style.display = 'none';
@@ -261,8 +258,8 @@ export class ServiceSaveAddBRanch extends LitElement {
         const prj = mls.actual[5].project;
         if (!prj) throw new Error('Project invalid');
 
-        await this.driver.createNewBranch({owner: this.owner, repo:this.repo, branch:this.branch, newBranch:name});
-        
+        await this.driver.createNewBranch({ owner: this.owner, repo: this.repo, branch: this.branch, newBranch: name });
+
     }
 
     private async getInfosRepo() {

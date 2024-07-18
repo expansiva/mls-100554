@@ -7,6 +7,7 @@ import * as icons from './_100554_collabIcons';
 import { template_package, template_build, template_tsconfig } from './_100554_templatesNewProject';
 import { collab_spinner_clock } from './_100554_collabIcons';
 import { CollabEditMd } from './_100554_collabEditMd';
+import { getMyKeysBranch } from './_100554_libCommom';
 
 
 /// **collab_i18n_start**
@@ -547,17 +548,10 @@ export class ServiceProjectDetails100554 extends ServiceBase {
             if (!this.driver || this.driver.shortName !== this.projectDriver)
                 this.driver = mls.stor.others.getDefaultDriver(prj);
 
-            const info = mls.l5.getProjectSettings(prj);
-
-            if (!info) return;
-
-            let str = info.projectURL.split('/');
-            str = str.filter((item: string) => item.trim() !== "");
-
-            this.branch = str[0];
-            this.owner = str[1];
-            this.repo = str[2];
-
+            const info = getMyKeysBranch(prj)
+            this.branch = info.branch;
+            this.owner = info.owner;
+            this.repo = info.repo;;
             this.getInfosRepo();
 
         }, 500)
