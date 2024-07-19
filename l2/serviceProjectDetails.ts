@@ -520,10 +520,10 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     //------------- IMPLEMENTATION-----------------------
 
     private keyLocalHistory = {
-        github: 'keyGitHub',
-        gitlab: 'keyGitLab'
+        GitHub: 'keyGitHub',
+        GitLab: 'keyGitLab'
     }
-
+    
     //-- braches
 
     private listForks: mls.stor.others.IFork[] = []
@@ -652,7 +652,6 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
     private async setReadme() {
 
-        debugger;
         const project = mls.actual[5].project;
         if (!project) {
             return;

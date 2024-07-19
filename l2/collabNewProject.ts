@@ -499,9 +499,9 @@ export class CollabNewProject extends CollabLitElement {
             newPercent += percent;
             this.setProgress(newPercent);
 
-            // await this.tryItem(async () => { await this.createConfigFile(newProjectId); }, `${this.msg.log_6}`);
-            // newPercent += percent;
-            // this.setProgress(newPercent);
+            await this.tryItem(async () => { await this.createConfigFile(newProjectId, this.orgName, this.newProjectName); }, `${this.msg.log_6}`);
+            newPercent += percent;
+            this.setProgress(newPercent);
 
 
         } catch (err: any) {
@@ -517,9 +517,14 @@ export class CollabNewProject extends CollabLitElement {
 
     }
 
-    private async createConfigFile(project: number) {
+    private async createConfigFile(project: number, orgName: string, projectName: string) {
         const newConfig: mls.l5_common.ProjectConfig = {
-            designSystems: [],
+            orgName,
+            designSystems: [{
+                dsIndex: '0',
+                dsName: projectName,
+                widgetIOName: '_100529_config_ds_default'
+            }],
             languages: []
         };
 

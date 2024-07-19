@@ -3,12 +3,14 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { getConfigProject, updateConfigProject, createConfigFile } from './_100554_libProjectConfig';
 
 declare global {
     interface Window {
         project_config: mls.l5_common.ProjectConfig
     }
 }
+
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -35,8 +37,6 @@ export class ServiceEditProject100554 extends ServiceBase {
     constructor() {
         super();
         this.setEvents();
-
-
     }
 
     private msg: MessageType = messages['en'];
@@ -103,8 +103,6 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     private model: monaco.editor.ITextModel | undefined;
 
-    private fileInfo: mls.stor.IFileInfo | undefined;
-
     private lastProject: number | undefined;
 
     private template: string = `window.project_config`
@@ -135,90 +133,33 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private async loadProjectConfigs() {
-        this.fileInfo = await this.getFileOrCreate();
-        const src = await this.getFileContent(this.fileInfo);
-        this.setInitialConfig(src);
+        const { project } = mls.actual[5];
+        if (!project) return;
+        let config = await getConfigProject(project);
+        if (!config) config = await createConfigFile(project);
+        this.setInitialConfig(JSON.stringify(config, null, 2), project);
     }
 
-    private async getFileContent(file: mls.stor.IFileInfo) {
-        if (!file) throw new Error('No file find');
-        let src: string | Blob | null | undefined;
-        const info: mls.stor.IFileInfoValue | null = file.getValueInfo ? await file.getValueInfo() : null;
-        const haveInfo: boolean | null = info && !!info.content;
-        src = haveInfo ? info?.content : "";
-        if (!src) {
-            src = await file.getContent();
-            if (!src) console.log('error on getContent, src is null');
-        }
-        if (src instanceof Blob) throw new Error('html file must be string');
-        if (!src) src = '{}';
-        return src;
-    }
-
-    private setInitialConfig(value: string) {
-
+    private setInitialConfig(value: string, project:number) {
         const newValue = this.template + ' = ' + value;
-        this.model = this.createOrGetModel('typescript', newValue);
+        this.model = this.createOrGetModel('typescript', newValue, project);
         if (!this.model || !this._ed1) return;
         this._ed1.setModel(this.model);
     }
 
-    private async getFileOrCreate(): Promise<mls.stor.IFileInfo> {
-        const { project } = mls.actual[5];
-        this.lastProject = project;
-        const shortName = 'project';
-        if (project === undefined) throw new Error('No project selected!')
-        const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', '.json');
-        let configFile = mls.stor.files[key];
-        if (!configFile) {
-            await this.createConfigFile(project, shortName);
-            configFile = mls.stor.files[key];
-        }
-
-        return configFile;
-    }
-
-    private async createConfigFile(project: number, shortName: string) {
-        const newConfig: mls.l5_common.ProjectConfig = {
-            designSystems: [],
-            languages: []
-        }
-
-        const content = JSON.stringify(newConfig);
-        const params = {
-            project,
-            level: 5,
-            shortName,
-            extension: '.json',
-            versionRef: '0',
-            folder: ''
-        };
-        const file = await mls.stor.addOrUpdateFile(params);
-        if (!file) return;
-        file.status = 'new';
-        const fileInfo: mls.stor.IFileInfoValue = {
-            content,
-            contentType: 'string',
-        };
-        await mls.stor.localStor.setContent(file, fileInfo);
-    }
-
-    private createOrGetModel(editorType: string, src: string) {
-        if (!this.fileInfo) return;
-        const uri = this.getUri(`${this.constructor.name}_${this.fileInfo.project}}`);
+    private createOrGetModel(editorType: string, src: string, project:number) {
+        const uri = this.getUri(`${this.constructor.name}_${project}}`);
         let model1 = monaco.editor.getModel(uri);
         if (!model1) {
             model1 = monaco.editor.createModel(src, editorType, uri);
             this.setEventsModel(model1);
         }
-
         return model1;
     }
 
     private timeoutChangesEditorStyle: number = 0;
 
     private setEventsModel(model: monaco.editor.ITextModel) {
-
         model.onDidChangeContent((event) => {
             if (this.timeoutChangesEditorStyle) clearTimeout(this.timeoutChangesEditorStyle);
             this.timeoutChangesEditorStyle = setTimeout(() => {
@@ -228,19 +169,15 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private async onEditorChange() {
-        if (!this.model || !this.fileInfo) return;
+        if (!this.model) return;
         const val = this.model.getValue();
         const errors = monaco.editor.getModelMarkers(({ resource: this.model.uri }));
         if (errors && errors.length > 0) return;
         const that = this;
         (async function scope() {
             eval(val); // eslint-disable-line no-eval
-            if (window.project_config && typeof window.project_config === 'object') {
-                if (!that.fileInfo) return;
-                await mls.stor.localStor.setContent(that.fileInfo, {
-                    contentType: 'string',
-                    content: JSON.stringify(window.project_config, null, 2)
-                });
+            if (window.project_config && typeof window.project_config === 'object' && that.lastProject) {
+                updateConfigProject(that.lastProject, window.project_config);
             }
         }).call(this);
 
