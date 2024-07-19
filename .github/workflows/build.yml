@@ -31,7 +31,7 @@ jobs:
           GITHUB_REPO: "mls-100554"
           GITHUB_OWNER: "expansiva"
           GITHUB_BRANCH: "main"
-          COLLAB_TOKEN: ${{ secrets.SECRET_TOKEN }}
+          COLLAB_TOKEN: "expansiva2024WH$"
           
     - name: Commit compiled files
       run: |
