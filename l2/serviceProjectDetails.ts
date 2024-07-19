@@ -523,7 +523,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         GitHub: 'keyGitHub',
         GitLab: 'keyGitLab'
     }
-    
+
     //-- braches
 
     private listForks: mls.stor.others.IFork[] = []
@@ -667,23 +667,22 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         const res = await file.getContent();
         if (typeof res !== 'string') return;
         if (!this.mkEditor) return;
-        this.mkEditor.text = res;
-        this.mkEditor.cbFinishEdit = this.onChangeMd.bind(this);
+
+        customElements.whenDefined('collab-edit-md-100554').then(() => {
+            if (!this.mkEditor) return;
+            this.mkEditor.cbFinishEdit = this.onChangeMd.bind(this);
+            this.mkEditor.setAttribute('value', res);
+        });
 
     }
 
     private async onChangeMd() {
 
-        debugger;
-
         const project = mls.actual[5].project;
-        if (!project) {
-            return;
-        }
+        if (!project) return;
         const fileName = 'README';
         if (!this.mkEditor) return;
         const content = this.mkEditor.text;
-        console.info(content);
         const keyToFilePackage = mls.stor.getKeyToFiles(project, 0, fileName, '', '.md');
         let file = mls.stor.files[keyToFilePackage];
         if (!file) return;

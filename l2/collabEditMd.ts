@@ -33,11 +33,6 @@ export class CollabEditMd extends LitElement {
 
     get text() { return this.editor.value() || ''; }
 
-    set text(src: string) {
-        if (!this.editor) return;
-        this.editor.value(src);
-    }
-
     firstUpdated(changedProperties: any) {
         super.firstUpdated(changedProperties);
         if (!(window as any).easymdeLoaded) {
@@ -51,7 +46,6 @@ export class CollabEditMd extends LitElement {
             document.head.appendChild(script);
         } else {
             this.initEditor();
-
         }
     }
 
@@ -68,8 +62,6 @@ export class CollabEditMd extends LitElement {
     private initEditor(cb?: Function): void {
         this.easyMDE = (window as any)['EasyMDE'];
         this._initEditor(cb);
-        this.text = this.value;
-
     }
 
     private onOpenedChanged(value: boolean) {
@@ -79,8 +71,19 @@ export class CollabEditMd extends LitElement {
         toolbar.classList.toggle('d-none', !this.openedToolbar);
     }
 
+    updated(changedProperties: Map<string | number | symbol, unknown>) {
+
+        if (changedProperties.has('value')) {
+            this.editor?.value(this.value);
+        }
+    }
+
 
     private _initEditor(cb?: Function): void {
+
+        if (!this.containerQuillEditor) return;
+
+        this.containerQuillEditor.value = this.value;
 
         this.editor = new this.easyMDE({
             element: this.containerQuillEditor,
@@ -88,7 +91,7 @@ export class CollabEditMd extends LitElement {
             status: false,
             autoDownloadFontAwesome: false
         });
-
+        this.editor.value(this.value);
         this.editor.togglePreview();
         this.onOpenedChanged(this.getAttribute('opened') === 'true');
         if (cb) cb();
