@@ -1,6 +1,6 @@
 /// <mls shortName="icaPageOverlayItem" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement, PropertyValueMap } from 'lit';
+import { html, LitElement, PropertyValueMap, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { WCDToolbox } from '_100554_wcdToolbox';
 import { IICADepths, getPosition } from './_100554_icaPageOverlayBase';
@@ -53,7 +53,11 @@ export class IcaPageOverlayItem extends LitElement {
         this.style.height = pos.height;
         this.style.top = pos.top;
         this.style.left = pos.left;
-        return html``;
+        let aux = '';
+        if (this.info.element.dataset.event && this.level === '2') {
+            aux = `<span style="display: flex; justify-content: center; align-items: center; width: 15px; background: var(--grey-color-darker); border-radius: 10px; padding: 2px; position: absolute; right: -8px; top: -9px; box-shadow: 0px 2px 4px #353535;"><svg style="fill:#fafa21; width:12px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288l111.5 0L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7l-111.5 0L349.4 44.6z"/></svg></span>`;
+        }
+        return html`${unsafeHTML(aux)}`;
     }
 
     //---------IMPLEMENTS--------------
