@@ -34,14 +34,25 @@ export class CollabEditMd extends LitElement {
     get text() { return this.editor.value() || ''; }
 
     set text(src: string) {
-        debugger;
         if (!this.editor) return;
         this.editor.value(src);
     }
 
     firstUpdated(changedProperties: any) {
         super.firstUpdated(changedProperties);
-        this.initEditor();
+        if (!(window as any).easymdeLoaded) {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js';
+            script.onload = () => {
+                (window as any).easymdeLoaded = true;
+                this.initEditor();
+
+            };
+            document.head.appendChild(script);
+        } else {
+            this.initEditor();
+
+        }
     }
 
     private cbFinishFc: Function | undefined;
@@ -58,7 +69,7 @@ export class CollabEditMd extends LitElement {
         this.easyMDE = (window as any)['EasyMDE'];
         this._initEditor(cb);
         this.text = this.value;
-        
+
     }
 
     private onOpenedChanged(value: boolean) {
