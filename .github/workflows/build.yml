@@ -26,6 +26,11 @@ jobs:
 
     - name: Compile CI
       run: npm run buildCI
+      env:
+          GITHUB_PROJECT: 100554
+          GITHUB_REPO: "mls-100554"
+          GITHUB_OWNER: "expansiva"
+          GITHUB_BRANCH: "main"
 
     - name: Commit compiled files
       run: |
