@@ -1,12 +1,12 @@
 /// <mls shortName="serviceSave" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { collab_branch } from './_100554_collabIcons';
 import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
 import { getMyKeysBranch } from './_100554_libCommom';
+import { getConfigProject, updateConfigProject } from './_100554_libProjectConfig';
 
 initServiceSaveaddBranch();
 /// **collab_i18n_start**
@@ -806,6 +806,21 @@ export class ServiceSave extends ServiceBase {
 
             this.showLoader(true);
 
+            if (!mls.l5.actualOrg) throw new Error('No organization selected');
+            const prj = mls.actual[5].project;
+            if (!prj) throw new Error('Not found project actual');
+
+            const actualOrg = Object.keys(mls.stor.orgs)[mls.l5.actualOrg];
+            const config = await getConfigProject(prj);
+            if (!config) throw new Error('Not found config file in this project');
+            const configOrg = config.orgName;
+
+            if (actualOrg !== configOrg) {
+                config.orgName = actualOrg;
+                await updateConfigProject(prj, config);
+            }
+
+        
             const txt = father.querySelector('textarea')
             const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
             const msg = txt ? txt.value : '';
