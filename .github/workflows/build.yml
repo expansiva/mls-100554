@@ -29,7 +29,7 @@ jobs:
       env:
           COLLAB_PROJECT: 100554
           COLLAB_REPO: "mls-100554"
-          COLLAB_OWNER: "expansiva"
+          COLLAB_OWNER: "mls"
           COLLAB_BRANCH: "main"
           COLLAB_DRIVER: "GitHub"
           COLLAB_TOKEN: ${{ vars.COLLAB_TOKEN }}
