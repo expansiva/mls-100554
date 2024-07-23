@@ -6,13 +6,18 @@ const FILENAME = 'project';
 const LEVEL = 5;
 const EXTENSION = '.json';
 
-export async function getConfigProject(project: number): Promise<mls.l5_common.ProjectConfig | undefined> {
+export async function getConfigProject(project: number, ignoreLocalChanges = false): Promise<mls.l5_common.ProjectConfig | undefined> {
     if (projectConfig[project]) return projectConfig[project];
     if (project === undefined) return undefined;
     const key = mls.stor.getKeyToFiles(project, LEVEL, FILENAME, '', EXTENSION);
     let configFile = mls.stor.files[key];
     if (!configFile) return undefined;
+    const lastStatus = configFile.inLocalStorage;
+    if (ignoreLocalChanges) {
+        configFile.inLocalStorage = false;
+    }
     const content = await configFile.getContent();
+    configFile.inLocalStorage = lastStatus;
     if (!content || typeof content !== 'string') return undefined;
     const config = JSON.parse(content);
     projectConfig[project] = config;

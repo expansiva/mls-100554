@@ -794,6 +794,8 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
+    private forceSaveL5ProjectFile: boolean = false;
+
     private async onSave(e: MouseEvent) {
 
         try {
@@ -804,23 +806,25 @@ export class ServiceSave extends ServiceBase {
             const father = el.closest('sectionsave') as HTMLDivElement;
             if (!father) return;
 
-            this.showLoader(true);
+            // this.showLoader(true);
 
             if (!mls.l5.actualOrg) throw new Error('No organization selected');
             const prj = mls.actual[5].project;
             if (!prj) throw new Error('Not found project actual');
 
             const actualOrg = Object.keys(mls.stor.orgs)[mls.l5.actualOrg];
-            const config = await getConfigProject(prj);
+            const config = await getConfigProject(prj, true);
+
             if (!config) throw new Error('Not found config file in this project');
             const configOrg = config.orgName;
 
             if (actualOrg !== configOrg) {
                 config.orgName = actualOrg;
                 await updateConfigProject(prj, config);
+                this.forceSaveL5ProjectFile = true;
             }
 
-        
+
             const txt = father.querySelector('textarea')
             const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
             const msg = txt ? txt.value : '';
@@ -934,6 +938,19 @@ export class ServiceSave extends ServiceBase {
     private getAllFileToSave(father: HTMLElement): mls.stor.IFileInfo[] {
 
         const ar: mls.stor.IFileInfo[] = [];
+        if (this.forceSaveL5ProjectFile) {
+            const allChecks = father.querySelectorAll('input[type="checkbox"][onlyStatusFather]');
+            allChecks.forEach((item: any) => {
+                if (item.instance
+                    && item.instance.level === 5
+                    && item.instance.shortName === 'project'
+                    && item.instance.extension === '.json') {
+                    item.checked = true;
+                }
+            });
+            this.forceSaveL5ProjectFile = false;
+        }
+
         const els = father.querySelectorAll('input[type="checkbox"][onlyStatusFather]:checked');
 
         els.forEach((el: any) => {
