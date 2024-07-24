@@ -113,17 +113,44 @@ export class IcaPageOverlayItem extends LitElement {
         if (origin !== "editor") this.selectOnHTML();
 
         const iHave = this.querySelector('wcd-toolbox-100554');
-        if(iHave) return;
-        
+        if (iHave) return;
+
+        const group = this.findAncestorWithIsicaGroup(this.info?.element);
+        if(group && (group as any).overlayRef){
+            (group as any).overlayRef.click();
+            return;
+        }
+
         await this.addWCDToolbox();
         if (this.level !== '4') return;
         //mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
         mls.events.fire(4, 'WCDEventChange' as any, `{"op":"Navigation"}`);
     }
 
+    private findAncestorWithIsicaGroup(element: HTMLElement | undefined) {
+
+        while (element) {
+            if (element !== this.info?.element && element.hasAttribute && element.hasAttribute('isicagroup') && element.getAttribute('isicagroup') === 'true') {
+                return element;
+            }
+
+            if (element.parentNode) {
+                element = element.parentNode as HTMLElement;
+            } else if ((element as any).host) {
+                // If inside a shadow DOM, move up to the host
+                element = (element as any).host as HTMLElement;
+            } else {
+                // Reached the top of the DOM tree
+                break;
+            }
+        }
+
+        return null;
+    }
+
     private async addWCDToolbox() {
         if (!this.overlay || !this.info || !this.level) return;
- 
+
         this.style.opacity = '';
         this.style.background = '';
 

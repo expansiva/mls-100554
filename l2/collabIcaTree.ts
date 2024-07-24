@@ -103,7 +103,7 @@ export class CollabFCATree extends CollabLitElement {
                     </div>
                     <div class="groupHiddenList" .info=${item} @click="${this.clickGroupHidden}">
                         <span class="mls-gpbtnslider-item fa fa-up-down-left-right" title="move" @click="${this.activeMove}"></span>
-                        <span class="mls-gpbtnslider-item fa classLock" @click="${this.setLock}"></span>
+                        
                         <span class="mls-gpbtnslider-item fa fa-trash" @click="${this.delEl}" title="remove"></span>
                     </div>
                 </div>
@@ -117,6 +117,8 @@ export class CollabFCATree extends CollabLitElement {
                 </ul>
             </li>
         `;
+
+        //<span class="mls-gpbtnslider-item fa classLock" @click="${this.setLock}"></span>
 
     }
 
