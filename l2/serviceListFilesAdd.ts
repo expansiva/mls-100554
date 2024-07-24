@@ -56,6 +56,11 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
     async connectedCallback() {
         super.connectedCallback();
+        await this.init();
+
+    }
+
+    private async init() {
         await this.getTemplates();
         this.loading = false;
     }
@@ -267,7 +272,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
         const props = getAttributeDefinitionsLit(root, subgroup, finalgroup);
         const res = props.map(line => {
             let cleanedLine = line.replace(/@property\(\{.*\}\)\s*/, ''); // Remove "@property({...}) "
-            cleanedLine = cleanedLine.replace(/=.+?;/, ';'); // Remove tudo apÛs o "=" atÈ o prÛximo ";"
+            cleanedLine = cleanedLine.replace(/=.+?;/, ';'); // Remove tudo ap√≥s o "=" at√© o pr√≥ximo ";"
             cleanedLine = 'abstract ' + cleanedLine;
             return cleanedLine;
         });
@@ -348,7 +353,7 @@ ${[interfaceString].join('\n')}
 
         if (obj.shortName === '') return false;
         if (obj.shortName.length === 0 || obj.shortName.length > 255) return false;
-        const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~∫∞""''``·‡‚„ÈËÍÌÔÛÙıˆ˙ÁÒ¡¿¬√…»Õœ”‘’÷⁄«—]/;
+        const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~¬∫¬∞""''``√°√†√¢√£√©√®√™√≠√Ø√≥√¥√µ√∂√∫√ß√±√Å√Ä√Ç√É√â√à√ç√è√ì√î√ï√ñ√ö√á√ë]/;
         if (invalidCharacters.test(obj.shortName)) return false;
 
         const key = mls.stor.getKeyToFiles(obj.project, obj.level, obj.shortName, obj.folder, obj.extension);
@@ -418,28 +423,52 @@ ${[interfaceString].join('\n')}
         return templates;
     }
 
+    private tryAccessMFile(project: number, shortName: string, maxAttempts: number): Promise<mls.l2.editor.IMFile | undefined> {
+        return new Promise((resolve, reject) => {
+            let attempts = 0;
+
+            const interval = setInterval(() => {
+
+                const value = mls.l2.editor.get({ project, shortName });
+                attempts++;
+                if ((value && value.compilerResults && value.compilerResults.prodJS)) {
+                    clearInterval(interval);
+                    resolve(value);
+                }
+
+                if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    reject(new Error('Max attempts reached without finding the variable.'));
+                }
+            }, 500);
+        });
+    }
+
+    async delay() {
+        await new Promise((resolve) => setTimeout(resolve, 30000));
+    }
+
     private async getEnhacementsInstancies(enhancementDetails: IEnhancementDetails[]) {
 
         const enhancementModules: IEnhancementModules = {};
 
         for await (let details of enhancementDetails) {
+
             const { value, key } = details;
             const storFile = mls.stor.files[value];
             if (!storFile) return;
             const { project, shortName } = storFile;
-            const mfile = mls.l2.editor.get({ project, shortName });
+
+            let mfile = mls.l2.editor.get({ project, shortName });
             if (!mfile) {
-                await this.loadMyMFiles(value, project);
+                this.loadMyMFiles();
+                await this.delay();
+                mfile = await this.tryAccessMFile(project, shortName, 20);
             }
 
-            if (!mfile) throw new Error('Error on load mfile')
+            if (!mfile) continue;
             let enhancementModule = await mls.l2.enhancement.getEnhancementModule(mfile);
-            if (!enhancementModule) {
-                await this.loadMyMFiles(value, project);
-                enhancementModule = await mls.l2.enhancement.getEnhancementModule(mfile);
-            };
-
-            if (!enhancementModule) throw new Error('Error on load enhancementModule')
+            if (!enhancementModule) continue;
 
             enhancementModules[key] = {
                 instance: enhancementModule,
@@ -458,15 +487,12 @@ ${[interfaceString].join('\n')}
     }
 
 
-    private async loadMyMFiles(key: string, project: number) {
-        const params = {} as mls.events.IFileAction;
-        const fEnh = mls.stor.files[key];
-        if (!fEnh) return;
-        params.action = 'preLoadProject' as typeof params.action;
-        params.level = +this.level;
-        params.project = project;
-        params.newProject = project;
-        await this.fireComunication(params);
+    private async loadMyMFiles() {
+        await mls.events.fire([2], 'ProjectLoaded', JSON.stringify({
+            project: 100554,
+            level: 2,
+            needCompile: true
+        }), 0);
     }
 
 }
