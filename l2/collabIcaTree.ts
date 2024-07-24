@@ -164,7 +164,8 @@ export class CollabFCATree extends CollabLitElement {
         const reentrance = (array: IInfoElCholdren[], element: HTMLElement) => {
 
             let info: IInfoElCholdren | undefined;
-            if (element.tagName.toLowerCase().startsWith('ica')) {
+            const tag = element.tagName.toLowerCase();
+            if (tag.startsWith('ica') && !tag.startsWith('ica-page-overlay')) {
 
                 info = { el: element as IcaLitElementBase, children: [] as any };
                 array.push(info);

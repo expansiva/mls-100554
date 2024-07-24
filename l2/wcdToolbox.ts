@@ -98,7 +98,7 @@ export class WCDToolbox extends CollabLitElement {
     }
 
     public updateBaseNoPadding(elBase: HTMLElement, elChange: HTMLElement): void {
-        return this._updateBaseNoPadding(elBase,elChange)
+        return this._updateBaseNoPadding(elBase, elChange)
     }
     public updateBackgroundAuxSize(tp: 'show' | 'hide' = 'hide'): void {
         return this._updateBackgroundAuxSize(tp);
@@ -158,7 +158,7 @@ export class WCDToolbox extends CollabLitElement {
     private timeResize = 0;
     private initObserverResize() {
 
-        if (!this.elICA ) return;
+        if (!this.elICA) return;
 
         if (this.resizeObserver) this.resizeObserver.disconnect();
         this.resizeObserver = new ResizeObserver(entries => {
@@ -170,8 +170,8 @@ export class WCDToolbox extends CollabLitElement {
                     const attr = this.getAttribute('needresize');
                     if (!this.elMain || attr === 'false') return;
                     this.updateSize(this.elMain, this, true);
-                    
-                }, 500) 
+
+                }, 500)
             }
         });
         this.resizeObserver.observe(this.elICA);
@@ -229,6 +229,8 @@ export class WCDToolbox extends CollabLitElement {
             }
 
         });
+
+        this.adjustPositionIfNecessary()
 
         if (lastHelper) {
             lastHelper.click();
@@ -640,6 +642,72 @@ export class WCDToolbox extends CollabLitElement {
 
     }
 
+    private adjustPositionIfNecessary() {
+
+        setTimeout(() => {
+
+            if (!this.shadowRoot) return;
+
+            const child: HTMLElement[] = [];
+            Array.from(this.shadowRoot.children).forEach((item) => {
+                const tag = item.tagName.toLocaleLowerCase();
+                const invalid = ['wcd-toolbox-aux-background', 'wcd-toolbox-title'];
+                if (invalid.includes(tag)) return;
+                child.push(item as HTMLElement);
+            });
+
+            if (child.length > 1) {
+
+                for (let idx = 0; idx < child.length; idx++) {
+
+                    const item1 = child[idx];
+                    const item2 = child[idx + 1];
+
+                    if (!item1 || !item2) continue;
+
+                    const rect1 = item1.getBoundingClientRect();
+                    const rect2 = item2.getBoundingClientRect();
+
+                    if (this.rectsOverlap(rect1, rect2)) {
+
+                        if (rect1.left < rect2.left) {
+                            // Ajusta a posição do segundo elemento
+                            item2.style.left = `${rect1.height + 20}px`;//`${rect1.right - rect1.left + 10}px`; // Move à direita do primeiro
+                        } else {
+                            // Ajusta a posição do primeiro elemento
+                            item1.style.left = `${rect2.height + 20}px`;//`${rect2.right - rect2.left + 10}px`; // Move à direita do segundo
+                        }
+
+                    }
+
+
+                }
+
+            }
+
+        }, 500);
+
+    }
+
+    private rectsOverlap(rect1: DOMRect, rect2: DOMRect): boolean {
+        return !(rect1.right < rect2.left ||
+            rect1.left > rect2.right ||
+            rect1.bottom < rect2.top ||
+            rect1.top > rect2.bottom);
+    }
+
+    private ensureVisibility(elem: HTMLElement) {
+
+        const rect = elem.getBoundingClientRect();
+
+        if (rect.right > window.innerWidth) {
+            elem.style.left = `${window.innerWidth - rect.width}px`;
+        }
+        if (rect.bottom > window.innerHeight) {
+            elem.style.top = `${window.innerHeight - rect.height}px`;
+        }
+    }
+
 
     //--------------CSS--------------------
     //z-index:9999;
@@ -927,12 +995,12 @@ export class WCDToolbox extends CollabLitElement {
             min-width: 150px;
             min-height: 50px;
             padding:.5rem;
-            border:1px solid var(--bg-primary-color-lighter);
+            border:1px solid var(--bg-secondary-color-darker);
             background:#fff;
             border-bottom-left-radius: 10px;
             border-bottom-right-radius: 10px;
             border-top-right-radius: 10px;
-            box-shadow: 0px 1px 4px 1px var(--bg-primary-color-lighter);
+            
             background:var(--bg-primary-color-lighter)
         }
 
