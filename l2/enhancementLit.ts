@@ -5,20 +5,84 @@ import { getComponentDependencies } from './_100554_dependenciesLit'
 import { validateTagName, validateRender } from './_100554_validateLit'
 import { setCodeLens } from './_100554_codeLensLit'
 import { injectStyle, getCssWithoutTag } from './_100554_processCssLit'
+import { getMessageKey } from "./_100554_collabLitElement";
 
+/// **collab_i18n_start**
+const message_pt = {
+    title1: "Criar um arquivo em branco.",
+    title2: "Criar um arquivo de pagina.",
+    title3: "Criar um web component em lit",
+    desc1: "Criar um arquivo em branco em lit 3.",
+    desc2: "Criar um arquivo do tipo pagina. Na pagina sera possivel manipular o globalState e dos eventos da pÃ¡gina",
+    desc3: "Criar um web component em lit 3 ,que serÃ¡ utilizado em pÃ¡ginas.\n O Lit Ã© um framework para criar web componentes rÃ¡pidos e com atualizaÃ§Ãµes dinÃ¢micas sem ter que repintar toda a tela.\n ApÃ³s criar o arquivo use a inteligÃªncia artificial para preparar o web component.",
+}
 
-export const getAddNewFileDetails = () =>{
+const message_en = {
+    title1: "Create a blank file.",
+    title2: "Create a page file.",
+    title3: "Create a web component in Lit",
+    desc1: "Create a blank file in Lit 3.",
+    desc2: "Create a page file. In the page, it will be possible to manipulate the globalState and the page events.",
+    desc3: "Create a web component in Lit 3 that will be used on pages.\n Lit is a framework for creating fast web components with dynamic updates without repainting the entire screen.\n After creating the file, use artificial intelligence to prepare the web component."
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en-us': message_en,
+    'pt-br': message_pt
+}
+/// **collab_i18n_end**
+
+const lang = getMessageKey(messages);
+let msg: MessageType = messages[lang];
+
+export const getAddNewFileDetails = () => {
     return [
         {
-            title: "Criar um arquivo em branco",
-            description: "Criar um arquivo em branco em lit 3.",
+            title: msg.title1,
+            description: msg.desc1,
             tags: ["lit", "html", "component"],
             example: ``,
             aimActionSuggest: ""
         },
         {
-            title: "Criar um web component em lit",
-            description: "Criar um web component em lit 3 ,que será utilizado em páginas.\n O Lit é um framework para criar web componentes rápidos e com atualizações dinâmicas sem ter que repintar toda a tela.\n Após criar o arquivo use a inteligência artificial para preparar o web component.",
+            title: msg.title2,
+            description: msg.desc2,
+            tags: ["lit", "html", "page"],
+            example: `
+import { CollabPageElement } from './_100554_collabPageElement'
+import { customElement } from 'lit/decorators.js';
+
+@customElement('[tagName]')
+export class [className] extends CollabPageElement {
+
+    initPage() {
+        window.globalState = {
+            tables: {
+                sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
+            },
+            newUser: {
+                name: '',
+                age: 0,
+                city: '',
+                sex: ''
+            },
+            sum: 0,
+        };
+    }
+
+    /// **collab_events_start**
+    handleClickbuttonSum() {
+        // here or code for event
+    }
+
+}`,
+            aimActionSuggest: ""
+        },
+        {
+            title: msg.title3,
+            description: msg.desc3,
             tags: ["lit", "html", "component"],
             example: `
 import { html, css, LitElement } from 'lit'; 
