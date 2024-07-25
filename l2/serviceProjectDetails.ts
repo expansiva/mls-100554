@@ -7,7 +7,7 @@ import * as icons from './_100554_collabIcons';
 import { template_package, template_build, template_tsconfig } from './_100554_templatesNewProject';
 import { collab_spinner_clock } from './_100554_collabIcons';
 import { CollabEditMd } from './_100554_collabEditMd';
-import { getMyKeysBranch } from './_100554_libCommom';
+import { getMyKeysBranch, getDateFormated } from './_100554_libCommom';
 
 
 /// **collab_i18n_start**
@@ -129,6 +129,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
     @property() projectOrg: string | undefined;
     @property() projectOwner: string | undefined;
     @property() projectCreatedAt: string | undefined;
+    @property() projectLastModified: string | undefined;
     @property() projectURL: string | undefined;
     @property() designSystems: number | undefined;
     @property() projectCreated: boolean = false;
@@ -258,7 +259,6 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                     
                 </section>
                 
-                
                 `
             }`
     }
@@ -272,7 +272,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
                         <ul class="listInfo">
                             <li style="margin-bottom:1rem;">
                                 <b>${this.msg.lastModified}:</b>
-                                <span style="font-style: italic;-">(In development)</span>
+                                <span style="font-style: italic;-">${this.projectLastModified}</span>
                             </li>
                             <li>
                                 <b><span>Total Files:</span></b>
@@ -589,6 +589,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
 
         // this.designSystems = settings.designSystems ? settings.designSystems.length : 0; //TODO: ler arquivo config
 
+        this.projectLastModified = getDateFormated(details.repository_lastModified || '');
         this.name = details.name;
         this.projectDriver = settings.projectDriver;
         this.projectCreatedAt = new Date(details.created_at).toLocaleString();

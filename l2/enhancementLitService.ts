@@ -8,9 +8,12 @@ import {
     setStylesProcessed as setStylesProcessedDefault,
 } from './_100554_enhancementLit';
 
+import { getMessageKey } from "./_100554_collabLitElement";
+
+/// **collab_i18n_start**
 const message_pt = {
     title: 'Criar um service em lit',
-    description: "Criar um service em lit 3 ,que será utilizado no sistema collab.\n O Lit é um framework para criar web componentes rápidos e com atualizações dinâmicas sem ter que repintar toda a tela.\n Após criar o arquivo use a inteligência artificial para preparar o web component."
+    description: "Criar um service em lit 3 ,que serÃ¡ utilizado no sistema collab.\n O Lit Ã© um framework para criar web componentes rÃ¡pidos e com atualizaÃ§Ãµes dinÃ¢micas sem ter que repintar toda a tela.\n ApÃ³s criar o arquivo use a inteligÃªncia artificial para preparar o web component."
 }
 
 const message_en = {
@@ -24,18 +27,8 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
+/// **collab_i18n_end**
 
-const getMessageKey = (messages: any): string => {
-  const keys = Object.keys(messages);
-  if (!keys || keys.length < 1) throw new Error('Error Message not valid for international');
-  const firstKey = keys[0];
-  const lang = (document.documentElement.lang || '').toLowerCase();
-  if (!lang) return firstKey;
-  if (messages.hasOwnProperty(lang)) return lang;
-  const similarLang = keys.find((key: string) => lang.substring(0, 2) === key);
-  if (similarLang) return similarLang;
-  return firstKey;
-}
 
 const lang = getMessageKey(messages)
 const msg: MessageType = messages[lang] ;
