@@ -9,7 +9,7 @@ import { getFormComponentsPrompt, getAttributeDefinitions } from './_100554_icaB
 import { initIcaSelectGroup, IcaSelectGroup } from './_100554_icaSelectGroup';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
-const myName = '_100554_aimActionAddIca';
+const myName = '_100554_aimActionAddIca' ;
 
 /// **collab_i18n_start**
 const message_pt = {
