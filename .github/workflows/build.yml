@@ -3,10 +3,26 @@ name: Build TypeScript
 on:
   push:
     branches:
-      - main  # ou a branch que você deseja monitorar
+      - main
+    paths:
+      - 'l1/**'
+      - 'l2/**'
+      - 'l3/**'
+      - 'l4/**'
+      - 'l5/**'
+      - 'l6/**'
+      - 'l7/**'
   pull_request:
     branches:
-      - main  # ou a branch que você deseja monitorar
+      - main
+    paths:
+      - 'l1/**'
+      - 'l2/**'
+      - 'l3/**'
+      - 'l4/**'
+      - 'l5/**'
+      - 'l6/**'
+      - 'l7/**'
 
 jobs:
   build:
