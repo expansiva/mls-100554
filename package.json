@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "adm-zip": "^0.5.14",
+    "less": "^4.2.0",
     "mls-ci": "git+https://github.com/expansiva/mls-ci.git",
     "node-fetch": "^2.7.0",
     "typescript": "^5.5.3"
