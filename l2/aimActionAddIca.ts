@@ -1,4 +1,4 @@
-/// <mls shortName="aimActionAddIca" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="aimActionAddIca" project="100554" enhancement="_100554_enhancementLit" groupName="other" /> 
 
 import { html, TemplateResult } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
