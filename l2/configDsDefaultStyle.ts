@@ -1,10 +1,20 @@
 /// <mls shortName="configDsDefaultStyle" project="100554" enhancement="_blank" groupName="other" />
 import { IDS, Common } from './_100554_configDsDefaultCommon';
-import { Token } from './_100554_configDsDefaultTokens';
+import {
+    DesignSystemIO,
+    StyleIO,
+    ComponentIO,
+    IComponentsStyleInfos,
+    IComponentsStyle,
+    IComponentInfo,
+    IDSRef
+} from './_100554_libDesignSystem';
 
-export class Style extends mls.l3.Style {
+import { Token } from './_100554_configDsDefaultTokens2';
 
-    constructor(dsIO: mls.l3.DesignSystemIO, ds: IDS, component: mls.l3.Component) {
+export class Style extends StyleIO {
+
+    constructor(dsIO: DesignSystemIO, ds: IDS, component: ComponentIO) {
         super(dsIO);
         this.ds = ds;
         this.methods = new Common(ds, dsIO);;
@@ -13,16 +23,16 @@ export class Style extends mls.l3.Style {
         this.prepareStyles();
     }
 
-    public list: mls.l3.IComponentsStyleInfos = {};
-    public add = (componentName: string, stylename: string, less: string, reference?: mls.l3.IDSRef) => this._addComponentStyle(componentName, stylename, less, reference);
+    public list: IComponentsStyleInfos = {};
+    public add = (componentName: string, stylename: string, less: string, reference?: IDSRef) => this._addComponentStyle(componentName, stylename, less, reference);
     public rename = (componentName: string, styleName: string, newName: string) => this._renameComponentStyle(componentName, styleName, newName);
     public remove = (componentName: string, styleName: string) => this._removeComponentStyle(componentName, styleName);
     public find = (componentName: string, styleName: string) => this._find(componentName, styleName);
 
     private ds: IDS;
     private methods: Common;
-    private component: mls.l3.Component;
-    private token: mls.l3.Token;
+    private component: ComponentIO;
+    private token: Token;
 
     private prepareStyles() {
         this.list = {};
@@ -37,12 +47,12 @@ export class Style extends mls.l3.Style {
         return `${componentName}_${styleName}`;
     }
 
-    private _find(componentName: string, exampleName: string): mls.l3.IComponentsStyle | null {
+    private _find(componentName: string, exampleName: string): IComponentsStyle | null {
         const key = this.getKeyComponentStyle(componentName, exampleName);
         return this.list[key];
     }
 
-    private async _addComponentStyle(componentName: string, stylename: string, less: string, reference?: mls.l3.IDSRef): Promise<void> {
+    private async _addComponentStyle(componentName: string, stylename: string, less: string, reference?: IDSRef): Promise<void> {
 
         const componentByName = this.component.find(componentName);
         if (!componentByName) throw new Error(`component: ${componentName} dont exists`);
@@ -50,7 +60,7 @@ export class Style extends mls.l3.Style {
         if (styleByName) throw new Error(`style with name: ${stylename} already exists in component: ${componentName}`);
 
         const fullpath = this.methods.getDsComponentStyleFilePath(componentName);
-        const newStyle: mls.l3.IComponentsStyle = {
+        const newStyle: IComponentsStyle = {
             stylename,
             reference,
             setStyleLessIO: (): Promise<boolean> => { return Promise.resolve(true) },
@@ -67,7 +77,7 @@ export class Style extends mls.l3.Style {
         }
     }
 
-    private _addComponentStyle2(component: mls.l3.IComponentInfo, style: mls.l3.IComponentsStyle) {
+    private _addComponentStyle2(component: IComponentInfo, style: IComponentsStyle) {
         style.setStyleLessIO = (content: string) => this._setStyleLessIO(style, component.name, content);
         style.getStyleLessIO = () => this._getStyleLessIO(style, component.name);
         const key = this.getKeyComponentStyle(component.name, style.stylename);
@@ -116,14 +126,14 @@ export class Style extends mls.l3.Style {
         }
     }
 
-    private async _getStyleLessIO(style: mls.l3.IComponentsStyle, componentName: string): Promise<string> {
+    private async _getStyleLessIO(style: IComponentsStyle, componentName: string): Promise<string> {
         const shortName = style.stylename;
         const fullpath = this.methods.getDsComponentStyleFilePath(componentName);
         const content = await this.methods.getContentFile(shortName, 'less', fullpath);
         return content as string;
     }
 
-    private async _setStyleLessIO(style: mls.l3.IComponentsStyle, componentName: string, content: string): Promise<boolean> {
+    private async _setStyleLessIO(style: IComponentsStyle, componentName: string, content: string): Promise<boolean> {
         const shortName = style.stylename;
         const fullpath = this.methods.getDsComponentStyleFilePath(componentName);
 
@@ -132,7 +142,7 @@ export class Style extends mls.l3.Style {
             return true;
         }
 
-        const lessTokens = await this.token.getTokensLess();
+        const lessTokens = await this.token.getTokensLess('Default');
 
         const contentWithLessTokens = content + '\n' + lessTokens;
         await this.methods.setContentFile(shortName, 'less', fullpath, content);

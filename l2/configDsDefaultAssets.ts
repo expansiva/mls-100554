@@ -1,9 +1,17 @@
 /// <mls shortName="configDsDefaultAssets" project="100554" enhancement="_blank" groupName="other" />
 import { IDS, Common } from './_100554_configDsDefaultCommon';
+import {
+    DesignSystemIO,
+    AssetIO,
+    IAssetInfos,
+    IAssetsInfo,
+    AssetsGroupType,
+    IDSRef
+} from './_100554_libDesignSystem';
 
-export class Asset extends mls.l3.Asset {
+export class Asset extends AssetIO {
 
-    constructor(dsIO: mls.l3.DesignSystemIO, ds: IDS) {
+    constructor(dsIO: DesignSystemIO, ds: IDS) {
         super(dsIO);
         this.ds = ds;
         this.methods = new Common(ds, dsIO);
@@ -13,13 +21,11 @@ export class Asset extends mls.l3.Asset {
     private ds: IDS;
     private methods: Common;
 
-    public add = (opt: { path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType, content: File, reference?: any }) => this._addAssets(opt.path, opt.shortname, opt.tags, opt.description, opt.assetType, opt.content, opt.reference);
-
-
-    public update = (path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType) => this._updateAsset(path, shortname, tags, description, assetType);
+    public add = (path: string, shortname: string, tags: string[], description: string, assetType: AssetsGroupType, content: File, reference?: IDSRef) => this._addAssets(path, shortname, tags, description, assetType, content, reference);
+    public update = (path: string, shortname: string, tags: string[], description: string, assetType: AssetsGroupType) => this._updateAsset(path, shortname, tags, description, assetType);
     public remove = (path: string, shortname: string) => this._removeAssets(path, shortname);
     public find = (path: string, shortname: string) => this._find(path, shortname);
-    public list: mls.l3.IAssetInfos = {};
+    public list: IAssetInfos = {};
 
     private prepareAssets() {
         this.list = {};
@@ -29,7 +35,7 @@ export class Asset extends mls.l3.Asset {
         });
     }
 
-    private _find(path: string, shortname: string): mls.l3.IAssetsInfo | null {
+    private _find(path: string, shortname: string): IAssetsInfo | null {
         const key = this.getKeyAsset(path, shortname);
         return this.list[key];
     }
@@ -38,7 +44,7 @@ export class Asset extends mls.l3.Asset {
         return `${path}_${shortname}`;
     }
 
-    private async _addAssets(path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType, content: File, reference: mls.l3.IDSRef): Promise<void> {
+    private async _addAssets(path: string, shortname: string, tags: string[], description: string, assetType: AssetsGroupType, content: File, reference?: IDSRef): Promise<void> {
 
         const newShortName = shortname.replace(/_/g, '-');
         const assetsByName = this.find(path, shortname);
@@ -48,7 +54,7 @@ export class Asset extends mls.l3.Asset {
         const fileNameWithoutExtension = newShortName.slice(0, extensionIndex);
         const fullpath = path;
 
-        const asset: mls.l3.IAssetsInfo = {
+        const asset: IAssetsInfo = {
             description,
             reference,
             content: '',
@@ -59,7 +65,7 @@ export class Asset extends mls.l3.Asset {
             type: assetType,
             last_updated_by: this.methods.getUser(),
             last_updated: this.methods.getDateNow(),
-        } as mls.l3.IAssetsInfo;
+        } as IAssetsInfo;
 
         const key = this.getKeyAsset(path, shortname);
         this.list[key] = asset;
@@ -74,7 +80,7 @@ export class Asset extends mls.l3.Asset {
 
     }
 
-    private async _updateAsset(path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType): Promise<void> {
+    private async _updateAsset(path: string, shortname: string, tags: string[], description: string, assetType: AssetsGroupType): Promise<void> {
 
         const assetsByName = this.find(path, shortname);
         if (!assetsByName) throw new Error(`assets: ${path}/${shortname} dont exists`);

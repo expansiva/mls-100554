@@ -1,9 +1,14 @@
 /// <mls shortName="configDsDefaultDocs" project="100554" enhancement="_blank" groupName="other" />
 import { IDS, Common } from './_100554_configDsDefaultCommon';
+import {
+    DesignSystemIO,
+    DocIO,
+    IDocInfos,
+    IDocInfo
+} from './_100554_libDesignSystem';
+export class Doc extends DocIO {
 
-export class Doc extends mls.l3.Doc {
-
-    constructor(dsIO: mls.l3.DesignSystemIO, ds: IDS) {
+    constructor(dsIO: DesignSystemIO, ds: IDS) {
         super(dsIO);
         this.ds = ds;
         this.methods = new Common(ds, dsIO);
@@ -17,7 +22,7 @@ export class Doc extends mls.l3.Doc {
     public update = (id: number, parentId: number, title: string, content: string) => this._updateDoc(id, parentId, title, content);
     public remove = (id: number) => this._removeDoc(id);
     public find = (id: number) => this._find(id);
-    public list: mls.l3.IDocInfos = {};
+    public list: IDocInfos = {};
 
     private prepareDocs() {
         this.list = {};
@@ -26,7 +31,7 @@ export class Doc extends mls.l3.Doc {
         });
     }
 
-    private _find(id: number): mls.l3.IDocInfo | null {
+    private _find(id: number): IDocInfo | null {
         return this.list[id];
     }
 
@@ -44,7 +49,7 @@ export class Doc extends mls.l3.Doc {
 
         const fullpath = this.methods.getDocsMlsFilePath();
         const index = this.getLastDocIndex() + 1;
-        const doc: mls.l3.IDocInfo = {
+        const doc: IDocInfo = {
             id: index,
             parentID,
             title,
@@ -61,7 +66,7 @@ export class Doc extends mls.l3.Doc {
         }
     }
 
-    private _addDoc2(doc: mls.l3.IDocInfo) {
+    private _addDoc2(doc: IDocInfo) {
         doc.getContent = () => this.getDocContent(doc);
         doc.setContent = (newcontent: string | null) => this.setDocContent(doc, newcontent);
         this.list[doc.id] = doc;
@@ -99,13 +104,13 @@ export class Doc extends mls.l3.Doc {
         }
     }
 
-    private async getDocContent(doc: mls.l3.IDocInfo): Promise<string> {
+    private async getDocContent(doc: IDocInfo): Promise<string> {
         const fullpath = this.methods.getDocsMlsFilePath();
         const content = await this.methods.getContentFile(doc.id.toString(), 'txt', fullpath);
         return content as string;
     }
 
-    private async setDocContent(doc: mls.l3.IDocInfo, content: string | null): Promise<boolean> {
+    private async setDocContent(doc: IDocInfo, content: string | null): Promise<boolean> {
 
         const fullpath = this.methods.getDocsMlsFilePath();
         if (content === null) {

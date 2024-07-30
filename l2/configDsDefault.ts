@@ -1,15 +1,16 @@
 /// <mls shortName="configDsDefault" project="100554" enhancement="_blank" groupName="other" />
-import { IDS, Common, Token as DSToken } from './_100554_configDsDefaultCommon';
+import { IDS, Common } from './_100554_configDsDefaultCommon';
 import { Doc } from './_100554_configDsDefaultDocs';
-import { Token } from './_100554_configDsDefaultTokens';
+import { Token } from './_100554_configDsDefaultTokens2';
 import { Asset } from './_100554_configDsDefaultAssets';
 import { Css } from './_100554_configDsDefaultCss';
 import { Component } from './_100554_configDsDefaultComponent';
-import { list } from './_100554_libDesignSystem';
+import { list, DesignSystemIO, IDSRef } from './_100554_libDesignSystem';
 
-export class _100554_configDsDefault {
+export class _100554_configDsDefault extends DesignSystemIO {
 
     constructor(project: number, dsindex: number) {
+        super();
         this.project = project;
         this.dsindex = dsindex;
     }
@@ -29,13 +30,14 @@ export class _100554_configDsDefault {
 
     private ds: IDS | undefined = undefined;
 
-    public docs: mls.l3.Doc | undefined;
-    public components: mls.l3.Component | undefined;
-    public tokens: mls.l3.Token | undefined;
-    public assets: mls.l3.Asset | undefined;
-    public css: mls.l3.Css | undefined;
+    public docs: Doc | undefined;
+    public components: Component | undefined;
+    public tokens: Token | undefined;
+    public assets:Asset | undefined;
+    public css: Css | undefined;
 
     private methods: Common = new Common(this.ds as IDS, this as any);
+
 
     private async _init() {
 
@@ -47,7 +49,9 @@ export class _100554_configDsDefault {
         // await this.prepareStorFiles(dsInfo.dsName);
 
         let mainDsFile;
-        mainDsFile = await this.methods.getContentFile(dsInfo.dsName, 'json', `ds/${dsInfo.dsName}`);
+        // mainDsFile = await this.methods.getContentFile(dsInfo.dsName, 'json', `ds/${dsInfo.dsName}`);
+        mainDsFile = await this.methods.getContentFile(dsInfo.dsName + '2', 'json', `ds/${dsInfo.dsName}`);
+
         if (!mainDsFile) return;
 
         this.ds = JSON.parse(mainDsFile as string);
@@ -66,7 +70,7 @@ export class _100554_configDsDefault {
 
     }
 
-    private async _createDs(project: number, dsindex: number, createdAt: string, reference: mls.l3.IDSRef): Promise<void> {
+    private async _createDs(project: number, dsindex: number, createdAt: string, reference: IDSRef): Promise<void> {
 
         const projectDsDetails: mls.l5_common.DesignSystem[] = await list(project);
         const dsInfo = projectDsDetails[dsindex];
@@ -86,7 +90,7 @@ export class _100554_configDsDefault {
 
     }
 
-    private async createDsByTemplate(defaultDsInfo: mls.l5_common.DesignSystem, dsInfo: mls.l5_common.DesignSystem, project: number, user: string, reference: mls.l3.IDSRef) {
+    private async createDsByTemplate(defaultDsInfo: mls.l5_common.DesignSystem, dsInfo: mls.l5_common.DesignSystem, project: number, user: string, reference: IDSRef) {
 
         await mls.stor.server.loadProjectInfoIfNeeded(project);
 
@@ -113,7 +117,7 @@ export class _100554_configDsDefault {
         }
     }
 
-    private async createEmptyDS(dsInfo: mls.l5_common.DesignSystem, user: string, reference: mls.l3.IDSRef) {
+    private async createEmptyDS(dsInfo: mls.l5_common.DesignSystem, user: string, reference: IDSRef) {
         const newDs: IDS = {
             name: dsInfo.dsName,
             created_by: user,

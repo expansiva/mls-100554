@@ -1,15 +1,15 @@
 /// <mls shortName="configDsDefaultCommon" project="100554" enhancement="_blank" groupName="other" />
-
+import { DesignSystemIO, ITokens, TokensCategories } from './_100554_libDesignSystem';
 export class Common {
 
-    constructor(ds: IDS | undefined, dsIO: mls.l3.DesignSystemIO) {
+    constructor(ds: IDS | undefined, dsIO: DesignSystemIO) {
         this.ds = ds;
         this.dsIO = dsIO;
     }
 
     private ds: IDS | undefined;
 
-    private dsIO: mls.l3.DesignSystemIO;
+    private dsIO: DesignSystemIO;
 
     public getUser(): string {
         return localStorage.getItem('loginUser') || '';
@@ -79,11 +79,22 @@ export class Common {
         this.mergeJSON();
         const fullpath = this.getDsMlsFilePath();
         const content = JSON.stringify(this.ds);
-        return this.setContentFile(this.ds.name, 'json', fullpath, content);
+        console.log(JSON.parse(content));
+        return true;
+        // return this.setContentFile(this.ds.name, 'json', fullpath, content);
     }
 
     private mergeJSON() {
-        if (!this.ds) return;
+
+        if (!this.ds ||
+            !this.dsIO.assets ||
+            !this.dsIO.tokens ||
+            !this.dsIO.components ||
+            !this.dsIO.assets ||
+            !this.dsIO.css ||
+            !this.dsIO.docs
+        ) return;
+
 
         const assetsKeys = Object.keys(this.dsIO.assets.list);
         const tokensKeys = Object.keys(this.dsIO.tokens.list);
@@ -100,64 +111,64 @@ export class Common {
         this.ds.assets.items = [];
 
         docsKeys.forEach((keyDoc) => {
-            if (!this.ds) return;
+            if (!this.ds || !this.dsIO.docs) return;
             this.ds.docs.items.push(this.dsIO.docs.list[+keyDoc]);
         });
         cssKeys.forEach((keyCss) => {
-            if (!this.ds) return;
+            if (!this.ds || !this.dsIO.css) return;
             this.ds.css.items.push(this.dsIO.css.list[keyCss]);
         });
         assetsKeys.forEach((keyAsset) => {
-            if (!this.ds) return;
+            if (!this.ds || !this.dsIO.assets) return;
             this.ds.assets.items.push(this.dsIO.assets.list[keyAsset]);
         });
-        tokensKeys.forEach((keyToken) => {
+        tokensKeys.forEach((theme) => {
+
+            if (!this.ds || !this.dsIO.tokens) return;
+            const list = this.dsIO.tokens.list;
             if (!this.ds) return;
-            if (Object.keys(this.dsIO.tokens.list).length === 1) { // only for test
+            let obj: ITokens | undefined = (this.ds.tokens.items as ITokens[]).find((item) => { item.themeName == theme });
+            if (!obj) {
+                obj = {
+                    color: {},
+                    global: {},
+                    typography: {},
+                    themeName: theme,
+                }
+            }
+            const cats = Object.keys(list[theme]);
+            cats.forEach((cat) => {
+                if (obj && !obj[cat as TokensCategories]) {
+                    obj[cat as TokensCategories] = {}
+                }
+                const tokens = Object.keys(list[theme][cat as TokensCategories]);
 
-                const list = this.dsIO.tokens.list as any;
-                const themes = Object.keys(list) as any[];
-
-                themes.forEach((theme: string) => {
-                    if (!this.ds) return;
-                    let obj: ITokens | undefined = (this.ds.tokens.items as ITokens[]).find((item) => { item.themeName == theme });
-                    if (!obj) {
-                        obj = {
-                            color: {},
-                            global: {},
-                            typography: {},
-                            themeName: theme,
-                        }
-                    }
-                    const cats = Object.keys(list[theme]);
-                    cats.forEach((cat) => {
-                        if (obj && !obj[cat as TokensCategories]) {
-                            obj[cat as TokensCategories] = {}
-                        }
-                        const tokens = Object.keys(list[theme][cat]);
-                        tokens.forEach((tok)=>{
-                            if(!obj) return;
-                            obj[cat as TokensCategories][tok] = list[theme][cat][tok]
-                        });
-                    });
+                tokens.forEach((tok) => {
+                    if (!obj) return;
+                    obj[cat as TokensCategories][tok] = list[theme][cat as TokensCategories][tok]
                 });
+            });
 
-            } else (this.ds.tokens.items as mls.l3.ITokenInfo[]).push(this.dsIO.tokens.list[keyToken]);
+            this.ds.tokens.items.push(obj);
+
         });
+
         componentsKeys.forEach((keyComp) => {
-            if (!this.ds) return;
+            if (!this.ds || !this.dsIO.components) return;
 
             const comp = this.dsIO.components.list[keyComp];
             comp.examples = [];
             comp.styles = [];
 
             examplesKeys.forEach((keyEx) => {
+                if (!this.dsIO.components) return;
                 const parts = keyEx.split('_');
                 const compName = '_' + [parts[1], parts[2]].join('_');
                 if (compName === keyComp) comp.examples.push(this.dsIO.components.examples.list[keyEx]);
             });
 
             stylesKeys.forEach((keySty) => {
+                if (!this.dsIO.components) return;
                 const parts = keySty.split('_');
                 const compName = '_' + [parts[1], parts[2]].join('_');
                 if (compName === keyComp) comp.styles.push(this.dsIO.components.styles.list[keySty]);
@@ -591,7 +602,7 @@ export interface IDS {
         items: mls.l3.IDocInfo[]
     },
     tokens: {
-        items: ITokens[] | mls.l3.ITokenInfo[]
+        items: ITokens[]
     },
     assets: {
         items: mls.l3.IAssetsInfo[]
@@ -604,110 +615,3 @@ export interface IDS {
     }
 }
 
-export abstract class DesignSystemIO {
-    abstract project: number | undefined;
-    abstract dsindex: number | undefined;
-    abstract createdBy: string;
-    abstract lastUpdated: string;
-    abstract lastUpdatedBy: string;
-    abstract docs: mls.l3.Doc | undefined;
-    abstract tokens: Token | undefined;
-    abstract css: mls.l3.Css | undefined;
-    abstract assets: mls.l3.Asset | undefined;
-    abstract components: mls.l3.Component | undefined;
-    abstract init: () => Promise<void>;
-    abstract remove: () => Promise<void>;
-    abstract create: (project: number, dsindex: number, createdAt: string, reference?: IDSRef) => Promise<void>;
-    abstract dispose: () => Promise<void>;
-}
-
-export abstract class Token {
-
-    constructor(ds: mls.l3.DesignSystemIO) {
-        this._ds = ds;
-    };
-
-    _ds: mls.l3.DesignSystemIO;
-
-    abstract list: ITokenInfo;
-
-    /**
-     * Adds a token to the system.
-     * @param {string} key - The key of the token to be added.
-     * @param {string} value - The value of the token to be added.
-     * @param {theme} theme - The name of theme where the token to be added.
-     * @param {category} category - The name of category where the token to be added.
-     * @param {TokensCategories} category - The category of the token.
-     * @returns {Promise<void>}  A Promise that resolves when the token has been successfully added.
-     */
-    abstract add: (key: string, value: string, theme: string, category: TokensCategories) => Promise<void>;
-
-    /**
-     * Retrieves the tokens in LESS format.
-     * @returns {Promise<string>} A promise that resolves to a string representing the tokens in LESS format.
-     */
-    abstract getTokensLess: (theme: string) => Promise<string>;
-
-
-    /**
-     * Retrieves the tokens in CSS format.
-     * @returns {Promise<string>} A promise that resolves to a string representing the tokens in CSS format.
-     */
-    abstract getTokensCss: (theme: string) => Promise<string>;
-
-    /**
-     * Updates the value of a specific token.
-     * @param {string} path - The path of the token to update.
-     * @param {string} newValue - The new value for the token.
-     * @param {theme} theme - The name of theme where the token to be updated.
-     * @returns {Promise<void>}  A Promise that resolves when the token has been successfully updated.
-     */
-    abstract update: (key: string, newValue: string, theme: string) => Promise<void>;
-
-    /**
-     * Removes a specific token.
-     * @param {string} key - The key of the token to remove.
-     * @param {theme} theme - The name of theme where the token to be removed.
-     * @returns {Promise<void>}  A Promise that resolves when the token has been successfully removed.
-     */
-    abstract remove: (key: string, theme: string) => Promise<void>;
-}
-
-
-export interface IDSRef {
-    project: number;
-    dsindex: number;
-    referenceAt?: Date;
-    index?: number;
-}
-
-export type ITokenInfo = {
-    [key: string]: ITokenInfo2;
-}
-
-export type ITokenInfo2 = {
-    [key in TokensCategories]: IToken;
-};
-
-export type IToken = {
-    [key: string]: string
-}
-
-export type TokensCategories = 'color' | 'typography' | 'global';
-
-export interface ITokens {
-    themeName: string,
-    color: IToken,
-    typography: IToken,
-    global: IToken
-}
-
-
-export interface IThemes {
-    [theme: string]: mls.l3.ITokenInfo[]
-}
-
-export interface ITheme {
-    description: string,
-    tokens: mls.l3.ITokenInfo[]
-}

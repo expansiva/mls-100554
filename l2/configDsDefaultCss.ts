@@ -1,11 +1,18 @@
 /// <mls shortName="configDsDefaultCss" project="100554" enhancement="_blank" groupName="other" />
+
 import { IDS, Common } from './_100554_configDsDefaultCommon';
-import { Token } from './_100554_configDsDefaultTokens';
+import {
+      DesignSystemIO,
+    CssIO,
+    ICssInfos,
+    ICssInfo
+} from './_100554_libDesignSystem';
+import { Token } from './_100554_configDsDefaultTokens2';
 import { PreCompileLess } from './_100554_configDsDefaultPreCompileLess';
 
-export class Css extends mls.l3.Css {
+export class Css extends CssIO {
 
-    constructor(dsIO: mls.l3.DesignSystemIO, ds: IDS) {
+    constructor(dsIO: DesignSystemIO, ds: IDS) {
         super(dsIO);
         this.ds = ds;
         this.methods = new Common(ds, dsIO);
@@ -15,14 +22,14 @@ export class Css extends mls.l3.Css {
 
     private ds: IDS;
     private methods: Common;
-    private tokens: mls.l3.Token;
+    private tokens: Token;
 
-    public list: mls.l3.ICssInfos = {};
+    public list: ICssInfos = {};
     public add = (name: string, content: string) => this._addCss(name, content);
     public setHTMLPreview = (content: string) => this._setHTMLPreview(content);
     public getHTMLPreview = () => this._getHTMLPreview();
     public find = (name: string) => this._find(name);
-    public getStylesInLess = () => this._getCssGlobalLess();
+    public getStylesInLess = (theme: string) => this._getCssGlobalLess(theme);
 
     private prepareCss() {
         this.list = {};
@@ -31,7 +38,7 @@ export class Css extends mls.l3.Css {
         });
     }
 
-    private _find(name: string): mls.l3.ICssInfo | null {
+    private _find(name: string): ICssInfo | null {
         return this.list[name];
     }
 
@@ -48,7 +55,7 @@ export class Css extends mls.l3.Css {
         const shortName = name;
         const fullpath = this.methods.getDsCssFilePath();
 
-        const css: mls.l3.ICssInfo = {
+        const css: ICssInfo = {
             name,
             getContent: (): Promise<string> => { return Promise.resolve('') },
             setContent: (): Promise<boolean> => { return Promise.resolve(true) }
@@ -63,7 +70,7 @@ export class Css extends mls.l3.Css {
         }
     }
 
-    private _addCss2(css: mls.l3.ICssInfo) {
+    private _addCss2(css: ICssInfo) {
         css.getContent = () => this.getCssContent(css);
         css.setContent = (newcontent: string | null) => this.setCssContent(css, newcontent);
         this.list[css.name] = css;
@@ -71,7 +78,7 @@ export class Css extends mls.l3.Css {
 
     private cacheCss: any = {};
 
-    private async getCssContent(css: mls.l3.ICssInfo): Promise<string> {
+    private async getCssContent(css: ICssInfo): Promise<string> {
 
         const shortName = css.name;
         const ext = this.getExtension(shortName);
@@ -98,10 +105,10 @@ export class Css extends mls.l3.Css {
         return content as string;
     }
 
-    private async setCssContent(css: mls.l3.ICssInfo, content: string | null): Promise<boolean> {
+    private async setCssContent(css: ICssInfo, content: string | null): Promise<boolean> {
         if (content === null) Promise.resolve(false);
 
-        const lessTokens = await this.tokens.getTokensLess();
+        const lessTokens = await this.tokens.getTokensLess('Default');
         const fullpath = this.methods.getDsCssFilePath();
         const contentWithLessTokens = content + '\n' + lessTokens;
         const shortName = css.name;
@@ -122,15 +129,14 @@ export class Css extends mls.l3.Css {
 
     }
 
-    private async _getCssGlobalLess(): Promise<string> {
-
+    private async _getCssGlobalLess(theme: string): Promise<string> {
         const preCompileLess = new PreCompileLess();
         const keys = Object.keys(this.list);
         const promisesDsLess = keys.map(async (css) => this.list[css].getContent());
         const resultsDsLess = await Promise.all(promisesDsLess);
         const lessStr = resultsDsLess.join('\n');
-        const tokens = await this.tokens.getTokensLess();
-        const res = await preCompileLess.execute(lessStr, tokens, this.ds.tokens.items, ':host', false);
+        const tokens = await this.tokens.getTokensLess(theme);
+        const res = await preCompileLess.execute(lessStr, tokens, 'Default', this.ds.tokens.items as any, ':host', false);
         return res;
 
     }
