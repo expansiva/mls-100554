@@ -495,7 +495,8 @@ export class CollabFCATree extends CollabLitElement {
         if (!inOver) inOver = 'false';
 
         if (!el || !el.info || inOver === 'true' || el.className.indexOf('activeBranch') >= 0) return;
-        el.info.el.style.border = '1px solid blue';
+        //el.info.el.style.border = '1px solid blue';
+        el.info.el.style.boxShadow = '0px 0px 2px #0909dd';
 
 
     }
@@ -511,7 +512,8 @@ export class CollabFCATree extends CollabLitElement {
         }
 
         el.removeAttribute('inOver');
-        el.info.el.style.border = '';
+        //el.info.el.style.border = '';
+        el.info.el.style.boxShadow = '';
 
 
     }
@@ -535,6 +537,7 @@ export class CollabFCATree extends CollabLitElement {
         }
 
         collab-ica-tree-100554 ul li .header {
+            border: 1px solid transparent;
             padding: .4rem;
             cursor: pointer;
         }
