@@ -738,7 +738,7 @@ export class ServiceSave extends ServiceBase {
 
         });
 
-        mls.stor.localDB.savePrjInfo(mls.actual[5].project as number, retArray); // save cache, dont await
+        //mls.stor.localDB.savePrjInfo(mls.actual[5].project as number, retArray); // save cache, dont await
 
     }
 
