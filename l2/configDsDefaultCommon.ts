@@ -674,10 +674,10 @@ export const initialtokensTypography = {
     "line-height-medium": "calc(@line-height-base-unit * 1.3)",
     "line-height-large": "calc(@line-height-base-unit * 1.5)",
     "font-weight-lighter": "100",
-    "line-height-light": "200",
-    "line-height-normal": "400",
-    "line-height-bold": "700",
-    "line-height-bolder": "900"
+    "font-weight-light": "200",
+    "font-weight-normal": "400",
+    "font-weight-bold": "700",
+    "font-weight-bolder": "900"
 };
 
 
