@@ -3,7 +3,9 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { getDSInstance } from './_100554_libDesignSystem';
+import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
+import { CollabLitElement } from './_100554_collabLitElement';
+
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -38,27 +40,27 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 @customElement('service-ds-colors-100554')
-export class ServiceDsColors100554 extends ServiceBase {
+export class ServiceDsColors100554 extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
     
     constructor() {
         super();
-        this.setEvents();
+        // this.setEvents();
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    public details: IService = {
-        icon: '&#xf53f',
-        state: 'foreground',
-        tooltip: 'Colors',
-        visible: false,
-        position: "right",
-        tags: ['ds_tokens'],
-        widget: '_100554_serviceDsColors',
-        level: [3]
-    }
+    // public details: IService = {
+    //     icon: '&#xf53f',
+    //     state: 'foreground',
+    //     tooltip: 'Colors',
+    //     visible: false,
+    //     position: "right",
+    //     tags: ['ds_tokens'],
+    //     widget: '_100554_serviceDsColors',
+    //     level: [3]
+    // }
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opHelper') return this.showHelper();
@@ -95,19 +97,19 @@ export class ServiceDsColors100554 extends ServiceBase {
     }
 
     setEvents() {
-        mls.events.addEventListener([3], ['DSColorChanged'], (ev) => {
-            const visible = this.visible === 'true';
-            if (!visible) return;
-            this.onDSColorChanged(ev);
-        });
+        // mls.events.addEventListener([3], ['DSColorChanged'], (ev) => {
+        //     const visible = this.visible === 'true';
+        //     if (!visible) return;
+        //     this.onDSColorChanged(ev);
+        // });
 
-        mls.events.addEventListener([3], ['DSTokenSelected'], (ev) => {
-            this.showNav2Item(true);
-        });
+        // mls.events.addEventListener([3], ['DSTokenSelected'], (ev) => {
+        //     this.showNav2Item(true);
+        // });
 
-        mls.events.addEventListener([3], ['DSTokenUnSelected'], (ev) => {
-            this.showNav2Item(false);
-        });
+        // mls.events.addEventListener([3], ['DSTokenUnSelected'], (ev) => {
+        //     this.showNav2Item(false);
+        // });
     }
 
     private actualTokens: IThemesTokens | undefined;
@@ -130,7 +132,7 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     private selectedTheme: string = 'default';
 
-    private ds: mls.l3.DesignSystemIO | undefined;
+    private ds: DesignSystemIO | undefined;
 
     private keysName: any = {
         default: '',
@@ -186,18 +188,18 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     async connectedCallback() {
         super.connectedCallback();
-        this.loading = true;
+        // this.loading = true;
         await this.init();
-        this.loading = false;
+        // this.loading = false;
     }
 
-    private setTooltip() {
-        if (!this.tooltipEl) return;
-        if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_add as HTMLElement);
-        if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_delete as HTMLElement);
-        if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_update as HTMLElement);
-        if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_revert as HTMLElement);
-    }
+    // private setTooltip() {
+    //     if (!this.tooltipEl) return;
+    //     if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_add as HTMLElement);
+    //     if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_delete as HTMLElement);
+    //     if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_update as HTMLElement);
+    //     if (this.tooltipEl) this.tooltipEl.tooltip(this.service_color_revert as HTMLElement);
+    // }
 
     private async getThemes() {
         this.themeList = await this.getAllThemes();
@@ -281,11 +283,11 @@ export class ServiceDsColors100554 extends ServiceBase {
     }
 
     private updateActualTokens() {
-        if (!this.ds) return;
-        const tokens = this.ds.tokens.list;
-        const arrTokens = Object.keys(tokens).map((tok) => tokens[tok]);
-        const onlyColorsTokens = arrTokens.filter((tok) => tok.category === 'color');
-        this.actualTokens = this.getTokens(onlyColorsTokens);
+        // if (!this.ds) return;
+        // const tokens = this.ds.tokens.list;
+        // const arrTokens = Object.keys(tokens).map((tok) => tokens[tok]);
+        // const onlyColorsTokens = arrTokens.filter((tok) => tok.category === 'color');
+        // this.actualTokens = this.getTokens(onlyColorsTokens);
     }
 
     private getColorsItem(data: IThemes) {
@@ -302,7 +304,7 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     private async onChangeTokens(fireEvent: boolean = false) {
 
-        this.setError('');
+        //this.setError('');
         if (!this.actualTokens) return;
 
 
@@ -339,7 +341,7 @@ export class ServiceDsColors100554 extends ServiceBase {
 
 
     private onChangeTheme(e: MouseEvent) {
-        this.setError('');
+        //this.setError('');
         const target = e.target as HTMLSelectElement;
         const theme = target.value;
         this.selectedTheme = theme;
@@ -347,7 +349,7 @@ export class ServiceDsColors100554 extends ServiceBase {
     }
 
     private handleAddThemeClick() {
-        this.setError('');
+        //this.setError('');
         this.showAddContainer = true;
     }
 
@@ -357,11 +359,11 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     private async onConfirmAction() {
 
-        this.setError('');
+        //this.setError('');
         const onlyLetterNumbers = /^[a-zA-Z0-9]+$/;
         if (!this.service_color_inp_themename || !this.service_color_inp_themedesc) return;
         if (!onlyLetterNumbers.test(this.service_color_inp_themename.value)) {
-            this.setError('Theme name accept only letters and numbers!');
+            //this.setError('Theme name accept only letters and numbers!');
             return;
         }
         await this.saveTheme(this.service_color_inp_themename.value, this.service_color_inp_themedesc.value);
@@ -369,9 +371,9 @@ export class ServiceDsColors100554 extends ServiceBase {
     }
 
     private async updateTheme() {
-        this.setError('');
+        //this.setError('');
         if (this.themes[this.selectedTheme]?.isdefault || this.selectedTheme === 'default') {
-            this.setError('This is a system theme, cannot be updated!');
+            //this.setError('This is a system theme, cannot be updated!');
             return;
         }
         if (!this.actualTokens || !this.ds) return;
@@ -390,9 +392,9 @@ export class ServiceDsColors100554 extends ServiceBase {
 
 
     private async deleteTheme() {
-        this.setError('');
+        //this.setError('');
         if (this.themes[this.selectedTheme]?.isdefault || this.selectedTheme === 'default') {
-            this.setError('This is a system theme, cannot be deleted!');
+            // this.setError('This is a system theme, cannot be deleted!');
             return;
         }
         if (!this.ds) return;
@@ -417,7 +419,7 @@ export class ServiceDsColors100554 extends ServiceBase {
     }
 
     private async revertTokensColors() {
-        this.setError('');
+        // this.setError('');
         this.toogleIconOnAction(this.service_color_revert as HTMLElement, true);
         if (!this.ds || !this.actualTokens) return;
         try {
@@ -434,7 +436,7 @@ export class ServiceDsColors100554 extends ServiceBase {
 
             // mls.events.fire([3], ['DSColorChanged'], JSON.stringify(params), 0);
         } catch (err: any) {
-            this.setError(err.message);
+            // this.setError(err.message);
         } finally {
             this.toogleIconOnAction(this.service_color_revert as HTMLElement, false);
         }
@@ -486,7 +488,7 @@ export class ServiceDsColors100554 extends ServiceBase {
 
     firstUpdated(changedProperties: any) {
         super.firstUpdated(changedProperties);
-        this.setTooltip();
+        //this.setTooltip();
     }
 
     render() {

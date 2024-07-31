@@ -1,16 +1,10 @@
 /// <mls shortName="serviceDsStyleBorder" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": ["collab-ds-input-range-100554","collab-ds-input-select-color-100554"]
- * }
- */
-
-import { html, css, LitElement, repeat } from 'lit';
+import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -48,7 +42,7 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 @customElement('service-ds-style-border-100554')
-export class ServiceDsStyleBorder extends ServiceBase {
+export class ServiceDsStyleBorder extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
     
@@ -67,45 +61,6 @@ export class ServiceDsStyleBorder extends ServiceBase {
         this.setEvents();
     }
 
-    public details: IService = {
-        icon: '&#xf853',
-        state: 'foreground',
-        position: 'right',
-        tooltip: 'Border',
-        visible: false,
-        tags: ['ds_styles'],
-        widget: '_100554_serviceDsStyleBorder',
-        level: [3]
-
-    }
-
-    public onClickLink = (op: string): boolean => {
-        if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
-    }
-
-    public onClickIcon = (op: string): void => {
-    }
-
-    public menu: IMenu = {
-        title: 'Border',
-        actions: {
-        },
-        icons: {
-        },
-        actionDefault: '', // call after close icon clicked
-        iconDefault: '',
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon
-    }
-
-    onServiceClick(visible: boolean, reinit: boolean) {
-        if (visible) {
-            this.fireEventAboutMe();
-
-        }
-    }
 
     //-------------EVENTS--------------
 
@@ -114,32 +69,17 @@ export class ServiceDsStyleBorder extends ServiceBase {
             this.onstylechanged(ev.desc as any);
         });
 
-        mls.events.addEventListener([3], ['DSStyleSelected'], (ev) => {
-            this.onDSStyleSelected(ev);
-        });
-
-        mls.events.addEventListener([3], ['DSStyleUnSelected'], (ev) => {
-            this.onDSStyleUnSelected(ev);
-        });
-
         mls.events.addEventListener([3], ['DSStyleCursorChanged'], (ev) => {
             this.onDSStyleCursorChanged(ev);
         });
 
-
     }
 
     private onstylechanged(desc: string) {
-
         const obj: IEventsObj = JSON.parse(desc);
-        if (obj.emitter === 'left' && this.visible === 'true' && obj.value.length > 0) {
-
+        if (obj.emitter === 'left' && obj.value.length > 0) {
             this.setValues(obj.value);
-
         }
-
-
-
     }
 
     private setValues(ar: IBlockLessLine[]): void {
@@ -167,26 +107,11 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     }
 
-    private onDSStyleSelected(ev: mls.events.IEvent) {
-
-        const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
-        if (params.service.length > 0 && !params.service.includes(this.helper) || !this.serviceItemNav) return;
-        this.serviceItemNav.setAttribute('mode', 'A');
-        this.showNav2Item(true);
-
-    }
-
-    private onDSStyleUnSelected(ev: mls.events.IEvent) {
-        const params: IEventsSelectedObj = ev.desc ? JSON.parse(ev.desc) : [];
-        if (params.service.includes(this.helper) || !this.serviceItemNav) return;
-        this.showNav2Item(false);
-    }
 
     private onDSStyleCursorChanged(ev: mls.events.IEvent) {
         const rc: ICursorChangeEventsObj = JSON.parse(ev.desc as any);
         if (rc.helper === this.helper) {
-            if (this.visible === 'true' || !this.serviceItemNav) return;
-            this.serviceItemNav.click();
+            
         }
     }
 
@@ -197,10 +122,8 @@ export class ServiceDsStyleBorder extends ServiceBase {
     }
 
     render() {
-
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang]
-
         return html`${this.renderBorder()}${this.renderRadius()}${this.renderGallery()}`;
     }
 
@@ -323,7 +246,6 @@ export class ServiceDsStyleBorder extends ServiceBase {
         }
 
         const prop = group === 'border' ? group : 'border-radius';
-
         const elP1 = this.shadowRoot.querySelector(`*[prop="${info[group].p1}"]`) as HTMLInputElement;
         const elP2 = this.shadowRoot.querySelector(`*[prop="${info[group].p2}"]`) as HTMLInputElement;
         const elP3 = this.shadowRoot.querySelector(`*[prop="${info[group].p3}"]`) as HTMLInputElement;
@@ -336,8 +258,6 @@ export class ServiceDsStyleBorder extends ServiceBase {
         if (elP3) ar.push(elP3);
         if (elP4) ar.push(elP4);
 
-        console.info(ar);
-
         ar.forEach((i) => {
             i.value = value;
         });
@@ -349,39 +269,17 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
     }
 
-    private fireEventAboutMe(): void {
-
-        console.info('fireEventAboutMe')
-        const rc = {
-            emitter: 'right-get',
-        };
-
-        mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc), 500);
-    }
-
     private emitEvent(obj: IBlockLessLine) {
-
         if (this.myUpp) return;
         const rc: IEventsObj = {
-            emitter: this.position,
+            emitter: 'right',
             value: [obj],
             helper: this.helper
         };
-
         if (typeof mls !== 'object') return;
         mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
-
     }
 
-    private timeLoader = -1;
-    private showLoader(loader: boolean): void {
-
-        clearTimeout(this.timeLoader);
-        this.timeLoader = setTimeout(() => {
-            this.loading = loader;
-        }, 200);
-
-    }
 
     private clickGallery(e: MouseEvent): void {
 
@@ -396,7 +294,6 @@ export class ServiceDsStyleBorder extends ServiceBase {
 
             const [key, value] = item.split(':');
             if (!key) return;
-
             changes.push({
                 key: key.trim(),
                 value: value.trim()
@@ -411,7 +308,6 @@ export class ServiceDsStyleBorder extends ServiceBase {
         };
 
         this.setValues(changes);
-
         mls.events.fire([3], ['DSStyleChanged'], JSON.stringify(rc));
 
     }
@@ -437,11 +333,6 @@ export class ServiceDsStyleBorder extends ServiceBase {
 interface ICursorChangeEventsObj {
     emitter: 'left'
     helper: string,
-}
-
-interface IEventsSelectedObj {
-    service: string[]
-    isComponent: boolean
 }
 
 interface IEventsObj {
