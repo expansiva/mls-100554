@@ -140,10 +140,13 @@ export abstract class ServiceBase extends CollabLitElement {
         if (name === 'visible') {
             const visible = newVal === 'true';
             const reinit: boolean = oldVal !== null && visible !== false;
+
             if (this.onServiceClick && typeof this.onServiceClick === 'function') {
+
                 const nav3 = this.getNav3ServiceContent();
-                if (nav3) nav3.layout();
+                if (nav3) nav3.layout(); // resize
                 this.onServiceClick(visible, reinit, nav3);
+
             }
         }
 
