@@ -60,7 +60,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceListFiles extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    
+
     @property() mode: string = 'list';
 
     @property() project: number = 1;
@@ -80,7 +80,7 @@ export class ServiceListFiles extends ServiceBase {
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-    
+
     private info = {
         tot: 0,
         version: 0,
@@ -128,7 +128,7 @@ export class ServiceListFiles extends ServiceBase {
         if (visible && reinit) {
 
             this.init();
-            this.firstTimeVerifyProject();
+            //this.firstTimeVerifyProject();
 
         }
 
@@ -273,11 +273,11 @@ export class ServiceListFiles extends ServiceBase {
 
             auxS = `<b>[${this.info.storage}]</b> <span class="fa fa-location-dot"></span> <b>${this.msg.filesInLocalStorage}.</b>`;
         }
-
+        //verifyChangeInList
         return html`
         <div class="groupHeader">
             <div class="groupAction"> 
-                <a @click="${this.verifyChangeInList}" id="listUpdateFiles">${this.msg.updateListVerify}</a>
+                <a @click="${this.unzipSourceIfNeeded}" id="listUpdateFiles">${this.msg.updateListVerify}</a>
                 <a @click="${this.showAdd}">${this.msg.addNewFile}</a>
             </div>
             <div class="groupFilter">
@@ -380,16 +380,16 @@ export class ServiceListFiles extends ServiceBase {
         let auxHtml = '';
         const keyHtml = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.html');
 
-        const htmlLocal = mls.stor.files[keyHtml] && mls.stor.files[keyHtml].inLocalStorage; 
+        const htmlLocal = mls.stor.files[keyHtml] && mls.stor.files[keyHtml].inLocalStorage;
 
         if (file.inLocalStorage) {
 
-            auxStorage = `<span title=".ts${ htmlLocal ? ', .html' : ''} in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
-            
-        }else if (htmlLocal) {
+            auxStorage = `<span title=".ts${htmlLocal ? ', .html' : ''} in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
+
+        } else if (htmlLocal) {
 
             auxStorage = `<span title=".html in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
-            
+
         }
 
         if (file.hasError) {
@@ -491,7 +491,7 @@ export class ServiceListFiles extends ServiceBase {
 
         const iptProj = elContentAux.querySelector('.spanPrj input') as HTMLInputElement;
         const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
-                
+
         if (!father || !li) return;
 
         li.appendChild(elContentAux);
@@ -499,11 +499,11 @@ export class ServiceListFiles extends ServiceBase {
         iptProj.value = mls.actual[5].project as any;
         iptName.value = '';
         btnActCloneRename.onclick = async (e2: MouseEvent) => {
-    
+
             try {
 
                 e2.stopPropagation();
-                
+
                 this.validInputsAux(myfile, { mode: mode, project: iptProj.value, name: iptName.value });
 
                 this.fireEvents(mode, myfile, { project: +iptProj.value, shortName: iptName.value });
@@ -759,38 +759,12 @@ export class ServiceListFiles extends ServiceBase {
 
             }, 50000);
 
-            /*mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true).then(() => {
+        } catch (e: any) {
 
-                const key = Object.keys(mls.stor.files)?.filter((item) => item.indexOf((mls.actual[5].project as number).toString()) >= 0);
-                if (key.length > 0) {
-
-                    this.fireEvents('projectListChanged', mls.stor.files[key[0]], {}, 3000);
-                    mls.events.fireFileAction('updatedOnServer', mls.stor.files[key[0]], 'left', undefined, undefined, undefined, undefined, 3500);
-
-                }
-
-                this.changeList(3000);
-
-            });
-
-            setTimeout(() => {
-
-                if (!this) return;
-                el.innerText = 'update list/ verify';
-
-            }, 50000);*/
-
-        } catch (e) {
-
+            console.info('Error verifyChangeInList2:' + e.message);
             //this.shomMyError(e.message);
 
         }
-
-    }
-
-    private async verifyChangeInList3() {
-
-
 
     }
 
@@ -901,7 +875,7 @@ export class ServiceListFiles extends ServiceBase {
                 const key = mls.stor.getKeyToFiles(res[i].project, this.level, res[i].shortName, res[i].folder, res[i].extension);
                 if (!mls.stor.files[key]) {
                     res.splice(i, 1);
-                }else if (mls.stor.files[key] && mls.stor.files[key].status === 'nochange' && mls.stor.files[key].shortName !== file.shortName) {
+                } else if (mls.stor.files[key] && mls.stor.files[key].status === 'nochange' && mls.stor.files[key].shortName !== file.shortName) {
                     res.splice(i, 1);
                 }
             }
@@ -933,6 +907,81 @@ export class ServiceListFiles extends ServiceBase {
 
         return !mls.stor.files[key];
 
+    }
+
+
+
+
+    //----------UNZIP-----------------
+
+    private base64ToArrayBuffer(base64: string): ArrayBuffer {
+        const binaryString = atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    private async unzipBase64(base64: string): Promise<{ key: string, value: string }[]> {
+        const arrayBuffer = this.base64ToArrayBuffer(base64);
+        const zip = new (window['JSZip' as any] as any)();
+        const ret: { key: string, value: string }[] = [];
+        // Load the zip file
+        const content = await zip.loadAsync(arrayBuffer);
+        console.log(content);
+        // Extract files
+        for await (const [fileName, fileContent] of Object.entries(content.files)) {
+
+            if ((fileContent as any).dir) continue;
+
+            const fileData = await (fileContent as any).async("string"); // you can change "string" to other formats if needed
+            ret.push({ key: fileName, value: fileData });
+
+        }
+        return ret;
+    }
+
+    private async unzipSourceIfNeeded() {
+
+        const prj = mls.actual[5].project;
+        if (!prj) return;
+
+        const filesWithOutCache = (await mls.stor.cache.getStatesOfCache(prj)).filter(c => c.localCacheState !== 'HIT');
+
+        if (filesWithOutCache.length === 0) return;
+
+        const key = `${prj}_0_obj_source.zip`;
+        const fStor = mls.stor.files[key];
+        if (!fStor) {
+            console.info('Not found source.zip in this project');
+            return;
+        }
+
+        const b64 = await fStor.getContent();
+        if (!b64 || typeof b64 !== 'string') return;
+
+        const filesFromSource = await this.unzipBase64(b64);
+        console.info(filesFromSource); 
+
+        if (filesFromSource.length < 1) return;
+
+        for await (let info of filesWithOutCache) {
+
+            const stor = mls.stor.files[info.fileKey];
+            if (!stor || stor.project != prj) continue;
+
+            const auxL = stor.level === 0 ? '' : 'l' + stor.level+'/';
+            const name = `${auxL}${stor.folder.endsWith('/') ? stor.folder : stor.folder + '/'}${stor.shortName}${stor.extension}`;
+
+            const file = filesFromSource.filter((i) => i.key === name);
+            console.info(name, file)
+            if (file.length < 1) continue;
+
+            await mls.stor.cache.addIfNeed({project:prj, folder: stor.folder, shortName:stor.shortName, version:stor.versionRef, content:file[0].value, extension:stor.extension, contentType: stor.extension === '.js' ? 'application/javascript' : 'text/plain'})
+        }
+        
     }
 
 }
