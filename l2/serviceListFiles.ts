@@ -948,7 +948,7 @@ export class ServiceListFiles extends ServiceBase {
         const prj = mls.actual[5].project;
         if (!prj) return;
 
-        const filesWithOutCache = (await mls.stor.cache.getStatesOfCache(prj)).filter(c => c.localCacheState !== 'HIT');
+        const filesWithOutCache = (await mls.stor.cache.getStatesOfCache(prj)).filter(c => c.localCacheState === 'MISS' && c.fileKey.indexOf('_0_') < 0);
 
         if (filesWithOutCache.length === 0) return;
 
@@ -976,10 +976,19 @@ export class ServiceListFiles extends ServiceBase {
             const name = `${auxL}${stor.folder.endsWith('/') ? stor.folder : stor.folder + '/'}${stor.shortName}${stor.extension}`;
 
             const file = filesFromSource.filter((i) => i.key === name);
-            console.info(name, file)
             if (file.length < 1) continue;
 
-            await mls.stor.cache.addIfNeed({project:prj, folder: stor.folder, shortName:stor.shortName, version:stor.versionRef, content:file[0].value, extension:stor.extension, contentType: stor.extension === '.js' ? 'application/javascript' : 'text/plain'})
+            await mls.stor.cache.addIfNeed(
+                {
+                    project: prj,
+                    folder: stor.folder,
+                    shortName: stor.shortName,
+                    version: stor.versionRef,
+                    content: file[0].value,
+                    extension: stor.extension,
+                    contentType: stor.extension === '.js' ? 'application/javascript' : 'text/plain'
+                }
+            )
         }
         
     }
