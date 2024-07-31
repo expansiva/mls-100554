@@ -160,8 +160,8 @@ export class ServicePreviewView extends LitElement {
         if (changedProperties.has('level')) {
             const oldLevel = changedProperties.get('level');
             if (!oldLevel) return;
-
-            if (this.level === '7') {
+            this.fireChangeICA();
+            /*if (this.level === '7') {
                 this.fireChangeICA();
                 this.load();
             } else if (oldLevel === '7') {
@@ -169,7 +169,7 @@ export class ServicePreviewView extends LitElement {
                 this.fireChangeICA();
             } else {
                 this.fireChangeICA();
-            }
+            }*/
 
         }
     }
@@ -375,9 +375,9 @@ export class ServicePreviewView extends LitElement {
         if (!iframe.contentDocument || !this.mfile) return;
         let txt = await this.getFileContent();
 
-        if (this.level === '7') {
+        /*if (this.level === '7') {
             txt = this.cleanTree();
-        }
+        }*/
 
         if (this.lastHTML === txt) {
             const h = this.lastCompiledUrl;
