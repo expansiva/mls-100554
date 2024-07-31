@@ -76,7 +76,11 @@ export class Token extends TokenIO {
         const tokenByTheme = this.list[theme];
         if (!tokenByTheme) throw new Error(`no find theme: ${theme}`);
         let tokensLess = '';
-        tokensLess += Object.keys(tokenByTheme.color).map((key) => `@${key}: ${tokenByTheme.color[key]};`).join('\n');
+        tokensLess += Object.keys(tokenByTheme.color).map((key) => {
+            let token = '';
+            if (!key.startsWith('_dark-')) token = `@${key}: ${tokenByTheme.color[key]};`
+            return token;
+        }).filter((item) => !!item).join('\n')
         tokensLess += '\n' + Object.keys(tokenByTheme.typography).map((key) => `@${key}: ${tokenByTheme.typography[key]};`).join('\n');
         tokensLess += '\n' + Object.keys(tokenByTheme.global).map((key) => `@${key}: ${tokenByTheme.global[key]};`).join('\n');
         return Promise.resolve(tokensLess);

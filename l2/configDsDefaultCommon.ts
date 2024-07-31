@@ -19,11 +19,6 @@ export class Common {
         return new Date().toISOString();
     }
 
-    public getDsThemeFilePath(): string {
-        if (!this.ds) throw new Error('Design system not loaded yet');
-        return `ds/cssthemes`;
-    }
-
     public getDsMlsFilePath(): string {
         if (!this.ds) throw new Error('Design system not loaded yet');
         return `ds/${this.ds.name}`;
@@ -79,9 +74,7 @@ export class Common {
         this.mergeJSON();
         const fullpath = this.getDsMlsFilePath();
         const content = JSON.stringify(this.ds);
-        console.log(JSON.parse(content));
-        return true;
-        // return this.setContentFile(this.ds.name, 'json', fullpath, content);
+        return this.setContentFile(this.ds.name, 'json', fullpath, content);
     }
 
     private mergeJSON() {

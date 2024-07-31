@@ -3,15 +3,14 @@
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
-import { initCollabShowCodeSnippet100554, CollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet';
+
 import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
 import { getInfoMyService } from './_100554_aimHelper';
 
 @customElement('aim-task-result-code-100554')
 export class AimTaskResultCode extends AimTaskBase {
 
-    @query('collab-show-code-snippet-100554')
-    codeSnippet: CollabShowCodeSnippet100554 | undefined;
+
 
     @query('collab-show-code-diff-100554')
     codeDif: CollabShowCodeDiff | undefined;
@@ -20,7 +19,7 @@ export class AimTaskResultCode extends AimTaskBase {
 
     constructor() {
         super();
-        initCollabShowCodeSnippet100554();
+    
         initCollabShowCodeDiff100554();
     }
 
@@ -71,7 +70,7 @@ export class AimTaskResultCode extends AimTaskBase {
 
     firstUpdated(a: any) {
         super.firstUpdated(a);
-        if (this.codeSnippet) this.codeSnippet.textIn = this.result;
+        // if (this.codeSnippet) this.codeSnippet.textIn = this.result;
     }
 
 }

@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { getInfoMyService } from "./_100554_aimHelper";
-import { initCollabShowCodeSnippet100554, CollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet';
+// import { initCollabShowCodeSnippet100554, CollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet';
 import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
 
 import { ServiceDsTokens100554 } from "_100554_serviceDsTokens";
@@ -14,15 +14,11 @@ export class AimTaskResultTokens extends AimTaskBase {
 
     constructor() {
         super();
-        initCollabShowCodeSnippet100554();
         initCollabShowCodeDiff100554();
     }
 
     @query('collab-show-code-diff-100554')
     codeDiff: CollabShowCodeDiff | undefined;
-
-    @query('collab-show-code-snippet-100554')
-    codeSnippet: CollabShowCodeSnippet100554 | undefined;
 
     private result: string = '';
 
@@ -32,7 +28,7 @@ export class AimTaskResultTokens extends AimTaskBase {
 
     firstUpdated(a: any) {
         super.firstUpdated(a);
-        if (this.codeSnippet) this.codeSnippet.textIn = this.result;
+        // if (this.codeSnippet) this.codeSnippet.textIn = this.result;
     }
 
     renderBody(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild) {

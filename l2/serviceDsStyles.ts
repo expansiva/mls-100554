@@ -208,7 +208,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private init() {
-        //this.getModelOrCreate('', 'style');
+        // this.getModelOrCreate('', 'style');
         this.getModelOrCreate('', 'results');
         this.setEvents();
     }
@@ -220,7 +220,6 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async checkComponentOpenInL2() {
-        if (!this.dsInstance || !this.dsInstance.components) return;
         const actualL2 = mls.actual[2].getFullName();
         if (!actualL2) {
             this.showStyle();
@@ -241,6 +240,7 @@ export class ServiceDsStyles extends ServiceBase {
         const file = mls.stor.files[key];
 
         if (actualL2 === this.componentName && file && file.status === 'changed') return;
+        if (!this.dsInstance || !this.dsInstance.components) return;
 
         const newCompExist = this.dsInstance?.components.find(actualL2);
         if (!newCompExist) {
@@ -1097,22 +1097,22 @@ export class ServiceDsStyles extends ServiceBase {
         return content;
     }
 
+    private actualTheme: string = 'Default';
+
     private async getTokens() {
         if (!this.dsInstance || !this.dsInstance.tokens) return '';
 
         if (!this.dsInstance) return;
-        const list = this.dsInstance.tokens.list;
-        const tokens: mls.l3.ITokenInfo[] = [];
-        Object.keys(list).forEach((tok) => {
-            // tokens.push(list[tok]);
-        });
-        const tokensColors = tokens.filter((tok) => tok.category === 'color' && !tok.key.startsWith('_dark-'));
-        const tokensTypo = tokens.filter((tok) => tok.category === 'typography');
-        const tokensCustom = tokens.filter((tok) => tok.category === 'custom');
-        const strColors = tokensColors.map((item) => `@${item.key}: ${item.value};`).join('\n');
-        const strTypo = tokensTypo.map((item) => `@${item.key}: ${item.value};`).join('\n');
-        const strCustom = tokensCustom.map((item) => `@${item.key}: ${item.value};`).join('\n');
-        const resumeTokens = ['// Tokens Colors', strColors, '// Tokens Typography', strTypo, '//Tokens Custom', strCustom].join('\n');
+        const resumeTokens = this.dsInstance.tokens.getTokensLess(this.actualTheme)
+        
+        // const tokensColors = tokens.filter((tok) => tok.category === 'color' && !tok.key.startsWith('_dark-'));
+        // const tokensTypo = tokens.filter((tok) => tok.category === 'typography');
+        // const tokensCustom = tokens.filter((tok) => tok.category === 'custom');
+
+        // const strColors = themeActual.color.map((item) => `@${item.key}: ${item.value};`).join('\n');
+        // const strTypo = tokensTypo.map((item) => `@${item.key}: ${item.value};`).join('\n');
+        // const strCustom = tokensCustom.map((item) => `@${item.key}: ${item.value};`).join('\n');
+        // const resumeTokens = ['// Tokens Colors', strColors, '// Tokens Typography', strTypo, '//Tokens Custom', strCustom].join('\n');
         return resumeTokens;
     }
 

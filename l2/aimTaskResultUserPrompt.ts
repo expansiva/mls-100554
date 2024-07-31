@@ -3,7 +3,7 @@
 import { html, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
-import { initCollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet';
+// import { initCollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -31,7 +31,7 @@ export class AimTaskResulUserPrompt extends AimTaskBase {
 
     constructor() {
         super();
-        initCollabShowCodeSnippet100554();
+        // initCollabShowCodeSnippet100554();
     }
 
     private msg: MessageType = messages['en'];
