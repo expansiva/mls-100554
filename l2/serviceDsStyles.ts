@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { getDSInstance } from './_100554_libDesignSystem';
+import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -25,7 +25,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceDsStyles extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    
+
     constructor() {
         super();
         this.init();
@@ -140,7 +140,7 @@ export class ServiceDsStyles extends ServiceBase {
     private isSetStyle: boolean = false;
     private oldStyleName: string = '';
     private rightServiceOpened: string = '';
-    private dsInstance: mls.l3.DesignSystemIO | undefined;
+    private dsInstance: DesignSystemIO | undefined;
     private lastEditorInfo = {
         line: 0,
         content: ''
@@ -220,7 +220,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async checkComponentOpenInL2() {
-        // if (!this.isComponent) return;
+        if (!this.dsInstance || !this.dsInstance.components) return;
         const actualL2 = mls.actual[2].getFullName();
         if (!actualL2) {
             this.showStyle();
@@ -317,6 +317,7 @@ export class ServiceDsStyles extends ServiceBase {
 
     private showResultCss(): boolean {
 
+        if (!this.dsInstance || !this.dsInstance.components) return false;
         if (!this._ed1) return false;
         const modelResults = this.models['results'] as IMonacoModelStyle;
         this._ed1.setModel(modelResults);
@@ -327,7 +328,7 @@ export class ServiceDsStyles extends ServiceBase {
 
         modelResults.setValue('Compiling...');
         if (!this.dsInstance) return false;
-        this.dsInstance.components.getCSS(this.componentName).then((result) => {
+        this.dsInstance.components.getCSS(this.componentName, 'Default').then((result) => {
             modelResults.setValue(result);
         }).catch((err) => {
             modelResults.setValue(err);
@@ -795,6 +796,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async onEditorChange(isGet: boolean) {
+        if (!this.dsInstance || !this.dsInstance.css) return;
 
         if (this.isSetStyle) {
             this.isSetStyle = false;
@@ -1082,12 +1084,13 @@ export class ServiceDsStyles extends ServiceBase {
         const { mode } = mls.actual[3];
         if (project === undefined) throw new Error('No project selected!');
         this.dsInstance = await getDSInstance(project, mode);
+        if (!this.dsInstance) return;
         await this.dsInstance.init();
     }
 
     private async getStyle() {
         await this.initDsInstance();
-        if (!this.dsInstance) return '';
+        if (!this.dsInstance || !this.dsInstance.css) return '';
         const cssItem = this.dsInstance.css.list['definitions'];
         if (!cssItem) return '';
         const content = await cssItem.getContent();
@@ -1095,11 +1098,13 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async getTokens() {
+        if (!this.dsInstance || !this.dsInstance.tokens) return '';
+
         if (!this.dsInstance) return;
-        const { list } = this.dsInstance.tokens;
+        const list = this.dsInstance.tokens.list;
         const tokens: mls.l3.ITokenInfo[] = [];
         Object.keys(list).forEach((tok) => {
-            tokens.push(list[tok]);
+            // tokens.push(list[tok]);
         });
         const tokensColors = tokens.filter((tok) => tok.category === 'color' && !tok.key.startsWith('_dark-'));
         const tokensTypo = tokens.filter((tok) => tok.category === 'typography');
@@ -1158,6 +1163,7 @@ export class ServiceDsStyles extends ServiceBase {
     }
 
     private async onAddWidgetStyle(value: string) {
+        if (!this.dsInstance || !this.dsInstance.components) return;
         this.setError('');
         const tagName = this.getWidgetTagName(this.componentName);
         const styleName = value;
@@ -1193,6 +1199,7 @@ export class ServiceDsStyles extends ServiceBase {
 
     private async onRenameWidgetStyle(style: mls.l3.IComponentsStyle, value: string) {
         this.setError('');
+        if (!this.dsInstance || !this.dsInstance.components) return;
         try {
             this.isStyleRename = true;
             this.oldStyleName = style.stylename;
@@ -1216,6 +1223,7 @@ export class ServiceDsStyles extends ServiceBase {
 
         const dsInstance = await getDSInstance(project, dsindex);
         await dsInstance.init();
+        if (!dsInstance || !dsInstance.components) return;
         const comp = await dsInstance.components.find(componentName);
         if (!comp) return;
         this.stylesComponent = comp.styles;
@@ -1333,6 +1341,63 @@ export class ServiceDsStyles extends ServiceBase {
 
     @property() isHelperContainerOpen: boolean = false;
 
+    private helpers = [
+        {
+            title: 'Border',
+            ref: '_100554_serviceDsStyleBorder',
+            loaded: false,
+        },
+        {
+            title: 'Size',
+            ref: '_100554_dsStyleSize',
+            loaded: false,
+        },
+        {
+            title: 'Typography',
+            ref: '_100554_dsStyleTypography',
+            loaded: false,
+        },
+        {
+            title: 'Column',
+            ref: '_100554_dsStyleColumn',
+            loaded: false,
+        },
+        {
+            title: 'Background',
+            ref: '_100554_dsStyleBackground',
+            loaded: false,
+        },
+        {
+            title: 'TextShadow',
+            ref: '_100554_dsStyleTextShadow',
+            loaded: false,
+        },
+        {
+            title: 'Flex',
+            ref: '_100554_dsStyleFlex',
+            loaded: false,
+        },
+        {
+            title: 'Spacing',
+            ref: '_100554_dsStyleSpacing',
+            loaded: false,
+        },
+        {
+            title: 'Clippath',
+            ref: '_100554_dsStyleClippath',
+            loaded: false,
+        },
+        {
+            title: 'Filter',
+            ref: '_100554_dsStyleFilter',
+            loaded: false,
+        },
+        {
+            title: 'Transform',
+            ref: '_100554_dsStyleTransform',
+            loaded: false,
+        },
+    ];
 
     private async handleOpenHelperClick() {
         if (!this.containerHelpers) return;
@@ -1341,19 +1406,33 @@ export class ServiceDsStyles extends ServiceBase {
             this.isHelperContainerOpen = false;
         } else {
             this.containerHelpers.classList.add('open');
-            if (this.helperDiv && this.helperDiv.children.length === 0) {
-                await import('./' + '_100554_serviceDsStyleBorder');
-                const tagName = convertFileNameToTag('_100554_serviceDsStyleBorder');
-                const el = document.createElement(tagName);
-                this.helperDiv.appendChild(el);
-            }
             this.isHelperContainerOpen = true;
         }
     }
 
+    private async onDetailsHelperClick(ev: MouseEvent, helper: { title: string, ref: string }) {
+        const target = ev.target as HTMLElement;
+        const details = target.closest('details');
+        if (!details) return;
+        const container = details.querySelector('div');
+        if (!container) return;
+        if (container.children.length === 0) {
+            await import('./' + helper.ref);
+            const tagName = convertFileNameToTag(helper.ref);
+            const el = document.createElement(tagName);
+            container.appendChild(el);
+        }
+    }
+
+    firstUpdated() {
+        setTimeout(() => {
+            this.style.position = 'relative';
+            this.style.display = 'block';
+        }, 500);
+
+    }
+
     render() {
-        this.style.position = 'relative';
-        this.style.display = 'block';
 
         return html`
             <style>${this.myStyle}</style>
@@ -1361,7 +1440,16 @@ export class ServiceDsStyles extends ServiceBase {
                 <div class="toogle" @click=${this.handleOpenHelperClick}> 
                     <i class="${this.isHelperContainerOpen ? 'fa fa-chevron-right' : 'fa fa-chevron-left'}"></i>
                 </div>
-                <div class="helper"></div>
+                <div class="helper">
+                    ${this.helpers.map((helper) => {
+            return html`
+                            <details @click=${(ev: MouseEvent) => this.onDetailsHelperClick(ev, helper)}>
+                                <summary >${helper.title}</summary>
+                                <div></div>
+                            </details>
+                        `
+        })}
+                </div>
             </div>
             <div class="styles-if-component" style=${this.isComponent ? "display:'';" : "display:none"}>
                 <select 
@@ -1410,10 +1498,28 @@ export class ServiceDsStyles extends ServiceBase {
         }
         .container-open-helper.open .helper{
             opacity: 1;
+            width: 100%;
+            height: 100%;
         }
         .container-open-helper .helper{
-            opacity: 0.1;
-            overflow:hidden;
+            z-index: 0;
+            opacity: 0;
+            overflow:auto;
+            font-size: 14px;
+            width: 0;
+            height: 0;
+        }
+        .container-open-helper .helper details[open] {
+            margin-bottom: 1rem;
+        }
+        .container-open-helper .helper details summary {
+            font-weight: bold;
+            padding-left: .5rem;
+        }
+        .container-open-helper .helper details > div {
+            margin-left: 1rem;
+            margin-top: 1rem;
+            border-bottom: 1px solid #cecece;
         }
         .container-open-helper .toogle{
             position: absolute;

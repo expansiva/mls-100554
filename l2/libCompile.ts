@@ -281,8 +281,8 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IM
 
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
-        if (!ds) return;
-        const css = await ds.components.getCSS(fullName)
+        if (!ds || !ds.components) return;
+        const css = await ds.components.getCSS(fullName, 'Default')
         myCss.push(css);
 
     } catch (e: any) {
@@ -298,8 +298,8 @@ async function getGlobalCss(mfile: mls.l2.editor.IMFile) {
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
-        if (!ds) return;
-        const css = await ds.css.getStylesInLess()
+        if (!ds || !ds.css) return;
+        const css = await ds.css.getStylesInLess('Default')
         return css;
     } catch (e: any) {
         if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
@@ -310,8 +310,8 @@ async function getTokens(myTokens: string[], mfile: mls.l2.editor.IMFile) {
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
-        if (!ds) return;
-        const tokens = await (ds.tokens as any)['getTokensCss']();
+        if (!ds || !ds.tokens) return;
+        const tokens = await ds.tokens.getTokensCss('Default');
         myTokens.push(tokens);
     } catch (e: any) {
 

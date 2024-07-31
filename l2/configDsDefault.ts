@@ -50,7 +50,7 @@ export class _100554_configDsDefault extends DesignSystemIO {
 
         let mainDsFile;
         // mainDsFile = await this.methods.getContentFile(dsInfo.dsName, 'json', `ds/${dsInfo.dsName}`);
-        mainDsFile = await this.methods.getContentFile(dsInfo.dsName + '2', 'json', `ds/${dsInfo.dsName}`);
+        mainDsFile = await this.methods.getContentFile(dsInfo.dsName, 'json', `ds/${dsInfo.dsName}`);
 
         if (!mainDsFile) return;
 
@@ -127,7 +127,7 @@ export class _100554_configDsDefault extends DesignSystemIO {
             assets: { items: [] },
             components: { items: [] },
             docs: { items: [] },
-            tokens: { items: this.methods.tokensInitial },
+            tokens: { items: [] },
             css: { items: [] }
         };
 

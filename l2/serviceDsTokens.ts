@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { getDSInstance, list as listDs } from './_100554_libDesignSystem';
+import { getDSInstance, list as listDs, DesignSystemIO, IToken, TokensCategories } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -24,14 +24,14 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceDsTokens100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    
+
     constructor() {
         super();
-        this.setEvents();
     }
 
-    @property({ type: String })
-    msize = '';
+    @property({ type: String }) msize = '';
+    @property({ type: String }) actualTheme = 'Default';
+
 
     createRenderRoot() {
         return this;
@@ -50,27 +50,27 @@ export class ServiceDsTokens100554 extends ServiceBase {
         level: [3]
     }
 
-    public onClickLink = (op: string): boolean => {
-        if (op === 'opTypography') return this.showTypography();
-        if (op === 'opCustom') return this.showCustom();
-        if (op === 'opColors') return this.showColors();
-        if (op === 'opColors2') return this.showColors2();
-        if (op === 'opEditor') return this.showResume();
-        if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
+    public onClickIcon = (op: string): void => {
+        if (op === 'icTypography') this.showTypography();
+        if (op === 'icGlobal') this.showGlobal();
+        if (op === 'icColor') this.showColors();
     }
 
     public menu: IMenu = {
         title: 'Tokens',
         actions: {
-            opColors: 'Colors',
-            opTypography: 'Typography',
-            opCustom: 'Custom',
+
         },
-        icons: {},
-        actionDefault: 'opColors2', // call after close icon clicked
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
+        icons: {
+            icColor: 'Colors;f53f',
+            icTypography: 'Typography;f031',
+            icGlobal: 'Global;f065'
+        },
+        actionDefault: '',
+        iconDefault: 'icColor',
+        setMode: undefined,
+        onClickLink: undefined,
+        onClickIcon: this.onClickIcon,
         getLastMode: undefined,
         updateTitle: undefined
     }
@@ -82,7 +82,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
     async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
         if (visible) {
-            const params: IEventsSelectedObj = { isComponent: false, service: ['_100529_service_styles_preview'] };
+            const params: IEventsSelectedObj = { isComponent: false, service: [] };
             mls.events.fire([3], ['DSTokenSelected'], JSON.stringify(params), 1000);
             if (el && typeof el.layout === 'function') el.layout();
         } else {
@@ -136,7 +136,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
     private timeoutChangesEditorTypography: number = 0;
 
-    private timeoutChangesEditorCustom: number = 0;
+    private timeoutChangesEditorGlobal: number = 0;
 
     @query('mls-editor-100529')
     private c2: HTMLElement | undefined;
@@ -156,55 +156,60 @@ export class ServiceDsTokens100554 extends ServiceBase {
     }
 
 
-    private dsInstance: mls.l3.DesignSystemIO | undefined;
+    private dsInstance: DesignSystemIO | undefined;
 
-    private async setTokens() {
-        const { resumeTokens, tokensColors, tokensCustom, tokensTypo } = await this.getTokens();
-        this.setInitialModels(resumeTokens, 'resume');
+    private async setTokens(theme: string) {
+        const { tokensColors, tokensGlobal, tokensTypo } = await this.getTokens(theme);
         this.setInitialModels(tokensColors, 'color');
-        this.setInitialModels(tokensCustom, 'custom');
+        this.setInitialModels(tokensGlobal, 'global');
         this.setInitialModels(tokensTypo, 'typography');
     }
 
-    private tokensColors: mls.l3.ITokenInfo[] = [];
-    private tokensTypo: mls.l3.ITokenInfo[] = [];
-    private tokensCustom: mls.l3.ITokenInfo[] = [];
+    private tokensColors: IToken = {};
+    private tokensTypo: IToken = {};
+    private tokensGlobal: IToken = {};
 
     private actualTypeTokens: string = 'color';
 
-    private async getTokens() {
+    private async getTokens(theme: string) {
 
         const { project } = mls.actual[5];
         const { mode } = mls.actual[3];
         if (project === undefined || mode === undefined) throw new Error('No project or design system selected');
 
         const dss = await listDs(project);
-
         const dsInfo = dss[mode];
-        if (!dsInfo) return { tokensColors: '', tokensTypo: '', tokensCustom: '', resumeTokens: '' };
+        if (!dsInfo) return { tokensColors: '', tokensTypo: '', tokensGlobal: '', resumeTokens: '' };
 
         this.dsInstance = await getDSInstance(project, mode);
         await this.dsInstance.init();
+        if (!this.dsInstance.tokens) throw new Error('No tokens finded');
 
-        const { list } = this.dsInstance.tokens;
-        const tokens: mls.l3.ITokenInfo[] = [];
-        Object.keys(list).forEach((tok) => {
-            tokens.push(list[tok]);
-        });
-        this.tokensColors = tokens.filter((tok) => tok.category === 'color');
-        this.tokensTypo = tokens.filter((tok) => tok.category === 'typography');
-        this.tokensCustom = tokens.filter((tok) => tok.category === 'custom');
+        const list = this.dsInstance.tokens.list;
+        const tokens = list[theme];
+        this.tokensColors = tokens.color;
+        this.tokensTypo = tokens.typography;
+        this.tokensGlobal = tokens.global;
 
-        const strColors = this.tokensColors.map((item) => `@${item.key}: ${item.value};`).join('\n');
-        const strTypo = this.tokensTypo.map((item) => `@${item.key}: ${item.value};`).join('\n');
-        const strCustom = this.tokensCustom.map((item) => `@${item.key}: ${item.value};`).join('\n');
-        const resumeTokens = ['// Tokens Colors', strColors, '// Tokens Typography', strTypo, '//Tokens Custom', strCustom].join('\n');
+        const strColors = Object.entries(this.tokensColors).map((entry) => {
+            const [key, value] = entry;
+            return `@${key}: ${value};`
+        }).join('\n');
+
+        const strTypo = Object.entries(this.tokensTypo).map((entry) => {
+            const [key, value] = entry;
+            return `@${key}: ${value};`
+        }).join('\n');
+
+        const strGlobal = Object.entries(this.tokensGlobal).map((entry) => {
+            const [key, value] = entry;
+            return `@${key}: ${value};`
+        }).join('\n');
 
         return {
             tokensColors: strColors,
             tokensTypo: strTypo,
-            tokensCustom: strCustom,
-            resumeTokens
+            tokensGlobal: strGlobal,
         };
 
     }
@@ -224,60 +229,30 @@ export class ServiceDsTokens100554 extends ServiceBase {
     }
 
     private setInitialModels(src: string, model: string) {
-
         const uri = this.getUri('l3_tokens');
         this.models[model] = monaco.editor.getModel(uri) as monaco.editor.ITextModel;
         if (this.models[model]) this.models[model].setValue(src);
         else this.models[model] = monaco.editor.createModel(src, 'less', uri);
-
     }
 
 
-    private showResume(): boolean {
-        this.menu.title = 'Tokens - Resume';
-        if (this.menu.updateTitle) this.menu.updateTitle();
-        this.showResume2();
-        return true;
-    }
-
-    private async showResume2() {
-
-        this.actualTypeTokens = 'resume';
-
-        const { resumeTokens } = await this.getTokens();
-        this.setInitialModels(resumeTokens, 'resume');
-        if (!this._ed1) return true;
-        this._ed1.setModel(this.models['resume']);
-        this._ed1.updateOptions({ readOnly: true });
-        return true;
-    }
-
-    private showCustom(): boolean {
-
-        this.actualTypeTokens = 'custom';
-        if (this.menu.setMode) this.menu.setMode('editor');
-        if (!this._ed1) return true;
-
-        this._ed1.setModel(this.models['custom']);
+    private showGlobal() {
+        this.actualTypeTokens = 'global';
+        if (!this._ed1) return;
+        this._ed1.setModel(this.models['global']);
         this._ed1.updateOptions({ readOnly: false });
-        mls.events.fire([this.level], ['DSCustomClicked'], 'Custom Clicked');
-
         this._ed1.getModel()?.onDidChangeContent((event) => {
-            this.timeoutChangesEditorCustom = setTimeout(() => {
-                if (this.timeoutChangesEditorCustom) clearTimeout(this.timeoutChangesEditorCustom);
-                this.onEditorCustomChange(event.changes);
+            this.timeoutChangesEditorGlobal = setTimeout(() => {
+                if (this.timeoutChangesEditorGlobal) clearTimeout(this.timeoutChangesEditorGlobal);
+                this.onEditorGlobalChange(event.changes);
             }, 1000);
         });
 
-        return true;
     }
 
-    private showTypography(): boolean {
-
+    private showTypography() {
         this.actualTypeTokens = 'typography'
-        if (this.menu.setMode) this.menu.setMode('editor');
-        if (!this._ed1) return true;
-
+        if (!this._ed1) return;
         this._ed1.setModel(this.models['typography']);
         this._ed1.updateOptions({ readOnly: false });
         this._ed1.getModel()?.onDidChangeContent((event) => {
@@ -286,101 +261,35 @@ export class ServiceDsTokens100554 extends ServiceBase {
                 this.onEditorTypoChange(event.changes);
             }, 1000);
         });
-        return true;
 
     }
 
-    private showColors(): boolean {
-        if (this.menu.setMode) this.menu.setMode('initial');
-        return this.showColors2();
-    }
-
-    private showColors2(): boolean {
-
+    private async showColors() {
         this.actualTypeTokens = 'color';
-        this.setTokens().then(() => {
-
-            if (!this._ed1) return true;
-
-            this._ed1.setModel(this.models['color']);
-            this._ed1.updateOptions({ readOnly: false });
-            const rc: mls.l3.ITokenInfo[] = this.getEditorJsonKeyValue('color');
-            const params: IEditorChangedEventsObj = {
-                emitter: 'left',
-                value: `${JSON.stringify(rc)};${''};${this.isRightChange ? 'refresh' : 'editor'}`
-            };
-
-            mls.events.fire([this.level], ['DSColorChanged'], JSON.stringify(params), 1000);
-
-            this._ed1.getModel()?.onDidChangeContent((event) => {
-                this.timeoutChangesEditorColor = setTimeout(() => {
-                    if (this.timeoutChangesEditorColor) clearTimeout(this.timeoutChangesEditorColor);
-                    this.onEditorColorChange(event.changes);
-                }, 500);
-            });
-
-            this._ed1.onDidChangeCursorPosition((event) => {
-                this.onEditorColorLineChange(event.position.lineNumber);
-            });
-
+        if (Object.keys(this.tokensColors).length === 0) {
+            await this.setTokens(this.actualTheme);
+        }
+        if (!this._ed1) return;
+        this._ed1.setModel(this.models['color']);
+        this._ed1.updateOptions({ readOnly: false });
+        this._ed1.getModel()?.onDidChangeContent((event) => {
+            this.timeoutChangesEditorColor = setTimeout(() => {
+                if (this.timeoutChangesEditorColor) clearTimeout(this.timeoutChangesEditorColor);
+                this.onEditorColorChange(event.changes);
+            }, 500);
         });
 
-        return true;
-
-    }
-
-    private lastLineColor: number | undefined = undefined;
-
-    private onEditorColorLineChange(line: number) {
-        if (this.isRightChange) {
-            this.isRightChange = false;
-            return;
-        }
-        if (this.lastLine && this.lastLineColor !== line) {
-            this.lastLineColor = line;
-
-            if (!this._ed1) return;
-            const model = this._ed1.getModel();
-            if (!model) return;
-            const lineKeyValue = this.convertTokenLineEditorToKeyValue(model.getLineContent(line));
-            const params = {
-                emitter: 'left',
-                value: `${lineKeyValue.key};${''};line`
-            };
-            mls.events.fire([this.level], ['DSColorChanged'], JSON.stringify(params), 0);
-        }
     }
 
     private onEditorColorChange(changes: monaco.editor.IModelContentChange[]) {
-
         const [change] = changes;
         if (!change) return;
-
-        const lineChange = change.range.startLineNumber;
         if (!this._ed1) return;
         const model = this._ed1.getModel();
         if (!model) return;
-        const lineKeyValue = this.convertTokenLineEditorToKeyValue(model.getLineContent(lineChange));
-
         const tokens = this.getEditorsTokens();
-        const colorsTokens = tokens.filter((item) => item.category === 'color');
-
-        (this.dsInstance?.tokens as any)['setTokenList'](tokens); // passar função pra lib
-        let params: IEditorChangedEventsObj;
-        if (this.isRightChange) {
-            this.isRightChange = false;
-            params = {
-                emitter: 'left',
-                value: `${JSON.stringify(colorsTokens)};${''};refresh`
-            };
-        } else {
-            params = {
-                emitter: 'left',
-                value: `${lineKeyValue.key || JSON.stringify(colorsTokens)};${''};editor`
-            };
-        }
-
-        mls.events.fire([this.level], ['DSColorChanged'], JSON.stringify(params));
+        if (!this.dsInstance || !this.dsInstance.tokens) return;
+        this.dsInstance.tokens.setTokens(this.actualTheme, tokens.color, tokens.typography, tokens.global);
 
     }
 
@@ -388,108 +297,38 @@ export class ServiceDsTokens100554 extends ServiceBase {
         const [change] = changes;
         if (!change) return;
         const tokens = this.getEditorsTokens();
-        const typoTokens = tokens.filter((item) => item.category === 'typography');
-        (this.dsInstance?.tokens as any)['setTokenList'](tokens);
-        const rc: mls.l3.ITokenInfo[] = this.getEditorJsonKeyValue('typography');
-        const params: IEditorChangedEventsObj = {
-            emitter: 'left',
-            value: `${JSON.stringify(rc)};${''};${'editor'}`
-        };
-        mls.events.fire([this.level], ['DSTYPOChanged'], JSON.stringify(params), 1000);
-
+        if (!this.dsInstance || !this.dsInstance.tokens) return;
+        this.dsInstance.tokens.setTokens(this.actualTheme, tokens.color, tokens.typography, tokens.global);
     }
 
-    private onEditorCustomChange(changes: monaco.editor.IModelContentChange[]) {
+    private onEditorGlobalChange(changes: monaco.editor.IModelContentChange[]) {
         const [change] = changes;
         if (!change) return;
         const tokens = this.getEditorsTokens();
-        const customTokens = tokens.filter((item) => item.category === 'custom');
-        (this.dsInstance?.tokens as any)['setTokenList'](tokens);
+        if (!this.dsInstance || !this.dsInstance.tokens) return;
+        this.dsInstance.tokens.setTokens(this.actualTheme, tokens.color, tokens.typography, tokens.global);
+    }
 
-        const rc: mls.l3.ITokenInfo[] = this.getEditorJsonKeyValue('custom');
-        const params: IEditorChangedEventsObj = {
-            emitter: 'left',
-            value: `${JSON.stringify(rc)};${''};${'editor'}`
+    private getEditorsTokens() {
+        const typography: IToken = this.getEditorJsonKeyValue('typography');
+        const color: IToken = this.getEditorJsonKeyValue('color');
+        const global: IToken = this.getEditorJsonKeyValue('global');
+        return {
+            color,
+            global,
+            typography,
         };
-        mls.events.fire([this.level], ['DSCustomChanged'], JSON.stringify(params), 1000);
     }
 
-    private getEditorsTokens(): mls.l3.ITokenInfo[] {
-        const rcT: mls.l3.ITokenInfo[] = this.getEditorJsonKeyValue('typography');
-        const rcC: mls.l3.ITokenInfo[] = this.getEditorJsonKeyValue('color');
-        const rcCustom: mls.l3.ITokenInfo[] = this.getEditorJsonKeyValue('custom');
-        return [...rcC, ...rcT, ...rcCustom];
-    }
-
-    private isRightChange = false;
-
-    private async editEditorByDSColorChanged(desc: string) {
-
-        const params: IEditorChangedEventsObj = JSON.parse(desc);
-        if (params.emitter !== 'right') return;
-        if (!this._ed1 || !this.dsInstance) return;
-
-        const [key, value, mode] = params.value.split(';');
-        if (mode !== 'helper' && mode !== 'line') return;
-
-        this.isRightChange = true;
-        const colorModel: monaco.editor.ITextModel = this.models['color'];
-
-        if (key.startsWith('[')) {
-            const allTokensColors = JSON.parse(key);
-            this.tokensColors = allTokensColors;
-            const allTokens = [...this.tokensColors, ...this.tokensTypo, ...this.tokensCustom];
-            await (this.dsInstance?.tokens as any)['setTokenList'](allTokens);
-            const { tokensColors } = await this.getTokens();
-            colorModel.setValue(tokensColors);
-            return;
-        }
-
-        if (mode === 'helper' && this._ed1.getModel()?.id !== colorModel.id) {
-            await this.dsInstance.tokens.update(key, value);
-            return;
-        }
-
-        const line = this._ed1.getModel()?.findMatches(`@${key}:`, true, false, false, null, true);
-        if (!line || line.length === 0) return;
-
-        const { startLineNumber, startColumn, endLineNumber } = line[0].range;
-        const lineLength = colorModel.getLineContent(startLineNumber).length + 1;
-        const range = new monaco.Range(startLineNumber, startColumn, endLineNumber, lineLength);
-        const text = value ? `@${key}: ${value};` : null;
-
-        if (mode === 'helper' && !text) {
-            this._ed1.executeEdits('', [{ range: new monaco.Range(range.startLineNumber, 1, range.startLineNumber + 1, 1), text }]);
-            return;
-        }
-
-        if (mode === 'helper') this._ed1.executeEdits('color', [{ range, text }]);
-        if (this.lastLine['color'] === startLineNumber) return;
-        this.lastLine['color'] = startLineNumber;
-        this._ed1.setSelection(new monaco.Selection(range.startLineNumber, 0, range.startLineNumber, lineLength));
-        this._ed1.revealLineInCenter(startLineNumber);
-
-    }
-
-    private getEditorJsonKeyValue(model: mls.l3.TokensCategories): mls.l3.ITokenInfo[] {
-
+    private getEditorJsonKeyValue(model: TokensCategories): IToken {
         const editorValue = this.models[model].getValue().trim().split('\n');
-        let rc: mls.l3.ITokenInfo[] = (editorValue.map((line: any) => {
-            const obj: mls.l3.ITokenInfo = {} as mls.l3.ITokenInfo;
+        const tokens: IToken = {};
+        editorValue.forEach((line: any) => {
             const { key, value } = this.convertTokenLineEditorToKeyValue(line);
-            obj.key = key;
-            obj.value = value;
-            obj.category = model;
-            return obj;
-        }).filter((item: any) => item.key !== undefined));
-
-        const filteredRc = rc.reduce((acc: mls.l3.ITokenInfo[], current) => {
-            const x: any = acc.find((item: any) => item.key === current.key);
-            return (!x || !x.key || !x.value) ? acc.concat([current]) : acc;
-        }, []);
-
-        return filteredRc;
-
+            if (!key) return;
+            tokens[key] = value;
+        })
+        return tokens;
     }
 
     private convertTokenLineEditorToKeyValue(content: string): mls.l3.ITokenInfo {
@@ -505,22 +344,6 @@ export class ServiceDsTokens100554 extends ServiceBase {
     private setMsizeEditor() {
         if (!this.visible) return;
         this.c2?.setAttribute('msize', this.msize);
-    }
-
-    setEvents() {
-        mls.events.addEventListener([3], ['DSColorChanged'], (ev) => {
-            if (ev.desc) this.editEditorByDSColorChanged(ev.desc);
-        });
-
-        mls.events.addEventListener([this.level], ['DSTYPOClicked'], (ev) => {
-            if (ev.desc !== 'right') return;
-            this.onClickLink('opTypography');
-        });
-
-        mls.events.addEventListener([this.level], ['DSColorClicked'], (ev) => {
-            if (ev.desc !== 'right') return;
-            this.onClickLink('opColors');
-        });
     }
 
     updated(changedProperties: any) {

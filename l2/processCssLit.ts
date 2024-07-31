@@ -14,7 +14,7 @@ export async function injectStyle(model: mls.l2.editor.IMFile, dsIndex: number):
     await ds.init();
     const fileName = `_${model.project}_${model.shortName}`;
     const tagName = convertFileNameToTag(fileName)
-    const css = await ds.components.getCSS(fileName);
+    const css = await ds.components?.getCSS(fileName, 'Default');
     if (!css) return;
     const css2 = getCssWithoutTag(css, tagName);
     if (model && model.compilerResults) {

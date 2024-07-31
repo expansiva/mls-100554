@@ -311,15 +311,15 @@ export class ServiceSource100554 extends ServiceBase {
         scr.src = i2;
         div.appendChild(scr);
 
-        const ds = await getDSInstance(100554, 0);
-        if (ds) {
-            await ds.init();
-            ds.components.getCSS('_100554_mlsHistoryList').then((css) => {
-                const style = document.createElement('style');
-                style.textContent = css;
-                div.appendChild(style);
-            });
-        }
+        // const ds = await getDSInstance(100554, 0);
+        // if (ds) {
+        //     await ds.init();
+        //     ds.components.getCSS('_100554_mlsHistoryList').then((css) => {
+        //         const style = document.createElement('style');
+        //         style.textContent = css;
+        //         div.appendChild(style);
+        //     });
+        // }
 
         const obj = {
             icTs: '.ts',

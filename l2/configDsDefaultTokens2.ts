@@ -1,11 +1,20 @@
 /// <mls shortName="configDsDefaultTokens2" project="100554" enhancement="_blank" groupName="other" />
 
-import { IDS, Common, Token as TokenIO, ITokens, IToken, ITokenInfo, TokensCategories } from './_100554_configDsDefaultCommon';
+import { IDS, Common, initialTokensColor, initialTokensGlobal, initialtokensTypography } from './_100554_configDsDefaultCommon';
+import {
+    DesignSystemIO,
+    TokenIO,
+    IToken,
+    ITokens,
+    ITokenInfo,
+    TokensCategories
+} from './_100554_libDesignSystem';
+
 import { PreCompileLess } from './_100554_configDsDefaultPreCompileLess';
 
 export class Token extends TokenIO {
 
-    constructor(dsIO: mls.l3.DesignSystemIO, ds: IDS) {
+    constructor(dsIO: DesignSystemIO, ds: IDS) {
         super(dsIO);
         this.ds = ds;
         this.methods = new Common(ds, dsIO);
@@ -19,11 +28,12 @@ export class Token extends TokenIO {
     public update = (key: string, newValue: string, theme: string) => this._updateToken(key, newValue, theme);
     public remove = (key: string, theme: string) => this._removeToken(key, theme);
     public find = (key: string, theme: string) => this._find(key, theme);
-
+    public addTheme = (theme: string) => this._addTheme(theme);
+    public removeTheme = (theme: string) => this._removeTheme(theme);
     public list: ITokenInfo = {};
-
     public getTokensLess = (theme: string) => this._getTokensLess(theme);
     public getTokensCss = (theme: string) => this._getTokensCss(theme);
+    public setTokens = (theme: string, tokensColor: IToken, tokensTypography: IToken, tokensGlobal: IToken) => this._setTokens(theme, tokensColor, tokensTypography, tokensGlobal);
 
     private prepareTokens() {
         this.list = {};
@@ -73,19 +83,19 @@ export class Token extends TokenIO {
     }
 
     private async _getTokensCss(theme: string): Promise<string> {
-        return Promise.resolve('');
-        // const tokensLess = await this._getTokensLess();
-        // try {
-        //     const preCompileLess = new PreCompileLess();
-        //     const tokensCss = await preCompileLess.execute('', tokensLess, this.ds.tokens.items, ':root'); // mls.l2.compileLess(allLess);
-        //     return tokensCss;
-        // } catch (err: any) {
-        //     throw new Error(`Error on compile tokens Less: ${err.message}`);
-        // }
+        const tokensLess = await this._getTokensLess(theme);
+        try {
+            const preCompileLess = new PreCompileLess();
+            const tokensCss = await preCompileLess.execute('', tokensLess, theme, this.ds.tokens.items as ITokens[], ':root');
+            return tokensCss;
+        } catch (err: any) {
+            throw new Error(`Error on compile tokens Less: ${err.message}`);
+        }
     }
 
     private async _addToken(key: string, value: string, theme: string, category: TokensCategories): Promise<void> {
 
+        if (!this.list[theme]) throw new Error(`theme: ${theme} dont exists`);
         const tokenByKey = this.find(key, theme);
         if (tokenByKey) throw new Error(`token: ${key} already exists in theme: ${theme}`);
         this.list[theme][category][key] = value;
@@ -100,6 +110,7 @@ export class Token extends TokenIO {
 
     private async _updateToken(key: string, value: string, theme: string): Promise<void> {
 
+        if (!this.list[theme]) throw new Error(`theme: ${theme} dont exists`);
         const tokenByKey = this.find(key, theme);
         if (!tokenByKey) throw new Error(`token: ${key} dont exists in theme: ${theme}`);
 
@@ -122,6 +133,54 @@ export class Token extends TokenIO {
             return Promise.resolve();
         } catch (err: any) {
             return Promise.reject(new Error('Error on remove token:' + err.message));
+        }
+    }
+
+    private async _addTheme(theme: string): Promise<void> {
+
+        if (this.list[theme]) throw new Error(`theme: ${theme} already exists`);
+        this.list[theme] = {
+            color: initialTokensColor,
+            global: initialTokensGlobal,
+            typography: initialtokensTypography,
+        }
+
+        try {
+            await this.methods.setContentFileDsMain();
+            return Promise.resolve();
+        } catch (err: any) {
+            return Promise.reject(new Error('Error on remove token:' + err.message));
+        }
+
+    }
+
+    private async _removeTheme(theme: string): Promise<void> {
+
+        if (!this.list[theme]) throw new Error(`theme: ${theme} dont exists`);
+        delete this.list[theme];
+
+        try {
+            await this.methods.setContentFileDsMain();
+            return Promise.resolve();
+        } catch (err: any) {
+            return Promise.reject(new Error('Error on remove token:' + err.message));
+        }
+
+    }
+
+    private async _setTokens(theme: string, tokensColor: IToken, tokensTypography: IToken, tokensGlobal: IToken) {
+
+        if (!this.list[theme]) throw new Error(`theme: ${theme} dont exists`);
+
+        this.list[theme].color = tokensColor;
+        this.list[theme].typography = tokensTypography;
+        this.list[theme].global = tokensGlobal;
+
+        try {
+            await this.methods.setContentFileDsMain();
+            return Promise.resolve();
+        } catch (err: any) {
+            return Promise.reject(new Error('Error on set tokens:' + err.message));
         }
     }
 
