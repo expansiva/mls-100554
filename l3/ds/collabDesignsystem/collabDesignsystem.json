@@ -1278,6 +1278,7 @@
     "items": [
       {
         "themeName": "Default",
+        "description": "Tema padrão do projeto",
         "color": {
           "text-primary-color-lighter": "#535353",
           "text-primary-color": "#403f3f",
@@ -1368,6 +1369,7 @@
       },
       {
         "themeName": "Natal",
+        "description": "Tema utilizado para o natal",
         "color": {
           "text-primary-color-lighter": "#535353",
           "text-primary-color": "#403f3f",
