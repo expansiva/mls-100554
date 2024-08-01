@@ -55,7 +55,7 @@ export class IcaPageOverlayItem extends LitElement {
         this.style.left = pos.left;
         let aux = '';
         if (this.info.element.dataset.event && this.level === '2') {
-            aux = `<span style="display: flex; justify-content: center; align-items: center; width: 15px; background: var(--grey-color-darker); border-radius: 10px; padding: 2px; position: absolute; right: -8px; bottom: -8px; box-shadow: 0px 2px 4px #35353500;"><svg style="fill:#ffffff; width:12px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288l111.5 0L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7l-111.5 0L349.4 44.6z"/></svg></span>`;
+            aux = `<span class="itemHasEvent" style="display: flex; justify-content: center; align-items: center; width: 15px; background: var(--grey-color-darker); border-radius: 10px; padding: 2px; position: absolute; right: -8px; bottom: -8px; box-shadow: 0px 2px 4px #35353500;"><svg style="fill:#ffffff; width:12px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288l111.5 0L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7l-111.5 0L349.4 44.6z"/></svg></span>`;
         }
         return html`${unsafeHTML(aux)}`;
     }
@@ -154,10 +154,17 @@ export class IcaPageOverlayItem extends LitElement {
         this.style.opacity = '';
         this.style.background = '';
 
+        const iHaveEvents = this.querySelector('.itemHasEvent') as HTMLElement;
+        if (iHaveEvents) {
+            iHaveEvents.style.display = 'none';
+        }
+
         const wcds = this.overlay.querySelectorAll('wcd-toolbox-100554');
         wcds.forEach((wc) => {
             const pr = wc.closest('ica-page-overlay-item-100554') as IcaPageOverlayItem;
             if (pr && pr.info) pr.info.element.setAttribute('renderType', 'edit');
+            const oelHaveEvents = pr.querySelector('.itemHasEvent') as HTMLElement;
+            if(oelHaveEvents) oelHaveEvents.style.display = 'flex'
             wc.remove()
         });
         const wcd = document.createElement('wcd-toolbox-100554') as WCDToolbox;
