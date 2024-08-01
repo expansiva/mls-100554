@@ -28,7 +28,7 @@ export class Token extends TokenIO {
     public update = (key: string, newValue: string, theme: string) => this._updateToken(key, newValue, theme);
     public remove = (key: string, theme: string) => this._removeToken(key, theme);
     public find = (key: string, theme: string) => this._find(key, theme);
-    public addTheme = (theme: string) => this._addTheme(theme);
+    public addTheme = (theme: string, description:string) => this._addTheme(theme, description);
     public removeTheme = (theme: string) => this._removeTheme(theme);
     public list: ITokenInfo = {};
     public getTokensLess = (theme: string) => this._getTokensLess(theme);
@@ -40,11 +40,14 @@ export class Token extends TokenIO {
         (this.ds.tokens.items as ITokens[]).forEach((token) => {
             if (!this.list[token.themeName]) {
                 this.list[token.themeName] = {
+                    description: '',
                     color: {},
                     global: {},
                     typography: {},
                 }
             }
+
+            this.list[token.themeName].description = token.description;
             Object.keys(token.global).forEach((key) => {
                 this.list[token.themeName]['global'][key] = token.global[key];
             });
@@ -140,10 +143,11 @@ export class Token extends TokenIO {
         }
     }
 
-    private async _addTheme(theme: string): Promise<void> {
+    private async _addTheme(theme: string, description:string): Promise<void> {
 
         if (this.list[theme]) throw new Error(`theme: ${theme} already exists`);
         this.list[theme] = {
+            description,
             color: initialTokensColor,
             global: initialTokensGlobal,
             typography: initialtokensTypography,

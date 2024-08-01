@@ -84,7 +84,7 @@ export abstract class TokenIO {
     abstract getTokensCss: (theme: string) => Promise<string>;
     abstract update: (key: string, newValue: string, theme: string) => Promise<void>;
     abstract remove: (key: string, theme: string) => Promise<void>;
-    abstract addTheme: (theme: string) => Promise<void>;
+    abstract addTheme: (theme: string, description:string) => Promise<void>;
     abstract removeTheme: (theme: string) => Promise<void>;
     abstract setTokens: (theme: string, tokensColor: IToken, tokensTypography: IToken, tokensGlobal: IToken) => Promise<void>;
 }
@@ -171,7 +171,12 @@ export type ITokenInfo = {
 }
 
 export type ITokenInfo2 = {
-    [key in TokensCategories]: IToken;
+    // [key in TokensCategories]: IToken;
+    color: IToken,
+    typography: IToken,
+    global: IToken,
+    description:string
+
 };
 
 export type IToken = {
@@ -182,6 +187,7 @@ export type TokensCategories = 'color' | 'typography' | 'global';
 
 export interface ITokens {
     themeName: string,
+    description: string,
     color: IToken,
     typography: IToken,
     global: IToken

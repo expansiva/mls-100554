@@ -2,14 +2,20 @@
 
 import { html, css } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getDSInstance, list as listDs, DesignSystemIO, IToken, TokensCategories } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
+    theme: "Tema",
+    addNewTheme: 'Adicionar novo tema',
+    back: 'Voltar',
 }
 
 const message_en = {
+    theme: "Theme",
+    addNewTheme: 'Add new theme',
+    back: 'Back',
 }
 
 type MessageType = typeof message_en;
@@ -31,6 +37,8 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
     @property({ type: String }) msize = '';
     @property({ type: String }) actualTheme = 'Default';
+    @property({ type: String }) currentScenario: IScenaries = 'editor';
+    @property({ type: String }) themes: IThemes[] = [];
 
 
     createRenderRoot() {
@@ -45,7 +53,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
         tooltip: 'Tokens',
         visible: true,
         position: "left",
-        tags: ['ds_tokens'],
+        tags: [],
         widget: '_100554_serviceDsTokens',
         level: [3]
     }
@@ -56,8 +64,15 @@ export class ServiceDsTokens100554 extends ServiceBase {
         if (op === 'icColor') this.showColors();
     }
 
+    public onClickTitle = () => {
+        this._onClickTitle();
+    }
+
     public menu: IMenu = {
-        title: 'Tokens',
+        title: {
+            icon: '&#xf053',
+            text: 'Theme'
+        },
         actions: {
 
         },
@@ -71,8 +86,10 @@ export class ServiceDsTokens100554 extends ServiceBase {
         setMode: undefined,
         onClickLink: undefined,
         onClickIcon: this.onClickIcon,
+        onClickTitle: this.onClickTitle,
         getLastMode: undefined,
         updateTitle: undefined
+
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
@@ -90,10 +107,6 @@ export class ServiceDsTokens100554 extends ServiceBase {
             mls.events.fire([3], ['DSTokenUnSelected'], JSON.stringify(params), 0);
         }
 
-    }
-    firstUpdated(changedProperties: any) {
-        super.firstUpdated(changedProperties);
-        this.createEditor();
     }
 
     public getActualRef() {
@@ -144,15 +157,8 @@ export class ServiceDsTokens100554 extends ServiceBase {
     private models: IModels = {
         resume: {} as monaco.editor.ITextModel,
         color: {} as monaco.editor.ITextModel,
-        custom: {} as monaco.editor.ITextModel,
+        global: {} as monaco.editor.ITextModel,
         typography: {} as monaco.editor.ITextModel,
-    }
-
-    private lastLine: ILines = {
-        resume: undefined,
-        color: undefined,
-        custom: undefined,
-        typography: undefined,
     }
 
 
@@ -346,16 +352,161 @@ export class ServiceDsTokens100554 extends ServiceBase {
         this.c2?.setAttribute('msize', this.msize);
     }
 
+    private _onClickTitle() {
+        this.currentScenario = 'select';
+    }
+
+    private getThemes() {
+        if (!this.dsInstance || !this.dsInstance.tokens) return [];
+        const list = this.dsInstance.tokens.list;
+        const themes: IThemes[] = [];
+        Object.keys(list).forEach((theme) => {
+
+            const themeItem: IThemes = {
+                themeName: theme,
+                description: list[theme].description,
+                pallete: []
+            };
+
+            Object.keys(list[theme].color).forEach((token) => {
+                themeItem.pallete.push(list[theme].color[token]);
+            });
+            themes.push(themeItem);
+        });
+
+        return themes;
+
+    }
+
+    private async onSelectTheme(theme: string) {
+        this.tokensColors = {};
+        this.tokensGlobal = {};
+        this.tokensTypo = {};
+        this.actualTheme = theme;
+        this.currentScenario = 'editor';
+        (this.menu.title as IMenuTitle).text = `${this.msg.theme}:${this.actualTheme}`;
+        if (this.menu.updateTitle) this.menu.updateTitle();
+    }
+
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
             if (!this.visible) return;
             this.setMsizeEditor();
         }
+
+        if (changedProperties.has('currentScenario') && this.currentScenario === 'editor') {
+            this.createEditor();
+            this.showColors();
+        }
+    }
+
+    firstUpdated(changedProperties: any) {
+        super.firstUpdated(changedProperties);
+        (this.menu.title as IMenuTitle).text = `${this.msg.theme}:${this.actualTheme}`;
+        if (this.menu.updateTitle) this.menu.updateTitle();
+    }
+
+    renderEditor() {
+        return html`<mls-editor-100529 ismls2="true"></mls-editor-100529>`
+    }
+
+    renderSelect() {
+
+        this.themes = this.getThemes();
+        return html`<div class="select-theme">
+            <div>
+                ${this.themes.map((theme) => {
+            return html`
+                    <div class="theme-item" @click=${() => { this.onSelectTheme(theme.themeName) }}>
+                        <span>${theme.themeName}</span>
+                        <span class="desc">${theme.description}</span>
+
+                        <div class="pallete">
+                            ${theme.pallete.map((color) => {
+                return html`<div class="pallete-item" style="background-color:${color};"></div>`
+            })}
+                        </div>
+                    </div>`
+        })}
+            </div>
+            <div class="select-theme-action">
+                <a href="#">${this.msg.addNewTheme}</a>
+            </div>
+        </div>`
+    }
+
+    renderScenario() {
+        switch (this.currentScenario) {
+            case 'editor':
+                return html`${this.renderEditor()}`
+            case 'add':
+                return html`
+                `
+            case 'select':
+                return html`
+                    ${this.renderSelect()}
+                `
+        }
     }
 
     render() {
-        return html`<mls-editor-100529 ismls2="true"></mls-editor-100529>`;
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
+        return html`
+            <section>
+                ${this.renderScenario()}
+            </section>
+            <style>${this.styles}</style>
+        `
     }
+
+    private styles = `
+        .select-theme {
+            padding: 1rem;
+        }
+        .select-theme .select-theme-action {
+            display:flex;
+            justify-content:center;
+        }
+        .select-theme .theme-item {
+            border-bottom: 1px solid #cecece;
+        }
+        .select-theme .theme-item .desc {
+            font-size: var(--font-size-16);
+            display:block;
+        }
+        .select-theme .theme-item .pallete {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            padding-bottom: 1rem;
+        }
+        .select-theme .theme-item .pallete .pallete-item {
+            cursor:pointer;
+            background-color: #535353;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .select-theme .theme-item .pallete:hover {
+            opacity: .7
+        }
+    `
+}
+
+
+type IScenaries = 'editor' | 'select' | 'add';
+
+interface IThemes {
+    themeName: string,
+    description:string,
+    pallete: string[]
 }
 
 interface IEditorChangedEventsObj {

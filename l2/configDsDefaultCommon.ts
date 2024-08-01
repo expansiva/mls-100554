@@ -127,17 +127,19 @@ export class Common {
                     global: {},
                     typography: {},
                     themeName: theme,
+                    description: list[theme].description
                 }
             }
+            
             const cats = Object.keys(list[theme]);
             cats.forEach((cat) => {
-                if (obj && !obj[cat as TokensCategories]) {
+                if (obj && !obj[cat as TokensCategories] && cat !== 'description') {
                     obj[cat as TokensCategories] = {}
                 }
                 const tokens = Object.keys(list[theme][cat as TokensCategories]);
 
                 tokens.forEach((tok) => {
-                    if (!obj) return;
+                    if (!obj || cat === 'description') return;
                     obj[cat as TokensCategories][tok] = list[theme][cat as TokensCategories][tok]
                 });
             });
