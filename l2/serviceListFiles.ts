@@ -281,13 +281,16 @@ export class ServiceListFiles extends ServiceBase {
                 <a @click="${this.showAdd}">${this.msg.addNewFile}</a>
             </div>
             <div class="groupFilter">
-                <div class="groupFilterRadio">
-                    <input id="radioProjectActual" name="projectFind" type="radio" checked="checked" value="${this.projectLabel}" @click="${this.clickRadioProjectActual}">
-                    <label for="radioProjectActual">${this.projectLabel}</label>
-                    <input id="radioProjectZero" name="projectFind" type="radio" value="0" @click="${this.clickRadioProject0}">
-                    <label for="radioProjectZero">${this.msg.localProject}</label>
-                </div>
-                <input type="text" placeholder="Filter" @input="${this.filterLiChange}">
+                
+                    <form>
+                        <div class="groupFilterRadio">
+                            <input id="radioProjectActual" name="projectFind" type="radio" checked="checked" value="${this.projectLabel}" @click="${this.clickRadioProjectActual}">
+                            <label for="radioProjectActual">${this.projectLabel}</label>
+                            <input id="radioProjectZero" name="projectFind" type="radio" value="0" @click="${this.clickRadioProject0}">
+                            <label for="radioProjectZero">${this.msg.localProject}</label>
+                        </div>
+                    </form>
+                <input name="projectFilter" type="text" placeholder="Filter" @input="${this.filterLiChange}">
             </div>
             <div class="groupInfo">
                 <span style="margin-right:10px">
@@ -355,12 +358,14 @@ export class ServiceListFiles extends ServiceBase {
         return html`
             <div class="elContentAux" style="display:none" @click="${this.clickOptStop}">
                 <div class="elContentAux2">
-                    <span class="spanPrj">
-                        <input style="width: 80px;" .value="${this.project}" @click="${this.clickOptStop}">
-                    </span>
-                    <span class="spanName">
-                        <input @click="${this.clickOptStop}">
-                    </span>
+                    <form>
+                        <span class="spanPrj">
+                            <input name="projectEdit1" style="width: 80px;" .value="${this.project}" @click="${this.clickOptStop}">
+                        </span>
+                        <span class="spanName">
+                            <input name="projectEdit2" @click="${this.clickOptStop}">
+                        </span>
+                    </form>
                     <button class="btnActCloneRename fa fa-file-pen" style="margin: 4px 0px;"></button>
                     <button class="fa fa-ban" title="cancel" @click="${this.clickHiddenAux}" style="margin: 4px 0px;"></button>
                 </div>
