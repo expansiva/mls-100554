@@ -4,22 +4,32 @@ import { html, css } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getDSInstance, list as listDs, DesignSystemIO, IToken, TokensCategories } from './_100554_libDesignSystem';
+import { collab_trash } from './_100554_collabIcons';
 
 /// **collab_i18n_start**
 const message_pt = {
     theme: "Tema",
     addNewTheme: 'Adicionar novo tema',
+    newThemeName: "Nome",
+    newThemeDesc: "Descrição",
+    btnAddNewTheme: 'Salvar',
+    btnAddNewThemeIA: 'Criar com IA',
     back: 'Voltar',
+    errorNewThemeName: 'O nome do tema não pode estar em branco',
 }
 
 const message_en = {
     theme: "Theme",
     addNewTheme: 'Add new theme',
+    newThemeName: "Name",
+    newThemeDesc: "Description",
+    btnAddNewTheme: 'Save',
+    btnAddNewThemeIA: 'Create with AI',
     back: 'Back',
+    errorNewThemeName: 'Theme name cannot be blank',
 }
 
 type MessageType = typeof message_en;
-
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
@@ -39,7 +49,8 @@ export class ServiceDsTokens100554 extends ServiceBase {
     @property({ type: String }) actualTheme = 'Default';
     @property({ type: String }) currentScenario: IScenaries = 'editor';
     @property({ type: String }) themes: IThemes[] = [];
-
+    @query("#new-theme-name") inpName: HTMLInputElement | undefined;
+    @query("#new-theme-desc") inpDesc: HTMLTextAreaElement | undefined;
 
     createRenderRoot() {
         return this;
@@ -70,7 +81,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
     public menu: IMenu = {
         title: {
-            icon: '&#xf053',
+            icon: '&#xf054',
             text: 'Theme'
         },
         actions: {
@@ -287,6 +298,15 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
     }
 
+    private fireEvent() {
+        const params: IEditorChangedEventsObj = {
+            emitter: 'left',
+            value: this.actualTheme
+        };
+        mls.events.fire([this.level], ['DSColorChanged'], JSON.stringify(params), 1000);
+
+    }
+
     private onEditorColorChange(changes: monaco.editor.IModelContentChange[]) {
         const [change] = changes;
         if (!change) return;
@@ -296,6 +316,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
         const tokens = this.getEditorsTokens();
         if (!this.dsInstance || !this.dsInstance.tokens) return;
         this.dsInstance.tokens.setTokens(this.actualTheme, tokens.color, tokens.typography, tokens.global);
+        this.fireEvent();
 
     }
 
@@ -305,6 +326,8 @@ export class ServiceDsTokens100554 extends ServiceBase {
         const tokens = this.getEditorsTokens();
         if (!this.dsInstance || !this.dsInstance.tokens) return;
         this.dsInstance.tokens.setTokens(this.actualTheme, tokens.color, tokens.typography, tokens.global);
+        this.fireEvent();
+
     }
 
     private onEditorGlobalChange(changes: monaco.editor.IModelContentChange[]) {
@@ -313,6 +336,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
         const tokens = this.getEditorsTokens();
         if (!this.dsInstance || !this.dsInstance.tokens) return;
         this.dsInstance.tokens.setTokens(this.actualTheme, tokens.color, tokens.typography, tokens.global);
+        this.fireEvent();
     }
 
     private getEditorsTokens() {
@@ -353,7 +377,17 @@ export class ServiceDsTokens100554 extends ServiceBase {
     }
 
     private _onClickTitle() {
+
+        if (this.currentScenario === 'select') {
+            this.currentScenario = 'editor';
+            this.currentScenario = 'select';
+            (this.menu.title as IMenuTitle).icon = `&#xf054`;
+            if (this.menu.updateTitle) this.menu.updateTitle();
+            return;
+        }
         this.currentScenario = 'select';
+        (this.menu.title as IMenuTitle).icon = `&#xf053`;
+        if (this.menu.updateTitle) this.menu.updateTitle();
     }
 
     private getThemes() {
@@ -378,6 +412,33 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
     }
 
+    private clearInputs() {
+        if (this.inpDesc) this.inpDesc.value = '';
+        if (this.inpName) this.inpName.value = '';
+    }
+
+    private async onSaveThemeClick() {
+        const name = this.inpName?.value;
+        const desc = this.inpDesc?.value || '';
+
+        if (!name) {
+            this.setError(this.msg.errorNewThemeName)
+            return;
+        }
+
+        if (!this.dsInstance || !this.dsInstance.tokens) return;
+        try {
+            await this.dsInstance.tokens.addTheme(name, desc);
+            this.clearInputs();
+            this.themes = this.getThemes();
+            this.requestUpdate();
+        } catch (err: any) {
+            this.setError(err.message)
+
+        }
+
+    }
+
     private async onSelectTheme(theme: string) {
         this.tokensColors = {};
         this.tokensGlobal = {};
@@ -385,7 +446,21 @@ export class ServiceDsTokens100554 extends ServiceBase {
         this.actualTheme = theme;
         this.currentScenario = 'editor';
         (this.menu.title as IMenuTitle).text = `${this.msg.theme}:${this.actualTheme}`;
+        (this.menu.title as IMenuTitle).icon = `&#xf054`;
         if (this.menu.updateTitle) this.menu.updateTitle();
+    }
+
+    private async deleteTheme(ev: MouseEvent, theme: string) {
+        ev.stopPropagation();
+        if (!this.dsInstance || !this.dsInstance.tokens) return;
+        try {
+            await this.dsInstance.tokens.removeTheme(theme);
+            if (this.actualTheme === theme) this.actualTheme = 'Default';
+            this.themes = this.getThemes();
+            this.requestUpdate();
+        } catch (err: any) {
+            this.setError(err.message)
+        }
     }
 
     updated(changedProperties: any) {
@@ -403,6 +478,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
     firstUpdated(changedProperties: any) {
         super.firstUpdated(changedProperties);
         (this.menu.title as IMenuTitle).text = `${this.msg.theme}:${this.actualTheme}`;
+        (this.menu.title as IMenuTitle).icon = `&#xf054`;
         if (this.menu.updateTitle) this.menu.updateTitle();
     }
 
@@ -418,6 +494,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
                 ${this.themes.map((theme) => {
             return html`
                     <div class="theme-item" @click=${() => { this.onSelectTheme(theme.themeName) }}>
+                        ${theme.themeName !== 'Default' ? html`<span class="remove" @click=${(e: MouseEvent) => this.deleteTheme(e, theme.themeName)}>${collab_trash}</span>` : html``} 
                         <span>${theme.themeName}</span>
                         <span class="desc">${theme.description}</span>
 
@@ -429,9 +506,22 @@ export class ServiceDsTokens100554 extends ServiceBase {
                     </div>`
         })}
             </div>
-            <div class="select-theme-action">
-                <a href="#">${this.msg.addNewTheme}</a>
-            </div>
+            <details>
+                <summary>${this.msg.addNewTheme}</summary>
+                <form>
+                    <label>${this.msg.newThemeName}</label>
+                    <input id="new-theme-name"></input>
+                    <label>${this.msg.newThemeDesc}</label>
+                    <textarea id="new-theme-desc"></textarea>
+                </form>
+
+                <div class="select-theme-action">
+                    <button @click=${this.onSaveThemeClick}>${this.msg.btnAddNewTheme}</button>
+                    <button>${this.msg.btnAddNewThemeIA}</button>
+                </div>
+            
+            </details>
+            
         </div>`
     }
 
@@ -439,9 +529,6 @@ export class ServiceDsTokens100554 extends ServiceBase {
         switch (this.currentScenario) {
             case 'editor':
                 return html`${this.renderEditor()}`
-            case 'add':
-                return html`
-                `
             case 'select':
                 return html`
                     ${this.renderSelect()}
@@ -465,13 +552,76 @@ export class ServiceDsTokens100554 extends ServiceBase {
         .select-theme {
             padding: 1rem;
         }
+        .select-theme details > div{
+            padding:1rem;
+        }
+        .select-theme details input {
+            display: block;
+            width:100%;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #000000;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            outline: none;
+        }
+
+        .select-theme details textarea {
+            display: block;
+            width:100%;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #000000;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            outline: none;
+        }
+
+        .select-theme details > div button:hover{
+            background-color: var(--grey-color-light);
+        }
+
+        .select-theme details > div button {
+            background-color: var(--bg-secondary-color-lighter);
+            border-radius: 8px;
+            border:none;
+            box-shadow: 0px 1px 3px 0px var(--grey-color);
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap:.2rem;
+            font-weight: 700;
+            align-items: center;
+            height: 40px;
+            transition: height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            padding: 0.5rem;
+            color: var(--text-primary-color);
+            cursor:pointer;
+        }
+        
         .select-theme .select-theme-action {
+            margin-top:1rem;
             display:flex;
             justify-content:center;
+            gap:1rem;
         }
         .select-theme .theme-item {
+            position:relative;
             border-bottom: 1px solid #cecece;
         }
+        .select-theme .theme-item .remove{
+            position:absolute;
+            cursor:pointer;
+            top:5px;
+            right:0;
+        }
+        
         .select-theme .theme-item .desc {
             font-size: var(--font-size-16);
             display:block;
@@ -480,6 +630,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
             padding-bottom: 1rem;
+            gap: 0.1rem;
         }
         .select-theme .theme-item .pallete .pallete-item {
             cursor:pointer;
@@ -501,11 +652,11 @@ export class ServiceDsTokens100554 extends ServiceBase {
 }
 
 
-type IScenaries = 'editor' | 'select' | 'add';
+type IScenaries = 'editor' | 'select';
 
 interface IThemes {
     themeName: string,
-    description:string,
+    description: string,
     pallete: string[]
 }
 
