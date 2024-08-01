@@ -3,10 +3,10 @@
 // typescript new file
 import { getDSInstance } from './_100554_libDesignSystem';
 
-export const getDependenciesByHtml = (mfile: mls.l2.editor.IMFile, html: string, withCss: boolean = false): Promise<IJSONDependence> => {
+export const getDependenciesByHtml = (mfile: mls.l2.editor.IMFile, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
         try {
-            resolve(await getDependencies(mfile, 'byHtml', html, withCss))
+            resolve(await getDependencies(mfile, 'byHtml', html, theme, withCss))
         } catch (e) {
             reject(e);
         }
@@ -18,7 +18,7 @@ export const getDependenciesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boo
         try {
             if (mfile.storFile.extension !== '.ts') throw new Error('Only myfile .ts');
             const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
-            resolve(await getDependencies(mfile, tag, `<${tag}></${tag}>`, withCss))
+            resolve(await getDependencies(mfile, tag, `<${tag}></${tag}>`, 'Default', withCss))
         } catch (e) {
             reject(e);
         }
@@ -40,7 +40,7 @@ async function getTagsInTypescript(mfile: mls.l2.editor.IMFile, tags: string[]):
     return tags;
 }
 
-async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, html: string, withCss: boolean = false) {
+async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, html: string, theme: string, withCss: boolean = false) {
 
     const myImportsMap: string[] = [];
     const myImports: string[] = [];
@@ -54,7 +54,7 @@ async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, ht
     if (!tags.includes(tag)) tags.push(tag);
 
     tags = await getTagsInTypescript(mfile, tags);
-    const globalCss = await getGlobalCss(mfile);
+    const globalCss = await getGlobalCss(mfile, theme);
 
     await loadMyNeedsToCompile(
         tags,
@@ -64,7 +64,8 @@ async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, ht
         myTokens,
         myErrors,
         myModules,
-        withCss
+        withCss,
+        theme
     );
 
     return {
@@ -104,7 +105,8 @@ async function loadMyNeedsToCompile(
     myTokens: string[],
     myErrors: { tag: string, error: string }[],
     myModules: any,
-    compileCss: boolean) {
+    compileCss: boolean,
+    theme: string) {
 
     try {
 
@@ -142,9 +144,9 @@ async function loadMyNeedsToCompile(
         await getJSImporMap(myImportsMap, enhacementName, mfile, myModules);
         await getJS(myImports, enhacementName, mfile, myModules);
         if (compileCss) {
-            await getCss(myCss, name, mfile);
+            await getCss(myCss, name, mfile, theme);
         }
-        await getTokens(myTokens, mfile);
+        await getTokens(myTokens, mfile, theme);
 
 
     } catch (e: any) {
@@ -164,7 +166,8 @@ async function loadMyNeedsToCompile(
                 myTokens,
                 myErrors,
                 myModules,
-                compileCss
+                compileCss,
+                theme
             );
         }
 
@@ -275,14 +278,14 @@ function verifyMyImportsNeedImport(myImports: string[], name: string): string[] 
 
 };
 
-async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IMFile) {
+async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IMFile, theme: string) {
 
     try {
 
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
         if (!ds || !ds.components) return;
-        const css = await ds.components.getCSS(fullName, 'Default')
+        const css = await ds.components.getCSS(fullName, theme)
         myCss.push(css);
 
     } catch (e: any) {
@@ -294,24 +297,24 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IM
 
 }
 
-async function getGlobalCss(mfile: mls.l2.editor.IMFile) {
+async function getGlobalCss(mfile: mls.l2.editor.IMFile, theme: string) {
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
         if (!ds || !ds.css) return;
-        const css = await ds.css.getStylesInLess('Default')
+        const css = await ds.css.getStylesInLess(theme)
         return css;
     } catch (e: any) {
         if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
     }
 }
 
-async function getTokens(myTokens: string[], mfile: mls.l2.editor.IMFile) {
+async function getTokens(myTokens: string[], mfile: mls.l2.editor.IMFile, theme: string) {
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
         if (!ds || !ds.tokens) return;
-        const tokens = await ds.tokens.getTokensCss('Default');
+        const tokens = await ds.tokens.getTokensCss(theme);
         myTokens.push(tokens);
     } catch (e: any) {
 

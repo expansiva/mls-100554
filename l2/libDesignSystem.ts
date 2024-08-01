@@ -1,9 +1,10 @@
 /// <mls shortName="libDesignSystem" project="100554" enhancement="_blank" groupName="other" />
-
+import { getConfigProject } from './_100554_libProjectConfig'
 const instanceCache: IDSInstanceCache = {};
 
 export async function list(project: number) {
     const config = await getConfigProject(project);
+    if(!config) return [];
     const ds: mls.l5_common.DesignSystem[] = config.designSystems || [];
     return ds;
 }
@@ -21,17 +22,6 @@ async function _getDsInstance(project: number, dsindex: number): Promise<DesignS
     const instance: DesignSystemIO = await getOrCreateDSInstanceIO(project, dsindex, '_100554_configDsDefault');
     if (!instance) throw new Error('Invalid ds instance!');
     return instance;
-}
-
-async function getConfigProject(project: number): Promise<any> {
-    const shortName = 'project';
-    if (project === undefined) throw new Error('No project selected!')
-    const key = mls.stor.getKeyToFiles(project, 5, shortName, '', '.json');
-    let configFile = mls.stor.files[key];
-    if (!configFile) throw new Error('No config file!');
-    const content = await configFile.getContent();
-    if (!content || typeof content !== 'string') throw new Error('Invalid config file!');
-    return JSON.parse(content);
 }
 
 export async function getOrCreateDSInstanceIO(project: number, dsindex: number, widgetIOName: string): Promise<DesignSystemIO> {
@@ -55,6 +45,12 @@ interface IDSInstanceCache {
     [key: string]: DesignSystemIO;
 }
 
+interface IProjectConfigCache {
+    [key: number]: {
+        versionRef: string;
+        config: mls.l5_common.ProjectConfig;
+    }
+}
 
 export abstract class DesignSystemIO {
     abstract project: number;
@@ -84,7 +80,7 @@ export abstract class TokenIO {
     abstract getTokensCss: (theme: string) => Promise<string>;
     abstract update: (key: string, newValue: string, theme: string) => Promise<void>;
     abstract remove: (key: string, theme: string) => Promise<void>;
-    abstract addTheme: (theme: string, description:string) => Promise<void>;
+    abstract addTheme: (theme: string, description: string) => Promise<void>;
     abstract removeTheme: (theme: string) => Promise<void>;
     abstract setTokens: (theme: string, tokensColor: IToken, tokensTypography: IToken, tokensGlobal: IToken) => Promise<void>;
 }
@@ -175,7 +171,7 @@ export type ITokenInfo2 = {
     color: IToken,
     typography: IToken,
     global: IToken,
-    description:string
+    description: string
 
 };
 

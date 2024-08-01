@@ -298,12 +298,12 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
     }
 
-    private fireEvent() {
+    private fireEvent(event: string) {
         const params: IEditorChangedEventsObj = {
             emitter: 'left',
             value: this.actualTheme
         };
-        mls.events.fire([this.level], ['DSColorChanged'], JSON.stringify(params), 1000);
+        mls.events.fire([this.level], [event] as any, JSON.stringify(params), 1000);
 
     }
 
@@ -316,7 +316,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
         const tokens = this.getEditorsTokens();
         if (!this.dsInstance || !this.dsInstance.tokens) return;
         this.dsInstance.tokens.setTokens(this.actualTheme, tokens.color, tokens.typography, tokens.global);
-        this.fireEvent();
+        this.fireEvent('DSTokensChanged');
 
     }
 
@@ -326,7 +326,8 @@ export class ServiceDsTokens100554 extends ServiceBase {
         const tokens = this.getEditorsTokens();
         if (!this.dsInstance || !this.dsInstance.tokens) return;
         this.dsInstance.tokens.setTokens(this.actualTheme, tokens.color, tokens.typography, tokens.global);
-        this.fireEvent();
+        this.fireEvent('DSTokensChanged');
+
 
     }
 
@@ -336,7 +337,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
         const tokens = this.getEditorsTokens();
         if (!this.dsInstance || !this.dsInstance.tokens) return;
         this.dsInstance.tokens.setTokens(this.actualTheme, tokens.color, tokens.typography, tokens.global);
-        this.fireEvent();
+        this.fireEvent('DSTokensChanged');
     }
 
     private getEditorsTokens() {
@@ -380,14 +381,15 @@ export class ServiceDsTokens100554 extends ServiceBase {
 
         if (this.currentScenario === 'select') {
             this.currentScenario = 'editor';
-            this.currentScenario = 'select';
             (this.menu.title as IMenuTitle).icon = `&#xf054`;
             if (this.menu.updateTitle) this.menu.updateTitle();
             return;
         }
+
         this.currentScenario = 'select';
         (this.menu.title as IMenuTitle).icon = `&#xf053`;
         if (this.menu.updateTitle) this.menu.updateTitle();
+
     }
 
     private getThemes() {
@@ -448,6 +450,7 @@ export class ServiceDsTokens100554 extends ServiceBase {
         (this.menu.title as IMenuTitle).text = `${this.msg.theme}:${this.actualTheme}`;
         (this.menu.title as IMenuTitle).icon = `&#xf054`;
         if (this.menu.updateTitle) this.menu.updateTitle();
+        this.fireEvent('DSThemeChanged');
     }
 
     private async deleteTheme(ev: MouseEvent, theme: string) {

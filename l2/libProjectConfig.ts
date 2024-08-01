@@ -1,32 +1,41 @@
 /// <mls shortName="libProjectConfig" project="100554" enhancement="_blank" groupName="other" />
 
-export const projectConfig: ICacheProjectConfig = {};
+export const projectConfig: IProjectConfigCache = {};
 
 const FILENAME = 'project';
 const LEVEL = 5;
 const EXTENSION = '.json';
 
+
 export async function getConfigProject(project: number, ignoreLocalChanges = false): Promise<mls.l5_common.ProjectConfig | undefined> {
-    if (projectConfig[project]) return projectConfig[project];
+
     if (project === undefined) return undefined;
     const key = mls.stor.getKeyToFiles(project, LEVEL, FILENAME, '', EXTENSION);
     let configFile = mls.stor.files[key];
     if (!configFile) return undefined;
-    const lastStatus = configFile.inLocalStorage;
-    if (ignoreLocalChanges) {
-        configFile.inLocalStorage = false;
+
+    if (!projectConfig[project] || (projectConfig[project].versionRef !== configFile.versionRef) || ignoreLocalChanges) {
+
+        const lastStatus = configFile.inLocalStorage;
+        if (ignoreLocalChanges) {
+            configFile.inLocalStorage = false;
+        }
+        const content = await configFile.getContent();
+        configFile.inLocalStorage = lastStatus;
+        if (!content || typeof content !== 'string') return undefined;
+        const config = JSON.parse(content);
+        projectConfig[project] = {
+            config,
+            versionRef: configFile.versionRef
+        }
     }
-    const content = await configFile.getContent();
-    configFile.inLocalStorage = lastStatus;
-    if (!content || typeof content !== 'string') return undefined;
-    const config = JSON.parse(content);
-    projectConfig[project] = config;
-    return projectConfig[project];
+
+    return projectConfig[project].config;
 }
 
 export async function updateConfigProject(project: number, newConfig: mls.l5_common.ProjectConfig): Promise<void> {
     const key = mls.stor.getKeyToFiles(project, LEVEL, FILENAME, '', EXTENSION);
-    projectConfig[project] = newConfig;
+    projectConfig[project].config = newConfig;
     const configFile = mls.stor.files[key];
     if (!configFile) throw new Error('No config file!');
     await mls.stor.localStor.setContent(configFile, {
@@ -41,8 +50,8 @@ export async function createConfigFile(project: number): Promise<mls.l5_common.P
     let configFile = mls.stor.files[key];
     if (configFile) throw new Error('config file already exists');
     const config = await _createConfigFile(project);
-    projectConfig[project] = config;
-    return projectConfig[project];
+    projectConfig[project].config = config;
+    return projectConfig[project].config;
 }
 
 async function _createConfigFile(project: number) {
@@ -71,7 +80,9 @@ async function _createConfigFile(project: number) {
     return newConfig;
 }
 
-
-interface ICacheProjectConfig {
-    [key: number]: mls.l5_common.ProjectConfig
+interface IProjectConfigCache {
+    [key: number]: {
+        versionRef: string;
+        config: mls.l5_common.ProjectConfig;
+    }
 }

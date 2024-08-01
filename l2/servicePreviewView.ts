@@ -4,7 +4,7 @@ import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { getDSInstance } from './_100554_libDesignSystem';
+import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 
 export const initServicePreviewView = '';
 
@@ -55,6 +55,8 @@ export class ServicePreviewView extends LitElement {
     @property() watch: boolean = true;
 
     @property() stylechanged: string = '';
+
+    @property() actualtheme: string = 'Default';
 
     @property() error: string = '';
 
@@ -268,7 +270,7 @@ export class ServicePreviewView extends LitElement {
     private async addStyles() {
         if (!this.mfile) return;
         let txt = await this.getFileContent();
-        const ret = await getDependenciesByHtml(this.mfile, txt, true);
+        const ret = await getDependenciesByHtml(this.mfile, txt, this.actualtheme, true);
         const iframe = this.shadowRoot?.querySelector('iframe');
         if (!iframe) return;
         this.mountCSS(ret, iframe);
@@ -390,7 +392,7 @@ export class ServicePreviewView extends LitElement {
         iframe.contentDocument.body.style.paddingTop = '10px';
         (iframe.contentDocument.body as any)['service'] = this.father;
 
-        const ret = await getDependenciesByHtml(this.mfile, txt, true);
+        const ret = await getDependenciesByHtml(this.mfile, txt, this.actualtheme, true);
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
         this.mountCSS(ret, iframe);
@@ -706,7 +708,7 @@ export class ServicePreviewView extends LitElement {
         return groupName;
     }
 
-    private async addComponent(name: string, ds: mls.l3.DesignSystemIO) {
+    private async addComponent(name: string, ds: DesignSystemIO) {
 
         if (!name || !ds) return;
         const group = await this.getGroup(name);
@@ -727,6 +729,7 @@ export class ServicePreviewView extends LitElement {
         };
 
         try {
+            if (!ds.components) return;
             await ds.components.add(widget);
         } catch (err: any) {
             const msg = 'Error on add component in design system';
@@ -935,5 +938,5 @@ export class ServicePreviewView extends LitElement {
 interface IInfoDesignSystem {
     project: number,
     level: number,
-    ds: mls.l3.DesignSystemIO
+    ds: DesignSystemIO
 }

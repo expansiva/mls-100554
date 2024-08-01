@@ -274,6 +274,7 @@ export interface IMenu {
     setMenuActive?: (op: string) => void,
     selectButton?: (op: string) => void
     closeMenu?: Function,
+    refresh?: Function,
     getLastMode?: IGetLastMode,
     lastIcon?: string,
     updateTitle?: Function,

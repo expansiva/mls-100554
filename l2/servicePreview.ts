@@ -10,7 +10,7 @@ import { initServicePreviewView } from './_100554_servicePreviewView';
 import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
 import { IcaLitElement } from './_100554_icaLitElement';
 
-import { getDSInstance } from './_100554_libDesignSystem';
+import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -19,7 +19,7 @@ const message_pt = {
     editStyle: 'Editar estilo',
     pause: 'Parar preview',
     dark: ' escuro',
-    light: 'Tema claro'
+    light: 'claro'
 }
 
 const message_en = {
@@ -27,8 +27,8 @@ const message_en = {
     variations: 'Variation',
     editStyle: 'Edit style',
     pause: 'Pause preview',
-    dark: 'Theme dark',
-    light: 'Theme light'
+    dark: 'dark',
+    light: 'light'
 }
 
 type MessageType = typeof message_en;
@@ -58,6 +58,12 @@ export class ServicePreview100554 extends ServiceBase {
 
     private elPreview: HTMLElement | undefined = undefined;
 
+    private themes: string[] = ['Default'];
+
+    private actualTheme = 'Default';
+
+    private ds: DesignSystemIO | undefined;
+
     private info: any = {};
 
     constructor() {
@@ -65,7 +71,6 @@ export class ServicePreview100554 extends ServiceBase {
         initServicePreviewView;
         initServicePreviewAddStyle;
         this.setEvents();
-        // this.getTheme();
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
@@ -99,8 +104,34 @@ export class ServicePreview100554 extends ServiceBase {
         if (op === 'btEditStyle') return this.editStyles();
         if (op === 'btVariations') return this.onBtVariationsClick(opMenu);
         if (op === 'btTheme') return this.onBtThemeClick();
+        if (op === 'btTokens') return this.onBtTokensClick(opMenu);
+
 
         else throw new Error('Invalid option')
+    }
+
+    public menu: IMenu = {
+        title: 'Preview',
+        actions: {
+        },
+        icons: {
+            icPreviewD: 'Desktop;f390',
+            icPreviewM: 'Mobile;f3cf'
+        },
+        buttons: {
+            btTheme: `${this.msg.light};${this.msg.dark};f185;f186`,
+            btTokens: this.msg.theme + ';f53f:menu:Default,',
+            btVariations: this.msg.variations + ';f1ab:menu:0 - Default,1 - Portugues,2 - Espanhol,3 - Russo',
+            btEditStyle: this.msg.editStyle + ';f0d0',
+            btWatch: this.msg.pause + ';Update Preview;f04c;f04b',
+        },
+        actionDefault: '', // call after close icon clicked
+        iconDefault: 'icPreviewD',
+        setMode: undefined, // child will set this
+        onClickLink: this.onClickLink,
+        onClickIcon: this.onClickIcon,
+        onClickButton: this.onClickButton
+
     }
 
     private objVariations: any = {
@@ -147,6 +178,12 @@ export class ServicePreview100554 extends ServiceBase {
         return this.light;
     }
 
+    private onBtTokensClick(opMenu: string | undefined) {
+        if (!opMenu) return true;
+        this.actualTheme = opMenu;
+        this.onStyleChanged();
+        return true;
+    }
 
     private toogleWatch(): boolean {
         this.watch = !this.watch;
@@ -161,28 +198,6 @@ export class ServicePreview100554 extends ServiceBase {
         return true;
     }
 
-    public menu: IMenu = {
-        title: 'Preview',
-        actions: {
-        },
-        icons: {
-            icPreviewD: 'Desktop;f390',
-            icPreviewM: 'Mobile;f3cf'
-        },
-        buttons: {
-            btTheme: `${this.msg.light};${this.msg.dark};f185;f186`,
-            btVariations: this.msg.variations + ';f1ab:menu:0 - Default,1 - Portugues,2 - Espanhol,3 - Russo',
-            btEditStyle: this.msg.editStyle + ';f0d0',
-            btWatch: this.msg.pause + ';Update Preview;f04c;f04b',
-        },
-        actionDefault: '', // call after close icon clicked
-        iconDefault: 'icPreviewD',
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
-        onClickButton: this.onClickButton
-
-    }
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
@@ -207,8 +222,8 @@ export class ServicePreview100554 extends ServiceBase {
     private setEvents() {
 
         mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
-        mls.events.addEventListener([3], ['DSStyleChanged', 'DSColorChanged', 'DSCustomChanged', 'DSTYPOChanged'], async (ev) => {
-
+        
+        mls.events.addEventListener([3], ['DSStyleChanged', 'DSTokensChanged'] as any, async (ev) => {
             const rc: any = JSON.parse(ev.desc as any);
             if (
                 rc.emitter === 'right' ||
@@ -216,7 +231,14 @@ export class ServicePreview100554 extends ServiceBase {
                 (rc.emitter === 'left' && rc.helper)) return;
 
             if (this.watch) this.onStyleChanged();
+        });
 
+        mls.events.addEventListener([3], ['DSThemeChanged'] as any, async (ev) => {
+
+            const rc: any = JSON.parse(ev.desc as any);
+            if (rc.emitter !== 'left' || this.visible === 'false') return;
+            this.actualTheme = rc.value || 'Default';
+            if (this.watch) this.onStyleChanged();
 
         });
 
@@ -236,6 +258,8 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.elPreview) {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('stylechanged', 'true');
+            this.elPreview.setAttribute('actualtheme', this.actualTheme);
+
         }
     }
 
@@ -272,8 +296,12 @@ export class ServicePreview100554 extends ServiceBase {
     async connectedCallback() {
         super.connectedCallback();
         const dsIndex = mls.actual[3].mode && +this.level !== 2 ? mls.actual[3].mode : 0;
-        const ds = await getDSInstance(mls.actual[5].project as any, dsIndex);
-        await ds.init();
+        this.ds = await getDSInstance(mls.actual[5].project as any, dsIndex);
+        await this.ds.init();
+        if (!this.ds || !this.ds.tokens) return;
+        this.themes = Object.keys(this.ds.tokens.list);
+        if (this.menu.buttons) this.menu.buttons.btTokens = this.msg.theme + `;f53f:menu:${this.themes.join(',')}`;
+        if (this.menu.refresh) this.menu.refresh();
     }
 
     render() {
@@ -335,6 +363,7 @@ export class ServicePreview100554 extends ServiceBase {
         doc.setAttribute('page', fullname);
         doc.setAttribute('level', this.level as any);
         doc.setAttribute('mode', mode);
+        doc.setAttribute('actualtheme', this.actualTheme);
         (doc as any).father = this;
         this.lastLevel = this.level;
         this.elPreview = doc;
