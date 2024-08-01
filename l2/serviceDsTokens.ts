@@ -56,8 +56,6 @@ export class ServiceDsTokens100554 extends ServiceBase {
         return this;
     }
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     public details: IService = {
         icon: '&#xf0ae',
         state: 'foreground',

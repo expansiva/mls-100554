@@ -1,10 +1,13 @@
 /// <mls shortName="mlsHistoryList" project="100554" enhancement="_100554_enhancementLit" groupName="internal" />
 
-import { html, LitElement, unsafeHTML } from 'lit';
+import { html, unsafeHTML, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 @customElement('mls-history-list-100554')
-export class SimpleGreeting extends LitElement {
+export class MlsHistoryList extends CollabLitElement {
+
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property({ type: Number }) project: number = 100554;
     @property({ type: String }) shortName: string = 'mlsStartL2';
@@ -188,10 +191,6 @@ export class SimpleGreeting extends LitElement {
             + ('00' + dateValue.getMinutes()).slice(-2) + ':'
             + ('00' + dateValue.getSeconds()).slice(-2);
         return dataFormat;
-    }
-
-    createRenderRoot() {
-        return this;
     }
 
     handleClick(a: PointerEvent) {

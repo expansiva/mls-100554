@@ -530,6 +530,7 @@ export class ServiceSource100554 extends ServiceBase {
             const storFile = getStorFile();
             const storFileHTML: mls.stor.IFileInfo | undefined = getStorFileHTML();
             await this.deleteFiles(storFileHTML, storFile);
+            await mls.stor.localDB.removePrjInfo(storFile.project);
         };
 
         const onUndo = async (): Promise<void> => {
@@ -542,6 +543,7 @@ export class ServiceSource100554 extends ServiceBase {
             const storFile = getStorFile();
             const storFileHTML = getStorFileHTML();
             await this.renameFiles(storFileHTML, storFile, fileAction.newProject as number, fileAction.newshortName as string, fileAction);
+            await mls.stor.localDB.removePrjInfo(storFile.project);
         };
 
         const onClone = async (): Promise<void> => {
