@@ -114,7 +114,7 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     renderProperties() {
-        return html`<div>In development: Properties</div>`;
+        return html`<collab-ica-config-attributes-100554 .myParent=${this} ></collab-ica-config-attributes-100554>`;
     }
 
     renderStyles() {

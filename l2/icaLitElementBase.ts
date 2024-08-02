@@ -414,6 +414,11 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         return myDefinition.getEventDescription(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup, event);
     }
 
+    getAtributtes(): string[] {
+
+        if (!this.myInfos) this.myInfos = this.getMyInfos();
+        return myDefinition.getAtributtes(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup);
+    }
 
 }
 
