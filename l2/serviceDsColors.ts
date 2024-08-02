@@ -51,17 +51,6 @@ export class ServiceDsColors100554 extends CollabLitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    // public details: IService = {
-    //     icon: '&#xf53f',
-    //     state: 'foreground',
-    //     tooltip: 'Colors',
-    //     visible: false,
-    //     position: "right",
-    //     tags: ['ds_tokens'],
-    //     widget: '_100554_serviceDsColors',
-    //     level: [3]
-    // }
-
     public onClickLink = (op: string): boolean => {
         if (op === 'opHelper') return this.showHelper();
         if (this.menu.setMode) this.menu.setMode('initial');
