@@ -6,7 +6,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 
 /// **collab_i18n_start**
 const message_pt = {
-    addService: 'Adicionar Serviço',
+    addService: 'Adicionar ServiÃ§o', 
     back: 'Voltar',
     hidden: 'Oculto',
     style: 'Estilo'
