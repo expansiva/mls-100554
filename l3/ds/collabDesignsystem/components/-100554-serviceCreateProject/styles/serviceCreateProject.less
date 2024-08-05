@@ -1,3 +1,101 @@
-service-create-project-100554 { //don't change this line 
- 	 
+service-create-project-100554 {
+    //don't change this line 
+
+    details>div {
+        padding-left: @space-32;
+    }
+    textarea{
+        width: 100%;
+    }
+
+    .buttons-container{
+        margin-top: @space-32;
+        display: flex;
+        justify-content: center;
+    }
+
+    .select-type-project {
+        table{
+            font-size: @font-size-16;
+            border-spacing: 0;
+        }
+        table thead th {
+            border: none;
+            background-color: @grey-color-light;
+            white-space: nowrap;
+        }
+
+        table tbody tr{
+            cursor: pointer;
+            &:hover,&.selected{
+                background-color: @grey-color-lighter;
+            }
+        }
+        table tbody td {
+            text-align: center;
+            vertical-align: middle;
+            span{
+                font-weight: @font-weight-bold;
+            }
+            small{
+                font-weight: @font-weight-lighter;
+                color: @text-primary-color-lighter;
+            }
+        }
+    }
+
+    .details-new-project{
+        ul {
+            list-style: none;
+        }
+        .card-list{
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+
+        }
+        .card-item{
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+            border: 1px solid @grey-color-light;
+            padding: @space-16;
+            gap: .4rem;
+            cursor: pointer;
+            &:hover,&.selected{
+                background-color: @grey-color-lighter;
+            }
+            .card-type{
+                width: 30px;
+                display: block;
+                margin-left: auto;
+                padding: .25em .4em;
+                font-size: 75%;
+                font-weight: 700;
+                line-height: 1;
+                text-align: center;
+                white-space: nowrap;
+                padding-right: .6em;
+                padding-left: .6em;
+                border-radius: 10rem;
+                background-color: @bg-secondary-color;
+             
+            }
+            .card-desc{
+                font-size: @font-size-16;
+            }
+            .card-details{
+                font-size: @font-size-16;
+                ul li{
+                    display: flex;
+                    align-items: center;
+                }
+            
+
+            }
+        }
+    }
 }
+
