@@ -626,6 +626,7 @@ const icaDescriptions: icaBase.FormComponent[] = [
   {
     group: "Apresentation / Text / Text",
     description: msg.dATText,
+    attributes: "text,type",
     events: "click,focus,blur"
   },
   {
