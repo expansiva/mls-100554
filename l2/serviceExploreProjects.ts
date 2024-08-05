@@ -34,7 +34,6 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     name: string = 'Somebody';
 
 
-
     //----------CONFIG SERVICE------------------
 
     public details: IService = {
@@ -84,8 +83,20 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
     }
 
+    //----------EVENTS---------------------
+
+    private setEvents() {
+        mls.events.addEventListener([6], ['ProjectExplore'] as any, (details) => {
+            this.openService('_100554_serviceExploreProjects', 'left', 6);
+        });
+    }
+
 
     //----------COMPONENT------------------
+
+    connectedCallback() {
+        this.setEvents();
+    }
 
     render() {
         return html`<h2> ${this.msg.inDevelopment} !</h2>`;
