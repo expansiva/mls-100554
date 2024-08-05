@@ -5,7 +5,7 @@ import { customElement, query, property } from 'lit/decorators.js';
 import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 import { getInfoMyService } from "./_100554_aimHelper";
-import { getFormComponentsPrompt, getAttributeDefinitions } from './_100554_icaBaseDescription';
+import { getFormComponentsPrompt, getAttributeDefinitions } from './_100554_icaBaseDescription'; 
 import { initIcaSelectGroup, IcaSelectGroup } from './_100554_icaSelectGroup';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
