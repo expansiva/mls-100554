@@ -2,7 +2,7 @@
 
 import { html, TemplateResult } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js'; 
-import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
+import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper'; 
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 import { getInfoMyService } from "./_100554_aimHelper";
 import { getFormComponentsPrompt, getAttributeDefinitions } from './_100554_icaBaseDescription';
