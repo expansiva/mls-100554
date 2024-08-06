@@ -38,7 +38,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf0b1',
-        state: 'foreground',
+        state: 'background',
         position: 'left',
         tooltip: 'Explore Projects',
         visible: true,

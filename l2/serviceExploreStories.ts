@@ -114,8 +114,6 @@ export class ServiceExploreStories100554 extends ServiceBase {
 
     renderDraft() {
         return html`
-            <div class="scroll-custom">
-                
                 <ul>
                     ${this.renderList()}
                 </ul>
@@ -149,16 +147,19 @@ export class ServiceExploreStories100554 extends ServiceBase {
 
     renderLiItem(file: IItensFiles, index: number, inHistory: boolean) {
 
+        const aux = file.file.status === 'deleted' ? "text-decoration: line-through; color: #cf0707;" : '';
         return html`
-            <li  .myFile=${file.file} .nameFilter="${file.name}">
+            <li @click="${this.clickLi}" .myFile=${file.file} .nameFilter="${file.name}">
                 <div class="elContent">
-                    <h3>${file.name}</h3>
+                    <h3 style="${aux}">${file.name}</h3>
                     <span>${file.desc}</span>
-                    <menuitems @click="${this.overMenu}" @mouseleave="${this.blurMenu}">
-                        <menuicon></menuicon>
+                    <menuitems @click="${this.clickMenu}" @mouseleave="${this.blurMenu}">
+                        <menuicon>
+                            <svg xmlns='http://www.w3.org/2000/svg' style="fill:#8f8f8ffa"  viewBox='0 0 512 512'><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path  d='M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z'/></svg>
+                        </menuicon>
                         <menubox>
-                            <menuitem>${this.msg.editDraft}</menuitem>
-                            <menuitem>${this.msg.delDraft}</menuitem>
+                            <menuitem @click="${this.clickOptOpen}">${this.msg.editDraft}</menuitem>
+                            <menuitem @click="${this.clickOptDel}">${this.msg.delDraft}</menuitem>
                         </menubox>
                     </menuitems>
                 </div>
@@ -239,9 +240,9 @@ export class ServiceExploreStories100554 extends ServiceBase {
             const div = document.createElement('div');
             div.innerHTML = await sf.getContent() as string;
 
-            let name = div.querySelector('[type="h1"], [type="h2"], [type="h3"], [type="h4"], [type="h5"]')?.getAttribute('text') || sf.shortName;
+            let name = div.querySelector('.story-title')?.getAttribute('text') || sf.shortName;
 
-            let desc = div.querySelector('[type="p"], [type="span"], [type="code"]')?.getAttribute('text') || this.msg.noPragraph;
+            let desc = div.querySelector('.story-desc')?.getAttribute('text') || this.msg.noPragraph;
 
             arraySf.push({
                 desc,
@@ -255,14 +256,27 @@ export class ServiceExploreStories100554 extends ServiceBase {
 
     }
 
-    private overMenu(e:MouseEvent) {
+    private clickLi(e:MouseEvent) {
 
+        e.stopPropagation();
+        let el = e.target as HTMLElement;
+        if (el.tagName.toLocaleLowerCase() !== 'li')
+            el = el.closest('li') as HTMLElement;
+        if (!el) return;
+
+        this.fireEvents('open', (el as any).myFile, {});
+
+    }
+
+    private clickMenu(e:MouseEvent) {
+
+        e.stopPropagation();
         let el = e.target as HTMLElement;
         if (el.tagName.toLocaleLowerCase() !== 'menuitems')
             el = el.closest('menuitems') as HTMLElement;
         if (!el) return;
 
-        el.setAttribute('mode', 'open');
+        el.setAttribute('mode', 'open'); 
 
     }
 
@@ -274,6 +288,69 @@ export class ServiceExploreStories100554 extends ServiceBase {
         if (!el) return;
 
         el.setAttribute('mode', '');
+
+    }
+
+    private clickOptOpen(e: MouseEvent) {
+
+        e.stopPropagation();
+        let el = e.target as HTMLElement;
+        if (el.tagName.toLocaleLowerCase() !== 'li')
+            el = el.closest('li') as HTMLElement;
+        if (!el) return;
+
+        this.selectLevel(2)
+        this.fireEvents('open', (el as any).myFile, {});
+
+    }
+
+    private clickOptDel(e: MouseEvent) {
+
+        e.stopPropagation();
+        let el = e.target as HTMLElement;
+        if (el.tagName.toLocaleLowerCase() !== 'li')
+            el = el.closest('li') as HTMLElement;
+        if (!el) return;
+
+        this.fireEvents('delete', (el as any).myFile, {});
+        setTimeout(() => {
+            this.requestUpdate();
+        }, 800) 
+
+    }
+
+    
+    private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
+
+        const params = {} as mls.events.IFileAction;
+
+        (params.action as any) = action;
+        params.level = file.level;
+        params.project = file.project;
+        params.shortName = file.shortName;
+        params.extension = '.ts';
+        params.folder = file.folder;
+        params.position = this.position as ('right' | 'left');
+
+        if (info && info.shortName) {
+            params.newshortName = info.shortName;
+            params.newProject = info.project;
+            params.newfolder = file.folder;
+        }
+
+        if (['open'].includes(action)) {
+
+            mls.actual[2].setFullName(`_${file.project}_${file.shortName}`);
+            (mls.actual[2] as any)[this.position as any] = {
+                project: file.project,
+                shortName: file.shortName,
+                extension: '.ts',
+                folder: file.folder,
+            } as any;
+
+        }
+
+        mls.events.fire([2], ['FileAction'], JSON.stringify(params), timeout);
 
     }
 

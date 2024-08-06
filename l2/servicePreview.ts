@@ -268,7 +268,7 @@ export class ServicePreview100554 extends ServiceBase {
         try {
 
             if (this.visible === 'false' || !this.visible) return;
-            if (ev.level !== +this.level || (ev.type !== 'FileAction')) return;
+            if (ev.level !== 2 || (ev.type !== 'FileAction')) return;
             const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
             const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new'];
 

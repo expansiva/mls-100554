@@ -492,7 +492,7 @@ export class ServiceSource100554 extends ServiceBase {
     private isNewFile: boolean = false;
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
-        if (ev.level !== this.level || (ev.type !== 'FileAction')) return;
+        if (ev.level !== 2 || (ev.type !== 'FileAction')) return;
         if (!ev.desc) return;
         const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
         if (fileAction.position !== this.position) return;
