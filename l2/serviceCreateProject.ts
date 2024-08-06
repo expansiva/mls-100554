@@ -14,6 +14,7 @@ const message_pt = {
     alertNoSelect: 'Por favor selecione um tipo de projeto',
     btnContinuar: 'Continuar',
     btnCreate: 'Criar projeto(Em desenvolvimento)',
+    errorContinue: 'Selecione o tipo de site antes'
 
 }
 
@@ -25,6 +26,7 @@ const message_en = {
     alertNoSelect: 'Please select project type',
     btnContinuar: 'Continue',
     btnCreate: 'Create Project (In develpoment)',
+    errorContinue: 'Select the site type first'
 }
 
 type MessageType = typeof message_en;
@@ -105,6 +107,10 @@ export class ServiceCreateProject100554 extends ServiceBase {
     }
 
     private onBtnContinueClick() {
+        if (!this.actualSiteSelected) {
+            this.setError(this.msg.errorContinue)
+            return;
+        }
         this.menu.title = {
             icon: '&#xf053',
             text: this.msg.createProjectTitle
@@ -122,7 +128,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
     private onTypeSiteClick(item: ISites, el: HTMLElement) {
         if (this.sitesItems) this.sitesItems.forEach((item) => item.classList.remove('selected'))
         if (el) {
-            const tr = el.closest('tr');
+            const tr = el.closest('.tr-item');
             tr?.classList.toggle('selected');
         }
 
@@ -130,6 +136,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
     }
 
     private onPluginPublishClick(item: IPlugins, el: HTMLElement) {
+        if (!item.enabled) return;
         if (this.publishItems) this.publishItems.forEach((item) => item.classList.remove('selected'))
         if (el) {
             const card = el.closest('.card-item');
@@ -139,11 +146,14 @@ export class ServiceCreateProject100554 extends ServiceBase {
     }
 
     private onPluginStorageClick(item: IPlugins, el: HTMLElement) {
+        if (!item.enabled) return;
         if (this.storageItems) this.storageItems.forEach((item) => item.classList.remove('selected'))
         if (el) {
             const card = el.closest('.card-item');
             card?.classList.toggle('selected');
         }
+
+
     }
 
     private setEvents() {
@@ -174,8 +184,8 @@ export class ServiceCreateProject100554 extends ServiceBase {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        ${this.data.map((item) =>
-            html`
+                                        ${this.data.map((item) => {
+            return item.mode === 'system' ? '' : html`
                                                 <tr class="tr-item" @click=${(e: MouseEvent) => { this.onTypeSiteClick(item, e.target as HTMLElement) }}>
                                                     <td><span>${item.title}</span> <br><small> ${item.description} </small></td>
                                                     <td>${item.web === true ? collab_check : collab_xmark} </td>
@@ -186,6 +196,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
                                                     <td>${item.multilanguage === true ? collab_check : collab_xmark} </td>                                
                                                 </tr>
                                                 `
+        }
         )}
                                     </tbody>
                                 </table>
@@ -195,6 +206,18 @@ export class ServiceCreateProject100554 extends ServiceBase {
                         <details>
                             <summary>system</summary>
                             <div>
+                                <ul>
+                                    ${this.data.map((item) => {
+            return item.mode === 'site' ? '' : html`
+                                                <li class="tr-item" @click=${(e: MouseEvent) => { this.onTypeSiteClick(item, e.target as HTMLElement) }}>
+                                                    <span>${item.title}</span> 
+                                                    <br>
+                                                    <small> ${item.description} </small>                            
+                                                </li>
+                                                `
+        }
+        )}
+                                </ul>
                             </div>
                         </details>
                     </div>
@@ -241,7 +264,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
                         <div class="card-list">
                             ${this.pluginsPublish.map((item, index) => {
             return html`
-                                <div class="card-item publish-item  ${!item.enabled ? 'disabled' : '' }  ${index === 0 ? 'selected' : '' }">
+                                <div class="card-item publish-item  ${!item.enabled ? 'disabled' : ''}  ${index === 0 ? 'selected' : ''}">
 
                                     <span class="card-type ${item.type}">${item.type}</span>
                                     <span class="card-title">${item.title}</span>
@@ -272,7 +295,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
                         <div class="card-list" >
                             ${this.pluginsStorage.map((item, index) => {
             return html`
-                                <div class="card-item storage-item ${!item.enabled ? 'disabled' : ''} ${index === 0 ? 'selected' : '' }"
+                                <div class="card-item storage-item ${!item.enabled ? 'disabled' : ''} ${index === 0 ? 'selected' : ''}"
                                  @click=${(e: MouseEvent) => { this.onPluginStorageClick(item, e.target as HTMLElement) }}>
 
                                     <span class="card-type ${item.type}">${item.type}</span>
@@ -334,6 +357,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
     private data: ISites[] = [
         {
             title: "Blog / Institucional",
+            mode: "site",
             description: "Ex: sites pessoais / comerciais com dados estáticos",
             more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
@@ -345,6 +369,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         },
         {
             title: "Plataforma de publicação conteúdo(em desenvolvimento)",
+            mode: "site",
             description: "Ex: Medium, Youtube, Vimeo",
             more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
@@ -356,6 +381,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         },
         {
             title: "Portfólio / CMS(em desenvolvimento)",
+            mode: "site",
             description: "sites pessoais ou comerciais com apresentação serviços produtos",
             more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
@@ -367,6 +393,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         },
         {
             title: "Landing Page(em desenvolvimento)",
+            mode: "site",
             description: "Captura de usuários e vendas produtos/serviços ",
             more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
@@ -378,6 +405,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         },
         {
             title: "Educacional(em desenvolvimento)",
+            mode: "site",
             description: "distribuição cursos e gestão alunos",
             more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
@@ -389,6 +417,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         },
         {
             title: "E-Commerce(em desenvolvimento)",
+            mode: "site",
             description: "Loja online de vendas",
             more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
@@ -400,6 +429,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         },
         {
             title: "Educacional(em desenvolvimento)",
+            mode: "site",
             description: "Ex: sites pessoais / comerciais com dados estáticos",
             more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
@@ -411,6 +441,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         },
         {
             title: "B2B , B2C (Vendas)(em desenvolvimento)",
+            mode: "site",
             description: "Ex: Amazon, Alibaba",
             more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
@@ -422,7 +453,32 @@ export class ServiceCreateProject100554 extends ServiceBase {
         },
         {
             title: "ERP ( BackOffice)(em desenvolvimento)",
+            mode: "site",
             description: "Ex: SAP, Oracle ERP",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
+            web: true,
+            mobile: true,
+            appMobileIOS: true,
+            appMobileAndroid: true,
+            backend: true,
+            multilanguage: true
+        },
+        {
+            title: "Plugins(em desenvolvimento)",
+            mode: "system",
+            description: "Pacote de plugins para o sistema",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
+            web: true,
+            mobile: true,
+            appMobileIOS: true,
+            appMobileAndroid: true,
+            backend: true,
+            multilanguage: true
+        },
+        {
+            title: "Pacote de Componentes(em desenvolvimento)",
+            mode: "system",
+            description: "Pacote de componentes para o sistema",
             more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
             mobile: true,
@@ -552,6 +608,7 @@ interface IPluginsPublishDetails {
 }
 
 interface ISites {
+    mode: 'site' | 'system',
     title: string,
     description: string,
     more: string,

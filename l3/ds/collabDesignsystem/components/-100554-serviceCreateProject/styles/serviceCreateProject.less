@@ -36,6 +36,32 @@ service-create-project-100554 {
             flex-wrap: wrap;
             .col-left{
                 flex:1;
+
+                ul {
+                    list-style: none;
+                    padding-inline-start: 0;
+                    li:hover, li.selected{
+                        background-color: @active-color;
+                        color:#ffffff;
+                        small{
+                            color: #ffffff;
+                        }
+                    }
+
+                    li{
+                        padding: 1rem 0.3rem;
+                        font-size: @font-size-16;
+                        margin-bottom: @space-8;
+                        cursor: pointer;
+                        span{
+                            font-weight: @font-weight-bold;
+                        }
+                        small{
+                            font-weight: @font-weight-lighter;
+                            color: @text-primary-color-lighter;
+                        }
+                    }
+                }
             }
             .col-right{
                 min-width: 400px;
@@ -82,14 +108,20 @@ service-create-project-100554 {
          }
         
         table tbody tr> td:not(:nth-child(1)){
-            color: rebeccapurple;
             width: 80px;
         }
 
         table tbody tr{
             cursor: pointer;
             &:hover,&.selected{
-                background-color: @grey-color-light;
+                background-color: @active-color;
+                color:#ffffff;
+                small{
+                    color: #ffffff;
+                }
+                svg{
+                    fill: #ffffff;
+                }
             }
         }
         table tbody td {
