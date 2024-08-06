@@ -1,4 +1,4 @@
-/// <mls shortName="icaPageMedium" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="icaPageStory" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { CollabPageElement } from './_100554_collabPageElement'
 import { customElement } from 'lit/decorators.js';
