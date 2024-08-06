@@ -3,7 +3,7 @@
 import { CollabPageElement } from './_100554_collabPageElement'
 import { customElement } from 'lit/decorators.js';
 
-@customElement('ica-page-medium-100554')
+@customElement('ica-page-story-100554')
 export class IcaPageMedium100554 extends CollabPageElement {
 
     initPage() {
