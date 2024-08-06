@@ -1,39 +1,101 @@
 service-create-project-100554 {
     //don't change this line 
 
+    :host{
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: block;
+    }
+
     details>div {
         padding-left: @space-32;
     }
+
     textarea{
-        width: 100%;
+        width: 600px;
     }
 
     .buttons-container{
         margin-top: @space-32;
+        margin-bottom: @space-32;
         display: flex;
         justify-content: center;
+        button{
+            color: #ffffff;
+            background-color: @active-color;
+            min-width: 200px;
+        }
     }
 
     .select-type-project {
+        padding: @space-16;
+
+        .cols{
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+            .col-left{
+                flex:1;
+            }
+            .col-right{
+                min-width: 400px;
+                flex:1;
+
+                .details-selected-item{
+                    margin-top:2rem;
+                    .details-title{
+                        font-size: @font-size-20;
+                        font-weight: @font-weight-bold;
+                        display: block;
+                    }
+                    .details-more{
+                        font-size: @font-size-16;
+                    }
+                }
+
+                .details-select-type{
+                    display: block;
+                    span{
+                        display: flex;
+                        justify-content: center;
+                    }
+                } 
+            }
+        }
         table{
             font-size: @font-size-16;
             border-spacing: 0;
+            table-layout: fixed;
+            width: 100%;
         }
         table thead th {
             border: none;
             background-color: @grey-color-light;
-            white-space: nowrap;
+        }
+
+        table thead th:nth-child(1){
+           width: 200px;
+         }
+
+         table thead th:not(:nth-child(1)){
+           width: 80px;
+         }
+        
+        table tbody tr> td:not(:nth-child(1)){
+            color: rebeccapurple;
+            width: 80px;
         }
 
         table tbody tr{
             cursor: pointer;
             &:hover,&.selected{
-                background-color: @grey-color-lighter;
+                background-color: @grey-color-light;
             }
         }
         table tbody td {
             text-align: center;
             vertical-align: middle;
+            
             span{
                 font-weight: @font-weight-bold;
             }
@@ -45,6 +107,7 @@ service-create-project-100554 {
     }
 
     .details-new-project{
+        padding: @space-16;
         ul {
             list-style: none;
         }
@@ -56,6 +119,10 @@ service-create-project-100554 {
             flex-wrap: wrap;
 
         }
+        .card-item.disabled{
+            cursor: not-allowed;
+            opacity: .7;
+        }
         .card-item{
             display: flex;
             flex-direction: column;
@@ -65,7 +132,7 @@ service-create-project-100554 {
             gap: .4rem;
             cursor: pointer;
             &:hover,&.selected{
-                background-color: @grey-color-lighter;
+                background-color: @grey-color-light;
             }
             .card-type{
                 width: 30px;
@@ -81,6 +148,17 @@ service-create-project-100554 {
                 padding-left: .6em;
                 border-radius: 10rem;
                 background-color: @bg-secondary-color;
+
+                &.free{
+                    background-color: @success-color;
+                    color: @grey-color-lighter;
+                }
+
+                &.pro{
+                    background-color: @active-color;
+                    color: @grey-color-lighter;
+
+                }
              
             }
             .card-desc{

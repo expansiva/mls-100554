@@ -1,13 +1,13 @@
 /// <mls shortName="serviceCreateProject" project="100554" enhancement="_100554_enhancementLitService" groupName="other" />
 
 import { html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, queryAll } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_check, collab_xmark } from './_100554_collabIcons';
 
 /// **collab_i18n_start**
 const message_pt = {
-    createProjectTitle: 'Criar projecto',
+    createProjectTitle: 'Criar projeto',
     createProjectHelper: 'Por favor escolha o tipo de projeto abaixo e pressione continuar',
     labelName: 'Nome do projeto',
     labelDescription: 'Descrição',
@@ -25,8 +25,6 @@ const message_en = {
     alertNoSelect: 'Please select project type',
     btnContinuar: 'Continue',
     btnCreate: 'Create Project (In develpoment)',
-
-
 }
 
 type MessageType = typeof message_en;
@@ -40,15 +38,28 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-create-project-100554')
 export class ServiceCreateProject100554 extends ServiceBase {
 
+    constructor() {
+        super();
+        this.setEvents();
+    }
+
     private msg: MessageType = messages['en'];
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    @property({ type: String }) currentScenario: IScenaries = 'customize';
+    @property({ type: String }) currentScenario: IScenaries = 'select';
+
+    @property() actualSiteSelected: ISites | undefined;
+
+    @queryAll('.tr-item') sitesItems: NodeListOf<HTMLElement> | undefined;
+
+    @queryAll('.publish-item') publishItems: NodeListOf<HTMLElement> | undefined;
+
+    @queryAll('.storage-item') storageItems: NodeListOf<HTMLElement> | undefined;
 
     public details: IService = {
         icon: '&#xf15b',
-        state: 'foreground',
+        state: 'background',
         position: 'left',
         tooltip: 'Create project',
         visible: true,
@@ -61,6 +72,15 @@ export class ServiceCreateProject100554 extends ServiceBase {
         return false;
     }
 
+    public onClickTitle() {
+        this.changeScenario('select');
+        this.menu.title = {
+            icon: '',
+            text: this.msg.createProjectTitle,
+        }
+        if (this.menu.updateTitle) this.menu.updateTitle();
+    }
+
     public menu: IMenu = {
         title: this.msg.createProjectTitle,
         actions: {
@@ -69,12 +89,15 @@ export class ServiceCreateProject100554 extends ServiceBase {
         actionDefault: '', // call after close icon clicked
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
+        onClickTitle: this.onClickTitle.bind(this),
         getLastMode: undefined,
         updateTitle: undefined
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
+        if (visible === true) this.setFullScreen(6, 'left')
+        else this.setFullScreen(6, 'default')
     }
 
     private changeScenario(scenario: IScenaries) {
@@ -82,71 +105,120 @@ export class ServiceCreateProject100554 extends ServiceBase {
     }
 
     private onBtnContinueClick() {
+        this.menu.title = {
+            icon: '&#xf053',
+            text: this.msg.createProjectTitle
+        }
+        if (this.menu.updateTitle) this.menu.updateTitle();
+        this.scrollTop = 0;
         this.changeScenario('customize');
     }
 
     private onBtnCreateClick() {
-        //
+        //todo
+    }
+
+
+    private onTypeSiteClick(item: ISites, el: HTMLElement) {
+        if (this.sitesItems) this.sitesItems.forEach((item) => item.classList.remove('selected'))
+        if (el) {
+            const tr = el.closest('tr');
+            tr?.classList.toggle('selected');
+        }
+
+        this.actualSiteSelected = item;
+    }
+
+    private onPluginPublishClick(item: IPlugins, el: HTMLElement) {
+        if (this.publishItems) this.publishItems.forEach((item) => item.classList.remove('selected'))
+        if (el) {
+            const card = el.closest('.card-item');
+            card?.classList.toggle('selected');
+        }
+
+    }
+
+    private onPluginStorageClick(item: IPlugins, el: HTMLElement) {
+        if (this.storageItems) this.storageItems.forEach((item) => item.classList.remove('selected'))
+        if (el) {
+            const card = el.closest('.card-item');
+            card?.classList.toggle('selected');
+        }
+    }
+
+    private setEvents() {
+        mls.events.addEventListener([6], ['ProjectCreate'] as any, (details) => {
+            this.openService('_100554_serviceCreateProject', 'left', 6);
+        });
     }
 
     private renderSelect() {
         return html`
             <div class="select-type-project">
-                <details>
-                    <summary>sites</summary>
-                    <div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Web</th>
-                                    <th>Mobile(Responsive)</th>
-                                    <th>App(Mobile) - IOS</th>
-                                    <th>App(Mobile) - Android</th>
-                                    <th>App Backend</th>
-                                    <th>Multilanguage</th>
+                <div class="cols">
+                    <div class="col-left">
+                        <details open>
+                            <summary>Sites</summary>
+                            <div>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Web</th>
+                                            <th>Mobile Responsive</th>
+                                            <th>App IOS</th>
+                                            <th>App Android</th>
+                                            <th>App Backend</th>
+                                            <th>Multi Language</th>
 
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${this.data.map((item) =>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${this.data.map((item) =>
             html`
-                                    <tr>
-                                        <td><span>${item.title}</span> <br><small> ${item.description} </small></td>
-                                        <td>${item.web === true ? collab_check : collab_xmark} </td>
-                                        <td>${item.mobile === true ? collab_check : collab_xmark} </td>
-                                        <td>${item.appMobileIOS === true ? collab_check : collab_xmark} </td>
-                                        <td>${item.appMobileAndroid === true ? collab_check : collab_xmark} </td>
-                                        <td>${item.backend === true ? collab_check : collab_xmark} </td>
-                                        <td>${item.multilanguage === true ? collab_check : collab_xmark} </td>                                
-                                    </tr>
-                                    `
+                                                <tr class="tr-item" @click=${(e: MouseEvent) => { this.onTypeSiteClick(item, e.target as HTMLElement) }}>
+                                                    <td><span>${item.title}</span> <br><small> ${item.description} </small></td>
+                                                    <td>${item.web === true ? collab_check : collab_xmark} </td>
+                                                    <td>${item.mobile === true ? collab_check : collab_xmark} </td>
+                                                    <td>${item.appMobileIOS === true ? collab_check : collab_xmark} </td>
+                                                    <td>${item.appMobileAndroid === true ? collab_check : collab_xmark} </td>
+                                                    <td>${item.backend === true ? collab_check : collab_xmark} </td>
+                                                    <td>${item.multilanguage === true ? collab_check : collab_xmark} </td>                                
+                                                </tr>
+                                                `
         )}
-                        
-                            
-                            </tbody>
-                        <table>
-                    </div>
-                </details>
-                <details>
-                    <summary>system</summary>
-                    <div>
-                    </div>
-                </details>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
 
-                <div>
+                        <details>
+                            <summary>system</summary>
+                            <div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="col-right">
+                        <div class="details-selected-item">
+                            <div>
+                                <span class="details-title">${this.actualSiteSelected?.title}</span>
+                                <span class="details-more">${this.actualSiteSelected?.more}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="buttons-container">
                     <button @click=${this.onBtnContinueClick}>${this.msg.btnContinuar}</button>
                 </div>
+
             </div>
 
         `;
     }
 
-
-
     private renderCustomize() {
         return html`
-
             <div class="details-new-project">
                 <details open>
                     <summary>Resume</summary>
@@ -167,17 +239,17 @@ export class ServiceCreateProject100554 extends ServiceBase {
                     <summary>Plugins Publicação</summary>
                     <div>
                         <div class="card-list">
-                            ${this.pluginsPublish.map((item) => {
-                                return html`
-                                <div class="card-item">
+                            ${this.pluginsPublish.map((item, index) => {
+            return html`
+                                <div class="card-item publish-item  ${!item.enabled ? 'disabled' : '' }  ${index === 0 ? 'selected' : '' }">
 
-                                    <span class="card-type">${item.type}</span>
+                                    <span class="card-type ${item.type}">${item.type}</span>
                                     <span class="card-title">${item.title}</span>
                                     <span class="card-desc">${item.description}</span>
-                                    <div class="card-details">
+                                    <div class="card-details" @click=${(e: MouseEvent) => { this.onPluginPublishClick(item, e.target as HTMLElement) }}>
                                         <ul>   
                                             ${item.details.map((details) => {
-                                                return html`
+                return html`
                                                     <li>
                                                         <span>${details.enabled === true ? collab_check : collab_xmark} </span>                                
                                                         <span>${details.item}</span>
@@ -185,30 +257,31 @@ export class ServiceCreateProject100554 extends ServiceBase {
                                                     </li>
                                                 
                                                 `
-                                            })}
+            })}
                                         </ul>
                                     </div>
                                 </div>
                                 `
-                            })}
+        })}
                         </div>
                     </div>
                 </details>
                 <details open>
                     <summary>Plugins Armazenamento</summary>
                     <div>
-                        <div class="card-list">
-                            ${this.pluginsStorage.map((item) => {
-                                return html`
-                                <div class="card-item">
+                        <div class="card-list" >
+                            ${this.pluginsStorage.map((item, index) => {
+            return html`
+                                <div class="card-item storage-item ${!item.enabled ? 'disabled' : ''} ${index === 0 ? 'selected' : '' }"
+                                 @click=${(e: MouseEvent) => { this.onPluginStorageClick(item, e.target as HTMLElement) }}>
 
-                                    <span class="card-type">${item.type}</span>
+                                    <span class="card-type ${item.type}">${item.type}</span>
                                     <span class="card-title">${item.title}</span>
                                     <span class="card-desc">${item.description}</span>
                                     <div class="card-details">
                                         <ul>   
                                             ${item.details.map((details) => {
-                                                return html`
+                return html`
                                                     <li>
                                                         <span>${details.enabled === true ? collab_check : collab_xmark} </span>                                
                                                         <span>${details.item}</span>
@@ -216,12 +289,12 @@ export class ServiceCreateProject100554 extends ServiceBase {
                                                     </li>
                                                 
                                                 `
-                                            })}
+            })}
                                         </ul>
                                     </div>
                                 </div>
                                 `
-                            })}
+        })}
                         </div>
                     </div>
                 </details>
@@ -262,6 +335,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         {
             title: "Blog / Institucional",
             description: "Ex: sites pessoais / comerciais com dados estáticos",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
             mobile: true,
             appMobileIOS: false,
@@ -272,6 +346,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         {
             title: "Plataforma de publicação conteúdo(em desenvolvimento)",
             description: "Ex: Medium, Youtube, Vimeo",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
             mobile: true,
             appMobileIOS: false,
@@ -282,6 +357,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         {
             title: "Portfólio / CMS(em desenvolvimento)",
             description: "sites pessoais ou comerciais com apresentação serviços produtos",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
             mobile: true,
             appMobileIOS: true,
@@ -292,6 +368,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         {
             title: "Landing Page(em desenvolvimento)",
             description: "Captura de usuários e vendas produtos/serviços ",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
             mobile: true,
             appMobileIOS: true,
@@ -302,6 +379,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         {
             title: "Educacional(em desenvolvimento)",
             description: "distribuição cursos e gestão alunos",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
             mobile: true,
             appMobileIOS: true,
@@ -312,6 +390,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         {
             title: "E-Commerce(em desenvolvimento)",
             description: "Loja online de vendas",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
             mobile: true,
             appMobileIOS: true,
@@ -322,6 +401,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         {
             title: "Educacional(em desenvolvimento)",
             description: "Ex: sites pessoais / comerciais com dados estáticos",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
             mobile: true,
             appMobileIOS: true,
@@ -332,6 +412,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         {
             title: "B2B , B2C (Vendas)(em desenvolvimento)",
             description: "Ex: Amazon, Alibaba",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
             mobile: true,
             appMobileIOS: true,
@@ -342,6 +423,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
         {
             title: "ERP ( BackOffice)(em desenvolvimento)",
             description: "Ex: SAP, Oracle ERP",
+            more: "Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.Lorem ipsum dolor sit amet. Quo vitae omnis qui sunt officiis qui dolor assumenda a officia quia. Ab nihil inventore sed accusamus quaerat At velit quidem qui molestias quidem est rerum labore aut officiis ratione! Rem assumenda quod ut consequatur voluptatem qui aliquam suscipit. Qui quia eveniet et atque animi id voluptatem natus et enim laudantium aut laboriosam ratione.Sit tenetur pariatur sit iure accusantium et accusamus tenetur ut fugit consequatur eum eligendi velit sed sunt nobis et perspiciatis incidunt. Aut explicabo maxime non animi autem rem repudiandae labore eum aliquam quis.",
             web: true,
             mobile: true,
             appMobileIOS: true,
@@ -356,6 +438,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
             type: 'free',
             title: 'Download site',
             description: 'Permite baixar o site na máquina local e instalar em um provedor, requer conhecimentos técnicos',
+            enabled: true,
             details: [
                 {
                     enabled: true,
@@ -371,6 +454,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
             type: 'pro',
             title: 'GitHub',
             description: 'Permite publicar e usar sites no github.io , exemplo: meusite.github.io',
+            enabled: false,
             details: [
                 {
                     enabled: true,
@@ -386,6 +470,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
             type: 'pro',
             title: 'S3 - site estático',
             description: 'Permite usar um serviço que cobra pelo que utiliza, econômico, muito escalável, e com o DNS personalizado, ex: meusite.com',
+            enabled: false,
             details: [
                 {
                     enabled: true,
@@ -404,6 +489,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
             type: 'free',
             title: 'Armazenamento Local',
             description: 'Permite baixar o site na máquina local e instalar em um provedor, requer conhecimentos técnicos',
+            enabled: true,
             details: [
                 {
                     enabled: false,
@@ -419,6 +505,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
             type: 'pro',
             title: 'GitHub',
             description: 'Permite controle de versão robusto, integração contínua, revisões de código,  acessível de qualquer lugar, aumentando a produtividade e a segurança do código',
+            enabled: false,
             details: [
                 {
                     enabled: true,
@@ -434,6 +521,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
             type: 'pro',
             title: 'GitLab',
             description: 'Semelhante ao GitHub, permite também a instalação em servidores próprios, útil para empresas com muitos desenvolvedores simultâneos e que querem um serviço dedicado',
+            enabled: false,
             details: [
                 {
                     enabled: true,
@@ -452,6 +540,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
 type IScenaries = 'select' | 'customize';
 interface IPlugins {
     type: 'free' | 'pro',
+    enabled: boolean,
     title: string,
     description: string,
     details: IPluginsPublishDetails[]
@@ -465,6 +554,7 @@ interface IPluginsPublishDetails {
 interface ISites {
     title: string,
     description: string,
+    more: string,
     web: true,
     mobile: boolean,
     appMobileIOS: boolean,
