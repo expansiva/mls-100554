@@ -17,10 +17,11 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     }
 
     abstract mySymbol: string;
-    abstract actions: icaGlobal.IActionLevels;
+    //abstract actions: icaGlobal.IActionLevels;
     abstract setActions(level: string): Promise<void>;
     abstract changeStateHtml(info: string): void;
     abstract allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
+    abstract getActionsTags(): icaGlobal.ActionTag[];
 
     public overlayRef: HTMLElement | undefined;
 
@@ -48,12 +49,13 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
     public internalInnerHTML = '';
 
-    public isLoadMyAction: any = {};
+    //public isLoadMyAction: any = {};
 
     private lastWidget: string = '';
 
     private styleElMain: CSSStyleDeclaration | undefined = undefined;
 
+    //--------COMPONENT-----------------
     createRenderRoot() {
         return this;
     }
@@ -61,6 +63,16 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     connectedCallback(): void {
         super.connectedCallback();
         this.setInitialConfigs();
+    }
+
+    shouldUpdate(changedProperties: Map<string, string>): boolean {
+
+        if (changedProperties.get('changeState') !== undefined && this.changeState && this.renderType === 'editactive') {
+            this.doChangeState(this.changeState);
+            return false;
+        }
+        return true;
+
     }
 
     async firstUpdated(changedProperties: Map<string | number | symbol, unknown>) {
@@ -77,7 +89,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
         const hasLevel = changedProperties.has('level');
         const hasStyleEl = changedProperties.has('styleel');
-        // const hasId = changedProperties.has('id');
 
         if (this.lastWidget !== this.widget) {
             this.lastWidget = this.widget as string;
@@ -85,12 +96,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
                 this.updateStyleDisplay();
             });
         }
-
-        // if (hasId) {
-        //     const valId = changedProperties.get('id');
-        //     if (this.id === valId || !valId) return;
-        //     this.updateId(valId as string);
-        // }
 
         if (hasLevel) {
             const valLevel = changedProperties.get('level');
@@ -105,6 +110,22 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
 
     }
+
+    render() {
+
+        this.style.display = 'block';
+        if (!this.style.width) this.style.width = 'inherit';
+        if (!this.style.height) this.style.height = 'inherit';
+
+        const attrs = this.getAttributes();
+        let code = `
+            <${this.widget} ${attrs}>
+            </${this.widget}>
+        `;
+        return html`${unsafeHTML(code)}`;
+    }
+
+    //---------IMPLEMENTATION-------------
 
     public changeStateStyle(style: {}): void {
 
@@ -173,15 +194,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             this.style.display = d.display;
         }
     }
-    shouldUpdate(changedProperties: Map<string, string>): boolean {
-
-        if (changedProperties.get('changeState') !== undefined && this.changeState && this.renderType === 'editactive') {
-            this.doChangeState(this.changeState);
-            return false;
-        }
-        return true;
-
-    }
+    
 
     private doChangeState(js: string): void {
 
@@ -301,20 +314,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
     }
 
-    render() {
-
-        this.style.display = 'block';
-        if (!this.style.width) this.style.width = 'inherit';
-        if (!this.style.height) this.style.height = 'inherit';
-
-        const attrs = this.getAttributes();
-        let code = `
-            <${this.widget} ${attrs}>
-            </${this.widget}>
-        `;
-        return html`${unsafeHTML(code)}`;
-    }
-
     getAttributes() {
 
         const excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id', icaGlobal.ATTRGROUP];
@@ -424,8 +423,9 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
 interface IcaLitElementBaseMethods {
     mySymbol: string;
-    actions: icaGlobal.IActionLevels;
-    setActions(level: string): Promise<void>;
+    //actions: icaGlobal.IActionLevels;
+    //setActions(level: string): Promise<void>;
+    getActionsTags(): icaGlobal.ActionTag[];
     changeStateStyle(info: {}): void;
     changeStateHtml(info: string): void;
     allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;

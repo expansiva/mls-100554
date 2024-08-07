@@ -5,7 +5,8 @@ import { CollabPageElement } from './_100554_collabPageElement'
 import { customElement } from 'lit/decorators.js';
 
 @customElement('test-page-ica-full-100554')
-export class TestPageICAFull extends CollabPageElement {
+export class TestPageICAFull extends CollabPageElement {    
+    
 
     initPage() {
     

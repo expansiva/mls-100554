@@ -40,5 +40,11 @@ export interface IActionLevels {
     '7': IActionsToolbox[],
 }
 
+export interface ActionTag {
+    name: string; // tag name or component name
+    position?: 'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' |  'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' |  'p-r1' | 'p-r2' | 'p-r3' | 'p-r4'  ; // suggestion of position, WCD will define
+    args?: string; // optional args string, can be a JSON string
+    level?: number[]; // levels where this will be visible
+}
 
 

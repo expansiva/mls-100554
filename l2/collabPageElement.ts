@@ -3,31 +3,29 @@ import { html, PropertyValueMap } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { IcaPageOverlayItem, initIcaPageOverlayItem } from './_100554_icaPageOverlayItem';
-import { IICADepths } from './_100554_icaPageOverlayBase';
-import { initIcaPageOverlay } from './_100554_icaPageOverlay';
-import { initWCDToolbox } from './_100554_wcdToolbox';
+import { WcdOverlayLitBase, IICADepths } from './_100554_wcdOverlayLitBase'
+import { convertTagToFileName } from './_100554_utilsLit'
 
 export abstract class CollabPageElement extends CollabLitElement {
 
     abstract initPage(): void
+
+    @property({ type: String, reflect: true }) modeoverlay: string = '';
+
+    @property({ type: String, reflect: true }) level: string = mls.actualLevel.toString() || '7';
+
+    private overlay: WcdOverlayLitBase | undefined;
+
     public isPage = true;
 
     constructor() {
         super();
-        initWCDToolbox();
-        initIcaPageOverlay();
-        initIcaPageOverlayItem();
     }
 
-    @property({ type: String, reflect: true }) level: string = mls.actualLevel.toString() || '7';
+    //--------COMPONENT------------
 
-    private overlay: HTMLElement | undefined;
-
-
-    getVariationDevice(): IDevice {
-        const device = (document.documentElement.getAttribute('data-device') || 'desktop').toLowerCase();
-        return device as IDevice;
+    createRenderRoot() {
+        return this; // dont use shadow root
     }
 
     firstUpdated(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
@@ -42,7 +40,27 @@ export abstract class CollabPageElement extends CollabLitElement {
 
     }
 
-    setupIds() {
+    updated(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('level') && changedProperties.get('level') !== undefined) {
+            this.checkToAddOverlay();
+        }
+    }
+
+    render() {
+        this.style.position = 'relative';
+        return html``;
+    }
+
+    //--------IMPLEMENTS------------
+
+    private getVariationDevice(): IDevice {
+        const device = (document.documentElement.getAttribute('data-device') || 'desktop').toLowerCase();
+        return device as IDevice;
+    }
+
+    
+    private setupIds():void {
         const icas = this.findAllElementsIca(this);
         let device: string = this.getVariationDevice();
         if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1);
@@ -56,7 +74,7 @@ export abstract class CollabPageElement extends CollabLitElement {
 
     }
 
-    setupEvents() {
+    private setupEvents():void {
 
         const allWebComponentsInPage = this.getAllWebComponents(this);
         let device: string = this.getVariationDevice();
@@ -90,61 +108,53 @@ export abstract class CollabPageElement extends CollabLitElement {
 
     }
 
-    updated(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
-        super.updated(changedProperties);
-        if (changedProperties.has('level') && changedProperties.get('level') !== undefined) {
-            this.checkToAddOverlay();
-        }
-    }
+    private checkToAddOverlay():void {
 
-    createRenderRoot() {
-        return this; // dont use shadow root
-    }
-
-    render() {
-        this.style.position = 'relative';
-        return html``;
-    }
-
-
-    private checkToAddOverlay() {
         if (this.level === '7') {
             this.overlay?.remove();
             this.overlay = undefined;
             return;
         }
+
         if (this.overlay) {
-            this.changeOverlayItemsLevel();
+            this.overlay.setAttribute('level', this.level)
+            this.overlay.changeOverlayItemsLevel();
             return;
         }
+
         this.createOverlay();
     }
 
-    private changeOverlayItemsLevel() {
-        if (!this.overlay) return;
-        Array.from(this.overlay.children).forEach((item) => {
-            item.setAttribute('level', this.level);
-        })
+    private async createOverlay() {
+
+        if (!this.modeoverlay) return;
+
+        const ok = await this.importWCDOverlay(this.modeoverlay); 
+        if (!ok) return;
+        this.overlay = document.createElement(this.modeoverlay) as WcdOverlayLitBase;
+        this.overlay.myItens = this.findAllElementsIca(this);
+        this.overlay.createOverlayItems();
+        this.appendChild(this.overlay as HTMLElement);
+
     }
 
-    private createOverlay() {
-        this.overlay = document.createElement('ica-page-overlay-100554') as HTMLElement;
-        const boundingPage = this.getBoundingClientRect();
-        const icas = this.findAllElementsIca(this);
-        icas.forEach((item) => {
-            item.element.setAttribute('level', this.level);
-            this.createOverlayItem(item, this.overlay as HTMLElement, boundingPage);
-        });
-        this.appendChild(this.overlay);
-    }
+    private hasImport: string[] = [];
+    private async importWCDOverlay(imports: string) {
 
-    private createOverlayItem(icaInfo: IICADepths, content: HTMLElement, boundingPage: DOMRect) {
-        const icaOverlayItem = document.createElement('ica-page-overlay-item-100554') as IcaPageOverlayItem;
-        icaOverlayItem.setAttribute('widget', icaInfo.element.tagName.toLowerCase());
-        icaOverlayItem.setAttribute('level', this.level);
-        icaOverlayItem.info = icaInfo;
-        icaOverlayItem.boundingPage = boundingPage;
-        content.appendChild(icaOverlayItem)
+        try {
+
+            if (this.hasImport.includes(imports)) return true;
+            imports = convertTagToFileName(imports);
+            if (!imports.startsWith('./')) imports = './' + imports;
+            await import(imports);
+            this.hasImport.push(imports);
+            return true;
+            
+        } catch (e) {
+            console.info(e);
+            return false
+        }
+
     }
 
     private findAllElementsIca(el: HTMLElement): IICADepths[] {
