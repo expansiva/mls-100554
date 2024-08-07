@@ -7,10 +7,9 @@ import { getConfigProject, updateConfigProject, createConfigFile } from './_1005
 
 declare global {
     interface Window {
-        project_config: mls.l5_common.ProjectConfig
+        project_config: any
     }
 }
-
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -77,8 +76,8 @@ export class ServiceEditProject100554 extends ServiceBase {
                 this.setMsizeEditor();
             }, 100)
         }
+        const { project } = mls.actual[5];
         if (reinit) {
-            const { project } = mls.actual[5];
             this.refreshIfNeeded(project);
         }
     }
@@ -135,19 +134,20 @@ export class ServiceEditProject100554 extends ServiceBase {
     private async loadProjectConfigs() {
         const { project } = mls.actual[5];
         if (!project) return;
+        this.lastProject = project;
         let config = await getConfigProject(project);
         if (!config) config = await createConfigFile(project);
         this.setInitialConfig(JSON.stringify(config, null, 2), project);
     }
 
-    private setInitialConfig(value: string, project:number) {
+    private setInitialConfig(value: string, project: number) {
         const newValue = this.template + ' = ' + value;
         this.model = this.createOrGetModel('typescript', newValue, project);
         if (!this.model || !this._ed1) return;
         this._ed1.setModel(this.model);
     }
 
-    private createOrGetModel(editorType: string, src: string, project:number) {
+    private createOrGetModel(editorType: string, src: string, project: number) {
         const uri = this.getUri(`${this.constructor.name}_${project}}`);
         let model1 = monaco.editor.getModel(uri);
         if (!model1) {
@@ -169,6 +169,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private async onEditorChange() {
+
         if (!this.model) return;
         const val = this.model.getValue();
         const errors = monaco.editor.getModelMarkers(({ resource: this.model.uri }));

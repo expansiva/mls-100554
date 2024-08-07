@@ -3,30 +3,37 @@
 import { html, css } from 'lit';
 import { customElement, property, queryAll } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { collab_check, collab_xmark } from './_100554_collabIcons';
+import { collab_check, collab_xmark, collab_lock } from './_100554_collabIcons';
 
 /// **collab_i18n_start**
 const message_pt = {
     createProjectTitle: 'Criar projeto',
-    createProjectHelper: 'Por favor escolha o tipo de projeto abaixo e pressione continuar',
+    createProjectHelper: 'Por favor escolha o tipo de projeto abaixo e pressione continuar.',
     labelName: 'Nome do projeto',
     labelDescription: 'Descrição',
     alertNoSelect: 'Por favor selecione um tipo de projeto',
     btnContinuar: 'Continuar',
     btnCreate: 'Criar projeto(Em desenvolvimento)',
-    errorContinue: 'Selecione o tipo de site antes'
-
+    errorContinue: 'Selecione o tipo de site antes',
+    detailsSystem: 'Sistema',
+    detailsPluginsStorage: 'Plugins de armazenamento',
+    detailsPluginsPublish: 'Plugins de publicação',
+    alert: 'Em desenvolvimento',
 }
 
 const message_en = {
     createProjectTitle: 'Create project',
-    createProjectHelper: 'Please choose your project type below and press continue',
+    createProjectHelper: 'Please choose your project type below and press continue.',
     labelName: 'Project name',
     labelDescription: 'Description',
     alertNoSelect: 'Please select project type',
     btnContinuar: 'Continue',
     btnCreate: 'Create Project (In develpoment)',
-    errorContinue: 'Select the site type first'
+    errorContinue: 'Select the site type first',
+    detailsSystem: 'System',
+    detailsPluginsStorage: 'Storage plugins',
+    detailsPluginsPublish: 'Publish plugins',
+    alert: 'In develpoment'
 }
 
 type MessageType = typeof message_en;
@@ -76,6 +83,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
 
     public onClickTitle() {
         this.changeScenario('select');
+        this.actualSiteSelected = undefined;
         this.menu.title = {
             icon: '',
             text: this.msg.createProjectTitle,
@@ -121,7 +129,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
     }
 
     private onBtnCreateClick() {
-        //todo
+        alert(this.msg.alert);
     }
 
 
@@ -136,22 +144,28 @@ export class ServiceCreateProject100554 extends ServiceBase {
     }
 
     private onPluginPublishClick(item: IPlugins, el: HTMLElement) {
-        if (!item.enabled) return;
-        if (this.publishItems) this.publishItems.forEach((item) => item.classList.remove('selected'))
-        if (el) {
-            const card = el.closest('.card-item');
-            card?.classList.toggle('selected');
+        const card = el.closest('.card-item');
+        if (!item.enabled) {
+            card?.classList.add('shake');
+            setTimeout(() => card?.classList.remove('shake'), 1000);
+            return;
         }
+        if (this.publishItems) this.publishItems.forEach((item) => item.classList.remove('selected'))
+        if (card) card.classList.toggle('selected');
+
 
     }
 
     private onPluginStorageClick(item: IPlugins, el: HTMLElement) {
-        if (!item.enabled) return;
-        if (this.storageItems) this.storageItems.forEach((item) => item.classList.remove('selected'))
-        if (el) {
-            const card = el.closest('.card-item');
-            card?.classList.toggle('selected');
+        const card = el.closest('.card-item');
+        if (!item.enabled) {
+            card?.classList.add('shake');
+            setTimeout(() => card?.classList.remove('shake'), 1000);
+            return;
         }
+        if (this.storageItems) this.storageItems.forEach((item) => item.classList.remove('selected'))
+        if (card) card.classList.toggle('selected');
+
 
 
     }
@@ -165,6 +179,12 @@ export class ServiceCreateProject100554 extends ServiceBase {
     private renderSelect() {
         return html`
             <div class="select-type-project">
+                <span>${this.msg.createProjectHelper}</span>
+                <div class="buttons-container left">
+                    <button @click=${this.onBtnContinueClick}>${this.msg.btnContinuar}</button>
+                </div>
+
+                <hr>
                 <div class="cols">
                     <div class="col-left">
                         <details open>
@@ -203,8 +223,8 @@ export class ServiceCreateProject100554 extends ServiceBase {
                             </div>
                         </details>
 
-                        <details>
-                            <summary>system</summary>
+                        <details open>
+                            <summary>${this.msg.detailsSystem}</summary>
                             <div>
                                 <ul>
                                     ${this.data.map((item) => {
@@ -247,29 +267,36 @@ export class ServiceCreateProject100554 extends ServiceBase {
                     <summary>Resume</summary>
                     <div>
                         <ul>
-                            <li>Id: 101001 </li>
-                            <li>${this.msg.labelName}: 'Test'</li>
+                            <li>
+                                <span>Id:</span>
+                                <input value="101001" readonly></input>
+                            </li>
+                            <li></li>
+                                <span>${this.msg.labelName}:</span>
+                                <input value="Test"></input>
                             <li>
                                 <span>${this.msg.labelDescription}:</span>
-                                <textarea rows=6>
-                                </textarea>
+                                <textarea rows=6></textarea>
                             </li>
                         </ul>
                     </div>
                 </details>
                 
                 <details open>
-                    <summary>Plugins Publicação</summary>
+                    <summary>${this.msg.detailsPluginsPublish}</summary>
                     <div>
                         <div class="card-list">
                             ${this.pluginsPublish.map((item, index) => {
             return html`
-                                <div class="card-item publish-item  ${!item.enabled ? 'disabled' : ''}  ${index === 0 ? 'selected' : ''}">
-
+                                <div
+                                    class="card-item publish-item  ${!item.enabled ? 'disabled' : ''}  ${index === 0 ? 'selected' : ''}"
+                                    @click=${(e: MouseEvent) => { this.onPluginPublishClick(item, e.target as HTMLElement) }}
+                                >
+                                    ${!item.enabled ? html`<span class="card-lock">${collab_lock}</span>` : ''}
                                     <span class="card-type ${item.type}">${item.type}</span>
                                     <span class="card-title">${item.title}</span>
                                     <span class="card-desc">${item.description}</span>
-                                    <div class="card-details" @click=${(e: MouseEvent) => { this.onPluginPublishClick(item, e.target as HTMLElement) }}>
+                                    <div class="card-details" >
                                         <ul>   
                                             ${item.details.map((details) => {
                 return html`
@@ -290,7 +317,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
                     </div>
                 </details>
                 <details open>
-                    <summary>Plugins Armazenamento</summary>
+                    <summary>${this.msg.detailsPluginsStorage}</summary>
                     <div>
                         <div class="card-list" >
                             ${this.pluginsStorage.map((item, index) => {
@@ -298,6 +325,7 @@ export class ServiceCreateProject100554 extends ServiceBase {
                                 <div class="card-item storage-item ${!item.enabled ? 'disabled' : ''} ${index === 0 ? 'selected' : ''}"
                                  @click=${(e: MouseEvent) => { this.onPluginStorageClick(item, e.target as HTMLElement) }}>
 
+                                    ${!item.enabled ? html`<span class="card-lock">${collab_lock}</span>` : ''}
                                     <span class="card-type ${item.type}">${item.type}</span>
                                     <span class="card-title">${item.title}</span>
                                     <span class="card-desc">${item.description}</span>
