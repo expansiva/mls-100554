@@ -95,39 +95,3 @@ export class WcdToolboxItemActionEvents extends WcdToolboxItemBase {
     }
 
 }
-
-/*export const getTemplate = (mode: string = '', position: string = ''): icaGlobal.IActionsToolbox => {
-
-    let ret: icaGlobal.IActionsToolbox = templateActionEvents.event as icaGlobal.IActionsToolbox;
-    if (position !== '') ret.position = position as any;
-    const a = initCollabSelectOneWithDescription;
-    return ret as icaGlobal.IActionsToolbox;
-
-}
-
-const templateActionEvents = {
-    event: {
-        position: 'p-r1',
-        tp: 'event',
-        format: '',
-        title: '',
-        iconSvg: '',
-        onclick: (e: MouseEvent, wc: WCDToolbox) => {
-            debugger;
-            if (wc.level === '2') { 
-                const overlayItem = wc.parentElement as IcaPageOverlayItem;
-                if (!overlayItem) return;
-                const elIca = overlayItem.info?.element;
-                if(!elIca || !elIca.id) return;
-                mls.events.fire(2, 'WidgetAction' as any, `{"op":"OpenScenario", "widget":"_100554_scenarioInsertEventOrChange", "value":"${e.detail}", "id":"${elIca.id}"}`);
-            }
-        },
-        menuItens: [],
-        menuSubItens: [],
-        widget: 'collab-select-one-with-description-100554',
-        cursor: 'pointer',
-        attrs: undefined,
-        isDblClick: false
-    }
-}*/
-

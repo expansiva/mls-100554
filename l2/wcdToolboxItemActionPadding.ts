@@ -2,20 +2,48 @@
 
 import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IActionsToolbox } from './_100554_icaGlobal';
 import { WCDToolbox } from './_100554_wcdToolbox';
+import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
-//version 4
-@customElement('wcd-toolbox-item-action-padding-100554')
-export class WCDToolboxItemActionPadding extends LitElement {
 
-    @property({ type: String, reflect: true })
-    private tpChange: 'top' | 'bottom' | 'left' | 'right' | 'all' | undefined;
+/// **collab_i18n_start**
+const message_pt = {
+    margin: 'Margin',
+    padding: 'Padding',
+    top: 'Top',
+    left: 'Left',
+    bottom: 'Bottom',
+    right: 'Right',
+
+}
+
+const message_en = {
+    margin: 'Margin',
+    padding: 'Padding',
+    top: 'Top',
+    left: 'Left',
+    bottom: 'Bottom',
+    right: 'Right',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en': message_en,
+    'pt': message_pt
+}
+/// **collab_i18n_end**
+
+@customElement('wcd-toolbox-item-action-padding-100554')
+export class WCDToolboxItemActionPadding extends WcdToolboxItemBase { 
+
+    private myMsg: MessageType = messages['en'];
 
     public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined;
     public elICA: IcaLitElementBase | undefined;
+    public args: string | undefined;
 
     private elExternal: HTMLElement | undefined;
     private startX: number = 0;
@@ -25,29 +53,126 @@ export class WCDToolboxItemActionPadding extends LitElement {
     private startLeft: number = 0;
     private startRight: number = 0;
 
+    //-------COMPONENT---------------------
+
+    //-------COMPONENT---------------------
+
     createRenderRoot() {
         return this;
-    }
-
-    render() {
-
-        this.renderOutdoorScenary();
-        return html``;
-
     }
 
     updated(changedProperties: any) {
 
         super.updated(changedProperties);
         if (!this.elMain || !this.myParent) return;
-        this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
-        this.myParent.updateBackgroundAuxSize('show');
-        this.onmousedown = (e) => this.initDragging(e);
+        
+        if (this.args && ['top', 'bottom', 'left', 'right'].includes(this.args)){
+            this.onmousedown = (e) => this.initDragging(e);
+            this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+            this.myParent.updateBackgroundAuxSize('show');
+        }
 
     }
 
+    render() {
 
-    //-----------------
+        switch (this.args) {
+            case 'top':
+                return this.renderOne('top');
+            case 'bottom':
+                return this.renderOne('bottom');
+            case 'left':
+                return this.renderOne('left');
+            case 'right':
+                return this.renderOne('right');
+            case 'all':
+                return this.renderAll();
+            default: return this.renderButton();
+        }
+
+    }
+
+    renderButton() {
+        this.onclick = (e) => this.clickButton(e);
+        this.classList.add('f-button');
+        return html`<svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M352 64c0-17.7-14.3-32-32-32H128c-17.7 0-32 14.3-32 32s14.3 32 32 32H320c17.7 0 32-14.3 32-32zm96 128c0-17.7-14.3-32-32-32H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H416c17.7 0 32-14.3 32-32zM0 448c0 17.7 14.3 32 32 32H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H32c-17.7 0-32 14.3-32 32zM352 320c0-17.7-14.3-32-32-32H128c-17.7 0-32 14.3-32 32s14.3 32 32 32H320c17.7 0 32-14.3 32-32z"/></svg>`;
+    }
+
+    renderOne(pos: string) {
+        this.classList.add('f-square');
+
+        switch (pos) {
+            case 'top':
+                this.style.cursor = 'ns-resize';
+                break;
+            case 'bottom':
+                this.style.cursor = 'ns-resize';
+                break;
+            case 'left':
+                this.style.cursor = 'ew-resize';
+                break;
+            case 'right':
+                this.style.cursor = 'ew-resize';
+                break;
+            default: '';
+        }
+        return html``;
+    }
+
+    renderAll() {
+        return html``;
+    }
+
+    //------IMPLEMENTATION----------------
+
+    private clickButton(e: MouseEvent) {
+
+        e.stopPropagation();
+
+        if (!this.myParent) return;
+
+        this.myParent.setIconsWcdToolbox(
+            [
+                {
+                    name: 'backButton'
+                },
+                {
+                    name: 'padding',
+                    args: 'top',
+                    position: 'p-m1'
+                },
+                {
+                    name: 'padding',
+                    args: 'right',
+                    position: 'p-r2'
+                },
+                {
+                    name: 'padding',
+                    args: 'bottom',
+                    position: 'p-m3'
+                },
+                {
+                    name: 'padding',
+                    args: 'left',
+                    position: 'p-l2'
+                }
+            ],
+            false,
+            'padding'
+        )
+
+        const params = {
+            level: 4,
+            position: 'right',
+            wdcPath: this.myParent.title,
+            op: 'Styles',
+        }
+
+        mls.events.fire([4], 'WCDEvent' as any, JSON.stringify(params))
+    }
+
+    //------EXTERAL SCENARY----------------
+
     private async renderOutdoorScenary() {
 
         if (!this.myParent || this.myParent.level !== '4') return;
@@ -128,8 +253,7 @@ export class WCDToolboxItemActionPadding extends LitElement {
         this.fireEvent();
     }
 
-
-    //-------------------------------------------
+    //---------DRAG------------------
 
     private timeRemoveResize = 0;
     private initDragging(e: MouseEvent): void {
@@ -152,19 +276,19 @@ export class WCDToolboxItemActionPadding extends LitElement {
             const deltaX: number = (e.clientX - this.startX);
             const deltaY: number = (e.clientY - this.startY);
 
-            if (!this.tpChange || ['top'].includes(this.tpChange)) {
+            if (!this.args || ['top'].includes(this.args)) {
                 this.elMain.style.paddingTop = (this.startTop + deltaY) + 'px';
             }
 
-            if (!this.tpChange || ['bottom'].includes(this.tpChange)) {
+            if (!this.args || ['bottom'].includes(this.args)) {
                 this.elMain.style.paddingBottom = (this.startBottom + deltaY) + 'px';
             }
 
-            if (!this.tpChange || ['left'].includes(this.tpChange)) {
+            if (!this.args || ['left'].includes(this.args)) {
                 this.elMain.style.paddingLeft = (this.startLeft + deltaX) + 'px';
             }
 
-            if (!this.tpChange || ['right'].includes(this.tpChange)) {
+            if (!this.args || ['right'].includes(this.args)) {
                 this.elMain.style.paddingRight = (this.startRight + deltaX * -1) + 'px';
             }
 
@@ -199,19 +323,21 @@ export class WCDToolboxItemActionPadding extends LitElement {
         document.body.addEventListener('mouseup', stopDragging, false);
     }
 
+    //----------FIRE-----------------
+
     private fireEvent(ret: string = ''): void {
 
         if (!this.elMain || !this.myParent) return;
 
         if (ret === '') {
 
-            if (this.tpChange === 'top') ret = `{"paddingTop":"${this.elMain.style.paddingTop}"}`;
+            if (this.args === 'top') ret = `{"paddingTop":"${this.elMain.style.paddingTop}"}`;
 
-            if (this.tpChange === 'bottom') ret = `{"paddingBottom":"${this.elMain.style.paddingBottom}"}`;
+            if (this.args === 'bottom') ret = `{"paddingBottom":"${this.elMain.style.paddingBottom}"}`;
 
-            if (this.tpChange === 'left') ret = `{"paddingLeft":"${this.elMain.style.paddingLeft}"}`;
+            if (this.args === 'left') ret = `{"paddingLeft":"${this.elMain.style.paddingLeft}"}`;
 
-            if (this.tpChange === 'right') ret = `{"paddingRight":"${this.elMain.style.paddingRight}"}`;
+            if (this.args === 'right') ret = `{"paddingRight":"${this.elMain.style.paddingRight}"}`;
 
         }
 
@@ -225,133 +351,4 @@ export class WCDToolboxItemActionPadding extends LitElement {
 
     }
 
-
-
-    private myMsg = {
-        margin: 'Margin',
-        padding: 'Padding',
-        top: 'Top',
-        left: 'Left',
-        bottom: 'Bottom',
-        right: 'Right',
-    }
-
 }
-
-export const getTemplate = (mode: string = '', position: string = ''): IActionsToolbox => {
-
-    let ret: IActionsToolbox = templateActionPadding.buttonPadding as IActionsToolbox;
-    if (mode === 'paddingTop') ret = templateActionPadding.paddingTop as IActionsToolbox;
-    if (mode === 'paddingRight') ret = templateActionPadding.paddingRight as IActionsToolbox;
-    if (mode === 'paddingBottom') ret = templateActionPadding.paddingBottom as IActionsToolbox;
-    if (mode === 'paddingLeft') ret = templateActionPadding.paddingLeft as IActionsToolbox;
-
-    if (position !== '') ret.position = position as any;
-    return ret as IActionsToolbox;
-
-}
-
-const templateActionPadding = {
-    backButton: {
-        position: '',
-        tp: 'back-button',
-        format: '',
-        title: 'Back',
-        iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"/></svg>',
-        onclick: (e: MouseEvent, wc: WCDToolbox) => {
-            wc.setIconsWcdToolbox([], true, 'size');
-            wc.backNavigationScenaryOutdoor();
-        },
-        menuItens: [],
-        menuSubItens: [],
-        widget: '',
-        cursor: 'pointer',
-        attrs: undefined,
-        isDblClick: false,
-    },
-
-    //padding
-    buttonPadding: {
-        position: 'p-l4',
-        tp: 'button',
-        format: '',
-        title: 'padding',
-        iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M352 64c0-17.7-14.3-32-32-32H128c-17.7 0-32 14.3-32 32s14.3 32 32 32H320c17.7 0 32-14.3 32-32zm96 128c0-17.7-14.3-32-32-32H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H416c17.7 0 32-14.3 32-32zM0 448c0 17.7 14.3 32 32 32H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H32c-17.7 0-32 14.3-32 32zM352 320c0-17.7-14.3-32-32-32H128c-17.7 0-32 14.3-32 32s14.3 32 32 32H320c17.7 0 32-14.3 32-32z"/></svg>',
-        onclick: (e: MouseEvent, wc: WCDToolbox) => {
-            wc.setIconsWcdToolbox(
-                [
-                    templateActionPadding.backButton as IActionsToolbox,
-                    templateActionPadding.paddingTop as IActionsToolbox,
-                    templateActionPadding.paddingRight as IActionsToolbox,
-                    templateActionPadding.paddingBottom as IActionsToolbox,
-                    templateActionPadding.paddingLeft as IActionsToolbox
-                ],
-                false,
-                'padding'
-            )
-        },
-        menuItens: [],
-        menuSubItens: [],
-        widget: '',
-        cursor: 'pointer',
-        attrs: undefined,
-        isDblClick: false,
-    },
-    paddingTop: {
-        position: 'p-m1',
-        tp: 'action',
-        format: 'square',
-        title: '',
-        iconSvg: '',
-        onclick: undefined,
-        menuItens: [],
-        menuSubItens: [],
-        widget: 'wcd-toolbox-item-action-padding-100554',
-        cursor: 'ns-resize',
-        attrs: [{ attr: 'tpchange', value: 'top' }],
-        isDblClick: false,
-    },
-    paddingRight: {
-        position: 'p-r2',
-        tp: 'action',
-        format: 'square',
-        title: '',
-        iconSvg: '',
-        onclick: undefined,
-        menuItens: [],
-        menuSubItens: [],
-        widget: 'wcd-toolbox-item-action-padding-100554',
-        cursor: 'ew-resize',
-        attrs: [{ attr: 'tpchange', value: 'right' }],
-        isDblClick: false,
-    },
-    paddingBottom: {
-        position: 'p-m3',
-        tp: 'action',
-        format: 'square',
-        title: '',
-        iconSvg: '',
-        onclick: undefined,
-        menuItens: [],
-        menuSubItens: [],
-        widget: 'wcd-toolbox-item-action-padding-100554',
-        cursor: 'ns-resize',
-        attrs: [{ attr: 'tpchange', value: 'bottom' }],
-        isDblClick: false,
-    },
-    paddingLeft: {
-        position: 'p-l2',
-        tp: 'action',
-        format: 'square',
-        title: '',
-        iconSvg: '',
-        onclick: undefined,
-        menuItens: [],
-        menuSubItens: [],
-        widget: 'wcd-toolbox-item-action-padding-100554',
-        cursor: 'ew-resize',
-        attrs: [{ attr: 'tpchange', value: 'left' }],
-        isDblClick: false,
-    },
-}
-

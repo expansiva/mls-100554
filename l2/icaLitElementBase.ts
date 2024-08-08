@@ -17,13 +17,14 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     }
 
     abstract mySymbol: string;
-    //abstract actions: icaGlobal.IActionLevels;
     abstract setActions(level: string): Promise<void>;
     abstract changeStateHtml(info: string): void;
     abstract allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
     abstract getActionsTags(): icaGlobal.ActionTag[];
 
     public overlayRef: HTMLElement | undefined;
+
+    public clickMenu: Function | undefined;
 
     @property({ type: String })
     @collabState(states.CHANGESTATE)
@@ -48,8 +49,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     public styleel: string | undefined = '';
 
     public internalInnerHTML = '';
-
-    //public isLoadMyAction: any = {};
 
     private lastWidget: string = '';
 
@@ -423,8 +422,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
 interface IcaLitElementBaseMethods {
     mySymbol: string;
-    //actions: icaGlobal.IActionLevels;
-    //setActions(level: string): Promise<void>;
     getActionsTags(): icaGlobal.ActionTag[];
     changeStateStyle(info: {}): void;
     changeStateHtml(info: string): void;

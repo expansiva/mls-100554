@@ -9,9 +9,6 @@ import { ServiceBase } from './_100554_serviceBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 
-
-import * as states from './_100554_icaCollabStore';
-
 export function initWCDToolbox() {
     return true;
 }
@@ -118,17 +115,35 @@ export class WCDToolbox extends CollabLitElement {
             args: '',
             level: [2]
         },
+        'backButton': {
+            name: 'button',
+            position: 'p-r0',
+            args: '',
+            level: [1, 2, 3, 4, 5, 6]
+        },
         'margin': {
             name: '_100554_wcdToolboxItemActionMargin',
             position: 'p-m4',
             args: '',
             level: [4]
         },
-        'backButton': {
-            name: 'button',
-            position: 'p-r0',
+        'padding': {
+            name: '_100554_wcdToolboxItemActionPadding',
+            position: 'p-l4',
             args: '',
-            level: [1, 2, 3, 4, 5, 6]
+            level: [4]
+        },
+        'size': {
+            name: '_100554_wcdToolboxItemActionSize',
+            position: 'p-r4',
+            args: '',
+            level: [4]
+        },
+        'menu': {
+            name: '_100554_wcdToolboxItemActionMenu',
+            position: 'p-m1',
+            args: '',
+            level: [4]
         }
     }
 
@@ -153,7 +168,7 @@ export class WCDToolbox extends CollabLitElement {
             if ((this.defaultActions as any)[i.name]) {
                 const args = i.args ? i.args : undefined;
                 const pos = i.position ? i.position : undefined;
-                i = Object.assign({},(this.defaultActions as any)[i.name] ) as ActionTag;
+                i = Object.assign({}, (this.defaultActions as any)[i.name]) as ActionTag;
                 if (args) i.args = args;
                 if (pos) i.position = pos;
             }
@@ -487,8 +502,8 @@ export class WCDToolbox extends CollabLitElement {
         const heightori = height;
         let left = 0;
         let top = 0;
-        left -= parseInt(marginLeft, 10);
-        top -= parseInt(marginTop, 10);
+        //left -= parseInt(marginLeft, 10);
+        //top -= parseInt(marginTop, 10);
 
         if (top > 0) top = 0;
 
@@ -505,8 +520,8 @@ export class WCDToolbox extends CollabLitElement {
         elChange.style.display = this.parentElement.style.display;
         elChange.style.background = '#bdbdbd3d';
         elChange.style.position = 'absolute';
-
-        if ((elBase.style.height && paddingTop) || (paddingTop && paddingBottom)) {
+    
+        if (parseInt(paddingTop, 10) !== 0 && ((elBase.style.height && paddingTop) || (paddingTop && paddingBottom))) {
             elChange.style.top = '-' + (parseInt(paddingTop, 10) + parseInt(fontSize, 10)) + 'px';
         } else if (paddingTop !== '0px') elChange.style.top = '-' + (heightori - 6) + 'px';
 
@@ -554,302 +569,6 @@ export class WCDToolbox extends CollabLitElement {
         st.height = height + 'px';
 
     }
-
-
-    /*private renderActions(arr: IActionsToolbox[]): void {
-
-        if (!arr) return;
-        if (!this.shadowRoot) return;
-        let lastHelper: HTMLElement | undefined;
-
-        const allItens = this.shadowRoot.querySelectorAll('*');
-        allItens.forEach((i: Element) => {
-            if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-aux-background') return;
-            if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-title') return;
-            i.remove()
-        });
-
-        arr.forEach((i: IActionsToolbox) => {
-
-            switch (i.tp) {
-                case 'menu':
-                    this.addMenu(i);
-                    break;
-                case 'button':
-                    const btnEl = this.addButton(i);
-                    if (this.lastHelper === i.title) lastHelper = btnEl;
-                    break;
-                case 'back-button':
-                    this.addBackButton(i);
-                    break;
-                case 'action':
-                    this.addAction(i);
-                    break;
-                case 'event':
-                    this.addEvent(i);
-                    break;
-                default: '';
-            }
-
-        });
-
-        this.adjustPositionIfNecessary()
-
-        if (lastHelper) {
-            lastHelper.click();
-        }
-
-    }
-
-    private addBackButton(item: IActionsToolbox): void {
-
-        if (!this.shadowRoot || !this.parentElement) return;
-        const el = document.createElement('wcd-toolbox-item-action-backbutton-100554');
-        el.innerHTML = '';
-        el.className = `${item.position} fcaBackButton`;
-        el.title = item.title as string;
-        el.style.cssText = `width: 18px; background-position: center; height: 18px; background-size: auto; background-repeat: no-repeat; z-index: 9;`;
-        el.style.zIndex = '9999';
-
-        el.style.backgroundImage = `url('data:image/svg+xml,${(item.iconSvg as string).replace(/\'/g, '"')}')`
-        el.onclick = (e: MouseEvent) => {
-            e.stopPropagation();
-            this.lastHelper = '';
-            if (item.onclick) item.onclick(e, this);
-        }
-
-        this.shadowRoot.appendChild(el);
-        setTimeout(() => {
-            if (!this.isElementVisible(el)) {
-                el.style.top = '0px';
-                el.style.right = '0px';
-            }
-        }, 300)
-
-    }
-
-    private addAction(act: IActionsToolbox): void {
-
-        if (!this.elMain || !this.shadowRoot || !act.widget) return undefined;
-        if (act.isDblClick && act.onclick) {
-
-            this.ondblclick = (e: MouseEvent) => {
-                if (act.onclick) {
-                    act.onclick(
-                        e,
-                        this,
-                        (vl: string) => {
-                            super.setCollabState(states.CHANGESTATE, vl);
-                        }
-                    );
-                }
-            }
-            return;
-
-        }
-
-        const el = document.createElement(act.widget) as WcdToolboxItemBase;
-        if (act.iconSvg && act.iconSvg !== '') el.innerHTML = act.iconSvg as string;
-
-        el.className = `p ${act.position} f-${act.format}`;
-        el.myParent = this;
-        el.elMain = this.elMain;
-        el.elICA = this.elICA;
-        el.style.cursor = act.cursor as string;
-        el.style.zIndex = '9999';
-
-        if (act.attrs) {
-            act.attrs.forEach((attr) => {
-                el.setAttribute(attr.attr, attr.value);
-            });
-        }
-
-        el.addEventListener("onChange", (obj: any) => {
-            if (!obj || !obj.detail || !obj.detail.valor) return;
-            super.setCollabState(states.CHANGESTATE, obj.detail.valor);
-        })
-
-        this.shadowRoot.appendChild(el);
-
-    }
-
-    private addButton(item: IActionsToolbox): HTMLElement | undefined {
-
-        if (!item.onclick || !this.shadowRoot || !this.parentElement || !['p-r4', 'p-m4', 'p-l4', 'p-l5'].includes(item.position)) return;
-
-        const el = document.createElement('div');
-        el.className = `p ${item.position} fcaButtonAction`;
-        el.title = item.title as string;
-        el.style.cssText = `width: 18px; height: 18px; background: #fff; display:flex; justify-content: center; align-items:center;`;
-        el.style.zIndex = '9999';
-
-        if (item.format === 'circle') {
-            el.style.cssText += ' border-radius:50%; box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);'
-        }
-
-        el.innerHTML = (item.iconSvg as string);
-        el.onclick = (e: MouseEvent) => {
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            if (item.onclick) item.onclick(e, this);
-            this.lastHelper = item.title as string;
-        }
-
-        this.shadowRoot.appendChild(el);
-        setTimeout(() => {
-            if (!this.isElementVisible(el)) {
-                el.style.bottom = '0px';
-            }
-        }, 300)
-
-        return el;
-    }
-
-    private addEvent(act: IActionsToolbox): void {
-
-        if (!this.elMain || !this.shadowRoot || !act.widget) return undefined;
-
-        const el = document.createElement(act.widget);
-
-        el.className = `${act.position} f-${act.format}`;
-        (el as any).myParent = this;
-        (el as any).elMain = this.elMain;
-        (el as any).elICA = this.elICA;
-        el.style.zIndex = '9999';
-
-        if (this.elICA && this.elICA.id && this.elICA.getMyEvents && this.elICA.getDefinitionFromEvent) {
-
-            const events = this.elICA.getMyEvents() as string;
-            const opt: any[] = [];
-            events.split(',').forEach((ev: string) => {
-                const info = {
-                    key: ev.trim(),
-                    value: ev.trim(),
-                    description: this.elICA?.getDefinitionFromEvent(ev.trim()) || ''
-                }
-                opt.push(info);
-            });
-
-            (el as any).options = opt;
-
-        } else if (this.elICA && !this.elICA.id) {
-            const opt: any[] = [];
-            opt.push({
-                key: 'id',
-                value: 'id',
-                description: 'Please set id in element for create events'
-            });
-            (el as any).options = opt;
-        }
-
-        el.style.cursor = act.cursor as string;
-        if (act.onclick) {
-            el.addEventListener('select-change', (e) => {
-                (e as any).elICA = this.elICA;
-                if (act.onclick) act.onclick(e, this)
-            });
-        }
-        this.shadowRoot.appendChild(el);
-
-    }
-    
-    private addMenu(item: IActionsToolbox): void {
-
-        if (!this.elMain || !this.shadowRoot) return undefined;
-
-        const menuContainer = document.createElement('wcd-toolbox-menu');
-        const container = document.createElement('wcd-toolbox-menu-container');
-        const containerItens = document.createElement('wcd-toolbox-itemmenu');
-        const iSubItens = document.createElement('a');
-        const containerSubItens = document.createElement('wcd-toolbox-submenu');
-
-        menuContainer.className = item.position;
-        menuContainer.appendChild(container);
-        menuContainer.style.zIndex = '9999';
-
-        containerSubItens.onmouseleave = () => {
-            containerSubItens.style.display = 'none';
-        }
-
-        containerSubItens.onclick = () => {
-            containerSubItens.style.display = 'none';
-        }
-
-        item.menuItens.forEach((i: IActionsToolboxMenu) => {
-
-            if (!i.onclick) return;
-
-            const a = document.createElement('a');
-            const ic = document.createElement('i');
-            ic.title = i.text;
-            ic.style.cssText = `width: 18px; background-position: center; height: 18px; background-size: auto; background-repeat: no-repeat;`;
-            ic.style.backgroundImage = `url('data:image/svg+xml,${(i.iconSvg as string).replace(/\'/g, '"')}')`;
-            a.className = 'menuItensFcaToolbox';
-            a.appendChild(ic);
-            containerItens.appendChild(a);
-            a.onclick = (e) => {
-                e.stopPropagation();
-                i.onclick(e, this);
-            };
-
-        });
-
-        if (!item.menuSubItens.find((i) => i.text === 'About')) item.menuSubItens.push(templateAbout);
-
-        container.appendChild(containerItens);
-        if (item.menuSubItens.length > 0) {
-
-            iSubItens.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>`;
-            iSubItens.onclick = (e) => {
-                e.stopPropagation();
-                containerSubItens.style.display = containerSubItens.style.display === '' ? 'none' : '';
-            };
-
-            iSubItens.setAttribute('title', '');
-            containerItens.appendChild(iSubItens);
-            containerSubItens.style.display = 'none';
-            container.appendChild(containerSubItens);
-
-        }
-
-        item.menuSubItens.forEach((i: IActionsToolboxMenu) => {
-
-            if (!i.onclick) return;
-
-            const a = document.createElement('a');
-            const ic = document.createElement('i');
-            const span = document.createElement('span');
-            span.innerText = i.text;
-            a.title = i.text;
-            ic.style.cssText = `width: 18px; background-position: center; height: 18px; background-size: auto; background-repeat: no-repeat;`;
-            ic.style.backgroundImage = `url('data:image/svg+xml,${(i.iconSvg as string).replace(/\'/g, '"')}')`
-            a.className = 'menuSubItensFcaToolbox';
-            a.appendChild(ic);
-            a.appendChild(span);
-            a.onclick = (e) => {
-                e.stopPropagation();
-                i.onclick(e, this);
-            };
-            containerSubItens.appendChild(a);
-
-        });
-
-        this.shadowRoot.appendChild(menuContainer);
-        setTimeout(() => {
-            if (!this.isElementVisible(menuContainer)) {
-                menuContainer.style.top = '0px';
-                const el = this.shadowRoot?.querySelector('.p-m2');
-                if (el) {
-                    menuContainer.style.left = '0px';
-                    menuContainer.style.transform = 'none';
-                }
-            }
-
-        }, 300)
-        //this.updateSize(this.elMain, this, true);
-
-    }*/
-
 
     //--------------CSS--------------------
 
@@ -1082,339 +801,5 @@ export class WCDToolbox extends CollabLitElement {
 
 
     `;
-    /*static styles = css`
-        :host{
-            display:block;
-            border:1px solid #d3cece;
-            position:absolute;
-            user-select:none;
-            background: #c8c8c8c2;
-        }
-
-        .itensFcaToolbox:hover{
-            background:purple;
-        }
-
-        .fcaButtonAction{
-            cursor:pointer;
-            background:var(--bg-primary-color)!important;
-            padding:5px;
-            border-radius:5px;
-            border: 1px solid var(--grey-color-darker);
-        }
-
-        .fcaButtonAction svg{
-            fill:var(--text-primary-color);
-        }
-
-        .fcaBackButton{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-2rem;
-            right:0px
-        }
-
-        .wcdBackButton{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-2rem;
-            right:0px
-        }
-
-        .p{
-            z-index:9999;
-        }
-
-        .p-l1{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-6px;
-            left:-6px
-        }
-
-        .p-l2{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:50%;
-            left:-6px;
-            transform: translateY(-50%);
-        }
-
-        .p-l3{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-6px;
-            left:-6px;
-        }
-
-        .p-l4{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-2rem;
-            left:0px;
-        }
-
-        .p-l5{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:50%;
-            left:-23px;
-            transform: translateY(-50%);
-        }
-
-        .p-m1{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-6px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .p-m2{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .p-m3{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-6px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .p-m4{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-2rem;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .p-r1{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-6px;
-            right:-6px
-        }
-
-        .p-r2{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:50%;
-            right:-6px;
-            transform: translateY(-50%);
-        }
-
-        .p-r3{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-6px;
-            right:-6px;
-        }
-
-        .p-r4{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-2rem;
-            right:-6px;
-        }
-
-        .f-circle{
-            width:10px;
-            height:10px;
-            background:#fff;
-            border-radius:50%;
-            box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);
-        }
-        
-
-        .f-square{
-            width:23px;
-            height:7px;
-            background:#fff;
-            border-radius:3px;
-            box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);
-        }
-
-        .p-l1.f-square{
-            top:-4px;
-            left:-4px
-        }
-
-        .p-l2.f-square{
-            top:50%;
-            left:-4px;
-            width:7px;
-            height:23px;
-        }
-
-        .p-l3.f-square{
-            bottom:-4px;
-            left:-4px;
-        }
-
-        .p-m1.f-square{
-            top:-4px;
-            width:23px;
-            height:7px;
-        }
-
-        .p-m2.f-square{
-            width:23px;
-            height:7px;
-        }
-
-        .p-m3.f-square{
-            bottom:-4px;
-            width:23px;
-            height:7px;
-        }
-
-        .p-r1.f-square{
-            top:-4px;
-            right:-4px
-        }
-
-        .p-r2.f-square{
-            right:-4px;
-            width:7px;
-            height:23px;
-        }
-
-        .p-r3.f-square{
-            bottom:-4px;
-            right:-4px;
-        }
-
-        wcd-toolbox-menu.p-m1{
-            top:-30px
-        }
-
-        wcd-toolbox-menu.p-m3{
-            bottom:-30px
-        }
-
-        wcd-toolbox-menu{
-            display:block;
-            height:17px;
-            border:1px solid #d3cece;
-            padding:.2rem;
-            border-radius:5px;
-            position:relative;
-            background:#fff;
-            
-        }
-
-        wcd-toolbox-menu-container{
-            display:block;
-            position:relative;
-            
-        }
-
-        wcd-toolbox-itemmenu{
-            display:flex;
-            height:20px;
-            gap:.3rem;
-            
-        }
-
-        wcd-toolbox-itemmenu a{
-            display: flex!important;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size:13px;
-            width:18px;
-            height:18px;
-            
-        }
-
-        wcd-toolbox-itemmenu a:hover{
-            background:#e1e1e1;
-        }
-
-        wcd-toolbox-submenu{
-            position:absolute;
-            top:19px;
-            left:80%;
-            display:flex;
-            flex-direction: column;
-            gap:.3rem;
-            min-width: 150px;
-            min-height: 50px;
-            padding:.5rem;
-            border:1px solid var(--bg-secondary-color-darker);
-            background:#fff;
-            border-bottom-left-radius: 10px;
-            border-bottom-right-radius: 10px;
-            border-top-right-radius: 10px;
-            
-            background:var(--bg-primary-color-lighter)
-        }
-
-        wcd-toolbox-submenu a {
-            font-size:13px;
-            display:flex;
-            gap:.3rem;
-            align-items: center;
-            padding:.1rem;
-            color:var(--text-primary-color);
-        }
-
-        wcd-toolbox-submenu a:hover {
-            background:var(--grey-color-light);
-        }
-
-        wcd-toolbox-title {
-            display:block;
-            position: absolute;
-            background: #4c4c4c;
-            color: #fff;
-            font-size: 11px;
-            text-transform: lowercase;
-            padding: 0 .5rem;
-            height: 14px;
-            bottom: -14px;
-            right: -1px;
-            border-bottom-right-radius: 5px;
-            border-bottom-left-radius: 5px;
-            font-weight: normal;
-            letter-spacing: -.5px;
-            font-family: monospace;
-            width: max-content;
-        }
-
-
-    `;*/
-
+    
 }
-
-/*const templateAbout = {
-    text: 'About',
-    iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm169.8-90.7c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V250.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1H222.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>',
-    onclick: (e: MouseEvent, wc: WCDToolbox) => {
-
-        const bd = wc.closest('body') as any;
-        if (bd.service && bd.service.setAboutTag) bd.service.setAboutTag(wc.title.toLocaleLowerCase())
-
-    }
-}*/
