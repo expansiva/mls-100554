@@ -105,7 +105,6 @@ export class ServiceCreateProject100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
         if (visible === true) this.setFullScreen(6, 'left')
         else this.setFullScreen(6, 'default')
     }
@@ -268,15 +267,22 @@ export class ServiceCreateProject100554 extends ServiceBase {
                     <div>
                         <ul>
                             <li>
-                                <span>Id:</span>
-                                <input value="101001" readonly></input>
+                                <div class="container-input">
+                                    <span>Id:</span>
+                                    <input value="101001" readonly></input>
+                                </div>
                             </li>
                             <li></li>
-                                <span>${this.msg.labelName}:</span>
-                                <input value="Test"></input>
+                                <div class="container-input">
+                                    <span>${this.msg.labelName}:</span>
+                                    <input value="Test"></input>
+                                </div>
+
                             <li>
-                                <span>${this.msg.labelDescription}:</span>
-                                <textarea rows=6></textarea>
+                                <div class="container-input">
+                                    <span>${this.msg.labelDescription}:</span>
+                                    <textarea rows=6></textarea>
+                                </div>
                             </li>
                         </ul>
                     </div>
