@@ -2,25 +2,21 @@
 
 import { customElement } from 'lit/decorators.js';
 import { IcaLitElementBase, IAllowCommand } from './_100554_icaLitElementBase';
-import { IActionLevels } from './_100554_icaGlobal';
+import { ActionTag } from './_100554_icaGlobal';
 
 @customElement('ica-layout-flow-column-100554')
 export class IcaLayoutFlowColumn extends IcaLitElementBase {
 
     public mySymbol = 'fa-table-columns';
 
-    public actions: IActionLevels = { '1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': [] }
-
-    public async setActions(level: string) {
-        if (level === '4') {
-            await this.importAction('_100554_wcdToolboxItemActionMargin', this.actions, level);
-            await this.importAction('_100554_wcdToolboxItemActionPadding', this.actions, level);
-            await this.importAction('_100554_wcdToolboxItemActionMenu', this.actions, level);
-        }
-        if (level === '2') {
-            await this.importAction('_100554_wcdToolboxItemActionEvents', this.actions, level);
-        }
-        return;
+    public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "events" },
+        ]
     }
 
     public changeStateHtml(html: string): void {

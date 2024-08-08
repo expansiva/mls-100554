@@ -125,25 +125,25 @@ export class WCDToolbox extends CollabLitElement {
             name: '_100554_wcdToolboxItemActionMargin',
             position: 'p-m4',
             args: '',
-            level: [4]
+            level: [2]
         },
         'padding': {
             name: '_100554_wcdToolboxItemActionPadding',
             position: 'p-l4',
             args: '',
-            level: [4]
+            level: [2]
         },
         'size': {
             name: '_100554_wcdToolboxItemActionSize',
             position: 'p-r4',
             args: '',
-            level: [4]
+            level: [2]
         },
         'menu': {
             name: '_100554_wcdToolboxItemActionMenu',
             position: 'p-m1',
             args: '',
-            level: [4]
+            level: [2]
         }
     }
 
@@ -369,7 +369,7 @@ export class WCDToolbox extends CollabLitElement {
 
             if (!this.shadowRoot) return;
 
-            const child: HTMLElement[] = [];
+            let child: HTMLElement[] = [];
             Array.from(this.shadowRoot.children).forEach((item) => {
                 const tag = item.tagName.toLocaleLowerCase();
                 const invalid = ['wcd-toolbox-aux-background', 'wcd-toolbox-title'];
@@ -379,6 +379,8 @@ export class WCDToolbox extends CollabLitElement {
 
             if (child.length > 1) {
 
+                child = this.organizeArray(child);
+
                 for (let idx = 0; idx < child.length; idx++) {
 
                     const item1 = child[idx];
@@ -386,18 +388,30 @@ export class WCDToolbox extends CollabLitElement {
 
                     if (!item1 || !item2) continue;
 
-                    const rect1 = item1.getBoundingClientRect();
-                    const rect2 = item2.getBoundingClientRect();
+
+                    let rect1 = item1.getBoundingClientRect();
+                    let rect2 = item2.getBoundingClientRect();
+
 
                     if (this.rectsOverlap(rect1, rect2)) {
 
+                        const offset = this.calculateHorizontalOffset(item1, item2);
+
                         if (rect1.left < rect2.left) {
+                            console.info(rect1)
                             // Ajusta a posição do segundo elemento
-                            item2.style.left = `${rect1.height + 20}px`;//`${rect1.right - rect1.left + 10}px`; // Move à direita do primeiro
+                            item2.style.left = `${rect1.right - rect1.left + 20}px`;//`${rect1.right - rect1.left + 10}px`; // Move à direita do primeiro
                         } else {
                             // Ajusta a posição do primeiro elemento
-                            item1.style.left = `${rect2.height + 20}px`;//`${rect2.right - rect2.left + 10}px`; // Move à direita do segundo
+                            item1.style.left = `${rect2.width + 20}px`;//`${rect2.right - rect2.left + 10}px`; // Move à direita do segundo
                         }
+
+                        rect1 = item1.getBoundingClientRect();
+                        rect2 = item2.getBoundingClientRect();
+
+                        console.info({ item1, item2 })
+                        console.info(this.rectsOverlap(rect1, rect2));
+
 
                     }
 
@@ -408,6 +422,42 @@ export class WCDToolbox extends CollabLitElement {
 
         }, 500);
 
+    }
+
+    private calculateHorizontalOffset(element1: HTMLElement, element2: HTMLElement, padding = 20) {
+        
+        const rect1 = element1.getBoundingClientRect();
+        const rect2 = element2.getBoundingClientRect();
+
+        
+        if (rect1.right > rect2.left && rect1.left < rect2.right) {
+            
+            const offset = (rect1.right - rect2.left) + padding;
+            return offset;
+        }
+
+        
+        return 0;
+    }
+
+    private organizeArray(elementsArray: HTMLElement[]): HTMLElement[] {
+        const classOrder = ['p-l1', 'p-m1', 'p-r1',
+            'p-l2', 'p-m2', 'p-r2',
+            'p-l3', 'p-m3', 'p-r3',
+            'p-l4', 'p-m4', 'p-r4'];
+
+        // 2. Função de comparação para usar no sort
+        const compareByClass = (a: any, b: any) => {
+            // Encontre a classe de cada elemento que esteja na lista de ordem
+            const aClass = classOrder.find(cls => a.classList.contains(cls)) as string;
+            const bClass = classOrder.find(cls => b.classList.contains(cls)) as string;
+
+            // Compare as posições dessas classes na lista
+            return classOrder.indexOf(aClass) - classOrder.indexOf(bClass);
+        }
+
+
+        return elementsArray.sort(compareByClass);
     }
 
     private rectsOverlap(rect1: DOMRect, rect2: DOMRect): boolean {
@@ -520,7 +570,7 @@ export class WCDToolbox extends CollabLitElement {
         elChange.style.display = this.parentElement.style.display;
         elChange.style.background = '#bdbdbd3d';
         elChange.style.position = 'absolute';
-    
+
         if (parseInt(paddingTop, 10) !== 0 && ((elBase.style.height && paddingTop) || (paddingTop && paddingBottom))) {
             elChange.style.top = '-' + (parseInt(paddingTop, 10) + parseInt(fontSize, 10)) + 'px';
         } else if (paddingTop !== '0px') elChange.style.top = '-' + (heightori - 6) + 'px';
@@ -801,5 +851,5 @@ export class WCDToolbox extends CollabLitElement {
 
 
     `;
-    
+
 }

@@ -17,7 +17,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     }
 
     abstract mySymbol: string;
-    abstract setActions(level: string): Promise<void>;
     abstract changeStateHtml(info: string): void;
     abstract allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
     abstract getActionsTags(): icaGlobal.ActionTag[];

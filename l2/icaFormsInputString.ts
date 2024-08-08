@@ -1,7 +1,7 @@
 /// <mls shortName="icaFormsInputString" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { customElement } from 'lit/decorators.js';
-import { IActionLevels, ActionTag } from './_100554_icaGlobal';
+import { ActionTag } from './_100554_icaGlobal';
 import { IcaLitElementBase, IAllowCommand } from './_100554_icaLitElementBase';
 
 @customElement('ica-forms-input-string-100554')
