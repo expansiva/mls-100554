@@ -118,6 +118,11 @@ export class ServiceCreateProject100554 extends ServiceBase {
             this.setError(this.msg.errorContinue)
             return;
         }
+
+        if (this.actualSiteSelected.title !== 'Blog / Institucional') {
+            this.setError(this.msg.alert)
+            return;
+        }
         this.menu.title = {
             icon: '&#xf053',
             text: this.msg.createProjectTitle
