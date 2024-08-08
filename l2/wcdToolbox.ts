@@ -188,7 +188,7 @@ export class WCDToolbox extends CollabLitElement {
             el.myParent = this;
             el.elMain = this.elMain;
             el.elICA = this.elICA;
-            el.style.zIndex = '9999';
+            el.style.zIndex = '9998';
             el.args = i.args;
 
             this.shadowRoot.appendChild(el);
@@ -388,30 +388,16 @@ export class WCDToolbox extends CollabLitElement {
 
                     if (!item1 || !item2) continue;
 
-
                     let rect1 = item1.getBoundingClientRect();
                     let rect2 = item2.getBoundingClientRect();
 
+                    const overlap = this.rectsOverlap(rect1, rect2);
 
-                    if (this.rectsOverlap(rect1, rect2)) {
+                    if (overlap) {
 
-                        const offset = this.calculateHorizontalOffset(item1, item2);
+                        const base = item1.style.left !== '' ? parseInt(item1.style.left, 10) : 0;
 
-                        if (rect1.left < rect2.left) {
-                            console.info(rect1)
-                            // Ajusta a posição do segundo elemento
-                            item2.style.left = `${rect1.right - rect1.left + 20}px`;//`${rect1.right - rect1.left + 10}px`; // Move à direita do primeiro
-                        } else {
-                            // Ajusta a posição do primeiro elemento
-                            item1.style.left = `${rect2.width + 20}px`;//`${rect2.right - rect2.left + 10}px`; // Move à direita do segundo
-                        }
-
-                        rect1 = item1.getBoundingClientRect();
-                        rect2 = item2.getBoundingClientRect();
-
-                        console.info({ item1, item2 })
-                        console.info(this.rectsOverlap(rect1, rect2));
-
+                        item2.style.left = base > 0 ? (base + 20) + 'px' : `${((rect1.right - rect1.left) + 20)}px`;
 
                     }
 
@@ -425,18 +411,18 @@ export class WCDToolbox extends CollabLitElement {
     }
 
     private calculateHorizontalOffset(element1: HTMLElement, element2: HTMLElement, padding = 20) {
-        
+
         const rect1 = element1.getBoundingClientRect();
         const rect2 = element2.getBoundingClientRect();
 
-        
+
         if (rect1.right > rect2.left && rect1.left < rect2.right) {
-            
+
             const offset = (rect1.right - rect2.left) + padding;
             return offset;
         }
 
-        
+
         return 0;
     }
 

@@ -77,7 +77,7 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
     render() {
 
         if (!this.myItens) return html``;
-
+        this.style.zIndex = '9999';
         return html`
         <style>${this.css}</style>
         <wcd-toolbox-itemmenu>
@@ -319,7 +319,6 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
             border-bottom-left-radius: 10px;
             border-bottom-right-radius: 10px;
             border-top-right-radius: 10px;
-            
             background:var(--bg-primary-color-lighter)
         }
 
