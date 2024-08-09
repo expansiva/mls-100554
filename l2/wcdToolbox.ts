@@ -125,25 +125,25 @@ export class WCDToolbox extends CollabLitElement {
             name: '_100554_wcdToolboxItemActionMargin',
             position: 'p-m4',
             args: '',
-            level: [2]
+            level: [4]
         },
         'padding': {
             name: '_100554_wcdToolboxItemActionPadding',
             position: 'p-l4',
             args: '',
-            level: [2]
+            level: [4]
         },
         'size': {
             name: '_100554_wcdToolboxItemActionSize',
             position: 'p-r4',
             args: '',
-            level: [2]
+            level: [4]
         },
         'menu': {
             name: '_100554_wcdToolboxItemActionMenu',
             position: 'p-m1',
             args: '',
-            level: [2]
+            level: [4]
         }
     }
 
