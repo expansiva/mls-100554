@@ -277,7 +277,7 @@ export class ServiceListFiles extends ServiceBase {
         return html`
         <div class="groupHeader">
             <div class="groupAction"> 
-                <a @click="${this.unzipSourceIfNeeded}" id="listUpdateFiles">${this.msg.updateListVerify}</a>
+                <a @click="${this.verifyChangeInList}" id="listUpdateFiles">${this.msg.updateListVerify}</a>
                 <a @click="${this.showAdd}">${this.msg.addNewFile}</a>
             </div>
             <div class="groupFilter">
@@ -918,7 +918,7 @@ export class ServiceListFiles extends ServiceBase {
 
 
     //----------UNZIP-----------------
-
+    /*
     private base64ToArrayBuffer(base64: string): ArrayBuffer {
         const binaryString = atob(base64);
         const len = binaryString.length;
@@ -996,6 +996,6 @@ export class ServiceListFiles extends ServiceBase {
             )
         }
         
-    }
+    }*/
 
 }

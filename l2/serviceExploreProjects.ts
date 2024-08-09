@@ -95,6 +95,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     //----------COMPONENT------------------
 
     connectedCallback() {
+        super.connectedCallback();
         this.setEvents();
     }
 

@@ -153,7 +153,7 @@ export class ServiceExploreStories100554 extends ServiceBase {
                 <div class="elContent">
                     <h3 style="${aux}">${file.name}</h3>
                     <span>${file.desc}</span>
-                    <menuitems @click="${this.clickMenu}" @mouseleave="${this.blurMenu}">
+                    <menuitems @click="${this.clickMenu}" @mouseleave="${this.blurMenu}" @mouseover="${this.overMenu}">
                         <menuicon>
                             <svg xmlns='http://www.w3.org/2000/svg' style="fill:#8f8f8ffa"  viewBox='0 0 512 512'><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path  d='M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z'/></svg>
                         </menuicon>
@@ -196,7 +196,7 @@ export class ServiceExploreStories100554 extends ServiceBase {
 
             const arraySf: IItensFiles[] = await this.getFilesProject();
             this.files = [...arraySf];
-            
+
         } catch (e) {
 
             console.info(e);
@@ -214,7 +214,7 @@ export class ServiceExploreStories100554 extends ServiceBase {
         if (!window['mls']) return [];
         const arraySf: IItensFiles[] = [];
         const ext = (this.extensionLevel as any)[this.level as any] as string;
-    
+
         for await (const i of Object.keys(mls.stor.files).sort()) {
 
             const sf = mls.stor.files[i];
@@ -233,7 +233,7 @@ export class ServiceExploreStories100554 extends ServiceBase {
 
             if (content.indexOf('extends') < 0) continue;
             const start = content.indexOf('extends') + 'extends'.length;
-            const end = content.substring(start,content.length).indexOf('{') ;
+            const end = content.substring(start, content.length).indexOf('{');
             const extendsPage = content.substr(start, end);
             if (extendsPage.toLocaleLowerCase().indexOf('page') < 0) continue;
 
@@ -247,7 +247,7 @@ export class ServiceExploreStories100554 extends ServiceBase {
             arraySf.push({
                 desc,
                 name,
-                file:sf
+                file: sf
             });
 
         }
@@ -256,7 +256,7 @@ export class ServiceExploreStories100554 extends ServiceBase {
 
     }
 
-    private clickLi(e:MouseEvent) {
+    private clickLi(e: MouseEvent) {
 
         e.stopPropagation();
         let el = e.target as HTMLElement;
@@ -268,7 +268,7 @@ export class ServiceExploreStories100554 extends ServiceBase {
 
     }
 
-    private clickMenu(e:MouseEvent) {
+    private clickMenu(e: MouseEvent) {
 
         e.stopPropagation();
         let el = e.target as HTMLElement;
@@ -276,18 +276,32 @@ export class ServiceExploreStories100554 extends ServiceBase {
             el = el.closest('menuitems') as HTMLElement;
         if (!el) return;
 
-        el.setAttribute('mode', 'open'); 
+        if (el.getAttribute('mode') === 'open') {
+            el.setAttribute('mode', '');
+        }else el.setAttribute('mode', 'open');
 
     }
 
-    private blurMenu(e:MouseEvent) {
+
+    private timeBlur = 0;
+    private blurMenu(e: MouseEvent) {
 
         let el = e.target as HTMLElement;
         if (el.tagName.toLocaleLowerCase() !== 'menuitems')
             el = el.closest('menuitems') as HTMLElement;
-        if (!el) return;
+        if (!el || !el.getAttribute('mode')) return;
 
-        el.setAttribute('mode', '');
+        this.timeBlur = setTimeout(() => {
+            el.setAttribute('mode', '');
+        }, 800)
+
+
+    }
+
+    private overMenu(e: MouseEvent) {
+
+        if (!this.timeBlur) return;
+        clearTimeout(this.timeBlur);
 
     }
 
@@ -315,11 +329,11 @@ export class ServiceExploreStories100554 extends ServiceBase {
         this.fireEvents('delete', (el as any).myFile, {});
         setTimeout(() => {
             this.requestUpdate();
-        }, 800) 
+        }, 800)
 
     }
 
-    
+
     private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
 
         const params = {} as mls.events.IFileAction;
@@ -358,7 +372,7 @@ export class ServiceExploreStories100554 extends ServiceBase {
 
 type ITabType = 'icDraft' | 'icPublished';
 
-interface IItensFiles{
+interface IItensFiles {
     file: mls.stor.IFileInfo,
     name: string,
     desc: string,

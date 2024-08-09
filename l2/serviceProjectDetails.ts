@@ -852,6 +852,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         this._fireEventProjectSelected(item.id);
         this.changeScenario('details');
         await this.loadProjectActual(item.id);
+        await mls.stor.server.unzipSourcesIfNeeded(item.id)
     }
 
     private async onHistoryClick(item: IHistory) {
@@ -860,6 +861,7 @@ export class ServiceProjectDetails100554 extends ServiceBase {
         this._fireEventProjectSelected(item.project);
         this.changeScenario('details');
         await this.loadProjectActual(item.project);
+        await mls.stor.server.unzipSourcesIfNeeded(item.project)
     }
 
     private async loadProjectActual(project: number) {
