@@ -373,11 +373,13 @@ export class ServiceSource100554 extends ServiceBase {
             if (storFile.project === project
                 && storFile.level === 2
                 && storFile.extension === '.ts'
-                && storFile.inLocalStorage
+                
                 && storFile.shortName !== shortName) {
                 promises.push(this.createModelTS2(storFile, false, false));
             }
         }
+
+	    // && storFile.inLocalStorage
         // load project .d.ts, aka, declare modules ...
         // const projectTS: string = ''; // get localstorage indexmodule
         // promises.push(this.createProjectModel(project));
