@@ -34,5 +34,23 @@
       ]
     }
   ],
-  "orgName": "mls"
+  "orgName": "mls",
+  "reasons": {
+    "1": "in development",
+    "2": {
+      "message": "Esta funcionalidade não está incluída neste projeto.",
+      "message_en": "This functionality is not included in this project."
+    }
+  },
+  "services": [
+    ";_100554_serviceUserSettings,_100554_serviceNotification,_100554_serviceAim",
+    "-*{reason:1}",
+    "",
+    "",
+    "_100554_serviceListFiles,_100554_serviceIca;_100554_servicePreview",
+    "_100554_serviceProjectDetails,_100554_serviceSave,_100554_serviceExploreStories,_100554_servicePlugins;_100554_servicePreview,_100554_serviceEditProject,_100554_serviceAim",
+    "_100554_serviceCreateProject,_100554_serviceExploreProjects;_100554_servicePreview",
+    ";_100554_servicePreview"
+  ],
+  "servicesConfigEnabled": true
 }
