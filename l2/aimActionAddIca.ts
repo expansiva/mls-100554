@@ -1,6 +1,6 @@
 /// <mls shortName="aimActionAddIca" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, TemplateResult } from 'lit';
+import { html, TemplateResult } from 'lit'; 
 import { customElement, query, property } from 'lit/decorators.js'; 
 import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
