@@ -65,17 +65,20 @@ export abstract class ServiceBase extends CollabLitElement {
     }
 
     public openService(service: string, position: 'left' | 'right', level: number) {
+    
         let page = this.closest('collab-page');
         if (!page) return;
         const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
         if (!toolbar) return;
-        if (this.level !== level) {
+        if (mls.actualLevel !== level) {
             (toolbar as any).state[level][position] = service;
             this.selectLevel(level);
             return;
         }
         const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
-        if (item) item.click();
+        if (item) {
+            item.click();
+        }
         return;
     }
 

@@ -16,6 +16,7 @@ export abstract class IcaFormsInputNumber extends IcaLitElementBase {
             { name: "menu" },
             { name: "size" },
             { name: "events" },
+            { name: "_100554_wcdAdd", level: [2], position: 'p-l4' },
         ]
     }
 
