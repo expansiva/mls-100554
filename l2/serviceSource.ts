@@ -358,7 +358,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private static projectsLoaded: number[] = [];
-    private async readAllProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true): Promise<void> {
+    private async readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true): Promise<void> {
         // load all typescripts dependencies of project , except shortName
         if (ServiceSource100554.projectsLoaded.includes(project)) return;
         if (mls.istrace) console.log('loading files from project ' + project);
@@ -373,16 +373,19 @@ export class ServiceSource100554 extends ServiceBase {
             if (storFile.project === project
                 && storFile.level === 2
                 && storFile.extension === '.ts'
-                
+                // && storFile.inLocalStorage
                 && storFile.shortName !== shortName) {
                 promises.push(this.createModelTS2(storFile, false, false));
             }
         }
 
-	    // && storFile.inLocalStorage
         // load project .d.ts, aka, declare modules ...
         // const projectTS: string = ''; // get localstorage indexmodule
         // promises.push(this.createProjectModel(project));
+        const info = await mls.stor.localDB.readPrjInfo(100554);
+        if (info && info.indexModules && info.indexModules !== '') {
+            promises.push(this.createProjectModel(project, info.indexModules));
+        }
 
         if (mls.istrace) console.time('creating models');
         await Promise.all(promises);
@@ -390,6 +393,34 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (window.traceLivecicle) console.info('firing: mls.l2.editor.compileAllProjectIfNeed ', project);
         if (needCompile) await mls.l2.editor.compileAllProjectIfNeed(project, true);
+    }
+
+    private async createProjectModel(prj: number, contentTS: string): Promise<mls.l2.editor.IMFile> {
+
+        let model1 = mls.l2.editor.get({ project:prj, shortName: '' });
+        if (model1) return model1;
+
+        const ftype =  ".d.ts";
+        const uri = this.getUri(`_${prj}_`, ftype);
+        const model = monaco.editor.createModel(contentTS, 'typescript', uri);
+        model1 = {
+            changed: false, // not changed in this section, but storFile.changed is about all sections
+            error: false,
+            project : prj,
+            shortName: '',
+            extension: ftype,
+            model,
+            storFile: undefined as any,
+            originalCRC : undefined,
+            originalProject: undefined,
+            originalShortName : undefined,
+            codeLens: [],
+        };
+        mls.l2.editor.add(model1);
+
+        return model1;
+
+
     }
 
     private async deleteFile(storFile: mls.stor.IFileInfo) {
@@ -487,7 +518,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (!ev.desc) return;
         try {
             const projectLoadedInfo = JSON.parse(ev.desc) as mls.events.IProjectLoaded;
-            await this.readAllProjectTypescriptAndCompile(projectLoadedInfo.project, '', projectLoadedInfo.needCompile);
+            await this.readProjectTypescriptAndCompile(projectLoadedInfo.project, '', projectLoadedInfo.needCompile);
         } catch (e) {
             console.error('Error on serviceSource_onProjectLoadedEvents: ', e);
         }
@@ -641,7 +672,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (!fileModel) {
             await this.createModelTS2(storFileTS, true, true);
             this.showActiveModel();
-            await this.readAllProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true).then(async () => {
+            await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true).then(async () => {
                 await this.createOrShowModelHTML(false);
             });
         } else {
@@ -928,7 +959,7 @@ export class ServiceSource100554 extends ServiceBase {
                     // Verifica se a linha contém '<ica-' e 'id="'
                     if (lineContent.includes('<ica-') && lineContent.includes('id="')) {
                         const idValue = this.extractIdValue(lineContent);
-                        if(this.lastIdSelected === idValue) return;
+                        if (this.lastIdSelected === idValue) return;
                         this.lastIdSelected = idValue;
                         if (idValue && this.lastOrigin === 'editor') {
                             mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectWidget", "id":"${idValue}", "origin":"editor"}`);
@@ -1609,7 +1640,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     private selectLineinHTML(line: number, origin: 'preview' | 'editor') {
         if (this.menu.lastIcon !== 'icHTML' || !this._ed1) return;
         this.lastOrigin = origin;
-        if(origin === 'editor') return;
+        if (origin === 'editor') return;
         this.goToLine(line);
     }
 

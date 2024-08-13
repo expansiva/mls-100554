@@ -49,7 +49,7 @@ export class ServiceExploreStories100554 extends ServiceBase {
     //----------CONFIG SERVICE------------------
     public details: IService = {
         icon: '&#xf15b',
-        state: 'foreground',
+        state: 'background',
         position: 'left',
         tooltip: 'Explore Stories',
         visible: true,
@@ -87,12 +87,26 @@ export class ServiceExploreStories100554 extends ServiceBase {
 
     }
 
+    //--------EVENTS----------------
+
+    private setEvents() {
+    
+        mls.events.addEventListener([5], ['ProjectSelected'], (ev) => {
+            
+            if (this.project === mls.actual[5].project) return;
+            this.openService('_100554_serviceExploreStories', 'left', 5);
+            this.init();
+
+        });
+    }
+    
+
     //----------COMPONENT------------------
 
     connectedCallback() {
         super.connectedCallback();
+        this.setEvents();
         this.init();
-
     }
 
     render() {

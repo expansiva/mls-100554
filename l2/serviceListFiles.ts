@@ -568,6 +568,23 @@ export class ServiceListFiles extends ServiceBase {
 
     }
 
+    private fireEventThisProject = 0;
+    private fireEventLoadProject(): void {
+
+        if (this.fireEventThisProject === mls.actual[5].project) return;
+        this.fireEventThisProject = mls.actual[5].project as number;
+
+        const info = {} as mls.events.IProjectLoaded;
+        info.project = mls.actual[5].project as number;
+        info.level = 2;
+        info.needCompile = true;
+
+        mls.events.fire([(+(this.level as any) as any)], ['ProjectLoaded'], JSON.stringify(info), 0);
+
+        console.info('disparou o evento');
+
+    }
+
     private changeListTimeout: number = 0;
     public changeList(time: number = 500): void {
 
@@ -596,6 +613,7 @@ export class ServiceListFiles extends ServiceBase {
         this.info.error = 0;
         this.project = mls.actual[5].project as number;
         this.projectLabel = this.project.toString();
+        this.fireEventLoadProject();
         this.showLoader(true);
         await this.getFiles();
         this.showLoader(false);
