@@ -116,27 +116,18 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceExploreProjects100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-
     private inFullscreen: boolean = false;
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-
-    @property() state: IServiceList = { history: [], orgs: [], projectSelected: undefined };
-    @property({ type: String }) currentScenario: IScenaries = 'select';
-    @property() lastPrjId: string | null | undefined;
     @property() projectCreated: boolean = false;
-
+    @property() state: IServiceList = { history: [], orgs: [], projectSelected: undefined };
+    @property() lastPrjId: string | null | undefined;
+    @property({ type: String }) currentScenario: IScenaries = 'select';
 
     @queryAll('.serviceListProjects .serviceListList li') list: NodeListOf<HTMLElement> | undefined;
     @queryAll('.serviceListProjects .serviceListTitle') titleList: NodeListOf<HTMLElement> | undefined;
     @query('.l5-project-list-history') historieEl: HTMLElement | undefined;
-
-    constructor() {
-        super();
-    }
-
-
 
     //----------CONFIG SERVICE------------------
 
@@ -214,11 +205,10 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                     ${this.renderAdd()}
                 `
         }
-        
     }
 
     renderSelectProject() {
-
+        
         this.getOrgsAndProjects();
         this.state.history = this.loadHistory();
         return html`
@@ -264,11 +254,10 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
 
     renderAdd() {
-
         return html`
         <collab-new-project-100554 @collab-new-project=${this.onProjectCreated}></collab-new-project-100554>
         <div style="display:flex; justify-content:center;">
-            ${this.projectCreated ? html`<button id="button-see-project" ${this.msg.btnOpenProject}</button>` : ''}
+            ${this.projectCreated ? html`<button id="button-see-project" >${this.msg.btnOpenProject}</button>` : ''}
         </div>
         `
     }
@@ -377,7 +366,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         this.setProjectActual(item.project);
         this.setOrgActual(item.project);
         this._fireEventProjectSelected(item.project);
-        this.changeScenario('details');
+        this.changeScenario('select');
         await this.loadProjectActual(item.project);
         await mls.stor.server.unzipSourcesIfNeeded(item.project)
     }
@@ -440,6 +429,15 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
 type IScenaries = 'details' | 'select' | 'add';
 
+interface IProjectSelectedParams {
+    emitter: 'left' | 'right',
+    value: number
+}
+
+export interface IProjectDetails {
+
+}
+
 interface IStateOrg {
     key: string,
     name: string,
@@ -458,10 +456,7 @@ interface IHistory {
     project: number,
     name: string
 }
-
 interface IParamsEvent {
     emitter: 'right' | 'left',
     value: number
 }
-
-
