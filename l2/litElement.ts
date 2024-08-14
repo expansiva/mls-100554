@@ -1,5 +1,5 @@
 /// <mls shortName="litElement" project="100554" enhancement="_blank" />
-				
+
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -48,26 +48,26 @@
  *
  * @packageDocumentation
  */
-import {PropertyValues, ReactiveElement} from '_100554_litReactiveElement';
-import {render, RenderOptions, noChange, RootPart} from '_100554_litHtml';
+import { PropertyValues, ReactiveElement } from '_100554_litReactiveElement';
+import { render, RenderOptions, noChange, RootPart } from '_100554_litHtml';
 export * from '_100554_litReactiveElement';
 export * from '_100554_litHtml';
 
-import {LitUnstable} from '_100554_litHtml';
+import { LitUnstable } from '_100554_litHtml';
 import { ReactiveUnstable } from '_100554_litReactiveElement';
 
 export * from '_100554_litClassMap';
 export * from '_100554_litIfDefined';
 export * from '_100554_litLive';
 export * from '_100554_litStyleMap';
-export * from '_100554_litDirectivesHelper';
+export { ChildPart, IsTemplateResult, Primitive, TemplateResultType, clearPart, getCommittedValue, getDirectiveClass, insertPart, isCompiledTemplateResult, isDirectiveResult, isPrimitive, isSingleExpression, isTemplateResult, removePart, setChildPartValue, setCommittedValue } from '_100554_litDirectivesHelper';
 export * from '_100554_litWhen';
 
 type RepeatFunction = () => void;
 export const repeat = (
-  array: unknown[], 
-  func: RepeatFunction = () => {}, 
-  func2: RepeatFunction = () => {}
+  array: unknown[],
+  func: RepeatFunction = () => { },
+  func2: RepeatFunction = () => { }
 ): void => {
   console.info(array, func, func2);
 }
@@ -141,7 +141,7 @@ export class LitElement extends ReactiveElement {
    * Note this property name is a string to prevent breaking Closure JS Compiler
    * optimizations. See @lit/reactive-element for more information.
    */
-  protected static override ['finalized'] = true;
+  protected static override['finalized'] = true;
 
   // This property needs to remain unminified.
   static ['_$litElement$'] = true;
@@ -149,7 +149,7 @@ export class LitElement extends ReactiveElement {
   /**
    * @category rendering
    */
-  readonly renderOptions: RenderOptions = {host: this};
+  readonly renderOptions: RenderOptions = { host: this };
 
   private __childPart: RootPart | undefined = undefined;
 
@@ -164,8 +164,8 @@ export class LitElement extends ReactiveElement {
     // important so that adoptedStyleSheets have precedence over styles in
     // the shadowRoot.
     this.renderOptions.renderBefore ??= renderRoot!.firstChild as ChildNode;
-  
-    
+
+
     return renderRoot;
   }
 
@@ -250,13 +250,13 @@ export class LitElement extends ReactiveElement {
 }
 
 // Install hydration if available
-(globalThis as any).litElementHydrateSupport?.({LitElement});
+(globalThis as any).litElementHydrateSupport?.({ LitElement });
 
 // Apply polyfills if available
 const polyfillSupport = DEV_MODE
   ? (globalThis as any).litElementPolyfillSupportDevMode
   : (globalThis as any).litElementPolyfillSupport;
-polyfillSupport?.({LitElement});
+polyfillSupport?.({ LitElement });
 
 // DEV mode warnings
 if (DEV_MODE) {
@@ -275,8 +275,8 @@ if (DEV_MODE) {
         issueWarning(
           renamed ? 'renamed-api' : 'removed-api',
           `\`${name}\` is implemented on class ${ctorName}. It ` +
-            `has been ${renamed ? 'renamed' : 'removed'} ` +
-            `in this version of LitElement.`
+          `has been ${renamed ? 'renamed' : 'removed'} ` +
+          `in this version of LitElement.`
         );
       }
     };
@@ -326,6 +326,6 @@ if (DEV_MODE && (globalThis as any).litElementVersions.length > 1) {
   issueWarning!(
     'multiple-versions',
     `Multiple versions of Lit loaded. Loading multiple versions ` +
-      `is not recommended.`
+    `is not recommended.`
   );
 }
