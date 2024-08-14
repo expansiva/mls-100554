@@ -1,4 +1,4 @@
-/// <mls shortName="enhancementLit" project="100554" enhancement="_100554_enhancementVanilla" groupName="other" />
+/// <mls shortName="enhancementLit" project="100554" enhancement="_blank" groupName="other" />
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { getPropierties } from './_100554_propiertiesLit'
 import { getComponentDependencies } from './_100554_dependenciesLit'

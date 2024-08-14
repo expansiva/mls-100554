@@ -12,7 +12,6 @@ export class ServiceSource100554 extends ServiceBase {
 
     constructor() {
         super();
-
         mls.events.addListener(2, 'WidgetAction', this.onWidgetActionEvents.bind(this));
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
@@ -359,7 +358,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     private static projectsLoaded: number[] = [];
     private async readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true): Promise<void> {
-        // load all typescripts dependencies of project , except shortName
+        // load all typescripts dependencies (in development) of project , except shortName
         if (ServiceSource100554.projectsLoaded.includes(project)) return;
         if (mls.istrace) console.log('loading files from project ' + project);
         ServiceSource100554.projectsLoaded.push(project);
@@ -373,15 +372,12 @@ export class ServiceSource100554 extends ServiceBase {
             if (storFile.project === project
                 && storFile.level === 2
                 && storFile.extension === '.ts'
-                // && storFile.inLocalStorage
+                && storFile.inLocalStorage
                 && storFile.shortName !== shortName) {
                 promises.push(this.createModelTS2(storFile, false, false));
             }
         }
 
-        // load project .d.ts, aka, declare modules ...
-        // const projectTS: string = ''; // get localstorage indexmodule
-        // promises.push(this.createProjectModel(project));
         const info = await mls.stor.localDB.readPrjInfo(100554);
         if (info && info.indexModules && info.indexModules !== '') {
             promises.push(this.createProjectModel(project, info.indexModules));
@@ -417,10 +413,7 @@ export class ServiceSource100554 extends ServiceBase {
             codeLens: [],
         };
         mls.l2.editor.add(model1);
-
         return model1;
-
-
     }
 
     private async deleteFile(storFile: mls.stor.IFileInfo) {
@@ -1031,7 +1024,7 @@ export class ServiceSource100554 extends ServiceBase {
     private async createModelTS_testFile() {
         const shortName = 'testFile';
         const project = 0; // localstorage project
-        const defaultTS = `/// <mls shortName="${shortName}" project="${project}" enhancement="config_ts_web-component" />\n// typescript example`;
+        const defaultTS = `/// <mls shortName="${shortName}" project="${project}" enhancement="_blank" />\n// typescript example`;
         await this.createModelTS1(shortName, project, defaultTS, true);
     }
 
@@ -1282,7 +1275,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private getConfEditorToTypescript(): string {
-        return `/// <mls shortName="config_monaco_editor" project="0" enhancement="config_config" />
+        return `/// <mls shortName="config_monaco_editor" project="0" enhancement="_blank" />
 		
 mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE], null, 2) + ';\n';
     }
@@ -1454,8 +1447,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: model.getValue() });
             }
             mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, (model as any)['position']);
-
-            if (mls.istrace) console.info('fire source event');
         }, 400);
     };
 
