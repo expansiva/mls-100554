@@ -157,12 +157,19 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         .add-button{
             position:relative;
         }
+        button span {
+            color: var(--text-primary-color);
+        }
+        button svg{
+            fill: var(--text-primary-color);
+        }
         button {
             width: 32px;
             height: 32px;
             line-height: 30px;
             padding: 0;
             font-size: 15px;
+            background: var(--bg-primary-color-lighter);
             border-radius: 100%;
             border: 1px solid rgba(0, 0, 0, .15);
             text-decoration: none;
