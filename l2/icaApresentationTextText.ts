@@ -10,14 +10,19 @@ export abstract class IcaFormsInputNumber extends IcaLitElementBase {
     public mySymbol = 'fa-t';
 
     public getActionsTags(): ActionTag[] {
-        return [
+
+        let rc: ActionTag[] = [
             { name: "margin" },
             { name: "padding" },
             { name: "menu" },
             { name: "size" },
             { name: "events" },
-            { name: "_100554_wcdAdd", level: [2], position: 'p-l4' },
         ]
+        
+        let isBlankLine = !this.getAttribute('text');
+        if (isBlankLine) rc.push({ name: "add" });
+
+        return rc;
     }
 
     public changeStateHtml(html: string): void {

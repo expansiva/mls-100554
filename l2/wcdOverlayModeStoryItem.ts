@@ -3,7 +3,7 @@
 import { html, LitElement, PropertyValueMap, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { WCDToolbox , initWCDToolbox} from './_100554_wcdToolbox';
-import { IICADepths, getPosition } from './_100554_wcdOverlayLitBase';
+import { IICADepths, getPosition, WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
 
 export function initWcdOverlayModeStoryItem(): boolean {
     return true;
@@ -20,7 +20,7 @@ export class WcdOverlayModeStoryItem extends LitElement {
 
     public boundingPage: DOMRect | undefined;
 
-    private overlay: HTMLElement | undefined;
+    public overlay: WcdOverlayLitBase | undefined;
 
     constructor() {
         super();
@@ -47,7 +47,7 @@ export class WcdOverlayModeStoryItem extends LitElement {
 
     render() {
 
-        this.overlay = this.parentElement as HTMLElement;
+        this.overlay = this.parentElement as WcdOverlayLitBase;
 
         if (!this.info || !this.boundingPage) return html``;
         const pos = getPosition(this.info, this.boundingPage);

@@ -4,6 +4,7 @@ import { html, PropertyValueMap } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaGlobal';
 
 export abstract class WcdOverlayLitBase extends CollabLitElement {
 
@@ -23,6 +24,7 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
 
     abstract createOverlayItems(): void 
 
+    abstract getActionsTagsDefault(): { [key:string]: ActionTag };
 }
 
 export function getPosition(icaInfo: IICADepths, boundingPage: DOMRect) {

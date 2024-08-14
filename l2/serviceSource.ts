@@ -1454,6 +1454,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: model.getValue() });
             }
             mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, (model as any)['position']);
+
+            if (mls.istrace) console.info('fire source event');
         }, 400);
     };
 

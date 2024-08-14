@@ -4,6 +4,7 @@ import { html, PropertyValueMap } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { WcdOverlayLitBase, IICADepths, getPosition } from './_100554_wcdOverlayLitBase';
 import { WcdOverlayModeStoryItem, initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
+import { ActionTag } from './_100554_icaGlobal';
 
 @customElement('wcd-overlay-mode-story-100554')
 export class WcdOverlayModeStory extends WcdOverlayLitBase {
@@ -16,6 +17,53 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
 
     private resizeObserver: ResizeObserver | undefined;
 
+    public getActionsTagsDefault():{[key:string]:ActionTag} {
+        return {
+            'events': {
+                name: '_100554_wcdToolboxItemActionEvents',
+                position: 'p-r1',
+                args: '',
+                level: [2]
+            },
+            'backButton': {
+                name: 'button',
+                position: 'p-r0' as any,
+                args: '',
+                level: [1, 2, 3, 4, 5, 6]
+            },
+            'margin': {
+                name: '_100554_wcdToolboxItemActionMargin',
+                position: 'p-m4',
+                args: '',
+                level: [4]
+            },
+            'padding': {
+                name: '_100554_wcdToolboxItemActionPadding',
+                position: 'p-l4',
+                args: '',
+                level: [4]
+            },
+            'size': {
+                name: '_100554_wcdToolboxItemActionSize',
+                position: 'p-r4',
+                args: '',
+                level: [4]
+            },
+            'menu': {
+                name: '_100554_wcdToolboxItemActionMenu',
+                position: 'p-m1',
+                args: '',
+                level: [4]
+            },
+            'add': {
+                name: "_100554_wcdAdd",
+                level: [2, 4],
+                position: 'p-l4',
+                args: ''
+            }
+        }
+    }
+
     //---------COMPONENT----------------
 
     firstUpdated() {
@@ -23,7 +71,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         this.resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 this.updateSizeOverlayItems();
-                
+
             }
         });
         this.resizeObserver.observe(this);
@@ -64,12 +112,12 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
     createOverlayItems(): void {
 
         const boundingPage = this.getBoundingClientRect();
-        
+
         this.myItens.forEach((item) => {
             item.element.setAttribute('level', this.level);
             this.createOverlayItem(item, this as HTMLElement, boundingPage);
-        });     
-        
+        });
+
     }
 
     private createOverlayItem(icaInfo: IICADepths, content: HTMLElement, boundingPage: DOMRect): void {
@@ -83,7 +131,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
     }
 
     private updateSizeOverlayItems() {
-        
+
         const items = Array.from(this.children) as WcdOverlayModeStoryItem[];
         const boundingPage = this.getBoundingClientRect();
         items.forEach((item) => {

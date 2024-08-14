@@ -11,7 +11,7 @@ import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 
 export function initWCDToolbox() {
     return true;
-}
+} 
 
 @customElement('wcd-toolbox-100554')
 export class WCDToolbox extends CollabLitElement {
@@ -108,46 +108,12 @@ export class WCDToolbox extends CollabLitElement {
 
     //---------------IMPLEMENTATION----------------
 
-    private defaultActions = {
-        'events': {
-            name: '_100554_wcdToolboxItemActionEvents',
-            position: 'p-r1',
-            args: '',
-            level: [2]
-        },
-        'backButton': {
-            name: 'button',
-            position: 'p-r0',
-            args: '',
-            level: [1, 2, 3, 4, 5, 6]
-        },
-        'margin': {
-            name: '_100554_wcdToolboxItemActionMargin',
-            position: 'p-m4',
-            args: '',
-            level: [4]
-        },
-        'padding': {
-            name: '_100554_wcdToolboxItemActionPadding',
-            position: 'p-l4',
-            args: '',
-            level: [4]
-        },
-        'size': {
-            name: '_100554_wcdToolboxItemActionSize',
-            position: 'p-r4',
-            args: '',
-            level: [4]
-        },
-        'menu': {
-            name: '_100554_wcdToolboxItemActionMenu',
-            position: 'p-m1',
-            args: '',
-            level: [4]
-        }
-    }
-
     private async _renderAction(actions?: ActionTag[]) {
+
+        const parent = this.parentElement?.parentElement as any;
+        
+        if (!parent || !parent.getActionsTagsDefault) return;
+        const defaultActions = parent.getActionsTagsDefault();
 
         if (!this.elICA || !this.elICA.getActionsTags) return;
         if (!actions) actions = this.elICA.getActionsTags();
@@ -165,10 +131,10 @@ export class WCDToolbox extends CollabLitElement {
 
             if (!this.shadowRoot) continue;
 
-            if ((this.defaultActions as any)[i.name]) {
+            if (defaultActions[i.name]) {
                 const args = i.args ? i.args : undefined;
                 const pos = i.position ? i.position : undefined;
-                i = Object.assign({}, (this.defaultActions as any)[i.name]) as ActionTag;
+                i = Object.assign({}, defaultActions[i.name]) as ActionTag;
                 if (args) i.args = args;
                 if (pos) i.position = pos;
             }
