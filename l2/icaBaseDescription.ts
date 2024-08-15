@@ -112,6 +112,7 @@ const message_pt = {
   dLFGrid: "Apresenta coleções de itens em uma estrutura bidimensional, facilitando a comparação e visualização.",
   dLFAdaptive: "Layouts que se ajustam dinamicamente ao tamanho do dispositivo, mantendo a acessibilidade e a usabilidade.",
   dLFSplit: "Divide a tela em áreas distintas para interação simultânea com diferentes conteúdos.",
+  dLFDivider: "Insere divisores visuais que separam conteúdos sem modificar a estrutura lógica ou hierárquica da página, melhorando a clareza visual.",
   dLGTable: "Apresenta dados em formato tabular, permitindo fácil análise e comparação de informações.",
   dLGCards: "Destaca conjuntos de informações ou itens individuais em formato de cartões, oferecendo uma visão geral acessível.",
   dBVPdf: "Componente para visualizar documentos PDF dentro da aplicação. Permite aos usuários ler e interagir com conteúdo PDF diretamente na interface, sem necessidade de downloads ou aplicativos externos.",
@@ -296,6 +297,7 @@ const message_en = {
   dLFGrid: "Presents collections of items in a two-dimensional structure, facilitating comparison and visualization.",
   dLFAdaptive: "Layouts that dynamically adjust to the device size, maintaining accessibility and usability.",
   dLFSplit: "Divides the screen into distinct areas for simultaneous interaction with different content.",
+  dLFDivider: "Insere divisores visuais que separam conteúdos sem modificar a estrutura lógica ou hierárquica da página, melhorando a clareza visual.",
   dLGTable: "Displays data in tabular format, allowing easy analysis and comparison of information.",
   dLGCards: "Highlights sets of information or individual items in card format, providing an accessible overview.",
   dBVPdf: "Component for viewing PDF documents within the application. Allows users to read and interact with PDF content directly in the interface, without the need for downloads or external applications.",
@@ -649,7 +651,8 @@ const icaDescriptions: icaBase.FormComponent[] = [
   {
     group: "Apresentation / Images / Images",
     description: msg.dAIImages,
-    events: "click"
+    events: "click",
+    attributes: "src,alt,width,height,loading,placeholder"
   },
   {
     group: "Apresentation / Images / Icons",
@@ -803,6 +806,12 @@ const icaDescriptions: icaBase.FormComponent[] = [
     description: msg.dLFSplit,
     events: "click,focus,blur"
   },
+  {
+    group: "Layout / Flow / Divider",
+    description: msg.dLFDivider,
+    attributes: "text",
+    events: ""
+  },
 
   // Group
   {
@@ -853,21 +862,21 @@ const icaDescriptions: icaBase.FormComponent[] = [
 
 const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "name", lit: "@property({ type: String }) name: string | undefined;" },
-  { path: "hint", lit: "@property({ type: String }) hint: string | undefined; // An optional descriptive hint for the field", variations: true },
-  { path: "label", lit: "@property({ type: String }) label: string | undefined; // A label to identify this field", variations: true },
-  { path: "required", lit: "@property({ type: Boolean }) required: boolean = false; // Whether the field is required or optional" },
-  { path: "disabled", lit: "@property({ type: Boolean }) disabled: boolean = false; // Whether the field is ready for input or disabled" },
-  { path: "maxvalue", lit: "@property({ type: Number }) maxvalue: number | undefined = undefined; // Maximum value restriction for the input" },
-  { path: "minvalue", lit: "@property({ type: Number }) minvalue: number | undefined = undefined; // Minimum value restriction for the input" },
-  { path: "step", lit: "@property({ type: Number }) step: number | undefined = undefined; // The step increment between values" },
-  { path: "placeholder", lit: "@property({ type: String }) placeholder: string| undefined; // Placeholder text for the input field", variations: true },
-  { path: "pattern", lit: "@property({ type: String }) pattern: string| undefined; // A regular expression that the input's value must match" },
-  { path: "errormessage", lit: "@property({ type: String }) errormessage: string| undefined; // Custom error message to display when input validation fails", variations: true },
-  { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean = false; // Whether the field should be automatically focused on page load" },
-  { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined = undefined; // Maximum length restriction for the input" },
-  { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined = undefined; // Minimum length restriction for the input" },
-  { path: "autoCapitalize", lit: "@property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = undefined; // Controls whether and how text input is automatically capitalized as it is entered by the user." },
-  { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on' = undefined; // Indicates whether the browser's autocorrect feature is on or off." },
+  { path: "hint", lit: "@property({ type: String }) hint: string | undefined;", variations: true },
+  { path: "label", lit: "@property({ type: String }) label: string | undefined;", variations: true },
+  { path: "required", lit: "@property({ type: Boolean }) required: boolean;" },
+  { path: "disabled", lit: "@property({ type: Boolean }) disabled: boolean;" },
+  { path: "maxvalue", lit: "@property({ type: Number }) maxvalue: number | undefined;" },
+  { path: "minvalue", lit: "@property({ type: Number }) minvalue: number | undefined;" },
+  { path: "step", lit: "@property({ type: Number }) step: number | undefined;" },
+  { path: "placeholder", lit: "@property({ type: String }) placeholder: string| undefined;", variations: true },
+  { path: "pattern", lit: "@property({ type: String }) pattern: string| undefined;" },
+  { path: "errormessage", lit: "@property({ type: String }) errormessage: string| undefined;", variations: true },
+  { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean;" },
+  { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined;" },
+  { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined;" },
+  { path: "autoCapitalize", lit: "@property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';" },
+  { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on';" },
   { path: "autocomplete", lit: "@property({ type: String }) autocomplete: string | undefined;" },
   { path: "value", lit: "@property({ type: String }) value: string | undefined;", variations: true },
   { path: "options", lit: "@property() options: OptionItem[] | undefined; // Optional path in the global JSON or a valid JSON for a list of options " },
@@ -875,8 +884,13 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "inputmode", lit: " @property({ type: String }) inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = 'none';" },
   { path: "title", lit: "@property({ type: String }) title: string;", variations: true },
   { path: "icon", lit: "@property({ type: String }) icon: string | undefined;" },
-  { path: "form", lit: "@property({ type: String }) form: string | undefined; // The form element that the button is associated with (it is the owning form)." },
+  { path: "form", lit: "@property({ type: String }) form: string | undefined;" },
+
   { path: "text", lit: "@property({ type: String }) text: string | undefined;", variations: true },
+  { path: "src", lit: "@property() src: string | undefined;" },
+  { path: "alt", lit: "@property() alt: string | undefined;", variations: true },
+  { path: "width", lit: "@property() width: string | undefined;" },
+  { path: "height", lit: "@property() height: string | undefined;" },
 
 ];
 

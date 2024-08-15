@@ -269,9 +269,23 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
     private createTemplateIca(root: string, subgroup: string, finalgroup: string) {
 
+        function formatProperty(propertyString:string):string {
+            // Regex para capturar o nome da propriedade e seu tipo
+            const regex = /@property\((?:[^\)]*)\)?\s*([\w]+):\s*([\w| ]+);/;
+            const match = propertyString.match(regex);
+
+            if (match) {
+                const [, propertyName, propertyType] = match;
+                return `abstract ${propertyName}: ${propertyType};`;
+            }
+
+            // Retorna a string original se não corresponder ao formato esperado
+            return propertyString;
+        }
+
         const props = getAttributeDefinitionsLit(root, subgroup, finalgroup);
         const res = props.map(line => {
-            let cleanedLine = line.replace(/@property\(\{.*\}\)\s*/, ''); // Remove "@property({...}) "
+            let cleanedLine = formatProperty(line);
             cleanedLine = cleanedLine.replace(/=.+?;/, ';'); // Remove tudo após o "=" até o próximo ";"
             cleanedLine = 'abstract ' + cleanedLine;
             return cleanedLine;
@@ -397,7 +411,6 @@ ${[interfaceString].join('\n')}
             array.push(opt);
         });
 
-        mls.l2.enhancement.getEnhancementDetails
         return [...array];
     }
 
