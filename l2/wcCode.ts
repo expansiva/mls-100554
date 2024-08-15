@@ -89,12 +89,12 @@ export class WcCode100554 extends IcaApresentationTextCodeBase {
         return html`
         
        <pre>
-            <select .value=${this.language} @change=${(e:MouseEvent) => { this.onChangeLanguage(e) }}>
+            <select style="display:none;" .value=${this.language} @change=${(e:MouseEvent) => { this.onChangeLanguage(e) }}>
                 ${this.languages.map((lang) => {
                     return html`<option value=${lang}>${lang}</option>`
                 })}
             </select>
-            <code class="code" contenteditable="true" spellcheck="false" @input=${this.onChangeText}></code>
+            <code class="code" contenteditable="false" spellcheck="false" @input=${this.onChangeText}></code>
        </pre>
     `;
     }
