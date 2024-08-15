@@ -652,7 +652,7 @@ const icaDescriptions: icaBase.FormComponent[] = [
     group: "Apresentation / Images / Images",
     description: msg.dAIImages,
     events: "click",
-    attributes: "src,alt,width,height,loading,placeholder"
+    attributes: "src,alt,width,height"
   },
   {
     group: "Apresentation / Images / Icons",
@@ -810,7 +810,7 @@ const icaDescriptions: icaBase.FormComponent[] = [
     group: "Layout / Flow / Divider",
     description: msg.dLFDivider,
     attributes: "text",
-    events: ""
+    events: "click"
   },
 
   // Group
