@@ -75,7 +75,8 @@ const message_pt = {
   dNCPopup: "Popups que fornecem informações adicionais, mensagens ou conteúdo interativo, aparecendo sobre o conteúdo existente sem redirecionar o usuário.",
   dNCScrollspy: "Um componente que atualiza links de navegação baseados na rolagem, indicando qual seção do conteúdo está atualmente visível na tela.",
   dATText: "Para apresentar blocos de texto simples.",
-  dATBanner: "Para exibir banners promocionais ou informativos.",
+  dATCode:  "Para apresentar blocos de códigos simples.",
+  dATBanner:"Para exibir banners promocionais ou informativos.",
   dATQuote: "Para destacar citações ou depoimentos.",
   dATRich: "Para apresentar texto com formatação rica.",
   dAIImages: "Para apresentar imagens individuais ou em grupo.",
@@ -260,6 +261,7 @@ const message_en = {
   dNCPopup: "Popups that provide additional information, messages, or interactive content, appearing over the existing content without redirecting the user.",
   dNCScrollspy: "A component that updates navigation links based on scrolling, indicating which section of the content is currently visible on the screen.",
   dATText: "To present blocks of simple text.",
+  dATCode: "To present blocks of code.",
   dATBanner: "To display promotional or informational banners.",
   dATQuote: "To highlight quotations or testimonials.",
   dATRich: "To present text with rich formatting.",
@@ -632,6 +634,12 @@ const icaDescriptions: icaBase.FormComponent[] = [
     events: "click,focus,blur"
   },
   {
+    group: "Apresentation / Text / Code",
+    description: msg.dATCode,
+    attributes: "text,language,languages",
+    events: "click"
+  },
+  {
     group: "Apresentation / Text / Banner",
     description: msg.dATBanner,
     events: "click,focus,blur"
@@ -891,6 +899,9 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "alt", lit: "@property() alt: string | undefined;", variations: true },
   { path: "width", lit: "@property() width: string | undefined;" },
   { path: "height", lit: "@property() height: string | undefined;" },
+
+  { path: "language", lit: "@property({ type: String ) language: string | undefined;" },
+  { path: "languages", lit: "@property({ type: Array ) languages: string[] | undefined;" },
 
 ];
 

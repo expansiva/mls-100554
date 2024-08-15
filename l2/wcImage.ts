@@ -1,6 +1,5 @@
 /// <mls shortName="wcImage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IcaApresentationImagesImagesBase } from './_100554_icaApresentationImagesImagesBase';
@@ -14,8 +13,8 @@ export class WcImage100554 extends IcaApresentationImagesImagesBase {
         }
 
         .image-container{
-            margin-right: auto;
-            margin-left: auto;
+            display: flex;
+            justify-content: center;
         }
 
         img{
