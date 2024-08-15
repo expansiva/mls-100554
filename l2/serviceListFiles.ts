@@ -1,6 +1,6 @@
 /// <mls shortName="serviceListFiles" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/**
+/** 
  * @mlsComponentDetails {
  *  "webComponentDependencies": ["service-list-files-add-100554"]
  * }
@@ -580,8 +580,6 @@ export class ServiceListFiles extends ServiceBase {
         info.needCompile = true;
 
         mls.events.fire([(+(this.level as any) as any)], ['ProjectLoaded'], JSON.stringify(info), 0);
-
-        console.info('disparou o evento');
 
     }
 
