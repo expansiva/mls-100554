@@ -6,7 +6,8 @@ import { getDSInstance } from './_100554_libDesignSystem';
 export const getDependenciesByHtml = (mfile: mls.l2.editor.IMFile, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
         try {
-            resolve(await getDependencies(mfile, 'byHtml', html, theme, withCss))
+            const ret = await getDependencies(mfile, 'byHtml', html, theme, withCss);
+            resolve(ret)
         } catch (e) {
             reject(e);
         }
@@ -98,6 +99,203 @@ function extrairTagsCustomizadas(html: string): string[] {
 }
 
 async function loadMyNeedsToCompile(
+    tags: string[],
+    myImportsMap: string[],
+    myImports: string[],
+    myCss: string[],
+    myTokens: string[],
+    myErrors: { tag: string, error: string }[],
+    myModules: any,
+    compileCss: boolean,
+    theme: string) {
+
+    try {
+
+        if (tags.length <= 0) return;
+        const name = convertTagToFileName(tags[0]);
+
+        mls.actual[0].setFullName(name);
+        const { project, path } = mls.actual[0];
+        if (!project || !path) return;
+
+        const ipath = { project, shortName: path };
+
+        const enhacementName = await mls.l2.enhancement.getEnhancementVariable(ipath);
+        
+        if (!enhacementName) throw new Error('enhacementName not valid');
+
+
+        if (!myModules[enhacementName]) {
+
+            const mModule = await mls.l2.enhancement.getEnhancementInstance(ipath);
+
+            myModules[enhacementName] = {
+                jsMap: false,
+                mModule
+            };
+
+        }
+
+        //tags = await addRequeries(enhacementName, ipath, tags, myModules);
+        await getJSImporMap(myImportsMap, enhacementName, ipath, myModules);
+        await getJS(myImports, enhacementName, ipath, myModules);
+        if (compileCss) {
+            await getCss(myCss, name, ipath, theme);
+        }
+        await getTokens(myTokens, ipath, theme);
+
+
+    } catch (e: any) {
+
+        if (tags.length <= 0) return;
+        myErrors.push({ tag: tags[0], error: e.message })
+
+    } finally {
+
+        tags.shift();
+        if (tags.length > 0) {
+            await loadMyNeedsToCompile(
+                tags,
+                myImportsMap,
+                myImports,
+                myCss,
+                myTokens,
+                myErrors,
+                myModules,
+                compileCss,
+                theme
+            );
+        }
+
+    }
+
+}
+
+async function getJSImporMap(myImportsMap: string[], enhacementName: string, mfile: mls.l2.editor.IPath, myModules: any) {
+
+    if (!myModules[enhacementName]) {
+        throw new Error('Enhacement not found ');
+    }
+
+    if (myModules[enhacementName].jsMap) return;
+
+    myModules[enhacementName].jsMap = true;
+    const mmodule = myModules[enhacementName].mModule as mls.l2.enhancement.IEnhancementInstance;
+
+    if (!mmodule || !mmodule.requires) return;
+
+    const aRequire = mmodule.requires;
+
+    aRequire.forEach((i) => {
+
+        if (i.type !== 'cdn') return;
+
+        myImportsMap.push(`"${i.name}": "${i.ref}"`);
+
+    });
+
+}
+
+async function getJS(myImports: string[], enhacementName: string, mfile: mls.l2.editor.IPath, myModules: any) {
+
+    if (!myModules[enhacementName]) {
+        throw new Error('Enhacement not found ');
+    }
+
+    if (myImports.includes(`/_${mfile.project}_${mfile.shortName}`)) return;
+
+    myImports.push(`/_${mfile.project}_${mfile.shortName}`);
+
+}
+
+
+
+async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IPath, theme: string) {
+
+    try {
+
+        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
+        const ds = await getDSInstance(mfile.project, dsindex);
+        if (!ds || !ds.components) return;
+        const css = await ds.components.getCSS(fullName, theme)
+        myCss.push(css);
+
+    } catch (e: any) {
+
+        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
+
+    }
+
+
+}
+
+async function getGlobalCss(mfile: mls.l2.editor.IPath, theme: string) {
+    try {
+        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
+        const ds = await getDSInstance(mfile.project, dsindex);
+        if (!ds || !ds.css) return;
+        const css = await ds.css.getStylesInLess(theme)
+        return css;
+    } catch (e: any) {
+        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
+    }
+}
+
+async function getTokens(myTokens: string[], mfile: mls.l2.editor.IPath, theme: string) {
+    try {
+        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
+        const ds = await getDSInstance(mfile.project, dsindex);
+        if (!ds || !ds.tokens) return;
+        const tokens = await ds.tokens.getTokensCss(theme);
+        myTokens.push(tokens);
+    } catch (e: any) {
+
+        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
+
+    }
+}
+
+function getAllWebComponentsInSource(source: string): string[] {
+    const regex = /<([a-z0-9]+-[a-z0-9-]*)(?=\s|>|\/|$)/g;
+    const matches = source.match(regex) || [];
+    const componentNames = matches.map(tag => tag.slice(1));
+    return [...new Set(componentNames)];
+}
+
+function convertFileNameToTag(widget: string) {
+    const regex = /_([0-9]+)_?(.*)/;
+    const match = widget.match(regex);
+    if (match) {
+        const [, number, rest] = match;
+        const convertedSrc = rest.replace(/([A-Z])/g, '-$1').toLowerCase();
+        widget = `${convertedSrc}-${number}`;
+    }
+    return widget;
+}
+
+function convertTagToFileName(tag: string) {
+    const regex = /(.+)-(\d+)/;
+    const match = tag.match(regex);
+    if (match) {
+        const [, rest, number] = match;
+        const convertedSrc = rest.replace(/-(.)/g, (_, letter) => letter.toUpperCase());
+        tag = `_${number}_${convertedSrc}`;
+    }
+    return tag;
+}
+
+export interface IJSONDependence {
+    file: string,
+    wcComponents: string[],
+    importsMap: string[],
+    importsJs: string[],
+    css: string[],
+    globalCss: string | undefined,
+    tokens: string[],
+    errors: { tag: string, error: string }[]
+}
+
+/*async function loadMyNeedsToCompile(
     tags: string[],
     myImportsMap: string[],
     myImports: string[],
@@ -297,18 +495,6 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IM
 
 }
 
-async function getGlobalCss(mfile: mls.l2.editor.IMFile, theme: string) {
-    try {
-        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-        const ds = await getDSInstance(mfile.project, dsindex);
-        if (!ds || !ds.css) return;
-        const css = await ds.css.getStylesInLess(theme)
-        return css;
-    } catch (e: any) {
-        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
-    }
-}
-
 async function getTokens(myTokens: string[], mfile: mls.l2.editor.IMFile, theme: string) {
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
@@ -323,42 +509,16 @@ async function getTokens(myTokens: string[], mfile: mls.l2.editor.IMFile, theme:
     }
 }
 
-function getAllWebComponentsInSource(source: string): string[] {
-    const regex = /<([a-z0-9]+-[a-z0-9-]*)(?=\s|>|\/|$)/g;
-    const matches = source.match(regex) || [];
-    const componentNames = matches.map(tag => tag.slice(1));
-    return [...new Set(componentNames)];
-}
-
-function convertFileNameToTag(widget: string) {
-    const regex = /_([0-9]+)_?(.*)/;
-    const match = widget.match(regex);
-    if (match) {
-        const [, number, rest] = match;
-        const convertedSrc = rest.replace(/([A-Z])/g, '-$1').toLowerCase();
-        widget = `${convertedSrc}-${number}`;
+async function getGlobalCss(mfile: mls.l2.editor.IMFile, theme: string) {
+    try {
+        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
+        const ds = await getDSInstance(mfile.project, dsindex);
+        if (!ds || !ds.css) return;
+        const css = await ds.css.getStylesInLess(theme)
+        return css;
+    } catch (e: any) {
+        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
     }
-    return widget;
 }
 
-function convertTagToFileName(tag: string) {
-    const regex = /(.+)-(\d+)/;
-    const match = tag.match(regex);
-    if (match) {
-        const [, rest, number] = match;
-        const convertedSrc = rest.replace(/-(.)/g, (_, letter) => letter.toUpperCase());
-        tag = `_${number}_${convertedSrc}`;
-    }
-    return tag;
-}
-
-export interface IJSONDependence {
-    file: string,
-    wcComponents: string[],
-    importsMap: string[],
-    importsJs: string[],
-    css: string[],
-    globalCss: string | undefined,
-    tokens: string[],
-    errors: { tag: string, error: string }[]
-}
+*/

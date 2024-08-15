@@ -1446,7 +1446,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 if (storFileHTML.status !== 'renamed' && (storFileHTML.status !== 'new')) storFileHTML.status = 'changed';
                 await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: model.getValue() });
             }
-            mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, (model as any)['position']);
+            mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, this.position );//(model as any)['position']
         }, 400);
     };
 
