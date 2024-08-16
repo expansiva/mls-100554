@@ -1,6 +1,6 @@
 /// <mls shortName="serviceListFilesAdd" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement, repeat } from 'lit';
+import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase } from './_100554_serviceBase';
@@ -269,7 +269,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
     private createTemplateIca(root: string, subgroup: string, finalgroup: string) {
 
-        function formatProperty(propertyString:string):string {
+        function formatProperty(propertyString: string): string {
             // Regex para capturar o nome da propriedade e seu tipo
             const regex = /@property\((?:[^\)]*)\)?\s*([\w]+):\s*([\w| ]+);/;
             const match = propertyString.match(regex);
@@ -471,16 +471,7 @@ ${[interfaceString].join('\n')}
             const storFile = mls.stor.files[value];
             if (!storFile) return;
             const { project, shortName } = storFile;
-
-            let mfile = mls.l2.editor.get({ project, shortName });
-            if (!mfile) {
-                this.loadMyMFiles();
-                await this.delay();
-                mfile = await this.tryAccessMFile(project, shortName, 20);
-            }
-
-            if (!mfile) continue;
-            let enhancementModule = await mls.l2.enhancement.getEnhancementModule(mfile);
+            let enhancementModule = await mls.l2.enhancement.getEnhancementModule({ project, shortName });
             if (!enhancementModule) continue;
 
             enhancementModules[key] = {
@@ -497,15 +488,6 @@ ${[interfaceString].join('\n')}
         obj.position = this.position;
         await mls.events.fire([+this.level as any], ['FileAction'], JSON.stringify(obj), 0);
 
-    }
-
-
-    private async loadMyMFiles() {
-        await mls.events.fire([2], 'ProjectLoaded', JSON.stringify({
-            project: 100554,
-            level: 2,
-            needCompile: true
-        }), 0);
     }
 
 }
