@@ -46,20 +46,18 @@ export class WcEmbedsSocialMedia100554 extends IcaApresentationEmbedsSocialMedia
             const urlParams = new URLSearchParams(new URL(url).search);
             videoId = urlParams.get('v');
         }
-        return html`<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
+        return html`<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen style="display: flex; justify-content: center; align-items: center; margin: 0 auto;"></iframe>`;
     }
 
     generateTwitterEmbed(url: string) {
-
         this.loadExternalScripts()
         return html`
-            <blockquote class="twitter-tweet">
-            <a href="${url.replace('x.com', 'twitter.com')}"></a>
-            </blockquote> 
-            
+            <iframe style='width:100%;border:none' onload="setTimeout(()=>{this.style.height = (this.contentWindow.document.body.scrollHeight + 50) +'px'},1500)" srcdoc=' <html> <head> <title></title> </head> <body style=" display: flex; align-items: center; justify-content: center;"> <blockquote class="twitter-tweet"> <a href="${url.replace('x.com', 'twitter.com')}"></a> </blockquote> <script src="https://platform.twitter.com/widgets.js" ></script> </body> </html>'> 
+            </iframe>
         `;
 
     }
+
 
     loadExternalScripts() {
         // Carrega o script do Twitter
