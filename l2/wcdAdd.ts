@@ -108,7 +108,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
 
     private show(evt: MouseEvent) {
 
-        if (!this.addTooltip) return;
+        if (!this.addTooltip || !this.containerButtons) return;
 
         this.addTooltip.innerHTML = '';
         const el = (evt.currentTarget as any)['element'] as HTMLElement;
@@ -120,7 +120,10 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
 
         content.innerHTML = title || '';
 
+
         const position = el.getBoundingClientRect();
+        const positionContainer = this.containerButtons.getBoundingClientRect();
+
         const positionDocument = document.body.getBoundingClientRect();
         const { width } = positionDocument;
 
@@ -130,12 +133,12 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
 
         if (positionContent.width + position.left > (width - this.widthMarginOfError)) {
             arrow.classList.add('open-to-right');
-            this.addTooltip.style.left = (position.left + (position.width / 2) - (positionContent.width - 30)) + 'px';
+            this.addTooltip.style.left = ((position.left - positionContainer.left) + (position.width / 2) - (positionContent.width - 30)) + 'px';
             this.addTooltip.style.top = '35px';
 
         } else {
             this.addTooltip.style.top = '35px';
-            this.addTooltip.style.left = (position.left + (position.width / 2)) + 'px';
+            this.addTooltip.style.left = ((position.left - positionContainer.left) + (position.width / 2)) + 'px';
         }
 
     }
@@ -191,6 +194,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
 
         }
         .buttons-actions{
+            position:relative;
             display:none;
             padding-left: 22px;
         }

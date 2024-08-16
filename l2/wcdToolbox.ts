@@ -470,15 +470,18 @@ export class WCDToolbox extends CollabLitElement {
         const widget = this.elMain;
         if (!widget || !this.titleEl) return;
         const selectBoxRect = widget.getBoundingClientRect();
-        this.titleEl.style.display = 'block';
+         this.titleEl.style.display = 'none';
         const popupWidth = this.titleEl.offsetWidth;
         this.titleEl.style.display = '';
         this.titleEl.style.left = '';
         this.titleEl.style.top = '';
         this.titleEl.style.bottom = '';
-        const spaceRight = window.innerWidth - selectBoxRect.right;
-        if (spaceRight >= popupWidth) this.titleEl.style.left = `${-1}px`;
-        else this.titleEl.style.right = `${-1}px`;
+
+        this.titleEl.style.right = `${-1}px`;
+
+        //const spaceRight = window.innerWidth - selectBoxRect.right;
+        //if (spaceRight >= popupWidth) this.titleEl.style.left = `${-1}px`;
+        //else this.titleEl.style.right = `${-1}px`;
     }
 
     private _updateBackgroundAuxSize(tp: 'show' | 'hide' = 'hide'): void {
