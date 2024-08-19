@@ -24,6 +24,7 @@ export class WcEmbedsSocialMedia100554 extends IcaApresentationEmbedsSocialMedia
 
     render() {
 
+        this.style.display = 'block'
         if (!this.url) return html`<h3>Not found url</h3>`
 
         if (this.url.includes("youtube.com") || this.url.includes("youtu.be"))

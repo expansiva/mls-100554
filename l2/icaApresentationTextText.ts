@@ -17,6 +17,7 @@ export abstract class IcaFormsInputNumber extends IcaLitElementBase {
             { name: "menu" },
             { name: "size" },
             { name: "events" },
+            { name: "edit", args:"text" },
         ]
         
         let isBlankLine = !this.getAttribute('text');

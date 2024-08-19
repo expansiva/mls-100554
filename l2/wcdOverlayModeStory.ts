@@ -60,6 +60,12 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
                 level: [2, 4],
                 position: 'p-l4',
                 args: ''
+            },
+            'edit': {
+                name: "_100554_wcdToolboxItemActionEditText",
+                level: [2, 4],
+                position: 'p-r4',
+                args: ''
             }
         }
     }
