@@ -332,7 +332,6 @@ ${[interfaceString].join('\n')}
 
     }
 
-
     private saveLocalHistory(project: number, shortName: string, extension: string, folder: string): void {
 
         const info = localStorage.getItem('mlsInfoHistoryL' + this.level);
@@ -434,31 +433,6 @@ ${[interfaceString].join('\n')}
 
 
         return templates;
-    }
-
-    private tryAccessMFile(project: number, shortName: string, maxAttempts: number): Promise<mls.l2.editor.IMFile | undefined> {
-        return new Promise((resolve, reject) => {
-            let attempts = 0;
-
-            const interval = setInterval(() => {
-
-                const value = mls.l2.editor.get({ project, shortName });
-                attempts++;
-                if ((value && value.compilerResults && value.compilerResults.prodJS)) {
-                    clearInterval(interval);
-                    resolve(value);
-                }
-
-                if (attempts >= maxAttempts) {
-                    clearInterval(interval);
-                    reject(new Error('Max attempts reached without finding the variable.'));
-                }
-            }, 500);
-        });
-    }
-
-    async delay() {
-        await new Promise((resolve) => setTimeout(resolve, 30000));
     }
 
     private async getEnhacementsInstancies(enhancementDetails: IEnhancementDetails[]) {
