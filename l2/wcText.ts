@@ -20,6 +20,7 @@ export class WcInputText100554 extends IcaApresentationTextTextBase {
             width: 100%;
         }
     `
+    
     error: string = '';
 
     render() {
@@ -57,7 +58,8 @@ export class WcInputText100554 extends IcaApresentationTextTextBase {
                 tag = 'span';
         }
 
-        return unsafeHTML(`<${tag}>${this.text}</${tag}>`)
+        const line = `<${tag}>${this.text}</${tag}>`;
+        return unsafeHTML(line)
     }
 
    
