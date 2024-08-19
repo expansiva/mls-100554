@@ -24,11 +24,12 @@ const messages: { [key: string]: MessageType } = {
 @customElement('wcd-toolbox-item-action-edit-text-100554')
 export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
-    public myParent: WCDToolbox | undefined;
-    public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBase | undefined;
+    public myParent: WCDToolbox | undefined | any;
+    public elMain: HTMLElement | undefined | any;
+    public elICA: IcaLitElementBase | undefined | any;
     public args: string | undefined;
 
+    private myInfos = {tp:"", attr:""}
     private myMsg: MessageType = messages['en'];
 
     private edittextwcd: HTMLElement | undefined;
@@ -37,6 +38,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     createRenderRoot() {
         return this;
+    }
+
+    disconnectedCallback() {
+
+        if(this.elMain) this.elMain.style.visibility = '';
+        super.disconnectedCallback();
     }
 
     updated(changedProperties: any) {
@@ -48,7 +55,19 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     render() {
 
-        switch (this.args) {
+        if (this.args) {
+
+            try {
+                const i = JSON.parse(this.args);
+                if (i.tp) this.myInfos.tp = i.tp;
+                if (i.attr) this.myInfos.attr = i.attr;
+            } catch (e) {
+                
+            }
+            
+        }
+
+        switch (this.myInfos.tp) {
             case 'edit':
                 return this.renderEdit();
             default: return this.renderButton();
@@ -63,28 +82,59 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     renderEdit() {
+
         if (!this.elMain || !this.myParent) return;
+
+        this.style.left = '0';
+        this.style.top = '0';
+        this.style.background = '#fff';
 
         const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;
 
         if (!el) return html`Not found element`;
 
-        const info = this.myParent.getBoundingClientRect();
-        const css = `width:${info.width}px; height:${info.height}px; background:#fff`
-        return html`<div id="edittextwcd" contenteditable="true" @keydown="${this.onkeyDown}" @input="${this.onInput}" style="${css}">${unsafeHTML(el.innerHTML)}</div>`;
+        
+        const css = 'outline:none';
+
+        this.myParent.fcBeforeBackButton = this.backButton.bind(this);
+
+        el.setAttribute('contenteditable', 'true');
+        el.style.outline = 'none';
+
+        this.firstText = el.innerHTML;
+
+        this.elMain.style.visibility = 'hidden';
+
+        const ret = html`<div id="edittextwcd"  @keydown="${this.onkeyDown}" @input="${this.onInput}" style="${css}">${unsafeHTML(el.outerHTML)}</div>
+            <style>
+                #edittextwcd *{
+                    margin:0px;
+                }
+            </style>
+        `;
+
+        el.removeAttribute('contenteditable');
+        el.style.outline = '';
+
+        return ret;
     }
 
     //---------IMPLEMENTATION-----------------
 
+    private firstText = '';
+    private myText = '';
+
     private onInput(e: MouseEvent) {
         e.stopPropagation();
-        const me = e.target as HTMLElement;
+        let me = e.target as HTMLElement;
+        if (me.id !== 'edittextwcd') me = me.closest('#edittextwcd') as HTMLElement;
 
         if (!me || !this.elMain || !this.myParent) return;
 
         const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;
 
         el.innerText = me.innerText as string;
+        this.myText = el.innerHTML as string;
     }
 
     private onkeyDown(e: any) {
@@ -94,10 +144,8 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (e.key === 'Enter') {
             e.preventDefault();
-            this.myParent.updateSize(this.elMain, this.querySelector('#edittextwcd') as HTMLElement, true);
             document.execCommand('insertText', false, '\n');
         } else if (e.key === 'Backspace') {
-            this.myParent.updateSize(this.elMain, this.querySelector('#edittextwcd') as HTMLElement, true);
             
         }
 
@@ -116,8 +164,9 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
                 },
                 {
                     name: 'edit',
-                    args: 'edit',
-                    position: 'p-m2'
+                    args: '{"tp":"edit", "attr":"text"}',
+                    position: 'p-l1',
+                    toolboxOptions: {background: '#fff'}
                 },
 
             ],
@@ -126,4 +175,16 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         )
 
     }
+
+    private backButton() {
+    
+        if (!this.myInfos.attr || !this.elICA) return;
+        if (this.myText === this.firstText || this.myText === '') return;
+        this.firstText = this.myText;
+
+        let aux = '';
+        const lang = (document.documentElement.lang || '').toLowerCase();
+        if (this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
+        this.elICA.setAttribute(this.myInfos.attr+aux, this.myText);
+    } 
 }

@@ -195,6 +195,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     render() {
+        this.getLastProject();
         switch (this.currentScenario) {
             case 'select':
                 return html`
@@ -263,6 +264,11 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     //----------IMPLEMENTS------------------
+
+    private getLastProject() {
+        this.lastPrjId = localStorage.getItem('l5-last-project');
+        return this.lastPrjId;
+    }
 
     private getOrgsAndProjects() {
 
@@ -369,6 +375,23 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         this.changeScenario('select');
         await this.loadProjectActual(item.project);
         await mls.stor.server.unzipSourcesIfNeeded(item.project)
+        this.openExplore()
+    }
+
+    private async onProjectClick(item: any) {
+        this.setProjectActual(item.id);
+        this.setOrgActual(item.id);
+        this.addOnHistory(item);
+        this._fireEventProjectSelected(item.id);
+        this.changeScenario('details');
+        await this.loadProjectActual(item.id);
+        await mls.stor.server.unzipSourcesIfNeeded(item.id);
+        this.openExplore()
+    }
+
+
+    private openExplore() {
+        mls.events.fire([5], ['ProjectSelected'], '');    
     }
 
     private setProjectActual(project: number) {
@@ -394,16 +417,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         await mls.stor.server.loadProjectInfoIfNeeded(project);
     }
 
-    private async onProjectClick(item: any) {
-        this.setProjectActual(item.id);
-        this.setOrgActual(item.id);
-        this.addOnHistory(item);
-        this._fireEventProjectSelected(item.id);
-        this.changeScenario('details');
-        await this.loadProjectActual(item.id);
-        await mls.stor.server.unzipSourcesIfNeeded(item.id)
-    }
-
+    
     private addOnHistory(item: any) {
         const indexInHistory = this.state.history.findIndex((his) => his.name === item.name && his.project === item.id);
         if (indexInHistory > -1) this.state.history.splice(indexInHistory, 1);

@@ -1,5 +1,4 @@
 /// <mls shortName="wcdAdd" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-
 import { html, css, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { getMessageKey } from "./_100554_collabLitElement";
@@ -7,7 +6,6 @@ import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { collab_xmark, collab_image, collab_unsplash, collab_video, collab_code, collab_ellipsis, collab_link } from './_100554_collabIcons'
-
 /// **collab_i18n_start**
 const message_pt = {
     image: 'Adicionar uma imagem',
@@ -17,7 +15,6 @@ const message_pt = {
     code: 'Adicionar um novo bloco de código',
     newPart: 'Adicionar uma nova parte',
 }
-
 const message_en = {
     image: 'Add an image',
     video: 'Add a video',
@@ -26,48 +23,35 @@ const message_en = {
     code: 'Add a new code block',
     newPart: 'Add a new part',
 }
-
 type MessageType = typeof message_en;
-
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
 /// **collab_i18n_end**
-
 @customElement('wcd-add-100554')
 export class WcdAdd100554 extends WcdToolboxItemBase {
-
     private msg: MessageType = messages['en'];
-
-    public myParent: WCDToolbox | undefined;
-    public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBase | undefined;
+    public myParent: WCDToolbox | undefined | any;
+    public elMain: HTMLElement | undefined | any;
+    public elICA: IcaLitElementBase | undefined | any;
     public args: string | undefined;
-
-
     @query('.buttons-actions') containerButtons: HTMLDivElement | undefined;
     @query('add-tooltip') addTooltip: HTMLElement | undefined;
-
     createRenderRoot() {
         return this;
     }
-
-
     firstUpdated() {
         const allBtns = this.containerButtons?.querySelectorAll('button');
         if (!allBtns) return;
         allBtns.forEach((btn) => { this.tooltipElement(btn); });
-
     }
-
     render() {
         const lang = getMessageKey(messages);
         this.msg = messages[lang];
-
         return html`
         <div class="add-button close">
-            <button @click=${this.onButtonClick} > 
+            <button @click=${this.onButtonClick} >
                 <span>
                     ${collab_xmark}
                 </span>
@@ -83,80 +67,58 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             </div>
         </div>
         <style>${this.styles}</style>
-
         `;
     }
-
     private tooltipElement(el: HTMLElement) {
         if (this.addTooltip && el) this.tooltip(el);
     }
-
     private tooltip(el: HTMLElement) {
         el.addEventListener('mouseover', this.show.bind(this), false);
         (el as any)['element'] = el;
         el.addEventListener('mouseleave', this.destroy.bind(this), false);
     }
-
     private destroy(evt: MouseEvent) {
         if (!this.addTooltip) return;
         this.addTooltip.innerHTML = '';
         this.addTooltip.style.top = '0px';
         this.addTooltip.style.left = '0px';
     }
-
     private widthMarginOfError = 10;
-
     private show(evt: MouseEvent) {
-
         if (!this.addTooltip || !this.containerButtons) return;
-
         this.addTooltip.innerHTML = '';
         const el = (evt.currentTarget as any)['element'] as HTMLElement;
         if (!el) return;
-
         const title = el.getAttribute('data-tooltip');
         const arrow = document.createElement('div');
         const content = document.createElement('span');
-
         content.innerHTML = title || '';
-
-
         const position = el.getBoundingClientRect();
         const positionContainer = this.containerButtons.getBoundingClientRect();
-
         const positionDocument = document.body.getBoundingClientRect();
         const { width } = positionDocument;
-
         this.addTooltip.appendChild(arrow);
         this.addTooltip.appendChild(content);
         const positionContent = content.getBoundingClientRect();
-
         if (positionContent.width + position.left > (width - this.widthMarginOfError)) {
             arrow.classList.add('open-to-right');
             this.addTooltip.style.left = ((position.left - positionContainer.left) + (position.width / 2) - (positionContent.width - 30)) + 'px';
             this.addTooltip.style.top = '35px';
-
         } else {
             this.addTooltip.style.top = '35px';
             this.addTooltip.style.left = ((position.left - positionContainer.left) + (position.width / 2)) + 'px';
         }
-
     }
-
     onButtonClick(e: MouseEvent) {
         const target = e.target as HTMLElement;
         const btn = target.closest('.add-button');
         if (!btn) return;
         btn.classList.toggle('close');
-
         if (!this.containerButtons) return;
         const allBtns = this.containerButtons.querySelectorAll('button');
         allBtns.forEach((bt) => bt.classList.toggle('scale-in-center', !btn.classList.contains('close')))
-
     }
-
     private styles = `
-
         .add-button{
             position:relative;
         }
@@ -191,7 +153,6 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         .add-button:not(.close) .buttons-actions{
             opacity: 1;
             display:inline-block;
-
         }
         .buttons-actions{
             position:relative;
@@ -201,74 +162,69 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         button svg{
             transition:transform .1s,-webkit-transform .1s;
         }
-
         .add-button.close svg{
             transform:rotate(-45deg);
         }
-
         button span {
             vertical-align: middle;
         }
-
         add-tooltip {
             display:block;
-			position: absolute;
-			will-change: transform;
-			white-space: nowrap;
-			top: 0px;
-			left: 0px;
-			transform: translate3d(-13px, 5px, 0px);
-			z-index: 9999;
+            position: absolute;
+            will-change: transform;
+            white-space: nowrap;
+            top: 0px;
+            left: 0px;
+            transform: translate3d(-13px, 5px, 0px);
+            z-index: 9999;
             font-size:14px;
-		}
-		add-tooltip > div {
-			top: -8px;
-			position: absolute;
-			display: block;
-			width: 100%;
-			height: 0.4rem;
-		}
-		add-tooltip > div::before {
-			position: absolute;
-			content: "";
-			border-color: transparent;
-			border-style: solid;
-			bottom: -1px;
-			left: 5px;
-			border-width: 0 0.4rem 0.4rem;
-			border-bottom-color: #000;
-		}
-		add-tooltip > div.open-to-right::before {
-			left: 0;
-			content: none;
-		}
-		add-tooltip > div.open-to-right::after {
-			position: absolute;
-			content: "";
-			border-color: transparent;
-			border-style: solid;
-			right: 8px;
-			bottom: -1px;
-			border-width: 0 0.4rem 0.4rem;
-			border-bottom-color: #000;
-		}
-		add-tooltip > span {
-			max-width: 200px;
-			padding: 0.25rem 0.5rem;
-			color: #fff;
-			text-align: center;
-			background-color: #000;
-			border-radius: 0.25rem;
-		}
-		add-toolti a[title]:hover::after {
-			display: none;
-		}
-
+        }
+        add-tooltip > div {
+            top: -8px;
+            position: absolute;
+            display: block;
+            width: 100%;
+            height: 0.4rem;
+        }
+        add-tooltip > div::before {
+            position: absolute;
+            content: "";
+            border-color: transparent;
+            border-style: solid;
+            bottom: -1px;
+            left: 5px;
+            border-width: 0 0.4rem 0.4rem;
+            border-bottom-color: #000;
+        }
+        add-tooltip > div.open-to-right::before {
+            left: 0;
+            content: none;
+        }
+        add-tooltip > div.open-to-right::after {
+            position: absolute;
+            content: "";
+            border-color: transparent;
+            border-style: solid;
+            right: 8px;
+            bottom: -1px;
+            border-width: 0 0.4rem 0.4rem;
+            border-bottom-color: #000;
+        }
+        add-tooltip > span {
+            max-width: 200px;
+            padding: 0.25rem 0.5rem;
+            color: #fff;
+            text-align: center;
+            background-color: #000;
+            border-radius: 0.25rem;
+        }
+        add-toolti a[title]:hover::after {
+            display: none;
+        }
         .scale-in-center {
             -webkit-animation: scale-in-center 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
                     animation: scale-in-center 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
         }
-
         @-webkit-keyframes scale-in-center {
             0% {
                 -webkit-transform: scale(0);
@@ -293,11 +249,5 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
                 opacity: 1;
             }
         }
-
     `;
-
-}
-
-interface CollabTooltipElement extends HTMLElement {
-    tooltip: (el: HTMLElement) => void
 }

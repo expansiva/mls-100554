@@ -58,15 +58,22 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
             'add': {
                 name: "_100554_wcdAdd",
                 level: [2, 4],
-                position: 'p-l4',
-                args: ''
+                position: 'p-l2',
+                args: '',
+                toolboxOptions:{background:'none', border:'none'}
             },
             'edit': {
                 name: "_100554_wcdToolboxItemActionEditText",
                 level: [2, 4],
                 position: 'p-r4',
                 args: ''
-            }
+            },
+            'title': {
+                name: "_100554_wcdTitle",
+                level: [1, 2, 3, 4, 5, 6],
+                position: 'p-l1',
+                args: ''
+            },
         }
     }
 

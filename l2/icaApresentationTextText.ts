@@ -11,19 +11,21 @@ export abstract class IcaFormsInputNumber extends IcaLitElementBase {
 
     public getActionsTags(): ActionTag[] {
 
+        let isBlankLine = !this.getAttribute('text');
+        if (isBlankLine) return [{ name: "add"}];
+
         let rc: ActionTag[] = [
             { name: "margin" },
             { name: "padding" },
             { name: "menu" },
             { name: "size" },
             { name: "events" },
-            { name: "edit", args:"text" },
+            { name: "edit" },
+            { name: "title" },
         ]
         
-        let isBlankLine = !this.getAttribute('text');
-        if (isBlankLine) rc.push({ name: "add" });
-
         return rc;
+        
     }
 
     public changeStateHtml(html: string): void {

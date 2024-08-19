@@ -9,7 +9,7 @@ import { IcaLitElementBase } from './_100554_icaLitElementBase';
 @customElement('wcd-title-100554')
 export class WcdAdd100554 extends WcdToolboxItemBase {
 
-    public myParent: WCDToolbox | undefined | any;
+    public myParent: WCDToolbox | undefined | any ;
     public elMain: HTMLElement | undefined | any;
     public elICA: IcaLitElementBase | undefined | any;
     public args: string | undefined;
@@ -19,9 +19,8 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
     }
 
     render() {
-
         return html`
-            <div>${this.args || ''}</div>
+            <div>${this.myParent?.widget || ''}</div>
             <style>${this.styles}</style>
         `;
     }

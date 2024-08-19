@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { CollabLitElement } from './_100554_collabLitElement';
-import { ActionTag } from './_100554_icaGlobal';
+import { ActionTag, IToolboxOptions } from './_100554_icaGlobal';
 import { ServiceBase } from './_100554_serviceBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
@@ -17,8 +17,6 @@ export function initWCDToolbox() {
 export class WCDToolbox extends CollabLitElement {
 
     // ------------ PROPERTIES ------------------
-
-    @query('wcd-toolbox-title') titleEl: HTMLElement | undefined;
 
     @property({ type: String, reflect: true })
     public level: string | undefined;
@@ -70,13 +68,11 @@ export class WCDToolbox extends CollabLitElement {
         this._renderAction();
         this.updateSize(this.elMain, this, true);
         this.initObserverResize();
-        this.calculateTitlePosition();
     }
 
     render() {
         return html`
          <wcd-toolbox-aux-background></wcd-toolbox-aux-background>
-         <wcd-toolbox-title>${this.widget}</wcd-toolbox-title>
         `;
     }
 
@@ -123,10 +119,11 @@ export class WCDToolbox extends CollabLitElement {
         const allItens = this.shadowRoot.querySelectorAll('*');
         allItens.forEach((i: Element) => {
             if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-aux-background') return;
-            if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-title') return;
             i.remove()
         });
 
+        this.setDefaultToolBoxOptions();
+        
         for await (let i of actions) {
 
             if (!this.shadowRoot) continue;
@@ -134,10 +131,15 @@ export class WCDToolbox extends CollabLitElement {
             if (defaultActions[i.name]) {
                 const args = i.args ? i.args : undefined;
                 const pos = i.position ? i.position : undefined;
+                const toll = i.toolboxOptions ? i.toolboxOptions : undefined;
+
                 i = Object.assign({}, defaultActions[i.name]) as ActionTag;
                 if (args) i.args = args;
                 if (pos) i.position = pos;
+                if (toll) i.toolboxOptions = toll;
             }
+
+            if (i.toolboxOptions) this.setToolBoxOptions(i.toolboxOptions);
 
             if (i.name === 'button') {
                 this.addBackButton();
@@ -151,9 +153,9 @@ export class WCDToolbox extends CollabLitElement {
 
             const el = document.createElement(convertFileNameToTag(i.name)) as WcdToolboxItemBase;
             el.className = `p ${i.position}`;
-            el.myParent = this;
+            el.myParent = this as any;
             el.elMain = this.elMain;
-            el.elICA = this.elICA;
+            el.elICA = this.elICA as any;
             el.style.zIndex = '9998';
             el.args = i.args;
 
@@ -162,6 +164,18 @@ export class WCDToolbox extends CollabLitElement {
         };
 
         this.adjustPositionIfNecessary()
+
+    }
+
+    private setDefaultToolBoxOptions() {
+        this.style.background = '';
+        this.style.border = '';
+    }
+
+    private setToolBoxOptions(info:IToolboxOptions) {
+
+        if (info.background) this.style.background = info.background;
+        if (info.border) this.style.border = info.border;
 
     }
 
@@ -338,7 +352,7 @@ export class WCDToolbox extends CollabLitElement {
             let child: HTMLElement[] = [];
             Array.from(this.shadowRoot.children).forEach((item) => {
                 const tag = item.tagName.toLocaleLowerCase();
-                const invalid = ['wcd-toolbox-aux-background', 'wcd-toolbox-title'];
+                const invalid = ['span', 'wcd-toolbox-aux-background'];
                 if (invalid.includes(tag)) return;
                 child.push(item as HTMLElement);
             });
@@ -463,25 +477,6 @@ export class WCDToolbox extends CollabLitElement {
 
         }, 50);
 
-    }
-
-    private calculateTitlePosition() {
-        if (!this.widget || !this.parentElement) return;
-        const widget = this.elMain;
-        if (!widget || !this.titleEl) return;
-        const selectBoxRect = widget.getBoundingClientRect();
-         this.titleEl.style.display = 'none';
-        const popupWidth = this.titleEl.offsetWidth;
-        this.titleEl.style.display = '';
-        this.titleEl.style.left = '';
-        this.titleEl.style.top = '';
-        this.titleEl.style.bottom = '';
-
-        this.titleEl.style.right = `${-1}px`;
-
-        //const spaceRight = window.innerWidth - selectBoxRect.right;
-        //if (spaceRight >= popupWidth) this.titleEl.style.left = `${-1}px`;
-        //else this.titleEl.style.right = `${-1}px`;
     }
 
     private _updateBackgroundAuxSize(tp: 'show' | 'hide' = 'hide'): void {
@@ -783,25 +778,6 @@ export class WCDToolbox extends CollabLitElement {
         .p-r3.f-square{
             bottom:-4px;
             right:-4px;
-        }
-
-        wcd-toolbox-title {
-            display:block;
-            position: absolute;
-            background: #4c4c4c;
-            color: #fff;
-            font-size: 11px;
-            text-transform: lowercase;
-            padding: 0 .5rem;
-            height: 14px;
-            bottom: -14px;
-            right: -1px;
-            border-bottom-right-radius: 5px;
-            border-bottom-left-radius: 5px;
-            font-weight: normal;
-            letter-spacing: -.5px;
-            font-family: monospace;
-            width: max-content;
         }
 
 
