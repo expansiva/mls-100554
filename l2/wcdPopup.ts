@@ -2,6 +2,11 @@
 
 import { html, LitElement, render, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import './_100554_wcdPopupItemBold';
+import './_100554_wcdPopupItemItalic';
+import './_100554_wcdPopupItemLink';
+import './_100554_wcdPopupItemSeparator';
+import './_100554_wcdPopupItemH1';
 
 export function initWcdPopup(): boolean {
   return true;
@@ -38,8 +43,12 @@ export class WCDPopup extends LitElement {
   // Render the popup at the specified position
   render() {
     return html`
-      <div class="popup-content" style="top: ${this.y}px; left: ${this.x}px; height: 40px; width: 100px">
+      <div class="popup-content" style="top: ${this.y}px; left: ${this.x}px; height: 40px">
             <wcd-popup-item-bold-100554></wcd-popup-item-bold-100554>
+            <wcd-popup-item-italic-100554></wcd-popup-item-italic-100554>
+            <wcd-popup-item-link-100554></wcd-popup-item-link-100554>
+            <wcd-popup-item-separator-100554></wcd-popup-item-separator-100554>
+            <wcd-popup-item-h1-100554></wcd-popup-item-h1-100554>
       </div>
     `;
   }

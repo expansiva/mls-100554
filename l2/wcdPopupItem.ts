@@ -11,8 +11,6 @@ export class WCDPopupItem extends LitElement {
         console.log('in WCDPopupItem')
     }
 
-  @property({ type: String }) label = '';
-
   static styles = css`
     :host {
       display: inline-block;
@@ -33,14 +31,13 @@ export class WCDPopupItem extends LitElement {
 
   // Default onClick handler, should be overridden by child classes
   handleClick() {
-    console.log(`Clicked: ${this.label}`);
+    console.log(`wcd popup click not implemented`);
   }
 
-    render() {
-    console.log('in render WCDPopupItem')
+  render() {
     return html`
       <div @click=${this.handleClick}>
-        ${this.label}
+        ?
       </div>
     `;
   }
