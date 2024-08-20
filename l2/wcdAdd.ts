@@ -136,7 +136,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             font-size: 15px;
             background: var(--bg-primary-color-lighter);
             border-radius: 100%;
-            border: 1px solid rgba(0, 0, 0, .15);
+            border: 1px solid rgba(0,0,0,.68);
             text-decoration: none;
             cursor: pointer;
             vertical-align: bottom;
