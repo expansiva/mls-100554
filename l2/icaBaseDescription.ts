@@ -702,7 +702,7 @@ const icaDescriptions: icaBase.FormComponent[] = [
   {
     group: "Apresentation / Video / Image Video",
     description: msg.dAVImage,
-    events: "click,play,pause,ended"
+    events: "click,play,pause,ended",
   },
   {
     group: "Apresentation / Video / Video Playlist",

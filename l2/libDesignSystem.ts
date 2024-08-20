@@ -102,7 +102,7 @@ export abstract class AssetIO {
     }
     _ds: DesignSystemIO;
     abstract list: IAssetInfos;
-    abstract add: (path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType, content: File, reference: mls.l3.IDSRef) => Promise<void>;
+    abstract add: (path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType, content: File, reference?: mls.l3.IDSRef) => Promise<void>;
     abstract remove: (path: string, shortname: string) => Promise<void>;
     abstract update: (path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType) => Promise<void>;
     abstract find: (path: string, shortname: string) => IAssetsInfo | null;

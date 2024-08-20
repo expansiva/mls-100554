@@ -4,7 +4,7 @@ import { html, css, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initCollabInputTag, CollabInputTag } from './_100554_collabInputTag';
-import { getDSInstance, list } from './_100554_libDesignSystem';
+import { getDSInstance, list, DesignSystemIO } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -165,7 +165,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
         readOnly: false
     }
 
-    private dsInstance: mls.l3.DesignSystemIO | undefined;
+    private dsInstance: DesignSystemIO | undefined;
 
     private lastProject: number | undefined;
 
@@ -408,7 +408,7 @@ export class ServiceDsAssets100554 extends ServiceBase {
 
     private async onActionAddConfirm() {
 
-        if (!this.inputFile || !this.dsInstance) return;
+        if (!this.inputFile || !this.dsInstance || !this.dsInstance.assets) return;
 
         const tags = this.inputTags?.value.trim().split(',') || [];
         const description = this.txtDesc?.value || '';
@@ -419,7 +419,9 @@ export class ServiceDsAssets100554 extends ServiceBase {
         const content = file;
         const path = this.actualPath;
 
-        await this.dsInstance.assets.add({ path, shortname: file.name, tags, description, assetType, content });
+
+
+        await this.dsInstance.assets.add(path, file.name, tags, description, assetType, content);
         // await this.prepareFiles();
         this.updateActualFiles(this.actualPath);
         this.isAddMode = false;
