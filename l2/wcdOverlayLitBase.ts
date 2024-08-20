@@ -52,7 +52,7 @@ export function getPosition(icaInfo: IICADepths, boundingPage: DOMRect) {
 }
 
 export interface IICADepths {
-    element: IcaLitElementBase,
+    element: IcaLitElementBase | HTMLElement,
     depth: number,
     x: number,
     y: number,

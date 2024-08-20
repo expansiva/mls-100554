@@ -12,12 +12,13 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
     constructor() {
         super();
         initWcdOverlayModeStoryItem();
+        document.onkeydown = (e) => { this.onkeyDown(e) }
     }
 
 
     private resizeObserver: ResizeObserver | undefined;
 
-    public getActionsTagsDefault():{[key:string]:ActionTag} {
+    public getActionsTagsDefault(): { [key: string]: ActionTag } {
         return {
             'events': {
                 name: '_100554_wcdToolboxItemActionEvents',
@@ -60,7 +61,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
                 level: [2, 4],
                 position: 'p-l2',
                 args: '',
-                toolboxOptions:{background:'none', border:'none'}
+                toolboxOptions: { background: 'none', border: 'none' }
             },
             'edit': {
                 name: "_100554_wcdToolboxItemActionEditText",
@@ -126,6 +127,8 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
 
         const boundingPage = this.getBoundingClientRect();
 
+        this.innerHTML = '';
+
         this.myItens.forEach((item) => {
             item.element.setAttribute('level', this.level);
             this.createOverlayItem(item, this as HTMLElement, boundingPage);
@@ -138,7 +141,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         const icaOverlayItem = document.createElement('wcd-overlay-mode-story-item-100554') as WcdOverlayModeStoryItem;
         icaOverlayItem.setAttribute('widget', icaInfo.element.tagName.toLowerCase());
         icaOverlayItem.setAttribute('level', this.level);
-        icaOverlayItem.info = icaInfo;
+        icaOverlayItem.info = icaInfo as any;
         icaOverlayItem.boundingPage = boundingPage;
         content.appendChild(icaOverlayItem)
     }
@@ -160,6 +163,63 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
             item.style.top = pos.top;
             item.style.left = pos.left;
         });
+    }
+
+    private onkeyDown(e: any) {
+
+        e.stopPropagation();
+
+        let el = this.querySelector('wcd-toolbox-100554');
+        if (!el) return;
+        el = el.parentElement;
+
+        if (!(el as WcdOverlayModeStoryItem).info) return;
+
+        el = (el as WcdOverlayModeStoryItem).info?.element as HTMLElement;
+
+        if (e.key === 'Enter') {
+
+            e.preventDefault();
+
+            const elAdd = document.createElement('ica-apresentation-text-text-100554') as HTMLElement;
+
+            elAdd.setAttribute('widget', 'wc-text-100554');
+            elAdd.setAttribute('type', 'p');
+            elAdd.setAttribute('text', '');
+            elAdd.id = 'ica_apText' + this.children.length + 1;
+
+            el.insertAdjacentElement('afterend', elAdd);
+
+            setTimeout(() => {
+
+                const { x, y, height, width } = elAdd.getBoundingClientRect();
+
+                this.myItens.push({ element: elAdd, depth: 0, x, y, height, width, opacity: elAdd.style.opacity });
+
+                this.createOverlayItems()
+
+            }, 500)
+
+
+        } else if (e.key === 'Backspace') {
+            e.preventDefault();
+            if (!(el as any).overlayRef) return;
+
+            console.info(this.myItens.length);
+
+            const index = this.myItens.findIndex(item => item.element === el);
+
+            if (index !== -1) {
+                this.myItens.splice(index, 1);
+            }
+
+            console.info(this.myItens.length);
+
+            (el as any).overlayRef.remove();
+            el.remove();
+
+        }
+
     }
 
 }
