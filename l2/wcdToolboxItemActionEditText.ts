@@ -5,6 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { initWcdPopup } from './_100554_wcdPopup';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -29,10 +30,15 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     public elICA: IcaLitElementBase | undefined | any;
     public args: string | undefined;
 
-    private myInfos = {tp:"", attr:""}
+    private myInfos = { tp: "", attr: "" }
     private myMsg: MessageType = messages['en'];
 
     private edittextwcd: HTMLElement | undefined;
+
+    constructor() {
+        super();
+        initWcdPopup();
+    }
 
     //-------COMPONENT---------------------
 
@@ -42,7 +48,13 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     disconnectedCallback() {
 
-        if(this.elMain) this.elMain.style.visibility = '';
+        if (this.elMain) this.elMain.style.visibility = '';
+        if (this.myText !== this.firstText && this.myText != '') {
+            let aux = '';
+            const lang = (document.documentElement.lang || '').toLowerCase();
+            if (this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
+            this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
+        };
         super.disconnectedCallback();
     }
 
@@ -62,9 +74,9 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
                 if (i.tp) this.myInfos.tp = i.tp;
                 if (i.attr) this.myInfos.attr = i.attr;
             } catch (e) {
-                
+
             }
-            
+
         }
 
         switch (this.myInfos.tp) {
@@ -93,8 +105,8 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (!el) return html`Not found element`;
 
-        
-        const css = 'outline:none';
+
+        const css = 'outline:none; position:relative';
 
         this.myParent.fcBeforeBackButton = this.backButton.bind(this);
 
@@ -105,7 +117,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         this.elMain.style.visibility = 'hidden';
 
-        const ret = html`<div id="edittextwcd"  @keydown="${this.onkeyDown}" @input="${this.onInput}" style="${css}">${unsafeHTML(el.outerHTML)}</div>
+        const ret = html`<div id="edittextwcd"  @keydown="${this.onkeyDown}" @mouseup="${this.mouseUP}" @input="${this.onInput}" style="${css}">${unsafeHTML(el.outerHTML)}</div>
             <style>
                 #edittextwcd *{
                     margin:0px;
@@ -146,7 +158,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             e.preventDefault();
             document.execCommand('insertText', false, '\n');
         } else if (e.key === 'Backspace') {
-            
+
         }
 
     }
@@ -166,7 +178,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
                     name: 'edit',
                     args: '{"tp":"edit", "attr":"text"}',
                     position: 'p-l1',
-                    toolboxOptions: {background: '#fff'}
+                    toolboxOptions: { background: '#fff' }
                 },
 
             ],
@@ -176,8 +188,45 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     }
 
+    private mouseUP(e: any) {
+
+        const existingDiv = this.querySelector('wcd-popup-100554');
+        if (existingDiv) {
+            existingDiv.remove();
+        }
+
+        const shadowSelection = this.getRootNode() as any;
+
+        // Obter a seleção de texto
+        const selection = shadowSelection.getSelection() as any;
+
+        let selectedText = '';
+
+        if (selection.rangeCount <= 0) return
+
+        const range = selection.getRangeAt(0);
+        selectedText = range.toString();
+        
+        if (selectedText === '') return;
+
+        const selectedNode = this.querySelector('*[contenteditable]') as any;
+
+        // Obter o tamanho da fonte
+        const fontSize = window.getComputedStyle(selectedNode).fontSize;
+        const f = fontSize ? parseInt(fontSize, 10) : 0;
+
+        // Cria uma nova div
+        const newDiv = document.createElement('wcd-popup-100554');
+        newDiv.setAttribute('x', e.layerX);
+        newDiv.setAttribute('y', (e.layerY - f).toString());
+
+        // Adiciona a div ao container
+        this.appendChild(newDiv);
+        
+    }
+
     private backButton() {
-    
+
         if (!this.myInfos.attr || !this.elICA) return;
         if (this.myText === this.firstText || this.myText === '') return;
         this.firstText = this.myText;
@@ -185,6 +234,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         let aux = '';
         const lang = (document.documentElement.lang || '').toLowerCase();
         if (this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
-        this.elICA.setAttribute(this.myInfos.attr+aux, this.myText);
-    } 
+        this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
+    }
 }

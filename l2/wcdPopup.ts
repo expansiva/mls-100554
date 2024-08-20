@@ -3,6 +3,10 @@
 import { html, LitElement, render, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+export function initWcdPopup(): boolean {
+  return true;
+}
+
 @customElement('wcd-popup-100554')
 export class WCDPopup extends LitElement {
 
