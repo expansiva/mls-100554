@@ -161,10 +161,9 @@ export class ServicePreview100554 extends ServiceBase {
         if (htmlEl) htmlEl.lang = this.objVariations[variation];
         window.globalVariation = !isNaN(+variation) ? +variation : 0;
         if (window.top) window.top.window.globalVariation = !isNaN(+variation) ? +variation : 0;
-        this.requestUpdateAllIcaComponentsInPage();
+        if(this.level === 7) this.requestUpdateAllIcaComponentsInPage();
+        else this.onReloader();
         return true;
-
-
     }
 
     private onBtThemeClick() {
