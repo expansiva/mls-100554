@@ -75,8 +75,8 @@ const message_pt = {
   dNCPopup: "Popups que fornecem informações adicionais, mensagens ou conteúdo interativo, aparecendo sobre o conteúdo existente sem redirecionar o usuário.",
   dNCScrollspy: "Um componente que atualiza links de navegação baseados na rolagem, indicando qual seção do conteúdo está atualmente visível na tela.",
   dATText: "Para apresentar blocos de texto simples.",
-  dATCode:  "Para apresentar blocos de códigos simples.",
-  dATBanner:"Para exibir banners promocionais ou informativos.",
+  dATCode: "Para apresentar blocos de códigos simples.",
+  dATBanner: "Para exibir banners promocionais ou informativos.",
   dATQuote: "Para destacar citações ou depoimentos.",
   dATRich: "Para apresentar texto com formatação rica.",
   dAIImages: "Para apresentar imagens individuais ou em grupo.",
@@ -697,6 +697,7 @@ const icaDescriptions: icaBase.FormComponent[] = [
   {
     group: "Apresentation / Video / Embedded Video",
     description: msg.dAVEmbedded,
+    attributes: "src,autoplay,controls,loop,preload",
     events: "click,play,pause,ended"
   },
   {
@@ -895,10 +896,14 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "form", lit: "@property({ type: String }) form: string | undefined;" },
 
   { path: "text", lit: "@property({ type: String }) text: string | undefined;", variations: true },
-  { path: "src", lit: "@property() src: string | undefined;" },
+  { path: "src", lit: "@property({ type: String }) src: string | undefined;" },
   { path: "alt", lit: "@property() alt: string | undefined;", variations: true },
   { path: "width", lit: "@property() width: string | undefined;" },
   { path: "height", lit: "@property() height: string | undefined;" },
+  { path: "autoplay", lit: "@property() autoplay: boolean = false;" },
+  { path: "controls", lit: "@property() controls: boolean = true;" },
+  { path: "loop", lit: "@property() loop: boolean = false;" },
+  { path: "preload", lit: "@property() loop: 'auto' | 'metadata' | 'none' = 'auto';" },
 
   { path: "language", lit: "@property({ type: String ) language: string | undefined;" },
   { path: "languages", lit: "@property({ type: Array ) languages: string[] | undefined;" },
