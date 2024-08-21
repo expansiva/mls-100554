@@ -6,17 +6,27 @@ import { WcdOverlayLitBase, IICADepths, getPosition } from './_100554_wcdOverlay
 import { WcdOverlayModeStoryItem, initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
 import { ActionTag } from './_100554_icaGlobal';
 
+import { excCommandEnter } from './_100554_wcdCommandEnter';
+import { excCommandDel } from './_100554_wcdCommandDel';
+import { excCommandCopy } from './_100554_wcdCommandCopy';
+
 @customElement('wcd-overlay-mode-story-100554')
 export class WcdOverlayModeStory extends WcdOverlayLitBase {
 
     constructor() {
         super();
         initWcdOverlayModeStoryItem();
-        document.onkeydown = (e) => { this.onkeyDown(e) }
     }
 
-
     private resizeObserver: ResizeObserver | undefined;
+
+    public myKeyEvents = {
+        'Enter': excCommandEnter,
+        'Backspace': excCommandDel,
+        'Delete': excCommandDel,
+        'c': excCommandCopy,
+        'v': excCommandCopy
+    };
 
     public getActionsTagsDefault(): { [key: string]: ActionTag } {
         return {
@@ -163,63 +173,6 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
             item.style.top = pos.top;
             item.style.left = pos.left;
         });
-    }
-
-    private onkeyDown(e: any) {
-
-        e.stopPropagation();
-
-        let el = this.querySelector('wcd-toolbox-100554');
-        if (!el) return;
-        el = el.parentElement;
-
-        if (!(el as WcdOverlayModeStoryItem).info) return;
-
-        el = (el as WcdOverlayModeStoryItem).info?.element as HTMLElement;
-
-        if (e.key === 'Enter') {
-
-            e.preventDefault();
-
-            const elAdd = document.createElement('ica-apresentation-text-text-100554') as HTMLElement;
-
-            elAdd.setAttribute('widget', 'wc-text-100554');
-            elAdd.setAttribute('type', 'p');
-            elAdd.setAttribute('text', '');
-            elAdd.id = 'ica_apText' + this.children.length + 1;
-
-            el.insertAdjacentElement('afterend', elAdd);
-
-            setTimeout(() => {
-
-                const { x, y, height, width } = elAdd.getBoundingClientRect();
-
-                this.myItens.push({ element: elAdd, depth: 0, x, y, height, width, opacity: elAdd.style.opacity });
-
-                this.createOverlayItems()
-
-            }, 500)
-
-
-        } else if (e.key === 'Backspace') {
-            e.preventDefault();
-            if (!(el as any).overlayRef) return;
-
-            console.info(this.myItens.length);
-
-            const index = this.myItens.findIndex(item => item.element === el);
-
-            if (index !== -1) {
-                this.myItens.splice(index, 1);
-            }
-
-            console.info(this.myItens.length);
-
-            (el as any).overlayRef.remove();
-            el.remove();
-
-        }
-
     }
 
 }

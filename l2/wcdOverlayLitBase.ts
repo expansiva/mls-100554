@@ -12,6 +12,11 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
 
     public myItens: IICADepths[] = []
 
+    constructor() {
+        super();
+        document.onkeydown = (e) => { this.onkeyDown(e) }
+    }
+
     //------------COMPONENT---------------
     
     createRenderRoot() {
@@ -20,11 +25,40 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
 
     //-----------IMEPLEMENTATION----------    
 
+    abstract myKeyEvents:{[key: string]:Function}
+    
     abstract changeOverlayItemsLevel() :void 
 
-    abstract createOverlayItems(): void 
+    abstract createOverlayItems(): void;
 
-    abstract getActionsTagsDefault(): { [key:string]: ActionTag };
+    abstract getActionsTagsDefault(): { [key: string]: ActionTag };
+
+    private onkeyDown(e: any) {
+
+        e.stopPropagation();
+        
+        let el = this.querySelector('wcd-toolbox-100554');
+
+        if (!el) {
+            if (this.myKeyEvents[e.key]) this.myKeyEvents[e.key](e, this, undefined);
+            return;
+        }
+
+        el = el.parentElement;
+
+        if (!(el as any).info) {
+            
+            if (this.myKeyEvents[e.key]) this.myKeyEvents[e.key](e, this, undefined);
+            return;
+
+        }
+
+        el = (el as any).info?.element as HTMLElement;
+
+        if (this.myKeyEvents[e.key]) this.myKeyEvents[e.key](e, this, el);    
+
+    }
+    
 }
 
 export function getPosition(icaInfo: IICADepths, boundingPage: DOMRect) {

@@ -119,6 +119,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         this.myParent.fcBeforeBackButton = this.backButton.bind(this);
 
         el.setAttribute('contenteditable', 'true');
+        el.setAttribute('spellcheck', 'false');
         el.style.outline = 'none';
 
         this.firstText = el.innerHTML;
@@ -135,6 +136,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         `;
 
         el.removeAttribute('contenteditable');
+        el.removeAttribute('spellcheck');
         el.style.outline = '';
 
         setTimeout(() => {
