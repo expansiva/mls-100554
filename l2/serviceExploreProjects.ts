@@ -391,6 +391,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
 
     private openExplore() {
+        this.selectLevel(5)
         mls.events.fire([5], ['ProjectSelected'], '');    
     }
 

@@ -93,7 +93,7 @@ export class ServiceExploreStories100554 extends ServiceBase {
     
         mls.events.addEventListener([5], ['ProjectSelected'], (ev) => {
             
-            if (this.project === mls.actual[5].project) return;
+            //if (this.project === mls.actual[5].project) return;
             this.openService('_100554_serviceExploreStories', 'left', 5);
             this.init();
 
