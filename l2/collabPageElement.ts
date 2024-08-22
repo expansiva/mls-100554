@@ -6,6 +6,8 @@ import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { WcdOverlayLitBase, IICADepths } from './_100554_wcdOverlayLitBase'
 import { convertTagToFileName } from './_100554_utilsLit'
 
+export const PREFIX_ICA_ID = 'ica_';
+
 export abstract class CollabPageElement extends CollabLitElement {
 
     abstract initPage(): void
@@ -67,7 +69,7 @@ export abstract class CollabPageElement extends CollabLitElement {
 
         icas.forEach((item) => {
             const oldId = item.element.id;
-            const icaId = `ica_${item.element.id}`;
+            const icaId = `${PREFIX_ICA_ID}${item.element.id}`;
             item.element.setAttribute('id', icaId);
             item.element.setAttribute('idel', oldId);
         });

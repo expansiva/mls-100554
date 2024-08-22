@@ -2,6 +2,7 @@
 
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { IWCDCommand } from './_100554_wcdCommandBase';
+import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
 export async function execute(options: IWCDCommand) {
 
@@ -9,10 +10,13 @@ export async function execute(options: IWCDCommand) {
 
     const elDivider = document.createElement('ica-layout-flow-divider-100554') as IcaLitElementBase;
     elDivider.setAttribute('widget', 'wc-divider-100554');
-    const allFlowDividers = options.overlay.querySelectorAll('ica-layout-flow-divider-100554')
-    elDivider.id = 'ica_apDivider' + (allFlowDividers.length + 1);
-    options.selectedIca.insertAdjacentElement('afterend', elDivider);
+    const allFlowDividers = options.overlay.querySelectorAll('[widget="ica-layout-flow-divider-100554"]');
 
+    const id = 'apDivider' + (allFlowDividers.length + 1);;
+    elDivider.id = PREFIX_ICA_ID + id;
+    elDivider.setAttribute('idEl', id);
+
+    options.selectedIca.insertAdjacentElement('afterend', elDivider);
     await elDivider.updateComplete;
     options.selectedIca.remove();
 
