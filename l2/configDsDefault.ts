@@ -16,7 +16,9 @@ export class _100554_configDsDefault extends DesignSystemIO {
     }
 
     public project: number = 0;
-    public dsindex: number = 0;;
+    public dsindex: number = 0;
+    public dsname: string = '';
+
     public createdBy: string = '';
     public lastUpdated: string = '';;
     public lastUpdatedBy: string = '';;
@@ -30,11 +32,11 @@ export class _100554_configDsDefault extends DesignSystemIO {
 
     private ds: IDS | undefined = undefined;
 
-    public docs: Doc | undefined;
-    public components: Component | undefined;
-    public tokens: Token | undefined;
-    public assets:Asset | undefined;
-    public css: Css | undefined;
+    public docs: Doc | undefined | any;
+    public components: Component | undefined | any;;
+    public tokens: Token | undefined | any;;
+    public assets:Asset | undefined | any;;
+    public css: Css | undefined | any;;
 
     private methods: Common = new Common(this.ds as IDS, this as any);
 
@@ -58,6 +60,7 @@ export class _100554_configDsDefault extends DesignSystemIO {
         if (!this.ds) return;
 
         this.methods = new Common(this.ds, this as any);
+        this.dsname = this.ds.name;
         this.createdBy = this.ds.created_by;
         this.lastUpdated = this.ds.last_updated;
         this.lastUpdatedBy = this.ds.last_updated_by;

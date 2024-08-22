@@ -55,6 +55,7 @@ interface IProjectConfigCache {
 export abstract class DesignSystemIO {
     abstract project: number;
     abstract dsindex: number;
+    abstract dsname: string;
     abstract createdBy: string;
     abstract lastUpdated: string;
     abstract lastUpdatedBy: string;
