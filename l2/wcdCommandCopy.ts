@@ -2,10 +2,15 @@
 
 import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IWCDCommand } from './_100554_wcdCommandBase';
 
 var infoCopy:IcaLitElementBase | undefined = undefined;
 
-export function excCommandCopy(e: KeyboardEvent, overlay: WcdOverlayLitBase, ica: IcaLitElementBase | undefined) {
+export function execute(param: IWCDCommand) {
+
+    const e = param.args as KeyboardEvent;
+    const ica = param.selectedIca;
+    const overlay = param.overlay;
 
     e.preventDefault();
 

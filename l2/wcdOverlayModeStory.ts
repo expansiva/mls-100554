@@ -6,9 +6,9 @@ import { WcdOverlayLitBase, IICADepths, getPosition } from './_100554_wcdOverlay
 import { WcdOverlayModeStoryItem, initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
 import { ActionTag } from './_100554_icaGlobal';
 
-import { excCommandEnter } from './_100554_wcdCommandEnter';
-import { excCommandDel } from './_100554_wcdCommandDel';
-import { excCommandCopy } from './_100554_wcdCommandCopy';
+import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
+import { execute as excCommandDel } from './_100554_wcdCommandDel';
+import { execute as excCommandCopy } from './_100554_wcdCommandCopy';
 
 @customElement('wcd-overlay-mode-story-100554')
 export class WcdOverlayModeStory extends WcdOverlayLitBase {

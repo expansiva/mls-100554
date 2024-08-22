@@ -1,9 +1,13 @@
 /// <mls shortName="wcdCommandEnter" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IWCDCommand } from './_100554_wcdCommandBase';
 
-export function excCommandEnter(e: InputEvent, overlay: WcdOverlayLitBase, ica: IcaLitElementBase | undefined) {
+export function execute(param: IWCDCommand) {
+
+    const e = param.args as KeyboardEvent;
+    const ica = param.selectedIca;
+    const overlay = param.overlay;
 
     e.preventDefault();
 
@@ -26,7 +30,10 @@ export function excCommandEnter(e: InputEvent, overlay: WcdOverlayLitBase, ica: 
 
         overlay.createOverlayItems()
 
-        setTimeout(() => {elAdd.overlayRef?.click();}, 500);
+        setTimeout(() => {
+            elAdd.overlayRef?.click();
+            elAdd.scrollIntoView({behavior:'smooth', block:'center'});
+        }, 500);
 
     }, 500);
 

@@ -5,6 +5,7 @@ import { property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { ActionTag } from './_100554_icaGlobal';
+import { IWCDCommand } from './_100554_wcdCommandBase';
 
 export abstract class WcdOverlayLitBase extends CollabLitElement {
 
@@ -39,8 +40,14 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
         
         let el = this.querySelector('wcd-toolbox-100554');
 
+        const param: IWCDCommand = {
+            args: e,
+            overlay: this,
+            selectedIca: undefined
+        };
+
         if (!el) {
-            if (this.myKeyEvents[e.key]) this.myKeyEvents[e.key](e, this, undefined);
+            if (this.myKeyEvents[e.key]) this.myKeyEvents[e.key](param);
             return;
         }
 
@@ -48,14 +55,17 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
 
         if (!(el as any).info) {
             
-            if (this.myKeyEvents[e.key]) this.myKeyEvents[e.key](e, this, undefined);
+            if (this.myKeyEvents[e.key]) this.myKeyEvents[e.key](param);
             return;
 
         }
 
         el = (el as any).info?.element as HTMLElement;
 
-        if (this.myKeyEvents[e.key]) this.myKeyEvents[e.key](e, this, el);    
+        if (this.myKeyEvents[e.key]) {
+            param.selectedIca = el as IcaLitElementBase;
+            this.myKeyEvents[e.key](param);
+        }   
 
     }
     

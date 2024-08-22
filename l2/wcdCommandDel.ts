@@ -1,9 +1,13 @@
 /// <mls shortName="wcdCommandDel" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IWCDCommand } from './_100554_wcdCommandBase';
 
-export function excCommandDel(e: KeyboardEvent, overlay: WcdOverlayLitBase, ica: IcaLitElementBase | undefined) {
+export function execute(param: IWCDCommand) {
+
+    const e = param.args as KeyboardEvent;
+    const ica = param.selectedIca;
+    const overlay = param.overlay;
 
     e.preventDefault();
 
@@ -37,7 +41,10 @@ export function excCommandDel(e: KeyboardEvent, overlay: WcdOverlayLitBase, ica:
         ica.overlayRef.remove();
         ica.remove();
 
-        if (sibling && sibling.overlayRef) sibling.overlayRef.click();
+        if (sibling && sibling.overlayRef) {
+            sibling.overlayRef.click();
+            sibling.scrollIntoView({behavior:'smooth', block:'center'});
+        }
 
     }
 
