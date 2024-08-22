@@ -2,8 +2,10 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { WcdDialogBase } from './_100554_wcdDialogBase';
-import { execCommandAddImage } from './_100554_wcdCommandAddImage';
+import { execute } from './_100554_wcdCommandAddImage';
+import { WCDToolbox } from './_100554_wcdToolbox';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { CollabLitElement } from './_100554_collabLitElement'
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -28,13 +30,16 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 @customElement('wcd-dialog-image-unsplash-100554')
-export class WcdDialogImage100554 extends WcdDialogBase {
+export class WcdDialogImage100554 extends CollabLitElement {
+
+    public myParent: WCDToolbox | undefined | any;
+    public elMain: HTMLElement | undefined | any;
+    public elICA: IcaLitElementBase | undefined | any;
+    public args: string | undefined;
 
     private msg: MessageType = messages['en'];
 
-    public execute = (args?: {}) => this._execute(args);
-
-    @query('prompt-input') prompt: HTMLInputElement | undefined;
+    @query('#prompt-input') prompt: HTMLInputElement | undefined;
 
     @property() images: IUnsplashImage[] = [];
 
@@ -52,9 +57,7 @@ export class WcdDialogImage100554 extends WcdDialogBase {
 
     private clientId: string = 'UEmilNZzuDCesxf1L__2J4T18vdlj6jHMsdeFet3WTQ';
 
-    private _execute(args?: {}) {
-        return;
-    }
+    private lastHeight: string | undefined;
 
     private async getImages() {
 
@@ -71,6 +74,7 @@ export class WcdDialogImage100554 extends WcdDialogBase {
     }
 
     private async handleKeyDown(event: KeyboardEvent) {
+        event.stopPropagation();
         if (event.key === 'Enter') {
             if (this.lastQuery !== this.query) {
                 this.actualPage = 1;
@@ -94,7 +98,40 @@ export class WcdDialogImage100554 extends WcdDialogBase {
 
 
     private handleInput(event: KeyboardEvent) {
+        event.stopPropagation();
         this.query = (event.target as HTMLInputElement)?.value || '';
+    }
+
+    private handleGalleryClick(item: IUnsplashImage) {
+        execute({
+            args: { src: item.urls.regular },
+            overlay: this.myParent.parentElement?.parentElement,
+            selectedIca: this.elICA,
+        });
+    }
+
+    private recalculeIcaHeight() {
+        if (!this.elICA) return;
+        const height = this.getBoundingClientRect()?.height;
+        if (this.lastHeight === undefined) this.lastHeight = this.elICA.style.height;
+        this.elICA.style.height = height + 'px';
+    }
+
+    disconnectedCallback() {
+        this.elICA.style.height = this.lastHeight;
+        super.disconnectedCallback();
+    }
+
+    updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('images')) {
+            this.recalculeIcaHeight();
+        }
+    }
+
+    firstUpdated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.firstUpdated(changedProperties);
+        if (this.prompt) this.prompt.focus();
     }
 
     render() {
@@ -126,7 +163,7 @@ export class WcdDialogImage100554 extends WcdDialogBase {
                 <div class="gallery">
                     ${this.images.map((image) => {
             return html`
-                        <div class="gallery-item">
+                        <div @click=${() => { this.handleGalleryClick(image) }} class="gallery-item">
                             <img src=${image.urls.small}></img>
                             <p>${image.user.first_name}</p>
                         </div>`
@@ -142,6 +179,7 @@ export class WcdDialogImage100554 extends WcdDialogBase {
 
         :host{
             display:block;
+            width:100%;
         }
         .container{
             padding:1rem;

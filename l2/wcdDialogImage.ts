@@ -1,17 +1,25 @@
 /// <mls shortName="wcdDialogImage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { WcdDialogBase } from './_100554_wcdDialogBase';
+import { WCDToolbox } from './_100554_wcdToolbox';
 import { getDSInstance, DesignSystemIO, IAssetsInfo } from './_100554_libDesignSystem';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { execute } from './_100554_wcdCommandAddImage';
 
 @customElement('wcd-dialog-image-100554')
-export class WcdDialogImage100554 extends WcdDialogBase {
+export class WcdDialogImage100554 extends LitElement {
+
+    public myParent: WCDToolbox | undefined | any;
+    public elMain: HTMLElement | undefined | any;
+    public elICA: IcaLitElementBase | undefined | any;
+    public args: string | undefined;
 
     static styles = css`
 
         :host{
             display:block;
+            width:100%
         }
         .container{
             padding:1rem;
@@ -76,8 +84,6 @@ export class WcdDialogImage100554 extends WcdDialogBase {
         }
     `;
 
-    public execute = (args?: {}) => this._execute(args);
-
     private dsInstance: DesignSystemIO | undefined;
 
     @property() images: IImageItem[] = [];
@@ -86,14 +92,12 @@ export class WcdDialogImage100554 extends WcdDialogBase {
 
     private project: number | undefined;
 
-    private _execute(args?: {}) {
-        return;
-    }
-
     private async initDsInstance(project: number, dsIndex: number) {
         this.dsInstance = await getDSInstance(project, dsIndex);
         await this.dsInstance.init();
     }
+
+    private lastHeight: string | undefined;
 
     async firstUpdated() {
         const { project } = mls.actual[5];
@@ -101,6 +105,16 @@ export class WcdDialogImage100554 extends WcdDialogBase {
         this.project = project;
         await this.initDsInstance(project, 0);
         this.images = await this.getImages(project);
+        // this.recalculeIcaHeight();
+    }
+
+    private recalculeIcaHeight() {
+
+        if (!this.elICA) return;
+        const height = this.getBoundingClientRect()?.height;
+        if (this.lastHeight === undefined) this.lastHeight = this.elICA.style.height;
+        this.elICA.style.height = height + 'px';
+
     }
 
     private async getImages(project: number) {
@@ -156,6 +170,29 @@ export class WcdDialogImage100554 extends WcdDialogBase {
         const path = `ds/${dsName}/assets`
         await this.dsInstance.assets.add(path, file.name, [], '', 'image', file);
         this.images = await this.getImages(this.project);
+        await this.updateComplete;
+        const last = this.images[this.images.length - 1];
+        this.handleClickGallery(last);
+    }
+
+    private handleClickGallery(item: IImageItem) {
+        execute({
+            args: { src: item.src },
+            overlay: this.myParent.parentElement?.parentElement,
+            selectedIca: this.elICA,
+        });
+    }
+
+    updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('images')) {
+            this.recalculeIcaHeight();
+        }
+    }
+
+    disconnectedCallback() {
+        this.elICA.style.height = this.lastHeight;
+        super.disconnectedCallback();
     }
 
     render() {
@@ -169,7 +206,7 @@ export class WcdDialogImage100554 extends WcdDialogBase {
                 </div>
                 <div class="gallery">
                     ${this.images.map((image) => {
-            return html`<img src=${image.srcCache} alt=${image.description}></img>`
+            return html`<img @click=${() => { this.handleClickGallery(image) }} src=${image.srcCache} alt=${image.description}></img>`
         })}
                 </div>
 

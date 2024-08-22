@@ -5,7 +5,10 @@ import { getMessageKey } from "./_100554_collabLitElement";
 import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { collab_xmark, collab_image, collab_unsplash, collab_video, collab_code, collab_ellipsis, collab_link } from './_100554_collabIcons'
+import * as commandDivider from './_100554_wcdCommandAddDivider';
+
+import { collab_xmark, collab_image, collab_unsplash, collab_video, collab_code, collab_ellipsis, collab_link } from './_100554_collabIcons';
+
 /// **collab_i18n_start**
 const message_pt = {
     image: 'Adicionar uma imagem',
@@ -31,21 +34,30 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 @customElement('wcd-add-100554')
 export class WcdAdd100554 extends WcdToolboxItemBase {
+
     private msg: MessageType = messages['en'];
     public myParent: WCDToolbox | undefined | any;
     public elMain: HTMLElement | undefined | any;
     public elICA: IcaLitElementBase | undefined | any;
     public args: string | undefined;
+
     @query('.buttons-actions') containerButtons: HTMLDivElement | undefined;
     @query('add-tooltip') addTooltip: HTMLElement | undefined;
+    @query('.add-button-helper') helperContainer: HTMLElement | undefined;
+
     createRenderRoot() {
         return this;
     }
+
     firstUpdated() {
         const allBtns = this.containerButtons?.querySelectorAll('button');
         if (!allBtns) return;
         allBtns.forEach((btn) => { this.tooltipElement(btn); });
+        this.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
     }
+
     render() {
         const lang = getMessageKey(messages);
         this.msg = messages[lang];
@@ -57,33 +69,97 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
                 </span>
             </button>
             <div class="buttons-actions">
-                <button data-tooltip=${this.msg.image} ><span>${collab_image}</span></button>
-                <button data-tooltip=${this.msg.unsplash}><span>${collab_unsplash}</span></button>
+                <button @click=${this.handleImageClick} data-tooltip=${this.msg.image} ><span>${collab_image}</span></button>
+                <button @click=${this.handleUnsplashClick} data-tooltip=${this.msg.unsplash}><span>${collab_unsplash}</span></button>
                 <button data-tooltip=${this.msg.video}><span>${collab_video}</span></button>
                 <button data-tooltip=${this.msg.embed}><span>${collab_link}</span></button>
                 <button data-tooltip=${this.msg.code}><span>${collab_code}</span></button>
-                <button data-tooltip=${this.msg.newPart}><span>${collab_ellipsis}</span></button>
+                <button @click=${this.handleNewPartClick} data-tooltip=${this.msg.newPart}><span>${collab_ellipsis}</span></button>
                 <add-tooltip></add-tooltip>
             </div>
+        </div>
+
+        <div class="add-button-helper">
+            <div data-helper="image"></div>
+            <div data-helper="unsplash"></div>
         </div>
         <style>${this.styles}</style>
         `;
     }
+
+
+    private async handleUnsplashClick(e: MouseEvent) {
+        e.stopPropagation();
+        this.showHelper('unsplash');
+    }
+
+    private async handleImageClick(e: MouseEvent) {
+        e.stopPropagation();
+        this.showHelper('image');
+    }
+
+    private async handleNewPartClick(e: MouseEvent) {
+        commandDivider.execute({
+            args: {},
+            overlay: this.myParent.parentElement?.parentElement,
+            selectedIca: this.elICA,
+        });
+    }
+
+
+    private importsInfo: IImports = {
+        unsplash: '_100554_wcdDialogImageUnsplash',
+        image: '_100554_wcdDialogImage'
+    }
+
+    private showHelper(helper: string) {
+
+        if (!this.myParent) return;
+
+        this.myParent.onclick = undefined;
+
+        this.myParent.setIconsWcdToolbox(
+            [
+                {
+                    name: 'backButton'
+                },
+                {
+                    name: this.importsInfo[helper],
+                    args: '',
+                    position: 'p-l1',
+                    level: [2],
+                    toolboxOptions: { background: '#fff', border: 'none' }
+                },
+
+            ],
+            false,
+            'size'
+        );
+
+
+
+
+    }
+
     private tooltipElement(el: HTMLElement) {
         if (this.addTooltip && el) this.tooltip(el);
     }
+
     private tooltip(el: HTMLElement) {
         el.addEventListener('mouseover', this.show.bind(this), false);
         (el as any)['element'] = el;
         el.addEventListener('mouseleave', this.destroy.bind(this), false);
     }
+
     private destroy(evt: MouseEvent) {
         if (!this.addTooltip) return;
         this.addTooltip.innerHTML = '';
         this.addTooltip.style.top = '0px';
         this.addTooltip.style.left = '0px';
     }
+
     private widthMarginOfError = 10;
+
     private show(evt: MouseEvent) {
         if (!this.addTooltip || !this.containerButtons) return;
         this.addTooltip.innerHTML = '';
@@ -109,7 +185,9 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             this.addTooltip.style.left = ((position.left - positionContainer.left) + (position.width / 2)) + 'px';
         }
     }
+
     onButtonClick(e: MouseEvent) {
+        e.stopPropagation();
         const target = e.target as HTMLElement;
         const btn = target.closest('.add-button');
         if (!btn) return;
@@ -118,6 +196,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         const allBtns = this.containerButtons.querySelectorAll('button');
         allBtns.forEach((bt) => bt.classList.toggle('scale-in-center', !btn.classList.contains('close')))
     }
+
     private styles = `
         .add-button{
             position:relative;
@@ -250,4 +329,8 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             }
         }
     `;
+}
+
+interface IImports {
+    [key: string]: string;
 }
