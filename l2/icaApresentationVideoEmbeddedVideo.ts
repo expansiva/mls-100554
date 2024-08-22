@@ -14,6 +14,7 @@ export abstract class IcaApresentationVideoEmbeddedVideo extends IcaLitElementBa
             { name: "margin" },
             { name: "size" },
             { name: "events" },
+            { name: "title" },
         ]
     }
 

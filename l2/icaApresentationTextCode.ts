@@ -17,6 +17,7 @@ export abstract class IcaApresentationTextCode extends IcaLitElementBase {
             { name: "size" },
             { name: "edit" },
             { name: "events" },
+            { name: "title" },
         ]
     }
 

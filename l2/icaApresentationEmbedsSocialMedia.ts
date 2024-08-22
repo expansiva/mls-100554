@@ -12,6 +12,7 @@ export abstract class IcaApresentationEmbedsSocialMedia100554 extends IcaLitElem
         let rc: ActionTag[] = [
             { name: "margin" },
             { name: "size" },
+            { name: "title" },
         ]
 
         return rc;

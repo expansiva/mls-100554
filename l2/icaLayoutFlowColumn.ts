@@ -16,6 +16,7 @@ export class IcaLayoutFlowColumn extends IcaLitElementBase {
             { name: "menu" },
             { name: "size" },
             { name: "events" },
+            { name: "title" },
         ]
     }
 

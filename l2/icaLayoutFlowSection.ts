@@ -16,6 +16,7 @@ export abstract class icaLayoutFlowSection extends IcaLitElementBase {
             { name: "menu" },
             { name: "size" },
             { name: "events" },
+            { name: "title" },
         ]
     }
 
