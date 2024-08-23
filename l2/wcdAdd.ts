@@ -6,6 +6,7 @@ import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import * as commandDivider from './_100554_wcdCommandAddDivider';
+import * as commandCode from './_100554_wcdCommandAddCodeBlock';
 
 import { collab_xmark, collab_image, collab_unsplash, collab_video, collab_code, collab_ellipsis, collab_link } from './_100554_collabIcons';
 
@@ -72,8 +73,8 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
                 <button @click=${this.handleImageClick} data-tooltip=${this.msg.image} ><span>${collab_image}</span></button>
                 <button @click=${this.handleUnsplashClick} data-tooltip=${this.msg.unsplash}><span>${collab_unsplash}</span></button>
                 <button data-tooltip=${this.msg.video}><span>${collab_video}</span></button>
-                <button data-tooltip=${this.msg.embed}><span>${collab_link}</span></button>
-                <button data-tooltip=${this.msg.code}><span>${collab_code}</span></button>
+                <button @click=${this.handleEmbedClick} data-tooltip=${this.msg.embed}><span>${collab_link}</span></button>
+                <button @click=${this.handleCodeClick} data-tooltip=${this.msg.code}><span>${collab_code}</span></button>
                 <button @click=${this.handleNewPartClick} data-tooltip=${this.msg.newPart}><span>${collab_ellipsis}</span></button>
                 <add-tooltip></add-tooltip>
             </div>
@@ -106,18 +107,30 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         });
     }
 
+    private async handleCodeClick(e: MouseEvent) {
+        commandCode.execute({
+            args: {},
+            overlay: this.myParent.parentElement?.parentElement,
+            selectedIca: this.elICA,
+        });
+    }
+
+    private async handleEmbedClick(e: MouseEvent) {
+        this.showHelper('embed');
+    }
+
+
 
     private importsInfo: IImports = {
         unsplash: '_100554_wcdDialogImageUnsplash',
-        image: '_100554_wcdDialogImage'
+        image: '_100554_wcdDialogImage',
+        embed: '_100554_wcdDialogEmbedLink',
     }
 
     private showHelper(helper: string) {
 
         if (!this.myParent) return;
-
         this.myParent.onclick = undefined;
-
         this.myParent.setIconsWcdToolbox(
             [
                 {
@@ -135,9 +148,6 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             false,
             'size'
         );
-
-
-
 
     }
 
