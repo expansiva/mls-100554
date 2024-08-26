@@ -9,6 +9,7 @@ import { ActionTag } from './_100554_icaGlobal';
 import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
 import { execute as excCommandDel } from './_100554_wcdCommandDel';
 import { execute as excCommandCopy } from './_100554_wcdCommandCopy';
+import { execute as excCommandNext } from './_100554_wcdCommandSelectNext';
 
 @customElement('wcd-overlay-mode-story-100554')
 export class WcdOverlayModeStory extends WcdOverlayLitBase {
@@ -25,7 +26,11 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         'Backspace': excCommandDel,
         'Delete': excCommandDel,
         'c': excCommandCopy,
-        'v': excCommandCopy
+        'v': excCommandCopy,
+        'ArrowDown': excCommandNext,
+        'ArrowLeft': excCommandNext,
+        'ArrowUp': excCommandNext,
+        'ArrowRight': excCommandNext
     };
 
     public getActionsTagsDefault(): { [key: string]: ActionTag } {
