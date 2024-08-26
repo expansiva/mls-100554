@@ -32,6 +32,8 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
 
     abstract createOverlayItems(): void;
 
+    abstract selectItem(ica:IcaLitElementBase): void;
+
     abstract getActionsTagsDefault(): { [key: string]: ActionTag };
 
     private onkeyDown(e: any) {
@@ -42,7 +44,7 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
 
         const param: IWCDCommand = {
             args: e,
-            overlay: this,
+            overlay: this as any,
             selectedIca: undefined
         };
 
@@ -63,7 +65,7 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
         el = (el as any).info?.element as HTMLElement;
 
         if (this.myKeyEvents[e.key]) {
-            param.selectedIca = el as IcaLitElementBase;
+            param.selectedIca = el as any;//as IcaLitElementBase;
             this.myKeyEvents[e.key](param);
         }   
 

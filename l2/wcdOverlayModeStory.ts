@@ -10,6 +10,7 @@ import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
 import { execute as excCommandDel } from './_100554_wcdCommandDel';
 import { execute as excCommandCopy } from './_100554_wcdCommandCopy';
 import { execute as excCommandNext } from './_100554_wcdCommandSelectNext';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
 @customElement('wcd-overlay-mode-story-100554')
 export class WcdOverlayModeStory extends WcdOverlayLitBase {
@@ -21,17 +22,50 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
 
     private resizeObserver: ResizeObserver | undefined;
 
+    private keys: any = {
+        'ArrowDown': 'botton',
+        'ArrowLeft': 'left',
+        'ArrowUp': 'top',
+        'ArrowRight': 'right'
+    }
+
+
     public myKeyEvents = {
         'Enter': excCommandEnter,
         'Backspace': excCommandDel,
         'Delete': excCommandDel,
         'c': excCommandCopy,
         'v': excCommandCopy,
-        'ArrowDown': excCommandNext,
-        'ArrowLeft': excCommandNext,
-        'ArrowUp': excCommandNext,
-        'ArrowRight': excCommandNext
+        'ArrowDown': this.onkeydownArrow.bind(this),
+        'ArrowLeft':  this.onkeydownArrow.bind(this),
+        'ArrowUp':  this.onkeydownArrow.bind(this),
+        'ArrowRight':  this.onkeydownArrow.bind(this)
     };
+
+    private onkeydownArrow(e: any) {
+
+        const param = {
+            args: {},
+            overlay: e.overlay,
+            selectedIca: e.selectedIca
+        }
+        e = e.args as KeyboardEvent;
+
+        e.preventDefault();
+        console.info(e)
+        if (!this.keys[e.key]) return;
+        const info:any = {};
+        info.position = this.keys[e.key];
+        info.positionMode = e.altKey ? 'tree' : 'visual';
+        param.args = info;
+
+        excCommandNext(param);
+    }
+
+    public selectItem(ica: IcaLitElementBase): void {
+        if (!ica || !ica.overlayRef) return;
+        ica.overlayRef.click();
+    }
 
     public getActionsTagsDefault(): { [key: string]: ActionTag } {
         return {
