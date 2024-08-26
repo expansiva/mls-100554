@@ -88,7 +88,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         const hasLevel = changedProperties.has('level');
         const hasStyleEl = changedProperties.has('styleel');
 
-        if (this.lastWidget !== this.widget) {
+        if (this.widget && this.lastWidget !== this.widget) {
             this.lastWidget = this.widget as string;
             customElements.whenDefined(this.lastWidget).then(() => {
                 this.updateStyleDisplay();
@@ -192,7 +192,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             this.style.display = d.display;
         }
     }
-    
+
 
     private doChangeState(js: string): void {
 

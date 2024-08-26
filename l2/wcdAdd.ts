@@ -72,7 +72,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             <div class="buttons-actions">
                 <button @click=${this.handleImageClick} data-tooltip=${this.msg.image} ><span>${collab_image}</span></button>
                 <button @click=${this.handleUnsplashClick} data-tooltip=${this.msg.unsplash}><span>${collab_unsplash}</span></button>
-                <button data-tooltip=${this.msg.video}><span>${collab_video}</span></button>
+                <button @click=${this.handleVideoClick} data-tooltip=${this.msg.video}><span>${collab_video}</span></button>
                 <button @click=${this.handleEmbedClick} data-tooltip=${this.msg.embed}><span>${collab_link}</span></button>
                 <button @click=${this.handleCodeClick} data-tooltip=${this.msg.code}><span>${collab_code}</span></button>
                 <button @click=${this.handleNewPartClick} data-tooltip=${this.msg.newPart}><span>${collab_ellipsis}</span></button>
@@ -119,11 +119,14 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         this.showHelper('embed');
     }
 
-
+    private async handleVideoClick(e: MouseEvent) {
+        this.showHelper('video');
+    }
 
     private importsInfo: IImports = {
         unsplash: '_100554_wcdDialogImageUnsplash',
         image: '_100554_wcdDialogImage',
+        video: '_100554_wcdDialogVideo',
         embed: '_100554_wcdDialogEmbedLink',
     }
 
