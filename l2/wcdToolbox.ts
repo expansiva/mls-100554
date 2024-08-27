@@ -6,6 +6,7 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { CollabLitElement } from './_100554_collabLitElement';
 import { ServiceBase } from './_100554_serviceBase';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
+import {WCDMethods} from './_100554_wcdTypes';
 import * as tps from './_100554_icaTypes';
 
 export function initWCDToolbox() {
@@ -13,7 +14,7 @@ export function initWCDToolbox() {
 } 
 
 @customElement('wcd-toolbox-100554')
-export class WCDToolbox extends CollabLitElement {
+export class WCDToolbox extends CollabLitElement implements WCDMethods {
 
     // ------------ PROPERTIES ------------------
 
@@ -96,6 +97,7 @@ export class WCDToolbox extends CollabLitElement {
     public updateBaseNoPadding(elBase: HTMLElement, elChange: HTMLElement): void {
         return this._updateBaseNoPadding(elBase, elChange)
     }
+    
     public updateBackgroundAuxSize(tp: 'show' | 'hide' = 'hide'): void {
         return this._updateBackgroundAuxSize(tp);
     }
