@@ -1810,7 +1810,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private isHTMLSystemChange: boolean = false;
     private syncDom: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
-        console.info('receive EventConciliate', this.position);
 
         if (ev.level !== this.level) return;
         if (this.position === 'right') return;
