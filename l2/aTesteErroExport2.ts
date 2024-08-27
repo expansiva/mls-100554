@@ -5,7 +5,10 @@ import { ITeste } from './_100554_aTesteErroExport1';
 export function teste(): ITeste {
     const obj: ITeste = {
         args: '',
-        param: ''
+        param: '',
+        el: undefined
     }
+
+    console.info(obj.el)
     return obj;
 }
