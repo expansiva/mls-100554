@@ -1,10 +1,11 @@
 /// <mls shortName="wcdOverlayModeStory" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, PropertyValueMap } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { WcdOverlayLitBase, IICADepths, getPosition } from './_100554_wcdOverlayLitBase';
+import { html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
 import { WcdOverlayModeStoryItem, initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
-import { ActionTag } from './_100554_icaGlobal';
+import { ActionTag, IICADepths } from './_100554_icaTypes';
+import { getPosition } from './_100554_icaGlobal';
 
 import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
 import { execute as excCommandDel } from './_100554_wcdCommandDel';
@@ -23,9 +24,9 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
     private resizeObserver: ResizeObserver | undefined;
 
     private keys: any = {
-        'ArrowDown': 'botton',
+        'ArrowDown': 'down',
         'ArrowLeft': 'left',
-        'ArrowUp': 'top',
+        'ArrowUp': 'up',
         'ArrowRight': 'right'
     }
 
@@ -52,7 +53,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         e = e.args as KeyboardEvent;
 
         e.preventDefault();
-        console.info(e)
+        
         if (!this.keys[e.key]) return;
         const info:any = {};
         info.position = this.keys[e.key];

@@ -3,7 +3,9 @@
 import { html, LitElement, PropertyValueMap, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { WCDToolbox , initWCDToolbox} from './_100554_wcdToolbox';
-import { IICADepths, getPosition, WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
+import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
+import { IICADepths } from './_100554_icaTypes';
+import { getPosition } from './_100554_icaGlobal';
 
 export function initWcdOverlayModeStoryItem(): boolean {
     return true;
