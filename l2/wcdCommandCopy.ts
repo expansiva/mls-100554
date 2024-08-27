@@ -2,7 +2,7 @@
 
 import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { IWCDCommand } from './_100554_wcdCommandBase';
+import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
 
 var infoCopy:IcaLitElementBase | undefined = undefined;
 
@@ -47,5 +47,7 @@ function excPaste(overlay: WcdOverlayLitBase, ica: IcaLitElementBase) {
         setTimeout(() => {elAdd.overlayRef?.click();}, 500);
 
     }, 500);
+
+    dispatchEventConciliate();
 
 }

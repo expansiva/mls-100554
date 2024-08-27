@@ -89,7 +89,6 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         `;
     }
 
-
     private async handleUnsplashClick(e: MouseEvent) {
         e.stopPropagation();
         this.showHelper('unsplash');
@@ -101,7 +100,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
     }
 
     private async handleNewPartClick(e: MouseEvent) {
-        commandDivider.execute({
+        await commandDivider.execute({
             args: {},
             overlay: this.myParent.parentElement?.parentElement,
             selectedIca: this.elICA,
@@ -109,7 +108,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
     }
 
     private async handleCodeClick(e: MouseEvent) {
-        commandCode.execute({
+        await commandCode.execute({
             args: {},
             overlay: this.myParent.parentElement?.parentElement,
             selectedIca: this.elICA,

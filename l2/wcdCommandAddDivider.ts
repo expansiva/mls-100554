@@ -1,7 +1,7 @@
 /// <mls shortName="wcdCommandAddDivider" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { IWCDCommand } from './_100554_wcdCommandBase';
+import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
 export async function execute(options: IWCDCommand) {
@@ -25,6 +25,8 @@ export async function execute(options: IWCDCommand) {
     options.overlay.myItens.push({ element: elDivider, depth: 0, x, y, height, width, opacity: elDivider.style.opacity });
     options.overlay.createOverlayItems();
     setTimeout(() => { elDivider.overlayRef?.click(); }, 500);
+
+    dispatchEventConciliate();
 
 }
 

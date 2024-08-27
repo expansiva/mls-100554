@@ -105,7 +105,6 @@ export class WcdDialogImage100554 extends LitElement {
         this.project = project;
         await this.initDsInstance(project, 0);
         this.images = await this.getImages(project);
-        // this.recalculeIcaHeight();
     }
 
     private recalculeIcaHeight() {
@@ -175,12 +174,13 @@ export class WcdDialogImage100554 extends LitElement {
         this.handleClickGallery(last);
     }
 
-    private handleClickGallery(item: IImageItem) {
-        execute({
+    private async handleClickGallery(item: IImageItem) {
+        await execute({
             args: { src: item.src },
             overlay: this.myParent.parentElement?.parentElement,
             selectedIca: this.elICA,
         });
+
     }
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {

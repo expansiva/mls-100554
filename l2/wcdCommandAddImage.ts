@@ -1,7 +1,7 @@
 /// <mls shortName="wcdCommandAddImage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { IWCDCommand } from './_100554_wcdCommandBase';
+import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
 export async function execute(options: IWCDCommand) {
@@ -29,7 +29,7 @@ export async function execute(options: IWCDCommand) {
     options.overlay.myItens.push({ element: elImage, depth: 0, x, y, height, width, opacity: elImage.style.opacity });
     options.overlay.createOverlayItems();
     setTimeout(() => { elImage.overlayRef?.click(); }, 500);
-
+    dispatchEventConciliate();
 }
 
 interface IArgs {

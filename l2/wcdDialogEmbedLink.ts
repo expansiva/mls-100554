@@ -40,12 +40,13 @@ export class WcdDialogEmbedLink100554 extends CollabLitElement {
     private async handleKeyDown(event: KeyboardEvent) {
         event.stopPropagation();
         if (event.key === 'Enter') {
-            execute({
+            await execute({
                 args: { url: this.link },
                 overlay: this.myParent.parentElement?.parentElement,
                 selectedIca: this.elICA,
             });
         }
+        
     }
 
     private handleInput(event: KeyboardEvent) {

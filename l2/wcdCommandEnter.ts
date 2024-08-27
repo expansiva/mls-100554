@@ -1,7 +1,7 @@
 /// <mls shortName="wcdCommandEnter" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { IWCDCommand } from './_100554_wcdCommandBase';
+import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
 
 export function execute(param: IWCDCommand) {
 
@@ -33,6 +33,6 @@ export function execute(param: IWCDCommand) {
         elAdd.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
 
-
+    dispatchEventConciliate();
 
 }

@@ -171,14 +171,15 @@ export class WcdDialogImage100554 extends LitElement {
         this.handleClickGallery(last);
     }
 
-    private handleClickGallery(item: IVideoItem, ev?: MouseEvent) {
+    private async handleClickGallery(item: IVideoItem, ev?: MouseEvent) {
         ev?.preventDefault();
         ev?.stopPropagation();
-        execute({
+        await execute({
             args: { src: item.src },
             overlay: this.myParent.parentElement?.parentElement,
             selectedIca: this.elICA,
         });
+    
     }
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {

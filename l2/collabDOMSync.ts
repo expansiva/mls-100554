@@ -1,26 +1,17 @@
 /// <mls shortName="collabDOMSync" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 export function sync(model: monaco.editor.ITextModel, iframe: HTMLIFrameElement) {
-
     if (!model) return;
-
     const newHTMLOnlyICA = clearTree(iframe)
     const formatedNewHTML = formatHtml(newHTMLOnlyICA);
     const formatedOldHTML = formatHtml(model.getValue());
-
-    const tempModel = monaco.editor.createModel('', 'html');
-
     const diffs = getDiffs(formatedOldHTML.split('\n'), formatedNewHTML.split('\n'));
-    console.info(diffs);
     setValueInModeKeepingUndo(model, formatedNewHTML, false);
     applyDiffs(model, diffs);
-
 }
 
 function getDiffs(originalLines: string[], modifiedLines: string[]) {
-
     const diffs: IDiffs[] = [];
-
     originalLines.forEach((line, index) => {
         if (line !== modifiedLines[index]) {
             diffs.push({
@@ -30,56 +21,22 @@ function getDiffs(originalLines: string[], modifiedLines: string[]) {
             });
         }
     });
-
-    return diffs;
-}
-
-function getDiffs2(originalModel: monaco.editor.ITextModel, modifiedModel: monaco.editor.ITextModel) {
-    const originalLines = originalModel.getLinesContent();
-    const modifiedLines = modifiedModel.getLinesContent();
-    const diffs: IDiffs[] = [];
-
-    originalLines.forEach((line, index) => {
-        if (line !== modifiedLines[index]) {
-            diffs.push({
-                lineNumber: index + 1,
-                originalLine: line,
-                modifiedLine: modifiedLines[index]
-            });
-        }
-    });
-
     return diffs;
 }
 
 function applyDiffs(originalModel: monaco.editor.ITextModel, diffs: IDiffs[]) {
 
-
     const editor = findEditorByModel(originalModel);
-    console.info(editor);
     if (!editor) return;
     diffs.forEach(diff => {
-
         const lineContent = originalModel.getLineContent(diff.lineNumber);
-
-        // originalModel.applyEdits([{
-        //     range: new monaco.Range(diff.lineNumber, 1, diff.lineNumber, lineContent),
-        //     text: diff.modifiedLine
-        // }]);
-
         editor.executeEdits('my-source', [{
             range: new monaco.Range(diff.lineNumber, 1, diff.lineNumber, lineContent.length + 1),
             text: diff.modifiedLine,
             forceMoveMarkers: true
         }]);
-
-        // originalModel.pushEditOperations([], [{
-        //     range: new monaco.Range(diff.lineNumber, 1, diff.lineNumber, lineContent.length + 1),
-        //     text: diff.modifiedLine
-        // }], () => null);
-
-
     });
+
 }
 
 function findEditorByModel(model: monaco.editor.ITextModel): monaco.editor.ICodeEditor | null {
@@ -112,19 +69,6 @@ function setValueInModeKeepingUndo(model: monaco.editor.ITextModel, val: string,
     }];
 
     model.pushEditOperations([], operations as any, () => []);
-}
-
-function registerProvider() {
-    monaco.languages.registerDocumentFormattingEditProvider('html', {
-        provideDocumentFormattingEdits: (model) => {
-            const value = model.getValue();
-            const formattedValue = formatHtml(value);
-            return [{
-                range: model.getFullModelRange(),
-                text: formattedValue
-            }];
-        }
-    });
 }
 
 export function formatHtml(html: string) {

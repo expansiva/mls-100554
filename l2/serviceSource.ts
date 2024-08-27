@@ -5,7 +5,7 @@ import { customElement, query, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
-import {  formatHtml } from './_100554_collabDOMSync';
+import { formatHtml, sync } from './_100554_collabDOMSync';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -16,6 +16,8 @@ export class ServiceSource100554 extends ServiceBase {
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
         mls.events.addListener(2, 'ProjectLoaded', (ev) => this.onProjectLoadedEvents(ev));
+        mls.events.addListener(2, 'DOMSync' as any, (ev) => this.syncDom(ev));
+
         this.initMonaco_GlobalEditor();
     }
 
@@ -309,17 +311,6 @@ export class ServiceSource100554 extends ServiceBase {
         scr.id = i2.replace('/', '');
         scr.src = i2;
         div.appendChild(scr);
-
-        // const ds = await getDSInstance(100554, 0);
-        // if (ds) {
-        //     await ds.init();
-        //     ds.components.getCSS('_100554_mlsHistoryList').then((css) => {
-        //         const style = document.createElement('style');
-        //         style.textContent = css;
-        //         div.appendChild(style);
-        //     });
-        // }
-
         const obj = {
             icTs: '.ts',
             icHTML: '.html',
@@ -516,7 +507,6 @@ export class ServiceSource100554 extends ServiceBase {
             console.error('Error on serviceSource_onProjectLoadedEvents: ', e);
         }
     }
-
 
 
     private isNewFile: boolean = false;
@@ -1447,7 +1437,13 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 if (storFileHTML.status !== 'renamed' && (storFileHTML.status !== 'new')) storFileHTML.status = 'changed';
                 await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: model.getValue() });
             }
-            if (mls.istrace) console.info('fire model html')
+            if (mls.istrace) console.info('fire model html');
+
+            if (this.isHTMLSystemChange) {
+                this.isHTMLSystemChange = false;
+                return;
+            }
+
             mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, this.position);//(model as any)['position']
         }, 400);
     };
@@ -1811,6 +1807,35 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             }
         });
     }
+
+    private isHTMLSystemChange: boolean = false;
+    private syncDom: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
+        console.info('receive EventConciliate', this.position);
+
+        if (ev.level !== this.level) return;
+        if (this.position === 'right') return;
+        try {
+            const op = this.position === 'left' ? 'right' : 'left';
+            const servOp = this.nav3Service?.getActiveInstance(op);
+            if (!servOp) return;
+
+            const iframe = servOp.previousElementSibling
+                ?.querySelector('service-preview-view-100554')
+                ?.shadowRoot
+                ?.querySelector('iframe');
+
+            const { shortName, project } = mls.l2.editor.editors[this.confE];
+            const uri = this.getUri(`_${project}_${shortName}`, '.html');
+            let model = monaco.editor.getModel(uri);
+            if (!model || !iframe) return;
+            this.isHTMLSystemChange = true;
+            sync(model, iframe);
+
+        } catch (e) {
+            console.error('Error on syncDom: ', e);
+        }
+    }
+
 
     //----------------------------------------
 }

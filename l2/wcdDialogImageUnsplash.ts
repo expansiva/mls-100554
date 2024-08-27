@@ -102,12 +102,14 @@ export class WcdDialogImage100554 extends CollabLitElement {
         this.query = (event.target as HTMLInputElement)?.value || '';
     }
 
-    private handleGalleryClick(item: IUnsplashImage) {
-        execute({
+    private async handleGalleryClick(item: IUnsplashImage) {
+        
+        await execute({
             args: { src: item.urls.regular },
             overlay: this.myParent.parentElement?.parentElement,
             selectedIca: this.elICA,
         });
+        
     }
 
     private recalculeIcaHeight() {
