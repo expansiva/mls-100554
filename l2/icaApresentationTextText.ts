@@ -12,7 +12,7 @@ export abstract class IcaFormsInputNumber extends IcaLitElementBase {
     public getActionsTags(): ActionTag[] {
 
         let isBlankLine = !this.getAttribute('text');
-        if (isBlankLine) return [{ name: "add"},{ name: "edit", args:'{"tp":"click", "attr":"text"}' }];
+        if (isBlankLine) return [{ name: "add"},{ name: "edit", args:'{"tp":"edit", "attr":"text"}' },{ name: "backButton"}];
 
         let rc: ActionTag[] = [
             { name: "margin" },

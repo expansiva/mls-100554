@@ -8,7 +8,6 @@ export class WCDPopupItem extends LitElement {
 
     constructor() {
         super();
-        console.log('in WCDPopupItem')
     }
 
   static styles = css`

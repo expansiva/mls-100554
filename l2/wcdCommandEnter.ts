@@ -12,7 +12,7 @@ export function execute(param: IWCDCommand) {
     e.preventDefault();
 
     if (!ica) return;
-    
+
     const elAdd = document.createElement('ica-apresentation-text-text-100554') as IcaLitElementBase;
 
     elAdd.setAttribute('widget', 'wc-text-100554');
@@ -22,19 +22,17 @@ export function execute(param: IWCDCommand) {
 
     ica.insertAdjacentElement('afterend', elAdd);
 
+    const { x, y, height, width } = elAdd.getBoundingClientRect();
+
+    overlay.myItens.push({ element: elAdd, depth: 0, x, y, height, width, opacity: elAdd.style.opacity });
+
+    overlay.createOverlayItems()
+
     setTimeout(() => {
+        elAdd.overlayRef?.click();
+        elAdd.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
 
-        const { x, y, height, width } = elAdd.getBoundingClientRect();
 
-        overlay.myItens.push({ element: elAdd, depth: 0, x, y, height, width, opacity: elAdd.style.opacity });
-
-        overlay.createOverlayItems()
-
-        setTimeout(() => {
-            elAdd.overlayRef?.click();
-            elAdd.scrollIntoView({behavior:'smooth', block:'center'});
-        }, 500);
-
-    }, 500);
 
 }

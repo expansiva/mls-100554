@@ -62,6 +62,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
     render() {
         const lang = getMessageKey(messages);
         this.msg = messages[lang];
+        this.style.zIndex = '99999';
         return html`
         <div class="add-button close">
             <button @click=${this.onButtonClick} >

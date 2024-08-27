@@ -224,23 +224,56 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         const range = selection.getRangeAt(0);
         selectedText = range.toString();
-        
+
         if (selectedText === '') return;
 
-        const selectedNode = this.querySelector('*[contenteditable]') as any;
+        const rect = range.getBoundingClientRect();
 
-        // Obter o tamanho da fonte
-        const fontSize = window.getComputedStyle(selectedNode).fontSize;
-        const f = fontSize ? parseInt(fontSize, 10) : 0;
+        const base = (rect.right - rect.left) / 2
 
         // Cria uma nova div
         const newDiv = document.createElement('wcd-popup-100554');
-        newDiv.setAttribute('x', e.layerX);
-        newDiv.setAttribute('y', (e.layerY - f).toString());
+
+        if (this.isSameLine(range)) {
+            newDiv.setAttribute('x', (e.layerX - base).toString());
+            newDiv.setAttribute('y', e.layerY);
+            newDiv.style.transform = 'translate(-49%, -139%)';
+        } else {
+            newDiv.setAttribute('x', e.layerX);
+            newDiv.setAttribute('y', (e.layerY + 15 ).toString());
+            newDiv.style.transform = 'translate(-49%, 0%)';
+        }
 
         // Adiciona a div ao container
         this.appendChild(newDiv);
         
+    }
+
+    private isSameLine(range: any): boolean{
+        // Cria um clone da range para evitar alterações na seleção original
+        const rangeClone = range.cloneRange();
+
+        // Adiciona um marcador invisível no início da seleção
+        rangeClone.collapse(true);
+        const startMarker = document.createElement('span');
+        rangeClone.insertNode(startMarker);
+
+        // Adiciona um marcador invisível no fim da seleção
+        const rangeEndClone = range.cloneRange();
+        rangeEndClone.collapse(false);
+        const endMarker = document.createElement('span');
+        rangeEndClone.insertNode(endMarker);
+
+        // Obtém as coordenadas dos marcadores
+        const startRect = startMarker.getBoundingClientRect();
+        const endRect = endMarker.getBoundingClientRect();
+
+        // Remove os marcadores do DOM
+        startMarker.remove();
+        endMarker.remove();
+
+        // Verifica se a seleção começou em uma linha e terminou em outra
+        return (startRect.top === endRect.top);
     }
 
     private backButton() {
