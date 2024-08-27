@@ -5,9 +5,16 @@ export function sync(model: monaco.editor.ITextModel, iframe: HTMLIFrameElement)
     const newHTMLOnlyICA = clearTree(iframe)
     const formatedNewHTML = formatHtml(newHTMLOnlyICA);
     const formatedOldHTML = formatHtml(model.getValue());
-    const diffs = getDiffs(formatedOldHTML.split('\n'), formatedNewHTML.split('\n'));
-    setValueInModeKeepingUndo(model, formatedNewHTML, false);
-    applyDiffs(model, diffs);
+    const formatedNewHTMLArr = formatedNewHTML.split('\n');
+    const formatedOldHTMLArr = formatedOldHTML.split('\n');
+
+    if (formatedNewHTMLArr.length === formatedOldHTMLArr.length) {
+        const diffs = getDiffs(formatedOldHTMLArr, formatedNewHTMLArr);
+        applyDiffs(model, diffs);
+    } else {
+        setValueInModeKeepingUndo2(model, formatedNewHTML);
+    }
+
 }
 
 function getDiffs(originalLines: string[], modifiedLines: string[]) {
@@ -28,18 +35,33 @@ function applyDiffs(originalModel: monaco.editor.ITextModel, diffs: IDiffs[]) {
 
     const editor = findEditorByModel(originalModel);
     if (!editor) return;
+
+    const edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
+
     diffs.forEach(diff => {
-        const lineContent = originalModel.getLineContent(diff.lineNumber);
-        editor.executeEdits('my-source', [{
-            range: new monaco.Range(diff.lineNumber, 1, diff.lineNumber, lineContent.length + 1),
-            text: diff.modifiedLine,
-            forceMoveMarkers: true
-        }]);
+        if (!diff.lineNumber) return;
+        const lines = originalModel.getLineCount();
+        let lineContent = 0;
+
+        if (diff.lineNumber <= lines) lineContent = originalModel.getLineLength(diff.lineNumber);
+        else lineContent = diff.modifiedLine?.length || 0;
+
+        let range: monaco.Range;
+        range = new monaco.Range(diff.lineNumber, 1, diff.lineNumber, lineContent + 1)
+        const edit: monaco.editor.IIdentifiedSingleEditOperation = {
+            range,
+            text: diff.modifiedLine || '',
+            forceMoveMarkers: true,
+        }
+        edits.push(edit);
     });
+
+    editor.executeEdits('my-source', edits);
 
 }
 
 function findEditorByModel(model: monaco.editor.ITextModel): monaco.editor.ICodeEditor | null {
+
     const allEditors = monaco.editor.getEditors();
     let associatedEditor = null;
     allEditors.forEach((editor) => {
@@ -50,25 +72,20 @@ function findEditorByModel(model: monaco.editor.ITextModel): monaco.editor.ICode
     return associatedEditor;
 }
 
-function setValueInModeKeepingUndo(model: monaco.editor.ITextModel, val: string, checkFirstLine: boolean) {
-    let fullRange = model.getFullModelRange();
-    let newText = val;
-    if (checkFirstLine && !(val.trim().startsWith('/// <mls shortName'))) {
-        const firstLine = model.getLineContent(1);
-        newText = firstLine + '\n' + newText;
-    }
-    const lines = newText.split('\n');
-    const operations = [{
-        range: fullRange,
-        text: '',
-        forceMoveMarkers: true
-    }, {
-        range: { startLineNumber: 1, startColumn: 1 },
-        text: lines.join('\n'),
-        forceMoveMarkers: true
-    }];
 
-    model.pushEditOperations([], operations as any, () => []);
+function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent: string) {
+
+    const editor = findEditorByModel(model);
+    if (!editor) return;
+    const lastLineNumber = model.getLineCount();
+    const lastLineLength = model.getLineLength(lastLineNumber);
+    const range = new monaco.Range(1, 1, lastLineNumber, lastLineLength + 1);
+    editor.pushUndoStop();
+    editor.executeEdits('userEdit', [{
+        range: range,
+        text: newContent
+    }]);
+    editor.pushUndoStop();
 }
 
 export function formatHtml(html: string) {

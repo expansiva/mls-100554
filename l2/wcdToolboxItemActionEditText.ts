@@ -286,5 +286,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         const lang = (document.documentElement.lang || '').toLowerCase();
         if (this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
         this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
+        mls.events.fire([2], ['DOMSync'] as any);
     }
 }
