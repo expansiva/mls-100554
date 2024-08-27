@@ -7,6 +7,7 @@ import { collabState } from './_100554_collabLitElement';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import * as tps from './_100554_icaTypes';
+import * as globalIca from './_100554_icaGlobal';
 import * as myDefinition from './_100554_icaBaseDescription';
 
 
@@ -26,7 +27,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
     public clickMenu: Function | undefined;
 
     @property({ type: String })
-    @collabState(tps.CHANGESTATE)
+    @collabState(globalIca.CHANGESTATE)
     private changeState: string = '';
 
     @property({ type: String, reflect: true })
@@ -214,11 +215,11 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
         let ret: IcaLitElementBase[] = [];
         const reentrance = (el: IcaLitElementBase | HTMLElement) => {
             const tag = el.tagName.toLowerCase();
-            if (tag.startsWith(`${tps.PREFIX}-`)) {
+            if (tag.startsWith(`${globalIca.PREFIX}-`)) {
                 ret.push(el as IcaLitElementBase);
             }
 
-            const isGroup = el.getAttribute(`${tps.ATTRGROUP}`);
+            const isGroup = el.getAttribute(`${globalIca.ATTRGROUP}`);
             if (!isGroup || isGroup === 'false') {
                 Array.from(el.children).forEach(i => {
                     reentrance(i as HTMLElement);
@@ -234,7 +235,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
     }
 
     public getMyScope(): IcaLitElementBase | HTMLElement | undefined {
-        let ret = this.closest(`${tps.ICAPAGE}`) as IcaLitElementBase;
+        let ret = this.closest(`${globalIca.ICAPAGE}`) as IcaLitElementBase;
         if (!ret) ret = this.closest('body') as any;
         return ret
     }
@@ -243,15 +244,15 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
         const parent = target.parentElement;
         if (!parent) return;
         const tag = parent.tagName.toLowerCase();
-        if (!tag.startsWith(`${tps.PREFIX}-`)) return this.getIcaParent(parent);
-        else if (tag.startsWith(`${tps.PREFIX}-`)) return parent as IcaLitElementBase;
+        if (!tag.startsWith(`${globalIca.PREFIX}-`)) return this.getIcaParent(parent);
+        else if (tag.startsWith(`${globalIca.PREFIX}-`)) return parent as IcaLitElementBase;
     }
 
     async performPreSlotAllocationOperations() {
 
         if (!this.widget) return;
         const tag = convertFileNameToTag(this.widget);
-        if (tag.startsWith(tps.PREFIX) || tag.startsWith(tps.PREFIXWCD)) return;
+        if (tag.startsWith(globalIca.PREFIX) || tag.startsWith(globalIca.PREFIXWCD)) return;
 
         Promise.all([tag].map((wc) => customElements.whenDefined(wc))).then(async () => {
 
@@ -260,7 +261,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
             if (!widgetElement || !childrens || childrens.length === 0) return;
 
             childrens.forEach((child) => {
-                if (child.tagName.toLowerCase().startsWith(tps.PREFIXWCD)) return;
+                if (child.tagName.toLowerCase().startsWith(globalIca.PREFIXWCD)) return;
                 child.remove();
                 widgetElement.appendChild(child);
             });
@@ -294,7 +295,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
 
     getAttributes() {
 
-        const excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id', tps.ATTRGROUP];
+        const excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id', globalIca.ATTRGROUP];
         const objVariations: any = {
             0: 'en',
             1: 'pt',
