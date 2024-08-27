@@ -179,10 +179,6 @@ export class WcdOverlayModeStoryItem extends LitElement {
         wcd.elICA = this.info.element;
         this.info.element.setAttribute('renderType', 'editactive')
 
-        /*await this.setActions();
-        let act = (this.info.element.actions as any)[this.level as any];
-        if (!act) act = [];
-        wcd.actions = act;*/
         wcd.lastHelper = '';
 
         this.appendChild(wcd);
@@ -209,15 +205,6 @@ export class WcdOverlayModeStoryItem extends LitElement {
         mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectLine", "line":${startLineNumber}, "origin":"preview"}`);
 
     }
-
-    /*private async setActions() {
-        if (!this.info || !this.info.element) return;
-        const el = this.info.element;
-        if (el.isLoadMyAction[this.level as any]) return;
-
-        await el.setActions(this.level as any);
-        el.isLoadMyAction[this.level as any] = true;
-    }*/
 
     private async checkToChangeWCD() {
 
