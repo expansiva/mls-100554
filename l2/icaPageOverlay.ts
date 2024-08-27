@@ -2,10 +2,9 @@
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { IcaPageOverlayItem } from './_100554_icaPageOverlayItem';
-import { getPosition } from './_100554_icaPageOverlayBase';
+import { getPosition } from './_100554_icaGlobal';
 import { CollabLitElement } from './_100554_collabLitElement';
-
+import { IcaPageOverlayItem } from './_100554_icaPageOverlayItem';
 
 export function initIcaPageOverlay(): boolean {
     return true;

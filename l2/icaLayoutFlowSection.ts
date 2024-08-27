@@ -1,8 +1,8 @@
 /// <mls shortName="icaLayoutFlowSection" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { customElement } from 'lit/decorators.js';
-import { ActionTag } from './_100554_icaGlobal';
-import { IcaLitElementBase, IAllowCommand } from './_100554_icaLitElementBase';
+import { ActionTag, IAllowCommand } from './_100554_icaTypes';
+import { IcaLitElementBase} from './_100554_icaLitElementBase';
 
 @customElement('ica-layout-flow-section-100554')
 export abstract class icaLayoutFlowSection extends IcaLitElementBase {

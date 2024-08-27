@@ -1,8 +1,8 @@
 /// <mls shortName="icaLayoutFlowColumn" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { customElement } from 'lit/decorators.js';
-import { IcaLitElementBase, IAllowCommand } from './_100554_icaLitElementBase';
-import { ActionTag } from './_100554_icaGlobal';
+import { ActionTag, IAllowCommand } from './_100554_icaTypes';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
 @customElement('ica-layout-flow-column-100554')
 export class IcaLayoutFlowColumn extends IcaLitElementBase {

@@ -1,16 +1,16 @@
 /// <mls shortName="icaLitElementBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+import { html, unsafeHTML } from 'lit';
+import { property } from 'lit/decorators.js';
+
 import { collabState } from './_100554_collabLitElement';
 import { IcaLitElement } from './_100554_icaLitElement';
-
-import * as icaGlobal from './_100554_icaGlobal';
-import * as states from './_100554_icaCollabStore';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
-import { html, unsafeHTML, css } from 'lit';
-import { property } from 'lit/decorators.js';
+import * as tps from './_100554_icaTypes';
 import * as myDefinition from './_100554_icaBaseDescription';
 
-export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitElementBaseMethods {
+
+export abstract class IcaLitElementBase extends IcaLitElement implements tps.IcaLitElementBaseMethods {
 
     constructor() {
         super();
@@ -18,15 +18,15 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
     abstract mySymbol: string;
     abstract changeStateHtml(info: string): void;
-    abstract allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
-    abstract getActionsTags(): icaGlobal.ActionTag[];
+    abstract allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): tps.IAllowCommand;
+    abstract getActionsTags(): tps.ActionTag[];
 
     public overlayRef: HTMLElement | undefined;
 
     public clickMenu: Function | undefined;
 
     @property({ type: String })
-    @collabState(states.CHANGESTATE)
+    @collabState(tps.CHANGESTATE)
     private changeState: string = '';
 
     @property({ type: String, reflect: true })
@@ -137,13 +137,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         }
     }
 
-    private updateId(id: string) {
-        if (!this.widget) return;
-        const widgetEl = this.querySelector(this.widget) as HTMLElement;
-        if (!widgetEl) return;
-        widgetEl.id = id;
-    }
-
     private updateStyleEl() {
         if (!this.widget) return;
         const widgetEl = this.querySelector(this.widget) as HTMLElement;
@@ -216,29 +209,16 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         //mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
     }
 
-    public async importAction(imports: string, actions: icaGlobal.IActionLevels, level: string, mode: string = '', position: string = '') {
-
-        try {
-            if (!imports.startsWith('./')) imports = './' + imports;
-            const { getTemplate } = await import(imports);
-            const temp = getTemplate(mode, position);
-            (actions as any)[level].push(temp);
-        } catch (e) {
-            console.info(e);
-        }
-
-    }
-
     public getICAComponents(scope: HTMLElement): IcaLitElementBase[] {
 
         let ret: IcaLitElementBase[] = [];
         const reentrance = (el: IcaLitElementBase | HTMLElement) => {
             const tag = el.tagName.toLowerCase();
-            if (tag.startsWith(`${icaGlobal.PREFIX}-`)) {
+            if (tag.startsWith(`${tps.PREFIX}-`)) {
                 ret.push(el as IcaLitElementBase);
             }
 
-            const isGroup = el.getAttribute(`${icaGlobal.ATTRGROUP}`);
+            const isGroup = el.getAttribute(`${tps.ATTRGROUP}`);
             if (!isGroup || isGroup === 'false') {
                 Array.from(el.children).forEach(i => {
                     reentrance(i as HTMLElement);
@@ -254,7 +234,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
     }
 
     public getMyScope(): IcaLitElementBase | HTMLElement | undefined {
-        let ret = this.closest(`${icaGlobal.ICAPAGE}`) as IcaLitElementBase;
+        let ret = this.closest(`${tps.ICAPAGE}`) as IcaLitElementBase;
         if (!ret) ret = this.closest('body') as any;
         return ret
     }
@@ -263,15 +243,15 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
         const parent = target.parentElement;
         if (!parent) return;
         const tag = parent.tagName.toLowerCase();
-        if (!tag.startsWith(`${icaGlobal.PREFIX}-`)) return this.getIcaParent(parent);
-        else if (tag.startsWith(`${icaGlobal.PREFIX}-`)) return parent as IcaLitElementBase;
+        if (!tag.startsWith(`${tps.PREFIX}-`)) return this.getIcaParent(parent);
+        else if (tag.startsWith(`${tps.PREFIX}-`)) return parent as IcaLitElementBase;
     }
 
     async performPreSlotAllocationOperations() {
 
         if (!this.widget) return;
         const tag = convertFileNameToTag(this.widget);
-        if (tag.startsWith(icaGlobal.PREFIX) || tag.startsWith(icaGlobal.PREFIXWCD)) return;
+        if (tag.startsWith(tps.PREFIX) || tag.startsWith(tps.PREFIXWCD)) return;
 
         Promise.all([tag].map((wc) => customElements.whenDefined(wc))).then(async () => {
 
@@ -280,7 +260,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
             if (!widgetElement || !childrens || childrens.length === 0) return;
 
             childrens.forEach((child) => {
-                if (child.tagName.toLowerCase().startsWith(icaGlobal.PREFIXWCD)) return;
+                if (child.tagName.toLowerCase().startsWith(tps.PREFIXWCD)) return;
                 child.remove();
                 widgetElement.appendChild(child);
             });
@@ -314,7 +294,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
     getAttributes() {
 
-        const excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id', icaGlobal.ATTRGROUP];
+        const excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id', tps.ATTRGROUP];
         const objVariations: any = {
             0: 'en',
             1: 'pt',
@@ -419,17 +399,4 @@ export abstract class IcaLitElementBase extends IcaLitElement implements IcaLitE
 
 }
 
-interface IcaLitElementBaseMethods {
-    mySymbol: string;
-    getActionsTags(): icaGlobal.ActionTag[];
-    changeStateStyle(info: {}): void;
-    changeStateHtml(info: string): void;
-    allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
 
-}
-
-export interface IAllowCommand {
-    inside: boolean,
-    before: boolean,
-    after: boolean
-}

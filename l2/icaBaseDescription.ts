@@ -1,6 +1,6 @@
 /// <mls shortName="icaBaseDescription" project="100554" enhancement="_blank" />
 
-import * as icaBase from "./_100554_icaBase";
+import * as icaBase from "./_100554_icaTypes";
 import { getMessageKey } from "./_100554_collabLitElement";
 
 /// **collab_i18n_start**

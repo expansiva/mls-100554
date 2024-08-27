@@ -2,7 +2,6 @@
 
 import { state1 } from './_100554_icaDecorators';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { property } from 'lit/decorators.js';
 
 export * from './_100554_icaDecorators';
 

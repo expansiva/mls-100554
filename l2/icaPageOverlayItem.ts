@@ -2,8 +2,9 @@
 
 import { html, LitElement, PropertyValueMap, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { WCDToolbox } from '_100554_wcdToolbox';
-import { IICADepths, getPosition } from './_100554_icaPageOverlayBase';
+import { WCDToolbox } from './_100554_wcdToolbox';
+import * as tps from './_100554_icaTypes';
+import * as globalIca from './_100554_icaGlobal';
 
 export function initIcaPageOverlayItem(): boolean {
     return true;
@@ -11,7 +12,7 @@ export function initIcaPageOverlayItem(): boolean {
 @customElement('ica-page-overlay-item-100554')
 export class IcaPageOverlayItem extends LitElement {
 
-    @property() info: IICADepths | undefined;
+    @property() info: tps.IICADepths | undefined;
 
     @property() widget: string | undefined;
 
@@ -45,7 +46,7 @@ export class IcaPageOverlayItem extends LitElement {
         this.overlay = this.parentElement as HTMLElement;
 
         if (!this.info || !this.boundingPage) return html``;
-        const pos = getPosition(this.info, this.boundingPage);
+        const pos = globalIca.getPosition(this.info, this.boundingPage);
         this.info.element.overlayRef = this;
         this.style.display = 'block';
         this.style.position = 'absolute';
@@ -169,13 +170,9 @@ export class IcaPageOverlayItem extends LitElement {
         });
         const wcd = document.createElement('wcd-toolbox-100554') as WCDToolbox;
         wcd.setAttribute('level', this.level);
-        wcd.elICA = this.info.element;
+        wcd.elICA = this.info.element ;
         this.info.element.setAttribute('renderType', 'editactive')
 
-        await this.setActions();
-        let act = (this.info.element.actions as any)[this.level as any];
-        if (!act) act = [];
-        wcd.actions = act;
         wcd.lastHelper = '';
 
         this.appendChild(wcd);
@@ -201,15 +198,6 @@ export class IcaPageOverlayItem extends LitElement {
 
         mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectLine", "line":${startLineNumber}, "origin":"preview"}`);
 
-    }
-
-    private async setActions() {
-        if (!this.info || !this.info.element) return;
-        const el = this.info.element;
-        if (el.isLoadMyAction[this.level as any]) return;
-
-        await el.setActions(this.level as any);
-        el.isLoadMyAction[this.level as any] = true;
     }
 
     private async checkToChangeWCD() {

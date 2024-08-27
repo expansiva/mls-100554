@@ -1,8 +1,8 @@
 /// <mls shortName="icaApresentationTextText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { customElement } from 'lit/decorators.js';
-import { ActionTag } from './_100554_icaGlobal';
-import { IcaLitElementBase, IAllowCommand } from './_100554_icaLitElementBase';
+import { ActionTag, IAllowCommand } from './_100554_icaTypes';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
 @customElement('ica-apresentation-text-text-100554')
 export abstract class IcaFormsInputNumber extends IcaLitElementBase {

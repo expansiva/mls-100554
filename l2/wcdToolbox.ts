@@ -4,10 +4,9 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { CollabLitElement } from './_100554_collabLitElement';
-import { ActionTag, IToolboxOptions } from './_100554_icaGlobal';
 import { ServiceBase } from './_100554_serviceBase';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
+import * as tps from './_100554_icaTypes';
 
 export function initWCDToolbox() {
     return true;
@@ -26,7 +25,7 @@ export class WCDToolbox extends CollabLitElement {
 
     public elMain: HTMLElement | undefined; // component from ica render
 
-    public elICA: IcaLitElementBase | undefined; // ica base to wcd
+    public elICA: tps.IcaLitElementBaseMethods | undefined; // ica base to wcd
 
     private wcServiceICA: ServiceBase | undefined;
 
@@ -90,7 +89,7 @@ export class WCDToolbox extends CollabLitElement {
         return this._backNavigationScenaryOutdoor();
     }
 
-    public setIconsWcdToolbox(act: ActionTag[], useSelf: boolean = false, updataSize: 'false' | 'size' | 'padding' = 'false'): void {
+    public setIconsWcdToolbox(act: tps.ActionTag[], useSelf: boolean = false, updataSize: 'false' | 'size' | 'padding' = 'false'): void {
         return this._setIconsWcdToolbox(act, useSelf, updataSize);
     }
 
@@ -104,7 +103,7 @@ export class WCDToolbox extends CollabLitElement {
 
     //---------------IMPLEMENTATION----------------
 
-    private async _renderAction(actions?: ActionTag[]) {
+    private async _renderAction(actions?: tps.ActionTag[]) {
 
         const parent = this.parentElement?.parentElement as any;
         
@@ -133,7 +132,7 @@ export class WCDToolbox extends CollabLitElement {
                 const pos = i.position ? i.position : undefined;
                 const toll = i.toolboxOptions ? i.toolboxOptions : undefined;
 
-                i = Object.assign({}, defaultActions[i.name]) as ActionTag;
+                i = Object.assign({}, defaultActions[i.name]) as tps.ActionTag;
                 if (args) i.args = args;
                 if (pos) i.position = pos;
                 if (toll) i.toolboxOptions = toll;
@@ -153,9 +152,9 @@ export class WCDToolbox extends CollabLitElement {
 
             const el = document.createElement(convertFileNameToTag(i.name)) as WcdToolboxItemBase;
             el.className = `p ${i.position}`;
-            el.myParent = this as any;
+            el.myParent = this;
             el.elMain = this.elMain;
-            el.elICA = this.elICA as any;
+            el.elICA = this.elICA;
             el.style.zIndex = '9998';
             el.args = i.args;
 
@@ -172,7 +171,7 @@ export class WCDToolbox extends CollabLitElement {
         this.style.border = '';
     }
 
-    private setToolBoxOptions(info:IToolboxOptions) {
+    private setToolBoxOptions(info: tps.IToolboxOptions) {
 
         if (info.background) this.style.background = info.background;
         if (info.border) this.style.border = info.border;
@@ -197,7 +196,7 @@ export class WCDToolbox extends CollabLitElement {
 
     }
 
-    private _setIconsWcdToolbox(act: ActionTag[], useSelf: boolean = false, updataSize: 'false' | 'size' | 'padding' = 'false'): void {
+    private _setIconsWcdToolbox(act: tps.ActionTag[], useSelf: boolean = false, updataSize: 'false' | 'size' | 'padding' = 'false'): void {
 
         if (useSelf) this._renderAction();
         else this._renderAction(act);
