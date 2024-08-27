@@ -4,14 +4,13 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
 import { WcdOverlayModeStoryItem, initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
-import { ActionTag, IICADepths } from './_100554_icaTypes';
+import { ActionTag, IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { getPosition } from './_100554_icaGlobal';
 
 import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
 import { execute as excCommandDel } from './_100554_wcdCommandDel';
 import { execute as excCommandCopy } from './_100554_wcdCommandCopy';
 import { execute as excCommandNext } from './_100554_wcdCommandSelectNext';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
 @customElement('wcd-overlay-mode-story-100554')
 export class WcdOverlayModeStory extends WcdOverlayLitBase {
@@ -63,7 +62,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         excCommandNext(param);
     }
 
-    public selectItem(ica: IcaLitElementBase): void {
+    public selectItem(ica: IcaLitElementBaseMethods): void {
         if (!ica || !ica.overlayRef) return;
         ica.overlayRef.click();
     }

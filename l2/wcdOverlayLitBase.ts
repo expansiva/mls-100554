@@ -3,8 +3,7 @@
 import { html, PropertyValueMap } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { ActionTag, IICADepths } from './_100554_icaTypes';
+import { ActionTag, IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdCommandBase';
 
 export abstract class WcdOverlayLitBase extends CollabLitElement {
@@ -32,7 +31,7 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
 
     abstract createOverlayItems(): void;
 
-    abstract selectItem(ica:IcaLitElementBase): void;
+    abstract selectItem(ica:IcaLitElementBaseMethods): void;
 
     abstract getActionsTagsDefault(): { [key: string]: ActionTag };
 
