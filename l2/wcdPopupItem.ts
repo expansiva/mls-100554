@@ -13,13 +13,13 @@ export class WCDPopupItem extends LitElement {
   static styles = css`
     :host {
       display: inline-block;
-      padding: 8px 12px;
-      background-color: #333;
+      padding: 6px 10px;
+      background-color: black;
       color: white;
       border-radius: 4px;
       cursor: pointer;
       text-align: center;
-      font-size: 14px;
+      font-size: 16px;
       transition: background-color 0.2s ease;
     }
 
