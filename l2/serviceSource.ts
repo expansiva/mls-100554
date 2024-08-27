@@ -5,7 +5,7 @@ import { customElement, query, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
-import { getDSInstance } from './_100554_libDesignSystem';
+import {  formatHtml } from './_100554_collabDOMSync';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -393,23 +393,23 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async createProjectModel(prj: number, contentTS: string): Promise<mls.l2.editor.IMFile> {
 
-        let model1 = mls.l2.editor.get({ project:prj, shortName: '' });
+        let model1 = mls.l2.editor.get({ project: prj, shortName: '' });
         if (model1) return model1;
 
-        const ftype =  ".d.ts";
+        const ftype = ".d.ts";
         const uri = this.getUri(`_${prj}_`, ftype);
         const model = monaco.editor.createModel(contentTS, 'typescript', uri);
         model1 = {
             changed: false, // not changed in this section, but storFile.changed is about all sections
             error: false,
-            project : prj,
+            project: prj,
             shortName: '',
             extension: ftype,
             model,
             storFile: undefined as any,
-            originalCRC : undefined,
+            originalCRC: undefined,
             originalProject: undefined,
-            originalShortName : undefined,
+            originalShortName: undefined,
             codeLens: [],
         };
         mls.l2.editor.add(model1);
@@ -1373,6 +1373,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
 
         if (open && this._ed1) this._ed1.setModel(model);
+        this.registerProvider();
         return storFileHTML;
     }
 
@@ -1446,8 +1447,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 if (storFileHTML.status !== 'renamed' && (storFileHTML.status !== 'new')) storFileHTML.status = 'changed';
                 await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: model.getValue() });
             }
-            if(mls.istrace) console.info('fire model html')
-            mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, this.position );//(model as any)['position']
+            if (mls.istrace) console.info('fire model html')
+            mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, this.position);//(model as any)['position']
         }, 400);
     };
 
@@ -1503,6 +1504,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (!this.visible) return;
             this.c2?.setAttribute('msize', this.msize);
         }
+    }
+    firstUpdated(changedProperties: any) {
+        super.firstUpdated(changedProperties);
+        this.registerProvider();
     }
 
     render() {
@@ -1792,6 +1797,19 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (!model) return;
         model.setValue(html.innerHTML);
 
+    }
+
+    private registerProvider() {
+        monaco.languages.registerDocumentFormattingEditProvider('html', {
+            provideDocumentFormattingEdits: (model) => {
+                const value = model.getValue();
+                const formattedValue = formatHtml(value);
+                return [{
+                    range: model.getFullModelRange(),
+                    text: formattedValue
+                }];
+            }
+        });
     }
 
     //----------------------------------------

@@ -125,10 +125,9 @@ function registerProvider() {
             }];
         }
     });
-
 }
 
-function formatHtml(html: string) {
+export function formatHtml(html: string) {
     // Cria um container temporário para o HTML
     const container = document.createElement('div');
     container.innerHTML = html;
