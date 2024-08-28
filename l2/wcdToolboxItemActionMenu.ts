@@ -47,7 +47,7 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
     public elICA: IcaLitElementBase | undefined;
     public args: string | undefined;
 
-    @property({ reflect: true }) myItens: IWCDMenu100554 | undefined;
+    @property({ reflect: false }) myItens: IWCDMenu100554 | undefined;
     @query('wcd-toolbox-submenu') containerSubMenu: HTMLElement | undefined;
 
     //----------COMPONENT---------------
@@ -56,10 +56,9 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
         return this;
     }
 
-    updated() {
+    firstUpdated() {
 
         try {
-
             if (!this.args || this.args === '') {
                 this.myItens = this.defaultItens;
             } else {
@@ -75,8 +74,7 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
     }
 
     render() {
-
-        if (!this.myItens) return html``;
+        if (!this.myItens || this.myItens.itens === undefined ) return html``;
         this.style.zIndex = '9999';
         return html`
         <style>${this.css}</style>

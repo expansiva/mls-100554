@@ -68,7 +68,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
     }
 
     public getActionsTagsDefault(): { [key: string]: ActionTag } {
-        return {
+        /*return {
             'events': {
                 name: '_100554_wcdToolboxItemActionEvents',
                 position: 'p-r1',
@@ -122,6 +122,39 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
                 name: "_100554_wcdTitle",
                 level: [1, 2, 3, 4, 5, 6],
                 position: 'p-l1',
+                args: ''
+            },
+        }*/
+        return {
+            'backButton': {
+                name: 'button',
+                position: 'p-r0' as any,
+                args: '',
+                level: [1, 2, 3, 4, 5, 6]
+            },
+            'menu': {
+                name: '_100554_wcdToolboxItemActionMenu',
+                position: 'p-m1',
+                args: '{}',
+                level: [4]
+            },
+            'add': {
+                name: "_100554_wcdAdd",
+                level: [2, 4],
+                position: 'p-l2',
+                args: '',
+                toolboxOptions: { background: 'none', border: 'none' }
+            },
+            'edit': {
+                name: "_100554_wcdToolboxItemActionEditText",
+                level: [2, 4],
+                position: 'p-l0',
+                args: ''
+            },
+            'title': {
+                name: "_100554_wcdTitle",
+                level: [1, 2, 3, 4, 5, 6],
+                position: 'p-r3',
                 args: ''
             },
         }

@@ -326,6 +326,8 @@ export class ServicePreviewView extends LitElement {
             const html = iframe.contentDocument?.querySelector('html');
             if (html) html.lang = this.objVariations[window.globalVariation] || 'en-US';
 
+            if(iframe.contentDocument) iframe.contentDocument.body.style.paddingTop = '55px';
+
             this.showLoader(false);
         } catch (e: any) {
             this.error = e.message;

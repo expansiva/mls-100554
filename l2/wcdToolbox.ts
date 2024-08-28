@@ -591,6 +591,14 @@ export class WCDToolbox extends CollabLitElement implements WCDMethods {
             right:0px
         }
 
+        .p-l0{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:-2rem;
+            left:-6px
+        }
+
         .p-l1{
             cursor:pointer;
             display:block;

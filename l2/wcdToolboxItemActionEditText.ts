@@ -54,6 +54,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             const lang = (document.documentElement.lang || '').toLowerCase();
             if (this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
             this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
+            mls.events.fire([2], ['DOMSync'] as any);
         };
         super.disconnectedCallback();
     }
@@ -90,6 +91,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     renderButton() {
+        if (this.myParent) this.myParent.onclick = (e: any) => this.clickButton(e);
         this.onclick = (e) => this.clickButton(e);
         this.classList.add('f-button');
         return html`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/></svg>`;
@@ -97,7 +99,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     renderClick() {
 
-        if(this.myParent) this.myParent.onclick = (e:any) => this.clickButton(e);
+        if (this.myParent) this.myParent.onclick = (e: any) => this.clickButton(e);
         return html``;
     }
 
@@ -127,7 +129,8 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         this.elMain.style.visibility = 'hidden';
 
-        const ret = html`<div id="edittextwcd"  @keydown="${this.onkeyDown}" @mouseup="${this.mouseUP}" @input="${this.onInput}" style="${css}">${unsafeHTML(el.outerHTML)}</div>
+        const ret = html`<div id="edittextwcd"  @keydown="${this.onkeyDown}" @mouseup="${this.mouseUP}" @input="${this.onInput}" style="${css}">${unsafeHTML(el.outerHTML)}
+            </div>
             <style>
                 #edittextwcd *{
                     margin:0px;
@@ -144,8 +147,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             if (!el) return;
             el.focus();
         }, 500);
-        
+
         return ret;
+    }
+
+    public changeType(tp: string) {
+        this.elICA.setAttribute('type', tp);
     }
 
     //---------IMPLEMENTATION-----------------
@@ -167,14 +174,22 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     private onkeyDown(e: any) {
-        e.stopPropagation();
+        
 
         if (!this.myParent || !this.elMain) return;
 
         if (e.key === 'Enter') {
+            e.stopPropagation();
             //e.preventDefault();
             //document.execCommand('insertText', false, '\n');
         } else if (e.key === 'Backspace') {
+            e.stopPropagation();
+
+        } else if (e.key === 'c') {
+            e.stopPropagation();
+
+        } else if (e.key === 'v') {
+            e.stopPropagation();
 
         }
 
@@ -194,7 +209,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
                 },
                 {
                     name: 'edit',
-                    args: '{"tp":"edit", "attr":"'+this.myInfos.attr+'"}',
+                    args: '{"tp":"edit", "attr":"' + this.myInfos.attr + '"}',
                     position: 'p-l1',
                     toolboxOptions: { background: '#fff' }
                 },
@@ -227,55 +242,30 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (selectedText === '') return;
 
-        const rect = range.getBoundingClientRect();
+        const rects = range.getClientRects();
 
-        const base = (rect.right - rect.left) / 2
+        const father = this.querySelector('#edittextwcd');
+        if (!father) return;
 
-        // Cria uma nova div
         const newDiv = document.createElement('wcd-popup-100554');
-
-        if (this.isSameLine(range)) {
-            newDiv.setAttribute('x', (e.layerX - base).toString());
-            newDiv.setAttribute('y', e.layerY);
-            newDiv.style.transform = 'translate(-49%, -139%)';
-        } else {
-            newDiv.setAttribute('x', e.layerX);
-            newDiv.setAttribute('y', (e.layerY + 15 ).toString());
-            newDiv.style.transform = 'translate(-49%, 0%)';
-        }
-
-        // Adiciona a div ao container
-        this.appendChild(newDiv);
+        father.appendChild(newDiv);
         
+        const rectFather = father.getBoundingClientRect();
+        const firstLineRect = rects[0];
+
+        const left = (firstLineRect.left - rectFather.left);
+        const top = (firstLineRect.top - rectFather.top) - newDiv.offsetHeight;
+
+        newDiv.setAttribute('x', (left).toString());
+        newDiv.setAttribute('y', (top).toString());
+
+        newDiv.style.transform = 'translate(-50%, -130%)';
+
+        
+
     }
 
-    private isSameLine(range: any): boolean{
-        // Cria um clone da range para evitar alterações na seleção original
-        const rangeClone = range.cloneRange();
-
-        // Adiciona um marcador invisível no início da seleção
-        rangeClone.collapse(true);
-        const startMarker = document.createElement('span');
-        rangeClone.insertNode(startMarker);
-
-        // Adiciona um marcador invisível no fim da seleção
-        const rangeEndClone = range.cloneRange();
-        rangeEndClone.collapse(false);
-        const endMarker = document.createElement('span');
-        rangeEndClone.insertNode(endMarker);
-
-        // Obtém as coordenadas dos marcadores
-        const startRect = startMarker.getBoundingClientRect();
-        const endRect = endMarker.getBoundingClientRect();
-
-        // Remove os marcadores do DOM
-        startMarker.remove();
-        endMarker.remove();
-
-        // Verifica se a seleção começou em uma linha e terminou em outra
-        return (startRect.top === endRect.top);
-    }
-
+    
     private backButton() {
 
         if (!this.myInfos.attr || !this.elICA) return;
