@@ -1,12 +1,13 @@
 /// <mls shortName="wcdOverlayLitBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, PropertyValueMap } from 'lit';
+
 import { property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { ActionTag, IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes';
+import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { IWCDCommand } from './_100554_wcdCommandBase';
 
-export abstract class WcdOverlayLitBase extends CollabLitElement {
+export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDOverlayMethods {
 
     @property({ type: String, reflect: true }) level: string = mls.actualLevel.toString() || '7';
 
@@ -18,27 +19,27 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
     }
 
     //------------COMPONENT---------------
-    
+
     createRenderRoot() {
         return this; // dont use shadow root
     }
 
     //-----------IMEPLEMENTATION----------    
 
-    abstract myKeyEvents:{[key: string]:Function}
-    
-    abstract changeOverlayItemsLevel() :void 
+    abstract myKeyEvents: { [key: string]: Function }
+
+    abstract changeOverlayItemsLevel(): void
 
     abstract createOverlayItems(): void;
 
-    abstract selectItem(ica:IcaLitElementBaseMethods): void;
+    abstract selectItem(ica: IcaLitElementBaseMethods): void;
 
     abstract getActionsTagsDefault(): { [key: string]: ActionTag };
 
     private onkeyDown(e: any) {
 
         e.stopPropagation();
-        
+
         let el = this.querySelector('wcd-toolbox-100554');
 
         const param: IWCDCommand = {
@@ -55,7 +56,7 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
         el = el.parentElement;
 
         if (!(el as any).info) {
-            
+
             if (this.myKeyEvents[e.key]) this.myKeyEvents[e.key](param);
             return;
 
@@ -66,8 +67,8 @@ export abstract class WcdOverlayLitBase extends CollabLitElement {
         if (this.myKeyEvents[e.key]) {
             param.selectedIca = el as any;//as IcaLitElementBase;
             this.myKeyEvents[e.key](param);
-        }   
+        }
 
     }
-    
+
 }
