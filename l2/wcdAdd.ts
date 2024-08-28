@@ -1,6 +1,6 @@
 /// <mls shortName="wcdAdd" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, css, LitElement } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, query, property } from 'lit/decorators.js';
 import { getMessageKey } from "./_100554_collabLitElement";
 import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
@@ -46,6 +46,8 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
     @query('add-tooltip') addTooltip: HTMLElement | undefined;
     @query('.add-button-helper') helperContainer: HTMLElement | undefined;
 
+    @property() intialMode: 'close' | 'open' = 'close';
+
     createRenderRoot() {
         return this;
     }
@@ -64,19 +66,19 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         this.msg = messages[lang];
         this.style.zIndex = '99999';
         return html`
-        <div class="add-button close">
+        <div class="add-button ${this.intialMode === 'close' ? 'close' : ''}">
             <button @click=${this.onButtonClick} >
                 <span>
                     ${collab_xmark}
                 </span>
             </button>
             <div class="buttons-actions">
-                <button @click=${this.handleImageClick} data-tooltip=${this.msg.image} ><span>${collab_image}</span></button>
-                <button @click=${this.handleUnsplashClick} data-tooltip=${this.msg.unsplash}><span>${collab_unsplash}</span></button>
-                <button @click=${this.handleVideoClick} data-tooltip=${this.msg.video}><span>${collab_video}</span></button>
-                <button @click=${this.handleEmbedClick} data-tooltip=${this.msg.embed}><span>${collab_link}</span></button>
-                <button @click=${this.handleCodeClick} data-tooltip=${this.msg.code}><span>${collab_code}</span></button>
-                <button @click=${this.handleNewPartClick} data-tooltip=${this.msg.newPart}><span>${collab_ellipsis}</span></button>
+                <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'image')} @click=${this.handleImageClick} data-tooltip=${this.msg.image} ><span>${collab_image}</span></button>
+                <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'unsplash')} @click=${this.handleUnsplashClick} data-tooltip=${this.msg.unsplash}><span>${collab_unsplash}</span></button>
+                <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'video')} @click=${this.handleVideoClick} data-tooltip=${this.msg.video}><span>${collab_video}</span></button>
+                <button  @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'embed')} @click=${this.handleEmbedClick} data-tooltip=${this.msg.embed}><span>${collab_link}</span></button>
+                <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'code')} @click=${this.handleCodeClick} data-tooltip=${this.msg.code}><span>${collab_code}</span></button>
+                <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'part')} @click=${this.handleNewPartClick} data-tooltip=${this.msg.newPart}><span>${collab_ellipsis}</span></button>
                 <add-tooltip></add-tooltip>
             </div>
         </div>
@@ -92,6 +94,27 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
     private async handleUnsplashClick(e: MouseEvent) {
         e.stopPropagation();
         this.showHelper('unsplash');
+    }
+
+    private handleClick(action: 'image' | 'unsplash' | 'video' | 'embed' | 'code' | 'part') {
+        const obj = {
+            image: this.handleImageClick,
+            unsplash: this.handleUnsplashClick,
+            video: this.handleVideoClick,
+            embed: this.handleEmbedClick,
+            code: this.handleCodeClick,
+            part: this.handleNewPartClick,
+        };
+
+        if (obj[action]) obj[action](new MouseEvent('click'));
+
+    }
+
+    private async handleKeyDown(e: KeyboardEvent, btnAction: 'image' | 'unsplash' | 'video' | 'embed' | 'code' | 'part') {
+        e.stopPropagation();
+        if (e.key === 'Enter') {
+            this.handleClick(btnAction);
+        }
     }
 
     private async handleImageClick(e: MouseEvent) {
