@@ -33,9 +33,9 @@ function getDiffs(originalLines: string[], modifiedLines: string[]) {
 
 function applyDiffs(originalModel: monaco.editor.ITextModel, diffs: IDiffs[]) {
 
-    const editor = findEditorByModel(originalModel);
+    const editor = findEditor();
     if (!editor) return;
-
+    editor.setModel(originalModel);
     const edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
 
     diffs.forEach(diff => {
@@ -60,12 +60,17 @@ function applyDiffs(originalModel: monaco.editor.ITextModel, diffs: IDiffs[]) {
 
 }
 
-function findEditorByModel(model: monaco.editor.ITextModel): monaco.editor.ICodeEditor | null {
+function findEditor(): monaco.editor.ICodeEditor | null {
+
+    const { shortName, project } = (mls.actual[2] as any).left;
+    let associatedEditor = null;
+
+    const mfile = mls.l2.editor.get({ shortName, project });
+    if (!mfile) return associatedEditor;
 
     const allEditors = monaco.editor.getEditors();
-    let associatedEditor = null;
     allEditors.forEach((editor) => {
-        if (editor.getModel() === model) {
+        if (editor.getModel() === mfile.model || editor.getModel() === (mfile as any)['modelHTML']) {
             associatedEditor = editor;
         }
     });
@@ -75,8 +80,9 @@ function findEditorByModel(model: monaco.editor.ITextModel): monaco.editor.ICode
 
 function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent: string) {
 
-    const editor = findEditorByModel(model);
+    const editor = findEditor();
     if (!editor) return;
+    editor.setModel(model);
     const lastLineNumber = model.getLineCount();
     const lastLineLength = model.getLineLength(lastLineNumber);
     const range = new monaco.Range(1, 1, lastLineNumber, lastLineLength + 1);

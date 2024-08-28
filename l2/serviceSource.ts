@@ -1811,7 +1811,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     private isHTMLSystemChange: boolean = false;
     private syncDom: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
-        if (ev.level !== this.level) return;
         if (this.position === 'right') return;
         try {
             const op = this.position === 'left' ? 'right' : 'left';
@@ -1829,6 +1828,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (!model || !iframe) return;
             this.isHTMLSystemChange = true;
             sync(model, iframe);
+            if (this.menu.setIconActive && this.menu.lastIcon !== 'icHTML') this.menu.setIconActive('icHTML');
 
         } catch (e) {
             console.error('Error on syncDom: ', e);
