@@ -221,7 +221,17 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     }
 
-    private mouseUP(e: any) {
+    private mouseUP(e: MouseEvent) {
+
+
+        let click = e.target as HTMLElement;
+        if (!click) return;
+
+        if (click.tagName && click.tagName.toLocaleLowerCase() !== 'wcd-popup-100554') {
+            click = click.closest('wcd-popup-100554') as HTMLElement;
+
+            if (click && click.tagName && click.tagName.toLocaleLowerCase() === 'wcd-popup-100554') return;
+        } else if( click.tagName && click.tagName.toLocaleLowerCase() === 'wcd-popup-100554') return;
 
         const existingDiv = this.querySelector('wcd-popup-100554');
         if (existingDiv) {
