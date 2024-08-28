@@ -255,7 +255,7 @@ async function getTokens(myTokens: string[], mfile: mls.l2.editor.IPath, theme: 
     }
 }
 
-function getAllWebComponentsInSource(source: string): string[] {
+export function getAllWebComponentsInSource(source: string): string[] {
     const regex = /<([a-z0-9]+-[a-z0-9-]*)(?=\s|>|\/|$)/g;
     const matches = source.match(regex) || [];
     const componentNames = matches.map(tag => tag.slice(1));

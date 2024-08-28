@@ -9,7 +9,7 @@ import { convertTagToFileName } from './_100554_utilsLit'
 import { initServicePreviewView } from './_100554_servicePreviewView';
 import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
 import { IcaLitElement } from './_100554_icaLitElement';
-
+import { IWCDParams } from '_100554_serviceIca'
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
@@ -19,7 +19,9 @@ const message_pt = {
     editStyle: 'Editar estilo',
     pause: 'Parar preview',
     dark: ' escuro',
-    light: 'claro'
+    light: 'claro',
+    help: 'Ajuda'
+
 }
 
 const message_en = {
@@ -28,7 +30,8 @@ const message_en = {
     editStyle: 'Edit style',
     pause: 'Pause preview',
     dark: 'dark',
-    light: 'light'
+    light: 'light',
+    help: 'Help'
 }
 
 type MessageType = typeof message_en;
@@ -102,6 +105,7 @@ export class ServicePreview100554 extends ServiceBase {
     public onClickButton = (op: string, opMenu?: string): boolean => {
         if (op === 'btWatch') return this.toogleWatch();
         if (op === 'btEditStyle') return this.editStyles();
+        if (op === 'btHelp') return this.onHelpClick();
         if (op === 'btVariations') return this.onBtVariationsClick(opMenu);
         if (op === 'btTheme') return this.onBtThemeClick();
         if (op === 'btTokens') return this.onBtTokensClick(opMenu);
@@ -124,6 +128,7 @@ export class ServicePreview100554 extends ServiceBase {
             btVariations: this.msg.variations + ';f1ab:menu:0 - Default,1 - Portugues,2 - Espanhol,3 - Russo',
             btEditStyle: this.msg.editStyle + ';f0d0',
             btWatch: this.msg.pause + ';Update Preview;f04c;f04b',
+            btHelp: this.msg.help + ';f059',
         },
         actionDefault: '', // call after close icon clicked
         iconDefault: 'icPreviewD',
@@ -161,7 +166,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (htmlEl) htmlEl.lang = this.objVariations[variation];
         window.globalVariation = !isNaN(+variation) ? +variation : 0;
         if (window.top) window.top.window.globalVariation = !isNaN(+variation) ? +variation : 0;
-        if(this.level === 7) this.requestUpdateAllIcaComponentsInPage();
+        if (this.level === 7) this.requestUpdateAllIcaComponentsInPage();
         else this.onReloader();
         return true;
     }
@@ -197,6 +202,17 @@ export class ServicePreview100554 extends ServiceBase {
         return true;
     }
 
+    private onHelpClick(): boolean {
+        this.openService('_100554_serviceIca', 'left', 4);
+        const params: IWCDParams = {
+            level: 4,
+            op: 'AboutICA',
+            position: 'left',
+            wdcPath: '',
+        }
+        mls.events.fire([4], ['WCDEvent'] as any, JSON.stringify(params), 300);
+        return true;
+    }
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
@@ -221,7 +237,7 @@ export class ServicePreview100554 extends ServiceBase {
     private setEvents() {
 
         mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
-        
+
         mls.events.addEventListener([3], ['DSStyleChanged', 'DSTokensChanged'] as any, async (ev) => {
             const rc: any = JSON.parse(ev.desc as any);
             if (

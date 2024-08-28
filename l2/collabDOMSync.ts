@@ -95,6 +95,7 @@ function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent:
 }
 
 export function formatHtml(html: string) {
+    console.info(html)
     // Cria um container temporário para o HTML
     const container = document.createElement('div');
     container.innerHTML = html;

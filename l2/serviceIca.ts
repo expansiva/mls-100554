@@ -1,9 +1,12 @@
 /// <mls shortName="serviceIca" project="100554" enhancement="_100554_enhancementLitService" groupName="service" />
 
 import { html, css, unsafeHTML, repeat } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initCollabICATree } from './_100554_collabIcaTree';
+import { getAllWebComponentsInSource } from './_100554_libCompile';
+import { convertTagToFileName } from './_100554_utilsLit';
+
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -24,11 +27,12 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceFca100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    
+
     static styles = css``
 
-    @property()
-    activeTab: ITabType = 'AboutICA';
+    @property() activeTab: ITabType = 'AboutICA';
+
+    @query('#helpDiv') helpDiv: HTMLDivElement | undefined;
 
     constructor() {
         super();
@@ -40,7 +44,7 @@ export class ServiceFca100554 extends ServiceBase {
         icon: '&#xf2db',
         state: 'background',
         position: 'left',
-        tooltip: 'Service ICA',
+        tooltip: 'ICA',
         visible: true,
         widget: '_100554_serviceIca',
         level: [4]
@@ -55,7 +59,7 @@ export class ServiceFca100554 extends ServiceBase {
         actions: {
         },
         icons: {
-            AboutICA: 'About ICA;3f',
+            AboutICA: 'Help;3f',
             Navigation: 'Navigation;f041',
             Properties: 'Properties;f0ce',
             Styles: 'Styles;f5ad',
@@ -126,10 +130,51 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     renderAboutICA() {
-        return html`<div>In develpoment: AboutICA</div>`;
+        const { shortName, project } = (mls.actual[2] as any).left;
+        const mfile = mls.l2.editor.get({ shortName, project });
+        if (!mfile) return html`<div>No file opened</div>`;
+        const modelHTML = (mfile as any).modelHTML;
+        if (!modelHTML) return html`<div>No html source founded in opened file</div>`;
+        const htmlFile = modelHTML.getValue() || '';
+
+        const div = document.createElement('div');
+        div.innerHTML = htmlFile;
+
+        const icaPage = div.querySelector('ica-page-story-100554');
+        if (icaPage) {
+            this.loadHelpPage('wcdOverlayModeStory', 100554);
+            return html`<div id="helpDiv"></div>`
+        }
+
+        return html`<div>In develpoment: Help ICA</div>`;
     }
 
     //------------IMPLEMENTATION------------------
+
+    private async loadHelpPage(shortName: string, project: number) {
+        const keyFile = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
+        const storFile = mls.stor.files[keyFile];
+        if (storFile) {
+            const content = await storFile.getContent();
+            if (this.helpDiv && typeof content === 'string') {
+                const allWcs = getAllWebComponentsInSource(content);
+
+                allWcs.forEach((wc) => {
+                    const fileName = convertTagToFileName(wc);
+                    const script = document.createElement('script');
+                    script.type = 'module';
+                    script.id = fileName;
+                    script.src = (`/${fileName}`);
+                    this.helpDiv?.appendChild(script)
+                });
+
+                const div = document.createElement('div');
+                div.innerHTML = content;
+                this.helpDiv.appendChild(div);
+            }
+
+        }
+    }
 
     private setEvents(): void {
         mls.events.addListener(4, 'WCDEvent' as any, (ev) => this.onWCDEvent(ev));
