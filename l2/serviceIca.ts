@@ -140,13 +140,9 @@ export class ServiceFca100554 extends ServiceBase {
         const div = document.createElement('div');
         div.innerHTML = htmlFile;
 
-        const icaPage = div.querySelector('ica-page-story-100554');
-        if (icaPage) {
-            this.loadHelpPage('wcdOverlayModeStory', 100554);
-            return html`<div id="helpDiv"></div>`
-        }
+        this.loadHelpPage('wcdOverlayModeStory', 100554);
+        return html`<div id="helpDiv"></div>`
 
-        return html`<div>In develpoment: Help ICA</div>`;
     }
 
     //------------IMPLEMENTATION------------------
