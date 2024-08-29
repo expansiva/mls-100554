@@ -5,8 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { CollabLitElement } from './_100554_collabLitElement';
 import { ServiceBase } from './_100554_serviceBase';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import {WCDMethods} from './_100554_wcdTypes';
+import { WCDToolboxMethodos, WCDToolboxItemMethodos } from './_100554_wcdTypes';
 import * as tps from './_100554_icaTypes';
 
 export function initWCDToolbox() {
@@ -14,7 +13,7 @@ export function initWCDToolbox() {
 } 
 
 @customElement('wcd-toolbox-100554')
-export class WCDToolbox extends CollabLitElement implements WCDMethods {
+export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     // ------------ PROPERTIES ------------------
 
@@ -152,7 +151,7 @@ export class WCDToolbox extends CollabLitElement implements WCDMethods {
             const ok = await this.importWCDActions(i.name);
             if (!ok) continue;
 
-            const el = document.createElement(convertFileNameToTag(i.name)) as WcdToolboxItemBase;
+            const el = document.createElement(convertFileNameToTag(i.name)) as WCDToolboxItemMethodos;
             el.className = `p ${i.position}`;
             el.myParent = this;
             el.elMain = this.elMain;

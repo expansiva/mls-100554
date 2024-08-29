@@ -4,8 +4,7 @@
 import { property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { ActionTag, IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { WCDOverlayMethods } from './_100554_wcdTypes';
-import { IWCDCommand } from './_100554_wcdCommandBase';
+import { WCDOverlayMethods, IWCDCommand, WCDToolboxMethodos } from './_100554_wcdTypes';
 
 export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDOverlayMethods {
 
@@ -36,15 +35,15 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
 
     abstract getActionsTagsDefault(): { [key: string]: ActionTag };
 
-    private onkeyDown(e: any) {
+    private onkeyDown(e: KeyboardEvent) {
 
         e.stopPropagation();
 
-        let el = this.querySelector('wcd-toolbox-100554');
+        let el = this.querySelector('wcd-toolbox-100554') as WCDToolboxMethodos;
 
         const param: IWCDCommand = {
             args: e,
-            overlay: this as any,
+            overlay: this,
             selectedIca: undefined
         };
 
@@ -53,19 +52,8 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
             return;
         }
 
-        el = el.parentElement;
-
-        if (!(el as any).info) {
-
-            if (this.myKeyEvents[e.key]) this.myKeyEvents[e.key](param);
-            return;
-
-        }
-
-        el = (el as any).info?.element as HTMLElement;
-
         if (this.myKeyEvents[e.key]) {
-            param.selectedIca = el as any;//as IcaLitElementBase;
+            param.selectedIca = el.elICA;//as IcaLitElementBase;
             this.myKeyEvents[e.key](param);
         }
 

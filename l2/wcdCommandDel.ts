@@ -1,7 +1,8 @@
 /// <mls shortName="wcdCommandDel" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { IWCDCommand } from './_100554_wcdTypes';
+import { dispatchEventConciliate } from './_100554_wcdCommandBase';
 
 export function execute(param: IWCDCommand) {
 

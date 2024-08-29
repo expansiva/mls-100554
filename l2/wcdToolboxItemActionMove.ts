@@ -1,18 +1,17 @@
 /// <mls shortName="wcdToolboxItemActionMove" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { IActionsToolbox } from './_100554_icaGlobal';
-import { WCDToolbox } from './_100554_wcdToolbox';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import {WCDToolboxMethodos} from './_100554_wcdTypes';
+import {IcaLitElementBaseMethods, IActionsToolbox} from './_100554_icaTypes';
 
 //version 4
 @customElement('wcd-toolbox-item-action-move-100554')
 export class WCDToolboxItemActionMove extends LitElement {
 
-    public myParent: WCDToolbox | undefined;
+    public myParent: WCDToolboxMethodos | undefined;
     public elMain: HTMLElement | undefined;
-    public elFCA: IcaLitElementBase | undefined;
-    private myElements: IcaLitElementBase[] | undefined;
+    public elFCA: IcaLitElementBaseMethods | undefined;
+    private myElements: IcaLitElementBaseMethods[] | undefined;
 
     createRenderRoot() {
         return this;
@@ -57,7 +56,7 @@ export class WCDToolboxItemActionMove extends LitElement {
             e.stopPropagation();
             if (!this.myParent || !this.elFCA) return;
 
-            const myGrandFather = this.myParent.parentElement as IcaLitElementBase;
+            const myGrandFather = this.myParent.parentElement as IcaLitElementBaseMethods;
 
             document.body.style.cursor = '';
 
@@ -78,7 +77,7 @@ export class WCDToolboxItemActionMove extends LitElement {
             const move = aux.tagName.toLocaleLowerCase();
 
             const newEl: any = this.elFCA.cloneNode(true);
-            /// newEl.myInnerHTML = this.elFCA.myInnerHTML; ver questão filhos
+            /// newEl.myInnerHTML = this.elFCA.myInnerHTML; ver questÃ£o filhos
 
             switch (move) {
                 case 'wcd-dragdrop-aux-before':
@@ -108,7 +107,7 @@ export class WCDToolboxItemActionMove extends LitElement {
             //}
 
             setTimeout(() => {
-                if (this.myParent) mls.events.fire((+(this.myParent.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+                if (this.myParent) mls.events.fire((+(this.myParent.level)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
             }, 500)
 
 
@@ -147,7 +146,7 @@ export class WCDToolboxItemActionMove extends LitElement {
         if (!this.elMain || !this.elFCA || !this.myParent || !document.defaultView) return;
 
         //WCD's father will always be an FCA
-        const myGrandFather = this.myParent.parentElement as IcaLitElementBase;
+        const myGrandFather = this.myParent.parentElement as IcaLitElementBaseMethods;
 
         const scope = myGrandFather.getMyScope();
         if (!scope) return;
@@ -171,9 +170,9 @@ export class WCDToolboxItemActionMove extends LitElement {
     }
 
     
-    private onlyNeedAddTag(array: IcaLitElementBase[]): IcaLitElementBase[] {
+    private onlyNeedAddTag(array: IcaLitElementBaseMethods[]): IcaLitElementBaseMethods[] {
 
-        const a: IcaLitElementBase[] = [];
+        const a: IcaLitElementBaseMethods[] = [];
 
         for (let i = 0; i <= array.length; i++) {
 
@@ -196,7 +195,7 @@ export class WCDToolboxItemActionMove extends LitElement {
         return a;
     }
 
-    private changeStateDrag(elBase: IcaLitElementBase, elScope: HTMLElement, elMove: IcaLitElementBase): void {
+    private changeStateDrag(elBase: IcaLitElementBaseMethods, elScope: HTMLElement, elMove: IcaLitElementBaseMethods): void {
 
         if (!elBase) return;
         if (elBase.getAttribute('renderType') === 'editactive' || !this.myParent) return;
@@ -252,7 +251,7 @@ export class WCDToolboxItemActionMove extends LitElement {
 
     }
 
-    private changeStateDrop(elBase: IcaLitElementBase): void {
+    private changeStateDrop(elBase: IcaLitElementBaseMethods): void {
 
         if (!elBase) return;
         if (elBase.getAttribute('renderType') === 'editactive') return;

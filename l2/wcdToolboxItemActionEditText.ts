@@ -2,11 +2,10 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { initWcdPopup } from './_100554_wcdPopup';
-import { WCDToolboxItemEditTextMethodos, WCDPopupMethodos } from './_100554_wcdTypes';
+import { WCDToolboxItemEditTextMethodos, WCDPopupMethodos, WCDToolboxMethodos } from './_100554_wcdTypes';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -26,9 +25,9 @@ const messages: { [key: string]: MessageType } = {
 @customElement('wcd-toolbox-item-action-edit-text-100554')
 export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements WCDToolboxItemEditTextMethodos {
 
-    public myParent: WCDToolbox | undefined;
-    public elMain: HTMLElement | undefined | any;
-    public elICA: IcaLitElementBase | undefined | any;
+    public myParent: WCDToolboxMethodos | undefined;
+    public elMain: HTMLElement | undefined ;
+    public elICA: IcaLitElementBaseMethods | undefined;
     public args: string | undefined;
 
     private myInfos = { tp: "", attr: "text" }
@@ -99,14 +98,16 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
 
     renderEdit() {
 
-        if (!this.elICA || !this.myParent) return;
+        if (!this.elICA || !this.myParent || !this.elICA.widget) return;
 
         this.style.left = '0';
         this.style.top = '0';
         this.style.background = '#fff';
 
         const ref = this.elICA.querySelector(this.elICA.widget);
-        if (ref) this.elMain = ref;
+        if (ref) this.elMain = ref as HTMLElement;
+
+        if (!this.elMain) return;
 
         const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;
 
@@ -163,9 +164,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
     private fireChange(): void {
 
         if ((this.myText !== this.firstText) || (this.myTag !== this.firstTag)) {
+
+            if (!this.elICA ) return;
+
             let aux = '';
             const lang = (document.documentElement.lang || '').toLowerCase();
-            if (this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
+            if (this.elICA.globalVariation && this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
             this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
             mls.events.fire([2], ['DOMSync'] as any);
         };
@@ -173,6 +177,8 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
     }
 
     public changeType(tp: string) {
+
+        if (!this.elICA) return;
 
         const oldTp = this.elICA.getAttribute('type');
 
@@ -220,11 +226,11 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
             // Dispare o evento no elemento alvo
             newElement.dispatchEvent(mouseUpEvent);
             
-        },500)
+        },100)
 
         el.remove();
 
-        if (this.myParent) this.myParent.updateSize(this.elICA, this.myParent, true);
+        if (this.elICA && this.myParent) this.myParent.updateSize(this.elICA, this.myParent, true);
     }
 
     private moveSelectionToElement(newElement: HTMLElement) {

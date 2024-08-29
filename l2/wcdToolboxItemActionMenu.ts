@@ -3,9 +3,9 @@
 import { html, LitElement, render, repeat, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import * as icaGlobal from './_100554_icaGlobal';
-import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
+import {WCDToolboxMethodos} from './_100554_wcdTypes';
 
 
 
@@ -42,9 +42,9 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
 
     private myMsg: MessageType = messages['en'];
 
-    public myParent: WCDToolbox | undefined;
+    public myParent: WCDToolboxMethodos | undefined;
     public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBase | undefined;
+    public elICA: IcaLitElementBaseMethods | undefined;
     public args: string | undefined;
 
     @property({ reflect: false }) myItens: IWCDMenu100554 | undefined;
@@ -81,7 +81,7 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
         <wcd-toolbox-itemmenu>
         ${repeat(this.myItens.itens,
             ((key: IWCDMenuItem100554, idx: number) => 'i' + idx) as any,
-            ((item: IWCDMenuItem100554, index: any) => {
+            ((item: IWCDMenuItem100554, index: number) => {
 
                 return this.renderItem(item, index);
 
@@ -92,7 +92,7 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
         <wcd-toolbox-submenu style="display:none">
             ${repeat(this.myItens.subItens,
             ((key: IWCDMenuItem100554, idx: number) => 'i' + idx) as any,
-            ((item: IWCDMenuItem100554, index: any) => {
+            ((item: IWCDMenuItem100554, index: number) => {
 
                 return this.renderSubItem(item, index);
 
@@ -202,7 +202,7 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
 
     private goToParent() {
 
-        const toParent = (el: IcaLitElementBase) => {
+        const toParent = (el: IcaLitElementBaseMethods) => {
 
 
             let parent = el.parentElement;
@@ -210,9 +210,9 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
             if (!parent) return;
             const tag = parent.tagName.toLowerCase();
 
-            if (!tag.startsWith(`${icaGlobal.PREFIX}-`)) toParent(parent as IcaLitElementBase);
+            if (!tag.startsWith(`${icaGlobal.PREFIX}-`)) toParent(parent as IcaLitElementBaseMethods);
             else if (tag.startsWith(`${icaGlobal.PREFIX}-`)) {
-                const overlayItem = (parent as IcaLitElementBase).overlayRef;
+                const overlayItem = (parent as IcaLitElementBaseMethods).overlayRef;
                 if (!overlayItem) return;
                 overlayItem.click();
             }
@@ -227,12 +227,12 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
 
     private goToFirstChild() {
 
-        const toFirstChild = (el: IcaLitElementBase) => {
+        const toFirstChild = (el: IcaLitElementBaseMethods) => {
 
 
             if (el.children.length === 0) return;
 
-            const findNextIca = (childrens: Element[]): IcaLitElementBase => {
+            const findNextIca = (childrens: Element[]): IcaLitElementBaseMethods => {
                 const child = childrens.find((item => item.tagName.toLowerCase().startsWith(`${icaGlobal.PREFIX}-`)));
                 if (!child) {
                     for (let ch of childrens) {
@@ -242,7 +242,7 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
                         return next;
                     }
                 }
-                return child as IcaLitElementBase;
+                return child as IcaLitElementBaseMethods;
             };
 
             const arrChildren = (Array.from(el.shadowRoot ? el.shadowRoot.children : el.children));

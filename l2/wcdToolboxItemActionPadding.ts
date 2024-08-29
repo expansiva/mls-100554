@@ -2,9 +2,9 @@
 
 import { html, LitElement, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { WCDToolboxMethodos} from './_100554_wcdTypes';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 
 
 /// **collab_i18n_start**
@@ -40,9 +40,9 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
 
     private myMsg: MessageType = messages['en'];
 
-    public myParent: WCDToolbox | undefined;
+    public myParent: WCDToolboxMethodos | undefined;
     public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBase | undefined;
+    public elICA: IcaLitElementBaseMethods | undefined;
     public args: string | undefined;
 
     private elExternal: HTMLElement | undefined;

@@ -2,9 +2,9 @@
 
 import { unsafeHTML } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
-import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { WCDToolboxMethodos} from './_100554_wcdTypes';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { initCollabSelectOneWithDescription, CollabSelectOneWithDescription100554 } from './_100554_collabSelectOneWithDescription'
 
 //version 4
@@ -12,9 +12,9 @@ import { initCollabSelectOneWithDescription, CollabSelectOneWithDescription10055
 @customElement('wcd-toolbox-item-action-events-100554')
 export class WcdToolboxItemActionEvents extends WcdToolboxItemBase {
 
-    public myParent: WCDToolbox | undefined;
+    public myParent: WCDToolboxMethodos | undefined;
     public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBase | undefined;
+    public elICA: IcaLitElementBaseMethods | undefined;
     public args: string | undefined;
 
     @query('collab-select-one-with-description-100554') elEvents: CollabSelectOneWithDescription100554 | undefined;

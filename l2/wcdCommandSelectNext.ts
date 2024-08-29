@@ -1,8 +1,6 @@
 /// <mls shortName="wcdCommandSelectNext" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { IWCDCommand } from './_100554_wcdCommandBase';
+import { IWCDCommand } from './_100554_wcdTypes';
 
 export async function execute(param: IWCDCommand) {
 

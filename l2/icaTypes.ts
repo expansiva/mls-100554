@@ -59,7 +59,7 @@ export interface IActionLevels {
 
 export interface ActionTag {
     name: string; // tag name or component name
-    position?: 'p-l0' | 'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' | 'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' | 'p-r1' | 'p-r2' | 'p-r3' | 'p-r4'; // suggestion of position, WCD will define
+    position?: 'p-l0' | 'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' | 'p-m0' | 'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' | 'p-r0' | 'p-r1' | 'p-r2' | 'p-r3' | 'p-r4'; // suggestion of position, WCD will define
     args?: string; // optional args string, can be a JSON string
     level?: number[]; // levels where this will be visible
     toolboxOptions?: IToolboxOptions
@@ -71,13 +71,23 @@ export interface IToolboxOptions {
 }
 
 export interface IcaLitElementBaseMethods extends LitElement {
+    level: '1' | '2' | '3' | '4' | '5' | '6' | '7' | undefined;
+    globalVariation: number | undefined;
+    widget: string | undefined;
     overlayRef: HTMLElement | undefined;
     mySymbol: string;
     getActionsTags(): ActionTag[];
     changeStateStyle(info: {}): void;
     changeStateHtml(info: string): void;
     allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
-
+    clickMenu: Function | undefined;
+    getICAComponents(scope: HTMLElement): IcaLitElementBaseMethods[];
+    getMyScope(): IcaLitElementBaseMethods | HTMLElement | undefined;
+    getIcaParent(target: HTMLElement): IcaLitElementBaseMethods | undefined;
+    getMyInfos(): { root: string, subGroup: string, finalGroup: string };
+    getMyEvents(): string;
+    getDefinitionFromEvent(event: string): string;
+    getAtributtes(): string[];
 }
 
 export interface IICADepths {

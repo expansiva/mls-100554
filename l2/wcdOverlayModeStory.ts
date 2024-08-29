@@ -3,14 +3,14 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
-import { WcdOverlayModeStoryItem, initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
 import { ActionTag, IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes';
+import { IWCDCommand, WCDToolboxMethodos } from './_100554_wcdTypes';
 import { getPosition } from './_100554_icaGlobal';
-
 import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
 import { execute as excCommandDel } from './_100554_wcdCommandDel';
 import { execute as excCommandCopy } from './_100554_wcdCommandCopy';
 import { execute as excCommandNext } from './_100554_wcdCommandSelectNext';
+import { WcdOverlayModeStoryItem, initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
 
 @customElement('wcd-overlay-mode-story-100554')
 export class WcdOverlayModeStory extends WcdOverlayLitBase {
@@ -22,7 +22,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
 
     private resizeObserver: ResizeObserver | undefined;
 
-    private keys: any = {
+    private keys: {[key:string]:string} = {
         'ArrowDown': 'down',
         'ArrowLeft': 'left',
         'ArrowUp': 'up',
@@ -42,21 +42,24 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         'ArrowRight':  this.onkeydownArrow.bind(this)
     };
 
-    private onkeydownArrow(e: any) {
+    private onkeydownArrow(e:IWCDCommand ) {
 
-        const param = {
+        const param:IWCDCommand = {
             args: {},
             overlay: e.overlay,
             selectedIca: e.selectedIca
         }
-        e = e.args as KeyboardEvent;
-
-        e.preventDefault();
         
-        if (!this.keys[e.key]) return;
-        const info:any = {};
-        info.position = this.keys[e.key];
-        info.positionMode = e.altKey ? 'tree' : 'visual';
+        const event = e.args as KeyboardEvent;
+
+        event.preventDefault();
+        
+        if (!this.keys[event.key]) return;
+        const info: { position: string, positionMode: string } =
+            { position: '', positionMode: '' };
+
+        info.position = this.keys[event.key];
+        info.positionMode = event.altKey ? 'tree' : 'visual';
         param.args = info;
 
         excCommandNext(param);
@@ -77,7 +80,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
             },
             'backButton': {
                 name: 'button',
-                position: 'p-r0' as any,
+                position: 'p-r0',
                 args: '',
                 level: [1, 2, 3, 4, 5, 6]
             },
@@ -128,7 +131,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         return {
             'backButton': {
                 name: 'button',
-                position: 'p-r0' as any,
+                position: 'p-r0',
                 args: '',
                 level: [1, 2, 3, 4, 5, 6]
             },
@@ -155,6 +158,18 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
                 name: "_100554_wcdTitle",
                 level: [1, 2, 3, 4, 5, 6],
                 position: 'p-r3',
+                args: ''
+            },
+            'edit-code': {
+                name: "_100554_wcdToolboxItemActionEditCode",
+                level: [2, 4],
+                position: 'p-l0',
+                args: ''
+            },
+            'code-language': {
+                name: "_100554_wcdToolboxItemActionCodeLanguage",
+                level: [2, 4],
+                position: 'p-l0',
                 args: ''
             },
         }
@@ -223,7 +238,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         const icaOverlayItem = document.createElement('wcd-overlay-mode-story-item-100554') as WcdOverlayModeStoryItem;
         icaOverlayItem.setAttribute('widget', icaInfo.element.tagName.toLowerCase());
         icaOverlayItem.setAttribute('level', this.level);
-        icaOverlayItem.info = icaInfo as any;
+        icaOverlayItem.info = icaInfo;
         icaOverlayItem.boundingPage = boundingPage;
         content.appendChild(icaOverlayItem)
     }
