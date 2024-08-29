@@ -12,7 +12,7 @@ export class WCDPopup extends LitElement {
 
   @property({ type: Number }) x = 0;
   @property({ type: Number }) y = 0;
-  @property({ type: String }) buttons = 'bold,italic,link,separator,h1,h2,h3,h4,separator,blockquote';
+  @property({ type: String }) buttons = 'bold,italic,link,separator,h1,h2,h3,h4,separator,blockquote,dropcap';
 
 static styles = css`
   :host {
@@ -79,6 +79,9 @@ static styles = css`
       case 'blockquote':
         await import('./_100554_wcdPopupItemBlockQuote');
         return 'wcd-popup-item-block-quote-100554';
+      case 'dropcap':
+        await import('./_100554_wcdPopupItemDropCap');
+        return 'wcd-popup-item-drop-cap-100554';
       default:
         console.error('invalid button name: "' + button + '"');
         return null;
