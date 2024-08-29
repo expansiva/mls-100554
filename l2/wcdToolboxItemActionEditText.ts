@@ -101,7 +101,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
         if (!this.elICA || !this.myParent || !this.elICA.widget) return;
 
         this.style.left = '0';
-        this.style.top = '0';
         this.style.background = '#fff';
 
         const ref = this.elICA.querySelector(this.elICA.widget);
@@ -127,6 +126,8 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
 
         this.myTag = el.tagName;
         this.firstTag = el.tagName;
+
+        if(this.myText !== '') this.style.top = '1px';
 
         this.elMain.style.visibility = 'hidden';
 
@@ -290,20 +291,9 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
 
         if (!this.myParent || !this.elMain) return;
 
-        if (e.key === 'Enter') {
+        if(['Enter', 'Backspace', 'Delete', 'c', 'v', 'ArrowLeft', 'ArrowRight'].includes(e.key)){
             e.stopPropagation();
-            //e.preventDefault();
-            //document.execCommand('insertText', false, '\n');
-        } else if (e.key === 'Backspace') {
-            e.stopPropagation();
-
-        } else if (e.key === 'c') {
-            e.stopPropagation();
-
-        } else if (e.key === 'v') {
-            e.stopPropagation();
-
-        }
+        } 
 
     }
 

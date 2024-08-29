@@ -18,7 +18,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
     // ------------ PROPERTIES ------------------
 
     @property({ type: String, reflect: true })
-    public level: string | undefined;
+    public level: string = '';
 
     @property({ type: String, reflect: true })
     private widget: string | undefined;

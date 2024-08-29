@@ -59,9 +59,19 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         this.addEventListener('click', (e) => {
             e.stopPropagation();
         });
+
     }
 
     render() {
+
+        if (this.args) {
+            try {
+                const j = JSON.parse(this.args);
+                if (j && j.open) this.intialMode = 'open';
+            } catch (e) {
+                
+            }
+        }
         const lang = getMessageKey(messages);
         this.msg = messages[lang];
         this.style.zIndex = '99999';

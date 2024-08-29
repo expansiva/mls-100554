@@ -14,7 +14,23 @@ export abstract class IcaApresentationTextText extends IcaLitElementBase {
     public getActionsTags(): ActionTag[] {
 
         let isBlankLine = !this.getAttribute('text');
-        if (isBlankLine) return [{ name: "add"},{ name: "edit", args:'{"tp":"edit", "attr":"text"}', position: 'p-m2' },{ name: "backButton"}];
+        if (isBlankLine) {
+
+            let auxEdt = '{"tp":"edit", "attr":"text"}';
+            let auxAdd = '';
+            const addOpen = this.getAttribute('addOpen');
+            this.removeAttribute('addOpen');
+            if (addOpen) {
+                auxAdd = '{"open":true}';
+                auxEdt = '{"tp":"click", "attr":"text"}';
+            }
+
+            return [
+                { name: "add", args:auxAdd },
+                { name: "edit", args: auxEdt, position: 'p-m2' },
+                { name: "backButton" }
+            ];
+        }
 
         let rc: ActionTag[] = [
             { name: "margin" },

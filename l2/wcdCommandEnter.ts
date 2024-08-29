@@ -23,6 +23,8 @@ export function execute(param: IWCDCommand) {
     elAdd.setAttribute('type', 'p');
     elAdd.setAttribute('text', '');
     elAdd.id = 'ica_apText' + overlay.children.length + 1;
+    
+    if (e.altKey) elAdd.setAttribute('addOpen', 'true');
 
     ica.insertAdjacentElement('afterend', elAdd);
     const { x, y, height, width } = elAdd.getBoundingClientRect();
