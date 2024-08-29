@@ -1,6 +1,6 @@
 /// <mls shortName="wcdCommandAddImage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
@@ -11,7 +11,7 @@ export async function execute(param: IWCDCommand) {
     const args = param.args as IArgs;
     if (!args.src || typeof args.src !== 'string') throw new Error('Invalid args: src is missing or invalid');
 
-    const elImage = document.createElement('ica-apresentation-images-images-100554') as IcaLitElementBase;
+    const elImage = document.createElement('ica-apresentation-images-images-100554') as IcaLitElementBaseMethods;
     elImage.setAttribute('widget', 'wc-image-100554');
     elImage.setAttribute('src', args.src || '');
     const allImagesAp = param.overlay.querySelectorAll('[widget="ica-apresentation-images-images-100554"]');

@@ -1,6 +1,6 @@
 /// <mls shortName="wcdCommandDel" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
 
 export function execute(param: IWCDCommand) {
@@ -19,7 +19,7 @@ export function execute(param: IWCDCommand) {
 
     if (e.key.toLocaleLowerCase() === 'backspace') {
 
-        const sibling = ica.previousElementSibling as IcaLitElementBase;
+        const sibling = ica.previousElementSibling as IcaLitElementBaseMethods;
         if (!sibling || !sibling.overlayRef) return;
         const index = overlay.myItens.findIndex(item => item.element === sibling);
 
@@ -32,7 +32,7 @@ export function execute(param: IWCDCommand) {
 
     } else {
 
-        const sibling = ica.previousElementSibling as IcaLitElementBase;
+        const sibling = ica.previousElementSibling as IcaLitElementBaseMethods;
         const index = overlay.myItens.findIndex(item => item.element === ica);
 
         if (index !== -1) {

@@ -1,6 +1,6 @@
 /// <mls shortName="wcdCommandAddDivider" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
@@ -10,7 +10,7 @@ export async function execute(param: IWCDCommand) {
     if (!param.overlay || typeof param.overlay.selectItem !== 'function') throw new Error('invalid param.overlay');
 
     const widgetDivider = 'ica-layout-flow-divider-100554'
-    const elDivider = document.createElement(widgetDivider) as IcaLitElementBase;
+    const elDivider = document.createElement(widgetDivider) as IcaLitElementBaseMethods;
     elDivider.setAttribute('widget', 'wc-divider-100554');
     const allFlowDividers = param.overlay.querySelectorAll(`[widget="${widgetDivider}"]`);
 

@@ -1,6 +1,6 @@
 /// <mls shortName="wcdCommandAddEmbedLink" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
@@ -12,7 +12,7 @@ export async function execute(param: IWCDCommand) {
     const args = param.args as IArgs;
     if (!args.url || typeof args.url !== 'string') throw new Error('Invalid args: url is missing or invalid');
 
-    const elEmbedSocialMedia = document.createElement('ica-apresentation-embeds-social-media-100554') as IcaLitElementBase;
+    const elEmbedSocialMedia = document.createElement('ica-apresentation-embeds-social-media-100554') as IcaLitElementBaseMethods;
     elEmbedSocialMedia.setAttribute('widget', 'wc-embeds-social-media-100554');
     elEmbedSocialMedia.setAttribute('url', args.url || '');
 

@@ -1,6 +1,6 @@
 /// <mls shortName="wcdCommandAddCodeBlock" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
@@ -10,7 +10,7 @@ export async function execute(param: IWCDCommand) {
     if (!param.overlay || typeof param.overlay.selectItem !== 'function') throw new Error('invalid param.overlay');
 
     const widgetIca = 'ica-apresentation-text-code-100554';
-    const elDivider = document.createElement(widgetIca) as IcaLitElementBase;
+    const elDivider = document.createElement(widgetIca) as IcaLitElementBaseMethods;
     elDivider.setAttribute('widget', 'wc-code-100554');
     const allCode = param.overlay.querySelectorAll(`[widget="${widgetIca}"]`);
 

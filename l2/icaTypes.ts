@@ -1,28 +1,29 @@
 /// <mls shortName="icaTypes" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+import { LitElement } from 'lit';
 
 export type FormComponent = {
-  group: string;
-  description: string;
-  prompt?: string;
-  attributes?: string; 
-  events?:string;
+    group: string;
+    description: string;
+    prompt?: string;
+    attributes?: string;
+    events?: string;
 };
 
 export type AttributeDefinition = {
-  path: string;
-  lit: string;
-  variations?: boolean
+    path: string;
+    lit: string;
+    variations?: boolean
 };
 
 export type EventsDefinition = {
-  name: string;
-  desc: string;
-  group?: string[];
+    name: string;
+    desc: string;
+    group?: string[];
 };
 
 export interface IActionsToolbox {
     position: 'p-l0' | 'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' | 'p-l5' | 'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' | 'p-r0' | 'p-r1' | 'p-r2' | 'p-r3' | 'p-r4' | '',
-    tp: 'menu' | 'button' | 'back-button' | 'action' | 'event' ,
+    tp: 'menu' | 'button' | 'back-button' | 'action' | 'event',
     format: 'square' | 'circle' | '',
     title: string | undefined,
     iconSvg: string | undefined,
@@ -35,10 +36,10 @@ export interface IActionsToolbox {
     isDblClick: boolean,
 }
 
-export interface IAttr{
+export interface IAttr {
     attr: string,
     value: string
-} 
+}
 
 export interface IActionsToolboxMenu {
     iconSvg: string,
@@ -58,7 +59,7 @@ export interface IActionLevels {
 
 export interface ActionTag {
     name: string; // tag name or component name
-    position?: 'p-l0' |'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' |  'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' |  'p-r1' | 'p-r2' | 'p-r3' | 'p-r4'  ; // suggestion of position, WCD will define
+    position?: 'p-l0' | 'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' | 'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' | 'p-r1' | 'p-r2' | 'p-r3' | 'p-r4'; // suggestion of position, WCD will define
     args?: string; // optional args string, can be a JSON string
     level?: number[]; // levels where this will be visible
     toolboxOptions?: IToolboxOptions
@@ -69,7 +70,7 @@ export interface IToolboxOptions {
     border?: string,
 }
 
-export interface IcaLitElementBaseMethods extends HTMLElement  {
+export interface IcaLitElementBaseMethods extends LitElement {
     overlayRef: HTMLElement | undefined;
     mySymbol: string;
     getActionsTags(): ActionTag[];
@@ -80,7 +81,7 @@ export interface IcaLitElementBaseMethods extends HTMLElement  {
 }
 
 export interface IICADepths {
-    element: IcaLitElementBaseMethods ,
+    element: IcaLitElementBaseMethods,
     depth: number,
     x: number,
     y: number,

@@ -1,6 +1,6 @@
 /// <mls shortName="wcdCommandEnter" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand, dispatchEventConciliate } from './_100554_wcdCommandBase';
 
 export function execute(param: IWCDCommand) {
@@ -17,7 +17,7 @@ export function execute(param: IWCDCommand) {
 
     if (!ica) return;
 
-    const elAdd = document.createElement('ica-apresentation-text-text-100554') as IcaLitElementBase;
+    const elAdd = document.createElement('ica-apresentation-text-text-100554') as IcaLitElementBaseMethods;
     elAdd.setAttribute('widget', 'wc-text-100554');
     elAdd.setAttribute('type', 'p');
     elAdd.setAttribute('text', '');
