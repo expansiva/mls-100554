@@ -1,7 +1,7 @@
 /// <mls shortName="collabDOMSync" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 export function sync(model: monaco.editor.ITextModel, iframe: HTMLIFrameElement) {
-    if (!model) return;
+    if (!model || !iframe) return;
     const newHTMLOnlyICA = clearTree(iframe)
     const formatedNewHTML = formatHtml(newHTMLOnlyICA);
     const formatedOldHTML = formatHtml(model.getValue());
@@ -14,7 +14,6 @@ export function sync(model: monaco.editor.ITextModel, iframe: HTMLIFrameElement)
     } else {
         setValueInModeKeepingUndo2(model, formatedNewHTML);
     }
-
 }
 
 function getDiffs(originalLines: string[], modifiedLines: string[]) {
@@ -95,7 +94,6 @@ function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent:
 }
 
 export function formatHtml(html: string) {
-    console.info(html)
     // Cria um container temporário para o HTML
     const container = document.createElement('div');
     container.innerHTML = html;
