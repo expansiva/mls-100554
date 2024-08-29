@@ -68,6 +68,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
     public selectItem(ica: IcaLitElementBaseMethods): void {
         if (!ica || !ica.overlayRef) return;
         ica.overlayRef.click();
+        ica.overlayRef.scrollIntoView({ block: 'center' });
     }
 
     public getActionsTagsDefault(): { [key: string]: ActionTag } {

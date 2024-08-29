@@ -233,8 +233,12 @@ export class CollabFCATree extends CollabLitElement {
 
             this.idLastClick = target.id;
             item.el.overlayRef?.click();
+            item.el.overlayRef?.scrollIntoView({ block: 'center' });
 
-        } else item.el.overlayRef?.click();
+        } else {
+            item.el.overlayRef?.click();
+            item.el.overlayRef?.scrollIntoView({ block: 'center' });
+        }
 
     }
 
