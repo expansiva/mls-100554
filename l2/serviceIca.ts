@@ -166,6 +166,7 @@ export class ServiceFca100554 extends ServiceBase {
 
                 const div = document.createElement('div');
                 div.innerHTML = content;
+                this.helpDiv.innerHTML = '';
                 this.helpDiv.appendChild(div);
             }
 
