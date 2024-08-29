@@ -2,53 +2,63 @@
 
 import { html, LitElement, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { WCDToolboxItemEditTextMethodos, WCDPopupMethodos } from './_100554_wcdTypes';
 
 export function initWcdPopup(): boolean {
   return true;
 }
 
 @customElement('wcd-popup-100554')
-export class WCDPopup extends LitElement {
+export class WCDPopup extends LitElement implements WCDPopupMethodos {
+
+  public myParent: WCDToolboxItemEditTextMethodos | undefined;
 
   @property({ type: Number }) x = 0;
   @property({ type: Number }) y = 0;
-  @property({ type: String }) buttons = 'bold,italic,link,separator,h1,h2,h3,h4,separator,blockquote,dropcap';
+  @property({ type: String }) buttons = 'bold,italic,link,separator,h1,h2,h3,h4,separator,blockquote';
 
-static styles = css`
-  :host {
-    position: absolute;
-    display: block;
-    background-color: black;
-    color: white;
-    padding: 8px;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-    font-family: sans-serif;
-    z-index: 1000;
-  }
+  static styles = css`
+    :host {
+      position: absolute;
+      display: block;
+      background-color: black;
+      color: white;
+      padding: 8px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      font-family: sans-serif;
+      z-index: 1000;
+    }
 
-  :host::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: -8px;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid black;
-  }
+    :host::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -8px;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid black;
+    }
 
-  .popup-content {
-    display: flex;
-    align-items: center;
-  }
+    .popup-content {
+      display: flex;
+      align-items: center;
+    }
 
-  ::slotted(*) {
-    margin: 0 4px;
+    ::slotted(*) {
+      margin: 0 4px;
+    }
+  `;
+
+  public changeType(tp: string) {
+
+    if (!this.myParent) return;
+    this.myParent.changeType(tp);
+
   }
-`;
 
   private async loadComponent(button: string) {
     switch (button) {
@@ -79,9 +89,6 @@ static styles = css`
       case 'blockquote':
         await import('./_100554_wcdPopupItemBlockQuote');
         return 'wcd-popup-item-block-quote-100554';
-      case 'dropcap':
-        await import('./_100554_wcdPopupItemDropCap');
-        return 'wcd-popup-item-drop-cap-100554';
       default:
         console.error('invalid button name: "' + button + '"');
         return null;

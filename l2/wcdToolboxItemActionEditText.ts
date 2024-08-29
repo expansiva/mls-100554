@@ -6,6 +6,7 @@ import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { initWcdPopup } from './_100554_wcdPopup';
+import { WCDToolboxItemEditTextMethodos, WCDPopupMethodos } from './_100554_wcdTypes';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -23,9 +24,9 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 @customElement('wcd-toolbox-item-action-edit-text-100554')
-export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
+export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements WCDToolboxItemEditTextMethodos {
 
-    public myParent: WCDToolbox | undefined | any;
+    public myParent: WCDToolbox | undefined;
     public elMain: HTMLElement | undefined | any;
     public elICA: IcaLitElementBase | undefined | any;
     public args: string | undefined;
@@ -33,7 +34,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     private myInfos = { tp: "", attr: "text" }
     private myMsg: MessageType = messages['en'];
 
-    private edittextwcd: HTMLElement | undefined;
 
     constructor() {
         super();
@@ -49,13 +49,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     disconnectedCallback() {
 
         if (this.elMain) this.elMain.style.visibility = '';
-        if (this.myText !== this.firstText) {
-            let aux = '';
-            const lang = (document.documentElement.lang || '').toLowerCase();
-            if (this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
-            this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
-            mls.events.fire([2], ['DOMSync'] as any);
-        };
+        this.fireChange();
         super.disconnectedCallback();
     }
 
@@ -105,11 +99,14 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     renderEdit() {
 
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
 
         this.style.left = '0';
         this.style.top = '0';
         this.style.background = '#fff';
+
+        const ref = this.elICA.querySelector(this.elICA.widget);
+        if (ref) this.elMain = ref;
 
         const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;
 
@@ -126,6 +123,9 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         this.firstText = el.innerHTML;
         this.myText = el.innerHTML;
+
+        this.myTag = el.tagName;
+        this.firstTag = el.tagName;
 
         this.elMain.style.visibility = 'hidden';
 
@@ -151,14 +151,120 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         return ret;
     }
 
-    public changeType(tp: string) {
-        this.elICA.setAttribute('type', tp);
-    }
+
 
     //---------IMPLEMENTATION-----------------
 
     private firstText = '';
+    private firstTag = '';
+    private myTag = '';
     private myText = '';
+
+    private fireChange(): void {
+
+        if ((this.myText !== this.firstText) || (this.myTag !== this.firstTag)) {
+            let aux = '';
+            const lang = (document.documentElement.lang || '').toLowerCase();
+            if (this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
+            this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
+            mls.events.fire([2], ['DOMSync'] as any);
+        };
+
+    }
+
+    public changeType(tp: string) {
+
+        const oldTp = this.elICA.getAttribute('type');
+
+        if (oldTp === tp.toLocaleLowerCase()) {
+            this.elICA.setAttribute('type', 'p');
+            this.changeInEditor('p');
+        } else {
+            this.changeInEditor(tp.toLocaleLowerCase());
+            this.elICA.setAttribute('type', tp.toLocaleLowerCase());
+        }
+
+    }
+
+    private changeInEditor(tp: string) {
+
+        const edit = this.querySelector('#edittextwcd');
+        if (!edit) return;
+
+        const el = this.querySelector('*[contenteditable]') as HTMLElement;
+        if (!el) return;
+
+        this.myTag = tp;
+        const newElement = document.createElement(tp);
+        newElement.innerHTML = el.innerHTML;
+        newElement.setAttribute('contenteditable', 'true');
+        newElement.setAttribute('spellcheck', 'false');
+        newElement.style.outline = 'none';
+
+        edit.appendChild(newElement);
+
+        this.moveSelectionToElement(newElement)
+
+        const mouseUpEvent = new MouseEvent('mouseup', {
+            bubbles: true, // Permite que o evento propague através do DOM
+            cancelable: true, // Permite que o evento seja cancelado
+            view: window, // Defina a janela para o evento
+            clientX: 0, // Posição X do mouse
+            clientY: 0 // Posição Y do mouse
+        });
+
+
+        
+        setTimeout(() => {
+
+            // Dispare o evento no elemento alvo
+            newElement.dispatchEvent(mouseUpEvent);
+            
+        },500)
+
+        el.remove();
+
+        if (this.myParent) this.myParent.updateSize(this.elICA, this.myParent, true);
+    }
+
+    private moveSelectionToElement(newElement: HTMLElement) {
+
+        const shadowSelection = this.getRootNode() as any;
+
+        // Obter a seleção de texto
+        const selection = shadowSelection.getSelection() as any;
+
+        // Se há uma seleção no elemento com contentEditable
+        if (selection.rangeCount > 0) {
+            // Obtenha o range da seleção
+            const range = selection.getRangeAt(0);
+
+            // Obtenha o texto selecionado
+            const selectedText = range.toString();
+
+            // Obtenha a posição de início e fim da seleção no texto
+            const startOffset = range.startOffset;
+            const endOffset = range.endOffset;
+
+            // Agora vamos criar uma nova seleção no otherElement
+            const newRange = document.createRange();
+
+            // Achar o texto no otherElement e selecionar o mesmo texto
+            const textNode = newElement.firstChild;
+
+            if (!textNode) return;
+
+            newRange.setStart(textNode, startOffset);
+            newRange.setEnd(textNode, endOffset);
+
+            // Limpa a seleção existente e adiciona a nova seleção
+            const newSelection = shadowSelection.getSelection();
+            newSelection.removeAllRanges();
+            newSelection.addRange(newRange);
+
+        }
+
+    }
 
     private onInput(e: MouseEvent) {
         e.stopPropagation();
@@ -174,7 +280,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     private onkeyDown(e: any) {
-        
+
 
         if (!this.myParent || !this.elMain) return;
 
@@ -201,7 +307,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (!this.myParent) return;
 
-        this.myParent.onclick = undefined;
+        this.myParent.onclick = null;
         this.myParent.setIconsWcdToolbox(
             [
                 {
@@ -223,7 +329,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     private mouseUP(e: MouseEvent) {
 
-
         let click = e.target as HTMLElement;
         if (!click) return;
 
@@ -231,7 +336,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             click = click.closest('wcd-popup-100554') as HTMLElement;
 
             if (click && click.tagName && click.tagName.toLocaleLowerCase() === 'wcd-popup-100554') return;
-        } else if( click.tagName && click.tagName.toLocaleLowerCase() === 'wcd-popup-100554') return;
+        } else if (click.tagName && click.tagName.toLocaleLowerCase() === 'wcd-popup-100554') return;
 
         const existingDiv = this.querySelector('wcd-popup-100554');
         if (existingDiv) {
@@ -257,9 +362,9 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         const father = this.querySelector('#edittextwcd');
         if (!father) return;
 
-        const newDiv = document.createElement('wcd-popup-100554');
+        const newDiv = document.createElement('wcd-popup-100554') as WCDPopupMethodos;
         father.appendChild(newDiv);
-        
+
         const rectFather = father.getBoundingClientRect();
         const firstLineRect = rects[0];
 
@@ -268,24 +373,23 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         newDiv.setAttribute('x', (left).toString());
         newDiv.setAttribute('y', (top).toString());
+        newDiv.myParent = this;
 
-        newDiv.style.transform = 'translate(-50%, -130%)';
+        newDiv.style.transform = 'translate(-50%, -100%)';
 
-        
+
 
     }
 
-    
+
     private backButton() {
 
         if (!this.myInfos.attr || !this.elICA) return;
         if (this.myText === this.firstText) return;
+
+        this.fireChange();
+
         this.firstText = this.myText;
 
-        let aux = '';
-        const lang = (document.documentElement.lang || '').toLowerCase();
-        if (this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
-        this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
-        mls.events.fire([2], ['DOMSync'] as any);
     }
 }

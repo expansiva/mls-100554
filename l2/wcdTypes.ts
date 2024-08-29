@@ -19,3 +19,12 @@ export interface WCDOverlayMethods extends HTMLElement {
     getActionsTagsDefault(): { [key: string]: tps.ActionTag };
     myItens: tps.IICADepths[]
 }
+
+export interface WCDPopupMethodos extends HTMLElement{
+    myParent: WCDToolboxItemEditTextMethodos | undefined;
+    changeType: (tp:string) => void;
+}
+
+export interface WCDToolboxItemEditTextMethodos extends HTMLElement{
+    changeType: (tp:string) => void;
+}

@@ -2,7 +2,8 @@
 
 import { html, svg, LitElement, render, css, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { WCDPopupItem } from './_100554_wcdPopupItem'
+import { WCDPopupItem } from './_100554_wcdPopupItem';
+import { WCDPopupMethodos } from './_100554_wcdTypes';
 
 @customElement('wcd-popup-item-h1-100554')
 export class WCDPopupItemH1 extends WCDPopupItem {
@@ -26,22 +27,31 @@ export class WCDPopupItemH1 extends WCDPopupItem {
 
     public normalText = 'P';
     public headerText = 'H1';
-
+    /*
     handleClick() {
+
+        
         const selection = document.getSelection();
         if (selection && selection.rangeCount > 0) {
+            console.info('b')
             const range = selection.getRangeAt(0);
             const selectedElement = range.commonAncestorContainer;
+            console.info(selectedElement)
+            debugger;
             const parentElement = this.findParentParagraphOrHeading(selectedElement);
+            console.info(parentElement)
             if (parentElement) {
+                console.info('c')
                 if (parentElement.tagName === this.headerText) {
                     const p = document.createElement(this.normalText.toLowerCase());
                     p.innerHTML = parentElement.innerHTML;
                     parentElement.parentNode?.replaceChild(p, parentElement);
+                    this.changeType(this.normalText.toLowerCase());
                 } else if (parentElement.tagName === this.normalText) {
                     const header = document.createElement(this.headerText.toLowerCase());
                     header.innerHTML = parentElement.innerHTML;
                     parentElement.parentNode?.replaceChild(header, parentElement);
+                    this.changeType(this.headerText.toLowerCase());
                 }
             }
         }
@@ -56,5 +66,28 @@ export class WCDPopupItemH1 extends WCDPopupItem {
             element = element.parentNode as Node;
         }
         return null;
+    }*/
+
+    handleClick() {
+
+        const parent = this.getMyParent();
+        if (!parent) return;
+
+        parent.changeType(this.headerText);
+        
     }
+
+    getMyParent(): WCDPopupMethodos | undefined {
+
+        const shadow = this.getRootNode() as ShadowRoot;
+        if (!shadow) return;
+
+        const parent = shadow.host as WCDPopupMethodos;
+
+        if (!parent) return;
+
+        return parent
+
+    }
+
 }

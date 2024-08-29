@@ -441,8 +441,8 @@ export class WCDToolbox extends CollabLitElement implements WCDMethods {
 
             const display = elChange.style.display;
             elChange.style.display = 'none!important';
-            const icaBase = elBase.parentElement;
-            if (!icaBase) return;
+            //const icaBase = elBase.parentElement;
+            //if (!icaBase) return;
             const ad3 = (n1: number, s1: string, s2: string): number => n1 + parseInt(s1, 10) + parseInt(s2, 10);
             const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom, paddingLeft, paddingRight } = window.getComputedStyle(elBase);
 
@@ -641,6 +641,15 @@ export class WCDToolbox extends CollabLitElement implements WCDMethods {
             transform: translateY(-50%);
         }
 
+        .p-r0{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:-2rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
         .p-m1{
             cursor:pointer;
             display:block;
@@ -675,6 +684,14 @@ export class WCDToolbox extends CollabLitElement implements WCDMethods {
             bottom:-2rem;
             left: 50%;
             transform: translateX(-50%);
+        }
+
+        .p-r0{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top:-2rem;
+            right:-6px
         }
 
         .p-r1{
