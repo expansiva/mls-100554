@@ -54,6 +54,8 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
 
     private styleElMain: CSSStyleDeclaration | undefined = undefined;
 
+    private excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id', globalIca.ATTRGROUP];
+
     //--------COMPONENT-----------------
     createRenderRoot() {
         return this;
@@ -65,13 +67,22 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
     }
 
     shouldUpdate(changedProperties: Map<string, string>): boolean {
-
         if (changedProperties.get('changeState') !== undefined && this.changeState && this.renderType === 'editactive') {
             this.doChangeState(this.changeState);
             return false;
         }
         return true;
+    }
 
+    attributeChangedCallback(
+        name: string,
+        oldValue: string | null,
+        newValue: string | null
+    ): void {
+        super.attributeChangedCallback(name, oldValue, newValue);
+        if (!this.excludesProps.includes(name) && oldValue !== newValue && newValue) {
+            this.updateAttrInWc(name,newValue)
+        }
     }
 
     async firstUpdated(changedProperties: Map<string | number | symbol, unknown>) {
@@ -107,6 +118,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
             if (this.styleel === valStyleEl) return;
             this.updateStyleEl();
         }
+
 
     }
 
@@ -177,6 +189,11 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
         if (!widgetEl) return;
         traverseShadowRoot(widgetEl as HTMLElement);
 
+    }
+
+    private updateAttrInWc(prop: string, value: string) {
+        const el = this.querySelector(this.widget as string);
+        if (el) el.setAttribute(prop, value);
     }
 
     private updateStyleDisplay() {
@@ -293,9 +310,9 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
         }
     }
 
-    getAttributes() {
 
-        const excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id', globalIca.ATTRGROUP];
+    private getAttributes() {
+
         const objVariations: any = {
             0: 'en',
             1: 'pt',
@@ -309,7 +326,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
         const attributeNames = this.getAttributeNames();
 
         for (let attrName of attributeNames) {
-            if (excludesProps.includes(attrName)) continue;
+            if (this.excludesProps.includes(attrName)) continue;
 
             let attrValue = this.getAttribute(attrName);
             if (attrName === 'idel') attrName = 'id'

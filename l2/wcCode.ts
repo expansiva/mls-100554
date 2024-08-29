@@ -124,6 +124,7 @@ export class WcCode100554 extends IcaApresentationTextCodeBase {
 
     pre{
         position:relative;
+        white-space:pre-line;
     }
     pre select {
         position:absolute;
@@ -237,35 +238,7 @@ export class WcCode100554 extends IcaApresentationTextCodeBase {
       pre {
         margin: 0;
       }
-      .actions{
-        height:30px; 
-        background: #b4b4b4; 
-        display:flex; 
-        align-items:center;
-        padding:0 1rem; 
-        color:#fff;
-        .actions-list{
-          display:flex;
-          gap:1rem;
-        }
-      }
-      .language {
-        flex:1;
-      }
-      
-      .action-item{
-        display:flex; 
-        align-items:center;
-        justify-content: center;
-        cursor:pointer;
-        min-width: 70px;
-      }
-      .accepted{
-        cursor:default;
-      }
-      .copied {
-        cursor:default;
-      }
+
     `;
 
 }

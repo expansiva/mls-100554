@@ -1,27 +1,32 @@
 /// <mls shortName="icaApresentationTextCode" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { IcaApresentationTextCodeBase } from './_100554_icaApresentationTextCodeBase';
 
 @customElement('ica-apresentation-text-code-100554')
-export abstract class IcaApresentationTextCode extends IcaLitElementBase {
+export abstract class IcaApresentationTextCode extends IcaLitElementBase implements IcaApresentationTextCodeBase {
+
+    @property({ type: String, reflect: true }) language = 'typescript';
+
+    @property({ type: Array }) languages = [];
+
+    @property({ type: String, reflect: true }) text = '';
 
     public mySymbol = 'fa-code';
 
     public getActionsTags(): ActionTag[] {
         return [
             { name: "margin" },
-            { name: "padding" },
             { name: "menu" },
             { name: "size" },
-            { name: "edit" },
-            { name: "events" },
+            { name: "edit-code" },
             { name: "title" },
+            { name: "code-language" },
         ]
     }
 
-    
     public changeStateHtml(html: string): void {
 
     }
