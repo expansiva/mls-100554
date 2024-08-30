@@ -141,7 +141,7 @@ export class ServiceFca100554 extends ServiceBase {
         div.innerHTML = htmlFile;
 
         this.loadHelpPage('wcdOverlayModeStoryPage', 100554);
-        return html`<div id="helpDiv"></div>`
+        return html`<div style="overflow:auto;height:100%;" id="helpDiv"></div>`
 
     }
 
