@@ -604,7 +604,10 @@ const icaDescriptions: icaBase.FormComponent[] = [
     description: msg.dNCScenary,
     events: "scenary-changed"
   },
-  { group: "Navigation / Content / Stepper", description: msg.dNCStepper },
+  {
+    group: "Navigation / Content / Stepper",
+    description: msg.dNCStepper
+  },
   {
     group: "Navigation / Content / Toolbar",
     description: msg.dNCToolbar,
@@ -613,6 +616,7 @@ const icaDescriptions: icaBase.FormComponent[] = [
   {
     group: "Navigation / Content / Accordion",
     description: msg.dNCAccordion,
+    attributes: "open,text",
     events: "open,close,change"
   },
   {
@@ -904,6 +908,8 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "controls", lit: "@property() controls: boolean = true;" },
   { path: "loop", lit: "@property() loop: boolean = false;" },
   { path: "preload", lit: "@property() loop: 'auto' | 'metadata' | 'none' = 'auto';" },
+
+  { path: "open", lit: "@property({ type: Boolean }) open = false;" },
 
   { path: "language", lit: "@property({ type: String ) language: string | undefined;" },
   { path: "languages", lit: "@property({ type: Array ) languages: string[] | undefined;" },

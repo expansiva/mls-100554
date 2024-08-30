@@ -94,9 +94,10 @@ function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent:
 }
 
 export function formatHtml(html: string) {
+
     // Cria um container temporário para o HTML
     const container = document.createElement('div');
-    container.innerHTML = html;
+    container.innerHTML = html.trim();
 
     // Função para formatar um nó e seus filhos
     function formatNode(node: any, indentLevel = 0) {
@@ -167,6 +168,20 @@ function clearTree(iframe: HTMLIFrameElement): string {
 function clearTree2(parent: HTMLElement, element: HTMLElement): HTMLElement {
 
     const tagname = element.tagName.toLowerCase();
+
+    if (element && element.getAttribute('modeoverlay')) {
+        const clone = element.cloneNode(false);
+        (clone as HTMLElement).removeAttribute('style');
+        (clone as HTMLElement).removeAttribute('level');
+        parent.appendChild(clone);
+        let children = [];
+        if (element.shadowRoot) children = [...element.shadowRoot.children]
+        else children = [...element.children]
+        for (const child of children) {
+            clearTree2(clone as HTMLElement, child as HTMLElement);
+        }
+    }
+
     if (tagname.startsWith('ica-')) {
 
         const clone = element.cloneNode(false);

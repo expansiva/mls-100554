@@ -38,7 +38,7 @@ export class IcaLoadPage100554 extends IcaLitElement {
 
     async getDeps(html: string): Promise<IJSONDependence> {
         const mfile = mls.l2.editor.mfiles[this.src];
-        const deps = await getDependenciesByHtml(mfile, html, '');
+        const deps = await getDependenciesByHtml(mfile, html, 'Default');
         return deps;
 
     }

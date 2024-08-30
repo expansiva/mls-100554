@@ -140,7 +140,7 @@ export class ServiceFca100554 extends ServiceBase {
         const div = document.createElement('div');
         div.innerHTML = htmlFile;
 
-        this.loadHelpPage('wcdOverlayModeStory', 100554);
+        this.loadHelpPage('wcdOverlayModeStoryPage', 100554);
         return html`<div id="helpDiv"></div>`
 
     }
@@ -166,6 +166,7 @@ export class ServiceFca100554 extends ServiceBase {
 
                 const div = document.createElement('div');
                 div.innerHTML = content;
+                div.children[0].setAttribute('level', '7');
                 this.helpDiv.innerHTML = '';
                 this.helpDiv.appendChild(div);
             }
