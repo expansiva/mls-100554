@@ -6,6 +6,7 @@ import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { initWcdPopup } from './_100554_wcdPopup';
 import { WCDToolboxItemEditTextMethodos, WCDPopupMethodos, WCDToolboxMethodos } from './_100554_wcdTypes';
+import { dispatchEventConciliate } from './_100554_wcdCommandBase';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -165,14 +166,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
     private fireChange(): void {
 
         if ((this.myText !== this.firstText) || (this.myTag !== this.firstTag)) {
-
             if (!this.elICA ) return;
-
             let aux = '';
             const lang = (document.documentElement.lang || '').toLowerCase();
             if (this.elICA.globalVariation && this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
             this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
-            mls.events.fire([2], ['DOMSync'] as any);
+            dispatchEventConciliate();
         };
 
     }
