@@ -58,6 +58,11 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
 
     disconnectedCallback() {
+        window.wcdState = {
+            elICA: undefined,
+            myParent: undefined,
+            elMain: undefined,
+        };
         super.disconnectedCallback();
         if (this.resizeObserver) this.resizeObserver.disconnect();
     }
@@ -123,6 +128,12 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         });
 
         this.setDefaultToolBoxOptions();
+
+        window.wcdState = {
+            elICA: this.elICA,
+            myParent: this,
+            elMain: this.elMain,
+        };
         
         for await (let i of actions) {
 
