@@ -16,7 +16,7 @@ export class ServiceSource100554 extends ServiceBase {
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
         mls.events.addListener(2, 'ProjectLoaded', (ev) => this.onProjectLoadedEvents(ev));
-        mls.events.addListener(2, 'DOMSync' as any, (ev) => this.syncDom(ev));
+        mls.events.addListener(2, 'DomAction', (ev) => this.syncDom(ev));
 
         this.initMonaco_GlobalEditor();
     }
