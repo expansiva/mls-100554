@@ -27,47 +27,7 @@ export class WCDPopupItemH1 extends WCDPopupItem {
 
     public normalText = 'P';
     public headerText = 'H1';
-    /*
-    handleClick() {
-
-        
-        const selection = document.getSelection();
-        if (selection && selection.rangeCount > 0) {
-            console.info('b')
-            const range = selection.getRangeAt(0);
-            const selectedElement = range.commonAncestorContainer;
-            console.info(selectedElement)
-            debugger;
-            const parentElement = this.findParentParagraphOrHeading(selectedElement);
-            console.info(parentElement)
-            if (parentElement) {
-                console.info('c')
-                if (parentElement.tagName === this.headerText) {
-                    const p = document.createElement(this.normalText.toLowerCase());
-                    p.innerHTML = parentElement.innerHTML;
-                    parentElement.parentNode?.replaceChild(p, parentElement);
-                    this.changeType(this.normalText.toLowerCase());
-                } else if (parentElement.tagName === this.normalText) {
-                    const header = document.createElement(this.headerText.toLowerCase());
-                    header.innerHTML = parentElement.innerHTML;
-                    parentElement.parentNode?.replaceChild(header, parentElement);
-                    this.changeType(this.headerText.toLowerCase());
-                }
-            }
-        }
-    }
-
-    findParentParagraphOrHeading(element: Node): HTMLElement | null {
-        while (element && element.nodeType === Node.ELEMENT_NODE) {
-            const tagName = (element as HTMLElement).tagName;
-            if (tagName === this.normalText || tagName === this.headerText) {
-                return element as HTMLElement;
-            }
-            element = element.parentNode as Node;
-        }
-        return null;
-    }*/
-
+    
     handleClick() {
 
         const parent = this.getMyParent();

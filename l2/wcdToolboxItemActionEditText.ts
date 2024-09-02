@@ -1,38 +1,19 @@
 /// <mls shortName="wcdToolboxItemActionEditText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, unsafeHTML } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement} from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { initWcdPopup } from './_100554_wcdPopup';
-import { WCDToolboxItemEditTextMethodos, WCDPopupMethodos, WCDToolboxMethodos } from './_100554_wcdTypes';
+import { WCDPopupMethodos } from './_100554_wcdTypes';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
 
-/// **collab_i18n_start**
-const message_pt = {
-}
-
-const message_en = {
-}
-
-type MessageType = typeof message_en;
-
-const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
-}
-/// **collab_i18n_end**
 
 @customElement('wcd-toolbox-item-action-edit-text-100554')
-export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements WCDToolboxItemEditTextMethodos {
+export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
-    public myParent: WCDToolboxMethodos | undefined;
-    public elMain: HTMLElement | undefined ;
-    public elICA: IcaLitElementBaseMethods | undefined;
     public args: string | undefined;
 
     private myInfos = { tp: "", attr: "text" }
-    private myMsg: MessageType = messages['en'];
 
 
     constructor() {
@@ -212,18 +193,17 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
         this.moveSelectionToElement(newElement)
 
         const mouseUpEvent = new MouseEvent('mouseup', {
-            bubbles: true, // Permite que o evento propague através do DOM
-            cancelable: true, // Permite que o evento seja cancelado
-            view: window, // Defina a janela para o evento
-            clientX: 0, // Posição X do mouse
-            clientY: 0 // Posição Y do mouse
+            bubbles: true, 
+            cancelable: true,
+            view: window,
+            clientX: 0,
+            clientY: 0
         });
 
 
         
         setTimeout(() => {
 
-            // Dispare o evento no elemento alvo
             newElement.dispatchEvent(mouseUpEvent);
             
         },100)
@@ -237,25 +217,20 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
 
         const shadowSelection = this.getRootNode() as any;
 
-        // Obter a seleção de texto
         const selection = shadowSelection.getSelection() as any;
 
-        // Se há uma seleção no elemento com contentEditable
+
         if (selection.rangeCount > 0) {
-            // Obtenha o range da seleção
+
             const range = selection.getRangeAt(0);
 
-            // Obtenha o texto selecionado
             const selectedText = range.toString();
 
-            // Obtenha a posição de início e fim da seleção no texto
             const startOffset = range.startOffset;
             const endOffset = range.endOffset;
 
-            // Agora vamos criar uma nova seleção no otherElement
             const newRange = document.createRange();
 
-            // Achar o texto no otherElement e selecionar o mesmo texto
             const textNode = newElement.firstChild;
 
             if (!textNode) return;
@@ -263,7 +238,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
             newRange.setStart(textNode, startOffset);
             newRange.setEnd(textNode, endOffset);
 
-            // Limpa a seleção existente e adiciona a nova seleção
             const newSelection = shadowSelection.getSelection();
             newSelection.removeAllRanges();
             newSelection.addRange(newRange);
@@ -340,7 +314,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase implements 
 
         const shadowSelection = this.getRootNode() as any;
 
-        // Obter a seleção de texto
         const selection = shadowSelection.getSelection() as any;
 
         let selectedText = '';

@@ -1,10 +1,8 @@
 /// <mls shortName="wcdToolboxItemActionMargin" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement, render } from 'lit';
+import { html, render } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { WCDToolboxMethodos} from './_100554_wcdTypes';
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 
 //version 4
 
@@ -41,9 +39,6 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
 
     private myMsg: MessageType = messages['en'];
 
-    public myParent: WCDToolboxMethodos | undefined;
-    public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBaseMethods | undefined;
     public args: string | undefined;
 
     private elExternal: HTMLElement | undefined;

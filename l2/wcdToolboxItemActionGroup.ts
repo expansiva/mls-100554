@@ -3,18 +3,13 @@
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import * as icaGlobal from './_100554_icaGlobal';
-import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
 //version 4
 @customElement('wcd-toolbox-item-action-group-100554')
 export class WCDToolboxItemActionGroup extends WcdToolboxItemBase {
-
-    public myParent: WCDToolbox | undefined;
-    public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBase | undefined;
+    
+    public args: string|undefined;
 
     createRenderRoot() {
         return this;
@@ -68,31 +63,5 @@ export class WCDToolboxItemActionGroup extends WcdToolboxItemBase {
             this.innerHTML = lock;
             this.elICA.setAttribute(icaGlobal.ATTRGROUP, 'true');
         }
-    }
-}
-
-export const getTemplate = (mode: string = '', position: string = ''): icaGlobal.IActionsToolbox => {
-
-    let ret: icaGlobal.IActionsToolbox = templateActionGroup.group as icaGlobal.IActionsToolbox;
-    if (position !== '') ret.position = position as any;
-
-    return ret as icaGlobal.IActionsToolbox;
-
-}
-
-const templateActionGroup = {
-    group: {
-        position: 'p-r4',
-        tp: 'action',
-        format: '',
-        title: 'Group',
-        iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192V144C80 64.5 144.5 0 224 0s144 64.5 144 144v48h16c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64H80z"/></svg>',
-        onclick: undefined,
-        menuItens: [],
-        menuSubItens: [],
-        widget: 'wcd-toolbox-item-action-group-100554',
-        cursor: 'pointer',
-        attrs: undefined,
-        isDblClick:false
     }
 }

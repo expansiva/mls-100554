@@ -2,16 +2,11 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
 @customElement('wcd-title-100554')
-export class WcdAdd100554 extends WcdToolboxItemBase {
+export class WcdTitle extends WcdToolboxItemBase {
 
-    public myParent: WCDToolbox | undefined | any ;
-    public elMain: HTMLElement | undefined | any;
-    public elICA: IcaLitElementBase | undefined | any;
     public args: string | undefined;
 
     createRenderRoot() {

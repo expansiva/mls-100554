@@ -5,46 +5,11 @@ import { customElement, property, query } from 'lit/decorators.js';
 import * as icaGlobal from './_100554_icaGlobal';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
-import {WCDToolboxMethodos} from './_100554_wcdTypes';
 
-
-
-/// **collab_i18n_start**
-const message_pt = {
-    margin: 'Margin',
-    padding: 'Padding',
-    top: 'Top',
-    left: 'Left',
-    bottom: 'Bottom',
-    right: 'Right',
-
-}
-
-const message_en = {
-    margin: 'Margin',
-    padding: 'Padding',
-    top: 'Top',
-    left: 'Left',
-    bottom: 'Bottom',
-    right: 'Right',
-}
-
-type MessageType = typeof message_en;
-
-const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
-}
-/// **collab_i18n_end**
 
 @customElement('wcd-toolbox-item-action-menu-100554')
 export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
 
-    private myMsg: MessageType = messages['en'];
-
-    public myParent: WCDToolboxMethodos | undefined;
-    public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBaseMethods | undefined;
     public args: string | undefined;
 
     @property({ reflect: false }) myItens: IWCDMenu100554 | undefined;

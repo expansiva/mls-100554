@@ -6,10 +6,18 @@ import { CollabLitElement } from './_100554_collabLitElement';
 
 export abstract class WcdToolboxItemBase extends CollabLitElement implements WCDToolboxItemMethodos {
 
-    abstract myParent: WCDToolboxMethodos | undefined;
-    abstract elMain: HTMLElement | undefined;
-    abstract elICA: IcaLitElementBaseMethods | undefined;
+    public myParent: WCDToolboxMethodos | undefined;
+    public elMain: HTMLElement | undefined;
+    public elICA: IcaLitElementBaseMethods | undefined;
     abstract args: string | undefined;
+
+    constructor() {
+        super();
+        this.myParent = window.wcdState.myParent;
+        this.elMain = window.wcdState.elMain;
+        this.elICA = window.wcdState.elICA;
+        
+    }
 
     createRenderRoot() {
         return this;

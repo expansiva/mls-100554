@@ -1,37 +1,15 @@
 /// <mls shortName="wcdToolboxItemActionEditCode" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, unsafeHTML } from 'lit';
+import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IcaLitElementBaseMethods } from '_100554_icaTypes';
-import { WCDToolboxMethodos } from '_100554_wcdTypes';
-
-/// **collab_i18n_start**
-const message_pt = {
-}
-
-const message_en = {
-}
-
-type MessageType = typeof message_en;
-
-const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
-}
-/// **collab_i18n_end**
 
 @customElement('wcd-toolbox-item-action-edit-code-100554')
 export class WCDToolboxItemActionEditCode extends WcdToolboxItemBase {
 
-    public myParent: WCDToolboxMethodos | undefined;
-    public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBaseMethods | undefined;
     public args: string | undefined;
 
     private myInfos = { tp: "", attr: "text" }
-    private msg: MessageType = messages['en'];
 
     @query('#edittextwcd') contentEditables: HTMLElement | undefined;
 

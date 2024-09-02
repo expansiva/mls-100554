@@ -164,9 +164,9 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
             const el = document.createElement(convertFileNameToTag(i.name)) as WCDToolboxItemMethodos;
             el.className = `p ${i.position}`;
-            el.myParent = this;
-            el.elMain = this.elMain;
-            el.elICA = this.elICA;
+            //el.myParent = this;
+            //el.elMain = this.elMain;
+            //el.elICA = this.elICA;
             el.style.zIndex = '9998';
             el.args = i.args;
 
