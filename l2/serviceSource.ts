@@ -512,8 +512,6 @@ export class ServiceSource100554 extends ServiceBase {
     private isNewFile: boolean = false;
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
-        debugger;
-
         if (ev.level !== 2 || (ev.type !== 'FileAction')) return;
         if (!ev.desc) return;
         const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
@@ -1342,9 +1340,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private async createOrShowModelHTML(open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
-
-        debugger;
-
+        
         let shortName: string = '';
         let project: number = 0;
         const conf = mls.l2.editor.editors[this.confE];
