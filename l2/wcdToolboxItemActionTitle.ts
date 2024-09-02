@@ -1,11 +1,11 @@
-/// <mls shortName="wcdTitle" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="wcdToolboxItemActionTitle" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 
-@customElement('wcd-title-100554')
-export class WcdTitle extends WcdToolboxItemBase {
+@customElement('wcd-toolbox-item-action-title-100554')
+export class WcdToolboxItemActionTitle extends WcdToolboxItemBase {
 
     public args: string | undefined;
 
@@ -22,7 +22,7 @@ export class WcdTitle extends WcdToolboxItemBase {
 
 
     private styles = `
-        wcd-title-100554 div {
+        wcd-toolbox-item-action-title-100554 div {
             display:block;
             background: #4c4c4c;
             color: #fff;
