@@ -70,7 +70,7 @@ function findEditor(): monaco.editor.ICodeEditor | null {
     const allEditors = monaco.editor.getEditors();
     allEditors.forEach((editor) => {
         const modelEd = editor.getModel();
-        if (modelEd && (modelEd.id === mfile.model.id || modelEd.id === (mfile as any)['modelHTML'].id)) {
+        if (modelEd && (modelEd.id === mfile.model.id || modelEd.id === (mfile as any)['modelHTML']?.id)) {
             associatedEditor = editor;
         }
     });

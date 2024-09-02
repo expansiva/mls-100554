@@ -4,6 +4,7 @@ import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
 import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
+import { countElementsWithTagName } from './_100554_wcdGlobal';
 
 export async function execute(param: IWCDCommand) {
 
@@ -19,8 +20,9 @@ export async function execute(param: IWCDCommand) {
     const elImage = document.createElement(icaTagName) as IcaLitElementBaseMethods;
     elImage.setAttribute('widget', 'wc-image-100554');
     elImage.setAttribute('src', args.src || '');
-    const allImagesAp = param.overlay.querySelectorAll(`[widget="${icaTagName}"]`);
-    const id = 'apImage' + (allImagesAp.length + 1);;
+
+    const allImagesAp = countElementsWithTagName(param.overlay, icaTagName);
+    const id = 'apImage' + (allImagesAp + 1);;
     elImage.id = PREFIX_ICA_ID + id;
     elImage.setAttribute('idEl', id);
     param.selectedIca.insertAdjacentElement('afterend', elImage);

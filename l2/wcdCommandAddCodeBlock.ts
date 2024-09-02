@@ -4,6 +4,7 @@ import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
 import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
+import { countElementsWithTagName } from './_100554_wcdGlobal';
 
 export async function execute(param: IWCDCommand) {
 
@@ -17,9 +18,9 @@ export async function execute(param: IWCDCommand) {
     const widgetIca = icaTagName;
     const elDivider = document.createElement(widgetIca) as IcaLitElementBaseMethods;
     elDivider.setAttribute('widget', 'wc-code-100554');
-    const allCode = param.overlay.querySelectorAll(`[widget="${icaTagName}"]`);
+    const allCode = countElementsWithTagName(param.overlay, icaTagName);
 
-    const id = 'apCode' + (allCode.length + 1);;
+    const id = 'apCode' + (allCode + 1);;
     elDivider.id = PREFIX_ICA_ID + id;
     elDivider.setAttribute('idEl', id);
 

@@ -4,6 +4,7 @@ import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
 import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
+import { countElementsWithTagName } from './_100554_wcdGlobal';
 
 export async function execute(param: IWCDCommand) {
 
@@ -18,12 +19,12 @@ export async function execute(param: IWCDCommand) {
     importFilesIfNeeded([icaTagName, wcTagName]);
 
     const elEmbedSocialMedia = document.createElement(icaTagName) as IcaLitElementBaseMethods;
+    
     elEmbedSocialMedia.setAttribute('widget', wcTagName);
     elEmbedSocialMedia.setAttribute('url', args.url || '');
 
-    const allEmbedLinks = param.overlay.querySelectorAll(`[widget="${icaTagName}"]`);
-
-    const id = 'apEmbedLink' + (allEmbedLinks.length + 1);;
+    const allEmbedLinks = countElementsWithTagName(param.overlay, icaTagName);
+    const id = 'apEmbedLink' + (allEmbedLinks + 1);;
     elEmbedSocialMedia.id = PREFIX_ICA_ID + id;
     elEmbedSocialMedia.setAttribute('idEl', id);
     param.selectedIca.insertAdjacentElement('afterend', elEmbedSocialMedia);

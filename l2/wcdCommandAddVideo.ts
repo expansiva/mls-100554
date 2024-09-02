@@ -4,6 +4,7 @@ import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
 import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
+import { countElementsWithTagName } from './_100554_wcdGlobal';
 
 export async function execute(param: IWCDCommand) {
 
@@ -21,8 +22,8 @@ export async function execute(param: IWCDCommand) {
     elVideo.setAttribute('controls', 'true');
     elVideo.setAttribute('src', args.src || '');
 
-    const allVideoAp = param.overlay.querySelectorAll(`[widget="${icaTagName}"]`);
-    const id = 'apVideo' + (allVideoAp.length + 1);;
+    const allVideoAp = countElementsWithTagName(param.overlay, icaTagName);
+    const id = 'apVideo' + (allVideoAp + 1);;
     elVideo.id = PREFIX_ICA_ID + id;
     elVideo.setAttribute('idEl', id);
     param.selectedIca.insertAdjacentElement('afterend', elVideo);

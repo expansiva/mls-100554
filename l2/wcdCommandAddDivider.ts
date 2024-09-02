@@ -4,28 +4,39 @@ import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
 import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
+import { findParentElementWithTagName, getSiblingsAfter, countElementsWithTagName } from './_100554_wcdGlobal';
 
 export async function execute(param: IWCDCommand) {
 
     if (!param?.selectedIca) throw new Error('invalid param.selectedIca');
     if (!param.overlay || typeof param.overlay.selectItem !== 'function') throw new Error('invalid param.overlay');
 
+    const icaSectionTagName = 'ica-layout-flow-section-100554';
+    const wcSectionTagName = 'wc-section-100554';
     const icaTagName = 'ica-layout-flow-divider-100554';
     const wcTagName = 'wc-divider-100554';
-    importFilesIfNeeded([icaTagName, wcTagName]);
+
+    const imports = [icaTagName, wcTagName, icaSectionTagName, wcSectionTagName];
+    importFilesIfNeeded(imports);
 
     const elDivider = document.createElement(icaTagName) as IcaLitElementBaseMethods;
     elDivider.setAttribute('widget', wcTagName);
-    const allFlowDividers = param.overlay.querySelectorAll(`[widget="${icaTagName}"]`);
-
-    const id = 'apDivider' + (allFlowDividers.length + 1);;
+    const allFlowDividers = countElementsWithTagName(param.overlay, icaTagName);
+    const id = 'apDivider' + (allFlowDividers + 1);;
     elDivider.id = PREFIX_ICA_ID + id;
     elDivider.setAttribute('idEl', id);
 
-    param.selectedIca.insertAdjacentElement('afterend', elDivider);
-    await elDivider.updateComplete;
+    const siblings = getSiblingsAfter(param.selectedIca);
+    const sectionNew = addSection(icaSectionTagName, wcSectionTagName, param.overlay, [elDivider, ...siblings]);
+    const parentSection = findParentElementWithTagName(param.selectedIca, icaSectionTagName);
+
+    if (!parentSection) return;
+    parentSection.insertAdjacentElement('afterend', sectionNew);
+
+    await sectionNew.updateComplete;
     param.selectedIca.remove();
 
+    await elDivider.updateComplete;
     const { x, y, height, width } = elDivider.getBoundingClientRect();
     if (!param.overlay.myItens) param.overlay.myItens = [];
     param.overlay.myItens.push({ element: elDivider, depth: 0, x, y, height, width, opacity: elDivider.style.opacity });
@@ -34,6 +45,19 @@ export async function execute(param: IWCDCommand) {
 
     dispatchEventConciliate();
 
+
 }
 
+function addSection(icaSectionTagName: string, wcSectionTagName: string, overlay: HTMLElement, childrens: Element[]) {
+    const elSection = document.createElement(icaSectionTagName) as IcaLitElementBaseMethods;
+    elSection.setAttribute('widget', wcSectionTagName);
+    const allFlowDividers = overlay.querySelectorAll(`[widget="${icaSectionTagName}"]`);
+    const id = 'flowSection' + (allFlowDividers.length + 1);;
+    elSection.id = PREFIX_ICA_ID + id;
+    elSection.setAttribute('idEl', id);
 
+    childrens.forEach((child) => {
+        elSection.appendChild(child);
+    });
+    return elSection;
+}
