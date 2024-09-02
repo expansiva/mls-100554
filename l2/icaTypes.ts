@@ -70,7 +70,7 @@ export interface IToolboxOptions {
     border?: string,
 }
 
-export interface IcaLitElementBaseMethods extends LitElement {
+export interface IcaLitElementBaseMethods extends HTMLElement {
     level: '1' | '2' | '3' | '4' | '5' | '6' | '7' | undefined;
     globalVariation: number | undefined;
     widget: string | undefined;
@@ -80,8 +80,7 @@ export interface IcaLitElementBaseMethods extends LitElement {
     changeStateStyle(info: {}): void;
     changeStateHtml(info: string): void;
     allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
-    clickMenu: Function | undefined;
-    getICAComponents(scope: HTMLElement): IcaLitElementBaseMethods[];
+    getICAComponents(scope: HTMLElement): IcaLitElementBaseMethods [];
     getMyScope(): IcaLitElementBaseMethods | HTMLElement | undefined;
     getIcaParent(target: HTMLElement): IcaLitElementBaseMethods | undefined;
     getMyInfos(): { root: string, subGroup: string, finalGroup: string };

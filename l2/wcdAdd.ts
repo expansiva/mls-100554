@@ -2,17 +2,10 @@
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { WCDToolboxMethodos } from './_100554_wcdTypes';
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { collab_xmark } from './_100554_collabIcons';
 
-/// **collab_i18n_end**
 @customElement('wcd-add-100554')
 export class WcdAdd100554 extends WcdToolboxItemBase {
-
-    public myParent: WCDToolboxMethodos | undefined;
-    public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBaseMethods | undefined;
 
     public args: string | undefined;
 

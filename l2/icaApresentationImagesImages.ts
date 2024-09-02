@@ -13,7 +13,7 @@ export abstract class IcaApresentationImagesImages extends IcaLitElementBase {
         return [
             { name: "margin" },
             { name: "padding" },
-            { name: "menu" },
+            { name: "menu" , args:'{"itens":[{"item":"_100554_wcdMenuItemImage", "args":"big"}]}'},
             { name: "size" },
             { name: "events" },
             { name: "title" },

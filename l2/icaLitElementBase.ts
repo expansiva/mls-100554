@@ -24,8 +24,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
 
     public overlayRef: HTMLElement | undefined;
 
-    public clickMenu: Function | undefined;
-
     @property({ type: String })
     @collabState(globalIca.CHANGESTATE)
     private changeState: string = '';

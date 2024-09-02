@@ -2,8 +2,8 @@
 
 import { html, LitElement, PropertyValueMap, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { WCDToolbox , initWCDToolbox} from './_100554_wcdToolbox';
-import { WCDOverlayItensMethods, WCDOverlayMethods } from './_100554_wcdTypes';
+import {  initWCDToolbox} from './_100554_wcdToolbox';
+import { WCDOverlayItensMethods, WCDOverlayMethods, WCDToolboxMethodos } from './_100554_wcdTypes';
 import { IICADepths } from './_100554_icaTypes';
 import { getPosition } from './_100554_icaGlobal';
 
@@ -174,7 +174,7 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
             if(oelHaveEvents) oelHaveEvents.style.display = 'flex'
             wc.remove()
         });
-        const wcd = document.createElement('wcd-toolbox-100554') as WCDToolbox;
+        const wcd = document.createElement('wcd-toolbox-100554') as WCDToolboxMethodos;
         wcd.setAttribute('level', this.level);
         wcd.elICA = this.info.element;
         this.info.element.setAttribute('renderType', 'editactive')
@@ -208,7 +208,7 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
 
     private async checkToChangeWCD() {
 
-        const wcd = this.querySelector('wcd-toolbox-100554') as WCDToolbox;
+        const wcd = this.querySelector('wcd-toolbox-100554') as WCDToolboxMethodos;
         if (!wcd) return;
         if (!this.info || !this.info.element) return;
         await this.addWCDToolbox();

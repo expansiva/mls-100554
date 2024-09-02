@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
 import { ActionTag, IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { IWCDCommand, WCDToolboxMethodos } from './_100554_wcdTypes';
+import { IWCDCommand } from './_100554_wcdTypes';
 import { getPosition } from './_100554_icaGlobal';
 import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
 import { execute as excCommandDel } from './_100554_wcdCommandDel';
@@ -82,9 +82,9 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
             },
             'menu': {
                 name: '_100554_wcdToolboxItemActionMenu',
-                position: 'p-m1',
+                position: 'p-m0',
                 args: '{}',
-                level: [4]
+                level: [2, 4]
             },
             'add': {
                 name: "_100554_wcdAdd",

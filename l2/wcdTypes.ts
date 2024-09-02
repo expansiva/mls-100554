@@ -3,7 +3,8 @@
 import * as tps from './_100554_icaTypes';
 
 export interface WCDToolboxMethodos extends HTMLElement {
-    widget:string
+    lastHelper:string,
+    widget:string | undefined,
     level:string,
     elMain: HTMLElement | undefined; // component from ica render
     elICA: tps.IcaLitElementBaseMethods | undefined; // ica base to wcd
