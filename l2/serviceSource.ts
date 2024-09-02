@@ -512,10 +512,13 @@ export class ServiceSource100554 extends ServiceBase {
     private isNewFile: boolean = false;
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
+        debugger;
+
         if (ev.level !== 2 || (ev.type !== 'FileAction')) return;
         if (!ev.desc) return;
         const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
         if (fileAction.position !== this.position) return;
+        
         let keyFiles: string; // set on getStorFile 
         let keyFilesHTML: string; // set on getStorFile 
 
@@ -1340,6 +1343,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private async createOrShowModelHTML(open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
 
+        debugger;
+
         let shortName: string = '';
         let project: number = 0;
         const conf = mls.l2.editor.editors[this.confE];
@@ -1363,11 +1368,11 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
 
         if (open && this._ed1) this._ed1.setModel(model);
-        if (!open) {
-            mls.events.fireFileAction('modeCreated', storFileHTML, this.position);
-        }
-        this.registerProvider();
 
+        if (this._ed1 && this._ed1.getModel()?.id !== model.id) {
+            mls.events.fireFileAction('modeCreated', storFileHTML, this.position);
+            this.registerProvider();
+        }
 
         return storFileHTML;
     }

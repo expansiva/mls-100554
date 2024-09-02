@@ -130,6 +130,7 @@ export class ServiceFca100554 extends ServiceBase {
     }
 
     renderAboutICA() {
+        if (!(mls.actual[2] as any).left) return html`<div>No file opened</div>`
         const { shortName, project } = (mls.actual[2] as any).left;
         const mfile = mls.l2.editor.get({ shortName, project });
         if (!mfile) return html`<div>No file opened</div>`;
