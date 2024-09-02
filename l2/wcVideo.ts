@@ -14,6 +14,7 @@ export class WcVideo100554 extends IcaApresentationVideoEmbeddedVideoBase {
         video {
             width: 100%;
             height: auto;
+            border: 1px solid;
         }
     `;
 
