@@ -22,7 +22,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
 
     private resizeObserver: ResizeObserver | undefined;
 
-    private keys: {[key:string]:string} = {
+    private keys: { [key: string]: string } = {
         'ArrowDown': 'down',
         'ArrowLeft': 'left',
         'ArrowUp': 'up',
@@ -37,23 +37,23 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         'c': excCommandCopy,
         'v': excCommandCopy,
         'ArrowDown': this.onkeydownArrow.bind(this),
-        'ArrowLeft':  this.onkeydownArrow.bind(this),
-        'ArrowUp':  this.onkeydownArrow.bind(this),
-        'ArrowRight':  this.onkeydownArrow.bind(this)
+        'ArrowLeft': this.onkeydownArrow.bind(this),
+        'ArrowUp': this.onkeydownArrow.bind(this),
+        'ArrowRight': this.onkeydownArrow.bind(this)
     };
 
-    private onkeydownArrow(e:IWCDCommand ) {
+    private onkeydownArrow(e: IWCDCommand) {
 
-        const param:IWCDCommand = {
+        const param: IWCDCommand = {
             args: {},
             overlay: e.overlay,
             selectedIca: e.selectedIca
         }
-        
+
         const event = e.args as KeyboardEvent;
 
         event.preventDefault();
-        
+
         if (!this.keys[event.key]) return;
         const info: { position: string, positionMode: string } =
             { position: '', positionMode: '' };
@@ -146,7 +146,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
                 name: "_100554_wcdAdd",
                 level: [2, 4],
                 position: 'p-l2',
-                args: '',
+                args: '{ "buttons" : "image,unsplash,video,embed,code,part" }',
                 toolboxOptions: { background: 'none', border: 'none' }
             },
             'edit': {

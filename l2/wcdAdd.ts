@@ -1,64 +1,53 @@
 /// <mls shortName="wcdAdd" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { html, css, LitElement } from 'lit';
+import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
-import { getMessageKey } from "./_100554_collabLitElement";
-import { WCDToolbox } from './_100554_wcdToolbox';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import * as commandDivider from './_100554_wcdCommandAddDivider';
-import * as commandCode from './_100554_wcdCommandAddCodeBlock';
+import { WCDToolboxMethodos } from './_100554_wcdTypes';
+import { IcaLitElementBaseMethods } from './_100554_icaTypes';
+import { collab_xmark } from './_100554_collabIcons';
 
-import { collab_xmark, collab_image, collab_unsplash, collab_video, collab_code, collab_ellipsis, collab_link } from './_100554_collabIcons';
-
-/// **collab_i18n_start**
-const message_pt = {
-    image: 'Adicionar uma imagem',
-    video: 'Adicionar um video',
-    embed: 'Adicionar um link incorporado',
-    unsplash: 'Adicionar uma imagem do Unsplash',
-    code: 'Adicionar um novo bloco de código',
-    newPart: 'Adicionar uma nova parte',
-}
-const message_en = {
-    image: 'Add an image',
-    video: 'Add a video',
-    embed: 'Add an embed',
-    unsplash: 'Add an imagem from Unsplash',
-    code: 'Add a new code block',
-    newPart: 'Add a new part',
-}
-type MessageType = typeof message_en;
-const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
-}
 /// **collab_i18n_end**
 @customElement('wcd-add-100554')
 export class WcdAdd100554 extends WcdToolboxItemBase {
 
-    private msg: MessageType = messages['en'];
-    public myParent: WCDToolbox | undefined | any;
-    public elMain: HTMLElement | undefined | any;
-    public elICA: IcaLitElementBase | undefined | any;
+    public myParent: WCDToolboxMethodos | undefined;
+    public elMain: HTMLElement | undefined;
+    public elICA: IcaLitElementBaseMethods | undefined;
+
     public args: string | undefined;
 
+    @property({ type: String }) buttons = 'image,unsplash,video,embed,code,part';
+    @property() initialMode: 'close' | 'open' = 'close';
+
     @query('.buttons-actions') containerButtons: HTMLDivElement | undefined;
+    @query('.buttons-actions-container') containerButtonsContainer: HTMLDivElement | undefined;
+
     @query('add-tooltip') addTooltip: HTMLElement | undefined;
     @query('.add-button-helper') helperContainer: HTMLElement | undefined;
 
-    @property() intialMode: 'close' | 'open' = 'close';
 
     createRenderRoot() {
         return this;
     }
 
-    firstUpdated() {
-        const allBtns = this.containerButtons?.querySelectorAll('button');
-        if (!allBtns) return;
-        allBtns.forEach((btn) => { this.tooltipElement(btn); });
+    async firstUpdated() {
+
         this.addEventListener('click', (e) => {
             e.stopPropagation();
         });
+
+        const buttonsArray = this.buttons.split(',').map(button => button.trim());
+        const components: (string | null)[] = await Promise.all(buttonsArray.map(button => this.loadComponent(button)));
+        if (!this.containerButtons) return;
+        this.containerButtons.innerHTML = `
+            ${components.filter(Boolean).map(button => `<${button}></${button}>`).join('')}
+        `;
+
+        setTimeout(() => {
+            const allBtns = this.containerButtons?.querySelectorAll('button');
+            if (!allBtns) return;
+            allBtns.forEach((btn) => { this.tooltipElement(btn); });
+        }, 500)
 
     }
 
@@ -66,125 +55,63 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
 
         if (this.args) {
             try {
-                const j = JSON.parse(this.args);
-                if (j && j.open) this.intialMode = 'open';
-            } catch (e) {
-                
+                const args: IArgs = JSON.parse(this.args);
+                if (!args) return;
+                if (args.open) this.initialMode = 'open';
+                if (args.buttons) this.buttons = args.buttons;
+            } catch (e: any) {
+                throw new Error('Invalid args' + e.message);
             }
         }
-        const lang = getMessageKey(messages);
-        this.msg = messages[lang];
+
         this.style.zIndex = '99999';
         return html`
-        <div class="add-button ${this.intialMode === 'close' ? 'close' : ''}">
+        <div class="add-button ${this.initialMode === 'close' ? 'close' : ''}">
             <button @click=${this.onButtonClick} >
                 <span>
                     ${collab_xmark}
                 </span>
             </button>
-            <div class="buttons-actions">
-                <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'image')} @click=${this.handleImageClick} data-tooltip=${this.msg.image} ><span>${collab_image}</span></button>
-                <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'unsplash')} @click=${this.handleUnsplashClick} data-tooltip=${this.msg.unsplash}><span>${collab_unsplash}</span></button>
-                <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'video')} @click=${this.handleVideoClick} data-tooltip=${this.msg.video}><span>${collab_video}</span></button>
-                <button  @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'embed')} @click=${this.handleEmbedClick} data-tooltip=${this.msg.embed}><span>${collab_link}</span></button>
-                <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'code')} @click=${this.handleCodeClick} data-tooltip=${this.msg.code}><span>${collab_code}</span></button>
-                <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, 'part')} @click=${this.handleNewPartClick} data-tooltip=${this.msg.newPart}><span>${collab_ellipsis}</span></button>
+            <div class="buttons-actions-container">
+                <div class="buttons-actions"></div>
                 <add-tooltip></add-tooltip>
             </div>
         </div>
 
         <div class="add-button-helper">
-            <div data-helper="image"></div>
-            <div data-helper="unsplash"></div>
+            ${this.buttons.split(',').map((btn) => html`<div data-helper="${btn}"></div>`)}
         </div>
         <style>${this.styles}</style>
         `;
     }
 
-    private async handleUnsplashClick(e: MouseEvent) {
-        e.stopPropagation();
-        this.showHelper('unsplash');
-    }
-
-    private handleClick(action: 'image' | 'unsplash' | 'video' | 'embed' | 'code' | 'part') {
-        const obj = {
-            image: this.handleImageClick,
-            unsplash: this.handleUnsplashClick,
-            video: this.handleVideoClick,
-            embed: this.handleEmbedClick,
-            code: this.handleCodeClick,
-            part: this.handleNewPartClick,
-        };
-
-        if (obj[action]) obj[action](new MouseEvent('click'));
-
-    }
-
-    private async handleKeyDown(e: KeyboardEvent, btnAction: 'image' | 'unsplash' | 'video' | 'embed' | 'code' | 'part') {
-        e.stopPropagation();
-        if (e.key === 'Enter') {
-            this.handleClick(btnAction);
+    private async loadComponent(button: string) {
+        switch (button) {
+            case 'image':
+                await import('./_100554_wcdAddItemImage');
+                return 'wcd-add-item-image-100554';
+            case 'unsplash':
+                await import('./_100554_wcdAddItemUnsplash');
+                return 'wcd-add-item-unsplash-100554';
+            case 'video':
+                await import('./_100554_wcdAddItemVideo');
+                return 'wcd-add-item-video-100554';
+            case 'video':
+                await import('./_100554_wcdAddItemVideo');
+                return 'wcd-add-item-video-100554';
+            case 'code':
+                await import('./_100554_wcdAddItemCode');
+                return 'wcd-add-item-code-100554';
+            case 'embed':
+                await import('./_100554_wcdAddItemEmbed');
+                return 'wcd-add-item-embed-100554';
+            case 'part':
+                await import('./_100554_wcdAddItemPart');
+                return 'wcd-add-item-part-100554';
+            default:
+                console.error('invalid button name: "' + button + '"');
+                return null;
         }
-    }
-
-    private async handleImageClick(e: MouseEvent) {
-        e.stopPropagation();
-        this.showHelper('image');
-    }
-
-    private async handleNewPartClick(e: MouseEvent) {
-        await commandDivider.execute({
-            args: {},
-            overlay: this.myParent.parentElement?.parentElement,
-            selectedIca: this.elICA,
-        });
-    }
-
-    private async handleCodeClick(e: MouseEvent) {
-        await commandCode.execute({
-            args: {},
-            overlay: this.myParent.parentElement?.parentElement,
-            selectedIca: this.elICA,
-        });
-    }
-
-    private async handleEmbedClick(e: MouseEvent) {
-        this.showHelper('embed');
-    }
-
-    private async handleVideoClick(e: MouseEvent) {
-        this.showHelper('video');
-    }
-
-    private importsInfo: IImports = {
-        unsplash: '_100554_wcdDialogImageUnsplash',
-        image: '_100554_wcdDialogImage',
-        video: '_100554_wcdDialogVideo',
-        embed: '_100554_wcdDialogEmbedLink',
-    }
-
-    private showHelper(helper: string) {
-
-        if (!this.myParent) return;
-        this.myParent.onclick = undefined;
-        this.myParent.setIconsWcdToolbox(
-            [
-                {
-                    name: 'backButton'
-                },
-                {
-                    name: this.importsInfo[helper],
-                    args: '',
-                    position: 'p-l1',
-                    level: [2],
-                    toolboxOptions: { background: '#fff', border: 'none' }
-                },
-
-            ],
-            false,
-            'size'
-        );
-
     }
 
     private tooltipElement(el: HTMLElement) {
@@ -228,7 +155,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             this.addTooltip.style.top = '35px';
         } else {
             this.addTooltip.style.top = '35px';
-            this.addTooltip.style.left = ((position.left - positionContainer.left) + (position.width / 2)) + 'px';
+            this.addTooltip.style.left = ((position.left - positionContainer.left) + (position.width / 2) + 20) + 'px';
         }
     }
 
@@ -275,14 +202,17 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
         }
-        .add-button:not(.close) .buttons-actions{
+        .add-button:not(.close) .buttons-actions-container{
             opacity: 1;
             display:inline-block;
         }
-        .buttons-actions{
+        .buttons-actions-container{
             position:relative;
             display:none;
             padding-left: 22px;
+        }
+        .buttons-actions{
+            position:relative;
         }
         button svg{
             transition:transform .1s,-webkit-transform .1s;
@@ -377,6 +307,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
     `;
 }
 
-interface IImports {
-    [key: string]: string;
+interface IArgs {
+    open: boolean,
+    buttons: string,
 }

@@ -95,32 +95,26 @@ function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent:
 
 export function formatHtml(html: string) {
 
-    // Cria um container temporário para o HTML
     const container = document.createElement('div');
     container.innerHTML = html.trim();
 
-    // Função para formatar um nó e seus filhos
     function formatNode(node: any, indentLevel = 0) {
-        const indent = '\t'.repeat(indentLevel); // Indentação para o nível atual usando tabulação
-        const childIndent = '\t'.repeat(indentLevel + 1); // Indentação adicional para os atributos
+        const indent = '\t'.repeat(indentLevel); 
+        const childIndent = '\t'.repeat(indentLevel + 1);
         let formattedHtml = '';
 
         if (node.nodeType === Node.ELEMENT_NODE) {
-            // Formatar tag de abertura
+        
             formattedHtml += `${indent}<${node.nodeName.toLowerCase()}`;
-
-            // Adicionar atributos formatados
             for (const attr of node.attributes) {
                 formattedHtml += `\n${childIndent}${attr.name}="${attr.value}"`;
             }
 
-            // Verificar se a tag é auto-fechada
             const isSelfClosing = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'].includes(node.nodeName.toLowerCase());
             if (node.children.length === 0 && isSelfClosing) {
                 formattedHtml += ' />';
             } else {
                 formattedHtml += '>';
-                // Formatando filhos
                 let childHtml = '';
                 for (const child of node.childNodes) {
                     const childFormatted = formatNode(child, indentLevel + 1);
@@ -129,11 +123,9 @@ export function formatHtml(html: string) {
                     }
                 }
                 formattedHtml += childHtml;
-                // Adicionar tag de fechamento
                 formattedHtml += `\n${indent}</${node.nodeName.toLowerCase()}>`;
             }
         } else if (node.nodeType === Node.TEXT_NODE) {
-            // Adicionar texto, removendo espaços em branco desnecessários
             const trimmedText = node.nodeValue.trim();
             if (trimmedText) {
                 formattedHtml += trimmedText;
@@ -142,10 +134,8 @@ export function formatHtml(html: string) {
         return formattedHtml;
     }
 
-    // Começa a formatação a partir do elemento raiz
     let result = formatNode(container.firstChild);
 
-    // Remove linhas em branco desnecessárias
     result = result
         .split('\n')
         .filter(line => line.trim() !== '')

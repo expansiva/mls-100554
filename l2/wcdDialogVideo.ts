@@ -2,18 +2,149 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { WCDToolbox } from './_100554_wcdToolbox';
 import { getDSInstance, DesignSystemIO, IAssetsInfo } from './_100554_libDesignSystem';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { execute } from './_100554_wcdCommandAddVideo';
+import { WCDOverlayMethods } from './_100554_wcdTypes';
 
 @customElement('wcd-dialog-video-100554')
-export class WcdDialogImage100554 extends LitElement {
+export class WcdDialogVideo100554 extends LitElement {
 
-    public myParent: WCDToolbox | undefined | any;
-    public elMain: HTMLElement | undefined | any;
-    public elICA: IcaLitElementBase | undefined | any;
-    public args: string | undefined;
+    private dsInstance: DesignSystemIO | undefined;
+
+    @property() videos: IVideoItem[] = [];
+
+    @query('#file-input') inputFile: HTMLInputElement | undefined;
+
+    private project: number | undefined;
+
+    private async initDsInstance(project: number, dsIndex: number) {
+        this.dsInstance = await getDSInstance(project, dsIndex);
+        await this.dsInstance.init();
+    }
+
+    private lastHeight: string | undefined;
+
+    async firstUpdated() {
+        const { project } = mls.actual[5];
+        if (!project) return;
+        this.project = project;
+        await this.initDsInstance(project, 0);
+        this.videos = await this.getVideos(project);
+    }
+
+    private recalculeIcaHeight() {
+        if (!window.wcdState) throw new Error('Invalid window.wcdState');
+        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        const height = this.getBoundingClientRect()?.height;
+        if (this.lastHeight === undefined) this.lastHeight = window.wcdState.elICA.style.height;
+        window.wcdState.elICA.style.height = height + 'px';
+    }
+
+    private async getVideos(project: number) {
+        if (!this.dsInstance || !this.dsInstance.assets) return [];
+        const videos: IVideoItem[] = [];
+        const list = this.dsInstance.assets.list;
+
+        for await (const item of Object.entries(list)) {
+            const [key, value] = item;
+            const src = `/l3/${project}/${value.path}/${value.shortname}`;
+            if (value.type === 'video') {
+                const srcCache = await this.getUrlL3(src) || '';
+                const newVideoAssetsItem: IVideoItem = {
+                    ...value,
+                    src,
+                    srcCache
+                }
+                videos.push(newVideoAssetsItem);
+            }
+        }
+
+        return videos;
+    }
+
+    private async getUrlL3(src: string) {
+        const parts = src.split('/');
+        const folderNumber = parts[2];
+        const dsNumber = "3";
+        const remainingParts = parts.slice(3).join('_');
+        const result = `${folderNumber}_${dsNumber}_${remainingParts}`;
+        const storFile = mls.stor.files[result];
+        if (!storFile) throw new Error('Invalid url');
+        const urlCache = await storFile.saveContentInCacheIfNeed();
+        return urlCache;
+    }
+
+    private onUploadClick() {
+        if (!this.inputFile) return;
+        this.inputFile.click();
+    }
+
+    private onChangeImage(event: Event) {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+            this.addVideo(input.files[0]);
+        }
+    }
+
+    private async addVideo(file: File) {
+        if (!this.dsInstance || !this.dsInstance.assets || !this.project) return;
+        const dsName = this.dsInstance.dsname;
+        const path = `ds/${dsName}/assets`
+        await this.dsInstance.assets.add(path, file.name, [], '', 'video', file);
+        this.videos = await this.getVideos(this.project);
+        await this.updateComplete;
+        const last = this.videos[this.videos.length - 1];
+        this.handleClickGallery(last);
+    }
+
+    private async handleClickGallery(item: IVideoItem, ev?: MouseEvent) {
+
+        if (!window.wcdState) throw new Error('Invalid window.wcdState');
+        if (!window.wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+
+        ev?.preventDefault();
+        ev?.stopPropagation();
+        await execute({
+            args: { src: item.src },
+            overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
+            selectedIca: window.wcdState.elICA,
+        });
+
+    }
+
+    updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('videos')) {
+            this.recalculeIcaHeight();
+        }
+    }
+
+    disconnectedCallback() {
+        if (!window.wcdState) throw new Error('Invalid window.wcdState');
+        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        window.wcdState.elICA.style.height = this.lastHeight || '';
+        super.disconnectedCallback();
+    }
+
+    render() {
+        return html`
+
+            <div class="container">
+                <div class="actions-buttons">
+                    <button @click=${this.onUploadClick}>Upload</button>
+                    <input @change=${this.onChangeImage} type="file" id="file-input" accept="image/*" style="display: none;">
+                </div>
+                <div class="gallery">
+                    ${this.videos.map((video) => {
+            return html`<video controls @click=${(ev: MouseEvent) => { this.handleClickGallery(video, ev) }} src=${video.srcCache} alt=${video.description}></video>`
+        })}
+                </div>
+
+            </div>
+
+        `;
+    }
 
     static styles = css`
 
@@ -82,137 +213,6 @@ export class WcdDialogImage100554 extends LitElement {
             }
         }
     `;
-
-    private dsInstance: DesignSystemIO | undefined;
-
-    @property() videos: IVideoItem[] = [];
-
-    @query('#file-input') inputFile: HTMLInputElement | undefined;
-
-    private project: number | undefined;
-
-    private async initDsInstance(project: number, dsIndex: number) {
-        this.dsInstance = await getDSInstance(project, dsIndex);
-        await this.dsInstance.init();
-    }
-
-    private lastHeight: string | undefined;
-
-    async firstUpdated() {
-        const { project } = mls.actual[5];
-        if (!project) return;
-        this.project = project;
-        await this.initDsInstance(project, 0);
-        this.videos = await this.getVideos(project);
-    }
-
-    private recalculeIcaHeight() {
-        if (!this.elICA) return;
-        const height = this.getBoundingClientRect()?.height;
-        if (this.lastHeight === undefined) this.lastHeight = this.elICA.style.height;
-        this.elICA.style.height = height + 'px';
-    }
-
-    private async getVideos(project: number) {
-        if (!this.dsInstance || !this.dsInstance.assets) return [];
-        const videos: IVideoItem[] = [];
-        const list = this.dsInstance.assets.list;
-
-        for await (const item of Object.entries(list)) {
-            const [key, value] = item;
-            const src = `/l3/${project}/${value.path}/${value.shortname}`;
-            if (value.type === 'video') {
-                const srcCache = await this.getUrlL3(src) || '';
-                const newVideoAssetsItem: IVideoItem = {
-                    ...value,
-                    src,
-                    srcCache
-                }
-                videos.push(newVideoAssetsItem);
-            }
-        }
-
-        return videos;
-    }
-
-    private async getUrlL3(src: string) {
-        const parts = src.split('/');
-        const folderNumber = parts[2];
-        const dsNumber = "3";
-        const remainingParts = parts.slice(3).join('_');
-        const result = `${folderNumber}_${dsNumber}_${remainingParts}`;
-        const storFile = mls.stor.files[result];
-        if (!storFile) throw new Error('Invalid url');
-        const urlCache = await storFile.saveContentInCacheIfNeed();
-        return urlCache;
-    }
-
-    private onUploadClick() {
-        if (!this.inputFile) return;
-        this.inputFile.click();
-    }
-
-    private onChangeImage(event: Event) {
-        const input = event.target as HTMLInputElement;
-
-        if (input.files && input.files[0]) {
-            this.addVideo(input.files[0]);
-        }
-    }
-
-    private async addVideo(file: File) {
-        if (!this.dsInstance || !this.dsInstance.assets || !this.project) return;
-        const dsName = this.dsInstance.dsname;
-        const path = `ds/${dsName}/assets`
-        await this.dsInstance.assets.add(path, file.name, [], '', 'video', file);
-        this.videos = await this.getVideos(this.project);
-        await this.updateComplete;
-        const last = this.videos[this.videos.length - 1];
-        this.handleClickGallery(last);
-    }
-
-    private async handleClickGallery(item: IVideoItem, ev?: MouseEvent) {
-        ev?.preventDefault();
-        ev?.stopPropagation();
-        await execute({
-            args: { src: item.src },
-            overlay: this.myParent.parentElement?.parentElement,
-            selectedIca: this.elICA,
-        });
-    
-    }
-
-    updated(changedProperties: Map<string | number | symbol, unknown>) {
-        super.updated(changedProperties);
-        if (changedProperties.has('videos')) {
-            this.recalculeIcaHeight();
-        }
-    }
-
-    disconnectedCallback() {
-        this.elICA.style.height = this.lastHeight;
-        super.disconnectedCallback();
-    }
-
-    render() {
-        return html`
-
-            <div class="container">
-
-                <div class="actions-buttons">
-                    <button @click=${this.onUploadClick}>Upload</button>
-                    <input @change=${this.onChangeImage} type="file" id="file-input" accept="image/*" style="display: none;">
-                </div>
-                <div class="gallery">
-                    ${this.videos.map((video) => {
-            return html`<video controls @click=${(ev: MouseEvent) => { this.handleClickGallery(video, ev) }} src=${video.srcCache} alt=${video.description}></video>`
-        })}
-                </div>
-
-            </div>
-
-        `;
-    }
 }
 
 interface IVideoItem extends IAssetsInfo {

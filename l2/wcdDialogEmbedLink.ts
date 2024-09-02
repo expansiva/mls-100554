@@ -3,8 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { execute } from './_100554_wcdCommandAddEmbedLink';
-import { WCDToolbox } from './_100554_wcdToolbox';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { CollabLitElement } from './_100554_collabLitElement'
 
 /// **collab_i18n_start**
@@ -26,11 +25,6 @@ const messages: { [key: string]: MessageType } = {
 @customElement('wcd-dialog-embed-link-100554')
 export class WcdDialogEmbedLink100554 extends CollabLitElement {
 
-    public myParent: WCDToolbox | undefined | any;
-    public elMain: HTMLElement | undefined | any;
-    public elICA: IcaLitElementBase | undefined | any;
-    public args: string | undefined;
-
     private link: string = '';
 
     private msg: MessageType = messages['en'];
@@ -39,14 +33,18 @@ export class WcdDialogEmbedLink100554 extends CollabLitElement {
 
     private async handleKeyDown(event: KeyboardEvent) {
         event.stopPropagation();
+        if (!window.wcdState) throw new Error('Invalid window.wcdState');
+        if (!window.wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+
         if (event.key === 'Enter') {
             await execute({
                 args: { url: this.link },
-                overlay: this.myParent.parentElement?.parentElement,
-                selectedIca: this.elICA,
+                overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
+                selectedIca: window.wcdState.elICA,
             });
         }
-        
+
     }
 
     private handleInput(event: KeyboardEvent) {
@@ -63,7 +61,6 @@ export class WcdDialogEmbedLink100554 extends CollabLitElement {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-
         return html`
 
             <div class="container">

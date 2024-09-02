@@ -8,7 +8,7 @@ import { IcaLitElementBase } from './_100554_icaLitElementBase';
 export abstract class IcaApresentationTextText extends IcaLitElementBase {
 
     @property({ type: String }) type: string | undefined;
-    
+
     public mySymbol = 'fa-t';
 
     public getActionsTags(): ActionTag[] {
@@ -21,12 +21,12 @@ export abstract class IcaApresentationTextText extends IcaLitElementBase {
             const addOpen = this.getAttribute('addOpen');
             this.removeAttribute('addOpen');
             if (addOpen) {
-                auxAdd = '{"open":true}';
+                auxAdd = '{"open":true, "buttons" : "image,unsplash,video,embed,code,part"}';
                 auxEdt = '{"tp":"click", "attr":"text"}';
             }
 
             return [
-                { name: "add", args:auxAdd },
+                { name: "add", args: auxAdd },
                 { name: "edit", args: auxEdt, position: 'p-m2' },
                 { name: "backButton" }
             ];
@@ -38,12 +38,12 @@ export abstract class IcaApresentationTextText extends IcaLitElementBase {
             { name: "menu" },
             { name: "size" },
             { name: "events" },
-            { name: "edit", args:'{"tp":"btn", "attr":"text"}' },
+            { name: "edit", args: '{"tp":"btn", "attr":"text"}' },
             { name: "title" },
         ]
-        
+
         return rc;
-        
+
     }
 
     public changeStateHtml(html: string): void {
