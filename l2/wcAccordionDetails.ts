@@ -17,7 +17,6 @@ export class WcAccordionDetails100554 extends IcaNavigationContentAccordionBase 
     @property({ type: Boolean }) open = false;
 
     render() {
-        console.info(this.open)
         return html`
         <details .open="${this.open}">
             <summary>${this.text || ''}</summary>

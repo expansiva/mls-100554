@@ -141,7 +141,16 @@ export class ServiceFca100554 extends ServiceBase {
         const div = document.createElement('div');
         div.innerHTML = htmlFile;
 
-        this.loadHelpPage('wcdOverlayModeStoryPage', 100554);
+        const modeOverlay = div.querySelector('[modeoverlay]');
+        if (modeOverlay) {
+            const overlayNameAttr = modeOverlay.getAttribute('modeoverlay') || '';
+            const overlayName = convertTagToFileName(overlayNameAttr);
+            const overlayNameHelp = overlayName + 'Help';
+            mls.actual[0].setFullName(overlayNameHelp);
+            const { project, path } = mls.actual[0];
+            this.loadHelpPage(path || '', project || 0);
+        }
+
         return html`<div style="overflow:auto;height:100%;" id="helpDiv"></div>`
 
     }
