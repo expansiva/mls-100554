@@ -285,7 +285,7 @@ export class ServicePreview100554 extends ServiceBase {
             if (this.visible === 'false' || !this.visible) return;
             if (ev.level !== 2 || (ev.type !== 'FileAction')) return;
             const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
-            const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new'];
+            const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new','modeCreated'];
 
             if (
                 fileAction.position === this.position ||
@@ -293,7 +293,16 @@ export class ServicePreview100554 extends ServiceBase {
             ) return;
 
             if (mls.istrace) console.info('is preview repaint:' + this.watch)
-            if (this.watch) this.onReloader();
+            if (fileAction.action === 'open' && this.watch) {
+
+                this.loading = true;
+                return;
+            }
+            if (this.watch) {
+                
+                this.loading = false;
+                this.onReloader();
+            }
 
         } catch (e) {
             console.info(e);
