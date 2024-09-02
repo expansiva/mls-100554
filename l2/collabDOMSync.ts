@@ -33,7 +33,7 @@ function getDiffs(originalLines: string[], modifiedLines: string[]) {
 function applyDiffs(originalModel: monaco.editor.ITextModel, diffs: IDiffs[]) {
 
     const editor = findEditor();
-    if (!editor) return;
+    if (!editor) throw new Error('No find editor');
     editor.setModel(originalModel);
     const edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
 
@@ -80,7 +80,7 @@ function findEditor(): monaco.editor.ICodeEditor | null {
 function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent: string) {
 
     const editor = findEditor();
-    if (!editor) return;
+    if (!editor) throw new Error('No find editor');
     editor.setModel(model);
     const lastLineNumber = model.getLineCount();
     const lastLineLength = model.getLineLength(lastLineNumber);
@@ -99,12 +99,12 @@ export function formatHtml(html: string) {
     container.innerHTML = html.trim();
 
     function formatNode(node: any, indentLevel = 0) {
-        const indent = '\t'.repeat(indentLevel); 
+        const indent = '\t'.repeat(indentLevel);
         const childIndent = '\t'.repeat(indentLevel + 1);
         let formattedHtml = '';
 
         if (node.nodeType === Node.ELEMENT_NODE) {
-        
+
             formattedHtml += `${indent}<${node.nodeName.toLowerCase()}`;
             for (const attr of node.attributes) {
                 formattedHtml += `\n${childIndent}${attr.name}="${attr.value}"`;
