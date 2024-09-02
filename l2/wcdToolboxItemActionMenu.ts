@@ -1,7 +1,7 @@
 /// <mls shortName="wcdToolboxItemActionMenu" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, repeat, unsafeHTML } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { html,  } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
 
@@ -12,7 +12,7 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
     public args: string | undefined;
     public myInfos: IWCDMenu100554 | undefined;
 
-    
+    @query('wcd-toolbox-items-menu') elItens: HTMLElement | undefined;
     //----------COMPONENT---------------
 
     createRenderRoot() {
@@ -24,34 +24,17 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
     render() {
         
         this.setMyArgs();
-        if (!this.myInfos || this.myInfos.itens === undefined ) return html``;
+        if (!this.myInfos || this.myInfos.itens === undefined) return html``;
+        setTimeout(()=>{ this.loadItens()},200)
         this.style.zIndex = '9999';
         return html`
         <style>${this.css}</style>
-        <wcd-toolbox-itemmenu>
-            ${repeat(this.myInfos.itens,
-                ((key: IWCDMenuItem100554, idx: number) => 'i' + idx) as any,
-                ((item: IWCDMenuItem100554, index: number) => {
-
-                    return this.renderItem(item, index);
-
-                }) as any
-            )}
-        </wcd-toolbox-itemmenu>
+        <wcd-toolbox-items-menu>
+        </wcd-toolbox-items-menu>
             
         `;
 
     }
-
-    renderItem(item: IWCDMenuItem100554, index: number) {
-        const tag = this.loadItemAndReturnTag(item.item)
-        return html`
-            <${tag} .args=${item.arg}>
-            </${tag}>
-        `
-    }
-
-    
 
 
     //-----------IMPLEMENTATION-----------
@@ -71,17 +54,36 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
 
     }
 
+    private async loadItens() {
+
+        if (!this.myInfos || this.myInfos.itens === undefined) return;
+
+        for await (const item of this.myInfos.itens) {
+
+            await this.loadItem(item);
+        }
+        
+    }
+
     private isLoad:string[] = [];
-    private async loadItemAndReturnTag(file: string) {
+    private async loadItem(item: IWCDMenuItem100554) {
 
         try {
 
-            if (this.isLoad.includes(file)) return'';
+            let file = item.item;
+            if (!this.isLoad.includes(file)) {
+                if (!file.startsWith('./')) file = './' + file;
+                await import(file);
+            }
 
+            const tag = convertFileNameToTag(item.item)
+            const el = document.createElement(tag);
+            (el as any).args = item.args;
 
-            if (!file.startsWith('./')) file = './' + file;
-            await import(file);
-            return convertFileNameToTag(file.replace('./', ''))
+            const f = document.createElement('wcd-toolbox-item-menu');
+            f.appendChild(el);
+
+            if (this.elItens) this.elItens.appendChild(f);
             
         } catch (e) {
             return '';
@@ -96,23 +98,31 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
 
         wcd-toolbox-item-action-menu-100554{
             display:block;
-            height:17px;
             border:1px solid #d3cece;
-            padding:.2rem;
+            padding:.3rem;
             border-radius:5px;
             background:#fff;
         }
 
-        wcd-toolbox-itemmenu{
+        wcd-toolbox-items-menu{
             display:flex;
-            height:20px;
-            gap:.3rem;
+            height:18px;
+            gap: .5rem;
+            justify-content: center;
+            align-items: center;
             
         }
 
-        
+        wcd-toolbox-item-menu{
+            height: 18px;
+            padding: .2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+        }
 
-        wcd-toolbox-itemmenu a:hover{
+        wcd-toolbox-item-menu:hover{
             background:#e1e1e1;
         }
 
@@ -128,5 +138,5 @@ interface IWCDMenu100554 {
 
 interface IWCDMenuItem100554 {
     item: string,
-    arg: string,
+    args: string,
 }

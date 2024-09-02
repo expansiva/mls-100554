@@ -21,7 +21,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
     public level: string = '';
 
     @property({ type: String, reflect: true })
-    private widget: string | undefined;
+    public widget: string | undefined;
 
     public elMain: HTMLElement | undefined; // component from ica render
 
@@ -651,7 +651,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
             transform: translateY(-50%);
         }
 
-        .p-r0{
+        .p-m0{
             cursor:pointer;
             display:block;
             position:absolute;
