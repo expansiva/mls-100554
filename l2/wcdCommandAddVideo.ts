@@ -2,7 +2,7 @@
 
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
 export async function execute(param: IWCDCommand) {
@@ -12,12 +12,16 @@ export async function execute(param: IWCDCommand) {
     const args = param.args as IArgs;
     if (!args.src || typeof args.src !== 'string') throw new Error('Invalid args: src is missing or invalid');
 
-    const elVideo = document.createElement('ica-apresentation-video-embedded-video-100554') as IcaLitElementBaseMethods;
-    elVideo.setAttribute('widget', 'wc-video-100554');
+    const icaTagName = 'ica-apresentation-video-embedded-video-100554';
+    const wcTagName = 'wc-video-100554';
+    importFilesIfNeeded([icaTagName, wcTagName]);
+
+    const elVideo = document.createElement(icaTagName) as IcaLitElementBaseMethods;
+    elVideo.setAttribute('widget', wcTagName);
     elVideo.setAttribute('controls', 'true');
     elVideo.setAttribute('src', args.src || '');
 
-    const allVideoAp = param.overlay.querySelectorAll('[widget="ica-apresentation-video-embedded-video-100554"]');
+    const allVideoAp = param.overlay.querySelectorAll(`[widget="${icaTagName}"]`);
     const id = 'apVideo' + (allVideoAp.length + 1);;
     elVideo.id = PREFIX_ICA_ID + id;
     elVideo.setAttribute('idEl', id);

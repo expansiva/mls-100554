@@ -2,7 +2,7 @@
 
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
-import {dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
 export async function execute(param: IWCDCommand) {
@@ -10,10 +10,14 @@ export async function execute(param: IWCDCommand) {
     if (!param?.selectedIca) throw new Error('invalid param.selectedIca');
     if (!param.overlay || typeof param.overlay.selectItem !== 'function') throw new Error('invalid param.overlay');
 
-    const widgetIca = 'ica-apresentation-text-code-100554';
+    const icaTagName = 'ica-apresentation-text-code-100554';
+    const wcTagName = 'wc-code-100554';
+    importFilesIfNeeded([icaTagName, wcTagName]);
+
+    const widgetIca = icaTagName;
     const elDivider = document.createElement(widgetIca) as IcaLitElementBaseMethods;
     elDivider.setAttribute('widget', 'wc-code-100554');
-    const allCode = param.overlay.querySelectorAll(`[widget="${widgetIca}"]`);
+    const allCode = param.overlay.querySelectorAll(`[widget="${icaTagName}"]`);
 
     const id = 'apCode' + (allCode.length + 1);;
     elDivider.id = PREFIX_ICA_ID + id;

@@ -2,22 +2,26 @@
 
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
 export async function execute(param: IWCDCommand) {
-    
+
     if (!param?.selectedIca) throw new Error('invalid param.selectedIca');
     if (!param.overlay || typeof param.overlay.selectItem !== 'function') throw new Error('invalid param.overlay');
 
     const args = param.args as IArgs;
     if (!args.url || typeof args.url !== 'string') throw new Error('Invalid args: url is missing or invalid');
 
-    const elEmbedSocialMedia = document.createElement('ica-apresentation-embeds-social-media-100554') as IcaLitElementBaseMethods;
-    elEmbedSocialMedia.setAttribute('widget', 'wc-embeds-social-media-100554');
+    const icaTagName = 'ica-apresentation-embeds-social-media-100554';
+    const wcTagName = 'wc-embeds-social-media-100554';
+    importFilesIfNeeded([icaTagName, wcTagName]);
+
+    const elEmbedSocialMedia = document.createElement(icaTagName) as IcaLitElementBaseMethods;
+    elEmbedSocialMedia.setAttribute('widget', wcTagName);
     elEmbedSocialMedia.setAttribute('url', args.url || '');
 
-    const allEmbedLinks = param.overlay.querySelectorAll('[widget="ica-apresentation-embeds-social-media-100554"]');
+    const allEmbedLinks = param.overlay.querySelectorAll(`[widget="${icaTagName}"]`);
 
     const id = 'apEmbedLink' + (allEmbedLinks.length + 1);;
     elEmbedSocialMedia.id = PREFIX_ICA_ID + id;

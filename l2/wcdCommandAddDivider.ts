@@ -2,7 +2,7 @@
 
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
 
 export async function execute(param: IWCDCommand) {
@@ -10,10 +10,13 @@ export async function execute(param: IWCDCommand) {
     if (!param?.selectedIca) throw new Error('invalid param.selectedIca');
     if (!param.overlay || typeof param.overlay.selectItem !== 'function') throw new Error('invalid param.overlay');
 
-    const widgetDivider = 'ica-layout-flow-divider-100554'
-    const elDivider = document.createElement(widgetDivider) as IcaLitElementBaseMethods;
-    elDivider.setAttribute('widget', 'wc-divider-100554');
-    const allFlowDividers = param.overlay.querySelectorAll(`[widget="${widgetDivider}"]`);
+    const icaTagName = 'ica-layout-flow-divider-100554';
+    const wcTagName = 'wc-divider-100554';
+    importFilesIfNeeded([icaTagName, wcTagName]);
+
+    const elDivider = document.createElement(icaTagName) as IcaLitElementBaseMethods;
+    elDivider.setAttribute('widget', wcTagName);
+    const allFlowDividers = param.overlay.querySelectorAll(`[widget="${icaTagName}"]`);
 
     const id = 'apDivider' + (allFlowDividers.length + 1);;
     elDivider.id = PREFIX_ICA_ID + id;
@@ -32,4 +35,5 @@ export async function execute(param: IWCDCommand) {
     dispatchEventConciliate();
 
 }
+
 
