@@ -69,13 +69,13 @@ function findEditor(): monaco.editor.ICodeEditor | null {
 
     const allEditors = monaco.editor.getEditors();
     allEditors.forEach((editor) => {
-        if (editor.getModel() === mfile.model || editor.getModel() === (mfile as any)['modelHTML']) {
+        const modelEd = editor.getModel();
+        if (modelEd && (modelEd.id === mfile.model.id || modelEd.id === (mfile as any)['modelHTML'].id)) {
             associatedEditor = editor;
         }
     });
     return associatedEditor;
 }
-
 
 function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent: string) {
 

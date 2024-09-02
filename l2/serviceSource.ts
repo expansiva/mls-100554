@@ -1362,12 +1362,13 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (mfile) (mfile as any).modelHTML = model;
         }
 
-        if (open && this._ed1) {
-            this._ed1.setModel(model);
-
+        if (open && this._ed1) this._ed1.setModel(model);
+        if (!open) {
+            mls.events.fireFileAction('modeCreated', storFileHTML, this.position);
         }
-        mls.events.fireFileAction('modeCreated', storFileHTML, this.position);
         this.registerProvider();
+
+
         return storFileHTML;
     }
 
