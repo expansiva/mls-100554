@@ -117,7 +117,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             </div>
             <style>
                 #edittextwcd *{
-                    margin:0px;
+                    
                 }
             </style>
         `;
