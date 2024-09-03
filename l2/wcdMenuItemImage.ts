@@ -1,14 +1,16 @@
 /// <mls shortName="wcdMenuItemImage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html } from 'lit';
-import { customElement} from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
+import { WCDOverlayMethods } from './_100554_wcdTypes';
+import * as commandChangeImage from './_100554_wcdCommandChangeSizeImage';
 
 @customElement('wcd-menu-item-image-100554')
 export class WcdAdd100554 extends WcdToolboxItemBase {
 
     public args: string | undefined;
-    
+
     //---------------COMPONENT----------------
 
     render() {
@@ -57,16 +59,45 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
 
     //---------------IMPLEMENTS----------------
 
-    clickBig() {
-        console.info('clicou em big');
+    async clickBig() {
+        if (!window.wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+
+        await commandChangeImage.execute({
+            args: {
+                newSize: 'full'
+            },
+            overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
+            selectedIca: window.wcdState.elICA,
+        });
+
     }
 
-    clickCenter() {
-        console.info('clicou em center');
+    async clickCenter() {
+        if (!window.wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+
+        await commandChangeImage.execute({
+            args: {
+                newSize: 'outset'
+            },
+            overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
+            selectedIca: window.wcdState.elICA,
+        });
+
     }
 
-    clickNormal() {
-        console.info('clicou em normal');
+    async clickNormal() {
+        if (!window.wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+
+        await commandChangeImage.execute({
+            args: {
+                newSize: 'inset'
+            },
+            overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
+            selectedIca: window.wcdState.elICA,
+        });
     }
 
 }

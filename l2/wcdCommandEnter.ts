@@ -2,7 +2,9 @@
 
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
+import { PREFIX_ICA_ID } from './_100554_collabPageElement';
+import { findParentElementWithTagName, countElementsWithTagName } from './_100554_wcdGlobal';
 
 export function execute(param: IWCDCommand) {
 
@@ -13,20 +15,46 @@ export function execute(param: IWCDCommand) {
     const e = param.args as KeyboardEvent;
     const ica = param.selectedIca;
     const overlay = param.overlay;
-
     e.preventDefault();
-
     if (!ica) return;
+
+    const icaSectionTagName = 'ica-layout-flow-section-100554';
+    const wcSectionTagName = 'wc-section-100554';
+    const icaTagName = 'ica-apresentation-text-text-100554';
+    const wcTagName = 'wc-text-100554';
+
+    const imports = [icaTagName, wcTagName, icaSectionTagName, wcSectionTagName];
+    importFilesIfNeeded(imports);
 
     const elAdd = document.createElement('ica-apresentation-text-text-100554') as IcaLitElementBaseMethods;
     elAdd.setAttribute('widget', 'wc-text-100554');
     elAdd.setAttribute('type', 'p');
     elAdd.setAttribute('text', '');
-    elAdd.id = 'ica_apText' + overlay.children.length + 1;
-    
+
+    const allTexts = countElementsWithTagName(overlay, icaSectionTagName);
+    elAdd.id = 'ica_apText' + (allTexts + 1);
     if (e.altKey) elAdd.setAttribute('addOpen', 'true');
 
-    ica.insertAdjacentElement('afterend', elAdd);
+    const parentSection = findParentElementWithTagName(param.selectedIca, icaSectionTagName);
+
+    if (parentSection && (parentSection.classList.contains('full') || parentSection.classList.contains('outset'))) {
+        let nextSection = parentSection.nextElementSibling;
+
+        if (nextSection && nextSection.classList.contains('inset')) {
+            const nextChidrens = nextSection?.children[0]?.shadowRoot?.children || [];
+            const firstChildrenNext = nextChidrens[0];
+            if (firstChildrenNext) nextSection?.children[0]?.shadowRoot?.insertBefore(elAdd, firstChildrenNext);
+            else nextSection?.appendChild(param.selectedIca);
+
+        } else {
+            const sectionImage = addSection(icaSectionTagName, wcSectionTagName, param.overlay, [elAdd]);
+            parentSection.insertAdjacentElement('afterend', sectionImage);
+        }
+
+    } else {
+        ica.insertAdjacentElement('afterend', elAdd);
+    }
+
     const { x, y, height, width } = elAdd.getBoundingClientRect();
     overlay.myItens.push({ element: elAdd, depth: 0, x, y, height, width, opacity: elAdd.style.opacity });
     overlay.createOverlayItems()
@@ -38,4 +66,18 @@ export function execute(param: IWCDCommand) {
 
     dispatchEventConciliate();
 
+}
+
+function addSection(icaSectionTagName: string, wcSectionTagName: string, overlay: HTMLElement, childrens: Element[]) {
+    const elSection = document.createElement(icaSectionTagName) as IcaLitElementBaseMethods;
+    elSection.setAttribute('widget', wcSectionTagName);
+    const allSections = countElementsWithTagName(overlay, icaSectionTagName);
+    const id = 'flowSection' + (allSections + 1);;
+    elSection.classList.add('inset');
+    elSection.id = PREFIX_ICA_ID + id;
+    elSection.setAttribute('idEl', id);
+    childrens.forEach((child) => {
+        elSection.appendChild(child);
+    });
+    return elSection;
 }

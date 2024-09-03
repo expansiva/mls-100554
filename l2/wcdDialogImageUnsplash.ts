@@ -102,7 +102,7 @@ export class WcdDialogImageUnsplash100554 extends CollabLitElement {
         if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
 
         await execute({
-            args: { src: item.urls.regular },
+            args: { src: item.urls.full },
             overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
             selectedIca: window.wcdState.elICA,
         });

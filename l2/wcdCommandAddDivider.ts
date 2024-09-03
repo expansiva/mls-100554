@@ -51,10 +51,11 @@ export async function execute(param: IWCDCommand) {
 function addSection(icaSectionTagName: string, wcSectionTagName: string, overlay: HTMLElement, childrens: Element[]) {
     const elSection = document.createElement(icaSectionTagName) as IcaLitElementBaseMethods;
     elSection.setAttribute('widget', wcSectionTagName);
-    const allFlowDividers = overlay.querySelectorAll(`[widget="${icaSectionTagName}"]`);
-    const id = 'flowSection' + (allFlowDividers.length + 1);;
+    const allSections = countElementsWithTagName(overlay, icaSectionTagName);
+    const id = 'flowSection' + (allSections + 1);;
     elSection.id = PREFIX_ICA_ID + id;
     elSection.setAttribute('idEl', id);
+    elSection.classList.add('inset');
 
     childrens.forEach((child) => {
         elSection.appendChild(child);

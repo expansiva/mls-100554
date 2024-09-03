@@ -17,5 +17,9 @@ export class IcaPageMedium100554 extends CollabPageElement {
         // here or code for event
     }
 
-
 }
+
+
+
+
+

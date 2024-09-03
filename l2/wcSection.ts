@@ -12,9 +12,17 @@ export class WcSection100554 extends IcaLayoutFlowSectionBase {
             height: 100%;
             width: 100%;
             display: block;
-            max-width: 680px;
             margin-left: auto;
             margin-right: auto;
+        }
+        :host(.full) {
+            width: 100%;
+        }
+        :host(.outset) {
+            max-width: 740px;
+        }
+        :host(.inset) {
+            max-width: 680px;
         }
     `;
 

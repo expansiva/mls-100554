@@ -8,6 +8,9 @@ import { IcaNavigationContentAccordionBase } from './_100554_icaNavigationConten
 @customElement('ica-navigation-content-accordion-100554')
 export abstract class IcaNavigationContentAccordion extends IcaLitElementBase implements IcaNavigationContentAccordionBase {
 
+    @property({ type: String }) text = '';
+    @property({ type: Boolean }) open = false;
+
     public mySymbol = 'fa-bars';
 
     public getActionsTags(): ActionTag[] {
