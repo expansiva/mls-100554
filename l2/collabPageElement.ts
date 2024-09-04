@@ -3,7 +3,9 @@ import { html, PropertyValueMap } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { WcdOverlayLitBase, IICADepths } from './_100554_wcdOverlayLitBase'
+import { WCDOverlayMethods } from './_100554_wcdTypes';
+import { IICADepths } from './_100554_icaTypes'
+
 import { convertTagToFileName } from './_100554_utilsLit'
 
 export const PREFIX_ICA_ID = 'ica_';
@@ -16,9 +18,13 @@ export abstract class CollabPageElement extends CollabLitElement {
 
     @property({ type: String, reflect: true }) level: string = mls.actualLevel.toString() || '7';
 
-    private overlay: WcdOverlayLitBase | undefined;
+    public overlay: WCDOverlayMethods | undefined;
 
     public isPage = true;
+
+    public refreshOverlay(){
+        this.checkToAddOverlay();
+    }
 
     constructor() {
         super();
@@ -133,7 +139,7 @@ export abstract class CollabPageElement extends CollabLitElement {
 
         const ok = await this.importWCDOverlay(this.modeoverlay); 
         if (!ok) return;
-        this.overlay = document.createElement(this.modeoverlay) as WcdOverlayLitBase;
+        this.overlay = document.createElement(this.modeoverlay) as WCDOverlayMethods;
         this.overlay.myItens = this.findAllElementsIca(this);
         this.overlay.createOverlayItems();
         this.appendChild(this.overlay as HTMLElement);

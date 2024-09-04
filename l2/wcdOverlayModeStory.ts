@@ -11,6 +11,7 @@ import { execute as excCommandDel } from './_100554_wcdCommandDel';
 import { execute as excCommandCopy } from './_100554_wcdCommandCopy';
 import { execute as excCommandNext } from './_100554_wcdCommandSelectNext';
 import { WcdOverlayModeStoryItem, initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
+import { CollabPageElement } from './_100554_collabPageElement';
 
 @customElement('wcd-overlay-mode-story-100554')
 export class WcdOverlayModeStory extends WcdOverlayLitBase {
@@ -63,6 +64,15 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         param.args = info;
 
         excCommandNext(param);
+    }
+
+    public refreshOverlay(){
+        const page = this.parentElement as CollabPageElement; 
+        if(page){
+            page.overlay?.remove();
+            page.overlay = undefined;
+            page.refreshOverlay();
+        }
     }
 
     public selectItem(ica: IcaLitElementBaseMethods): void {

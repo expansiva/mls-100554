@@ -24,52 +24,66 @@ export async function execute(param: IWCDCommand) {
     const parentSection = findParentElementWithTagName(param.selectedIca, icaSectionTagName);
     if (!parentSection) throw new Error('image is not in valid section');
     let oldSize: string = getOldSize(parentSection as HTMLElement)
+    let previousSection = parentSection.previousElementSibling;
+    let nextSection = parentSection.nextElementSibling;
+    const nextSectionIsInset = nextSection?.classList.contains('inset') || false;
+    const previousSectionIsInset = previousSection?.classList.contains('inset') || false;
 
     if (oldSize === 'inset' && (args.newSize === 'full' || args.newSize === 'outset')) {
 
         const siblings = getSiblingsAfter(param.selectedIca);
-        const sectionImage = addSection(icaSectionTagName, wcSectionTagName, param.overlay, [param.selectedIca]);
-        sectionImage.classList.add(args.newSize);
-        parentSection.insertAdjacentElement('afterend', sectionImage);
+        if (!previousSection && !nextSectionIsInset && siblings.length === 0) {
 
-        if (siblings.length > 0) {
-            const sectionAfter = addSection(icaSectionTagName, wcSectionTagName, param.overlay, siblings);
-            sectionAfter.classList.add('inset');
-            sectionImage.insertAdjacentElement('afterend', sectionAfter);
-            const isEmpty = (parentSection?.children[0]?.shadowRoot?.children || []).length === 0;
-            if (isEmpty) {
-                parentSection.remove();
-                const indexOverlayParentSection = param.overlay.myItens.findIndex(item => item.element === parentSection);
-                if (indexOverlayParentSection !== -1) param.overlay.myItens.splice(indexOverlayParentSection, 1);
+            const [wc] = parentSection.children;
+            allowedSizes.forEach((size) => {
+                parentSection?.classList.remove(size);
+                wc?.classList.remove(size);
+            });
+            parentSection?.classList.add('outset');
+            wc?.classList.add('outset');
+
+        } else {
+
+            const sectionImage = addSection(icaSectionTagName, wcSectionTagName, param.overlay, [param.selectedIca]);
+            sectionImage.classList.add(args.newSize);
+            parentSection.insertAdjacentElement('afterend', sectionImage);
+
+            if (siblings.length > 0) {
+                const sectionAfter = addSection(icaSectionTagName, wcSectionTagName, param.overlay, siblings);
+                sectionAfter.classList.add('inset');
+                sectionImage.insertAdjacentElement('afterend', sectionAfter);
+                const isEmpty = (parentSection?.children[0]?.shadowRoot?.children || []).length === 0;
+                if (isEmpty) {
+                    parentSection.remove();
+                    const indexOverlayParentSection = param.overlay.myItens.findIndex(item => item.element === parentSection);
+                    if (indexOverlayParentSection !== -1) param.overlay.myItens.splice(indexOverlayParentSection, 1);
+                }
             }
-        }
 
-        await sectionImage.updateComplete;
-        selectIca(param.selectedIca, param.overlay)
+            await sectionImage.updateComplete;
+        }
 
     }
 
     if ((oldSize === 'full' || oldSize === 'outset') && args.newSize === 'inset') {
 
-        let previousSection = parentSection.previousElementSibling;
-        let nextSection = parentSection.nextElementSibling;
-
-        const nextSectionIsInset = nextSection?.classList.contains('inset') || false;
-        const previousSectionIsInset = previousSection?.classList.contains('inset') || false;
         const isEmptySections = !param.selectedIca.previousElementSibling && !param.selectedIca.nextElementSibling;
 
         if (!previousSection && !nextSectionIsInset || (!previousSectionIsInset && !nextSectionIsInset)) {
-            // console.info('criar');
-            return;
-        }
+            const [wc] = parentSection.children;
+            allowedSizes.forEach((size) => {
+                parentSection?.classList.remove(size);
+                wc?.classList.remove(size);
+            });
+            parentSection?.classList.add('inset');
+            wc?.classList.add('inset');
 
-        if ((!previousSection || !previousSectionIsInset) && nextSectionIsInset) {
+        } else if ((!previousSection || !previousSectionIsInset) && nextSectionIsInset) {
 
             const nextChidrens = nextSection?.children[0]?.shadowRoot?.children || [];
             const firstChildrenNext = nextChidrens[0];
             if (firstChildrenNext) nextSection?.children[0]?.shadowRoot?.insertBefore(param.selectedIca, firstChildrenNext);
             else nextSection?.appendChild(param.selectedIca);
-
             if (isEmptySections) {
                 parentSection.remove();
                 const indexOverlayParentSection = param.overlay.myItens.findIndex(item => item.element === parentSection);
@@ -90,14 +104,17 @@ export async function execute(param: IWCDCommand) {
                 Array.from(nextChidrens).reverse().forEach((child) => {
                     if (param.selectedIca) param.selectedIca.insertAdjacentElement('afterend', child);
                 });
+
                 parentSection.remove();
                 const indexOverlayParentSection = param.overlay.myItens.findIndex(item => item.element === parentSection);
                 if (indexOverlayParentSection !== -1) param.overlay.myItens.splice(indexOverlayParentSection, 1);
+
                 if (nextSection) {
                     nextSection.remove();
                     const indexOverlayNextSection = param.overlay.myItens.findIndex(item => item.element === nextSection);
                     if (indexOverlayNextSection !== -1) param.overlay.myItens.splice(indexOverlayNextSection, 1);
                 }
+
             } else if (parentSection) {
 
                 const [wc] = parentSection.children;
@@ -123,7 +140,9 @@ export async function execute(param: IWCDCommand) {
         }
     }
 
-    // dispatchEventConciliate();
+    param.overlay.refreshOverlay();
+    selectIca(param.selectedIca, param.overlay);
+    dispatchEventConciliate();
 
 }
 
@@ -142,10 +161,6 @@ function getOldSize(parentSection: HTMLElement) {
 }
 
 function selectIca(selectedIca: any, overlay: WCDOverlayMethods) {
-    const { x, y, height, width } = selectedIca.getBoundingClientRect();
-    if (!overlay.myItens) overlay.myItens = [];
-    overlay.myItens.push({ element: selectedIca, depth: 0, x, y, height, width, opacity: selectedIca.style.opacity });
-    overlay.createOverlayItems();
     setTimeout(() => { overlay.selectItem(selectedIca as IcaLitElementBaseMethods); }, 500);
 }
 

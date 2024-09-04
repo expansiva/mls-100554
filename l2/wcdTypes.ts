@@ -31,6 +31,7 @@ export interface WCDOverlayMethods extends HTMLElement {
     createOverlayItems(): void;
     selectItem(ica: tps.IcaLitElementBaseMethods): void;
     getActionsTagsDefault(): { [key: string]: tps.ActionTag };
+    refreshOverlay(): void;
     myItens: tps.IICADepths[]
 }
 
