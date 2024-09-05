@@ -15,11 +15,12 @@ import { Example } from './_100554_configDsDefaultExample';
 import { Style } from './_100554_configDsDefaultStyle';
 import { PreCompileLess } from './_100554_configDsDefaultPreCompileLess';
 
-export class Component extends ComponentIO {
+export class Component implements ComponentIO {
 
     constructor(dsIO: DesignSystemIO, ds: IDS) {
-        super(dsIO);
+
         this.ds = ds;
+        this._ds = dsIO;
         this.methods = new Common(ds, dsIO);
         this.tokens = new Token(dsIO, ds);
         this.css = new Css(dsIO, ds);
@@ -33,6 +34,7 @@ export class Component extends ComponentIO {
     private tokens: TokenIO;
     private css: CssIO;
 
+    public _ds: DesignSystemIO;
     public list: IComponentInfos = {};
     public add = (widget: IComponentInfo) => this._addComponent(widget);
     public update = (name: string, widget: IComponentInfo) => this._updateComponent(name, widget);
@@ -145,7 +147,6 @@ export class Component extends ComponentIO {
         const allLess = [globalcss, less].join('\n');
 
         try {
-
             const preCompileLess = new PreCompileLess();
             const compiledCss = await preCompileLess.compileLess(allLess);
             return compiledCss;

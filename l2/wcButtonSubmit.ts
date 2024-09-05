@@ -7,8 +7,6 @@ import { IcaFormsSubmitSubmitBase } from './_100554_icaFormsSubmitSubmitBase';
 @customElement('wc-button-submit-100554')
 export class WcButtonSubmit extends IcaFormsSubmitSubmitBase {
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     @property({ type: String }) name: string | undefined;
     @property({ type: String }) title: string = '';
     @property({ type: String }) icon: string | undefined;

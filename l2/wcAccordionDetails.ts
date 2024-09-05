@@ -7,12 +7,6 @@ import { IcaNavigationContentAccordionBase } from './_100554_icaNavigationConten
 @customElement('wc-accordion-details-100554')
 export class WcAccordionDetails100554 extends IcaNavigationContentAccordionBase {
 
-     static styles = css`
-        details > div {
-            margin-left:2rem;
-        }
-    `;
-
     @property({ type: String }) text = '';
     @property({ type: Boolean }) open = false;
 

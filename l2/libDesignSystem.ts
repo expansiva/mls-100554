@@ -4,7 +4,7 @@ const instanceCache: IDSInstanceCache = {};
 
 export async function list(project: number) {
     const config = await getConfigProject(project);
-    if(!config) return [];
+    if (!config) return [];
     const ds: mls.l5_common.DesignSystem[] = config.designSystems || [];
     return ds;
 }
@@ -52,108 +52,108 @@ interface IProjectConfigCache {
     }
 }
 
-export abstract class DesignSystemIO {
-    abstract project: number;
-    abstract dsindex: number;
-    abstract dsname: string;
-    abstract createdBy: string;
-    abstract lastUpdated: string;
-    abstract lastUpdatedBy: string;
-    abstract docs: DocIO | undefined;
-    abstract tokens: TokenIO | undefined;
-    abstract css: CssIO | undefined;
-    abstract assets: AssetIO | undefined;
-    abstract components: ComponentIO | undefined;
-    abstract init: () => Promise<void>;
-    abstract remove: () => Promise<void>;
-    abstract create: (project: number, dsindex: number, createdAt: string, reference?: IDSRef) => Promise<void>;
-    abstract dispose: () => Promise<void>;
+// export abstract class DesignSystemIO {
+//     abstract project: number;
+//     abstract dsindex: number;
+//     abstract dsname: string;
+//     abstract createdBy: string;
+//     abstract lastUpdated: string;
+//     abstract lastUpdatedBy: string;
+//     abstract docs: DocIO | undefined;
+//     abstract tokens: TokenIO | undefined;
+//     abstract css: CssIO | undefined;
+//     abstract assets: AssetIO | undefined;
+//     abstract components: ComponentIO | undefined;
+//     abstract init: () => Promise<void>;
+//     abstract remove: () => Promise<void>;
+//     abstract create: (project: number, dsindex: number, createdAt: string, reference?: IDSRef) => Promise<void>;
+//     abstract dispose: () => Promise<void>;
+//     abstract getDesignSystemCss: () => Promise<string>;
+// }
+
+export interface DesignSystemIO {
+    project: number;
+    dsindex: number;
+    dsname: string;
+    createdBy: string;
+    lastUpdated: string;
+    lastUpdatedBy: string;
+    docs: DocIO | undefined;
+    tokens: TokenIO | undefined;
+    css: CssIO | undefined;
+    assets: AssetIO | undefined;
+    components: ComponentIO | undefined;
+    init: () => Promise<void>;
+    remove: () => Promise<void>;
+    create: (project: number, dsindex: number, createdAt: string, reference?: IDSRef) => Promise<void>;
+    dispose: () => Promise<void>;
+    getDesignSystemCss: (theme: string) => Promise<string>;
 }
 
-export abstract class TokenIO {
-    constructor(ds: DesignSystemIO) {
-        this._ds = ds;
-    };
+export interface TokenIO {
     _ds: DesignSystemIO;
-    abstract list: ITokenInfo;
-    abstract add: (key: string, value: string, theme: string, category: TokensCategories) => Promise<void>;
-    abstract getTokensLess: (theme: string) => Promise<string>;
-    abstract getTokensCss: (theme: string) => Promise<string>;
-    abstract update: (key: string, newValue: string, theme: string) => Promise<void>;
-    abstract remove: (key: string, theme: string) => Promise<void>;
-    abstract addTheme: (theme: string, description: string) => Promise<void>;
-    abstract removeTheme: (theme: string) => Promise<void>;
-    abstract setTokens: (theme: string, tokensColor: IToken, tokensTypography: IToken, tokensGlobal: IToken) => Promise<void>;
+    list: ITokenInfo;
+    add: (key: string, value: string, theme: string, category: TokensCategories) => Promise<void>;
+    getTokensLess: (theme: string) => Promise<string>;
+    getTokensCss: (theme: string) => Promise<string>;
+    update: (key: string, newValue: string, theme: string) => Promise<void>;
+    remove: (key: string, theme: string) => Promise<void>;
+    addTheme: (theme: string, description: string) => Promise<void>;
+    removeTheme: (theme: string) => Promise<void>;
+    setTokens: (theme: string, tokensColor: IToken, tokensTypography: IToken, tokensGlobal: IToken) => Promise<void>;
 }
 
-export abstract class DocIO {
-    constructor(ds: DesignSystemIO) {
-        this._ds = ds;
-    }
+export interface DocIO {
     _ds: DesignSystemIO;
-    abstract list: IDocInfos;
-    abstract find: (id: number) => IDocInfo | null;
-    abstract add: (parentID: number, title: string, content: string) => Promise<number>;
-    abstract update: (id: number, parentID: number, title: string, content: string) => Promise<void>;
-    abstract remove: (id: number) => Promise<void>;
-}
-export abstract class AssetIO {
-    constructor(ds: DesignSystemIO) {
-        this._ds = ds;
-    }
-    _ds: DesignSystemIO;
-    abstract list: IAssetInfos;
-    abstract add: (path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType, content: File, reference?: mls.l3.IDSRef) => Promise<void>;
-    abstract remove: (path: string, shortname: string) => Promise<void>;
-    abstract update: (path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType) => Promise<void>;
-    abstract find: (path: string, shortname: string) => IAssetsInfo | null;
+    list: IDocInfos;
+    find: (id: number) => IDocInfo | null;
+    add: (parentID: number, title: string, content: string) => Promise<number>;
+    update: (id: number, parentID: number, title: string, content: string) => Promise<void>;
+    remove: (id: number) => Promise<void>;
 }
 
-export abstract class CssIO {
-    constructor(ds: DesignSystemIO) {
-        this._ds = ds;
-    }
+export interface AssetIO {
     _ds: DesignSystemIO;
-    abstract list: ICssInfos;
-    abstract getStylesInLess: (theme: string) => Promise<string>;
-    abstract add: (name: string, content: string) => Promise<void>;
+    list: IAssetInfos;
+    add: (path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType, content: File, reference?: mls.l3.IDSRef) => Promise<void>;
+    remove: (path: string, shortname: string) => Promise<void>;
+    update: (path: string, shortname: string, tags: string[], description: string, assetType: mls.l3.AssetsGroupType) => Promise<void>;
+    find: (path: string, shortname: string) => IAssetsInfo | null;
 }
-export abstract class ComponentIO {
-    constructor(ds: DesignSystemIO) {
-        this._ds = ds;
-    }
-    _ds: DesignSystemIO;
-    abstract list: IComponentInfos;
-    abstract examples: ExampleIO;
-    abstract styles: StyleIO;
-    abstract add: (widget: IComponentInfo) => Promise<void>;
-    abstract remove: (componentName: string) => Promise<void>;
-    abstract getCSS: (componentName: string, theme: string) => Promise<string>;
-    abstract getStylesLess: (componentName: string, theme: string) => Promise<string | null>;
-    abstract find: (componentName: string) => IComponentInfo | null;
-}
-export abstract class ExampleIO {
-    constructor(ds: DesignSystemIO) {
-        this._ds = ds;
-    }
-    _ds: DesignSystemIO;
-    abstract list: IComponentsExampleInfos;
-    abstract add: (componentName: string, exampleName: string, description: string, exampleJsonP: string, reference?: mls.l3.IDSRef) => Promise<void>;
-    abstract rename: (componentName: string, exampleName: string, newExampleName: string) => Promise<void>;
-    abstract remove: (componentName: string, exampleName: string) => Promise<void>;
-    abstract find: (componentName: string, exampleName: string) => IComponentsExample | null;
-}
-export abstract class StyleIO {
-    constructor(ds: DesignSystemIO) {
-        this._ds = ds;
-    }
-    _ds: DesignSystemIO;
-    abstract list: IComponentsStyleInfos;
 
-    abstract add: (componentName: string, classname: string, less: string, reference?: mls.l3.IDSRef) => Promise<void>;
-    abstract rename: (componentName: string, styleName: string, newName: string) => Promise<void>;
-    abstract remove: (componentName: string, styleName: string) => Promise<void>;
-    abstract find: (componentName: string, styleName: string) => IComponentsStyle | null;
+export interface CssIO {
+    _ds: DesignSystemIO;
+    list: ICssInfos;
+    getStylesInLess: (theme: string) => Promise<string>;
+    add: (name: string, content: string) => Promise<void>;
+}
+
+export interface ComponentIO {
+    _ds: DesignSystemIO;
+    list: IComponentInfos;
+    examples: ExampleIO;
+    styles: StyleIO;
+    add: (widget: IComponentInfo) => Promise<void>;
+    remove: (componentName: string) => Promise<void>;
+    getCSS: (componentName: string, theme: string) => Promise<string>;
+    getStylesLess: (componentName: string, theme: string) => Promise<string | null>;
+    find: (componentName: string) => IComponentInfo | null;
+}
+export interface ExampleIO {
+    _ds: DesignSystemIO;
+    list: IComponentsExampleInfos;
+    add: (componentName: string, exampleName: string, description: string, exampleJsonP: string, reference?: mls.l3.IDSRef) => Promise<void>;
+    rename: (componentName: string, exampleName: string, newExampleName: string) => Promise<void>;
+    remove: (componentName: string, exampleName: string) => Promise<void>;
+    find: (componentName: string, exampleName: string) => IComponentsExample | null;
+}
+export interface StyleIO {
+    _ds: DesignSystemIO;
+    list: IComponentsStyleInfos;
+    add: (componentName: string, classname: string, less: string, reference?: mls.l3.IDSRef) => Promise<void>;
+    rename: (componentName: string, styleName: string, newName: string) => Promise<void>;
+    remove: (componentName: string, styleName: string) => Promise<void>;
+    find: (componentName: string, styleName: string) => IComponentsStyle | null;
 }
 
 export interface IDSRef {

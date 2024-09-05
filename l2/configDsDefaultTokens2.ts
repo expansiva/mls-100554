@@ -12,10 +12,10 @@ import {
 
 import { PreCompileLess } from './_100554_configDsDefaultPreCompileLess';
 
-export class Token extends TokenIO {
+export class Token implements TokenIO {
 
     constructor(dsIO: DesignSystemIO, ds: IDS) {
-        super(dsIO);
+        this._ds = dsIO;
         this.ds = ds;
         this.methods = new Common(ds, dsIO);
         this.prepareTokens();
@@ -24,6 +24,7 @@ export class Token extends TokenIO {
     private ds: IDS;
     private methods: Common;
 
+    public _ds: DesignSystemIO;
     public add = (key: string, value: string, theme: string, category: TokensCategories) => this._addToken(key, value, theme, category);
     public update = (key: string, newValue: string, theme: string) => this._updateToken(key, newValue, theme);
     public remove = (key: string, theme: string) => this._removeToken(key, theme);

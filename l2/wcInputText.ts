@@ -7,36 +7,7 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 @customElement('wc-input-text-100554')
 export class WcInputText100554 extends IcaFormsInputStringBase {
 
-    static styles = css`
-    :host {
-        display: block;
-    }
-    
-    .input_control {
-        display: block;
-        width:calc(100% - 1.5rem - 1px);
-        padding: 0.375rem 0.75rem;
-        font-size: 1rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: #212529;
-        background-color: #fff;
-        background-clip: padding-box;
-        border: 1px solid #ced4da;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        border-radius: 0.25rem;
-        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-        outline:none;
-    }
-    .form_hint{
-        color: blue;
-    }
-    .form_error_message{
-        color: red;
-    }
-    `
+
     @propertyDataSource({ type: String }) datasource: string | undefined;
 
     @property({ type: String }) name: string | undefined;

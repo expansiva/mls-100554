@@ -11,10 +11,10 @@ import {
     IDSRef
 } from './_100554_libDesignSystem';
 
-export class Example extends ExampleIO {
+export class Example implements ExampleIO {
 
     constructor(dsIO: DesignSystemIO, ds: IDS, component: ComponentIO) {
-        super(dsIO);
+        this._ds = dsIO;
         this.ds = ds;
         this.methods = new Common(ds, dsIO);
         this.component = component;
@@ -25,9 +25,9 @@ export class Example extends ExampleIO {
 
     private methods: Common;
     private component: ComponentIO;
-
+    
+    public _ds: DesignSystemIO;
     public list: IComponentsExampleInfos = {};
-
     public add = (componentName: string, exampleName: string, description: string, exampleJsonP: string, reference?: mls.l3.IDSRef) => this._addComponentExample(componentName, exampleName, description, exampleJsonP, reference);
     public update = (componentName: string, exampleName: string, description: string) => this._updateExample(componentName, exampleName, description); // need add
     public rename = (componentName: string, exampleName: string, newName: string) => this._renameExample(componentName, exampleName, newName);

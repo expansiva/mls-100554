@@ -12,10 +12,10 @@ import {
 
 import { Token } from './_100554_configDsDefaultTokens2';
 
-export class Style extends StyleIO {
+export class Style implements StyleIO {
 
     constructor(dsIO: DesignSystemIO, ds: IDS, component: ComponentIO) {
-        super(dsIO);
+        this._ds = dsIO;
         this.ds = ds;
         this.methods = new Common(ds, dsIO);;
         this.component = component;
@@ -23,6 +23,7 @@ export class Style extends StyleIO {
         this.prepareStyles();
     }
 
+    public _ds: DesignSystemIO;
     public list: IComponentsStyleInfos = {};
     public add = (componentName: string, stylename: string, less: string, reference?: IDSRef) => this._addComponentStyle(componentName, stylename, less, reference);
     public rename = (componentName: string, styleName: string, newName: string) => this._renameComponentStyle(componentName, styleName, newName);

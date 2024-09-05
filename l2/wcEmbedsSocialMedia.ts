@@ -8,19 +8,11 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 @customElement('wc-embeds-social-media-100554')
 export class WcEmbedsSocialMedia100554 extends IcaApresentationEmbedsSocialMediaBase100554 {
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     @propertyDataSource({ type: String }) datasource: string | undefined;
 
     @property({ type: String }) description: string | undefined;
 
     @property({ type: String }) url: string | undefined;
-
-
-    //-----------COMPONENT-----------
-    createRenderRoot() {
-        return this; // dont use shadow root
-    }
 
     render() {
 

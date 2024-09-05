@@ -9,10 +9,10 @@ import {
     IDSRef
 } from './_100554_libDesignSystem';
 
-export class Asset extends AssetIO {
+export class Asset implements AssetIO {
 
     constructor(dsIO: DesignSystemIO, ds: IDS) {
-        super(dsIO);
+        this._ds = dsIO;
         this.ds = ds;
         this.methods = new Common(ds, dsIO);
         this.prepareAssets();
@@ -21,6 +21,7 @@ export class Asset extends AssetIO {
     private ds: IDS;
     private methods: Common;
 
+    public _ds: DesignSystemIO;
     public add = (path: string, shortname: string, tags: string[], description: string, assetType: AssetsGroupType, content: File, reference?: IDSRef) => this._addAssets(path, shortname, tags, description, assetType, content, reference);
     public update = (path: string, shortname: string, tags: string[], description: string, assetType: AssetsGroupType) => this._updateAsset(path, shortname, tags, description, assetType);
     public remove = (path: string, shortname: string) => this._removeAssets(path, shortname);

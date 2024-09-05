@@ -7,16 +7,6 @@ import { IcaLayoutFlowRowBase } from './_100554_icaLayoutFlowRowBase';
 @customElement('wc-row-100554')
 export class WcRow extends IcaLayoutFlowRowBase {
 
-    static styles = css`
-        :host {
-            margin-top:.5rem;
-            height: 100%;
-            width:100%;
-            display:flex; 
-            gap:1rem;
-        }
-    `;
-
     @property() hint: string | undefined;
 
     render() {

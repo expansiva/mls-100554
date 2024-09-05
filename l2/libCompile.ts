@@ -121,7 +121,7 @@ async function loadMyNeedsToCompile(
         const ipath = { project, shortName: path };
 
         const enhacementName = await mls.l2.enhancement.getEnhancementVariable(ipath);
-        
+
         if (!enhacementName) throw new Error('enhacementName not valid');
 
 
@@ -139,6 +139,7 @@ async function loadMyNeedsToCompile(
         //tags = await addRequeries(enhacementName, ipath, tags, myModules);
         await getJSImporMap(myImportsMap, enhacementName, ipath, myModules);
         await getJS(myImports, enhacementName, ipath, myModules);
+
         if (compileCss) {
             await getCss(myCss, name, ipath, theme);
         }
@@ -217,7 +218,7 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IP
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
         if (!ds || !ds.components) return;
-        const css = await ds.components.getCSS(fullName, theme)
+        const css = await ds.components.getCSS(fullName, theme);
         myCss.push(css);
 
     } catch (e: any) {
@@ -230,12 +231,14 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IP
 }
 
 async function getGlobalCss(mfile: mls.l2.editor.IPath, theme: string) {
+    console.info('getGlobalCss')
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
-        if (!ds || !ds.css) return;
-        const css = await ds.css.getStylesInLess(theme)
-        return css;
+        if (!ds || !ds.css || !ds.components) return;
+        // const css = await ds.css.getStylesInLess(theme);
+        const css2 = await ds.getDesignSystemCss(theme);
+        return css2;
     } catch (e: any) {
         if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
     }

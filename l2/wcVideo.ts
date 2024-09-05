@@ -7,17 +7,6 @@ import { IcaApresentationVideoEmbeddedVideoBase } from './_100554_icaApresentati
 @customElement('wc-video-100554')
 export class WcVideo100554 extends IcaApresentationVideoEmbeddedVideoBase {
 
-    static styles = css`
-        :host{
-            display:block;
-        }
-        video {
-            width: 100%;
-            height: auto;
-            border: 1px solid;
-        }
-    `;
-
     @property({ type: String }) src = '';
     @property({ type: Boolean }) autoplay = false;
     @property({ type: Boolean }) controls = true;

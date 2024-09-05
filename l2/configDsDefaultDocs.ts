@@ -6,11 +6,11 @@ import {
     IDocInfos,
     IDocInfo
 } from './_100554_libDesignSystem';
-export class Doc extends DocIO {
+export class Doc implements DocIO {
 
     constructor(dsIO: DesignSystemIO, ds: IDS) {
-        super(dsIO);
         this.ds = ds;
+        this._ds = dsIO;
         this.methods = new Common(ds, dsIO);
         this.prepareDocs();
     }
@@ -18,6 +18,7 @@ export class Doc extends DocIO {
     private ds: IDS;
     private methods: Common;
 
+    public _ds: DesignSystemIO;
     public add = (parentId: number, title: string, content: string) => this._addDoc(parentId, title, content);
     public update = (id: number, parentId: number, title: string, content: string) => this._updateDoc(id, parentId, title, content);
     public remove = (id: number) => this._removeDoc(id);

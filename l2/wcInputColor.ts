@@ -5,37 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 @customElement('wc-input-color-100554')
 export class WcInputColor extends LitElement {
-
-    static styles = css`
-    :host {
-        display: block;
-    }
     
-    .input_control {
-        display: block;
-        font-size: 1rem;
-        cursor:pointer;
-        font-weight: 400;
-        line-height: 1.5;
-        color: #212529;
-        background-color: #fff;
-        background-clip: padding-box;
-        border: 1px solid #ced4da;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        border-radius: 0.25rem;
-        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-        outline:none;
-    }
-    .form_hint{
-        color: blue;
-    }
-    .form_error_message{
-        color: red;
-    }
-    `
-
     @property({ type: String }) name: string | undefined;
 
     @property({ type: String }) label: string | undefined;

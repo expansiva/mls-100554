@@ -7,21 +7,6 @@ import { IcaApresentationImagesImagesBase } from './_100554_icaApresentationImag
 @customElement('wc-image-100554')
 export class WcImage100554 extends IcaApresentationImagesImagesBase {
 
-    static styles = css`
-        :host {
-            display:block; 
-        }
-
-        .image-container{
-            display: flex;
-            justify-content: center;
-        }
-
-        img{
-            max-width: 100%;
-        }
-    `
-
     @property() src: string | undefined;
     @property() alt: string | undefined;
     @property() width: string | undefined;

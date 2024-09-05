@@ -7,55 +7,7 @@ import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
 @customElement('wc-input-number-with-buttons-100554')
 export class WCInputNumber extends IcaFormsInputNumberBase {
 
-    static styles = css`
-    :host {
-        display: block;
-    }
-
-    div{
-        display:flex;
-        gap: .3rem;
-    }
-
-    button {
-        width:40px;
-        cursor: pointer;
-        border:none;
-    }
-
-    .input_control {
-        display: block;
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-        font-size: 1rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: #212529;
-        background-color: #fff;
-        background-clip: padding-box;
-        border: 1px solid #ced4da;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        border-radius: 0.25rem;
-        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-        outline:none;
-        text-align:center;
-    }
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    input[type="number"] {
-        -moz-appearance: textfield; /* Firefox */
-    }
-    .form_error_message{
-        color: red;
-    }
-    `
-   @propertyDataSource({ type: String }) datasource: number | undefined;
+    @propertyDataSource({ type: String }) datasource: number | undefined;
 
     @property({ type: String }) name: string | undefined;
 
@@ -127,7 +79,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
 
         if (!this.input) return;
         let newval = +this.input.value - 1
-        if (!isNaN(newval) && (this.minvalue === undefined || (newval >= this.minvalue))){
+        if (!isNaN(newval) && (this.minvalue === undefined || (newval >= this.minvalue))) {
             this.datasource = newval;
         }
     }
@@ -135,7 +87,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
     private handlePlusClick() {
         if (!this.input) return;
         let newval = +this.input.value + 1
-        if (!isNaN(newval) && (this.maxvalue === undefined || (newval <= this.maxvalue))){
+        if (!isNaN(newval) && (this.maxvalue === undefined || (newval <= this.maxvalue))) {
             this.datasource = newval;
         }
 

@@ -13,13 +13,6 @@ export class WcInputText100554 extends IcaApresentationTextTextBase {
     @property({ type: String }) text: string | undefined;
 
     @property({ type: String }) type: string | undefined;
-
-    static styles = css`
-        :host{
-            display: inline-block;
-            width: 100%;
-        }
-    `
     
     error: string = '';
 

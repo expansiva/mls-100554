@@ -7,13 +7,6 @@ import { IcaLayoutFlowColumnBase } from './_100554_icaLayoutFlowColumnBase';
 @customElement('wc-column-100554')
 export class WcColumn extends IcaLayoutFlowColumnBase {
 
-    static styles = css`
-    :host {
-        display: block;
-        width:100%;
-        flex: 1;
-    }`
-
     render() {
         return html`
         <slot></slot>

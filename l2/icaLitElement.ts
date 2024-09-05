@@ -14,6 +14,10 @@ export abstract class IcaLitElement extends CollabLitElement {
 
   stateKeys: Set<string> = new Set<string>();
 
+  createRenderRoot() {
+    return this;
+  }
+
   connectedCallback(): void {
     super.connectedCallback();
     if (isTrace) console.info(`connectedCallback, subscribe fields: ${Array.from(this.stateKeys)}`);

@@ -10,11 +10,11 @@ import {
 import { Token } from './_100554_configDsDefaultTokens2';
 import { PreCompileLess } from './_100554_configDsDefaultPreCompileLess';
 
-export class Css extends CssIO {
+export class Css implements CssIO {
 
     constructor(dsIO: DesignSystemIO, ds: IDS) {
-        super(dsIO);
         this.ds = ds;
+        this._ds = dsIO;
         this.methods = new Common(ds, dsIO);
         this.tokens = new Token(dsIO, ds);
         this.prepareCss();
@@ -24,6 +24,7 @@ export class Css extends CssIO {
     private methods: Common;
     private tokens: Token;
 
+    public _ds: DesignSystemIO;
     public list: ICssInfos = {};
     public add = (name: string, content: string) => this._addCss(name, content);
     public setHTMLPreview = (content: string) => this._setHTMLPreview(content);

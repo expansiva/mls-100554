@@ -5,12 +5,13 @@ import { Token } from './_100554_configDsDefaultTokens2';
 import { Asset } from './_100554_configDsDefaultAssets';
 import { Css } from './_100554_configDsDefaultCss';
 import { Component } from './_100554_configDsDefaultComponent';
-import { list, DesignSystemIO, IDSRef } from './_100554_libDesignSystem';
+import { PreCompileLess } from './_100554_configDsDefaultPreCompileLess';
 
-export class _100554_configDsDefault extends DesignSystemIO {
+import { list, DesignSystemIO, IDSRef, DocIO, CssIO, AssetIO, TokenIO, ComponentIO } from './_100554_libDesignSystem';
+
+export class _100554_configDsDefault implements DesignSystemIO {
 
     constructor(project: number, dsindex: number) {
-        super();
         this.project = project;
         this.dsindex = dsindex;
     }
@@ -30,13 +31,15 @@ export class _100554_configDsDefault extends DesignSystemIO {
     public create = (project: number, dsindex: number, createdAt: string, reference: mls.l3.IDSRef | any) => this._createDs(project, dsindex, createdAt, reference);
     public _getOriginalDsJSON = () => this.__getOriginalDsJSON();
 
+    public getDesignSystemCss = (theme: string) => this._getDesignSystemCss(theme)
+
     private ds: IDS | undefined = undefined;
 
-    public docs: Doc | undefined | any;
-    public components: Component | undefined | any;;
-    public tokens: Token | undefined | any;;
-    public assets:Asset | undefined | any;;
-    public css: Css | undefined | any;;
+    public docs: DocIO | undefined;
+    public components: ComponentIO | undefined;
+    public tokens: TokenIO | undefined;
+    public assets: AssetIO | undefined;
+    public css: CssIO | undefined;
 
     private methods: Common = new Common(this.ds as IDS, this as any);
 
@@ -59,17 +62,17 @@ export class _100554_configDsDefault extends DesignSystemIO {
         this.ds = JSON.parse(mainDsFile as string);
         if (!this.ds) return;
 
-        this.methods = new Common(this.ds, this as any);
+        this.methods = new Common(this.ds, this);
         this.dsname = this.ds.name;
         this.createdBy = this.ds.created_by;
         this.lastUpdated = this.ds.last_updated;
         this.lastUpdatedBy = this.ds.last_updated_by;
 
-        this.docs = new Doc(this as any, this.ds);
-        this.tokens = new Token(this as any, this.ds);
-        this.assets = new Asset(this as any, this.ds);
-        this.css = new Css(this as any, this.ds);
-        this.components = new Component(this as any, this.ds);
+        this.docs = new Doc(this, this.ds);
+        this.tokens = new Token(this, this.ds);
+        this.assets = new Asset(this, this.ds);
+        this.css = new Css(this, this.ds);
+        this.components = new Component(this, this.ds);
 
     }
 
@@ -77,7 +80,7 @@ export class _100554_configDsDefault extends DesignSystemIO {
 
         const projectDsDetails: mls.l5_common.DesignSystem[] = await list(project);
         const dsInfo = projectDsDetails[dsindex];
-        this.methods = new Common(this.ds, this as any);
+        this.methods = new Common(this.ds, this);
 
         const user: string = this.methods.getUser();
         const copyFromProjecy = 100554; // Collab WorksSpace
@@ -235,6 +238,38 @@ export class _100554_configDsDefault extends DesignSystemIO {
             json = undefined;
         }
         return json;
+    }
+
+    private async _getDesignSystemCss(theme: string): Promise<string> {
+
+        if (!this.css || !this.components) return '';
+        const css = await this.css.getStylesInLess(theme);
+        const allComponentsCss: string[] = [];
+
+        for await (const component of Object.keys(this.components.list)) {
+            try {
+                const lessComponent = await this.components.getStylesLess(component, theme);
+                if (lessComponent) {
+                    allComponentsCss.push(`// widget: ${component} \n${lessComponent}\n`);
+                }
+            } catch (err) {
+                console.info('erro no component:', component)
+                continue;
+            }
+        }
+
+        const allLess = `//global css\n${css}\n${allComponentsCss.join('\n')}`
+
+        try {
+            const preCompileLess = new PreCompileLess();
+            const compiledCss = await preCompileLess.compileLess(allLess);
+            console.info(compiledCss);
+            return compiledCss;
+        } catch (err: any) {
+            throw new Error(`Error on compile all less : ${err.message}`);
+        }
+
+
     }
 
     private async _remove(): Promise<void> {
