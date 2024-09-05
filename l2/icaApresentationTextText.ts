@@ -27,7 +27,7 @@ export abstract class IcaApresentationTextText extends IcaLitElementBase {
 
             return [
                 { name: "add", args: auxAdd },
-                { name: "edit", args: auxEdt, position: 'p-m2' },
+                { name: "edit", args: auxEdt, position: 'p-l2' },
                 { name: "backButton" }
             ];
         }

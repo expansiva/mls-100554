@@ -267,11 +267,13 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         let me = e.target as HTMLElement;
         if (me.id !== 'edittextwcd') me = me.closest('#edittextwcd') as HTMLElement;
 
+        me = me.querySelector('*[contenteditable]') as HTMLElement
+
         if (!me || !this.elMain || !this.myParent) return;
 
         const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;
 
-        el.innerText = me.innerText as string;
+        el.innerHTML = me.innerHTML as string;
         this.myText = el.innerHTML as string;
     }
 
