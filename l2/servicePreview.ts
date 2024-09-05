@@ -49,6 +49,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     @property() itens: any = undefined;
 
+    @property() msize: string = '';
+
     @property() error: string = '';
 
     @property() watch: boolean = true;
@@ -67,9 +69,17 @@ export class ServicePreview100554 extends ServiceBase {
 
     private ds: DesignSystemIO | undefined;
 
-    private info: any = {};
+    private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
+
+    private monacoeditor: HTMLElement | undefined;
+
+    get confE() { return `l${this.level}_${this.position}`; }
 
     constructor() {
+        window.preview = {
+            editor: undefined,
+            iframe: undefined
+        };
         super();
         initServicePreviewView;
         initServicePreviewAddStyle;
@@ -91,13 +101,14 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (op === 'opAboutTag') return this.opAboutTag();
+        if (op === 'opResultHTML') return this.showEditorHTML();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
 
     public onClickIcon = (op: string): void => {
         this.lastMode = op;
+        this._ed1?.updateOptions({ readOnly: false });
         if (op === 'icPreviewD') this.preview('desktop');
         if (op === 'icPreviewM') this.preview('mobile');
     }
@@ -109,14 +120,13 @@ export class ServicePreview100554 extends ServiceBase {
         if (op === 'btVariations') return this.onBtVariationsClick(opMenu);
         if (op === 'btTheme') return this.onBtThemeClick();
         if (op === 'btTokens') return this.onBtTokensClick(opMenu);
-
-
         else throw new Error('Invalid option')
     }
 
     public menu: IMenu = {
         title: 'Preview',
         actions: {
+            opResultHTML: 'Result HTML'
         },
         icons: {
             icPreviewD: 'Desktop;f390',
@@ -137,6 +147,15 @@ export class ServicePreview100554 extends ServiceBase {
         onClickIcon: this.onClickIcon,
         onClickButton: this.onClickButton
 
+    }
+
+    private showEditorHTML() {
+        if (this.menu.setMode) {
+            this.menu.setMode('page', this.monacoeditor);
+            this._ed1?.updateOptions({ readOnly: true });
+            this._ed1?.layout();
+        }
+        return true;
     }
 
     private objVariations: any = {
@@ -236,6 +255,21 @@ export class ServicePreview100554 extends ServiceBase {
 
     private setEvents() {
 
+        mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => {
+            try {
+                if (!ev.desc) return;
+                if (ev.level !== this.level) return;
+                const iPath: mls.l2.editor.IPath = JSON.parse(ev.desc);
+                if (!iPath || !iPath.project || !iPath.shortName) return;
+                const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
+                const storFile = mls.stor.files[keyStorFile];
+                if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
+                this.setModel(storFile);
+            } catch (err: any) {
+                throw new Error(err);
+            }
+        });
+
         mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
 
         mls.events.addEventListener([3], ['DSStyleChanged', 'DSTokensChanged'] as any, async (ev) => {
@@ -285,21 +319,28 @@ export class ServicePreview100554 extends ServiceBase {
             if (this.visible === 'false' || !this.visible) return;
             if (ev.level !== 2 || (ev.type !== 'FileAction')) return;
             const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
-            const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new','modeCreated'];
+            const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
 
             if (
                 fileAction.position === this.position ||
                 !eventsValid.includes(fileAction.action)
             ) return;
 
-            if (mls.istrace) console.info('is preview repaint:' + this.watch)
+            const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
+            const storFileHTML = mls.stor.files[keyToFileInfo];
+
+            if (fileAction.action === 'open') {
+                this.setModel(storFileHTML);
+            }
+
+            if (mls.istrace) console.info('is preview repaint:' + this.watch);
             if (fileAction.action === 'open' && this.watch) {
 
                 this.loading = true;
                 return;
             }
             if (this.watch) {
-                
+
                 this.loading = false;
                 this.onReloader();
             }
@@ -329,6 +370,43 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.menu.refresh) this.menu.refresh();
     }
 
+    private createEditor() {
+        if (!this.monacoeditor) {
+            this.monacoeditor = document.createElement('mls-editor-100529');
+            this.monacoeditor.setAttribute('ismls2', 'true');
+            const [width, height] = this.msize.split(',');
+            this.monacoeditor.style.width = width + 'px';
+            this.monacoeditor.style.height = height + 'px';
+        }
+        if (this._ed1) return;
+
+        this._ed1 = monaco.editor.create(this.monacoeditor, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
+        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+            noImplicitAny: true
+        });
+        (this.monacoeditor as any)['mlsEditor'] = this._ed1;
+        window.preview.editor = this._ed1;
+    }
+
+    private async createModelIfNeeded(storFile: mls.stor.IFileInfo): Promise<monaco.editor.ITextModel | null> {
+        if (!storFile) throw new Error('Invalid storFile');
+        const uri = this.getUri(`_${storFile.project}_${storFile.shortName}`, '.html');
+        let model = monaco.editor.getModel(uri);
+        if (model) return model;
+        await mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile));
+        return model;
+    }
+
+    private async setModel(storFile: mls.stor.IFileInfo) {
+        const model = await this.createModelIfNeeded(storFile);
+        if (!this._ed1 || !model) return;
+        this._ed1.setModel(model);
+    }
+
+    private getUri(shortFN: string, ftype: '.ts' | '.d.ts' | '.html'): monaco.Uri {
+        return monaco.Uri.parse(`file://server/${shortFN}${ftype}`);
+    }
+
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
@@ -336,6 +414,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     firstUpdated() {
+        this.createEditor();
         const theme = this.getTheme();
         if (theme === 'dark' && this.menu.selectButton) {
             this.menu.selectButton('btTheme');

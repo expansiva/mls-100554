@@ -1,8 +1,11 @@
 /// <mls shortName="collabDOMSync" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-export function sync(model: monaco.editor.ITextModel, iframe: HTMLIFrameElement) {
-    if (!model || !iframe) return;
-    const newHTMLOnlyICA = clearTree(iframe)
+export function sync() {
+
+    if (!window.preview.editor || !window.preview.iframe) return;
+    const model = window.preview.editor.getModel();
+    if (!model) return;
+    const newHTMLOnlyICA = clearTree(window.preview.iframe)
     const formatedNewHTML = formatHtml(newHTMLOnlyICA);
     const formatedOldHTML = formatHtml(model.getValue());
     const formatedNewHTMLArr = formatedNewHTML.split('\n');
@@ -32,7 +35,7 @@ function getDiffs(originalLines: string[], modifiedLines: string[]) {
 
 function applyDiffs(originalModel: monaco.editor.ITextModel, diffs: IDiffs[]) {
 
-    const editor = findEditor();
+    const editor = window.preview.editor;
     if (!editor) throw new Error('No find editor');
     editor.setModel(originalModel);
     const edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
@@ -59,28 +62,11 @@ function applyDiffs(originalModel: monaco.editor.ITextModel, diffs: IDiffs[]) {
 
 }
 
-function findEditor(): monaco.editor.ICodeEditor | null {
-
-    const { shortName, project } = (mls.actual[2] as any).left;
-    let associatedEditor = null;
-
-    const mfile = mls.l2.editor.get({ shortName, project });
-    if (!mfile) return associatedEditor;
-
-    const allEditors = monaco.editor.getEditors();
-    allEditors.forEach((editor) => {
-        const modelEd = editor.getModel();
-        if (modelEd && (modelEd.id === mfile.model.id || modelEd.id === (mfile as any)['modelHTML']?.id)) {
-            associatedEditor = editor;
-        }
-    });
-    return associatedEditor;
-}
-
 function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent: string) {
+    const editor = window.preview.editor;
+    if (!editor)
+        throw new Error('No find editor');
 
-    const editor = findEditor();
-    if (!editor) throw new Error('No find editor');
     editor.setModel(model);
     const lastLineNumber = model.getLineCount();
     const lastLineLength = model.getLineLength(lastLineNumber);
@@ -91,7 +77,9 @@ function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent:
         text: newContent
     }]);
     editor.pushUndoStop();
+    editor.layout();
 }
+
 
 export function formatHtml(html: string) {
 

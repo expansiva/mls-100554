@@ -10,6 +10,5 @@ declare global {
             elMain: HTMLElement | undefined;
             elICA: IcaLitElementBaseMethods | undefined;
         }
-
     }
 }

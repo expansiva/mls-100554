@@ -17,6 +17,8 @@ export class ServiceSource100554 extends ServiceBase {
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
         mls.events.addListener(2, 'ProjectLoaded', (ev) => this.onProjectLoadedEvents(ev));
         mls.events.addListener(2, 'DomAction', (ev) => this.syncDom(ev));
+        mls.events.addListener(2, 'CreateModelHTML' as any, (ev) => this.checkToCreateModelHTML(ev));
+
 
         this.initMonaco_GlobalEditor();
     }
@@ -516,7 +518,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (!ev.desc) return;
         const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
         if (fileAction.position !== this.position) return;
-        
+
         let keyFiles: string; // set on getStorFile 
         let keyFilesHTML: string; // set on getStorFile 
 
@@ -1340,7 +1342,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private async createOrShowModelHTML(open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
-        
+
         let shortName: string = '';
         let project: number = 0;
         const conf = mls.l2.editor.editors[this.confE];
@@ -1397,6 +1399,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const uri = this.getUri(`_${project}_${shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
         if (model) return model;
+
         const content = fileInfo ? fileInfo.content : await storFileHTML.getContent();
         model = monaco.editor.createModel(content as string, 'html', uri);
 
@@ -1816,29 +1819,32 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private isHTMLSystemChange: boolean = false;
     private syncDom: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
-
         if (this.position === 'right') return;
         try {
-            const op = this.position === 'left' ? 'right' : 'left';
-            const servOp = this.nav3Service?.getActiveInstance(op);
-            if (!servOp) return;
-
-            const iframe = servOp.previousElementSibling
-                ?.querySelector('service-preview-view-100554')
-                ?.shadowRoot
-                ?.querySelector('iframe');
-
-            const { shortName, project } = mls.l2.editor.editors[this.confE];
-            const uri = this.getUri(`_${project}_${shortName}`, '.html');
-            let model = monaco.editor.getModel(uri);
-            if (!model || !iframe) return;
             this.isHTMLSystemChange = true;
-            sync(model, iframe);
-            if (this.menu.setIconActive && this.menu.lastIcon !== 'icHTML') this.menu.setIconActive('icHTML');
+            sync();
 
         } catch (e) {
             console.error('Error on syncDom: ', e);
         }
+    }
+
+    private async checkToCreateModelHTML(ev: mls.events.IEvent) {
+
+        if (!ev.desc) return;
+        if (this.position === 'right') return;
+        try {
+            const iPath: mls.l2.editor.IPath = JSON.parse(ev.desc);
+            if (!iPath || !iPath.project || !iPath.shortName) return;
+            const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
+            const storFile = mls.stor.files[keyStorFile];
+            if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
+            await this.getOrCreateModelHTML(storFile.shortName, storFile.project, storFile);
+            mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any , ev.desc);
+        } catch (err: any) {
+            throw new Error(err);
+        }
+
     }
 
 

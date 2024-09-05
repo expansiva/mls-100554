@@ -10,6 +10,8 @@ import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
 import { execute as excCommandDel } from './_100554_wcdCommandDel';
 import { execute as excCommandCopy } from './_100554_wcdCommandCopy';
 import { execute as excCommandNext } from './_100554_wcdCommandSelectNext';
+import { execute as excCommandUndo } from './_100554_wcdCommandUndo';
+
 import { WcdOverlayModeStoryItem, initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
 import { CollabPageElement } from './_100554_collabPageElement';
 
@@ -37,6 +39,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
         'Delete': excCommandDel,
         'c': excCommandCopy,
         'v': excCommandCopy,
+        'z': excCommandUndo,
         'ArrowDown': this.onkeydownArrow.bind(this),
         'ArrowLeft': this.onkeydownArrow.bind(this),
         'ArrowUp': this.onkeydownArrow.bind(this),

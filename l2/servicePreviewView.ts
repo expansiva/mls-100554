@@ -307,6 +307,7 @@ export class ServicePreviewView extends LitElement {
             head.appendChild(base);
         }
         this.init(iframe);
+        window.preview.iframe = iframe;
     }
 
     private objVariations: any = {
