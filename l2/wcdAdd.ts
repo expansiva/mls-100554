@@ -37,9 +37,9 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         `;
 
         setTimeout(() => {
-            const allBtns = this.containerButtons?.querySelectorAll('button');
+            const allBtns = this.containerButtons?.querySelectorAll('wcd-add-button');
             if (!allBtns) return;
-            allBtns.forEach((btn) => { this.tooltipElement(btn); });
+            allBtns.forEach((btn) => { this.tooltipElement(btn as HTMLElement); });
         }, 500)
 
     }
@@ -60,11 +60,11 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         this.style.zIndex = '99999';
         return html`
         <div class="add-button ${this.initialMode === 'close' ? 'close' : ''}">
-            <button @click=${this.onButtonClick} >
+            <wcd-add-button @click=${this.onButtonClick} >
                 <span>
                     ${collab_xmark}
                 </span>
-            </button>
+            </wcd-add-button>
             <div class="buttons-actions-container">
                 <div class="buttons-actions"></div>
                 <add-tooltip></add-tooltip>
@@ -159,7 +159,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         if (!btn) return;
         btn.classList.toggle('close');
         if (!this.containerButtons) return;
-        const allBtns = this.containerButtons.querySelectorAll('button');
+        const allBtns = this.containerButtons.querySelectorAll('wcd-add-button');
         allBtns.forEach((bt) => bt.classList.toggle('scale-in-center', !btn.classList.contains('close')))
     }
 
@@ -167,13 +167,13 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         .add-button{
             position:relative;
         }
-        button span {
+        wcd-add-button span {
             color: var(--text-primary-color);
         }
-        button svg{
+        wcd-add-button svg{
             fill: var(--text-primary-color);
         }
-        button {
+        wcd-add-button {
             width: 32px;
             height: 32px;
             line-height: 30px;
@@ -194,6 +194,19 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             font-style: normal;
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
+            appearance: auto;
+            text-rendering: auto;
+            letter-spacing: normal;
+            word-spacing: normal;
+            line-height: normal;
+            text-transform: none;
+            text-indent: 0px;
+            text-shadow: none;
+            text-align: center;
+            box-sizing: border-box;
+            margin: 0em;
+            padding-block: 1px;
+            padding-inline: 6px;
         }
         .add-button:not(.close) .buttons-actions-container{
             opacity: 1;
@@ -207,13 +220,13 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         .buttons-actions{
             position:relative;
         }
-        button svg{
+        wcd-add-button svg{
             transition:transform .1s,-webkit-transform .1s;
         }
         .add-button.close svg{
             transform:rotate(-45deg);
         }
-        button span {
+        wcd-add-button span {
             vertical-align: middle;
         }
         add-tooltip {

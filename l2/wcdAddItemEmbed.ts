@@ -34,7 +34,7 @@ export class WcdAddItemEmbed100554 extends CollabLitElement {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         return html`
-        <button @keydown=${this.handleKeyDown} @click=${this.handleClick} data-tooltip=${this.msg.embed} ><span>${collab_link}</span></button>
+        <wcd-add-button @keydown=${this.handleKeyDown} @click=${this.handleClick} data-tooltip=${this.msg.embed} ><span>${collab_link}</span></wcd-add-button>
 
     `;
     }

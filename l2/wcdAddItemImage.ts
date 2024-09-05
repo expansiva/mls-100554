@@ -34,7 +34,7 @@ export class WcdAddItemImage100554 extends CollabLitElement {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         return html`
-        <button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e)} @click=${this.handleImageClick} data-tooltip=${this.msg.image} ><span>${collab_image}</span></button>
+        <wcd-add-button @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e)} @click=${this.handleImageClick} data-tooltip=${this.msg.image} ><span>${collab_image}</span></wcd-add-button>
 
     `;
     }

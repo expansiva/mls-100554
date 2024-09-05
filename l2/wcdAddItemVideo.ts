@@ -34,7 +34,7 @@ export class WcdAddItemVideo100554 extends CollabLitElement {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         return html`
-        <button @keydown=${this.handleKeyDown} @click=${this.handleClick} data-tooltip=${this.msg.video} ><span>${collab_video}</span></button>
+        <wcd-add-button @keydown=${this.handleKeyDown} @click=${this.handleClick} data-tooltip=${this.msg.video} ><span>${collab_video}</span></wcd-add-button>
 
     `;
     }
