@@ -135,27 +135,6 @@
       {
         "docPath": "",
         "examples": [],
-        "group": "navigation",
-        "l4MarketingRef": "",
-        "name": "_100554_mlsToolbarService",
-        "styles": [
-          {
-            "stylename": "mlsToolbarService",
-            "last_updated": "2023-12-22T13:23:12.820Z",
-            "last_updated_by": "Guilherme"
-          }
-        ],
-        "tags": [
-          "internal"
-        ],
-        "widgetExampleRef": {
-          "path": "",
-          "tagname": ""
-        }
-      },
-      {
-        "docPath": "",
-        "examples": [],
         "group": "other",
         "l4MarketingRef": "",
         "name": "_100554_collabConfigService",
