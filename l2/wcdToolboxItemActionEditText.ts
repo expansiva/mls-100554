@@ -13,7 +13,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     public args: string | undefined;
 
-    private myInfos = { tp: "", attr: "text" }
+    private myInfos = { tp: "", attr: "text", x: undefined, y:undefined  }
 
 
     constructor() {
@@ -49,6 +49,8 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
                 const i = JSON.parse(this.args);
                 if (i.tp) this.myInfos.tp = i.tp;
                 if (i.attr) this.myInfos.attr = i.attr;
+                if (i.x) this.myInfos.x = i.x;
+                if (i.y) this.myInfos.y = i.y;
             } catch (e) {
 
             }
@@ -66,7 +68,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     renderButton() {
-        if (this.myParent) this.myParent.onclick = (e: any) => this.clickButton(e);
+        if (this.myParent) this.myParent.onclick = (e: any) => this.clickButton(e, 'click');
         this.onclick = (e) => this.clickButton(e);
         this.classList.add('f-button');
         return html`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/></svg>`;
@@ -74,7 +76,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     renderClick() {
 
-        if (this.myParent) this.myParent.onclick = (e: any) => this.clickButton(e);
+        if (this.myParent) this.myParent.onclick = (e: any) => this.clickButton(e, 'click');
         return html``;
     }
 
@@ -130,6 +132,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             const el = this.querySelector('*[contenteditable]') as HTMLElement;
             if (!el) return;
             el.focus();
+            this.setCaret();
         }, 500);
 
         return ret;
@@ -143,6 +146,19 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     private firstTag = '';
     private myTag = '';
     private myText = '';
+
+    private setCaret(): void {
+
+        if (this.myInfos.x === undefined || this.myInfos.y === undefined) return;
+        const range = document.caretRangeFromPoint(this.myInfos.x, this.myInfos.y);
+        const selection = window.getSelection();
+
+        if (!selection || !range) return;
+
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+    }
 
     private fireChange(): void {
 
@@ -270,11 +286,14 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     }
 
-    private clickButton(e: MouseEvent) {
+    private clickButton(e: MouseEvent, tp:string = 'btn') {
 
         e.stopPropagation();
 
         if (!this.myParent) return;
+
+        let aux = '"tp":"edit", "attr": "' + this.myInfos.attr + '"';
+        if (tp !== 'btn') aux = aux + `, "x":${e.x}, "y":${e.y}`;
 
         this.myParent.onclick = null;
         this.myParent.setIconsWcdToolbox(
@@ -284,7 +303,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
                 },
                 {
                     name: 'edit',
-                    args: '{"tp":"edit", "attr":"' + this.myInfos.attr + '"}',
+                    args: '{'+aux+'}',
                     position: 'p-l1',
                     toolboxOptions: { background: '#fff' }
                 },

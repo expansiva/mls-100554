@@ -45,6 +45,10 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     // ------------ COMPONENT-------------------
 
+    createRenderRoot() {
+        return this; // dont use shadow root
+    }
+
     connectedCallback() {
         super.connectedCallback();
         if (!this.elICA) return;
@@ -76,6 +80,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     render() {
         return html`
+        <style>${this.css}</style>
          <wcd-toolbox-aux-background></wcd-toolbox-aux-background>
         `;
     }
@@ -119,11 +124,12 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         if (!this.elICA || !this.elICA.getActionsTags) return;
         if (!actions) actions = this.elICA.getActionsTags();
 
-        if (!this.shadowRoot) return;
+        //if (!this.shadowRoot) return;
 
-        const allItens = this.shadowRoot.querySelectorAll('*');
+        //const allItens = this.shadowRoot.querySelectorAll('*');
+        const allItens = this.querySelectorAll('*');
         allItens.forEach((i: Element) => {
-            if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-aux-background') return;
+            if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-aux-background' || i.tagName.toLocaleLowerCase() === 'style') return;
             i.remove()
         });
 
@@ -137,7 +143,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         
         for await (let i of actions) {
 
-            if (!this.shadowRoot) continue;
+            //if (!this.shadowRoot) continue;
 
             if (defaultActions[i.name]) {
                 const args = i.args ? i.args : undefined;
@@ -170,7 +176,8 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
             el.style.zIndex = '9998';
             el.args = i.args;
 
-            this.shadowRoot.appendChild(el);
+            //this.shadowRoot.appendChild(el);
+            this.appendChild(el);
 
         };
 
@@ -223,7 +230,8 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     private addBackButton(): void {
 
-        if (!this.shadowRoot || !this.parentElement) return;
+        //if (!this.shadowRoot || !this.parentElement) return;
+        if (!this.parentElement) return;
 
         const el = document.createElement('span');
         el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"/></svg>';
@@ -245,7 +253,8 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
         }
 
-        this.shadowRoot.appendChild(el);
+        //this.shadowRoot.appendChild(el);
+        this.appendChild(el);
 
         setTimeout(() => {
             if (!this.isElementVisible(el)) {
@@ -358,10 +367,11 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
         setTimeout(() => {
 
-            if (!this.shadowRoot) return;
+            //if (!this.shadowRoot) return;
 
             let child: HTMLElement[] = [];
-            Array.from(this.shadowRoot.children).forEach((item) => {
+            //Array.from(this.shadowRoot.children).forEach((item) => {
+            Array.from(this.children).forEach((item) => {
                 const tag = item.tagName.toLocaleLowerCase();
                 const invalid = ['span', 'wcd-toolbox-aux-background'];
                 if (invalid.includes(tag)) return;
@@ -492,9 +502,10 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     private _updateBackgroundAuxSize(tp: 'show' | 'hide' = 'hide'): void {
 
-        if (!this.shadowRoot) return;
+        //if (!this.shadowRoot) return;
 
-        const elChange = this.shadowRoot.querySelector('wcd-toolbox-aux-background') as HTMLElement;
+        //const elChange = this.shadowRoot.querySelector('wcd-toolbox-aux-background') as HTMLElement;
+        const elChange = this.querySelector('wcd-toolbox-aux-background') as HTMLElement;
         const elBase = this.elMain;
         if (!elBase || !elChange || !this.parentElement) return;
 
@@ -583,9 +594,10 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     //--------------CSS--------------------
 
-    static styles = css`
+    //static styles = css`
+    private css =`
 
-        :host{
+        wcd-toolbox-100554{
             display:block;
             border:1px solid #d3cece;
             position:absolute;
