@@ -253,7 +253,7 @@ export class _100554_configDsDefault implements DesignSystemIO {
                     allComponentsCss.push(`// widget: ${component} \n${lessComponent}\n`);
                 }
             } catch (err) {
-                console.info('erro no component:', component)
+                console.info('err component:', component)
                 continue;
             }
         }
@@ -263,7 +263,6 @@ export class _100554_configDsDefault implements DesignSystemIO {
         try {
             const preCompileLess = new PreCompileLess();
             const compiledCss = await preCompileLess.compileLess(allLess);
-            console.info(compiledCss);
             return compiledCss;
         } catch (err: any) {
             throw new Error(`Error on compile all less : ${err.message}`);

@@ -231,7 +231,6 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IP
 }
 
 async function getGlobalCss(mfile: mls.l2.editor.IPath, theme: string) {
-    console.info('getGlobalCss')
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
