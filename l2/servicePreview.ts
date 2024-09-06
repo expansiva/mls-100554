@@ -1,11 +1,8 @@
 /// <mls shortName="servicePreview" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-// version = 1
-
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
-import { convertTagToFileName } from './_100554_utilsLit'
 import { initServicePreviewView } from './_100554_servicePreviewView';
 import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
 import { IcaLitElement } from './_100554_icaLitElement';
@@ -76,11 +73,11 @@ export class ServicePreview100554 extends ServiceBase {
     get confE() { return `l${this.level}_${this.position}`; }
 
     constructor() {
+        super();
         window.preview = {
             editor: undefined,
             iframe: undefined
         };
-        super();
         initServicePreviewView;
         initServicePreviewAddStyle;
         this.setEvents();
@@ -102,15 +99,15 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opResultHTML') return this.showEditorHTML();
-        if (this.menu.setMode) this.menu.setMode('initial');
+        // if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
 
     public onClickIcon = (op: string): void => {
-        this.lastMode = op;
         this._ed1?.updateOptions({ readOnly: false });
         if (op === 'icPreviewD') this.preview('desktop');
         if (op === 'icPreviewM') this.preview('mobile');
+        this.lastMode = op;
     }
 
     public onClickButton = (op: string, opMenu?: string): boolean => {
@@ -154,6 +151,8 @@ export class ServicePreview100554 extends ServiceBase {
             this.menu.setMode('page', this.monacoeditor);
             this._ed1?.updateOptions({ readOnly: true });
             this._ed1?.layout();
+            this.monacoeditor?.setAttribute('msize', this.msize);
+
         }
         return true;
     }
@@ -421,40 +420,27 @@ export class ServicePreview100554 extends ServiceBase {
         }
     }
 
+    updated(changedProperties: Map<string | number | symbol, unknown>): void {
+        super.updated(changedProperties);
+
+        const hasMsize = changedProperties.has('msize');
+        if (hasMsize) {
+            const msize = changedProperties.get('msize');
+            if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
+            const [width, height] = msize.split(',');
+            this.monacoeditor.setAttribute('msize', msize);
+
+        }
+
+
+
+    }
+
     // -------------- IMPLEMENTS-----------------
 
     private getTheme() {
         const theme = localStorage.getItem('_100554_serviceUserSettings_theme') || 'light';
         return theme;
-    }
-
-    public async setAboutTag(tag: string) {
-
-        try {
-            if (!tag) return false;
-            const file = convertTagToFileName(tag.toLocaleLowerCase());
-            this.htmlAbout = `  
-                <h3>About this Component</h3>
-                <ul>
-                    <li>Reference: ${file}</li>
-                    <li>Tag: ${tag} </li>
-                    <li>Level: 2 </li>                    
-                </ul>`
-                ;
-
-            if (this.menu.setMenuActive && this.htmlAbout) this.menu.setMenuActive('opAboutTag');
-        } catch (e) {
-            console.info(e);
-            return false;
-        }
-    }
-
-    private htmlAbout = '';
-    private opAboutTag() {
-        const doc = document.createElement('div');
-        doc.innerHTML = this.htmlAbout;
-        if (this.menu.setMode) this.menu.setMode('page', doc);
-        return true;
     }
 
     private async preview(mode: string) {
@@ -469,9 +455,9 @@ export class ServicePreview100554 extends ServiceBase {
         doc.setAttribute('mode', mode);
         doc.setAttribute('actualtheme', this.actualTheme);
         (doc as any).father = this;
-        this.lastLevel = this.level;
         this.elPreview = doc;
         if (this.menu.setMode) this.menu.setMode('page', doc);
+        this.lastLevel = this.level;
         return true;
 
     }
@@ -492,10 +478,8 @@ export class ServicePreview100554 extends ServiceBase {
             if (el.tagName.split('-').length > 1 && (el as IcaLitElement).globalVariation !== undefined) {
                 (el as IcaLitElement).globalVariation = window.globalVariation;
             }
-        })
-
+        });
     }
-
 
     private findAllElementsIca(el: HTMLElement): HTMLElement[] {
         let elements: HTMLElement[] = [];
@@ -528,7 +512,3 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
 }
-
-
-
-
