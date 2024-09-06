@@ -4,7 +4,7 @@ import { IWCDCommand } from './_100554_wcdTypes';
 
 export function execute(param: IWCDCommand) {
 
-    if (!param?.selectedIca) throw new Error('invalid param.selectedIca');
+    // if (!param?.selectedIca) throw new Error('invalid param.selectedIca');
     if (!param.overlay || typeof param.overlay.selectItem !== 'function') throw new Error('invalid param.overlay');
     if (!param.args || !(param.args instanceof KeyboardEvent)) throw new Error('invalid param.args');
 

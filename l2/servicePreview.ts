@@ -166,10 +166,9 @@ export class ServicePreview100554 extends ServiceBase {
 
     private getIframePreviewHTML(): HTMLHtmlElement | undefined {
 
-        const htmlEl = this.previousElementSibling
-            ?.querySelector('service-preview-view-100554')
-            ?.shadowRoot
-            ?.querySelector('iframe')
+        if (!window.preview.iframe) throw new Error('Preview no created yet');
+
+        const htmlEl = window.preview.iframe
             ?.contentDocument
             ?.querySelector('html') as HTMLHtmlElement;
 
@@ -307,7 +306,6 @@ export class ServicePreview100554 extends ServiceBase {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('stylechanged', 'true');
             this.elPreview.setAttribute('actualtheme', this.actualTheme);
-
         }
     }
 
@@ -350,11 +348,6 @@ export class ServicePreview100554 extends ServiceBase {
 
     }
 
-    private activeMe(status: string, click: boolean): void {
-        if (!this.serviceItemNav) return;
-        this.serviceItemNav.setAttribute('mode', status);
-        if (click) this.serviceItemNav.click();
-    }
 
     // -------------- COMPONENT ---------------
 
@@ -368,6 +361,33 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.menu.buttons) this.menu.buttons.btTokens = this.msg.theme + `;f53f:menu:${this.themes.join(',')}`;
         if (this.menu.refresh) this.menu.refresh();
     }
+
+    render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        return html``;
+    }
+
+    firstUpdated() {
+        this.createEditor();
+        const theme = this.getTheme();
+        if (theme === 'dark' && this.menu.selectButton) {
+            this.menu.selectButton('btTheme');
+        }
+    }
+
+    updated(changedProperties: Map<string | number | symbol, unknown>): void {
+        super.updated(changedProperties);
+        const hasMsize = changedProperties.has('msize');
+        if (hasMsize) {
+            const msize = changedProperties.get('msize');
+            if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
+            this.monacoeditor.setAttribute('msize', msize);
+        }
+    }
+
+    // -------------- IMPLEMENTS-----------------
+
 
     private createEditor() {
         if (!this.monacoeditor) {
@@ -406,38 +426,6 @@ export class ServicePreview100554 extends ServiceBase {
         return monaco.Uri.parse(`file://server/${shortFN}${ftype}`);
     }
 
-    render() {
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
-        return html``;
-    }
-
-    firstUpdated() {
-        this.createEditor();
-        const theme = this.getTheme();
-        if (theme === 'dark' && this.menu.selectButton) {
-            this.menu.selectButton('btTheme');
-        }
-    }
-
-    updated(changedProperties: Map<string | number | symbol, unknown>): void {
-        super.updated(changedProperties);
-
-        const hasMsize = changedProperties.has('msize');
-        if (hasMsize) {
-            const msize = changedProperties.get('msize');
-            if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
-            const [width, height] = msize.split(',');
-            this.monacoeditor.setAttribute('msize', msize);
-
-        }
-
-
-
-    }
-
-    // -------------- IMPLEMENTS-----------------
-
     private getTheme() {
         const theme = localStorage.getItem('_100554_serviceUserSettings_theme') || 'light';
         return theme;
@@ -462,13 +450,12 @@ export class ServicePreview100554 extends ServiceBase {
 
     }
     private requestUpdateAllIcaComponentsInPage() {
-        const body = this.previousElementSibling
-            ?.querySelector('service-preview-view-100554')
-            ?.shadowRoot
-            ?.querySelector('iframe')
+
+        if (!window.preview.iframe) throw new Error('Preview no created yet');
+
+        const body = window.preview.iframe
             ?.contentDocument
             ?.querySelector('body');
-
 
         if (!body) return;
         const elements = this.findAllElementsIca(body)
