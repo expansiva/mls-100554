@@ -52,7 +52,7 @@ export async function execute(param: IWCDCommand) {
                 const sectionAfter = addSection(icaSectionTagName, wcSectionTagName, param.overlay, siblings);
                 sectionAfter.classList.add('inset');
                 sectionImage.insertAdjacentElement('afterend', sectionAfter);
-                const isEmpty = (parentSection?.children[0]?.shadowRoot?.children || []).length === 0;
+                const isEmpty = (parentSection?.children[0]?.children || []).length === 0;
                 if (isEmpty) {
                     parentSection.remove();
                     const indexOverlayParentSection = param.overlay.myItens.findIndex(item => item.element === parentSection);
@@ -80,9 +80,9 @@ export async function execute(param: IWCDCommand) {
 
         } else if ((!previousSection || !previousSectionIsInset) && nextSectionIsInset) {
 
-            const nextChidrens = nextSection?.children[0]?.shadowRoot?.children || [];
+            const nextChidrens = nextSection?.children[0]?.children || [];
             const firstChildrenNext = nextChidrens[0];
-            if (firstChildrenNext) nextSection?.children[0]?.shadowRoot?.insertBefore(param.selectedIca, firstChildrenNext);
+            if (firstChildrenNext) nextSection?.children[0]?.insertBefore(param.selectedIca, firstChildrenNext);
             else nextSection?.appendChild(param.selectedIca);
             if (isEmptySections) {
                 parentSection.remove();
@@ -94,8 +94,8 @@ export async function execute(param: IWCDCommand) {
 
             if (!previousSection) return;
 
-            const previousChildrens = previousSection.children[0]?.shadowRoot?.children || [];
-            const nextChidrens = nextSection?.children[0]?.shadowRoot?.children || [];
+            const previousChildrens = previousSection.children[0]?.children || [];
+            const nextChidrens = nextSection?.children[0]?.children || [];
 
             const lastChildrenPrevious = previousChildrens[previousChildrens.length - 1];
             lastChildrenPrevious.insertAdjacentElement('afterend', param.selectedIca);

@@ -39,13 +39,11 @@ export function execute(param: IWCDCommand) {
 
     if (parentSection && (parentSection.classList.contains('full') || parentSection.classList.contains('outset'))) {
         let nextSection = parentSection.nextElementSibling;
-
         if (nextSection && nextSection.classList.contains('inset')) {
-            const nextChidrens = nextSection?.children[0]?.shadowRoot?.children || [];
+            const nextChidrens = nextSection?.children[0].children || [];
             const firstChildrenNext = nextChidrens[0];
-            if (firstChildrenNext) nextSection?.children[0]?.shadowRoot?.insertBefore(elAdd, firstChildrenNext);
+            if (firstChildrenNext) nextSection?.children[0]?.insertBefore(elAdd, firstChildrenNext);
             else nextSection?.appendChild(param.selectedIca);
-
         } else {
             const sectionImage = addSection(icaSectionTagName, wcSectionTagName, param.overlay, [elAdd]);
             parentSection.insertAdjacentElement('afterend', sectionImage);
