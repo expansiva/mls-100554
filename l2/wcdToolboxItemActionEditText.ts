@@ -13,7 +13,9 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     public args: string | undefined;
 
-    private myInfos = { tp: "", attr: "text", x: undefined, y:undefined  }
+    private myInfos = { tp: "", attr: "text", x: undefined, y: undefined }
+
+    private isSetMinHeight = {isSet:false, oldValue:''}
 
 
     constructor() {
@@ -31,6 +33,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (this.elMain) this.elMain.style.visibility = '';
         this.fireChange();
+
+        if (this.isSetMinHeight.isSet && this.elMain) {
+            if (this.isSetMinHeight.oldValue) this.elMain.style.minHeight = this.isSetMinHeight.oldValue;
+            else this.elMain.style.minHeight = '';
+        }
+
         super.disconnectedCallback();
     }
 
@@ -111,7 +119,13 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         this.myTag = el.tagName;
         this.firstTag = el.tagName;
 
-        if(this.myText !== '') this.style.top = '1px';
+        if (this.myText !== '') this.style.top = '1px';
+
+        if (this.myText === '') {
+            if (this.elMain.style.minHeight) this.isSetMinHeight.oldValue = this.elMain.style.minHeight;
+            this.elMain.style.minHeight = '5rem';
+            this.isSetMinHeight.isSet = true;
+        }
 
         this.elMain.style.visibility = 'hidden';
 
@@ -124,6 +138,9 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             </style>
         `;
 
+
+
+
         el.removeAttribute('contenteditable');
         el.removeAttribute('spellcheck');
         el.style.outline = '';
@@ -131,7 +148,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         setTimeout(() => {
             const el = this.querySelector('*[contenteditable]') as HTMLElement;
             if (!el) return;
-            el.focus();
+            el.focus({ preventScroll: true });
             this.setCaret();
         }, 500);
 

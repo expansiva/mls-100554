@@ -20,8 +20,34 @@ export function execute(param: IWCDCommand) {
 
     if (e.key.toLocaleLowerCase() === 'backspace') {
 
-        const sibling = ica.previousElementSibling as IcaLitElementBaseMethods;
-        if (!sibling || !sibling.overlayRef) return;
+        let sibling = ica.previousElementSibling as IcaLitElementBaseMethods;
+        if (!sibling || !sibling.overlayRef) {
+
+            const findIcaParentSibling = (icaBase: HTMLElement): IcaLitElementBaseMethods | undefined | null | Element=> {
+
+                let p = icaBase.parentElement as IcaLitElementBaseMethods;
+                if (p && !p.tagName.toLocaleLowerCase().startsWith('ica-')) {
+                    return findIcaParentSibling(p);
+                }
+
+
+                p = p.previousElementSibling as IcaLitElementBaseMethods;
+                if (!p) return undefined;
+
+
+                const tag = p.widget as string;
+                const elPR = p.querySelector(tag);
+
+                if (elPR && elPR.children.length > 1) return elPR.children[elPR.children.length - 1]; 
+                else if(p) return p
+
+                return undefined;
+            }
+
+            sibling = findIcaParentSibling(ica) as IcaLitElementBaseMethods;
+            if (!sibling || !sibling.overlayRef) return;
+        }
+
         const index = overlay.myItens.findIndex(item => item.element === sibling);
 
         if (index !== -1) {
