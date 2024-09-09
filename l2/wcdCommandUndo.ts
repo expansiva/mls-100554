@@ -19,7 +19,10 @@ export function execute(param: IWCDCommand) {
     const uri = getUri(`_${project}_${shortName}`, '.html');
     let model = monaco.editor.getModel(uri);
     if (!model) throw new Error('invalid model');
-    if ((model as any).undo) (model as any).undo();
+    if ((model as any).undo) {
+        localStorage.setItem('servicePreviewScrool', window.scrollY.toString());
+        (model as any).undo();
+    }
 
 }
 

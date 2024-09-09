@@ -471,6 +471,15 @@ export class ServicePreviewView extends LitElement {
 				window['l2_html'] = window['l2_html']  ? window['l2_html']  : parent.l2_html ? parent.l2_html : top['l2_html'];
                 window['monaco'] = window['monaco']  ? window['monaco']  : parent.monaco ? parent.monaco : top['monaco'];
 				window['l2_fieldTypes'] = window['l2_fieldTypes']  ? window['l2_fieldTypes']  : parent.l2_fieldTypes ? parent.l2_fieldTypes : top['l2_fieldTypes'];window['litDisableBundleWarning'] = true; window['collabActualLevel'] = ${this.level};
+
+                function setScrool(){
+            
+                    const scrollY = localStorage.getItem('servicePreviewScrool');
+                    if(!scrollY) return;
+                    localStorage.setItem('servicePreviewScrool', '');
+                    setTimeout(()=>{window.scrollTo(0, scrollY);},500);
+                }
+                setScrool();
 				`;
             ifr.contentDocument?.body.appendChild(s);
 
