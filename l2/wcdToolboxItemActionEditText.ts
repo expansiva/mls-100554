@@ -1,7 +1,7 @@
 /// <mls shortName="wcdToolboxItemActionEditText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, unsafeHTML } from 'lit';
-import { customElement} from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { initWcdPopup } from './_100554_wcdPopup';
 import { WCDPopupMethodos } from './_100554_wcdTypes';
@@ -15,7 +15,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     private myInfos = { tp: "", attr: "text", x: undefined, y: undefined }
 
-    private isSetMinHeight = {isSet:false, oldValue:''}
+    private isSetMinHeight = { isSet: false, oldValue: '' }
 
 
     constructor() {
@@ -180,7 +180,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     private fireChange(): void {
 
         if ((this.myText !== this.firstText) || (this.myTag !== this.firstTag)) {
-            if (!this.elICA ) return;
+            if (!this.elICA) return;
             let aux = '';
             const lang = (document.documentElement.lang || '').toLowerCase();
             if (this.elICA.globalVariation && this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
@@ -226,7 +226,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         this.moveSelectionToElement(newElement)
 
         const mouseUpEvent = new MouseEvent('mouseup', {
-            bubbles: true, 
+            bubbles: true,
             cancelable: true,
             view: window,
             clientX: 0,
@@ -234,12 +234,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         });
 
 
-        
+
         setTimeout(() => {
 
             newElement.dispatchEvent(mouseUpEvent);
-            
-        },100)
+
+        }, 100)
 
         el.remove();
 
@@ -299,13 +299,83 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (!this.myParent || !this.elMain) return;
 
-        if(['Enter', 'Backspace', 'Delete', 'c', 'v', 'ArrowLeft', 'ArrowRight'].includes(e.key)){
+        if (e.key === 'Enter') {
+            e.preventDefault();
             e.stopPropagation();
-        } 
+            document.execCommand('insertLineBreak');
+        }
+
+        if (['Enter', 'Backspace', 'Delete', 'c', 'v', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            e.stopPropagation();
+        }
+
+        if (e.key === 'ArrowUp') {
+
+            const ret = this.isCaretInFirstLine();
+            if (!ret) {
+                e.stopPropagation();
+            }
+
+        }
+
+        if (e.key === 'ArrowDown') {
+
+            const ret = this.isCaretInLastLine();
+            if (!ret) {
+                e.stopPropagation();
+            }
+
+        }
 
     }
 
-    private clickButton(e: MouseEvent, tp:string = 'btn') {
+    private isCaretInFirstLine() {
+
+        const contentEditableElement = this.querySelector('*[contenteditable]') as HTMLElement
+        const shadowSelection = this.getRootNode() as any;
+        const selection = shadowSelection.getSelection() as any;
+
+        if (contentEditableElement.innerText === '') return true;
+
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const rects = range.getClientRects();
+
+            if (rects.length > 0) {
+                const firstLineRect = contentEditableElement.getClientRects()[0]; 
+                const caretRect = rects[0];
+
+                return (caretRect.top - 5) <= firstLineRect.top;
+            }
+        }
+        return false;
+    }
+
+    private isCaretInLastLine() {
+
+        const contentEditableElement = this.querySelector('*[contenteditable]') as HTMLElement
+        const shadowSelection = this.getRootNode() as any;
+        const selection = shadowSelection.getSelection() as any;
+
+
+        if (contentEditableElement.innerText === '') return true;
+
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const rects = range.getClientRects();
+
+            if (rects.length > 0) {
+                const rectArray = Array.from(contentEditableElement.getClientRects());
+                const lastLineRect = rectArray[rectArray.length - 1];
+                const caretRect = rects[0];
+
+                return (caretRect.bottom + 5) >= lastLineRect.bottom;
+            }
+        }
+        return false;
+    }
+
+    private clickButton(e: MouseEvent, tp: string = 'btn') {
 
         e.stopPropagation();
 
@@ -322,7 +392,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
                 },
                 {
                     name: 'edit',
-                    args: '{'+aux+'}',
+                    args: '{' + aux + '}',
                     position: 'p-l1',
                     toolboxOptions: { background: '#fff' }
                 },
