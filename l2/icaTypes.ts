@@ -22,7 +22,7 @@ export type EventsDefinition = {
 };
 
 export interface IActionsToolbox {
-    position: 'p-l0' | 'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' | 'p-l5' | 'p-m0' | 'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' | 'p-r0' | 'p-r1' | 'p-r2' | 'p-r3' | 'p-r4' | '',
+    position: 'p-l0' | 'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' | 'p-l5' | 'p-m0' | 'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' | 'p-r0' | 'p-r1' | 'p-r2' | 'p-r3' | 'p-r4' | 'p-title' | '',
     tp: 'menu' | 'button' | 'back-button' | 'action' | 'event',
     format: 'square' | 'circle' | '',
     title: string | undefined,
@@ -59,7 +59,7 @@ export interface IActionLevels {
 
 export interface ActionTag {
     name: string; // tag name or component name
-    position?: 'p-l0' | 'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' | 'p-m0' | 'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' | 'p-r0' | 'p-r1' | 'p-r2' | 'p-r3' | 'p-r4'; // suggestion of position, WCD will define
+    position?: 'p-l0' | 'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' | 'p-m0' | 'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' | 'p-r0' | 'p-r1' | 'p-r2' | 'p-r3' | 'p-r4' | 'p-title' ; // suggestion of position, WCD will define
     args?: string; // optional args string, can be a JSON string
     level?: number[]; // levels where this will be visible
     toolboxOptions?: IToolboxOptions
