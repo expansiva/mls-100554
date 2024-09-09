@@ -129,11 +129,20 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         this.elMain.style.visibility = 'hidden';
 
-        const ret = html`<div id="edittextwcd"  @keydown="${this.onkeyDown}" @mouseup="${this.mouseUP}" @input="${this.onInput}" style="${css}">${unsafeHTML(el.outerHTML)}
+        this.hasDropCap = this.elMain.classList.contains('dropcap');
+
+        const ret = html`<div id="edittextwcd" class="${this.hasDropCap ? 'dropcap' : ''}" @keydown="${this.onkeyDown}" @mouseup="${this.mouseUP}" @input="${this.onInput}" style="${css}">${unsafeHTML(el.outerHTML)}
             </div>
             <style>
                 #edittextwcd *{
                     
+                }
+                #edittextwcd.dropcap p::first-letter{
+                    font-size: 3em;
+                    font-weight: bold;
+                    float: left;
+                    line-height: 1;
+                    margin-right: 0.1em;
                 }
             </style>
         `;
@@ -163,6 +172,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     private firstTag = '';
     private myTag = '';
     private myText = '';
+    private hasDropCap: boolean = false;
 
     private setCaret(): void {
 
@@ -179,12 +189,19 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     private fireChange(): void {
 
-        if ((this.myText !== this.firstText) || (this.myTag !== this.firstTag)) {
+        const edit = this.querySelector('#edittextwcd');
+        const actualDropCap = edit?.classList.contains('dropcap');
+
+        
+        if ((this.myText !== this.firstText) || (this.myTag !== this.firstTag) || this.hasDropCap !== actualDropCap) {
             if (!this.elICA) return;
             let aux = '';
             const lang = (document.documentElement.lang || '').toLowerCase();
             if (this.elICA.globalVariation && this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
             this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
+
+            if (actualDropCap) this.elICA.classList.add('dropcap');
+            else this.elICA.classList.remove('dropcap');
             dispatchEventConciliate();
         };
 
@@ -342,7 +359,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             const rects = range.getClientRects();
 
             if (rects.length > 0) {
-                const firstLineRect = contentEditableElement.getClientRects()[0]; 
+                const firstLineRect = contentEditableElement.getClientRects()[0];
                 const caretRect = rects[0];
 
                 return (caretRect.top - 5) <= firstLineRect.top;

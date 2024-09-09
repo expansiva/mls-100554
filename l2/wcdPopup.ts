@@ -15,7 +15,7 @@ export class WCDPopup extends LitElement implements WCDPopupMethodos {
 
   @property({ type: Number }) x = 0;
   @property({ type: Number }) y = 0;
-  @property({ type: String }) buttons = 'bold,italic,link,separator,h1,h2,h3,h4,separator,blockquote';
+  @property({ type: String }) buttons = 'bold,italic,dropcap,link,separator,h1,h2,h3,h4,separator,blockquote';
 
   static styles = css`
     :host {
@@ -89,6 +89,9 @@ export class WCDPopup extends LitElement implements WCDPopupMethodos {
       case 'blockquote':
         await import('./_100554_wcdPopupItemBlockQuote');
         return 'wcd-popup-item-block-quote-100554';
+      case 'dropcap':
+        await import('./_100554_wcdPopupItemDropCap');
+        return 'wcd-popup-item-drop-cap-100554';
       default:
         console.error('invalid button name: "' + button + '"');
         return null;
@@ -100,7 +103,10 @@ export class WCDPopup extends LitElement implements WCDPopupMethodos {
     const components: (string | null)[] = await Promise.all(buttonsArray.map(button => this.loadComponent(button)));
     this.shadowRoot!.innerHTML = `
       <div class="popup-content" style="top: ${this.y}px; left: ${this.x}px; height: 40px">
-        ${components.filter(Boolean).map(button => `<${button}></${button}>`).join('')}
+        ${components.filter(Boolean).map(button => {
+      const valid = this.isValid(button);
+      return `<${button} ${!valid ? 'style="display:none"' : ''}></${button}>`
+    }).join('')}
       </div>
     `;
   }
@@ -116,5 +122,38 @@ export class WCDPopup extends LitElement implements WCDPopupMethodos {
       this.style.top = `${this.y}px`;
     }
   }
+
+  isValid(name: string | null): boolean {
+    if (!name) return false;
+    if (name !== 'wcd-popup-item-drop-cap-100554') return true;
+    return this.checkIsValidDropCap();
+  }
+
+  checkIsValidDropCap(): boolean {
+    const contentEditable = this.parentElement?.querySelector('[contenteditable="true"]') as HTMLElement;
+    if (!contentEditable) return false;
+    const isFirstWordSelected = this.isFirstWordSelected(contentEditable);
+    return isFirstWordSelected;
+  }
+
+  isFirstWordSelected(contentEditableElement: HTMLElement) {
+
+    const selection = window.getSelection();
+    if (!selection || !contentEditableElement) return false;
+    const range = selection.getRangeAt(0);
+    if (!contentEditableElement.contains(range.commonAncestorContainer)) return false;
+    const textContent = contentEditableElement.textContent?.trim() || '';
+    const firstWord = textContent.split(/\s+/)[0];
+    const firstWordStart = textContent.indexOf(firstWord);
+    const firstWordEnd = firstWordStart + firstWord.length;
+    const isFirstLetterUppercase = firstWord.charAt(0) === firstWord.charAt(0).toUpperCase();
+    const selectionStart = range.startOffset;
+    const selectionEnd = range.endOffset;
+    const isPartOfFirstWordSelected = (selectionStart < firstWordEnd && selectionEnd > firstWordStart);
+    return isPartOfFirstWordSelected && isFirstLetterUppercase;
+
+  }
+
+
 }
 

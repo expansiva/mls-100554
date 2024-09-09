@@ -26,10 +26,18 @@ export class WCDPopupItemDropCap extends WCDPopupItem {
       </div>
     `;
   }
+  handleClick() {
 
-    handleClick() {
-    // get the ica selected
-    // aplly class = 'dropcap'
+    if (!window.wcdState.elMain) throw new Error('Invalid wcdState.elMain');
+    if (!window.wcdState.elICA) throw new Error('Invalid wcdState.elICA');
+
+    const wcdContent = window.wcdState.myParent?.querySelector('#edittextwcd');
+    if (!wcdContent) throw new Error('Invalid wcdContent id: #edittextwcd');
+
+    window.wcdState.elICA.classList.toggle('dropcap');
+    window.wcdState.elMain.classList.toggle('dropcap');
+    wcdContent.classList.toggle('dropcap');
 
   }
+
 }
