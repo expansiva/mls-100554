@@ -741,6 +741,14 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
             right:-6px;
         }
 
+        .p-title{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            bottom:-16px;
+            right:-6px;
+        }
+
         .p-r4{
             cursor:pointer;
             display:block;

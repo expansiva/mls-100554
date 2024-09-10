@@ -17,6 +17,10 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
         document.onkeydown = (e) => { this.onkeyDown(e) }
     }
 
+    refreshOverlay(): void {
+        throw new Error('Method not implemented.');
+    }
+
     //------------COMPONENT---------------
 
     createRenderRoot() {

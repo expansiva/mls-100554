@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
 import { ActionTag, IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { IWCDCommand } from './_100554_wcdTypes';
+import { IWCDCommand, WCDOverlayItensMethods } from './_100554_wcdTypes';
 import { getPosition } from './_100554_icaGlobal';
 import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
 import { execute as excCommandDel } from './_100554_wcdCommandDel';
@@ -12,7 +12,7 @@ import { execute as excCommandCopy } from './_100554_wcdCommandCopy';
 import { execute as excCommandNext } from './_100554_wcdCommandSelectNext';
 import { execute as excCommandUndo } from './_100554_wcdCommandUndo';
 
-import { WcdOverlayModeStoryItem, initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
+import { initWcdOverlayModeStoryItem } from './_100554_wcdOverlayModeStoryItem';
 import { CollabPageElement } from './_100554_collabPageElement';
 
 @customElement('wcd-overlay-mode-story-100554')
@@ -115,7 +115,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
             'title': {
                 name: "_100554_wcdToolboxItemActionTitle",
                 level: [1, 2, 3, 4, 5, 6],
-                position: 'p-r3',
+                position: 'p-title',
                 args: ''
             },
             'edit-code': {
@@ -193,17 +193,17 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
 
     private createOverlayItem(icaInfo: IICADepths, content: HTMLElement, boundingPage: DOMRect): void {
 
-        const icaOverlayItem = document.createElement('wcd-overlay-mode-story-item-100554') as WcdOverlayModeStoryItem;
+        const icaOverlayItem = document.createElement('wcd-overlay-mode-story-item-100554') as WCDOverlayItensMethods;
         icaOverlayItem.setAttribute('widget', icaInfo.element.tagName.toLowerCase());
         icaOverlayItem.setAttribute('level', this.level);
-        icaOverlayItem.info = icaInfo;
+        icaOverlayItem.info = icaInfo as any;
         icaOverlayItem.boundingPage = boundingPage;
         content.appendChild(icaOverlayItem)
     }
 
     private updateSizeOverlayItems() {
 
-        const items = Array.from(this.children) as WcdOverlayModeStoryItem[];
+        const items = Array.from(this.children) as WCDOverlayItensMethods[];
         const boundingPage = this.getBoundingClientRect();
         items.forEach((item) => {
             if (!item.info) return;

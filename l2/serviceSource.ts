@@ -943,7 +943,8 @@ export class ServiceSource100554 extends ServiceBase {
                     const lineContent = model.getLineContent(position.lineNumber);
 
                     // Verifica se a linha contém '<ica-' e 'id="'
-                    if (lineContent.includes('<ica-') && lineContent.includes('id="')) {
+                    //if (lineContent.includes('<ica-') && lineContent.includes('id="')) {
+                    if (lineContent.includes('id="')) {
                         const idValue = this.extractIdValue(lineContent);
                         if (this.lastIdSelected === idValue) return;
                         this.lastIdSelected = idValue;
@@ -953,6 +954,50 @@ export class ServiceSource100554 extends ServiceBase {
                             this.lastOrigin = 'editor';
                         }
                     }
+
+                    /*//const position = e.position;
+
+                    if (!position) return; // Sem posição válida, sair.
+
+                    // 1. Captura todo o conteúdo do editor e o converte em uma única linha
+                    const fullContent = model.getValue().replace(/\n/g, ' ');
+
+                    // 2. Converter a posição do cursor no editor para uma posição no texto concatenado
+                    const lineNumber = position.lineNumber;
+                    const column = position.column;
+
+                    // Calcula o índice correspondente no texto concatenado
+                    let indexInText = 0;
+                    for (let i = 1; i < lineNumber; i++) {
+                        indexInText += model.getLineContent(i).length + 1; // Soma a linha e um espaço para a quebra de linha removida
+                    }
+                    indexInText += column - 1; // Soma a posição da coluna dentro da linha
+
+                    // 3. Procurar a tag HTML na posição atual do cursor
+                    const regex = /<(\s*ica-[\w-]+)[^>]*id\s*=\s*["']([^"']+)["'][^>]*>/g;
+                    let match;
+                    let tagFound = false;
+
+                    while ((match = regex.exec(fullContent)) !== null) {
+                        const tagStart = match.index;           // Início da tag
+                        const tagEnd = regex.lastIndex;         // Fim da tag
+                        const tag = match[1];                   // Tag que começa com "ica-"
+                        const id = match[2];                    // Valor do atributo id
+
+                        // 4. Verifica se o índice do cursor está dentro do intervalo da tag
+                        if (indexInText >= tagStart && indexInText <= tagEnd) {
+                            console.log(`Tag: ${tag}, ID: ${id}`);
+                            tagFound = true;
+                            // Aqui você pode realizar ações com o ID (ex.: destacar no editor)
+                            break;
+                        }
+                    }
+
+                    
+
+                    if (!tagFound) {
+                        console.log("Nenhuma tag correspondente encontrada na posição do cursor.");
+                    }*/
 
                 }, 500)
 
@@ -1840,7 +1885,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             const storFile = mls.stor.files[keyStorFile];
             if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
             await this.getOrCreateModelHTML(storFile.shortName, storFile.project, storFile);
-            mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any , ev.desc);
+            mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, ev.desc);
         } catch (err: any) {
             throw new Error(err);
         }
