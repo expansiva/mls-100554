@@ -736,6 +736,7 @@ const icaDescriptions: icaBase.FormComponent[] = [
   {
     group: "Apresentation / Charts / 2D",
     description: msg.dAC2d,
+    attributes: 'framework,datasource,renderer',
     events: "click,focus,focus,blur"
   },
   {
@@ -913,6 +914,9 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
 
   { path: "language", lit: "@property({ type: String ) language: string | undefined;" },
   { path: "languages", lit: "@property({ type: Array ) languages: string[] | undefined;" },
+
+  { path: "framework", lit: "@property({ type: String ) framework: string | undefined;" },
+  { path: "renderer", lit: "@property({ type: String ) renderer: string | undefined;" },
 
 ];
 
