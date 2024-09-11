@@ -251,6 +251,7 @@ export class ServicePreview100554 extends ServiceBase {
     // -------------- EVENTS -------------------
 
 
+
     private setEvents() {
 
         mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => {
@@ -412,7 +413,7 @@ export class ServicePreview100554 extends ServiceBase {
         const uri = this.getUri(`_${storFile.project}_${storFile.shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
         if (model) return model;
-        await mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile));
+        await mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile), 500);
         return model;
     }
 

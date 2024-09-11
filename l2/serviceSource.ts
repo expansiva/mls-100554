@@ -1223,7 +1223,11 @@ export class ServiceSource100554 extends ServiceBase {
         const keyFileHtml = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.html');
         const storFileHtml = mls.stor.files[keyFileHtml];
         if (storFileHtml) {
-            await this.getOrCreateModelHTML(storFile.shortName, storFile.project, storFileHtml);
+
+            if (!this.htmlModelAlreadyProcessed[keyFileHtml]) {
+                this.htmlModelAlreadyProcessed[keyFileHtml] = true;
+                await this.getOrCreateModelHTML(storFile.shortName, storFile.project, storFileHtml);
+            }
         }
 
         if (compile) {
@@ -1884,13 +1888,17 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
             const storFile = mls.stor.files[keyStorFile];
             if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
-            await this.getOrCreateModelHTML(storFile.shortName, storFile.project, storFile);
+            if (!this.htmlModelAlreadyProcessed[keyStorFile]) {
+                this.htmlModelAlreadyProcessed[keyStorFile] = true;
+                await this.getOrCreateModelHTML(storFile.shortName, storFile.project, storFile);
+            }
             mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, ev.desc);
         } catch (err: any) {
             throw new Error(err);
         }
-
     }
+
+    private htmlModelAlreadyProcessed: { [key: string]: boolean } = {};
 
 
     //----------------------------------------
