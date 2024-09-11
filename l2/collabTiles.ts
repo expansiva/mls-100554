@@ -12,23 +12,23 @@ export class CollabTiles extends LitElement {
     @property({ type: [], reflect: true }) tilesItens = [    
         {
             title: 'Disciplina',
-            plugin: '',
+            plugin: '_100554_pluginTestDashboard1',
             position: '1 / 1 / 4 / 4'
         },
         
         {
             title: 'Acidentes',
-            plugin: '',
+            plugin: '_100554_pluginTestDashboard2',
             position: '1 / 4 / 3 / 7'
         },
         {
             title: 'Atividades',
-            plugin: '',
+            plugin: '_100554_pluginTestDashboard3',
             position: '3 / 4 / 7 / 7'
         },
         {
             title: 'Numero',
-            plugin: '',
+            plugin: '_100554_pluginTestDashboard4',
             position: '4 / 1 / 7 / 4'
         }
     ];

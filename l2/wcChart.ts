@@ -1,7 +1,5 @@
 /// <mls shortName="wcChart" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/// <mls shortName="wcEchartsPie" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-
 import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { propertyDataSource } from './_100554_icaLitElement';

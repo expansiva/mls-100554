@@ -40,9 +40,12 @@ export class ServiceDashboard100554 extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
     }
-
-    @property()
-    name: string = 'Somebody';
+    updated(changedProperties: any) {
+        if (changedProperties.has('msize')) {
+            if (!this.visible) return;
+            const all = this.shadowRoot?.querySelectorAll('wc-chart-100554');
+        }
+    }
 
     render() {
         return html`<collab-tiles-100554></collab-tiles-100554>`;

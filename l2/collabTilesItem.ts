@@ -25,7 +25,7 @@ export class CollabTilesItem extends LitElement {
         
         this.style.gridArea = this.position;
         if (this.mode === 'loading') return this.renderLoading();
-        else this.renderPlugin();
+        return this.renderPlugin();
         
     }
 
@@ -34,8 +34,9 @@ export class CollabTilesItem extends LitElement {
         setTimeout(() => {
             this.setPlugin();
         }, 200);
+        
         return html`
-            <collabtileitemcontent>
+            <collabtileitemcontent style="height:100%; width:100%;overflow:hidden;">
             </collabtileitemcontent>
         `
     }
@@ -66,7 +67,7 @@ export class CollabTilesItem extends LitElement {
     //-----------IMPLEMENTS-----------
 
     private async loadingPlugin() {
-
+        
         if (!this.plugin) {
             setTimeout(() => {
                 this.mode = 'plugin';
