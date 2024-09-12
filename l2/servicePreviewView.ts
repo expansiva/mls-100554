@@ -362,7 +362,7 @@ export class ServicePreviewView extends LitElement {
             '.html'
         );
 
-        const mkey = mls.l2.editor.getKey({
+        const mkey = mls.l2.getKey({
             project: info.project as number,
             shortName: info.path as string,
         }
