@@ -128,7 +128,7 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
             return;
         }
 
-        await this.addWCDToolbox(e.x,e.y);
+        await this.addWCDToolbox();
         if (this.level !== '4') return;
         //mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
         mls.events.fire(4, 'WCDEventChange' as any, `{"op":"Navigation"}`);
@@ -155,7 +155,7 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
         return null;
     }
 
-    private async addWCDToolbox(x:number= 0,y:number= 0) {
+    private async addWCDToolbox() {
         if (!this.overlay || !this.info || !this.level) return;
 
         this.style.opacity = '';
@@ -176,7 +176,6 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
         });
         const wcd = document.createElement('wcd-toolbox-100554') as WCDToolboxMethodos;
         wcd.setAttribute('level', this.level);
-        wcd.setAttribute('initialclick', `${x},${y}`);
         wcd.elICA = this.info.element;
         this.info.element.setAttribute('renderType', 'editactive')
 
@@ -194,7 +193,7 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
         const id = this.info.element.getAttribute('idel');
         if (!id) return;
         const infoL2 = (mls.actual[2] as any).left as any;
-        const name = mls.l2.editor.getKey({ project: infoL2.project, shortName: infoL2.shortName });
+        const name = mls.l2.getKey({ project: infoL2.project, shortName: infoL2.shortName });
         const mfile = mls.l2.editor.mfiles[name];
         if (!mfile || !(mfile as any).modelHTML) return;
 
