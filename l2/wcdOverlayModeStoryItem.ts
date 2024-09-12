@@ -128,7 +128,7 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
             return;
         }
 
-        await this.addWCDToolbox();
+        await this.addWCDToolbox(e.x,e.y);
         if (this.level !== '4') return;
         //mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
         mls.events.fire(4, 'WCDEventChange' as any, `{"op":"Navigation"}`);
@@ -155,7 +155,7 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
         return null;
     }
 
-    private async addWCDToolbox() {
+    private async addWCDToolbox(x:number= 0,y:number= 0) {
         if (!this.overlay || !this.info || !this.level) return;
 
         this.style.opacity = '';
@@ -178,7 +178,7 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
         wcd.setAttribute('level', this.level);
         wcd.elICA = this.info.element;
         this.info.element.setAttribute('renderType', 'editactive')
-
+        wcd.setAttribute('initialclick', `${x},${y}`);
         wcd.lastHelper = '';
 
         this.appendChild(wcd);
