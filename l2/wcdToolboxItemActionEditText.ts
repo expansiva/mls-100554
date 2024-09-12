@@ -15,8 +15,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     private myInfos = { tp: "", attr: "text", x: undefined, y: undefined }
 
-    private isSetMinHeight = { isSet: false, oldValue: '' }
-
 
     constructor() {
         super();
@@ -33,11 +31,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (this.elMain) this.elMain.style.visibility = '';
         this.fireChange();
-
-        if (this.isSetMinHeight.isSet && this.elMain) {
-            if (this.isSetMinHeight.oldValue) this.elMain.style.minHeight = this.isSetMinHeight.oldValue;
-            else this.elMain.style.minHeight = '';
-        }
 
         super.disconnectedCallback();
     }
@@ -132,12 +125,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (this.myText !== '') this.style.top = '1px';
 
-        if (this.myText === '') {
-            if (this.elMain.style.minHeight) this.isSetMinHeight.oldValue = this.elMain.style.minHeight;
-            this.elMain.style.minHeight = '5rem';
-            this.isSetMinHeight.isSet = true;
-        }
-
         this.elMain.style.visibility = 'hidden';
 
         this.hasDropCap = this.elMain.classList.contains('dropcap');
@@ -166,9 +153,9 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         el.style.outline = '';
 
         setTimeout(() => {
-            const el = this.querySelector('*[contenteditable]') as HTMLElement;
-            if (!el) return;
-            el.focus({ preventScroll: true });
+            const el1 = this.querySelector('*[contenteditable]') as HTMLElement;
+            if (!el1) return;
+            el1.focus({ preventScroll: true });
             this.setCaret();
         }, 500);
         return ret;
@@ -187,7 +174,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     private setCaret(): void {
 
-        if (this.myInfos.x === undefined || this.myInfos.y === undefined) return;
+        if (this.myInfos.x === undefined || this.myInfos.y === undefined || (this.myInfos.x === 0 && this.myInfos.y === 0)) return;
         const range = document.caretRangeFromPoint(this.myInfos.x, this.myInfos.y);
         const selection = window.getSelection();
 
@@ -334,14 +321,17 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         }
 
         if (['Enter', 'Backspace', 'Delete', 'c', 'v', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            this.removePopUpIfNeeded();
             e.stopPropagation();
         }
 
         if (e.key === 'ArrowUp') {
 
+
             const ret = this.isCaretInFirstLine();
             if (!ret) {
                 e.stopPropagation();
+                this.removePopUpIfNeeded();
             }
 
         }
@@ -351,8 +341,18 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             const ret = this.isCaretInLastLine();
             if (!ret) {
                 e.stopPropagation();
+                this.removePopUpIfNeeded();
             }
 
+        }
+
+        if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
+            e.stopPropagation();
+            return;
+        }
+
+        if (e.shiftKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+            this.mouseUP(e);
         }
 
     }
@@ -432,6 +432,17 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     }
 
+    private removePopUpIfNeeded(): void {
+
+        const existingDiv = this.querySelector('wcd-popup-100554');
+        const shadowSelection = this.getRootNode() as any;
+        const selection = shadowSelection.getSelection() as any;
+
+        if ( selection.toString() === '' && existingDiv) {
+            existingDiv.remove();
+        }
+    }
+
     private mouseUP(e: MouseEvent) {
 
         let click = e.target as HTMLElement;
@@ -481,23 +492,23 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         newDiv.style.transform = 'translate(-50%, -100%)';
 
-        setTimeout(() => { 
+        setTimeout(() => {
 
             const isVisible = this.isElementVisible(newDiv);
             if (!isVisible.visibleLeft) newDiv.style.transform = 'translate(0%, -100%)';
-            if(!isVisible.visibleRight) newDiv.style.transform = 'translate(-100%, -100%)';
+            if (!isVisible.visibleRight) newDiv.style.transform = 'translate(-100%, -100%)';
 
         }, 100);
 
     }
 
-    private isElementVisible(element: HTMLElement): {visibleLeft:boolean, visibleRight:boolean} {
+    private isElementVisible(element: HTMLElement): { visibleLeft: boolean, visibleRight: boolean } {
         const rect = element.getBoundingClientRect();
         return {
             visibleLeft: rect.left >= 0,
             visibleRight: rect.right <= (window.innerWidth || document.documentElement.clientWidth)
         }
-        ;
+            ;
     }
 
 

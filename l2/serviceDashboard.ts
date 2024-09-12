@@ -8,13 +8,19 @@ import './_100554_collabTiles';
 @customElement('service-dashboard-100554')
 export class ServiceDashboard100554 extends ServiceBase {
 
+    @property() msize: string = '';
+
+    @property() cssBreakPoint: string = '';
+
     static styles = css`[[mls_getDefaultDesignSystem]]`;
+
+
 
     public details: IService = {
         icon: '&#xf201',
         state: 'foreground',
         position: 'left',
-        tooltip: 'Service Dashboard',
+        tooltip: 'Dashboard',
         visible: true,
         widget: '_100554_serviceDashboard',
         level: [6]
@@ -40,14 +46,29 @@ export class ServiceDashboard100554 extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
     }
+
+    private refreshTimeOut = 0;
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
             if (!this.visible) return;
             const all = this.shadowRoot?.querySelectorAll('wc-chart-100554');
+
+            const [w, h] = this.msize.split(',');
+
+            if (w && +w < 800) this.cssBreakPoint = 'break-800';
+            else if (w && +w > 800) this.cssBreakPoint = '';
+
+            clearTimeout(this.refreshTimeOut);
+            this.refreshTimeOut = setTimeout(() => {
+                all?.forEach((i:any) => {
+                    if(i.myChart && i.myChart.resize) i.myChart.resize();
+                });
+            },500)
+            
         }
     }
 
     render() {
-        return html`<collab-tiles-100554></collab-tiles-100554>`;
+        return html`<collab-tiles-100554 class="${this.cssBreakPoint}"></collab-tiles-100554>`;
     }
 }

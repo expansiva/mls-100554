@@ -54,6 +54,7 @@ export class WcInputText100554 extends IcaApresentationTextTextBase {
                 tag = 'span';
         }
 
+        if (!this.text) this.style.minHeight = '5rem';
         const line = `<${tag}>${this.text}</${tag}>`;
         return unsafeHTML(line)
     }
