@@ -31,8 +31,6 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     public fcBeforeBackButton: Function | undefined = undefined;
 
-    //public actions: IActionsToolbox[] = [];
-
     get lastHelper() {
         if (!this.elICA) return '';
         return (this.elICA as any)['lasthelper'];
@@ -73,9 +71,10 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     firstUpdated() {
         if (!this.elMain) return;
-        this._renderAction();
         this.updateSize(this.elMain, this, true);
         this.initObserverResize();
+        this._renderAction();
+        
     }
 
     render() {
@@ -116,73 +115,66 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     private async _renderAction(actions?: tps.ActionTag[]) {
 
-        const parent = this.parentElement?.parentElement as any;
-        
-        if (!parent || !parent.getActionsTagsDefault) return;
-        const defaultActions = parent.getActionsTagsDefault();
+        setTimeout(async () => { 
+            const parent = this.parentElement?.parentElement as any;
+            
+            if (!parent || !parent.getActionsTagsDefault) return;
+            const defaultActions = parent.getActionsTagsDefault();
 
-        if (!this.elICA || !this.elICA.getActionsTags) return;
-        if (!actions) actions = this.elICA.getActionsTags();
+            if (!this.elICA || !this.elICA.getActionsTags) return;
+            if (!actions) actions = this.elICA.getActionsTags();
 
-        //if (!this.shadowRoot) return;
+            const allItens = this.querySelectorAll('*');
+            allItens.forEach((i: Element) => {
+                if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-aux-background' || i.tagName.toLocaleLowerCase() === 'style') return;
+                i.remove()
+            });
 
-        //const allItens = this.shadowRoot.querySelectorAll('*');
-        const allItens = this.querySelectorAll('*');
-        allItens.forEach((i: Element) => {
-            if (i.tagName.toLocaleLowerCase() === 'wcd-toolbox-aux-background' || i.tagName.toLocaleLowerCase() === 'style') return;
-            i.remove()
-        });
+            this.setDefaultToolBoxOptions();
 
-        this.setDefaultToolBoxOptions();
+            window.wcdState = {
+                elICA: this.elICA,
+                myParent: this,
+                elMain: this.elMain,
+            };
+            
+            for await (let i of actions) {
 
-        window.wcdState = {
-            elICA: this.elICA,
-            myParent: this,
-            elMain: this.elMain,
-        };
-        
-        for await (let i of actions) {
+                if (defaultActions[i.name]) {
+                    const args = i.args ? i.args : undefined;
+                    const pos = i.position ? i.position : undefined;
+                    const toll = i.toolboxOptions ? i.toolboxOptions : undefined;
 
-            //if (!this.shadowRoot) continue;
+                    i = Object.assign({}, defaultActions[i.name]) as tps.ActionTag;
+                    if (args) i.args = args;
+                    if (pos) i.position = pos;
+                    if (toll) i.toolboxOptions = toll;
+                }
 
-            if (defaultActions[i.name]) {
-                const args = i.args ? i.args : undefined;
-                const pos = i.position ? i.position : undefined;
-                const toll = i.toolboxOptions ? i.toolboxOptions : undefined;
+                if (i.toolboxOptions) this.setToolBoxOptions(i.toolboxOptions);
 
-                i = Object.assign({}, defaultActions[i.name]) as tps.ActionTag;
-                if (args) i.args = args;
-                if (pos) i.position = pos;
-                if (toll) i.toolboxOptions = toll;
-            }
+                if (i.name === 'button') {
+                    this.addBackButton();
+                    continue;
+                }
 
-            if (i.toolboxOptions) this.setToolBoxOptions(i.toolboxOptions);
+                if (!i.name.startsWith('_') || !i.level || (this.level && !i.level.includes(+this.level))) continue;
 
-            if (i.name === 'button') {
-                this.addBackButton();
-                continue;
-            }
+                const ok = await this.importWCDActions(i.name);
+                if (!ok) continue;
 
-            if (!i.name.startsWith('_') || !i.level || (this.level && !i.level.includes(+this.level))) continue;
+                const el = document.createElement(convertFileNameToTag(i.name)) as WCDToolboxItemMethodos;
+                el.className = `p ${i.position}`;
+                el.style.zIndex = '9998';
+                el.args = i.args;
 
-            const ok = await this.importWCDActions(i.name);
-            if (!ok) continue;
+                this.appendChild(el);
 
-            const el = document.createElement(convertFileNameToTag(i.name)) as WCDToolboxItemMethodos;
-            el.className = `p ${i.position}`;
-            //el.myParent = this;
-            //el.elMain = this.elMain;
-            //el.elICA = this.elICA;
-            el.style.zIndex = '9998';
-            el.args = i.args;
+            };
 
-            //this.shadowRoot.appendChild(el);
-            this.appendChild(el);
-
-        };
-
-        this.adjustPositionIfNecessary()
-
+            
+            this.adjustPositionIfNecessary()
+        }, 100);
     }
 
     private setDefaultToolBoxOptions() {
@@ -366,7 +358,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
     private adjustPositionIfNecessary() {
 
         setTimeout(() => {
-
+            
             //if (!this.shadowRoot) return;
 
             let child: HTMLElement[] = [];
@@ -407,7 +399,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
             }
 
-        }, 500);
+        }, 200);
 
     }
 
@@ -594,7 +586,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     //--------------CSS--------------------
 
-    //static styles = css`
+    //static styles = css` #c8c8c8c2;
     private css =`
 
         wcd-toolbox-100554{
@@ -602,7 +594,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
             border:1px solid #d3cece;
             position:absolute;
             user-select:none;
-            background: #c8c8c8c2;
+            background: transparent;
         }
 
         .wcdBackButton{

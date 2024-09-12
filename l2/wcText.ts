@@ -47,6 +47,9 @@ export class WcInputText100554 extends IcaApresentationTextTextBase {
             case 'p':
                 tag = 'p';
                 break;
+            case 'blockquote':
+                tag = 'code';
+                break;
             default:
                 tag = 'span';
         }

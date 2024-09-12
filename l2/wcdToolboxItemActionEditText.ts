@@ -59,6 +59,16 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
                 if (i.attr) this.myInfos.attr = i.attr;
                 if (i.x) this.myInfos.x = i.x;
                 if (i.y) this.myInfos.y = i.y;
+
+                if (!i.x || !i.y) {
+                    const initialclick = this.myParent?.getAttribute('initialclick');
+                    if (initialclick) {
+                        const arrayinitialclick = initialclick.split(',');
+                        this.myInfos.x = arrayinitialclick[0] ? +arrayinitialclick[0] : 0 as any;
+                        this.myInfos.y = arrayinitialclick[1] ? +arrayinitialclick[1] : 0 as any;
+                    }
+                }
+
             } catch (e) {
 
             }
@@ -90,6 +100,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     renderEdit() {
 
+
         if (!this.elICA || !this.myParent || !this.elICA.widget) return;
 
         this.style.left = '0';
@@ -105,7 +116,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         if (!el) return html`Not found element`;
 
 
-        const css = 'outline:none; position:relative; min-width:20px';
+        const css = 'outline:none; position:relative; min-width:20px;';
 
         this.myParent.fcBeforeBackButton = this.backButton.bind(this);
 
@@ -160,8 +171,8 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             el.focus({ preventScroll: true });
             this.setCaret();
         }, 500);
-
         return ret;
+
     }
 
 
@@ -192,7 +203,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         const edit = this.querySelector('#edittextwcd');
         const actualDropCap = edit?.classList.contains('dropcap');
 
-        
+
         if ((this.myText !== this.firstText) || (this.myTag !== this.firstTag) || this.hasDropCap !== actualDropCap) {
             if (!this.elICA) return;
             let aux = '';
@@ -470,8 +481,23 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         newDiv.style.transform = 'translate(-50%, -100%)';
 
+        setTimeout(() => { 
 
+            const isVisible = this.isElementVisible(newDiv);
+            if (!isVisible.visibleLeft) newDiv.style.transform = 'translate(0%, -100%)';
+            if(!isVisible.visibleRight) newDiv.style.transform = 'translate(-100%, -100%)';
 
+        }, 100);
+
+    }
+
+    private isElementVisible(element: HTMLElement): {visibleLeft:boolean, visibleRight:boolean} {
+        const rect = element.getBoundingClientRect();
+        return {
+            visibleLeft: rect.left >= 0,
+            visibleRight: rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        }
+        ;
     }
 
 
