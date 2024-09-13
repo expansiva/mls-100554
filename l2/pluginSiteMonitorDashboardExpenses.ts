@@ -1,11 +1,11 @@
-/// <mls shortName="pluginSiteMonitorDashboardErrors" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls shortName="pluginSiteMonitorDashboardExpenses" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { query, property } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 
 export const pluginData: mls.plugin.IPluginData = {
-    title: "Errors",
+    title: "Expenses",
     getSvg(): TemplateResult {
         return svg`
      <svg svg width="22" height="22"  style="overflow:visible;enable-background:new 0 0 32 32" viewBox="0 0 32 32" width="32" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><g id="Error_1_"><g id="Error"><circle cx="16" cy="16" id="BG" r="16" style="fill:#D72828;"/><path d="M14.5,25h3v-3h-3V25z M14.5,6v13h3V6H14.5z" id="Exclamatory_x5F_Sign" style="fill:#E6E6E6;"/></g></g></g></svg>
@@ -13,7 +13,7 @@ export const pluginData: mls.plugin.IPluginData = {
     }
 };
 
-export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
+export class PluginSiteMonitorDashboardExpenses extends PluginBaseModule {
 
     @property({ type: String }) filter: string = "today";
 
@@ -25,65 +25,62 @@ export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
 
         await import('./_100554_wcChart');
 
-        const dataByFilter: any = {
-            today: [
-                ['400', 3],
-                ['401', 3],
-                ['402', 0],
-                ['403', 2],
-                ['404', 3],
-                ['405', 8],
-                ['409', 3],
-            ],
-            week: [
-                ['400', 14],
-                ['401', 13],
-                ['402', 16],
-                ['403', 12],
-                ['404', 13],
-                ['405', 13],
-                ['409', 13],
-            ],
-            mounth: [
-                ['400', 43],
-                ['401', 83],
-                ['402', 86],
-                ['403', 72],
-                ['404', 43],
-                ['405', 83],
-                ['409', 43],
-            ],
-            all: [
-                ['400', 143],
-                ['401', 183],
-                ['402', 186],
-                ['403', 172],
-                ['404', 143],
-                ['405', 183],
-                ['409', 143],
-            ],
-        }
         this.chartData = {
-
-            legend: {},
-            tooltip: {},
-            dataset: {
-                source: dataByFilter[this.filter || 'today']
+            title: {
+                text: "Expense Breakdown",
+                subtext: "Total Expenses: $920",
+                left: "center"
             },
-            xAxis: { type: 'category' },
-            yAxis: {},
-            series: [{
-                type: 'bar',
-                itemStyle: {
-                    color: (p: any) => {
-                        const colorList = ["#f68a55"];
-                        return colorList[p.dataIndex];
+            tooltip: {
+                trigger: "item",
+                formatter: "{a} <br/>{b}: ${c} ({d}%)"
+            },
+            legend: {
+                orient: "vertical",
+                left: "left",
+                data: ["CDN", "EC2", "Database", "Domain", "Others"]
+            },
+            series: [
+                {
+                    name: "Expenses",
+                    type: "pie",
+                    radius: "50%",
+                    data: [
+                        { "value": 300, "name": "CDN" },
+                        { "value": 250, "name": "EC2" },
+                        { "value": 200, "name": "Database" },
+                        { "value": 100, "name": "Domain" },
+                        { "value": 70, "name": "Others" }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: "rgba(0, 0, 0, 0.5)"
+                        }
                     }
                 }
-            }],
+            ],
+            toolbox: {
+                feature: {
+                    saveAsImage: {
+                        title: "Save"
+                    }
+                }
+            }
         }
         await this.updateComplete;
-        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" datasource=${JSON.stringify(this.chartData)}></wc-chart-100554>`;
+        const data = JSON.stringify(this.chartData);
+        function escapeHTML(str:string) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
+        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" datasource="${escapeHTML(data)}"></wc-chart-100554>`;
 
     }
 
@@ -197,6 +194,6 @@ export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
 
 }
 
-if (!customElements.get('plugin-site-monitor-dashboard-errors-100554')) {
-    customElements.define('plugin-site-monitor-dashboard-errors-100554', PluginSiteMonitorDashboardErrors);
+if (!customElements.get('plugin-site-monitor-dashboard-expenses-100554')) {
+    customElements.define('plugin-site-monitor-dashboard-expenses-100554', PluginSiteMonitorDashboardExpenses);
 }

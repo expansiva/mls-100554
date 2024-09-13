@@ -1,11 +1,11 @@
-/// <mls shortName="pluginSiteMonitorDashboardErrors" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls shortName="pluginSiteMonitorDashboardSpikes" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { query, property } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 
 export const pluginData: mls.plugin.IPluginData = {
-    title: "Errors",
+    title: "Spikes",
     getSvg(): TemplateResult {
         return svg`
      <svg svg width="22" height="22"  style="overflow:visible;enable-background:new 0 0 32 32" viewBox="0 0 32 32" width="32" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><g id="Error_1_"><g id="Error"><circle cx="16" cy="16" id="BG" r="16" style="fill:#D72828;"/><path d="M14.5,25h3v-3h-3V25z M14.5,6v13h3V6H14.5z" id="Exclamatory_x5F_Sign" style="fill:#E6E6E6;"/></g></g></g></svg>
@@ -13,7 +13,7 @@ export const pluginData: mls.plugin.IPluginData = {
     }
 };
 
-export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
+export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
 
     @property({ type: String }) filter: string = "today";
 
@@ -25,65 +25,67 @@ export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
 
         await import('./_100554_wcChart');
 
-        const dataByFilter: any = {
-            today: [
-                ['400', 3],
-                ['401', 3],
-                ['402', 0],
-                ['403', 2],
-                ['404', 3],
-                ['405', 8],
-                ['409', 3],
-            ],
-            week: [
-                ['400', 14],
-                ['401', 13],
-                ['402', 16],
-                ['403', 12],
-                ['404', 13],
-                ['405', 13],
-                ['409', 13],
-            ],
-            mounth: [
-                ['400', 43],
-                ['401', 83],
-                ['402', 86],
-                ['403', 72],
-                ['404', 43],
-                ['405', 83],
-                ['409', 43],
-            ],
-            all: [
-                ['400', 143],
-                ['401', 183],
-                ['402', 186],
-                ['403', 172],
-                ['404', 143],
-                ['405', 183],
-                ['409', 143],
-            ],
-        }
         this.chartData = {
-
-            legend: {},
-            tooltip: {},
-            dataset: {
-                source: dataByFilter[this.filter || 'today']
+            "title": {
+                "text": "Hourly Traffic Spikes",
             },
-            xAxis: { type: 'category' },
-            yAxis: {},
-            series: [{
-                type: 'bar',
-                itemStyle: {
-                    color: (p: any) => {
-                        const colorList = ["#f68a55"];
-                        return colorList[p.dataIndex];
+            "tooltip": {
+                "trigger": "axis"
+            },
+            "legend": {
+                "data": ["Number of Requests"]
+            },
+            "xAxis": {
+                "type": "category",
+                "boundaryGap": false,
+                "data": ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"]
+            },
+            "yAxis": {
+                "type": "value",
+                "name": "Number of Requests"
+            },
+            "series": [
+                {
+                    "name": "Number of Requests",
+                    "type": "line",
+                    "data": [50, 45, 60, 80, 120, 140, 200, 300, 250, 230, 210, 180, 170, 150, 130, 100, 90, 160, 220, 260, 300, 320, 340, 280],
+                    "markPoint": {
+                        "data": [
+                            { "type": "max", "name": "Max Traffic" },
+                            { "type": "min", "name": "Min Traffic" }
+                        ]
+                    },
+                    "markLine": {
+                        "data": [
+                            { "type": "average", "name": "Average Traffic" }
+                        ]
+                    },
+                    "smooth": true,
+                    "lineStyle": {
+                        "width": 2
                     }
                 }
-            }],
+            ],
+            "toolbox": {
+                "feature": {
+                    "saveAsImage": {
+                        "title": "Save"
+                    }
+                }
+            }
         }
         await this.updateComplete;
-        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" datasource=${JSON.stringify(this.chartData)}></wc-chart-100554>`;
+        const data = JSON.stringify(this.chartData);
+        function escapeHTML(str: string) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
+        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" datasource="${escapeHTML(data)}"></wc-chart-100554>`;
 
     }
 
@@ -197,6 +199,6 @@ export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
 
 }
 
-if (!customElements.get('plugin-site-monitor-dashboard-errors-100554')) {
-    customElements.define('plugin-site-monitor-dashboard-errors-100554', PluginSiteMonitorDashboardErrors);
+if (!customElements.get('plugin-site-monitor-dashboard-spikes-100554')) {
+    customElements.define('plugin-site-monitor-dashboard-spikes-100554', PluginSiteMonitorDashboardSpikes);
 }

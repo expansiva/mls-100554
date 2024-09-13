@@ -2,7 +2,7 @@
 
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { convertFileNameToTag  } from './_100554_utilsLit';
+import { convertFileNameToTag } from './_100554_utilsLit';
 
 
 @customElement('collab-tiles-item-100554')
@@ -22,30 +22,11 @@ export class CollabTilesItem extends LitElement {
     }
 
     render() {
-        
         this.style.gridArea = this.position;
-        if (this.mode === 'loading') return this.renderLoading();
-        return this.renderPlugin();
-        
-    }
-
-    renderPlugin() {
-
-        setTimeout(() => {
-            this.setPlugin();
-        }, 200);
-        
-        return html`
-            <collabtileitemcontent style="height:100%; width:100%;overflow:hidden;">
-            </collabtileitemcontent>
-        `
-    }
-
-    renderLoading() {
-
+        this.onclick = () => this.clickPlugin();
         this.loadingPlugin();
         return html`
-            <div style="position:relative; width:100%; height:100%;background: #ececec;">
+            <div style="${this.mode !== 'loading' ? 'display:none;' : 'position:relative; width:100%; height:100%;background: #ececec;'}">
                 <div class="loader">
                     <div class="square"></div>
                     <div class="square"></div>
@@ -58,38 +39,53 @@ export class CollabTilesItem extends LitElement {
                     <div class="square last"></div>
                 </div>
             </div>
+            <collabtileitemcontent style="${this.mode !== 'plugin' ? 'display:none;' : 'height:100%; width:100%;overflow:hidden;'}"></collabtileitemcontent>
             <style>
                 ${this.myCss}
             </style>
         `
+
     }
+
 
     //-----------IMPLEMENTS-----------
 
     private async loadingPlugin() {
-        
-        if (!this.plugin) {
-            setTimeout(() => {
-                this.mode = 'plugin';
-            }, +this.index * 800);
-            return;
-        }
+
         await import('./' + this.plugin)
         const tag = convertFileNameToTag(this.plugin);
         this.elPlugin = document.createElement(tag);
         this.elPlugin.setAttribute('dashboardindex', this.index);
+        this.setPlugin();
+    }
+
+    private async setPlugin() {
+        const el = this.querySelector('collabtileitemcontent');
+        if (!el || !this.elPlugin) return;
+        el.innerHTML = '';
+        el.appendChild(this.elPlugin);
         if ((this.elPlugin as any).prepare) await (this.elPlugin as any).prepare();
         this.mode = 'plugin';
 
     }
 
-    private setPlugin(): void {
+    private clickPlugin(): void {
 
-        const el = this.querySelector('collabtileitemcontent');
-        if (!el || !this.elPlugin) return;
+        if (!this.plugin) return;
 
-        el.appendChild(this.elPlugin);
-        
+        mls.actual[0].setFullName(this.plugin);
+        mls.events.fire(
+            mls.actualLevel as any,
+            'PluginDetails' as any,
+            JSON.stringify(
+                {
+                    shortName: mls.actual[0].path,
+                    project: mls.actual[0].project
+                }
+            ),
+            0
+        );
+
     }
 
     private myCss = `
