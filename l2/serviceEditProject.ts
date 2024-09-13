@@ -54,6 +54,7 @@ export class ServiceEditProject100554 extends ServiceBase {
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opConfig') return this.showStart();
+        if (op === 'opClear') return this.clearChanges();
         if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
@@ -61,6 +62,7 @@ export class ServiceEditProject100554 extends ServiceBase {
     public menu: IMenu = {
         title: this.msg.menu_title,
         actions: {
+            opClear: 'Clear changes',
         },
         icons: {},
         actionDefault: 'opConfig', // call after close icon clicked
@@ -107,7 +109,23 @@ export class ServiceEditProject100554 extends ServiceBase {
     private template: string = `window.project_config`
 
     private showStart() {
+        if (this._ed1) {
+            const [width, height] = this.msize.split(',');
+            this._ed1.layout({ width: +width, height: +height });
+        }
         return true;
+    }
+
+    private clearChanges() {
+        this._clearChanges();
+        if (this.menu.setMode) this.menu.setMode('initial');
+        return false;
+    }
+
+    private _clearChanges() {
+
+        this.loadProjectConfigs(true)
+
     }
 
     private refreshIfNeeded(project: number | undefined) {
@@ -131,11 +149,11 @@ export class ServiceEditProject100554 extends ServiceBase {
         this.setMsizeEditor();
     }
 
-    private async loadProjectConfigs() {
+    private async loadProjectConfigs(ignoreLocal: boolean = false) {
         const { project } = mls.actual[5];
         if (!project) return;
         this.lastProject = project;
-        let config = await getConfigProject(project);
+        let config = await getConfigProject(project, ignoreLocal);
         if (!config) config = await createConfigFile(project);
         this.setInitialConfig(JSON.stringify(config, null, 2), project);
     }
@@ -153,6 +171,8 @@ export class ServiceEditProject100554 extends ServiceBase {
         if (!model1) {
             model1 = monaco.editor.createModel(src, editorType, uri);
             this.setEventsModel(model1);
+        } else {
+            model1.setValue(src);
         }
         return model1;
     }
