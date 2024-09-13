@@ -169,15 +169,16 @@ export class CollabTiles extends LitElement {
             text-align: center;
         }
 
-        @media (max-width: 780px) {
-            collab-tiles-100554 collab-tiles{
-                display:flex;
-                flex-direction:column;
-            }
-            collab-tiles-100554 collab-tiles-item-100554 {
-                grid-area: none !important;
-            }
+        
+        collab-tiles-100554.break-800 collab-tiles{
+            display:flex;
+            flex-direction:column;
         }
+        collab-tiles-100554.break-800 collab-tiles-item-100554 {
+            grid-area: none !important;
+            height: 300px;
+        }
+        
     `
 
 }
