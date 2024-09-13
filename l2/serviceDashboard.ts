@@ -14,7 +14,9 @@ export class ServiceDashboard100554 extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
+    @property() activeTab:string = 'Icon1';
 
+    //------SERVICE----------
 
     public details: IService = {
         icon: '&#xf201',
@@ -31,14 +33,24 @@ export class ServiceDashboard100554 extends ServiceBase {
         return false;
     }
 
+    public onClickIcon = (op: string): void => {
+        this.activeTab = op;
+    }
+
     public menu: IMenu = {
         title: 'Dashboard',
         actions: {
         },
-        icons: {},
+        icons: {
+            Icon1: 'Example 1;f0e8',
+            Icon2: 'Example 2;f0d6',
+
+        },
         actionDefault: '', // call after close icon clicked
+        iconDefault: 'Icon1',
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
+        onClickIcon: this.onClickIcon,
         getLastMode: undefined,
         updateTitle: undefined
     }
@@ -47,28 +59,57 @@ export class ServiceDashboard100554 extends ServiceBase {
 
     }
 
+    //---------COMPONENT-------------
+
     private refreshTimeOut = 0;
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
             if (!this.visible) return;
-            const all = this.shadowRoot?.querySelectorAll('wc-chart-100554');
 
             const [w, h] = this.msize.split(',');
 
             if (w && +w < 800) this.cssBreakPoint = 'break-800';
             else if (w && +w > 800) this.cssBreakPoint = '';
-
             clearTimeout(this.refreshTimeOut);
+
             this.refreshTimeOut = setTimeout(() => {
-                all?.forEach((i:any) => {
-                    if(i.myChart && i.myChart.resize) i.myChart.resize();
+                this.shadowRoot?.querySelectorAll('collab-tiles-item-100554 collabtileitemcontent').forEach((item) => {
+                    Array.from(item.children).forEach((plugin) => {
+                        const root = plugin.shadowRoot || plugin;
+                        root.querySelectorAll('wc-chart-100554').forEach((chart: any) => {
+                            if (chart.myChart && chart.myChart.resize) chart.myChart.resize();
+                        });
+                    });
                 });
-            },500)
-            
+
+            }, 500)
+
         }
     }
 
     render() {
+        return html`
+            ${this.renderContent()}
+        `;
+    }
+
+    renderContent() {
+        switch (this.activeTab) {
+            case 'Icon1':
+                return this.renderIcon1();
+            case 'Icon2':
+                return this.renderIcon2();
+            default:
+                return html``;
+        }
+    }
+
+
+    renderIcon1() {
         return html`<collab-tiles-100554 class="${this.cssBreakPoint}"></collab-tiles-100554>`;
+    }
+
+    renderIcon2() {
+        return html`Segunda opção`;
     }
 }
