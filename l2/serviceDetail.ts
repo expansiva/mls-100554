@@ -14,6 +14,8 @@ export class ServiceDetail100554 extends ServiceBase {
 
     @query('#contentPlugin') contentPlugin: HTMLDivElement | undefined;
 
+    private plugin: { shortName: string, project: number } = {} as any;
+
     constructor() {
         super();
         this.setEvents();
@@ -32,13 +34,15 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
-        if (this.menu.setMode) this.menu.setMode('initial');
+        if (op === 'opAboutThis') return this.showAboutThis();
+        if (this.menu.setMode) this.menu.setMode('initial');        
         return false;
     }
 
     public menu: IMenu = {
         title: 'Example',
         actions: {
+            opAboutThis: 'About this content',
         },
         icons: {},
         actionDefault: '', // call after close icon clicked
@@ -46,6 +50,42 @@ export class ServiceDetail100554 extends ServiceBase {
         onClickLink: this.onClickLink,
         getLastMode: undefined,
         updateTitle: undefined
+    }
+
+    private showAboutThis(): boolean {
+
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+        div.innerHTML = `
+        
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: _${this.plugin.project}_${this.plugin.shortName}</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+                <li><button>Open</button></li>
+            </ul>
+		
+
+        `;
+        div.onclick = (e) => {
+
+            let el = e.target as HTMLElement;
+
+            if (el.tagName.toLocaleLowerCase() === 'button' || (el.parentElement && el.parentElement.tagName.toLocaleLowerCase() === 'button')) {
+
+                const keyFile = mls.stor.getKeyToFiles(this.plugin.project, 2, this.plugin.shortName, '', '.ts');
+                const storFile = mls.stor.files[keyFile];
+
+                if (!storFile) return;
+
+                this.selectLevel(2)
+                this.fireEvents('open', storFile, {});
+            }
+
+        };
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
     }
 
     //----------COMPONENT------------------
@@ -86,6 +126,7 @@ export class ServiceDetail100554 extends ServiceBase {
             return;
         } else if (!storFile) return;
 
+        this.plugin = info ;
         const content = await storFile.getContent();
         
         if (this.contentPlugin && typeof content === 'string') {
@@ -105,6 +146,40 @@ export class ServiceDetail100554 extends ServiceBase {
             });
 
         }
+
+    }
+
+    private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
+
+        const params = {} as mls.events.IFileAction;
+
+        (params.action as any) = action;
+        params.level = file.level;
+        params.project = file.project;
+        params.shortName = file.shortName;
+        params.extension = '.ts';
+        params.folder = file.folder;
+        params.position = 'left' as ('right' | 'left');
+
+        if (info && info.shortName) {
+            params.newshortName = info.shortName;
+            params.newProject = info.project;
+            params.newfolder = file.folder;
+        }
+
+        if (['open'].includes(action)) {
+
+            mls.actual[2].setFullName(`_${file.project}_${file.shortName}`);
+            (mls.actual[2] as any)['left' as any] = {
+                project: file.project,
+                shortName: file.shortName,
+                extension: '.ts',
+                folder: file.folder,
+            } as any;
+
+        }
+
+        mls.events.fire([2], ['FileAction'], JSON.stringify(params), timeout);
 
     }
 
