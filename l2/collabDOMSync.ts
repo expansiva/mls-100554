@@ -116,7 +116,7 @@ export function formatHtml(html: string) {
         } else if (node.nodeType === Node.TEXT_NODE) {
             const trimmedText = node.nodeValue.trim();
             if (trimmedText) {
-                formattedHtml += trimmedText;
+                formattedHtml += (indent + trimmedText);
             }
         }
         return formattedHtml;

@@ -848,7 +848,7 @@ export class ServiceSource100554 extends ServiceBase {
     private renameTSFile(model1: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): void {
         if (storFile.hasError) throw new Error('Error on rename, clear errors before rename');
         if (!this.isNewNameValid(newShortName)) throw new Error('Error on rename, new shortName is a invalid name');
-        const newSts: mls.l2.editor.IPath = { shortName: newShortName, project: newProject };
+        const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject };
         if (!mls.l2.editor.rename(model1, newSts)) throw new Error('Error on rename mls.l2.editor.mfiles');
         if (!mls.stor.renameFile(storFile, newSts)) throw new Error('Error on rename mls.stor.files');
         mls.common.tripleslash.changeVariable(model1, 'shortName', newShortName);
@@ -1509,7 +1509,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     private async renameHTMLFile(storFileHTML: mls.stor.IFileInfo, newProject: number, newShortName: string) {
 
         if (!storFileHTML) return;
-        const newSts: mls.l2.editor.IPath = { shortName: newShortName, project: newProject };
+        const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject };
         await this.getOrCreateModelHTML(storFileHTML.shortName, storFileHTML.project, storFileHTML);
         if (!storFileHTML.getValueInfo) return;
         const valueInfo = await storFileHTML.getValueInfo();
@@ -1611,7 +1611,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             const keyLocal = 'last_' + level + '_' + position;
             if (!info[keyLocal]) return false;
 
-            const key = mls.l2.editor.getKey(
+            const key = mls.l2.getKey(
                 {
                     project: +info[keyLocal].project,
                     shortName: info[keyLocal].shortName
@@ -1883,7 +1883,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (!ev.desc) return;
         if (this.position === 'right') return;
         try {
-            const iPath: mls.l2.editor.IPath = JSON.parse(ev.desc);
+            const iPath: mls.cbe.IPath = JSON.parse(ev.desc);
             if (!iPath || !iPath.project || !iPath.shortName) return;
             const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
             const storFile = mls.stor.files[keyStorFile];
