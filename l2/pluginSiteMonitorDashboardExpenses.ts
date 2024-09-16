@@ -8,7 +8,7 @@ export const pluginData: mls.plugin.IPluginData = {
     title: "Expenses",
     getSvg(): TemplateResult {
         return svg`
-     <svg svg width="22" height="22"  style="overflow:visible;enable-background:new 0 0 32 32" viewBox="0 0 32 32" width="32" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><g id="Error_1_"><g id="Error"><circle cx="16" cy="16" id="BG" r="16" style="fill:#D72828;"/><path d="M14.5,25h3v-3h-3V25z M14.5,6v13h3V6H14.5z" id="Exclamatory_x5F_Sign" style="fill:#E6E6E6;"/></g></g></g></svg>
+     <svg svg width="22" height="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 64C28.7 64 0 92.7 0 128L0 384c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64L64 64zm64 320l-64 0 0-64c35.3 0 64 28.7 64 64zM64 192l0-64 64 0c0 35.3-28.7 64-64 64zM448 384c0-35.3 28.7-64 64-64l0 64-64 0zm64-192c-35.3 0-64-28.7-64-64l64 0 0 64zM288 160a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"/></svg>
     `;
     }
 };
@@ -19,7 +19,10 @@ export class PluginSiteMonitorDashboardExpenses extends PluginBaseModule {
 
     @property() chartData = {};
 
+    @property({ type: Boolean }) autoPrepare: boolean = false;
+
     @query('.plugin-body') body: HTMLDivElement | undefined;
+
 
     async prepare() {
 
@@ -71,7 +74,7 @@ export class PluginSiteMonitorDashboardExpenses extends PluginBaseModule {
         }
         await this.updateComplete;
         const data = JSON.stringify(this.chartData);
-        function escapeHTML(str:string) {
+        function escapeHTML(str: string) {
             return str
                 .replace(/&/g, "&amp;")
                 .replace(/"/g, "&quot;")
@@ -84,12 +87,10 @@ export class PluginSiteMonitorDashboardExpenses extends PluginBaseModule {
 
     }
 
-    // firstUpdated() {
-    //     if (!this.body) return;
-    //     this.body.style.height = '500px';
-    //     this.body.style.width = '800px';
-    //     this.prepare();
-    // }
+    firstUpdated() {
+        if (!this.body || !this.autoPrepare) return;
+        this.prepare();
+    }
 
     render(): TemplateResult {
         this.style.display = 'block';
@@ -140,8 +141,8 @@ export class PluginSiteMonitorDashboardExpenses extends PluginBaseModule {
         }
         .plugin-container {
             background-color: #f4f5ff;
-            padding: 20px;
             border-radius: 8px;
+            padding: 10px 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;

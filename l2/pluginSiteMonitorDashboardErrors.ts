@@ -8,7 +8,7 @@ export const pluginData: mls.plugin.IPluginData = {
     title: "Errors",
     getSvg(): TemplateResult {
         return svg`
-     <svg svg width="22" height="22"  style="overflow:visible;enable-background:new 0 0 32 32" viewBox="0 0 32 32" width="32" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><g id="Error_1_"><g id="Error"><circle cx="16" cy="16" id="BG" r="16" style="fill:#D72828;"/><path d="M14.5,25h3v-3h-3V25z M14.5,6v13h3V6H14.5z" id="Exclamatory_x5F_Sign" style="fill:#E6E6E6;"/></g></g></g></svg>
+     <svg svg width="22" height="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
     `;
     }
 };
@@ -18,6 +18,8 @@ export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
     @property({ type: String }) filter: string = "today";
 
     @property() chartData = {};
+
+    @property({ type: Boolean }) autoPrepare: boolean = false;
 
     @query('.plugin-body') body: HTMLDivElement | undefined;
 
@@ -87,12 +89,10 @@ export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
 
     }
 
-    // firstUpdated() {
-    //     if (!this.body) return;
-    //     this.body.style.height = '500px';
-    //     this.body.style.width = '800px';
-    //     this.prepare();
-    // }
+    firstUpdated() {
+        if (!this.body || !this.autoPrepare) return;
+        this.prepare();
+    }
 
     render(): TemplateResult {
         this.style.display = 'block';
@@ -143,7 +143,7 @@ export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
         }
         .plugin-container {
             background-color: #f4f5ff;
-            padding: 20px;
+            padding: 10px 0;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             display: flex;

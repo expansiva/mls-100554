@@ -1,25 +1,25 @@
-/// <mls shortName="pluginSiteMonitorDashboardSpikes" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="pluginSiteMonitorDashboardResponseTime" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { query, property } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 
 export const pluginData: mls.plugin.IPluginData = {
-    title: "Spikes",
+    title: "Response Time",
     getSvg(): TemplateResult {
         return svg`
-     <svg svg width="22" height="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 116.8c0-15.8 20.5-22 29.3-8.9L192 256l0-139.2c0-15.8 20.5-22 29.3-8.9L320 256l0-139.2c0-15.8 20.5-22 29.3-8.9L448 256l0-139.2c0-15.8 20.5-22 29.3-8.9L606.8 302.2c14.2 21.3-1.1 49.7-26.6 49.7L512 352l-64 0-64 0-64 0-64 0-64 0L64 352l0-235.2zM32 384l576 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32z"/></svg>
+     <svg svg width="22" height="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120l0 136c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2 280 120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/></svg>
     `;
     }
 };
 
-export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
+export class PluginSiteMonitorDashboardResponseTime extends PluginBaseModule {
 
     @property({ type: String }) filter: string = "today";
 
-    @property() chartData = {};
-
     @property({ type: Boolean }) autoPrepare: boolean = false;
+
+    @property() chartData = {};
 
     @query('.plugin-body') body: HTMLDivElement | undefined;
 
@@ -29,51 +29,49 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
 
         this.chartData = {
             "title": {
-                "text": "Hourly Traffic Spikes",
+                "text": "Average Response Time Over Time",
             },
             "tooltip": {
                 "trigger": "axis"
             },
-            "legend": {
-                "data": ["Number of Requests"]
-            },
             "xAxis": {
                 "type": "category",
-                "boundaryGap": false,
-                "data": ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"]
+                "data": ["2024-09-01", "2024-09-02", "2024-09-03", "2024-09-04", "2024-09-05", "2024-09-06"]
             },
             "yAxis": {
                 "type": "value",
-                "name": "Number of Requests"
+                "name": "Response Time (ms)",
+                "axisLabel": {
+                    "formatter": "{value} ms"
+                }
             },
             "series": [
                 {
-                    "name": "Number of Requests",
+                    "name": "Response Time",
                     "type": "line",
-                    "data": [50, 45, 60, 80, 120, 140, 200, 300, 250, 230, 210, 180, 170, 150, 130, 100, 90, 160, 220, 260, 300, 320, 340, 280],
+                    "data": [120, 200, 150, 80, 70, 110],
                     "markPoint": {
                         "data": [
-                            { "type": "max", "name": "Max Traffic" },
-                            { "type": "min", "name": "Min Traffic" }
+                            { "type": "max", "name": "Max" },
+                            { "type": "min", "name": "Min" }
                         ]
                     },
                     "markLine": {
-                        "data": [
-                            { "type": "average", "name": "Average Traffic" }
-                        ]
+                        "data": [{ "type": "average", "name": "Average" }]
                     },
-                    "smooth": true,
-                    "lineStyle": {
-                        "width": 2
-                    }
+                    "smooth": true
                 }
             ],
             "toolbox": {
                 "feature": {
-                    "saveAsImage": {
-                        "title": "Save"
-                    }
+                    "saveAsImage": {}
                 }
+            },
+            "grid": {
+                "left": "3%",
+                "right": "4%",
+                "bottom": "3%",
+                "containLabel": true
             }
         }
         await this.updateComplete;
@@ -146,7 +144,6 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
         .plugin-container {
             background-color: #f4f5ff;
             padding: 10px 0;
-
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             display: flex;
@@ -200,6 +197,6 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
 
 }
 
-if (!customElements.get('plugin-site-monitor-dashboard-spikes-100554')) {
-    customElements.define('plugin-site-monitor-dashboard-spikes-100554', PluginSiteMonitorDashboardSpikes);
+if (!customElements.get('plugin-site-monitor-dashboard-response-time-100554')) {
+    customElements.define('plugin-site-monitor-dashboard-response-time-100554', PluginSiteMonitorDashboardResponseTime);
 }

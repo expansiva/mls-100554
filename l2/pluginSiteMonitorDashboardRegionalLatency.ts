@@ -1,70 +1,81 @@
-/// <mls shortName="pluginSiteMonitorDashboardSpikes" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="pluginSiteMonitorDashboardRegionalLatency" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { query, property } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 
 export const pluginData: mls.plugin.IPluginData = {
-    title: "Spikes",
+    title: "Regional Latency",
     getSvg(): TemplateResult {
         return svg`
-     <svg svg width="22" height="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 116.8c0-15.8 20.5-22 29.3-8.9L192 256l0-139.2c0-15.8 20.5-22 29.3-8.9L320 256l0-139.2c0-15.8 20.5-22 29.3-8.9L448 256l0-139.2c0-15.8 20.5-22 29.3-8.9L606.8 302.2c14.2 21.3-1.1 49.7-26.6 49.7L512 352l-64 0-64 0-64 0-64 0-64 0L64 352l0-235.2zM32 384l576 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32z"/></svg>
+     <svg svg width="22" height="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M384 476.1L192 421.2l0-385.3L384 90.8l0 385.3zm32-1.2l0-386.5L543.1 37.5c15.8-6.3 32.9 5.3 32.9 22.3l0 334.8c0 9.8-6 18.6-15.1 22.3L416 474.8zM15.1 95.1L160 37.2l0 386.5L32.9 474.5C17.1 480.8 0 469.2 0 452.2L0 117.4c0-9.8 6-18.6 15.1-22.3z"/></svg>
     `;
     }
 };
 
-export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
+export class PluginSiteMonitorDashboardRegionalLatency extends PluginBaseModule {
 
     @property({ type: String }) filter: string = "today";
 
-    @property() chartData = {};
+    @property() chartDataBar = {};
+
+    @property() chartDataMap = {};
+
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
 
     @query('.plugin-body') body: HTMLDivElement | undefined;
 
+    @query('.bar') bar: HTMLDivElement | undefined;
+
+    @query('.map') map: HTMLDivElement | undefined;
+
     async prepare() {
 
         await import('./_100554_wcChart');
 
-        this.chartData = {
+        this.chartDataBar = {
             "title": {
-                "text": "Hourly Traffic Spikes",
+                "text": "Regional Latency (ms)",
             },
             "tooltip": {
-                "trigger": "axis"
+                "trigger": "axis",
+                "axisPointer": {
+                    "type": "shadow"
+                }
             },
             "legend": {
-                "data": ["Number of Requests"]
+                "data": ["Latency"]
             },
             "xAxis": {
                 "type": "category",
-                "boundaryGap": false,
-                "data": ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"]
+                "data": ["North America", "Europe", "Asia", "South America", "Africa", "Australia"]
             },
             "yAxis": {
                 "type": "value",
-                "name": "Number of Requests"
+                "name": "Response Time (ms)",
+                "axisLabel": {
+                    "formatter": "{value} ms"
+                }
             },
             "series": [
                 {
-                    "name": "Number of Requests",
-                    "type": "line",
-                    "data": [50, 45, 60, 80, 120, 140, 200, 300, 250, 230, 210, 180, 170, 150, 130, 100, 90, 160, 220, 260, 300, 320, 340, 280],
+                    "name": "Latency",
+                    "type": "bar",
+                    "data": [120, 150, 200, 180, 220, 130],
                     "markPoint": {
                         "data": [
-                            { "type": "max", "name": "Max Traffic" },
-                            { "type": "min", "name": "Min Traffic" }
+                            { "type": "max", "name": "Max Latency" },
+                            { "type": "min", "name": "Min Latency" }
                         ]
                     },
                     "markLine": {
                         "data": [
-                            { "type": "average", "name": "Average Traffic" }
+                            { "type": "average", "name": "Average Latency" }
                         ]
                     },
-                    "smooth": true,
-                    "lineStyle": {
-                        "width": 2
+                    "itemStyle": {
+                        "color": "#5470C6"
                     }
                 }
             ],
@@ -74,10 +85,19 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
                         "title": "Save"
                     }
                 }
+            },
+            "grid": {
+                "left": "3%",
+                "right": "4%",
+                "bottom": "3%",
+                "containLabel": true
             }
-        }
+        };
+
         await this.updateComplete;
-        const data = JSON.stringify(this.chartData);
+        const dataBar = JSON.stringify(this.chartDataBar);
+        const dataMap = JSON.stringify(this.chartDataMap);
+
         function escapeHTML(str: string) {
             return str
                 .replace(/&/g, "&amp;")
@@ -87,7 +107,9 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
                 .replace(/>/g, "&gt;");
         }
 
-        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" datasource="${escapeHTML(data)}"></wc-chart-100554>`;
+        if (this.bar) this.bar.innerHTML = `<wc-chart-100554 renderer="svg" datasource="${escapeHTML(dataBar)}"></wc-chart-100554>`;
+        // if (this.map) this.map.innerHTML = `<wc-chart-100554 renderer="svg" datasource="${escapeHTML(dataMap)}"></wc-chart-100554>`;
+
 
     }
 
@@ -127,7 +149,12 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
     }
 
     renderBody(): TemplateResult {
-        return html`<div class="plugin-body"></div>`;
+        return html`<div class="plugin-body">
+            <div class="bar"></div>
+            <div class="map"></div>
+
+
+        </div>`;
     }
 
     handleChange(e: MouseEvent) {
@@ -143,11 +170,14 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
             height:100%;
             width:100%;
         }
+        .plugin-body > div{
+            height:100%;
+            width:100%;
+        }
         .plugin-container {
             background-color: #f4f5ff;
-            padding: 10px 0;
-
             border-radius: 8px;
+            padding: 10px 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
@@ -200,6 +230,6 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
 
 }
 
-if (!customElements.get('plugin-site-monitor-dashboard-spikes-100554')) {
-    customElements.define('plugin-site-monitor-dashboard-spikes-100554', PluginSiteMonitorDashboardSpikes);
+if (!customElements.get('plugin-site-monitor-dashboard-regional-latency-100554')) {
+    customElements.define('plugin-site-monitor-dashboard-regional-latency-100554', PluginSiteMonitorDashboardRegionalLatency);
 }
