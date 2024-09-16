@@ -14,7 +14,7 @@ export class ServiceDashboard100554 extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    @property() activeTab:string = 'Icon1';
+    @property() activeTab: string = 'Icon1';
 
     //------SERVICE----------
 
@@ -104,12 +104,75 @@ export class ServiceDashboard100554 extends ServiceBase {
         }
     }
 
+    private pluginsDash1 = [
+        {
+            title: 'Errors',
+            plugin: '_100554_pluginSiteMonitorDashboardErrors',
+            position: '1 / 1 / 4 / 3'
+        },
+
+        {
+            title: 'Spikes',
+            plugin: '_100554_pluginSiteMonitorDashboardSpikes',
+            position: '1 / 3 / 4 / 7'
+        },
+        {
+            title: 'Expenses',
+            plugin: '_100554_pluginSiteMonitorDashboardExpenses',
+            position: '4 / 4 / 7 / 7'
+        },
+        {
+            title: 'Sales',
+            plugin: '_100554_pluginSiteMonitorDashboardSales',
+            position: '4 / 1 / 7 / 4'
+        },
+        {
+            title: 'Response Time',
+            plugin: '_100554_pluginSiteMonitorDashboardResponseTime',
+            position: '7 / 1 / 11 / 4'
+        },
+        {
+            title: 'Active Users',
+            plugin: '_100554_pluginSiteMonitorDashboardActiveUsers',
+            position: '7 / 4 / 11 / 7'
+        },
+        {
+            title: 'Regional Latency',
+            plugin: '_100554_pluginSiteMonitorDashboardRegionalLatency',
+            position: '11 / 1 / 15 / 7'
+        },
+    ];
+
+    private pluginsDash2 = [
+        {
+            title: 'Errors',
+            plugin: '_100554_pluginSiteMonitorDashboardErrors',
+            position: '1 / 1 / 5 / 4'
+        },
+
+        {
+            title: 'Spikes',
+            plugin: '_100554_pluginSiteMonitorDashboardExpenses',
+            position: '1 / 4 / 5 / 7'
+        },
+        {
+            title: 'Expenses',
+            plugin: '_100554_pluginSiteMonitorDashboardSpikes',
+            position: '5 / 4 / 8 / 7'
+        },
+        {
+            title: 'Sales',
+            plugin: '_100554_pluginSiteMonitorDashboardSales',
+            position: '5 / 1 / 8 / 4'
+        },
+    ];
+
 
     renderIcon1() {
-        return html`<collab-tiles-100554 class="${this.cssBreakPoint}"></collab-tiles-100554>`;
+        return html`<collab-tiles-100554 .tilesItens=${this.pluginsDash1} class="${this.cssBreakPoint}"></collab-tiles-100554>`;
     }
 
     renderIcon2() {
-        return html`Segunda opção`;
+        return html`<collab-tiles-100554 .tilesItens=${this.pluginsDash2} class="${this.cssBreakPoint}"></collab-tiles-100554>`
     }
 }

@@ -9,30 +9,7 @@ export class CollabTiles extends LitElement {
 
     @property({ type: String, reflect: true }) config = 'close';
 
-    @property({ type: [], reflect: true }) tilesItens = [    
-        {
-            title: 'Disciplina',
-            plugin: '_100554_pluginSiteMonitorDashboardErrors',
-            position: '1 / 1 / 4 / 3'
-        },
-        
-        {
-            title: 'Acidentes',
-            plugin: '_100554_pluginSiteMonitorDashboardSpikes',
-            position: '1 / 3 / 4 / 7'
-        },
-        {
-            title: 'Atividades',
-            plugin: '_100554_pluginSiteMonitorDashboardExpenses',
-            position: '4 / 4 / 7 / 7'
-        },
-        {
-            title: 'Numero',
-            plugin: '_100554_pluginSiteMonitorDashboardSales',
-            position: '4 / 1 / 7 / 4'
-        }
-    ];
-    
+    @property({ type: [], reflect: true }) tilesItens: ITilesItem[] = []
 
     @property({ type: String, reflect: true }) text = '';
 
@@ -48,19 +25,19 @@ export class CollabTiles extends LitElement {
             ${this.renderConfigItens()}
             <collab-tiles>
                 ${repeat(
-                    this.tilesItens,
-                    ((key: ITilesItem, idx: number) => 'tile_' + idx) as any,
-                    ((item: ITilesItem, index: any) => {
-                        return this.renderItem(item, index);
-                    }) as any
-                )}
+            this.tilesItens,
+            ((key: ITilesItem, idx: number) => 'tile_' + idx) as any,
+            ((item: ITilesItem, index: any) => {
+                return this.renderItem(item, index);
+            }) as any
+        )}
             </collab-tiles>
             <style>${this.myCss}</style>
         `;
     }
-    
 
-    renderItem(item: ITilesItem, idx:number) {
+
+    renderItem(item: ITilesItem, idx: number) {
         return html`
         <collab-tiles-item-100554 position="${item.position}" index="${idx}" plugin="${item.plugin}"></collab-tiles-item-100554>
         `
@@ -90,17 +67,17 @@ export class CollabTiles extends LitElement {
             </div>
             <ul>
                 ${repeat(
-                    this.tilesItens,
-                    ((key: ITilesItem, idx: number) => 'tile_' + idx) as any,
-                    ((item: ITilesItem, index: any) => {
-                        return this.renderItemConfig(item, index);
-                    }) as any
-                )}
+            this.tilesItens,
+            ((key: ITilesItem, idx: number) => 'tile_' + idx) as any,
+            ((item: ITilesItem, index: any) => {
+                return this.renderItemConfig(item, index);
+            }) as any
+        )}
             </ul>
         `
     }
 
-    renderItemConfig(item: ITilesItem, index:number) {
+    renderItemConfig(item: ITilesItem, index: number) {
         return html`
         <li>
             <div>${item.title}: <div>
@@ -117,7 +94,7 @@ export class CollabTiles extends LitElement {
 
     private close() {
         this.config = 'close';
-        
+
     }
 
     private fireChange(e: MouseEvent): void {
