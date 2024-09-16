@@ -6,6 +6,16 @@ const FILENAME = 'project';
 const LEVEL = 5;
 const EXTENSION = '.json';
 
+export async function clearLocalChanges(project: number) {
+    if (project === undefined) return;
+    const key = mls.stor.getKeyToFiles(project, LEVEL, FILENAME, '', EXTENSION);
+    let configFile = mls.stor.files[key];
+    if (!configFile) return;
+    const config = await getConfigProject(project, true);
+    if (!config) return;
+    updateConfigProject(project, config)
+    configFile.inLocalStorage = false;
+}
 
 export async function getConfigProject(project: number, ignoreLocalChanges = false): Promise<mls.l5_common.ProjectConfig | undefined> {
 

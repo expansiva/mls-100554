@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { getConfigProject, updateConfigProject, createConfigFile } from './_100554_libProjectConfig';
+import * as libProjectConfig from './_100554_libProjectConfig';
 
 declare global {
     interface Window {
@@ -123,9 +123,8 @@ export class ServiceEditProject100554 extends ServiceBase {
     }
 
     private _clearChanges() {
-
-        this.loadProjectConfigs(true)
-
+        this.loadProjectConfigs(true);
+        if (this.lastProject) libProjectConfig.clearLocalChanges(this.lastProject)
     }
 
     private refreshIfNeeded(project: number | undefined) {
@@ -153,8 +152,8 @@ export class ServiceEditProject100554 extends ServiceBase {
         const { project } = mls.actual[5];
         if (!project) return;
         this.lastProject = project;
-        let config = await getConfigProject(project, ignoreLocal);
-        if (!config) config = await createConfigFile(project);
+        let config = await libProjectConfig.getConfigProject(project, ignoreLocal);
+        if (!config) config = await libProjectConfig.createConfigFile(project);
         this.setInitialConfig(JSON.stringify(config, null, 2), project);
     }
 
@@ -198,7 +197,7 @@ export class ServiceEditProject100554 extends ServiceBase {
         (async function scope() {
             eval(val); // eslint-disable-line no-eval
             if (window.project_config && typeof window.project_config === 'object' && that.lastProject) {
-                updateConfigProject(that.lastProject, window.project_config);
+                libProjectConfig.updateConfigProject(that.lastProject, window.project_config);
             }
         }).call(this);
 
