@@ -581,12 +581,12 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     //--------------CSS--------------------
 
-    //static styles = css` #c8c8c8c2;
+    //static styles = css` #c8c8c8c2; border:1px solid #d3cece;
     private css = `
 
         wcd-toolbox-100554{
             display:block;
-            border:1px solid #d3cece;
+            
             position:absolute;
             user-select:none;
             background: transparent;

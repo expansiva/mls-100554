@@ -157,7 +157,8 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             if (!el1) return;
             el1.focus({ preventScroll: true });
             this.setCaret();
-        }, 500);
+        }, 100);
+        
         return ret;
 
     }
