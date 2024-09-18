@@ -1,0 +1,176 @@
+service-project-100554 {
+
+    //don't change this line 
+    :host {
+        display: block;
+        font-family: @font-family-primary;
+        box-sizing: border-box;
+        font-size: @font-size-16;
+        height: 100%;
+        overflow: auto;
+        padding-left: 10px;
+    }
+
+    .buttons-container{
+        display: flex;
+        justify-content: center;
+        button{
+            background-color: @info-color;
+            color: #fff;
+        }
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+
+    }
+    .panel{
+        display: block;
+        padding: 1rem;
+        .panel-container{
+            display: flex;
+            flex-direction:row;
+            gap: 1rem;
+        }
+      
+        .panel-container-item{
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            gap: .5rem;
+            &:hover{
+                span{
+                    text-decoration: underline;
+                    color: @active-color;
+                }
+                svg {
+                    fill: @active-color;
+                }
+            }
+        }
+    }
+
+    .plugin-container {
+
+        list-style: none;
+        padding-top: 10px;
+        padding-inline-start: 0px;
+
+        li {
+            padding: 10px 0;
+            font-size: @font-size-16;
+        }
+
+        li details>summary {
+            cursor: pointer;
+            font-size: @font-size-16;
+            font-weight: @font-weight-bold;
+        }
+
+        .plugins-list {
+            grid-auto-rows: 1fr;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(49%, 100%), 1fr));
+            gap: 20px;
+        }
+
+        .plugins-list .plugin {
+            margin-left: 1rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid @grey-color;
+            border-radius: 3px;
+            cursor: pointer;
+
+            &:hover {
+                border-color: @grey-color-darker;
+            }
+
+            .plugin-title {
+                display: inline-block;
+                vertical-align: top;
+
+                h3 {
+                    font-weight: @font-weight-normal;
+                    color: @info-color;
+                    margin: 0;
+                }
+            }
+
+            .plugin-info {
+                margin-bottom: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: .5rem;
+
+                >div {
+                    display: flex;
+                    justify-content: space-between;
+
+                    flex-wrap: wrap;
+                    align-items: center;
+
+                }
+
+
+                .owner {
+                    span {
+                        color: @text-primary-color-lighter;
+                    }
+
+                    svg {
+                        fill: @text-primary-color-lighter;
+                    }
+                }
+
+                .plugin-status {
+
+                    >div {
+                        display: inline-block;
+                        width: 10px;
+                        height: 10px;
+                        border-radius: 50%;
+                        margin-right: 3px;
+                    }
+
+                }
+
+                .plugin-status.active>div {
+                    background-color: green;
+                    animation: pulse 1.5s infinite;
+                }
+
+                .plugin-status.inactive>div {
+                    background-color: red;
+                }
+
+
+                >p {
+                    font-size: @font-size-16;
+                }
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+
+                50% {
+                    transform: scale(1.2);
+                    opacity: 0.7;
+                }
+
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+        }
+    }
+
+
+}
+

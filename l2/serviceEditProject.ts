@@ -7,7 +7,7 @@ import * as libProjectConfig from './_100554_libProjectConfig';
 
 declare global {
     interface Window {
-        project_config: any
+        project_config: mls.l5_common.ProjectConfig
     }
 }
 
@@ -34,6 +34,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceEditProject100554 extends ServiceBase {
 
     constructor() {
+
         super();
         this.setEvents();
     }

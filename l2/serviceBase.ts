@@ -65,7 +65,7 @@ export abstract class ServiceBase extends CollabLitElement {
     }
 
     public openService(service: string, position: 'left' | 'right', level: number) {
-    
+
         let page = this.closest('collab-page');
         if (!page) return;
         const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
@@ -281,6 +281,7 @@ export interface IMenu {
     getLastMode?: IGetLastMode,
     lastIcon?: string,
     updateTitle?: Function,
+    iconMenuType?: 'full' | 'onlyicon',
 }
 
 export interface IMenuTitle {
