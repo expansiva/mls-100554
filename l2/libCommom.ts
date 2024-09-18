@@ -142,3 +142,12 @@ export function getDateFormated(dt: string): string {
     return lastUpdated;
 
 }
+
+export function escapeHTML(str: string) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}

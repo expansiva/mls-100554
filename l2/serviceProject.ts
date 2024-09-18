@@ -1,11 +1,12 @@
 /// <mls shortName="serviceProject" project="100554" enhancement="_100554_enhancementLitService" groupName="other" />
 
-import { html, css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { html, css, repeat } from 'lit';
+import { customElement, property, query, } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_user } from './_100554_collabIcons';
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName } from './_100554_utilsLit';
+import('./_100554_collabPanel');
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -83,6 +84,12 @@ export class ServiceProject100554 extends ServiceBase {
 
     }
 
+
+    firstUpdated() {
+        this.setMyData();
+    }
+
+
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
@@ -120,8 +127,37 @@ export class ServiceProject100554 extends ServiceBase {
         return html`<div style="overflow:auto;height:100%;" id="projectDiv"></div>`
     }
 
+    private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
 
-    private renderAdmin() {
+    renderAdmin() {
+        
+        const keys = Object.keys(this.myData);
+        return html`
+        <div>
+            ${repeat(keys, (
+            (key: string, idx: number) => key + idx) as any,
+            ((item: string, index: any) => {
+
+                return this.renderPanel(item, index);
+
+            }) as any
+        )}
+        </div>
+        `
+
+    }
+
+    renderPanel(key: string, index: number) {
+        return html`
+            <collab-panel-100554 .myData=${this.myData[key]}>
+            </collab-panel-100554>
+        
+        `
+    }
+
+
+    private renderAdmin2() {
+
         return html`
         <div>
             <div class="panel">
@@ -248,8 +284,32 @@ export class ServiceProject100554 extends ServiceBase {
         }
     }
 
+    private async setMyData() {
 
+        const prj = mls.actual[5].project;
+        if (!prj) return;
+        let array: any[] = [];
+        await mls.plugin.loadAll(prj, false);
+        array = mls.plugin.getAllMenuActions(prj, {} as any);
+
+        const wc = ["_100554_pluginProjectConfig", "_100554_pluginProjectUsage", "_100554_pluginProjectInfo", "_100554_pluginProjectReadMe"]
+
+        array.forEach((item: mls.plugin.MenuAction) => {
+
+            if (!wc.includes(item.widget)) return;
+            const cat = item.category as string;
+            if (!this.myData[cat]) this.myData[cat] = [item]
+            else this.myData[cat].push(item);
+
+        });
+
+        this.requestUpdate();
+
+    }
 }
+
+
+
 
 type IScenery = 'Explore' | 'ShowCase' | 'Admin' | 'Plugins'
 
