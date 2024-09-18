@@ -27,6 +27,8 @@ export class CollabPanelItem extends LitElement {
 
     render() {
 
+        this.onclick = () => this.clickItem();
+
         let aux;
         if (this.badge) aux = unsafeHTML(`
             <collab-panel-item-badge>
@@ -50,6 +52,33 @@ export class CollabPanelItem extends LitElement {
     }
 
     //---------IMPLEMENT-------------
+
+    private clickItem(): void {
+
+        if (this.classList.contains('active')) return;
+
+        const parent = this.getRootNode() as HTMLElement;
+        if (!parent) return;
+
+        const elActive = parent.querySelector('.active');
+        if (elActive) elActive.classList.remove('active');
+
+        this.classList.add('active');
+
+        mls.actual[0].setFullName(this.widget);
+        mls.events.fire(
+            mls.actualLevel as any,
+            'PluginDetails' as any,
+            JSON.stringify(
+                {
+                    shortName: mls.actual[0].path,
+                    project: mls.actual[0].project
+                }
+            ),
+            0
+        );
+        
+    }
 
     private async setMyInfo() {
         if (!this.widget) return;

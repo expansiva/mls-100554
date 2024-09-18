@@ -16,10 +16,60 @@ export class PluginSiteMonitorIndex extends PluginBaseIndex {
             widget: '_100554_pluginSiteMonitorDashboardErrors'
         },
         {
+            category: 'Site',
+            scope: ['l6Dashboard'],
+            auth: ['admin', 'editor'],
+            widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
+        },
+        {
+            category: 'Site',
+            scope: ['l6Dashboard'],
+            auth: ['admin', 'editor'],
+            widget: '_100554_pluginSiteMonitorDashboardSpikes'
+        },
+        {
+            category: 'Site',
+            scope: ['l6Dashboard'],
+            auth: ['admin', 'editor'],
+            widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
+        },
+        {
+            category: 'Site',
+            scope: ['createNewWidget'],
+            auth: ['admin', 'author'],
+            widget: '_100554_pluginSiteMonitorDashboardResponseTime'
+        },
+
+        
+        {
             category: 'Tools',
             scope: ['createNewWidget'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorUses'
+            widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
+        },
+        {
+            category: 'Tools',
+            scope: ['createNewWidget'],
+            auth: ['admin', 'author'],
+            widget: '_100554_pluginSiteMonitorDashboardRegionalLatency'
+        },
+        {
+            category: 'Tools',
+            scope: ['createNewWidget'],
+            auth: ['admin', 'author'],
+            widget: '_100554_pluginSiteMonitorDashboardResponseTime'
+        },
+        {
+            category: 'Tools',
+            scope: ['createNewWidget'],
+            auth: ['admin', 'author'],
+            widget: '_100554_pluginSiteMonitorDashboardSales'
+        },
+        {
+            category: 'Site',
+            scope: ['l6Dashboard'],
+            auth: ['admin', 'editor'],
+            widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
         }
       ];
     }

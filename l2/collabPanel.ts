@@ -90,6 +90,7 @@ export class CollabPanel extends LitElement {
             user-select:none;
             text-transform: uppercase;
             font-weight: 600;
+            cursor:pointer;
         }
 
         collab-panel-100554 paneltitle{
@@ -111,10 +112,15 @@ export class CollabPanel extends LitElement {
             flex-wrap: wrap;
         }
         
+        collab-panel-item-100554.active {
+            text-decoration: underline;
+        }
+
         collab-panel-item-100554 {
             display:block;
             min-width:280px;
             min-height:100px;
+            cursor:pointer;
         }
 
         collab-panel-item-100554 collab-panel-item{
