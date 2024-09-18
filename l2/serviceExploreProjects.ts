@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property, queryAll, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import * as icons from './_100554_collabIcons';
+import './_100554_pluginCreateNewProject'
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -30,7 +30,7 @@ const message_pt = {
     selectProject: 'Selecione o projeto',
     btnChange: 'Alterar',
     btnUpdate: 'Atualizar',
-    btnAddNewProject: 'Adicionar novo projeto',
+    btnAddNewProject: 'Criar novo projeto',
     btnCreateProject: 'Criar projeto',
     btnRefreshOrg: 'Atualizar',
     btnOpenProject: 'Abrir projeto',
@@ -79,7 +79,7 @@ const message_en = {
     selectProject: 'Select project',
     btnChange: 'Change',
     btnUpdate: 'Update',
-    btnAddNewProject: 'Add new Project',
+    btnAddNewProject: 'Create new Project',
     btnCreateProject: 'Create project',
     btnRefreshOrg: 'Refresh',
     btnOpenProject: 'Open project',
@@ -129,13 +129,14 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     @queryAll('.serviceListProjects .serviceListTitle') titleList: NodeListOf<HTMLElement> | undefined;
     @query('.l5-project-list-history') historieEl: HTMLElement | undefined;
 
+    @property() activeTab: string = 'IMyProject';
     //----------CONFIG SERVICE------------------
 
     public details: IService = {
         icon: '&#xf0b1',
         state: 'background',
         position: 'left',
-        tooltip: 'Explore Projects',
+        tooltip: 'Projects',
         visible: true,
         widget: '_100554_serviceExploreProjects',
         level: [6]
@@ -146,35 +147,44 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         return false;
     }
 
+    public onClickIcon = (op: string): void => {
+        this.activeTab = op;
+    }
+
     public menu: IMenu = {
         title: 'Explore Projects',
         actions: {
         },
-        icons: {},
+        icons: {
+            IMyProject: 'My Project;e571',
+            IExplore: 'Explore;f542',
+        },
         actionDefault: '', // call after close icon clicked
         setMode: undefined, // child will set this
+        iconDefault: 'IMyProject',
         onClickLink: this.onClickLink,
+        onClickIcon: this.onClickIcon,
         getLastMode: undefined,
         updateTitle: undefined
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (visible) {
+        /*if (visible) {
 
             if (!this.inFullscreen) {
-                this.setFullScreen(6, 'left')
-                this.inFullscreen = true;
+                //this.setFullScreen(6, 'left')
+                this.inFullscreen = false;
             }
 
         } else if (!visible) {
 
             if (this.inFullscreen) {
-                this.setFullScreen(6, 'default')
+                //this.setFullScreen(6, 'default')
                 this.inFullscreen = false;
             }
 
-        }
+        }*/
 
     }
 
@@ -195,6 +205,27 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     render() {
+        return html`
+            ${this.renderContent()}
+        `;
+    }
+
+    renderContent() {
+        switch (this.activeTab) {
+            case 'IMyProject':
+                return this.renderMyProject();
+            case 'IExplore':
+                return this.renderExplore();
+            default:
+                return html``;
+        }
+    }
+
+    renderExplore() {
+        return html`<h3 style="padding:2rem">Explore others projects , in development</h3>`
+    }
+
+    renderMyProject() {
         this.getLastProject();
         switch (this.currentScenario) {
             case 'select':
@@ -221,12 +252,20 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                 <div class="l5-project-list-history" style="${this.state.history.length === 0 ? 'display:none' : 'display: block'}">
                     <div class="serviceListTitle">History</div>
                     <ul class="serviceListList">
-                        ${this.state.history.map((his) => html`
-                            <li class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} @click=${() => { this.onHistoryClick(his) }}>
+                        ${this.state.history.map(
+                            (his) => html`
+                            <li class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} >
                                 <div>
                                     <span>${his.name + ' (' + his.project.toString() + ')'}</span>
                                 </div>
-                                <span>${icons.collab_chevron_right}</span>
+                                <div style="display:flex; gap:1rem;font-size:.8rem">
+                                    <span style="cursor:pointer" @click=${() => { this.onHistoryClick(his) }}>
+                                        Select
+                                    </span>
+                                    <span style="cursor:pointer">
+                                        Detail
+                                    </span>
+                                </div>
                             </li>
                         `)}
                     </ul>
@@ -237,11 +276,18 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                             <div class="serviceListTitle">${org.key}</div>
                             <ul class="serviceListList">
                                 ${org.projects.map((prj) => html`
-                                <li class=${this.lastPrjId && +this.lastPrjId === prj.id ? "selected" : ""} @click=${() => this.onProjectClick(prj)}>
+                                <li class=${this.lastPrjId && +this.lastPrjId === prj.id ? "selected" : ""} >
                                     <div>
                                         <span>${prj.name + ' (' + prj.id.toString() + ')'}</span>
                                     </div>
-                                <span>${icons.collab_chevron_right}</span>
+                                    <div style="display:flex; gap:1rem;font-size:.8rem">
+                                        <span style="cursor:pointer" @click=${() => this.onProjectClick(prj)}>
+                                            Select
+                                        </span>
+                                        <span style="cursor:pointer">
+                                            Detail
+                                        </span>
+                                    </div>
                                 </li>
                             `)}
                             </ul>
@@ -256,14 +302,25 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
     renderAdd() {
         return html`
+            <div @click="${this.backScenaryList}" style="padding-left: 1rem; padding-top: .5rem; cursor: pointer;">< Back</div>
+            <plugin-create-new-project-100554>
+            </plugin-create-new-project-100554>
+        `
+
+
+        /*return html`
         <collab-new-project-100554 @collab-new-project=${this.onProjectCreated}></collab-new-project-100554>
         <div style="display:flex; justify-content:center;">
             ${this.projectCreated ? html`<button id="button-see-project" >${this.msg.btnOpenProject}</button>` : ''}
         </div>
-        `
+        `*/
     }
 
     //----------IMPLEMENTS------------------
+
+    private backScenaryList() {
+        this.changeScenario('select');
+    }
 
     private getLastProject() {
         this.lastPrjId = localStorage.getItem('l5-last-project');
