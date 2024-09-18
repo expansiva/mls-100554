@@ -12,6 +12,8 @@ export class ServiceDetail100554 extends ServiceBase {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
+    @property({ type: String }) msize = '';
+
     @query('#contentPlugin') contentPlugin: HTMLDivElement | undefined;
 
     private plugin: { shortName: string, project: number } = {} as any;
@@ -27,7 +29,7 @@ export class ServiceDetail100554 extends ServiceBase {
         icon: '&#xf059',
         state: 'background',
         position: 'right',
-        tooltip: 'Plugin Detail',
+        tooltip: 'Detail',
         visible: true,
         widget: '_100554_serviceDetail',
         level: [1,2,3,4,5,6,7]
@@ -40,7 +42,7 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Example',
+        title: '',
         actions: {
             opAboutThis: 'About this content',
         },
@@ -56,11 +58,14 @@ export class ServiceDetail100554 extends ServiceBase {
 
         const div = document.createElement('div');
         div.style.padding = '1rem';
+
+        const name = this.plugin.project ? `_${this.plugin.project}_${this.plugin.shortName}` : 'nothing selected';
+
         div.innerHTML = `
         
             <h3>About this content</h3>
             <ul>
-                <li>Reference: _${this.plugin.project}_${this.plugin.shortName}</li>
+                <li>Reference: ${name}</li>
                 <li>Level: ${this.level}</li>
                 <li>Position: ${this.position}</li>
                 <li><button>Open</button></li>
@@ -89,6 +94,22 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     //----------COMPONENT------------------
+
+    createRenderRoot() {
+        return this;
+    }
+
+    updated(changedProperties: any) {
+        if (changedProperties.has('msize')) {
+            if (!this.visible || !this.contentPlugin) return;
+
+            Array.from(this.contentPlugin.children).forEach((child) => {
+                if (child.tagName.startsWith('PLUGIN-')) {
+                    child.setAttribute('msize', this.msize);
+                }
+            });
+        }
+    }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
@@ -126,9 +147,9 @@ export class ServiceDetail100554 extends ServiceBase {
             return;
         } else if (!storFile) return;
 
-        this.plugin = info ;
+        this.plugin = info;
         const content = await storFile.getContent();
-        
+
         if (this.contentPlugin && typeof content === 'string') {
 
             this.contentPlugin.innerHTML = '';
@@ -143,6 +164,12 @@ export class ServiceDetail100554 extends ServiceBase {
                 script.id = fileName;
                 script.src = (`/${fileName}`);
                 this.contentPlugin?.appendChild(script)
+            });
+
+            Array.from(this.contentPlugin.children).forEach((child) => {
+                if (child.tagName.startsWith('PLUGIN-')) {
+                    child.setAttribute('msize', this.msize);
+                }
             });
 
         }
