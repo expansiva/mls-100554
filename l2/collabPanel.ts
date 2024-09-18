@@ -118,9 +118,10 @@ export class CollabPanel extends LitElement {
 
         collab-panel-item-100554 {
             display:block;
-            min-width:280px;
-            min-height:100px;
+            min-width:7em;
+            min-height:40px;
             cursor:pointer;
+            padding-right: 2em;
         }
 
         collab-panel-item-100554 collab-panel-item{
@@ -133,10 +134,10 @@ export class CollabPanel extends LitElement {
 
         collab-panel-item-100554 collab-panel-item-svg{
             display:flex;
-            padding:.5rem;
+            padding:4px;
             align-items: center;
             justify-content:center;
-            width:38px;
+            
         }
 
         collab-panel-item-100554 collab-panel-item-info{
