@@ -54,6 +54,21 @@ export async function updateConfigProject(project: number, newConfig: mls.l5_com
     });
 }
 
+export async function updateConfigProjectPlugins(
+    project: number,
+    newPlugins: { [key: string]: mls.l5_common.IPlugin; }
+): Promise<void> {
+    const key = mls.stor.getKeyToFiles(project, LEVEL, FILENAME, '', EXTENSION);
+    projectConfig[project].config.plugins = newPlugins;
+    const configFile = mls.stor.files[key];
+    if (!configFile) throw new Error('No config file!');
+    await mls.stor.localStor.setContent(configFile, {
+        contentType: 'string',
+        content: JSON.stringify(projectConfig[project], null, 2)
+    });
+}
+
+
 export async function createConfigFile(project: number): Promise<mls.l5_common.ProjectConfig> {
     if (project === undefined) throw new Error('Invalid project')
     const key = mls.stor.getKeyToFiles(project, LEVEL, FILENAME, '', EXTENSION);
@@ -68,7 +83,11 @@ async function _createConfigFile(project: number) {
     const newConfig: mls.l5_common.ProjectConfig = {
         orgName: '',
         designSystems: [],
-        languages: []
+        languages: [],
+        plugins: {},
+        reasons: {},
+        services: [],
+        servicesConfigEnabled: false,
     }
     const content = JSON.stringify(newConfig);
     const params = {

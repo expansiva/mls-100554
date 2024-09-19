@@ -48,6 +48,8 @@ export class ServicePreviewView extends LitElement {
 
     @property() mode: string = 'desktop';
 
+    @property() lang: string = 'en';
+
     @property() level: string = '';
 
     @property() isDsComponent: boolean = false;
@@ -310,10 +312,10 @@ export class ServicePreviewView extends LitElement {
         window.preview.iframe = iframe;
     }
 
-    private objVariations: any = {
-        0: 'en-US',
-        1: 'pt-BR'
-    }
+    // private objVariations: any = {
+    //     0: 'en-US',
+    //     1: 'pt-BR'
+    // }
 
     private async init(iframe: HTMLIFrameElement) {
         try {
@@ -325,7 +327,7 @@ export class ServicePreviewView extends LitElement {
             iframe.style.display = '';
 
             const html = iframe.contentDocument?.querySelector('html');
-            if (html) html.lang = this.objVariations[window.globalVariation] || 'en-US';
+            if (html) html.lang = this.lang;  // this.objVariations[window.globalVariation] || 'en-US';
 
             if(iframe.contentDocument) iframe.contentDocument.body.style.paddingTop = '55px';
 

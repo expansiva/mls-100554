@@ -8,7 +8,7 @@
   ],
   "languages": [
     {
-      "language": "pt-BR",
+      "language": "en",
       "path": "/",
       "variations": [
         {
@@ -21,8 +21,8 @@
       ]
     },
     {
-      "language": "en-US",
-      "path": "/",
+      "language": "pt",
+      "path": "/pt",
       "variations": [
         {
           "type": "master",
@@ -30,6 +30,19 @@
           "subdomain": "",
           "designSystem": "",
           "variation": 10
+        }
+      ]
+    },
+    {
+      "language": "es",
+      "path": "/es",
+      "variations": [
+        {
+          "type": "master",
+          "enabled": true,
+          "subdomain": "",
+          "designSystem": "",
+          "variation": 20
         }
       ]
     }
@@ -53,5 +66,21 @@
     ";_100554_servicePreview,_100554_serviceDetail"
   ],
   "servicesConfigEnabled": true,
-  "plugins": {}
+  "plugins": {
+    "_100554_pluginExamplesIndex": {
+      "_100554_pluginSiteMonitorDashboardActiveUsers": {
+        "l6Dashboard": {
+          "Examples 1": "tile 2 4",
+          "Examples 2": "tile 3 7"
+        },
+        "enabled": "true"
+      },
+      "_100554_pluginSiteMonitorDashboardSpikes": {
+        "l6Dashboard": {
+          "Examples 2": "tile 3 4"
+        },
+        "enabled": "true"
+      }
+    }
+  }
 }

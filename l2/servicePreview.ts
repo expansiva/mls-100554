@@ -8,6 +8,7 @@ import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { IWCDParams } from '_100554_serviceIca'
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
+import { getConfigProject } from './_100554_libProjectConfig';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -18,7 +19,6 @@ const message_pt = {
     dark: ' escuro',
     light: 'claro',
     help: 'Ajuda'
-
 }
 
 const message_en = {
@@ -42,7 +42,7 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-preview-100554')
 export class ServicePreview100554 extends ServiceBase {
 
-    private msg: MessageType = messages['en'];
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() itens: any = undefined;
 
@@ -53,6 +53,10 @@ export class ServicePreview100554 extends ServiceBase {
     @property() watch: boolean = true;
 
     @property() light: boolean = true;
+
+    @property() lang: string = 'en';
+
+    private msg: MessageType = messages['en'];
 
     private lastMode: string = 'icPreviewD';
 
@@ -70,6 +74,12 @@ export class ServicePreview100554 extends ServiceBase {
 
     private monacoeditor: HTMLElement | undefined;
 
+    private languages: { [key: number]: string } = {}
+
+    private levels = [1, 2, 3, 4, 5, 6, 7];
+
+    private timeEvent: number = -1;
+
     get confE() { return `l${this.level}_${this.position}`; }
 
     constructor() {
@@ -83,10 +93,6 @@ export class ServicePreview100554 extends ServiceBase {
         this.setEvents();
     }
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
-    private levels = [1, 2, 3, 4, 5, 6, 7];
-
     public details: IService = {
         icon: '&#xf06e',
         state: 'foreground',
@@ -99,7 +105,6 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opResultHTML') return this.showEditorHTML();
-        // if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
 
@@ -146,6 +151,158 @@ export class ServicePreview100554 extends ServiceBase {
 
     }
 
+    public onServiceClick(visible: boolean, reinit: boolean) {
+
+        if (visible && !reinit && this.menu.setIconActive) {
+            this.menu.setIconActive(this.lastMode);
+
+        } else if (visible && reinit && this.elPreview && this.menu.setIconActive && this.lastLevel == this.level) {
+            this.menu.setIconActive(this.lastMode);
+
+        } if (this.elPreview) {
+
+            this.lastLevel = this.level;
+            this.elPreview.setAttribute('level', this.level.toString());
+        } else {
+            this.preview(this.lastMode);
+        }
+    }
+
+    // -------------- EVENTS -------------------
+
+    private setEvents() {
+
+        mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => {
+            this.onModelHTMLCreated(ev);
+        });
+
+        mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
+
+        mls.events.addEventListener([3], ['DSStyleChanged', 'DSTokensChanged'] as any, async (ev) => {
+            this.onDSStyleOrTokensChanged(ev);
+        });
+
+        mls.events.addEventListener([3], ['DSThemeChanged'] as any, async (ev) => {
+            this.onDsThemeChanged(ev);
+        });
+    }
+
+    private onReloader(): void {
+        clearTimeout(this.timeEvent);
+        this.timeEvent = setTimeout(async () => {
+            this.onServiceClick(true, false);
+            mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+        }, 500);
+    }
+
+    private onModelHTMLCreated(ev: mls.events.IEvent): void {
+        try {
+            if (!ev.desc) return;
+            if (ev.level !== this.level) return;
+            const iPath: mls.cbe.IPath = JSON.parse(ev.desc);
+            if (!iPath || !iPath.project || !iPath.shortName) return;
+            const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
+            const storFile = mls.stor.files[keyStorFile];
+            if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
+            this.setModel(storFile);
+        } catch (err: any) {
+            throw new Error(err);
+        }
+    }
+
+    private onDSStyleOrTokensChanged(ev: mls.events.IEvent): void {
+        const rc: any = JSON.parse(ev.desc as any);
+        if (
+            rc.emitter === 'right' ||
+            rc.emitter === 'right-get' ||
+            (rc.emitter === 'left' && rc.helper)) return;
+
+        if (this.watch) this.onStyleChanged();
+    }
+
+    private onStyleChanged() {
+        if (this.elPreview) {
+            this.lastLevel = this.level;
+            this.elPreview.setAttribute('stylechanged', 'true');
+            this.elPreview.setAttribute('actualtheme', this.actualTheme);
+        }
+    }
+
+    private async onDsThemeChanged(ev: mls.events.IEvent): Promise<void> {
+        const rc: any = JSON.parse(ev.desc as any);
+        if (rc.emitter !== 'left' || this.visible === 'false') return;
+        this.actualTheme = rc.value || 'Default';
+        if (this.watch) this.onStyleChanged();
+    }
+
+    private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
+
+        try {
+
+            if (this.visible === 'false' || !this.visible) return;
+            if (ev.level !== 2 || (ev.type !== 'FileAction')) return;
+            const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
+            const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
+
+            if (
+                fileAction.position === this.position ||
+                !eventsValid.includes(fileAction.action)
+            ) return;
+
+            const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
+            const storFileHTML = mls.stor.files[keyToFileInfo];
+
+            if (fileAction.action === 'open') {
+                this.setModel(storFileHTML);
+            }
+
+            if (mls.istrace) console.info('is preview repaint:' + this.watch);
+            if (fileAction.action === 'open' && this.watch) {
+
+                this.loading = true;
+                return;
+            }
+            if (this.watch) {
+
+                this.loading = false;
+                this.onReloader();
+            }
+
+        } catch (e) {
+            console.info(e);
+        }
+
+    }
+
+
+    // -------------- COMPONENT ---------------
+
+    render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        return html``;
+    }
+
+    async firstUpdated() {
+        this.createEditor();
+        const darkOrLight = this.getDarkLight();
+        if (darkOrLight === 'dark' && this.menu.selectButton) this.menu.selectButton('btTheme');
+        this.setLanguages();
+        this.setTheme();
+    }
+
+    updated(changedProperties: Map<string | number | symbol, unknown>): void {
+        super.updated(changedProperties);
+        const hasMsize = changedProperties.has('msize');
+        if (hasMsize) {
+            const msize = changedProperties.get('msize');
+            if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
+            this.monacoeditor.setAttribute('msize', msize);
+        }
+    }
+
+    // -------------- IMPLEMENTS-----------------
+
     private showEditorHTML() {
         if (this.menu.setMode) {
             this.menu.setMode('page', this.monacoeditor);
@@ -157,30 +314,22 @@ export class ServicePreview100554 extends ServiceBase {
         return true;
     }
 
-    private objVariations: any = {
-        0: 'en',
-        1: 'pt',
-        2: 'es',
-        3: 'ru'
-    }
 
     private getIframePreviewHTML(): HTMLHtmlElement | undefined {
-
         if (!window.preview.iframe) throw new Error('Preview no created yet');
-
         const htmlEl = window.preview.iframe
             ?.contentDocument
             ?.querySelector('html') as HTMLHtmlElement;
-
         return htmlEl;
-
     }
 
     private onBtVariationsClick(opMenu: string | undefined) {
+
         if (!opMenu) return true;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         const variation = opMenu.substring(0, 1);
-        if (htmlEl) htmlEl.lang = this.objVariations[variation];
+        if (htmlEl) htmlEl.lang = this.languages[+variation];
+        this.lang = this.languages[+variation];
         window.globalVariation = !isNaN(+variation) ? +variation : 0;
         if (window.top) window.top.window.globalVariation = !isNaN(+variation) ? +variation : 0;
         if (this.level === 7) this.requestUpdateAllIcaComponentsInPage();
@@ -231,164 +380,6 @@ export class ServicePreview100554 extends ServiceBase {
         return true;
     }
 
-    onServiceClick(visible: boolean, reinit: boolean) {
-
-        if (visible && !reinit && this.menu.setIconActive) {
-            this.menu.setIconActive(this.lastMode);
-
-        } else if (visible && reinit && this.elPreview && this.menu.setIconActive && this.lastLevel == this.level) {
-            this.menu.setIconActive(this.lastMode);
-
-        } if (this.elPreview) {
-
-            this.lastLevel = this.level;
-            this.elPreview.setAttribute('level', this.level.toString());
-        } else {
-            this.preview(this.lastMode);
-        }
-    }
-
-    // -------------- EVENTS -------------------
-
-
-
-    private setEvents() {
-
-        mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => {
-            try {
-                if (!ev.desc) return;
-                if (ev.level !== this.level) return;
-                const iPath: mls.l2.editor.IPath = JSON.parse(ev.desc);
-                if (!iPath || !iPath.project || !iPath.shortName) return;
-                const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
-                const storFile = mls.stor.files[keyStorFile];
-                if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
-                this.setModel(storFile);
-            } catch (err: any) {
-                throw new Error(err);
-            }
-        });
-
-        mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
-
-        mls.events.addEventListener([3], ['DSStyleChanged', 'DSTokensChanged'] as any, async (ev) => {
-            const rc: any = JSON.parse(ev.desc as any);
-            if (
-                rc.emitter === 'right' ||
-                rc.emitter === 'right-get' ||
-                (rc.emitter === 'left' && rc.helper)) return;
-
-            if (this.watch) this.onStyleChanged();
-        });
-
-        mls.events.addEventListener([3], ['DSThemeChanged'] as any, async (ev) => {
-
-            const rc: any = JSON.parse(ev.desc as any);
-            if (rc.emitter !== 'left' || this.visible === 'false') return;
-            this.actualTheme = rc.value || 'Default';
-            if (this.watch) this.onStyleChanged();
-
-        });
-
-    }
-
-    private timeEvent: number = -1;
-
-    private onReloader(): void {
-        clearTimeout(this.timeEvent);
-        this.timeEvent = setTimeout(async () => {
-            this.onServiceClick(true, false);
-            mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
-        }, 500);
-    }
-
-    private onStyleChanged() {
-        if (this.elPreview) {
-            this.lastLevel = this.level;
-            this.elPreview.setAttribute('stylechanged', 'true');
-            this.elPreview.setAttribute('actualtheme', this.actualTheme);
-        }
-    }
-
-    private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
-
-        try {
-
-            if (this.visible === 'false' || !this.visible) return;
-            if (ev.level !== 2 || (ev.type !== 'FileAction')) return;
-            const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
-            const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
-
-            if (
-                fileAction.position === this.position ||
-                !eventsValid.includes(fileAction.action)
-            ) return;
-
-            const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
-            const storFileHTML = mls.stor.files[keyToFileInfo];
-
-            if (fileAction.action === 'open') {
-                this.setModel(storFileHTML);
-            }
-
-            if (mls.istrace) console.info('is preview repaint:' + this.watch);
-            if (fileAction.action === 'open' && this.watch) {
-
-                this.loading = true;
-                return;
-            }
-            if (this.watch) {
-
-                this.loading = false;
-                this.onReloader();
-            }
-
-        } catch (e) {
-            console.info(e);
-        }
-
-    }
-
-
-    // -------------- COMPONENT ---------------
-
-    async connectedCallback() {
-        super.connectedCallback();
-        const dsIndex = mls.actual[3].mode && +this.level !== 2 ? mls.actual[3].mode : 0;
-        this.ds = await getDSInstance(mls.actual[5].project as any, dsIndex);
-        await this.ds.init();
-        if (!this.ds || !this.ds.tokens) return;
-        this.themes = Object.keys(this.ds.tokens.list);
-        if (this.menu.buttons) this.menu.buttons.btTokens = this.msg.theme + `;f53f:menu:${this.themes.join(',')}`;
-        if (this.menu.refresh) this.menu.refresh();
-    }
-
-    render() {
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
-        return html``;
-    }
-
-    firstUpdated() {
-        this.createEditor();
-        const theme = this.getTheme();
-        if (theme === 'dark' && this.menu.selectButton) {
-            this.menu.selectButton('btTheme');
-        }
-    }
-
-    updated(changedProperties: Map<string | number | symbol, unknown>): void {
-        super.updated(changedProperties);
-        const hasMsize = changedProperties.has('msize');
-        if (hasMsize) {
-            const msize = changedProperties.get('msize');
-            if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
-            this.monacoeditor.setAttribute('msize', msize);
-        }
-    }
-
-    // -------------- IMPLEMENTS-----------------
-
 
     private createEditor() {
         if (!this.monacoeditor) {
@@ -427,13 +418,40 @@ export class ServicePreview100554 extends ServiceBase {
         return monaco.Uri.parse(`file://server/${shortFN}${ftype}`);
     }
 
-    private getTheme() {
+    private getDarkLight() {
         const theme = localStorage.getItem('_100554_serviceUserSettings_theme') || 'light';
         return theme;
     }
 
-    private async preview(mode: string) {
+    private async setLanguages() {
+        const { project } = mls.actual[5];
+        if (!project) throw new Error('Invalid project');
+        const config = await getConfigProject(project);
+        if (!config || !config.languages || Object.keys(config.languages).length === 0) {
+            this.languages = {
+                0: 'en'
+            }
+        } else {
+            Object.entries(config.languages).forEach((entry) => {
+                const [key, value] = entry;
+                this.languages[+key] = value.language;
+            });
+        }
+        if (this.menu.buttons) this.menu.buttons.btVariations = this.msg.variations + `;f1ab:menu:${Object.keys(this.languages).map((item) => `${item} - ${this.languages[+item]}`).join(',')}`;
+        if (this.menu.refresh) this.menu.refresh();
+    }
 
+    private async setTheme() {
+        const dsIndex = mls.actual[3].mode && +this.level !== 2 ? mls.actual[3].mode : 0;
+        this.ds = await getDSInstance(mls.actual[5].project as any, dsIndex);
+        await this.ds.init();
+        if (!this.ds || !this.ds.tokens) return;
+        this.themes = Object.keys(this.ds.tokens.list);
+        if (this.menu.buttons) this.menu.buttons.btTokens = this.msg.theme + `;f53f:menu:${this.themes.join(',')}`;
+        if (this.menu.refresh) this.menu.refresh();
+    }
+
+    private async preview(mode: string) {
         if (!(mls.actual[2] as any).left) return true;
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
         this.menu.title = 'Preview: ' + fullname;
@@ -443,17 +461,17 @@ export class ServicePreview100554 extends ServiceBase {
         doc.setAttribute('level', this.level as any);
         doc.setAttribute('mode', mode);
         doc.setAttribute('actualtheme', this.actualTheme);
+        doc.setAttribute('lang', this.lang);
+
         (doc as any).father = this;
         this.elPreview = doc;
         if (this.menu.setMode) this.menu.setMode('page', doc);
         this.lastLevel = this.level;
         return true;
-
     }
+
     private requestUpdateAllIcaComponentsInPage() {
-
         if (!window.preview.iframe) throw new Error('Preview no created yet');
-
         const body = window.preview.iframe
             ?.contentDocument
             ?.querySelector('body');
