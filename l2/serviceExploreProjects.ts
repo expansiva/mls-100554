@@ -259,10 +259,10 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                                     <span>${his.name + ' (' + his.project.toString() + ')'}</span>
                                 </div>
                                 <div style="display:flex; gap:1rem;font-size:.8rem">
-                                    <span style="cursor:pointer" @click=${() => { this.onHistoryClick(his) }}>
+                                    <span class="linkItem"  @click=${() => { this.onHistoryClick(his) }}>
                                         Select
                                     </span>
-                                    <span style="cursor:pointer">
+                                    <span class="linkItem" @click=${() => this.firedetail()}>
                                         Detail
                                     </span>
                                 </div>
@@ -281,10 +281,10 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                                         <span>${prj.name + ' (' + prj.id.toString() + ')'}</span>
                                     </div>
                                     <div style="display:flex; gap:1rem;font-size:.8rem">
-                                        <span style="cursor:pointer" @click=${() => this.onProjectClick(prj)}>
+                                        <span class="linkItem"  @click=${() => this.onProjectClick(prj)}>
                                             Select
                                         </span>
-                                        <span style="cursor:pointer">
+                                        <span class="linkItem" @click=${() => this.firedetail()}>
                                             Detail
                                         </span>
                                     </div>
@@ -317,6 +317,20 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     //----------IMPLEMENTS------------------
+
+    private firedetail() {
+        mls.events.fire(
+            mls.actualLevel as any,
+            'PluginDetails' as any,
+            JSON.stringify(
+                {
+                    shortName: 'pluginProjectDetail',
+                    project: mls.actual[5].project
+                }
+            ),
+            0
+        );
+    }
 
     private backScenaryList() {
         this.changeScenario('select');

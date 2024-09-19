@@ -94,8 +94,8 @@ export class PluginProjectInfo extends PluginBaseModule {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         this.style.display = 'block';
-        this.style.width = '100%';
-        this.style.height = '100%';
+        //this.style.width = '100%';
+        //this.style.height = '100%';
         if (this.scope !== "dashboard") return html``;
         return html`
             <div class="plugin-container">
@@ -167,7 +167,7 @@ export class PluginProjectInfo extends PluginBaseModule {
         :host {
             font-family: @font-family-primary;
             display: block;
-            height: calc(100% - 55px);
+            
             overflow: auto;
             background: @bg-primary-color;
             font-size: @font-size-16;

@@ -1,0 +1,112 @@
+/// <mls shortName="pluginProjectDetail" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+import { html, css, svg, TemplateResult, LitElement } from 'lit';
+import { query, property, customElement } from 'lit/decorators.js';
+import { getAllWebComponentsInSource } from './_100554_libCompile';
+import { convertTagToFileName } from './_100554_utilsLit';
+import { PluginBaseModule } from './_100554_pluginBaseModule';
+import "./_100554_pluginProjectInfo";
+
+export const pluginData: mls.plugin.IPluginData = {
+    title: "Project Detail",
+    getSvg(): TemplateResult {
+        return svg`
+        <svg height="22px" width="22px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM80 64l64 0c8.8 0 16 7.2 16 16s-7.2 16-16 16L80 96c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l64 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-64 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm16 96l192 0c17.7 0 32 14.3 32 32l0 64c0 17.7-14.3 32-32 32L96 352c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32zm0 32l0 64 192 0 0-64L96 256zM240 416l64 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-64 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg>
+    `;
+    }
+};
+
+@customElement('plugin-project-detail-100554')
+export class PluginProjectDetail extends LitElement {
+
+    @query('contentproject') contentproject: HTMLElement | undefined;
+
+
+    async prepare() {
+    }
+
+
+    //----------COMPONENT--------------------
+
+    firstUpdated() {
+        this.loadProject();
+    }
+
+    render(): TemplateResult {
+
+        return html`
+            <plugin-project-info-100554 autoPrepare="true" ></plugin-project-info-100554>
+            <div style="padding:16px">
+            <details open>
+                <summary>Project</summary>
+                <contentproject style="padding:2rem; display:block">
+                </contentproject>
+            </details>
+            </div>
+        `;
+    }
+
+
+    //----------IMPLEMENTATION--------------------
+
+    private async loadProject() {
+
+        if (!this.contentproject) return;
+        const  prj = mls.actual[5].project;
+
+        if (!prj) return;
+
+        const keyFile = mls.stor.getKeyToFiles(prj, 2, 'project', '', '.html');
+        const storFile = mls.stor.files[keyFile];
+
+        if (!storFile && this.contentproject) {
+            this.contentproject.innerHTML = 'project.html not found';
+            return;
+        } else if (!storFile) return;
+
+        const content = await storFile.getContent() as string;
+
+        this.contentproject.innerHTML = '';
+        const allWcs = getAllWebComponentsInSource(content);
+
+        this.contentproject.innerHTML = content;
+
+        allWcs.forEach((wc) => {
+            const fileName = convertTagToFileName(wc);
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.id = fileName;
+            script.src = (`/${fileName}`);
+            this.contentproject?.appendChild(script)
+        });
+
+
+    }
+
+
+    //----------CSS--------------------
+
+    static styles = css`
+    
+        :host {
+            font-family: @font-family-primary;
+            display: block;
+            height: calc(100% - 55px);
+            overflow: auto;
+            background: @bg-primary-color;
+            font-size: @font-size-16;
+        }   
+
+        details{
+            border: 1px solid var(--grey-color-light);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            >div{
+                padding-left: 2rem;
+            }
+        } 
+    `;
+
+
+}
