@@ -94,10 +94,10 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     renderEdit() {
 
 
-        if (!this.elICA || !this.myParent || !this.elICA.widget) return;
+        if (!this.elICA || !this.myParent  || !this.elICA.widget) return;
 
         this.style.left = '0';
-        this.style.background = '#fff';
+        //this.style.background = '#fff';
 
         const ref = this.elICA.querySelector(this.elICA.widget);
         if (ref) this.elMain = ref as HTMLElement;

@@ -87,6 +87,16 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     //---------------PUBLIC----------------
 
+    public async beforeDelete() {
+
+        for await (const i of Array.from(this.children)) {
+            i.remove();
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        
+    }
+
     public updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean): void {
         return this._updateSize(elBase, elChange, changePosition);
     }

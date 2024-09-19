@@ -456,6 +456,9 @@ export class ServicePreview100554 extends ServiceBase {
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
         this.menu.title = 'Preview: ' + fullname;
         if (this.menu.updateTitle) this.menu.updateTitle();
+
+        await this.fireWcdChanges();
+        
         const doc = document.createElement('service-preview-view-100554');
         doc.setAttribute('page', fullname);
         doc.setAttribute('level', this.level as any);
@@ -468,6 +471,20 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.menu.setMode) this.menu.setMode('page', doc);
         this.lastLevel = this.level;
         return true;
+    }
+
+    private async fireWcdChanges() {
+
+        const iframe = window.preview.iframe;
+        if (!iframe) return;
+
+        const wcd = iframe.contentDocument?.body.querySelector('wcd-toolbox-100554') as any;
+
+        if (!wcd) return;
+
+        await wcd.beforeDelete();
+
+        return;
     }
 
     private requestUpdateAllIcaComponentsInPage() {

@@ -10,26 +10,26 @@ export class PluginSiteMonitorIndex extends PluginBaseIndex {
       return [
         {
             category: 'Site',
-            scope: ['l6Dashboard'],
+            scope: ['createNewWidget'],
             priority: 1,
             auth: ['admin', 'editor'],
             widget: '_100554_pluginSiteMonitorDashboardErrors'
         },
         {
             category: 'Site',
-            scope: ['l6Dashboard'],
+            scope: ['createNewWidget'],
             auth: ['admin', 'editor'],
             widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
         },
         {
             category: 'Site',
-            scope: ['l6Dashboard'],
+            scope: ['createNewWidget'],
             auth: ['admin', 'editor'],
             widget: '_100554_pluginSiteMonitorDashboardSpikes'
         },
         {
             category: 'Site',
-            scope: ['l6Dashboard'],
+            scope: ['createNewWidget'],
             auth: ['admin', 'editor'],
             widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
         },
@@ -67,7 +67,7 @@ export class PluginSiteMonitorIndex extends PluginBaseIndex {
         },
         {
             category: 'Site',
-            scope: ['l6Dashboard'],
+            scope: ['createNewWidget'],
             auth: ['admin', 'editor'],
             widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
         }

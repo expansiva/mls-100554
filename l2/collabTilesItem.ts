@@ -22,7 +22,12 @@ export class CollabTilesItem extends LitElement {
     }
 
     render() {
-        this.style.gridArea = this.position;
+
+        const [r, c] = this.position ? this.position.split(' ') : ['2', '2'];
+
+
+        this.style.gridRow = 'span ' + r;
+        this.style.gridColumn = 'span ' + c;
         this.onclick = () => this.clickPlugin();
         this.loadingPlugin();
         return html`

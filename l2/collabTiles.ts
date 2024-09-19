@@ -131,10 +131,9 @@ export class CollabTiles extends LitElement {
 
         collab-tiles-100554 collab-tiles{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             grid-auto-rows: 100px;
-            gap: 15px;
-            padding:10px;
+            gap: 10px;
         }
 
         collab-tiles-100554 collab-tiles-item-100554{
