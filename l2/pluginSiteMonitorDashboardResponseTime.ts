@@ -17,9 +17,11 @@ export class PluginSiteMonitorDashboardResponseTime extends PluginBaseModule {
 
     @property({ type: String }) filter: string = "today";
 
+    @property() chartData: any = {};
+
     @property({ type: Boolean }) autoPrepare: boolean = false;
 
-    @property() chartData = {};
+    @property({ type: String }) mode: 'simplified' | 'full' = 'simplified';
 
     @query('.plugin-body') body: HTMLDivElement | undefined;
 
@@ -28,9 +30,6 @@ export class PluginSiteMonitorDashboardResponseTime extends PluginBaseModule {
         await import('./_100554_wcChart');
 
         this.chartData = {
-            "title": {
-                "text": "Average Response Time Over Time",
-            },
             "tooltip": {
                 "trigger": "axis"
             },
@@ -62,18 +61,20 @@ export class PluginSiteMonitorDashboardResponseTime extends PluginBaseModule {
                     "smooth": true
                 }
             ],
-            "toolbox": {
-                "feature": {
-                    "saveAsImage": {}
-                }
-            },
             "grid": {
                 "left": "3%",
                 "right": "4%",
                 "bottom": "3%",
                 "containLabel": true
             }
+        };
+
+        if (this.mode === 'full') {
+            this.chartData.title = {
+                text: "Average Response Time Over Time",
+            };
         }
+
         await this.updateComplete;
         const data = JSON.stringify(this.chartData);
         function escapeHTML(str: string) {

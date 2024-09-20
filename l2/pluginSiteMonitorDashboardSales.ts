@@ -17,9 +17,11 @@ export class PluginSiteMonitorDashboardSales extends PluginBaseModule {
 
     @property({ type: String }) filter: string = "today";
 
-    @property() chartData = {};
+    @property() chartData: any = {};
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
+
+    @property({ type: String }) mode: 'simplified' | 'full' = 'simplified';
 
     @query('.plugin-body') body: HTMLDivElement | undefined;
 
@@ -28,20 +30,12 @@ export class PluginSiteMonitorDashboardSales extends PluginBaseModule {
         await import('./_100554_wcChart');
 
         this.chartData = {
-            "title": {
-                "text": "Product Sales Distribution",
-                "subtext": "Total Sales: $15,000",
-                "left": "center"
-            },
+
             "tooltip": {
                 "trigger": "item",
                 "formatter": "{a} <br/>{b}: {c} ({d}%)"
             },
-            "legend": {
-                "orient": "vertical",
-                "left": "left",
-                "data": ["Product A", "Product B", "Product C", "Product D", "Product E"]
-            },
+    
             "series": [
                 {
                     "name": "Sales",
@@ -63,14 +57,22 @@ export class PluginSiteMonitorDashboardSales extends PluginBaseModule {
                     }
                 }
             ],
-            "toolbox": {
-                "feature": {
-                    "saveAsImage": {
-                        "title": "Save"
-                    }
-                }
-            }
         }
+
+        if (this.mode === 'full') {
+            this.chartData.title = {
+                text: "Product Sales Distribution",
+                subtext: "Total Sales: $15,000",
+                left: "center"
+            };
+
+            this.chartData.legend = {
+                orient: "vertical",
+                left: "left",
+                data: ["Product A", "Product B", "Product C", "Product D", "Product E"]
+            };
+        }
+
         await this.updateComplete;
         const data = JSON.stringify(this.chartData);
         function escapeHTML(str: string) {

@@ -3,7 +3,6 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { getConfigProject } from './_100554_libProjectConfig';
 import './_100554_collabTiles';
 
 @customElement('service-dashboard-100554')
@@ -39,12 +38,12 @@ export class ServiceDashboard100554 extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Dashboard',
+        title: '',
         actions: {
         },
         icons: {
             Icon1: 'Example 1;f0e8',
-            Icon2: 'Example 2;f0e8',
+            Icon2: 'Example 2;f0d6',
 
         },
         actionDefault: '', // call after close icon clicked
@@ -61,10 +60,6 @@ export class ServiceDashboard100554 extends ServiceBase {
     }
 
     //---------COMPONENT-------------
-
-    firstUpdated() {
-        this.loadAndSetPlugins();
-    }
 
     private refreshTimeOut = 0;
     updated(changedProperties: any) {
@@ -109,86 +104,75 @@ export class ServiceDashboard100554 extends ServiceBase {
         }
     }
 
+    private pluginsDash1 = [
+        {
+            title: 'Errors',
+            plugin: '_100554_pluginSiteMonitorDashboardErrors',
+            position: '1 / 1 / 4 / 3'
+        },
+
+        {
+            title: 'Spikes',
+            plugin: '_100554_pluginSiteMonitorDashboardSpikes',
+            position: '1 / 3 / 4 / 7'
+        },
+        {
+            title: 'Expenses',
+            plugin: '_100554_pluginSiteMonitorDashboardExpenses',
+            position: '4 / 4 / 7 / 7'
+        },
+        {
+            title: 'Sales',
+            plugin: '_100554_pluginSiteMonitorDashboardSales',
+            position: '4 / 1 / 7 / 4'
+        },
+        {
+            title: 'Response Time',
+            plugin: '_100554_pluginSiteMonitorDashboardResponseTime',
+            position: '7 / 1 / 11 / 4'
+        },
+        {
+            title: 'Active Users',
+            plugin: '_100554_pluginSiteMonitorDashboardActiveUsers',
+            position: '7 / 4 / 11 / 7'
+        },
+        {
+            title: 'Regional Latency',
+            plugin: '_100554_pluginSiteMonitorDashboardRegionalLatency',
+            position: '11 / 1 / 15 / 7'
+        },
+    ];
+
+    private pluginsDash2 = [
+        {
+            title: 'Errors',
+            plugin: '_100554_pluginSiteMonitorDashboardErrors',
+            position: '1 / 1 / 5 / 4'
+        },
+
+        {
+            title: 'Spikes',
+            plugin: '_100554_pluginSiteMonitorDashboardExpenses',
+            position: '1 / 4 / 5 / 7'
+        },
+        {
+            title: 'Expenses',
+            plugin: '_100554_pluginSiteMonitorDashboardSpikes',
+            position: '5 / 4 / 8 / 7'
+        },
+        {
+            title: 'Sales',
+            plugin: '_100554_pluginSiteMonitorDashboardSales',
+            position: '5 / 1 / 8 / 4'
+        },
+    ];
+
+
     renderIcon1() {
-
-        if (this.pluginsDash1.length <= 0) return html`<h3 style="padding:2rem">Not found plugins</h3>`;
-
         return html`<collab-tiles-100554 .tilesItens=${this.pluginsDash1} class="${this.cssBreakPoint}"></collab-tiles-100554>`;
     }
 
     renderIcon2() {
-
-        if (this.pluginsDash2.length <= 0) return html`<h3 style="padding:2rem">Not found plugins</h3>`;
-
         return html`<collab-tiles-100554 .tilesItens=${this.pluginsDash2} class="${this.cssBreakPoint}"></collab-tiles-100554>`
     }
-
-    //------------IMPLEMENTATION---------------
-
-    private pluginsDash1: ITiles[] = [];
-
-    private pluginsDash2: ITiles[] = [];
-
-    private async loadAndSetPlugins() {
-
-        const prj = mls.actual[5].project;
-        if (!prj) return;
-
-        await mls.plugin.loadAll(prj, true);
-        const dash = "l6Dashboard" as mls.plugin.Scope;
-        const arry = mls.plugin.getAllMenuActions(100554, { scope: dash } as any);
-
-        const config = await getConfigProject(prj);
-
-        arry.forEach((i, index) => {
-
-            const item: ITiles = {
-                title: 'Tile_' + index,
-                plugin: i.widget,
-                position: '2 2'
-            };
-
-            const pos = this.getPosition(config, i.widgetConfig, i.widget, i.category);
-
-            item.position = pos;
-
-            switch (i.category) {
-                case 'Examples 1': {
-                    this.pluginsDash1.push(item);
-                    break;
-                }
-                case 'Examples 2': {
-                    this.pluginsDash2.push(item);
-                    break;
-                }
-                default: '';
-            }
-
-        });
-
-        this.requestUpdate();
-    }
-
-    private getPosition(config: mls.l5_common.ProjectConfig | undefined, widgetConfig: string | undefined, widget: string, cat: string | null ): string{
-        
-        if (!config || !widgetConfig || !cat) return '2 2';
-
-        const plugin = config.plugins;
-
-        widgetConfig = '_' + widgetConfig.replace('2_', '').replace('.ts', '');
-    
-        if (!plugin[widgetConfig] || !plugin[widgetConfig][widget] || !(plugin[widgetConfig][widget] as any)["l6Dashboard" as any] || !(plugin[widgetConfig][widget] as any)["l6Dashboard"][cat]) return '2 2';
-
-        return (plugin[widgetConfig][widget] as any)["l6Dashboard"][cat].replace('tile', '').trim();
-
-        
-
-    }
-
-}
-
-interface ITiles {
-    title: string,
-    plugin: string,
-    position: string
 }

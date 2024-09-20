@@ -17,12 +17,11 @@ export class PluginSiteMonitorDashboardRegionalLatency extends PluginBaseModule 
 
     @property({ type: String }) filter: string = "today";
 
-    @property() chartDataBar = {};
-
-    @property() chartDataMap = {};
-
+    @property() chartDataBar: any = {};
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
+
+    @property({ type: String }) mode: 'simplified' | 'full' = 'simplified';
 
     @query('.plugin-body') body: HTMLDivElement | undefined;
 
@@ -35,17 +34,11 @@ export class PluginSiteMonitorDashboardRegionalLatency extends PluginBaseModule 
         await import('./_100554_wcChart');
 
         this.chartDataBar = {
-            "title": {
-                "text": "Regional Latency (ms)",
-            },
             "tooltip": {
                 "trigger": "axis",
                 "axisPointer": {
                     "type": "shadow"
                 }
-            },
-            "legend": {
-                "data": ["Latency"]
             },
             "xAxis": {
                 "type": "category",
@@ -79,13 +72,6 @@ export class PluginSiteMonitorDashboardRegionalLatency extends PluginBaseModule 
                     }
                 }
             ],
-            "toolbox": {
-                "feature": {
-                    "saveAsImage": {
-                        "title": "Save"
-                    }
-                }
-            },
             "grid": {
                 "left": "3%",
                 "right": "4%",
@@ -94,9 +80,20 @@ export class PluginSiteMonitorDashboardRegionalLatency extends PluginBaseModule 
             }
         };
 
+        if (this.mode === 'full') {
+            this.chartDataBar.title = {
+                text: "Regional Latency (ms)",
+            };
+
+            this.chartDataBar.legend = {
+                "data": ["Latency"]
+            };
+        }
+
+
         await this.updateComplete;
         const dataBar = JSON.stringify(this.chartDataBar);
-        const dataMap = JSON.stringify(this.chartDataMap);
+
 
         function escapeHTML(str: string) {
             return str

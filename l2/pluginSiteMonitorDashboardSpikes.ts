@@ -17,9 +17,11 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
 
     @property({ type: String }) filter: string = "today";
 
-    @property() chartData = {};
+    @property() chartData:any = {};
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
+
+    @property({ type: String }) mode: 'simplified' | 'full' = 'simplified';
 
     @query('.plugin-body') body: HTMLDivElement | undefined;
 
@@ -28,9 +30,6 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
         await import('./_100554_wcChart');
 
         this.chartData = {
-            "title": {
-                "text": "Hourly Traffic Spikes",
-            },
             "tooltip": {
                 "trigger": "axis"
             },
@@ -68,14 +67,14 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
                     }
                 }
             ],
-            "toolbox": {
-                "feature": {
-                    "saveAsImage": {
-                        "title": "Save"
-                    }
-                }
+        };
+
+        if (this.mode === 'full') {
+            this.chartData.title = {
+                text: "Hourly Traffic Spikes"
             }
         }
+
         await this.updateComplete;
         const data = JSON.stringify(this.chartData);
         function escapeHTML(str: string) {
