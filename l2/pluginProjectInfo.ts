@@ -56,6 +56,7 @@ export class PluginProjectInfo extends PluginBaseModule {
     private msg: MessageType = messages['en'];
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
+    @property() project: string | undefined;
     @property() projectName: string | undefined;
     @property() projectDriver: string | undefined;
     @property() projectOrg: string | undefined;
@@ -68,7 +69,7 @@ export class PluginProjectInfo extends PluginBaseModule {
 
     async prepare() {
 
-        const { project } = mls.actual[5];
+        const  project  = this.project ? +this.project : mls.actual[5].project;
         if (!project) return;
         let settings = mls.l5.getProjectSettings(project);
         let details = mls.l5.getProjectDetails(project);

@@ -13,7 +13,7 @@ import { getConfigProject } from './_100554_libProjectConfig';
 /// **collab_i18n_start**
 const message_pt = {
     theme: 'Tema',
-    variations: 'Variação',
+    variations: 'Linguagem',
     editStyle: 'Editar estilo',
     pause: 'Parar preview',
     dark: ' escuro',
@@ -23,7 +23,7 @@ const message_pt = {
 
 const message_en = {
     theme: 'Theme',
-    variations: 'Variation',
+    variations: 'Language',
     editStyle: 'Edit style',
     pause: 'Pause preview',
     dark: 'dark',
@@ -116,14 +116,26 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public onClickButton = (op: string, opMenu?: string): boolean => {
+
         if (op === 'btWatch') return this.toogleWatch();
         if (op === 'btEditStyle') return this.editStyles();
         if (op === 'btHelp') return this.onHelpClick();
+        if (['btVariations', 'btTheme', 'btTokens'].includes(op)) {
+            this.actButton(op, opMenu);
+            return true;
+        }
+        else throw new Error('Invalid option')
+    }
+
+    public async actButton(op: string, opMenu?: string) {
+
+        await this.fireWcdChanges();
         if (op === 'btVariations') return this.onBtVariationsClick(opMenu);
         if (op === 'btTheme') return this.onBtThemeClick();
         if (op === 'btTokens') return this.onBtTokensClick(opMenu);
-        else throw new Error('Invalid option')
+        
     }
+
 
     public menu: IMenu = {
         title: 'Preview',

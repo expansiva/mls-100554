@@ -152,7 +152,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'Explore Projects',
+        title: '',
         actions: {
         },
         icons: {
@@ -262,7 +262,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                                     <span class="linkItem"  @click=${() => { this.onHistoryClick(his) }}>
                                         Select
                                     </span>
-                                    <span class="linkItem" @click=${() => this.firedetail()}>
+                                    <span class="linkItem" @click=${() => this.firedetail(his)}>
                                         Detail
                                     </span>
                                 </div>
@@ -284,7 +284,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                                         <span class="linkItem"  @click=${() => this.onProjectClick(prj)}>
                                             Select
                                         </span>
-                                        <span class="linkItem" @click=${() => this.firedetail()}>
+                                        <span class="linkItem" @click=${() => this.firedetail(prj)}>
                                             Detail
                                         </span>
                                     </div>
@@ -318,14 +318,17 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
     //----------IMPLEMENTS------------------
 
-    private firedetail() {
+    private async firedetail(prj:{project: number, name: string}) {
+
+        localStorage.setItem('serviceDetail', '{"action":"open", "prj":' + prj.project + '}');
+        
         mls.events.fire(
-            mls.actualLevel as any,
+            2 as any,
             'PluginDetails' as any,
             JSON.stringify(
                 {
                     shortName: 'pluginProjectDetail',
-                    project: mls.actual[5].project
+                    project: 100554
                 }
             ),
             0

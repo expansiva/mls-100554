@@ -20,7 +20,7 @@ export const pluginData: mls.plugin.IPluginData = {
 export class PluginProjectDetail extends LitElement {
 
     @query('contentproject') contentproject: HTMLElement | undefined;
-
+    @query('contentprojectinfo') contentprojectinfo: HTMLElement | undefined;
 
     async prepare() {
     }
@@ -35,7 +35,9 @@ export class PluginProjectDetail extends LitElement {
     render(): TemplateResult {
 
         return html`
-            <plugin-project-info-100554 autoPrepare="true" ></plugin-project-info-100554>
+            <contentprojectinfo>
+            </contentprojectinfo>
+            
             <div style="padding:16px">
             <details open>
                 <summary>Project</summary>
@@ -50,11 +52,28 @@ export class PluginProjectDetail extends LitElement {
     //----------IMPLEMENTATION--------------------
 
     private async loadProject() {
+    
+        if (!this.contentproject || !this.contentprojectinfo) return;
 
-        if (!this.contentproject) return;
-        const  prj = mls.actual[5].project;
+        const txt = localStorage.getItem('serviceDetail');
+        const info = txt ? JSON.parse(txt) : undefined;
 
-        if (!prj) return;
+        if (!info) return;
+
+        localStorage.removeItem('serviceDetail');
+
+        const  prj = info.prj;
+        const actual = mls.actual[5].project;
+
+        if (!prj || !actual) return;
+
+        if (prj !== actual) {
+            await mls.stor.server.loadProjectInfoIfNeeded(prj, false);
+        }
+
+        this.contentprojectinfo.innerHTML = `
+            <plugin-project-info-100554 autoPrepare="true" project="${prj}" ></plugin-project-info-100554>
+        `
 
         const keyFile = mls.stor.getKeyToFiles(prj, 2, 'project', '', '.html');
         const storFile = mls.stor.files[keyFile];
@@ -63,6 +82,7 @@ export class PluginProjectDetail extends LitElement {
             this.contentproject.innerHTML = 'project.html not found';
             return;
         } else if (!storFile) return;
+
 
         const content = await storFile.getContent() as string;
 
@@ -79,6 +99,8 @@ export class PluginProjectDetail extends LitElement {
             script.src = (`/${fileName}`);
             this.contentproject?.appendChild(script)
         });
+
+        
 
 
     }
