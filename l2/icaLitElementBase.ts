@@ -13,10 +13,6 @@ import * as myDefinition from './_100554_icaBaseDescription';
 
 export abstract class IcaLitElementBase extends IcaLitElement implements tps.IcaLitElementBaseMethods {
 
-    constructor() {
-        super();
-    }
-
     abstract mySymbol: string;
     abstract changeStateHtml(info: string): void;
     abstract allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): tps.IAllowCommand;
@@ -225,13 +221,13 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
         //mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
     }
 
-    public getICAComponents(scope: HTMLElement): IcaLitElementBase[] {
+    public getICAComponents(scope: HTMLElement): tps.IcaLitElementBaseMethods[] {
 
-        let ret: IcaLitElementBase[] = [];
+        let ret: tps.IcaLitElementBaseMethods[] = [];
         const reentrance = (el: IcaLitElementBase | HTMLElement) => {
             const tag = el.tagName.toLowerCase();
             if (tag.startsWith(`${globalIca.PREFIX}-`)) {
-                ret.push(el as IcaLitElementBase);
+                ret.push(el as tps.IcaLitElementBaseMethods);
             }
 
             const isGroup = el.getAttribute(`${globalIca.ATTRGROUP}`);
@@ -255,12 +251,12 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
         return ret
     }
 
-    public getIcaParent(target: HTMLElement): IcaLitElementBase | undefined {
+    public getIcaParent(target: HTMLElement): tps.IcaLitElementBaseMethods | undefined {
         const parent = target.parentElement;
         if (!parent) return;
         const tag = parent.tagName.toLowerCase();
         if (!tag.startsWith(`${globalIca.PREFIX}-`)) return this.getIcaParent(parent);
-        else if (tag.startsWith(`${globalIca.PREFIX}-`)) return parent as IcaLitElementBase;
+        else if (tag.startsWith(`${globalIca.PREFIX}-`)) return parent as tps.IcaLitElementBaseMethods;
     }
 
     async performPreSlotAllocationOperations() {
@@ -311,15 +307,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
 
     private getAttributes() {
 
-        const objVariations: any = {
-            0: 'en',
-            1: 'pt',
-            2: 'es',
-            3: 'ru'
-        };
-
-        const variation = objVariations[this.globalVariation || 0];
-
+        const language = (this.closest('html') as HTMLHtmlElement)?.lang || 'en';    
         const attributes = [];
         const attributeNames = this.getAttributeNames();
 
@@ -337,11 +325,9 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
             }
         }
 
-
-        const attrsByVariation = this.filterAttributes(attributes, variation);
+        const attrsByVariation = this.filterAttributes(attributes, language);
         let attributesStr = '';
         attrsByVariation.forEach((item) => attributesStr += `${item.name}="${item.value}"`)
-
         //  console.info({ el: this, variation, attributes, attrsByVariation });
 
         return attributesStr;
@@ -350,7 +336,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
 
     private filterAttributes(attributes: { name: string, value: string }[], variation: string) {
 
-        const variationSuffix = `-${variation}`; // -en
+        const variationSuffix = `-${variation.toLowerCase()}`; // -en
         const variationAttributes = attributes.filter(attr => attr.name.endsWith(variationSuffix));
 
         const nonVariationAttributes = attributes.filter(attr => {

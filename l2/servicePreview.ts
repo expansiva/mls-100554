@@ -74,7 +74,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private monacoeditor: HTMLElement | undefined;
 
-    private languages: { [key: number]: string } = {}
+    private languages: ILanguage = {}
 
     private levels = [1, 2, 3, 4, 5, 6, 7];
 
@@ -133,7 +133,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (op === 'btVariations') return this.onBtVariationsClick(opMenu);
         if (op === 'btTheme') return this.onBtThemeClick();
         if (op === 'btTokens') return this.onBtTokensClick(opMenu);
-        
+
     }
 
 
@@ -149,7 +149,7 @@ export class ServicePreview100554 extends ServiceBase {
         buttons: {
             btTheme: `${this.msg.light};${this.msg.dark};f185;f186`,
             btTokens: this.msg.theme + ';f53f:menu:Default,',
-            btVariations: this.msg.variations + ';f1ab:menu:0 - Default,1 - Portugues,2 - Espanhol,3 - Russo',
+            btVariations: this.msg.variations + ';f1ab:menu-flags:Default,Portugues,Espanhol,Russo',
             btEditStyle: this.msg.editStyle + ';f0d0',
             btWatch: this.msg.pause + ';Update Preview;f04c;f04b',
             btHelp: this.msg.help + ';f059',
@@ -339,11 +339,13 @@ export class ServicePreview100554 extends ServiceBase {
 
         if (!opMenu) return true;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
-        const variation = opMenu.substring(0, 1);
-        if (htmlEl) htmlEl.lang = this.languages[+variation];
-        this.lang = this.languages[+variation];
-        window.globalVariation = !isNaN(+variation) ? +variation : 0;
-        if (window.top) window.top.window.globalVariation = !isNaN(+variation) ? +variation : 0;
+        if (htmlEl) htmlEl.lang = this.languages[opMenu].acronym;
+        this.lang = this.languages[opMenu].acronym;
+        const variation = Object.keys(this.languages).indexOf(opMenu);
+
+        window.globalVariation = !isNaN(variation) ? variation : 0;
+        if (window.top) window.top.window.globalVariation = !isNaN(variation) ? variation : 0;
+
         if (this.level === 7) this.requestUpdateAllIcaComponentsInPage();
         else this.onReloader();
         return true;
@@ -439,17 +441,37 @@ export class ServicePreview100554 extends ServiceBase {
         const { project } = mls.actual[5];
         if (!project) throw new Error('Invalid project');
         const config = await getConfigProject(project);
-        if (!config || !config.languages || Object.keys(config.languages).length === 0) {
+
+        if (!config || !config.languages || config.languages.length === 0) {
             this.languages = {
-                0: 'en'
+                'English_en': { acronym: 'en', name: 'English' }
             }
         } else {
-            Object.entries(config.languages).forEach((entry) => {
-                const [key, value] = entry;
-                this.languages[+key] = value.language;
+            const testLangs = [
+                {
+                    "language": "en",
+                    "name": "English",
+                    "path": "/",
+                },
+                {
+                    "language": "pt",
+                    "name": "Portuguese",
+                    "path": "/pt",
+                },
+                {
+                    "language": "es",
+                    "name": "Spanish",
+                    "path": "/es",
+                }
+            ]
+            testLangs.forEach((entry, index) => {
+                this.languages[`${entry.name}_${entry.language}`] = {
+                    acronym: entry.language,
+                    name: entry.name,
+                }
             });
         }
-        if (this.menu.buttons) this.menu.buttons.btVariations = this.msg.variations + `;f1ab:menu:${Object.keys(this.languages).map((item) => `${item} - ${this.languages[+item]}`).join(',')}`;
+        if (this.menu.buttons) this.menu.buttons.btVariations = this.msg.variations + `;f1ab:menu-flags:${Object.keys(this.languages).join(',')}`;
         if (this.menu.refresh) this.menu.refresh();
     }
 
@@ -470,7 +492,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.menu.updateTitle) this.menu.updateTitle();
 
         await this.fireWcdChanges();
-        
+
         const doc = document.createElement('service-preview-view-100554');
         doc.setAttribute('page', fullname);
         doc.setAttribute('level', this.level as any);
@@ -546,4 +568,8 @@ export class ServicePreview100554 extends ServiceBase {
         return elements;
     }
 
+}
+
+interface ILanguage {
+    [key: string]: { acronym: string, name: string }
 }
