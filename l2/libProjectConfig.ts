@@ -64,7 +64,7 @@ export async function updateConfigProjectPlugins(
     if (!configFile) throw new Error('No config file!');
     await mls.stor.localStor.setContent(configFile, {
         contentType: 'string',
-        content: JSON.stringify(projectConfig[project], null, 2)
+        content: JSON.stringify(projectConfig[project].config, null, 2)
     });
 }
 

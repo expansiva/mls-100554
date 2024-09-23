@@ -2,6 +2,7 @@
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { getConfigProject, updateConfigProjectPlugins } from './_100554_libProjectConfig';
 import './_100554_collabTilesItem';
 import 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.3/Sortable.min.js';//https://github.com/SortableJS/Sortable/blob/master/Sortable.js
 @customElement('collab-tiles-100554')
@@ -13,7 +14,11 @@ export class CollabTiles extends LitElement {
 
     @property({ type: String, reflect: true }) text = '';
 
+    @property({ type: String, reflect: true }) example = '';
+
     @query('collab-tiles') collabTiles: HTMLElement | undefined;
+
+    private oldJson = '';
 
 
     //---------COMPONENT-------------
@@ -29,7 +34,7 @@ export class CollabTiles extends LitElement {
             <collab-tiles>
                 ${repeat(
             this.tilesItens,
-            ((key: ITilesItem, idx: number) => 'tile_' + idx) as any,
+            ((key: ITilesItem, idx: number) => key.plugin) as any,
             ((item: ITilesItem, index: any) => {
                 return this.renderItem(item, index);
             }) as any
@@ -41,8 +46,9 @@ export class CollabTiles extends LitElement {
 
 
     renderItem(item: ITilesItem, idx: number) {
+
         return html`
-        <collab-tiles-item-100554 position="${item.position}" index="${idx}" plugin="${item.plugin}"></collab-tiles-item-100554>
+        <collab-tiles-item-100554 position="${item.position}" index="${idx}" plugin="${item.plugin}" .myinfo=${item}></collab-tiles-item-100554>
         `
     }
 
@@ -71,19 +77,6 @@ export class CollabTiles extends LitElement {
             </div>
             
         `
-
-        /*
-        
-        <ul>
-                ${repeat(
-            this.tilesItens,
-            ((key: ITilesItem, idx: number) => 'tile_' + idx) as any,
-            ((item: ITilesItem, index: any) => {
-                return this.renderItemConfig(item, index);
-            }) as any
-        )}
-            </ul>
-        */
     }
 
     renderItemConfig(item: ITilesItem, index: number) {
@@ -103,12 +96,12 @@ export class CollabTiles extends LitElement {
         const all = this.querySelectorAll('collab-tiles-item-100554');
 
         if (!active) {
-            
+
             Array.from(all).forEach((e) => {
                 e.removeAttribute('edit');
             })
 
-            if(this.sort) this.sort.destroy();
+            if (this.sort) this.sort.destroy();
 
             return;
         }
@@ -118,9 +111,7 @@ export class CollabTiles extends LitElement {
             this.sort = (window['Sortable' as any] as any).create(this.collabTiles, {
                 group: "sorting",
                 sort: active,
-                onUpdate: function (evt: any) {
-                    console.info(evt)
-                },
+                onUpdate: function (evt: any) {},
             });
         }
 
@@ -131,13 +122,118 @@ export class CollabTiles extends LitElement {
     }
 
     private open() {
+        this.oldJson = JSON.stringify(this.tilesItens)
         this.config = 'open';
         this.setDragAndDrop(true);
     }
 
-    private close() {
+    private async close() {
+
+        await this.verifyNeedSaveAndSave();
         this.config = 'close';
-        this.setDragAndDrop(false)
+        this.setDragAndDrop(false);
+
+
+    }
+
+    private async verifyNeedSaveAndSave() {
+
+        const all = this.querySelectorAll('collab-tiles-item-100554');
+    
+        const actualTiles: ITilesItem[] = [];
+
+        Array.from(all).forEach((e: any, index: number) => {
+
+            const tl: ITilesItem | undefined = e && e.myinfo ? e.myinfo : undefined;
+            if (!tl) return;
+
+            const idx = e.getAttribute('index') ? +e.getAttribute('index') : 0;
+
+            if (idx !== index) {
+                tl.index = (index + 1).toString();
+            }
+
+            actualTiles.push(tl);
+        })
+
+        const actualJson = JSON.stringify(actualTiles);
+
+        const need = actualJson !== this.oldJson;
+
+        if (need) {
+            await this.changeConfig(actualTiles);
+
+            actualTiles.sort((a, b) => {
+                return Number(a.index) - Number(b.index);
+            });
+
+            this.tilesItens = actualTiles;
+        }
+
+        return;
+    }
+
+    private async changeConfig(tiles: ITilesItem[]) {
+
+        const prj = mls.actual[5].project;
+        if (!prj) return;
+
+
+        const config = await getConfigProject(prj);
+
+        if (!config) return;
+
+        tiles.forEach((t) => {
+            this.setInfoPlugin(config, t);
+        });
+
+        await updateConfigProjectPlugins(prj, config.plugins)
+
+    }
+
+    private setInfoPlugin(config: mls.l5_common.ProjectConfig | undefined, tile: ITilesItem) {
+
+        if (!config) return;
+
+        const dash = "l6Dashboard" as mls.plugin.Scope;
+        const ex = "Examples " + this.example;
+        const pos: string = 'tile ' + tile.position + ' ' + tile.index;
+
+        const plugin = config.plugins;
+
+        if (!plugin[tile.widgetConfig]) {
+
+            plugin[tile.widgetConfig] = {
+                [tile.plugin]: {
+                    "l6Dashboard": {
+                        [ex]: pos
+                    },
+                    "enabled": tile.enabled
+                }
+            }
+        } else if (plugin[tile.widgetConfig] && !plugin[tile.widgetConfig][tile.plugin]) {
+            plugin[tile.widgetConfig][tile.plugin] = {
+                "l6Dashboard": {
+                    [ex]: pos
+                },
+                "enabled": tile.enabled
+            }
+
+        } else if (plugin[tile.widgetConfig] && plugin[tile.widgetConfig][tile.plugin] && !plugin[tile.widgetConfig][tile.plugin][dash]) {
+
+            plugin[tile.widgetConfig][tile.plugin][dash] = {
+                [ex]: pos
+            };
+
+            plugin[tile.widgetConfig][tile.plugin].enabled = tile.enabled;
+
+        } else if (plugin[tile.widgetConfig] && plugin[tile.widgetConfig][tile.plugin] && plugin[tile.widgetConfig][tile.plugin][dash]) { 
+
+            (plugin[tile.widgetConfig][tile.plugin][dash] as any)[ex] = pos as any
+
+            plugin[tile.widgetConfig][tile.plugin].enabled = tile.enabled;
+
+        }
 
     }
 
@@ -206,7 +302,10 @@ export class CollabTiles extends LitElement {
 }
 
 interface ITilesItem {
-    title: string;
-    plugin: string;
-    position: string;
+    title: string,
+    plugin: string,
+    position: string,
+    index: string,
+    enabled: string,
+    widgetConfig: string
 }

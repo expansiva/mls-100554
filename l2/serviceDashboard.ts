@@ -113,14 +113,14 @@ export class ServiceDashboard100554 extends ServiceBase {
 
         if (this.pluginsDash1.length <= 0) return html`<h3 style="padding:2rem">Not found plugins</h3>`;
 
-        return html`<collab-tiles-100554 .tilesItens=${this.pluginsDash1} class="${this.cssBreakPoint}"></collab-tiles-100554>`;
+        return html`<collab-tiles-100554 .tilesItens=${this.pluginsDash1} example="1" class="${this.cssBreakPoint}"></collab-tiles-100554>`;
     }
 
     renderIcon2() {
 
         if (this.pluginsDash2.length <= 0) return html`<h3 style="padding:2rem">Not found plugins</h3>`;
 
-        return html`<collab-tiles-100554 .tilesItens=${this.pluginsDash2} class="${this.cssBreakPoint}"></collab-tiles-100554>`
+        return html`<collab-tiles-100554 .tilesItens=${this.pluginsDash2} example="2" class="${this.cssBreakPoint}"></collab-tiles-100554>`
     }
 
     //------------IMPLEMENTATION---------------
@@ -145,12 +145,18 @@ export class ServiceDashboard100554 extends ServiceBase {
             const item: ITiles = {
                 title: 'Tile_' + index,
                 plugin: i.widget,
-                position: '2 2'
+                position: '2 2',
+                index: '99',
+                enabled: 'true',
+                widgetConfig: ''
             };
 
-            const pos = this.getPosition(config, i.widgetConfig, i.widget, i.category);
+            const infoPlugin = this.getInfoPlugin(config, i.widgetConfig, i.widget, i.category);
 
-            item.position = pos;
+            item.position = infoPlugin.pos;
+            item.index = infoPlugin.index;
+            item.enabled = infoPlugin.enabled;
+            item.widgetConfig = infoPlugin.widgetConfig;
 
             switch (i.category) {
                 case 'Examples 1': {
@@ -166,22 +172,43 @@ export class ServiceDashboard100554 extends ServiceBase {
 
         });
 
+        this.pluginsDash1.sort((a, b) => {
+            return Number(a.index) - Number(b.index);
+        });
+        
+        this.pluginsDash2.sort((a, b) => {
+            return Number(a.index) - Number(b.index);
+        });
+
         this.requestUpdate();
     }
 
-    private getPosition(config: mls.l5_common.ProjectConfig | undefined, widgetConfig: string | undefined, widget: string, cat: string | null ): string{
-        
-        if (!config || !widgetConfig || !cat) return '2 2';
+    private getInfoPlugin(config: mls.l5_common.ProjectConfig | undefined, widgetConfig: string | undefined, widget: string, cat: string | null): { index: string, enabled: string, pos: string, widgetConfig:string } {
+
+        const ret = { index: '99', enabled: 'true', pos: '2 2', widgetConfig: '' }
+        if (!config || !widgetConfig || !cat) return ret;
 
         const plugin = config.plugins;
 
         widgetConfig = '_' + widgetConfig.replace('2_', '').replace('.ts', '');
-    
-        if (!plugin[widgetConfig] || !plugin[widgetConfig][widget] || !(plugin[widgetConfig][widget] as any)["l6Dashboard" as any] || !(plugin[widgetConfig][widget] as any)["l6Dashboard"][cat]) return '2 2';
 
-        return (plugin[widgetConfig][widget] as any)["l6Dashboard"][cat].replace('tile', '').trim();
-
+        ret.widgetConfig = widgetConfig;
         
+        if (!plugin[widgetConfig] || !plugin[widgetConfig][widget] || !(plugin[widgetConfig][widget] as any)["l6Dashboard" as any] || !(plugin[widgetConfig][widget] as any)["l6Dashboard"][cat]) return ret;
+
+        const pos = (plugin[widgetConfig][widget] as any)["l6Dashboard"][cat].replace('tile', '').trim();
+
+        const a: string[] = pos.split(' ');
+
+        if (a.length < 3) ret.pos = a.join(' ');
+        else {
+            ret.index = a.pop() as string;
+            ret.pos = a.join(' ');
+        }
+
+        ret.enabled = (plugin[widgetConfig][widget] as any).enabled;
+
+        return ret;
 
     }
 
@@ -190,5 +217,8 @@ export class ServiceDashboard100554 extends ServiceBase {
 interface ITiles {
     title: string,
     plugin: string,
-    position: string
+    position: string,
+    index: string,
+    enabled: string,
+    widgetConfig:string
 }

@@ -13,6 +13,8 @@ export class CollabTilesItem extends LitElement {
     private startWidth: number = 0;
     private startHeight: number = 0;
 
+    public myinfo: ITilesItem | undefined;
+
     @property({ type: String, reflect: true }) position = '';
     @property({ type: String, reflect: true }) plugin = '';
     @property({ type: String, reflect: true }) index = '';
@@ -43,8 +45,13 @@ export class CollabTilesItem extends LitElement {
 
     render() {
 
-        const [r, c] = this.position ? this.position.split(' ') : ['2', '2'];
+        if (!this.myinfo) return;
 
+        this.style.display = '';
+        if(this.edit !== 'true' && this.myinfo.enabled === 'false') this.style.display = 'none';
+
+
+        const [r, c] = this.position ? this.position.split(' ') : ['2', '2'];
 
         this.style.gridRow = 'span ' + r;
         this.style.gridColumn = 'span ' + c;
@@ -81,13 +88,32 @@ export class CollabTilesItem extends LitElement {
     }
 
     renderResize() {
+
+        let title = 'activate'
+        let aux = '<svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-111 111-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0L369 209z"/></svg>';
+
+        if (this.myinfo && this.myinfo.enabled !== 'false') {
+            aux = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:15px"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"/></svg>';
+            title = 'disable';
+        }
+
         return html`
+            <collabtileenabled title="${title}" @click="${this.setEnabled}">${unsafeHTML(aux)}</collabtileenabled>
             <collabtileitemresize draggable="true">
             </collabtileitemresize>
         `
     }
 
     //-----------IMPLEMENTS-----------
+
+    private setEnabled() {
+
+        if (!this.myinfo) return;
+
+        this.myinfo.enabled = this.myinfo.enabled === 'true' ? 'false' : 'true' ;
+        this.requestUpdate();
+        
+    }
 
     private async loadingPlugin() {
 
@@ -173,6 +199,8 @@ export class CollabTilesItem extends LitElement {
         this.style.width = '';
         this.style.height = '';
 
+        if(this.myinfo) this.myinfo.position = row + ' '+col;
+
     }
 
     private myCss = `
@@ -193,6 +221,21 @@ export class CollabTilesItem extends LitElement {
             position: absolute;
             transform: translate(40%, 40%);
             cursor: se-resize;
+        }
+
+        collabtileenabled{
+            top: 0px;
+            left: 0px;
+            width:18px;
+            height:18px;
+            background:#fff;
+            border-radius:50%;
+            position: absolute;
+            transform: translate(-40%, -40%);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         @-webkit-keyframes enter {
@@ -337,4 +380,13 @@ export class CollabTilesItem extends LitElement {
         }
     `
 
+}
+
+interface ITilesItem {
+    title: string,
+    plugin: string,
+    position: string,
+    index: string,
+    enabled: string,
+    widgetConfig:string
 }
