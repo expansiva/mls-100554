@@ -24,7 +24,7 @@ export async function getConfigProject(project: number, ignoreLocalChanges = fal
     let configFile = mls.stor.files[key];
     if (!configFile) return undefined;
 
-    if (!projectConfig[project] || (projectConfig[project].versionRef !== configFile.versionRef) || ignoreLocalChanges) {
+    if (!projectConfig[project] /*|| (projectConfig[project].versionRef !== configFile.versionRef)*/ || ignoreLocalChanges) {
 
         const lastStatus = configFile.inLocalStorage;
         if (ignoreLocalChanges) {

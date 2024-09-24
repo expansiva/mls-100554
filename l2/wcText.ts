@@ -49,7 +49,6 @@ export class WcInputText100554 extends IcaApresentationTextTextBase {
                 break;
             case 'blockquote':
                 tag = 'blockquote';
-                this.style.borderLeft = '1px solid #cfcccc';
                 break;
             default:
                 tag = 'span';
