@@ -58,6 +58,17 @@ export class ServiceDashboard100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
+        if (!visible) {
+            const el = this.shadowRoot?.querySelector('collab-tiles-100554');
+            if (!el) return;
+
+            const config = el.getAttribute('config');
+            if (config === 'close' || !(el as any).onlyclose) return;
+
+            (el as any).onlyclose();
+
+
+        }
     }
 
     //---------COMPONENT-------------

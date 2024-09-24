@@ -71,9 +71,15 @@ export class CollabTiles extends LitElement {
     renderConfigItensClose() {
         return html`
             <div style="display:flex; justify-content: end;">
-                <button class="collabtilesconfigiten" style="margin-right:10px" title="config" @click="${this.close}">
-                    <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"/></svg>
+                <button class="collabtilesconfigiten" style="margin-right:10px" title="save" @click="${this.close}">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-111 111-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0L369 209z"/></svg>
+                    Save
                 </button>
+                <button class="collabtilesconfigiten" style="margin-right:10px" title="cancel" @click="${this.onlyclose}">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"/></svg>
+                    Cancel
+                </button>
+                
             </div>
             
         `
@@ -122,17 +128,35 @@ export class CollabTiles extends LitElement {
     }
 
     private open() {
-        this.oldJson = JSON.stringify(this.tilesItens)
+        this.oldJson = JSON.stringify(this.tilesItens);
         this.config = 'open';
         this.setDragAndDrop(true);
+
+        if(mls.actualLevel !== 2) mls.events.fire(
+            mls.actualLevel as any,
+            'PluginDetails' as any,
+            JSON.stringify(
+                {
+                    shortName: '',
+                    project: '',
+                    htmlText: '<div></div>'
+                }
+            ),
+            0
+        );
     }
 
     private async close() {
-
         await this.verifyNeedSaveAndSave();
         this.config = 'close';
         this.setDragAndDrop(false);
 
+    }
+
+    private onlyclose() {
+        this.tilesItens = JSON.parse(this.oldJson);
+        this.config = 'close';
+        this.setDragAndDrop(false);
 
     }
 

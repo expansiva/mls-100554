@@ -32,12 +32,12 @@ export class ServiceDetail100554 extends ServiceBase {
         tooltip: 'Detail',
         visible: true,
         widget: '_100554_serviceDetail',
-        level: [1,2,3,4,5,6,7]
+        level: [1, 2, 3, 4, 5, 6, 7]
     }
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opAboutThis') return this.showAboutThis();
-        if (this.menu.setMode) this.menu.setMode('initial');        
+        if (this.menu.setMode) this.menu.setMode('initial');
         return false;
     }
 
@@ -93,6 +93,21 @@ export class ServiceDetail100554 extends ServiceBase {
         return true;
     }
 
+    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+
+        if (!visible && this.contentPlugin) {
+            this.contentPlugin.innerHTML = '';
+        }
+
+        if (!this.contentPlugin) return;
+        Array.from(this.contentPlugin.children).forEach((child) => {
+            if (child.tagName.startsWith('PLUGIN-')) {
+                child.setAttribute('msize', this.msize);
+            }
+        });
+
+    }
+
     //----------COMPONENT------------------
 
     createRenderRoot() {
@@ -111,15 +126,8 @@ export class ServiceDetail100554 extends ServiceBase {
         }
     }
 
-    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
-    }
-
-    @property()
-    name: string = 'Somebody';
-
     render() {
-        return html`<div style="overflow:auto;height:100%;" id="contentPlugin"></div>`;
+        return html`<div style="overflow:auto;height:100%;padding:1rem" id="contentPlugin"></div>`;
     }
 
     //----------IMPLEMENTS-------------------
@@ -133,18 +141,21 @@ export class ServiceDetail100554 extends ServiceBase {
 
         if (!ev.desc) return;
         this.openMe();
-        const data: { shortName: string, project: number } = JSON.parse(ev.desc);
-        if (data.shortName) this.openPlugin(data)
+        const data: { shortName: string, project: number, htmlText: string } = JSON.parse(ev.desc);
+        if (data.shortName || data.htmlText) this.openPlugin(data)
 
     }
 
-    private async openPlugin(info: { shortName: string, project: number }) {
+    private async openPlugin(info: { shortName: string, project: number, htmlText: string }) {
 
         const keyFile = mls.stor.getKeyToFiles(info.project, 2, info.shortName, '', '.html');
         const storFile = mls.stor.files[keyFile];
         if (!storFile && this.contentPlugin) {
-            this.contentPlugin.innerHTML = 'Not found storFile:' + JSON.stringify(info);
+
+            if (info.htmlText) this.contentPlugin.innerHTML = info.htmlText;
+            else this.contentPlugin.innerHTML = 'Not found storFile:' + JSON.stringify(info);
             return;
+
         } else if (!storFile) return;
 
         this.plugin = info;

@@ -51,7 +51,7 @@ export class CollabTilesItem extends LitElement {
         if(this.edit !== 'true' && this.myinfo.enabled === 'false') this.style.display = 'none';
 
 
-        const [r, c] = this.position ? this.position.split(' ') : ['2', '2'];
+        const [r, c] = this.myinfo.position ? this.myinfo.position.split(' ') : ['2', '2'];
 
         this.style.gridRow = 'span ' + r;
         this.style.gridColumn = 'span ' + c;
@@ -90,10 +90,10 @@ export class CollabTilesItem extends LitElement {
     renderResize() {
 
         let title = 'activate'
-        let aux = '<svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-111 111-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0L369 209z"/></svg>';
+        let aux = '+';
 
         if (this.myinfo && this.myinfo.enabled !== 'false') {
-            aux = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:15px"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"/></svg>';
+            aux = '-';
             title = 'disable';
         }
 
@@ -186,6 +186,8 @@ export class CollabTilesItem extends LitElement {
         let col = Number.parseInt(this.style.width);
         let row = Number.parseInt(this.style.height);
 
+        if (!col || !row) return;
+
         if (col < 0) col = col * -1;
         if (row < 0) row = row * -1;
 
@@ -232,10 +234,12 @@ export class CollabTilesItem extends LitElement {
             border-radius:50%;
             position: absolute;
             transform: translate(-40%, -40%);
+            box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
+            color:#000;
         }
 
         @-webkit-keyframes enter {

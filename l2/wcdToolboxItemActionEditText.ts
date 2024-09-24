@@ -142,15 +142,10 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
                     line-height: 1;
                     margin-right: 0.1em;
                 }
-
-                #edittextwcd blockquote{
-                    border-left: 3px solid var(--text-primary-color-darker);
-                    padding-left: 20px;
-                    margin-left: -23px;
-                    padding-bottom: 2px;
-                }
             </style>
         `;
+
+
 
 
         el.removeAttribute('contenteditable');
@@ -179,12 +174,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     private hasDropCap: boolean = false;
 
     private setCaret(): void {
-
+    
         if (this.myInfos.x === undefined || this.myInfos.y === undefined || (this.myInfos.x === 0 && this.myInfos.y === 0)) return;
         const range = document.caretRangeFromPoint(this.myInfos.x, this.myInfos.y);
         const selection = window.getSelection();
 
-        if (!selection || !range) return;
+        if (!selection || !range || range.endContainer.nodeName !== '#text') return;
 
         selection.removeAllRanges();
         selection.addRange(range);

@@ -26,6 +26,24 @@ export class PluginExamplesIndex extends PluginBaseIndex {
             widget: '_100554_pluginSiteMonitorDashboardExpenses'
         },
         {
+            category: 'Examples 1',
+            scope: ['l6Dashboard'],
+            auth: ['admin', 'author'],
+            widget: '_100554_pluginSiteMonitorDashboardRegionalLatency'
+        },
+        {
+            category: 'Examples 1',
+            scope: ['l6Dashboard'],
+            auth: ['admin', 'author'],
+            widget: '_100554_pluginSiteMonitorDashboardResponseTime'
+        },
+        {
+            category: 'Examples 1',
+            scope: ['l6Dashboard'],
+            auth: ['admin', 'author'],
+            widget: '_100554_pluginSiteMonitorDashboardSales'
+        },
+        {
             category: 'Examples 2',
             scope: ['l6Dashboard'],
             auth: ['admin', 'author'],
@@ -42,7 +60,7 @@ export class PluginExamplesIndex extends PluginBaseIndex {
             scope: ['l6Dashboard'],
             auth: ['admin', 'author'],
             widget: '_100554_pluginSiteMonitorDashboardSales'
-          },
+        },
         {
             category: 'Examples 2',
             scope: ['l6Dashboard'],
