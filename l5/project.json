@@ -9,42 +9,18 @@
   "languages": [
     {
       "language": "en",
-      "path": "/",
-      "variations": [
-        {
-          "type": "master",
-          "enabled": true,
-          "subdomain": "",
-          "designSystem": "",
-          "variation": 0
-        }
-      ]
+      "name": "English",
+      "path": "/"
     },
     {
       "language": "pt",
-      "path": "/pt",
-      "variations": [
-        {
-          "type": "master",
-          "enabled": true,
-          "subdomain": "",
-          "designSystem": "",
-          "variation": 10
-        }
-      ]
+      "name": "Portuguese",
+      "path": "/pt"
     },
     {
       "language": "es",
-      "path": "/es",
-      "variations": [
-        {
-          "type": "master",
-          "enabled": true,
-          "subdomain": "",
-          "designSystem": "",
-          "variation": 20
-        }
-      ]
+      "name": "Spanish",
+      "path": "/es"
     }
   ],
   "orgName": "collab",
@@ -70,7 +46,7 @@
     "_100554_pluginExamplesIndex": {
       "_100554_pluginSiteMonitorDashboardActiveUsers": {
         "l6Dashboard": {
-          "Examples 1": "tile 2 4",
+          "Examples 1": "tile 2 2 1",
           "Examples 2": "tile 3 7"
         },
         "enabled": "true"
@@ -78,6 +54,36 @@
       "_100554_pluginSiteMonitorDashboardSpikes": {
         "l6Dashboard": {
           "Examples 2": "tile 3 4"
+        },
+        "enabled": "true"
+      },
+      "_100554_pluginSiteMonitorDashboardErrors": {
+        "l6Dashboard": {
+          "Examples 1": "tile 2 2 2"
+        },
+        "enabled": "true"
+      },
+      "_100554_pluginSiteMonitorDashboardExpenses": {
+        "l6Dashboard": {
+          "Examples 1": "tile 2 3 99"
+        },
+        "enabled": "true"
+      },
+      "_100554_pluginSiteMonitorDashboardRegionalLatency": {
+        "l6Dashboard": {
+          "Examples 1": "tile 2 2 99"
+        },
+        "enabled": "true"
+      },
+      "_100554_pluginSiteMonitorDashboardResponseTime": {
+        "l6Dashboard": {
+          "Examples 1": "tile 2 2 99"
+        },
+        "enabled": "true"
+      },
+      "_100554_pluginSiteMonitorDashboardSales": {
+        "l6Dashboard": {
+          "Examples 1": "tile 2 2 99"
         },
         "enabled": "true"
       }

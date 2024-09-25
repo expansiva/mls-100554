@@ -447,24 +447,7 @@ export class ServicePreview100554 extends ServiceBase {
                 'English_en': { acronym: 'en', name: 'English' }
             }
         } else {
-            const testLangs = [
-                {
-                    "language": "en",
-                    "name": "English",
-                    "path": "/",
-                },
-                {
-                    "language": "pt",
-                    "name": "Portuguese",
-                    "path": "/pt",
-                },
-                {
-                    "language": "es",
-                    "name": "Spanish",
-                    "path": "/es",
-                }
-            ]
-            testLangs.forEach((entry, index) => {
+            config.languages.forEach((entry, index) => {
                 this.languages[`${entry.name}_${entry.language}`] = {
                     acronym: entry.language,
                     name: entry.name,
