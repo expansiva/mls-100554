@@ -120,7 +120,9 @@ export class ServicePreview100554 extends ServiceBase {
         if (op === 'btWatch') return this.toogleWatch();
         if (op === 'btEditStyle') return this.editStyles();
         if (op === 'btHelp') return this.onHelpClick();
-        if (['btVariations', 'btTheme', 'btTokens'].includes(op)) {
+        if (op === 'btTheme') return this.onBtThemeClick();
+
+        if (['btVariations', 'btTokens'].includes(op)) {
             this.actButton(op, opMenu);
             return true;
         }
@@ -128,14 +130,10 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public async actButton(op: string, opMenu?: string) {
-
         await this.fireWcdChanges();
         if (op === 'btVariations') return this.onBtVariationsClick(opMenu);
-        if (op === 'btTheme') return this.onBtThemeClick();
         if (op === 'btTokens') return this.onBtTokensClick(opMenu);
-
     }
-
 
     public menu: IMenu = {
         title: 'Preview',
