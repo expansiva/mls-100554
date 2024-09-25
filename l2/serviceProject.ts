@@ -113,11 +113,28 @@ export class ServiceProject100554 extends ServiceBase {
         }
     }
 
+    private fireEventClose(msg: string) {
+        mls.events.fire(
+            5,
+            'PluginDetails' as any,
+            JSON.stringify(
+                {
+                    htmlText: `<div>${msg}</div>`
+
+                }
+            ),
+            0
+        );
+    }
+
     private renderExplore() {
+        this.fireEventClose('In development: Details explore');
         return html`In develpoment`;
     }
 
     private renderShowCase() {
+        this.fireEventClose('In development: Details showcase');
+
         const { project } = mls.actual[5];
         if (!project) return '<div>No project selected</div<';
         const keyToFile = mls.stor.getKeyToFiles(project, 2, 'project', '', '.html');
@@ -130,7 +147,9 @@ export class ServiceProject100554 extends ServiceBase {
     private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
 
     renderAdmin() {
-        
+
+        this.fireEventClose('Select a plugin');
+
         const keys = Object.keys(this.myData);
         return html`
         <div>
@@ -177,6 +196,8 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     private renderPlugin() {
+        this.fireEventClose('In development: Details plugins');
+
         const groupedPlugins = this.groupPluginsByCategory(this.pluginsList);
         const sortedCategories = Object.keys(groupedPlugins).sort();
         return html`
