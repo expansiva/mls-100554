@@ -1,8 +1,9 @@
 /// <mls shortName="wcdCommandDel" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { IWCDCommand } from './_100554_wcdTypes';
+import { IWCDCommand, WCDOverlayMethods } from './_100554_wcdTypes';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { findParentElementWithTagName } from './_100554_wcdGlobal'
 
 export function execute(param: IWCDCommand) {
 
@@ -13,69 +14,88 @@ export function execute(param: IWCDCommand) {
     const e = param.args as KeyboardEvent;
     const ica = param.selectedIca;
     const overlay = param.overlay;
-
     e.preventDefault();
 
     if (!ica || !ica.overlayRef) return;
-
-    if (e.key.toLocaleLowerCase() === 'backspace') {
-
-        let sibling = ica.previousElementSibling as IcaLitElementBaseMethods;
-        if (!sibling || !sibling.overlayRef) {
-
-            const findIcaParentSibling = (icaBase: HTMLElement): IcaLitElementBaseMethods | undefined | null | Element=> {
-
-                let p = icaBase.parentElement as IcaLitElementBaseMethods;
-                if (p && !p.tagName.toLocaleLowerCase().startsWith('ica-')) {
-                    return findIcaParentSibling(p);
-                }
-
-
-                p = p.previousElementSibling as IcaLitElementBaseMethods;
-                if (!p) return undefined;
-
-
-                const tag = p.widget as string;
-                const elPR = p.querySelector(tag);
-
-                if (elPR && elPR.children.length > 1) return elPR.children[elPR.children.length - 1]; 
-                else if(p) return p
-
-                return undefined;
-            }
-
-            sibling = findIcaParentSibling(ica) as IcaLitElementBaseMethods;
-            if (!sibling || !sibling.overlayRef) return;
-        }
-
-        const index = overlay.myItens.findIndex(item => item.element === sibling);
-
-        if (index !== -1) {
-            overlay.myItens.splice(index, 1);
-        }
-
-        sibling.overlayRef.remove();
-        sibling.remove();
-
-    } else {
-
-        const sibling = ica.previousElementSibling as IcaLitElementBaseMethods;
-        const index = overlay.myItens.findIndex(item => item.element === ica);
-
-        if (index !== -1) {
-            overlay.myItens.splice(index, 1);
-        }
-
-        ica.overlayRef.remove();
-        ica.remove();
-
-        if (sibling && sibling.overlayRef) {
-            sibling.overlayRef.click();
-            sibling.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-    }
+    if (e.key.toLocaleLowerCase() === 'backspace') onBackspace(ica, overlay);
+    else onDel(ica, overlay);
 
     dispatchEventConciliate();
 
 }
+
+function onDel(ica: IcaLitElementBaseMethods, overlay: WCDOverlayMethods) {
+    let sibling = ica.previousElementSibling as IcaLitElementBaseMethods;
+    const sectionParent = findParentElementWithTagName(ica, 'ica-layout-flow-section-100554') as HTMLElement;
+    ica.remove();
+
+    if (sectionParent) sibling = checkParentSection(sectionParent, sibling);
+
+    overlay.refreshOverlay();
+    setTimeout(() => {
+        if (sibling && sibling.overlayRef) {
+            sibling.overlayRef.click();
+            sibling.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
+}
+
+function onBackspace(ica: IcaLitElementBaseMethods, overlay: WCDOverlayMethods) {
+    let sibling = ica.previousElementSibling as IcaLitElementBaseMethods;
+    if (!sibling || !sibling.overlayRef) {
+        sibling = findIcaParentSibling(ica) as IcaLitElementBaseMethods;
+        if (!sibling || !sibling.overlayRef) return;
+    }
+
+    const sectionParent = findParentElementWithTagName(sibling, 'ica-layout-flow-section-100554') as HTMLElement;
+    sibling.remove();
+    if (sectionParent) sibling = checkParentSection(sectionParent, sibling);
+    overlay.refreshOverlay();
+    setTimeout(() => {
+        if (sibling && sibling.overlayRef) {
+            sibling.overlayRef.click();
+            sibling.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
+
+}
+
+function checkParentSection(sectionParent: HTMLElement, sibling: IcaLitElementBaseMethods): IcaLitElementBaseMethods {
+    if (sectionParent) {
+        const sectionWidgetName = sectionParent.getAttribute('widget') || '';
+        const sectionEl = sectionParent.querySelector(sectionWidgetName);
+
+        if (sectionEl && sectionEl.children.length === 0) {
+            const previousOrNextSection = sectionParent.previousElementSibling || sectionParent.nextElementSibling;
+            if (previousOrNextSection) {
+                const sectionpreviousOrNextWidgetName = previousOrNextSection.getAttribute('widget') || '';
+                if (sectionpreviousOrNextWidgetName) {
+                    const sectionpreviousOrNextEl = previousOrNextSection.querySelector(sectionpreviousOrNextWidgetName);
+                    if (sectionpreviousOrNextEl) sibling = sectionpreviousOrNextEl.children[sectionpreviousOrNextEl.childElementCount - 1] as IcaLitElementBaseMethods;
+                }
+            }
+            sectionParent.remove();
+        }
+
+    }
+
+    return sibling;
+}
+
+function findIcaParentSibling(icaBase: HTMLElement): IcaLitElementBaseMethods | undefined | null | Element {
+
+    let parentElement = icaBase.parentElement as IcaLitElementBaseMethods;
+    if (parentElement && !parentElement.tagName.toLocaleLowerCase().startsWith('ica-')) {
+        return findIcaParentSibling(parentElement);
+    }
+
+    parentElement = parentElement.previousElementSibling as IcaLitElementBaseMethods;
+    if (!parentElement) return undefined;
+    const tag = parentElement.widget as string;
+    const elPR = parentElement.querySelector(tag);
+    if (elPR && elPR.children.length > 1) return elPR.children[elPR.children.length - 1];
+    else if (parentElement) return parentElement;
+    return undefined;
+}
+
+
