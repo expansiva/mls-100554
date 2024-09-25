@@ -142,6 +142,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
                     line-height: 1;
                     margin-right: 0.1em;
                 }
+                #edittextwcd blockquote{
+                    border-left: 3px solid var(--text-primary-color-darker);
+                    padding-left: 20px;
+                    margin-left: -23px;
+                    padding-bottom: 2px;
+                }
             </style>
         `;
 
