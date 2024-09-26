@@ -284,6 +284,7 @@ export class CollabTiles extends LitElement {
             background: none;
             border: none;
             box-shadow: none;
+            cursor:pointer;
         }
 
         collab-tiles-100554 .collabtilesconfigiten:hover{
@@ -291,6 +292,7 @@ export class CollabTiles extends LitElement {
             border: none;
             box-shadow: none;
             fill:#7d00ff;
+            color:#7d00ff;
         }
 
         collab-tiles-100554 collab-tiles{
