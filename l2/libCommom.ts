@@ -1,5 +1,7 @@
 /// <mls shortName="libCommom" project="100554" enhancement="_blank" groupName="other" />
 import { getMessageKey } from "./_100554_collabLitElement";
+import { getAllWebComponentsInSource } from './_100554_libCompile';
+import { convertTagToFileName } from './_100554_utilsLit';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -151,3 +153,68 @@ export function escapeHTML(str: string) {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
 }
+
+
+export function openService(service: string, position: 'left' | 'right', level: number) {
+    let page = document.querySelector('collab-page');
+    if (!page) return;
+    const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
+    if (!toolbar) return;
+    if (mls.actualLevel !== level) {
+        (toolbar as any).state[level][position] = service;
+        selectLevel(level);
+        return;
+    }
+    const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
+    if (item) {
+        item.click();
+    }
+    return;
+}
+
+export function selectLevel(level: number) {
+
+    const page = document.querySelector('collab-page');
+    const nav = page?.querySelector('collab-nav-1') as HTMLElement;
+    const objIndex = {
+        0: 7,
+        1: 6,
+        2: 5,
+        3: 4,
+        4: 3,
+        5: 2,
+        6: 1,
+        7: 0,
+
+    } as any;
+    if (!nav) return;
+    nav.setAttribute('tabindexactive', objIndex[level]);
+
+}
+
+
+export async function loadFileHTMLInContainer(el: HTMLElement, shortName: string, project: number) {
+
+    const keyFile = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
+    const storFile = mls.stor.files[keyFile];
+    if (!storFile) throw new Error('File not founded');
+
+    const content = await storFile.getContent();
+    if (!content || typeof content !== 'string') throw new Error('File html invalid');
+
+    el.innerHTML = '';
+
+    const allWcs = getAllWebComponentsInSource(content);
+    el.innerHTML = content;
+
+    allWcs.forEach((wc) => {
+        const fileName = convertTagToFileName(wc);
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.id = fileName;
+        script.src = (`/${fileName}`);
+        el.appendChild(script)
+    });
+
+}
+

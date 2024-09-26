@@ -204,6 +204,22 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_serviceNotification'
             },
+
+
+            {
+                category: 'List',
+                scope: ['l5Explore'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginExploreList'
+            },
+            {
+                category: 'Stories',
+                scope: ['l5Explore'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginExploreStories'
+            },
         ];
     }
 

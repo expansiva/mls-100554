@@ -5,7 +5,8 @@ import { customElement, property, query, } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_user } from './_100554_collabIcons';
 import { getAllWebComponentsInSource } from './_100554_libCompile';
-import { convertTagToFileName } from './_100554_utilsLit';
+import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
+
 import('./_100554_collabPanel');
 
 /// **collab_i18n_start**
@@ -34,8 +35,11 @@ export class ServiceProject100554 extends ServiceBase {
 
     @property() activeTab: IScenery = 'Explore';
 
+    @property({ type: Array }) explories: mls.plugin.MenuAction[] = [];
+
     @query('#projectDiv') projectDiv: HTMLDivElement | undefined;
 
+    @query('details') firstDetails: HTMLDetailsExplore | undefined;
 
     public details: IService = {
         icon: '&#xf542',
@@ -80,15 +84,29 @@ export class ServiceProject100554 extends ServiceBase {
 
     }
 
+
+    private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
+
+    async firstUpdated() {
+        this.setMyData();
+        await this.getExploreData();
+        if (this.activeTab === 'Explore') {
+            await this.updateComplete;
+            if (this.firstDetails) this.firstDetails.click();
+        }
+    }
+
+    async updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('activeTab') && this.activeTab === 'Explore') {
+            await this.updateComplete;
+            if (this.firstDetails) this.firstDetails.click();
+        }
+    }
+
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
     }
-
-
-    firstUpdated() {
-        this.setMyData();
-    }
-
 
     render() {
         const lang = this.getMessageKey(messages);
@@ -98,7 +116,7 @@ export class ServiceProject100554 extends ServiceBase {
         `;
     }
 
-    renderContent() {
+    private renderContent() {
         switch (this.activeTab) {
             case 'Explore':
                 return this.renderExplore();
@@ -129,7 +147,40 @@ export class ServiceProject100554 extends ServiceBase {
 
     private renderExplore() {
         this.fireEventClose('In development: Details explore');
-        return html`In develpoment`;
+        return html`<div>
+                ${this.explories.map((explorie, index) => {
+            return html`
+                        <details ?open=${index === 0} .data=${explorie} @click=${this.handleDetailExplorieClick}>
+                            <summary>${explorie.category}</summary>
+                            <div></div>
+                        </details>
+                    `
+        })
+            }</div>`;
+    }
+
+    private async handleDetailExplorieClick(e: MouseEvent) {
+        const target = e.target as HTMLElement;
+        const details = target.closest('details') as HTMLDetailsExplore;
+        if (!details) return;
+        const div = details.querySelector('div');
+        if (!div || div.childElementCount > 0) return;
+
+        await import(`./${details.data.widget}`);
+        const pluginTag = convertFileNameToTag(details.data.widget);
+        const pluginEl = document.createElement(pluginTag);
+        pluginEl.setAttribute('autoprepare', '');
+        pluginEl.setAttribute('level', this.level.toString());
+        pluginEl.setAttribute('position', this.position.toString());
+        div.appendChild(pluginEl);
+    }
+
+    private async getExploreData() {
+        const { project } = mls.actual[5]
+        if (!project) throw new Error('No project selected');
+        await mls.plugin.loadAll(project, true);
+        this.explories = mls.plugin.getAllMenuActions(project, { scope: 'l5Explore' } as any);
+
     }
 
     private renderShowCase() {
@@ -144,9 +195,7 @@ export class ServiceProject100554 extends ServiceBase {
         return html`<div style="overflow:auto;height:100%;" id="projectDiv"></div>`
     }
 
-    private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
-
-    renderAdmin() {
+    private renderAdmin() {
 
         this.fireEventClose('Select a plugin');
 
@@ -166,33 +215,12 @@ export class ServiceProject100554 extends ServiceBase {
 
     }
 
-    renderPanel(key: string, index: number) {
+    private renderPanel(key: string, index: number) {
         return html`
             <collab-panel-100554 .myData=${this.myData[key]}>
             </collab-panel-100554>
         
         `
-    }
-
-
-    private renderAdmin2() {
-
-        return html`
-        <div>
-            <div class="panel">
-                <div class="panel-container">
-                    <div class="panel-container-item">
-                        <svg fill="#000000" height="40px" width="40px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 459.75 459.75" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M447.652,304.13h-40.138c-6.681,0-12.097,5.416-12.097,12.097v95.805c0,6.681,5.416,12.098,12.097,12.098h40.138 c6.681,0,12.098-5.416,12.098-12.098v-95.805C459.75,309.546,454.334,304.13,447.652,304.13z"></path> <path d="M348.798,258.13H308.66c-6.681,0-12.098,5.416-12.098,12.097v141.805c0,6.681,5.416,12.098,12.098,12.098h40.138 c6.681,0,12.097-5.416,12.097-12.098V270.228C360.896,263.546,355.48,258.13,348.798,258.13z"></path> <path d="M151.09,304.13h-40.138c-6.681,0-12.097,5.416-12.097,12.097v95.805c0,6.681,5.416,12.098,12.097,12.098h40.138 c6.681,0,12.098-5.416,12.098-12.098v-95.805C163.188,309.546,157.771,304.13,151.09,304.13z"></path> <path d="M52.236,258.13H12.098C5.416,258.13,0,263.546,0,270.228v141.805c0,6.681,5.416,12.098,12.098,12.098h40.138 c6.681,0,12.097-5.416,12.097-12.098V270.228C64.333,263.546,58.917,258.13,52.236,258.13z"></path> <path d="M249.944,196.968h-40.138c-6.681,0-12.098,5.416-12.098,12.098v202.967c0,6.681,5.416,12.098,12.098,12.098h40.138 c6.681,0,12.098-5.416,12.098-12.098V209.066C262.042,202.384,256.625,196.968,249.944,196.968z"></path> <path d="M436.869,244.62c8.14,0,15-6.633,15-15v-48.479c0-8.284-6.716-15-15-15c-8.284,0-15,6.716-15,15v12.119L269.52,40.044 c-3.148-3.165-7.536-4.767-11.989-4.362c-4.446,0.403-8.482,2.765-11.011,6.445L131.745,209.185L30.942,144.969 c-6.987-4.451-16.26-2.396-20.71,4.592c-4.451,6.987-2.396,16.259,4.592,20.71l113.021,72c2.495,1.589,5.286,2.351,8.046,2.351 c4.783,0,9.475-2.285,12.376-6.507L261.003,74.025L400.8,214.62h-12.41c-8.284,0-15,6.716-15,15c0,8.284,6.716,15,15,15 c6.71,0,41.649,0,48.443,0H436.869z"></path> </g> </g></svg>
-                        <span>Usage</span>
-                    </div>
-                    <div class="panel-container-item">
-                       <svg viewBox="0 0 32 32" height="40px" width="40px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="icomoon-ignore"> </g> <path d="M17.599 3.738v2.598l0.8 0.207c0.905 0.234 1.768 0.597 2.566 1.081l0.715 0.434 1.86-1.86 2.262 2.262-1.888 1.888 0.407 0.708c0.451 0.785 0.788 1.635 1.002 2.527l0.196 0.817h2.744v3.199h-2.806l-0.216 0.782c-0.233 0.844-0.583 1.654-1.040 2.406l-0.434 0.716 2.036 2.035-2.262 2.262-2.064-2.064-0.707 0.407c-0.734 0.422-1.531 0.745-2.368 0.961l-0.8 0.206v2.951h-3.199v-2.951l-0.8-0.206c-0.837-0.216-1.634-0.539-2.368-0.961l-0.708-0.407-2.064 2.064-2.262-2.262 2.036-2.035-0.434-0.716c-0.457-0.753-0.807-1.562-1.040-2.406l-0.216-0.782h-2.806v-3.199h2.744l0.196-0.817c0.213-0.891 0.551-1.742 1.002-2.527l0.407-0.708-1.888-1.888 2.262-2.262 1.86 1.86 0.715-0.434c0.798-0.484 1.661-0.848 2.566-1.081l0.8-0.207v-2.598h3.199zM16 20.799c2.646 0 4.798-2.153 4.798-4.799s-2.152-4.799-4.798-4.799-4.798 2.153-4.798 4.799c0 2.646 2.152 4.799 4.798 4.799zM18.666 2.672h-5.331v2.839c-1.018 0.263-1.975 0.67-2.852 1.202l-2.022-2.022-3.769 3.77 2.065 2.065c-0.498 0.867-0.875 1.81-1.114 2.809h-2.97v5.331h3.060c0.263 0.953 0.655 1.85 1.156 2.676l-2.198 2.198 3.769 3.77 2.241-2.241c0.816 0.469 1.7 0.828 2.633 1.069v3.191h5.331v-3.191c0.933-0.241 1.817-0.6 2.633-1.069l2.241 2.241 3.769-3.77-2.198-2.198c0.501-0.826 0.893-1.723 1.156-2.676h3.060v-5.331h-2.97c-0.239-0.999-0.616-1.941-1.114-2.809l2.065-2.065-3.769-3.77-2.022 2.022c-0.877-0.532-1.834-0.939-2.852-1.202v-2.839h-0zM16 19.733c-2.062 0-3.732-1.671-3.732-3.733s1.67-3.732 3.732-3.732 3.732 1.671 3.732 3.732c0 2.062-1.67 3.733-3.732 3.733v0z" > </path> </g></svg>
-                        <span>Config</span>
-                    </div>     
-                </div>
-            </div>
-        
-        </div>`;
     }
 
     private renderPlugin() {
@@ -340,6 +368,10 @@ interface Plugin {
     description: string;
     category: string;
     status: PluginStatus
+}
+
+interface HTMLDetailsExplore extends HTMLDetailsElement {
+    data: mls.plugin.MenuAction
 }
 
 type PluginStatus = 'active' | 'inactive';
