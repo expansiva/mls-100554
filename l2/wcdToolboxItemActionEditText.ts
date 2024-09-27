@@ -226,9 +226,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             this.elICA.setAttribute('type', tp.toLocaleLowerCase());
         }
 
+
     }
 
     private changeInEditor(tp: string) {
+
+        if (!this.elMain) return;
 
         const edit = this.querySelector('#edittextwcd');
         if (!edit) return;
@@ -238,7 +241,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         this.myTag = tp;
         const newElement = document.createElement(tp);
-        newElement.innerHTML = el.innerHTML;
+        newElement.innerHTML = this.elMain.getAttribute(this.myInfos.attr) as string;
         newElement.setAttribute('contenteditable', 'true');
         newElement.setAttribute('spellcheck', 'false');
         newElement.style.outline = 'none';
@@ -269,7 +272,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     private moveSelectionToElement(newElement: HTMLElement) {
-
+        debugger;
         const shadowSelection = this.getRootNode() as any;
 
         const selection = shadowSelection.getSelection() as any;
@@ -308,7 +311,14 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         me = me.querySelector('*[contenteditable]') as HTMLElement
 
-        if (!me || !this.elMain || !this.myParent) return;
+        if (!me || !this.elMain || !this.myParent || !this.elICA) return;
+
+        const actualElMain = this.elICA.querySelector(this.elICA.getAttribute('widget') as string) as HTMLElement;
+
+        if (actualElMain !== this.elMain) {
+            this.elMain = actualElMain;
+            window.wcdState.elMain = actualElMain;
+        }
 
         const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;
 

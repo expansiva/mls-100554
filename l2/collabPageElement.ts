@@ -169,11 +169,14 @@ export abstract class CollabPageElement extends CollabLitElement {
         let elements: IICADepths[] = [];
         let elToSearch: Element | ShadowRoot = el;
 
+        const arrayEls: HTMLElement[] = []; 
+
         function traverseShadowRoot(element: HTMLElement, depth: number) {
 
-            if (element.tagName.toLowerCase().startsWith('ica')) {
+            if (element.tagName.toLowerCase().startsWith('ica') && !arrayEls.includes(element)) {
                 const { x, y, height, width } = element.getBoundingClientRect();
                 elements.push({ element: element as IcaLitElementBase, depth, x, y, height, width, opacity: element.style.opacity });
+                arrayEls.push(element);
                 return;
             }
             if (element.shadowRoot) {
@@ -188,14 +191,16 @@ export abstract class CollabPageElement extends CollabLitElement {
             }
         }
 
-        if (el.shadowRoot) elToSearch = el.shadowRoot;
+
+
+        if (el.shadowRoot) 
+            elToSearch = el.shadowRoot;
         elToSearch.querySelectorAll('*').forEach((item) => {
             traverseShadowRoot(item as HTMLElement, 0); // Inicializar com profundidade 0
         });
 
-
-
         return elements;
+
     }
 
     private getAllWebComponents(root: HTMLElement): HTMLElement[] {

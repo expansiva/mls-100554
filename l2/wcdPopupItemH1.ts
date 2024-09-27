@@ -7,47 +7,47 @@ import { WCDPopupMethodos } from './_100554_wcdTypes';
 
 @customElement('wcd-popup-item-h1-100554')
 export class WCDPopupItemH1 extends WCDPopupItem {
-    // this class is used by others files
+  // this class is used by others files
 
-    getSvg(): TemplateResult {
-        return svg`
+  getSvg(): TemplateResult {
+    return svg`
       <svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
         <text x="3" y="17" font-size="14" font-weight="bold">H1</text>
       </svg>
     `;
-    }
+  }
 
-    render() {
-        return html`
+  render() {
+    return html`
       <div @click=${this.handleClick} tabindex="-1">
       ${this.getSvg()}
       </div>
     `;
-    }
+  }
 
-    public normalText = 'P';
-    public headerText = 'H1';
-    
-    handleClick() {
+  public normalText = 'P';
+  public headerText = 'H1';
 
-        const parent = this.getMyParent();
-        if (!parent) return;
+  handleClick() {
 
-        parent.changeType(this.headerText);
-        
-    }
+    const parent = this.getMyParent();
+    if (!parent) return;
 
-    getMyParent(): WCDPopupMethodos | undefined {
+    parent.changeType(this.headerText);
 
-        const shadow = this.getRootNode() as ShadowRoot;
-        if (!shadow) return;
+  }
 
-        const parent = shadow.host as WCDPopupMethodos;
+  getMyParent(): WCDPopupMethodos | undefined {
 
-        if (!parent) return;
+    const shadow = this.getRootNode() as ShadowRoot;
+    if (!shadow) return;
 
-        return parent
+    const parent = shadow.host as WCDPopupMethodos;
 
-    }
+    if (!parent) return;
+
+    return parent
+
+  }
 
 }
