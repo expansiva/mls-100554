@@ -137,7 +137,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
-        if (ev.level !== 5 || (ev.type !== 'FileAction')) return;
+        if (![1,2,3,4,5].includes(ev.level) || (ev.type !== 'FileAction')) return;
         const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
         if (
             fileAction.position !== this.position ||
