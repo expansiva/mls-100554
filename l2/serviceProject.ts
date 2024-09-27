@@ -172,7 +172,8 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     private renderExplore() {
-        this.fireEventClose('In development: Details explore');
+        
+        // this.fireEventClose('In development: Details explore');
         return html`<div>
                 ${this.explories.map((explorie, index) => {
             return html`
