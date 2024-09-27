@@ -142,6 +142,11 @@ plugin-explore-list-100554 { //don't change this line
         margin: 0px;
         list-style: none;
 
+
+        li.selected{
+            background: @grey-color-light;
+        }
+
         li {
             padding: 0.5rem;
             cursor: pointer;
@@ -259,7 +264,7 @@ plugin-explore-list-100554 { //don't change this line
             }
 
             &:hover:not(.headerTitle) {
-                background: @bg-primary-color-lighter;
+                background: @grey-color-light;
             }
         }
     }

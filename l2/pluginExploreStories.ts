@@ -3,7 +3,7 @@
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { selectLevel } from './_100554_libCommom';
+import { selectLevel, forceServiceInstance, openService } from './_100554_libCommom';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -47,6 +47,10 @@ export class PluginExploreStories extends PluginBaseModule {
 
     private project = 1;
 
+    @property() position: 'left' | 'right' = 'left';
+
+    @property() level: number = 0;
+
     @property({ type: Boolean }) autoPrepare: boolean = false;
 
     @property({ type: Array }) files: IItensFiles[] = [];
@@ -60,6 +64,8 @@ export class PluginExploreStories extends PluginBaseModule {
     firstUpdated() {
         if (!this.autoPrepare) return;
         this.prepare();
+        forceServiceInstance(2, '_100554_serviceSource');
+
     }
 
     render() {
@@ -198,17 +204,13 @@ export class PluginExploreStories extends PluginBaseModule {
     }
 
     private clickLi(e: MouseEvent) {
-        debugger;
-
         e.stopPropagation();
         let el = e.target as HTMLElement;
         if (el.tagName.toLocaleLowerCase() !== 'li')
             el = el.closest('li') as HTMLElement;
         if (!el) return;
-
-
+        openService('_100554_servicePreview', 'right', +this.level);
         this.fireEvents('open', (el as any).myFile, {});
-
     }
 
     private clickMenu(e: MouseEvent) {
@@ -255,8 +257,7 @@ export class PluginExploreStories extends PluginBaseModule {
         if (el.tagName.toLocaleLowerCase() !== 'li')
             el = el.closest('li') as HTMLElement;
         if (!el) return;
-
-        selectLevel(2)
+        selectLevel(2);
         this.fireEvents('open', (el as any).myFile, {});
 
     }
@@ -277,7 +278,7 @@ export class PluginExploreStories extends PluginBaseModule {
     }
 
 
-    private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
+    private fireEvents(action: string, file: mls.stor.IFileInfo, info: any,  timeout: number = 0): void {
 
         const params = {} as mls.events.IFileAction;
 
@@ -287,7 +288,7 @@ export class PluginExploreStories extends PluginBaseModule {
         params.shortName = file.shortName;
         params.extension = '.ts';
         params.folder = file.folder;
-        params.position = 'right';
+        params.position = this.position;
 
         if (info && info.shortName) {
             params.newshortName = info.shortName;
@@ -298,7 +299,7 @@ export class PluginExploreStories extends PluginBaseModule {
         if (['open'].includes(action)) {
 
             mls.actual[2].setFullName(`_${file.project}_${file.shortName}`);
-            (mls.actual[2] as any)['right'] = {
+            (mls.actual[2] as any)[this.position] = {
                 project: file.project,
                 shortName: file.shortName,
                 extension: '.ts',

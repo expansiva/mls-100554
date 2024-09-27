@@ -192,6 +192,15 @@ export function selectLevel(level: number) {
 
 }
 
+export async function forceServiceInstance(level: number, service: string) {
+
+    const page = document.querySelector('collab-page');
+    const nav = page?.querySelector('collab-nav-1') as HTMLElement;
+    if (!nav) return;
+    await (nav as any).forceInstanceIfNeed([`${service};${level}`])
+
+}
+
 
 export async function loadFileHTMLInContainer(el: HTMLElement, shortName: string, project: number) {
 

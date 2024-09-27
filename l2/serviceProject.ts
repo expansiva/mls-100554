@@ -84,7 +84,6 @@ export class ServiceProject100554 extends ServiceBase {
 
     }
 
-
     private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
 
     async firstUpdated() {
@@ -104,8 +103,13 @@ export class ServiceProject100554 extends ServiceBase {
         }
     }
 
-    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+    private lastLevel: number = 0;
 
+    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+        if (this.visible && this.lastLevel !== this.level) {
+            this.lastLevel = this.level;
+            this.updateIconsByLevel(this.lastLevel);
+        }
     }
 
     render() {
@@ -114,6 +118,28 @@ export class ServiceProject100554 extends ServiceBase {
         return html`
             ${this.renderContent()}
         `;
+    }
+
+
+    private updateIconsByLevel(level: number) {
+        if (!this.menu || !this.menu.refresh) return;
+
+        if (level === 5) {
+            this.menu.icons = {
+                Explore: 'Explore;e521',
+                ShowCase: 'ShowCase;f5da',
+                Admin: 'Admin;f508',
+                Plugins: 'Plugins;f1e6',
+            }
+        } else {
+            this.menu.icons = {
+                Explore: 'Explore;e521',
+                ShowCase: 'ShowCase;f5da',
+            }
+        }
+
+        this.menu.refresh();
+        
     }
 
     private renderContent() {

@@ -1,8 +1,9 @@
 /// <mls shortName="pluginExploreList" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
-import {  property } from 'lit/decorators.js';
+import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
+import { selectLevel, forceServiceInstance } from './_100554_libCommom';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -59,7 +60,7 @@ export const pluginData: mls.plugin.IPluginData = {
 export class PluginExploreList extends PluginBaseModule {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-    
+
     private msg: MessageType = messages['en'];
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
@@ -68,7 +69,9 @@ export class PluginExploreList extends PluginBaseModule {
 
     @property() position: string = 'left';
 
-    @property() level: number = 0;
+    // @property() level: number = 0;
+
+    @property() levelFiles: number = 2;
 
     @property() project: number = 1;
 
@@ -79,6 +82,8 @@ export class PluginExploreList extends PluginBaseModule {
     @property({ type: Array }) files: mls.stor.IFileInfo[] = [];
 
     @property({ type: Array }) history: mls.stor.IFileInfo[] = [];
+
+    @queryAll('li') lis: HTMLElement[] | undefined;
 
     constructor() {
         super();
@@ -99,6 +104,14 @@ export class PluginExploreList extends PluginBaseModule {
     firstUpdated() {
         if (!this.autoPrepare) return;
         this.prepare();
+        forceServiceInstance(2, '_100554_serviceSource');
+
+    }
+
+    private async showAdd() {
+        await import('./_100554_serviceListFilesAdd');
+        this.inFilter = false;
+        this.mode = 'add';
     }
 
     private setEvents() {
@@ -184,7 +197,8 @@ export class PluginExploreList extends PluginBaseModule {
         <div class="groupHeader">
             <div class="groupAction"> 
                 <a @click="${this.verifyChangeInList}" id="listUpdateFiles">${this.msg.updateListVerify}</a>
-                <a>${this.msg.addNewFile}</a>
+                <a @click="${this.showAdd}">${this.msg.addNewFile}</a>
+
             </div>
             <div class="groupFilter">
                 
@@ -317,8 +331,10 @@ export class PluginExploreList extends PluginBaseModule {
 
         const style = this.inFilter && inHistory ? 'display:none' : '';
 
+        const actualL2 = (mls.actual[2] as any)[this.position]?.shortName;
+
         return html`
-            <li @click="${this.clickOptOpen}" style="${style}" .myFile=${file} .nameFilter="${nameFilter}">
+            <li @click="${this.clickOptOpen}" class="${file.shortName === actualL2 ? 'selected' : ''}" style="${style}" .myFile=${file} .nameFilter="${nameFilter}">
                 <div class="elContent">
                     <div class="groupHiddenList" @click="${this.clickGroupHidden}">
                         <span class="mls-gpbtnslider-item fa fa-undo" title="${this.msg.undo}" @click="${this.clickOptUndo}"></span>
@@ -335,7 +351,7 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     renderAdd() {
-        return html`<service-list-files-add-100554 level="${this.level}" position="${this.position}" .father="${this}"></service-list-files-add-100554>`
+        return html`<service-list-files-add-100554 level="${this.levelFiles}" position="${this.position}" .father="${this}"></service-list-files-add-100554>`
     }
 
     //------------ EVENTOS -----------------
@@ -357,11 +373,18 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
-    private clickOptOpen(e: MouseEvent) {
+    private async clickOptOpen(e: MouseEvent) {
+
         e.stopPropagation();
+        const target = e.target as HTMLElement;
+        const li = target.closest('li');
+        this.lis?.forEach((l) => l.classList.remove('selected'));
+        if (li) li.classList.add('selected');
+
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
         this.setHistory(mfile);
+        selectLevel(2);
         this.fireEvents('open', mfile, {});
 
     }
@@ -449,8 +472,8 @@ export class PluginExploreList extends PluginBaseModule {
 
         if (['open'].includes(action)) {
 
-            mls.actual[this.level as any].setFullName(`_${file.project}_${file.shortName}`);
-            (mls.actual[this.level as any] as any)[this.position as any] = {
+            mls.actual[this.levelFiles as any].setFullName(`_${file.project}_${file.shortName}`);
+            (mls.actual[this.levelFiles as any] as any)[this.position as any] = {
                 project: file.project,
                 shortName: file.shortName,
                 extension: file.extension,
@@ -459,7 +482,7 @@ export class PluginExploreList extends PluginBaseModule {
 
         }
 
-        mls.events.fire([(+(this.level as any) as any)], ['FileAction'], JSON.stringify(params), timeout);
+        mls.events.fire([(+(this.levelFiles as any) as any)], ['FileAction'], JSON.stringify(params), timeout);
 
         if (['open'].includes(action)) return;
         this.changeList(100);
@@ -477,7 +500,7 @@ export class PluginExploreList extends PluginBaseModule {
         info.level = 2;
         info.needCompile = true;
 
-        mls.events.fire([(+(this.level as any) as any)], ['ProjectLoaded'], JSON.stringify(info), 0);
+        mls.events.fire([(+(this.levelFiles as any) as any)], ['ProjectLoaded'], JSON.stringify(info), 0);
 
     }
 
@@ -669,13 +692,13 @@ export class PluginExploreList extends PluginBaseModule {
 
         if (!window['mls']) return [];
         const arraySf: mls.stor.IFileInfo[] = [];
-        const ext = (this.extensionLevel as any)[this.level as any] as string;
+        const ext = (this.extensionLevel as any)[this.levelFiles as any] as string;
         for (const i of Object.keys(mls.stor.files).sort()) {
 
             const sf = mls.stor.files[i];
             if (
                 sf.project !== this.project ||
-                sf.level !== +(this.level as any) ||
+                sf.level !== +(this.levelFiles as any) ||
                 sf.extension !== ext
             ) continue;
 
@@ -702,11 +725,11 @@ export class PluginExploreList extends PluginBaseModule {
 
         for await (const i of lh) {
 
-            let key = mls.stor.getKeyToFiles(i.project, this.level as any, i.shortName, i.folder, i.extension);
+            let key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
 
             if (!mls.stor.files[key] && +this.project === 0) {
                 await mls.stor.server.loadProjectInfoIfNeeded(i.project);
-                key = mls.stor.getKeyToFiles(i.project, this.level as any, i.shortName, i.folder, i.extension);
+                key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
             }
 
             if (!mls.stor.files[key] || (i.project !== +this.project && +this.project !== 0)) continue;
@@ -720,14 +743,14 @@ export class PluginExploreList extends PluginBaseModule {
 
     private getHistory(): { project: number, shortName: string, extension: string, folder: string }[] {
 
-        const info = localStorage.getItem('mlsInfoHistoryL' + this.level as any);
+        const info = localStorage.getItem('mlsInfoHistoryL' + this.levelFiles as any);
         return info ? JSON.parse(info) : [];
 
     }
 
     private setHistory(file: mls.stor.IFileInfo): void {
 
-        const info = localStorage.getItem('mlsInfoHistoryL' + this.level as any);
+        const info = localStorage.getItem('mlsInfoHistoryL' + this.levelFiles as any);
         const res: any[] = info ? JSON.parse(info) : [];
         let idx = -1;
         res.forEach((i: any, index) => {
@@ -744,7 +767,7 @@ export class PluginExploreList extends PluginBaseModule {
         if (res.length > 10) {
             for (let i = res.length - 1; i >= 0; i--) {
                 if (res.length <= 10) break;
-                const key = mls.stor.getKeyToFiles(res[i].project, this.level, res[i].shortName, res[i].folder, res[i].extension);
+                const key = mls.stor.getKeyToFiles(res[i].project, this.levelFiles, res[i].shortName, res[i].folder, res[i].extension);
                 if (!mls.stor.files[key]) {
                     res.splice(i, 1);
                 } else if (mls.stor.files[key] && mls.stor.files[key].status === 'nochange' && mls.stor.files[key].shortName !== file.shortName) {
@@ -753,7 +776,7 @@ export class PluginExploreList extends PluginBaseModule {
             }
         }
 
-        localStorage.setItem('mlsInfoHistoryL' + this.level as any, JSON.stringify(res));
+        localStorage.setItem('mlsInfoHistoryL' + this.levelFiles as any, JSON.stringify(res));
 
     }
 
@@ -770,7 +793,7 @@ export class PluginExploreList extends PluginBaseModule {
         if (action.name.length === 0 || action.name.length > 255) return false;
         const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
         if (invalidCharacters.test(action.name)) return false;
-        const key = mls.stor.getKeyToFiles(+action.project, this.level as any, action.name, file.folder, file.extension);
+        const key = mls.stor.getKeyToFiles(+action.project, this.levelFiles as any, action.name, file.folder, file.extension);
         return !mls.stor.files[key];
 
     }

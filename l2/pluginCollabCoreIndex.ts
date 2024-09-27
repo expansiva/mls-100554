@@ -33,25 +33,11 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l6ServicesLeft'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_serviceExploreProjects'
-            },
-            {
-                category: 'Services',
-                scope: ['l6ServicesLeft'],
-                priority: 1,
-                auth: ['*'],
                 widget: '_100554_serviceDashboard'
             },
             {
                 category: 'Services',
-                scope: ['l5ServicesLeft'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceAdminPanel'
-            },
-            {
-                category: 'Services',
-                scope: ['l5ServicesLeft'],
+                scope: ['l5ServicesLeft', 'l4ServicesLeft', 'l3ServicesLeft', 'l2ServicesLeft', 'l1ServicesLeft'],
                 priority: 1,
                 auth: ['*'],
                 widget: '_100554_serviceProject'
@@ -59,28 +45,21 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             {
                 category: 'Services',
                 scope: ['l5ServicesLeft'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceSave'
             },
-            {
-                category: 'Services',
-                scope: ['l5ServicesLeft'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceExploreStories'
-            },
-            {
-                category: 'Services',
-                scope: ['l4ServicesLeft'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceListFiles'
-            },
+            // {
+            //     category: 'Services',
+            //     scope: ['l4ServicesLeft'],
+            //     priority: 2,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceListFiles'
+            // },
             {
                 category: 'Services',
                 scope: ['l4ServicesLeft'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceIca'
             },
@@ -88,42 +67,42 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             {
                 category: 'Services',
                 scope: ['l3ServicesLeft'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceSelectDs'
             },
             {
                 category: 'Services',
                 scope: ['l3ServicesLeft'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceDsDocList'
             },
             {
                 category: 'Services',
                 scope: ['l3ServicesLeft'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceDsTokens'
             },
             {
                 category: 'Services',
                 scope: ['l3ServicesLeft'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceDsAssets'
             },
             {
                 category: 'Services',
                 scope: ['l3ServicesLeft'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceDsComponentsList'
             },
             {
                 category: 'Services',
                 scope: ['l3ServicesLeft'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceDsStyles'
             },
@@ -162,31 +141,31 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_serviceDsAssetsEditor'
             },
+            // {
+            //     category: 'Services',
+            //     scope: ['l2ServicesLeft', 'l2ServicesRight'],
+            //     priority: 2,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceListFiles'
+            // },
             {
                 category: 'Services',
                 scope: ['l2ServicesLeft', 'l2ServicesRight'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceListFiles'
-            },
-            {
-                category: 'Services',
-                scope: ['l2ServicesLeft', 'l2ServicesRight'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceSource'
             },
             {
                 category: 'Services',
                 scope: ['l2ServicesLeft', 'l2ServicesRight'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceResults'
             },
             {
                 category: 'Services',
                 scope: ['l2ServicesLeft', 'l2ServicesRight'],
-                priority: 1,
+                priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceHistories'
             },
@@ -207,7 +186,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
 
 
             {
-                category: 'List',
+                category: 'Components',
                 scope: ['l5Explore'],
                 priority: 1,
                 auth: ['*'],
