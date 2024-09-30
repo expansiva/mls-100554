@@ -70,13 +70,6 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_serviceSave'
             },
-            // {
-            //     category: 'Services',
-            //     scope: ['l4ServicesLeft'],
-            //     priority: 2,
-            //     auth: ['*'],
-            //     widget: '_100554_serviceListFiles'
-            // },
             {
                 category: 'Services',
                 scope: ['l4ServicesLeft'],
@@ -162,26 +155,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_serviceDsAssetsEditor'
             },
-            // {
-            //     category: 'Services',
-            //     scope: ['l2ServicesLeft', 'l2ServicesRight'],
-            //     priority: 2,
-            //     auth: ['*'],
-            //     widget: '_100554_serviceListFiles'
-            // },
+
             {
                 category: 'Services',
                 scope: ['l2ServicesLeft', 'l2ServicesRight'],
                 priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceSource'
-            },
-            {
-                category: 'Services',
-                scope: ['l2ServicesLeft', 'l2ServicesRight'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_serviceResults'
             },
             {
                 category: 'Services',
@@ -204,8 +184,6 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_serviceNotification'
             },
-
-
             {
                 category: 'Components',
                 scope: ['l5Explore'],
