@@ -96,9 +96,14 @@ export class ServiceProject100554 extends ServiceBase {
 
     async updated(changedProperties: Map<string | number | symbol, unknown>) {
         super.updated(changedProperties);
-        if (changedProperties.has('activeTab') && this.activeTab === 'Explore') {
-            await this.updateComplete;
-            if (this.firstDetails) this.firstDetails.click();
+        if (changedProperties.has('activeTab') && !!changedProperties.get('activeTab')) {
+
+            if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
+            if (this.activeTab === 'Explore') {
+                await this.updateComplete;
+                if (this.firstDetails) this.firstDetails.click();
+            }
+
         }
     }
 
@@ -138,7 +143,7 @@ export class ServiceProject100554 extends ServiceBase {
         }
 
         this.menu.refresh();
-        
+
     }
 
     private renderContent() {
@@ -171,7 +176,7 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     private renderExplore() {
-        
+
         // this.fireEventClose('In development: Details explore');
         return html`<div>
                 ${this.explories.map((explorie, index) => {

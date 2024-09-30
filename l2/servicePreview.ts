@@ -452,6 +452,7 @@ export class ServicePreview100554 extends ServiceBase {
                 }
             });
         }
+
         if (this.menu.buttons) this.menu.buttons.btVariations = this.msg.variations + `;f1ab:menu-flags:${Object.keys(this.languages).join(',')}`;
         if (this.menu.refresh) this.menu.refresh();
     }

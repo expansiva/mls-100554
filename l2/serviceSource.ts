@@ -18,13 +18,10 @@ export class ServiceSource100554 extends ServiceBase {
         mls.events.addListener(2, 'ProjectLoaded', (ev) => this.onProjectLoadedEvents(ev));
         mls.events.addListener(2, 'DomAction', (ev) => this.syncDom(ev));
         mls.events.addListener(2, 'CreateModelHTML' as any, (ev) => this.checkToCreateModelHTML(ev));
-
-
         this.initMonaco_GlobalEditor();
     }
 
-    @property({ type: String })
-    msize = '';
+    @property({ type: String }) msize = '';
 
     createRenderRoot() {
         return this;
@@ -43,11 +40,13 @@ export class ServiceSource100554 extends ServiceBase {
 
     public onClickIcon = (op: string): void => {
         if (op === 'icTs') this.showActiveModel();
-        if (op === 'icHTML') this.createOrShowModelHTML(true);
+        if (op === 'icHTML') this.createOrShowModelHtmlOrCss(true, '.html');
+        if (op === 'icCss') this.createOrShowModelHtmlOrCss(true, '.less');
+
     }
 
     public onClickTitle = () => {
-        this.openService('_100554_serviceListFiles', this.position, 2);
+        this.openService('_100554_serviceProject', this.position, 2, { activeTab: 'Explore' });
     }
 
     public details: IService = {
@@ -74,7 +73,9 @@ export class ServiceSource100554 extends ServiceBase {
         },
         icons: {
             icTs: 'Typescript;f121',
-            icHTML: 'HTML;f1c9'
+            icHTML: 'HTML;f1c9',
+            icCss: 'Css;f31c'
+
         },
         actionDefault: '', // call after close icon clicked
         iconDefault: 'icTs',
@@ -521,6 +522,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         let keyFiles: string; // set on getStorFile 
         let keyFilesHTML: string; // set on getStorFile 
+        let keyFilesCss: string; // set on getStorFile 
 
         const getStorFile = (): mls.stor.IFileInfo => {
             keyFiles = mls.stor.getKeyToFiles(fileAction.project, fileAction.level, fileAction.shortName, fileAction.folder, fileAction.extension);
@@ -534,6 +536,11 @@ export class ServiceSource100554 extends ServiceBase {
             return mls.stor.files[keyFilesHTML];
         };
 
+        const getStorFileCss = (): mls.stor.IFileInfo | undefined => {
+            keyFilesCss = mls.stor.getKeyToFiles(fileAction.project, fileAction.level, fileAction.shortName, fileAction.folder, '.less');
+            return mls.stor.files[keyFilesCss];
+        };
+
         const onNew = async (): Promise<void> => {
             await this.newFiles(
                 fileAction.newshortName as string,
@@ -545,27 +552,31 @@ export class ServiceSource100554 extends ServiceBase {
 
         const onOpen = async (): Promise<void> => {
             const storFile = getStorFile();
-            const storFileHTML: mls.stor.IFileInfo | undefined = getStorFileHTML();
-            await this.openFiles(storFileHTML, storFile, fileAction.position);
+            const storFileHTML = getStorFileHTML();
+            const storFileCss = getStorFileCss();
+            await this.openFiles(storFileHTML, storFile, storFileCss, fileAction.position);
         };
 
         const onDelete = async (): Promise<void> => {
             const storFile = getStorFile();
-            const storFileHTML: mls.stor.IFileInfo | undefined = getStorFileHTML();
-            await this.deleteFiles(storFileHTML, storFile);
+            const storFileHTML = getStorFileHTML();
+            const storFileCss = getStorFileCss();
+            await this.deleteFiles(storFileHTML, storFile, storFileCss);
             await mls.stor.localDB.removePrjInfo(storFile.project);
         };
 
         const onUndo = async (): Promise<void> => {
             const storFile = getStorFile();
             const storFileHTML = getStorFileHTML();
-            await this.undoFiles(storFileHTML, storFile, keyFilesHTML, keyFiles);
+            const storFileCss = getStorFileCss();
+            await this.undoFiles(storFileHTML, storFile, storFileCss, keyFilesHTML, keyFiles, keyFilesCss);
         };
 
         const onRename = async (): Promise<void> => {
             const storFile = getStorFile();
             const storFileHTML = getStorFileHTML();
-            await this.renameFiles(storFileHTML, storFile, fileAction.newProject as number, fileAction.newshortName as string, fileAction);
+            const storFileCss = getStorFileCss();
+            await this.renameFiles(storFileHTML, storFile, storFileCss, fileAction.newProject as number, fileAction.newshortName as string, fileAction);
             await mls.stor.localDB.removePrjInfo(storFile.project);
         };
 
@@ -596,8 +607,8 @@ export class ServiceSource100554 extends ServiceBase {
         if (mls.istrace) console.timeEnd('onAction_' + fileAction.action + '_' + fileAction.position);
     }
 
-    private async deleteFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo) {
-        for await (let storFile of [storFileHTML, storFileTS]) {
+    private async deleteFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, storFileCss: mls.stor.IFileInfo | undefined) {
+        for await (let storFile of [storFileHTML, storFileTS, storFileCss]) {
             if (!storFile) continue;
             if (storFile.status === 'new') this.deleteFile(storFile);
             else storFile.status = 'deleted';
@@ -609,7 +620,6 @@ export class ServiceSource100554 extends ServiceBase {
         await this.createModelTS_loading();
         this.activeThisService();
         await this.createModelTS_clone(storFileTS, newProject, newShortName);
-        await this.createModelHTML_clone(storFileTS, newProject, newShortName);
 
         (mls.actual[this.level] as any)[this.position] = {
             project: newProject,
@@ -644,12 +654,13 @@ export class ServiceSource100554 extends ServiceBase {
 				\n// typescript new file\n`;
         await this.createModelTS1(newShortName as string, newProject as number,
             newTSSource, true);
-        await this.createOrShowModelHTML(false);
+        await this.createOrShowModelHtmlOrCss(false, '.html');
+        await this.createOrShowModelHtmlOrCss(false, '.less');
         this.showActiveModel();
         this.isNewFile = false;
     }
 
-    private async openFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, position: 'left' | 'right') {
+    private async openFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, storFileCss: mls.stor.IFileInfo | undefined, position: 'left' | 'right') {
 
         await this.createModelTS_loading();
         this.activeThisService();
@@ -659,19 +670,20 @@ export class ServiceSource100554 extends ServiceBase {
             await this.createModelTS2(storFileTS, true, true);
             this.showActiveModel();
             await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true).then(async () => {
-                await this.createOrShowModelHTML(false);
+                await this.createOrShowModelHtmlOrCss(false, '.html');
+                await this.createOrShowModelHtmlOrCss(false, '.less');
             });
         } else {
             mls.l2.editor.editors[this.confE] = fileModel;
             mls.l2.editor.forceModelUpdate(fileModel.model);
-            await this.createOrShowModelHTML(false);
+            await this.createOrShowModelHtmlOrCss(false, '.html');
+            await this.createOrShowModelHtmlOrCss(false, '.less');
             this.showActiveModel();
         }
-        if (storFileTS && !storFileTS.inLocalStorage && storFileTS.isLocalVersionOutdated)
-            storFileTS.isLocalVersionOutdated = false;
 
-        if (storFileHTML && !storFileHTML.inLocalStorage && storFileHTML.isLocalVersionOutdated)
-            storFileHTML.isLocalVersionOutdated = false;
+        [storFileCss, storFileTS, storFileHTML].forEach((storF) => {
+            if (storF && !storF.inLocalStorage && storF.isLocalVersionOutdated) storF.isLocalVersionOutdated = false;
+        });
 
         this.saveLocalStorageLastOpen(storFileTS, position);
         if (!this._ed1) return;
@@ -679,7 +691,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
 
-    private async renameFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, newProject: number, newShortName: string, oldFileAction: mls.events.IFileAction) {
+    private async renameFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, storFileCss: mls.stor.IFileInfo | undefined, newProject: number, newShortName: string, oldFileAction: mls.events.IFileAction) {
 
         await this.createModelTS_loading();
         this.activeThisService();
@@ -688,7 +700,9 @@ export class ServiceSource100554 extends ServiceBase {
         this.renameTSFile(model1, storFileTS, newProject, newShortName);
 
         mls.l2.editor.editors[this.confE] = model1;
-        this.renameHTMLFile(storFileHTML as mls.stor.IFileInfo, newProject, newShortName);
+        this.renameHTMLOrCssFile(storFileHTML as mls.stor.IFileInfo, newProject, newShortName, '.html');
+        this.renameHTMLOrCssFile(storFileCss as mls.stor.IFileInfo, newProject, newShortName, '.less');
+
 
         (mls.actual[this.level] as any)[this.position] = {
             project: newProject,
@@ -744,9 +758,9 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
 
-    private async undoFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, keyFileHTML: string, keyFileTS: string) {
+    private async undoFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, storFileCss: mls.stor.IFileInfo | undefined, keyFileHTML: string, keyFileTS: string, keyFileCss: string) {
 
-        for await (let data of [{ storFile: storFileHTML, keyFiles: keyFileHTML }, { storFile: storFileTS, keyFiles: keyFileTS }]) {
+        for await (let data of [{ storFile: storFileHTML, keyFiles: keyFileHTML }, { storFile: storFileTS, keyFiles: keyFileTS }, { storFile: storFileCss, keyFiles: keyFileCss }]) {
 
             if (!data.storFile) continue;
             if (data.storFile.status === 'deleted') {
@@ -790,7 +804,8 @@ export class ServiceSource100554 extends ServiceBase {
                 const uri = this.getUri(`_${data.storFile.project}_${data.storFile.shortName}`, '.html');
                 const model = monaco.editor.getModel(uri);
                 if (model) model.dispose();
-                await this.createOrShowModelHTML(false);
+                await this.createOrShowModelHtmlOrCss(false, '.html');
+                await this.createOrShowModelHtmlOrCss(false, '.less');
             }
 
             mls.events.fireFileAction('statusOrErrorChanged', data.storFile, this.position);
@@ -1055,7 +1070,7 @@ export class ServiceSource100554 extends ServiceBase {
         } as monaco.editor.IEditorOptions;
     }
 
-    private getUri(shortFN: string, ftype: '.ts' | '.d.ts' | '.html'): monaco.Uri {
+    private getUri(shortFN: string, ftype: '.ts' | '.d.ts' | '.html' | '.less'): monaco.Uri {
         return monaco.Uri.parse(`file://server/${shortFN}${ftype}`);
     }
 
@@ -1110,43 +1125,43 @@ export class ServiceSource100554 extends ServiceBase {
 
     }
 
-    private async createModelHTML_clone(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string) {
+    // private async createModelHTML_clone(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string) {
 
-        const { shortName, project } = storFile;
-        const uri = this.getUri(`_${project}_${shortName}`, '.html');
-        let model = monaco.editor.getModel(uri);
-        let cont = '<h1>Edit this</h1>';
-        let key = '';
+    //     const { shortName, project } = storFile;
+    //     const uri = this.getUri(`_${project}_${shortName}`, '.html');
+    //     let model = monaco.editor.getModel(uri);
+    //     let cont = '<h1>Edit this</h1>';
+    //     let key = '';
 
-        if (model) cont = model.getValue();
-        else {
-            key = mls.stor.getKeyToFiles(project, storFile.level, shortName, '', '.html');
-            if (mls.stor.files[key]) cont = await mls.stor.files[key].getContent() as any;
-        }
+    //     if (model) cont = model.getValue();
+    //     else {
+    //         key = mls.stor.getKeyToFiles(project, storFile.level, shortName, '', '.html');
+    //         if (mls.stor.files[key]) cont = await mls.stor.files[key].getContent() as any;
+    //     }
 
-        const baseTag = convertFileNameToTag(`_${storFile.project}_${storFile.shortName}`)
-        const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
-        const regex = new RegExp(baseTag, 'g');
-        cont = cont.replace(regex, newTag);
-        key = mls.stor.getKeyToFiles(newProject, storFile.level, newShortName, '', '.html');
-        let file: mls.stor.IFileInfo | undefined = mls.stor.files[key];
+    //     const baseTag = convertFileNameToTag(`_${storFile.project}_${storFile.shortName}`)
+    //     const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
+    //     const regex = new RegExp(baseTag, 'g');
+    //     cont = cont.replace(regex, newTag);
+    //     key = mls.stor.getKeyToFiles(newProject, storFile.level, newShortName, '', '.html');
+    //     let file: mls.stor.IFileInfo | undefined = mls.stor.files[key];
 
-        if (!file) {
-            file = await mls.stor.addOrUpdateFile({ project, level: storFile.level, shortName: newShortName, extension: '.html', versionRef: new Date().toISOString(), folder: '' });
-            if (!file) throw new Error('Invalid storFile');
-            file.status = 'new';
-        }
+    //     if (!file) {
+    //         file = await mls.stor.addOrUpdateFile({ project, level: storFile.level, shortName: newShortName, extension: '.html', versionRef: new Date().toISOString(), folder: '' });
+    //         if (!file) throw new Error('Invalid storFile');
+    //         file.status = 'new';
+    //     }
 
-        const fileInfo: mls.stor.IFileInfoValue = {
-            content: cont,
-            contentType: 'string',
-        };
+    //     const fileInfo: mls.stor.IFileInfoValue = {
+    //         content: cont,
+    //         contentType: 'string',
+    //     };
 
-        await mls.stor.localStor.setContent(file, fileInfo);
+    //     await mls.stor.localStor.setContent(file, fileInfo);
 
-        await this.getOrCreateModelHTML(newShortName, newProject, file, fileInfo);
+    //     await this.getOrCreateModelHTML(newShortName, newProject, file, fileInfo);
 
-    }
+    // }
 
     private async createModelTS1(shortName: string, project: number, defaultTS: string, activateModel: boolean): Promise<mls.l2.editor.IMFile> {
         // create new file or load project 0 file
@@ -1221,14 +1236,20 @@ export class ServiceSource100554 extends ServiceBase {
         this.addEventsModelTS(storFile, model1);
 
         const keyFileHtml = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.html');
-        const storFileHtml = mls.stor.files[keyFileHtml];
-        if (storFileHtml) {
+        const keyFileCss = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.less');
 
+        const storFileHtml = mls.stor.files[keyFileHtml];
+        const storFileCss = mls.stor.files[keyFileCss];
+
+        if (storFileHtml) {
             if (!this.htmlModelAlreadyProcessed[keyFileHtml]) {
                 this.htmlModelAlreadyProcessed[keyFileHtml] = true;
-                await this.getOrCreateModelHTML(storFile.shortName, storFile.project, storFileHtml);
+                await this.getOrCreateModelHtmlOrCss(storFile.shortName, storFile.project, '.html', storFileHtml);
             }
         }
+
+        if (storFileCss) await this.getOrCreateModelHtmlOrCss(storFile.shortName, storFile.project, '.less', storFileCss);
+
 
         if (compile) {
             await this.updateModelStatus(model1, false);
@@ -1390,7 +1411,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         return div1;
     }
 
-    private async createOrShowModelHTML(open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
+    // HTML LESS
+
+    private async createOrShowModelHtmlOrCss(open: boolean, mode: '.html' | '.less', fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
 
         let shortName: string = '';
         let project: number = 0;
@@ -1398,38 +1421,38 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         shortName = conf.shortName;
         project = conf.project;
 
-        const uri = this.getUri(`_${project}_${shortName}`, '.html');
+        const uri = this.getUri(`_${project}_${shortName}`, mode);
         let model = monaco.editor.getModel(uri);
-
-        const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', '.html');
-        let storFileHTML = mls.stor.files[key];
-        if (!storFileHTML) {
-            await this.createHTMLFile(project, shortName, `<h1>_${project}_${shortName}</h1>`);
-            storFileHTML = mls.stor.files[key];
+        const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', mode);
+        let storFile = mls.stor.files[key];
+        if (!storFile) {
+            await this.createHtmlOrCssFile(project, shortName, mode === '.html' ? `<h1>_${project}_${shortName}</h1>` : '//LESS', mode);
+            storFile = mls.stor.files[key];
         }
 
         if (!model) {
-            model = await this.getOrCreateModelHTML(shortName, project, storFileHTML, fileInfo);
+            model = await this.getOrCreateModelHtmlOrCss(shortName, project, mode, storFile, fileInfo);
             let mfile = mls.l2.editor.get({ project, shortName });
             if (mfile) (mfile as any).modelHTML = model;
         }
 
         if (open && this._ed1) this._ed1.setModel(model);
 
-        if (this._ed1 && this._ed1.getModel()?.id !== model.id) {
-            mls.events.fireFileAction('modeCreated', storFileHTML, this.position);
+        if (mode === '.html' && this._ed1 && this._ed1.getModel()?.id !== model.id) {
+            mls.events.fireFileAction('modeCreated', storFile, this.position);
             this.registerProvider();
         }
 
-        return storFileHTML;
+        return storFile;
+
     }
 
-    private async createHTMLFile(project: number, shortName: string, content: string) {
+    private async createHtmlOrCssFile(project: number, shortName: string, content: string, extension: string) {
         const params = {
             project,
             level: 2,
             shortName,
-            extension: '.html',
+            extension,
             versionRef: '0',
             folder: ''
         };
@@ -1443,102 +1466,44 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         await mls.stor.localStor.setContent(file, fileInfo);
     }
 
-    private async getOrCreateModelHTML(shortName: string, project: number, storFileHTML: mls.stor.IFileInfo, fileInfo?: mls.stor.IFileInfoValue): Promise<monaco.editor.ITextModel> {
+    private async getOrCreateModelHtmlOrCss(shortName: string, project: number, ext: '.html' | '.less', storFile: mls.stor.IFileInfo, fileInfo?: mls.stor.IFileInfoValue,): Promise<monaco.editor.ITextModel> {
         let mfile = mls.l2.editor.get({ project, shortName });
-        const uri = this.getUri(`_${project}_${shortName}`, '.html');
+        const uri = this.getUri(`_${project}_${shortName}`, ext);
+        const language = ext.substring(1, ext.length);
         let model = monaco.editor.getModel(uri);
         if (model) return model;
 
-        const content = fileInfo ? fileInfo.content : await storFileHTML.getContent();
-        model = monaco.editor.createModel(content as string, 'html', uri);
+        const content = fileInfo ? fileInfo.content : await storFile.getContent();
+        model = monaco.editor.createModel(content as string, language, uri);
 
-        if (mfile) (mfile as any)['modelHTML'] = model;
+        if (mfile) (mfile as any)[`model${language.toUpperCase()}`] = model;
         (model as any)['position'] = this.position;
         const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
         (model as any)['originalCRC'] = originalCRC;
 
-        (storFileHTML as any)['originalCRC'] = storFileHTML.inLocalStorage ? 'undefined' : mls.common.crc.crc32(model.getValue()).toString(16);
-        if (storFileHTML.status === 'renamed' && fileInfo) {
-            this.setEventsModelHTML(model, storFileHTML, fileInfo.originalShortName as string, fileInfo.originalProject as number);
+        (storFile as any)['originalCRC'] = storFile.inLocalStorage ? 'undefined' : mls.common.crc.crc32(model.getValue()).toString(16);
+        if (storFile.status === 'renamed' && fileInfo) {
+            this.setEventsModelHTMLOrCss(model, storFile, fileInfo.originalShortName as string, fileInfo.originalProject as number);
             model.setValue(fileInfo.content as string);
         } else {
-            this.setEventsModelHTML(model, storFileHTML, storFileHTML.shortName, storFileHTML.project);
+            this.setEventsModelHTMLOrCss(model, storFile, storFile.shortName, storFile.project);
         }
         return model;
     }
 
-    private setEventsModelHTML(model: monaco.editor.ITextModel, storFileHTML: mls.stor.IFileInfo, shortName: string, project: number): void {
-        storFileHTML.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdateHTML(storFileHTML, model);
-        storFileHTML.getValueInfo = () => this.getValueInfoHTML(
+    private setEventsModelHTMLOrCss(model: monaco.editor.ITextModel, storFile: mls.stor.IFileInfo, shortName: string, project: number): void {
+        storFile.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdateHtmlOrCss(storFile, model);
+        storFile.getValueInfo = () => this.getValueInfoHtmlOrCss(
             model,
             shortName,
             project,
-            (storFileHTML as any)['originalCRC']
+            (storFile as any)['originalCRC']
         );
 
-        if (model) model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelHTMLChange(e, storFileHTML, model));
-
+        if (model) model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelHtmlOrCssChange(e, storFile, model));
     }
 
-    private _onChangedContentHTML: number | undefined = undefined;
-
-    private onModelHTMLChange = (e: monaco.editor.IModelContentChangedEvent, storFileHTML: mls.stor.IFileInfo, model: monaco.editor.ITextModel): void => {
-        // some changes is to simulate changes to force compile
-        clearTimeout(this._onChangedContentHTML);
-        this._onChangedContentHTML = window.setTimeout(async () => {
-
-            const sameContent: boolean = (storFileHTML as any)['originalCRC'] === mls.common.crc.crc32(model.getValue()).toString(16);
-            if (sameContent) {
-                if (storFileHTML.status !== 'new' && storFileHTML.status !== 'renamed') storFileHTML.status = 'nochange';
-                if (storFileHTML.status !== 'renamed') await mls.stor.localStor.setContent(storFileHTML, { content: null }); // clear localstorage
-            } else {
-                if (storFileHTML.status !== 'renamed' && (storFileHTML.status !== 'new')) storFileHTML.status = 'changed';
-                await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: model.getValue() });
-            }
-            if (mls.istrace) console.info('fire model html');
-
-            if (this.isHTMLSystemChange) {
-                this.isHTMLSystemChange = false;
-                return;
-            }
-
-            mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, this.position);//(model as any)['position']
-        }, 400);
-    };
-
-    private async renameHTMLFile(storFileHTML: mls.stor.IFileInfo, newProject: number, newShortName: string) {
-
-        if (!storFileHTML) return;
-        const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject };
-        await this.getOrCreateModelHTML(storFileHTML.shortName, storFileHTML.project, storFileHTML);
-        if (!storFileHTML.getValueInfo) return;
-        const valueInfo = await storFileHTML.getValueInfo();
-
-        const { status } = storFileHTML;
-        if (!mls.stor.renameFile(storFileHTML, newSts)) throw new Error('Error on rename mls.stor.files');
-        const key = mls.stor.getKeyToFiles(newProject, this.level, newShortName, '', '.html');
-        const newStorFileHTML = mls.stor.files[key];
-        newStorFileHTML.status = 'renamed';
-        await mls.stor.localStor.setContent(newStorFileHTML, valueInfo);
-        setTimeout(async () => {
-            const file = await this.createOrShowModelHTML(false, valueInfo);
-            if (status === 'new') file.status = status;
-        }, 500);
-
-    }
-
-    private getValueInfoHTML = async (activeModel: monaco.editor.ITextModel, originalShortName: string, originalProject: number, originalCRC: string): Promise<mls.stor.IFileInfoValue> => {
-        const rc: mls.stor.IFileInfoValue = {
-            content: activeModel.getValue(),
-            contentType: 'string',
-            originalShortName,
-            originalProject,
-            originalCRC
-        };
-        return rc;
-    }
-
-    private async afterUpdateHTML(storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel) {
+    private async afterUpdateHtmlOrCss(storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel) {
 
         if (storFile.status === 'deleted') {
             await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
@@ -1552,6 +1517,210 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
         storFile.status = 'nochange';
     }
+
+    private getValueInfoHtmlOrCss = async (activeModel: monaco.editor.ITextModel, originalShortName: string, originalProject: number, originalCRC: string): Promise<mls.stor.IFileInfoValue> => {
+        const rc: mls.stor.IFileInfoValue = {
+            content: activeModel.getValue(),
+            contentType: 'string',
+            originalShortName,
+            originalProject,
+            originalCRC
+        };
+        return rc;
+    }
+
+    private _onChangedContentHtmlOrCss: number | undefined = undefined;
+
+    private onModelHtmlOrCssChange(e: monaco.editor.IModelContentChangedEvent, storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel): void {
+        // some changes is to simulate changes to force compile
+        clearTimeout(this._onChangedContentHtmlOrCss);
+        this._onChangedContentHtmlOrCss = window.setTimeout(async () => {
+
+            const sameContent: boolean = (storFile as any)['originalCRC'] === mls.common.crc.crc32(model.getValue()).toString(16);
+            if (sameContent) {
+                if (storFile.status !== 'new' && storFile.status !== 'renamed') storFile.status = 'nochange';
+                if (storFile.status !== 'renamed') await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
+            } else {
+                if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
+                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: model.getValue() });
+            }
+            if (mls.istrace) console.info('fire model html');
+
+            if (this.isHTMLSystemChange) {
+                this.isHTMLSystemChange = false;
+                return;
+            }
+
+            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+        }, 400);
+    };
+
+
+
+    // --------------
+
+
+    // private async createOrShowModelHTML(open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
+
+    //     let shortName: string = '';
+    //     let project: number = 0;
+    //     const conf = mls.l2.editor.editors[this.confE];
+    //     shortName = conf.shortName;
+    //     project = conf.project;
+
+    //     const uri = this.getUri(`_${project}_${shortName}`, '.html');
+    //     let model = monaco.editor.getModel(uri);
+
+    //     const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', '.html');
+    //     let storFileHTML = mls.stor.files[key];
+    //     if (!storFileHTML) {
+    //         await this.createHTMLFile(project, shortName, `<h1>_${project}_${shortName}</h1>`);
+    //         storFileHTML = mls.stor.files[key];
+    //     }
+
+    //     if (!model) {
+    //         model = await this.getOrCreateModelHTML(shortName, project, storFileHTML, fileInfo);
+    //         let mfile = mls.l2.editor.get({ project, shortName });
+    //         if (mfile) (mfile as any).modelHTML = model;
+    //     }
+
+    //     if (open && this._ed1) this._ed1.setModel(model);
+
+    //     if (this._ed1 && this._ed1.getModel()?.id !== model.id) {
+    //         mls.events.fireFileAction('modeCreated', storFileHTML, this.position);
+    //         this.registerProvider();
+    //     }
+
+    //     return storFileHTML;
+    // }
+
+    // private async createHTMLFile(project: number, shortName: string, content: string) {
+    //     const params = {
+    //         project,
+    //         level: 2,
+    //         shortName,
+    //         extension: '.html',
+    //         versionRef: '0',
+    //         folder: ''
+    //     };
+    //     const file = await mls.stor.addOrUpdateFile(params);
+    //     if (!file) throw new Error('Invalid storFile');
+    //     file.status = 'new';
+    //     const fileInfo: mls.stor.IFileInfoValue = {
+    //         content,
+    //         contentType: 'string',
+    //     };
+    //     await mls.stor.localStor.setContent(file, fileInfo);
+    // }
+
+    // private async getOrCreateModelHTML(shortName: string, project: number, storFileHTML: mls.stor.IFileInfo, fileInfo?: mls.stor.IFileInfoValue): Promise<monaco.editor.ITextModel> {
+    //     let mfile = mls.l2.editor.get({ project, shortName });
+    //     const uri = this.getUri(`_${project}_${shortName}`, '.html');
+    //     let model = monaco.editor.getModel(uri);
+    //     if (model) return model;
+
+    //     const content = fileInfo ? fileInfo.content : await storFileHTML.getContent();
+    //     model = monaco.editor.createModel(content as string, 'html', uri);
+
+    //     if (mfile) (mfile as any)['modelHTML'] = model;
+    //     (model as any)['position'] = this.position;
+    //     const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
+    //     (model as any)['originalCRC'] = originalCRC;
+
+    //     (storFileHTML as any)['originalCRC'] = storFileHTML.inLocalStorage ? 'undefined' : mls.common.crc.crc32(model.getValue()).toString(16);
+    //     if (storFileHTML.status === 'renamed' && fileInfo) {
+    //         this.setEventsModelHTML(model, storFileHTML, fileInfo.originalShortName as string, fileInfo.originalProject as number);
+    //         model.setValue(fileInfo.content as string);
+    //     } else {
+    //         this.setEventsModelHTML(model, storFileHTML, storFileHTML.shortName, storFileHTML.project);
+    //     }
+    //     return model;
+    // }
+
+    // private setEventsModelHTML(model: monaco.editor.ITextModel, storFileHTML: mls.stor.IFileInfo, shortName: string, project: number): void {
+    //     storFileHTML.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdateHTML(storFileHTML, model);
+    //     storFileHTML.getValueInfo = () => this.getValueInfoHTML(
+    //         model,
+    //         shortName,
+    //         project,
+    //         (storFileHTML as any)['originalCRC']
+    //     );
+
+    //     if (model) model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelHTMLChange(e, storFileHTML, model));
+
+    // }
+
+    // private _onChangedContentHTML: number | undefined = undefined;
+
+    // private onModelHTMLChange = (e: monaco.editor.IModelContentChangedEvent, storFileHTML: mls.stor.IFileInfo, model: monaco.editor.ITextModel): void => {
+    //     // some changes is to simulate changes to force compile
+    //     clearTimeout(this._onChangedContentHTML);
+    //     this._onChangedContentHTML = window.setTimeout(async () => {
+
+    //         const sameContent: boolean = (storFileHTML as any)['originalCRC'] === mls.common.crc.crc32(model.getValue()).toString(16);
+    //         if (sameContent) {
+    //             if (storFileHTML.status !== 'new' && storFileHTML.status !== 'renamed') storFileHTML.status = 'nochange';
+    //             if (storFileHTML.status !== 'renamed') await mls.stor.localStor.setContent(storFileHTML, { content: null }); // clear localstorage
+    //         } else {
+    //             if (storFileHTML.status !== 'renamed' && (storFileHTML.status !== 'new')) storFileHTML.status = 'changed';
+    //             await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: model.getValue() });
+    //         }
+    //         if (mls.istrace) console.info('fire model html');
+
+    //         if (this.isHTMLSystemChange) {
+    //             this.isHTMLSystemChange = false;
+    //             return;
+    //         }
+
+    //         mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, this.position);//(model as any)['position']
+    //     }, 400);
+    // };
+
+    private async renameHTMLOrCssFile(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, ext: '.html' | '.less') {
+
+        if (!storFile) return;
+        const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject };
+        await this.getOrCreateModelHtmlOrCss(storFile.shortName, storFile.project, ext, storFile);
+        if (!storFile.getValueInfo) return;
+        const valueInfo = await storFile.getValueInfo();
+        const { status } = storFile;
+        if (!mls.stor.renameFile(storFile, newSts)) throw new Error('Error on rename mls.stor.files');
+        const key = mls.stor.getKeyToFiles(newProject, this.level, newShortName, '', '.html');
+        const newStorFile = mls.stor.files[key];
+        newStorFile.status = 'renamed';
+        await mls.stor.localStor.setContent(newStorFile, valueInfo);
+        setTimeout(async () => {
+            const file = await this.createOrShowModelHtmlOrCss(false, ext, valueInfo);
+            if (status === 'new') file.status = status;
+        }, 500);
+
+    }
+
+    // private getValueInfoHTML = async (activeModel: monaco.editor.ITextModel, originalShortName: string, originalProject: number, originalCRC: string): Promise<mls.stor.IFileInfoValue> => {
+    //     const rc: mls.stor.IFileInfoValue = {
+    //         content: activeModel.getValue(),
+    //         contentType: 'string',
+    //         originalShortName,
+    //         originalProject,
+    //         originalCRC
+    //     };
+    //     return rc;
+    // }
+
+    // private async afterUpdateHTML(storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel) {
+
+    //     if (storFile.status === 'deleted') {
+    //         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+    //         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
+    //         delete mls.stor.files[keyFiles];
+    //         return;
+    //     }
+    //     if (storFile.status === 'renamed') {
+    //         (storFile as any)['originalCRC'] = mls.common.crc.crc32(model.getValue()).toString(16);
+    //     }
+    //     await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+    //     storFile.status = 'nochange';
+    // }
 
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
@@ -1890,7 +2059,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
             if (!this.htmlModelAlreadyProcessed[keyStorFile]) {
                 this.htmlModelAlreadyProcessed[keyStorFile] = true;
-                await this.getOrCreateModelHTML(storFile.shortName, storFile.project, storFile);
+                await this.getOrCreateModelHtmlOrCss(storFile.shortName, storFile.project, '.html', storFile);
             }
             mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, ev.desc);
         } catch (err: any) {

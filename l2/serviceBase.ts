@@ -1,8 +1,8 @@
 /// <mls shortName="serviceBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { LitElement } from 'lit';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { customElement, property, state } from 'lit/decorators.js';
+import * as libCommom from './_100554_libCommom';
 
 @customElement('service-base-100554')
 export abstract class ServiceBase extends CollabLitElement {
@@ -64,22 +64,8 @@ export abstract class ServiceBase extends CollabLitElement {
         if (itemService && itemService.show) itemService.show(show);
     }
 
-    public openService(service: string, position: 'left' | 'right', level: number) {
-
-        let page = this.closest('collab-page');
-        if (!page) return;
-        const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
-        if (!toolbar) return;
-        if (mls.actualLevel !== level) {
-            (toolbar as any).state[level][position] = service;
-            this.selectLevel(level);
-            return;
-        }
-        const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
-        if (item) {
-            item.click();
-        }
-        return;
+    public openService(service: string, position: 'left' | 'right', level: number, args?: Record<string, string>) {
+        libCommom.openService(service, position, level, args);
     }
 
     public setFullScreen(level: number, position: 'right' | 'left' | 'default') {
@@ -89,23 +75,7 @@ export abstract class ServiceBase extends CollabLitElement {
     }
 
     public selectLevel(level: number) {
-
-        const page = this.closest('collab-page');
-        const nav = page?.querySelector('collab-nav-1') as HTMLElement;
-
-        const objIndex = {
-            0: 7,
-            1: 6,
-            2: 5,
-            3: 4,
-            4: 3,
-            5: 2,
-            6: 1,
-            7: 0,
-
-        } as any;
-        if (!nav) return;
-        nav.setAttribute('tabindexactive', objIndex[level]);
+        libCommom.selectLevel(level);
     }
 
     public addScenario(page: string, fullscreen: boolean = false) {

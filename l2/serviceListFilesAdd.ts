@@ -158,6 +158,8 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
             if (!this.shadowRoot) return;
             if (!this.inputShortName) return;
+            if (!this.father) return;
+
             const { project } = mls.actual[5];
             if (!project) throw new Error('No project selected');
             if (!this.enhancementModules) throw new Error('No modules enhancement loaded');
@@ -208,6 +210,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
             this.showLoader(false);
             this.saveLocalHistory(params.project, params.shortName, params.extension, params.folder);
+            (this.father as any).mode = 'list';
 
         } catch (e: any) {
             setTimeout(() => {

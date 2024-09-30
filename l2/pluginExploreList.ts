@@ -108,6 +108,13 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
+    async updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('mode') && this.mode === 'list') {
+            this.init();
+        }
+    }
+
     private async showAdd() {
         await import('./_100554_serviceListFilesAdd');
         this.inFilter = false;
@@ -137,7 +144,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
-        if (![1,2,3,4,5].includes(ev.level) || (ev.type !== 'FileAction')) return;
+        if (![1, 2, 3, 4, 5].includes(ev.level) || (ev.type !== 'FileAction')) return;
         const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
         if (
             fileAction.position !== this.position ||

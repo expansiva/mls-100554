@@ -1,7 +1,7 @@
 /// <mls shortName="libCommom" project="100554" enhancement="_blank" groupName="other" />
 import { getMessageKey } from "./_100554_collabLitElement";
 import { getAllWebComponentsInSource } from './_100554_libCompile';
-import { convertTagToFileName } from './_100554_utilsLit';
+import { convertTagToFileName , convertFileNameToTag } from './_100554_utilsLit';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -155,7 +155,7 @@ export function escapeHTML(str: string) {
 }
 
 
-export function openService(service: string, position: 'left' | 'right', level: number) {
+export function openService(service: string, position: 'left' | 'right', level: number, args ?: Record<string, string>) {
     let page = document.querySelector('collab-page');
     if (!page) return;
     const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
@@ -166,9 +166,20 @@ export function openService(service: string, position: 'left' | 'right', level: 
         return;
     }
     const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
-    if (item) {
-        item.click();
+    const itemNav3Content = page.querySelector(`collab-nav-3-service[data-service="${service}"]`) as HTMLElement;
+
+    if (itemNav3Content && args) {
+        const tagService = convertFileNameToTag(service);
+        const serviceItem = itemNav3Content.querySelector(tagService);
+        if (serviceItem) {
+            Object.entries(args).forEach((arg) => {
+                const [key, value] = arg;
+                serviceItem.setAttribute(key, value);
+            })
+        }
     }
+    if (item) item.click();
+    
     return;
 }
 
@@ -197,7 +208,7 @@ export async function forceServiceInstance(level: number, service: string) {
     const page = document.querySelector('collab-page');
     const nav = page?.querySelector('collab-nav-1') as HTMLElement;
     if (!nav) return;
-    await (nav as any).forceInstanceIfNeed([`${service};${level}`])
+    await (nav as any).forceInstanceIfNeed([`${service};${level}`]);
 
 }
 
@@ -225,5 +236,9 @@ export async function loadFileHTMLInContainer(el: HTMLElement, shortName: string
         el.appendChild(script)
     });
 
+}
+
+export async function compileLess() {
+    
 }
 
