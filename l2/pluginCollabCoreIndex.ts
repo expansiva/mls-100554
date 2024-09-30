@@ -33,6 +33,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l6ServicesLeft'],
                 priority: 1,
                 auth: ['*'],
+                widget: '_100554_serviceExploreProjects'
+            },
+            {
+                category: 'Services',
+                scope: ['l6ServicesLeft'],
+                priority: 1,
+                auth: ['*'],
                 widget: '_100554_serviceDashboard'
             },
             {
@@ -41,6 +48,20 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 priority: 1,
                 auth: ['*'],
                 widget: '_100554_serviceProject'
+            },
+            {
+                category: 'Services',
+                scope: ['l5ServicesLeft'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_serviceWorkspace'
+            },
+            {
+                category: 'Services',
+                scope: ['l5ServicesLeft'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_servicePanel'
             },
             {
                 category: 'Services',
