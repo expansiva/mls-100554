@@ -24,6 +24,8 @@ const messages: { [key: string]: MessageType } = {
     'pt': message_pt
 }
 /// **collab_i18n_end**
+
+/*
 @customElement('service-results-100554')
 export class ServiceResults extends ServiceBase {
 
@@ -543,5 +545,5 @@ type IResultNames = {
     devDocPage?: string,
     assistant?: string,
     jsonImport: string,
-}
+}*/
 

@@ -272,7 +272,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     private moveSelectionToElement(newElement: HTMLElement) {
-        debugger;
+
         const shadowSelection = this.getRootNode() as any;
 
         const selection = shadowSelection.getSelection() as any;
@@ -305,6 +305,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     private onInput(e: MouseEvent) {
+        
         e.stopPropagation();
         let me = e.target as HTMLElement;
         if (me.id !== 'edittextwcd') me = me.closest('#edittextwcd') as HTMLElement;
@@ -322,6 +323,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;
 
+        const parent = this.parentElement;
+        const elAdd:HTMLElement | undefined = parent ? parent.querySelector('wcd-add-100554') as HTMLElement : undefined;
+
+        if (elAdd && me.innerHTML !== '') elAdd.style.display = 'none';
+        else if (elAdd) elAdd.style.display = '';
+        
         el.innerHTML = me.innerHTML as string;
         this.myText = el.innerHTML as string;
     }
