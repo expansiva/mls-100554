@@ -150,10 +150,11 @@ export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.en
     })
 }
 
-
 export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
+
     try {
         setCodeLens(mfile);
+        validateLess(mfile);
         if (validateTagName(mfile)) {
             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
@@ -189,4 +190,103 @@ function createStyleSheet(cssString: string, defaultView: Window) {
     const sheet = (new (defaultView as any).CSSStyleSheet() as any);
     sheet.replaceSync(cssString);
     return sheet;
+}
+
+function validateLess(mfile: mls.l2.editor.IMFile) {
+
+    const model: monaco.editor.ITextModel = (mfile as any).modelLESS;
+    const keyToStorFileLess = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, '', '.less');
+    const storFileLess = mls.stor.files[keyToStorFileLess];
+    if (!model || !storFileLess) return;
+
+    storFileLess.hasError = false;
+    const value = model.getValue();
+    let text = removeTokensFromSource(value);
+    text = removeCommentLines(text);
+    const markers: monaco.Position[] = [];
+    const validRootSelectorClass = /^[a-zA-Z][\w-]*\.[a-zA-Z][\w-]*$/;
+    const validRootSelectorTag = /^\s*[a-zA-Z]+[\w-]*-[\w-]*\s*$/;
+    const rootRules = getRootSelectors(text);
+
+    if (rootRules) {
+        rootRules.forEach((rule) => {
+            const lineSelector = rule.trim().split('\n')[0].trim();
+            const selector = lineSelector.split('{')[0].trim();
+            const position = getLineByText(model, lineSelector);
+            if (!validRootSelectorClass.test(selector) && !validRootSelectorTag.test(selector) && position) {
+                markers.push(position);
+            }
+        });
+    }
+
+    if (markers.length > 0) storFileLess.hasError = true;
+    setErrorOnEditor(markers, model);
+}
+
+function setErrorOnEditor(position: monaco.Position[], model: monaco.editor.ITextModel) {
+    monaco.editor.setModelMarkers(model, 'markerSource', []);
+    const markers: monaco.editor.IMarkerData[] = [];
+    position.forEach((pos) => {
+        const markerOptions = {
+            severity: monaco.MarkerSeverity.Error,
+            message: 'Invalid selector',
+            startLineNumber: pos.lineNumber,
+            startColumn: pos.column,
+            endLineNumber: pos.lineNumber,
+            endColumn: pos.column,
+        };
+        markers.push(markerOptions);
+    })
+    monaco.editor.setModelMarkers(model, 'markerSource', markers);
+}
+
+function getLineByText(model: monaco.editor.ITextModel, searchText: string) {
+    const lineCount = model.getLineCount();
+    for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
+        const lineContent = model.getLineContent(lineNumber);
+        if (lineContent.trim() === searchText) {
+            return new monaco.Position(lineNumber, 1);
+        }
+    }
+    return null;
+}
+
+function removeTokensFromSource(src: string) {
+    const regex = /\/\/Start Less Tokens[\s\S]*?\/\/End Less Tokens/g;
+    return src.replace(regex, '');
+}
+
+function removeCommentLines(text: string) {
+
+    const lines = text.split('\n');
+    const lineCount = lines.length - 1;
+
+    const newLines = [];
+
+    for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
+        const lineContent = lines[lineNumber]
+        if (!isCommentLine(lineContent)) {
+            newLines.push(lineContent);
+        }
+    }
+    const newContent = newLines.join('\n');
+    return newContent;
+}
+
+function getRootSelectors(lessContent: string): string[] {
+    const rootSelectors = [];
+    const regex = /^([^\s{]+(?:\.[^\s{]+)*(?:\s+[^\s{]+)*)\s*\{/gm; 
+    let match;
+    while ((match = regex.exec(lessContent)) !== null) {
+        rootSelectors.push((match[1].trim().replace(/\n/g, ' ').replace(/}/g, '') + ' {').trim()); 
+    }
+    return rootSelectors;
+}
+
+function isCommentLine(line: string) {
+    if (!line) return false;
+    if (line.trim().startsWith('//')) {
+        return true;
+    }
+    return line.trim().startsWith('/*') && line.trim().endsWith('*/');
 }

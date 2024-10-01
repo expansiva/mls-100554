@@ -6,6 +6,7 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
+import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -73,8 +74,8 @@ export class ServiceSource100554 extends ServiceBase {
         },
         icons: {
             icTs: 'Typescript;f121',
-            icHTML: 'HTML;f1c9',
-            icCss: 'Css;f31c'
+            icHTML: 'HTML;f13b',
+            icCss: 'Css;f38b'
 
         },
         actionDefault: '', // call after close icon clicked
@@ -254,10 +255,12 @@ export class ServiceSource100554 extends ServiceBase {
 
     public last: mls.IActual | undefined = undefined;
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
-
     private mConfEditor: monaco.editor.ITextModel | undefined;
-    get confE() { return `l${this.level}_${this.position}`; }
     private confE2(positionToolbar: string) { return `l${this.level}_${positionToolbar}`; }
+    private htmlModelAlreadyProcessed: { [key: string]: boolean } = {};
+    private dsInstance: DesignSystemIO | undefined;
+
+    get confE() { return `l${this.level}_${this.position}`; }
     get confETS() { return this.confE + '_TS'; }
     get confEJS() { return this.confE + '_JS'; }
 
@@ -695,13 +698,13 @@ export class ServiceSource100554 extends ServiceBase {
 
         await this.createModelTS_loading();
         this.activeThisService();
-        let model1 = mls.l2.editor.get(storFileTS);
-        if (!model1) model1 = await this.createModelTS2(storFileTS, false, true);
-        this.renameTSFile(model1, storFileTS, newProject, newShortName);
+        let mfile = mls.l2.editor.get(storFileTS);
+        if (!mfile) mfile = await this.createModelTS2(storFileTS, false, true);
+        this.renameTSFile(mfile, storFileTS, newProject, newShortName);
 
-        mls.l2.editor.editors[this.confE] = model1;
-        this.renameHTMLOrCssFile(storFileHTML as mls.stor.IFileInfo, newProject, newShortName, '.html');
-        this.renameHTMLOrCssFile(storFileCss as mls.stor.IFileInfo, newProject, newShortName, '.less');
+        mls.l2.editor.editors[this.confE] = mfile;
+        this.renameHTMLOrCssFile(mfile, storFileHTML as mls.stor.IFileInfo, newProject, newShortName, '.html');
+        this.renameHTMLOrCssFile(mfile, storFileCss as mls.stor.IFileInfo, newProject, newShortName, '.less');
 
 
         (mls.actual[this.level] as any)[this.position] = {
@@ -823,56 +826,52 @@ export class ServiceSource100554 extends ServiceBase {
         if (this.menu.closeMenu) this.menu.closeMenu()
     }
 
-    private async updateModelStatus(model1: mls.l2.editor.IMFile, changed: boolean): Promise<void> {
-        if (model1.project === 0) changed = true; // always in localstorage
-        model1.changed = changed;
+    private async updateModelStatus(mfile: mls.l2.editor.IMFile, changed: boolean): Promise<void> {
+        if (mfile.project === 0) changed = true; // always in localstorage
+        mfile.changed = changed;
 
-        const cr: mls.l2.editor.ICompilerResult = await mls.l2.editor.getCompilerResultTS({ project: model1.project, shortName: model1.shortName }, true);
+        const cr: mls.l2.editor.ICompilerResult = await mls.l2.editor.getCompilerResultTS({ project: mfile.project, shortName: mfile.shortName }, true);
         let hasError = cr.errors.length > 0;
-        model1.error = hasError;
-        const key = mls.stor.getKeyToFiles(model1.project, this.level, model1.shortName, '', model1.extension);
+        mfile.error = hasError;
+        const key = mls.stor.getKeyToFiles(mfile.project, this.level, mfile.shortName, '', mfile.extension);
         const storFile: mls.stor.IFileInfo = mls.stor.files[key];
-        const d = { project: model1.project, shortName: model1.shortName, level: this.level, position: this.position };
-        // mls.events.fire(2, 'TSSourceChanged', JSON.stringify(d));
+
         if (!hasError) {
-            const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementInstance(model1).catch((e) => undefined);
-            if (enhancementInstance) await enhancementInstance.onAfterChange(model1);
+            const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementInstance(mfile).catch((e) => undefined);
+            if (enhancementInstance) await enhancementInstance.onAfterChange(mfile);
             hasError = storFile.hasError;
         }
 
-        await this.changeStatusFile(model1, storFile, cr.tripleSlashMLS?.variables, hasError);
+        await this.changeStatusFile(mfile, storFile, cr.tripleSlashMLS?.variables, hasError);
     }
 
-    private async changeStatusFile(model1: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, variables: mls.common.tripleslash.ITripleSlashVariables | undefined, hasError: boolean): Promise<void> {
+    private async changeStatusFile(mfile: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, variables: mls.common.tripleslash.ITripleSlashVariables | undefined, hasError: boolean): Promise<void> {
         if (!storFile) return; // new file dont have storFile ???
         const oldStatus = storFile.status;
         storFile.hasError = hasError;
-        const sameContent: boolean = model1.originalCRC === mls.common.crc.crc32(model1.model.getValue()).toString(16);
+        const sameContent: boolean = mfile.originalCRC === mls.common.crc.crc32(mfile.model.getValue()).toString(16);
         if (sameContent) {
             if (storFile.status !== 'new') storFile.status = 'nochange';
             await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
         } else {
             if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
-            await mls.stor.localStor.setContent(storFile, await this.getValueInfo(model1));
+            await mls.stor.localStor.setContent(storFile, await this.getValueInfo(mfile));
         }
         if (oldStatus !== storFile.status) {
             mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
         }
     }
 
-    private renameTSFile(model1: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): void {
+    private renameTSFile(mfile: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): void {
         if (storFile.hasError) throw new Error('Error on rename, clear errors before rename');
         if (!this.isNewNameValid(newShortName)) throw new Error('Error on rename, new shortName is a invalid name');
         const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject };
-        if (!mls.l2.editor.rename(model1, newSts)) throw new Error('Error on rename mls.l2.editor.mfiles');
+        if (!mls.l2.editor.rename(mfile, newSts)) throw new Error('Error on rename mls.l2.editor.mfiles');
         if (!mls.stor.renameFile(storFile, newSts)) throw new Error('Error on rename mls.stor.files');
-        mls.common.tripleslash.changeVariable(model1, 'shortName', newShortName);
-        mls.common.tripleslash.changeVariable(model1, 'project', newProject.toString());
+        mls.common.tripleslash.changeVariable(mfile, 'shortName', newShortName);
+        mls.common.tripleslash.changeVariable(mfile, 'project', newProject.toString());
         if (storFile.status === 'new') return;
-        storFile.status = 'renamed'; // poderia ficar na função 
-        // setTimeout(() => {
-        // 	storFile.status = 'renamed';
-        // }, 600); // after change editor, status change to 'changed'
+        storFile.status = 'renamed';
     }
 
     private isNewNameValid(newShortName: string): boolean {
@@ -944,21 +943,25 @@ export class ServiceSource100554 extends ServiceBase {
 
             this._ed1.onDidChangeCursorPosition((e) => {
 
+                this._ed1?.updateOptions({ readOnly: false });
+
                 clearTimeout(this.timeHtmlChangeCursor);
+                if (!this._ed1) return;
+                if (this.menu.lastIcon === 'icCss') {
+                    const position = e.position;
+                    const { lineNumber } = position;
+                    const isReadOnlyArea = this.isReadOnlyArea(lineNumber);
+                    this._ed1.updateOptions({ readOnly: isReadOnlyArea });
+                    return;
+                }
 
                 if (!this._ed1 || this.menu.lastIcon !== 'icHTML') return;
-
                 const model = this._ed1.getModel();
                 const position = e.position;
-
                 if (!model) return;
 
                 this.timeHtmlChangeCursor = setTimeout(() => {
-
                     const lineContent = model.getLineContent(position.lineNumber);
-
-                    // Verifica se a linha contém '<ica-' e 'id="'
-                    //if (lineContent.includes('<ica-') && lineContent.includes('id="')) {
                     if (lineContent.includes('id="')) {
                         const idValue = this.extractIdValue(lineContent);
                         if (this.lastIdSelected === idValue) return;
@@ -969,51 +972,6 @@ export class ServiceSource100554 extends ServiceBase {
                             this.lastOrigin = 'editor';
                         }
                     }
-
-                    /*//const position = e.position;
-
-                    if (!position) return; // Sem posição válida, sair.
-
-                    // 1. Captura todo o conteúdo do editor e o converte em uma única linha
-                    const fullContent = model.getValue().replace(/\n/g, ' ');
-
-                    // 2. Converter a posição do cursor no editor para uma posição no texto concatenado
-                    const lineNumber = position.lineNumber;
-                    const column = position.column;
-
-                    // Calcula o índice correspondente no texto concatenado
-                    let indexInText = 0;
-                    for (let i = 1; i < lineNumber; i++) {
-                        indexInText += model.getLineContent(i).length + 1; // Soma a linha e um espaço para a quebra de linha removida
-                    }
-                    indexInText += column - 1; // Soma a posição da coluna dentro da linha
-
-                    // 3. Procurar a tag HTML na posição atual do cursor
-                    const regex = /<(\s*ica-[\w-]+)[^>]*id\s*=\s*["']([^"']+)["'][^>]*>/g;
-                    let match;
-                    let tagFound = false;
-
-                    while ((match = regex.exec(fullContent)) !== null) {
-                        const tagStart = match.index;           // Início da tag
-                        const tagEnd = regex.lastIndex;         // Fim da tag
-                        const tag = match[1];                   // Tag que começa com "ica-"
-                        const id = match[2];                    // Valor do atributo id
-
-                        // 4. Verifica se o índice do cursor está dentro do intervalo da tag
-                        if (indexInText >= tagStart && indexInText <= tagEnd) {
-                            console.log(`Tag: ${tag}, ID: ${id}`);
-                            tagFound = true;
-                            // Aqui você pode realizar ações com o ID (ex.: destacar no editor)
-                            break;
-                        }
-                    }
-
-                    
-
-                    if (!tagFound) {
-                        console.log("Nenhuma tag correspondente encontrada na posição do cursor.");
-                    }*/
-
                 }, 500)
 
             });
@@ -1091,7 +1049,6 @@ export class ServiceSource100554 extends ServiceBase {
             this.onFirtModel = false;
             this._ed1.setModel(mfile.model);
         }
-        // await mls.l2.editor.getCompilerResultTS(mfile, true);
     }
 
     private async createModelTS_clone(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string) {
@@ -1124,44 +1081,6 @@ export class ServiceSource100554 extends ServiceBase {
         return source;
 
     }
-
-    // private async createModelHTML_clone(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string) {
-
-    //     const { shortName, project } = storFile;
-    //     const uri = this.getUri(`_${project}_${shortName}`, '.html');
-    //     let model = monaco.editor.getModel(uri);
-    //     let cont = '<h1>Edit this</h1>';
-    //     let key = '';
-
-    //     if (model) cont = model.getValue();
-    //     else {
-    //         key = mls.stor.getKeyToFiles(project, storFile.level, shortName, '', '.html');
-    //         if (mls.stor.files[key]) cont = await mls.stor.files[key].getContent() as any;
-    //     }
-
-    //     const baseTag = convertFileNameToTag(`_${storFile.project}_${storFile.shortName}`)
-    //     const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
-    //     const regex = new RegExp(baseTag, 'g');
-    //     cont = cont.replace(regex, newTag);
-    //     key = mls.stor.getKeyToFiles(newProject, storFile.level, newShortName, '', '.html');
-    //     let file: mls.stor.IFileInfo | undefined = mls.stor.files[key];
-
-    //     if (!file) {
-    //         file = await mls.stor.addOrUpdateFile({ project, level: storFile.level, shortName: newShortName, extension: '.html', versionRef: new Date().toISOString(), folder: '' });
-    //         if (!file) throw new Error('Invalid storFile');
-    //         file.status = 'new';
-    //     }
-
-    //     const fileInfo: mls.stor.IFileInfoValue = {
-    //         content: cont,
-    //         contentType: 'string',
-    //     };
-
-    //     await mls.stor.localStor.setContent(file, fileInfo);
-
-    //     await this.getOrCreateModelHTML(newShortName, newProject, file, fileInfo);
-
-    // }
 
     private async createModelTS1(shortName: string, project: number, defaultTS: string, activateModel: boolean): Promise<mls.l2.editor.IMFile> {
         // create new file or load project 0 file
@@ -1237,7 +1156,6 @@ export class ServiceSource100554 extends ServiceBase {
 
         const keyFileHtml = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.html');
         const keyFileCss = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.less');
-
         const storFileHtml = mls.stor.files[keyFileHtml];
         const storFileCss = mls.stor.files[keyFileCss];
 
@@ -1418,6 +1336,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         let shortName: string = '';
         let project: number = 0;
         const conf = mls.l2.editor.editors[this.confE];
+
         shortName = conf.shortName;
         project = conf.project;
 
@@ -1426,7 +1345,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', mode);
         let storFile = mls.stor.files[key];
         if (!storFile) {
-            await this.createHtmlOrCssFile(project, shortName, mode === '.html' ? `<h1>_${project}_${shortName}</h1>` : '//LESS', mode);
+            if (mode === '.less') {
+                const newLess = await this.prepareInitialLess(shortName, project);
+                await this.createHtmlOrCssFile(project, shortName, newLess, mode);
+            } else {
+                await this.createHtmlOrCssFile(project, shortName, `<h1>_${project}_${shortName}</h1>`, mode);
+            }
             storFile = mls.stor.files[key];
         }
 
@@ -1440,11 +1364,25 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         if (mode === '.html' && this._ed1 && this._ed1.getModel()?.id !== model.id) {
             mls.events.fireFileAction('modeCreated', storFile, this.position);
-            this.registerProvider();
+            this.registerProviderHTML();
         }
 
         return storFile;
 
+    }
+
+    private async prepareInitialLess(shortName: string, project: number) {
+        await this.initDsInstance();
+        const lessTokens = await this.getTokens();
+        const tag = convertFileNameToTag(`_${project}_${shortName}`);
+
+        const newLess = `/// <mls shortName="${shortName}" project="${project}" />
+				\n${tag} {
+                \n // Here your less
+                \n} \n
+                \n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
+
+        return newLess;
     }
 
     private async createHtmlOrCssFile(project: number, shortName: string, content: string, extension: string) {
@@ -1468,6 +1406,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private async getOrCreateModelHtmlOrCss(shortName: string, project: number, ext: '.html' | '.less', storFile: mls.stor.IFileInfo, fileInfo?: mls.stor.IFileInfoValue,): Promise<monaco.editor.ITextModel> {
         let mfile = mls.l2.editor.get({ project, shortName });
+        if (!mfile) throw new Error('Invalid mfile')
         const uri = this.getUri(`_${project}_${shortName}`, ext);
         const language = ext.substring(1, ext.length);
         let model = monaco.editor.getModel(uri);
@@ -1483,15 +1422,15 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         (storFile as any)['originalCRC'] = storFile.inLocalStorage ? 'undefined' : mls.common.crc.crc32(model.getValue()).toString(16);
         if (storFile.status === 'renamed' && fileInfo) {
-            this.setEventsModelHTMLOrCss(model, storFile, fileInfo.originalShortName as string, fileInfo.originalProject as number);
+            this.setEventsModelHTMLOrCss(mfile, model, storFile, fileInfo.originalShortName as string, fileInfo.originalProject as number, ext);
             model.setValue(fileInfo.content as string);
         } else {
-            this.setEventsModelHTMLOrCss(model, storFile, storFile.shortName, storFile.project);
+            this.setEventsModelHTMLOrCss(mfile, model, storFile, storFile.shortName, storFile.project, ext);
         }
         return model;
     }
 
-    private setEventsModelHTMLOrCss(model: monaco.editor.ITextModel, storFile: mls.stor.IFileInfo, shortName: string, project: number): void {
+    private setEventsModelHTMLOrCss(mfile: mls.l2.editor.IMFile, model: monaco.editor.ITextModel, storFile: mls.stor.IFileInfo, shortName: string, project: number, ext: '.html' | '.less'): void {
         storFile.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdateHtmlOrCss(storFile, model);
         storFile.getValueInfo = () => this.getValueInfoHtmlOrCss(
             model,
@@ -1500,7 +1439,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             (storFile as any)['originalCRC']
         );
 
-        if (model) model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelHtmlOrCssChange(e, storFile, model));
+        if (!model) return;
+        model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelHtmlOrCssChange(e, mfile, storFile, model));
     }
 
     private async afterUpdateHtmlOrCss(storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel) {
@@ -1531,10 +1471,13 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private _onChangedContentHtmlOrCss: number | undefined = undefined;
 
-    private onModelHtmlOrCssChange(e: monaco.editor.IModelContentChangedEvent, storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel): void {
+    private onModelHtmlOrCssChange(e: monaco.editor.IModelContentChangedEvent, mfile: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel): void {
         // some changes is to simulate changes to force compile
         clearTimeout(this._onChangedContentHtmlOrCss);
         this._onChangedContentHtmlOrCss = window.setTimeout(async () => {
+
+            const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementInstance(mfile).catch((e) => undefined);
+            if (enhancementInstance) await enhancementInstance.onAfterChange(mfile);
 
             const sameContent: boolean = (storFile as any)['originalCRC'] === mls.common.crc.crc32(model.getValue()).toString(16);
             if (sameContent) {
@@ -1550,133 +1493,11 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 this.isHTMLSystemChange = false;
                 return;
             }
-
             mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
         }, 400);
     };
 
-
-
-    // --------------
-
-
-    // private async createOrShowModelHTML(open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
-
-    //     let shortName: string = '';
-    //     let project: number = 0;
-    //     const conf = mls.l2.editor.editors[this.confE];
-    //     shortName = conf.shortName;
-    //     project = conf.project;
-
-    //     const uri = this.getUri(`_${project}_${shortName}`, '.html');
-    //     let model = monaco.editor.getModel(uri);
-
-    //     const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', '.html');
-    //     let storFileHTML = mls.stor.files[key];
-    //     if (!storFileHTML) {
-    //         await this.createHTMLFile(project, shortName, `<h1>_${project}_${shortName}</h1>`);
-    //         storFileHTML = mls.stor.files[key];
-    //     }
-
-    //     if (!model) {
-    //         model = await this.getOrCreateModelHTML(shortName, project, storFileHTML, fileInfo);
-    //         let mfile = mls.l2.editor.get({ project, shortName });
-    //         if (mfile) (mfile as any).modelHTML = model;
-    //     }
-
-    //     if (open && this._ed1) this._ed1.setModel(model);
-
-    //     if (this._ed1 && this._ed1.getModel()?.id !== model.id) {
-    //         mls.events.fireFileAction('modeCreated', storFileHTML, this.position);
-    //         this.registerProvider();
-    //     }
-
-    //     return storFileHTML;
-    // }
-
-    // private async createHTMLFile(project: number, shortName: string, content: string) {
-    //     const params = {
-    //         project,
-    //         level: 2,
-    //         shortName,
-    //         extension: '.html',
-    //         versionRef: '0',
-    //         folder: ''
-    //     };
-    //     const file = await mls.stor.addOrUpdateFile(params);
-    //     if (!file) throw new Error('Invalid storFile');
-    //     file.status = 'new';
-    //     const fileInfo: mls.stor.IFileInfoValue = {
-    //         content,
-    //         contentType: 'string',
-    //     };
-    //     await mls.stor.localStor.setContent(file, fileInfo);
-    // }
-
-    // private async getOrCreateModelHTML(shortName: string, project: number, storFileHTML: mls.stor.IFileInfo, fileInfo?: mls.stor.IFileInfoValue): Promise<monaco.editor.ITextModel> {
-    //     let mfile = mls.l2.editor.get({ project, shortName });
-    //     const uri = this.getUri(`_${project}_${shortName}`, '.html');
-    //     let model = monaco.editor.getModel(uri);
-    //     if (model) return model;
-
-    //     const content = fileInfo ? fileInfo.content : await storFileHTML.getContent();
-    //     model = monaco.editor.createModel(content as string, 'html', uri);
-
-    //     if (mfile) (mfile as any)['modelHTML'] = model;
-    //     (model as any)['position'] = this.position;
-    //     const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
-    //     (model as any)['originalCRC'] = originalCRC;
-
-    //     (storFileHTML as any)['originalCRC'] = storFileHTML.inLocalStorage ? 'undefined' : mls.common.crc.crc32(model.getValue()).toString(16);
-    //     if (storFileHTML.status === 'renamed' && fileInfo) {
-    //         this.setEventsModelHTML(model, storFileHTML, fileInfo.originalShortName as string, fileInfo.originalProject as number);
-    //         model.setValue(fileInfo.content as string);
-    //     } else {
-    //         this.setEventsModelHTML(model, storFileHTML, storFileHTML.shortName, storFileHTML.project);
-    //     }
-    //     return model;
-    // }
-
-    // private setEventsModelHTML(model: monaco.editor.ITextModel, storFileHTML: mls.stor.IFileInfo, shortName: string, project: number): void {
-    //     storFileHTML.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdateHTML(storFileHTML, model);
-    //     storFileHTML.getValueInfo = () => this.getValueInfoHTML(
-    //         model,
-    //         shortName,
-    //         project,
-    //         (storFileHTML as any)['originalCRC']
-    //     );
-
-    //     if (model) model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelHTMLChange(e, storFileHTML, model));
-
-    // }
-
-    // private _onChangedContentHTML: number | undefined = undefined;
-
-    // private onModelHTMLChange = (e: monaco.editor.IModelContentChangedEvent, storFileHTML: mls.stor.IFileInfo, model: monaco.editor.ITextModel): void => {
-    //     // some changes is to simulate changes to force compile
-    //     clearTimeout(this._onChangedContentHTML);
-    //     this._onChangedContentHTML = window.setTimeout(async () => {
-
-    //         const sameContent: boolean = (storFileHTML as any)['originalCRC'] === mls.common.crc.crc32(model.getValue()).toString(16);
-    //         if (sameContent) {
-    //             if (storFileHTML.status !== 'new' && storFileHTML.status !== 'renamed') storFileHTML.status = 'nochange';
-    //             if (storFileHTML.status !== 'renamed') await mls.stor.localStor.setContent(storFileHTML, { content: null }); // clear localstorage
-    //         } else {
-    //             if (storFileHTML.status !== 'renamed' && (storFileHTML.status !== 'new')) storFileHTML.status = 'changed';
-    //             await mls.stor.localStor.setContent(storFileHTML, { contentType: 'string', content: model.getValue() });
-    //         }
-    //         if (mls.istrace) console.info('fire model html');
-
-    //         if (this.isHTMLSystemChange) {
-    //             this.isHTMLSystemChange = false;
-    //             return;
-    //         }
-
-    //         mls.events.fireFileAction('statusOrErrorChanged', storFileHTML, this.position);//(model as any)['position']
-    //     }, 400);
-    // };
-
-    private async renameHTMLOrCssFile(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, ext: '.html' | '.less') {
+    private async renameHTMLOrCssFile(mfile: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, ext: '.html' | '.less') {
 
         if (!storFile) return;
         const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject };
@@ -1685,9 +1506,14 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const valueInfo = await storFile.getValueInfo();
         const { status } = storFile;
         if (!mls.stor.renameFile(storFile, newSts)) throw new Error('Error on rename mls.stor.files');
-        const key = mls.stor.getKeyToFiles(newProject, this.level, newShortName, '', '.html');
+        const key = mls.stor.getKeyToFiles(newProject, this.level, newShortName, '', ext);
         const newStorFile = mls.stor.files[key];
         newStorFile.status = 'renamed';
+        if (ext === '.less') {
+            const modelLess = (mfile as any)['modelLESS'];
+            mls.common.tripleslash.changeVariable(modelLess, 'shortName', newShortName);
+            mls.common.tripleslash.changeVariable(modelLess, 'project', newProject.toString());
+        }
         await mls.stor.localStor.setContent(newStorFile, valueInfo);
         setTimeout(async () => {
             const file = await this.createOrShowModelHtmlOrCss(false, ext, valueInfo);
@@ -1696,31 +1522,43 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     }
 
-    // private getValueInfoHTML = async (activeModel: monaco.editor.ITextModel, originalShortName: string, originalProject: number, originalCRC: string): Promise<mls.stor.IFileInfoValue> => {
-    //     const rc: mls.stor.IFileInfoValue = {
-    //         content: activeModel.getValue(),
-    //         contentType: 'string',
-    //         originalShortName,
-    //         originalProject,
-    //         originalCRC
-    //     };
-    //     return rc;
-    // }
+    private async initDsInstance() {
+        const { project } = mls.actual[5];
+        const { mode } = mls.actual[3];
+        if (project === undefined) throw new Error('No project selected!');
+        this.dsInstance = await getDSInstance(project, mode);
+        if (!this.dsInstance) return;
+        await this.dsInstance.init();
+    }
 
-    // private async afterUpdateHTML(storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel) {
+    private async getTokens() {
+        if (!this.dsInstance || !this.dsInstance.tokens) return '';
+        if (!this.dsInstance) return;
+        const resumeTokens = this.dsInstance.tokens.getTokensLess('Default');
+        return resumeTokens;
+    }
 
-    //     if (storFile.status === 'deleted') {
-    //         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-    //         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
-    //         delete mls.stor.files[keyFiles];
-    //         return;
-    //     }
-    //     if (storFile.status === 'renamed') {
-    //         (storFile as any)['originalCRC'] = mls.common.crc.crc32(model.getValue()).toString(16);
-    //     }
-    //     await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-    //     storFile.status = 'nochange';
-    // }
+    private isReadOnlyArea(lineNumber: number): boolean {
+        const obj = this.getIntervalLinesReadOnly();
+        if (!obj) return false;
+        if (!obj.end || !obj.start) return false;
+        if (lineNumber >= obj.start && lineNumber <= obj.end) return true;
+        return false;
+    }
+
+    private getIntervalLinesReadOnly(): { start: number | undefined, end: number | undefined } | undefined {
+        if (!this._ed1) return;
+        const model = this._ed1.getModel();
+        if (!model) return;
+        const [startLine] = model.findMatches(`//Start Less Tokens`, true, false, false, null, true);
+        const [endLine] = model.findMatches(`//End Less Tokens`, true, false, false, null, true);
+        return {
+            end: endLine ? endLine.range.startLineNumber : undefined,
+            start: startLine ? startLine.range.startLineNumber : undefined
+        };
+    }
+
+
 
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
@@ -1730,7 +1568,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
     firstUpdated(changedProperties: any) {
         super.firstUpdated(changedProperties);
-        this.registerProvider();
+        this.registerProviderHTML();
     }
 
     render() {
@@ -1895,32 +1733,22 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
             const line = this.searchLineByStringTs(nameFc);
             if (line && this.menu.setIconActive) {
-
                 isExistEVentInTS = true;
                 this.menu.setIconActive('icTs');
                 this.goToLine(line);
-
             }
 
         }
 
         if (!isExistEVentInTS) {
 
-            if (!isExistEVentInHTML) {
-                this.setEventInHTml(json.id, json.event);
-            }
-
+            if (!isExistEVentInHTML) this.setEventInHTml(json.id, json.event);
             setTimeout(() => {
-
                 const str = `private ${nameFc}(){\n//Edit here your event ${json.event} code\n\n}`;
-
                 const line = this.searchLineByStringTs('/// **collab_events_start**');
                 if (!line) throw new Error('Not found collab_events_start');
-
                 this.setEditorValueByLineTs(str, line + 1);
-
-            }, 500)
-
+            }, 500);
 
         }
 
@@ -1931,41 +1759,27 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     private createOrSetEventPR(json: any) {
 
         //{"op":"CreateOrSetEvent", "id":"test", "event":"click", "device":"desktop", "func":""}
-
-        let isExistEVentInHTML = this.isEventExist(json.id, json.event);
-        let isExistEVentInTS = false;
+        let isExistEventInHTML = this.isEventExist(json.id, json.event);
+        let isExistEventInTS = false;
         const nameFc = getEventName(json.event, json.id, json.device);
-        if (isExistEVentInHTML) {
 
+        if (isExistEventInHTML) {
             const line = this.searchLineByStringTs(nameFc);
             if (line && this.menu.setIconActive) {
-
-                isExistEVentInTS = true;
+                isExistEventInTS = true;
                 this.menu.setIconActive('icTs');
                 this.goToLine(line);
-
             }
-
         }
 
-        if (!isExistEVentInTS) {
-
-            if (!isExistEVentInHTML) {
-                this.setEventInHTml(json.id, json.event);
-            }
-
+        if (!isExistEventInTS) {
+            if (!isExistEventInHTML) this.setEventInHTml(json.id, json.event);
             setTimeout(() => {
-
                 const str = `private ${nameFc}${json.func}`;
-
                 const line = this.searchLineByStringTs('/// **collab_events_start**');
                 if (!line) throw new Error('Not found collab_events_start');
-
                 this.setEditorValueByLineTs(str, line + 1);
-
-            }, 500)
-
-
+            }, 500);
         }
 
         this.closeScenario();
@@ -1975,18 +1789,15 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     private isEventExist(id: string, event: string): boolean {
 
         let isExist = false;
-
         const strHtml = this.getEditorHTMLValue();
         const html = document.createElement('div');
         html.innerHTML = strHtml;
-
         const el = html.querySelector('#' + id) as HTMLElement;
         if (el && el.dataset && el.dataset.event) {
             const events = el.dataset.event.split(' ');
             isExist = events.includes(event);
         }
-
-        return isExist
+        return isExist;
 
     }
 
@@ -2022,7 +1833,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     }
 
-    private registerProvider() {
+    private registerProviderHTML() {
         monaco.languages.registerDocumentFormattingEditProvider('html', {
             provideDocumentFormattingEdits: (model) => {
                 const value = model.getValue();
@@ -2067,8 +1878,5 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
     }
 
-    private htmlModelAlreadyProcessed: { [key: string]: boolean } = {};
 
-
-    //----------------------------------------
 }

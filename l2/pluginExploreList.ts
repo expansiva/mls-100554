@@ -69,8 +69,6 @@ export class PluginExploreList extends PluginBaseModule {
 
     @property() position: string = 'left';
 
-    // @property() level: number = 0;
-
     @property() levelFiles: number = 2;
 
     @property() project: number = 1;
@@ -303,6 +301,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     renderLiItem(file: mls.stor.IFileInfo, index: number, inHistory: boolean) {
 
+    
         const name = this.project === 0 && inHistory ? '_' + file.project + '_' + file.shortName : file.shortName;
 
         const nameFilter = inHistory ? '*******' : name.toLocaleLowerCase();
@@ -311,23 +310,26 @@ export class PluginExploreList extends PluginBaseModule {
         let auxBug = '';
         let auxHtml = '';
         const keyHtml = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.html');
+        const keyLess = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.less');
+        const lessFile = mls.stor.files[keyLess];
+        const htmlFile = mls.stor.files[keyHtml];
 
-        const htmlLocal = mls.stor.files[keyHtml] && mls.stor.files[keyHtml].inLocalStorage;
+        const htmlLocal = htmlFile && mls.stor.files[keyHtml].inLocalStorage;
+        const lessLocal = lessFile && mls.stor.files[keyLess].inLocalStorage;
+        const htmlError = htmlFile && htmlFile.hasError;
+        const lessError = lessFile && lessFile.hasError;
 
         if (file.inLocalStorage) {
-
-            auxStorage = `<span title=".ts${htmlLocal ? ', .html' : ''} in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
-
+            const titleLocalStorage = `.ts${htmlLocal ? ', .html' : ''} ${lessLocal ? ', .less' : ''} `
+            auxStorage = `<span title=" ${titleLocalStorage} in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
         } else if (htmlLocal) {
-
             auxStorage = `<span title=".html in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
-
+        } else if (lessLocal) {
+            auxStorage = `<span title=".less in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
         }
 
-        if (file.hasError) {
-
+        if (file.hasError || lessError || htmlError) {
             auxBug = `<span title="bug" class="fa fa-bug" style="color:rgb(169, 3, 3); height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
-
         }
 
         if (file.isLocalVersionOutdated) {
