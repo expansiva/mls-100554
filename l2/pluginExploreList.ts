@@ -310,25 +310,25 @@ export class PluginExploreList extends PluginBaseModule {
         let auxBug = '';
         let auxHtml = '';
         const keyHtml = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.html');
-        const keyLess = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.less');
-        const lessFile = mls.stor.files[keyLess];
+        const keyStyle = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.style');
+        const styleFile = mls.stor.files[keyStyle];
         const htmlFile = mls.stor.files[keyHtml];
 
         const htmlLocal = htmlFile && mls.stor.files[keyHtml].inLocalStorage;
-        const lessLocal = lessFile && mls.stor.files[keyLess].inLocalStorage;
+        const styleLocal = styleFile && mls.stor.files[keyStyle].inLocalStorage;
         const htmlError = htmlFile && htmlFile.hasError;
-        const lessError = lessFile && lessFile.hasError;
+        const styleError = styleFile && styleFile.hasError;
 
         if (file.inLocalStorage) {
-            const titleLocalStorage = `.ts${htmlLocal ? ', .html' : ''} ${lessLocal ? ', .less' : ''} `
+            const titleLocalStorage = `.ts${htmlLocal ? ', .html' : ''} ${styleLocal ? ', .less' : ''} `
             auxStorage = `<span title=" ${titleLocalStorage} in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
         } else if (htmlLocal) {
             auxStorage = `<span title=".html in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
-        } else if (lessLocal) {
+        } else if (styleLocal) {
             auxStorage = `<span title=".less in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
         }
 
-        if (file.hasError || lessError || htmlError) {
+        if (file.hasError || styleError || htmlError) {
             auxBug = `<span title="bug" class="fa fa-bug" style="color:rgb(169, 3, 3); height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
         }
 

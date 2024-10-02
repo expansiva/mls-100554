@@ -207,29 +207,32 @@ function validateLess(mfile: mls.l2.editor.IMFile) {
     const validRootSelectorClass = /^[a-zA-Z][\w-]*\.[a-zA-Z][\w-]*$/;
     const validRootSelectorTag = /^\s*[a-zA-Z]+[\w-]*-[\w-]*\s*$/;
     const rootRules = getRootSelectors(text);
+    const tagName = convertFileNameToTag(`_${mfile.project}_${mfile.shortName}`);
 
     if (rootRules) {
         rootRules.forEach((rule) => {
             const lineSelector = rule.trim().split('\n')[0].trim();
             const selector = lineSelector.split('{')[0].trim();
+            const isSameSelectorAndTag = selector.startsWith(tagName);
             const position = getLineByText(model, lineSelector);
-            if (!validRootSelectorClass.test(selector) && !validRootSelectorTag.test(selector) && position) {
+
+            if ((!isSameSelectorAndTag || (!validRootSelectorClass.test(selector) && !validRootSelectorTag.test(selector))) && position) {
                 markers.push(position);
             }
         });
     }
 
     if (markers.length > 0) storFileLess.hasError = true;
-    setErrorOnEditor(markers, model);
+    setErrorOnEditor(markers, model, tagName);
 }
 
-function setErrorOnEditor(position: monaco.Position[], model: monaco.editor.ITextModel) {
+function setErrorOnEditor(position: monaco.Position[], model: monaco.editor.ITextModel, tag: string) {
     monaco.editor.setModelMarkers(model, 'markerSource', []);
     const markers: monaco.editor.IMarkerData[] = [];
     position.forEach((pos) => {
         const markerOptions = {
             severity: monaco.MarkerSeverity.Error,
-            message: 'Invalid selector',
+            message: `Invalid selector, must starting with tag or tag.class ex: '${tag} {' or '${tag}.myclass {'`,
             startLineNumber: pos.lineNumber,
             startColumn: pos.column,
             endLineNumber: pos.lineNumber,
@@ -275,10 +278,10 @@ function removeCommentLines(text: string) {
 
 function getRootSelectors(lessContent: string): string[] {
     const rootSelectors = [];
-    const regex = /^([^\s{]+(?:\.[^\s{]+)*(?:\s+[^\s{]+)*)\s*\{/gm; 
+    const regex = /^([^\s{]+(?:\.[^\s{]+)*(?:\s+[^\s{]+)*)\s*\{/gm;
     let match;
     while ((match = regex.exec(lessContent)) !== null) {
-        rootSelectors.push((match[1].trim().replace(/\n/g, ' ').replace(/}/g, '') + ' {').trim()); 
+        rootSelectors.push((match[1].trim().replace(/\n/g, ' ').replace(/}/g, '') + ' {').trim());
     }
     return rootSelectors;
 }
