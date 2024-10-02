@@ -25,8 +25,8 @@ export const getAddNewFileDetails = async () => {
 
 export function validateStyle(mfile: mls.l2.editor.IMFile) {
 
-    const model: monaco.editor.ITextModel = (mfile as any).modelStyle;
-    const keyToStorFileLess = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, '', '.style');
+    const model: monaco.editor.ITextModel = (mfile as any).modelLESS;
+    const keyToStorFileLess = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, '', '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!model || !storFileLess) return;
 
@@ -150,8 +150,8 @@ export async function getTokensList() {
 }
 
 export async function compileStyleUsingMFile(mfile: mls.l2.editor.IMFile, prefix: ':host' | ':root', theme: string = 'Default') {
-    const model: monaco.editor.ITextModel = (mfile as any).modelStyle;
-    const keyToStorFileLess = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, '', '.style');
+    const model: monaco.editor.ITextModel = (mfile as any).modelLESS;
+    const keyToStorFileLess = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, '', '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!model || !storFileLess) return;
     const tokensLess = await getTokensLess(theme);
@@ -172,7 +172,7 @@ export async function compileStyleUsingMFile(mfile: mls.l2.editor.IMFile, prefix
 
 export async function compileStyleUsingStorFile(shortName: string, project:number, theme: string = 'Default') {
   
-    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, '', '.style');
+    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, '', '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!storFileLess) return;
    

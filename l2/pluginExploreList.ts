@@ -310,7 +310,7 @@ export class PluginExploreList extends PluginBaseModule {
         let auxBug = '';
         let auxHtml = '';
         const keyHtml = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.html');
-        const keyStyle = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.style');
+        const keyStyle = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.less');
         const styleFile = mls.stor.files[keyStyle];
         const htmlFile = mls.stor.files[keyHtml];
 
