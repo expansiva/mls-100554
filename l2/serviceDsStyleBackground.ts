@@ -1,11 +1,5 @@
 /// <mls shortName="serviceDsStyleBackground" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": ["collab-ds-input-range-100554"]
- * }
- */
-
 import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
@@ -21,7 +15,6 @@ const message_pt = {
     add: 'Add',
     del: 'Del'
 }
-
 
 const message_en = {
     gallery: 'Gallery',

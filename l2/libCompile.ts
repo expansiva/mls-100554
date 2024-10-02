@@ -2,6 +2,7 @@
 
 // typescript new file
 import { getDSInstance } from './_100554_libDesignSystem';
+import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
 
 export const getDependenciesByHtml = (mfile: mls.l2.editor.IMFile, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
@@ -142,6 +143,9 @@ async function loadMyNeedsToCompile(
 
         if (compileCss) {
             await getCss(myCss, name, ipath, theme);
+            await getCssL2(myCss, ipath, theme);
+
+            console.info(myCss);
         }
         await getTokens(myTokens, ipath, theme);
 
@@ -172,7 +176,7 @@ async function loadMyNeedsToCompile(
 
 }
 
-async function getJSImporMap(myImportsMap: string[], enhacementName: string, mfile: mls.l2.editor.IPath, myModules: any) {
+async function getJSImporMap(myImportsMap: string[], enhacementName: string, mfile: mls.cbe.IPath, myModules: any) {
 
     if (!myModules[enhacementName]) {
         throw new Error('Enhacement not found ');
@@ -197,7 +201,7 @@ async function getJSImporMap(myImportsMap: string[], enhacementName: string, mfi
 
 }
 
-async function getJS(myImports: string[], enhacementName: string, mfile: mls.l2.editor.IPath, myModules: any) {
+async function getJS(myImports: string[], enhacementName: string, mfile: mls.cbe.IPath, myModules: any) {
 
     if (!myModules[enhacementName]) {
         throw new Error('Enhacement not found ');
@@ -210,27 +214,43 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.l2.
 }
 
 
-
-async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IPath, theme: string) {
+async function getCss(myCss: string[], fullName: string, mfile: mls.cbe.IPath, theme: string) {
 
     try {
-
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
         if (!ds || !ds.components) return;
         const css = await ds.components.getCSS(fullName, theme);
         myCss.push(css);
-
     } catch (e: any) {
-
         if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
-
     }
+}
 
+async function getCssL2(resCss: string[], ipath: mls.cbe.IPath, theme: string) {
+
+    const mfile = mls.l2.editor.get(ipath);
+    if (!mfile) return;
+    const modelHTML = (mfile as any).modelHTML;
+    if (!modelHTML) return;
+    const html = modelHTML.getValue() || '';
+    const components = getAllWebComponentsInSource(html);
+
+    for await (let component of components) {
+        const fileName = convertTagToFileName(component);
+        mls.actual[0].setFullName(fileName);
+        const shortName = mls.actual[0].path;
+        const project = mls.actual[0].project;
+        if (!shortName || !project) continue;
+
+        const styleC = await compileStyleUsingStorFile(shortName, project, theme);
+        if (styleC) resCss.push(styleC);
+    }
 
 }
 
-async function getGlobalCss(mfile: mls.l2.editor.IPath, theme: string) {
+
+async function getGlobalCss(mfile: mls.cbe.IPath, theme: string) {
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
@@ -243,7 +263,7 @@ async function getGlobalCss(mfile: mls.l2.editor.IPath, theme: string) {
     }
 }
 
-async function getTokens(myTokens: string[], mfile: mls.l2.editor.IPath, theme: string) {
+async function getTokens(myTokens: string[], mfile: mls.cbe.IPath, theme: string) {
     try {
         const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
         const ds = await getDSInstance(mfile.project, dsindex);
@@ -296,231 +316,3 @@ export interface IJSONDependence {
     tokens: string[],
     errors: { tag: string, error: string }[]
 }
-
-/*async function loadMyNeedsToCompile(
-    tags: string[],
-    myImportsMap: string[],
-    myImports: string[],
-    myCss: string[],
-    myTokens: string[],
-    myErrors: { tag: string, error: string }[],
-    myModules: any,
-    compileCss: boolean,
-    theme: string) {
-
-    try {
-
-        if (tags.length <= 0) return;
-        const name = convertTagToFileName(tags[0]);
-
-        mls.actual[0].setFullName(name);
-        const { project, path } = mls.actual[0];
-        if (!project || !path) return;
-        const mfile = mls.l2.editor.get({ project, shortName: path });
-        if (!mfile) throw new Error('not found');
-
-        if (!mfile.compilerResults || !mfile.compilerResults.prodJS || !(mfile.compilerResults as any).tripleSlashMLS) {
-
-            if (mfile.compilerResults) mfile.compilerResults.modelNeedCompile = true;
-            await mls.l2.editor.getCompilerResultTS(mfile, true);
-
-        }
-
-        const enhacementName = (mfile.compilerResults as any).tripleSlashMLS.variables.enhancement;
-        if (!enhacementName) throw new Error('enhacementName not valid');
-
-
-        if (!myModules[enhacementName]) {
-
-            const mModule = await mls.l2.enhancement.getEnhancementInstance(mfile);
-            myModules[enhacementName] = {
-                jsMap: false,
-                mModule
-            };
-
-        }
-
-        tags = await addRequeries(enhacementName, mfile, tags, myModules);
-        await getJSImporMap(myImportsMap, enhacementName, mfile, myModules);
-        await getJS(myImports, enhacementName, mfile, myModules);
-        if (compileCss) {
-            await getCss(myCss, name, mfile, theme);
-        }
-        await getTokens(myTokens, mfile, theme);
-
-
-    } catch (e: any) {
-
-        if (tags.length <= 0) return;
-        myErrors.push({ tag: tags[0], error: e.message })
-
-    } finally {
-
-        tags.shift();
-        if (tags.length > 0) {
-            await loadMyNeedsToCompile(
-                tags,
-                myImportsMap,
-                myImports,
-                myCss,
-                myTokens,
-                myErrors,
-                myModules,
-                compileCss,
-                theme
-            );
-        }
-
-    }
-
-}
-
-async function addRequeries(enhacementName: string, mfile: mls.l2.editor.IMFile, array: string[], myModules: any) {
-
-    if (!myModules[enhacementName]) {
-        throw new Error('Enhacement not found ');
-    }
-
-    if (!myModules[enhacementName].mModule || !myModules[enhacementName].mModule.getDesignDetails) return array;
-
-    const obj = await myModules[enhacementName].mModule.getDesignDetails(mfile);
-    if (!obj || !obj.webComponentDependencies) return array;
-
-    for (let i of obj.webComponentDependencies) {
-
-        const tag = convertFileNameToTag(i);
-        if (!array.includes(tag)) {
-            array.push(tag);
-        }
-
-    }
-
-    return array;
-
-}
-
-async function getJSImporMap(myImportsMap: string[], enhacementName: string, mfile: mls.l2.editor.IMFile, myModules: any) {
-
-    if (!myModules[enhacementName]) {
-        throw new Error('Enhacement not found ');
-    }
-
-    if (myModules[enhacementName].jsMap) return;
-
-    myModules[enhacementName].jsMap = true;
-    const mmodule = myModules[enhacementName].mModule as mls.l2.enhancement.IEnhancementInstance;
-
-    if (!mmodule || !mmodule.requires) return;
-
-    const aRequire = mmodule.requires;
-
-    aRequire.forEach((i) => {
-
-        if (i.type !== 'cdn') return;
-
-        myImportsMap.push(`"${i.name}": "${i.ref}"`);
-
-    });
-
-}
-
-async function getJS(myImports: string[], enhacementName: string, mfile: mls.l2.editor.IMFile, myModules: any) {
-
-    if (!myModules[enhacementName]) {
-        throw new Error('Enhacement not found ');
-    }
-
-    if (mfile.compilerResults && mfile.compilerResults.imports && mfile.compilerResults.imports.length > 0) {
-
-        mfile.compilerResults.imports.forEach((n: string) => {
-
-            const name = n.replace('./', '/');
-            if (!myImports.includes(name) && n.startsWith('./')) {
-                myImports.push(name);
-
-            }
-            //myImports = verifyMyImportsNeedImport(myImports, name);
-
-        });
-
-    }
-
-    if (myImports.includes(`/_${mfile.project}_${mfile.shortName}`)) return;
-
-    myImports.push(`/_${mfile.project}_${mfile.shortName}`);
-
-}
-
-function verifyMyImportsNeedImport(myImports: string[], name: string): string[] {
-
-    name = name.replace('.', '').replace('/', '');
-    const { project, path } = mls.actual[0].setFullName(name);
-    const key = mls.l2.editor.getKey({ project: project as number, shortName: path as string });
-
-    const mfile = mls.l2.editor.mfiles[key];
-    if (!mfile) return myImports;
-
-    if (mfile.compilerResults && mfile.compilerResults.imports && mfile.compilerResults.imports.length > 0) {
-
-        mfile.compilerResults.imports.forEach((n: string) => {
-
-            const name = n.replace('./', '/');
-            if (!myImports.includes(name) && n.startsWith('./')) {
-                myImports.push(name);
-            }
-
-
-        });
-
-    }
-
-    return myImports;
-
-};
-
-async function getCss(myCss: string[], fullName: string, mfile: mls.l2.editor.IMFile, theme: string) {
-
-    try {
-
-        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-        const ds = await getDSInstance(mfile.project, dsindex);
-        if (!ds || !ds.components) return;
-        const css = await ds.components.getCSS(fullName, theme)
-        myCss.push(css);
-
-    } catch (e: any) {
-
-        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
-
-    }
-
-
-}
-
-async function getTokens(myTokens: string[], mfile: mls.l2.editor.IMFile, theme: string) {
-    try {
-        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-        const ds = await getDSInstance(mfile.project, dsindex);
-        if (!ds || !ds.tokens) return;
-        const tokens = await ds.tokens.getTokensCss(theme);
-        myTokens.push(tokens);
-    } catch (e: any) {
-
-        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
-
-    }
-}
-
-async function getGlobalCss(mfile: mls.l2.editor.IMFile, theme: string) {
-    try {
-        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-        const ds = await getDSInstance(mfile.project, dsindex);
-        if (!ds || !ds.css) return;
-        const css = await ds.css.getStylesInLess(theme)
-        return css;
-    } catch (e: any) {
-        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
-    }
-}
-
-*/

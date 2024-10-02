@@ -8,30 +8,24 @@ const message_ru = { installPlugin: 'Установить плагин', createN
 
 @customElement('ateste-100554')
 export class SimpleGreeting extends LitElement {
-    static styles = css`p { color: red } `;
+    
+    /// static styles = css`[[mls_getDefaultDesignSystem]]`;
+    createRenderRoot() {
+        return this;
+    }
 
-    @property()
-    name: string = new Date(Date.now()).toString();
+        
+    @property() name: string = new Date(Date.now()).toString();
     
     handleConfirm(e: CustomEvent) {
         console.info(e.detail)
     }
 
-    firstUpdated() {
-        this.initDs();
-    }
-    
-    async initDs() {
-        const instance = await getOrCreateDSInstanceIO(100554, 0, '_100554_configDsDefault');
-        await instance.init();
-        console.info(instance);
-        
-    }
-
     render() {
 
-        return html`${this.name}`;
+        return html`<h1>Hello world</h1>`;
     }
+
 
 
 }

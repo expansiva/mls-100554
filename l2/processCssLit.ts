@@ -1,26 +1,19 @@
 /// <mls shortName="processCssLit" project="100554" enhancement="_blank" />
-
 import { convertFileNameToTag } from './_100554_utilsLit'
-import { getDSInstance } from './_100554_libDesignSystem';
+import { compileStyleUsingMFile } from './_100554_enhancementStyle';
 
 export const MLS_GETDEFAULTDESIGNSYSTEM = '[[mls_getDefaultDesignSystem]]';
 
-export async function injectStyle(model: mls.l2.editor.IMFile, dsIndex: number): Promise<void> {
-
-    const js = model.compilerResults?.prodJS;
-    if (js && js.indexOf(MLS_GETDEFAULTDESIGNSYSTEM) === -1) return;
-    const ds = await getDSInstance(model.project, dsIndex);
-    if (!ds) return;
-    await ds.init();
-    const fileName = `_${model.project}_${model.shortName}`;
+export async function injectStyle(mfile: mls.l2.editor.IMFile, theme: string): Promise<void> {
+    const js = mfile.compilerResults?.prodJS;
+    if (js && js.indexOf(MLS_GETDEFAULTDESIGNSYSTEM) === -1)
+        return; const fileName = `_${mfile.project}_${mfile.shortName}`;
     const tagName = convertFileNameToTag(fileName)
-    const css = await ds.components?.getCSS(fileName, 'Default');
-    if (!css) return;
-    const css2 = getCssWithoutTag(css, tagName);
-    if (model && model.compilerResults) {
-        model.compilerResults.prodJS = model.compilerResults.prodJS.replace(MLS_GETDEFAULTDESIGNSYSTEM, css2)
-    }
-    return;
+    const css = await compileStyleUsingMFile(mfile, ':host', theme);
+    if (!css) return; const css2 = getCssWithoutTag(css, tagName);
+    if (mfile && mfile.compilerResults) {
+        mfile.compilerResults.prodJS = mfile.compilerResults.prodJS.replace(MLS_GETDEFAULTDESIGNSYSTEM, css2)
+    } return;
 }
 
 export function getCssWithoutTag(css: string, tag: string): string {

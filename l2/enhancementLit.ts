@@ -4,8 +4,9 @@ import { getPropierties } from './_100554_propiertiesLit'
 import { getComponentDependencies } from './_100554_dependenciesLit'
 import { validateTagName, validateRender } from './_100554_validateLit'
 import { setCodeLens } from './_100554_codeLensLit'
-import { injectStyle, getCssWithoutTag } from './_100554_processCssLit'
+import { injectStyle } from './_100554_processCssLit'
 import { getMessageKey } from "./_100554_collabLitElement";
+import { validateStyle } from "./_100554_enhancementStyle";
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -154,7 +155,7 @@ export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> 
 
     try {
         setCodeLens(mfile);
-        validateLess(mfile);
+        validateStyle(mfile);
         if (validateTagName(mfile)) {
             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
@@ -173,123 +174,6 @@ export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> 
 
 
 export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
-    await injectStyle(mfile, 0);
+    await injectStyle(mfile, 'Default');
     return;
-}
-
-export async function setStylesProcessed(newCss: string, el: HTMLElement, tag: string) {
-    const cssWithoutTag = getCssWithoutTag(newCss, tag);
-    if (!el.shadowRoot) return;
-    const stylesheet = createStyleSheet(cssWithoutTag, el.ownerDocument.defaultView!);
-    if (!stylesheet) return;
-    el.shadowRoot.adoptedStyleSheets = [stylesheet];
-    (el as any).requestUpdate();
-}
-
-function createStyleSheet(cssString: string, defaultView: Window) {
-    const sheet = (new (defaultView as any).CSSStyleSheet() as any);
-    sheet.replaceSync(cssString);
-    return sheet;
-}
-
-function validateLess(mfile: mls.l2.editor.IMFile) {
-
-    const model: monaco.editor.ITextModel = (mfile as any).modelLESS;
-    const keyToStorFileLess = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, '', '.less');
-    const storFileLess = mls.stor.files[keyToStorFileLess];
-    if (!model || !storFileLess) return;
-
-    storFileLess.hasError = false;
-    const value = model.getValue();
-    let text = removeTokensFromSource(value);
-    text = removeCommentLines(text);
-    const markers: monaco.Position[] = [];
-    const validRootSelectorClass = /^[a-zA-Z][\w-]*\.[a-zA-Z][\w-]*$/;
-    const validRootSelectorTag = /^\s*[a-zA-Z]+[\w-]*-[\w-]*\s*$/;
-    const rootRules = getRootSelectors(text);
-    const tagName = convertFileNameToTag(`_${mfile.project}_${mfile.shortName}`);
-
-    if (rootRules) {
-        rootRules.forEach((rule) => {
-            const lineSelector = rule.trim().split('\n')[0].trim();
-            const selector = lineSelector.split('{')[0].trim();
-            const isSameSelectorAndTag = selector.startsWith(tagName);
-            const position = getLineByText(model, lineSelector);
-
-            if ((!isSameSelectorAndTag || (!validRootSelectorClass.test(selector) && !validRootSelectorTag.test(selector))) && position) {
-                markers.push(position);
-            }
-        });
-    }
-
-    if (markers.length > 0) storFileLess.hasError = true;
-    setErrorOnEditor(markers, model, tagName);
-}
-
-function setErrorOnEditor(position: monaco.Position[], model: monaco.editor.ITextModel, tag: string) {
-    monaco.editor.setModelMarkers(model, 'markerSource', []);
-    const markers: monaco.editor.IMarkerData[] = [];
-    position.forEach((pos) => {
-        const markerOptions = {
-            severity: monaco.MarkerSeverity.Error,
-            message: `Invalid selector, must starting with tag or tag.class ex: '${tag} {' or '${tag}.myclass {'`,
-            startLineNumber: pos.lineNumber,
-            startColumn: pos.column,
-            endLineNumber: pos.lineNumber,
-            endColumn: pos.column,
-        };
-        markers.push(markerOptions);
-    })
-    monaco.editor.setModelMarkers(model, 'markerSource', markers);
-}
-
-function getLineByText(model: monaco.editor.ITextModel, searchText: string) {
-    const lineCount = model.getLineCount();
-    for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
-        const lineContent = model.getLineContent(lineNumber);
-        if (lineContent.trim() === searchText) {
-            return new monaco.Position(lineNumber, 1);
-        }
-    }
-    return null;
-}
-
-function removeTokensFromSource(src: string) {
-    const regex = /\/\/Start Less Tokens[\s\S]*?\/\/End Less Tokens/g;
-    return src.replace(regex, '');
-}
-
-function removeCommentLines(text: string) {
-
-    const lines = text.split('\n');
-    const lineCount = lines.length - 1;
-
-    const newLines = [];
-
-    for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
-        const lineContent = lines[lineNumber]
-        if (!isCommentLine(lineContent)) {
-            newLines.push(lineContent);
-        }
-    }
-    const newContent = newLines.join('\n');
-    return newContent;
-}
-
-function getRootSelectors(lessContent: string): string[] {
-    const rootSelectors = [];
-    const regex = /^([^\s{]+(?:\.[^\s{]+)*(?:\s+[^\s{]+)*)\s*\{/gm;
-    let match;
-    while ((match = regex.exec(lessContent)) !== null) {
-        rootSelectors.push((match[1].trim().replace(/\n/g, ' ').replace(/}/g, '') + ' {').trim());
-    }
-    return rootSelectors;
-}
-
-function isCommentLine(line: string) {
-    if (!line) return false;
-    if (line.trim().startsWith('//')) {
-        return true;
-    }
-    return line.trim().startsWith('/*') && line.trim().endsWith('*/');
 }

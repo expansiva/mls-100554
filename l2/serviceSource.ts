@@ -6,7 +6,7 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
-import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
+import { getAddNewFileDetails } from './_100554_enhancementStyle';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -257,7 +257,6 @@ export class ServiceSource100554 extends ServiceBase {
     private mConfEditor: monaco.editor.ITextModel | undefined;
     private confE2(positionToolbar: string) { return `l${this.level}_${positionToolbar}`; }
     private htmlModelAlreadyProcessed: { [key: string]: boolean } = {};
-    private dsInstance: DesignSystemIO | undefined;
 
     get confE() { return `l${this.level}_${this.position}`; }
     get confETS() { return this.confE + '_TS'; }
@@ -1371,17 +1370,15 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private async prepareInitialLess(shortName: string, project: number) {
-        await this.initDsInstance();
-        const lessTokens = await this.getTokens();
+
+        const details = await getAddNewFileDetails();
         const tag = convertFileNameToTag(`_${project}_${shortName}`);
+        const newStyle = details[0].example
+            .replace('[shortName]', shortName)
+            .replace('[project]', project.toString())
+            .replace('[tag]', tag)
 
-        const newLess = `/// <mls shortName="${shortName}" project="${project}" />
-				\n${tag} {
-                \n // Here your less
-                \n} \n
-                \n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
-
-        return newLess;
+        return newStyle;
     }
 
     private async createHtmlOrCssFile(project: number, shortName: string, content: string, extension: string) {
@@ -1407,14 +1404,18 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         let mfile = mls.l2.editor.get({ project, shortName });
         if (!mfile) throw new Error('Invalid mfile')
         const uri = this.getUri(`_${project}_${shortName}`, ext);
-        const language = 'less';
+        let language = ext.substring(1, ext.length);
+
+        language = language === 'style' ? 'less' : language;
+        const modelName = `model${ext === '.html' ? 'HTML' : 'Style'}`
+
         let model = monaco.editor.getModel(uri);
         if (model) return model;
 
         const content = fileInfo ? fileInfo.content : await storFile.getContent();
         model = monaco.editor.createModel(content as string, language, uri);
 
-        if (mfile) (mfile as any)[`model${language.toUpperCase()}`] = model;
+        if (mfile) (mfile as any)[modelName] = model;
         (model as any)['position'] = this.position;
         const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
         (model as any)['originalCRC'] = originalCRC;
@@ -1509,9 +1510,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const newStorFile = mls.stor.files[key];
         newStorFile.status = 'renamed';
         if (ext === '.style') {
-            const modelLess = (mfile as any)['modelLESS'];
-            mls.common.tripleslash.changeVariable(modelLess, 'shortName', newShortName);
-            mls.common.tripleslash.changeVariable(modelLess, 'project', newProject.toString());
+            const modelStyle = (mfile as any)['modelStyle'];
+            mls.common.tripleslash.changeVariable(modelStyle, 'shortName', newShortName);
+            mls.common.tripleslash.changeVariable(modelStyle, 'project', newProject.toString());
         }
         await mls.stor.localStor.setContent(newStorFile, valueInfo);
         setTimeout(async () => {
@@ -1519,22 +1520,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (status === 'new') file.status = status;
         }, 500);
 
-    }
-
-    private async initDsInstance() {
-        const { project } = mls.actual[5];
-        const { mode } = mls.actual[3];
-        if (project === undefined) throw new Error('No project selected!');
-        this.dsInstance = await getDSInstance(project, mode);
-        if (!this.dsInstance) return;
-        await this.dsInstance.init();
-    }
-
-    private async getTokens() {
-        if (!this.dsInstance || !this.dsInstance.tokens) return '';
-        if (!this.dsInstance) return;
-        const resumeTokens = this.dsInstance.tokens.getTokensLess('Default');
-        return resumeTokens;
     }
 
     private isReadOnlyArea(lineNumber: number): boolean {
