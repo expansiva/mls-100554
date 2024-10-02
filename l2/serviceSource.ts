@@ -1413,6 +1413,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (model) return model;
 
         const content = fileInfo ? fileInfo.content : await storFile.getContent();
+        if (content instanceof Blob) throw new Error('style file must be string');
+        if (!content) throw new Error('style file is undefined');;
+
         model = monaco.editor.createModel(content as string, language, uri);
 
         if (mfile) (mfile as any)[modelName] = model;
