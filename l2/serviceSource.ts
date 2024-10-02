@@ -6,7 +6,7 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
-import { getAddNewFileDetails } from './_100554_enhancementStyle';
+import { getAddNewFileDetails, removeTokensFromSource } from './_100554_enhancementStyle';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -1441,7 +1441,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         );
 
         if (!model) return;
-        model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelHtmlOrCssChange(e, mfile, storFile, model));
+        model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelHtmlOrCssChange(e, mfile, storFile, model, ext));
     }
 
     private async afterUpdateHtmlOrCss(storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel) {
@@ -1472,7 +1472,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private _onChangedContentHtmlOrCss: number | undefined = undefined;
 
-    private onModelHtmlOrCssChange(e: monaco.editor.IModelContentChangedEvent, mfile: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel): void {
+    private onModelHtmlOrCssChange(e: monaco.editor.IModelContentChangedEvent, mfile: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel, ext: '.html' | '.less'): void {
         // some changes is to simulate changes to force compile
         clearTimeout(this._onChangedContentHtmlOrCss);
         this._onChangedContentHtmlOrCss = window.setTimeout(async () => {
@@ -1480,13 +1480,18 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementInstance(mfile).catch((e) => undefined);
             if (enhancementInstance) await enhancementInstance.onAfterChange(mfile);
 
-            const sameContent: boolean = (storFile as any)['originalCRC'] === mls.common.crc.crc32(model.getValue()).toString(16);
+            let modelValue = model.getValue();
+            if (ext === '.less') {
+                modelValue = removeTokensFromSource(modelValue);
+            }
+
+            const sameContent: boolean = (storFile as any)['originalCRC'] === mls.common.crc.crc32(modelValue).toString(16);
             if (sameContent) {
                 if (storFile.status !== 'new' && storFile.status !== 'renamed') storFile.status = 'nochange';
                 if (storFile.status !== 'renamed') await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
             } else {
                 if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
-                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: model.getValue() });
+                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: modelValue });
             }
             if (mls.istrace) console.info('fire model html');
 

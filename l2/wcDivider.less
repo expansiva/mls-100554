@@ -1,0 +1,33 @@
+/// <mls shortName="wcDivider" project="100554" enhancement="enhancementStyle" />
+
+wc-divider-100554 {
+
+    display: block;
+    hr {
+        display: block;
+        border: 0;
+        text-align: center;
+        overflow: visible;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        height: auto;
+    }
+
+    hr:before {
+        font-family: var(--font-family-primary);
+        font-weight: 400;
+        font-style: italic;
+        font-size: var(--font-size-40);
+        letter-spacing: .6em;
+        content: attr(data-text);
+        display: inline-block;
+        margin-left: .6em;
+        color: var(--text-primary-color);
+        position: relative;
+        top: -10px;
+    }
+
+}
+
+
+
