@@ -139,7 +139,7 @@ export class ServiceListFilesAdd100554 extends LitElement {
 
     private async getTemplates() {
         const temp = await this.getAllEnhacementsTemplates();
-        this.templates = [...temp];
+        this.templates = [...temp || []];
     }
 
     private clickCancel(): void {
@@ -424,15 +424,25 @@ ${[interfaceString].join('\n')}
 
         if (!this.enhancementModules) return templates;
 
-        Object.entries(this.enhancementModules).map((entry) => {
+        for await (let entry of Object.entries(this.enhancementModules)) {
             const [entryKey, entryValue] = entry;
 
-            if (!((entryValue.instance as any).getAddNewFileDetails)) return;
-            const temp: ITemplateDetails[] = (entryValue.instance as any).getAddNewFileDetails();
+            if (!((entryValue.instance as any).getAddNewFileDetails)) continue;
+            const temp: ITemplateDetails[] = await (entryValue.instance as any).getAddNewFileDetails();
 
             temp.forEach((t) => t.enhancementKey = entryKey);
             templates = [...templates, ...temp]
-        });
+        }
+
+        // Object.entries(this.enhancementModules).map((entry) => {
+        //     const [entryKey, entryValue] = entry;
+
+        //     if (!((entryValue.instance as any).getAddNewFileDetails)) return;
+        //     const temp: ITemplateDetails[] = await(entryValue.instance as any).getAddNewFileDetails();
+
+        //     temp.forEach((t) => t.enhancementKey = entryKey);
+        //     templates = [...templates, ...temp]
+        // });
 
 
         return templates;
