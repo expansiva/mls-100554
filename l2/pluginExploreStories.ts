@@ -30,6 +30,7 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
+
 export const pluginData: mls.plugin.IPluginData = {
     title: "Stories",
     getSvg(): TemplateResult {

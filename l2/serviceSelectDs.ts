@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { initServiceSelectDsAdd } from './_100554_serviceSelectDsAdd'
 import { collab_file, collab_undo, collab_location_dot, collab_unbalanced } from './_100554_collabIcons'
-import { getDSInstance , IPrjDesignSystem, list } from './_100554_libDesignSystem';
+import { getDSInstance , list } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -210,7 +210,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
         if (this.menu.setMenuActive) this.menu.setMenuActive('opAdd')
     }
 
-    private async onItemClick(item: IPrjDesignSystem) {
+    private async onItemClick(item: any) {
         this.loading = true;
         this.serviceContent?.setAttribute('error', '');
 
@@ -228,7 +228,7 @@ export class ServiceSelectDs100554 extends ServiceBase {
     }
 
 
-    public async restoreDs(item:IPrjDesignSystem) {
+    public async restoreDs(item:any) {
         if (!this.state.actualProject) return;
         const ds = await getDSInstance(this.state.actualProject, item.dsIndex);
         this.loading = true;
@@ -377,7 +377,7 @@ interface IState {
 }
 
 interface IHistory {
-    [key: number]:IPrjDesignSystem[]
+    [key: number]:any[]
 }
 
 interface ILastDsSelected {
@@ -387,6 +387,6 @@ interface ILastDsSelected {
 interface IDSInfo {
     inLocalStorage: boolean,
     outdated: boolean,
-    dsInfo: IPrjDesignSystem,
+    dsInfo: any,
     files: mls.stor.IFileInfo[]
 }

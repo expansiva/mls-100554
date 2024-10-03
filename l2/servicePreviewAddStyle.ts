@@ -2,7 +2,7 @@
 
 import { html, repeat, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDSInstance } from './_100554_libDesignSystem';
+import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 
 export const initServicePreviewAddStyle = '';
 
@@ -40,7 +40,7 @@ export class ServicePreviewAddStyle extends LitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    private dsInstance: mls.l3.DesignSystemIO | undefined;
+    private dsInstance: DesignSystemIO | undefined;
 
     @property() father: any = undefined;
 
@@ -133,7 +133,7 @@ export class ServicePreviewAddStyle extends LitElement {
         if (!this.widget || !this.dsInstance) return;
 
         const componentName = this.widget;
-        const comp = this.dsInstance.components.find(componentName);
+        const comp = this.dsInstance.components?.find(componentName);
         if (!comp) this.styleAlready = false;
 
     }
@@ -252,7 +252,7 @@ export class ServicePreviewAddStyle extends LitElement {
 
         try {
 
-            await this.dsInstance.components.add(widget);
+            await this.dsInstance.components?.add(widget);
             this.styleAlready = true;
 
         } catch (err: any) {

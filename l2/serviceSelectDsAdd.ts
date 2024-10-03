@@ -4,7 +4,7 @@ import { html, css, LitElement, classMap } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase } from './_100554_serviceBase';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { IPrjDesignSystem, list } from './_100554_libDesignSystem';
+import {  list } from './_100554_libDesignSystem';
 
 export const initServiceSelectDsAdd = () => {
     return true;
@@ -149,7 +149,7 @@ export class ServiceSelectDsAdd100554 extends CollabLitElement {
         const rc: IDs[] = [];
 
         for await (let prj of projects) {
-            const dsByPrj: IPrjDesignSystem[] = await list(prj);
+            const dsByPrj: any[] = await list(prj);
             dsByPrj.forEach((info) => {
                 rc.push({
                     dsindex: info.dsIndex,
