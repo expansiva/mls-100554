@@ -1,4 +1,4 @@
-/// <mls shortName="enhancementStyle" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="enhancementStyle" project="100554" enhancement="_blank" groupName="other" />
 
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { getCssWithoutTag } from './_100554_processCssLit'
@@ -22,6 +22,36 @@ export const getAddNewFileDetails = async () => {
         }
     ]
 }
+
+export const requires: mls.l2.editor.IRequire[] = [];
+
+
+export const onAfterChange = (mfile: mls.l2.editor.IMFile) => {
+    try {
+        validateStyle(mfile);
+        return '';
+    } catch (e: any) {
+        throw new Error(e)
+    }
+};
+
+
+export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
+    return;
+}
+
+
+export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.enhancement.IDesignDetailsReturn> => {
+    return new Promise<mls.l2.enhancement.IDesignDetailsReturn>((resolve, reject) => {
+        try {
+            const ret = {} as mls.l2.enhancement.IDesignDetailsReturn;
+            resolve(ret);
+        } catch (e) {
+            reject(e);
+        }
+    })
+}
+
 
 export function validateStyle(mfile: mls.l2.editor.IMFile) {
 
@@ -170,15 +200,15 @@ export async function compileStyleUsingMFile(mfile: mls.l2.editor.IMFile, prefix
     }
 }
 
-export async function compileStyleUsingStorFile(shortName: string, project:number, theme: string = 'Default') {
-  
+export async function compileStyleUsingStorFile(shortName: string, project: number, theme: string = 'Default') {
+
     const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, '', '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!storFileLess) return;
-   
+
     const tokensList = await getTokensList();
     let val = await storFileLess.getContent();
-    if(!val || typeof val !== 'string') return '';
+    if (!val || typeof val !== 'string') return '';
 
     val = removeTokensFromSource(val);
     val = removeCommentLines(val);

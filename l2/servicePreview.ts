@@ -415,7 +415,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (!storFile) throw new Error('Invalid storFile');
         const uri = this.getUri(`_${storFile.project}_${storFile.shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
-        if (model) return model;
+        if (model || this.level === 2) return model;
         await mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile), 500);
         return model;
     }

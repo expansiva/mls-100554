@@ -367,7 +367,7 @@ export class ServiceSource100554 extends ServiceBase {
             if (storFile.project === project
                 && storFile.level === 2
                 && storFile.extension === '.ts'
-                && storFile.inLocalStorage
+                && (mls.istrace || storFile.inLocalStorage)
                 && storFile.shortName !== shortName) {
                 promises.push(this.createModelTS2(storFile, false, false));
             }
@@ -1477,7 +1477,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         clearTimeout(this._onChangedContentHtmlOrCss);
         this._onChangedContentHtmlOrCss = window.setTimeout(async () => {
 
-            const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementInstance(mfile).catch((e) => undefined);
+            const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await import('./_100554_enhancementStyle')
             if (enhancementInstance) await enhancementInstance.onAfterChange(mfile);
 
             let modelValue = model.getValue();

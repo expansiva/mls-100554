@@ -6,7 +6,6 @@ import { validateTagName, validateRender } from './_100554_validateLit'
 import { setCodeLens } from './_100554_codeLensLit'
 import { injectStyle } from './_100554_processCssLit'
 import { getMessageKey } from "./_100554_collabLitElement";
-import { validateStyle } from "./_100554_enhancementStyle";
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -155,7 +154,7 @@ export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> 
 
     try {
         setCodeLens(mfile);
-        validateStyle(mfile);
+        // validateStyle(mfile);
         if (validateTagName(mfile)) {
             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
             mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');

@@ -50,6 +50,6 @@ export const getPromptDefault = (): string => {
 }
 
 export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
-    await injectStyle(mfile, 0);
+    await injectStyle(mfile, 'Default');
     return;
 }

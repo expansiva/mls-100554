@@ -5,7 +5,7 @@ import {
     onAfterChange as onAfterChangeDefault,
     onAfterCompile as onAfterCompileDefault,
     requires as requiresDefault,
-    setStylesProcessed as setStylesProcessedDefault,
+    // setStylesProcessed as setStylesProcessedDefault,
 } from './_100554_enhancementLit';
 
 import { getMessageKey } from "./_100554_collabLitElement";
@@ -111,6 +111,6 @@ export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void>
     return onAfterCompileDefault(mfile);
 }
 
-export const setStylesProcessed = async (newCss: string, el: HTMLElement, tag: string): Promise<void> => {
-    return setStylesProcessedDefault(newCss, el, tag);
-}
+// export const setStylesProcessed = async (newCss: string, el: HTMLElement, tag: string): Promise<void> => {
+//     return setStylesProcessedDefault(newCss, el, tag);
+// }
