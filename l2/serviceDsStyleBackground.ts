@@ -34,6 +34,7 @@ const messages: { [key: string]: MessageType } = {
     'pt': message_pt
 }
 /// **collab_i18n_end**
+
 @customElement('service-ds-style-background-100554')
 export class ServiceDsStyleBackground extends ServiceBase {
 

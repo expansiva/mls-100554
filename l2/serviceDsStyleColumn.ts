@@ -1,11 +1,5 @@
 /// <mls shortName="serviceDsStyleColumn" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": ["collab-ds-input-range-100554"]
- * }
- */
-
 import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
@@ -18,7 +12,7 @@ const message_pt = {
     columnsWidth: 'Largura das colunas',
     columnsGap: 'Lacuna de colunas',
     columnsRule: 'Regra de Coluna',
-    columnSpan: 'Espanço da coluna',
+    columnSpan: 'EspanÃ§o da coluna',
     breakInside: 'Quebre por dentro'
 }
 

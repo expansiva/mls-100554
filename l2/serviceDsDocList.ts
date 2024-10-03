@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_plus, collab_chevron_right } from './_100554_collabIcons';
-import { getDSInstance , list } from './_100554_libDesignSystem';
+import { getDSInstance, DesignSystemIO, list } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -24,18 +24,19 @@ const messages: { [key: string]: MessageType } = {
     'pt': message_pt
 }
 /// **collab_i18n_end**
+
 @customElement('service-ds-doc-list-100554')
 export class ServiceDsDocList100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    
+
     constructor() {
         super();
         this.setEvents();
     }
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
-    
+
     @property()
     list: IDocNode[] = [];
 
@@ -49,7 +50,7 @@ export class ServiceDsDocList100554 extends ServiceBase {
 
     lastDsIndex: number | undefined;
     lastProject: number | undefined;
-    dsInstance: mls.l3.DesignSystemIO | undefined;
+    dsInstance: DesignSystemIO | undefined;
 
     public details: IService = {
         icon: '&#xf02d',
@@ -133,12 +134,13 @@ export class ServiceDsDocList100554 extends ServiceBase {
 
 
         this.dsInstance = await getDSInstance(project, mode);
+        if (!this.dsInstance || !this.dsInstance.docs) return [];
         await this.dsInstance.init();
         this.list = [];
         const allItems: mls.l3.IDocInfo[] = [];
 
         Object.keys(this.dsInstance.docs.list).forEach((doc: any) => {
-            if (!this.dsInstance) return;
+            if (!this.dsInstance || !this.dsInstance.docs) return;
             allItems.push(this.dsInstance.docs.list[doc]);
         });
         return allItems;
@@ -179,27 +181,31 @@ export class ServiceDsDocList100554 extends ServiceBase {
     }
 
     private async addDoc(parentID: number) {
-        if (!this.dsInstance) return;
+        if (!this.dsInstance || !this.dsInstance.docs) return [];
+
         const idx = await this.dsInstance.docs.add(parentID, 'NewDocument', 'Describe your new documentation here');
         await this.getState();
         this.selectDoc(idx);
     }
 
     private async changedMe(id: number, content: string) {
-        if (!this.dsInstance) return;
+        if (!this.dsInstance || !this.dsInstance.docs) return [];
+
         const doc = this.dsInstance.docs.list[id];
         if (!doc) return;
         doc.setContent(content);
     }
 
     private async updateDoc(id: number, parentID: number, title: string) {
-        if (!this.dsInstance) return;
+        if (!this.dsInstance || !this.dsInstance.docs) return [];
+
         await this.dsInstance.docs.update(id, parentID, title, '');
         this.getState();
     }
 
     private async removeDoc(id: number) {
-        if (!this.dsInstance) return;
+        if (!this.dsInstance || !this.dsInstance.docs) return [];
+
         if (!this.containerMain) return;
         const el = this.containerMain.querySelector(`details[docId = "${id}"]`);
         if (!el) return;

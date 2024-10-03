@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { IAssetsEventSelectedParams, IAssetsEventChangedParams } from './_100554_serviceDsAssets'
 import { initCollabInputTag } from './_100554_collabInputTag';
-import { getDSInstance, list } from './_100554_libDesignSystem';
+import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -100,7 +100,7 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
 
     private data: IAssetsEventChangedParams | undefined;
 
-    private ds: mls.l3.DesignSystemIO | undefined;
+    private ds: DesignSystemIO | undefined;
 
     private onDsAssetsUnSelected(ev: mls.events.IEvent) {
         if (!ev.desc) return;
@@ -184,7 +184,7 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
         this.state.description = '';
 
         await this.initDs();
-        if (!this.ds) return;
+        if (!this.ds || !this.ds.assets) return;
         const fullname = file.shortName + file.extension;
         const assetsItem = this.ds.assets.find(file.folder, fullname);
         if (!assetsItem) return;
@@ -196,7 +196,8 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
     }
 
     private handleKeyUp(e: MouseEvent) {
-        if (!this.ds) return;
+        if (!this.ds || !this.ds.assets) return;
+
         const value = (e.target as HTMLTextAreaElement).value;
         if (this.state.actualAssetsItem) {
             this.ds.assets.update(this.state.folder, this.state.actualAssetsItem.shortname, this.state.actualAssetsItem.tags, value, this.state.actualAssetsItem.type);
@@ -205,7 +206,8 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
 
     private handleValueChanged(value: string) {
 
-        if (!this.ds) return;
+        if (!this.ds || !this.ds.assets) return;
+
         if (this.state.actualAssetsItem) {
             this.ds.assets.update(this.state.folder, this.state.actualAssetsItem.shortname, value.split(','), this.state.actualAssetsItem.description, this.state.actualAssetsItem.type);
         }
@@ -213,7 +215,8 @@ export class ServiceDsAssetsOverview100554 extends ServiceBase {
 
     private async handleDelete() {
 
-        if (!this.ds) return;
+        if (!this.ds || !this.ds.assets) return;
+
         if (this.state.actualAssetsItem && this.state.actualFileInfo) {
 
             const deletedFile: mls.stor.IFileInfo = this.state.actualFileInfo;

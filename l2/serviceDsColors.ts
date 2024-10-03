@@ -6,7 +6,6 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { CollabLitElement } from './_100554_collabLitElement';
 
-
 /// **collab_i18n_start**
 const message_pt = {
     themes: 'Temas',

@@ -1,9 +1,4 @@
 /// <mls shortName="serviceDsStyleSize" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": ["collab-ds-input-range-100554"]
- * }
- */
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -13,11 +8,11 @@ import { initCollabDSInputRange } from './_100554_collabDsInputRange';
 /// **collab_i18n_start**
 const message_pt = {
     width: 'Largura',
-    maxWidth: 'Largura m·xima',
-    minWidth: 'Largura mÌnima',
+    maxWidth: 'Largura m√°xima',
+    minWidth: 'Largura m√≠nima',
     height: 'Altura',
-    maxHeight: 'Altura m·xima',
-    minHeight: 'Altura mÌnima',
+    maxHeight: 'Altura m√°xima',
+    minHeight: 'Altura m√≠nima',
     overflow: 'Overflow',
     overflowX: 'Overflow-x',
     overflowY: 'Overflow-y'

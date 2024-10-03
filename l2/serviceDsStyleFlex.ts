@@ -1,23 +1,17 @@
 /// <mls shortName="serviceDsStyleFlex" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": ["collab-ds-input-range-100554"]
- * }
- */
-
 import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 
 /// **collab_i18n_start**
 const message_pt = {
-    display: 'Exibição',
-    flexDirection: 'Direção flexível',
-    flexWrap: 'Envoltório flexível',
-    justifyContent: 'Justificar conteúdo',
+    display: 'ExibiÃ§Ã£o',
+    flexDirection: 'DireÃ§Ã£o flexÃ­vel',
+    flexWrap: 'EnvoltÃ³rio flexÃ­vel',
+    justifyContent: 'Justificar conteÃºdo',
     alignItems: 'Alinhar itens',
-    alignContent: 'Alinhar conteúdo',
+    alignContent: 'Alinhar conteÃºdo',
     alignSelf: 'Alinhar-se',
     order: 'Ordem'
 }
@@ -40,6 +34,7 @@ const messages: { [key: string]: MessageType } = {
     'pt': message_pt
 }
 /// **collab_i18n_end**
+
 
 @customElement('service-ds-style-flex-100554')
 export class ServiceDsStyleFlex extends ServiceBase {

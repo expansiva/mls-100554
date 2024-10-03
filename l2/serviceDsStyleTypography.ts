@@ -1,11 +1,5 @@
 /// <mls shortName="serviceDsStyleTypography" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": ["collab-ds-input-range-100554"]
- * }
- */
-
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
@@ -15,17 +9,17 @@ import { initCollabDsInputSelectColor } from './_100554_collabDsInputSelectColor
 /// **collab_i18n_start**
 const message_pt = {
     color: 'Cor',
-    fontFamily: 'Família de fontes',
+    fontFamily: 'FamÃ­lia de fontes',
     fontWeight: 'Peso da fonte',
     fontStyle: 'Estilo da fonte',
     fontSize: 'Tamanho da fonte',
-    letterSpacing: 'Espaçamento entre letras',
-    wordSpacing: 'Espaçamento entre palavras',
+    letterSpacing: 'EspaÃ§amento entre letras',
+    wordSpacing: 'EspaÃ§amento entre palavras',
     lineHeight: 'Altura da linha',
     textAlign: 'Alinhar texto',
     variant: 'Variante',
     transform: 'Transformar',
-    decoration: 'Decoração',
+    decoration: 'DecoraÃ§Ã£o',
     textOverflow: 'Text-overflow',
 }
 

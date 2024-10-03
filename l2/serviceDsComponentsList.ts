@@ -4,7 +4,7 @@ import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_cubes, collab_caret_righttv } from './_100554_collabIcons';
-import { getDSInstance } from './_100554_libDesignSystem';
+import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -35,7 +35,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
     @property()
     private selectWidget: string | undefined;
 
-    private ds: mls.l3.DesignSystemIO | undefined;
+    private ds: DesignSystemIO | undefined;
 
     constructor() {
         super();
@@ -205,7 +205,7 @@ export class ServiceDsComponentsList100554 extends ServiceBase {
 
     private setList(): void {
 
-        if (!this.ds) return;
+        if (!this.ds || !this.ds.components) return;
         const { list } = this.ds.components;
         const components: mls.l3.IComponentInfo[] = [];
 

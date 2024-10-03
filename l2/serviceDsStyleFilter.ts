@@ -1,11 +1,5 @@
 /// <mls shortName="serviceDsStyleFilter" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-/**
- * @mlsComponentDetails {
- *  "webComponentDependencies": ["collab-ds-input-range-100554"]
- * }
- */
-
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
@@ -21,7 +15,7 @@ const message_pt = {
     opacity: 'Opacidade',
     brightness: 'Brilho',
     contrast: 'Contraste',
-    hueRotate: 'Rotação de matiz',
+    hueRotate: 'RotaÃ§Ã£o de matiz',
     invert: 'Inverter',
 }
 
