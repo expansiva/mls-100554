@@ -520,10 +520,14 @@ export class CollabNewProject extends CollabLitElement {
     private async createConfigFile(project: number, orgName: string, projectName: string) {
         const newConfig: mls.l5_common.ProjectConfig = {
             orgName,
+            plugins: {},
+            reasons: {},
+            services: [],
+            servicesConfigEnabled: false,
             designSystems: [{
                 dsIndex: '0',
                 dsName: projectName,
-                widgetIOName: '_100529_config_ds_default'
+                widgetIOName: '_100529_config_ds_default',
             }],
             languages: []
         };

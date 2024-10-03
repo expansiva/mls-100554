@@ -3,7 +3,8 @@
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-export function initCollabDsInputSelectColor(){};
+export function initCollabDsInputSelectColor() { };
+
 @customElement('collab-ds-input-select-color-100554')
 export class CollabDsInputSelectColor extends LitElement {
 

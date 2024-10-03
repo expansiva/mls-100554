@@ -6,6 +6,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 export function initCollabInputTag() {
     return true;
 }
+
 @customElement('collab-input-tag-100554')
 export class CollabInputTag extends LitElement {
 

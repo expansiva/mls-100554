@@ -9,11 +9,9 @@ export class CollabLogLine100554 extends LitElement {
 
     static styles = css`[[mls_getDefaultDesignSystem]]`;
 
-    @property()
-    text: string = '';
+    @property() text: string = '';
 
-    @property()
-    status: ILogStatus = 'inprogress';
+    @property() status: ILogStatus = 'inprogress';
 
     private iconsByStatus: IIconsByStatus = {
         inprogress: collab_circle_notch,

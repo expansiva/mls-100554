@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
-import { getDSInstance, list } from './_100554_libDesignSystem';
+import { getDSInstance, list, DesignSystemIO } from './_100554_libDesignSystem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -106,7 +106,7 @@ export class ServiceDetailsDs100554 extends ServiceBase {
         });
     }
 
-    private ds: mls.l3.DesignSystemIO | undefined;
+    private ds: DesignSystemIO | undefined;
 
     showOverview(): boolean {
         return true;
@@ -124,7 +124,7 @@ export class ServiceDetailsDs100554 extends ServiceBase {
     private async setResume(project: number, index: number) {
         const dsInfo = await list(project);
         const { dsName } = dsInfo[index];
-        if (!this.ds) return;
+        if (!this.ds || !this.ds.components || !this.ds.tokens || !this.ds.docs) return;
         this.state.name = dsName;
         this.state.createdBy = this.ds.createdBy;
         this.state.lastUpdated = this.getLastModifiedFormated(this.ds.lastUpdated);
@@ -138,7 +138,7 @@ export class ServiceDetailsDs100554 extends ServiceBase {
     }
 
     private async getStyleLines(): Promise<number> {
-        if (!this.ds) return 0;
+        if (!this.ds || !this.ds.css) return 0;
         const style = await this.ds.css.list.definitions.getContent();
         const lenght = style.split('\n').length;
         return lenght;
