@@ -1382,11 +1382,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         if (!model) {
             model = await this.getOrCreateModelHtmlOrCss(shortName, project, mode, storFile, fileInfo);
-            const keyToModels = mls.l2.getKey({ shortName, project });
-            const models = mls.editor.models[keyToModels];
-            if (models) {
-                mode === '.html' ? models.html.model = model : models.style.model = model;
-            }
         }
 
         if (open && this._ed1) this._ed1.setModel(model);
