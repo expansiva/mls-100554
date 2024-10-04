@@ -1,0 +1,70 @@
+/// <mls shortName="collabPanelHelper" project="100554" enhancement="enhancementStyle" />
+
+collab-panel-helper-100554 {
+
+    .container-open-helper {
+        height: 100%;
+        position: absolute;
+        top: 0;
+        background: #f6f6f6;
+        right: 0;
+        width: 0;
+        z-index: 9999;
+        transition: width 0.5s ease;
+    }
+
+    .container-open-helper.open {
+        width: 40%;
+    }
+
+    .container-open-helper.open .helper {
+        opacity: 1;
+        width: 100%;
+        height: 100%;
+    }
+
+    .container-open-helper .helper {
+        z-index: 0;
+        opacity: 0;
+        overflow: auto;
+        font-size: 14px;
+        width: 0;
+        height: 0;
+    }
+
+    .container-open-helper .helper details[open] {
+        margin-bottom: 1rem;
+    }
+
+    .container-open-helper .helper details summary {
+        font-weight: bold;
+        padding-left: .5rem;
+    }
+
+    .container-open-helper .helper details>div {
+        margin-left: 1rem;
+        margin-top: 1rem;
+        border-bottom: 1px solid #cecece;
+    }
+
+    .container-open-helper .toogle {
+        position: absolute;
+        width: 30px;
+        height: 80px;
+        background: #f6f6f6;
+        top: 50%;
+        left: -30px;
+        z-index: 9999;
+        transform: translate(0%, -50%);
+        border-top-left-radius: 5px;
+        cursor: pointer;
+        border-bottom-left-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+}
+
+
+

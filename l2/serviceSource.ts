@@ -23,6 +23,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     @property({ type: String }) msize = '';
+    @property({ type: String }) aimContainerHeight = '60';
     @property({ type: String }) mode: IModes = 'icTs';
 
     createRenderRoot() {
@@ -102,7 +103,7 @@ export class ServiceSource100554 extends ServiceBase {
         }
         await this.initMonaco();
         if (this.menu.setIconActive) this.menu.setIconActive('icTs');
-        this.c2?.setAttribute('msize', this.msize);
+        this.updatedMSizeEditor();
     }
 
     //---------- Handling Editor --------
@@ -900,7 +901,7 @@ export class ServiceSource100554 extends ServiceBase {
             // in page, ex About, prepare model to after close hamburger
             this._ed1.setModel(activeModel.model);
         }
-        this.c2?.setAttribute('msize', this.msize);
+        this.updatedMSizeEditor();
         return true;
     }
 
@@ -1508,6 +1509,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     private _onChangedContentHtmlOrCss: number | undefined = undefined;
 
     private onModelHtmlOrCssChange(e: monaco.editor.IModelContentChangedEvent, mfile: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel, ext: '.html' | '.less'): void {
+
         // some changes is to simulate changes to force compile
         clearTimeout(this._onChangedContentHtmlOrCss);
         this._onChangedContentHtmlOrCss = window.setTimeout(async () => {
@@ -1583,12 +1585,18 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         };
     }
 
+    private updatedMSizeEditor() {
+        const [w, h, t, l] = this.msize.split(',');
+        const newH = (+h) - (+this.aimContainerHeight);
+        const newMsize = [w, newH, t, l].join(',');
+        this.c2?.setAttribute('msize', newMsize);
+    }
 
 
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
             if (!this.visible) return;
-            this.c2?.setAttribute('msize', this.msize);
+            this.updatedMSizeEditor();
         }
     }
 
@@ -1599,8 +1607,11 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     render() {
         return html`
-            <collab-panel-helper-100554 style="${this.mode !== 'icStyle' ? 'display:none': ''}"></collab-panel-helper-100554>
-            <mls-editor-100529 ismls2="true"></mls-editor-100529>
+            <div style="position:relative;">
+                <collab-panel-helper-100554 plugin="" style="${this.mode !== 'icStyle' ? 'display:none' : ''}"></collab-panel-helper-100554>
+                <mls-editor-100529 ismls2="true" style="position:relative;"></mls-editor-100529>
+            </div>
+            <aim-prompt-100554></aim-prompt-100554>
         `
     }
 
