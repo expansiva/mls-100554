@@ -206,6 +206,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onModelHTMLCreated(ev: mls.events.IEvent): void {
+
         try {
             if (!ev.desc) return;
             if (ev.level !== this.level) return;
@@ -268,12 +269,12 @@ export class ServicePreview100554 extends ServiceBase {
 
             if (mls.istrace) console.info('is preview repaint:' + this.watch);
             if (fileAction.action === 'open' && this.watch) {
-
                 this.loading = true;
+                this.onReloader();
                 return;
             }
-            if (this.watch) {
 
+            if (this.watch) {
                 this.loading = false;
                 this.onReloader();
             }
@@ -415,8 +416,10 @@ export class ServicePreview100554 extends ServiceBase {
         if (!storFile) throw new Error('Invalid storFile');
         const uri = this.getUri(`_${storFile.project}_${storFile.shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
-        if (model || this.level === 2) return model;
-        await mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile), 500);
+        if (model) return model;
+        setTimeout(() => {
+            mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile));
+        }, 2000)
         return model;
     }
 

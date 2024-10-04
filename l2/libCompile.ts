@@ -144,8 +144,6 @@ async function loadMyNeedsToCompile(
         if (compileCss) {
             await getCss(myCss, name, ipath, theme);
             await getCssL2(myCss, ipath, theme);
-
-            console.info(myCss);
         }
         await getTokens(myTokens, ipath, theme);
 

@@ -23,6 +23,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     @property({ type: String }) msize = '';
+    @property({ type: String }) mode: IModes = 'icTs';
 
     createRenderRoot() {
         return this;
@@ -40,9 +41,10 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     public onClickIcon = (op: string): void => {
+        this.mode = op as IModes;
         if (op === 'icTs') this.showActiveModel();
         if (op === 'icHTML') this.createOrShowModelHtmlOrCss(mls.l2.editor.editors[this.confE].shortName, mls.l2.editor.editors[this.confE].project, true, '.html');
-        if (op === 'icCss') this.createOrShowModelHtmlOrCss(mls.l2.editor.editors[this.confE].shortName, mls.l2.editor.editors[this.confE].project, true, '.less');
+        if (op === 'icStyle') this.createOrShowModelHtmlOrCss(mls.l2.editor.editors[this.confE].shortName, mls.l2.editor.editors[this.confE].project, true, '.less');
     }
 
     public onClickTitle = () => {
@@ -74,7 +76,7 @@ export class ServiceSource100554 extends ServiceBase {
         icons: {
             icTs: 'Typescript;f121',
             icHTML: 'HTML;f13b',
-            icCss: 'Css;f38b'
+            icStyle: 'Style;f38b'
 
         },
         actionDefault: '', // call after close icon clicked
@@ -252,11 +254,11 @@ export class ServiceSource100554 extends ServiceBase {
     @query('mls-editor-100529')
     private c2: HTMLElement | undefined;
 
+
     public last: mls.IActual | undefined = undefined;
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
     private mConfEditor: monaco.editor.ITextModel | undefined;
     private confE2(positionToolbar: string) { return `l${this.level}_${positionToolbar}`; }
-    private htmlModelAlreadyProcessed: { [key: string]: boolean } = {};
 
     get confE() { return `l${this.level}_${this.position}`; }
     get confETS() { return this.confE + '_TS'; }
@@ -392,15 +394,16 @@ export class ServiceSource100554 extends ServiceBase {
         if (model1) return model1;
 
         const ftype = ".d.ts";
-        const uri = this.getUri(`_${prj}_`, ftype);
-        const model = monaco.editor.createModel(contentTS, 'typescript', uri);
+        const modelsBase = await this.createModel(prj, '', '.d.ts', contentTS)
+        if (!modelsBase) throw new Error(`invalid mls.editor.models for file: _${prj}_.d.ts`);
+
         model1 = {
             changed: false, // not changed in this section, but storFile.changed is about all sections
             error: false,
             project: prj,
             shortName: '',
             extension: ftype,
-            model,
+            model: modelsBase.model,
             storFile: undefined as any,
             originalCRC: undefined,
             originalProject: undefined,
@@ -670,15 +673,10 @@ export class ServiceSource100554 extends ServiceBase {
         if (!fileModel) {
             await this.createModelTS2(storFileTS, true, true);
             this.showActiveModel();
-            await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true).then(async () => {
-                await this.createOrShowModelHtmlOrCss(storFileTS.shortName, storFileTS.project, false, '.html');
-                await this.createOrShowModelHtmlOrCss(storFileTS.shortName, storFileTS.project, false, '.less');
-            });
+            await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true)
         } else {
             mls.l2.editor.editors[this.confE] = fileModel;
             mls.l2.editor.forceModelUpdate(fileModel.model);
-            await this.createOrShowModelHtmlOrCss(storFileTS.shortName, storFileTS.project, false, '.html');
-            await this.createOrShowModelHtmlOrCss(storFileTS.shortName, storFileTS.project, false, '.less');
             this.showActiveModel();
         }
 
@@ -944,7 +942,7 @@ export class ServiceSource100554 extends ServiceBase {
 
                 clearTimeout(this.timeHtmlChangeCursor);
                 if (!this._ed1) return;
-                if (this.menu.lastIcon === 'icCss') {
+                if (this.menu.lastIcon === 'icStyle') {
                     const position = e.position;
                     const { lineNumber } = position;
                     const isReadOnlyArea = this.isReadOnlyArea(lineNumber);
@@ -1038,7 +1036,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     onFirtModel = true;
     private async createModelTS_loading() {
-        const shortName = 'loading...';
+        const shortName = 'loading';
         const project = 0; // localstorage project
         const defaultTS = 'wait...';
         const mfile = await this.createModelTS1(shortName, project, defaultTS, true);
@@ -1099,7 +1097,12 @@ export class ServiceSource100554 extends ServiceBase {
             const uri = this.getUri(`_${project}_${shortName}`, ftype);
             model1 = mls.l2.editor.get({ project, shortName });
             if (model1) return model1; // created in another instance
-            const model = monaco.editor.createModel(src, 'typescript', uri);
+            //const model = monaco.editor.createModel(src, 'typescript', uri);
+
+            const modelBase = await this.createModel(project, shortName, ftype, src);
+            if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}${ftype}`);
+            const model = modelBase.model;
+
             model1 = {
                 changed: true,
                 error: false,
@@ -1118,88 +1121,89 @@ export class ServiceSource100554 extends ServiceBase {
         return model1;
     }
 
+
     private async createModelTS2(storFile: mls.stor.IFileInfo, activedModel: boolean, compile: boolean): Promise<mls.l2.editor.IMFile> {
         // load source from repository
         const { project, shortName, extension } = storFile;
-        let model1 = mls.l2.editor.get({ project, shortName });
-        if (model1) return model1;
-        const info: mls.stor.IFileInfoValue | null = storFile.getValueInfo ? await storFile.getValueInfo() : null;
-        const haveInfo: boolean | null = info && !!info.content;
-        const src: string | Blob | null | undefined = haveInfo ? info?.content : await storFile.getContent();
-        if (src instanceof Blob) throw new Error('ts file must be string');
-        if (!src) throw new Error('ts file is undefined');;
+        let mfile = mls.l2.editor.get({ project, shortName });
+        if (mfile) return mfile;
 
-        const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src).toString(16);
-        const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
-        const originalShortName: string | undefined = haveInfo ? info?.originalShortName : undefined;
-        const ftype = src.split("\n")[0].indexOf(' type="definition"') > 0 ? ".d.ts" : ".ts";
-        const uri = this.getUri(`_${project}_${shortName}`, ftype);
-        const model = monaco.editor.createModel(src, 'typescript', uri);
-        model1 = {
+        const modelBase = await this.createModel(project, shortName, '.ts');
+        if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}.ts`);
+        mfile = {
             changed: false, // not changed in this section, but storFile.changed is about all sections
             error: false,
             project,
             shortName,
             extension,
-            model,
+            model: modelBase.model,
             storFile,
-            originalCRC,
-            originalProject,
-            originalShortName,
+            originalCRC: modelBase.originalCRC,
+            originalProject: modelBase.originalProject,
+            originalShortName: modelBase.originalShortName,
             codeLens: [],
         };
-        mls.l2.editor.add(model1);
-        this.addEventsModelTS(storFile, model1);
 
-        const keyFileHtml = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.html');
-        const keyFileCss = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.less');
-        let storFileHtml = mls.stor.files[keyFileHtml];
-        let storFileCss = mls.stor.files[keyFileCss];
+        mls.l2.editor.add(mfile);
+        this.addEventsModelTS(storFile, mfile);
 
-        if (!storFileHtml) storFileHtml = await this.createOrShowModelHtmlOrCss(shortName, project, false, '.html');
-        if (!storFileCss) storFileCss = await this.createOrShowModelHtmlOrCss(shortName, project, false, '.less');
-
-        const modelHTML = await this.getOrCreateModelHtmlOrCss(storFileHtml.shortName, storFileHtml.project, '.html', storFileHtml);
-        const modelStyle = await this.getOrCreateModelHtmlOrCss(storFileCss.shortName, storFileCss.project, '.less', storFileCss);
-
-        const infoHtml: mls.stor.IFileInfoValue | null = storFileHtml.getValueInfo ? await storFileHtml.getValueInfo() : null;
-        const haveInfoHtml: boolean | null = infoHtml && !!infoHtml.content;
-        const srcHtml: string | Blob | null | undefined = haveInfoHtml ? infoHtml?.content : await storFileHtml.getContent();
-        if (srcHtml instanceof Blob) throw new Error('html file must be string');
-        if (!srcHtml) throw new Error('html file is undefined');
-
-        const infoStyle: mls.stor.IFileInfoValue | null = storFileCss.getValueInfo ? await storFileCss.getValueInfo() : null;
-        const haveInfoStyle: boolean | null = infoStyle && !!infoStyle.content;
-        const srcStyle: string | Blob | null | undefined = haveInfoStyle ? infoStyle?.content : await storFileCss.getContent();
-        if (srcStyle instanceof Blob) throw new Error('style file must be string');
-        if (!srcStyle) throw new Error('style file is undefined');
-
-        const originalCRCHtml = haveInfoHtml ? infoHtml?.originalCRC : mls.common.crc.crc32(src).toString(16);
-        const originalCRCStyle = haveInfoStyle ? infoStyle?.originalCRC : mls.common.crc.crc32(src).toString(16);
-
-        const keyToModels = mls.l2.getKey({ project, shortName });
-        if (!mls.editor.models[keyToModels]) {
-            mls.editor.models[keyToModels] = {
-                ts: model1,
-                html: {
-                    model: modelHTML,
-                    codeLens: {},
-                    storFile: storFileHtml,
-                    originalCRC: originalCRCHtml
-                },
-                style: {
-                    model: modelStyle,
-                    codeLens: {},
-                    storFile: storFileCss,
-                    originalCRC: originalCRCStyle
-                }
-            }
+        const extFiles: Array<'.html' | '.less'> = ['.html', '.less'];
+        for await (let ext of extFiles) {
+            const keyFile1 = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', ext);
+            let storFile1 = mls.stor.files[keyFile1];
+            if (!storFile1) storFile1 = await this.createOrShowModelHtmlOrCss(shortName, project, false, ext);
+            await this.getOrCreateModelHtmlOrCss(storFile1.shortName, storFile1.project, ext, storFile1);
         }
 
 
-        if (compile) await this.updateModelStatus(model1, false);
-        if (activedModel) mls.l2.editor.editors[this.confE] = model1;
-        return model1;
+        if (compile) await this.updateModelStatus(mfile, false);
+        if (activedModel) mls.l2.editor.editors[this.confE] = mfile;
+        return mfile;
+
+    }
+
+
+    private async createModel(project: number, shortName: string, ext: '.ts' | '.d.ts' | '.html' | '.less', content?: string): Promise<mls.editor.IModelBase | undefined> {
+
+        let src: string | Blob | null | undefined = undefined;
+        let haveInfo: boolean = false;
+        let info: mls.stor.IFileInfoValue | null = null;
+        let storFile: mls.stor.IFileInfo | undefined;
+
+        if (ext !== '.d.ts') {
+            const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
+            storFile = mls.stor.files[keyToFile];
+            if (!storFile) throw new Error(`Invalid file: ${ext}`);
+            if (!content) {
+                info = storFile.getValueInfo ? await storFile.getValueInfo() : null;
+                haveInfo = !!info && !!info.content;
+                src = haveInfo ? info?.content : await storFile.getContent();
+            } else src = content;
+
+        } else {
+            src = content || '';
+        }
+
+        if (src instanceof Blob) throw new Error(`${ext} file must be string`);
+        if (!src) throw new Error(`${ext} file is undefined`);
+
+        const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src).toString(16);
+        const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
+        const originalShortName: string | undefined = haveInfo ? info?.originalShortName : undefined;
+
+        let model: mls.editor.IModelBase | undefined;
+        if (ext === '.html' && storFile) model = mls.editor.createModelHTML(storFile, src);
+        else if (ext === '.ts' && storFile) model = mls.editor.createModelTS(storFile, src);
+        else if (ext === '.d.ts') model = mls.editor.createModelProjectDefinition(project, src);
+        else if (ext === '.less' && storFile) model = mls.editor.createModelStyle(storFile, src);
+
+        if (!model) throw new Error(`Model invalid`);
+        if (ext !== '.d.ts') {
+            model.originalCRC = originalCRC;
+            model.originalProject = originalProject;
+            model.originalShortName = originalShortName;
+        }
+        return model;
 
     }
 
@@ -1222,10 +1226,17 @@ export class ServiceSource100554 extends ServiceBase {
         if (!storFile) throw new Error('Invalid storFile');
 
         const uri = this.getUri(shortName, extension);
-        const model = monaco.editor.getModel(uri);
+        let model = monaco.editor.getModel(uri);
         if (model) {
             this.mConfEditor = model;
-        } else this.mConfEditor = monaco.editor.createModel(src, 'typescript', uri);
+        } // else this.mConfEditor = monaco.editor.createModel(src, 'typescript', uri);
+
+        else {
+            const modelBase = await this.createModel(project, shortName, '.ts', src);
+            if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}.ts`);
+            model = modelBase.model;
+            this.mConfEditor = model;
+        }
 
 
         mls.l2.editor.add({
@@ -1356,21 +1367,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     // HTML LESS
 
+
     private async createOrShowModelHtmlOrCss(shortName: string, project: number, open: boolean, mode: '.html' | '.less', fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
 
-        // let shortName: string = '';
-        // let project: number = 0;
-        // const conf = mls.l2.editor.editors[this.confE];
-
-        // shortName = conf.shortName;
-        // project = conf.project;
-
-        const uri = this.getUri(`_${project}_${shortName}`, mode);
-        let model = monaco.editor.getModel(uri);
         const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', mode);
         let storFile = mls.stor.files[key];
         if (!storFile) {
-
             if (mode === '.less') {
                 const newLess = await this.prepareInitialLess(shortName, project);
                 await this.createHtmlOrCssFile(project, shortName, newLess, mode);
@@ -1380,10 +1382,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             storFile = mls.stor.files[key];
         }
 
-        if (!model) {
-            model = await this.getOrCreateModelHtmlOrCss(shortName, project, mode, storFile, fileInfo);
-        }
+        const uri = this.getUri(`_${project}_${shortName}`, mode);
+        let model = monaco.editor.getModel(uri);
 
+        if (!model) model = await this.getOrCreateModelHtmlOrCss(shortName, project, mode, storFile, fileInfo);
         if (open && this._ed1) this._ed1.setModel(model);
 
         if (mode === '.html' && this._ed1 && this._ed1.getModel()?.id !== model.id) {
@@ -1426,6 +1428,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         await mls.stor.localStor.setContent(file, fileInfo);
     }
 
+
     private async getOrCreateModelHtmlOrCss(shortName: string, project: number, ext: '.html' | '.less', storFile: mls.stor.IFileInfo, fileInfo?: mls.stor.IFileInfoValue,): Promise<monaco.editor.ITextModel> {
 
         let mfile = mls.l2.editor.get({ project, shortName });
@@ -1440,9 +1443,13 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         const content = fileInfo ? fileInfo.content : await storFile.getContent();
         if (content instanceof Blob) throw new Error('less file must be string');
-        if (!content) throw new Error('less file is undefined');;
+        if (!content) throw new Error('less file is undefined');
 
-        model = monaco.editor.createModel(content as string, language, uri);
+        const modelBase = await this.createModel(project, shortName, ext);
+        if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}${ext}`);
+
+        model = modelBase.model;
+
         if (mfile) (mfile as any)[modelName] = model;
 
         (model as any)['position'] = this.position;
@@ -1592,6 +1599,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     render() {
         return html`
+            <collab-panel-helper-100554 style="${this.mode !== 'icStyle' ? 'display:none': ''}"></collab-panel-helper-100554>
             <mls-editor-100529 ismls2="true"></mls-editor-100529>
         `
     }
@@ -1886,9 +1894,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (!iPath || !iPath.project || !iPath.shortName) return;
             const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
             const storFile = mls.stor.files[keyStorFile];
-            if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
-
+            if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile)
             await this.getOrCreateModelHtmlOrCss(storFile.shortName, storFile.project, '.html', storFile);
+            console.info('disparar evento')
             mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, ev.desc);
         } catch (err: any) {
             throw new Error(err);
@@ -1897,3 +1905,5 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
 
 }
+
+type IModes = 'icTs' | 'icStyle' | 'icHTML';
