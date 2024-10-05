@@ -3,7 +3,9 @@
 import { html, css, svg, TemplateResult, LitElement, repeat } from 'lit';
 import { query, property, customElement } from 'lit/decorators.js';
 import { getMyKeysBranch } from './_100554_libCommom';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
+import * as gitIO from './_100554_libGithubIo';
+
+//import { PluginBaseModule } from './_100554_pluginBaseModule';
 
 
 export const pluginData: mls.plugin.IPluginData = {
@@ -18,22 +20,17 @@ export const pluginData: mls.plugin.IPluginData = {
 @customElement('plugin-github-l4-issues-100554')
 export class PluginGithubL4Issues extends LitElement {
 
-
-    private owner: string = '';
-    private repo: string = '';
-    private branch: string = '';
     private repositoryId: string = '';
     private error: string = '';
-    private userInfo: IInfo | undefined;
+    private userInfo: gitIO.IInfo | undefined;
     private labelId: string = '';
+    private req: gitIO.IReq | undefined;
 
-    private viewIssue: IIssues | undefined;
-    private comments: IComments[] = [];
+    private viewIssue: gitIO.IIssues | undefined;
+    private comments: gitIO.IComments[] = [];
 
     @property() scenary: string = 'list';
-    @property() myIssues: IIssues[] = [];
-
-
+    @property() myIssues: gitIO.IIssues[] = [];
     @query('contentlistissues') contentlistissues: HTMLElement | undefined;
 
 
@@ -84,8 +81,8 @@ export class PluginGithubL4Issues extends LitElement {
             ${this.renderListFilter()}
             <contentlistissues>
                 ${repeat(
-            this.myIssues, ((key: IIssues) => key.id) as any,
-            ((k: IIssues, index: any) => {
+            this.myIssues, ((key: gitIO.IIssues) => key.id) as any,
+            ((k: gitIO.IIssues, index: any) => {
 
                 return this.renderListItem(k, index);
 
@@ -107,7 +104,7 @@ export class PluginGithubL4Issues extends LitElement {
         `
     }
 
-    renderListItem(item: IIssues, idx: number) {
+    renderListItem(item: gitIO.IIssues, idx: number) {
 
         return html`
         <contentlistitem @click="${this.clickIssues}" .info=${item} filter="${item.title}">
@@ -115,8 +112,8 @@ export class PluginGithubL4Issues extends LitElement {
                 <h3>${item.title}</h3>
                 <contentlabels>
                     ${repeat(item.labels,
-                    ((key: ILabel) => key.name) as any,
-                    ((k: ILabel, index: any) => {
+                    ((key: gitIO.ILabel) => key.name) as any,
+                    ((k: gitIO.ILabel, index: any) => {
                         return html`<contentlabel style="background:#${k.color}">${k.name}</contentlabel>`;
 
                     }) as any
@@ -188,8 +185,8 @@ export class PluginGithubL4Issues extends LitElement {
                     <h3>${this.viewIssue.title}</h3>
                     <contentlabels>
                         ${repeat(this.viewIssue.labels,
-                            ((key: ILabel) => key.name) as any,
-                            ((k: ILabel, index: any) => {
+                            ((key: gitIO.ILabel) => key.name) as any,
+                            ((k: gitIO.ILabel, index: any) => {
                                 return html`<contentlabel style="background:#${k.color}">${k.name}</contentlabel>`;
                             }) as any
                         )}
@@ -203,8 +200,8 @@ export class PluginGithubL4Issues extends LitElement {
                 <contentshowcomments>
                     ${this.renderComments(this.viewIssue)}
                     ${repeat(this.comments,
-                        ((key: IComments) => key.id) as any,
-                        ((k: IComments, index: any) => {
+                        ((key: gitIO.IComments) => key.id) as any,
+                        ((k: gitIO.IComments, index: any) => {
                             return this.renderComments(k);
                         }) as any
                     )}
@@ -244,7 +241,7 @@ export class PluginGithubL4Issues extends LitElement {
         
     }
 
-    renderComments(item: IComments) {
+    renderComments(item: gitIO.IComments) {
         return html`
             <itemcomment>
                 <commentavatar>
@@ -270,12 +267,13 @@ export class PluginGithubL4Issues extends LitElement {
 
     private async setInfos() {
 
-        this.userInfo = await this.getUserInfoIO();
         await this.initInfoProject();
-        await this.setRepositoryId();
-        await this.getIssues();
+        if (!this.req) return;
 
-        this.labelId = await this.getLabelIdOrAdd();
+        this.userInfo = await gitIO.getUserInfoIO(this.req);
+        this.repositoryId =  await gitIO.getRepositoryId(this.req);
+        this.myIssues =  await gitIO.getIssues(this.req);
+        this.labelId = await gitIO.getLabelIdOrAdd(this.req, this.repositoryId);
 
     }
 
@@ -285,7 +283,7 @@ export class PluginGithubL4Issues extends LitElement {
 
     private async removeVote(e: MouseEvent) {
 
-        if (!this.viewIssue || !this.userInfo) return;
+        if (!this.viewIssue || !this.userInfo || !this.req) return;
 
         let el = e.target as HTMLElement;
         if (el.tagName.toLocaleLowerCase() !== 'votethumbsup') {
@@ -294,7 +292,11 @@ export class PluginGithubL4Issues extends LitElement {
 
         if (!el || !(el as any).react) return;
 
-        const isRemove = await this.removeReact(this.viewIssue.id, (el as any).react.id);
+        const isRemove = await gitIO.removeReact(
+            this.req,
+            this.viewIssue.id,
+            (el as any).react.id
+        );
 
         if (!isRemove) return;
 
@@ -316,7 +318,7 @@ export class PluginGithubL4Issues extends LitElement {
 
     private async addVote(e: MouseEvent) {
 
-        if (!this.viewIssue || !this.userInfo) return;
+        if (!this.viewIssue || !this.userInfo || !this.req) return;
 
         let el = e.target as HTMLElement;
         if (el.tagName.toLocaleLowerCase() !== 'votethumbsup') {
@@ -325,7 +327,7 @@ export class PluginGithubL4Issues extends LitElement {
 
         if (!el) return;
 
-        const idAdd = await this.addReact(this.viewIssue.id);
+        const idAdd = await gitIO.addReact(this.req, this.viewIssue.id);
 
         if (!idAdd) return;
 
@@ -352,7 +354,7 @@ export class PluginGithubL4Issues extends LitElement {
         this.scenary = el.getAttribute('back') as string;
     }
 
-    private clickIssues(e: MouseEvent) {
+    private async clickIssues(e: MouseEvent) {
 
         let el = e.target as HTMLElement;
 
@@ -360,13 +362,15 @@ export class PluginGithubL4Issues extends LitElement {
             el = el.closest('contentlistitem') as HTMLElement;
         }
 
-        if (!el || !(el as any).info) return;
+        if (!el || !(el as any).info || !this.req) return;
 
-        this.getIssue((el as any).info);
+        this.comments = await gitIO.getIssue(this.req, (el as any).info as gitIO.IIssues);
+        this.viewIssue = (el as any).info;
+        this.scenary = 'show';
 
     }
 
-    private addNewIssue(e: MouseEvent) {
+    private async addNewIssue(e: MouseEvent) {
 
         let el = e.target as HTMLElement;
 
@@ -379,12 +383,28 @@ export class PluginGithubL4Issues extends LitElement {
 
         if (!eltitle || !eldesc) return;
 
-        if (!eltitle.value || !eldesc.value) {
+        if (!eltitle.value || !eldesc.value || !this.req || !this.repositoryId || !this.userInfo) {
             alert('Fill in all the information!');
             return;
         }
 
-        this.addNewIssueIO(eltitle.value, eldesc.value);
+        const issue = await gitIO.addNewIssueIO(
+            this.req,
+            this.userInfo,
+            this.repositoryId,
+            this.labelId,
+            eltitle.value,
+            eldesc.value
+        );
+
+        if (!issue) {
+            this.error = 'Erro to add issue';
+            return;
+        }
+
+        this.myIssues.unshift(issue);
+        this.scenary = 'list';
+
 
     }
 
@@ -412,353 +432,28 @@ export class PluginGithubL4Issues extends LitElement {
         }, 500);
     }
 
-    private clickNewComment(e: MouseEvent) {
+    private async clickNewComment(e: MouseEvent) {
 
         let el = e.target as HTMLElement;
         if (!el) return;
         el = el.closest('contentnewcomment')?.querySelector('textarea') as HTMLTextAreaElement;
 
-        if (!el) return;
+        if (!el || !this.req || !this.viewIssue) return;
 
         const v = (el as HTMLTextAreaElement).value;
         (el as HTMLTextAreaElement).value = '';
         if (!v) return;
 
-        this.addComment(v);
+        const com = await gitIO.addComment(this.req, this.viewIssue, v);
 
-    }
-
-    //------IO----------
-
-    private async addNewIssueIO( title:string , desc: string) {
-
-        try {
-
-            if (!this.userInfo || !this.repositoryId || !title || !desc || !this.labelId ) throw new Error('Not found information to add issue')
-
-            const q = `
-                mutation {
-                    createIssue(
-                        input: {
-                            repositoryId: "${this.repositoryId}"
-                            title: "${title}"
-                            body: "${desc}"
-                            labelIds: ["${this.labelId}"]
-                        }
-                    ) {
-                        issue {
-                            id
-                            number
-                            createdAt
-                            title
-                            bodyText
-                            state
-                            url
-                            labels(last:10){
-                                nodes{
-                                    color
-                                    name
-                                }
-                            }
-                        }
-                    }
-                }
-
-            `;
-
-            const ret = await this.qlFetch(q);
-
-            const issue = {} as IIssues;
-            issue.id = ret.createIssue.issue.id;
-            issue.numberIssues = ret.createIssue.issue.number;
-            issue.createdAt = ret.createIssue.issue.createdAt;
-            issue.title = ret.createIssue.issue.title;
-            issue.bodyText = ret.createIssue.issue.bodyText;
-            issue.state = ret.createIssue.issue.state;
-            issue.url = ret.createIssue.issue.url;
-            issue.author = this.userInfo.login;
-            issue.avatarUrl = this.userInfo.avatarUrl;
-            issue.labels = ret.createIssue.issue.labels.nodes;
-            issue.reactionsTU = 0;
-            issue.reactions = [];
-
-            this.myIssues.unshift(issue);
-            this.scenary = 'list';
-
+        if (!com) {
+            this.error = 'Erro add comment';
             return;
 
-        } catch (e) {
-            console.info(e);
-            return;
-        }
-        
-    }
-
-    private async removeReact( issueid:string , reactid: string) {
-
-        try {
-
-            const q = `
-                mutation {
-                    removeReaction(input: {
-                        subjectId: "${issueid}",
-                        content: THUMBS_UP}) 
-                    {
-                        reaction {
-                            id
-                            content
-                        }
-                    }
-                }
-            `;
-
-            const ret = await this.qlFetch(q);
-
-            return true;
-
-        } catch (e) {
-            console.info(e);
-            return false;
-        }
-        
-    }
-
-    private async addReact( issueid:string) {
-
-        try {
-
-            const q = `
-                mutation {
-                    addReaction(input: {
-                        subjectId: "${issueid}",
-                        content: THUMBS_UP}) 
-                    {
-                        reaction {
-                            id
-                            content
-                        }
-                    }
-                }
-            `;
-
-            const ret = await this.qlFetch(q);
-
-            if (!ret.addReaction || !ret.addReaction.reaction) return '';
-
-            return ret.addReaction.reaction.id;
-
-        } catch (e) {
-            console.info(e);
-            return '';
-        }
-        
-    }
-
-    private async getIssues(state: string = 'OPEN') {
-
-        try {
-
-            if (!this.owner || !this.repo) throw new Error('Not found owner project')
-
-            let aux = '';
-            if (state != '') aux = `, states:${state}`;
-
-            const q = `
-                query repository {
-                    repository(owner: "${this.owner}", name: "${this.repo}") {
-		                id
-			            issues(last: 100${aux}) {
-                            edges {
-                                node {
-                                    id
-                                    number
-                                    createdAt
-                                    title
-                                    bodyText
-                                    state
-                                    url
-                                    author{
-                                        login
-                                        avatarUrl
-                                    }
-                                    labels(last:20){
-                                        nodes{
-                                            color
-                                            name
-                                        }
-                                    }
-                                    reactions(last:100, content: THUMBS_UP) {
-                                        totalCount
-                                        nodes {
-                                            id
-                                            user {
-                                                login
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } 
-                    }
-                }
-            `;
-
-            const ret = await this.qlFetch(q);
-
-            const issues: IIssues[] = []
-
-            if (!ret || !ret.repository || !ret.repository.issues || !ret.repository.issues.edges) {
-                return
-            }
-
-            ret.repository.issues.edges.forEach((i: any) => {
-
-
-                if (!i || !i.node) return;
-                const issue = {} as IIssues;
-                issue.id = i.node.id;
-                issue.numberIssues = i.node.number;
-                issue.createdAt = i.node.createdAt;
-                issue.title = i.node.title;
-                issue.bodyText = i.node.bodyText;
-                issue.state = i.node.state;
-                issue.url = i.node.url;
-                issue.author = i.node.author.login;
-                issue.avatarUrl = i.node.author.avatarUrl;
-                issue.labels = i.node.labels.nodes;
-                issue.reactionsTU = i.node.reactions.totalCount;
-
-                const r: IReactions[] = [];
-                i.node.reactions.nodes.forEach((rt: any) => {
-                    r.push({
-                        id: rt.id,
-                        user: rt.user.login
-                    })
-                })
-                issue.reactions = r;
-
-                issues.push(issue);
-
-            });
-
-            this.myIssues = issues.sort((a, b) => {
-                return b.numberIssues - a.numberIssues;
-            });
-        } catch (e) {
-            console.info(e)
         }
 
-
-    }
-
-    private async addComment(comment: string) {
-
-        try {
-
-            if (!this.owner || !this.repo || !this.viewIssue) throw new Error('Not found owner project')
-
-            const q = `
-                mutation {
-	
-                    addComment(input: { subjectId: "${this.viewIssue.id}", body: "${comment.replace(/\"/g, '\"')}" }) {
-                        commentEdge {
-                            node {
-                                createdAt
-                                id
-                                bodyText
-                                author{
-                                    login,
-                                    avatarUrl
-                                }
-                            }
-                        }
-                    }
-                
-                }
-
-            `;
-
-            const ret = await this.qlFetch(q);
-
-            if (!ret || !ret.addComment || !ret.addComment.commentEdge || !ret.addComment.commentEdge.node) {
-                return
-            }
-
-            const com = {} as IComments;
-            com.id = ret.addComment.commentEdge.node.id;
-            com.createdAt = ret.addComment.commentEdge.node.createdAt;
-            com.bodyText = ret.addComment.commentEdge.node.bodyText;
-            com.author = ret.addComment.commentEdge.node.author.login;
-            com.avatarUrl = ret.addComment.commentEdge.node.author.avatarUrl;
-            this.comments.push(com);
-
-            this.requestUpdate();
-
-
-        } catch (e) {
-            console.info(e)
-        }
-
-
-    }
-
-    private async getIssue(issue: IIssues) {
-
-        try {
-
-            if (!this.owner || !this.repo) throw new Error('Not found owner project')
-
-            const q = `
-                query {
-                    repository(owner: "${this.owner}", name: "${this.repo}") {
-                        issue(number: ${issue.numberIssues}) {
-                            comments(last:100){
-                                nodes{
-                                    createdAt
-                                    id
-                                    bodyText
-                                    author{
-                                        login,
-                                        avatarUrl
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            `;
-
-            const ret = await this.qlFetch(q);
-
-            const comments: IComments[] = []
-
-            if (!ret || !ret.repository || !ret.repository.issue || !ret.repository.issue.comments || !ret.repository.issue.comments.nodes) {
-                return
-            }
-
-            ret.repository.issue.comments.nodes.forEach((i: any) => {
-
-
-                if (!i) return;
-                const com = {} as IComments;
-                com.id = i.id;
-                com.createdAt = i.createdAt;
-                com.bodyText = i.bodyText;
-                com.author = i.author.login;
-                com.avatarUrl = i.author.avatarUrl;
-                comments.push(com);
-
-            });
-
-            this.comments = comments;
-            this.viewIssue = issue;
-
-            this.scenary = 'show';
-
-        } catch (e) {
-            console.info(e)
-        }
-
+        this.comments.push(com);
+        this.requestUpdate();
 
     }
 
@@ -770,221 +465,13 @@ export class PluginGithubL4Issues extends LitElement {
         const info = getMyKeysBranch(prj);
         if (!info) return;
 
-        this.branch = info.branch;
-        this.owner = "santiagoExpansiva"; //info.owner;
-        this.repo = "testGit"; //info.repo;
-
-    }
-
-    private async setRepositoryId() {
-
-        try {
-
-            if (!this.owner || !this.repo) throw new Error('Not found owner project')
-
-            const q = `
-                query { 
-                    repository(owner: "${this.owner}", name: "${this.repo}") { id } 
-                }
-            `;
-
-            const ret = await this.qlFetch(q);
-
-            if (!ret || !ret.repository || !ret.repository.id) {
-                this.error = 'Not found repositoryId';
-                return;
-            }
-
-            this.repositoryId = ret.repository.id;
-
-        } catch (e) {
-            console.info(e)
+        this.req = {
+            mkey: this.mKey,
+            owner: "santiagoExpansiva", //info.owner,
+            repo: "testGit", //info.repo,
+            branch: info.branch,
         }
-
-
     }
-
-    private async getLabelIdOrAdd() {
-
-        try {
-
-            if (!this.owner || !this.repo) throw new Error('Not found owner project')
-
-            let q = `
-                query repository {
-                    repository(owner: "${this.owner}", name: "${this.repo}") {
-                        labels(last:100, query:"feature request"){
-                            nodes{
-                                id
-                                color
-                                name
-                            }
-                        }        
-                    }
-                }
-            `;
-
-            let ret = await this.qlFetch(q);
-
-            if (ret.repository && ret.repository.labels && ret.repository.labels.nodes && ret.repository.labels.nodes[0] && ret.repository.labels.nodes[0].name === 'feature request') {
-                
-                return ret.repository.labels.nodes[0].id;
-            }
-
-
-            q = `
-                mutation {
-                    createLabel(input: {
-                        repositoryId: "${this.repositoryId}", 
-                        name: "feature request", 
-                        color: "1E8103", 
-                        description: "Collabcodes label"
-                    }) {
-                        label {
-                        id
-                        name
-                        color
-                        description
-                        }
-                    }
-                }
-            `;
-
-            ret = await this.qlFetch(q);
-
-            if (ret.createLabel && ret.createLabel.label ) {
-                
-                return ret.createLabel.label.id;
-            }
-
-        } catch (e) {
-            console.info(e);
-            return '';
-        }
-
-
-    }
-
-
-    private qlFetch(query: string, variables?: {}): Promise<any> {
-
-        return new Promise<any>(async (resolve, reject) => {
-
-            try {
-
-                const info = await this.myFetch(query, variables);
-
-                if (!info || info.status !== 200) {
-                    reject(new Error('Erro status: ' + info.status + '; ' + info.ret.message));
-                    return;
-                }
-
-                if (info.ret.errors) {
-                    reject(new Error('Erro' + info.ret.errors[0].message));
-                    return;
-                }
-
-                resolve(info.ret.data);
-
-            } catch (er) {
-
-                reject(er);
-
-            }
-
-
-        });
-    }
-
-
-    private myFetch(query: string, variables?: {}): Promise<{ status: number, ret: any }> {
-
-        return new Promise<{ status: number, ret: any }>((resolve, reject) => {
-
-            try {
-
-                const body: { query: string, variables?: {} } = { query };
-
-                if (variables) body.variables = variables;
-                let status = 0;
-                fetch('https://api.github.com/graphql', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: 'application/json',
-                        Authorization: 'bearer ' + this.mKey
-                    },
-                    body: JSON.stringify(body)
-
-                }).then((r) => {
-                    status = r.status;
-                    return r.json();
-                }).then((data) => {
-                    resolve({ status, ret: data });
-                }).catch((e) => reject(e));
-
-            } catch (er) {
-
-                reject(er);
-
-            }
-
-        });
-
-    }
-
-    private getUserInfoIO(): Promise<IInfo> {
-
-        return new Promise<IInfo>(async (resolve, reject) => {
-
-            const q = `
-			{
-				viewer {
-					name
-					login
-					avatarUrl
-				}
-			}
-			`;
-
-            this.myFetch(q).then((data) => {
-
-                try {
-
-                    if (data.status !== 200) {
-                        reject(new Error('Erro status: ' + data.status + '; ' + data.ret.message));
-                        return;
-                    }
-
-                    if (data.ret.errors) {
-                        reject(new Error('Erro' + data.ret.errors[0].message));
-                        return;
-                    }
-
-                    const info = {} as IInfo;
-                    if (!data.ret || !data.ret.data.viewer) resolve(info);
-
-                    info.name = data.ret.data.viewer.name;
-                    info.login = data.ret.data.viewer.login;
-                    info.avatarUrl = data.ret.data.viewer.avatarUrl;
-
-                    resolve(info);
-
-                } catch (err) {
-
-                    reject(err);
-
-                }
-
-            }).catch((e: Error) => {
-
-                reject(e);
-
-            });
-
-        });
-    }
-
 
     //----------CSS--------------------
 
@@ -1252,42 +739,3 @@ export class PluginGithubL4Issues extends LitElement {
 
 }
 
-interface IIssues {
-    id: string,
-    numberIssues: number,
-    createdAt: string,
-    title: string,
-    bodyText: string,
-    state: string,
-    url: string,
-    author: string,
-    avatarUrl: string,
-    labels: ILabel[],
-    reactionsTU: number,
-    reactions: IReactions[]
-
-}
-
-interface IReactions {
-    id: string,
-    user: string
-}
-
-interface ILabel {
-    color: string,
-    name: string
-}
-
-interface IComments {
-    createdAt: string,
-    id: string,
-    bodyText: string,
-    author: string
-    avatarUrl: string
-}
-
-interface IInfo {
-    name: string,
-    login: string,
-    avatarUrl: string
-}
