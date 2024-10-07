@@ -6,7 +6,6 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName } from './_100554_utilsLit';
 
-
 @customElement('service-detail-100554')
 export class ServiceDetail100554 extends ServiceBase {
 
@@ -133,58 +132,52 @@ export class ServiceDetail100554 extends ServiceBase {
     //----------IMPLEMENTS-------------------
 
     private setEvents(): void {
-
-        mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['PluginDetails' as any], (ev) => this.onPluginDetails(ev));
+        mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['PluginDetails'], (ev) => this.onPluginDetails(ev));
     }
 
     private onPluginDetails(ev: mls.events.IEvent) {
-
-        if (!ev.desc) return;
+        if (!ev.desc) throw new Error('Error on PluginDetails event, invalid desc');
         this.openMe();
-        const data: { shortName: string, project: number, htmlText: string } = JSON.parse(ev.desc);
-        if (data.shortName || data.htmlText) this.openPlugin(data)
-
+        const data: mls.events.IPluginDetail = JSON.parse(ev.desc);
+        this.showPluginContent(data);
     }
 
-    private async openPlugin(info: { shortName: string, project: number, htmlText: string }) {
+    private async showPluginContent(info: mls.events.IPluginDetail) {
+        // show htmlText or plugin html
+        if (!info.project || !info.shortName) throw new Error(`Error on PluginDetails events, invalid data: ${info.project} ${info.shortName}`);
+        if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
+        const content: string = info.htmlText ? info.htmlText : await this.getHtmlFromPlugin(info);
+        this.updateContentPluginWithScripts(content);
+    }
 
+    private async getHtmlFromPlugin(info: mls.events.IPluginDetail): Promise<string> {
         const keyFile = mls.stor.getKeyToFiles(info.project, 2, info.shortName, '', '.html');
         const storFile = mls.stor.files[keyFile];
-        if (!storFile && this.contentPlugin) {
-
-            if (info.htmlText) this.contentPlugin.innerHTML = info.htmlText;
-            else this.contentPlugin.innerHTML = 'Not found storFile:' + JSON.stringify(info);
-            return;
-
-        } else if (!storFile) return;
-
+        if (!storFile) return 'Not found storFile:' + JSON.stringify(info);
         this.plugin = info;
         const content = await storFile.getContent();
+        if (typeof content !== 'string') return `Error on content of _${info.project}_${info.shortName}`;
+        return content;
+    }
 
-        if (this.contentPlugin && typeof content === 'string') {
-
-            this.contentPlugin.innerHTML = '';
-            const allWcs = getAllWebComponentsInSource(content);
-
-            this.contentPlugin.innerHTML = content;
-
-            allWcs.forEach((wc) => {
-                const fileName = convertTagToFileName(wc);
-                const script = document.createElement('script');
-                script.type = 'module';
-                script.id = fileName;
-                script.src = (`/${fileName}`);
-                this.contentPlugin?.appendChild(script)
-            });
-
-            Array.from(this.contentPlugin.children).forEach((child) => {
-                if (child.tagName.startsWith('PLUGIN-')) {
-                    child.setAttribute('msize', this.msize);
-                }
-            });
-
-        }
-
+    private updateContentPluginWithScripts(content: string): void {
+        if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
+        this.contentPlugin.innerHTML = '';
+        const allWcs = getAllWebComponentsInSource(content);
+        this.contentPlugin.innerHTML = content;
+        allWcs.forEach((wc) => {
+            const fileName = convertTagToFileName(wc);
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.id = fileName;
+            script.src = (`/${fileName}`);
+            this.contentPlugin?.appendChild(script)
+        });
+        Array.from(this.contentPlugin.children).forEach((child) => {
+            if (child.tagName.startsWith('PLUGIN-')) {
+                child.setAttribute('msize', this.msize);
+            }
+        });
     }
 
     private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
