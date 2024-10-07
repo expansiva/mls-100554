@@ -4,6 +4,7 @@ import { html, css, svg, TemplateResult, LitElement, repeat } from 'lit';
 import { query, property, customElement } from 'lit/decorators.js';
 import { getMyKeysBranch } from './_100554_libCommom';
 import * as gitIO from './_100554_libGithubIo';
+import 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.3/Sortable.min.js';
 
 export const pluginData: mls.plugin.IPluginData = {
     title: "GitHub Projects",
@@ -24,8 +25,10 @@ export class PluginGithubL4Project extends LitElement {
     private myProjcts: gitIO.IProject[] = [];
     private viewProject: gitIO.IProject | undefined;
     private itensShow: gitIO.IItemProject[] | undefined;
+    private sort: any[] = [];
 
     @property() scenary: string = 'list';
+    @property() isLoader: boolean = true;
 
     @query('contentstatus') contentstatus: HTMLElement | undefined;
 
@@ -51,6 +54,8 @@ export class PluginGithubL4Project extends LitElement {
 
         if (this.error != '') return this.renderError();
 
+        if (this.isLoader) return this.renderLoader();
+
         if (this.scenary === 'list') return this.renderList();
 
         if (this.scenary === 'showStatus') return this.renderShow();
@@ -58,6 +63,13 @@ export class PluginGithubL4Project extends LitElement {
         if (this.scenary === 'show') return this.renderShowCard();
 
         return html``;
+    }
+
+    renderLoader(): TemplateResult {
+
+        return html`<div class="contentloader">
+            <div class="loader"></div>
+        </div>`
     }
 
     renderError(): TemplateResult {
@@ -222,13 +234,13 @@ export class PluginGithubL4Project extends LitElement {
         `
     }
 
-    renderShowCardItem(item:gitIO.IItemProject): TemplateResult { 
+    renderShowCardItem(item: gitIO.IItemProject): TemplateResult {
 
         return html`
             <contentshowCarditem>
                 <div style=" display: flex; align-items: center; justify-content: space-between">
                     <h4>
-                        ${item.title}
+                        <span style=" white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: calc(100% - 71px);">${item.title}</span>
                         <togit url=${item.url} @click="${this.goToGit}">
                             <svg style="width: 20px; height: 20px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M439.6 236.1L244 40.5a28.9 28.9 0 0 0 -40.8 0l-40.7 40.6 51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.2 199v121.9c25.3 12.5 22.3 41.9 9.1 55a34.3 34.3 0 0 1 -48.6 0c-17.6-17.6-11.1-46.9 11.3-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1a28.9 28.9 0 0 0 0 40.8l195.6 195.6a28.9 28.9 0 0 0 40.8 0l194.7-194.7a28.9 28.9 0 0 0 0-40.8z"/></svg>
                         </togit>
@@ -237,14 +249,14 @@ export class PluginGithubL4Project extends LitElement {
 
                 <contentshowCarditeminfo>
                     ${repeat
-                    (item.fieldValues,
-                        ((key: gitIO.IItemProjectValues) => key.fieldId) as any,
-                        ((k: gitIO.IItemProjectValues, index: any) => {
+                (item.fieldValues,
+                    ((key: gitIO.IItemProjectValues) => key.fieldId) as any,
+                    ((k: gitIO.IItemProjectValues, index: any) => {
 
-                            return this.renderShowCardItemInfo(k);
+                        return this.renderShowCardItemInfo(k);
 
-                        }) as any
-                    )}
+                    }) as any
+                )}
 
                 </contentshowCarditeminfo>
                 <div style=" position: relative;">
@@ -263,10 +275,10 @@ export class PluginGithubL4Project extends LitElement {
 
     }
 
-    renderassignner(item: gitIO.IItemProject): TemplateResult { 
+    renderassignner(item: gitIO.IItemProject): TemplateResult {
 
-        console.info(item)
-        if (!item.assignees ||item.assignees.length <= 0 ) return html``;
+
+        if (!item.assignees || item.assignees.length <= 0) return html``;
 
         return html`
 
@@ -288,7 +300,7 @@ export class PluginGithubL4Project extends LitElement {
 
     }
 
-    renderShowCardItemInfo(field: gitIO.IItemProjectValues): TemplateResult { 
+    renderShowCardItemInfo(field: gitIO.IItemProjectValues): TemplateResult {
 
         if (field.fieldName === 'Title') return html``;
         return html`
@@ -310,6 +322,7 @@ export class PluginGithubL4Project extends LitElement {
         this.userInfo = await gitIO.getUserInfoIO(this.req);
         this.myProjcts = await gitIO.getProjects(this.req);
 
+        this.isLoader = false;
         this.requestUpdate();
 
     }
@@ -324,10 +337,47 @@ export class PluginGithubL4Project extends LitElement {
 
         this.req = {
             mkey: this.mKey,
-            owner: "santiagoExpansiva", //info.owner,
-            repo: "testGit", //info.repo,
+            owner: info.owner,//"santiagoExpansiva", //info.owner,
+            repo: info.repo,//"testGit", //info.repo,
             branch: info.branch,
         }
+    }
+
+    private setDragAndDrop(active: boolean) {
+
+
+        if (!active) {
+
+            if (this.sort) {
+                this.sort.forEach((i: any) => i.destroy())
+            }
+
+            return;
+        }
+
+        if ((window['Sortable' as any] as any)) {
+
+            const columns = this.shadowRoot?.querySelectorAll('contentst');
+
+            if (!columns) return;
+
+            Array.from(columns).forEach((i) => {
+                this.sort.push(
+                    (window['Sortable' as any] as any).create(i, {
+                        group: 'shared',
+                        sort: active,
+                        onEnd: function (evt: any) {
+
+                            console.info(evt);    
+
+                        },
+                    })
+                )
+            });
+        }
+
+
+
     }
 
     private backButton(e: MouseEvent) {
@@ -340,6 +390,7 @@ export class PluginGithubL4Project extends LitElement {
 
         if (!el || !el.getAttribute('back')) return;
 
+        this.setDragAndDrop(false);
         this.scenary = el.getAttribute('back') as string;
     }
 
@@ -356,7 +407,7 @@ export class PluginGithubL4Project extends LitElement {
         window.open(el.getAttribute('url') as string, '_blank');
     }
 
-    
+
 
     private clickChangeView(e: MouseEvent) {
 
@@ -382,6 +433,7 @@ export class PluginGithubL4Project extends LitElement {
 
         if (!el || !(el as any).info || !this.req) return;
 
+        this.isLoader = true;
         this.viewProject = (el as any).info;
 
         if (this.viewProject && this.viewProject.fields.length <= 0) {
@@ -394,6 +446,7 @@ export class PluginGithubL4Project extends LitElement {
             this.itensShow = await gitIO.getIssuesInProjects(this.req, this.viewProject.id);
         }
 
+        this.isLoader = false;
         this.scenary = 'show';
 
     }
@@ -414,7 +467,7 @@ export class PluginGithubL4Project extends LitElement {
             const q = this.contentstatus.querySelector('#st' + id);
             if (!q) return;
 
-            const item = document.createElement('div');
+            const item = document.createElement('itemstatusissues');
             item.innerHTML = `issue: ${i.title}`
 
             q.appendChild(item);
@@ -422,18 +475,21 @@ export class PluginGithubL4Project extends LitElement {
 
         })
 
+        this.setDragAndDrop(true);
+
     }
 
     //-------CSS----------------------
 
     static styles = css`
         :host {
-            font-family: @font-family-primary;
-            display: block;
-            height: calc(100% - 55px);
+            font-family: var(--font-family-primary);
+            display:block;
+            height: 100%;
             overflow: auto;
-            background: @bg-primary-color;
-            font-size: @font-size-16;
+            background: var(--bg-primary-color);
+            font-size: var(--font-size-16);
+            position:relative;
         }   
 
         backbutton{
@@ -557,9 +613,11 @@ export class PluginGithubL4Project extends LitElement {
             gap: .5rem;
             width: 100%;
             justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
 
-        contentst div{
+        contentst itemstatusissues{
             border: 1px solid var(--bg-secondary-color);
             padding: .5rem;
             border-radius: 10px;
@@ -592,12 +650,12 @@ export class PluginGithubL4Project extends LitElement {
 
         contentshowcarditem h4{
             margin: 0;
-            padding: 4px 13px;
+            padding: 4px 2px 4px 7px;
             color: #ffffff;
             background-color: #7d868d;
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
-            width: 100%;
+            width: calc(100% - 7px);
             display: flex;
             justify-content: space-between;
         }
@@ -638,6 +696,59 @@ export class PluginGithubL4Project extends LitElement {
             position: absolute;
             right: 5px;
             bottom: 0px;
+        }
+
+
+
+        .contentloader{
+            background: #f5f5f5;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0px;
+            left: 0px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader {
+            width: 50px;
+            height: 28px;
+            --_g: no-repeat radial-gradient(farthest-side,#000 94%,#0000);
+            background:
+                var(--_g) 50%  0,
+                var(--_g) 100% 0;
+            background-size: 12px 12px;
+            position: relative;
+            animation: l23-0 1.5s linear infinite;
+        }
+        .loader:before {
+            content: "";
+            position: absolute;
+            height: 12px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: #000;
+            left:0;
+            top:0;
+            animation: 
+                l23-1 1.5s linear infinite,
+                l23-2 0.5s cubic-bezier(0,200,.8,200) infinite;
+        }
+        @keyframes l23-0 {
+            0%,31%  {background-position: 50% 0   ,100% 0}
+            33%     {background-position: 50% 100%,100% 0}
+            43%,64% {background-position: 50% 0   ,100% 0}
+            66%     {background-position: 50% 0   ,100% 100%}
+            79%     {background-position: 50% 0   ,100% 0}
+            100%    {transform:translateX(calc(-100%/3))}
+        }
+        @keyframes l23-1 {
+            100% {left:calc(100% + 7px)}
+        }
+        @keyframes l23-2 {
+            100% {top:-0.1px}
         }
         
     `;

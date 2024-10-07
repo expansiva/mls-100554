@@ -31,6 +31,8 @@ export class PluginGithubL4Issues extends LitElement {
 
     @property() scenary: string = 'list';
     @property() myIssues: gitIO.IIssues[] = [];
+    @property() isLoader: boolean = true;
+
     @query('contentlistissues') contentlistissues: HTMLElement | undefined;
 
 
@@ -56,6 +58,8 @@ export class PluginGithubL4Issues extends LitElement {
 
         if (this.error != '') return this.renderError();
 
+        if (this.isLoader) return this.renderLoader();
+
         if (this.scenary === 'list') return this.renderList();
 
         if (this.scenary === 'show') return this.renderShow();
@@ -63,6 +67,13 @@ export class PluginGithubL4Issues extends LitElement {
         if (this.scenary === 'new') return this.renderNewIssue();
 
         return html``;
+    }
+
+    renderLoader(): TemplateResult {
+
+        return html`<div class="contentloader">
+            <div class="loader"></div>
+        </div>`
     }
 
     renderError(): TemplateResult {
@@ -274,6 +285,7 @@ export class PluginGithubL4Issues extends LitElement {
         this.repositoryId =  await gitIO.getRepositoryId(this.req);
         this.myIssues =  await gitIO.getIssues(this.req);
         this.labelId = await gitIO.getLabelIdOrAdd(this.req, this.repositoryId);
+        this.isLoader = false;
 
     }
 
@@ -388,6 +400,7 @@ export class PluginGithubL4Issues extends LitElement {
             return;
         }
 
+        this.isLoader = true;
         const issue = await gitIO.addNewIssueIO(
             this.req,
             this.userInfo,
@@ -403,6 +416,7 @@ export class PluginGithubL4Issues extends LitElement {
         }
 
         this.myIssues.unshift(issue);
+        this.isLoader = false;
         this.scenary = 'list';
 
 
@@ -444,6 +458,8 @@ export class PluginGithubL4Issues extends LitElement {
         (el as HTMLTextAreaElement).value = '';
         if (!v) return;
 
+        this.isLoader = true;
+
         const com = await gitIO.addComment(this.req, this.viewIssue, v);
 
         if (!com) {
@@ -453,6 +469,7 @@ export class PluginGithubL4Issues extends LitElement {
         }
 
         this.comments.push(com);
+        this.isLoader = false;
         this.requestUpdate();
 
     }
@@ -467,8 +484,8 @@ export class PluginGithubL4Issues extends LitElement {
 
         this.req = {
             mkey: this.mKey,
-            owner: "santiagoExpansiva", //info.owner,
-            repo: "testGit", //info.repo,
+            owner: info.owner,//"santiagoExpansiva", //info.owner,
+            repo: info.repo,//"testGit", //info.repo,
             branch: info.branch,
         }
     }
@@ -478,12 +495,12 @@ export class PluginGithubL4Issues extends LitElement {
     static styles = css`
     
         :host {
-            font-family: @font-family-primary;
-            display: block;
-            height: calc(100% - 55px);
+            font-family: var(--font-family-primary);
+            display:block;
+            height: 100%;
             overflow: auto;
-            background: @bg-primary-color;
-            font-size: @font-size-16;
+            background: var(--bg-primary-color);
+            font-size: var(--font-size-16);
         }   
 
         backbutton{
@@ -711,6 +728,7 @@ export class PluginGithubL4Issues extends LitElement {
             display: flex;
             justify-content: center;
             gap: .5rem;
+            padding-top: 1rem;
         }
 
         contentnewissue input{
@@ -733,6 +751,57 @@ export class PluginGithubL4Issues extends LitElement {
 
         contentnewissue h4{
             margin:0px;
+        }
+
+        .contentloader{
+            background: #f5f5f5;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0px;
+            left: 0px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader {
+            width: 50px;
+            height: 28px;
+            --_g: no-repeat radial-gradient(farthest-side,#000 94%,#0000);
+            background:
+                var(--_g) 50%  0,
+                var(--_g) 100% 0;
+            background-size: 12px 12px;
+            position: relative;
+            animation: l23-0 1.5s linear infinite;
+        }
+        .loader:before {
+            content: "";
+            position: absolute;
+            height: 12px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: #000;
+            left:0;
+            top:0;
+            animation: 
+                l23-1 1.5s linear infinite,
+                l23-2 0.5s cubic-bezier(0,200,.8,200) infinite;
+        }
+        @keyframes l23-0 {
+            0%,31%  {background-position: 50% 0   ,100% 0}
+            33%     {background-position: 50% 100%,100% 0}
+            43%,64% {background-position: 50% 0   ,100% 0}
+            66%     {background-position: 50% 0   ,100% 100%}
+            79%     {background-position: 50% 0   ,100% 0}
+            100%    {transform:translateX(calc(-100%/3))}
+        }
+        @keyframes l23-1 {
+            100% {left:calc(100% + 7px)}
+        }
+        @keyframes l23-2 {
+            100% {top:-0.1px}
         }
     `;
 

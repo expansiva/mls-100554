@@ -4,6 +4,9 @@ import { html, css, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
+import './_100554_pluginGithubL4Project';
+import './_100554_pluginGithubL4Issues';
+
 @customElement('service-workspace-100554')
 export class ServiceWorkspace100554 extends ServiceBase {
 
@@ -98,9 +101,8 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
     renderTasks() {
         return html`
-        <div style="padding:2rem">
-            Here are the plugins that integrate or manage the project's current tasks - under development
-        </div>`
+        <plugin-github-l4-project-100554>
+        </plugin-github-l4-project-100554>`
     }
 
     renderBackLog() {
@@ -112,9 +114,8 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
     renderRequirements() {
         return html`
-        <div style="padding:2rem">
-            Here the plugins that manage requirements, organized by categories such as "Functional", "Non-Functional", "Technical" or by priorities such as "MoSCoW" - in development
-        </div>`
+        <plugin-github-l4-issues-100554>
+        </plugin-github-l4-issues-100554>`
     }
 
     renderChat() {
