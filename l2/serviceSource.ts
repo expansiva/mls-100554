@@ -23,6 +23,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     @property({ type: String }) msize = '';
+    @property({ type: String }) aimContainerHeight = '60';
     @property({ type: String }) mode: IModes = 'icTs';
 
     createRenderRoot() {
@@ -1386,10 +1387,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         let model = monaco.editor.getModel(uri);
 
         if (!model) model = await this.getOrCreateModelHtmlOrCss(shortName, project, mode, storFile, fileInfo);
-        if (open && this._ed1) {
-            this._ed1.setModel(model);
-            this.updatedMSizeEditor();
-        }
+        if (open && this._ed1) this._ed1.setModel(model);
 
         if (mode === '.html' && this._ed1 && this._ed1.getModel()?.id !== model.id) {
             mls.events.fireFileAction('modeCreated', storFile, this.position);
@@ -1588,8 +1586,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private updatedMSizeEditor() {
-        this.c2?.setAttribute('msize', this.msize);
+        const [w, h, t, l] = this.msize.split(',');
+        const newH = (+h) - (+this.aimContainerHeight);
+        const newMsize = [w, newH, t, l].join(',');
+        this.c2?.setAttribute('msize', newMsize);
     }
+
 
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
@@ -1604,33 +1606,13 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     render() {
-
-        // return html`
-        //     <div style="position:relative;">
-        //         <collab-panel-helper-100554 plugin="" style="${this.mode !== 'icStyle' ? 'display:none' : ''}"></collab-panel-helper-100554>
-        //         <mls-editor-100529 ismls2="true" style="position:relative;"></mls-editor-100529>
-        //     </div>
-        //     <aim-prompt-100554></aim-prompt-100554>
-        // `
-
-
-        return html`    
-        <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="#1e1e1e">
-            <collab-spliter-horizontal-var-fixed-100554
-                slot="top"
-                complementcolor="#1e1e1e"
-                fixedwidth="500"
-                fixedvisible=${this.mode !== 'icStyle' ? 'hidden' : 'visible'} 
-            >
-                <mls-editor-100529 slot="left"></mls-editor-100529>
-                <div slot="right" style="height:100%;"></div>
-                
-            </collab-spliter-horizontal-var-fixed-100554>
-
-            <div slot="bottom">
-                <aim-prompt-100554></aim-prompt-100554>
+        return html`
+            <div style="position:relative;">
+                <collab-panel-helper-100554 plugin="" style="${this.mode !== 'icStyle' ? 'display:none' : ''}"></collab-panel-helper-100554>
+                <mls-editor-100529 ismls2="true" style="position:relative;"></mls-editor-100529>
             </div>
-        </collab-spliter-vertical-var-fixed-100554>`
+            <aim-prompt-100554></aim-prompt-100554>
+        `
     }
 
     private saveLocalStorageLastOpen(storFile: mls.stor.IFileInfo, position: string) {
@@ -1925,7 +1907,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             const storFile = mls.stor.files[keyStorFile];
             if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile)
             await this.getOrCreateModelHtmlOrCss(storFile.shortName, storFile.project, '.html', storFile);
-            console.info('disparar evento')
             mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, ev.desc);
         } catch (err: any) {
             throw new Error(err);
