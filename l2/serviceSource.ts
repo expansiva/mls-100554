@@ -1516,12 +1516,18 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         clearTimeout(this._onChangedContentHtmlOrCss);
         this._onChangedContentHtmlOrCss = window.setTimeout(async () => {
 
-            const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await import('./_100554_enhancementStyle')
-            if (enhancementInstance) await enhancementInstance.onAfterChange(mfile);
+            console.info('on change LESS')
+
+
 
             let modelValue = model.getValue();
             if (ext === '.less') {
+
+                const enhancementInstanceLess: mls.l2.enhancement.IEnhancementInstance | undefined = await import('./_100554_enhancementStyle')
+                if (enhancementInstanceLess) await enhancementInstanceLess.onAfterChange(mfile);
                 modelValue = removeTokensFromSource(modelValue);
+                mls.l2.editor.forceModelUpdate(mfile.model);
+
             }
 
             const sameContent: boolean = (storFile as any)['originalCRC'] === mls.common.crc.crc32(modelValue).toString(16);
