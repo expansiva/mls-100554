@@ -1,8 +1,8 @@
 /// <mls shortName="serviceWorkspace" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, repeat } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { customElement, property, query } from 'lit/decorators.js'; 
+import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase'; 
 
 import './_100554_pluginGithubL4Project';
 import './_100554_pluginGithubL4Issues';
@@ -12,7 +12,7 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
     @property() msize: string = '';
 
-    static styles = css``;
+    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() activeTab: string = 'ITasks';
 
