@@ -9,6 +9,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
 
   @property({ type: String }) fixedwidth = '0';
   @property({ type: String }) complementcolor = '#000';
+  @property({ type: String }) fixedvisible: 'hidden' | 'visible' = 'visible';
   @property({ type: Number }) spliterWidth = 20;
   @property({ type: String }) actualfixedwidth = this.fixedwidth;
   @property({ type: String }) msize = '';
@@ -25,6 +26,10 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
   updated(changedProperties: Map<string | number | symbol, unknown>) {
 
     if (changedProperties.has('msize')) this._applyMSize();
+    
+    if (changedProperties.has('fixedvisible') && changedProperties.get('fixedvisible') === 'hidden' && this.fixedvisible === 'visible') {
+        this._applyMSize();
+    } 
 
     if (changedProperties.has('fixedwidth')) {
       this.actualfixedwidth = this.fixedwidth;
@@ -59,7 +64,8 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     const msize = this.getMSize();
     let newWidth: string = '';
     let newMsize: string[] = [];
-    newWidth = (+(msize.width) - (+this.actualfixedwidth) - (this.spliterWidth)).toString();
+    newWidth = this.fixedvisible === 'visible' ? (+(msize.width) - (+this.actualfixedwidth) - (this.spliterWidth)).toString() : msize.width;
+    // newWidth = (+(msize.width) - (+this.actualfixedwidth) - (this.spliterWidth)).toString();
     newMsize = [`${newWidth}`, msize.heigth, msize.top, msize.left];
     return newMsize.join(',');
   }
@@ -68,7 +74,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     const msize = this.getMSize();
     let newWidth: string = '';
     let newMsize: string[] = [];
-    newWidth = this.actualfixedwidth;
+    newWidth = this.fixedvisible === 'visible' ? this.actualfixedwidth : '0';
     newMsize = [`${newWidth}`, msize.heigth, msize.top, msize.left];
     return newMsize.join(',');
   }
@@ -135,12 +141,16 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
   render() {
     return html`
       <div class="left-pane"></div>
-      <div class="spliter">
-          <div @click=${this._onSpliterClick} class="spliter-button">
-              <i>${collab_chevron_right}</i>          
-          </div>
-      </div>
-      <div class="right-pane"></div>
+
+      ${this.fixedvisible === 'visible' ?
+        html`<div class="spliter">
+                  <div @click=${this._onSpliterClick} class="spliter-button">
+                      <i>${collab_chevron_right}</i>          
+                  </div>
+              </div>
+              <div class="right-pane"></div>`
+        :
+        html``}
       <style>${this.styles}</style>
     `;
   }
