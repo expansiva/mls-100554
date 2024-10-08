@@ -1607,6 +1607,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     render() {
+        this.style.display = 'block';
         return html`
              <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="#1e1e1e">
                 <collab-spliter-horizontal-var-fixed-100554
