@@ -1516,10 +1516,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         clearTimeout(this._onChangedContentHtmlOrCss);
         this._onChangedContentHtmlOrCss = window.setTimeout(async () => {
 
-            console.info('on change LESS')
-
-
-
             let modelValue = model.getValue();
             if (ext === '.less') {
 
