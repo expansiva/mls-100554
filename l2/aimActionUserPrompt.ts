@@ -5,7 +5,6 @@ import { customElement, query, property } from 'lit/decorators.js';
 import { tasks, ITaskFinish, updateTaskOnServer, getUserConfigs } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { initCollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet';
 
 const myName = '_100554_aimActionUserPrompt';
 
@@ -43,11 +42,6 @@ const messages: { [key: string]: MessageType } = {
 @customElement('aim-action-user-prompt-100554')
 export class AimActionUserPrompt extends AimActionBase {
 
-    constructor() {
-        super();
-        initCollabShowCodeSnippet100554();
-    }
-
     private msg: MessageType = messages['en'];
 
     public getRules(): AimActionRules[] {
@@ -57,7 +51,7 @@ export class AimActionUserPrompt extends AimActionBase {
         }]
     }
 
-    public assistant = "gpt3_typescript";
+    public assistant = "gpt_ts";
     public title = "User Prompt";
     private taskRoot: mls.cbe.ITaskRoot | undefined;
 

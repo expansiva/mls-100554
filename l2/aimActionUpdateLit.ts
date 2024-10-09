@@ -45,7 +45,7 @@ export class AimActionUpdateLit extends AimActionBase {
         }]
     }
 
-    public assistant = "gpt3_typescript";
+    public assistant = "gpt_ts";
     public title = "Update Lit";
 
     language = 'english';
@@ -97,18 +97,13 @@ export class AimActionUpdateLit extends AimActionBase {
     }
 
     getPrompt(source: string, user: string) {
-
-        const prompt = ` 
-        Objective: Usando typescript, lit 3, alterar o código abaixo seguindo as instruções.\n\n
-        System:\n
-        1. Manter a linha 1 (tripe slash) que é de controle\n
-        2. Fazer e manter comentários no código em ingles\n\n
-        User:\n
-        1. ${user}\n\n
-        Expected Output Format:\n
-            Retornar o novo source inteiro em um unico bloco\n\n
-
-        Source:\n ${source} \n`;
+        const prompt = `
+        User Instructions:\n
+        ${user}\n\n
+        Source:\n
+        \`\`\`typescript
+        ${source}
+        \`\`\``
         return prompt;
     }
 

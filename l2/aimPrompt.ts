@@ -11,7 +11,7 @@ const message_pt = {
     btnSend: 'Enviar',
     placeHolder: 'Digite sua pergunta...' 
 }
-
+   
 const message_en = {
     btnSend: 'Send',
     placeHolder: 'Enter your question...'
@@ -29,6 +29,11 @@ export class CollabInputTag extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
     @property({ type: "string" }) text = "";
+
+    dataForDetails: mls.events.IPluginDetail = {
+        project: 100554,
+        shortName: 'aimPrompt'
+    }
 
     render() {
 
@@ -56,23 +61,14 @@ export class CollabInputTag extends CollabLitElement {
 
     private handleFocus(event: KeyboardEvent) {
         if (this.isInIframe()) return;
-        const input = event.target as HTMLInputElement;
-        // const text: string = input.value;
-        const data: mls.events.IPluginDetail = {
-            project: mls.actual[mls.actualLevel].project || 0,
-            shortName: mls.actual[mls.actualLevel].path || ''
-        }
-        mls.events.fire(mls.actualLevel, 'PluginDetails', JSON.stringify(data))
+        mls.events.fire(mls.actualLevel, 'PluginDetails', JSON.stringify(this.dataForDetails))
     }
 
     private handleInput(event: Event) {
         const textarea = event.target as HTMLTextAreaElement;
-        // Atualiza a propriedade 'text' com o valor do conteúdo do textarea
-        this.text = textarea.value;
-
-        // Ajusta a altura do textarea automaticamente conforme o conteúdo
-        textarea.style.height = 'auto'; // Reseta a altura para calcular corretamente
-        textarea.style.height = `${textarea.scrollHeight}px`; // Define a nova altura com base no conteúdo
+        // this.text = textarea.value;
+        textarea.style.height = 'auto';
+        textarea.style.height = `${textarea.scrollHeight}px`;
     }    
 
     static styles = css`
@@ -120,6 +116,4 @@ export class CollabInputTag extends CollabLitElement {
         }
     
     `;
-
-
 }

@@ -2,7 +2,8 @@
 
 
 export let tasks: mls.cbe.ITaskRoot[] = [];
-let lastReadFromServer: Date | undefined = undefined;
+export let tasksProject: number = 0;
+//let lastReadFromServer: Date | undefined = undefined;
 
 
 /**
@@ -34,31 +35,45 @@ export async function updateTaskOnServer(taskIndex: number): Promise<mls.cbe.ITa
   const project: number = mls.actual[5].project || 0;
   if (project < 1) throw new Error(`invalid project ${project}`);
   const taskRoot = { ...tasks[taskIndex] }; // get copy
+  mls.stor.localDB.saveTask(project, taskRoot);
   const resp = await mls.api.cbeAiTask(project, taskRoot, 'update record');
   if (resp.msg !== "ok") throw new Error("error on api prompt: " + resp.msg);
   if (resp.task) tasks[taskIndex] = { ...tasks[taskIndex], ...resp.task };
   return resp.task;
 }
 
-const timeToWait = 5 * 60 * 1000; // 5 minutes , in ms
-export async function readTasksFromServer(filtedBy: mls.cbe.IFilterTask, filter: string) {
-  if (lastReadFromServer) {
-    // compare and don't read again for last seconds
-    const timeSinceLastRead = new Date().getTime() - lastReadFromServer.getTime();
-    if (timeSinceLastRead < timeToWait) return;
-  }
-  lastReadFromServer = new Date();
-  const rc = await mls.api.cbeAiTaskList(mls.actual[5].project || 0, 'all', '');
-  if (rc.msg !== 'ok') {
-    console.error('error on read tasks from server: ', rc);
-    return;
-  }
-  tasks = rc.tasks;
-  for (const task of tasks) {
-    if (task.mode !== 'error' &&
-      task.mode !== 'processed' &&
-      task.mode !== 'waiting for user') task.mode = 'error';
-  }
+// const timeToWait = 5 * 60 * 1000; // 5 minutes , in ms
+// export async function readTasksFromServer(filtedBy: mls.cbe.IFilterTask, filter: string) {
+//   if (lastReadFromServer) {
+//     // compare and don't read again for last seconds
+//     const timeSinceLastRead = new Date().getTime() - lastReadFromServer.getTime();
+//     if (timeSinceLastRead < timeToWait) return;
+//   }
+//   lastReadFromServer = new Date();
+//   const rc = await mls.api.cbeAiTaskList(mls.actual[5].project || 0, 'all', '');
+//   if (rc.msg !== 'ok') {
+//     console.error('error on read tasks from server: ', rc);
+//     return;
+//   }
+//   tasks = rc.tasks;
+//   for (const task of tasks) {
+//     if (task.mode !== 'error' &&
+//       task.mode !== 'processed' &&
+//       task.mode !== 'waiting for user') task.mode = 'error';
+//   }
+// }
+
+export async function readTasks() {
+  const project = mls.actual[5].project || 0;
+  if (project < 1) throw new Error(`invalid project ${project}`);
+  if (tasks.length > 0 && tasksProject === project) return; // already read
+  const itasks = await mls.stor.localDB.readAllTasks(project)
+    .catch((e) => {
+      console.error(e);
+      return [];
+    });
+  tasks = itasks.map(task => task.taskRoot);
+  tasksProject = project;
 }
 
 export function getInfoMyService(elBase: HTMLElement): { level: number, position: string, actServiceOp: any } | undefined {

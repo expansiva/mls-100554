@@ -4,9 +4,9 @@ import { html, css, unsafeHTML, render, styleMap, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IToolbarChangeEvent } from './_100554_serviceBase';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
-import { tasks, readTasksFromServer, getUserConfigs, saveUserConfigs, IAimColums } from './_100554_aimHelper';
+import { tasks, readTasks, getUserConfigs, saveUserConfigs, IAimColums } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
-
+ 
 /// **collab_i18n_start**
 const message_pt = {
     loading: 'Carregando...',
@@ -310,7 +310,7 @@ export class ServiceAim100554 extends ServiceBase {
             this.actualServiceOpLevel = 2;
         }
 
-        await readTasksFromServer('all', '').then(async () => {
+        await readTasks().then(async () => {
             await this.setActions();
             const widgetsDistincts = new Set<string>();
             tasks.forEach(task => {
