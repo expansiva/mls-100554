@@ -199,7 +199,7 @@ export class PluginGithubL4Project extends LitElement {
                             <h4>
                                 ${k.name}
                             </h4>
-                            <contentst id="st${k.id}">
+                            <contentst id="st${k.id}" idfield="${item.id}" namefield="${k.name}">
                             </contentst>
                         </contentstatusitem>
                     `
@@ -361,16 +361,38 @@ export class PluginGithubL4Project extends LitElement {
 
             if (!columns) return;
 
+            const func = async (evt: any) => {
+
+                const namefield = evt.to.getAttribute('namefield');
+                const idField = evt.to.getAttribute('idfield');
+                const idIssue = evt.item.info.id;
+                const idStatus = evt.to.id.replace('st', '');
+
+                const find = (evt.item.info as gitIO.IItemProject).fieldValues.find((f: any) => f.fieldName.toLowerCase() === 'status');
+
+                if (find) {
+                    find.value = idStatus;
+                    find.valueText = namefield;
+                }
+
+                try {
+
+                    if (!this.req || !this.viewProject) throw new Error('Not found project');
+
+                    await gitIO.updateFieldSelectProjects(this.req, this.viewProject.id, idIssue, idField, idStatus);
+
+                } catch (e: any) {
+                    this.error = e.message;
+                }
+
+            }
+
             Array.from(columns).forEach((i) => {
                 this.sort.push(
                     (window['Sortable' as any] as any).create(i, {
                         group: 'shared',
                         sort: active,
-                        onEnd: function (evt: any) {
-
-                            console.info(evt);    
-
-                        },
+                        onEnd: func,
                     })
                 )
             });
@@ -468,8 +490,8 @@ export class PluginGithubL4Project extends LitElement {
             if (!q) return;
 
             const item = document.createElement('itemstatusissues');
-            item.innerHTML = `issue: ${i.title}`
-
+            item.innerHTML = `issue: ${i.title}`;
+            (item as any).info = i;
             q.appendChild(item);
 
 

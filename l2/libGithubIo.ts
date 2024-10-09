@@ -341,11 +341,19 @@ export async function getProjects(req: IReq): Promise<IProject[]> {
     }
 }
 
-export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string, labelId: string, title: string, desc: string):Promise<IIssues | undefined> {
+export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string, labelsId: string[], title: string, desc: string):Promise<IIssues | undefined> {
 
     try {
 
-        if (!repositoryId || !title || !desc || !labelId) throw new Error('Not found information to add issue')
+        if (!repositoryId || !title || !desc || !labelsId) throw new Error('Not found information to add issue')
+
+        let labelId = '';
+        labelsId.forEach((l) => {
+
+            if (labelId === '') labelId += `"${l}"`;
+            else labelId += `,"${l}"`;
+
+        });
 
         const q = `
                 mutation {
@@ -354,7 +362,7 @@ export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string
                             repositoryId: "${repositoryId}"
                             title: "${title}"
                             body: "${desc}"
-                            labelIds: ["${labelId}"]
+                            labelIds: [${labelId}]
                         }
                     ) {
                         issue {
@@ -367,6 +375,7 @@ export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string
                             url
                             labels(last:10){
                                 nodes{
+                                    id
                                     color
                                     name
                                 }
@@ -491,6 +500,7 @@ export async function getIssues(req: IReq, state: string = 'OPEN'): Promise<IIss
                                     }
                                     labels(last:20){
                                         nodes{
+                                            id
                                             color
                                             name
                                         }
@@ -610,7 +620,7 @@ export async function addComment(req: IReq, issue: IIssues, comment: string): Pr
 
 }
 
-export async function getIssue(req: IReq, issue: IIssues): Promise<IComments[]> {
+export async function getIssueComments(req: IReq, issue: IIssues): Promise<IComments[]> {
 
     try {
 
@@ -696,7 +706,100 @@ export async function getRepositoryId(req: IReq): Promise<string> {
 
 }
 
-export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<string> {
+export async function addLabelInIssue(req: IReq, issueId: string, labelId: string): Promise<ILabel | undefined> { 
+
+    try {
+
+        if (!req.owner || !req.repo) throw new Error('Not found owner project')
+
+        let q = `
+                mutation {
+                    addLabelsToLabelable(input: {
+                        labelableId: "${issueId}"
+                        labelIds: ["${labelId}"]
+                    }) {
+                        labelable {
+                            ... on Issue {
+                                id
+                                title
+                                labels(first: 100) {
+                                    nodes {
+                                        name
+                                        color
+                                        id
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+
+        let ret = await qlFetch(q, req.mkey);
+        let retLabel = undefined;
+        
+        if (ret.addLabelsToLabelable && ret.addLabelsToLabelable.labelable && ret.addLabelsToLabelable.labelable.labels && ret.addLabelsToLabelable.labelable.labels.nodes) {
+
+            ret.addLabelsToLabelable.labelable.labels.nodes.forEach((l:any) => {
+
+                if (l.id === labelId) {
+                    retLabel = l;
+                }
+                
+            })
+            
+        }
+
+        return retLabel;
+
+    } catch (e) {
+        console.info(e);
+        return undefined;
+    }
+
+}
+
+export async function removeLabelInIssue(req: IReq, issueId: string, labelId: string): Promise<boolean> { 
+
+    try {
+
+        if (!req.owner || !req.repo) throw new Error('Not found owner project')
+
+        let q = `
+                mutation {
+                    removeLabelsFromLabelable(input: {
+                        labelableId: "${issueId}"
+                        labelIds: ["${labelId}"]
+                    }) {
+                        labelable {
+                            ... on Issue {
+                                id
+                                title
+                                labels(first: 100) {
+                                    nodes {
+                                        name
+                                        color
+                                        id
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+
+        let ret = await qlFetch(q, req.mkey);
+
+        return true;
+
+    } catch (e) {
+        console.info(e);
+        return false;
+    }
+
+}
+
+export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<ILabelsCollab | undefined> {
 
     try {
 
@@ -705,7 +808,7 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
         let q = `
                 query repository {
                     repository(owner: "${req.owner}", name: "${req.repo}") {
-                        labels(last:100, query:"feature request"){
+                        labels(last:100){
                             nodes{
                                 id
                                 color
@@ -718,18 +821,75 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
 
         let ret = await qlFetch(q, req.mkey);
 
-        if (ret.repository && ret.repository.labels && ret.repository.labels.nodes && ret.repository.labels.nodes[0] && ret.repository.labels.nodes[0].name === 'feature request') {
+        const retLabels = {
+            feature: '',
+            low: '',
+            medium: '',
+            high: '',
+        } as ILabelsCollab;
 
-            return ret.repository.labels.nodes[0].id as string;
+        if (ret.repository && ret.repository.labels && ret.repository.labels.nodes) {
+
+            ret.repository.labels.nodes.forEach((l:any) => {
+
+                switch (l.name) {
+                    case 'feature request':
+                        retLabels.feature = l.id;
+                        break;
+                    case 'low':
+                        retLabels.low = l.id;
+                        break;
+                    case 'medium':
+                        retLabels.medium = l.id;
+                        break;
+                    case 'high':
+                        retLabels.high = l.id;
+                        break;
+                    default: '';
+                }
+            })
+            
         }
 
+        if (!retLabels.feature) {
+            retLabels.feature = await createLabelIO(req, repositoryId, 'feature request', '1e8103');
+        }
 
-        q = `
+        if (!retLabels.low) {
+            retLabels.low = await createLabelIO(req, repositoryId, 'low', '49ff18');
+        }
+
+        if (!retLabels.medium) {
+            retLabels.medium = await createLabelIO(req, repositoryId, 'medium', 'f1ff18');
+        }
+
+        if (!retLabels.high) {
+            retLabels.high = await createLabelIO(req, repositoryId, 'high', 'ff0000');
+        }
+
+        return retLabels;
+        
+
+    } catch (e) {
+        console.info(e);
+        return undefined;
+    }
+
+
+}
+
+export async function createLabelIO(req: IReq, repositoryId:string,  label:string, color:string): Promise<string> { 
+
+    try {
+
+        if (!req.owner || !req.repo) throw new Error('Not found owner project')
+
+        const q = `
                 mutation {
                     createLabel(input: {
                         repositoryId: "${repositoryId}", 
-                        name: "feature request", 
-                        color: "1E8103", 
+                        name: "${label}", 
+                        color: "${color}", 
                         description: "Collabcodes label"
                     }) {
                         label {
@@ -742,7 +902,7 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
                 }
             `;
 
-        ret = await qlFetch(q, req.mkey);
+        let ret = await qlFetch(q, req.mkey);
 
         if (ret.createLabel && ret.createLabel.label) {
 
@@ -755,7 +915,6 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
         console.info(e);
         return '';
     }
-
 
 }
 
@@ -948,6 +1107,7 @@ export interface IReactions {
 }
 
 export interface ILabel {
+    id:string,
     color: string,
     name: string
 }
@@ -964,4 +1124,11 @@ export interface IInfo {
     name: string,
     login: string,
     avatarUrl: string
+}
+
+export interface ILabelsCollab{
+    feature: string,
+    low: string,
+    medium: string,
+    high:string,
 }
