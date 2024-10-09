@@ -1635,7 +1635,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 <collab-spliter-horizontal-var-fixed-100554
                     slot="top"
                     complementcolor="#1e1e1e"
-                    fixedwidth="500"
+                    fixedwidth="30%"
                     fixedvisible=${this.mode !== 'icStyle' ? 'hidden' : `${this.panelRightOpened === true ? 'visible' : 'closed'}`} 
                 >
                     <mls-editor-100529 slot="left"></mls-editor-100529>

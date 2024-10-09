@@ -30,17 +30,20 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       this.open = this.fixedvisible === 'visible' ? true : false;
     }
 
-    if (changedProperties.has('msize') ||
-      (changedProperties.has('fixedvisible') && changedProperties.get('fixedvisible') === 'hidden' && this.fixedvisible === 'visible') ||
+    if (changedProperties.has('msize')) {
+      this.setFixedValueInPx();
+      this._applyMSize();
+    }
+
+    if ((changedProperties.has('fixedvisible') && changedProperties.get('fixedvisible') === 'hidden' && this.fixedvisible === 'visible') ||
       (changedProperties.has('fixedvisible') && this.fixedvisible === 'closed')
-    ) this._applyMSize();
+    ) {
+      this.setFixedValueInPx();
+      this._applyMSize();
+    }
 
     if (changedProperties.has('fixedwidth')) {
-      this.actualfixedwidth = this.fixedwidth;
-      this.style.setProperty('--fixed-width', this.fixedwidth + 'px');
-      if (this.open) {
-        this.style.setProperty('--right-pane-width', this.fixedwidth + 'px');
-      }
+      this.setFixedValueInPx();
       this.updatePanelsMSize();
     }
 
@@ -49,9 +52,23 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     }
   }
 
-  firstUpdated() {
-    this._distributeContent();
-    this.updatePanelsMSize();
+  private setFixedValueInPx() {
+
+    if (this.fixedwidth.endsWith('%')) {
+      const msize = this.getMSize();
+      const percent = this.fixedwidth.replace('%', '');
+      const percentInPx = ((+msize.width) / 100) * (+percent);
+      const percentInPx2 = Number.parseFloat(percentInPx.toFixed(2))
+      this.actualfixedwidth = this.open ? percentInPx2.toString() : '0';
+      this.style.setProperty('--fixed-width', this.actualfixedwidth + 'px');
+      if (this.open) this.style.setProperty('--right-pane-width', this.actualfixedwidth + 'px');
+      return;
+    }
+
+    this.style.setProperty('--fixed-width', this.actualfixedwidth + 'px');
+    if (this.open) this.style.setProperty('--right-pane-width', this.actualfixedwidth + 'px');
+    this.actualfixedwidth = this.fixedwidth;
+
   }
 
   private getMSize() {
@@ -68,6 +85,9 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     const msize = this.getMSize();
     let newWidth: string = '';
     let newMsize: string[] = [];
+    console.info({
+      left: this.actualfixedwidth
+    })
 
     if (this.fixedvisible === 'visible') newWidth = (+(msize.width) - (+this.actualfixedwidth) - (this.spliterWidth)).toString();
     else if (this.fixedvisible === 'closed') newWidth = (+(msize.width) - (+this.spliterWidth)).toString();
@@ -80,6 +100,10 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     const msize = this.getMSize();
     let newWidth: string = '';
     let newMsize: string[] = [];
+
+    console.info({
+      right: this.actualfixedwidth
+    })
 
     if (this.fixedvisible === 'visible') newWidth = this.actualfixedwidth;
     else if (this.fixedvisible === 'closed') newWidth = '0';
@@ -120,13 +144,11 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       this.open = !this.open;
       if (this.open) {
         rightPane.classList.remove('closed');
-        //button.classList.remove('closed');
-        this.actualfixedwidth = this.fixedwidth;
-        this.style.setProperty('--right-pane-width', this.fixedwidth + 'px');
+        this.setFixedValueInPx();
+        this.style.setProperty('--right-pane-width', this.actualfixedwidth + 'px');
       } else {
         this.actualfixedwidth = '0';
         rightPane.classList.add('closed');
-        //  button.classList.add('closed');
         this.style.setProperty('--right-pane-width', '0px');
       }
       this.updatePanelsMSize();
@@ -153,6 +175,11 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       }
     });
 
+  }
+
+  firstUpdated() {
+    this._distributeContent();
+    this.updatePanelsMSize();
   }
 
   render() {
