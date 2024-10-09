@@ -9,11 +9,12 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
 
   @property({ type: String }) fixedwidth = '0';
   @property({ type: String }) complementcolor = '#000';
-  @property({ type: String }) fixedvisible: 'hidden' | 'visible' = 'visible';
+  @property({ type: String }) fixedvisible: 'hidden' | 'visible' | 'closed' = 'visible';
   @property({ type: Number }) spliterWidth = 20;
   @property({ type: String }) actualfixedwidth = this.fixedwidth;
   @property({ type: String }) msize = '';
-  @property() isRightPaneOpen: boolean = true;
+
+  @property() open: boolean = true;
 
   @query('[slot="left"]') slotLeft: HTMLElement | undefined;
   @query('[slot="right"]') slotRight: HTMLElement | undefined;
@@ -25,16 +26,19 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
 
   updated(changedProperties: Map<string | number | symbol, unknown>) {
 
-    if (changedProperties.has('msize')) this._applyMSize();
-    
-    if (changedProperties.has('fixedvisible') && changedProperties.get('fixedvisible') === 'hidden' && this.fixedvisible === 'visible') {
-        this._applyMSize();
-    } 
+    if (changedProperties.has('fixedvisible')) {
+      this.open = this.fixedvisible === 'visible' ? true : false;
+    }
+
+    if (changedProperties.has('msize') ||
+      (changedProperties.has('fixedvisible') && changedProperties.get('fixedvisible') === 'hidden' && this.fixedvisible === 'visible') ||
+      (changedProperties.has('fixedvisible') && this.fixedvisible === 'closed')
+    ) this._applyMSize();
 
     if (changedProperties.has('fixedwidth')) {
       this.actualfixedwidth = this.fixedwidth;
       this.style.setProperty('--fixed-width', this.fixedwidth + 'px');
-      if (this.isRightPaneOpen) {
+      if (this.open) {
         this.style.setProperty('--right-pane-width', this.fixedwidth + 'px');
       }
       this.updatePanelsMSize();
@@ -47,7 +51,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
 
   firstUpdated() {
     this._distributeContent();
-    this._applyMSize();
+    this.updatePanelsMSize();
   }
 
   private getMSize() {
@@ -64,8 +68,17 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     const msize = this.getMSize();
     let newWidth: string = '';
     let newMsize: string[] = [];
-    newWidth = this.fixedvisible === 'visible' ? (+(msize.width) - (+this.actualfixedwidth) - (this.spliterWidth)).toString() : msize.width;
-    // newWidth = (+(msize.width) - (+this.actualfixedwidth) - (this.spliterWidth)).toString();
+
+    if (this.fixedvisible === 'visible') newWidth = (+(msize.width) - (+this.actualfixedwidth) - (this.spliterWidth)).toString();
+    else if (this.fixedvisible === 'closed') newWidth = (+(msize.width) - (+this.spliterWidth)).toString();
+    else newWidth = msize.width;
+
+    console.info({
+      w: msize.width,
+      fixedvisible: this.fixedvisible,
+      newWidth
+    })
+
     newMsize = [`${newWidth}`, msize.heigth, msize.top, msize.left];
     return newMsize.join(',');
   }
@@ -74,14 +87,23 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     const msize = this.getMSize();
     let newWidth: string = '';
     let newMsize: string[] = [];
-    newWidth = this.fixedvisible === 'visible' ? this.actualfixedwidth : '0';
+
+    if (this.fixedvisible === 'visible') newWidth = this.actualfixedwidth;
+    else if (this.fixedvisible === 'closed') newWidth = '0';
+    else newWidth = '0'
+
+    // newWidth = this.fixedvisible === 'visible' || this.fixedvisible === 'closed' ? this.actualfixedwidth : '0';
     newMsize = [`${newWidth}`, msize.heigth, msize.top, msize.left];
     return newMsize.join(',');
   }
 
   private updatePanelsMSize() {
-    if (this.slotLeft) this.slotLeft.setAttribute('msize', this.getMSizeLeft());
-    if (this.slotRight) this.slotRight.setAttribute('msize', this.getMSizeRight());
+    if (this.slotLeft) {
+      this.slotLeft.setAttribute('msize', this.getMSizeLeft());
+    }
+    if (this.slotRight) {
+      this.slotRight.setAttribute('msize', this.getMSizeRight());
+    }
   }
 
   _applyMSize() {
@@ -94,22 +116,24 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
   }
 
   _onSpliterClick(event: MouseEvent) {
+
     const spliter = event.target as HTMLElement;
     const button = spliter.closest('.spliter-button')
 
     if (button) {
+      this.fixedvisible = 'visible';
 
       const rightPane = this.querySelector('.right-pane') as HTMLElement;
-      this.isRightPaneOpen = !this.isRightPaneOpen;
-      if (this.isRightPaneOpen) {
+      this.open = !this.open;
+      if (this.open) {
         rightPane.classList.remove('closed');
-        button.classList.remove('closed');
+        //button.classList.remove('closed');
         this.actualfixedwidth = this.fixedwidth;
         this.style.setProperty('--right-pane-width', this.fixedwidth + 'px');
       } else {
         this.actualfixedwidth = '0';
         rightPane.classList.add('closed');
-        button.classList.add('closed');
+        //  button.classList.add('closed');
         this.style.setProperty('--right-pane-width', '0px');
       }
       this.updatePanelsMSize();
@@ -139,16 +163,17 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
   }
 
   render() {
+
     return html`
       <div class="left-pane"></div>
 
-      ${this.fixedvisible === 'visible' ?
+      ${(this.fixedvisible === 'visible' || this.fixedvisible === 'closed') ?
         html`<div class="spliter">
-                  <div @click=${this._onSpliterClick} class="spliter-button">
+                  <div @click=${this._onSpliterClick} class="spliter-button ${!this.open ? "closed" : ""}">
                       <i>${collab_chevron_right}</i>          
                   </div>
               </div>
-              <div class="right-pane"></div>`
+              <div class="right-pane ${this.fixedvisible === 'closed' ? "closed" : ""}"></div>`
         :
         html``}
       <style>${this.styles}</style>

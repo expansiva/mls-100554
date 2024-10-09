@@ -23,7 +23,9 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     @property({ type: String }) msize = '';
+    @property({ type: Boolean }) panelRightOpened = false;
     @property({ type: String }) mode: IModes = 'icTs';
+    private MINWIDTHTPANELRIGHT = 500;
 
     createRenderRoot() {
         return this;
@@ -281,8 +283,14 @@ export class ServiceSource100554 extends ServiceBase {
 
 
     private openRepo() {
+        if (!this.menu.lastIcon) return false;
         const { shortName, project } = mls.l2.editor.editors[this.confE];
-        const ext = this.menu.lastIcon === 'icTs' ? '.ts' : '.html';
+        const obj: { [key: string]: string } = {
+            icTs: '.ts',
+            icHTML: '.html',
+            icStyle: '.less',
+        };
+        const ext = obj[this.menu.lastIcon];
         const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
         const file = mls.stor.files[keyToFile];
         if (!file) {
@@ -320,6 +328,7 @@ export class ServiceSource100554 extends ServiceBase {
         const obj = {
             icTs: '.ts',
             icHTML: '.html',
+            icStyle: '.less',
         };
 
         const wc = document.createElement('mls-history-list-100554');
@@ -1518,12 +1527,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
             let modelValue = model.getValue();
             if (ext === '.less') {
-
                 const enhancementInstanceLess: mls.l2.enhancement.IEnhancementInstance | undefined = await import('./_100554_enhancementStyle')
                 if (enhancementInstanceLess) await enhancementInstanceLess.onAfterChange(mfile);
                 modelValue = removeTokensFromSource(modelValue);
                 mls.l2.editor.forceModelUpdate(mfile.model);
-
             }
 
             const sameContent: boolean = (storFile as any)['originalCRC'] === mls.common.crc.crc32(modelValue).toString(16);
@@ -1540,7 +1547,13 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 this.isHTMLSystemChange = false;
                 return;
             }
-            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
+
+
+            let position: 'left' | 'right';
+            if (mls.l2.editor.editors[this.confE2('left')]?.model.id === mfile.model.id) position = 'left';
+            else position = 'right';
+            mls.events.fireFileAction('statusOrErrorChanged', storFile, position);
+
         }, 400);
     };
 
@@ -1557,7 +1570,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const newStorFile = mls.stor.files[key];
         newStorFile.status = 'renamed';
         if (ext === '.less') {
-            const modelStyle = (mfile as any)['modelStyle'];
+            const modelStyle = (mfile as any)['modelLESS'];
             mls.common.tripleslash.changeVariable(modelStyle, 'shortName', newShortName);
             mls.common.tripleslash.changeVariable(modelStyle, 'project', newProject.toString());
         }
@@ -1596,6 +1609,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
+            const [w, h, t, l] = this.msize.split(',');
+            if (w) this.panelRightOpened = (+w) >= this.MINWIDTHTPANELRIGHT;
             if (!this.visible) return;
             this.updatedMSizeEditor();
         }
@@ -1614,7 +1629,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                     slot="top"
                     complementcolor="#1e1e1e"
                     fixedwidth="500"
-                    fixedvisible=${this.mode !== 'icStyle' ? 'hidden' : 'visible'} 
+                    fixedvisible=${this.mode !== 'icStyle' ? 'hidden' : `${this.panelRightOpened === true ? 'visible' : 'closed'}`} 
                 >
                     <mls-editor-100529 slot="left"></mls-editor-100529>
                     <div slot="right" style="height:100%;"></div>
