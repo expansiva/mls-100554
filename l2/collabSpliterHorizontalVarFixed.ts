@@ -72,13 +72,6 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     if (this.fixedvisible === 'visible') newWidth = (+(msize.width) - (+this.actualfixedwidth) - (this.spliterWidth)).toString();
     else if (this.fixedvisible === 'closed') newWidth = (+(msize.width) - (+this.spliterWidth)).toString();
     else newWidth = msize.width;
-
-    console.info({
-      w: msize.width,
-      fixedvisible: this.fixedvisible,
-      newWidth
-    })
-
     newMsize = [`${newWidth}`, msize.heigth, msize.top, msize.left];
     return newMsize.join(',');
   }

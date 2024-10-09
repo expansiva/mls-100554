@@ -6,7 +6,7 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
-import { getAddNewFileDetails, removeTokensFromSource } from './_100554_enhancementStyle';
+import { getAddNewFileDetails, removeTokensFromSource, getTokensLess } from './_100554_enhancementStyle';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -1196,6 +1196,8 @@ export class ServiceSource100554 extends ServiceBase {
         if (src instanceof Blob) throw new Error(`${ext} file must be string`);
         if (!src) throw new Error(`${ext} file is undefined`);
 
+
+
         const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src).toString(16);
         const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
         const originalShortName: string | undefined = haveInfo ? info?.originalShortName : undefined;
@@ -1204,7 +1206,12 @@ export class ServiceSource100554 extends ServiceBase {
         if (ext === '.html' && storFile) model = mls.editor.createModelHTML(storFile, src);
         else if (ext === '.ts' && storFile) model = mls.editor.createModelTS(storFile, src);
         else if (ext === '.d.ts') model = mls.editor.createModelProjectDefinition(project, src);
-        else if (ext === '.less' && storFile) model = mls.editor.createModelStyle(storFile, src);
+        else if (ext === '.less' && storFile) {
+            const lessTokens = await getTokensLess('Default');
+            const lineTokens = `\n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
+            src = src.concat(lineTokens);
+            model = mls.editor.createModelStyle(storFile, src);
+        }
 
         if (!model) throw new Error(`Model invalid`);
         if (ext !== '.d.ts') {

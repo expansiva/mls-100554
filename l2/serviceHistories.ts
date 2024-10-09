@@ -27,7 +27,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceHistories100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    
+
     constructor() {
         super();
         mls.events.addEventListener([2], ['HistoriesSelected' as any], (ev) => this.onSelectHistories(ev));
@@ -110,8 +110,15 @@ export class ServiceHistories100554 extends ServiceBase {
 
         if (!this.serviceItemNav) return;
         this.showNav2Item(true);
-        this.serviceItemNav.setAttribute('mode', 'A'); // old
         this.openMe();
+
+        const editorType: { [key: string]: string } = {
+            '.ts': 'typescript',
+            '.html': 'html',
+            '.less': 'less',
+        }
+
+        console.info(params.extension)
 
         const key = mls.stor.getKeyToFiles(params.project, params.level, params.shortName, params.folder, params.extension);
         const storFile = mls.stor.files[key];
@@ -129,7 +136,7 @@ export class ServiceHistories100554 extends ServiceBase {
         }
 
         const src1 = this.hashOriginal ? await this.getHistories(this.hashOriginal) : '';
-        this.setInitialHistories(src1, src2);
+        this.setInitialHistories(src1, src2, editorType[params.extension]);
         this.setMsizeEditor();
 
     }
@@ -143,9 +150,9 @@ export class ServiceHistories100554 extends ServiceBase {
     }
 
 
-    private setInitialHistories(srcOriginal: string, srcModified: string) {
-        const modelOriginal = this.createOrGetModel('typescript', srcOriginal, 'original');
-        const modelModified = this.createOrGetModel('typescript', srcModified, 'modified');
+    private setInitialHistories(srcOriginal: string, srcModified: string, language: string) {
+        const modelOriginal = this.createOrGetModel(language, srcOriginal, 'original');
+        const modelModified = this.createOrGetModel(language, srcModified, 'modified');
         if (!this._ed1) return;
         this._ed1.updateOptions({ readOnly: true });
         this._ed1.setModel({
@@ -173,6 +180,7 @@ export class ServiceHistories100554 extends ServiceBase {
         if (!this.c2 || this._ed1) return;
         const opt = {
             automaticLayout: true,
+            renderSideBySide: false
         };
         this._ed1 = monaco.editor.createDiffEditor(this.c2, opt);
         (this.c2 as any)['mlsEditor'] = this._ed1;
@@ -188,8 +196,8 @@ export class ServiceHistories100554 extends ServiceBase {
 
         if (visible) {
             this.createEditor();
-            this.setInitialHistories(this.msg.loading, this.msg.loading);
-            if (!this.fileInfo) this.setInitialHistories(this.msg.noHistoriesSelected, this.msg.noHistoriesSelected);
+            this.setInitialHistories(this.msg.loading, this.msg.loading, 'text');
+            if (!this.fileInfo) this.setInitialHistories(this.msg.noHistoriesSelected, this.msg.noHistoriesSelected, 'text');
             setTimeout(() => {
                 if (el && typeof el.layout === 'function') el.layout();
             }, 100)
