@@ -7,8 +7,7 @@ import { getDSInstance, DesignSystemIO, ITokenInfo } from './_100554_libDesignSy
 let dsInstance: DesignSystemIO | undefined;
 
 
-export const getAddNewFileDetails = async () => {
-    const lessTokens = await getTokensLess('Default');
+export const getAddNewFileDetails = () => {
     return [
         {
             title: 'Style',
@@ -17,8 +16,7 @@ export const getAddNewFileDetails = async () => {
             example: `/// <mls shortName="[shortName]" project="[project]" enhancement="enhancementStyle" />
 				\n[tag] {
                 \n // Here your less
-                \n} \n
-                \n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`
+                \n}`
         }
     ]
 }
