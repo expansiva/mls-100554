@@ -35,14 +35,15 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
 
     if (changedProperties.has('msize')) {
       this.setFixedValueInPx();
-      this._applyMSize();
+      this.updatePanelsMSize(!this.open);
     }
 
     if ((changedProperties.has('fixedvisible') && changedProperties.get('fixedvisible') === 'hidden' && this.fixedvisible === 'visible') ||
       (changedProperties.has('fixedvisible') && this.fixedvisible === 'closed')
     ) {
       this.setFixedValueInPx();
-      this._applyMSize();
+      this.updatePanelsMSize();
+
     }
 
     if (changedProperties.has('fixedwidth')) {
@@ -110,11 +111,14 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
 
-  private async updatePanelsMSize() {
+  private async updatePanelsMSize(reset: boolean = true) {
 
-    this.slotLeft?.setAttribute('msize', '');
-    this.slotRight?.setAttribute('msize', '');
-    await this.delay();
+    if (reset) {
+      this.slotLeft?.setAttribute('msize', '');
+      this.slotRight?.setAttribute('msize', '');
+      await this.delay();
+    }
+
     if (this.slotLeft) this.slotLeft.setAttribute('msize', this.getMSizeLeft());
     if (this.slotRight) this.slotRight.setAttribute('msize', this.getMSizeRight());
 
@@ -162,19 +166,13 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       const slotName = child.getAttribute('slot');
 
       if (slotName === 'left' && leftPane) {
-
         leftPane.appendChild(child);
-        msizeNew = this.getMSizeLeft();
-        // setTimeout(() => { child.setAttribute('msize', msizeNew), 100 });
-
       } else if (slotName === 'right' && rightPane) {
-
         rightPane.appendChild(child);
-        msizeNew = this.getMSizeRight();
-        // setTimeout(() => { child.setAttribute('msize', msizeNew), 100 });
-
       }
     });
+
+    this.updatePanelsMSize();
 
   }
 
