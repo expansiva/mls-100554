@@ -47,7 +47,7 @@ export class ServiceWorkspace100554 extends ServiceBase {
         icons: {
 
             IRequirements:'Requirements;f0a6',
-            IProject: 'Project;f0ae',
+            
             
 
         },
@@ -85,19 +85,11 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
     renderContent() {
         switch (this.activeTab) {
-            case 'IProject':
-                return this.renderProject();
             case 'IRequirements':
                 return this.renderRequirements();
             default:
                 return html``;
         }
-    }
-
-    renderProject() {
-        return html`
-        <plugin-github-l4-project-100554>
-        </plugin-github-l4-project-100554>`
     }
 
     renderRequirements() {
