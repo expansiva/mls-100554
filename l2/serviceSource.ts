@@ -1610,7 +1610,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private updatedMSizeEditor() {
-        this.c2?.setAttribute('msize', this.msize);
+        // this.c2?.setAttribute('msize', this.msize);
     }
 
 

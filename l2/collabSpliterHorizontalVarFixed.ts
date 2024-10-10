@@ -108,7 +108,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     return newMsize.join(',');
   }
   async delay() {
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   private async updatePanelsMSize(reset: boolean = true) {

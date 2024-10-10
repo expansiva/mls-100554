@@ -58,13 +58,6 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             },
             {
                 category: 'Services',
-                scope: ['l4ServicesLeft'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_serviceProduct'
-            },
-            {
-                category: 'Services',
                 scope: ['l5ServicesLeft'],
                 priority: 2,
                 auth: ['*'],
@@ -82,86 +75,92 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l4ServicesLeft'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_serviceIca'
-            },
-
-            {
-                category: 'Services',
-                scope: ['l3ServicesLeft'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_serviceSelectDs'
+                widget: '_100554_serviceProduct'
             },
             {
                 category: 'Services',
                 scope: ['l3ServicesLeft'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_serviceDsDocList'
+                widget: '_100554_servicePage'
             },
-            {
-                category: 'Services',
-                scope: ['l3ServicesLeft'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_serviceDsTokens'
-            },
-            {
-                category: 'Services',
-                scope: ['l3ServicesLeft'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_serviceDsAssets'
-            },
-            {
-                category: 'Services',
-                scope: ['l3ServicesLeft'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_serviceDsComponentsList'
-            },
-            {
-                category: 'Services',
-                scope: ['l3ServicesLeft'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_serviceDsStyles'
-            },
-            {
-                category: 'Services',
-                scope: ['l3ServicesRight'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceDetailsDs'
-            },
-            {
-                category: 'Services',
-                scope: ['l3ServicesRight'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceDsAssetsOverview'
-            },
-            {
-                category: 'Services',
-                scope: ['l3ServicesRight'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceDsAssetsVideo'
-            },
-            {
-                category: 'Services',
-                scope: ['l3ServicesRight'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceDsAssetsImage'
-            },
-            {
-                category: 'Services',
-                scope: ['l3ServicesRight'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceDsAssetsEditor'
-            },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesLeft'],
+            //     priority: 2,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceSelectDs'
+            // },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesLeft'],
+            //     priority: 2,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceDsDocList'
+            // },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesLeft'],
+            //     priority: 2,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceDsTokens'
+            // },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesLeft'],
+            //     priority: 2,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceDsAssets'
+            // },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesLeft'],
+            //     priority: 2,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceDsComponentsList'
+            // },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesLeft'],
+            //     priority: 2,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceDsStyles'
+            // },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesRight'],
+            //     priority: 1,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceDetailsDs'
+            // },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesRight'],
+            //     priority: 1,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceDsAssetsOverview'
+            // },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesRight'],
+            //     priority: 1,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceDsAssetsVideo'
+            // },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesRight'],
+            //     priority: 1,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceDsAssetsImage'
+            // },
+            // {
+            //     category: 'Services',
+            //     scope: ['l3ServicesRight'],
+            //     priority: 1,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceDsAssetsEditor'
+            // },
 
             {
                 category: 'Services',
@@ -204,6 +203,28 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 priority: 2,
                 auth: ['*'],
                 widget: '_100554_pluginExploreStories'
+            },
+
+            {
+                category: 'Stories',
+                scope: ['l3PageNavigation'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginPageNavigation'
+            },
+            {
+                category: 'Stories',
+                scope: ['l3PageProperties'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginPageProperties'
+            },
+            {
+                category: 'Linter',
+                scope: ['l3PageAI'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginPageAIVerify'
             },
         ];
     }
