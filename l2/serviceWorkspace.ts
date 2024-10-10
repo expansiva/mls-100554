@@ -101,7 +101,7 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
     renderTasks() {
         return html`
-        <plugin-github-l4-project-100554>
+        <plugin-github-l4-project-100554 autoclick="true">
         </plugin-github-l4-project-100554>`
     }
 

@@ -14,7 +14,7 @@ export async function updateFieldSelectProjects(req: IReq, idProject: string, id
                         itemId: "${idItem}"
                         fieldId: "${idField}"
                         value: { 
-                        singleSelectOptionId: "${idOption}"        
+                        singleSelectOptionId: ${ idOption === 'null' ? 'null': `"${idOption}"`}        
                         }
                     }
                     ) {
@@ -56,11 +56,33 @@ export async function getIssuesInProjects(req: IReq, idProject: string): Promise
                                     id
                                     content {
                                         ... on Issue {
-                                            title
                                             id
                                             number
-                                            url
                                             createdAt
+                                            title
+                                            bodyHTML
+                                            state
+                                            url
+                                            author{
+                                                login
+                                                avatarUrl
+                                            }
+                                            labels(last:20){
+                                                nodes{
+                                                    id
+                                                    color
+                                                    name
+                                                }
+                                            }
+                                            reactions(last:100, content: THUMBS_UP) {
+                                                totalCount
+                                                nodes {
+                                                    id
+                                                    user {
+                                                        login
+                                                    }
+                                                }
+                                            }
                                             assignees(first: 10) {
                                                 nodes {
                                                     login
@@ -161,9 +183,9 @@ export async function getIssuesInProjects(req: IReq, idProject: string): Promise
             if (!find) {
 
                 ret.push({
-                    value: 'nostatus',
+                    value: 'null',
                     fieldName: 'Status',
-                    fieldId: '',
+                    fieldId: 'null',
                     valueText: 'No status'
                 });
                 
@@ -179,13 +201,35 @@ export async function getIssuesInProjects(req: IReq, idProject: string): Promise
             if (!i) return;
             const item = {} as IItemProject;
             item.id = i.id;
-            item.title = i.content.title;
-            item.issueId = i.content.id;
-            item.createdAt = i.content.createdAt;
-            item.issueNumber = i.content.number;
-            item.url = i.content.url;
-            item.assignees = i.content.assignees && i.content.assignees.nodes ? i.content.assignees.nodes : [];
             item.fieldValues = getMyField(i.fieldValues.nodes);
+
+
+            const issue = {} as IIssues;
+            issue.id = i.content.id;
+            issue.numberIssues = i.content.number;
+            issue.createdAt = i.content.createdAt;
+            issue.title = i.content.title;
+            issue.bodyText = i.content.bodyHTML;
+            issue.state = i.content.state;
+            issue.url = i.content.url;
+            issue.author = i.content.author.login;
+            issue.avatarUrl = i.content.author.avatarUrl;
+            issue.labels = i.content.labels.nodes;
+            issue.reactionsTU = i.content.reactions.totalCount;
+            issue.comments = [];
+            issue.assignees = i.content.assignees.nodes;
+
+            const r: IReactions[] = [];
+            i.content.reactions.nodes.forEach((rt: any) => {
+                r.push({
+                    id: rt.id,
+                    user: rt.user.login
+                })
+            })
+            issue.reactions = r;
+
+
+            item.issue = issue;
 
             itens.push(item);
 
@@ -370,7 +414,7 @@ export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string
                             number
                             createdAt
                             title
-                            bodyText
+                            bodyHTML
                             state
                             url
                             labels(last:10){
@@ -393,7 +437,7 @@ export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string
         issue.numberIssues = ret.createIssue.issue.number;
         issue.createdAt = ret.createIssue.issue.createdAt;
         issue.title = ret.createIssue.issue.title;
-        issue.bodyText = ret.createIssue.issue.bodyText;
+        issue.bodyText = ret.createIssue.issue.bodyHTML;
         issue.state = ret.createIssue.issue.state;
         issue.url = ret.createIssue.issue.url;
         issue.author = user.login;
@@ -401,6 +445,8 @@ export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string
         issue.labels = ret.createIssue.issue.labels.nodes;
         issue.reactionsTU = 0;
         issue.reactions = [];
+        issue.comments = [];
+        issue.assignees = [];
 
         return issue;
 
@@ -491,7 +537,7 @@ export async function getIssues(req: IReq, state: string = 'OPEN'): Promise<IIss
                                     number
                                     createdAt
                                     title
-                                    bodyText
+                                    bodyHTML
                                     state
                                     url
                                     author{
@@ -512,6 +558,12 @@ export async function getIssues(req: IReq, state: string = 'OPEN'): Promise<IIss
                                             user {
                                                 login
                                             }
+                                        }
+                                    }
+                                    assignees(first: 10) {
+                                        nodes {
+                                            login
+                                            avatarUrl
                                         }
                                     }
                                 }
@@ -538,13 +590,15 @@ export async function getIssues(req: IReq, state: string = 'OPEN'): Promise<IIss
             issue.numberIssues = i.node.number;
             issue.createdAt = i.node.createdAt;
             issue.title = i.node.title;
-            issue.bodyText = i.node.bodyText;
+            issue.bodyText = i.node.bodyHTML;
             issue.state = i.node.state;
             issue.url = i.node.url;
             issue.author = i.node.author.login;
             issue.avatarUrl = i.node.author.avatarUrl;
             issue.labels = i.node.labels.nodes;
             issue.reactionsTU = i.node.reactions.totalCount;
+            issue.comments = [];
+            issue.assignees = i.node.assignees.nodes;
 
             const r: IReactions[] = [];
             i.node.reactions.nodes.forEach((rt: any) => {
@@ -564,6 +618,96 @@ export async function getIssues(req: IReq, state: string = 'OPEN'): Promise<IIss
     } catch (e) {
         console.info(e)
         return [];
+    }
+
+
+}
+
+
+export async function getIssue(req: IReq, id: string): Promise<IIssues | undefined> {
+
+    try {
+
+        if (!req.owner || !req.repo) throw new Error('Not found owner project')
+
+
+        const q = `
+                query {
+                    node(id: "${id}") {
+                        ... on Issue {
+                            id
+                            number
+                            createdAt
+                            title
+                            bodyHTML
+                            state
+                            url
+                            author{
+                                login
+                                avatarUrl
+                            }
+                            labels(last:20){
+                                nodes{
+                                    id
+                                    color
+                                    name
+                                }
+                            }
+                            reactions(last:100, content: THUMBS_UP) {
+                                totalCount
+                                nodes {
+                                    id
+                                    user {
+                                        login
+                                    }
+                                }
+                            }
+                            assignees(first: 10) {
+                                nodes {
+                                    login
+                                    avatarUrl
+                                }
+                            }
+                        } 
+                    }
+                }
+            `;
+
+        const ret = await qlFetch(q, req.mkey);
+
+        if (!ret || !ret.node) {
+            return undefined;
+        }
+
+        const issue = {} as IIssues;
+        issue.id = ret.node.id;
+        issue.numberIssues = ret.node.number;
+        issue.createdAt = ret.node.createdAt;
+        issue.title = ret.node.title;
+        issue.bodyText = ret.node.bodyHTML;
+        issue.state = ret.node.state;
+        issue.url = ret.node.url;
+        issue.author = ret.node.author.login;
+        issue.avatarUrl = ret.node.author.avatarUrl;
+        issue.labels = ret.node.labels.nodes;
+        issue.reactionsTU = ret.node.reactions.totalCount;
+        issue.comments = [];
+        issue.assignees = ret.node.assignees.nodes;
+
+        const r: IReactions[] = [];
+        ret.node.reactions.nodes.forEach((rt: any) => {
+            r.push({
+                id: rt.id,
+                user: rt.user.login
+            })
+        })
+        issue.reactions = r;
+
+        return issue;
+
+    } catch (e) {
+        console.info(e)
+        return undefined;
     }
 
 
@@ -634,7 +778,7 @@ export async function getIssueComments(req: IReq, issue: IIssues): Promise<IComm
                                 nodes{
                                     createdAt
                                     id
-                                    bodyText
+                                    bodyHTML
                                     author{
                                         login,
                                         avatarUrl
@@ -661,7 +805,7 @@ export async function getIssueComments(req: IReq, issue: IIssues): Promise<IComm
             const com = {} as IComments;
             com.id = i.id;
             com.createdAt = i.createdAt;
-            com.bodyText = i.bodyText;
+            com.bodyText = i.bodyHTML;
             com.author = i.author.login;
             com.avatarUrl = i.author.avatarUrl;
             comments.push(com);
@@ -1039,17 +1183,12 @@ function myFetch(query: string, mKey: string, variables?: {}): Promise<{ status:
 
 export interface IItemProject{
     id: string,
-	title: string,
-	issueId: string,
-    issueNumber: string,
-    createdAt:string,
-	url: string,
-    assignees: [],
+	issue:IIssues
 	fieldValues:IItemProjectValues[]
 }
 
-export interface IItemProjectAssignees{
-    login: string,
+export interface IAssignees{
+    login:string,
     avatarUrl:string
 }
 
@@ -1097,8 +1236,9 @@ export interface IIssues {
     avatarUrl: string,
     labels: ILabel[],
     reactionsTU: number,
-    reactions: IReactions[]
-
+    reactions: IReactions[],
+    comments: IComments[],
+    assignees:IAssignees[],
 }
 
 export interface IReactions {
