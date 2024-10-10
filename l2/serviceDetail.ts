@@ -144,7 +144,10 @@ export class ServiceDetail100554 extends ServiceBase {
 
     private async showPluginContent(info: mls.events.IPluginDetail) {
         // show htmlText or plugin html
-        if (!info.project || !info.shortName) throw new Error(`Error on PluginDetails events, invalid data: ${info.project} ${info.shortName}`);
+        if (!info.project || !info.shortName) {
+
+            if(!info.htmlText) throw new Error(`Error on PluginDetails events, invalid data: ${info.project} ${info.shortName}`);
+        }
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
         const content: string = info.htmlText ? info.htmlText : await this.getHtmlFromPlugin(info);
         this.updateContentPluginWithScripts(content);
