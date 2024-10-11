@@ -103,6 +103,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opResultHTML') return this.showEditorHTML();
+        if (op === 'opResultJS') return this.showResultJS();
+
         return false;
     }
 
@@ -135,7 +137,8 @@ export class ServicePreview100554 extends ServiceBase {
     public menu: IMenu = {
         title: 'Preview',
         actions: {
-            opResultHTML: 'Result HTML'
+            opResultHTML: 'Result HTML',
+            opResultJS: 'Result Javascript',
         },
         icons: {
             icPreviewD: 'Desktop;f390',
@@ -305,6 +308,7 @@ export class ServicePreview100554 extends ServiceBase {
             const msize = changedProperties.get('msize');
             if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
             this.monacoeditor.setAttribute('msize', msize);
+            if (this.pluginResultJS) this.pluginResultJS.setAttribute('msize', msize);
         }
     }
 
@@ -317,6 +321,19 @@ export class ServicePreview100554 extends ServiceBase {
             this._ed1?.layout();
             this.monacoeditor?.setAttribute('msize', this.msize);
 
+        }
+        return true;
+    }
+
+    private pluginResultJS: HTMLElement | undefined;
+    private showResultJS() {
+        import('./_100554_pluginPreviewResultJs');
+        if (this.menu.setMode) {
+            this.pluginResultJS = document.createElement('plugin-preview-result-js-100554');
+            this.pluginResultJS.setAttribute('msize', this.msize);
+            this.menu.setMode('page', this.pluginResultJS);
+            this.menu.title = 'Result Javascript';
+            if (this.menu.updateTitle) this.menu.updateTitle();
         }
         return true;
     }
