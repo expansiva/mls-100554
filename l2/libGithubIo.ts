@@ -1,6 +1,6 @@
 /// <mls shortName="libGithubIo" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-export async function updateFieldSelectProjects(req: IReq, idProject: string, idItem:string, idField:string, idOption:string): Promise<boolean>{
+export async function updateFieldSelectProjects(req: IReq, idProject: string, idItem: string, idField: string, idOption: string): Promise<boolean> {
 
     try {
 
@@ -14,7 +14,7 @@ export async function updateFieldSelectProjects(req: IReq, idProject: string, id
                         itemId: "${idItem}"
                         fieldId: "${idField}"
                         value: { 
-                        singleSelectOptionId: ${ idOption === 'null' ? 'null': `"${idOption}"`}        
+                        singleSelectOptionId: ${idOption === 'null' ? 'null' : `"${idOption}"`}        
                         }
                     }
                     ) {
@@ -33,15 +33,15 @@ export async function updateFieldSelectProjects(req: IReq, idProject: string, id
         }
 
         return true;
-            
+
     } catch (e) {
         console.info(e);
         return false;
     }
-    
+
 }
 
-export async function getIssuesInProjects(req: IReq, idProject: string): Promise<IItemProject[]>{
+export async function getIssuesInProjects(req: IReq, idProject: string): Promise<IItemProject[]> {
 
     try {
 
@@ -150,9 +150,9 @@ export async function getIssuesInProjects(req: IReq, idProject: string): Promise
         const itens: IItemProject[] = [];
 
 
-        const getMyField = (fv: any[]):IItemProjectValues[] => {
+        const getMyField = (fv: any[]): IItemProjectValues[] => {
 
-            const ret:IItemProjectValues[] = [];
+            const ret: IItemProjectValues[] = [];
 
             fv.forEach((ifv) => {
 
@@ -175,7 +175,7 @@ export async function getIssuesInProjects(req: IReq, idProject: string): Promise
                 nfv.fieldId = ifv.field ? ifv.field.id : '';
 
                 if (nfv.value) ret.push(nfv);
-                
+
             });
 
             const find = ret.find((f) => f.fieldName.toLowerCase() === 'status');
@@ -188,11 +188,11 @@ export async function getIssuesInProjects(req: IReq, idProject: string): Promise
                     fieldId: 'null',
                     valueText: 'No status'
                 });
-                
+
             }
 
             return ret;
-            
+
         }
 
         ret.node.items.nodes.forEach((i: any) => {
@@ -241,10 +241,10 @@ export async function getIssuesInProjects(req: IReq, idProject: string): Promise
         console.info(e);
         return [];
     }
-    
+
 }
 
-export async function getProjectFields(req: IReq, idProject:string): Promise<IFieldsProject[]> { 
+export async function getProjectFields(req: IReq, idProject: string): Promise<IFieldsProject[]> {
 
     try {
 
@@ -292,7 +292,7 @@ export async function getProjectFields(req: IReq, idProject:string): Promise<IFi
 
         const fields: IFieldsProject[] = [];
 
-        const tp = (t: string):string => {
+        const tp = (t: string): string => {
 
             if (t === 'NUMBER') return 'number';
 
@@ -311,7 +311,7 @@ export async function getProjectFields(req: IReq, idProject:string): Promise<IFi
             field.name = i.name;
             field.dataType = tp(i.dataType);
             field.options = i.options ? i.options : [];
-            
+
             fields.push(field);
 
         });
@@ -358,7 +358,7 @@ export async function getProjects(req: IReq): Promise<IProject[]> {
             return [];
         }
 
-        const prjs:IProject[] = [];
+        const prjs: IProject[] = [];
 
         ret.repository.projectsV2.nodes.forEach((i: any) => {
 
@@ -385,7 +385,7 @@ export async function getProjects(req: IReq): Promise<IProject[]> {
     }
 }
 
-export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string, labelsId: string[], title: string, desc: string):Promise<IIssues | undefined> {
+export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string, labelsId: string[], title: string, desc: string): Promise<IIssues | undefined> {
 
     try {
 
@@ -727,7 +727,7 @@ export async function addComment(req: IReq, issue: IIssues, comment: string): Pr
                             node {
                                 createdAt
                                 id
-                                bodyText
+                                bodyHTML
                                 author{
                                     login,
                                     avatarUrl
@@ -749,12 +749,12 @@ export async function addComment(req: IReq, issue: IIssues, comment: string): Pr
         const com = {} as IComments;
         com.id = ret.addComment.commentEdge.node.id;
         com.createdAt = ret.addComment.commentEdge.node.createdAt;
-        com.bodyText = ret.addComment.commentEdge.node.bodyText;
+        com.bodyText = ret.addComment.commentEdge.node.bodyHTML;
         com.author = ret.addComment.commentEdge.node.author.login;
         com.avatarUrl = ret.addComment.commentEdge.node.author.avatarUrl;
 
         return com;
-        
+
 
     } catch (e) {
         console.info(e);
@@ -850,7 +850,7 @@ export async function getRepositoryId(req: IReq): Promise<string> {
 
 }
 
-export async function addLabelInIssue(req: IReq, issueId: string, labelId: string): Promise<ILabel | undefined> { 
+export async function addLabelInIssue(req: IReq, issueId: string, labelId: string): Promise<ILabel | undefined> {
 
     try {
 
@@ -881,17 +881,17 @@ export async function addLabelInIssue(req: IReq, issueId: string, labelId: strin
 
         let ret = await qlFetch(q, req.mkey);
         let retLabel = undefined;
-        
+
         if (ret.addLabelsToLabelable && ret.addLabelsToLabelable.labelable && ret.addLabelsToLabelable.labelable.labels && ret.addLabelsToLabelable.labelable.labels.nodes) {
 
-            ret.addLabelsToLabelable.labelable.labels.nodes.forEach((l:any) => {
+            ret.addLabelsToLabelable.labelable.labels.nodes.forEach((l: any) => {
 
                 if (l.id === labelId) {
                     retLabel = l;
                 }
-                
+
             })
-            
+
         }
 
         return retLabel;
@@ -903,7 +903,7 @@ export async function addLabelInIssue(req: IReq, issueId: string, labelId: strin
 
 }
 
-export async function removeLabelInIssue(req: IReq, issueId: string, labelId: string): Promise<boolean> { 
+export async function removeLabelInIssue(req: IReq, issueId: string, labelId: string): Promise<boolean> {
 
     try {
 
@@ -943,6 +943,86 @@ export async function removeLabelInIssue(req: IReq, issueId: string, labelId: st
 
 }
 
+export async function getLabels(req: IReq): Promise<ILabel[]> {
+
+    try {
+
+        if (!req.owner || !req.repo) throw new Error('Not found owner project')
+
+        let q = `
+                query repository {
+                    repository(owner: "${req.owner}", name: "${req.repo}") {
+                        labels(last:100){
+                            nodes{
+                                id
+                                color
+                                name
+                            }
+                        }        
+                    }
+                }
+            `;
+
+        let ret = await qlFetch(q, req.mkey);
+
+        if (ret.repository && ret.repository.labels && ret.repository.labels.nodes) {
+
+            return ret.repository.labels.nodes;
+
+        }
+        return []
+
+    } catch (e) {
+        console.info(e);
+        return [];
+    }
+}
+
+export async function getUsers(req: IReq): Promise<IAssignees[]> {
+
+    try {
+
+        if (!req.owner || !req.repo) throw new Error('Not found owner project')
+
+        let q = `
+                query {
+                    repository(owner: "${req.owner}", name: "${req.repo}")  {
+                        collaborators(first: 100) {
+                            edges {
+                                node {
+                                    login
+                                    avatarUrl
+                                }
+                                permission
+                            }
+                        }
+                    }
+                }
+            `;
+
+        let ret = await qlFetch(q, req.mkey);
+
+        if (!ret.repository || !ret.repository.collaborators || !ret.repository.collaborators.edges) return [];
+
+        const users: IAssignees[] = [];
+
+        ret.repository.collaborators.edges.forEach((c:any) => {
+
+            users.push({
+                login: c.node.login,
+                avatarUrl: c.node.avatarUrl,
+            })
+
+        });
+
+        return users;
+
+    } catch (e) {
+        console.info(e);
+        return [];
+    }
+}
+
 export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<ILabelsCollab | undefined> {
 
     try {
@@ -974,7 +1054,7 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
 
         if (ret.repository && ret.repository.labels && ret.repository.labels.nodes) {
 
-            ret.repository.labels.nodes.forEach((l:any) => {
+            ret.repository.labels.nodes.forEach((l: any) => {
 
                 switch (l.name) {
                     case 'feature request':
@@ -992,27 +1072,32 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
                     default: '';
                 }
             })
-            
+
         }
 
+        let retLabel;
         if (!retLabels.feature) {
-            retLabels.feature = await createLabelIO(req, repositoryId, 'feature request', '1e8103');
+            retLabel = await createLabelIO(req, repositoryId, 'feature request', '1e8103');
+            retLabels.feature = retLabel ? retLabel.id : '' ;
         }
 
         if (!retLabels.low) {
-            retLabels.low = await createLabelIO(req, repositoryId, 'low', '49ff18');
+            retLabel = await createLabelIO(req, repositoryId, 'low', '49ff18');
+            retLabels.low = retLabel ? retLabel.id : '' ;
         }
 
         if (!retLabels.medium) {
-            retLabels.medium = await createLabelIO(req, repositoryId, 'medium', 'f1ff18');
+            retLabel = await createLabelIO(req, repositoryId, 'medium', 'f1ff18');
+            retLabels.medium = retLabel ? retLabel.id : '' ;
         }
 
         if (!retLabels.high) {
-            retLabels.high = await createLabelIO(req, repositoryId, 'high', 'ff0000');
+            retLabel = await createLabelIO(req, repositoryId, 'high', 'ff0000');
+            retLabels.high = retLabel ? retLabel.id : '' ;
         }
 
         return retLabels;
-        
+
 
     } catch (e) {
         console.info(e);
@@ -1022,7 +1107,7 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
 
 }
 
-export async function createLabelIO(req: IReq, repositoryId:string,  label:string, color:string): Promise<string> { 
+export async function createLabelIO(req: IReq, repositoryId: string, label: string, color: string): Promise<ILabel | undefined> {
 
     try {
 
@@ -1050,14 +1135,18 @@ export async function createLabelIO(req: IReq, repositoryId:string,  label:strin
 
         if (ret.createLabel && ret.createLabel.label) {
 
-            return ret.createLabel.label.id as string;
+            return {
+                id: ret.createLabel.label.id,
+                color: ret.createLabel.label.color,
+                name: ret.createLabel.label.name,
+            } as ILabel;
         }
 
-        return '';
+        return undefined;
 
     } catch (e) {
         console.info(e);
-        return '';
+        return undefined;
     }
 
 }
@@ -1181,40 +1270,40 @@ function myFetch(query: string, mKey: string, variables?: {}): Promise<{ status:
 
 }
 
-export interface IItemProject{
+export interface IItemProject {
     id: string,
-	issue:IIssues
-	fieldValues:IItemProjectValues[]
+    issue: IIssues
+    fieldValues: IItemProjectValues[]
 }
 
-export interface IAssignees{
-    login:string,
-    avatarUrl:string
+export interface IAssignees {
+    login: string,
+    avatarUrl: string
 }
 
-export interface IItemProjectValues{
+export interface IItemProjectValues {
     value: string,
-    valueText:string,
+    valueText: string,
     fieldName: string,
-    fieldId:string,
+    fieldId: string,
 }
 
-export interface IProject{
-    id:string,
-    number:number,
-    title:string,
-    createdAt:string
+export interface IProject {
+    id: string,
+    number: number,
+    title: string,
+    createdAt: string
     author: string,
     avatarUrl: string,
     url: string,
-    fields:IFieldsProject[]
+    fields: IFieldsProject[]
 }
 
-export interface IFieldsProject{
-    id:string,
+export interface IFieldsProject {
+    id: string,
     name: string,
     dataType: string,
-    options:{id:string, name:string}[]
+    options: { id: string, name: string }[]
 }
 
 export interface IReq {
@@ -1238,7 +1327,7 @@ export interface IIssues {
     reactionsTU: number,
     reactions: IReactions[],
     comments: IComments[],
-    assignees:IAssignees[],
+    assignees: IAssignees[],
 }
 
 export interface IReactions {
@@ -1247,7 +1336,7 @@ export interface IReactions {
 }
 
 export interface ILabel {
-    id:string,
+    id: string,
     color: string,
     name: string
 }
@@ -1266,9 +1355,9 @@ export interface IInfo {
     avatarUrl: string
 }
 
-export interface ILabelsCollab{
+export interface ILabelsCollab {
     feature: string,
     low: string,
     medium: string,
-    high:string,
+    high: string,
 }
