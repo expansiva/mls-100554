@@ -12,6 +12,7 @@ export const initServicePreviewView = '';
 const message_pt = {
     pageNotDefined: 'Página não definida',
     notFoundStorfile: 'Arquivo não encontrado',
+    errorCompile: 'Erro ao compilar typescript',
     configure: 'Configure seu HTML pela opção do editor!',
     width: 'Largura',
     height: 'Altura'
@@ -20,6 +21,7 @@ const message_pt = {
 const message_en = {
     pageNotDefined: 'Page not defined',
     notFoundStorfile: 'Not found storfile',
+    errorCompile: 'Error on compiling typescript',
     configure: 'Configure your html by editor option!',
     width: 'Width',
     height: 'Height',
@@ -90,7 +92,6 @@ export class ServicePreviewView extends LitElement {
     }
 
     render() {
-
         const lang = this.father && this.father.getMessageKey ? this.father.getMessageKey(messages) : 'en-us';
         this.msg = messages[lang];
         if (this.error !== '') return this.renderError();
@@ -312,24 +313,24 @@ export class ServicePreviewView extends LitElement {
         window.preview.iframe = iframe;
     }
 
-    // private objVariations: any = {
-    //     0: 'en-US',
-    //     1: 'pt-BR'
-    // }
-
     private async init(iframe: HTMLIFrameElement) {
-        try {
 
+        try {
             this.setDevice(iframe);
             this.setTheme(iframe);
             this.setMyFile();
+            if (this.mfile?.error) {
+                this.error = this.msg.errorCompile;
+                this.showLoader(false);
+                this.renderError();
+                return;
+            }
             await this.setHTml(iframe);
             iframe.style.display = '';
 
             const html = iframe.contentDocument?.querySelector('html');
-            if (html) html.lang = this.lang;  // this.objVariations[window.globalVariation] || 'en-US';
-
-            if(iframe.contentDocument) iframe.contentDocument.body.style.paddingTop = '55px';
+            if (html) html.lang = this.lang;
+            if (iframe.contentDocument) iframe.contentDocument.body.style.paddingTop = '55px';
 
             this.showLoader(false);
         } catch (e: any) {

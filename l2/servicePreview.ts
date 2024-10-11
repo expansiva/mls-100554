@@ -4,7 +4,6 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
 import { initServicePreviewView } from './_100554_servicePreviewView';
-import { initServicePreviewAddStyle } from './_100554_servicePreviewAddStyle';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { IWCDParams } from '_100554_serviceIca'
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
@@ -89,7 +88,6 @@ export class ServicePreview100554 extends ServiceBase {
             iframe: undefined
         };
         initServicePreviewView;
-        initServicePreviewAddStyle;
         this.setEvents();
     }
 
@@ -118,7 +116,6 @@ export class ServicePreview100554 extends ServiceBase {
     public onClickButton = (op: string, opMenu?: string): boolean => {
 
         if (op === 'btWatch') return this.toogleWatch();
-        if (op === 'btEditStyle') return this.editStyles();
         if (op === 'btHelp') return this.onHelpClick();
         if (op === 'btTheme') return this.onBtThemeClick();
 
@@ -148,7 +145,6 @@ export class ServicePreview100554 extends ServiceBase {
             btTheme: `${this.msg.light};${this.msg.dark};f185;f186`,
             btTokens: this.msg.theme + ';f53f:menu:Default,',
             btVariations: this.msg.variations + ';f1ab:menu-flags:Default,Portugues,Espanhol,Russo',
-            btEditStyle: this.msg.editStyle + ';f0d0',
             btWatch: this.msg.pause + ';Update Preview;f04c;f04b',
             btHelp: this.msg.help + ';f059',
         },
@@ -188,13 +184,13 @@ export class ServicePreview100554 extends ServiceBase {
 
         mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
 
-        mls.events.addEventListener([3], ['DSStyleChanged', 'DSTokensChanged'] as any, async (ev) => {
-            this.onDSStyleOrTokensChanged(ev);
-        });
+        // mls.events.addEventListener([3], ['DSStyleChanged', 'DSTokensChanged'] as any, async (ev) => {
+        //     this.onDSStyleOrTokensChanged(ev);
+        // });
 
-        mls.events.addEventListener([3], ['DSThemeChanged'] as any, async (ev) => {
-            this.onDsThemeChanged(ev);
-        });
+        // mls.events.addEventListener([3], ['DSThemeChanged'] as any, async (ev) => {
+        //     this.onDsThemeChanged(ev);
+        // });
     }
 
     private onReloader(): void {
@@ -374,11 +370,6 @@ export class ServicePreview100554 extends ServiceBase {
             this.onReloader();
         }
         return this.watch;
-    }
-
-    private editStyles(): boolean {
-        this.openService('_100554_serviceDsStyles', 'left', 3);
-        return true;
     }
 
     private onHelpClick(): boolean {
