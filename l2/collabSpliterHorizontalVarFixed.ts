@@ -107,6 +107,12 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     newMsize = [`${newWidth}`, msize.heigth, msize.top, msize.left];
     return newMsize.join(',');
   }
+
+  private updateMyHeight() {
+    const msize = this.getMSize();
+    this.style.height = msize.heigth + 'px';
+  }
+
   async delay() {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
@@ -118,7 +124,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       this.slotRight?.setAttribute('msize', '');
       await this.delay();
     }
-
+    this.updateMyHeight();
     if (this.slotLeft) this.slotLeft.setAttribute('msize', this.getMSizeLeft());
     if (this.slotRight) this.slotRight.setAttribute('msize', this.getMSizeRight());
 
