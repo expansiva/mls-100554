@@ -1644,11 +1644,31 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 </collab-spliter-horizontal-var-fixed-100554>
 
                 <div slot="bottom">
-                    <aim-prompt-100554></aim-prompt-100554>
+                    ${this.renderPrompt()}
                 </div>
         </collab-spliter-vertical-var-fixed-100554>`
 
     }
+
+    renderPrompt() {
+        const shortName = mls.l2.editor.editors[this.confE]?.shortName || '';
+        const project = mls.l2.editor.editors[this.confE]?.project || 0;
+        if (!shortName || !project) return html``;
+        const key = mls.editor.getKeyModel(project, shortName);
+        if (this.mode === 'icTs') return html`
+            <aim-prompt-typescript-100554
+                rendermode="editor" modelkey="${key}">
+            </aim-prompt-typescript-100554>`;
+        if (this.mode === 'icStyle') return html`
+            <aim-prompt-style-100554
+                rendermode="editor" modelkey="${key}">
+            </aim-prompt-style-100554>`;
+        if (this.mode === 'icHTML') return html`
+            <aim-prompt-html-100554
+                rendermode="editor" modelkey="${key}">
+            </aim-prompt-html-100554>`;
+        return html ``;
+    }    
 
     private saveLocalStorageLastOpen(storFile: mls.stor.IFileInfo, position: string) {
         try {

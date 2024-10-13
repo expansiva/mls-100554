@@ -13,8 +13,7 @@ import { add as addActionUpdateLit } from './_100554_aimActionUpdateLit';
 
 const dataForDetails: mls.events.IPluginDetail = {
     project: 100554,
-    shortName: 'aimPromptTypescript',
-    actualNav3: 'Typescript'
+    shortName: 'aimPromptTypescript'
 }
 const modelType: mls.editor.ModelType = 'ts';
 const languageid: string = 'typescript';
