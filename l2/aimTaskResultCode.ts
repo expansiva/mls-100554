@@ -5,12 +5,10 @@ import { customElement, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
 
 import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
-import { getInfoMyService } from './_100554_aimHelper';
+import { getInfoMyService, extractScript } from './_100554_aimHelper';
 
 @customElement('aim-task-result-code-100554')
 export class AimTaskResultCode extends AimTaskBase {
-
-
 
     @query('collab-show-code-diff-100554')
     codeDif: CollabShowCodeDiff | undefined;
@@ -30,42 +28,24 @@ export class AimTaskResultCode extends AimTaskBase {
     renderBody(taskRoot: mls.cbe.ITaskRoot, child: mls.cbe.ITaskChild) {
         const title = child.title;
         const body = child._tempResult || '';
-        this.result = this.extractScript(body);
+        this.result = extractScript(body, /```typescript([\s\S]+?)```/g);
         return html`
         <details open>
             <summary>${title}- Code</summary>
             <div style='margin: 10px'>
-                <collab-show-code-snippet-100554 withAccept="true" .onAccept=${this.onAccept.bind(this)}>
-                </collab-show-code-snippet-100554>
+                <collab-show-code-diff-100554 withAccept="true" .onAccept=${this.onAccept.bind(this)}>
+                </collab-show-code-diff-100554>
             </div> 
         </details>
         `;
     }
 
     private onAccept() {
+        console.info('onAccept')
         const info = getInfoMyService(this);
         if (!info || !info.actServiceOp) return;
         if (info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554') return;
         info.actServiceOp.setEditorValue(this.result);
-    }
-
-    private extractScript(src: string) {
-        const regex = /```typescript([\s\S]+?)```/g;
-        const matches = src.match(regex);
-        const contents = [];
-
-        let ret = src;
-
-        if (matches) {
-            for (const m of matches) {
-                const conteudo = m.replace(/```typescript|```/g, '').trim();
-                contents.push(conteudo);
-            }
-
-            ret = contents[0];
-        }
-
-        return ret;
     }
 
     firstUpdated(a: any) {

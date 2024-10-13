@@ -199,8 +199,12 @@ export class ServicePreview100554 extends ServiceBase {
     private onReloader(): void {
         clearTimeout(this.timeEvent);
         this.timeEvent = setTimeout(async () => {
+            console.time('serviceclick');
             this.onServiceClick(true, false);
+            console.timeEnd('serviceclick');
+            console.time('fire');
             mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+            console.timeEnd('fire');
         }, 500);
     }
 

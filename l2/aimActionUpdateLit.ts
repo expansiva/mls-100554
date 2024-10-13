@@ -1,60 +1,25 @@
 /// <mls shortName="aimActionUpdateLit" project="100554" enhancement="_100554_enhancementLit" />
 
-import { html, TemplateResult } from 'lit';
+import { html, css, TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { tasks, ITaskFinish, updateTaskOnServer, getInfoMyService } from './_100554_aimHelper';
+import { tasks, ITaskFinish, updateTaskOnServer, extractScript } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
+import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 
 const myName = '_100554_aimActionUpdateLit';
 
-/// **collab_i18n_start**
-const message_pt = {
-    title: 'Permitir atualizar o lit do file selecionado',
-    prompt: 'Prompt',
-    cancel: 'Cancelar',
-    confirm: 'Confirmar'
-}
-
-const message_en = {
-    title: 'Allow updating the lit of the selected file',
-    prompt: 'Prompt',
-    cancel: 'Cancel',
-    confirm: 'Confirm'
-}
-
-type MessageType = typeof message_en;
-
-const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
-}
-/// **collab_i18n_end**
-
-@customElement('aim-action-update-lit-100554')
 export class AimActionUpdateLit extends AimActionBase {
-
-    private msg: MessageType = messages['en'];
-
-    @query('textarea')
-    textarea: HTMLTextAreaElement | undefined;
 
     public getRules(): AimActionRules[] {
         return [{
             level: 2,
-            tags: ["*serviceSource*"]
+            tags: []
         }]
     }
 
     public assistant = "gpt_ts";
-    public title = "Update Lit";
-
+    title = 'user Prompt';
     language = 'english';
-
-    render() {
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
-        return super.render();
-    }
 
     private handleCancel() {
         this.dispatchEvent(new CustomEvent('add-task', {
@@ -62,90 +27,47 @@ export class AimActionUpdateLit extends AimActionBase {
         }));
     }
 
-    private handleAdd(): void {
+    renderAdd(): TemplateResult { // from abstract
+        return html``;
+    }
+
+    // public function
+    // return task created or -1
+    public add(args: IAdd): number {
+        if (!!args.error || !args.prompt) {
+            console.error(' error on prompt: ', args.error);
+            return -1;
+        }
 
         const taskRoot: mls.cbe.ITaskRoot = {
             mode: 'initializing',
-            title: 'update Lit',
+            title: args.title,
             widget: myName,
             children: [],
-            args: this.textarea?.value || '',
+            args: JSON.stringify(args),
             trace: [new Date().toISOString() + ': trask created at ']
         }
-        tasks.unshift(taskRoot);
-        this.prepareTask1(taskRoot);
-        this.dispatchEvent(new CustomEvent('finished-add-task-root', {
-            detail: taskRoot, bubbles: true, composed: true
-        }));
-    }
-
-    renderAdd(): TemplateResult { // from abstract
-
-        return html`
-        <p style="margin-bottom:0rem">${this.msg.title}</p>
-        <br>
-        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-          <label>${this.msg.prompt}</label>
-          <textarea></textarea>
-        </div>
-        <br>
-        <div class="buttonGroup">
-          <button @click="${this.handleCancel}">${this.msg.cancel}</button>
-          <button @click="${this.handleAdd}">${this.msg.confirm}</button>
-        </div>
-    `;
-    }
-
-    getPrompt(source: string, user: string) {
-        const prompt = `
-        User Instructions:\n
-        ${user}\n\n
-        Source:\n
-        \`\`\`typescript
-        ${source}
-        \`\`\``
-        return prompt;
-    }
-
-    prepareTask1(taskRoot: mls.cbe.ITaskRoot): void {
-        // create task to get typescript source from another side
+        const taskid: number = tasks.push(taskRoot) - 1;
         this.mode = taskRoot.mode = 'in progress';
+        this.prepareTaskExe(args, taskRoot);
+        return taskid;
+    }
+
+    prepareTaskExe(args: IAdd,taskRoot: mls.cbe.ITaskRoot): void {
+        // call LLM on server with prompt
         this.addTaskAndWaitForCompletion(taskRoot, {
             mode: 'initializing',
-            title: 'get typescript source',
-            widget: '_100554_aimTaskTSSource',
-            trace: [],
-            nextStep: this.prepareTask2.name // danger, loop
-        });
-    }
-
-    prepareTask2(taskFinishResult: ITaskFinish): void {
-        // call LLM on server with prompt
-        const child = taskFinishResult.taskChild;
-        if (taskFinishResult.status === 'error') {
-            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
-            return;
-        }
-        const source = taskFinishResult.result;
-        if (!source) {
-            this.mode = taskFinishResult.taskRoot.mode = child.mode = 'error';
-            child.trace.push('invalid finish , must be notify finish with result field');
-            this.requestUpdate();
-            return;
-        }
-        child.mode = 'processed';
-        this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
-            mode: 'initializing',
             title: 'exec prompt',
+            ref: args.fileRef,
             widget: '_100554_aimTaskExecLLM',
             agent: this.assistant,
-            prompt: this.getPrompt(source, taskFinishResult.taskRoot.args || ''),
+            prompt: args.prompt,
             trace: [],
-            nextStep: this.prepareTask3.name // danger, loop
+            nextStep: this.prepareTaskResult.name // danger, loop
         });
     }
 
-    prepareTask3(taskFinishResult: ITaskFinish): void {
+    prepareTaskResult(taskFinishResult: ITaskFinish): void {
         // show result
         const child = taskFinishResult.taskChild;
         const result: string = child.result || '';
@@ -157,12 +79,14 @@ export class AimActionUpdateLit extends AimActionBase {
         this.addTaskAndWaitForCompletion(taskFinishResult.taskRoot, {
             mode: 'initializing',
             title: 'result',
-            widget: '_100554_aimTaskResultCode',
+            widget: '_100554_aimTaskResultText',
             trace: [],
             _tempResult: result,
             nextStep: this.endTasks.name // danger, loop
         });
         this.requestUpdate();
+        const args: IAdd = JSON.parse(taskFinishResult.taskRoot.args || '');
+        this.updateModelTS(result, args.fileRef, taskFinishResult.taskRoot.key || '', args.modelType);
     }
 
     endTasks(taskFinishResult: ITaskFinish): void {
@@ -174,4 +98,51 @@ export class AimActionUpdateLit extends AimActionBase {
         updateTaskOnServer(taskFinishResult.taskIndex);
     }
 
+    async updateModelTS(newContent: string, fileRef: string, key: string, modelType: mls.editor.ModelType) {
+        if (!fileRef || !fileRef.startsWith('_')) throw new Error('Invalid fileRef in taskRoot:' + key + ', fileRef:' + fileRef);
+        const ts = extractScript(newContent, /```typescript([\s\S]+?)```/g);
+        let eModel = mls.editor.models[fileRef];
+        if (!eModel || !eModel.ts) {
+            await this.loadModelTS(fileRef);
+            eModel = mls.editor.models[fileRef]
+        }
+        if (!eModel || !eModel.ts) throw new Error('invalid fileRef in taskRoot, model dont exists: ' + fileRef);
+        if (modelType !== 'ts') throw new Error('invalid modelType in taskRoot, must be "ts": ' + key);
+        const model = eModel.ts?.model;
+        model.setValue(ts);
+    }
+
+    async loadModelTS(fileRef: string) {
+        // fileRef, ex _[project]_shortName
+        mls.actual[0].setFullName(fileRef);
+        const key = mls.stor.getKeyToFiles(
+            mls.actual[0].project || 0,
+            2, /* level */
+            mls.actual[0].path || '',
+            '', /** folder */
+            '.ts' /** extension */
+        );
+        const file = mls.stor.files[key]; 
+        if (!file) throw new Error('file dont exists: key=' + key);
+        const content = await file.getContent('') || '';
+        if (typeof content !== 'string') throw new Error('invalid file string in key ' + key);
+        mls.editor.createModelTS(file, content);
+    }
+
 }
+
+export interface IAdd {
+    title: string,
+    prompt: string,
+    error: string,
+    modelType: mls.editor.ModelType,
+    fileRef: string,
+}
+
+const tag = convertFileNameToTag(myName);
+if (!customElements.get(tag)) {
+    customElements.define(tag, AimActionUpdateLit);
+}
+
+const cl = new AimActionUpdateLit();
+export const add = (args: IAdd): number => cl.add(args);

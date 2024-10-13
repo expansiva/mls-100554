@@ -3,13 +3,13 @@
 const isTrace = false;
 
 // Declare a global state structure
-interface GlobalState {
+export interface GlobalState {
   [key: string]: any;
 }
 
 // Extend the Window interface
 declare global {
-  interface Window {
+  export interface Window {
     globalState: GlobalState;
     globalStateManagment: IcaState;
     globalVariation: number;

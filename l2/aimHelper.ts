@@ -131,6 +131,27 @@ export function saveUserConfigs(obj: IAimColums) {
   }
 }
 
+export function extractScript(src: string, regex: RegExp) {
+    //const regex = /```typescript([\s\S]+?)```/g;
+    const matches = src.match(regex);
+    const contents = [];
+
+    let ret = src;
+
+    if (matches) {
+        for (const m of matches) {
+            const conteudo = m.replace(/```typescript|```/g, '').trim();
+            contents.push(conteudo);
+        }
+
+        ret = contents[0];
+    } else { 
+        console.error('no match in task result, regex: "' + regex + '"');
+    }
+
+    return ret;
+}
+
 function getDefaultColumsConfigs(): IAimColums {
   return {
     status: true,

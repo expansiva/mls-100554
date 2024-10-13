@@ -7,7 +7,8 @@ import { CollabLitElement } from './_100554_collabLitElement';
 @customElement('aim-prompt-example-100554')
 export class AimPromptExample extends CollabLitElement {
 
- @property({ type: String }) text = "example"; // Define o valor do texto que será exibido no componente
+    @property({ type: String }) text = "example";
+    @property({ type: String }) for = "";
 
     static styles = css`
         .prompt-suggestion {
@@ -20,6 +21,7 @@ export class AimPromptExample extends CollabLitElement {
             cursor: pointer;
             font-family: Arial, sans-serif;
             transition: background-color 0.3s;
+            color: black;
         }
 
         .prompt-suggestion:hover {
@@ -34,7 +36,7 @@ export class AimPromptExample extends CollabLitElement {
     `;
 
     handleClick() {
-        const aimPromptElement = document.querySelector("aim-prompt-100554");
+        const aimPromptElement = document.querySelector(this.for);
         if (aimPromptElement) {
             aimPromptElement.setAttribute('text', this.text);
         }
