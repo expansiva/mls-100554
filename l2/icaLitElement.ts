@@ -53,5 +53,15 @@ export abstract class IcaLitElement extends CollabLitElement {
 
   }
 
+  loadStyle(css: string) {
+    const tagName = this.tagName.toLowerCase();
+    const alreadyAdded = document.body.querySelector(`style#${tagName}`);
+    if (alreadyAdded) return;
+    const style = document.createElement('style');
+    style.id = tagName;
+    style.textContent = css;
+    document.body.appendChild(style);
+  }
+
 }
 

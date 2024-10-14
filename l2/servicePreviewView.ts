@@ -278,7 +278,7 @@ export class ServicePreviewView extends LitElement {
         if (!iframe) return;
         this.mountCSS(ret, iframe);
         this.mountTokens(ret, iframe);
-        this.addGlobalStyle(ret, iframe);
+        // this.addGlobalStyle(ret, iframe);
 
         const tag = convertFileNameToTag(`_${this.mfile.project}_${this.mfile.shortName}`);
         const el = iframe.contentDocument?.body.querySelector(tag);
@@ -403,7 +403,7 @@ export class ServicePreviewView extends LitElement {
         this.mountJS(ret, iframe);
         this.mountCSS(ret, iframe);
         this.mountTokens(ret, iframe);
-        this.addGlobalStyle(ret, iframe);
+        // this.addGlobalStyle(ret, iframe);
 
     }
 
@@ -579,13 +579,15 @@ export class ServicePreviewView extends LitElement {
     private mountCSS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
         try {
             if (!ifr.contentDocument) return;
-            this.removeOlderStyle(ifr);
+            //this.removeOlderStyle(ifr);
             let cls = '';
             if (this.mode === 'mobile') cls = this.scrollMobile;
-            const css = info.css.join(' \n');
+
+            // const css = info.css.join(' \n');
             const style = document.createElement('style');
-            style.textContent = css + ' \n' + cls;
-            style.id = this.getIdStyle();
+            style.textContent = ' \n' + cls;
+            //style.textContent = css + ' \n' + cls;
+            //style.id = this.getIdStyle();
             ifr.contentDocument.body.className = 'scroll-custom';
             // ifr.contentDocument.body.style.height = 'calc(100vh - 40px)';
             ifr.contentDocument.body.style.width = '98%';
