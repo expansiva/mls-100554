@@ -5,7 +5,13 @@ import { compileStyleUsingMFile } from './_100554_enhancementStyle';
 export const MLS_GETDEFAULTDESIGNSYSTEM = '[[mls_getDefaultDesignSystem]]';
 
 export async function injectStyle(mfile: mls.l2.editor.IMFile, theme: string): Promise<void> {
+    console.info('passei injectStyle');
     const js = mfile.compilerResults?.prodJS;
+    console.info({
+        js,
+        hasTag: (js && js.indexOf(MLS_GETDEFAULTDESIGNSYSTEM) >= 0)
+    })
+
     if (js && js.indexOf(MLS_GETDEFAULTDESIGNSYSTEM) === -1) return injectStyleWithoutShadowRoot(mfile, theme);
     return injectStyleShadowRoot(mfile, theme);
 }
@@ -26,7 +32,8 @@ export async function injectStyleWithoutShadowRoot(mfile: mls.l2.editor.IMFile, 
     if (!css) return;
     if (mfile && mfile.compilerResults) {
         const newJs = addLineInConstructor(mfile.compilerResults.prodJS, `if(this.loadStyle) this.loadStyle(\`${css}\`);`);
-        console.info({newJs2: newJs})
+
+        console.info({ newJs2: newJs })
 
 
         if (!newJs || !newJs.trim().startsWith('/// <mls')) return;
@@ -61,7 +68,7 @@ function addLineInConstructor(code: string, lineToAdd: string): string {
             for (let j = constructorIndex + 1; j < lines.length; j++) {
                 if (lines[j].trim().startsWith('super(')) {
                     superIndex = j;
-    
+
                     if (lines[j + 1] && lines[j + 1].trim() === lineToAdd.trim()) {
                         lineAlreadyExists = true;
                     }
