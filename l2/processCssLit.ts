@@ -5,14 +5,7 @@ import { compileStyleUsingMFile } from './_100554_enhancementStyle';
 export const MLS_GETDEFAULTDESIGNSYSTEM = '[[mls_getDefaultDesignSystem]]';
 
 export async function injectStyle(mfile: mls.l2.editor.IMFile, theme: string): Promise<void> {
-    console.info('passei injectStyle');
     const js = mfile.compilerResults?.prodJS;
-    console.info({
-        js,
-        MLS_GETDEFAULTDESIGNSYSTEM,
-        hasTag: (js && js.indexOf(MLS_GETDEFAULTDESIGNSYSTEM) >= 0)
-    })
-
     if (js && js.indexOf(MLS_GETDEFAULTDESIGNSYSTEM) === -1) return injectStyleWithoutShadowRoot(mfile, theme);
     return injectStyleShadowRoot(mfile, theme);
 }
@@ -33,12 +26,7 @@ export async function injectStyleWithoutShadowRoot(mfile: mls.l2.editor.IMFile, 
     if (!css) return;
     if (mfile && mfile.compilerResults) {
         const newJs = addLineInConstructor(mfile.compilerResults.prodJS, `if(this.loadStyle) this.loadStyle(\`${css}\`);`);
-
-        console.info({ newJs2: newJs })
-
-
         if (!newJs || !newJs.trim().startsWith('/// <mls')) return;
-
         mfile.compilerResults.prodJS = newJs;
         mls.stor.cache.clearObsoleteCache();
         mfile.compilerResults.cacheVersion = (Math.floor(Math.random() * 99999).toString());
