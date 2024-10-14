@@ -27,10 +27,10 @@ export async function injectStyleWithoutShadowRoot(mfile: mls.l2.editor.IMFile, 
     if (mfile && mfile.compilerResults) {
         const newJs = addLineInConstructor(mfile.compilerResults.prodJS, `if(this.loadStyle) this.loadStyle(\`${css}\`);`);
 
-        //console.info({lastJs:mfile.compilerResults.prodJS, newJs})
+        if (!newJs || !newJs.startsWith('/// <mls')) return;
 
         mfile.compilerResults.prodJS = newJs;
-        // mls.stor.cache.clearObsoleteCache();
+        mls.stor.cache.clearObsoleteCache();
         mfile.compilerResults.cacheVersion = (Math.floor(Math.random() * 99999).toString());
         mls.stor.cache.AddMfileIfNeed(mfile);
     }
@@ -43,6 +43,8 @@ function addLineInConstructor(code: string, lineToAdd: string): string {
     let constructorIndex = -1;
     let superIndex = -1;
     let lineAlreadyExists = false;
+
+    if (!code) return code;
 
     for (let i = 0; i < lines.length; i++) {
         const trimmedLine = lines[i].trim();
