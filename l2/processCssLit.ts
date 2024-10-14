@@ -25,7 +25,7 @@ export async function injectStyleWithoutShadowRoot(mfile: mls.l2.editor.IMFile, 
     const css = await compileStyleUsingMFile(mfile, ':root', theme);
     if (!css) return;
     if (mfile && mfile.compilerResults) {
-        const newJs = addLineInConstructor(mfile.compilerResults.prodJS, `this.loadStyle(\`${css}\`);`);
+        const newJs = addLineInConstructor(mfile.compilerResults.prodJS, `if(this.loadStyle) this.loadStyle(\`${css}\`);`);
         mfile.compilerResults.prodJS = newJs;
         mls.stor.cache.clearObsoleteCache();
         mfile.compilerResults.cacheVersion = (Math.floor(Math.random() * 99999).toString());

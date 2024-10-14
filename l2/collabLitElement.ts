@@ -89,9 +89,13 @@ export class CollabLitElement extends LitElement {
   }
 
   loadStyle(css: string) {
+    if (!css) return;
     const tagName = this.tagName.toLowerCase();
     const alreadyAdded = document.body.querySelector(`style#${tagName}`);
-    if (alreadyAdded) return;
+    if (alreadyAdded) {
+      alreadyAdded.textContent = css;
+      return;
+    }
     const style = document.createElement('style');
     style.id = tagName;
     style.textContent = css;
