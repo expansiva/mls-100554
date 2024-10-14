@@ -9,6 +9,7 @@ export async function injectStyle(mfile: mls.l2.editor.IMFile, theme: string): P
     const js = mfile.compilerResults?.prodJS;
     console.info({
         js,
+        MLS_GETDEFAULTDESIGNSYSTEM,
         hasTag: (js && js.indexOf(MLS_GETDEFAULTDESIGNSYSTEM) >= 0)
     })
 
