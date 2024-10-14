@@ -568,6 +568,8 @@ export class ServiceSource100554 extends ServiceBase {
             const storFileHTML = getStorFileHTML();
             const storFileCss = getStorFileCss();
             await this.openFiles(storFileHTML, storFile, storFileCss, fileAction.position);
+            this.updatedMSizeEditor();
+
         };
 
         const onDelete = async (): Promise<void> => {
@@ -649,7 +651,7 @@ export class ServiceSource100554 extends ServiceBase {
         }
 
         const ev: mls.events.IEvent = {
-            level: this.level,
+            level: this.level as mls.Level,
             type: 'FileAction',
             desc: JSON.stringify(fileAction)
         }
@@ -726,7 +728,7 @@ export class ServiceSource100554 extends ServiceBase {
         }
 
         const ev: mls.events.IEvent = {
-            level: this.level,
+            level: this.level as mls.Level,
             type: 'FileAction',
             desc: JSON.stringify(fileAction)
         }
@@ -1610,9 +1612,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private updatedMSizeEditor() {
-        // this.c2?.setAttribute('msize', this.msize);
+        this.c2?.setAttribute('msize', this.msize);
     }
-
 
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
@@ -1667,8 +1668,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             <aim-prompt-html-100554
                 rendermode="editor" modelkey="${key}">
             </aim-prompt-html-100554>`;
-        return html ``;
-    }    
+        return html``;
+    }
 
     private saveLocalStorageLastOpen(storFile: mls.stor.IFileInfo, position: string) {
         try {
