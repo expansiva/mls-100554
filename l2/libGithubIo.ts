@@ -1,5 +1,39 @@
 /// <mls shortName="libGithubIo" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+export async function addIssueInProject(req: IReq, idProject: string, idIssue: string): Promise<boolean> {
+
+    try {
+
+        if (!req.owner || !req.repo || !idProject || !idIssue) throw new Error('Not found owner project')
+
+        const q = `
+                mutation {
+                    addProjectV2ItemById(input: {
+                        contentId: "${idIssue}",
+                        projectId: "${idProject}"
+                    }) {
+                        item {
+                        id
+                        }
+                    }
+                }
+            `;
+
+        const ret = await qlFetch(q, req.mkey);
+
+        if (!ret) {
+            return false;
+        }
+
+        return true;
+
+    } catch (e) {
+        console.info(e);
+        return false;
+    }
+
+}
+
 export async function updateFieldSelectProjects(req: IReq, idProject: string, idItem: string, idField: string, idOption: string): Promise<boolean> {
 
     try {

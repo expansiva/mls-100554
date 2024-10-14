@@ -145,8 +145,8 @@ export class PluginExploreList extends PluginBaseModule {
         if (![1, 2, 3, 4, 5].includes(ev.level) || (ev.type !== 'FileAction')) return;
         const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
         if (
-            fileAction.position !== this.position ||
-            !['statusOrErrorChanged', 'projectListChanged'].includes(fileAction.action) ||
+            /*fileAction.position !== this.position ||*/
+            !['statusOrErrorChanged', 'projectListChanged', 'new'].includes(fileAction.action) ||
             fileAction.project === 0
         ) return;
         this.init();
