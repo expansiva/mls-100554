@@ -8,9 +8,7 @@ import { IcaLayoutFlowColumnBase } from './_100554_icaLayoutFlowColumnBase';
 export class WcColumn extends IcaLayoutFlowColumnBase {
 
     render() {
-        return html`
-        <slot></slot>
-        `
+        return html`<slot></slot>`
     }
 
 }

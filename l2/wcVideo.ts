@@ -13,7 +13,6 @@ export class WcVideo100554 extends IcaApresentationVideoEmbeddedVideoBase {
     @property({ type: Boolean }) loop = false;
     @property({ type: Boolean }) muted = false;
     @property({ type: String }) preload: 'auto' | 'metadata' | 'none' = 'auto';
-    
     @query('video') video: HTMLVideoElement | undefined;
 
     render() {

@@ -14,20 +14,24 @@ wc-divider-100554 {
     }
 
     hr:before {
-        font-family: var(--font-family-primary);
+
+        font-family: @font-family-primary;
         font-weight: 400;
         font-style: italic;
-        font-size: var(--font-size-40);
+        font-size: @font-size-40;
         letter-spacing: .6em;
         content: attr(data-text);
         display: inline-block;
         margin-left: .6em;
-        color: var(--text-primary-color);
+        color: @text-primary-color;
         position: relative;
         top: -10px;
     }
 
 }
+
+
+
 
 
 

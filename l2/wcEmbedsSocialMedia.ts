@@ -9,9 +9,7 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 export class WcEmbedsSocialMedia100554 extends IcaApresentationEmbedsSocialMediaBase100554 {
 
     @propertyDataSource({ type: String }) datasource: string | undefined;
-
     @property({ type: String }) description: string | undefined;
-
     @property({ type: String }) url: string | undefined;
 
     render() {

@@ -24,8 +24,6 @@ export class ServiceNotification100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
     
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     public details: IService = {
         icon: '&#xf0f3',
         state: 'foreground',
@@ -55,6 +53,10 @@ export class ServiceNotification100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
+    }
+
+     createRenderRoot() {
+        return this;
     }
 
     render() {

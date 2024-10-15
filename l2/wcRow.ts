@@ -10,8 +10,6 @@ export class WcRow extends IcaLayoutFlowRowBase {
     @property() hint: string | undefined;
 
     render() {
-        return html`
-        <slot></slot>
-       `; 
+        return html`<slot></slot>`; 
     }
 }

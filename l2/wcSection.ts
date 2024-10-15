@@ -8,8 +8,6 @@ import { IcaLayoutFlowSectionBase } from './_100554_icaLayoutFlowSectionBase';
 export class WcSection100554 extends IcaLayoutFlowSectionBase {
 
     render() {
-        return html`
-        <slot></slot>
-       `;
+        return html`<slot></slot>`;
     }
 }

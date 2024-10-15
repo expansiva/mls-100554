@@ -37,8 +37,6 @@ export class ServiceUserSettings100554 extends ServiceBase {
 
     private myMessage: MessageType = messages['en-us'];
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     public details: IService = {
         icon: '&#xf4fe',
         state: 'foreground',
@@ -146,6 +144,10 @@ export class ServiceUserSettings100554 extends ServiceBase {
     private getUserThemeOS() {
         const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         return isDarkMode ? 'dark' : 'light';
+    }
+
+    createRenderRoot() {
+        return this;
     }
 
     render() {

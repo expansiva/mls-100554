@@ -9,9 +9,7 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 export class WcInputText100554 extends IcaApresentationTextTextBase {
 
     @propertyDataSource({ type: String }) datasource: string | undefined;
-
     @property({ type: String }) text: string | undefined;
-
     @property({ type: String }) type: string | undefined;
     
     error: string = '';

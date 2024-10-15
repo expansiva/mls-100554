@@ -4,7 +4,6 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaApresentationTextCodeBase } from './_100554_icaApresentationTextCodeBase';
 
-
 @customElement('wc-code-100554')
 export class WcCode100554 extends IcaApresentationTextCodeBase {
 
