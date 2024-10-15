@@ -30,8 +30,6 @@ export class ServiceProject100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     @property() activeTab: IScenery = 'Explore';
 
     @property({ type: Array }) explories: mls.plugin.MenuAction[] = [];
@@ -39,6 +37,10 @@ export class ServiceProject100554 extends ServiceBase {
     @query('#projectDiv') projectDiv: HTMLDivElement | undefined;
 
     @query('details') firstDetails: HTMLDetailsExplore | undefined;
+
+    createRenderRoot() {
+        return this;
+    }
 
     public details: IService = {
         icon: '&#xf542',

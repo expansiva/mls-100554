@@ -59,8 +59,6 @@ export const pluginData: mls.plugin.IPluginData = {
 
 export class PluginExploreList extends PluginBaseModule {
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     private msg: MessageType = messages['en'];
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
@@ -97,6 +95,10 @@ export class PluginExploreList extends PluginBaseModule {
 
     async prepare() {
         this.init();
+    }
+
+    createRenderRoot() {
+        return this;
     }
 
     firstUpdated() {
@@ -301,7 +303,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     renderLiItem(file: mls.stor.IFileInfo, index: number, inHistory: boolean) {
 
-    
+
         const name = this.project === 0 && inHistory ? '_' + file.project + '_' + file.shortName : file.shortName;
 
         const nameFilter = inHistory ? '*******' : name.toLocaleLowerCase();

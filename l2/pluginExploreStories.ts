@@ -42,8 +42,6 @@ export const pluginData: mls.plugin.IPluginData = {
 
 export class PluginExploreStories extends PluginBaseModule {
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     private msg: MessageType = messages['en'];
 
     private project = 1;
@@ -60,6 +58,10 @@ export class PluginExploreStories extends PluginBaseModule {
 
     async prepare() {
         this.init();
+    }
+
+    createRenderRoot() {
+        return this;
     }
 
     firstUpdated() {
@@ -279,7 +281,7 @@ export class PluginExploreStories extends PluginBaseModule {
     }
 
 
-    private fireEvents(action: string, file: mls.stor.IFileInfo, info: any,  timeout: number = 0): void {
+    private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
 
         const params = {} as mls.events.IFileAction;
 
