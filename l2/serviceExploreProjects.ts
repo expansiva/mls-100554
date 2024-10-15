@@ -116,10 +116,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceExploreProjects100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    private inFullscreen: boolean = false;
-
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
+    
     @property() projectCreated: boolean = false;
     @property() state: IServiceList = { history: [], orgs: [], projectSelected: undefined };
     @property() lastPrjId: string | null | undefined;
@@ -170,22 +167,6 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        /*if (visible) {
-
-            if (!this.inFullscreen) {
-                //this.setFullScreen(6, 'left')
-                this.inFullscreen = false;
-            }
-
-        } else if (!visible) {
-
-            if (this.inFullscreen) {
-                //this.setFullScreen(6, 'default')
-                this.inFullscreen = false;
-            }
-
-        }*/
-
     }
 
     //----------EVENTS---------------------
@@ -202,6 +183,10 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     connectedCallback() {
         super.connectedCallback();
         this.setEvents();
+    }
+
+    createRenderRoot() {
+        return this;
     }
 
     render() {
