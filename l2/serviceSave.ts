@@ -64,13 +64,14 @@ export class ServiceSave extends ServiceBase {
     @property() itens: any = undefined;
     @property() error: string = '';
 
+    createRenderRoot() {
+        return this;
+    }
 
     constructor() {
         super();
         this.setEvents();
     }
-
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     public details: IService = {
         icon: '&#xf0c7',
@@ -414,8 +415,8 @@ export class ServiceSave extends ServiceBase {
     renderLevelsDefault(level: string, project: string, indexP: number, index: number) {
 
         const objP = this.itens[project];
-        const itens = objP[+level] as [];
-
+        let itens = objP[+level] as Iitem[];
+        itens = itens.sort((a, b) => a.text.localeCompare(b.text));
         return html`
         <li>
             <div>
