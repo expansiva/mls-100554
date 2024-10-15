@@ -17,7 +17,7 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
 
     @property({ type: String }) filter: string = "today";
 
-    @property() chartData:any = {};
+    @property() chartData: any = {};
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
 
@@ -95,6 +95,10 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
         this.prepare();
     }
 
+    createRenderRoot() {
+        return this;
+    }
+
     render(): TemplateResult {
         this.style.display = 'block';
         this.style.width = '100%';
@@ -135,67 +139,6 @@ export class PluginSiteMonitorDashboardSpikes extends PluginBaseModule {
         this.filter = value;
         this.prepare();
     }
-
-    static styles = css`
-
-        .plugin-body{
-            height:100%;
-            width:100%;
-        }
-        .plugin-container {
-            background-color: #f4f5ff;
-            padding: 10px 0;
-
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            height:100%;
-            width:100%;
-        }
-
-        header {
-            display: flex;
-            align-items: center;
-            gap:3rem;
-            margin-bottom: 16px;
-        }
-        header > div{
-            display:flex;
-            gap:.5rem;
-        }
-
-        icon {
-            margin-right: 10px;
-        }
-
-        h2 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0;
-            color: #333;
-        }
-
-        small {
-            color: #888;
-            margin-left: auto;
-            font-size: 14px;
-        }
-
-        p {
-            font-size: 16px;
-            color: #555;
-        }
-        select {
-            border-radius: 13px;
-            border: 1px solid #cecece;
-            padding: .3rem;
-            cursor: pointer;
-            outline: none;
-        }
-    `;
-
 
 }
 

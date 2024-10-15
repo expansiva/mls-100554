@@ -13,8 +13,6 @@ export class ServiceDashboard100554 extends ServiceBase {
 
     @property() cssBreakPoint: string = '';
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     @property() activeTab: string = 'Icon1';
 
     //------SERVICE----------
@@ -73,6 +71,10 @@ export class ServiceDashboard100554 extends ServiceBase {
 
     //---------COMPONENT-------------
 
+    createRenderRoot() {
+        return this;
+    }
+    
     firstUpdated() {
         this.loadAndSetPlugins();
     }

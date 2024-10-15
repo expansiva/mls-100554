@@ -35,7 +35,7 @@ export class PluginSiteMonitorDashboardSales extends PluginBaseModule {
                 "trigger": "item",
                 "formatter": "{a} <br/>{b}: {c} ({d}%)"
             },
-    
+
             "series": [
                 {
                     "name": "Sales",
@@ -88,6 +88,10 @@ export class PluginSiteMonitorDashboardSales extends PluginBaseModule {
 
     }
 
+    createRenderRoot() {
+        return this;
+    }
+
     firstUpdated() {
         if (!this.body || !this.autoPrepare) return;
         this.prepare();
@@ -133,66 +137,6 @@ export class PluginSiteMonitorDashboardSales extends PluginBaseModule {
         this.filter = value;
         this.prepare();
     }
-
-    static styles = css`
-
-        .plugin-body{
-            height:100%;
-            width:100%;
-        }
-        .plugin-container {
-            background-color: #f4f5ff;
-            padding: 10px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            height:100%;
-            width:100%;
-        }
-
-        header {
-            display: flex;
-            align-items: center;
-            gap:3rem;
-            margin-bottom: 16px;
-        }
-        header > div{
-            display:flex;
-            gap:.5rem;
-        }
-
-        icon {
-            margin-right: 10px;
-        }
-
-        h2 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0;
-            color: #333;
-        }
-
-        small {
-            color: #888;
-            margin-left: auto;
-            font-size: 14px;
-        }
-
-        p {
-            font-size: 16px;
-            color: #555;
-        }
-        select {
-            border-radius: 13px;
-            border: 1px solid #cecece;
-            padding: .3rem;
-            cursor: pointer;
-            outline: none;
-        }
-    `;
-
 
 }
 
