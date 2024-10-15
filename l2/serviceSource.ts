@@ -767,7 +767,7 @@ export class ServiceSource100554 extends ServiceBase {
 
 
     private async undoFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, storFileCss: mls.stor.IFileInfo | undefined, keyFileHTML: string, keyFileTS: string, keyFileCss: string) {
-        debugger;
+
         for await (let data of [{ storFile: storFileHTML, keyFiles: keyFileHTML }, { storFile: storFileCss, keyFiles: keyFileCss }, { storFile: storFileTS, keyFiles: keyFileTS }]) {
 
             if (!data.storFile) continue;
@@ -1612,7 +1612,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         variableName: string,
         newValue: string
     ): boolean => {
-        debugger;
         const lines: string[] = (model.getValue() || '').split('\n');
         const line = lines[0];
         if (!line.startsWith('/// <')) throw new Error('line must start with "/// <" (triple slash and xml');
