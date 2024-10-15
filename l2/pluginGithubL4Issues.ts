@@ -4,9 +4,7 @@ import { html, css, svg, TemplateResult, LitElement, repeat } from 'lit';
 import { query, property, customElement } from 'lit/decorators.js';
 import { getMyKeysBranch } from './_100554_libCommom';
 import * as gitIO from './_100554_libGithubIo';
-
-//import { PluginBaseModule } from './_100554_pluginBaseModule';
-
+import { CollabLitElement } from './_100554_collabLitElement';
 
 export const pluginData: mls.plugin.IPluginData = {
     title: "GitHub Issues",
@@ -18,7 +16,7 @@ export const pluginData: mls.plugin.IPluginData = {
 };
 
 @customElement('plugin-github-l4-issues-100554')
-export class PluginGithubL4Issues extends LitElement {
+export class PluginGithubL4Issues extends CollabLitElement {
 
     private repositoryId: string = '';
     private error: string = '';
@@ -55,6 +53,11 @@ export class PluginGithubL4Issues extends LitElement {
         this.setInfos();
     }
 
+    createRenderRoot() {
+        return this;
+    }
+
+
     render(): TemplateResult {
 
         if (this.error != '') return this.renderError();
@@ -88,7 +91,7 @@ export class PluginGithubL4Issues extends LitElement {
     renderList(): TemplateResult {
 
         if (this.myIssues.length <= 0) {
-            
+
             return html`
             ${this.renderListFilter()}
             <h3 style="padding:0rem 4rem">No issues</h3>
@@ -130,12 +133,12 @@ export class PluginGithubL4Issues extends LitElement {
                 <h3>${item.title}</h3>
                 <contentlabels>
                     ${repeat(item.labels,
-                    ((key: gitIO.ILabel) => key.name) as any,
-                    ((k: gitIO.ILabel, index: any) => {
-                        return html`<contentlabel style="background:#${k.color}3b; color:#${k.color}; border: 1px solid #${k.color}">${k.name}</contentlabel>`;
+            ((key: gitIO.ILabel) => key.name) as any,
+            ((k: gitIO.ILabel, index: any) => {
+                return html`<contentlabel style="background:#${k.color}3b; color:#${k.color}; border: 1px solid #${k.color}">${k.name}</contentlabel>`;
 
-                    }) as any
-                )}
+            }) as any
+        )}
                 </contentlabels>
             </div>
             <span>
@@ -204,11 +207,11 @@ export class PluginGithubL4Issues extends LitElement {
                     <contentlabels>
                         ${this.renderThumbsUp()}
                         ${repeat(this.viewIssue.labels,
-                            ((key: gitIO.ILabel) => key.name) as any,
-                            ((k: gitIO.ILabel, index: any) => {
-                                return html`<contentlabel style="background:#${k.color}3b; color:#${k.color}; border: 1px solid #${k.color}">${k.name}</contentlabel>`;
-                            }) as any
-                        )}
+                ((key: gitIO.ILabel) => key.name) as any,
+                ((k: gitIO.ILabel, index: any) => {
+                    return html`<contentlabel style="background:#${k.color}3b; color:#${k.color}; border: 1px solid #${k.color}">${k.name}</contentlabel>`;
+                }) as any
+            )}
                     </contentlabels>
                 </div>
                 <span style="margin-left:42px;">
@@ -220,11 +223,11 @@ export class PluginGithubL4Issues extends LitElement {
                 <contentshowcomments>
                     ${this.renderComments(this.viewIssue)}
                     ${repeat(this.comments,
-                        ((key: gitIO.IComments) => key.id) as any,
-                        ((k: gitIO.IComments, index: any) => {
-                            return this.renderComments(k);
-                        }) as any
-                    )}
+                ((key: gitIO.IComments) => key.id) as any,
+                ((k: gitIO.IComments, index: any) => {
+                    return this.renderComments(k);
+                }) as any
+            )}
                 </contentshowcomments>
                 <contentnewcomment> 
                     <h4>Add a comment</h4>
@@ -260,7 +263,7 @@ export class PluginGithubL4Issues extends LitElement {
             </contentissuescogs>
         
         `
-        
+
     }
 
     renderThumbsUp() {
@@ -275,7 +278,7 @@ export class PluginGithubL4Issues extends LitElement {
                     <svg style="width:15px; fill:#e4e42e" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2l144 0c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48l-97.5 0c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3l0-38.3 0-48 0-24.9c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192l64 0c17.7 0 32 14.3 32 32l0 224c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32L0 224c0-17.7 14.3-32 32-32z"/></svg>(${this.viewIssue.reactionsTU})
                 </votethumbsup>
             `;
-            
+
         }
 
         return html`
@@ -283,7 +286,7 @@ export class PluginGithubL4Issues extends LitElement {
                 <svg style="width:15px; fill: #fff;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2l144 0c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48l-97.5 0c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3l0-38.3 0-48 0-24.9c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192l64 0c17.7 0 32 14.3 32 32l0 224c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32L0 224c0-17.7 14.3-32 32-32z"/></svg>(${this.viewIssue.reactionsTU})
             </votethumbsup>
         `;
-        
+
     }
 
     renderComments(item: gitIO.IComments) {
@@ -316,7 +319,7 @@ export class PluginGithubL4Issues extends LitElement {
         if (!this.req) return;
 
         this.userInfo = await gitIO.getUserInfoIO(this.req);
-        this.repositoryId =  await gitIO.getRepositoryId(this.req);
+        this.repositoryId = await gitIO.getRepositoryId(this.req);
         this.myIssues = await gitIO.getIssues(this.req);
         this.filterMyIssues();
         this.labelId = await gitIO.getLabelIdOrAdd(this.req, this.repositoryId);
@@ -346,7 +349,7 @@ export class PluginGithubL4Issues extends LitElement {
 
     }
 
-    private async changeLabelPrioriti(e:MouseEvent) {
+    private async changeLabelPrioriti(e: MouseEvent) {
 
         if (!this.viewIssue || !this.req) return;
 
@@ -373,17 +376,17 @@ export class PluginGithubL4Issues extends LitElement {
         if (hasItem) return;
 
         this.isLoader = true;
-        
-        const info = await gitIO.addLabelInIssue( this.req, this.viewIssue.id, el.value);
-            
-        if(index >= 0) {
+
+        const info = await gitIO.addLabelInIssue(this.req, this.viewIssue.id, el.value);
+
+        if (index >= 0) {
 
             this.viewIssue.labels.splice(index, 1);
             await gitIO.removeLabelInIssue(this.req, this.viewIssue.id, idLabelHas);
-            
+
         }
 
-        if(info) this.viewIssue.labels.push(info);
+        if (info) this.viewIssue.labels.push(info);
 
         this.isLoader = false;
         this.requestUpdate();
@@ -606,372 +609,6 @@ export class PluginGithubL4Issues extends LitElement {
             branch: info.branch,
         }
     }
-
-    //----------CSS--------------------
-
-    static styles = css`
-    
-        :host {
-            font-family: var(--font-family-primary);
-            display:block;
-            height: 100%;
-            overflow: auto;
-            background: #0d1117;
-            font-size: var(--font-size-16);
-            color:#e8eaec;
-        }   
-
-        backbutton{
-            width: 20px;
-            display: flex;
-            transform: rotate(180deg);
-            cursor: pointer;
-            margin-right:15px
-        }
-
-        buttonnewissues{
-            background: #1c8139;
-            color: #fff;
-            padding: .5rem;
-            border: none;
-            border-radius: 8px;
-            display: flex;
-            height: 17px;
-            justify-content: center;
-            align-items: center;
-            font-size: 1rem;
-            cursor:pointer;
-        }
-
-        buttonnewissues:hover{
-            background:#22a547
-        }
-
-        contentlistissues{
-            display: flex;
-            flex-direction: column;
-            padding: .5rem;
-        }
-
-        contentlistitem{
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 1rem;
-            padding: .5rem;
-            border-radius: 10px;
-            border: 1px solid #393939;
-            box-shadow: #8b88881a 0px 4px 10px -3px;
-        
-        }
-
-        contentlistitem:hover{
-            box-shadow: #ffffff96 0px 2px 8px -4px;
-        }
-
-        contentlistitem div{
-            display: flex;
-            justify-content: left;
-            align-items: center;
-            gap: .5rem;
-        }
-
-        contentlistitem h3{
-            margin: 0;
-        }
-
-        contentlistitem span{
-            font-size: 1rem;
-            color: #969494;
-        }
-
-        contentlabels{
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-        }
-
-        contentlabels contentlabel{
-            border-radius: 18px;
-            min-width: 49px;
-            display: flex;
-            justify-content: center;
-            font-size: .95rem;
-            color: #fff;
-            padding: 0 .5rem;
-        }
-
-
-
-
-        contentshow{
-            cursor:pointer;
-            display: flex;
-            flex-direction: column;
-            padding: .5rem;
-        }
-
-        contentshow votethumbsup{
-            float:right;
-            cursor:pointer;
-            display: flex;
-        }
-
-        contentshow div{
-            display: flex;
-            justify-content: left;
-            align-items: center;
-            gap: .5rem;
-        }
-
-        contentshow h3{
-            margin: 0;
-        }
-
-        contentshow span{
-            font-size: 1rem;
-            color: #969494;
-        }
-
-        contentshowcomments{
-            height: calc(100vh - 480px);
-            overflow-y: auto;
-            display: block;
-            padding-top: 2rem;
-            border-top: 1px solid #474748;
-            margin-top: 0.5rem;
-            border-bottom: 1px solid #474748;
-        }
-
-        contentshowcomments itemcomment{
-            display: flex;
-            gap: .5rem;
-            margin-bottom: 2rem;
-        }
-
-        contentshowcomments commentavatar{
-            display: block;
-        }
-
-        contentshowcomments commentavatar img{
-            width: 35px;
-            border-radius: 50%;
-            border: 1px solid #474748;
-        }
-
-        contentshowcomments boxcomment{
-            display: block;
-            width: 100%;
-            border-radius: 10px;
-            border: 1px solid #5b6063;
-        }
-
-        contentshowcomments boxcommentheader{
-            display: flex;
-            align-items: center;
-            gap: .8rem;
-            background: #5b6063;
-            padding-left: .5rem;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-            position:relative;
-        }
-
-        contentshowcomments boxcommentheader::before{   
-            position: absolute;
-            width: 6px;
-            content: ' ';
-            height: 12px;
-            top: 8px;
-            left: -8px;
-            background: #5b6063;
-            clip-path: polygon(0 50%, 100% 100%, 100% 0);
-        }
-
-        contentshowcomments boxcommentheader h4{
-            margin: 0px;
-        }
-
-        contentshowcomments boxcommentbody{
-            padding: 1rem;
-            display: block;
-        }
-
-        contentnewcomment{
-            display: flex;
-            flex-direction: column;
-            padding: 1rem;
-            justify-content: center;
-            gap: .5rem;
-        }
-
-        contentnewcomment textarea{
-            border: 1px solid #ddddde;
-            width: 100%;
-            border-radius: 4px;
-            height: 150px;
-            outline: none;
-            padding: .5rem;
-        }
-
-        contentnewcomment div{
-            display: flex;
-            align-items: end;
-            justify-content: end;
-            gap: .5rem;
-        }
-
-        contentnewcomment button{
-            background: #1c8139;
-            color: #fff;
-            padding: .5rem;
-            border: none;
-            border-radius: 8px;
-            cursor:pointer;
-        }
-
-        contentnewcomment button:hover{
-            background: #22a547;
-        }
-
-        contentnewcomment h4{
-            margin: 0;
-            color: #e8eaec;
-            font-size: 1.1rem;
-        }
-
-
-
-
-
-        contentnewissue{
-            display: flex;
-            justify-content: center;
-            gap: .5rem;
-            padding-top: 1rem;
-        }
-
-        contentnewissue input{
-            width: 100%;
-            border-radius: 5px;
-            outline: none;
-            padding-left: .2rem;
-            height: 25px;
-            border: 1px solid var(--bg-secondary-color-darker);
-        }
-
-        contentnewissue textarea{
-            width: 100%;
-            border-radius: 5px;
-            outline: none;
-            padding-left: .2rem;
-            height: 120px;
-            border: 1px solid var(--bg-secondary-color-darker);
-        }
-
-        contentnewissue h4{
-            margin:0px;
-        }
-
-
-
-        contentissuescogs{
-            position: relative;
-        }
-
-        contentissuescogs span{
-            position: absolute;
-            right: 5px;
-            top: -20px;
-        }
-
-        contentissuescogsinfo{
-            align-items: center;
-            justify-content: flex-end;
-            gap: 1rem;
-            display: flex;
-            position: absolute;
-            right: 5px;
-            background: #0d1117;
-            z-index: 99;
-            padding: .5rem;
-            border-radius: 5px;
-            box-shadow: 0px 3px 4px 1px #878787a6;
-        }
-
-        contentissuescogsinfo select{
-            border: 1px solid var(--bg-secondary-color-darker);
-            border-radius: 5px;
-            padding: 0.2rem;
-            
-        }
-
-        contentissuescogsinfo button{
-            background: #1c8139;
-            color: #fff;
-            padding: .5rem;
-            border: none;
-            border-radius: 8px;
-            cursor:pointer;
-        }
-
-        contentissuescogsinfo button:hover{
-            background: #22a547;
-        }
-
-
-
-        .contentloader{
-            background: #f5f5f5;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0px;
-            left: 0px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .loader {
-            width: 50px;
-            height: 28px;
-            --_g: no-repeat radial-gradient(farthest-side,#000 94%,#0000);
-            background:
-                var(--_g) 50%  0,
-                var(--_g) 100% 0;
-            background-size: 12px 12px;
-            position: relative;
-            animation: l23-0 1.5s linear infinite;
-        }
-        .loader:before {
-            content: "";
-            position: absolute;
-            height: 12px;
-            aspect-ratio: 1;
-            border-radius: 50%;
-            background: #000;
-            left:0;
-            top:0;
-            animation: 
-                l23-1 1.5s linear infinite,
-                l23-2 0.5s cubic-bezier(0,200,.8,200) infinite;
-        }
-        @keyframes l23-0 {
-            0%,31%  {background-position: 50% 0   ,100% 0}
-            33%     {background-position: 50% 100%,100% 0}
-            43%,64% {background-position: 50% 0   ,100% 0}
-            66%     {background-position: 50% 0   ,100% 100%}
-            79%     {background-position: 50% 0   ,100% 0}
-            100%    {transform:translateX(calc(-100%/3))}
-        }
-        @keyframes l23-1 {
-            100% {left:calc(100% + 7px)}
-        }
-        @keyframes l23-2 {
-            100% {top:-0.1px}
-        }
-    `;
 
 
 }

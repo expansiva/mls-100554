@@ -1,8 +1,8 @@
 /// <mls shortName="serviceWorkspace" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, repeat } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js'; 
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase'; 
+import { customElement, property, query } from 'lit/decorators.js';
+import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
 import './_100554_pluginGithubL4Project';
 import './_100554_pluginGithubL4Issues';
@@ -11,8 +11,6 @@ import './_100554_pluginGithubL4Issues';
 export class ServiceWorkspace100554 extends ServiceBase {
 
     @property() msize: string = '';
-
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() activeTab: string = 'ITasks';
 
@@ -48,8 +46,8 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
             ITasks: 'Tasks;f0ae',
             IBackLog: 'BackLog;e5a0',
-            IRequirements:'Requirements;f0a6',
-            IChat:'Chat;f086'
+            IRequirements: 'Requirements;f0a6',
+            IChat: 'Chat;f086'
 
         },
         actionDefault: '', // call after close icon clicked
@@ -64,7 +62,7 @@ export class ServiceWorkspace100554 extends ServiceBase {
     //------------COMPONENT-----------------
 
     firstUpdated() {
-        
+
     }
 
     updated(changedProperties: any) {
@@ -74,8 +72,8 @@ export class ServiceWorkspace100554 extends ServiceBase {
         if (!this.visible) return;
 
         const [w, h] = this.msize.split(',');
-        
-        
+
+
     }
 
     render() {
@@ -98,6 +96,11 @@ export class ServiceWorkspace100554 extends ServiceBase {
                 return html``;
         }
     }
+
+    createRenderRoot() {
+        return this;
+    }
+
 
     renderTasks() {
         return html`
@@ -127,5 +130,5 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
     //----------IMPLEMENTS------------------
 
-    
+
 }

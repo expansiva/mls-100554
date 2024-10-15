@@ -1,1 +1,393 @@
 //LESS
+plugin-github-l4-issues-100554 {
+
+    font-family: @font-family-primary;
+    font-size: @font-size-16;
+    font-weight: @font-weight-normal;
+    color: @text-primary-color;
+    background-color: @bg-primary-color;
+
+    display: block;
+    height: 100%;
+    position: relative;
+
+    backbutton {
+        width: 20px;
+        display: flex;
+        transform: rotate(180deg);
+        cursor: pointer;
+        margin-right: 15px
+    }
+
+    buttonnewissues {
+        background: #1c8139;
+        color: #fff;
+        padding: .5rem;
+        border: none;
+        border-radius: 8px;
+        display: flex;
+        height: 17px;
+        justify-content: center;
+        align-items: center;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    buttonnewissues:hover {
+        background: #22a547
+    }
+
+    contentlistissues {
+        display: flex;
+        flex-direction: column;
+        padding: .5rem;
+    }
+
+    contentlistitem {
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+        padding: .5rem;
+        border-radius: 10px;
+        border: 1px solid #393939;
+        box-shadow: #8b88881a 0px 4px 10px -3px;
+
+    }
+
+    contentlistitem:hover {
+        box-shadow: #ffffff96 0px 2px 8px -4px;
+    }
+
+    contentlistitem div {
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    contentlistitem h3 {
+        margin: 0;
+    }
+
+    contentlistitem span {
+        font-size: 1rem;
+        color:@text-primary-color;
+    }
+
+    contentlabels {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    contentlabels contentlabel {
+        border-radius: 18px;
+        min-width: 49px;
+        display: flex;
+        justify-content: center;
+        font-size: .95rem;
+        color: #fff;
+        padding: 0 .5rem;
+    }
+
+    contentshow {
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        padding: .5rem;
+    }
+
+    contentshow votethumbsup {
+        float: right;
+        cursor: pointer;
+        display: flex;
+    }
+
+    contentshow div {
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    contentshow h3 {
+        margin: 0;
+    }
+
+    contentshow span {
+        font-size: 1rem;
+        color: #969494;
+    }
+
+    contentshowcomments {
+        height: calc(100vh - 480px);
+        overflow-y: auto;
+        display: block;
+        padding-top: 2rem;
+        border-top: 1px solid #474748;
+        margin-top: 0.5rem;
+        border-bottom: 1px solid #474748;
+    }
+
+    contentshowcomments itemcomment {
+        display: flex;
+        gap: .5rem;
+        margin-bottom: 2rem;
+    }
+
+    contentshowcomments commentavatar {
+        display: block;
+    }
+
+    contentshowcomments commentavatar img {
+        width: 35px;
+        border-radius: 50%;
+        border: 1px solid #474748;
+    }
+
+    contentshowcomments boxcomment {
+        display: block;
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #5b6063;
+    }
+
+    contentshowcomments boxcommentheader {
+        display: flex;
+        align-items: center;
+        gap: .8rem;
+        background: #5b6063;
+        padding-left: .5rem;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        position: relative;
+    }
+
+    contentshowcomments boxcommentheader::before {
+        position: absolute;
+        width: 6px;
+        content: ' ';
+        height: 12px;
+        top: 8px;
+        left: -8px;
+        background: #5b6063;
+        clip-path: polygon(0 50%, 100% 100%, 100% 0);
+    }
+
+    contentshowcomments boxcommentheader h4 {
+        margin: 0px;
+    }
+
+    contentshowcomments boxcommentbody {
+        padding: 1rem;
+        display: block;
+    }
+
+    contentnewcomment {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        justify-content: center;
+        gap: .5rem;
+    }
+
+    contentnewcomment textarea {
+        border: 1px solid #ddddde;
+        width: 100%;
+        border-radius: 4px;
+        height: 150px;
+        outline: none;
+        padding: .5rem;
+    }
+
+    contentnewcomment div {
+        display: flex;
+        align-items: end;
+        justify-content: end;
+        gap: .5rem;
+    }
+
+    contentnewcomment button {
+        background: #1c8139;
+        color: #fff;
+        padding: .5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    contentnewcomment button:hover {
+        background: #22a547;
+    }
+
+    contentnewcomment h4 {
+        margin: 0;
+        color: #e8eaec;
+        font-size: 1.1rem;
+    }
+
+
+
+
+
+    contentnewissue {
+        display: flex;
+        justify-content: center;
+        gap: .5rem;
+        padding-top: 1rem;
+    }
+
+    contentnewissue input {
+        width: 100%;
+        border-radius: 5px;
+        outline: none;
+        padding-left: .2rem;
+        height: 25px;
+        border: 1px solid var(--bg-secondary-color-darker);
+    }
+
+    contentnewissue textarea {
+        width: 100%;
+        border-radius: 5px;
+        outline: none;
+        padding-left: .2rem;
+        height: 120px;
+        border: 1px solid var(--bg-secondary-color-darker);
+    }
+
+    contentnewissue h4 {
+        margin: 0px;
+    }
+
+
+
+    contentissuescogs {
+        position: relative;
+    }
+
+    contentissuescogs span {
+        position: absolute;
+        right: 5px;
+        top: -20px;
+    }
+
+    contentissuescogsinfo {
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+        display: flex;
+        position: absolute;
+        right: 5px;
+        background: #0d1117;
+        z-index: 99;
+        padding: .5rem;
+        border-radius: 5px;
+        box-shadow: 0px 3px 4px 1px #878787a6;
+    }
+
+    contentissuescogsinfo select {
+        border: 1px solid var(--bg-secondary-color-darker);
+        border-radius: 5px;
+        padding: 0.2rem;
+
+    }
+
+    contentissuescogsinfo button {
+        background: #1c8139;
+        color: #fff;
+        padding: .5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    contentissuescogsinfo button:hover {
+        background: #22a547;
+    }
+
+
+
+    .contentloader {
+        background: #f5f5f5;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loader {
+        width: 50px;
+        height: 28px;
+        --_g: no-repeat radial-gradient(farthest-side, #000 94%, #0000);
+        background:
+            var(--_g) 50% 0,
+            var(--_g) 100% 0;
+        background-size: 12px 12px;
+        position: relative;
+        animation: l23-0 1.5s linear infinite;
+    }
+
+    .loader:before {
+        content: "";
+        position: absolute;
+        height: 12px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: #000;
+        left: 0;
+        top: 0;
+        animation:
+            l23-1 1.5s linear infinite,
+            l23-2 0.5s cubic-bezier(0, 200, .8, 200) infinite;
+    }
+
+    @keyframes l23-0 {
+
+        0%,
+        31% {
+            background-position: 50% 0, 100% 0
+        }
+
+        33% {
+            background-position: 50% 100%, 100% 0
+        }
+
+        43%,
+        64% {
+            background-position: 50% 0, 100% 0
+        }
+
+        66% {
+            background-position: 50% 0, 100% 100%
+        }
+
+        79% {
+            background-position: 50% 0, 100% 0
+        }
+
+        100% {
+            transform: translateX(calc(-100%/3))
+        }
+    }
+
+    @keyframes l23-1 {
+        100% {
+            left: calc(100% + 7px)
+        }
+    }
+
+    @keyframes l23-2 {
+        100% {
+            top: -0.1px
+        }
+    }
+}
+
+
+
+

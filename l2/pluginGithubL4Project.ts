@@ -4,6 +4,7 @@ import { html, css, svg, TemplateResult, LitElement, repeat, unsafeHTML } from '
 import { query, property, customElement } from 'lit/decorators.js';
 import { getMyKeysBranch } from './_100554_libCommom';
 import * as gitIO from './_100554_libGithubIo';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 import 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.3/Sortable.min.js';
 
@@ -17,7 +18,7 @@ export const pluginData: mls.plugin.IPluginData = {
 };
 
 @customElement('plugin-github-l4-project-100554')
-export class PluginGithubL4Project extends LitElement {
+export class PluginGithubL4Project extends CollabLitElement {
 
     private repositoryId: string = '';
     private error: string = '';
@@ -41,8 +42,6 @@ export class PluginGithubL4Project extends LitElement {
     @property() viewIssue: gitIO.IItemProject | undefined;
     @property() addInStatus: string | undefined;
 
-
-
     @query('contentstatus') contentstatus: HTMLElement | undefined;
     @query('contentviewissue') contentviewissue: HTMLElement | undefined;
 
@@ -62,6 +61,10 @@ export class PluginGithubL4Project extends LitElement {
 
     firstUpdated() {
         this.setInfos();
+    }
+
+    createRenderRoot() {
+        return this;
     }
 
     render(): TemplateResult {
@@ -924,10 +927,6 @@ export class PluginGithubL4Project extends LitElement {
 
 
     }
-
-    //-------CSS----------------------
-
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     //-----ICONS------
 
