@@ -17,7 +17,6 @@ const message_en = {
     detailsHint: 'Details of the selected object on the page, - help , - widget settings like mutations (ica), - dynamic settings (wcd), please select an item on the page',
     selectPlugin: 'Please select a plugin IA',
     loading: 'Loading...'
-
 }
 
 type MessageType = typeof message_en;
@@ -76,12 +75,12 @@ export class ServicePage100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
+    
     }
 
     @property() activeTab: ITabType = 'icDetails';
     @property() pluginNav: string = '';
-    @property() pluginProp: string = '';
+    @property() pluginProp: string= '';
     @property() pluginsIA: { [key: string]: mls.plugin.MenuAction[] } = {};
     @property() pluginIALoaded: boolean = false;
 
@@ -117,12 +116,12 @@ export class ServicePage100554 extends ServiceBase {
     }
 
     renderNavigation() {
-        this.openService('_100554_servicePreview', 'right', 3);
+        // this.openService('_100554_servicePreview', 'right', 3);
         return html` ${this.pluginNav ? unsafeHTML(`<${this.pluginNav} .service=${this}></${this.pluginNav}>`) : `<div>${this.msg.loading}</div>`}`;
     }
 
     renderProperties() {
-        this.openService('_100554_servicePreview', 'right', 3);
+        // this.openService('_100554_servicePreview', 'right', 3);
         return html` ${this.pluginProp ? unsafeHTML(`<${this.pluginProp} .service=${this}></${this.pluginProp}>`) : `<div>${this.msg.loading}</div>`}`;
     }
 

@@ -36,6 +36,10 @@ export class PluginPageProperties extends PluginBaseModule {
         return true;
     }
 
+    createRenderRoot() {
+        return this;
+    }
+
     render() {
 
         const lang = this.getMessageKey(messages);
