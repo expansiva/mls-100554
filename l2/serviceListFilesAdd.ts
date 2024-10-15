@@ -1,9 +1,10 @@
 /// <mls shortName="serviceListFilesAdd" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase } from './_100554_serviceBase';
+import { CollabLitElement } from './_100554_collabLitElement';
 import { getAttributeDefinitionsLit, getFormComponentsDescription } from './_100554_icaBaseDescription';
 
 export const initServiceListFilesAdd = () => {
@@ -37,11 +38,9 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 @customElement('service-list-files-add-100554')
-export class ServiceListFilesAdd100554 extends LitElement {
+export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
-
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() level: number = -1;
     @property() error: string = '';
@@ -63,6 +62,10 @@ export class ServiceListFilesAdd100554 extends LitElement {
     private async init() {
         await this.getTemplates();
         this.loading = false;
+    }
+
+    createRenderRoot() {
+        return this;
     }
 
     render() {
