@@ -5,6 +5,7 @@ import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance } from './_100554_libCommom';
 
+
 /// **collab_i18n_start**
 const message_pt = {
     updateListVerify: "atualizar lista/verificar",

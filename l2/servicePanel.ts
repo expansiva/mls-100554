@@ -86,7 +86,11 @@ export class ServicePanel100554 extends ServiceBase {
         const [w, h] = this.msize.split(',');
         if (!this.servicePanel) return;
         this.servicePanel.style.height = h + 'px';
-        
+
+    }
+
+    createRenderRoot() {
+        return this;
     }
 
     render() {
@@ -101,7 +105,7 @@ export class ServicePanel100554 extends ServiceBase {
                 return this.renderSite();
             case 'IHistory':
                 return this.renderHistory();
-            
+
             default:
                 return html``;
         }

@@ -3,9 +3,10 @@
 import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertTagToFileName } from './_100554_utilsLit';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 @customElement('collab-panel-item-100554')
-export class CollabPanelItem extends LitElement {
+export class CollabPanelItem extends CollabLitElement {
 
     @property({ type: String, reflect: true }) widget: string  = '';
     @property({ type: String, reflect: true }) badge: string = '';
