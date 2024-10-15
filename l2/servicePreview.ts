@@ -209,7 +209,6 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onModelHTMLCreated(ev: mls.events.IEvent): void {
-
         try {
             if (!ev.desc) return;
             if (ev.level !== this.level) return;
@@ -429,9 +428,7 @@ export class ServicePreview100554 extends ServiceBase {
         const uri = this.getUri(`_${storFile.project}_${storFile.shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
         if (model) return model;
-        setTimeout(() => {
-            mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile));
-        }, 2000)
+        if (this.level !== 2) mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile));
         return model;
     }
 

@@ -428,7 +428,7 @@ export class ServiceSource100554 extends ServiceBase {
         const activeModel = mls.l2.editor.editors[this.confE];
         if (activeModel.project === storFile.project && activeModel.shortName === storFile.shortName) await this.createModelTS_testFile(); // show test file
         mls.l2.editor.remove(storFile);
-        this.removeEventsModelTS(storFile);
+        this.removeEventsStorFile(storFile);
         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
         delete mls.stor.files[keyFiles];
     }
@@ -455,7 +455,7 @@ export class ServiceSource100554 extends ServiceBase {
         model1.model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelChange(e, model1, storFile));
     }
 
-    private removeEventsModelTS(storFile: mls.stor.IFileInfo): void {
+    private removeEventsStorFile(storFile: mls.stor.IFileInfo): void {
         storFile.onAction = undefined;
         storFile.getValueInfo = undefined;
     }
@@ -705,13 +705,12 @@ export class ServiceSource100554 extends ServiceBase {
 
         await this.createModelTS_loading();
         this.activeThisService();
+
         let mfile = mls.l2.editor.get(storFileTS);
         if (!mfile) mfile = await this.createModelTS2(storFileTS, false, true);
-        this.renameTSFile(mfile, storFileTS, newProject, newShortName);
+        this.renameAllFiles(mfile, storFileTS, storFileHTML, storFileCss, newProject, newShortName);
 
         mls.l2.editor.editors[this.confE] = mfile;
-        this.renameHTMLOrCssFile(mfile, storFileHTML as mls.stor.IFileInfo, newProject, newShortName, '.html');
-        this.renameHTMLOrCssFile(mfile, storFileCss as mls.stor.IFileInfo, newProject, newShortName, '.less');
 
         (mls.actual[this.level] as any)[this.position] = {
             project: newProject,
@@ -751,7 +750,7 @@ export class ServiceSource100554 extends ServiceBase {
             await mls.l2.editor.compileAllProjectIfNeed(mls.actual[5].project as number, true, false);
             for await (const storFile of arr) {
                 mls.l2.editor.remove(storFile);
-                this.removeEventsModelTS(storFile);
+                this.removeEventsStorFile(storFile);
                 await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
                 await this.createModelTS2(storFile, false, true);
                 if (storFile.project === 100554) needMsg = true;
@@ -768,13 +767,13 @@ export class ServiceSource100554 extends ServiceBase {
 
 
     private async undoFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, storFileCss: mls.stor.IFileInfo | undefined, keyFileHTML: string, keyFileTS: string, keyFileCss: string) {
-
-        for await (let data of [{ storFile: storFileHTML, keyFiles: keyFileHTML }, { storFile: storFileTS, keyFiles: keyFileTS }, { storFile: storFileCss, keyFiles: keyFileCss }]) {
+        debugger;
+        for await (let data of [{ storFile: storFileHTML, keyFiles: keyFileHTML }, { storFile: storFileCss, keyFiles: keyFileCss }, { storFile: storFileTS, keyFiles: keyFileTS }]) {
 
             if (!data.storFile) continue;
             if (data.storFile.status === 'deleted') {
                 data.storFile.status = 'changed';
-                mls.events.fireFileAction('statusOrErrorChanged', data.storFile, this.position);
+
                 continue;
             }
 
@@ -785,15 +784,16 @@ export class ServiceSource100554 extends ServiceBase {
             if (data.storFile.extension === '.ts') {
                 // clear memory changes and localstor changes
                 const imFile = mls.l2.editor.editors[this.confE];
-                if (imFile.project === data.storFile.project && imFile.shortName === data.storFile.shortName) await this.createModelTS_testFile(); // show test file
+                if (imFile.project === data.storFile.project && imFile.shortName === data.storFile.shortName) await this.createModelTS_testFile(); // show test files
                 mls.l2.editor.remove(data.storFile);
-                this.removeEventsModelTS(data.storFile);
             }
 
+            this.removeEventsStorFile(data.storFile);
             await mls.stor.localStor.setContent(data.storFile, { contentType: 'string', content: null });
+
             if (data.storFile.status === 'new') {
                 delete mls.stor.files[data.keyFiles];
-                mls.events.fireFileAction('statusOrErrorChanged', data.storFile, this.position);
+                // mls.events.fireFileAction('statusOrErrorChanged', data.storFile, this.position);
                 continue;
             }
 
@@ -808,18 +808,16 @@ export class ServiceSource100554 extends ServiceBase {
                 data.storFile.status = 'changed';
             }
 
-            if (data.storFile.extension === '.ts') await this.createModelTS2(data.storFile, false, true);
-            else {
-                const uri = this.getUri(`_${data.storFile.project}_${data.storFile.shortName}`, '.html');
+            if (data.storFile.extension === '.less' || data.storFile.extension === '.html') {
+                const uri = this.getUri(`_${data.storFile.project}_${data.storFile.shortName}`, data.storFile.extension);
                 const model = monaco.editor.getModel(uri);
                 if (model) model.dispose();
-                //await this.createOrShowModelHtmlOrCss(data.storFile.shortName, data.storFile.project, false, '.html');
-                //await this.createOrShowModelHtmlOrCss(data.storFile.shortName, data.storFile.project, false, '.less');
             }
 
-            mls.events.fireFileAction('statusOrErrorChanged', data.storFile, this.position);
-
         };
+
+        await this.createModelTS2(storFileTS, false, true);
+        mls.events.fireFileAction('statusOrErrorChanged', storFileTS, this.position);
 
     }
 
@@ -868,10 +866,16 @@ export class ServiceSource100554 extends ServiceBase {
         }
     }
 
-    private renameTSFile(mfile: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): void {
+    private renameAllFiles(mfile: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, storFileHTML: mls.stor.IFileInfo | undefined, storFileCss: mls.stor.IFileInfo | undefined, newProject: number, newShortName: string): void {
+
         if (storFile.hasError) throw new Error('Error on rename, clear errors before rename');
         if (!this.isNewNameValid(newShortName)) throw new Error('Error on rename, new shortName is a invalid name');
+
         const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject };
+
+        this.renameHTMLOrCssFile(mfile, storFileHTML as mls.stor.IFileInfo, newProject, newShortName, '.html');
+        this.renameHTMLOrCssFile(mfile, storFileCss as mls.stor.IFileInfo, newProject, newShortName, '.less');
+
         if (!mls.l2.editor.rename(mfile, newSts)) throw new Error('Error on rename mls.l2.editor.mfiles');
         if (!mls.stor.renameFile(storFile, newSts)) throw new Error('Error on rename mls.stor.files');
         mls.common.tripleslash.changeVariable(mfile, 'shortName', newShortName);
@@ -1166,7 +1170,6 @@ export class ServiceSource100554 extends ServiceBase {
             await this.getOrCreateModelHtmlOrCss(storFile1.shortName, storFile1.project, ext, storFile1);
         }
 
-
         if (compile) await this.updateModelStatus(mfile, false);
         if (activedModel) mls.l2.editor.editors[this.confE] = mfile;
         return mfile;
@@ -1460,7 +1463,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const modelName = `model${ext === '.html' ? 'HTML' : 'LESS'}`
 
         let model = monaco.editor.getModel(uri);
-        if (model) return model;
+        if (model) {
+            if (this.visible === 'true') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify(storFile));
+            return model;
+        }
 
         const content = fileInfo ? fileInfo.content : await storFile.getContent();
         if (content instanceof Blob) throw new Error('less file must be string');
@@ -1468,6 +1474,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         const modelBase = await this.createModel(project, shortName, ext);
         if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}${ext}`);
+        if (this.visible === 'true') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify(storFile));
 
         model = modelBase.model;
 
@@ -1569,7 +1576,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     private async renameHTMLOrCssFile(mfile: mls.l2.editor.IMFile, storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, ext: '.html' | '.less') {
 
         if (!storFile) return;
+
+
         const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject };
+
         await this.getOrCreateModelHtmlOrCss(storFile.shortName, storFile.project, ext, storFile);
         if (!storFile.getValueInfo) return;
         const valueInfo = await storFile.getValueInfo();
@@ -1578,17 +1588,43 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const key = mls.stor.getKeyToFiles(newProject, this.level, newShortName, '', ext);
         const newStorFile = mls.stor.files[key];
         newStorFile.status = 'renamed';
-        if (ext === '.less') {
-            const modelStyle = (mfile as any)['modelLESS'];
-            mls.common.tripleslash.changeVariable(modelStyle, 'shortName', newShortName);
-            mls.common.tripleslash.changeVariable(modelStyle, 'project', newProject.toString());
-        }
-        await mls.stor.localStor.setContent(newStorFile, valueInfo);
+
+        //if (storFile.status === 'new') return;
+        //storFile.status = 'renamed';
+
+        // 
+
         setTimeout(async () => {
             const file = await this.createOrShowModelHtmlOrCss(newStorFile.shortName, newStorFile.project, false, ext, valueInfo);
+            if (ext === '.less') {
+                const modelStyle = (mfile as any)['modelLESS'];
+                this.tripleslashChangeVariable(modelStyle, 'shortName', newShortName);
+                this.tripleslashChangeVariable(modelStyle, 'project', newProject.toString());
+            }
+            await mls.stor.localStor.setContent(newStorFile, valueInfo);
             if (status === 'new') file.status = status;
         }, 500);
 
+    }
+
+    private tripleslashChangeVariable = (
+        model: monaco.editor.ITextModel,
+        variableName: string,
+        newValue: string
+    ): boolean => {
+        debugger;
+        const lines: string[] = (model.getValue() || '').split('\n');
+        const line = lines[0];
+        if (!line.startsWith('/// <')) throw new Error('line must start with "/// <" (triple slash and xml');
+
+        const regex = new RegExp(`(${variableName}\\s*=\\s*["'])([^"']*)`, "i");
+        const match = line.match(regex);
+
+        if (!match) return false;
+
+        lines[0] = line.replace(regex, `$1${newValue}`);
+        model.setValue(lines.join(('\n')));
+        return true;
     }
 
     private isReadOnlyArea(lineNumber: number): boolean {
@@ -1963,7 +1999,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             const storFile = mls.stor.files[keyStorFile];
             if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile)
             await this.getOrCreateModelHtmlOrCss(storFile.shortName, storFile.project, '.html', storFile);
-            mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, ev.desc);
         } catch (err: any) {
             throw new Error(err);
         }
