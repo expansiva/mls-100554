@@ -1,15 +1,17 @@
 /// <mls shortName="wcInputNumberWithButtons" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { html, LitElement, ifDefined, css } from 'lit';
+
+import { html, ifDefined } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
 import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
 
 @customElement('wc-input-number-with-buttons-100554')
 export class WCInputNumber extends IcaFormsInputNumberBase {
-    
-    @propertyDataSource({ type: String }) datasource: number | undefined;
+
 
     @property({ type: String }) name: string | undefined;
+
+    @propertyDataSource({ type: String }) datasource: number | undefined;
 
     @property({ type: String }) placeholder: string | undefined;
 
@@ -90,7 +92,6 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
         if (!isNaN(newval) && (this.maxvalue === undefined || (newval <= this.maxvalue))) {
             this.datasource = newval;
         }
-
     }
 
     private handleChange() {
