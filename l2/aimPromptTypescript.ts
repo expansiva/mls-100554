@@ -5,6 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { collab_arrow_up_long } from './_100554_collabIcons';
 import { readTasks } from "./_100554_aimHelper"
 import './_100554_aimPromptExample';
+import './_100554_aimPromptTypescript';
 import './_100554_aimActionUpdateLit';
 import './_100554_aimActionList';
 import './_100554_aimList';
@@ -40,7 +41,6 @@ const messages: { [key: string]: MessageType } = {
 @customElement('aim-prompt-typescript-100554')
 export class aimPromptTypeScript extends IcaLitElement {
 
-    static style = css`[[mls_getDefaultDesignSystem]]`;
 
     private msg: MessageType = messages['en'];
 
