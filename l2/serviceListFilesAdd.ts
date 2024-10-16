@@ -159,7 +159,6 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
         try {
 
-            if (!this.shadowRoot) return;
             if (!this.inputShortName) return;
             if (!this.father) return;
 

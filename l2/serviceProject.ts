@@ -1,7 +1,7 @@
 /// <mls shortName="serviceProject" project="100554" enhancement="_100554_enhancementLitService" groupName="other" />
 
 import { html, css, repeat } from 'lit';
-import { customElement, property, query, } from 'lit/decorators.js';
+import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { collab_user } from './_100554_collabIcons';
 import { getAllWebComponentsInSource } from './_100554_libCompile';
@@ -37,6 +37,8 @@ export class ServiceProject100554 extends ServiceBase {
     @query('#projectDiv') projectDiv: HTMLDivElement | undefined;
 
     @query('details') firstDetails: HTMLDetailsExplore | undefined;
+
+    @queryAll('.plugin-container') allContainers: HTMLDivElement[] | undefined;
 
     createRenderRoot() {
         return this;
@@ -112,9 +114,14 @@ export class ServiceProject100554 extends ServiceBase {
     private lastLevel: number = 0;
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+
         if (this.visible && this.lastLevel !== this.level) {
             this.lastLevel = this.level;
             this.updateIconsByLevel(this.lastLevel);
+        }
+
+        if (this.visible) {
+            this.refreshPlugins();
         }
     }
 
@@ -126,6 +133,14 @@ export class ServiceProject100554 extends ServiceBase {
         `;
     }
 
+    private refreshPlugins() {
+
+        this.allContainers?.forEach((item) => {
+            const plg = item.children[0];
+            if (plg) plg.setAttribute('mode', 'list');
+        })
+        
+    }
 
     private updateIconsByLevel(level: number) {
         if (!this.menu || !this.menu.refresh) return;
@@ -185,7 +200,7 @@ export class ServiceProject100554 extends ServiceBase {
             return html`
                         <details ?open=${index === 0} .data=${explorie} @click=${this.handleDetailExplorieClick}>
                             <summary>${explorie.category}</summary>
-                            <div></div>
+                            <div class="plugin-container"></div>
                         </details>
                     `
         })

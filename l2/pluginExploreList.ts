@@ -66,6 +66,8 @@ export class PluginExploreList extends PluginBaseModule {
 
     @property() mode: string = 'list';
 
+    @property() refresh: string = '';
+
     @property() position: string = 'left';
 
     @property() levelFiles: number = 2;
@@ -148,11 +150,15 @@ export class PluginExploreList extends PluginBaseModule {
         if (![1, 2, 3, 4, 5].includes(ev.level) || (ev.type !== 'FileAction')) return;
         const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
         if (
-            /*fileAction.position !== this.position ||*/
             !['statusOrErrorChanged', 'projectListChanged', 'new'].includes(fileAction.action) ||
             fileAction.project === 0
         ) return;
-        this.init();
+
+        setTimeout(() => {
+            this.init();
+
+        }, 1000);
+
 
     }
 
@@ -538,6 +544,8 @@ export class PluginExploreList extends PluginBaseModule {
 
     private async init() {
 
+        console.info(`passei no init ${this.position}`)
+
         this.info.tot = 0;
         this.info.version = 0;
         this.info.storage = 0;
@@ -689,10 +697,13 @@ export class PluginExploreList extends PluginBaseModule {
 
     private async getFiles() {
 
+        console.info(`passei no getFiles ${this.position}`)
+
         try {
             const arraySf: mls.stor.IFileInfo[] = this.getFilesProject();
             const arraySfHistory: mls.stor.IFileInfo[] = await this.getFileHistory();
             this.files = [...arraySf];
+            console.info(this.files);
             this.history = [...arraySfHistory];
         } catch (e) {
             console.info(e);
