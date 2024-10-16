@@ -544,8 +544,6 @@ export class PluginExploreList extends PluginBaseModule {
 
     private async init() {
 
-        console.info(`passei no init ${this.position}`)
-
         this.info.tot = 0;
         this.info.version = 0;
         this.info.storage = 0;
@@ -697,13 +695,10 @@ export class PluginExploreList extends PluginBaseModule {
 
     private async getFiles() {
 
-        console.info(`passei no getFiles ${this.position}`)
-
         try {
             const arraySf: mls.stor.IFileInfo[] = this.getFilesProject();
             const arraySfHistory: mls.stor.IFileInfo[] = await this.getFileHistory();
             this.files = [...arraySf];
-            console.info(this.files);
             this.history = [...arraySfHistory];
         } catch (e) {
             console.info(e);
