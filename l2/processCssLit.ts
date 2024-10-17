@@ -29,9 +29,21 @@ export async function injectStyleWithoutShadowRoot(mfile: mls.l2.editor.IMFile, 
         if (!newJs || !newJs.trim().startsWith('/// <mls')) return;
         mfile.compilerResults.prodJS = newJs;
         mls.stor.cache.clearObsoleteCache();
-        mfile.compilerResults.cacheVersion = (Math.floor(Math.random() * 99999).toString());
+        mfile.compilerResults.cacheVersion = generateCompactTimestamp();
         mls.stor.cache.AddMfileIfNeed(mfile);
     }
+}
+
+function generateCompactTimestamp() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-based, so +1
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+  return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
 }
 
 function addLineInConstructor(code: string, lineToAdd: string): string {

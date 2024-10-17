@@ -11,6 +11,7 @@ export class WcImage100554 extends IcaApresentationImagesImagesBase {
     @property() alt: string | undefined;
     @property() width: string | undefined;
     @property() height: string | undefined;
+    
 
     render() {
         return html`
