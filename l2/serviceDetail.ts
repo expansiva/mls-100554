@@ -133,6 +133,46 @@ export class ServiceDetail100554 extends ServiceBase {
 
     private setEvents(): void {
         mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['PluginDetails'], (ev) => this.onPluginDetails(ev));
+        mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
+        mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
+    }
+
+    private onMonacoEvents(ev: mls.events.IEvent): void {
+
+        if (!ev.desc) return;
+        const args: mls.events.IMonacoAction = JSON.parse(ev.desc);
+        if (!args) return;
+        const { action, position } = args;
+
+        if (position === this.position) return;
+        if (action !== 'helpAssistant') return;
+        if (!args.codeLenCommand?.refs) return;
+
+        this.openMe();
+        mls.actual[0].setFullName(args.codeLenCommand.refs);
+        const { project, path } = mls.actual[0];
+        if (!path || !project) return;
+        const info: mls.events.IPluginDetail = {
+            project,
+            shortName: path,
+        };
+        this.showPluginContent(info);
+
+    }
+
+    private async onFileActionReceived(ev: mls.events.IEvent) {
+
+        if (!ev.desc) return;
+        const params: mls.events.IFileAction = JSON.parse(ev.desc);
+        if (params.action !== 'fileReference') return;
+        const info: mls.events.IPluginDetail = {
+            project: 100554,
+            shortName: 'pluginCodelensFileReferences',
+            htmlText: `<plugin-codelens-file-references-100554 project=${params.project} shortname=${params.shortName} position=${params.position}></plugin-codelens-file-references-100554>`
+        };
+        this.openMe();
+        this.showPluginContent(info);
+
     }
 
     private onPluginDetails(ev: mls.events.IEvent) {
@@ -146,7 +186,7 @@ export class ServiceDetail100554 extends ServiceBase {
         // show htmlText or plugin html
         if (!info.project || !info.shortName) {
 
-            if(!info.htmlText) throw new Error(`Error on PluginDetails events, invalid data: ${info.project} ${info.shortName}`);
+            if (!info.htmlText) throw new Error(`Error on PluginDetails events, invalid data: ${info.project} ${info.shortName}`);
         }
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
         const content: string = info.htmlText ? info.htmlText : await this.getHtmlFromPlugin(info);

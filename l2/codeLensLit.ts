@@ -10,7 +10,6 @@ export function setCodeLens(mfile: mls.l2.editor.IMFile) {
     const { decorators } = compilerResults as any;
     if (mfile.shortName === 'enhancementLit' && mfile.project === 100554) return;
     setCodeLensDecoratorClass(model, decorators);
-    setCodeLensMlsComponents(model, mfile);
     setCodeLensServiceDetails(model, mfile);
 }
 
@@ -30,7 +29,7 @@ function setCodeLensDecoratorClass(model: monaco.editor.ITextModel, decorators: 
         if (!decoratorInfo || decoratorInfo.type !== 'ClassDeclaration') return;
         decoratorInfo.decorators.forEach((_decorator) => {
             if (_decorator.text.startsWith('customElement(')) {
-                mls.l2.codeLens.addCodeLen(model, _decorator.line + 1, { id: 'helpAssistant', title: `customElement`, jsComm: '', refs: 'codelens-custom-element-100554' });
+                mls.l2.codeLens.addCodeLen(model, _decorator.line + 1, { id: 'helpAssistant', title: `customElement`, jsComm: '', refs: '_100554_pluginCodelensCustomElement' });
             }
         })
     })
@@ -39,56 +38,10 @@ function setCodeLensDecoratorClass(model: monaco.editor.ITextModel, decorators: 
 async function setCodeLensServiceDetails(model: monaco.editor.ITextModel, mfile: mls.l2.editor.IMFile) {
     const lines = findLinesByText(model, 'public details: IService');
     lines.forEach((line) => {
-        mls.l2.codeLens.addCodeLen(model, line, { id: 'helpAssistant', title: `serviceDetails`, jsComm: '', refs: 'codelens-service-details-100554' });
+        mls.l2.codeLens.addCodeLen(model, line, { id: 'helpAssistant', title: `serviceDetails`, jsComm: '', refs: '_100554_pluginCodelensServiceDetails' });
     });
 }
 
-async function setCodeLensMlsComponents(model: monaco.editor.ITextModel, mfile: mls.l2.editor.IMFile) {
-
-    const errorInfo = {
-        line: 0,
-        start: 0,
-        end: 0,
-    }
-
-    const lines = findLinesByText(model, '@mlsComponentDetails');
-
-    lines.forEach((line) => {
-
-        errorInfo.line = line;
-        mls.l2.codeLens.addCodeLen(model, line, { id: 'helpAssistant', title: `mlsComponentDetails`, jsComm: '', refs: 'codelens-component-details-100554' });
-    });
-
-    const mModule = await mls.l2.enhancement.getEnhancementInstance(mfile);
-    if (!mModule) return;
-    const obj = await mModule.getDesignDetails(mfile);
-
-    let hasError = lines.length > 1 ? 'only one dependency declaration is valid.' : '';
-
-    if (!hasError) {
-        for (let i of obj.webComponentDependencies) {
-
-            if (!(mls.l2.editor as any).mfiles[i]) {
-                hasError = i;
-                break;
-            }
-
-        }
-    }
-
-    if (hasError) {
-
-        mfile.storFile.hasError = true;
-        const text = model.getLineContent(errorInfo.line);
-        errorInfo.end = text.length;
-        setErrorOnModel(model, errorInfo.line, errorInfo.start, errorInfo.end, hasError.startsWith('onl') ? hasError : `Not found dependence: ${hasError}`, monaco.MarkerSeverity.Error)
-
-        mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
-        mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
-    }
-
-
-}
 
 function findLinesByText(model: monaco.editor.ITextModel, textToFind: string): number[] {
     const lines: number[] = [];
