@@ -3,7 +3,6 @@
 import { html, unsafeHTML } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import { collabState } from './_100554_collabLitElement';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import * as tps from './_100554_icaTypes';
@@ -19,10 +18,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
     abstract getActionsTags(): tps.ActionTag[];
 
     public overlayRef: HTMLElement | undefined;
-
-    @property({ type: String })
-    @collabState(globalIca.CHANGESTATE)
-    private changeState: string = '';
 
     @property({ type: String, reflect: true })
     public widget: string | undefined;
@@ -58,14 +53,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
     connectedCallback(): void {
         super.connectedCallback();
         this.setInitialConfigs();
-    }
-
-    shouldUpdate(changedProperties: Map<string, string>): boolean {
-        if (changedProperties.get('changeState') !== undefined && this.changeState && this.renderType === 'editactive') {
-            this.doChangeState(this.changeState);
-            return false;
-        }
-        return true;
     }
 
     attributeChangedCallback(
