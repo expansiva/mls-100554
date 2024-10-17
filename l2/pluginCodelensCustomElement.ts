@@ -40,7 +40,6 @@ class MyCustomElement extends LitElement {
     
 }
     `
-
     render() {
 
         const lang = this.getMessageKey(messages);

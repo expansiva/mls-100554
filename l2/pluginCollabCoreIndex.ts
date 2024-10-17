@@ -226,6 +226,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginPageAIVerify'
             },
+            {
+                category: 'Results',
+                scope: ['l2PreviewResults'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginPreviewResultJs'
+            },
         ];
     }
 
