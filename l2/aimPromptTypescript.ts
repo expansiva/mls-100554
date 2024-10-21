@@ -5,9 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { collab_arrow_up_long } from './_100554_collabIcons';
 import { readTasks } from "./_100554_aimHelper"
 import './_100554_aimPromptExample';
-import './_100554_aimPromptTypescript';
 import './_100554_aimActionUpdateLit';
-import './_100554_aimActionList';
 import './_100554_aimList';
 import { IcaLitElement, propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
 import { add as addActionUpdateLit } from './_100554_aimActionUpdateLit';
