@@ -1,59 +1,99 @@
-/// <mls shortName="cssTokens" project="100554" enhancement="enhancementStyle" />
+/// <mls shortName="pluginStyleBackground" project="100554" enhancement="enhancementStyle" />
 
-css-tokens-100554 {
-  font-family: @font-family-primary;
-  font-size: @font-size-16;
-  font-weight: @font-weight-normal;
-  line-height: 1.5;
-  color: @text-primary-color;
-  background-color: @bg-primary-color;
+plugin-style-background-100554 {
+    
+    font-family: @font-family-primary;
+    font-size: @font-size-16;
+    display: block;
+    width: 100%;
 
-  >div {
-    padding: .5rem;
-  }
+    input,
+    select,
+    textarea {
+        display: block;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #000000;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        outline: none;
+    }
 
-  .tokens-container {
-    text-transform: uppercase;
-    font-size: @font-size-12;
-    color: @text-primary-color-darker;
-    margin-bottom: 1rem;
-  }
+    input[type="range"] {
+        width: 100%;
+    }
 
-  .tokens-content {
-    display: flex;
-    flex-wrap: wrap;
+    input[type="color"] {
+        min-width: 40px;
 
-  }
+    }
 
-  .token {
-    display: flex;
-    flex-direction: row;
-  }
+    .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
 
-  .token-item {
-    height: 45px;
-    width: 45px;
-    cursor: pointer;
-  }
+        .showtransparent {
+            content: ' ';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            z-index: 0;
+            background-image: linear-gradient(45deg, hsl(0, 0%, 80%) 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
 
+        .showres {
+            width: 100%;
+            height: 250px;
+            z-index: 1;
+            position: relative;
+
+        }
+
+        .showConfigContainer {
+            margin-top: -70px;
+            width: 80%;
+            min-height: 250px;
+            z-index: 2;
+            position: relative;
+            background: white;
+            border-radius: 5px;
+            padding: 1rem;
+            border: 1px solid #dfe1e6;
+            display: flex;
+            flex-wrap: wrap;
+
+            .showConfig {
+                min-width: 50%;
+                padding: .5rem;
+                flex: 1;
+
+                .showConfigItem {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+
+                    .active {
+                        background: #c6c5c5;
+                        color: #191919;
+                    }
+                }
+            }
+        }
+    }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

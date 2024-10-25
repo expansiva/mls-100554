@@ -19,8 +19,3 @@ export class IcaPageMedium100554 extends CollabPageElement {
 
 }
 
-
-
-
-
-

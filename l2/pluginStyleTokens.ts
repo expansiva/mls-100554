@@ -1,9 +1,11 @@
-/// <mls shortName="cssTokens" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="pluginStyleTokens" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
+import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'
-import { getDSInstance, DesignSystemIO, ITokenInfo } from './_100554_libDesignSystem';
+import { IcaLitElement } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_icaLitElement';
+import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
+import { IBlockLessLine } from './_100554_enhancementStyle';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -22,19 +24,22 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
+export const tags = ['color:@*', 'background-color:@*', 'background:@*'];
 
-@customElement('css-tokens-100554')
-export class PluginCssTokens extends CollabLitElement {
+@customElement('plugin-style-tokens-100554')
+export class PluginCssTokens extends IcaLitElement {
 
     private msg: MessageType = messages['en'];
 
-    @property({ type: Boolean }) autoPrepare: boolean = false;
+    @propertyDataSource() state: IStateStyle | undefined;
 
     @property() position: 'left' | 'right' = 'left';
 
     @property() level: number = 0;
 
-    @property() filter: string = '';
+    @property({ reflect: true }) prop: string = '';
+
+    @property({ reflect: true }) value: string = '';
 
     @property() theme: string = 'Default';
 
@@ -57,7 +62,8 @@ export class PluginCssTokens extends CollabLitElement {
         const resumeTokensByTheme = this.dsInstance.tokens.list[this.theme];
         if (!resumeTokensByTheme) return undefined;
         const tokensColorKeys = Object.keys(resumeTokensByTheme.color);
-        const res = tokensColorKeys.filter((key) => !key.startsWith('_dark') && key.startsWith(this.filter)).map((key2) => {
+        const filter = this.value.startsWith('@') ? this.value.substring(1, this.value.length) : this.value;
+        const res = tokensColorKeys.filter((key) => !key.startsWith('_dark') && key.indexOf(filter) > -1).map((key2) => {
             return {
                 key: key2,
                 value: resumeTokensByTheme.color[key2]
@@ -100,9 +106,7 @@ export class PluginCssTokens extends CollabLitElement {
     }
 
     handleColorClick(key: string, value: string) {
-
         console.info({ key, value });
-
     }
 
     setTooltip() {
@@ -123,13 +127,23 @@ export class PluginCssTokens extends CollabLitElement {
         if (changedProperties.has('tokens')) {
             this.setTooltip();
         }
-        if (changedProperties.has('filter')) {
+        if (changedProperties.has('value')) {
             this.getTokens();
         }
     }
 
-    async firstUpdated() {
+    async firstUpdated(a: any) {
+        super.firstUpdated(a)
         this.getTokens();
+    }
+
+    handleIcaStateChange(key: string, value: IStateStyle) {
+
+        if (key !== 'style' || !value || value.position !== this.position) return;
+        const { lineKey, lineValue } = value;
+        this.prop = lineKey;
+        this.value = lineValue;
+
     }
 
     render() {
@@ -164,4 +178,13 @@ export class PluginCssTokens extends CollabLitElement {
     }
 
 
+}
+
+interface IStateStyle {
+    lines: IBlockLessLine[]
+    selector: string
+    lineNumber: number
+    lineKey: string
+    lineValue: string,
+    position: 'left' | 'right'
 }

@@ -2,7 +2,7 @@
 
 // typescript new file
 import { getDSInstance } from './_100554_libDesignSystem';
-import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
+// import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
 
 export const getDependenciesByHtml = (mfile: mls.l2.editor.IMFile, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
@@ -56,7 +56,7 @@ async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, ht
     if (!tags.includes(tag)) tags.push(tag);
 
     tags = await getTagsInTypescript(mfile, tags);
-    const globalCss = await getGlobalCss(mfile, theme);
+    // const globalCss = await getGlobalCss(mfile, theme);
 
     await loadMyNeedsToCompile(
         tags,
@@ -76,7 +76,7 @@ async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, ht
         importsMap: myImportsMap,
         importsJs: myImports,
         css: myCss,
-        globalCss,
+        globalCss: '',
         tokens: myTokens,
         errors: myErrors
     }
@@ -142,7 +142,7 @@ async function loadMyNeedsToCompile(
         await getJS(myImports, enhacementName, ipath, myModules);
 
         if (compileCss) {
-            await getCss(myCss, name, ipath, theme);
+            // await getCss(myCss, name, ipath, theme);
             await getCssL2(myCss, ipath, theme);
         }
         await getTokens(myTokens, ipath, theme);
@@ -227,23 +227,23 @@ async function getCss(myCss: string[], fullName: string, mfile: mls.cbe.IPath, t
 
 async function getCssL2(resCss: string[], ipath: mls.cbe.IPath, theme: string) {
 
-    const mfile = mls.l2.editor.get(ipath);
-    if (!mfile) return;
-    const modelHTML = (mfile as any).modelHTML;
-    if (!modelHTML) return;
-    const html = modelHTML.getValue() || '';
-    const components = getAllWebComponentsInSource(html);
+    // const mfile = mls.l2.editor.get(ipath);
+    // if (!mfile) return;
+    // const modelHTML = (mfile as any).modelHTML;
+    // if (!modelHTML) return;
+    // const html = modelHTML.getValue() || '';
+    // const components = getAllWebComponentsInSource(html);
 
-    for await (let component of components) {
-        const fileName = convertTagToFileName(component);
-        mls.actual[0].setFullName(fileName);
-        const shortName = mls.actual[0].path;
-        const project = mls.actual[0].project;
-        if (!shortName || !project) continue;
+    // for await (let component of components) {
+    //     const fileName = convertTagToFileName(component);
+    //     mls.actual[0].setFullName(fileName);
+    //     const shortName = mls.actual[0].path;
+    //     const project = mls.actual[0].project;
+    //     if (!shortName || !project) continue;
 
-        const styleC = await compileStyleUsingStorFile(shortName, project, theme);
-        if (styleC) resCss.push(styleC);
-    }
+    //     const styleC = await compileStyleUsingStorFile(shortName, project, theme);
+    //     if (styleC) resCss.push(styleC);
+    // }
 
 }
 

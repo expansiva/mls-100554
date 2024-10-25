@@ -151,11 +151,14 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       this.open = !this.open;
       if (this.open) {
         rightPane.classList.remove('closed');
+        rightPane.style.display = 'block';
+
         this.setFixedValueInPx();
         this.style.setProperty('--right-pane-width', this.actualfixedwidth + 'px');
       } else {
         this.actualfixedwidth = '0';
         rightPane.classList.add('closed');
+        rightPane.style.display = 'none';
         this.style.setProperty('--right-pane-width', '0px');
       }
       this.updatePanelsMSize();
@@ -170,7 +173,6 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
 
     children.forEach(child => {
       const slotName = child.getAttribute('slot');
-
       if (slotName === 'left' && leftPane) {
         leftPane.appendChild(child);
       } else if (slotName === 'right' && rightPane) {
@@ -198,9 +200,10 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
                       <i>${collab_chevron_right}</i>          
                   </div>
               </div>
-              <div class="right-pane ${this.fixedvisible === 'closed' ? "closed" : ""}"></div>`
+              `
         :
-        html``}
+      html``}
+      <div class="right-pane ${this.fixedvisible === 'closed' ? "closed" : ""}"></div>
       <style>${this.styles}</style>
     `;
   }
@@ -262,6 +265,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       width: var(--right-pane-width, var(--fixed-width));
     }
     collab-spliter-horizontal-var-fixed-100554 > .right-pane.closed {
+      display:none;
       transition: width 0s;
       width: 0;
     }

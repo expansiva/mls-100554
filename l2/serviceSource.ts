@@ -6,7 +6,7 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
-import { getAddNewFileDetails, removeTokensFromSource, getTokensLess } from './_100554_enhancementStyle';
+import { getAddNewFileDetails, removeTokensFromSource, getTokensLess, IMonacoModelStyle } from './_100554_enhancementStyle';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -697,6 +697,12 @@ export class ServiceSource100554 extends ServiceBase {
 
         this.saveLocalStorageLastOpen(storFileTS, position);
         if (!this._ed1) return;
+
+        const enhancementInstanceLess = await import('./_100554_enhancementStyle');
+        let mfile = mls.l2.editor.get(storFileTS);
+        const modelStyle = (mfile as any).modelLESS;
+        enhancementInstanceLess.setModelAPI(this._ed1, modelStyle);
+        
         this.restaureViewState();
     }
 
@@ -962,6 +968,31 @@ export class ServiceSource100554 extends ServiceBase {
                     const { lineNumber } = position;
                     const isReadOnlyArea = this.isReadOnlyArea(lineNumber);
                     this._ed1.updateOptions({ readOnly: isReadOnlyArea });
+                    if (!isReadOnlyArea) {
+                        const model = this._ed1.getModel();
+                        if (model) {
+                            const mmodel = model as IMonacoModelStyle;
+                            const validPosition = mmodel.isCursorInBlockValid();
+                            if (validPosition) {
+                                const info = mmodel.getLessBlock();
+                                if (!info) return;
+                                const actualLine = info.lines.find((line) => line.line === lineNumber);
+                            
+                                const rc = {
+                                    lines: info.lines,
+                                    selector: info.selector,
+                                    lineNumber,
+                                    lineKey: actualLine?.key || '',
+                                    lineValue: actualLine?.value || '',
+                                    position: this.position
+                                }
+                                window.globalStateManagment.setState('style', rc);
+                                mls.events.fire([2], 'styleLineChanged' as any, JSON.stringify(rc), 0);
+                            }
+                        }
+
+                        
+                    }
                     return;
                 }
 
@@ -1545,6 +1576,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (ext === '.less') {
                 const enhancementInstanceLess: mls.l2.enhancement.IEnhancementInstance | undefined = await import('./_100554_enhancementStyle')
                 if (enhancementInstanceLess) await enhancementInstanceLess.onAfterChange(mfile);
+
                 modelValue = removeTokensFromSource(modelValue);
                 mls.l2.editor.forceModelUpdate(mfile.model);
             }
@@ -1659,6 +1691,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
     }
 
+    connectedCallback() {
+        super.connectedCallback();
+        if (!window.globalState) window.globalState = {}
+        window.globalState.style = {}
+    }
+
     firstUpdated(changedProperties: any) {
         super.firstUpdated(changedProperties);
         this.registerProviderHTML();
@@ -1675,7 +1713,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                     fixedvisible=${this.mode !== 'icStyle' ? 'hidden' : `${this.panelRightOpened === true ? 'visible' : 'closed'}`} 
                 >
                     <mls-editor-100529 slot="left"></mls-editor-100529>
-                    <div slot="right" style="height:100%;"></div>
+                    <css-helper-index-100554 state="{{ style }}" slot="right" position=${this.position} style="height:100%;"></css-helper-index-100554>
                     
                 </collab-spliter-horizontal-var-fixed-100554>
 

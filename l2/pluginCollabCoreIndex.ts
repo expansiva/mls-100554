@@ -233,6 +233,42 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginPreviewResultJs'
             },
+
+            {
+                category: 'Background',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleBackground'
+            },
+            {
+                category: 'Border',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleBorder'
+            },
+            {
+                category: 'Clippath',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleClippath'
+            },
+            {
+                category: 'Text Shadow',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleTextShadow'
+            },
+            {
+                category: 'Tokens',
+                scope: ['l2StyleHelper'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginStyleTokens'
+            },
         ];
     }
 

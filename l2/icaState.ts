@@ -65,7 +65,6 @@ export class IcaState {
       this.notify(key);
     }
   }
-
   /**
    * Retrieve state for a given key.
    * @param key - The state key.
@@ -83,7 +82,6 @@ export class IcaState {
    */
   subscribe(keyOrKeys: string | string[], component: Object): void {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
-
     keys.forEach((key) => {
       if (!this.componentMap.has(key)) {
         this.componentMap.set(key, new Set());
@@ -109,7 +107,8 @@ export class IcaState {
    * Notify subscribed components about a state change.
    * @param key - The state key that changed.
    */
-  private notify(key: string): void {
+  notify(key: string): void {
+
     Array.from(this.componentMap).find((map) => {
       const [stateKey, arr] = map;
       const path = stateKey.split(';')[1];
@@ -121,6 +120,7 @@ export class IcaState {
       });
     })
   }
+
 
   /**
    * Get statistics about current state keys and their subscribers.

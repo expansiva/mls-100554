@@ -2,7 +2,7 @@
 
 import { state1 } from './_100554_icaDecorators';
 import { CollabLitElement } from './_100554_collabLitElement';
-
+import { PropertyValueMap } from 'lit';
 export * from './_100554_icaDecorators';
 
 const isTrace = false;
@@ -27,6 +27,14 @@ export abstract class IcaLitElement extends CollabLitElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     state1.unsubscribe(Array.from(this.stateKeys), this);
+  }
+
+  firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
+    super.firstUpdated(_changedProperties);
+    Array.from(this.stateKeys).forEach((stateKey) => {
+      const [state, key] = stateKey.split(';');
+      state1.notify(key);
+    });
   }
 
   /**
