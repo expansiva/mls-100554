@@ -839,7 +839,7 @@ export class PluginGithubL4Project extends CollabLitElement {
     }
 
     private openMyChild(e: MouseEvent) {
-
+        debugger;
         let el = e.target as HTMLElement;
         let open: string | null | undefined = el.getAttribute('open');
 
@@ -848,7 +848,7 @@ export class PluginGithubL4Project extends CollabLitElement {
             if (!open) return;
         }
 
-        const elsOpen = this.shadowRoot?.querySelectorAll('*[child]');
+        const elsOpen = this.querySelectorAll('*[child]');
 
         if (!elsOpen) return;
 
@@ -883,7 +883,7 @@ export class PluginGithubL4Project extends CollabLitElement {
 
         if ((window['Sortable' as any] as any)) {
 
-            const columns = this.shadowRoot?.querySelectorAll('contentst');
+            const columns = this.querySelectorAll('contentst');
 
             if (!columns) return;
 
