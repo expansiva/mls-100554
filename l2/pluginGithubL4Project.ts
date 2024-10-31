@@ -839,7 +839,7 @@ export class PluginGithubL4Project extends CollabLitElement {
     }
 
     private openMyChild(e: MouseEvent) {
-        debugger;
+
         let el = e.target as HTMLElement;
         let open: string | null | undefined = el.getAttribute('open');
 
