@@ -702,7 +702,7 @@ export class ServiceSource100554 extends ServiceBase {
         let mfile = mls.l2.editor.get(storFileTS);
         const modelStyle = (mfile as any).modelLESS;
         enhancementInstanceLess.setModelAPI(this._ed1, modelStyle);
-        
+
         this.restaureViewState();
     }
 
@@ -973,25 +973,35 @@ export class ServiceSource100554 extends ServiceBase {
                         if (model) {
                             const mmodel = model as IMonacoModelStyle;
                             const validPosition = mmodel.isCursorInBlockValid();
+                            let validLine: boolean = true;
+                        
                             if (validPosition) {
                                 const info = mmodel.getLessBlock();
                                 if (!info) return;
+                                
                                 const actualLine = info.lines.find((line) => line.line === lineNumber);
-                            
+                                const blockInfo = mmodel.getBlockInfo();
+                                if (lineNumber === blockInfo.endLine || lineNumber === blockInfo.startLine) validLine = false;
+                                    
                                 const rc = {
                                     lines: info.lines,
                                     selector: info.selector,
                                     lineNumber,
                                     lineKey: actualLine?.key || '',
                                     lineValue: actualLine?.value || '',
-                                    position: this.position
+                                    position: this.position,
+                                    emitter: 'editor',
+                                    validLine
                                 }
                                 window.globalStateManagment.setState('style', rc);
                                 mls.events.fire([2], 'styleLineChanged' as any, JSON.stringify(rc), 0);
+                            } else {
+                                window.globalStateManagment.setState('style', {});
+
                             }
                         }
 
-                        
+
                     }
                     return;
                 }
@@ -1244,7 +1254,7 @@ export class ServiceSource100554 extends ServiceBase {
         else if (ext === '.d.ts') model = mls.editor.createModelProjectDefinition(project, src);
         else if (ext === '.less' && storFile) {
             const lessTokens = await getTokensLess('Default');
-            const lineTokens = `\n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
+            const lineTokens = `//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
             src = src.concat(lineTokens);
             model = mls.editor.createModelStyle(storFile, src);
         }

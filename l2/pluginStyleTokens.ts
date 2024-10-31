@@ -160,9 +160,9 @@ export class PluginCssTokens extends IcaLitElement {
             return this.tokens[cat][state][variation] ? html`
                             <div
                                 @click=${() => { this.handleColorClick(`${cat}${variation !== 'default' ? '-' + variation : ''}${state !== 'default' ? '-' + state : ''}`, this.tokens[cat][state][variation]) }} 
-                                class="token-item"
+                                class="token-item${this.value === '@' + (cat + (variation !== 'default' ? '-' + variation : '' + (state !== 'default' ? '-' + state : ''))) ? ' selected' : ''} "
                                 data-tooltip="${cat}${variation !== 'default' ? '-' + variation : ''}${state !== 'default' ? '-' + state : ''}"
-                                style="background-color: ${this.tokens[cat][state][variation]}">
+                                style="background-color: ${this.tokens[cat][state][variation]};border-color: ${this.tokens[cat][state][variation]}">
                             
                             </div>
                             ` : html``;

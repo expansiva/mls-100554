@@ -11,11 +11,15 @@ import { IBlockLess, IBlockLessLine } from './_100554_enhancementStyle';
 /// **collab_i18n_start**
 
 const message_pt = {
-    'msg': 'Selecione uma linha no editor'
+    'msg': 'Nenhum helper disponivel',
+    'selector': 'Seletor',
 }
 const message_en = {
-    'msg': 'Select a line in the editor'
+    'msg': 'No helper available.',
+    'selector': 'Selector',
+
 }
+
 
 type MessageType = typeof message_en;
 
@@ -39,6 +43,8 @@ export class CssHelperIndex extends IcaLitElement {
     @property({ reflect: true }) actualProp: string = '';
     @property({ reflect: true }) actualValue: string = '';
     @property({ reflect: true }) actualSelector: string = '';
+    @property() actualLineNumber: number | undefined;
+
     // @property() args: Record<string, string> = {};
     @propertyDataSource() state: IStateStyle | undefined;
 
@@ -53,6 +59,7 @@ export class CssHelperIndex extends IcaLitElement {
         this.actualProp = lineKey;
         this.actualValue = lineValue;
         this.actualSelector = selector;
+        this.actualLineNumber = lineNumber;
 
         if (lineNumber && lineKey) {
             this.actualProp = lineKey;
@@ -68,8 +75,8 @@ export class CssHelperIndex extends IcaLitElement {
 
     async updated(changedProperties: any) {
 
-        if (changedProperties.has('actualProp') || changedProperties.has('actualValue')) {
-            this.helpers = this.filterByProp(this.avaliablePlugins, this.actualProp, this.actualValue);
+        if (changedProperties.has('actualProp') || changedProperties.has('actualValue') || changedProperties.has('actualLineNumber')) {
+            this.helpers = this.filterByProp(this.avaliablePlugins, this.actualProp, this.actualValue).sort((a, b) => a.priority - b.priority);
             await this.updateComplete;
             this.openAllDetails();
 
@@ -101,7 +108,8 @@ export class CssHelperIndex extends IcaLitElement {
             const obj: IHelpers = {
                 name: plugin.category || 'none',
                 widget: plugin.widget,
-                tags: instance.tags
+                tags: instance.tags,
+                priority: plugin.priority || 1
             };
             helpers.push(obj);
         }
@@ -112,16 +120,18 @@ export class CssHelperIndex extends IcaLitElement {
 
     private filterByProp(helpers: IHelpers[], actualProp: string, actualValue: string): IHelpers[] {
 
+        if (!window.globalState?.style || !window.globalState?.style.lineNumber || !window.globalState?.style.validLine) return [];
+
         return helpers.filter(helper => {
             return helper.tags.some(helperTag => {
                 const [tagProperty, tagValue] = helperTag.split(':');
 
-                const validateTagOrProp = (tagCompare: string, value: string) => {
+                const validateTagOrProp = (tagCompare: string, value: string, returnAllIfEmpty: boolean = false) => {
                     // Se o valor for vazio, não atende à condição
-                    if (!value) {
-                        return false;
-                    }
 
+                    if (!value && returnAllIfEmpty) return true;
+                    if (!value) return false;
+                
                     // Excluir os que começam com prefixo negado (!)
                     if (tagCompare.startsWith('!')) {
                         const prefix = tagCompare.substring(1);
@@ -144,10 +154,11 @@ export class CssHelperIndex extends IcaLitElement {
                 };
 
                 // Verifica tanto a actualProp quanto o actualValue
-                const propMatches = validateTagOrProp(tagProperty, actualProp);
+                const propMatches = validateTagOrProp(tagProperty, actualProp, true);
                 const valueMatches = tagValue ? validateTagOrProp(tagValue, actualValue) : true; // Se não houver tagValue, não valida
 
                 return propMatches && valueMatches;
+
             });
         });
     }
@@ -185,7 +196,7 @@ export class CssHelperIndex extends IcaLitElement {
 
     render() {
         return html`
-            <div> ${this.actualSelector} </div>
+            <div> ${this.msg.selector}: <b>${this.actualSelector} </b> </div>
             ${when(this.helpers.length === 0,
             () => html`<div>${this.msg.msg}</div>`,
             () => html`
@@ -223,6 +234,7 @@ interface IStateStyle {
 
 interface IHelpers {
     name: string,
+    priority: number,
     widget: string,
     tags: string[]
 }
