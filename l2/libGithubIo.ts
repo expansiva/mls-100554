@@ -1,6 +1,6 @@
 /// <mls shortName="libGithubIo" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-export async function addIssueInProject(req: IReq, idProject: string, idIssue: string): Promise<boolean> {
+export async function addIssueInProject(req: IReq, idProject: string, idIssue: string): Promise<string | undefined> {
 
     try {
 
@@ -15,6 +15,38 @@ export async function addIssueInProject(req: IReq, idProject: string, idIssue: s
                         item {
                         id
                         }
+                    }
+                }
+            `;
+
+        const ret = await qlFetch(q, req.mkey);
+
+        if (!ret) {
+            return undefined;
+        }
+
+        return ret.addProjectV2ItemById.item.id;
+
+    } catch (e) {
+        console.info(e);
+        return undefined;
+    }
+
+}
+
+export async function removeIssueInProject(req: IReq, idProject: string, idIssueProject: string): Promise<boolean> {
+
+    try {
+
+        if (!req.owner || !req.repo || !idProject || !idIssueProject) throw new Error('Not found owner project')
+
+        const q = `
+                mutation {
+                    deleteProjectV2Item(input: { 
+                        projectId: "${idProject}",
+                        itemId: "${idIssueProject}"
+                    }) {
+                        deletedItemId
                     }
                 }
             `;
@@ -884,6 +916,45 @@ export async function getRepositoryId(req: IReq): Promise<string> {
 
 }
 
+export async function addMemberInIssue(req: IReq, issueId: string, memberId: string): Promise<boolean> {
+
+    try {
+
+        if (!req.owner || !req.repo) throw new Error('Not found owner project')
+
+        let q = `
+                mutation {
+
+                    addAssigneesToAssignable(input: {
+                        assignableId: "${issueId}",
+                        assigneeIds: ["${memberId}"]
+                    }) {
+                        assignable {
+                            ... on Issue {
+                                id
+                                title
+                                assignees(first: 1) {
+                                    nodes {
+                                        login
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+
+        await qlFetch(q, req.mkey);
+
+        return true;
+
+    } catch (e) {
+        console.info(e);
+        return false;
+    }
+
+}
+
 export async function addLabelInIssue(req: IReq, issueId: string, labelId: string): Promise<ILabel | undefined> {
 
     try {
@@ -933,6 +1004,44 @@ export async function addLabelInIssue(req: IReq, issueId: string, labelId: strin
     } catch (e) {
         console.info(e);
         return undefined;
+    }
+
+}
+
+export async function removeMemberInIssue(req: IReq, issueId: string, memberId: string): Promise<boolean> {
+
+    try {
+
+        if (!req.owner || !req.repo) throw new Error('Not found owner project')
+
+        let q = `
+                mutation {
+                removeAssigneesFromAssignable(input: {
+                    assignableId: "${issueId}",
+                    assigneeIds: ["${memberId}"]
+                }) {
+                        assignable {
+                            ... on Issue {
+                                id
+                                title
+                                assignees(first: 1) {
+                                    nodes {
+                                        login
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+
+        let ret = await qlFetch(q, req.mkey);
+
+        return true;
+
+    } catch (e) {
+        console.info(e);
+        return false;
     }
 
 }
@@ -1024,6 +1133,7 @@ export async function getUsers(req: IReq): Promise<IAssignees[]> {
                         collaborators(first: 100) {
                             edges {
                                 node {
+                                    id
                                     login
                                     avatarUrl
                                 }
@@ -1043,6 +1153,7 @@ export async function getUsers(req: IReq): Promise<IAssignees[]> {
         ret.repository.collaborators.edges.forEach((c:any) => {
 
             users.push({
+                id: c.node.id,
                 login: c.node.login,
                 avatarUrl: c.node.avatarUrl,
             })
@@ -1311,6 +1422,7 @@ export interface IItemProject {
 }
 
 export interface IAssignees {
+    id:string,
     login: string,
     avatarUrl: string
 }

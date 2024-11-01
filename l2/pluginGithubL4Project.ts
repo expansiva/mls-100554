@@ -154,7 +154,7 @@ export class PluginGithubL4Project extends CollabLitElement {
             <span>
                 #${this.viewProject.number} opened on ${new Date(this.viewProject.createdAt).toLocaleString()} by ${this.viewProject.author}
             </span>
-            <div style=" position: absolute; right: 5px; bottom: 0px; display: flex; gap: 1rem;">
+            <div style=" position: absolute; right: 5px; bottom: 0px; display: none; gap: 1rem;">
                 <viewtype show="show" @click="${this.clickChangeView}">
                     ${unsafeHTML(this.myIcons.card)}
                 </viewtype>
@@ -192,7 +192,7 @@ export class PluginGithubL4Project extends CollabLitElement {
         if (!item || item.options.length <= 0) return html`Not found status collumn`;
 
         const info = this.organizeItens();
-
+        
         setTimeout(() => { this.setDragAndDrop(true) }, 100);
 
         this.idFieldStatus = item.id;
@@ -255,14 +255,11 @@ export class PluginGithubL4Project extends CollabLitElement {
         return html`
             <itemstatusissues .info=${p} @click=${this.showViewIssue}>
                 <div style="display: flex; flex-wrap: wrap; gap: .2rem;">
-                    ${repeat(p.issue.labels, (
-            (key: gitIO.ILabel) => key.id) as any, (
-                (l: gitIO.ILabel, index: any) => {
-                    return html`
+                    ${repeat(p.issue.labels, ( (key: gitIO.ILabel) => key.id) as any, ( (l: gitIO.ILabel, index: any) => { return html`
                                 <contentlabel style="background:#${l.color}3b; color:#${l.color}; border: 1px solid #${l.color}">${l.name}</contentlabel>
                                 `
-                }) as any
-        )}
+                        }) as any
+                    )}
                     
                 </div>
                 <div>
@@ -270,14 +267,11 @@ export class PluginGithubL4Project extends CollabLitElement {
                 </div>
                 <div style="display: flex; flex-wrap: wrap; gap: .2rem;align-items: center; justify-content: flex-end;">
 
-                    ${repeat(p.issue.assignees, (
-            (key: gitIO.IAssignees) => key.avatarUrl) as any, (
-                (a: gitIO.IAssignees, index: any) => {
-                    return html`
+                    ${repeat(p.issue.assignees, ( (key: gitIO.IAssignees) => key.avatarUrl) as any, ( (a: gitIO.IAssignees, index: any) => { return html`
                                 <img src="${a.avatarUrl}" title="${a.login}">
                                 `
-                }) as any
-        )}
+                        }) as any
+                    )}
                     
                 </div>
             </itemstatusissues>
@@ -386,60 +380,69 @@ export class PluginGithubL4Project extends CollabLitElement {
         return html`
             <constentviewoptions>
                 <div>
-                    <h5 open="labels" @click="${this.openMyChild}">Labels</h5>
+                    <h5 open="labels" @click="${this.openMyChild}">
+                        ${unsafeHTML(this.myIcons.label)}
+                        Labels
+                    </h5>
                     <viewoptionitens child="labels" style="display:none;">
-                        ${repeat(this.myLabels, (
-            (key: gitIO.ILabel) => key.id) as any, (
-                (l: gitIO.ILabel, index: any) => {
-
-                    const find = this.viewIssue?.issue.labels.find((f) => f.id === l.id);
-                    if (find) return html`
-                                    <label for="${l.id}" style="cursor:pointer;padding:2px; background:#${l.color}3b; color:#${l.color}">
-                                        <input type="checkbox" @change="${this.changeLabel}" checked="true" id="${l.id}" value="${l.id}">
-                                        ${l.name}
-                                    </label>    
-                                `
-
-                    return html`
-                                    <label for="${l.id}" style="cursor:pointer;padding:2px; background:#${l.color}3b; color:#${l.color}">
-                                        <input type="checkbox" @change="${this.changeLabel}" id="${l.id}" value="${l.id}">
-                                        ${l.name}
-                                    </label>    
-                                `
-                }) as any
-        )}
+                        ${repeat(this.myLabels, ((key: gitIO.ILabel) => key.id) as any, ((l: gitIO.ILabel, index: any) => { return this.renderOptionsLabels(l) }) as any )}
                     </viewoptionitens>
                 </div>
                 <div>
-                    <h5 open="members" @click="${this.openMyChild}">Members</h5>
+                    <h5 open="members" @click="${this.openMyChild}">
+                        ${unsafeHTML(this.myIcons.member)}
+                        Members
+                    </h5>
                     <viewoptionitens child="members" style="display:none;">
-                        ${repeat(this.myUsers, (
-            (key: gitIO.IAssignees) => key.login) as any, (
-                (l: gitIO.IAssignees, index: any) => {
-
-                    const find = this.viewIssue?.issue.assignees.find((f) => f.login === l.login);
-
-                    if (find) return html`
-                                    <label for="${l.login}" style="cursor: pointer;padding: 3px; font-size: 11px; display: flex; align-items: center; gap: .2rem;">
-                                        <input type="checkbox" @change="${this.changeMembers}" checked="true" id="${l.login}" value="${l.login}">
-                                        <img src="${l.avatarUrl}" style="width:20px; border-radius:50%" />
-                                        ${l.login}
-                                    </label>    
-                                `
-
-                    return html`
-                                    <label for="${l.login}" style="cursor: pointer;padding: 3px; font-size: 11px; display: flex; align-items: center; gap: .2rem;">
-                                        <input type="checkbox" @change="${this.changeMembers}" id="${l.login}" value="${l.login}">
-                                        <img src="${l.avatarUrl}" style="width:20px; border-radius:50%" />
-                                        ${l.login}
-                                    </label>    
-                                `
-                }) as any
-        )}
+                        ${repeat(this.myUsers, ( (key: gitIO.IAssignees) => key.login) as any, ( (l: gitIO.IAssignees, index: any) => { return this.renderOptionsMembers(l) }) as any )}
                     </viewoptionitens>
+                </div>
+                <div>
+                    <h5 @click="${this.removeIssueInProject}">
+                        ${unsafeHTML(this.myIcons.trash)}
+                        Delete
+                    </h5>
                 </div>
             </constentviewoptions>
         `;
+    }
+
+    renderOptionsLabels(l: gitIO.ILabel): TemplateResult {
+
+        const find = this.viewIssue?.issue.labels.find((f) => f.id === l.id);
+        if (find) return html`
+            <label for="${l.id}" style="cursor:pointer;padding:2px; background:#${l.color}3b; color:#${l.color}">
+                <input type="checkbox" @change="${this.changeLabel}" checked="true" id="${l.id}" value="${l.id}">
+                ${l.name}
+            </label>    
+        `
+        return html`
+            <label for="${l.id}" style="cursor:pointer;padding:2px; background:#${l.color}3b; color:#${l.color}">
+                <input type="checkbox" @change="${this.changeLabel}" id="${l.id}" value="${l.id}">
+                ${l.name}
+            </label>    
+        `
+    }
+
+    renderOptionsMembers(l: gitIO.IAssignees): TemplateResult {
+
+        const find = this.viewIssue?.issue.assignees.find((f) => f.login === l.login);
+
+        if (find) return html`
+            <label for="${l.login}" style="cursor: pointer;padding: 3px; font-size: 11px; display: flex; align-items: center; gap: .2rem;">
+                <input type="checkbox" @change="${this.changeMembers}" checked="true" id="${l.login}" value="${l.login}">
+                <img src="${l.avatarUrl}" style="width:20px; border-radius:50%" />
+                ${l.login}
+            </label>    
+        `
+
+        return html`
+            <label for="${l.login}" style="cursor: pointer;padding: 3px; font-size: 11px; display: flex; align-items: center; gap: .2rem;">
+                <input type="checkbox" @change="${this.changeMembers}" id="${l.login}" value="${l.login}">
+                <img src="${l.avatarUrl}" style="width:20px; border-radius:50%" />
+                ${l.login}
+            </label>    
+        `
     }
 
     renderComentsInTask(c: gitIO.IComments): TemplateResult {
@@ -566,7 +569,6 @@ export class PluginGithubL4Project extends CollabLitElement {
     }
 
     private async addIssuesin(status: string) {
-        console.info(status);
         this.addInStatus = status;
 
     }
@@ -626,6 +628,7 @@ export class PluginGithubL4Project extends CollabLitElement {
 
         this.isLoader = false;
         this.scenary = 'showStatus';
+        this.requestUpdate();
 
     }
 
@@ -659,15 +662,17 @@ export class PluginGithubL4Project extends CollabLitElement {
             if (!issue) return;
 
             const isAdd = await gitIO.addIssueInProject(this.req, this.viewProject.id, issue.id);
+        
+            if (this.addInStatus && isAdd && this.addInStatus !== 'null') {
+                await gitIO.updateFieldSelectProjects(this.req, this.viewProject.id, isAdd, this.idFieldStatus, this.addInStatus);
+            }
 
             if (isAdd) this.itensShowProject = await gitIO.getIssuesInProjects(this.req, this.viewProject.id);
-
-            /*if (this.addInStatus && isAdd && this.addInStatus !== 'null') {
-                await gitIO.updateFieldSelectProjects(this.req, this.viewProject.id, issue.id, this.idFieldStatus, this.addInStatus);
-            }*/
-
+        
+            
             this.addInStatus = undefined;
             this.isLoader = false;
+            setTimeout(()=>{this.requestUpdate();}, 200) 
 
         } catch (err: any) {
             this.isLoader = false;
@@ -688,7 +693,7 @@ export class PluginGithubL4Project extends CollabLitElement {
             el = el.closest('input') as HTMLInputElement;
         }
 
-        let item;
+        let item: gitIO.ILabel | undefined;
 
 
         this.myLabels.forEach((l, idx) => {
@@ -697,12 +702,25 @@ export class PluginGithubL4Project extends CollabLitElement {
             }
         });
 
-        if (!item) return;
+        if (!item || !this.req) return;
 
         if (el.checked) {
 
             this.viewIssue.issue.labels.push(item);
-            // chamar api    
+
+            try {
+
+                gitIO.addLabelInIssue(
+                    this.req,
+                    this.viewIssue.issue.id,
+                    item.id
+                );
+
+            } catch (err: any) {
+                console.info('changeLabel add error:' + err.message)
+
+            }
+
         } else {
 
             let index = -1;
@@ -712,8 +730,21 @@ export class PluginGithubL4Project extends CollabLitElement {
             });
 
             if (index >= 0) {
+
                 this.viewIssue.issue.labels.splice(index, 1);
-                // chamar api
+
+                try {
+
+                    gitIO.removeLabelInIssue(
+                        this.req,
+                        this.viewIssue.issue.id,
+                        item.id
+                    );
+
+                } catch (err: any) {
+                    console.info('changeLabel remove error:' + err.message)
+
+                }
             }
 
         }
@@ -731,7 +762,7 @@ export class PluginGithubL4Project extends CollabLitElement {
             el = el.closest('input') as HTMLInputElement;
         }
 
-        let item;
+        let item: gitIO.IAssignees | undefined;
 
 
         this.myUsers.forEach((l, idx) => {
@@ -740,12 +771,24 @@ export class PluginGithubL4Project extends CollabLitElement {
             }
         });
 
-        if (!item) return;
+        if (!item || !this.req) return;
 
         if (el.checked) {
 
             this.viewIssue.issue.assignees.push(item);
-            // chamar api    
+            try {
+
+                gitIO.addMemberInIssue(
+                    this.req,
+                    this.viewIssue.issue.id,
+                    item.id
+                );
+
+            } catch (err: any) {
+                console.info('changeMembers add error:' + err.message)
+
+            }
+
         } else {
 
             let index = -1;
@@ -756,11 +799,47 @@ export class PluginGithubL4Project extends CollabLitElement {
 
             if (index >= 0) {
                 this.viewIssue.issue.assignees.splice(index, 1);
-                // chamar api
+                try {
+
+                    gitIO.removeMemberInIssue(
+                        this.req,
+                        this.viewIssue.issue.id,
+                        item.id
+                    );
+
+                } catch (err: any) {
+                    console.info('changeMembers add error:' + err.message)
+
+                }
             }
 
         }
 
+        this.requestUpdate();
+    }
+
+    private async removeIssueInProject(e: MouseEvent) {
+
+        if (!this.viewIssue || !this.itensShowProject || !this.req || !this.viewProject) return;
+
+        let indexDel = -1;
+        this.itensShowProject.forEach((i, index) => {
+            if (this.viewIssue && i.issue.id === this.viewIssue.issue.id) {
+                indexDel = index;
+            }
+        });
+
+        if (indexDel < 0) return;
+
+        this.itensShowProject.splice(indexDel, 1);
+
+        try {
+            gitIO.removeIssueInProject(this.req, this.viewProject.id, this.viewIssue.id);
+        } catch (e: any) {
+            console.info('removeIssueInProject:' + e.message)
+        }
+
+        this.viewIssue = undefined;
         this.requestUpdate();
     }
 
@@ -907,6 +986,9 @@ export class PluginGithubL4Project extends CollabLitElement {
 
                     await gitIO.updateFieldSelectProjects(this.req, this.viewProject.id, idIssue, idField, idStatus);
 
+                    evt.item.remove();
+                    this.requestUpdate();
+
                 } catch (e: any) {
                     this.error = e.message;
                 }
@@ -939,6 +1021,10 @@ export class PluginGithubL4Project extends CollabLitElement {
         table: `<svg style="width:15px;fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 256l0-96 160 0 0 96L64 256zm0 64l160 0 0 96L64 416l0-96zm224 96l0-96 160 0 0 96-160 0zM448 256l-160 0 0-96 160 0 0 96zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32z"/></svg>`,
         card: `<svg style="width:15px;fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96l0 32 576 0 0-32c0-35.3-28.7-64-64-64L64 32zM576 224L0 224 0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-192zM112 352l64 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-64 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm112 16c0-8.8 7.2-16 16-16l128 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-128 0c-8.8 0-16-7.2-16-16z"/></svg>`,
         back2: `<svg style="width:15px;fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M352 96l64 0c17.7 0 32 14.3 32 32l0 256c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c53 0 96-43 96-96l0-256c0-53-43-96-96-96l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32zm-9.4 182.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L242.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"/></svg>`,
-        back: `<svg xmlns="http://www.w3.org/2000/svg" style="width:15px;" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>`
+        back: `<svg xmlns="http://www.w3.org/2000/svg" style="width:15px;" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>`,
+        member: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg>`,
+        label: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 80L0 229.5c0 17 6.7 33.3 18.7 45.3l176 176c25 25 65.5 25 90.5 0L418.7 317.3c25-25 25-65.5 0-90.5l-176-176c-12-12-28.3-18.7-45.3-18.7L48 32C21.5 32 0 53.5 0 80zm112 32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>`,
+        trash: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z"/></svg>`
+
     }
 }
