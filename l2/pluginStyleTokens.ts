@@ -25,6 +25,7 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 export const tags = ['color:@*', 'background-color:@*', 'background:@*'];
+export const description = 'A specialized plugin for managing color design tokens. Easily define, organize, and apply color palettes to ensure consistency across your designs, enhancing accessibility and visual appeal in your projects.';
 
 @customElement('plugin-style-tokens-100554')
 export class PluginCssTokens extends IcaLitElement {

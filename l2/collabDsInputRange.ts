@@ -1,14 +1,13 @@
 /// <mls shortName="collabDsInputRange" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement, repeat } from 'lit';
+import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 export function initCollabDSInputRange() { };
 
 @customElement('collab-ds-input-range-100554')
-export class CollabDSInputRange extends LitElement {
-
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
+export class CollabDSInputRange extends CollabLitElement {
 
     public arraySelect: string[] = [];
 
@@ -54,8 +53,8 @@ export class CollabDSInputRange extends LitElement {
     }
 
     updated() {
-        if (!this.shadowRoot) return;
-        const sel = this.shadowRoot.querySelector('select') as HTMLSelectElement;
+
+        const sel = this.querySelector('select') as HTMLSelectElement;
         if (!sel) return;
         sel.value = this.onlyTxt(this.value);
     }
@@ -90,14 +89,9 @@ export class CollabDSInputRange extends LitElement {
 
         e.stopPropagation();
 
-        if (!this.shadowRoot) return;
-        const parent = this.shadowRoot;
-
-        let input = parent.querySelector('input[type="search"]') as HTMLInputElement;
-
-        let range = parent.querySelector('input[type="range"]') as HTMLInputElement;
-
-        let sel = parent.querySelector('select') as HTMLSelectElement;
+        let input = this.querySelector('input[type="search"]') as HTMLInputElement;
+        let range = this.querySelector('input[type="range"]') as HTMLInputElement;
+        let sel = this.querySelector('select') as HTMLSelectElement;
 
         if (!input || !sel || !range) return;
 

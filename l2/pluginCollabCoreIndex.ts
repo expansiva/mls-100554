@@ -269,6 +269,15 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginStyleTokens'
             },
+
+            {
+                category: 'Transform',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleTransform'
+            },
+
         ];
     }
 

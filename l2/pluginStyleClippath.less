@@ -1,10 +1,26 @@
 /// <mls shortName="pluginStyleClippath" project="100554" enhancement="enhancementStyle" />
-				
+
 plugin-style-clippath-100554 {
-                
- // Here your less
-                
+
+   .gallery {
+      margin-bottom: @space-8;
+      display: flex;
+      justify-content: start;
+      align-items: center;
+      gap: 1rem;
+      padding-top: 1rem;
+      flex-wrap: wrap;
+      cursor: pointer;
+      .gallery-item{
+         background: @text-primary-color; 
+         width: 30px;
+         height:45px;
+      }
+   }
+
 }
+
+
 
 //Start Less Tokens
 @text-primary-color-lighter: #535353;

@@ -7,6 +7,14 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { IBlockLess, IBlockLessLine } from './_100554_enhancementStyle';
+import {
+    collab_heart,
+    collab_heart_o,
+    collab_question,
+    collab_angles_right,
+    collab_chevron_right,
+    collab_info_circle
+} from './_100554_collabIcons'
 
 /// **collab_i18n_start**
 
@@ -40,6 +48,8 @@ export class CssHelperIndex extends IcaLitElement {
 
     @property() position: 'right' | 'left' | undefined;
 
+    @property() mode: 'collapsed ' | 'expanded ' | 'full' = 'collapsed ';
+
     @property({ reflect: true }) actualProp: string = '';
     @property({ reflect: true }) actualValue: string = '';
     @property({ reflect: true }) actualSelector: string = '';
@@ -48,7 +58,7 @@ export class CssHelperIndex extends IcaLitElement {
     // @property() args: Record<string, string> = {};
     @propertyDataSource() state: IStateStyle | undefined;
 
-    @queryAll('details') allDetails!: HTMLDetailsElement[];
+    @queryAll('.plugin-item') allPluginsEls!: IHTMLPluginItemElement[];
 
     handleIcaStateChange(key: string, value: IStateStyle) {
 
@@ -64,7 +74,7 @@ export class CssHelperIndex extends IcaLitElement {
         if (lineNumber && lineKey) {
             this.actualProp = lineKey;
             this.actualValue = lineValue;
-            this.openAllDetails(false);
+            this.openIfNeeded();
 
         } else {
             this.actualProp = '';
@@ -78,8 +88,7 @@ export class CssHelperIndex extends IcaLitElement {
         if (changedProperties.has('actualProp') || changedProperties.has('actualValue') || changedProperties.has('actualLineNumber')) {
             this.helpers = this.filterByProp(this.avaliablePlugins, this.actualProp, this.actualValue).sort((a, b) => a.priority - b.priority);
             await this.updateComplete;
-            this.openAllDetails();
-
+            this.openIfNeeded();
         }
     }
 
@@ -89,9 +98,8 @@ export class CssHelperIndex extends IcaLitElement {
         this.avaliablePlugins = avaliablePlugins;
         const helpers = this.filterByProp(this.avaliablePlugins, this.actualProp, this.actualValue);
         this.helpers = helpers;
+        // this.helpers = avaliablePlugins;
         await this.updateComplete;
-        this.openAllDetails();
-
     }
 
     private async getAvaliablesPlugins(): Promise<IHelpers[]> {
@@ -109,7 +117,12 @@ export class CssHelperIndex extends IcaLitElement {
                 name: plugin.category || 'none',
                 widget: plugin.widget,
                 tags: instance.tags,
-                priority: plugin.priority || 1
+                priority: plugin.priority || 1,
+                description: instance.description || '',
+                mode: 'collapsed',
+                liked: false,
+                likedAnimation: false,
+                showInfo: false
             };
             helpers.push(obj);
         }
@@ -121,17 +134,22 @@ export class CssHelperIndex extends IcaLitElement {
     private filterByProp(helpers: IHelpers[], actualProp: string, actualValue: string): IHelpers[] {
 
         if (!window.globalState?.style || !window.globalState?.style.lineNumber || !window.globalState?.style.validLine) return [];
+        // if (!window.globalState?.style?.lineKey) this.isPreviewMode = true;
 
-        return helpers.filter(helper => {
+        const rc = helpers.filter(helper => {
+
+
             return helper.tags.some(helperTag => {
                 const [tagProperty, tagValue] = helperTag.split(':');
 
                 const validateTagOrProp = (tagCompare: string, value: string, returnAllIfEmpty: boolean = false) => {
                     // Se o valor for vazio, não atende à condição
 
-                    if (!value && returnAllIfEmpty) return true;
+                    if (!value && returnAllIfEmpty) {
+                        return true;
+                    }
                     if (!value) return false;
-                
+
                     // Excluir os que começam com prefixo negado (!)
                     if (tagCompare.startsWith('!')) {
                         const prefix = tagCompare.substring(1);
@@ -153,6 +171,7 @@ export class CssHelperIndex extends IcaLitElement {
                     return tagCompare === value;
                 };
 
+
                 // Verifica tanto a actualProp quanto o actualValue
                 const propMatches = validateTagOrProp(tagProperty, actualProp, true);
                 const valueMatches = tagValue ? validateTagOrProp(tagValue, actualValue) : true; // Se não houver tagValue, não valida
@@ -161,37 +180,10 @@ export class CssHelperIndex extends IcaLitElement {
 
             });
         });
-    }
 
-    private async handleOpen(e: MouseEvent) {
-        const target = e.target as HTMLElement;
-        if (!target) return;
-        const details = target.closest('details') as HTMLDetailsElement;
-        if (!details) return;
-        this.openDetails(details);
-    }
-
-    private openAllDetails(open: boolean = true) {
-        this.allDetails.forEach((det) => this.openDetails(det, open));
-    }
-
-    private async openDetails(details: HTMLDetailsElement, open?: boolean) {
-
-        const container = details.querySelector(':scope>div');
-        if (details.open === true && open !== false) return;
-        if (!container) return;
-
-        if (container.childElementCount === 0) {
-            const tag = convertFileNameToTag(details.id);
-            const item = document.createElement(tag);
-            item.setAttribute('state', '{{ style }}');
-            container.appendChild(item);
-        }
-
-        if (open) {
-            details.open = true;
-            details.scrollIntoView({ behavior: 'smooth' });
-        }
+        const mode: IMode = rc.length < 3 ? 'full' : (rc.length < 7 ? 'expanded' : 'collapsed');
+        rc.forEach((help) => help.mode = mode);
+        return rc;
     }
 
     render() {
@@ -200,7 +192,7 @@ export class CssHelperIndex extends IcaLitElement {
             ${when(this.helpers.length === 0,
             () => html`<div>${this.msg.msg}</div>`,
             () => html`
-                <div>
+                <div class="helpers">
                 ${repeat(
                 this.helpers,
                 ((item: IHelpers) => item.widget) as any,
@@ -215,14 +207,134 @@ export class CssHelperIndex extends IcaLitElement {
     renderHelper(help: IHelpers, index: number) {
 
         return html`
-            <details @click=${this.handleOpen} id=${help.widget}>
-                <summary>${help.name} </summary>
-                <div></div>
-            </details>`
+            <div class="plugin-item" .data=${help} >
+                
+                <div class="plugin-item-header">
+                    <span>${help.name}</span>
+                    <div class="plugin-item-icons">
+                        <i
+                            class="i-expanded ${help.mode === 'full' || help.mode === 'expanded' ? 'open' : ''}"
+                            @click=${(e: MouseEvent) => { this.handleExpandedClick(e, help); }}
+                        >${collab_chevron_right}</i>
+
+                        <i
+                            class="i-full ${help.mode === 'full' ? 'open' : ''}"
+                            @click=${(e: MouseEvent) => { this.handleFullClick(e, help); }}
+                        
+                        >${collab_angles_right}</i>
+                        <i
+                            class="i-question ${help.showInfo ? 'info' : ''}"
+                            @click=${(e: MouseEvent) => { this.handleInfoClick(e, help); }}
+                        >${collab_question}</i>
+                        <i
+                            class="i-like ${help.liked ? 'liked' : ''} ${help.likedAnimation ? 'likedAnimation' : ''}"
+                            @click=${(e: MouseEvent) => { this.handleLikeClick(e, help); }}
+                        >${help.liked ? collab_heart : collab_heart_o}
+                        </i>
+                    </div>
+                </div>
+                
+                ${help.showInfo ? html`
+                    <div class="plugin-item-info">
+                        <i>${collab_info_circle}</i>
+                        <span>${help.widget}</span>
+                    </div>
+                `: ''}
+
+                <div class="plugin-item-desc">${help.description}</div>
+                <div class="plugin-item-container ${help.mode === 'expanded' ? 'expanded' : ''}">
+                </div>            
+
+            </div>`
+    }
+
+    openIfNeeded() {
+        this.allPluginsEls.forEach((pluginEl) => {
+            if (pluginEl.data.mode === "expanded" || pluginEl.data.mode === "full") {
+                const container = pluginEl.querySelector('.plugin-item-container') as HTMLElement;
+                this.openPlugin(container, pluginEl.data, false);
+            }
+        })
+    }
+
+    async handleOpenPlugin(e: MouseEvent, help: IHelpers, close: boolean = false) {
+        e.stopPropagation();
+        const target = e.target as HTMLElement;
+        if (!target) return;
+        const parent = target.closest('.plugin-item') as HTMLElement;
+        if (!parent) return;
+        const container = parent.querySelector('.plugin-item-container') as HTMLElement;
+        if (!container) return;
+        this.openPlugin(container, help, close);
+    }
+
+    private async openPlugin(container: HTMLElement, help: IHelpers, close: boolean) {
+        if (close) {
+            container.style.display = 'none';
+            return;
+        }
+
+        if (container.childElementCount === 0) {
+            const tag = convertFileNameToTag(help.widget);
+            const item = document.createElement(tag);
+            item.setAttribute('state', '{{ style }}');
+            item.setAttribute('showFull', help.mode === 'full' ? 'true' : 'false');
+            container.appendChild(item);
+        } else {
+            const item = container.children[0] as HTMLElement;
+            item.setAttribute('showFull', help.mode === 'full' ? 'true' : 'false');
+        }
+        container.style.display = 'block';
+
+
+    }
+
+    handleExpandedClick(e: MouseEvent, help: IHelpers) {
+        if (help.mode === 'expanded' || help.mode === 'full') {
+            help.mode = 'collapsed';
+            this.requestUpdate();
+            this.handleOpenPlugin(e, help, true);
+            return;
+        }
+        help.mode = 'expanded';
+        this.requestUpdate();
+        this.handleOpenPlugin(e, help);
+    }
+
+    handleFullClick(e: MouseEvent, help: IHelpers) {
+        if (help.mode === 'full') {
+            help.mode = 'collapsed';
+            this.requestUpdate();
+            this.handleOpenPlugin(e, help, true);
+            return;
+        }
+        help.mode = 'full';
+        this.requestUpdate();
+        this.handleOpenPlugin(e, help)
+
+    }
+
+    async handleLikeClick(e: MouseEvent, help: IHelpers) {
+        help.liked = !help.liked;
+        help.likedAnimation = help.liked;
+        this.requestUpdate();
+        setTimeout(() => {
+            help.likedAnimation = false;
+        }, 1000);
+    }
+
+    async handleInfoClick(e: MouseEvent, help: IHelpers) {
+        help.showInfo = !help.showInfo;
+        this.requestUpdate();
     }
 
 }
 
+type IMode = 'collapsed' | 'expanded' | 'full';
+
+interface IHTMLPluginItemElement extends HTMLElement {
+    data: IHelpers
+}
 interface IStateStyle {
     lines: IBlockLessLine[]
     selector: string
@@ -236,8 +348,14 @@ interface IHelpers {
     name: string,
     priority: number,
     widget: string,
-    tags: string[]
+    tags: string[],
+    description: string,
+    mode: IMode,
+    liked: boolean,
+    likedAnimation: boolean,
+    showInfo: boolean
 }
+
 interface IEventData {
     info: IBlockLess,
     lineNumber: number,

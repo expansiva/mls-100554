@@ -1,14 +1,13 @@
 /// <mls shortName="collabDsInputSelectColor" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement, repeat } from 'lit';
+import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 export function initCollabDsInputSelectColor() { };
 
 @customElement('collab-ds-input-select-color-100554')
-export class CollabDsInputSelectColor extends LitElement {
-
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
+export class CollabDsInputSelectColor extends CollabLitElement {
 
     get value() { return this.configGetValue(); };
 
@@ -79,11 +78,11 @@ export class CollabDsInputSelectColor extends LitElement {
     }
 
     updated() {
-        if (!this.shadowRoot) return;
-        const sel = this.shadowRoot.querySelector('div select') as HTMLSelectElement;
+        
+        const sel = this.querySelector('div select') as HTMLSelectElement;
         if (sel) sel.value = this.onlyTxt(this.valueInput); 
 
-        const sel2 = this.shadowRoot.querySelector('select[prop]') as HTMLSelectElement;
+        const sel2 = this.querySelector('select[prop]') as HTMLSelectElement;
         if (sel2) sel2.value = this.onlyTxt(this.valueSelect); 
     }
 
@@ -144,16 +143,10 @@ export class CollabDsInputSelectColor extends LitElement {
 
         e.stopPropagation();
 
-        if (!this.shadowRoot) return;
-        const parent = this.shadowRoot;
-
-        let input = parent.querySelector('input[type="search"]') as HTMLInputElement;
-
-        let sel = parent.querySelector('select') as HTMLSelectElement;
-
-        let sel2 = parent.querySelector('select[prop]') as HTMLSelectElement;
-
-        let color = parent.querySelector('input[type="color"]') as HTMLInputElement;
+        let input = this.querySelector('input[type="search"]') as HTMLInputElement;
+        let sel = this.querySelector('select') as HTMLSelectElement;
+        let sel2 = this.querySelector('select[prop]') as HTMLSelectElement;
+        let color = this.querySelector('input[type="color"]') as HTMLInputElement;
 
         const ret = [];
 

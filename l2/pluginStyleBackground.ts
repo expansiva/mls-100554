@@ -37,11 +37,14 @@ const messages: { [key: string]: MessageType } = {
 
 
 export const tags = ['background', 'background-color', 'color', 'border-color'];
+export const description = 'A robust plugin for managing and customizing background properties. Effortlessly handle background colors, images, gradients, and patterns to create visually appealing and dynamic UI designs.';
 
 @customElement('plugin-style-background-100554')
 export class PluginCssTokens extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
+
+    @property() showFull: string = 'false';
 
     @property() info: IMyInfoBackground = { tp: 'background', aux: '', itens: [] };
 
@@ -55,8 +58,10 @@ export class PluginCssTokens extends CollabLitElement {
         return html`<div class="container">${this.renderBody()}</div>`;
     }
 
-    renderBody() {
+    renderBody2() {
         return html`
+
+        
             <div class="showtransparent"></div>
             <div class="showres" style="${this.css}"></div>
             <div class="showConfigContainer" >
@@ -71,6 +76,20 @@ export class PluginCssTokens extends CollabLitElement {
                 </div>
             </div>
 
+        `;
+    }
+
+    renderBody() {
+        return html`
+
+        ${this.showFull === 'true' ?
+                html`
+                ${this.renderBody2()}
+            ` :
+                html`
+                ${this.renderGallery()}
+            `
+            }
         `;
     }
 
@@ -146,7 +165,7 @@ export class PluginCssTokens extends CollabLitElement {
         `;
     }
 
-     //-------------IMPLEMENTS--------------
+    //-------------IMPLEMENTS--------------
 
     private clickGallery(e: MouseEvent): void {
 

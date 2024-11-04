@@ -1,10 +1,73 @@
 /// <mls shortName="pluginStyleTextShadow" project="100554" enhancement="enhancementStyle" />
-				
+
 plugin-style-text-shadow-100554 {
-                
- // Here your less
-                
+
+    width: 100%;
+    display: block;
+    font-family: @font-family-primary;
+    font-size: @font-size-16;
+    font-weight: @font-weight-normal;
+    line-height: 1.5;
+    color: @text-primary-color;
+    background-color: @bg-primary-color;
+    padding-top: @space-8;
+
+    .helper-group-title {
+        margin: 0;
+        margin-top: @space-16;
+        margin-bottom: @space-8;
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    details {
+        summary {
+            cursor: pointer;
+        }
+
+        >div {
+            margin-left: @space-16;
+        }
+    }
+
+    .group {
+        margin-bottom: @space-8;
+        display: flex;
+        flex-direction: column;
+        font-size: @font-size-12;
+
+        .group-edit {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+
+            i {
+                display: flex;
+                flex-shrink: 0;
+
+            }
+
+        }
+
+    }
+
+    .gallery {
+        margin-bottom: @space-16;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+        gap: 1rem;
+        padding-top: 1rem;
+        flex-wrap: wrap;
+        cursor: pointer;
+    }
+
 }
+
+
+
+
+
 
 
 

@@ -62,7 +62,9 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       const msize = this.getMSize();
       const percent = this.fixedwidth.replace('%', '');
       const percentInPx = ((+msize.width) / 100) * (+percent);
-      const percentInPx2 = Number.parseFloat(percentInPx.toFixed(2))
+      let percentInPx2 = Number.parseFloat(percentInPx.toFixed(2))
+      if (percentInPx2 < 300) percentInPx2 = 300;
+
       this.actualfixedwidth = this.open ? percentInPx2.toString() : '0';
       this.style.setProperty('--fixed-width', this.actualfixedwidth + 'px');
       if (this.open) this.style.setProperty('--right-pane-width', this.actualfixedwidth + 'px');
@@ -216,6 +218,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       max-width: var(--max-width);
       max-height: var(--max-height);
       position: relative;
+      
     }
     collab-spliter-horizontal-var-fixed-100554 > .spliter {
       display: flex;
@@ -253,6 +256,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
 
     collab-spliter-horizontal-var-fixed-100554 > .left-pane, .right-pane {
       overflow: auto;
+      overflow-x: hidden;
     }
     collab-spliter-horizontal-var-fixed-100554 > .left-pane {
       background-color: var(--complement-color);
