@@ -152,23 +152,19 @@ export class PluginGithubL4Project extends CollabLitElement {
                 <backbutton back="list" @click=${this.backButton}>
                     ${unsafeHTML(this.myIcons.back2)}
                 </backbutton>
-                <h3>${this.viewProject.title}</h3>
+                <h3>
+                    <span class="showinfo" style="margin-left:1rem">
+                        <span class="infohv">
+                            ${this.viewProject.title}
+                        </span>
+                        <span class="infotxt">
+                            #${this.viewProject.number} opened on ${new Date(this.viewProject.createdAt).toLocaleString()} by ${this.viewProject.author}
+                        </span>
+                    </span>
+                </h3>
             </div>
-            <span class="showinfo">
-                <span>
-                    ---
-                </span>
-                <span class="infohv">
-                    ${unsafeHTML(this.myIcons.eye)}
-                </span>
-                <span class="infotxt">
-                    #${this.viewProject.number} opened on ${new Date(this.viewProject.createdAt).toLocaleString()} by ${this.viewProject.author}
-                </span>
-                <span>
-                    ---
-                </span>
-            </span>
-            <div style=" position: absolute; right: 5px; bottom: 0px; display: flex; gap: 1rem;">
+            
+            <div style=" position: absolute; right: 7px; bottom: 0px; display: flex; gap: 1rem; transform: translate(0, -37%);">
             
                 <viewtype @click="${this.listAllIssues}">
                     ${unsafeHTML(this.myIcons.plus)}
