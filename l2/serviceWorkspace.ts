@@ -71,8 +71,16 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
         if (!this.visible) return;
 
-        const [w, h] = this.msize.split(',');
 
+    }
+
+    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
+        
+        if (name === 'msize') {
+            const [width, height, top, left] = this.msize.split(',');
+            if (height) this.style.height = height + 'px';
+        }
+        super.attributeChangedCallback(name, oldVal, newVal);
 
     }
 

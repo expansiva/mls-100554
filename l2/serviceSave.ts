@@ -105,31 +105,6 @@ export class ServiceSave extends ServiceBase {
         return true;
     }
 
-    private showBranche(): boolean {
-        this.menu.title = 'Branchs';
-        if (this.menu.updateTitle) this.menu.updateTitle();
-
-        const div = document.createElement('div');
-        const el = document.createElement('save-add-branch-100554');
-        (el as any).callBack = (obj: any) => {
-            if (obj.nameWithOwner) {
-                const ret = obj.nameWithOwner.split('/');
-                this.owner = ret[0];
-                this.repo = ret[1];
-                this.branch = obj.defaultBranchRef.name
-            } else {
-                this.branch = obj.name;
-            }
-            if (this.menu.setMenuActive) this.menu.setMenuActive('initial');
-            this.requestUpdate();
-        };
-
-        div.appendChild(el);
-
-        if (this.menu.setMode) this.menu.setMode('page', div);
-        return true;
-    }
-
     onServiceClick(visible: boolean, reinit: boolean) {
 
         if (visible && reinit) {
@@ -494,6 +469,31 @@ export class ServiceSave extends ServiceBase {
 
     }
 
+    private showBranche(): boolean {
+        this.menu.title = 'Branchs';
+        if (this.menu.updateTitle) this.menu.updateTitle();
+
+        const div = document.createElement('div');
+        const el = document.createElement('save-add-branch-100554');
+        (el as any).callBack = (obj: any) => {
+            if (obj.nameWithOwner) {
+                const ret = obj.nameWithOwner.split('/');
+                this.owner = ret[0];
+                this.repo = ret[1];
+                this.branch = obj.defaultBranchRef.name
+            } else {
+                this.branch = obj.name;
+            }
+            if (this.menu.setMenuActive) this.menu.setMenuActive('initial');
+            this.requestUpdate();
+        };
+
+        div.appendChild(el);
+
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
+    }
+
     private async setInfos() {
 
         try {
@@ -696,66 +696,6 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
-    /*private async sleep(ms: number) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }*/
-
-    private createArrayInfoVersion(array: mls.stor.IFileInfo[]): { name: string, version: string, file: mls.stor.IFileInfo }[] {
-
-        const ret: any = [];
-        array.forEach((i) => {
-
-            ret.push({
-                name: `l${i.level}/${i.folder ? i.folder + '/' : ''}${i.shortName}${i.extension}`,
-                version: i.versionRef,
-                file: i
-            })
-
-        })
-        return ret;
-    }
-
-    private async uppVersionAfterSave(array: mls.stor.IFileInfo[]) {
-
-        const driver = mls.stor.others.getDefaultDriver(mls.actual[5].project as number);
-        const retArray = await driver.loadFilesInfo(mls.actual[5].project as number);
-
-        const arrayVersion = this.createArrayInfoVersion(array);
-
-        retArray.forEach(async (i) => {
-
-            const file = arrayVersion.filter((f) => f.name === i.ShortPath);
-            if (!file || file.length <= 0 || (file && file.length >= 1 && file[0].version === i.versionRef)) return;
-
-            if (file[0].version !== i.versionRef) {
-                //file[0].file.isLocalVersionOutdated = true;
-                //file[0].file.newVersionRefIfOutdated = i.versionRef;
-                file[0].file.versionRef = i.versionRef;
-                file[0].file.isLocalVersionOutdated = false;
-                file[0].file.newVersionRefIfOutdated = undefined;
-                await mls.stor.localStor.setContent(file[0].file, { contentType: 'string', content: null });
-
-            }
-
-        });
-
-        //mls.stor.localDB.savePrjInfo(mls.actual[5].project as number, retArray); // save cache, dont await
-
-    }
-
-    private async verifyVersionBlock(array: mls.stor.IFileInfo[]) {
-
-        try {
-
-            if (array.length <= 0) return;
-            const ret = await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
-
-        } catch (e: any) {
-            console.info('Error save verifyVersionBlock:' + e.message);
-        }
-
-    }
-
     private async createFork(e: MouseEvent) {
 
         try {
@@ -849,7 +789,7 @@ export class ServiceSave extends ServiceBase {
                         return;
                     }
 
-                    await this.verifyVersionBlock(array);
+                    //await this.verifyVersionBlock(array);
                     await this.onSavenew(array, msg);
                     await this.setInfos();
                     this.fireEvents();
@@ -1036,6 +976,88 @@ export class ServiceSave extends ServiceBase {
         storFile.status = 'nochange';
 
     }
+
+    private async uppVersionAfterSave(array: mls.stor.IFileInfo[]) { 
+
+        try {
+
+            const driver = mls.stor.others.getDefaultDriver(mls.actual[5].project as number);
+
+            if (!driver || !(driver as any).getVersionFromFiles) return;
+
+            const info = await (driver as any).getVersionFromFiles(this.owner, this.repo, this.branch, array);
+
+            if (!info) return;
+
+            for await (const a of array) {
+                const key = mls.stor.getKeyToFiles(a.project, a.level, a.shortName, a.folder, a.extension);
+
+                if (!mls.stor.files[key] || !info[key]) continue;
+
+                mls.stor.files[key].versionRef = info[key];
+                mls.stor.files[key].isLocalVersionOutdated = false;
+                mls.stor.files[key].newVersionRefIfOutdated = undefined;
+                await mls.stor.localStor.setContent(mls.stor.files[key], { contentType: 'string', content: null });
+            }
+
+        } catch (e) {
+            console.info(e);
+            return;
+        }
+        
+    }
+
+    /*private async uppVersionAfterSave(array: mls.stor.IFileInfo[]) {
+
+        const driver = mls.stor.others.getDefaultDriver(mls.actual[5].project as number);
+        const retArray = await driver.loadFilesInfo(mls.actual[5].project as number);
+
+        const arrayVersion = this.createArrayInfoVersion(array);
+
+        retArray.forEach(async (i) => {
+
+            const file = arrayVersion.filter((f) => f.name === i.ShortPath);
+            if (!file || file.length <= 0 || (file && file.length >= 1 && file[0].version === i.versionRef)) return;
+
+            if (file[0].version !== i.versionRef) {    
+                file[0].file.versionRef = i.versionRef;
+                file[0].file.isLocalVersionOutdated = false;
+                file[0].file.newVersionRefIfOutdated = undefined;
+                await mls.stor.localStor.setContent(file[0].file, { contentType: 'string', content: null });
+
+            }
+
+        });
+
+    }
+
+    private async verifyVersionBlock(array: mls.stor.IFileInfo[]) {
+
+        try {
+
+            if (array.length <= 0) return;
+            const ret = await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
+
+        } catch (e: any) {
+            console.info('Error save verifyVersionBlock:' + e.message);
+        }
+
+    }
+
+    private createArrayInfoVersion(array: mls.stor.IFileInfo[]): { name: string, version: string, file: mls.stor.IFileInfo }[] {
+
+        const ret: any = [];
+        array.forEach((i) => {
+
+            ret.push({
+                name: `l${i.level}/${i.folder ? i.folder + '/' : ''}${i.shortName}${i.extension}`,
+                version: i.versionRef,
+                file: i
+            })
+
+        })
+        return ret;
+    }*/
 
     private async deleteFile(storFile: mls.stor.IFileInfo) {
 
