@@ -1,6 +1,6 @@
 /// <mls shortName="pluginGithubL4Project" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, svg, TemplateResult, LitElement, repeat, unsafeHTML } from 'lit';
+import { html, svg, TemplateResult, repeat, unsafeHTML } from 'lit';
 import { query, property, customElement } from 'lit/decorators.js';
 import { getMyKeysBranch } from './_100554_libCommom';
 import * as gitIO from './_100554_libGithubIo';
@@ -41,6 +41,7 @@ export class PluginGithubL4Project extends CollabLitElement {
     @property() autoClick: string = 'false';
     @property() viewIssue: gitIO.IItemProject | undefined;
     @property() addInStatus: string | undefined;
+    @property() listIssues: gitIO.IIssues[] | undefined;
 
     @query('contentstatus') contentstatus: HTMLElement | undefined;
     @query('contentviewissue') contentviewissue: HTMLElement | undefined;
@@ -76,6 +77,8 @@ export class PluginGithubL4Project extends CollabLitElement {
         if (this.scenary === 'list') return this.renderList();
 
         if (this.scenary === 'showStatus') return this.renderShow();
+
+        if (this.scenary === 'listAddIssues') return this.renderListIssues();
 
         return html``;
     }
@@ -151,14 +154,29 @@ export class PluginGithubL4Project extends CollabLitElement {
                 </backbutton>
                 <h3>${this.viewProject.title}</h3>
             </div>
-            <span>
-                #${this.viewProject.number} opened on ${new Date(this.viewProject.createdAt).toLocaleString()} by ${this.viewProject.author}
+            <span class="showinfo">
+                <span>
+                    ---
+                </span>
+                <span class="infohv">
+                    ${unsafeHTML(this.myIcons.eye)}
+                </span>
+                <span class="infotxt">
+                    #${this.viewProject.number} opened on ${new Date(this.viewProject.createdAt).toLocaleString()} by ${this.viewProject.author}
+                </span>
+                <span>
+                    ---
+                </span>
             </span>
-            <div style=" position: absolute; right: 5px; bottom: 0px; display: none; gap: 1rem;">
-                <viewtype show="show" @click="${this.clickChangeView}">
+            <div style=" position: absolute; right: 5px; bottom: 0px; display: flex; gap: 1rem;">
+            
+                <viewtype @click="${this.listAllIssues}">
+                    ${unsafeHTML(this.myIcons.plus)}
+                </viewtype>
+                <viewtype style="display:none" show="show" @click="${this.clickChangeView}">
                     ${unsafeHTML(this.myIcons.card)}
                 </viewtype>
-                <viewtype show="showStatus" @click="${this.clickChangeView}">
+                <viewtype style="display:none" show="showStatus" @click="${this.clickChangeView}">
                     ${unsafeHTML(this.myIcons.table)}
                 </viewtype>
             </div>
@@ -192,7 +210,7 @@ export class PluginGithubL4Project extends CollabLitElement {
         if (!item || item.options.length <= 0) return html`Not found status collumn`;
 
         const info = this.organizeItens();
-        
+
         setTimeout(() => { this.setDragAndDrop(true) }, 100);
 
         this.idFieldStatus = item.id;
@@ -255,11 +273,11 @@ export class PluginGithubL4Project extends CollabLitElement {
         return html`
             <itemstatusissues .info=${p} @click=${this.showViewIssue}>
                 <div style="display: flex; flex-wrap: wrap; gap: .2rem;">
-                    ${repeat(p.issue.labels, ( (key: gitIO.ILabel) => key.id) as any, ( (l: gitIO.ILabel, index: any) => { return html`
+                    ${repeat(p.issue.labels, ((key: gitIO.ILabel) => key.id) as any, ((l: gitIO.ILabel, index: any) => {
+                            return html`
                                 <contentlabel style="background:#${l.color}3b; color:#${l.color}; border: 1px solid #${l.color}">${l.name}</contentlabel>
                                 `
-                        }) as any
-                    )}
+                    }) as any )}
                     
                 </div>
                 <div>
@@ -267,11 +285,11 @@ export class PluginGithubL4Project extends CollabLitElement {
                 </div>
                 <div style="display: flex; flex-wrap: wrap; gap: .2rem;align-items: center; justify-content: flex-end;">
 
-                    ${repeat(p.issue.assignees, ( (key: gitIO.IAssignees) => key.avatarUrl) as any, ( (a: gitIO.IAssignees, index: any) => { return html`
+                    ${repeat(p.issue.assignees, ((key: gitIO.IAssignees) => key.avatarUrl) as any, ((a: gitIO.IAssignees, index: any) => {
+                            return html`
                                 <img src="${a.avatarUrl}" title="${a.login}">
                                 `
-                        }) as any
-                    )}
+                    }) as any)}
                     
                 </div>
             </itemstatusissues>
@@ -317,24 +335,17 @@ export class PluginGithubL4Project extends CollabLitElement {
                     <div style="display: flex; flex-direction: column; gap: .3rem;height: 65px;">
                         <label style="font-size: 13px;">Members:</label>
                         <div style="display: flex; gap: .5rem; flex-wrap: wrap;">
-                            ${repeat(this.viewIssue.issue.assignees, (
-            (key: gitIO.IAssignees) => key.avatarUrl) as any, (
-                (a: gitIO.IAssignees, index: any) => {
-                    return html`<img style="width: 37px; border-radius: 50%;" src="${a.avatarUrl}" title="${a.login}"/>`
-
-                }) as any
-        )}
+                            ${repeat(this.viewIssue.issue.assignees, ((key: gitIO.IAssignees) => key.avatarUrl) as any, ((a: gitIO.IAssignees, index: any) => {
+                                return html`<img style="width: 37px; border-radius: 50%;" src="${a.avatarUrl}" title="${a.login}"/>`
+                            }) as any)}
                         </div>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: .3rem;height: 65px;">
                         <label style="font-size: 13px;">Labels:</label>
                         <div style="display: flex; gap: .5rem; flex-wrap: wrap;">
-                            ${repeat(this.viewIssue.issue.labels, (
-            (key: gitIO.ILabel) => key.id) as any, (
-                (l: gitIO.ILabel, index: any) => {
-                    return this.renderLabelsInTask(l)
-                }) as any
-        )}
+                            ${repeat(this.viewIssue.issue.labels, ((key: gitIO.ILabel) => key.id) as any, ((l: gitIO.ILabel, index: any) => {
+                                return this.renderLabelsInTask(l)
+                            }) as any)}
                         </div>
                     </div>
                 </div>
@@ -362,12 +373,9 @@ export class PluginGithubL4Project extends CollabLitElement {
                         </button>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: .5rem; margin-top: 3rem;">
-                        ${repeat(this.viewIssue.issue.comments, (
-            (key: gitIO.IComments) => key.id) as any, (
-                (c: gitIO.IComments, index: any) => {
-                    return this.renderComentsInTask(c)
-                }) as any
-        )}
+                        ${repeat(this.viewIssue.issue.comments, ((key: gitIO.IComments) => key.id) as any, ((c: gitIO.IComments, index: any) => {
+                            return this.renderComentsInTask(c)
+                        }) as any)}
                     </div>
                 </div>
             </div>
@@ -385,7 +393,7 @@ export class PluginGithubL4Project extends CollabLitElement {
                         Labels
                     </h5>
                     <viewoptionitens child="labels" style="display:none;">
-                        ${repeat(this.myLabels, ((key: gitIO.ILabel) => key.id) as any, ((l: gitIO.ILabel, index: any) => { return this.renderOptionsLabels(l) }) as any )}
+                        ${repeat(this.myLabels, ((key: gitIO.ILabel) => key.id) as any, ((l: gitIO.ILabel, index: any) => { return this.renderOptionsLabels(l) }) as any)}
                     </viewoptionitens>
                 </div>
                 <div>
@@ -394,7 +402,7 @@ export class PluginGithubL4Project extends CollabLitElement {
                         Members
                     </h5>
                     <viewoptionitens child="members" style="display:none;">
-                        ${repeat(this.myUsers, ( (key: gitIO.IAssignees) => key.login) as any, ( (l: gitIO.IAssignees, index: any) => { return this.renderOptionsMembers(l) }) as any )}
+                        ${repeat(this.myUsers, ((key: gitIO.IAssignees) => key.login) as any, ((l: gitIO.IAssignees, index: any) => { return this.renderOptionsMembers(l) }) as any)}
                     </viewoptionitens>
                 </div>
                 <div>
@@ -506,6 +514,57 @@ export class PluginGithubL4Project extends CollabLitElement {
 
     }
 
+
+    // Add List Issue
+
+    renderListIssues(): TemplateResult {
+
+        if (!this.listIssues || this.listIssues.length <= 0) {
+            return html` <h3 style="padding:0rem 4rem">No issues</h3>`;
+        }
+
+        return html`
+            <div style="padding:1rem">
+                <backbutton back="showStatus" @click=${this.backButton}>
+                    ${unsafeHTML(this.myIcons.back2)}
+                </backbutton>
+                <h3 style="text-align: center;margin:0px"> Issues </h3>
+            </div>
+            <contentlistissues>
+                ${repeat(this.listIssues, ((key: gitIO.IIssues) => key.id) as any, ((k: gitIO.IIssues, index: any) => {
+                        return this.renderListItemIssues(k, index);
+                    }) as any
+                )}
+            </contentlistissues>
+        `
+
+    }
+
+    renderListItemIssues(item: gitIO.IIssues, idx: number) {
+
+        return html`
+        <contentlistitem .info=${item} filter="${item.title}">
+            <div>
+                <h3>${item.title}</h3>
+                <contentlabels>
+                    ${repeat(item.labels, ((key: gitIO.ILabel) => key.name) as any, ((k: gitIO.ILabel, index: any) => {
+                        return html`
+                            <contentlabel style="background:#${k.color}3b; color:#${k.color}; border: 1px solid #${k.color}">
+                                ${k.name}
+                            </contentlabel>`;
+                    }) as any)}
+                </contentlabels>
+            </div>
+            <span>
+                #${item.numberIssues} opened on ${new Date(item.createdAt).toLocaleString()} by ${item.author}  <span style="margin-left:1rem">project: ${!item.project? 'none yet' : item.project.title}</span>
+                <contentthumb style="float:right" title="add" @click="${this.addIssueInProject}">
+                    ${unsafeHTML(this.myIcons.plus)}
+                </contentthumb>
+            </span>
+        </contentlistitem>
+        `
+    }
+
     //---------IMPLEMENTATION---------------
 
     private async setInfos() {
@@ -552,6 +611,7 @@ export class PluginGithubL4Project extends CollabLitElement {
         if (!el || !el.getAttribute('back')) return;
 
         this.scenary = el.getAttribute('back') as string;
+        setTimeout(() => this.requestUpdate(), 100);
     }
 
     private clickChangeView(e: MouseEvent) {
@@ -570,6 +630,25 @@ export class PluginGithubL4Project extends CollabLitElement {
 
     private async addIssuesin(status: string) {
         this.addInStatus = status;
+
+    }
+
+    private async addIssueInProject(e: MouseEvent) {
+
+        let el = e.target as HTMLElement;
+        let parent = el.closest('contentlistitem');
+
+        if (!parent || !(parent as any).info || !this.req || !this.viewProject) return;
+
+        const { info } = parent as any;
+
+        const isAdd = await gitIO.addIssueInProject(this.req, this.viewProject.id, info.id);
+
+        if (isAdd) this.itensShowProject = await gitIO.getIssuesInProjects(this.req, this.viewProject.id);
+
+        this.scenary = 'showStatus';
+
+        setTimeout(() => { this.requestUpdate(); }, 100)
 
     }
 
@@ -628,8 +707,28 @@ export class PluginGithubL4Project extends CollabLitElement {
 
         this.isLoader = false;
         this.scenary = 'showStatus';
-        this.requestUpdate();
+        setTimeout(() => { this.requestUpdate(); }, 100)
 
+    }
+
+    private async listAllIssues(e: MouseEvent) {
+
+        try {
+            
+            if (!this.req) return;
+            let listIssues: gitIO.IIssues[] = await gitIO.getIssues(this.req); 
+
+            listIssues = listIssues.filter((l) => l.project === undefined);
+
+            this.listIssues = listIssues;
+            this.scenary = 'listAddIssues'
+
+
+        
+        } catch (err:any) {
+            console.info('listAllIssues:' + err.message)
+        }
+        
     }
 
     private async addIssue(e: MouseEvent) {
@@ -662,17 +761,17 @@ export class PluginGithubL4Project extends CollabLitElement {
             if (!issue) return;
 
             const isAdd = await gitIO.addIssueInProject(this.req, this.viewProject.id, issue.id);
-        
+
             if (this.addInStatus && isAdd && this.addInStatus !== 'null') {
                 await gitIO.updateFieldSelectProjects(this.req, this.viewProject.id, isAdd, this.idFieldStatus, this.addInStatus);
             }
 
             if (isAdd) this.itensShowProject = await gitIO.getIssuesInProjects(this.req, this.viewProject.id);
-        
-            
+
+
             this.addInStatus = undefined;
             this.isLoader = false;
-            setTimeout(()=>{this.requestUpdate();}, 200) 
+            setTimeout(() => { this.requestUpdate(); }, 200)
 
         } catch (err: any) {
             this.isLoader = false;
@@ -1024,7 +1123,8 @@ export class PluginGithubL4Project extends CollabLitElement {
         back: `<svg xmlns="http://www.w3.org/2000/svg" style="width:15px;" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>`,
         member: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg>`,
         label: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 80L0 229.5c0 17 6.7 33.3 18.7 45.3l176 176c25 25 65.5 25 90.5 0L418.7 317.3c25-25 25-65.5 0-90.5l-176-176c-12-12-28.3-18.7-45.3-18.7L48 32C21.5 32 0 53.5 0 80zm112 32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>`,
-        trash: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z"/></svg>`
+        trash: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z"/></svg>`,
+        eye:`<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;fill:#fff" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"/></svg>`
 
     }
 }

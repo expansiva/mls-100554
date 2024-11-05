@@ -44,8 +44,8 @@ export class ServiceWorkspace100554 extends ServiceBase {
         },
         icons: {
 
-            ITasks: 'Tasks;f0ae',
-            IBackLog: 'BackLog;e5a0',
+            ITasks: 'Project;f0ae',
+            IBackLog: 'Issues;e5a0',
             IRequirements: 'Requirements;f0a6',
             IChat: 'Chat;f086'
 
@@ -110,14 +110,13 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
     renderBackLog() {
         return html`
-        <div style="padding:2rem">
-            Here are the plugins that integrate or manage the project's issues and requests - under development
-        </div>`
+        <plugin-github-l4-issues-100554>
+        </plugin-github-l4-issues-100554>`
     }
 
     renderRequirements() {
         return html`
-        <plugin-github-l4-issues-100554>
+        <plugin-github-l4-issues-100554 labelfilter="feature request">
         </plugin-github-l4-issues-100554>`
     }
 
