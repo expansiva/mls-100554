@@ -2,7 +2,7 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { CollabLitElement, getMessageKey } from './_100554_collabLitElement';
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
 
@@ -14,6 +14,7 @@ const message_pt = {
     blur: 'Desfoque',
     color: 'Cor',
     gallery: 'Galeria',
+    description: 'Um plugin abrangente para gerenciar e personalizar propriedades de sombra de texto. Aplique sombras sem esforço com deslocamentos ajustáveis, desfoque e opções de cores para melhorar a aparência e a legibilidade do texto.'
 
 }
 
@@ -24,6 +25,8 @@ const message_en = {
     blur: 'Blur',
     color: 'Color',
     gallery: 'Galeria',
+    description: 'A comprehensive plugin for managing and customizing text-shadow properties. Effortlessly apply shadows with adjustable offsets, blur, and color options to enhance text appearance and readability.'
+
 
 }
 
@@ -37,7 +40,11 @@ const messages: { [key: string]: MessageType } = {
 
 
 export const tags = ['text-shadow'];
-export const description = 'A comprehensive plugin for managing and customizing text-shadow properties. Effortlessly apply shadows with adjustable offsets, blur, and color options to enhance text appearance and readability.';
+
+export function getDescription() {
+    const lang = getMessageKey(messages);
+    return messages[lang].description;
+}
 
 @customElement('plugin-style-text-shadow-100554')
 export class PluginStyleTextShadow extends CollabLitElement {

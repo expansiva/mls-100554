@@ -2,7 +2,7 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { CollabLitElement, getMessageKey } from './_100554_collabLitElement';
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
 
@@ -35,6 +35,8 @@ const message_pt = {
     topRight: 'Superior/Direita',
     bottomLeft: 'Inferior/Esquerda',
     bottomRight: 'Inferior/Direita',
+    description: 'Um plugin poderoso projetado para manter e personalizar as propriedades das bordas sem esforço. Modifique estilos, larguras e cores de bordas com facilidade, garantindo componentes de UI consistentes e visualmente atraentes.'
+
 }
 
 const message_en = {
@@ -51,6 +53,7 @@ const message_en = {
     topRight: 'Top/Right',
     bottomLeft: 'Bottom/Left',
     bottomRight: 'Bottom/Right',
+    description: 'A powerful plugin designed to maintain and customize border properties effortlessly. Modify border styles, widths, and colors with ease, ensuring consistent and visually appealing UI components.'
 }
 
 type MessageType = typeof message_en;
@@ -63,10 +66,14 @@ const messages: { [key: string]: MessageType } = {
 
 
 export const tags = ['border*'];
-export const description = 'A powerful plugin designed to maintain and customize border properties effortlessly. Modify border styles, widths, and colors with ease, ensuring consistent and visually appealing UI components';
+export function getDescription() {
+    const lang = getMessageKey(messages);
+    return messages[lang].description;
+}
+
 
 @customElement('plugin-style-border-100554')
-export class PluginStyleClipath extends CollabLitElement {
+export class PluginStyleBorder extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
 

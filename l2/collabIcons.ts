@@ -285,3 +285,156 @@ export const collab_border_bottomRight = unsafeHTML(`
 export const collab_border_topRight = unsafeHTML(`
         <svg width="16" height="16" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg" ><path d="M12 18V20H10V18H12M4 10V12H2V10H4M4 6V8H2V6H4M16 18V20H14V18H16M4 14V16H2V14H4M4 18V20H2V18H4M8 18V20H6V18H8M20 2V20H18V4H2V2H20Z" /></svg>`);
 
+
+export const collab_margin_top = unsafeHTML(`
+        <svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<path fill="#444" d="M15 2v1h-1v-1h-1v1h-1v-1h-1v1h-1v-1h-1v1h-1v-1h-1v1h-1v-1h-1v1h-1v-1h-1v1h-1v-1h-1v1h-1v13h16v-14h-1zM15 15h-14v-11h14v11z"></path>
+<path fill="#444" d="M15 0h1v1h-1v-1z"></path>
+<path fill="#444" d="M14 1h1v1h-1v-1z"></path>
+<path fill="#444" d="M13 0h1v1h-1v-1z"></path>
+<path fill="#444" d="M12 1h1v1h-1v-1z"></path>
+<path fill="#444" d="M11 0h1v1h-1v-1z"></path>
+<path fill="#444" d="M10 1h1v1h-1v-1z"></path>
+<path fill="#444" d="M9 0h1v1h-1v-1z"></path>
+<path fill="#444" d="M8 1h1v1h-1v-1z"></path>
+<path fill="#444" d="M7 0h1v1h-1v-1z"></path>
+<path fill="#444" d="M6 1h1v1h-1v-1z"></path>
+<path fill="#444" d="M5 0h1v1h-1v-1z"></path>
+<path fill="#444" d="M4 1h1v1h-1v-1z"></path>
+<path fill="#444" d="M3 0h1v1h-1v-1z"></path>
+<path fill="#444" d="M2 1h1v1h-1v-1z"></path>
+<path fill="#444" d="M1 0h1v1h-1v-1z"></path>
+<path fill="#444" d="M0 1h1v1h-1v-1z"></path>
+</svg>`);
+
+export const collab_margin_left = unsafeHTML(`
+        <svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<path fill="#444" d="M2 0v1h1v1h-1v1h1v1h-1v1h1v1h-1v1h1v1h-1v1h1v1h-1v1h1v1h-1v1h1v1h-1v1h1v1h13v-16h-14zM15 15h-11v-14h11v14z"></path>
+<path fill="#444" d="M0 0h1v1h-1v-1z"></path>
+<path fill="#444" d="M1 1h1v1h-1v-1z"></path>
+<path fill="#444" d="M0 2h1v1h-1v-1z"></path>
+<path fill="#444" d="M1 3h1v1h-1v-1z"></path>
+<path fill="#444" d="M0 4h1v1h-1v-1z"></path>
+<path fill="#444" d="M1 5h1v1h-1v-1z"></path>
+<path fill="#444" d="M0 6h1v1h-1v-1z"></path>
+<path fill="#444" d="M1 7h1v1h-1v-1z"></path>
+<path fill="#444" d="M0 8h1v1h-1v-1z"></path>
+<path fill="#444" d="M1 9h1v1h-1v-1z"></path>
+<path fill="#444" d="M0 10h1v1h-1v-1z"></path>
+<path fill="#444" d="M1 11h1v1h-1v-1z"></path>
+<path fill="#444" d="M0 12h1v1h-1v-1z"></path>
+<path fill="#444" d="M1 13h1v1h-1v-1z"></path>
+<path fill="#444" d="M0 14h1v1h-1v-1z"></path>
+<path fill="#444" d="M1 15h1v1h-1v-1z"></path>
+</svg>`);
+
+export const collab_margin_bottom = unsafeHTML(`
+        <svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<path fill="#444" d="M0 0v14h1v-1h1v1h1v-1h1v1h1v-1h1v1h1v-1h1v1h1v-1h1v1h1v-1h1v1h1v-1h1v1h1v-1h1v-13h-16zM15 12h-14v-11h14v11z"></path>
+<path fill="#444" d="M0 15h1v1h-1v-1z"></path>
+<path fill="#444" d="M1 14h1v1h-1v-1z"></path>
+<path fill="#444" d="M2 15h1v1h-1v-1z"></path>
+<path fill="#444" d="M3 14h1v1h-1v-1z"></path>
+<path fill="#444" d="M4 15h1v1h-1v-1z"></path>
+<path fill="#444" d="M5 14h1v1h-1v-1z"></path>
+<path fill="#444" d="M6 15h1v1h-1v-1z"></path>
+<path fill="#444" d="M7 14h1v1h-1v-1z"></path>
+<path fill="#444" d="M8 15h1v1h-1v-1z"></path>
+<path fill="#444" d="M9 14h1v1h-1v-1z"></path>
+<path fill="#444" d="M10 15h1v1h-1v-1z"></path>
+<path fill="#444" d="M11 14h1v1h-1v-1z"></path>
+<path fill="#444" d="M12 15h1v1h-1v-1z"></path>
+<path fill="#444" d="M13 14h1v1h-1v-1z"></path>
+<path fill="#444" d="M14 15h1v1h-1v-1z"></path>
+<path fill="#444" d="M15 14h1v1h-1v-1z"></path>
+</svg>`);
+
+export const collab_margin_right = unsafeHTML(`
+        <svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<path fill="#444" d="M14 2v-1h-1v-1h-13v16h14v-1h-1v-1h1v-1h-1v-1h1v-1h-1v-1h1v-1h-1v-1h1v-1h-1v-1h1v-1h-1v-1h1v-1h-1v-1h1zM12 15h-11v-14h11v14z"></path>
+<path fill="#444" d="M15 15h1v1h-1v-1z"></path>
+<path fill="#444" d="M14 14h1v1h-1v-1z"></path>
+<path fill="#444" d="M15 13h1v1h-1v-1z"></path>
+<path fill="#444" d="M14 12h1v1h-1v-1z"></path>
+<path fill="#444" d="M15 11h1v1h-1v-1z"></path>
+<path fill="#444" d="M14 10h1v1h-1v-1z"></path>
+<path fill="#444" d="M15 9h1v1h-1v-1z"></path>
+<path fill="#444" d="M14 8h1v1h-1v-1z"></path>
+<path fill="#444" d="M15 7h1v1h-1v-1z"></path>
+<path fill="#444" d="M14 6h1v1h-1v-1z"></path>
+<path fill="#444" d="M15 5h1v1h-1v-1z"></path>
+<path fill="#444" d="M14 4h1v1h-1v-1z"></path>
+<path fill="#444" d="M15 3h1v1h-1v-1z"></path>
+<path fill="#444" d="M14 2h1v1h-1v-1z"></path>
+<path fill="#444" d="M15 1h1v1h-1v-1z"></path>
+<path fill="#444" d="M14 0h1v1h-1v-1z"></path>
+</svg>`);
+
+export const collab_padding_top = unsafeHTML(`
+        <svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<path fill="#444" d="M0 0v16h16v-16h-16zM15 3h-1v1h1v11h-14v-12h1v-1h-1v-1h1v1h1v-1h1v1h1v-1h1v1h1v-1h1v1h1v-1h1v1h1v-1h1v1h1v-1h1v1h1v1z"></path>
+<path fill="#444" d="M3 2h1v1h-1v-1z"></path>
+<path fill="#444" d="M2 3h1v1h-1v-1z"></path>
+<path fill="#444" d="M4 3h1v1h-1v-1z"></path>
+<path fill="#444" d="M6 3h1v1h-1v-1z"></path>
+<path fill="#444" d="M5 2h1v1h-1v-1z"></path>
+<path fill="#444" d="M7 2h1v1h-1v-1z"></path>
+<path fill="#444" d="M9 2h1v1h-1v-1z"></path>
+<path fill="#444" d="M8 3h1v1h-1v-1z"></path>
+<path fill="#444" d="M10 3h1v1h-1v-1z"></path>
+<path fill="#444" d="M12 3h1v1h-1v-1z"></path>
+<path fill="#444" d="M11 2h1v1h-1v-1z"></path>
+<path fill="#444" d="M13 2h1v1h-1v-1z"></path>
+</svg>`);
+
+export const collab_padding_left = unsafeHTML(`
+        <svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<path fill="#444" d="M0 16h16v-16h-16v16zM3 1v1h1v-1h11v14h-12v-1h-1v1h-1v-1h1v-1h-1v-1h1v-1h-1v-1h1v-1h-1v-1h1v-1h-1v-1h1v-1h-1v-1h1v-1h-1v-1h1v-1h1z"></path>
+<path fill="#444" d="M2 12h1v1h-1v-1z"></path>
+<path fill="#444" d="M3 13h1v1h-1v-1z"></path>
+<path fill="#444" d="M3 11h1v1h-1v-1z"></path>
+<path fill="#444" d="M3 9h1v1h-1v-1z"></path>
+<path fill="#444" d="M2 10h1v1h-1v-1z"></path>
+<path fill="#444" d="M2 8h1v1h-1v-1z"></path>
+<path fill="#444" d="M2 6h1v1h-1v-1z"></path>
+<path fill="#444" d="M3 7h1v1h-1v-1z"></path>
+<path fill="#444" d="M3 5h1v1h-1v-1z"></path>
+<path fill="#444" d="M3 3h1v1h-1v-1z"></path>
+<path fill="#444" d="M2 4h1v1h-1v-1z"></path>
+<path fill="#444" d="M2 2h1v1h-1v-1z"></path>
+</svg>`);
+
+export const collab_padding_bottom = unsafeHTML(`
+        <svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<path fill="#444" d="M16 16v-16h-16v16h16zM1 13h1v-1h-1v-11h14v12h-1v1h1v1h-1v-1h-1v1h-1v-1h-1v1h-1v-1h-1v1h-1v-1h-1v1h-1v-1h-1v1h-1v-1h-1v1h-1v-1h-1v-1z"></path>
+<path fill="#444" d="M12 13h1v1h-1v-1z"></path>
+<path fill="#444" d="M13 12h1v1h-1v-1z"></path>
+<path fill="#444" d="M11 12h1v1h-1v-1z"></path>
+<path fill="#444" d="M9 12h1v1h-1v-1z"></path>
+<path fill="#444" d="M10 13h1v1h-1v-1z"></path>
+<path fill="#444" d="M8 13h1v1h-1v-1z"></path>
+<path fill="#444" d="M6 13h1v1h-1v-1z"></path>
+<path fill="#444" d="M7 12h1v1h-1v-1z"></path>
+<path fill="#444" d="M5 12h1v1h-1v-1z"></path>
+<path fill="#444" d="M3 12h1v1h-1v-1z"></path>
+<path fill="#444" d="M4 13h1v1h-1v-1z"></path>
+<path fill="#444" d="M2 13h1v1h-1v-1z"></path>
+</svg>`);
+
+export const collab_padding_right = unsafeHTML(`
+        <svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<path fill="#444" d="M16 0h-16v16h16v-16zM13 15v-1h-1v1h-11v-14h12v1h1v-1h1v1h-1v1h1v1h-1v1h1v1h-1v1h1v1h-1v1h1v1h-1v1h1v1h-1v1h1v1h-1v1h-1z"></path>
+<path fill="#444" d="M13 3h1v1h-1v-1z"></path>
+<path fill="#444" d="M12 2h1v1h-1v-1z"></path>
+<path fill="#444" d="M12 4h1v1h-1v-1z"></path>
+<path fill="#444" d="M12 6h1v1h-1v-1z"></path>
+<path fill="#444" d="M13 5h1v1h-1v-1z"></path>
+<path fill="#444" d="M13 7h1v1h-1v-1z"></path>
+<path fill="#444" d="M13 9h1v1h-1v-1z"></path>
+<path fill="#444" d="M12 8h1v1h-1v-1z"></path>
+<path fill="#444" d="M12 10h1v1h-1v-1z"></path>
+<path fill="#444" d="M12 12h1v1h-1v-1z"></path>
+<path fill="#444" d="M13 11h1v1h-1v-1z"></path>
+<path fill="#444" d="M13 13h1v1h-1v-1z"></path>
+</svg>`);
+

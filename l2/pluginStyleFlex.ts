@@ -1,0 +1,236 @@
+/// <mls shortName="pluginStyleFlex" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+import { html, css, svg, repeat, TemplateResult } from 'lit';
+import { customElement, property, query, queryAll } from 'lit/decorators.js';
+import { CollabLitElement, getMessageKey } from './_100554_collabLitElement';
+import './_100554_collabDsInputRange';
+
+/// **collab_i18n_start**
+const message_pt = {
+    flex: 'Flex',
+    flexItem: 'Flex item',
+    display: 'Display',
+    flexDirection: 'Flex direction',
+    flexWrap: 'Flex wrap',
+    justifyContent: 'Justify content',
+    alignItems: 'Align items',
+    alignContent: 'Align content',
+    alignSelf: 'Align self',
+    order: 'Order',
+    description: 'Este plugin permite criar e ajustar colunas de texto de forma prática e eficiente. Com ele, é possível definir o número de colunas, o espaçamento entre elas e outros detalhes de formatação, proporcionando um layout organizado e facilitando a leitura.'
+}
+
+const message_en = {
+    flex: 'Flex',
+    flexItem: 'Flex item',
+    display: 'Display',
+    flexDirection: 'Flex direction',
+    flexWrap: 'Flex wrap',
+    justifyContent: 'Justify content',
+    alignItems: 'Align items',
+    alignContent: 'Align content',
+    alignSelf: 'Align self',
+    order: 'Order',
+    description: 'This plugin allows for easy and efficient creation and adjustment of text columns. It lets you set the number of columns, spacing between them, and other formatting details, providing an organized layout and enhancing readability.'
+
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en': message_en,
+    'pt': message_pt
+}
+/// **collab_i18n_end**
+
+export const tags = ['flex*', 'gap', 'align-items', 'justify-content'];
+
+export function getDescription() {
+    const lang = getMessageKey(messages);
+    return messages[lang].description;
+}
+
+@customElement('plugin-style-flex-100554')
+export class PluginStyleFlex extends CollabLitElement {
+
+    private msg: MessageType = messages['en'];
+
+    @property() showFull: string = 'true';
+
+
+    render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        return html`
+             ${this.showFull === 'true' ?
+                html`
+                ${this.renderGallery()}
+                ${this.renderFlex()}
+                ${this.renderFlexItem()}
+            ` :
+                html`
+                ${this.renderGallery()}
+            `
+            }
+        `;
+    }
+
+    renderFlex() {
+        return html`
+            <h5 class="helper-group-title" >${this.msg.flex}</h5>
+            <div class="group">
+            
+                <span>${this.msg.display}</span>
+                  <div class="group-edit">
+                    <select prop="display">
+                        <option value=""></option>
+                        <option value="flex">Flex</option>
+                        <option value="inline-flex">Inline Flex</option>
+                    </select>
+                </div>
+
+                <span>${this.msg.flexDirection}</span>
+                <div class="group-edit">
+                    <select class="group-select" prop="flex-direction">
+                        <option value=""></option>
+                        <option value="row">Row</option>
+                        <option value="row-reverse">Row Reverse</option>
+                        <option value="column">Column</option>
+                        <option value="column-reverse">Column Reverse</option>
+                    </select>   
+                </div>
+
+                <span>${this.msg.flexWrap}</span>
+                <div class="group-edit">
+                    <select class="group-select" prop="flex-wrap">
+                        <option value=""></option>
+                        <option value="nowrap">Nowrap</option>
+                        <option value="wrap">Wrap</option>
+                        <option value="wrap-reverse">Wrap Reverse</option>
+                    </select>  
+                </div>
+
+                <span>${this.msg.justifyContent}</span>
+                <div class="group-edit">
+                    <select class="group-select" prop="justify-content">
+                        <option value=""></option>
+                        <option value="flex-start">Flex start</option>
+                        <option value="flex-end">Flex end</option>
+                        <option value="center">Center</option>
+                        <option value="space-between">Space between</option>
+                        <option value="space-around">Space around</option>
+                    </select>  
+                </div>
+
+                <span>${this.msg.alignItems}</span>
+                <div class="group-edit">
+                    <select class="group-select" prop="align-items">
+                        <option value=""></option>
+                        <option value="flex-start">Flex start</option>
+                        <option value="flex-end">Flex end</option>
+                        <option value="center">Center</option>
+                        <option value="baseline">Baseline</option>
+                        <option value="stretch">Stretch</option>
+                    </select>  
+                </div>
+
+                <span>${this.msg.alignContent}</span>
+                <div class="group-edit">
+                    <select class="group-select" prop="align-content">
+                        <option value=""></option>
+                        <option value="flex-start">Flex start</option>
+                        <option value="flex-end">Flex end</option>
+                        <option value="center">Center</option>
+                        <option value="space-between">Space between</option>
+                        <option value="space-around">Space around</option>
+                        <option value="stretch">Stretch</option>
+                    </select>  
+                </div>
+            </div>
+        `
+    }
+
+
+    renderFlexItem() {
+        return html`
+            <h5 class="helper-group-title" >${this.msg.flexItem}</h5>
+            <div class="group">
+
+                <span>${this.msg.alignSelf}</span>
+                <div class="group-edit">
+                    <select class="group-select" prop="align-self">
+                        <option value=""></option>
+                        <option value="auto">auto</option>
+                        <option value="flex-start">Flex start</option>
+                        <option value="flex-end">Flex end</option>
+                        <option value="center">Center</option>
+                        <option value="baseline">Baseline</option>
+                        <option value="stretch">Stretch</option>
+                    </select>
+                </div>
+
+                <span>${this.msg.order}</span>
+                <div class="group-edit">
+                    <select class="group-select" prop="order">
+                        <option value=""></option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        
+                    </select>   
+                </div>
+            </div>
+        `
+    }
+
+    renderGallery() {
+        return html`
+        
+            <div class="gallery" >
+                ${repeat(this.arrayGallery.slice(0, 4), ((key: any) => key) as any,
+            ((css: any, index: any) => {
+
+                return html`<div class="gallery-item-1" style="${css}" .gallery=${css}>
+                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
+                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
+                            <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
+                        </div>`;
+            }) as any
+        )}
+            </div>
+            <div  class="gallery">
+                ${repeat(this.arrayGallery.slice(4, 8), ((key: any) => key) as any,
+            ((css: any, index: any) => {
+
+                return html`<div class="gallery-item-2" style="${css}" .gallery=${css}>
+                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
+                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
+                    <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
+                </div>`;
+            }) as any
+        )}
+            </div>
+        
+        `
+    }
+
+    private arrayGallery = [
+        'display: flex;flex-direction: row; justify-content: flex-start;',
+        'display: flex; flex-direction: row; justify-content: flex-end;',
+        'display: flex; flex-direction: row; justify-content: center;',
+        'display: flex; flex-direction: row; justify-content: space-between;',
+        'display: flex;flex-direction: column; justify-content: flex-start;',
+        'display: flex;flex-direction: column; justify-content: flex-end;',
+        'display: flex;flex-direction: column; justify-content: center;',
+        'display: flex;flex-direction: column; justify-content: space-between;'
+    ];
+
+}

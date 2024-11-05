@@ -2,14 +2,15 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'
+import { CollabLitElement,getMessageKey } from './_100554_collabLitElement'
 
 /// **collab_i18n_start**
 const message_pt = {
-
+    description: 'Um plugin versátil para manter e personalizar propriedades de clip-path CSS. Crie facilmente formas complexas e aplique-as a elementos, permitindo designs de UI exclusivos e criativos com precisão.'
 }
 
 const message_en = {
+    description: 'A versatile plugin for maintaining and customizing CSS clip-path properties. Easily create complex shapes and apply them to elements, enabling unique and creative UI designs with precision.'
 
 }
 
@@ -23,7 +24,11 @@ const messages: { [key: string]: MessageType } = {
 
 
 export const tags = ['clip-path'];
-export const description = 'A versatile plugin for maintaining and customizing CSS clip-path properties. Easily create complex shapes and apply them to elements, enabling unique and creative UI designs with precision.';
+
+export function getDescription() {
+    const lang = getMessageKey(messages);
+    return messages[lang].description;
+}
 
 @customElement('plugin-style-clippath-100554')
 export class PluginStyleClipath extends CollabLitElement {

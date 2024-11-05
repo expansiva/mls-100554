@@ -3,7 +3,7 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'
+import { CollabLitElement, getMessageKey } from './_100554_collabLitElement'
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -15,6 +15,7 @@ const message_pt = {
     translateX: 'Transladar x',
     translateY: 'Transladar y',
     rotate: 'Rotacionar',
+    description: 'Um plugin versátil para manter e aplicar propriedades de transformação CSS. Gerencie facilmente transformações de escala, rotação, inclinação e tradução para criar elementos de UI dinâmicos e interativos com precisão'
 }
 
 const message_en = {
@@ -26,6 +27,7 @@ const message_en = {
     translateX: 'Translate x',
     translateY: 'Translate y',
     rotate: 'Rotate',
+    description: 'A versatile plugin for maintaining and applying CSS transform properties. Easily manage scale, rotate, skew, and translate transformations to create dynamic and interactive UI elements with precision.'
 }
 
 type MessageType = typeof message_en;
@@ -38,7 +40,11 @@ const messages: { [key: string]: MessageType } = {
 
 
 export const tags = ['transform'];
-export const description = 'A versatile plugin for maintaining and applying CSS transform properties. Easily manage scale, rotate, skew, and translate transformations to create dynamic and interactive UI elements with precision.';
+
+export function getDescription() {
+    const lang = getMessageKey(messages);
+    return messages[lang].description;
+}
 
 @customElement('plugin-style-transform-100554')
 export class PluginStyleTransform extends CollabLitElement {
@@ -76,15 +82,15 @@ export class PluginStyleTransform extends CollabLitElement {
 
         return html`
             ${this.showFull === 'true' ?
-                    html`
+                html`
                     ${this.renderGallery()}
                     ${this.renderTransform()}
 
                 ` :
-                    html`
+                html`
                     ${this.renderGallery()}
                 `
-                }
+            }
         `;
 
     }

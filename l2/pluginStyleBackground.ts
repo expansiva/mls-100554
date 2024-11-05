@@ -2,7 +2,7 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'
+import { CollabLitElement, getMessageKey } from './_100554_collabLitElement'
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -13,7 +13,8 @@ const message_pt = {
     transparency: 'Transparencia',
     stop: 'Parar',
     add: 'Add',
-    del: 'Del'
+    del: 'Del',
+    description: 'Um plugin robusto para gerenciar e personalizar propriedades de plano de fundo. Lide facilmente com cores de fundo, imagens, gradientes e padrões para criar designs de UI visualmente atraentes e dinâmicos.'
 }
 
 const message_en = {
@@ -24,7 +25,9 @@ const message_en = {
     transparency: 'Transparency',
     stop: 'Stop',
     add: 'Add',
-    del: 'Del'
+    del: 'Del',
+    description: 'A robust plugin for managing and customizing background properties. Effortlessly handle background colors, images, gradients, and patterns to create visually appealing and dynamic UI designs.'
+
 }
 
 type MessageType = typeof message_en;
@@ -37,7 +40,10 @@ const messages: { [key: string]: MessageType } = {
 
 
 export const tags = ['background', 'background-color', 'color', 'border-color'];
-export const description = 'A robust plugin for managing and customizing background properties. Effortlessly handle background colors, images, gradients, and patterns to create visually appealing and dynamic UI designs.';
+export function getDescription() {
+    const lang = getMessageKey(messages);
+    return messages[lang].description;
+}
 
 @customElement('plugin-style-background-100554')
 export class PluginCssTokens extends CollabLitElement {

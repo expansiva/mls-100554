@@ -278,6 +278,33 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 widget: '_100554_pluginStyleTransform'
             },
 
+            {
+                category: 'Columns',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleColumn'
+            },
+
+            {
+                category: 'Spacing',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleSpacing'
+            },
+
+            {
+                category: 'Flex',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleFlex'
+            },
+
+
+
+
         ];
     }
 

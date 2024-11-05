@@ -407,7 +407,6 @@ export class ServiceDsStyleFlex extends ServiceBase {
         'display: flex;flex-direction: column; justify-content: flex-end;border: 1px solid #cccccc;margin-left: 10px; width:60px;height:200px; padding: 5px; cursor: pointer;background:white',
         'display: flex;flex-direction: column; justify-content: center;border: 1px solid #cccccc;margin-left: 10px; width:60px;height:200px; padding: 5px; cursor: pointer;background:white',
         'display: flex;flex-direction: column; justify-content: space-between;border: 1px solid #cccccc;margin-left: 10px; width:60px;height:200px; padding: 5px; cursor: pointer;background:white'
-
     ];
 
 }

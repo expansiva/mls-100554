@@ -3,17 +3,19 @@
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
+import { getMessageKey } from './_100554_collabLitElement';
+
 import { propertyDataSource } from './_100554_icaLitElement';
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { IBlockLessLine } from './_100554_enhancementStyle';
 
 /// **collab_i18n_start**
 const message_pt = {
-
+    description: 'Um plugin especializado para gerenciar tokens de design de cores. Defina, organize e aplique facilmente paletas de cores para garantir consistência em seus designs, melhorando a acessibilidade e o apelo visual em seus projetos.'
 }
 
 const message_en = {
-
+    description: 'A specialized plugin for managing color design tokens. Easily define, organize, and apply color palettes to ensure consistency across your designs, enhancing accessibility and visual appeal in your projects.'
 }
 
 type MessageType = typeof message_en;
@@ -25,7 +27,11 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 export const tags = ['color:@*', 'background-color:@*', 'background:@*'];
-export const description = 'A specialized plugin for managing color design tokens. Easily define, organize, and apply color palettes to ensure consistency across your designs, enhancing accessibility and visual appeal in your projects.';
+
+export function getDescription() {
+    const lang = getMessageKey(messages);
+    return messages[lang].description;
+}
 
 @customElement('plugin-style-tokens-100554')
 export class PluginCssTokens extends IcaLitElement {

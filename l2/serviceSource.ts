@@ -27,6 +27,8 @@ export class ServiceSource100554 extends ServiceBase {
     @property({ type: String }) mode: IModes = 'icTs';
     private MINWIDTHTPANELRIGHT = 500;
 
+    private viewsState: IViewState = {};
+
     createRenderRoot() {
         return this;
     }
@@ -43,6 +45,8 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     public onClickIcon = (op: string): void => {
+
+        this.saveViewState();
         this.mode = op as IModes;
         if (op === 'icTs') this.showActiveModel();
         if (op === 'icHTML') this.createOrShowModelHtmlOrCss(mls.l2.editor.editors[this.confE].shortName, mls.l2.editor.editors[this.confE].project, true, '.html');
@@ -256,6 +260,9 @@ export class ServiceSource100554 extends ServiceBase {
     @query('mls-editor-100529')
     private c2: HTMLElement | undefined;
 
+    @query('collab-spliter-vertical-var-fixed-100554')
+    private verticalSpliter: HTMLElement | undefined;
+
 
     public last: mls.IActual | undefined = undefined;
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
@@ -267,20 +274,37 @@ export class ServiceSource100554 extends ServiceBase {
     get confEJS() { return this.confE + '_JS'; }
 
     private saveViewState() {
-        if (!this._ed1) return;
-        const activeModel = mls.l2.editor.editors[this.confE];
-        if (!activeModel) return;
-        (activeModel as any)[`${this.position}_viewState`] = this._ed1.saveViewState();
+        let activeModel = mls.l2.editor.editors[this.confE];
+        if (!this._ed1 || !this.mode|| !activeModel) return;
+        const obj: { [key: string]: 'ts' | 'html' | 'style' } = {
+            icTs: 'ts',
+            icHTML: 'html',
+            icStyle: 'style',
+        };
+        const mode: 'ts' | 'html' | 'style' = obj[this.mode];
+        const keyViewState = `${activeModel.project}_${activeModel.shortName}`
+        if (!this.viewsState[keyViewState]) {
+            this.viewsState[keyViewState] = {
+                html: null,
+                ts: null,
+                style: null,
+            }
+        }
+        this.viewsState[keyViewState][mode] = this._ed1.saveViewState();
     }
 
     private restaureViewState() {
-        if (!this._ed1) return;
-        const activeModel = mls.l2.editor.editors[this.confE];
-        if (!activeModel) return;
-        const viewState = (activeModel as any)[`${this.position}_viewState`];
-        if (viewState) this._ed1.restoreViewState(viewState);
+        let activeModel = mls.l2.editor.editors[this.confE];
+        if (!this._ed1 || !this.mode || !activeModel) return;
+        const obj: { [key: string]: 'ts' | 'html' | 'style' } = {
+            icTs: 'ts',
+            icHTML: 'html',
+            icStyle: 'style',
+        };
+        const mode: 'ts' | 'html' | 'style' = obj[this.mode];
+        const keyViewState = `${activeModel.project}_${activeModel.shortName}`
+        if (this.viewsState[keyViewState] && this.viewsState[keyViewState][mode]) this._ed1.restoreViewState(this.viewsState[keyViewState][mode]);
     }
-
 
     private openRepo() {
         if (!this.menu.lastIcon) return false;
@@ -921,6 +945,7 @@ export class ServiceSource100554 extends ServiceBase {
             // in page, ex About, prepare model to after close hamburger
             this._ed1.setModel(activeModel.model);
         }
+        this.restaureViewState();
         this.updatedMSizeEditor();
         return true;
     }
@@ -974,15 +999,15 @@ export class ServiceSource100554 extends ServiceBase {
                             const mmodel = model as IMonacoModelStyle;
                             const validPosition = mmodel.isCursorInBlockValid();
                             let validLine: boolean = true;
-                        
+
                             if (validPosition) {
                                 const info = mmodel.getLessBlock();
                                 if (!info) return;
-                                
+
                                 const actualLine = info.lines.find((line) => line.line === lineNumber);
                                 const blockInfo = mmodel.getBlockInfo();
                                 if (lineNumber === blockInfo.endLine || lineNumber === blockInfo.startLine) validLine = false;
-                                    
+
                                 const rc = {
                                     lines: info.lines,
                                     selector: info.selector,
@@ -1450,6 +1475,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (!model) model = await this.getOrCreateModelHtmlOrCss(shortName, project, mode, storFile, fileInfo);
         if (open && this._ed1) {
             this._ed1.setModel(model);
+            this.restaureViewState();
             this.updatedMSizeEditor();
         }
 
@@ -1710,12 +1736,24 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     firstUpdated(changedProperties: any) {
         super.firstUpdated(changedProperties);
         this.registerProviderHTML();
+        if (this.c2) {
+            const bg = getComputedStyle(this.c2).backgroundColor;
+            console.info({
+                bg
+            })
+            if (bg && this.verticalSpliter) {
+                this.verticalSpliter.setAttribute('complementcolor', bg);
+
+                //1e1e1e
+            }
+
+        }
     }
 
     render() {
         this.style.display = 'block';
         return html`
-             <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="#1e1e1e">
+             <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="red">
                 <collab-spliter-horizontal-var-fixed-100554
                     slot="top"
                     complementcolor="#1e1e1e"
@@ -2052,6 +2090,16 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
 
+
+}
+
+interface IViewState {
+    [file: string]: IViewStates
+}
+interface IViewStates {
+    ts: monaco.editor.ICodeEditorViewState | null,
+    html: monaco.editor.ICodeEditorViewState | null,
+    style: monaco.editor.ICodeEditorViewState | null,
 }
 
 type IModes = 'icTs' | 'icStyle' | 'icHTML';
