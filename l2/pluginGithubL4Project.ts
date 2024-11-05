@@ -8,7 +8,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 
 import 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.3/Sortable.min.js';
 
-export const pluginData: mls.plugin.IPluginData = {
+export const pluginData: mls.plugin.IPluginData = { 
     title: "GitHub Projects",
     getSvg(): TemplateResult {
         return svg`
