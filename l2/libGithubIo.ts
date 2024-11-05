@@ -617,6 +617,13 @@ export async function getIssues(req: IReq, state: string = 'OPEN'): Promise<IIss
                                             name
                                         }
                                     }
+                                    projectsV2(first: 1) {
+                                        nodes {
+                                            number
+                                            title
+                                            id
+                                        }
+                                    }
                                     reactions(last:100, content: THUMBS_UP) {
                                         totalCount
                                         nodes {
@@ -675,6 +682,14 @@ export async function getIssues(req: IReq, state: string = 'OPEN'): Promise<IIss
             })
             issue.reactions = r;
 
+            i.node.projectsV2.nodes.forEach((pj: any) => {
+                issue.project = {
+                    id: pj.id,
+                    title: pj.title,
+                    number: pj.number
+                }
+            })
+
             issues.push(issue);
 
         });
@@ -717,6 +732,13 @@ export async function getIssue(req: IReq, id: string): Promise<IIssues | undefin
                                     id
                                     color
                                     name
+                                }
+                            }
+                            projectsV2(first: 1) {
+                                nodes {
+                                    number
+                                    title
+                                    id
                                 }
                             }
                             reactions(last:100, content: THUMBS_UP) {
@@ -768,6 +790,14 @@ export async function getIssue(req: IReq, id: string): Promise<IIssues | undefin
             })
         })
         issue.reactions = r;
+
+        ret.node.projectsV2.nodes.forEach((pj: any) => {
+            issue.project = {
+                id: pj.id,
+                title: pj.title,
+                number: pj.number
+            }
+        })
 
         return issue;
 
@@ -1150,7 +1180,7 @@ export async function getUsers(req: IReq): Promise<IAssignees[]> {
 
         const users: IAssignees[] = [];
 
-        ret.repository.collaborators.edges.forEach((c:any) => {
+        ret.repository.collaborators.edges.forEach((c: any) => {
 
             users.push({
                 id: c.node.id,
@@ -1223,22 +1253,22 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
         let retLabel;
         if (!retLabels.feature) {
             retLabel = await createLabelIO(req, repositoryId, 'feature request', '1e8103');
-            retLabels.feature = retLabel ? retLabel.id : '' ;
+            retLabels.feature = retLabel ? retLabel.id : '';
         }
 
         if (!retLabels.low) {
             retLabel = await createLabelIO(req, repositoryId, 'low', '49ff18');
-            retLabels.low = retLabel ? retLabel.id : '' ;
+            retLabels.low = retLabel ? retLabel.id : '';
         }
 
         if (!retLabels.medium) {
             retLabel = await createLabelIO(req, repositoryId, 'medium', 'f1ff18');
-            retLabels.medium = retLabel ? retLabel.id : '' ;
+            retLabels.medium = retLabel ? retLabel.id : '';
         }
 
         if (!retLabels.high) {
             retLabel = await createLabelIO(req, repositoryId, 'high', 'ff0000');
-            retLabels.high = retLabel ? retLabel.id : '' ;
+            retLabels.high = retLabel ? retLabel.id : '';
         }
 
         return retLabels;
@@ -1422,7 +1452,7 @@ export interface IItemProject {
 }
 
 export interface IAssignees {
-    id:string,
+    id: string,
     login: string,
     avatarUrl: string
 }
@@ -1456,7 +1486,7 @@ export interface IReq {
     mkey: string,
     owner: string,
     repo: string,
-    branch: string,
+    branch: string, 
 }
 
 export interface IIssues {
@@ -1474,6 +1504,13 @@ export interface IIssues {
     reactions: IReactions[],
     comments: IComments[],
     assignees: IAssignees[],
+    project: IProjectMain
+}
+
+export interface IProjectMain {
+    number: number,
+    title: string,
+    id: string
 }
 
 export interface IReactions {
