@@ -30,23 +30,11 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-
 export class PluginProjectFindFiles extends PluginBaseModule {
 
     private msg: MessageType = messages['en'];
     private matchedFiles: string[] = [];
     private progressValue: number = 0;
-
-    @property({ type: Boolean }) autoPrepare: boolean = false;
-    @query('.plugin-body') body: HTMLDivElement | undefined;
-
-    async prepare() {
-    }
-
-    firstUpdated() {
-        if (!this.body || !this.autoPrepare) return;
-        this.prepare();
-    }
 
     render(): TemplateResult {
         const lang = this.getMessageKey(messages);
@@ -74,7 +62,7 @@ export class PluginProjectFindFiles extends PluginBaseModule {
 
     renderBody(): TemplateResult {
         return html`
-            <div class="plugin-body">
+            <div class="body">
                 <label for="fileType">${this.msg.lblChoice}</label>
                 <select name="fileType">
                     <option value=".ts">.ts - typescript</option>
@@ -100,14 +88,13 @@ export class PluginProjectFindFiles extends PluginBaseModule {
         `;
     }
 
-    // Função disparada ao clicar no botão de pesquisa
     async onSearch() {
         const fileType = (this.querySelector('[name="fileType"]') as HTMLSelectElement).value;
         const searchText = (this.querySelector('[name="searchText"]') as HTMLInputElement).value;
-        const project: number = mls.actual[5].project ?? 0;
-        const files = Object.keys(mls.stor.files)
-            .filter((item => item.startsWith(project.toString())))
-            .filter((item => mls.stor.files[item].extension === fileType));
+        const project = mls.actual[5].project;
+        const files = Object.entries(mls.stor.files)
+            .filter(([, file]) => file.project === project && file.extension === fileType)
+            .map(([key]) => key);            
         await this.searchFiles(files, searchText);
     }
 
@@ -126,7 +113,6 @@ export class PluginProjectFindFiles extends PluginBaseModule {
         });
         await Promise.all(promises);
     }
-
 }
 
 if (!customElements.get('plugin-project-find-files-100554')) {
