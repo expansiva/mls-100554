@@ -7,8 +7,6 @@ import { CollabLitElement } from './_100554_collabLitElement';
 @customElement('mls-history-list-100554')
 export class MlsHistoryList extends CollabLitElement {
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     @property({ type: Number }) project: number = 100554;
     @property({ type: String }) shortName: string = 'mlsStartL2';
     @property({ type: String }) position: 'left' | 'right' = 'left';

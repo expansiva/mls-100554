@@ -14,6 +14,8 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
   @property({ type: String }) actualfixedwidth = this.fixedwidth;
   @property({ type: String }) msize = '';
   @property() open: boolean = true;
+  @property() openUser: boolean | undefined;
+
 
   @query('[slot="left"]') slotLeft: HTMLElement | undefined;
   @query('[slot="right"]') slotRight: HTMLElement | undefined;
@@ -26,7 +28,12 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
   updated(changedProperties: Map<string | number | symbol, unknown>) {
 
     if (changedProperties.has('fixedvisible')) {
-      this.open = this.fixedvisible === 'visible' ? true : false;
+      const fixedvisible = changedProperties.get('fixedvisible');
+      if ((fixedvisible === 'hidden' || fixedvisible === 'closed') && (this.fixedvisible === 'visible' && this.openUser !== undefined && this.openUser === false)) {
+        console.info('passei')
+        this.open = false;
+      } else this.open = this.fixedvisible === 'visible' ? true : false;
+
     }
 
     if (changedProperties.has('open')) {
@@ -63,7 +70,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       const percent = this.fixedwidth.replace('%', '');
       const percentInPx = ((+msize.width) / 100) * (+percent);
       let percentInPx2 = Number.parseFloat(percentInPx.toFixed(2))
-      if (percentInPx2 < 300) percentInPx2 = 300;
+      if (percentInPx2 < 300 && percentInPx2 > 0) percentInPx2 = 300;
 
       this.actualfixedwidth = this.open ? percentInPx2.toString() : '0';
       this.style.setProperty('--fixed-width', this.actualfixedwidth + 'px');
@@ -151,6 +158,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
 
       const rightPane = this.querySelector('.right-pane') as HTMLElement;
       this.open = !this.open;
+      this.openUser = this.open;
       if (this.open) {
         rightPane.classList.remove('closed');
         rightPane.style.display = 'block';
@@ -204,7 +212,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
               </div>
               `
         :
-      html``}
+        html``}
       <div class="right-pane ${this.fixedvisible === 'closed' ? "closed" : ""}"></div>
       <style>${this.styles}</style>
     `;
@@ -227,6 +235,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       background-color: var(--complement-color);
       position: relative;
       z-index: 1;
+      border-right: 1px solid #cecece;
     }
     collab-spliter-horizontal-var-fixed-100554 > .spliter .spliter-button {
       display: flex;
@@ -240,6 +249,7 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
       z-index: 1;
       border-top-left-radius: 5px;
       border-bottom-left-radius: 5px;
+      background-color: #f9f9f9;
     }
 
     collab-spliter-horizontal-var-fixed-100554 > .spliter .spliter-button i {

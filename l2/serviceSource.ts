@@ -7,6 +7,7 @@ import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_10
 import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
 import { getAddNewFileDetails, removeTokensFromSource, getTokensLess, IMonacoModelStyle } from './_100554_enhancementStyle';
+import { LessCSS } from "./_100554_lessCSS";
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -25,8 +26,9 @@ export class ServiceSource100554 extends ServiceBase {
     @property({ type: String }) msize = '';
     @property({ type: Boolean }) panelRightOpened = false;
     @property({ type: String }) mode: IModes = 'icTs';
-    private MINWIDTHTPANELRIGHT = 500;
 
+    private MINWIDTHTPANELRIGHT = 500;
+    private lessCSS: LessCSS | undefined;
     private viewsState: IViewState = {};
 
     createRenderRoot() {
@@ -109,6 +111,17 @@ export class ServiceSource100554 extends ServiceBase {
         await this.initMonaco();
         if (this.menu.setIconActive) this.menu.setIconActive('icTs');
         this.updatedMSizeEditor();
+        if (this.c2) {
+            const bgEl = this.c2.querySelector('.monaco-editor-background');
+            if (bgEl) {
+                const bg = getComputedStyle(bgEl).backgroundColor;
+                if (bg && this.horizontalSpliter && this.verticalSpliter) {
+                    this.horizontalSpliter.setAttribute('complementcolor', bg);
+                    this.verticalSpliter.setAttribute('complementcolor', bg);
+                }
+            }
+
+        }
     }
 
     //---------- Handling Editor --------
@@ -263,7 +276,9 @@ export class ServiceSource100554 extends ServiceBase {
     @query('collab-spliter-vertical-var-fixed-100554')
     private verticalSpliter: HTMLElement | undefined;
 
-
+    @query('collab-spliter-horizontal-var-fixed-100554')
+    private horizontalSpliter: HTMLElement | undefined;
+    
     public last: mls.IActual | undefined = undefined;
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
     private mConfEditor: monaco.editor.ITextModel | undefined;
@@ -275,7 +290,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     private saveViewState() {
         let activeModel = mls.l2.editor.editors[this.confE];
-        if (!this._ed1 || !this.mode|| !activeModel) return;
+        if (!this._ed1 || !this.mode || !activeModel) return;
         const obj: { [key: string]: 'ts' | 'html' | 'style' } = {
             icTs: 'ts',
             icHTML: 'html',
@@ -721,12 +736,6 @@ export class ServiceSource100554 extends ServiceBase {
 
         this.saveLocalStorageLastOpen(storFileTS, position);
         if (!this._ed1) return;
-
-        const enhancementInstanceLess = await import('./_100554_enhancementStyle');
-        let mfile = mls.l2.editor.get(storFileTS);
-        const modelStyle = (mfile as any).modelLESS;
-        enhancementInstanceLess.setModelAPI(this._ed1, modelStyle);
-
         this.restaureViewState();
     }
 
@@ -994,37 +1003,8 @@ export class ServiceSource100554 extends ServiceBase {
                     const isReadOnlyArea = this.isReadOnlyArea(lineNumber);
                     this._ed1.updateOptions({ readOnly: isReadOnlyArea });
                     if (!isReadOnlyArea) {
-                        const model = this._ed1.getModel();
-                        if (model) {
-                            const mmodel = model as IMonacoModelStyle;
-                            const validPosition = mmodel.isCursorInBlockValid();
-                            let validLine: boolean = true;
 
-                            if (validPosition) {
-                                const info = mmodel.getLessBlock();
-                                if (!info) return;
-
-                                const actualLine = info.lines.find((line) => line.line === lineNumber);
-                                const blockInfo = mmodel.getBlockInfo();
-                                if (lineNumber === blockInfo.endLine || lineNumber === blockInfo.startLine) validLine = false;
-
-                                const rc = {
-                                    lines: info.lines,
-                                    selector: info.selector,
-                                    lineNumber,
-                                    lineKey: actualLine?.key || '',
-                                    lineValue: actualLine?.value || '',
-                                    position: this.position,
-                                    emitter: 'editor',
-                                    validLine
-                                }
-                                window.globalStateManagment.setState('style', rc);
-                                mls.events.fire([2], 'styleLineChanged' as any, JSON.stringify(rc), 0);
-                            } else {
-                                window.globalStateManagment.setState('style', {});
-
-                            }
-                        }
+                        if (this.lessCSS && this.lessCSS.setStateByLine && typeof this.lessCSS.setStateByLine === 'function') this.lessCSS.setStateByLine(lineNumber, 'editor')
 
 
                     }
@@ -1454,7 +1434,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     // HTML LESS
 
-
     private async createOrShowModelHtmlOrCss(shortName: string, project: number, open: boolean, mode: '.html' | '.less', fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
 
         const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', mode);
@@ -1472,7 +1451,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const uri = this.getUri(`_${project}_${shortName}`, mode);
         let model = monaco.editor.getModel(uri);
 
-        if (!model) model = await this.getOrCreateModelHtmlOrCss(shortName, project, mode, storFile, fileInfo);
+        if (!model) {
+            model = await this.getOrCreateModelHtmlOrCss(shortName, project, mode, storFile, fileInfo);
+        }
+        if (mode === '.less') {
+            this.lessCSS = new LessCSS(uri.toString(), this.position);
+        }
         if (open && this._ed1) {
             this._ed1.setModel(model);
             this.restaureViewState();
@@ -1612,9 +1596,14 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (ext === '.less') {
                 const enhancementInstanceLess: mls.l2.enhancement.IEnhancementInstance | undefined = await import('./_100554_enhancementStyle')
                 if (enhancementInstanceLess) await enhancementInstanceLess.onAfterChange(mfile);
-
                 modelValue = removeTokensFromSource(modelValue);
                 mls.l2.editor.forceModelUpdate(mfile.model);
+                this.lessCSS?.refresh();
+                if (this.lessCSS && this._ed1) {
+                    const monacoPosition = this._ed1.getPosition();
+                    if (!monacoPosition) return;
+                    this.lessCSS.setStateByLine(monacoPosition.lineNumber, 'editor');
+                }
             }
 
             const sameContent: boolean = (storFile as any)['originalCRC'] === mls.common.crc.crc32(modelValue).toString(16);
@@ -1730,24 +1719,18 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     connectedCallback() {
         super.connectedCallback();
         if (!window.globalState) window.globalState = {}
-        window.globalState.style = {}
+        window.globalState.style = {};
+        if (!window.globalState.less) {
+            window.globalState.less = {
+                left: {},
+                right: {}
+            };
+        }
     }
 
     firstUpdated(changedProperties: any) {
         super.firstUpdated(changedProperties);
         this.registerProviderHTML();
-        if (this.c2) {
-            const bg = getComputedStyle(this.c2).backgroundColor;
-            console.info({
-                bg
-            })
-            if (bg && this.verticalSpliter) {
-                this.verticalSpliter.setAttribute('complementcolor', bg);
-
-                //1e1e1e
-            }
-
-        }
     }
 
     render() {
@@ -1761,7 +1744,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                     fixedvisible=${this.mode !== 'icStyle' ? 'hidden' : `${this.panelRightOpened === true ? 'visible' : 'closed'}`} 
                 >
                     <mls-editor-100529 slot="left"></mls-editor-100529>
-                    <css-helper-index-100554 state="{{ style }}" slot="right" position=${this.position} style="height:100%;"></css-helper-index-100554>
+                    <css-helper-index-100554 state="{{ less.${this.position} }}" slot="right" position=${this.position} style="height:100%;"></css-helper-index-100554>
                     
                 </collab-spliter-horizontal-var-fixed-100554>
 
