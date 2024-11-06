@@ -198,6 +198,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 widget: '_100554_pluginExploreList'
             },
             {
+                category: 'Helpers',
+                scope: ['l5Explore'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginProjectFindFiles'
+            },
+            {
                 category: 'Stories',
                 scope: ['l5Explore'],
                 priority: 2,
