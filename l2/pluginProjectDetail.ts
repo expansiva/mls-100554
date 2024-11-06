@@ -38,12 +38,12 @@ export class PluginProjectDetail extends LitElement {
             <contentprojectinfo>
             </contentprojectinfo>
             
-            <div style="padding:16px">
-            <details open>
-                <summary>Project</summary>
-                <contentproject style="padding:2rem; display:block">
-                </contentproject>
-            </details>
+            <div>
+                <details open>
+                    <summary>Project</summary>
+                    <contentproject style="padding:2rem; display:block">
+                    </contentproject>
+                </details>
             </div>
         `;
     }

@@ -8,7 +8,7 @@ export class PluginProjectIndex extends PluginBaseIndex {
 
     public getMenus(): mls.plugin.MenuAction[] {
         return [
-            {
+            /*{
                 category: 'Details',
                 scope: ['l5Project'],
                 priority: 1,
@@ -36,6 +36,13 @@ export class PluginProjectIndex extends PluginBaseIndex {
                 auth: ['admin'],
                 widget: '_100554_pluginProjectReadMe'
             },
+            {
+                category: 'Helpers',
+                scope: ['l5Project'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginProjectFindFiles'
+            },*/
         ];
     }
 

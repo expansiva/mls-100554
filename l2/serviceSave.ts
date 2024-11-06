@@ -55,6 +55,10 @@ export class ServiceSave extends ServiceBase {
 
     private myMessage: MessageType = messages['en'];
 
+    private mainowner: string = '';
+    private mainrepo: string = '';
+    private mainbranch: string = '';
+
     private owner: string = '';
     private repo: string = '';
     private branch: string = '';
@@ -203,6 +207,7 @@ export class ServiceSave extends ServiceBase {
         } else {
 
             return html`
+                ${this.renderHeader()}
                 ${this.renderNoItens()}
             `
 
@@ -251,13 +256,24 @@ export class ServiceSave extends ServiceBase {
                     ${collab_branch} Change
                 </button>
 
-                <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; background: #007bff; color: #fff; position: absolute; right: 0px;">
-                    <svg width="16" height="16" fill="#fff" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"></path></svg>
-                    Pull request
-                </button>
+                ${this.renderShowPullrequest()}
 
             </div>
         `
+    }
+
+    renderShowPullrequest() {
+
+        if (this.owner === this.mainowner &&
+            this.repo === this.mainrepo &&
+            this.branch === this.mainbranch) return html``;
+
+        return html`
+        <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; background: #007bff; color: #fff; position: absolute; right: 0px;" @click="${this.fireOnPullrequest}">
+            <svg width="16" height="16" fill="#fff" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"></path></svg>
+            Pull request
+        </button>
+        `;
     }
 
     renderNoItens() {
@@ -460,6 +476,10 @@ export class ServiceSave extends ServiceBase {
         this.branch = info.branch;
         this.owner = info.owner;
         this.repo = info.repo;
+
+        this.mainbranch = info.branch;
+        this.mainowner = info.owner;
+        this.mainrepo = info.repo;
     }
 
 
@@ -693,6 +713,38 @@ export class ServiceSave extends ServiceBase {
         } catch (e: any) {
             this.error = e.message;
             this.showLoader(false);
+        }
+    }
+
+    private async fireOnPullrequest(e: MouseEvent) {
+        try {
+
+            const prj = mls.actual[5].project;
+            if (!prj) throw new Error('Not found project actual');
+
+            this.showLoader(true);
+
+            const driver = mls.stor.others.getDefaultDriver(prj);
+
+            const opt = {
+                owner: this.owner,
+                repo: this.repo,
+                branch: this.branch,
+                title: 'Pull request',
+                description: 'Pull request'
+            }
+            const ret = await driver.createPullRequest(opt);
+
+            if (!ret) throw new Error('Error Pull request');
+
+            this.showLoader(false);
+
+        } catch (e: any) {
+
+            this.error = e.message;
+            this.showLoader(false);
+            console.info('Error fireOnPullrequest');
+
         }
     }
 

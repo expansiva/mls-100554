@@ -387,13 +387,13 @@ export class ServiceProject100554 extends ServiceBase {
         if (!prj) return;
         let array: any[] = [];
         await mls.plugin.loadAll(prj, false);
-        array = mls.plugin.getAllMenuActions(prj, {} as any);
+        array = mls.plugin.getAllMenuActions(prj, {scope:'l5Project'} as any);
 
-        const wc = ["_100554_pluginProjectConfig", "_100554_pluginProjectUsage", "_100554_pluginProjectInfo", "_100554_pluginProjectReadMe"]
+        /*const wc = ["_100554_pluginProjectConfig", "_100554_pluginProjectUsage", "_100554_pluginProjectInfo", "_100554_pluginProjectReadMe"]*/
 
         array.forEach((item: mls.plugin.MenuAction) => {
 
-            if (!wc.includes(item.widget)) return;
+            //if (!wc.includes(item.widget)) return;
             const cat = item.category as string;
             if (!this.myData[cat]) this.myData[cat] = [item]
             else this.myData[cat].push(item);

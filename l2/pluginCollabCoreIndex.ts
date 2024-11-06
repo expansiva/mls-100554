@@ -197,13 +197,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginExploreList'
             },
-            {
-                category: 'Helpers',
-                scope: ['l5Explore'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_pluginProjectFindFiles'
-            },
+            
             {
                 category: 'Stories',
                 scope: ['l5Explore'],
@@ -309,7 +303,41 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 widget: '_100554_pluginStyleFlex'
             },
 
-
+            {
+                category: 'Details',
+                scope: ['l5Project'],
+                priority: 1,
+                auth: ['admin'],
+                widget: '_100554_pluginProjectUsage'
+            },
+            {
+                category: 'Details',
+                scope: ['l5Project'],
+                priority: 1,
+                auth: ['admin'],
+                widget: '_100554_pluginProjectConfig'
+            },
+            {
+                category: 'Details',
+                scope: ['l5Project'],
+                priority: 1,
+                auth: ['admin'],
+                widget: '_100554_pluginProjectInfo'
+            },
+            {
+                category: 'About',
+                scope: ['l5Project'],
+                priority: 1,
+                auth: ['admin'],
+                widget: '_100554_pluginProjectReadMe'
+            },
+            {
+                category: 'Helpers',
+                scope: ['l5Project'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginProjectFindFiles'
+            },
 
 
         ];

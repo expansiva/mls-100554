@@ -105,12 +105,12 @@ export class ServiceSaveAddBRanch extends LitElement {
                     <input type="text"></input>
                 </div>
                 <div class="grp_btn">
-                    <button class="btn" @click="${this.addBranch}">
+                    <button class="btn" style="padding:.5rem" @click="${this.addBranch}">
                         <svg style=" width: 15px;" xmlns="http://www.w3.org/2000/svg" fill="#fff" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/></svg>
                         Add
                     </button>
 
-                    <button class="btn" style="background:#ff6b00" @click="${this.cancel}">
+                    <button class="btn" style="background:#ff6b00; padding:.5rem" @click="${this.cancel}">
                         <svg style="width:15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#fff"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M367.2 412.5L99.5 144.8C77.1 176.1 64 214.5 64 256c0 106 86 192 192 192c41.5 0 79.9-13.1 111.2-35.5zm45.3-45.3C434.9 335.9 448 297.5 448 256c0-106-86-192-192-192c-41.5 0-79.9 13.1-111.2 35.5L412.5 367.2zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z"/></svg>
                         Cancel
                     </button>
@@ -331,6 +331,7 @@ export class ServiceSaveAddBRanch extends LitElement {
             align-items: center;
             gap:.3rem;
             cursor:pointer;
+            
         }
 
         .contentInput{
