@@ -58,9 +58,12 @@ export class CollabPanelItem extends CollabLitElement {
 
         if (this.classList.contains('active')) return;
 
-        const parent = this.getRootNode() as HTMLElement;
+        let parent = this.closest('collab-panel-100554') as HTMLElement;
         if (!parent) return;
 
+        parent = parent.parentElement as HTMLElement;
+        if (!parent) return;
+        
         const elActive = parent.querySelector('.active');
         if (elActive) elActive.classList.remove('active');
 

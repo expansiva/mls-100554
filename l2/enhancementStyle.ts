@@ -236,14 +236,51 @@ function compileLess(str: string): Promise<string> {
 }
 
 async function preCompileLess(less: string, tokens: ITokenInfo, theme: string, prefix: ':host' | ':root', includeTokens: boolean): Promise<string> {
-    let newLess = '';
-    const actualTheme = tokens[theme];
-    const allTokens = { ...actualTheme.color, ...actualTheme.typography, ...actualTheme.global };
-    const darkAndLight = getDarkAndLight(allTokens);
-    const cssVars = getCssVars(darkAndLight, prefix);
-    newLess = replaceTokens(less, darkAndLight, cssVars, false);
-    newLess = await compileLess(newLess);
-    return newLess;
+    try {
+        let newLess = '';
+
+        const actualTheme = tokens[theme];
+        const allTokens = { ...actualTheme.color, ...actualTheme.typography, ...actualTheme.global };
+        const darkAndLight = getDarkAndLight(allTokens);
+        const cssVars = getCssVars(darkAndLight, prefix);
+        newLess = replaceTokens(less, darkAndLight, cssVars, false);
+        newLess = await compileLess(newLess);
+
+        if (less !== '' && newLess === '') {
+            errorCompileLess(`Error: invalid less`);
+        }
+        return newLess;
+    } catch (e: any) {
+        
+        console.info(e);
+        if (typeof e === 'string') errorCompileLess(e);
+        else if (e && e.message) errorCompileLess(e.message);
+        else errorCompileLess(`Error: invalid less`);
+
+        return '';
+    }
+
+}
+
+function errorCompileLess(err:string) {
+
+    const model = mls.editor.instances[mls.editor.activeInstance].getModel();
+    if (!model || model.getLanguageId() !== 'less') return;
+    monaco.editor.setModelMarkers(model, 'markerSource', []);
+    const markers: monaco.editor.IMarkerData[] = [];
+
+    const markerOptions = {
+        severity: monaco.MarkerSeverity.Error,
+        message: err,
+        startLineNumber: 0,
+        startColumn: 0,
+        endLineNumber: 0,
+        endColumn: 50,
+    };
+    markers.push(markerOptions);
+
+    monaco.editor.setModelMarkers(model, 'markerSource', markers);
+
 }
 
 function getDarkAndLight(allTokens: IKeyValueToken): IDarkLight {
