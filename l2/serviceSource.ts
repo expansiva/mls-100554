@@ -278,7 +278,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     @query('collab-spliter-horizontal-var-fixed-100554')
     private horizontalSpliter: HTMLElement | undefined;
-    
+
     public last: mls.IActual | undefined = undefined;
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
     private mConfEditor: monaco.editor.ITextModel | undefined;
@@ -855,7 +855,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         };
 
-        await this.createModelTS2(storFileTS, false, true);
+        await this.createModelTS2(storFileTS, false, true, true);
         mls.events.fireFileAction('statusOrErrorChanged', storFileTS, this.position);
 
     }
@@ -1183,7 +1183,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
 
-    private async createModelTS2(storFile: mls.stor.IFileInfo, activedModel: boolean, compile: boolean): Promise<mls.l2.editor.IMFile> {
+    private async createModelTS2(storFile: mls.stor.IFileInfo, activedModel: boolean, compile: boolean, afterUndo: boolean = false): Promise<mls.l2.editor.IMFile> {
         // load source from repository
         const { project, shortName, extension } = storFile;
         let mfile = mls.l2.editor.get({ project, shortName });
@@ -1212,8 +1212,8 @@ export class ServiceSource100554 extends ServiceBase {
         for await (let ext of extFiles) {
             const keyFile1 = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', ext);
             let storFile1 = mls.stor.files[keyFile1];
-            if (!storFile1) storFile1 = await this.createOrShowModelHtmlOrCss(shortName, project, false, ext);
-            await this.getOrCreateModelHtmlOrCss(storFile1.shortName, storFile1.project, ext, storFile1);
+            if (!storFile1 && !afterUndo) storFile1 = await this.createOrShowModelHtmlOrCss(shortName, project, false, ext);
+            if (!afterUndo) await this.getOrCreateModelHtmlOrCss(storFile1.shortName, storFile1.project, ext, storFile1);
         }
 
         if (compile) await this.updateModelStatus(mfile, false);
