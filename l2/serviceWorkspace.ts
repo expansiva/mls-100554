@@ -6,6 +6,7 @@ import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_service
 
 import './_100554_pluginGithubL4Project';
 import './_100554_pluginGithubL4Issues';
+import './_100554_pluginConfigLinks';
 
 @customElement('service-workspace-100554')
 export class ServiceWorkspace100554 extends ServiceBase {
@@ -43,7 +44,7 @@ export class ServiceWorkspace100554 extends ServiceBase {
         actions: {
         },
         icons: {
-
+            ILinks: 'Links;f0c1',
             ITasks: 'Project;f0ae',
             IBackLog: 'Issues;e5a0',
             IRequirements: 'Requirements;f0a6',
@@ -52,7 +53,7 @@ export class ServiceWorkspace100554 extends ServiceBase {
         },
         actionDefault: '', // call after close icon clicked
         setMode: undefined, // child will set this
-        iconDefault: 'ITasks',
+        iconDefault: 'ILinks',
         onClickLink: this.onClickLink,
         onClickIcon: this.onClickIcon,
         getLastMode: undefined,
@@ -92,6 +93,8 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
     renderContent() {
         switch (this.activeTab) {
+            case 'ILinks':
+                return this.renderLinks();
             case 'ITasks':
                 return this.renderTasks();
             case 'IBackLog':
@@ -109,6 +112,11 @@ export class ServiceWorkspace100554 extends ServiceBase {
         return this;
     }
 
+    renderLinks() {
+        return html`
+        <plugin-config-links-100554 autoPrepare>
+        </plugin-config-links-100554>`
+    }
 
     renderTasks() {
         return html`
