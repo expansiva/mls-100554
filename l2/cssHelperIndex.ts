@@ -6,7 +6,7 @@ import { IcaLitElement } from './_100554_icaLitElement';
 import { propertyDataSource } from './_100554_icaLitElement';
 import { PluginStyleIndexItem } from './_100554_pluginStyleIndexItem';
 import { IHelpers, IMode } from './_100554_cssHelperIndexBase';
-import { IBlockLessLine } from './_100554_enhancementStyle';
+import { ICSSState } from './_100554_lessCSS';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -34,30 +34,29 @@ export class CssHelperIndex extends IcaLitElement {
     @property() helpers: IHelpers[] = [];
     @property() avaliablePlugins: IHelpers[] = [];
 
-    @property() position: 'right' | 'left' | undefined;
-    @property({ reflect: true }) actualProp: string = '';
-    @property({ reflect: true }) actualValue: string = '';
-    @property({ reflect: true }) actualSelector: string = '';
+    @property() position: 'right' | 'left' = 'left';
+    @property({ reflect: true }) actualProp: string | undefined = '';
+    @property({ reflect: true }) actualValue: string | undefined = '';
+    @property({ reflect: true }) actualSelector: string | undefined = '';
     @property() actualLineNumber: number | undefined;
 
-    @propertyDataSource() state: IStateStyle | undefined;
+    @propertyDataSource() state: ICSSState | undefined;
 
     @queryAll('plugin-style-index-item-100554') allPluginsEls!: PluginStyleIndexItem[];
 
-    handleIcaStateChange(key: string, value: IStateStyle) {
+    handleIcaStateChange(_key: string, _value: ICSSState) {
 
-        if (key !== 'style' || !value || value.position !== this.position) return;
+        if (_key !== `less.${this.position}` || !_value) return;
+        const { key, value, selector, lineNumber } = _value;
 
-        const { lineKey, lineValue, selector, lineNumber } = value;
-
-        this.actualProp = lineKey;
-        this.actualValue = lineValue;
+        this.actualProp = key;
+        this.actualValue = value;
         this.actualSelector = selector;
         this.actualLineNumber = lineNumber;
 
-        if (lineNumber && lineKey) {
-            this.actualProp = lineKey;
-            this.actualValue = lineValue;
+        if (lineNumber && key) {
+            this.actualProp = key;
+            this.actualValue = value;
             this.openIfNeeded();
 
         } else {
@@ -123,9 +122,12 @@ export class CssHelperIndex extends IcaLitElement {
 
     }
 
-    private filterByProp(helpers: IHelpers[], actualProp: string, actualValue: string): IHelpers[] {
+    private filterByProp(helpers: IHelpers[], actualProp: string | undefined, actualValue: string | undefined): IHelpers[] {
 
-        if (!window.globalState?.style || !window.globalState?.style.lineNumber || !window.globalState?.style.validLine) return [];
+        if (!window.globalState?.less
+            || !window.globalState.less[this.position]
+            || !window.globalState.less[this.position].selector
+            || !window.globalState.less[this.position].lineNumber) return [];
 
         const rc = helpers.filter(helper => {
             return helper.tags.some(helperTag => {
@@ -153,8 +155,8 @@ export class CssHelperIndex extends IcaLitElement {
                     return tagCompare === value;
                 };
 
-                const propMatches = validateTagOrProp(tagProperty, actualProp, true);
-                const valueMatches = tagValue ? validateTagOrProp(tagValue, actualValue) : true; // Se não houver tagValue, não valida
+                const propMatches = validateTagOrProp(tagProperty, actualProp || '', true);
+                const valueMatches = tagValue ? validateTagOrProp(tagValue, actualValue || '') : true;
                 return propMatches && valueMatches;
 
             });
@@ -173,7 +175,7 @@ export class CssHelperIndex extends IcaLitElement {
             () => html`<div>${this.msg.msg}</div>`,
             () => html`
                 <div class="helpers">
-                ${repeat(
+                    ${repeat(
                 this.helpers,
                 ((item: IHelpers) => item.widget) as any,
                 ((item: IHelpers, index: number) => this.renderHelper(item, index)) as any)
@@ -184,7 +186,7 @@ export class CssHelperIndex extends IcaLitElement {
     }
 
     renderHelper(help: IHelpers, index: number) {
-        return html`<plugin-style-index-item-100554 .help=${help}></plugin-style-index-item-100554>`
+        return html`<plugin-style-index-item-100554 position="${this.position}" .help=${help}></plugin-style-index-item-100554>`
     }
 
     openIfNeeded() {
@@ -198,11 +200,3 @@ export class CssHelperIndex extends IcaLitElement {
 
 }
 
-interface IStateStyle {
-    lines: IBlockLessLine[]
-    selector: string
-    lineNumber: number
-    lineKey: string
-    lineValue: string,
-    position: 'left' | 'right'
-}

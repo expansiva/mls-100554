@@ -31,6 +31,8 @@ export class PluginStyleIndexItem extends CollabLitElement {
         widget: ''
     };
 
+    @property() position: 'left' | 'right' = 'left';
+
     public async open() {
         const container = this.querySelector('.plugin-item-container') as HTMLElement;
         this.openPlugin(container, this.help, false);
@@ -95,7 +97,7 @@ export class PluginStyleIndexItem extends CollabLitElement {
         if (container.childElementCount === 0) {
             const tag = convertFileNameToTag(help.widget);
             const item = document.createElement(tag);
-            item.setAttribute('state', '{{ style }}');
+            item.setAttribute('state', `{{ less.${this.position} }}`);
             item.setAttribute('showFull', help.mode === 'full' ? 'true' : 'false');
             container.appendChild(item);
         } else {

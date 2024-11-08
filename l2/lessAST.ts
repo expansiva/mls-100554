@@ -129,7 +129,7 @@ export class LessAst {
             this.ast[fullSelector]._startLine = lineNr;
 
             return;
-        }        
+        }
 
         // Match for a property within an open selector block, e.g., color: red;
         if (this.stack.length > 0) {
@@ -162,8 +162,8 @@ export class LessAst {
                 this.ast[currentSelector]._endLine = lineNr;
             }
             this.stack.pop(); // Move out of the current selector level
-        }        
-    }    
+        }
+    }
 
     /**
      * Lists all themes available in the AST.
@@ -199,7 +199,7 @@ export class LessAst {
         const themeKeys = Object.keys(themes);
 
         if (themeKeys.length < 1) return false;
-        
+
         // Find the last theme's _endLine to insert the new theme after it
         let lastLine = 0;
         themeKeys.forEach(theme => {
@@ -328,25 +328,33 @@ export class LessAst {
     public selectorLESS2CSS = (selector: string): string => {
         // Use the stack to track the selector hierarchy
         return selector.replace(/&/g, this.stack.join(" "));
-    };    
+    };
+
+    /**
+     * Converts a kebab-case property name to camelCase, e.g., background-color to backgroundColor.
+     * This ensures property names align with JavaScript/TypeScript conventions.
+     */
+    public toCamelCaseProperty(property: string): string {
+        return property.replace(/-([a-z])/g, (_, char) => char.toUpperCase());
+    }
 
     /**
      * Converts a camelCase property name to kebab-case, e.g., backgroundColor to background-color.
      * This ensures property names align with CSS/LESS conventions.
      */
-    private toKebabCaseProperty(property: string): string {
+    public toKebabCaseProperty(property: string): string {
         return property.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
     }
 
     public getProperty(selector: string, property: string): string | undefined {
         property = this.toKebabCaseProperty(property);
         const prop = this.ast[selector]?.[property];
-        
+
         // If the property is a number (_startLine or _endLine), convert to string
         if (typeof prop === 'number') return prop.toString();
-        
+
         // If the property is an object (CSS property), return its value
-        return typeof prop === 'object' && prop !== null ? prop.value : undefined;        
+        return typeof prop === 'object' && prop !== null ? prop.value : undefined;
     }
 
     private updateASTAfterInsertLine(lineNrInserted: number, linesInserted: number): void {
@@ -381,7 +389,7 @@ export class LessAst {
                 lineNr = this.findLastLineInSelector(selector);
             }
             const parts = selector.split(" ");
-            const indentation = "\t".repeat(parts.length);        
+            const indentation = "\t".repeat(parts.length);
             this.ast[selector][property] = {
                 value: newValue,
                 line: lineNr,
@@ -398,7 +406,7 @@ export class LessAst {
             const lineNr = prop.line; // save for delete
             delete this.ast[selector][property];
             this.updateASTAfterInsertLine(prop.line, -1);
-            return this.monacoDriver.deleteLine(this.url, lineNr);   
+            return this.monacoDriver.deleteLine(this.url, lineNr);
         }
         // update
         if (prop.value === newValue) return false; // no change
@@ -413,6 +421,17 @@ export class LessAst {
     public findLastLineInSelector(selectorLESS: string): number {
         if (!this.ast[selectorLESS]) return 1;
         return this.ast[selectorLESS]._endLine || 1;
+    }
+
+    public findInfoByLine(selectorLESS: string, lineNumber: number): { key: string, value: string; } | undefined {
+        if (!this.ast[selectorLESS]) return undefined;
+        const keyProps = Object.keys(this.ast[selectorLESS]);
+        const key = keyProps.find((prop) => ((this.ast[selectorLESS][prop] as { value: string; line: number; column: number; })?.line === lineNumber));
+        if (!key) return undefined;
+        return {
+            key,
+            value: (this.ast[selectorLESS][key] as { value: string; line: number; column: number; }).value
+        }
     }
 
     /**
@@ -437,8 +456,8 @@ export class LessAst {
 
             // Check if this selector block includes the line number using _startLine and _endLine
             if (
-                selectorData._startLine && 
-                selectorData._startLine <= lineNr && 
+                selectorData._startLine &&
+                selectorData._startLine <= lineNr &&
                 selectorData._endLine &&
                 selectorData._endLine >= lineNr
             ) {
@@ -475,7 +494,7 @@ export class LessAst {
         let startLine: number = 0;
         const parts = newSelectorLESS.split(" ");
         let currentSelector = "";
-        
+
         // Iterate over each part in the selector to ensure each level exists
         for (let i = 0; i < parts.length; i++) {
             const part = parts[i];
@@ -485,7 +504,7 @@ export class LessAst {
             if (!this.ast[currentSelector]) {
                 let insertPoint = this.findLastLineInSelector(currentSelector.split(" ").slice(0, -1).join(" ") || "root");
                 insertPoint = insertPoint > 0 ? insertPoint : startLine + 1;
-                
+
                 // Insert the selector in the source code and AST
                 const indentation = "\t".repeat(i);
                 this.monacoDriver.insertLine(this.url, insertPoint, `${indentation}${part} {`);

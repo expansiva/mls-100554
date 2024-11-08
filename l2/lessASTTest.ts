@@ -7,7 +7,7 @@ import { LessCSS } from "./_100554_lessCSS";
 @customElement('less-a-s-t-test-100554')
 export class LessASTTest100554 extends LitElement {
 
-    rootSelector = 'less-a-s-t-test-100554.theme2';
+    rootSelector = 'less-a-s-t-test-100554';
     fileToTest = '_100554_lessASTTest.less';
     url1 = monaco.editor.getModel(monaco.Uri.parse(`//server/${this.fileToTest}`));
 
@@ -16,15 +16,15 @@ export class LessASTTest100554 extends LitElement {
          <p>model: ${this.url1?.uri.toString()} </p>
          <pre>test: <br>${this.exeTest()}</pre>
          `;
-
     }
 
     exeTest = (): string => {
         if (!this.url1) return "undefined;";
         const url = this.url1.uri.toString();
-        const lessCSS = new LessCSS(url);     
+        const lessCSS = new LessCSS(url); 
+        const selector = lessCSS.lessAST.findSelectorByLine(18);
         lessCSS.setSelector(this.rootSelector);
-        return `selector: ${this.rootSelector}\n${this.testt1(lessCSS, this.rootSelector)}`;
+        return `selector: ${this.rootSelector}\n${this.test2(lessCSS, this.rootSelector)}`;
     }
 
     test1 = (lessCSS: LessCSS, rootSelector: string) => {
@@ -40,7 +40,7 @@ export class LessASTTest100554 extends LitElement {
         lessCSS.setSelector(selector);
         let result = `Adding selector ${selector} and property. If it already exists, please delete it manually before testing.\n`;
         result += "before:\n" + JSON.stringify(lessCSS.lessAST.ast[selector], null, 2) + "\n\n";
-        lessCSS.styles.backgroundColor = "red";
+        lessCSS.styles.margin = "2px";
         result += "after:\n" + JSON.stringify(lessCSS.lessAST.ast[selector], null, 2) + "\n\n";
         result += "full:\n" + JSON.stringify(lessCSS.lessAST.ast, null, 2) + "\n\n";
         return result;

@@ -1455,7 +1455,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             model = await this.getOrCreateModelHtmlOrCss(shortName, project, mode, storFile, fileInfo);
         }
         if (mode === '.less') {
-            this.lessCSS = new LessCSS(uri.toString(), this.position);
+            this.lessCSS = new LessCSS(uri.toString(),  this.position);
         }
         if (open && this._ed1) {
             this._ed1.setModel(model);
@@ -1598,11 +1598,16 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 if (enhancementInstanceLess) await enhancementInstanceLess.onAfterChange(mfile);
                 modelValue = removeTokensFromSource(modelValue);
                 mls.l2.editor.forceModelUpdate(mfile.model);
-                this.lessCSS?.refresh();
+                const lastemitter = window.globalState.less[this.position]?.emitter || 'editor';
+        
                 if (this.lessCSS && this._ed1) {
+                    const uri = this.getUri(`_${mfile.project}_${mfile.shortName}`, '.less');
+                    const lastSelector = this.lessCSS.selector;
+                    this.lessCSS = new LessCSS(uri.toString(), this.position);
+                    this.lessCSS.setSelector(lastSelector);
                     const monacoPosition = this._ed1.getPosition();
                     if (!monacoPosition) return;
-                    this.lessCSS.setStateByLine(monacoPosition.lineNumber, 'editor');
+                    this.lessCSS.setStateByLine(monacoPosition.lineNumber, lastemitter);
                 }
             }
 

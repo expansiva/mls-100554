@@ -3,11 +3,12 @@
 import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
+import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
 
 export function initCollabDSInputRange() { };
 
 @customElement('collab-ds-input-range-100554')
-export class CollabDSInputRange extends CollabLitElement {
+export class CollabDSInputRange extends IcaLitElement {
 
     public arraySelect: string[] = [];
 
@@ -22,23 +23,18 @@ export class CollabDSInputRange extends CollabLitElement {
     max: number = 100;
 
     render() {
+
+        //${this.renderInput()}
         return html`
-            ${this.renderInput()}
             ${this.renderSelect()}
             
         `
     }
 
-    renderInput() {
-        return html`
-            <input type="range" .value="${this.onlyNumber(this.value)}" min="${this.min}" max="${this.max}"   @input="${(e:InputEvent) => this.changeRange(e)}"></input>
-        `;
-    }
-
     renderSelect() {
         return html`
             <div>
-                <input type="search" .value="${this.onlyNumber(this.value)}" @input="${this.changeInput}"> </input>
+                <input type="number" .value="${this.onlyNumber(this.value)}" @input="${this.changeInput}"> </input>
                 <select @change="${this.changeSelect}" style="${this.useSelect === 'false' ? 'display:none' : ''}">
                     ${repeat(this.arraySelect, ((key: any) => key) as any,
             ((k: any, index: any) => {
@@ -53,7 +49,6 @@ export class CollabDSInputRange extends CollabLitElement {
     }
 
     updated() {
-
         const sel = this.querySelector('select') as HTMLSelectElement;
         if (!sel) return;
         sel.value = this.onlyTxt(this.value);
@@ -70,11 +65,7 @@ export class CollabDSInputRange extends CollabLitElement {
     private onlyTxt(str: string): string {
         const regexStr = /[a-zA-Z]+/;
         const res = str.match(regexStr);
-        return res && (res as any)[0] ? ((res as any)[0] as string).replace('.', '') : '';
-    }
-
-    private changeRange(e: InputEvent): void {
-        this.allChange(e, 'range')
+        return res && (res as any)[0] ? ((res as any)[0] as string).replace('.', '') : 'px';
     }
 
     private changeInput(e: InputEvent): void {
@@ -88,27 +79,11 @@ export class CollabDSInputRange extends CollabLitElement {
     private allChange(e: InputEvent, mode: string): void {
 
         e.stopPropagation();
-
-        let input = this.querySelector('input[type="search"]') as HTMLInputElement;
-        let range = this.querySelector('input[type="range"]') as HTMLInputElement;
+        let input = this.querySelector('input[type="number"]') as HTMLInputElement;
         let sel = this.querySelector('select') as HTMLSelectElement;
-
-        if (!input || !sel || !range) return;
-
-        if (mode === 'range') {
-
-            input.value = range.value;
-
-        } else if (mode === 'input') {
-
-            const tot = this.onlyNumber(input.value);
-            const max = range.max;
-            if (!max || max < tot) range.max = tot;
-            range.value = tot;
-
-        }
-
+        if (!input || !sel ) return;
         this.value = input.value + sel.value;
+
         this.fireEvents(
             {
                 key: this.prop,

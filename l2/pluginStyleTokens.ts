@@ -4,10 +4,10 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { getMessageKey } from './_100554_collabLitElement';
-
 import { propertyDataSource } from './_100554_icaLitElement';
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
-import { IBlockLessLine } from './_100554_enhancementStyle';
+import { ICSSState } from './_100554_lessCSS';
+import { LessAst } from "./_100554_lessAST";
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -38,7 +38,7 @@ export class PluginCssTokens extends IcaLitElement {
 
     private msg: MessageType = messages['en'];
 
-    @propertyDataSource() state: IStateStyle | undefined;
+    @propertyDataSource() state: ICSSState | undefined;
 
     @property() position: 'left' | 'right' = 'left';
 
@@ -113,7 +113,9 @@ export class PluginCssTokens extends IcaLitElement {
     }
 
     handleColorClick(key: string, value: string) {
-        console.info({ key, value });
+
+        if (!this.state || !this.state.lessCSS || !this.state.selector || !this.prop) return;
+        this.state.lessCSS.styles[this.prop as any] = `@${key}`;
     }
 
     setTooltip() {
@@ -144,13 +146,11 @@ export class PluginCssTokens extends IcaLitElement {
         this.getTokens();
     }
 
-    handleIcaStateChange(key: string, value: IStateStyle) {
-
-        if (key !== 'style' || !value || value.position !== this.position) return;
-        const { lineKey, lineValue } = value;
-        this.prop = lineKey;
-        this.value = lineValue;
-
+    handleIcaStateChange(_key: string, _value: ICSSState) {
+        if (_key !== `less.${this.position}` || !_value) return;
+        const { key, value } = _value;
+        this.prop = key || '';
+        this.value = value || '';
     }
 
     render() {
@@ -187,11 +187,3 @@ export class PluginCssTokens extends IcaLitElement {
 
 }
 
-interface IStateStyle {
-    lines: IBlockLessLine[]
-    selector: string
-    lineNumber: number
-    lineKey: string
-    lineValue: string,
-    position: 'left' | 'right'
-}
