@@ -26,12 +26,18 @@ export class PreCompileLess {
                 errorReporting: 'function'
             };
 
-            (window as any)['less'].render(str, options)
-                .then((output: any) => {
-                    resolve(output.css);
-                }, (error: any) => {
-                    reject(new Error('Error LESS: ' + error));
-                });
+            mls.l2.less.compile(str).then(async (css) => {
+                resolve(css);
+            }).catch((err) => {
+                reject(new Error('Error LESS: ' + err));
+            });
+
+            // (window as any)['less'].render(str, options)
+            //     .then((output: any) => {
+            //         resolve(output.css);
+            //     }, (error: any) => {
+            //         reject(new Error('Error LESS: ' + error));
+            //     });
         });
 
     }

@@ -119,7 +119,7 @@ export class Css implements CssIO {
         // await this.methods.setContentFileDsMain();
 
         return new Promise((resolve, reject) => {
-            mls.l2.compileLess(contentWithLessTokens).then(async (res) => {
+            mls.l2.less.compile(contentWithLessTokens).then(async (res) => {
                 this.methods.setFileError(shortName, fullpath, ext, false);
                 resolve(true);
             }).catch(async (err) => {

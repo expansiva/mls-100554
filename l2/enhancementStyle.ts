@@ -222,16 +222,23 @@ export async function compileStyleUsingStorFile(shortName: string, project: numb
 function compileLess(str: string): Promise<string> {
     return new Promise((resolve, reject) => {
         if (!str || str.trim().length < 1) resolve('');
-        const options = {
-            compress: true,
-            errorReporting: 'function'
-        };
-        (window as any)['less'].render(str, options)
-            .then((output: any) => {
-                resolve(output.css);
-            }, (error: any) => {
-                reject(new Error('Error LESS: ' + error));
-            });
+
+        mls.l2.less.compile(str).then(async (css) => {
+            resolve(css);
+        }).catch((err) => {
+            reject(new Error('Error LESS: ' + err));
+        });
+
+        // const options = {
+        //     compress: true,
+        //     errorReporting: 'function'
+        // };
+        // (window as any)['less'].render(str, options)
+        //     .then((output: any) => {
+        //         resolve(output.css);
+        //     }, (error: any) => {
+        //         reject(new Error('Error LESS: ' + error));
+        //     });
     });
 }
 
@@ -251,7 +258,7 @@ async function preCompileLess(less: string, tokens: ITokenInfo, theme: string, p
         }
         return newLess;
     } catch (e: any) {
-        
+
         console.info(e);
         if (typeof e === 'string') errorCompileLess(e);
         else if (e && e.message) errorCompileLess(e.message);
@@ -262,7 +269,7 @@ async function preCompileLess(less: string, tokens: ITokenInfo, theme: string, p
 
 }
 
-function errorCompileLess(err:string) {
+function errorCompileLess(err: string) {
 
     const model = mls.editor.instances[mls.editor.activeInstance].getModel();
     if (!model || model.getLanguageId() !== 'less') return;

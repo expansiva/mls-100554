@@ -149,7 +149,7 @@ export class Style implements StyleIO {
         await this.methods.setContentFile(shortName, 'less', fullpath, content);
         // await this.methods.setContentFileDsMain();
         return new Promise((resolve, reject) => {
-            mls.l2.compileLess(contentWithLessTokens).then(async (res) => {
+            mls.l2.less.compile(contentWithLessTokens).then(async (res) => {
                 this.methods.setFileError(shortName, fullpath, 'less', false);
                 resolve(true);
             }).catch((err) => {
