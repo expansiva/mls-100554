@@ -6,7 +6,7 @@ import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { IcaNavigationContentAccordionBase } from './_100554_icaNavigationContentAccordionBase';
 
 @customElement('ica-navigation-content-accordion-100554')
-export abstract class IcaNavigationContentAccordion extends IcaLitElementBase implements IcaNavigationContentAccordionBase {
+export abstract class IcaNavigationContentAccordion extends IcaLitElementBase  {
 
     @property({ type: String }) text = '';
     @property({ type: Boolean }) open = false;
