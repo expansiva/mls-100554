@@ -2,7 +2,7 @@
 
 import { html, css, unsafeHTML, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement, collabState } from './_100554_collabLitElement';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 @customElement('aim-base-100554')
 export class AimBase extends CollabLitElement {
