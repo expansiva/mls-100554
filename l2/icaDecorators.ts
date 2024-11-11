@@ -151,14 +151,3 @@ export interface OptionItem {
   key: string;
   value: string;
 }
-
-/**
- * Example usage of the propertyDataSource decorator.
- */
-// class SelectList extends IcaLitElement {
-//   @propertyDataSource({ type: Array })
-//   options: OptionItem[] = [];
-
-//   @propertyDataSource({ type: String })
-//   selectedValue: string = '';
-// }
