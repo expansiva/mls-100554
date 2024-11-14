@@ -686,17 +686,19 @@ export class ServiceSource100554 extends ServiceBase {
         this.activeThisService();
         this.closeMenu();
 
-        const fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
+        let fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
+
 
         if (!fileModels) {
             await this.createModelTS2(storFileTS, true, true);
+            fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
+            if (!fileModels) console.info('No file models');
             this.activeModels = fileModels;
             mls.editor.editors[this.position] = fileModels;
             this.showActiveModel();
             await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true);
         } else {
             this.activeModels = fileModels;
-        
             mls.editor.editors[this.position] = fileModels;
             const modelTs = this.activeModels.ts?.model;
             if (!modelTs) throw new Error('Invalid model TS');
@@ -946,7 +948,7 @@ export class ServiceSource100554 extends ServiceBase {
         }
 
         const model = this.activeModels.ts.model;
-        /// mls.editor.editors[this.position] = this.activeModels;
+        mls.editor.editors[this.position] = this.activeModels;
 
         if (!this._ed1 || !this.menu.getLastMode) return false;
         const changedFile: boolean = this.menu.title !== shortName;
@@ -1606,7 +1608,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 this.isHTMLSystemChange = false;
                 return;
             }
-
 
             let position: 'left' | 'right';
             let mode: 'html' | 'style' = ext === '.html' ? 'html' : 'style';
