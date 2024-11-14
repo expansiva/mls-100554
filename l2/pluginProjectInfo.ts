@@ -99,6 +99,7 @@ export class PluginProjectInfo extends PluginBaseModule {
     }
 
     renderHeader(): TemplateResult {
+        return html``;
         return html`
             <header>
                 <div>
@@ -110,9 +111,10 @@ export class PluginProjectInfo extends PluginBaseModule {
     }
 
     renderBody(): TemplateResult {
+        //${this.renderInfoFork()}
         return html`<div class="plugin-body">
             ${this.renderInfo()}
-            ${this.renderInfoFork()}
+            
             
         </div>`;
     }

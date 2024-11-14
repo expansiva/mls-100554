@@ -7,6 +7,8 @@ import './_100554_pluginCreateNewProject'
 
 /// **collab_i18n_start**
 const message_pt = {
+    select: 'Selecionar',
+    detail: 'Detalhe',
     inDevelopment: 'Em Desenvolvimento',
     noProjectSelected: 'Nenhum projeto selecionado!',
     detailsResume: 'Resumo',
@@ -56,6 +58,8 @@ const message_pt = {
 }
 
 const message_en = {
+    select: 'Select',
+    detail: 'Detail',
     inDevelopment: 'in development',
     noProjectSelected: 'No project selected!',
     detailsResume: 'Resume',
@@ -153,7 +157,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         actions: {
         },
         icons: {
-            IMyProject: 'My Project;e571',
+            IMyProject: 'My Projects;e571',
             IExplore: 'Explore;f542',
         },
         actionDefault: '', // call after close icon clicked
@@ -167,6 +171,10 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
+        if (this.lastPrjId && mls.actualLevel === 6 && visible) {
+            this.firedetail({ project: +this.lastPrjId, name: '' })
+        }
+        
     }
 
     //----------EVENTS---------------------
@@ -183,6 +191,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     connectedCallback() {
         super.connectedCallback();
         this.setEvents();
+        this.getLastProject();
     }
 
     createRenderRoot() {
@@ -190,6 +199,10 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang]
+        
         return html`
             ${this.renderContent()}
         `;
@@ -211,7 +224,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     renderMyProject() {
-        this.getLastProject();
+        
         switch (this.currentScenario) {
             case 'select':
                 return html`
@@ -245,10 +258,10 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                                 </div>
                                 <div style="display:flex; gap:1rem;font-size:.8rem">
                                     <span class="linkItem"  @click=${() => { this.onHistoryClick(his) }}>
-                                        Select
+                                        ${this.msg.select}
                                     </span>
                                     <span class="linkItem" @click=${() => this.firedetail(his)}>
-                                        Detail
+                                        ${this.msg.detail}
                                     </span>
                                 </div>
                             </li>
@@ -267,10 +280,10 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                                     </div>
                                     <div style="display:flex; gap:1rem;font-size:.8rem">
                                         <span class="linkItem"  @click=${() => this.onProjectClick(prj)}>
-                                            Select
+                                            ${this.msg.select}
                                         </span>
                                         <span class="linkItem" @click=${() => this.firedetail(prj)}>
-                                            Detail
+                                            ${this.msg.detail}
                                         </span>
                                     </div>
                                 </li>
@@ -291,14 +304,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
             <plugin-create-new-project-100554>
             </plugin-create-new-project-100554>
         `
-
-
-        /*return html`
-        <collab-new-project-100554 @collab-new-project=${this.onProjectCreated}></collab-new-project-100554>
-        <div style="display:flex; justify-content:center;">
-            ${this.projectCreated ? html`<button id="button-see-project" >${this.msg.btnOpenProject}</button>` : ''}
-        </div>
-        `*/
+        
     }
 
     //----------IMPLEMENTS------------------
