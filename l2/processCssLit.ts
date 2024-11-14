@@ -1,50 +1,30 @@
 /// <mls shortName="processCssLit" project="100554" enhancement="_blank" />
-import { convertFileNameToTag } from './_100554_utilsLit'
+
 import { compileStyleUsingMFile } from './_100554_enhancementStyle';
+import { generateCompactTimestamp } from './_100554_libCommom';
 
-export const MLS_GETDEFAULTDESIGNSYSTEM = '[[mls_getDefaultDesignSystem]]';
-
-export async function injectStyle(mfile: mls.l2.editor.IMFile, theme: string): Promise<void> {
-    const js = mfile.compilerResults?.prodJS;
-    if (js && js.indexOf(MLS_GETDEFAULTDESIGNSYSTEM) === -1) return injectStyleWithoutShadowRoot(mfile, theme);
-    return injectStyleShadowRoot(mfile, theme);
+export async function injectStyle(models: mls.editor.IModels, theme: string): Promise<void> {
+    injectStyleWithoutShadowRoot(models, theme);
 }
 
-export async function injectStyleShadowRoot(mfile: mls.l2.editor.IMFile, theme: string): Promise<void> {
-    const fileName = `_${mfile.project}_${mfile.shortName}`;
-    const tagName = convertFileNameToTag(fileName)
-    const css = await compileStyleUsingMFile(mfile, ':host', theme);
-    if (!css) return;
-    const css2 = getCssWithoutTag(css, tagName);
-    if (mfile && mfile.compilerResults) {
-        mfile.compilerResults.prodJS = mfile.compilerResults.prodJS.replace(MLS_GETDEFAULTDESIGNSYSTEM, css2)
-    }
-}
+export async function injectStyleWithoutShadowRoot(models: mls.editor.IModels, theme: string): Promise<void> {
 
-export async function injectStyleWithoutShadowRoot(mfile: mls.l2.editor.IMFile, theme: string): Promise<void> {
-    const css = await compileStyleUsingMFile(mfile, ':root', theme);
+    const modelTS = models.ts;
+    const modelStyle = models.style;
+    if (!modelStyle || !modelTS) return;
+
+    const css = await compileStyleUsingMFile(modelStyle, ':root', theme);
     if (!css) return;
-    if (mfile && mfile.compilerResults) {
-        const newJs = addLineInConstructor(mfile.compilerResults.prodJS, `if(this.loadStyle) this.loadStyle(\`${css}\`);`);
+    if (modelTS && modelTS.compilerResults) {
+        const newJs = addLineInConstructor(modelTS.compilerResults.prodJS, `if(this.loadStyle) this.loadStyle(\`${css}\`);`);
         if (!newJs || !newJs.trim().startsWith('/// <mls')) return;
-        mfile.compilerResults.prodJS = newJs;
+        modelTS.compilerResults.prodJS = newJs;
         mls.stor.cache.clearObsoleteCache();
-        mfile.compilerResults.cacheVersion = generateCompactTimestamp();
-        mls.stor.cache.AddMfileIfNeed(mfile);
+        modelTS.compilerResults.cacheVersion = generateCompactTimestamp();
+        mls.stor.cache.AddMfileIfNeed(modelTS as any);
     }
 }
 
-function generateCompactTimestamp() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-based, so +1
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-  return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
-}
 
 function addLineInConstructor(code: string, lineToAdd: string): string {
 

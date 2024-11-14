@@ -3,14 +3,19 @@
 import type { IDecoratorDictionary, IDecoratorDetails, IDecoratorClassInfo } from './_100554_propiertiesLit';
 import { convertFileNameToTag } from './_100554_utilsLit';
 
-export function validateTagName(mfile: mls.l2.editor.IMFile): boolean {
+export function validateTagName(modelTS: mls.editor.IModelTS): boolean {
 
-    mfile.storFile.hasError = false;
-    clearErrorsOnModel(mfile.model)
+    if (!modelTS || !modelTS.storFile) return false;
 
-    if (!mfile || !mfile.compilerResults) return false;
-    if (mfile.shortName === 'enhancementLit' && mfile.project === 100554) return false;
-    const decorators: IDecoratorDictionary = JSON.parse(mfile.compilerResults.decorators);
+    const { storFile, model } = modelTS;
+    const { project, shortName } = storFile;
+
+    storFile.hasError = false;
+    clearErrorsOnModel(model)
+
+    if (!modelTS.compilerResults) return false;
+    if (shortName === 'enhancementLit' && project === 100554) return false;
+    const decorators: IDecoratorDictionary = JSON.parse(modelTS.compilerResults.decorators);
     if (!decorators) return false;
     const decoratorToCheck = 'customElement';
     let rc: boolean = false;
@@ -22,12 +27,11 @@ export function validateTagName(mfile: mls.l2.editor.IMFile): boolean {
             const decoratorInfo = getDecoratorClassInfo(_decorator.text);
             if (!decoratorInfo || decoratorInfo.decoratorName !== decoratorToCheck) return;
 
-            let correctTagName = convertFileNameToTag(`_${mfile.project}_${mfile.shortName}`);
-            
+            let correctTagName = convertFileNameToTag(`_${project}_${shortName}`);
             if (correctTagName !== decoratorInfo.tagName) {
                 rc = true;
-                setErrorOnModel(mfile.model, _decorator.line + 1, decoratorToCheck.length + 3, _decorator.text.length + 1, `Invalid web component tag name, the correct definition is: ${correctTagName}`, monaco.MarkerSeverity.Error);
-                mfile.storFile.hasError = true;
+                setErrorOnModel(model, _decorator.line + 1, decoratorToCheck.length + 3, _decorator.text.length + 1, `Invalid web component tag name, the correct definition is: ${correctTagName}`, monaco.MarkerSeverity.Error);
+                storFile.hasError = true;
             }
         })
     })
@@ -35,14 +39,18 @@ export function validateTagName(mfile: mls.l2.editor.IMFile): boolean {
     return rc;
 }
 
-export function validateRender(mfile: mls.l2.editor.IMFile): boolean {
+export function validateRender(modelTS: mls.editor.IModelTS): boolean {
 
-    mfile.storFile.hasError = false;
-    clearErrorsOnModel(mfile.model);
-    if (!mfile || !mfile.compilerResults) return false;
-    if (mfile.shortName === 'enhancementLit' && mfile.project === 100554) return false;
-    const shortName = `_${mfile.project}_${mfile.shortName}`
-    return verify(mfile.model, shortName, mfile)
+    if (!modelTS || !modelTS.storFile) return false;
+    const { storFile, model, compilerResults } = modelTS;
+    const { project, shortName } = storFile;
+
+    storFile.hasError = false;
+    clearErrorsOnModel(model);
+    if (!compilerResults) return false;
+    if (shortName === 'enhancementLit' && project === 100554) return false;
+    const shortName2 = `_${project}_${shortName}`
+    return verify(model, shortName2)
 }
 
 function getDecoratorClassInfo(decoratorString: string): IDecoratorClassInfo | undefined {
@@ -87,7 +95,7 @@ function clearErrorsOnModel(model: monaco.editor.ITextModel) {
     monaco.editor.setModelMarkers(model, 'markerSource', []);
 }
 
-function verify(model: monaco.editor.ITextModel, shortName: string, mfile: mls.l2.editor.IMFile): boolean {
+function verify(model: monaco.editor.ITextModel, shortName: string): boolean {
     const lines = model.getLinesContent();
     const tag = convertFileNameToTag(shortName);
     const msgError = `Do not use the same component tag (${tag}) inside the rendering, possible looping`;

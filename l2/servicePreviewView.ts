@@ -42,7 +42,7 @@ export class ServicePreviewView extends LitElement {
 
     private file: mls.stor.IFileInfo | undefined = undefined;
 
-    private mfile: mls.l2.editor.IMFile | undefined = undefined;
+    private models: mls.editor.IModels | undefined = undefined;
 
     @property() father: any;
 
@@ -106,10 +106,6 @@ export class ServicePreviewView extends LitElement {
 
         this.watch = this.father.watch;
 
-        this.verifyWC().then((res) => {
-            this.isDsComponent = res;
-        })
-
         if (this.mode === 'mobile') {
             this.style.cssText = `
                 width:100%;
@@ -166,16 +162,6 @@ export class ServicePreviewView extends LitElement {
             const oldLevel = changedProperties.get('level');
             if (!oldLevel) return;
             this.fireChangeICA();
-            /*if (this.level === '7') {
-                this.fireChangeICA();
-                this.load();
-            } else if (oldLevel === '7') {
-                this.load();
-                this.fireChangeICA();
-            } else {
-                this.fireChangeICA();
-            }*/
-
         }
     }
 
@@ -270,34 +256,34 @@ export class ServicePreviewView extends LitElement {
         }
     }
 
-    private async addStyles() {
-        if (!this.mfile) return;
-        let txt = await this.getFileContent();
-        const ret = await getDependenciesByHtml(this.mfile, txt, this.actualtheme, true);
-        const iframe = this.shadowRoot?.querySelector('iframe');
-        if (!iframe) return;
-        this.mountCSS(ret, iframe);
-        this.mountTokens(ret, iframe);
-        // this.addGlobalStyle(ret, iframe);
+    private async addStyles() { // Nao utilizado mais
 
-        const tag = convertFileNameToTag(`_${this.mfile.project}_${this.mfile.shortName}`);
-        const el = iframe.contentDocument?.body.querySelector(tag);
-        if (!el) return;
-        const css = ret.css.join(' \n');
-        const enhacement = await this.getEnhacement();
-        if (!enhacement) return;
-        (enhacement as any).setStylesProcessed(css, el, tag);
-        // (el as any).setStylesProcessed(css, el, tag);
+        // if (!this.models || !this.models.ts) return;
+        // const { project, shortName } = this.models.ts.storFile;
+        // let txt = await this.getFileContent();
+        // const ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
+        // const iframe = this.shadowRoot?.querySelector('iframe');
+        // if (!iframe) return;
+        // this.mountCSS(ret, iframe);
+        // this.mountTokens(ret, iframe);
+
+        // const tag = convertFileNameToTag(`_${project}_${shortName}`);
+        // const el = iframe.contentDocument?.body.querySelector(tag);
+        // if (!el) return;
+        // const css = ret.css.join(' \n');
+        // const enhacement = await this.getEnhacement();
+        // if (!enhacement) return;
+        // (enhacement as any).setStylesProcessed(css, el, tag);
 
     }
 
-    private async getEnhacement() {
-        if (!this.mfile) return;
-        const enhacementName = (this.mfile.compilerResults as any).tripleSlashMLS.variables.enhancement;
-        if (!enhacementName) throw new Error('enhacementName not valid');
-        const mModule = await mls.l2.enhancement.getEnhancementInstance(this.mfile);
-        return mModule;
-    }
+    // private async getEnhacement() {
+    //     if (!this.mfile) return;
+    //     const enhacementName = (this.mfile.compilerResults as any).tripleSlashMLS.variables.enhancement;
+    //     if (!enhacementName) throw new Error('enhacementName not valid');
+    //     const mModule = await mls.l2.enhancement.getEnhancementInstance(this.mfile);
+    //     return mModule;
+    // }
 
     private load(): void {
         this.showLoader(true);
@@ -319,15 +305,20 @@ export class ServicePreviewView extends LitElement {
             this.setDevice(iframe);
             this.setTheme(iframe);
             this.setMyFile();
-            if (this.mfile?.error) {
+
+            if (!this.models
+                || this.models.ts?.storFile.hasError
+                || this.models.style?.storFile.hasError
+                || this.models.html?.storFile.hasError) {
+
                 this.error = this.msg.errorCompile;
                 this.showLoader(false);
                 this.renderError();
                 return;
             }
+
             await this.setHTml(iframe);
             iframe.style.display = '';
-
             const html = iframe.contentDocument?.querySelector('html');
             if (html) html.lang = this.lang;
             if (iframe.contentDocument) iframe.contentDocument.body.style.paddingTop = '55px';
@@ -368,24 +359,20 @@ export class ServicePreviewView extends LitElement {
         const mkey = mls.l2.getKey({
             project: info.project as number,
             shortName: info.path as string,
-        }
-        );
+        });
 
         if (!mls.stor.files[key]) throw new Error(this.msg.notFoundStorfile + ': ' + key);
-        if (!mls.l2.editor.mfiles[mkey]) throw new Error(this.msg.notFoundStorfile + ' mfile: ' + mkey);
+        if (!mls.editor.models[mkey]) throw new Error(this.msg.notFoundStorfile + ' mfile: ' + mkey);
+
         this.file = mls.stor.files[key];
-        this.mfile = mls.l2.editor.mfiles[mkey];
+        this.models = mls.editor.models[mkey];
     }
 
     private lastHTML: string = '';
     private async setHTml(iframe: HTMLIFrameElement) {
 
-        if (!iframe.contentDocument || !this.mfile) return;
+        if (!iframe.contentDocument || !this.models) return;
         let txt = await this.getFileContent();
-
-        /*if (this.level === '7') {
-            txt = this.cleanTree();
-        }*/
 
         if (this.lastHTML === txt) {
             const h = this.lastCompiledUrl;
@@ -398,12 +385,11 @@ export class ServicePreviewView extends LitElement {
         iframe.contentDocument.body.style.paddingTop = '10px';
         (iframe.contentDocument.body as any)['service'] = this.father;
 
-        const ret = await getDependenciesByHtml(this.mfile, txt, this.actualtheme, true);
+        const ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
-        this.mountCSS(ret, iframe);
+        this.mountCSS(iframe);
         this.mountTokens(ret, iframe);
-        // this.addGlobalStyle(ret, iframe);
 
     }
 
@@ -500,9 +486,9 @@ export class ServicePreviewView extends LitElement {
     private async simulateService(info: IJSONDependence, ifr: HTMLIFrameElement) {
 
         if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
-        if (this.file && this.mfile) {
+        if (this.file && this.models && this.models.ts) {
 
-            const txt = this.mfile.model.getValue();
+            const txt = this.models.ts.model.getValue();
             if (txt.indexOf('extends ServiceBase') === -1) return;
             const tag = convertFileNameToTag(`_${this.file.project}_${this.file.shortName}`);
             const instance = ifr.contentDocument.body.querySelector(tag);
@@ -576,20 +562,14 @@ export class ServicePreviewView extends LitElement {
         if (st) st.remove()
     }
 
-    private mountCSS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
+    private mountCSS(ifr: HTMLIFrameElement): void {
         try {
             if (!ifr.contentDocument) return;
-            //this.removeOlderStyle(ifr);
             let cls = '';
             if (this.mode === 'mobile') cls = this.scrollMobile;
-
-            // const css = info.css.join(' \n');
             const style = document.createElement('style');
             style.textContent = ' \n' + cls;
-            //style.textContent = css + ' \n' + cls;
-            //style.id = this.getIdStyle();
             ifr.contentDocument.body.className = 'scroll-custom';
-            // ifr.contentDocument.body.style.height = 'calc(100vh - 40px)';
             ifr.contentDocument.body.style.width = '98%';
             ifr.contentDocument.body.appendChild(style);
         } catch (e: any) {
@@ -598,13 +578,15 @@ export class ServicePreviewView extends LitElement {
     }
 
     private getIdStyle() {
-        if (!this.mfile) return '';
-        return '_' + this.mfile.project + '_' + this.mfile.shortName;
+        if (!this.models || !this.models.ts) return '';
+        const { project, shortName } = this.models.ts.storFile
+        return '_' + project + '_' + shortName;
     }
 
     private getIdTokens() {
-        if (!this.mfile) return 'ds_tokens';
-        return '_' + this.mfile.project + '_ds_tokens';
+        if (!this.models || !this.models.ts) return 'ds_tokens';
+        const { project } = this.models.ts.storFile
+        return '_' + project + '_ds_tokens';
     }
 
     private mountTokens(info: IJSONDependence, ifr: HTMLIFrameElement): void {
@@ -621,22 +603,6 @@ export class ServicePreviewView extends LitElement {
             console.info('Error mountTokens: ' + e.message);
         }
     }
-
-    private addGlobalStyle(info: IJSONDependence, ifr: HTMLIFrameElement): void {
-        try {
-            if (!ifr.contentDocument || !info.globalCss) return;
-            this.removeOlderGlobalStyle(ifr);
-            const css = info.globalCss;
-            const style = document.createElement('style');
-            style.textContent = css;
-            style.id = 'css_global';
-            ifr.contentDocument.body.appendChild(style);
-
-        } catch (e: any) {
-            console.info('Error add global styles: ' + e.message);
-        }
-    }
-
     private changeWidthP(e: InputEvent): void {
         const el = e.target as HTMLInputElement;
         if (!el) return;
@@ -661,137 +627,19 @@ export class ServicePreviewView extends LitElement {
         }, 200);
     }
 
-    private infoDS: IInfoDesignSystem | undefined = {} as IInfoDesignSystem;
-
-    private async verifyWC() {
-
-        const { project } = mls.actual[5];
-        if (!project) throw new Error('No project selected');
-
-        this.infoDS = {
-            ds: await getDSInstance(project, 0),
-            level: +this.level,
-            project
-        }
-
-        let comp;
-        await this.infoDS.ds.init();
-
-        mls.actual[0].setFullName(this.page);
-        const info = mls.actual[0];
-        const compName: string = `_${info.project}_${info.path}`;
-
-        if (this.infoDS.ds && this.infoDS.ds.components) comp = this.infoDS.ds.components.find(compName);
-        if (comp) return true;
-
-        const isAWebComponent = await this.checkIfIsAWebComponent(compName);
-        if (!isAWebComponent) return false;
-        await this.addComponent(compName, this.infoDS.ds);
-        return !!comp;
-
-    }
-
-    private async checkIfIsAWebComponent(widget: string): Promise<boolean> {
-
-
-        mls.actual[0].setFullName(widget);
-        const { project, path } = mls.actual[0];
-        if (!project || !path) return false;
-
-        if (path === 'servicePreviewView') return false;
-
-        const model = mls.l2.editor.get({ project, shortName: path });
-        if (!model) return false;
-        const file: mls.stor.IFileInfo = model.storFile;
-        if (!file) return false;
-        const content = await file.getContent();
-        if (typeof content !== 'string') return false;
-        const regex = /css\`\[\[mls_getDefaultDesignSystem\]\]\`/;
-
-        if (regex.test(content)) return true;
-        return false;
-
-    }
-
-    private async getGroup(widget: string): Promise<string> {
-        const defaultGroup = 'other';
-        mls.actual[0].setFullName(widget);
-        const model = mls.l2.editor.get({ project: mls.actual[0].project as any, shortName: mls.actual[0].path as any });
-        if (!model || !model.compilerResults || !model.compilerResults.tripleSlashMLS) return defaultGroup;
-        const { variables } = model.compilerResults.tripleSlashMLS;
-        if (!variables) return defaultGroup;
-        const { groupName } = variables;
-        if (!groupName) return defaultGroup;
-        return groupName;
-    }
-
-    private async addComponent(name: string, ds: DesignSystemIO) {
-
-        if (!name || !ds) return;
-        const group = await this.getGroup(name);
-        const componentName = name;
-        const widget: mls.l3.IComponentInfo = {
-            docPath: '',
-            examples: [],
-            group: group as mls.l3.ComponentsGroups,
-            l4MarketingRef: '',
-            name: componentName,
-            reference: undefined as any,
-            styles: [],
-            tags: [],
-            widgetExampleRef: {
-                path: '',
-                tagname: ''
-            }
-        };
-
-        try {
-            if (!ds.components) return;
-            await ds.components.add(widget);
-        } catch (err: any) {
-            const msg = 'Error on add component in design system';
-            this.error = msg;
-            throw new Error('Error on add component in design system');
-        }
-
-    }
-
     public cleanTree(): string {
 
         let ret = '';
-
         const iframe = this.shadowRoot?.querySelector('iframe');
-
         if (!iframe) return '';
-
         const div = document.createElement('div');
         const divRet = document.createElement('div');
         const body = iframe.contentDocument?.body
         if (!body) return ret;
         this.cleanTree2(div, body as HTMLElement);
-
-        /*const clearChildren = (father: HTMLElement, el: HTMLElement) => {
-            let children = [...el.children];
-
-            for (const child of children) {
-                const tagname = child.tagName.toLowerCase();
-                if (tagname.indexOf('-') > 0) {
-                    const clone = child.cloneNode(false);
-                    father.appendChild(clone);
-                    clearChildren(clone as HTMLElement, child as HTMLElement);
-                } else {
-                    clearChildren(father, child as HTMLElement);
-                }
-
-            }
-
-
-        }
-
-        clearChildren(divRet, div)*/
         this.cleanTree3(divRet, div);
-
         return divRet.innerHTML;
+
     }
 
     private cleanTree2(father: HTMLElement, element: HTMLElement): HTMLElement {

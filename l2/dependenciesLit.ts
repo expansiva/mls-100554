@@ -4,7 +4,7 @@ import { convertTagToFileName } from './_100554_utilsLit'
 import type { IJSDoc } from './_100554_propiertiesLit';
 import { setErrorOnModel } from './_100554_validateLit'
 
-export function getComponentDependencies(model: mls.l2.editor.IMFile): string[] {
+export function getComponentDependencies(model: mls.editor.IModelTS): string[] {
 
     const { devDoc } = model.compilerResults as any;
     if (!devDoc) return [];

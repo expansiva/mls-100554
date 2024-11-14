@@ -199,12 +199,12 @@ export class ServicePreview100554 extends ServiceBase {
     private onReloader(): void {
         clearTimeout(this.timeEvent);
         this.timeEvent = setTimeout(async () => {
-            console.time('serviceclick');
+            //console.time('serviceclick');
             this.onServiceClick(true, false);
-            console.timeEnd('serviceclick');
-            console.time('fire');
+            //console.timeEnd('serviceclick');
+            //console.time('fire');
             mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
-            console.timeEnd('fire');
+            //console.timeEnd('fire');
         }, 500);
     }
 
@@ -223,29 +223,12 @@ export class ServicePreview100554 extends ServiceBase {
         }
     }
 
-    private onDSStyleOrTokensChanged(ev: mls.events.IEvent): void {
-        const rc: any = JSON.parse(ev.desc as any);
-        if (
-            rc.emitter === 'right' ||
-            rc.emitter === 'right-get' ||
-            (rc.emitter === 'left' && rc.helper)) return;
-
-        if (this.watch) this.onStyleChanged();
-    }
-
     private onStyleChanged() {
         if (this.elPreview) {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('stylechanged', 'true');
             this.elPreview.setAttribute('actualtheme', this.actualTheme);
         }
-    }
-
-    private async onDsThemeChanged(ev: mls.events.IEvent): Promise<void> {
-        const rc: any = JSON.parse(ev.desc as any);
-        if (rc.emitter !== 'left' || this.visible === 'false') return;
-        this.actualTheme = rc.value || 'Default';
-        if (this.watch) this.onStyleChanged();
     }
 
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
@@ -265,10 +248,8 @@ export class ServicePreview100554 extends ServiceBase {
             const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
             const storFileHTML = mls.stor.files[keyToFileInfo];
 
-            if (fileAction.action === 'open') {
-                this.setModel(storFileHTML);
-            }
-
+            if (fileAction.action === 'open') this.setModel(storFileHTML);
+            
             if (mls.istrace) console.info('is preview repaint:' + this.watch);
             if (fileAction.action === 'open' && this.watch) {
                 this.loading = true;

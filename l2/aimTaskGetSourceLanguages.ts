@@ -47,9 +47,9 @@ export class AimTaskGetSourceLanguages extends AimTaskBase {
             onlyLanguageDontConfigured: args.onlyLanguageDontConfigured
         };
 
-        const mfile = mls.l2.editor.mfiles[fileName];
-        if (!mfile) infoFile.checkTs = false;
-        const valueTs = mfile.model.getValue() || '';
+        const models = mls.editor.models[fileName];
+        if (!models || !models.ts) infoFile.checkTs = false;
+        const valueTs = models.ts?.model.getValue() || '';
         if (!valueTs) infoFile.checkTs = false;
 
         const details = getDataInternationalization(valueTs);

@@ -1,23 +1,24 @@
 /// <mls shortName="codeLensLit" project="100554" enhancement="_blank" />
 
 import type { IDecoratorDictionary, IDecoratorDetails } from './_100554_propiertiesLit';
-import { setErrorOnModel } from './_100554_validateLit'
 
 // File: CodeLens
-export function setCodeLens(mfile: mls.l2.editor.IMFile) {
-    clearCodeLens(mfile);
-    const { model, compilerResults } = mfile;
-    const { decorators } = compilerResults as any;
-    if (mfile.shortName === 'enhancementLit' && mfile.project === 100554) return;
+export function setCodeLens(model1: mls.editor.IModelTS) {
+    
+    clearCodeLens(model1);
+    const { model, compilerResults, storFile } = model1;
+    if (!storFile || !model || !compilerResults) return;
+    const { decorators } = compilerResults;
+    if (storFile.shortName === 'enhancementLit' && storFile.project === 100554) return;
     setCodeLensDecoratorClass(model, decorators);
-    setCodeLensServiceDetails(model, mfile);
+    setCodeLensServiceDetails(model);
 }
 
-function clearCodeLens(mfile: mls.l2.editor.IMFile) {
-    for (let slineNr in mfile.codeLens) {
-        const codeLen = mfile.codeLens[slineNr];
+function clearCodeLens(model1: mls.editor.IModelBase) {
+    for (let slineNr in model1.codeLens) {
+        const codeLen = model1.codeLens[slineNr];
         if (codeLen[0].id === 'helpAssistant') {
-            mls.l2.codeLens.removeCodeLen(mfile.model, Number.parseInt(slineNr))
+            mls.l2.codeLens.removeCodeLen(model1.model, Number.parseInt(slineNr))
         }
     }
 }
@@ -35,7 +36,7 @@ function setCodeLensDecoratorClass(model: monaco.editor.ITextModel, decorators: 
     })
 }
 
-async function setCodeLensServiceDetails(model: monaco.editor.ITextModel, mfile: mls.l2.editor.IMFile) {
+async function setCodeLensServiceDetails(model: monaco.editor.ITextModel) {
     const lines = findLinesByText(model, 'public details: IService');
     lines.forEach((line) => {
         mls.l2.codeLens.addCodeLen(model, line, { id: 'helpAssistant', title: `serviceDetails`, jsComm: '', refs: '_100554_pluginCodelensServiceDetails' });

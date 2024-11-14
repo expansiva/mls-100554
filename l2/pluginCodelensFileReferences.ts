@@ -1,8 +1,7 @@
 /// <mls shortName="pluginCodelensFileReferences" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement } from 'lit';
-import { customElement, property, queryAll } from 'lit/decorators.js';
-import { collab_check, collab_xmark, collab_lock } from './_100554_collabIcons';
+import { html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 
 /// **collab_i18n_start**
@@ -35,7 +34,7 @@ export class PluginCodelensFileReferences extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
 
-    @property() references: mls.l2.editor.IMFile[] = [];
+    @property() references: mls.editor.IModelTS[] = [];
 
     @property() project: number = 0;
 
@@ -62,7 +61,7 @@ export class PluginCodelensFileReferences extends CollabLitElement {
                 ${this.references.map((ref) => html`
                 <li>
                     <a @click=${(e: MouseEvent) => { this.handleClick(e, ref) }} href="#">
-                        ${this.msg.prj}: ${ref.project} ${this.msg.shortname}: ${ref.shortName}  
+                        ${this.msg.prj}: ${ref.storFile.project} ${this.msg.shortname}: ${ref.storFile.shortName}  
                     </a> 
                 </li>`)}
             </ul>
@@ -71,24 +70,24 @@ export class PluginCodelensFileReferences extends CollabLitElement {
         </div>`
     }
 
-    private handleClick(e: MouseEvent, ref: mls.l2.editor.IMFile) {
+    private handleClick(e: MouseEvent, ref: mls.editor.IModelTS) {
         e.preventDefault();
         const cmdOpen: mls.events.IFileAction = {
             action: 'open',
             level: 2,
-            project: ref.project,
-            shortName: ref.shortName,
-            extension: ref.extension,
+            project: ref.storFile.project,
+            shortName: ref.storFile.shortName,
+            extension: ref.storFile.extension,
             folder: '',
             position: 'right'
         };
         mls.events.fire([2], ['FileAction'], JSON.stringify(cmdOpen), 0);
     }
 
-    private async getReferences(shortName: string, project: number): Promise<mls.l2.editor.IMFile[]> {
-        await mls.l2.editor.compileAllProjectIfNeed(project);
-        const refs: mls.l2.editor.IMFile[] = mls.l2.editor.listAllAffectedFiles(project, shortName);
-        return refs;
+    private async getReferences(shortName: string, project: number): Promise<mls.editor.IModelTS[]> {
+        const models = mls.editor.models[`_${project}_${shortName}`];
+        if (!models || !models.ts || !models.ts.compilerResults) return [];
+        return []; 
     }
 
 }

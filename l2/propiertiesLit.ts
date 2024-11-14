@@ -1,6 +1,6 @@
 /// <mls shortName="propiertiesLit" project="100554" enhancement="_blank" />
 				
-export function getPropierties(model: mls.l2.editor.IMFile): mls.l2.enhancement.IProperties[] {
+export function getPropierties(model: mls.editor.IModelTS): mls.l2.enhancement.IProperties[] {
     let rc: mls.l2.enhancement.IProperties[] = [];
     rc = getPropiertiesByDecorators(model);
     rc = getMoreInfoInJsDoc(model, rc)
@@ -27,7 +27,7 @@ function getDefaultPropierties(): mls.l2.enhancement.IProperties[] {
     ]
 }
 
-function getPropiertiesByDecorators(model: mls.l2.editor.IMFile): mls.l2.enhancement.IProperties[] {
+function getPropiertiesByDecorators(model:  mls.editor.IModelTS): mls.l2.enhancement.IProperties[] {
     const decorators = model.compilerResults?.decorators;
     if (!decorators) return [];
     const rc: mls.l2.enhancement.IProperties[] = [];
@@ -52,7 +52,7 @@ function getPropiertiesByDecorators(model: mls.l2.editor.IMFile): mls.l2.enhance
     return [...defaultProps, ...rc];
 }
 
-function getMoreInfoInJsDoc(model: mls.l2.editor.IMFile, propierties: mls.l2.enhancement.IProperties[]): mls.l2.enhancement.IProperties[] {
+function getMoreInfoInJsDoc(model:  mls.editor.IModelTS, propierties: mls.l2.enhancement.IProperties[]): mls.l2.enhancement.IProperties[] {
     const devDoc = model.compilerResults?.devDoc;
 
     if (!devDoc) return propierties;

@@ -1,7 +1,5 @@
 /// <mls shortName="enhancementLit" project="100554" enhancement="_blank" groupName="other" />
 import { convertFileNameToTag } from './_100554_utilsLit'
-import { getPropierties } from './_100554_propiertiesLit'
-import { getComponentDependencies } from './_100554_dependenciesLit'
 import { validateTagName, validateRender } from './_100554_validateLit'
 import { setCodeLens } from './_100554_codeLensLit'
 import { injectStyle } from './_100554_processCssLit'
@@ -105,7 +103,7 @@ export class [className] extends LitElement {
     ]
 }
 
-export const requires: mls.l2.editor.IRequire[] = [
+export const requires: mls.l2.enhancement.IRequire[] = [
     {
         type: 'tspath',
         name: 'lit',
@@ -130,18 +128,18 @@ export const requires: mls.l2.editor.IRequire[] = [
     }
 ];
 
-export const getDefaultHtmlExamplePreview = (model: mls.l2.editor.IMFile): string => {
-    const tag = convertFileNameToTag(`_${model.storFile.project}_${model.storFile.shortName}`);
+export const getDefaultHtmlExamplePreview = (modelTS: mls.editor.IModelTS): string => {
+    const tag = convertFileNameToTag(`_${modelTS.storFile.project}_${modelTS.storFile.shortName}`);
     return `<${tag}></${tag}>`;
 }
 
-export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.enhancement.IDesignDetailsReturn> => {
+export const getDesignDetails = (modelTS: mls.editor.IModelTS): Promise<mls.l2.enhancement.IDesignDetailsReturn> => {
     return new Promise<mls.l2.enhancement.IDesignDetailsReturn>((resolve, reject) => {
         try {
             const ret = {} as mls.l2.enhancement.IDesignDetailsReturn;
-            ret.defaultHtmlExamplePreview = getDefaultHtmlExamplePreview(model);
-            ret.properties = getPropierties(model);
-            ret.webComponentDependencies = getComponentDependencies(model);
+            ret.defaultHtmlExamplePreview = getDefaultHtmlExamplePreview(modelTS);
+            // ret.properties = getPropierties(modelTS);
+            // ret.webComponentDependencies = getComponentDependencies(modelTS);
             (ret as any)['servicePreviewDefault'] = '_100529_service_preview';
             resolve(ret);
         } catch (e) {
@@ -150,20 +148,21 @@ export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.en
     })
 }
 
-export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
+export const onAfterChange = async (modelTS: mls.editor.IModelTS): Promise<void> => {
 
     try {
-        setCodeLens(mfile);
-        // validateStyle(mfile);
-        if (validateTagName(mfile)) {
-            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
-            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
+        if (!modelTS || !modelTS.storFile) return;
+        setCodeLens(modelTS);
+
+        if (validateTagName(modelTS)) {
+            mls.events.fireFileAction('statusOrErrorChanged', modelTS.storFile, 'left');
+            mls.events.fireFileAction('statusOrErrorChanged', modelTS.storFile, 'right');
             return;
         }
 
-        if (validateRender(mfile)) {
-            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'left');
-            mls.events.fireFileAction('statusOrErrorChanged', mfile.storFile, 'right');
+        if (validateRender(modelTS)) {
+            mls.events.fireFileAction('statusOrErrorChanged', modelTS.storFile, 'left');
+            mls.events.fireFileAction('statusOrErrorChanged', modelTS.storFile, 'right');
             return;
         }
     } catch (e: any) {
@@ -172,7 +171,12 @@ export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> 
 };
 
 
-export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
-    await injectStyle(mfile, 'Default');
+export const onAfterCompile = async (mfile:mls.editor.IModelTS): Promise<void> => { 
+    let models: mls.editor.IModels | undefined;
+    models = mls.editor.models[`_${(mfile as  mls.editor.IModelTS).storFile.project}_${(mfile as  mls.editor.IModelTS).storFile.shortName}`];
+    
+    if (!models) return;
+    await injectStyle(models, 'Default');
     return;
+
 }

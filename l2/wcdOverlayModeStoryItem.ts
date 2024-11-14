@@ -194,10 +194,10 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
         if (!id) return;
         const infoL2 = (mls.actual[2] as any).left as any;
         const name = mls.l2.getKey({ project: infoL2.project, shortName: infoL2.shortName });
-        const mfile = mls.l2.editor.mfiles[name];
-        if (!mfile || !(mfile as any).modelHTML) return;
+        const models = mls.editor.models[name];
+        if (!models || !models.html) return;
 
-        const model = (mfile as any).modelHTML;
+        const model = models.html.model;
         const line = model.findMatches(`id="${id}"`, false, false, false, null, true);
         if (!line || !line[0]) return;
         const { startLineNumber } = line[0].range;

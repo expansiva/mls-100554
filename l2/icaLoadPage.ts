@@ -26,10 +26,11 @@ export class IcaLoadPage100554 extends IcaLitElement {
     }
 
     async getHTML() {
-        mls.actual[0].setFullName(this.src);
-        const { project, path } = mls.actual[0];
-        if (!project || !path) return '';
-        const keyToFile = mls.stor.getKeyToFiles(project, 2, path, '', '.html');
+
+        const { project, shortName } = mls.l2.getPath(this.src)
+        if (!project || !shortName) return '';
+        
+        const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
         const file = mls.stor.files[keyToFile];
         if (!file) return '';
         const content = await file.getContent();
@@ -37,8 +38,8 @@ export class IcaLoadPage100554 extends IcaLitElement {
     }
 
     async getDeps(html: string): Promise<IJSONDependence> {
-        const mfile = mls.l2.editor.mfiles[this.src];
-        const deps = await getDependenciesByHtml(mfile, html, 'Default');
+        const models = mls.editor.models[this.src];
+        const deps = await getDependenciesByHtml(models, html, 'Default');
         return deps;
 
     }

@@ -1,13 +1,12 @@
 /// <mls shortName="libCompile" project="100554" enhancement="_blank" />
 
-// typescript new file
-import { getDSInstance } from './_100554_libDesignSystem';
-// import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
+import { getDSInstance } from './_100554_libDesignSystem'
+import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 
-export const getDependenciesByHtml = (mfile: mls.l2.editor.IMFile, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
+export const getDependenciesByHtml = (models: mls.editor.IModels, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
         try {
-            const ret = await getDependencies(mfile, 'byHtml', html, theme, withCss);
+            const ret = await getDependencies(models, 'byHtml', html, theme, withCss);
             resolve(ret)
         } catch (e) {
             reject(e);
@@ -15,26 +14,29 @@ export const getDependenciesByHtml = (mfile: mls.l2.editor.IMFile, html: string,
     });
 }
 
-export const getDependenciesByMFile = (mfile: mls.l2.editor.IMFile, withCss: boolean = false): Promise<IJSONDependence> => {
+export const getDependenciesByMFile = (models: mls.editor.IModels, withCss: boolean = false): Promise<IJSONDependence> => {
+    if (!models.ts) throw new Error('getDependenciesByMFile: Invalid model ts');
+    const { project, shortName, extension } = models.ts.storFile;
     return new Promise<IJSONDependence>(async (resolve, reject) => {
         try {
-            if (mfile.storFile.extension !== '.ts') throw new Error('Only myfile .ts');
-            const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
-            resolve(await getDependencies(mfile, tag, `<${tag}></${tag}>`, 'Default', withCss))
+            if (extension !== '.ts') throw new Error('Only myfile .ts');
+            const tag = convertFileNameToTag(`_${project}_${shortName}`);
+            resolve(await getDependencies(models, tag, `<${tag}></${tag}>`, 'Default', withCss))
         } catch (e) {
             reject(e);
         }
     });
 }
 
-async function getTagsInTypescript(mfile: mls.l2.editor.IMFile, tags: string[]): Promise<string[]> {
-    const tagsInTypescript = getAllWebComponentsInSource(mfile.model.getValue());
+async function getTagsInTypescript(modelTS: mls.editor.IModelTS, tags: string[]): Promise<string[]> {
+    if (!modelTS.model) throw new Error('getTagsInTypescript: Invalid model ts');
+    const tagsInTypescript = getAllWebComponentsInSource(modelTS.model.getValue());
     for (const tagTs of tagsInTypescript) {
         if (!tags.includes(tagTs)) {
             const fileName = convertTagToFileName(tagTs);
-            const mfile = mls.l2.editor.mfiles[fileName];
-            if (mfile) {
-                await getTagsInTypescript(mfile, tags);
+            const mmodels = mls.editor.models[fileName];
+            if (mmodels && mmodels.ts) {
+                await getTagsInTypescript(mmodels.ts, tags);
                 tags.push(tagTs);
             }
         }
@@ -42,7 +44,10 @@ async function getTagsInTypescript(mfile: mls.l2.editor.IMFile, tags: string[]):
     return tags;
 }
 
-async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, html: string, theme: string, withCss: boolean = false) {
+async function getDependencies(models: mls.editor.IModels, filename: string, html: string, theme: string, withCss: boolean = false) {
+
+    if (!models.ts) throw new Error('getDependencies: Invalid model ts');
+    const { project, shortName } = models.ts.storFile;
 
     const myImportsMap: string[] = [];
     const myImports: string[] = [];
@@ -52,11 +57,9 @@ async function getDependencies(mfile: mls.l2.editor.IMFile, filename: string, ht
     const myModules = {};
     let tags = extrairTagsCustomizadas(html);
 
-    const tag = convertFileNameToTag(`_${mfile.storFile.project}_${mfile.storFile.shortName}`);
+    const tag = convertFileNameToTag(`_${project}_${shortName}`);
     if (!tags.includes(tag)) tags.push(tag);
-
-    tags = await getTagsInTypescript(mfile, tags);
-    // const globalCss = await getGlobalCss(mfile, theme);
+    tags = await getTagsInTypescript(models.ts, tags);
 
     await loadMyNeedsToCompile(
         tags,
@@ -114,22 +117,16 @@ async function loadMyNeedsToCompile(
 
         if (tags.length <= 0) return;
         const name = convertTagToFileName(tags[0]);
-
         mls.actual[0].setFullName(name);
         const { project, path } = mls.actual[0];
         if (!project || !path) return;
 
         const ipath = { project, shortName: path };
-
         const enhacementName = await mls.l2.enhancement.getEnhancementVariable(ipath);
-
         if (!enhacementName) throw new Error('enhacementName not valid');
 
-
         if (!myModules[enhacementName]) {
-
             const mModule = await mls.l2.enhancement.getEnhancementInstance(ipath);
-
             myModules[enhacementName] = {
                 jsMap: false,
                 mModule
@@ -137,16 +134,9 @@ async function loadMyNeedsToCompile(
 
         }
 
-        //tags = await addRequeries(enhacementName, ipath, tags, myModules);
-        await getJSImporMap(myImportsMap, enhacementName, ipath, myModules);
+        await getJSImporMap(myImportsMap, enhacementName, myModules);
         await getJS(myImports, enhacementName, ipath, myModules);
-
-        if (compileCss) {
-            // await getCss(myCss, name, ipath, theme);
-            await getCssL2(myCss, ipath, theme);
-        }
         await getTokens(myTokens, ipath, theme);
-
 
     } catch (e: any) {
 
@@ -174,104 +164,41 @@ async function loadMyNeedsToCompile(
 
 }
 
-async function getJSImporMap(myImportsMap: string[], enhacementName: string, mfile: mls.cbe.IPath, myModules: any) {
+async function getJSImporMap(myImportsMap: string[], enhacementName: string, myModules: any) {
 
-    if (!myModules[enhacementName]) {
-        throw new Error('Enhacement not found ');
-    }
+    if (!myModules[enhacementName]) throw new Error('Enhacement not found ');
 
     if (myModules[enhacementName].jsMap) return;
-
     myModules[enhacementName].jsMap = true;
     const mmodule = myModules[enhacementName].mModule as mls.l2.enhancement.IEnhancementInstance;
 
     if (!mmodule || !mmodule.requires) return;
-
     const aRequire = mmodule.requires;
 
     aRequire.forEach((i) => {
-
         if (i.type !== 'cdn') return;
-
         myImportsMap.push(`"${i.name}": "${i.ref}"`);
-
     });
 
 }
 
 async function getJS(myImports: string[], enhacementName: string, mfile: mls.cbe.IPath, myModules: any) {
 
-    if (!myModules[enhacementName]) {
-        throw new Error('Enhacement not found ');
-    }
-
+    if (!myModules[enhacementName]) throw new Error('Enhacement not found ');
     if (myImports.includes(`/_${mfile.project}_${mfile.shortName}`)) return;
-
     myImports.push(`/_${mfile.project}_${mfile.shortName}`);
 
 }
 
 
-async function getCss(myCss: string[], fullName: string, mfile: mls.cbe.IPath, theme: string) {
-
-    try {
-        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-        const ds = await getDSInstance(mfile.project, dsindex);
-        if (!ds || !ds.components) return;
-        const css = await ds.components.getCSS(fullName, theme);
-        myCss.push(css);
-    } catch (e: any) {
-        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
-    }
-}
-
-async function getCssL2(resCss: string[], ipath: mls.cbe.IPath, theme: string) {
-
-    // const mfile = mls.l2.editor.get(ipath);
-    // if (!mfile) return;
-    // const modelHTML = (mfile as any).modelHTML;
-    // if (!modelHTML) return;
-    // const html = modelHTML.getValue() || '';
-    // const components = getAllWebComponentsInSource(html);
-
-    // for await (let component of components) {
-    //     const fileName = convertTagToFileName(component);
-    //     mls.actual[0].setFullName(fileName);
-    //     const shortName = mls.actual[0].path;
-    //     const project = mls.actual[0].project;
-    //     if (!shortName || !project) continue;
-
-    //     const styleC = await compileStyleUsingStorFile(shortName, project, theme);
-    //     if (styleC) resCss.push(styleC);
-    // }
-
-}
-
-
-async function getGlobalCss(mfile: mls.cbe.IPath, theme: string) {
-    try {
-        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-        const ds = await getDSInstance(mfile.project, dsindex);
-        if (!ds || !ds.css || !ds.components) return;
-        // const css = await ds.css.getStylesInLess(theme);
-        const css2 = await ds.getDesignSystemCss(theme);
-        return css2;
-    } catch (e: any) {
-        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
-    }
-}
-
 async function getTokens(myTokens: string[], mfile: mls.cbe.IPath, theme: string) {
     try {
-        const dsindex = mls.actual[3].mode ? mls.actual[3].mode : 0;
-        const ds = await getDSInstance(mfile.project, dsindex);
+        const ds = await getDSInstance(mfile.project, 0);
         if (!ds || !ds.tokens) return;
         const tokens = await ds.tokens.getTokensCss(theme);
         myTokens.push(tokens);
     } catch (e: any) {
-
         if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
-
     }
 }
 
@@ -282,27 +209,6 @@ export function getAllWebComponentsInSource(source: string): string[] {
     return [...new Set(componentNames)];
 }
 
-function convertFileNameToTag(widget: string) {
-    const regex = /_([0-9]+)_?(.*)/;
-    const match = widget.match(regex);
-    if (match) {
-        const [, number, rest] = match;
-        const convertedSrc = rest.replace(/([A-Z])/g, '-$1').toLowerCase();
-        widget = `${convertedSrc}-${number}`;
-    }
-    return widget;
-}
-
-function convertTagToFileName(tag: string) {
-    const regex = /(.+)-(\d+)/;
-    const match = tag.match(regex);
-    if (match) {
-        const [, rest, number] = match;
-        const convertedSrc = rest.replace(/-(.)/g, (_, letter) => letter.toUpperCase());
-        tag = `_${number}_${convertedSrc}`;
-    }
-    return tag;
-}
 
 export interface IJSONDependence {
     file: string,

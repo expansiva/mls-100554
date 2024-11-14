@@ -28,12 +28,8 @@ export class PluginPreviewResultJs extends PluginBaseModule {
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
     private hasError: boolean = false;
     private results: Results = {
-        devDoc: '',
-        devJS: '',
-        devTS: '',
         errors: '',
         prodJS: '',
-        references: [],
         configTS: '',
         libTS: '',
         jsonImport: '',
@@ -57,13 +53,12 @@ export class PluginPreviewResultJs extends PluginBaseModule {
 
     async firstUpdated() {
         this.createEditor();
-        const editor = mls.l2.editor.editors[this.confE];
-        if (!editor) return;
-        const { project, shortName } = editor;
+        const actualFile = (mls.actual[2] as any).left;
+        if (!actualFile) return;
+        const { project, shortName } = actualFile;
         this.setInitialModelProdJS(project, shortName, 'compiling...');
         await this.getCompileResults(project, shortName);
         this.setInitialModelProdJS(project, shortName, this.results.prodJS);
-
 
     }
 
@@ -85,12 +80,12 @@ export class PluginPreviewResultJs extends PluginBaseModule {
 
     private async getCompileResults(project: number, shortName: string): Promise<void> {
 
-        const mfile = mls.l2.editor.get({ shortName, project });
-        if (!mfile) return;
-        if (mfile.compilerResults && !mfile.compilerResults.prodJS) mfile.compilerResults.modelNeedCompile = true;
-        const results = await mls.l2.editor.getCompilerResultTS(mfile);
+        const models = mls.editor.models[`_${project}_${shortName}`]
+        if (!models || !models.ts) return;
+        if (models.ts.compilerResults && !models.ts.compilerResults.prodJS) models.ts.compilerResults.modelNeedCompile = true;
+        await mls.l2.typescript.compile(models.ts);
         const errs = {
-            Errors: results.errors
+            Errors: models.ts.compilerResults?.errors || []
         };
 
         const libs = monaco.languages.typescript.typescriptDefaults.getExtraLibs();
@@ -101,13 +96,12 @@ export class PluginPreviewResultJs extends PluginBaseModule {
             };
         });
 
-        this.hasError = results.errors.length > 0;
-        const jsonImp = await getDependenciesByMFile(mfile);
+        this.hasError = errs.Errors.length > 0;
+        const jsonImp = await getDependenciesByMFile(models);
 
         this.results = {
-            ...results,
+            prodJS: models.ts.compilerResults?.prodJS || '',
             errors: JSON.stringify(errs, null, 2),
-            references: [],
             configTS: JSON.stringify(monaco.languages.typescript.typescriptDefaults.getCompilerOptions(), null, 2),
             libTS: JSON.stringify(libs2, null, 2),
             jsonImport: JSON.stringify(jsonImp, null, 2),
@@ -145,16 +139,9 @@ if (!customElements.get('plugin-preview-result-js-100554')) {
 
 type Results = {
     prodJS: string,
-    devJS: string,
-    devTS: string,
     errors: string;
-    devDoc: string;
     libTS: string;
     configTS: string;
-    references: mls.l2.editor.IMFile[],
-    refs?: string,
-    devDocPage?: string,
-    assistant?: string,
     jsonImport: string,
 }
 

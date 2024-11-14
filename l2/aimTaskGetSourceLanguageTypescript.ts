@@ -29,9 +29,11 @@ class AimTaskGetSourceLanguageTypescript extends AimTaskBase {
 
     private _getSource(shortName: string): Promise<ISourceTypescriptData> {
         return new Promise<ISourceTypescriptData>(async (resolve, reject) => {
-            const mfile = mls.l2.editor.mfiles[shortName];
-            if (!mfile) reject(`No mfile find for file: ${shortName}`);
-            const value = mfile.model.getValue();
+
+
+            const models = mls.editor.models[shortName];
+            if (!models || !models.ts || !models.ts.model) reject(`No find models for file: ${shortName}`);
+            const value = models.ts?.model.getValue() || '';
             const data = getDataInternationalization(value);
             resolve(data);
         })

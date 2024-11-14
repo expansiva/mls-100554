@@ -1,19 +1,15 @@
-/// <mls shortName="enhancementPage" project="100554" enhancement="_100554_enhancementVanilla" />
-
-import { injectStyle } from './_100554_processCssLit'
+/// <mls shortName="enhancementPage" project="100554" enhancement="_blank" />
 
 export const description = "Use this enhancement for pages"
-
 export const example = ``;
-
-export const requires: mls.l2.editor.IRequire[] = [];
+export const requires: mls.l2.enhancement.IRequire[] = [];
 
 export const getExample = (project: number, shortname: string): string => {
     let newExample = example;
     return newExample;
 }
 
-export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.enhancement.IDesignDetailsReturn> => {
+export const getDesignDetails = (modelTS: mls.editor.IModelTS): Promise<mls.l2.enhancement.IDesignDetailsReturn> => {
     return new Promise<mls.l2.enhancement.IDesignDetailsReturn>((resolve, reject) => {
         try {
             const ret = {} as mls.l2.enhancement.IDesignDetailsReturn;
@@ -37,7 +33,7 @@ export const prepareAdd = (prompt: string): { sourceTS: string, aiHeader: string
     return ret;
 }
 
-export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
+export const onAfterChange = async (modelTS: mls.editor.IModelTS): Promise<void> => {
     try {
         return;
     } catch (e: any) {
@@ -49,7 +45,6 @@ export const getPromptDefault = (): string => {
     return ``;
 }
 
-export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
-    await injectStyle(mfile, 'Default');
+export const onAfterCompile = async (modelTS: mls.editor.IModelTS): Promise<void> => {
     return;
 }

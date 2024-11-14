@@ -994,7 +994,7 @@ export class ServiceSave extends ServiceBase {
             }
 
             if (versionBLock > 0) {
-                window.collabMessages.add(`File ${versionBLock} was changed in server, file was not save`, 'information');
+                (window as any).collabMessages.add(`File ${versionBLock} was changed in server, file was not save`, 'information');
             }
 
             return;
@@ -1009,17 +1009,17 @@ export class ServiceSave extends ServiceBase {
 
     private async afterUpdate(storFile: mls.stor.IFileInfo) {
 
-        const mmodel: mls.l2.editor.IMFile | undefined = mls.l2.editor.get(storFile);
+        const mmodel: mls.editor.IModels | undefined = mls.editor.getModels(storFile.project, storFile.shortName);
 
         if (storFile.status === 'deleted') {
             this.deleteFile(storFile);
             return;
         }
-        if (storFile.status === 'renamed' && mmodel) {
+        if (storFile.status === 'renamed' && mmodel && mmodel.ts) {
 
-            mmodel.originalProject = undefined;
-            mmodel.originalShortName = undefined;
-            mmodel.originalCRC = mls.common.crc.crc32(mmodel.model.getValue()).toString(16);
+            mmodel.ts.originalProject = undefined;
+            mmodel.ts.originalShortName = undefined;
+            mmodel.ts.originalCRC = mls.common.crc.crc32(mmodel.ts.model.getValue()).toString(16);
 
         }
 
@@ -1029,7 +1029,7 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private async uppVersionAfterSave(array: mls.stor.IFileInfo[]) { 
+    private async uppVersionAfterSave(array: mls.stor.IFileInfo[]) {
 
         try {
 
@@ -1056,7 +1056,7 @@ export class ServiceSave extends ServiceBase {
             console.info(e);
             return;
         }
-        
+
     }
 
     /*private async uppVersionAfterSave(array: mls.stor.IFileInfo[]) {
@@ -1114,7 +1114,7 @@ export class ServiceSave extends ServiceBase {
     private async deleteFile(storFile: mls.stor.IFileInfo) {
 
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-        mls.l2.editor.remove(storFile);
+        mls.editor.deleteModels(storFile.project, storFile.shortName, true);
         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
         delete mls.stor.files[keyFiles];
 

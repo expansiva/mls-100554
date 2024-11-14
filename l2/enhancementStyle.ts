@@ -21,12 +21,14 @@ export const getAddNewFileDetails = () => {
     ]
 }
 
-export const requires: mls.l2.editor.IRequire[] = [];
+export const requires: mls.l2.enhancement.IRequire[] = [];
 
+export const onAfterChange = (models: mls.editor.IModels) => {
 
-export const onAfterChange = (mfile: mls.l2.editor.IMFile) => {
+    const modelStyle: mls.editor.IModelStyle | undefined = models.style;
+    if (!modelStyle) return '';
     try {
-        validateStyle(mfile);
+        validateStyle(modelStyle);
         return '';
     } catch (e: any) {
         throw new Error(e)
@@ -34,12 +36,12 @@ export const onAfterChange = (mfile: mls.l2.editor.IMFile) => {
 };
 
 
-export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
+export const onAfterCompile = async (modelStyle: mls.editor.IModelStyle): Promise<void> => {
     return;
 }
 
 
-export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.enhancement.IDesignDetailsReturn> => {
+export const getDesignDetails = (modelStyle: mls.editor.IModelStyle): Promise<mls.l2.enhancement.IDesignDetailsReturn> => {
     return new Promise<mls.l2.enhancement.IDesignDetailsReturn>((resolve, reject) => {
         try {
             const ret = {} as mls.l2.enhancement.IDesignDetailsReturn;
@@ -51,10 +53,11 @@ export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.en
 }
 
 
-export function validateStyle(mfile: mls.l2.editor.IMFile) {
+export function validateStyle(modelStyle: mls.editor.IModelStyle) {
 
-    const model: monaco.editor.ITextModel = (mfile as any).modelLESS;
-    const keyToStorFileLess = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, '', '.less');
+    const model: monaco.editor.ITextModel = modelStyle.model;
+    const { project, shortName } = modelStyle.storFile;
+    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, '', '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!model || !storFileLess) return;
 
@@ -66,7 +69,7 @@ export function validateStyle(mfile: mls.l2.editor.IMFile) {
     const validRootSelectorClass = /^[a-zA-Z][\w-]*\.[a-zA-Z][\w-]*$/;
     const validRootSelectorTag = /^\s*[a-zA-Z]+[\w-]*-[\w-]*\s*$/;
     const rootRules = getRootSelectors(text);
-    const tagName = convertFileNameToTag(`_${mfile.project}_${mfile.shortName}`);
+    const tagName = convertFileNameToTag(`_${project}_${shortName}`);
 
     if (rootRules) {
         rootRules.forEach((rule) => {
@@ -177,9 +180,10 @@ export async function getTokensList() {
     return resumeTokens;
 }
 
-export async function compileStyleUsingMFile(mfile: mls.l2.editor.IMFile, prefix: ':host' | ':root', theme: string = 'Default') {
-    const model: monaco.editor.ITextModel = (mfile as any).modelLESS;
-    const keyToStorFileLess = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, '', '.less');
+export async function compileStyleUsingMFile(modelStyle: mls.editor.IModelStyle, prefix: ':host' | ':root', theme: string = 'Default') {
+    const model: monaco.editor.ITextModel = modelStyle.model;
+    const { project, shortName } = modelStyle.storFile;
+    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, '', '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!model || !storFileLess) return;
     const tokensLess = await getTokensLess(theme);
@@ -395,312 +399,6 @@ function createStyleSheet(cssString: string, defaultView: Window) {
     const sheet = (new (defaultView as any).CSSStyleSheet() as any);
     sheet.replaceSync(cssString);
     return sheet;
-}
-
-export function setModelAPI(editor: monaco.editor.IStandaloneCodeEditor, model: monaco.editor.ITextModel | IMonacoModelStyle | undefined) {
-
-    if (!model) return;
-    const modelStyle = model as IMonacoModelStyle;
-
-    modelStyle.add = (text: string, lineNumber: number, refLine: number) => {
-        let lineToChange = lineNumber;
-        const blockInfo = modelStyle.getBlockInfo();
-        if (!lineToChange) {
-            const newLineNumber = refLine === blockInfo.endLine ? refLine : refLine + 1;
-            const columnStartRefLine = modelStyle.getLineIndentColumn(refLine as number);
-            const newLine = {
-                range: new monaco.Range(newLineNumber, 1, newLineNumber, 1),
-                text: ' '.repeat(columnStartRefLine - 1) + '\n',
-                forceMoveMarkers: true
-            };
-
-            if (editor) editor.executeEdits('style', [newLine]);
-            lineToChange = newLineNumber;
-        }
-
-        const columnStart = modelStyle['getLineIndentColumn'](lineToChange);
-        const columnEnd = modelStyle.getLineLength(lineToChange) + 1;
-        const range = new monaco.Range(lineToChange, columnStart, lineToChange, columnEnd);
-        if (editor) {
-            editor.executeEdits('style', [{ range, text }]);
-        }
-        const endLineLength = modelStyle.getLineLength(blockInfo.endLine) + 1;
-        const rangeBlock = new monaco.Range(blockInfo.startLine, 1, blockInfo.endLine, endLineLength);
-        modelStyle.removeBlankLines(rangeBlock);
-
-    };
-
-    modelStyle.changeBlock = (key: string, value: string, comment: string) => {
-        if (!editor) return;
-        const blockLess = modelStyle.getLessBlock();
-        const { lineNumber } = editor.getPosition() as monaco.Position;
-        const text = `${key}: ${value};//${comment}`;
-        const objChanged: any = {
-            lineChange: undefined,
-            prop: key,
-            newValue: value,
-            oldValue: ''
-        };
-
-        if (!blockLess) return;
-
-        blockLess.lines.forEach((item: any) => {
-            if (item.key === key) {
-                objChanged.lineChange = item.line;
-                objChanged.oldValue = item.value;
-            }
-        });
-
-        if (!objChanged.newValue) {
-            const linewithSameKey = blockLess.lines.find((line: any) => line.key === objChanged.prop);
-            if (!linewithSameKey) return;
-            modelStyle.removeLine(linewithSameKey.line);
-            return;
-        }
-
-        if (!objChanged.lineChange) {
-            modelStyle.add(text, objChanged.lineChange, lineNumber);
-            return;
-        }
-        modelStyle.add(text, objChanged.lineChange);
-    };
-
-    modelStyle.removeLine = (lineNumber: number) => {
-        const columnEnd = modelStyle.getLineLength(lineNumber) + 1;
-        const columnStart = modelStyle.getLineIndentColumn(lineNumber);
-        const range = new monaco.Range(lineNumber, columnStart, lineNumber, columnEnd);
-        if (editor) {
-            editor.executeEdits('', [{ range, text: null }]);
-        }
-    };
-
-    modelStyle.getLessBlock = (): IBlockLess | undefined => {
-
-        const { isValidBlock, endLine, startLine, selector } = modelStyle.getBlockInfo();
-        if (!isValidBlock) return undefined;
-
-        const rc: IBlockLess = {
-            lines: [],
-            selector
-        };
-
-        const lines = modelStyle.getLinesContent();
-        let bracketsOpenCount = 0;
-        let bracketsCloseCount = 0;
-
-        for (let i = startLine - 1; i <= endLine - 1; i++) {
-
-            let line = lines[i];
-            line = line.replace(/\/\/.*/, ''); // remove inline comment
-            const isInBlockComment = modelStyle.isInCommentBlock(lines, i + 1);
-            if (isInBlockComment) continue;
-            if (line.indexOf('{') >= 0) bracketsOpenCount += 1;
-            if (line.indexOf('}') >= 0) bracketsCloseCount += 1;
-            if ((bracketsOpenCount - bracketsCloseCount) > 1) continue;
-
-            const rules = line.split(';');
-            rules.forEach((rule: any) => {
-
-                if (!rule) return;
-                const item = modelStyle.convertRuleToKeyValue(rule);
-                if (!item) return;
-                item.line = i + 1;
-                rc.lines.push(item);
-
-            });
-
-        }
-
-        return rc;
-
-    };
-
-    modelStyle.getHelperNameByLine = (lineNumber: number): string => {
-
-        const lineContent = modelStyle.getLineContent(lineNumber);
-        const [, helperName] = lineContent.split('//');
-        return helperName;
-
-    };
-
-    modelStyle.isCursorInBlockValid = (): boolean => {
-
-        const blockInfo = modelStyle.getBlockInfo();
-        return blockInfo.isValidBlock;
-
-    };
-
-    modelStyle.getBlockInfoByLine = (lineNumber: number): IBlockInfo => {
-        const lines = modelStyle.getLinesContent();
-        const startBlockInfo = modelStyle.haveStartBlock(lines, lineNumber);
-        const endBlockInfo = modelStyle.haveEndBlock(lines, lineNumber);
-        const rc: IBlockInfo = {
-            selector: '',
-            endLine: endBlockInfo.line,
-            hasEndBlock: endBlockInfo.haveEndBlock,
-            hasStartBlock: startBlockInfo.haveStartBlock,
-            startLine: startBlockInfo.line,
-            isValidBlock: startBlockInfo.haveStartBlock && endBlockInfo.haveEndBlock
-        };
-
-        if (startBlockInfo.line > 0 && rc.isValidBlock) {
-            const lineStartContent = modelStyle.getLineContent(startBlockInfo.line);
-            rc.selector = lineStartContent.replace(/\/\/.*/, '').replace(/\{.*$/, '').trim();
-        }
-
-        return rc;
-    };
-
-    modelStyle.getBlockInfo = (): IBlockInfo => {
-        const { lineNumber } = editor.getPosition() as monaco.Position;
-        const rc = modelStyle.getBlockInfoByLine(lineNumber);
-        return rc;
-    };
-
-    modelStyle.isInCommentBlock = (lines: string[], lineNumber: number): boolean => {
-
-        let countStartBlockComment = 0;
-        let countEndBlockComment = 0;
-
-        for (let i = 0; i <= lineNumber - 1; i++) {
-            const line = lines[i];
-            if (line.indexOf('/*') >= 0) countStartBlockComment += 1;
-            if (line.indexOf('*/') >= 0 && i !== lineNumber - 1) countEndBlockComment += 1;
-        }
-
-        const isInBlockComment = countStartBlockComment > countEndBlockComment;
-        return isInBlockComment;
-
-    };
-
-    modelStyle.haveStartBlock = (lines: string[], lineNumber: number): { haveStartBlock: boolean, line: number } => {
-
-        const rc = {
-            haveStartBlock: false,
-            line: -1
-        };
-
-        let bracketsCount = 1;
-
-        let actualLine = lines[lineNumber - 1];
-        if (actualLine.trim().startsWith('//')) return rc;
-
-        actualLine = actualLine.replace(/\/\/.*/, '').replace(/\/\*.*/, ''); // remove comment in line
-        if (actualLine.indexOf('{') >= 0) {
-            rc.haveStartBlock = true;
-            rc.line = lineNumber;
-            return rc;
-        }
-
-        if (actualLine.indexOf('}') >= 0) bracketsCount -= 1;
-
-        const isInBlockComment = modelStyle.isInCommentBlock(lines, lineNumber);
-        if (isInBlockComment) return rc;
-
-        for (let i = lineNumber - 1; i >= 0; i--) {
-            let line = lines[i];
-            line = line.replace(/\/\/.*/, ''); // remove inline comment 
-            const lineInCommentBlock = modelStyle.isInCommentBlock(lines, i + 1);
-
-            if (line.indexOf('}') >= 0 && !lineInCommentBlock) bracketsCount += 1;
-            if (line.indexOf('{') >= 0 && !lineInCommentBlock) bracketsCount -= 1;
-
-            if (bracketsCount === 0) {
-                rc.haveStartBlock = true;
-                rc.line = i + 1;
-                break;
-            }
-        }
-
-        return rc;
-
-    };
-
-    modelStyle.haveEndBlock = (lines: string[], lineNumber: number): { haveEndBlock: boolean, line: number } => {
-
-        const rc = {
-            haveEndBlock: false,
-            line: -1
-        };
-
-        let bracketsCount = 1;
-        let actualLine = lines[lineNumber - 1];
-        if (actualLine.trim().startsWith('//')) return rc;
-        actualLine = actualLine.replace(/\/\/.*/, '').replace(/\/\*.*/, ''); // remove comment in line
-        if (actualLine.indexOf('}') >= 0) {
-            rc.haveEndBlock = true;
-            rc.line = lineNumber;
-            return rc;
-        }
-
-        if (actualLine.indexOf('{') >= 0) bracketsCount -= 1;
-        const isInBlockComment = modelStyle.isInCommentBlock(lines, lineNumber);
-        if (isInBlockComment) return rc;
-
-        for (let i = lineNumber - 1; i <= lines.length - 1; i++) {
-
-            let line = lines[i];
-            line = line.replace(/\/\/.*/, ''); // remove inline comment 
-            const lineInCommentBlock = modelStyle.isInCommentBlock(lines, i + 1);
-            if (line.indexOf('{') >= 0 && !lineInCommentBlock) bracketsCount += 1;
-            if (line.indexOf('}') >= 0 && !lineInCommentBlock) bracketsCount -= 1;
-            if (bracketsCount === 0) {
-                rc.haveEndBlock = true;
-                rc.line = i + 1;
-                break;
-            }
-
-        }
-        return rc;
-    };
-
-    modelStyle.convertRuleToKeyValue = (content: string): IBlockLessLine | undefined => {
-        const blockLine: IBlockLessLine = {} as IBlockLessLine;
-        const [key, value] = content.split(':');
-        if (!key || !value) return undefined;
-        blockLine.key = key.trim();
-        blockLine.value = value.trim();
-        return blockLine;
-    };
-
-}
-
-export interface IMonacoModelStyle extends monaco.editor.ITextModel {
-    add(cssLine: string, line: number, refLine?: number): void;
-    changeBlock(key: string, value: string, comment: string): void;
-    removeLine(line: number): void;
-    removeBlankLines(range: monaco.IRange): void;
-    getHelperNameByLine(line: number): string;
-    isCursorInBlockValid(): boolean;
-    haveStartBlock(lines: string[], lineNumber: number): { haveStartBlock: boolean, line: number };
-    haveEndBlock(lines: string[], lineNumber: number): { haveEndBlock: boolean, line: number };
-    isInCommentBlock(lines: string[], lineNumber: number): boolean;
-    getBlockInfo(): IBlockInfo;
-    getBlockInfoByLine(line: number): IBlockInfo;
-    getLessBlock(): IBlockLess | undefined;
-    convertRuleToKeyValue(content: string): IBlockLessLine | undefined;
-    getLineIndentColumn(line: number): number;
-}
-
-
-export interface IBlockLess {
-    selector: string,
-    lines: IBlockLessLine[]
-}
-
-export interface IBlockLessLine {
-    key: string,
-    value: string,
-    line: number
-}
-
-export interface IBlockInfo {
-    selector: string,
-    hasStartBlock: boolean,
-    startLine: number,
-    endLine: number,
-    hasEndBlock: boolean,
-    isValidBlock: boolean
 }
 
 

@@ -95,20 +95,20 @@ export const getAddNewFileDetails = () => {
 
 export const requires = requiresDefault;
 
-export const getDefaultHtmlExamplePreview = (model: mls.l2.editor.IMFile): string => {
-    return getDefaultHtmlExamplePreviewDefault(model)
+export const getDefaultHtmlExamplePreview = (modelTS: mls.editor.IModelTS): string => {
+    return getDefaultHtmlExamplePreviewDefault(modelTS)
 }
 
-export const getDesignDetails = (model: mls.l2.editor.IMFile): Promise<mls.l2.enhancement.IDesignDetailsReturn> => {
-    return getDesignDetailsDefault(model);
+export const getDesignDetails = (modelTS: mls.editor.IModelTS): Promise<mls.l2.enhancement.IDesignDetailsReturn> => {
+    return getDesignDetailsDefault(modelTS);
 }
 
-export const onAfterChange = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
-    return onAfterChangeDefault(mfile);
+export const onAfterChange = async (modelTS: mls.editor.IModelTS): Promise<void> => {
+    return onAfterChangeDefault(modelTS);
 };
 
-export const onAfterCompile = async (mfile: mls.l2.editor.IMFile): Promise<void> => {
-    return onAfterCompileDefault(mfile);
+export const onAfterCompile = async (modelTS: mls.editor.IModelTS): Promise<void> => {
+    return onAfterCompileDefault(modelTS);
 }
 
 // export const setStylesProcessed = async (newCss: string, el: HTMLElement, tag: string): Promise<void> => {

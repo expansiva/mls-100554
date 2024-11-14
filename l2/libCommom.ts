@@ -3,6 +3,7 @@ import { getMessageKey } from "./_100554_collabLitElement";
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName , convertFileNameToTag } from './_100554_utilsLit';
 
+
 /// **collab_i18n_start**
 const message_pt = {
     updatedToday: 'atualizado hoje',
@@ -87,6 +88,18 @@ export function getMyKeysBranch(project: number): { branch: string, owner: strin
 
     }
 
+}
+
+export function generateCompactTimestamp() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-based, so +1
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+  return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
 }
 
 
@@ -211,7 +224,6 @@ export async function forceServiceInstance(level: number, service: string) {
     await (nav as any).forceInstanceIfNeed([`${service};${level}`]);
 
 }
-
 
 export async function loadFileHTMLInContainer(el: HTMLElement, shortName: string, project: number) {
 
