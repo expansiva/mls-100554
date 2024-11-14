@@ -1,0 +1,2265 @@
+/// <mls shortName="driverGithub" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+import * as dL from './_100554_driverLib';
+
+export class driver_github_100554 extends mls.stor.others.DriverIOBase {
+
+    public shortName: string = 'GitHub';
+    public project: number = 100554;
+    public driverVersion: string = '1.0.0.1';
+
+    constructor() {
+
+        super();
+        if (mls.istrace) console.info('gitDriver: ' + this.driverVersion);
+
+    }
+
+    get mKey(): string {
+
+        const _mKey = localStorage.getItem('keyGitHub');
+        if (!_mKey) throw new Error('Please configure your key git hub');
+        return _mKey;
+
+    }
+
+
+    public getContents = (project: number, fileInfos: mls.stor.IFileInfo[]): Promise<mls.stor.IRegGetContents[]> => {
+        return this._getContents(project, fileInfos);
+    }
+
+    public setContents = (project: number, fileInfos: mls.stor.IFileInfo[], comments: string | null): Promise<boolean> => {
+        return this._setContents(project, fileInfos, comments);
+    };
+
+    public loadFilesInfo(project: number): Promise<mls.cbe.IPrjSourcesFiles[]> {
+        return this._loadFilesInfo(project);
+    }
+
+    public getHistory(fileInfo: mls.stor.IFileInfo): Promise<mls.stor.IHistory[] | null> {
+        return this._getHistory(fileInfo)
+    }
+
+    public getHistoryContent(fileInfo: mls.stor.IFileInfo, ref: string): Promise<string | null> {
+        return this._getHistoryContent(fileInfo, ref)
+    }
+
+    public getUrl(file: mls.stor.IFileInfo): string {
+        return this._getUrl(file);
+    }
+
+    public getVersionFromFiles(options: { owner: string; repo: string; branchName: string; files: mls.stor.IFileInfo[]; }): Promise<{ [key: string]: string; } | undefined> {
+        return this.getVersionFromFilesIO(options);
+    }
+
+    public checkBranchExistence(owner: string, repo: string, branchName: string): Promise<boolean> {
+        throw this.checkBranchExistenceIO(owner, repo, branchName);
+    }
+
+    public createNewBranch(option: { owner: string; repo: string; branch: string; newBranch: string; }): Promise<boolean> {
+        return this.createNewBranchIO(option);
+    }
+
+    public createPullRequest(options: { owner: string; repo: string; title: string; branch: string; description: string; }): Promise<boolean> {
+        return this.createPullRequestIO(options);
+    }
+
+    public reviewPullRequest(options: { owner: string; repo: string; branch: string; idRequest: string; isApproved: boolean; }): Promise<boolean> {
+        return this.reviewPullRequestIO(options);
+    }
+
+    public listPullRequests(owner: string, repo: string): Promise<mls.stor.others.IPullRequest[]> {
+        return this.listPullRequestsIO(owner, repo);
+    }
+
+    public listForks(owner: string, repo: string): Promise<mls.stor.others.IFork[]> {
+        return this.listForksIO(owner, repo);
+    }
+
+    public listBranches(owner: string, repo: string): Promise<mls.stor.others.IBranch[]> {
+        return this.listBranchesIO(owner, repo);
+    }
+
+    public getUserInfo(): Promise<mls.stor.others.IInfo> {
+        return this.getUserInfoIO();
+    }
+
+    public getOrganizations(login: string): Promise<mls.stor.others.IOrg[]> {
+        return this.getOrganizationsIO(login);
+    }
+
+    public createRepository(login: string, repo: string, organization: string, description: string, visibility: "PUBLIC" | "PRIVATE" | "INTERNAL"): Promise<boolean> {
+        return this.createRepositoryIO(login, repo, organization, description, visibility);
+    }
+
+    public deleteRepository(repo: string, organization: string): Promise<boolean> {
+        return this.deleteRepositoryIO(repo, organization);
+    }
+
+    public createFork(login: string, repoOri: string, orgOri: string, orgDest: string): Promise<boolean> {
+        return this.createForkIO(login, repoOri, orgOri, orgDest);
+    }
+
+    public renameRepository(owner: string, repo: string, newName: string): Promise<boolean> {
+        return this.renameRepositoryIO(owner, repo, newName);
+    }
+
+    public createFileInRepo(owner: string, repo: string, path: string, content: string | Uint8Array): Promise<boolean> {
+        return this.createFileInRepoIO(owner, repo, path, content);
+    }
+
+    public changeVisibility(owner: string, repo: string, visibility: "PUBLIC" | "PRIVATE" | "INTERNAL"): Promise<boolean> {
+        return this.changeVisibilityIO(owner, repo, visibility);
+    }
+
+    public verifyRepositoryNew(owner: string, repo: string, user: string): Promise<"free" | "reuse" | "wait" | "error"> {
+        return this.verifyRepositoryNewIO(owner, repo, user);
+    }
+
+    public verifyPermission(owner: string, repo: string, login: string): Promise<mls.stor.others.IPermission> {
+        return this.verifyPermissionIO(owner, repo, login);
+    }
+
+    public addVariable(name: string, value: string): Promise<boolean> {
+        return this.addVariableIO(name, value);
+    }
+
+    public updateVariable(name: string, value: string): Promise<boolean> {
+        return this.updateVariableIO(name, value);
+    }
+
+    public listVariables(): Promise<{ variables: { name: string; value: string; created_at: string; updated_at: string; }[]; total_count: number; }> {
+        return this.listVariablesIO();
+    }
+
+    public delVariable(name: string): Promise<boolean> {
+        return this.delVariableIO(name);
+    }
+
+    //---------IMPLEMENTS-----------
+
+    private _getUrl(file: mls.stor.IFileInfo) {
+
+		const { branch, owner, repo } = dL.getMyKeysBranch(file.project);
+
+		if (!branch || !owner || !repo) return 'https://github.com/';
+		const url = `https://github.com/${owner}/${repo}/blob/${branch}/l2/${file.shortName}${file.extension}`;
+		return url;
+	}
+
+    private async _getContents(project: number, fileInfos: mls.stor.IFileInfo[]): Promise<mls.stor.IRegGetContents[]> {
+
+        try {
+
+            return this.getContents2(fileInfos, []);
+
+        } catch (e: any) {
+
+            throw new Error('_getContents:' + e.message);
+
+        }
+
+    }
+
+    private async getContents2(fileInfos: mls.stor.IFileInfo[], father: mls.stor.IRegGetContents[]) {
+
+        if (fileInfos.length <= 0) return father;
+
+        const r = await this.getContent3(fileInfos[0]);
+        father.push({
+            fileInfo: fileInfos[0],
+            content: r
+        });
+
+        if (fileInfos.length >= 1) {
+
+            fileInfos.splice(0, 1);
+            father = await this.getContents2(fileInfos, father);
+
+        }
+
+        return father;
+
+    }
+
+    private getContent3(fileInfo: mls.stor.IFileInfo): Promise<string | Blob | null> {
+
+        return new Promise<string | Blob | null>(async (resolve, reject) => {
+
+            try {
+
+                const auxLevel = fileInfo.level === 0 ? '' : `l${fileInfo.level}/`;
+                const aux = fileInfo.folder === '' || fileInfo.folder.endsWith('/') ? '' : '/';
+                const ext = fileInfo.extension ? fileInfo.extension : '.ts';
+                const fileName = auxLevel + fileInfo.folder.replace(/\\/g, '/') + aux + fileInfo.shortName + ext;
+
+                let ret: any = '';
+
+                if (['.html', '.ts', '.css', '.txt', '.json', '.md', '.js', '.less'].includes(ext)) {
+
+                    ret = await this.getFilesIO(fileInfo.project, fileName);
+
+                } else {
+
+                    ret = await this.getFilesRestIO(fileInfo.project, fileInfo.versionRef, fileInfo.extension);
+
+                }
+                resolve(ret);
+
+            } catch (e: any) {
+
+                reject(new Error(e.message));
+
+            }
+
+        });
+
+    }
+
+    private async _setContents(project: number, fileInfos: mls.stor.IFileInfo[], comments: string | null): Promise<boolean> {
+
+        try {
+
+            return this.setContents2(fileInfos, comments);
+
+        } catch (e: any) {
+
+            throw new Error(e.message);
+
+        }
+
+    }
+
+    private async setContents2(fileInfos: mls.stor.IFileInfo[], comments: string | null) {
+
+        if (fileInfos.length <= 0) return true;
+
+        let ret = false;
+        let add: { path: string, content: string | Blob }[] = [];
+        let del: { path: string }[] = [];
+
+        for await (const f of fileInfos) {
+
+            const aux = f.folder === '' || f.folder.endsWith('/') ? '' : '/';
+            const aux2 = f.extension.startsWith('.') ? '' : '.';
+            const auxLevelPath = f.level === 0 ? '' : `l${f.level}/`;
+            const path = `${auxLevelPath}` + f.folder.replace(/\\/g, '/') + aux + f.shortName + aux2 + f.extension;
+
+            if (f.status === 'deleted') {
+
+                del.push({ path });
+
+            } else if (['changed', 'new', 'nochange'].includes(f.status)) {
+
+                add = await this.setContentAddFile(f, path, add);
+
+            } else if (f.status === 'renamed') {
+
+                const info = f.getValueInfo ? await f.getValueInfo() : undefined;
+
+                if (!info) continue;
+
+                const fileNameOld = `${auxLevelPath}` + f.folder.replace(/\\/g, '/') + aux + info.originalShortName + f.extension;
+
+                add = await this.setContentAddFile(f, path, add);
+                del.push({ path: fileNameOld });
+
+            } else throw new Error('Status invalid');
+
+        }
+
+        try {
+
+            ret = await this.saveMultipleFilesIO(fileInfos[0].project, add, del, comments as string);
+
+            await this.afterSave(fileInfos);
+
+            return ret;
+
+        } catch (e: any) {
+
+            throw new Error('Error:' + e.message);
+
+        }
+
+    }
+
+    private async afterSave(fileInfos: mls.stor.IFileInfo[]) {
+
+        try {
+
+            for await (const f of fileInfos) {
+
+                if (f.onAction) {
+
+                    await f.onAction('aftersave');
+
+                }
+
+            }
+
+        } catch (e: any) {
+
+            console.info('Erro onAftersace:' + e.message);
+
+        }
+    }
+
+    private async setContentAddFile(
+        f: mls.stor.IFileInfo,
+        path: string,
+        add: { path: string, content: string | Blob }[]):
+        Promise<{ path: string, content: string | Blob }[]> {
+
+        let cont = await this.verifyAndGetContent(f);
+
+        if (typeof cont !== 'string') {
+
+            cont = await dL.fileToBase64(cont as File);
+            [, cont] = cont.split('base64,');
+
+        } else cont = dL.base64EncodeUnicode(cont);//btoa(cont);
+
+        add.push({ path, content: cont as string });
+
+        return add;
+
+    }
+
+    private async verifyAndGetContent(fileInfo: mls.stor.IFileInfo) {
+
+        const oldV = fileInfo.inLocalStorage;
+        fileInfo.inLocalStorage = true;
+
+        if (fileInfo.getValueInfo) {
+
+            const cont = (await fileInfo.getValueInfo()).content;
+            fileInfo.inLocalStorage = oldV;
+            return cont;
+
+        }
+
+        const cont = await fileInfo.getContent();
+        fileInfo.inLocalStorage = oldV;
+        return cont;
+
+    }
+
+
+    private async _loadFilesInfo(project: number): Promise<mls.cbe.IPrjSourcesFiles[]> {
+        return new Promise<any[]>(async (resolve, reject) => {
+
+            try {
+
+                let projectDriver = 'mls';
+                let projectURL = '';
+
+                const obj = mls.l5.getProjectDetails(project);
+                if (!obj || !obj.value) throw new Error('Error loadFilesInfo getProjectDetails in:' + project);
+
+                const json = JSON.parse(obj.value);
+                if (!json) throw new Error('Error loadFilesInfo getProjectDetails .value json in:' + project);
+
+                if (!json.projectURL && json.l5_actionPrjSettings) {
+
+                    projectDriver = json.l5_actionPrjSettings.projectDriver || 'mls';
+                    projectURL = json.l5_actionPrjSettings.projectURL || '';
+
+                } else if (json.projectURL) {
+
+                    projectDriver = json.projectDriver || 'mls';
+                    projectURL = json.projectURL || '';
+
+                } else {
+                    throw new Error('Error loadFilesInfo project info:' + project);
+                }
+
+                (mls as any).stor.projects[project] = {
+                    project,
+                    projectDriver,
+                    projectURL,
+                };
+
+                const ret = await this.getFilesRepo(project);
+                return ret;
+
+            } catch (e: any) {
+                reject(new Error(e.message));
+            }
+
+        });
+    }
+
+    private getFilesRepo(project: number): Promise<mls.cbe.IPrjSourcesFiles[]> {
+
+        return new Promise<mls.cbe.IPrjSourcesFiles[]>(async (resolve, reject) => {
+
+            try {
+
+                const data = await this.getFilesRepoIO(project);
+                let ret: any[] = [];
+
+                if (!data.data.repository.object) resolve(ret);
+
+                if (data.data.repository.object.entries.length <= 0) resolve(ret);
+
+                data.data.repository.object.entries.forEach((obj1: any) => {
+
+                    ret = this.auxLoadFilesInfo2Reenter(obj1, ret);
+
+                });
+                resolve(ret);
+
+            } catch (e) {
+
+                reject(e);
+
+            }
+
+        });
+
+    }
+
+    private auxLoadFilesInfo2Reenter(obj: any, arr: any[]): any[] {
+
+        if (!obj.object || !obj.object.entries) {
+
+            if (obj.type === 'blob') {
+
+                arr.push(
+                    {
+                        ShortPath: 'l0/' + obj.name,
+                        versionRef: obj.oid,
+                        Length: obj.size,
+                    }
+                );
+
+            }
+
+            return (arr);
+        }
+
+        obj.object.entries.forEach((obj2: any) => {
+
+            if (obj2.type === 'blob') {
+
+                arr.push(
+                    {
+                        ShortPath: obj2.path.startsWith('l') ? obj2.path : 'l0/' + obj2.path,
+                        versionRef: obj2.oid,
+                        Length: obj2.size,
+                    }
+                );
+
+            } else {
+
+                this.auxLoadFilesInfo2Reenter(obj2, arr);
+
+            }
+
+        });
+
+        return (arr);
+    }
+
+
+    private _getHistory(file: mls.stor.IFileInfo): Promise<mls.stor.IHistory[]> {
+        return new Promise<mls.stor.IHistory[]>(async (resolve, reject) => {
+
+            try {
+
+                if (file.status === 'new') resolve([]);
+
+                const filename = file.shortName + (file.extension.startsWith('.') ? file.extension : '.' + file.extension);
+                const oid = file.versionRef;
+                const data = await this.getHistoryIO(file.project, file.level.toString(), filename, oid);
+                if (data.length <= 0) resolve([]);
+
+                const ret: mls.stor.IHistory[] = [];
+
+                data.forEach((i: any) => {
+
+                    if (!i.node.file) return;
+                    const obj = {
+                        authorName: i.node.author.name,
+                        authorUrl: i.node.author.avatarUrl,
+                        data: i.node.authoredDate,
+                        ref: i.node.file.object.oid,
+                        message: i.node.message,
+                        additions: i.node.additions,
+                        deletions: i.node.deletions,
+
+                    } as mls.stor.IHistory;
+
+                    ret.push(obj);
+
+                })
+
+                resolve(ret);
+
+            } catch (e) {
+                reject(e);
+            }
+
+        });
+
+    }
+
+    private _getHistoryContent(file: mls.stor.IFileInfo, ref: string): Promise<string> {
+		return new Promise<string>(async (resolve, reject) => {
+
+			try {
+
+				if (file.status === 'new') resolve('');
+
+				const ret = await this.getHistoryContentIO(file.project, ref);
+				resolve(ret);
+
+			} catch (e) {
+				reject(e);
+			}
+
+		});
+
+	}
+
+    private async fecthQl(query: string, variables?: {}): Promise<{ status: number, ret: any }> {
+
+        try {
+
+            const info = {
+                url: 'https://api.github.com/graphql',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    Authorization: 'bearer ' + this.mKey
+                },
+                query: query,
+                variables: variables,
+            }
+
+            const dt = await dL.myFetchQL(info);
+
+            if (dt.status !== 200) {
+                throw new Error('Erro status: ' + dt.status + '; ' + dt.ret.message);
+            }
+
+            if (dt.ret.errors) {
+                throw new Error('Erro' + dt.ret.errors[0].message);
+            }
+
+            return dt;
+
+        } catch (er: any) {
+
+            throw new Error('fecthQl:' + er.message);
+
+        }
+
+
+
+    }
+
+    //-------------IO----------------
+
+    private delVariableIO(variable: string): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!variable) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				const prj = mls.actual[5].project;
+				if (!prj) {
+					reject(new Error('Not Found project!'));
+					return;
+				}
+
+				const info = await dL.getMyKeysBranch(prj);
+
+				const retFetch = await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/actions/variables/${variable}`, {
+					method: 'DELETE',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+				});
+
+				if (retFetch.status === 404) {
+					resolve(false);
+					return;
+				}
+
+				if (retFetch.status === 403) {
+					resolve(false);
+					return;
+				}
+
+				const ret = await retFetch.json();
+
+				if (ret && ret.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
+				resolve(true);
+
+			} catch (err:any) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+    private listVariablesIO(): Promise<{ variables: { name: string, value: string, created_at: string, updated_at: string }[], total_count: number }> {
+
+		return new Promise<{ variables: { name: string, value: string, created_at: string, updated_at: string }[], total_count: number }>(async (resolve, reject) => {
+
+			try {
+
+				const prj = mls.actual[5].project;
+				if (!prj) {
+					reject(new Error('Not Found project!'));
+					return;
+				}
+
+				const info = await dL.getMyKeysBranch(prj);
+
+				const retFetch = await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/actions/variables`, {
+					method: 'GET',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+				});
+
+				if (retFetch.status !== 200) {
+					reject(new Error('Not Found! : status:' + retFetch.status));
+					return;
+				}
+
+				const ret = await retFetch.json();
+
+				if (ret && ret.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
+				resolve(ret as any);
+
+			} catch (err:any) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+    private updateVariableIO(variable: string, secret: string): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!variable || !secret) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				const prj = mls.actual[5].project;
+				if (!prj) {
+					reject(new Error('Not Found project!'));
+					return;
+				}
+
+				const info = await dL.getMyKeysBranch(prj)
+
+				const body = {
+					name: variable,
+					value: secret
+				};
+
+				const retFetch = await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/actions/variables/${variable}`, {
+					method: 'PATCH',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+					body: JSON.stringify(body)
+				});
+
+				if (retFetch.status === 404) {
+					resolve(false);
+					return;
+				}
+
+				if (retFetch.status === 403) {
+					resolve(false);
+					return;
+				}
+
+				const ret = await retFetch.json();
+
+				if (ret && ret.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
+				resolve(true);
+
+			} catch (err:any) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+    private addVariableIO(newVariable: string, secret: string): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!newVariable || !secret) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				const prj = mls.actual[5].project;
+				if (!prj) {
+					reject(new Error('Not Found project!'));
+					return;
+				}
+
+				const info = await dL.getMyKeysBranch(prj)
+
+				const body = {
+					name: newVariable,
+					value: secret
+				};
+
+				const retFetch = await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/actions/variables`, {
+					method: 'POST',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+					body: JSON.stringify(body)
+				});
+
+				if (retFetch.status === 404) {
+					resolve(false);
+					return;
+				}
+
+				if (retFetch.status === 403) {
+					resolve(false);
+					return;
+				}
+
+				const ret = await retFetch.json();
+
+				if (ret && ret.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
+				resolve(true);
+
+			} catch (err:any) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+    private verifyPermissionIO(owner: string, repo: string, login: string): Promise<mls.stor.others.IPermission> {
+
+		return new Promise<mls.stor.others.IPermission>(async (resolve, reject) => {
+
+			if (!repo || !owner || !login) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				const retFetch = await fetch(`https://api.github.com/repos/${owner}/${repo}/collaborators/${login}/permission`, {
+					method: 'GET',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+				});
+
+				if (retFetch.status === 404) {
+					resolve({
+						create: false,
+						delete: false,
+						write: false,
+						read: false,
+
+					});
+					return;
+				}
+
+				if (retFetch.status === 403) {
+					resolve({
+						create: false,
+						delete: false,
+						write: false,
+						read: true,
+
+					});
+					return;
+				}
+
+				const ret = await retFetch.json();
+
+				if (ret && ret.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
+				if (!ret || !ret.user || !ret.user.permissions) {
+					reject(new Error('Not found your permissions'));
+					return;
+				}
+
+				const info = {
+					create: false,
+					delete: false,
+					write: false,
+					read: false,
+
+				} as mls.stor.others.IPermission;
+
+				if (ret.user.permissions.admin || ret.user.permissions.maintain) {
+					info.create = true;
+					info.delete = true;
+					info.write = true;
+					info.read = true;
+
+				} else if (ret.user.permissions.push) {
+					info.create = false;
+					info.delete = false;
+					info.write = true;
+					info.read = true;
+				} else if (ret.user.permissions.triage || ret.user.permissions.pull) {
+					info.create = false;
+					info.delete = false;
+					info.write = false;
+					info.read = true;
+				}
+
+				resolve(info);
+
+			} catch (err) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+    private verifyRepositoryNewIO(owner: string, repo: string, user: string): Promise<'free' | 'reuse' | 'wait' | 'error'> {
+
+		return new Promise<'free' | 'reuse' | 'wait' | 'error'>(async (resolve, reject) => {
+
+			if (!repo || !owner || !user) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			// retorno
+			// free: free to create the repository
+			// reuse: The repository already exists for the user, you can reuse it
+			// wait: Please wait, another user is creating; 
+			// error: There is a repository, but I was unable to validate the user
+
+			try {
+
+				const retRepo = await (await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+					method: 'GET',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+				})).json();
+
+				if (retRepo && retRepo.name && retRepo.name !== 'mls-new') {
+					resolve('free');
+					return;
+				}
+
+				if (retRepo && retRepo.message && retRepo.status === '404') {
+					resolve('free');
+					return;
+				}
+
+				const ret = await (await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/validate.json?ref=main`, {
+					method: 'GET',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+				})).json();
+
+				if (ret && ret.message && ret.status === '404') {
+					resolve('error');
+					return;
+				}
+
+				if (ret && ret.content) {
+
+					try {
+
+						const txt = atob(ret.content);
+						const js = JSON.parse(txt.trim());
+
+						if (!js.users) {
+							resolve('error');
+							return;
+						}
+
+						if (js.users.includes(user)) {
+							resolve('reuse');
+							return;
+
+						}
+
+						resolve('wait');
+						return;
+
+					} catch {
+						resolve('error');
+						return;
+					}
+
+				}
+
+				resolve('free');
+
+			} catch (err:any) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+    private changeVisibilityIO(owner: string, repo: string, visibility: 'PUBLIC' | 'PRIVATE' | 'INTERNAL'): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!repo || !owner) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				const body = {
+					private: visibility === 'PRIVATE'
+				};
+
+				const ret = await (await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+					method: 'PATCH',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+					body: JSON.stringify(body)
+				})).json();
+
+				if (ret && ret.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
+				resolve(true);
+
+			} catch (err:any) {
+
+				reject(err);
+
+			}
+
+		});
+	}
+
+    private createFileInRepoIO(owner: string, repo: string, path: string, content: string | Uint8Array): Promise<boolean> {
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!repo || !owner) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				if (typeof (content) !== 'string') throw new Error('Not implemented');
+				content = dL.base64EncodeUnicode(content);
+
+				const body = {
+					message: 'Add ' + path,
+					content
+				};
+
+				const ret = await (await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+					method: 'PUT',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+					body: JSON.stringify(body)
+				})).json();
+
+				if (ret && ret.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
+				resolve(true);
+
+			} catch (err) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+    private renameRepositoryIO(owner: string, repo: string, newName: string): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!repo || !owner || repo === newName) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			const body = {
+				name: newName
+			};
+
+			try {
+				const ret = await (await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+					method: 'PATCH',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+					body: JSON.stringify(body)
+				})).json();
+
+				if (ret && ret.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
+				resolve(true);
+
+			} catch (err:any) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+    private createForkIO(login: string, repoOri: string, orgOri: string, orgDest: string): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!repoOri || !orgOri) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				let body = {} as any;
+
+				if (login !== orgDest) {
+					body.organization = orgDest;
+				}
+
+				const ret = await (await fetch(`https://api.github.com/repos/${orgOri}/${repoOri}/forks`, {
+					method: 'POST',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+					body: JSON.stringify(body)
+				})).json();
+
+				if (ret && ret.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
+				resolve(true);
+
+			} catch (err:any) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+    private deleteRepositoryIO(repo: string, organization: string): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!repo || !organization) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				const ret = await fetch(`https://api.github.com/repos/${organization}/${repo}`, {
+					method: 'DELETE',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer'
+				});
+
+				if (ret.status !== 204) {
+					reject(new Error('Error delete repository'));
+					return;
+				}
+
+				resolve(true);
+
+			} catch (err:any) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+    private createRepositoryIO(login: string, repo: string, organization: string, description: string, visibility: "PUBLIC" | "PRIVATE" | "INTERNAL"): Promise<boolean> {
+
+		return new Promise<boolean>((resolve, reject) => {
+
+			if (!repo || !organization) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			if (!description) description = "This project was created using the Collabcodes";
+
+			let q = '';
+
+			if (login === organization) {
+
+				q = `
+				mutation {
+					createRepository(input: {name: "${repo}", description: "${description}", visibility:${visibility}}) {
+						repository {
+							id
+							name
+							owner {
+								login
+							}
+						}
+					}
+				}
+				`;
+
+			} else {
+				q = `
+				mutation {
+					createRepository(input: {name: "${repo}", ownerId:"${organization}", description: "${description}", visibility:${visibility}}) {
+						repository {
+							id
+							name
+							owner {
+								login
+							}
+						}
+					}
+				}
+				`;
+			}
+
+			this.fecthQl(q).then(async (data) => {
+
+				try {
+
+					if (!data.ret || !data.ret.data.createRepository || !data.ret.data.createRepository.repository || !data.ret.data.createRepository.repository.id) reject(new Error('Erro not possible add repository'));
+
+					resolve(true);
+
+				} catch (err:any) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+
+	}
+
+    private getOrganizationsIO(login: string): Promise<mls.stor.others.IOrg[]> {
+
+		return new Promise<mls.stor.others.IOrg[]>(async (resolve, reject) => {
+
+			if (!login) {
+				reject(new Error('Login invalid!'));
+				return;
+			}
+
+			const q = `
+			{
+				user(login: "${login}") {
+					organizations(first: 100) {
+						edges {
+							node {
+								name
+								login
+								avatarUrl
+								
+							}
+						}
+					}
+				}
+			}
+			`;
+
+			this.fecthQl(q).then((data) => {
+
+				try {
+
+					const orgs: mls.stor.others.IOrg[] = [];
+					if (!data.ret || !data.ret.data.user || !data.ret.data.user.organizations || !data.ret.data.user.organizations.edges) resolve(orgs);
+
+					data.ret.data.user.organizations.edges.forEach((i: any) => {
+
+						const info = {} as mls.stor.others.IOrg;
+
+						info.name = i.node.name;
+						info.id = i.node.login;
+						info.avatarUrl = i.node.avatarUrl;
+						info.visibility = 'public';
+
+						orgs.push(info);
+
+					});
+
+					resolve(orgs);
+
+				} catch (err:any) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+	}
+
+    private getUserInfoIO(): Promise<mls.stor.others.IInfo> {
+
+		return new Promise<mls.stor.others.IInfo>(async (resolve, reject) => {
+
+			const q = `
+			{
+				viewer {
+					name
+					login
+					avatarUrl
+				}
+			}
+			`;
+
+			this.fecthQl(q).then((data) => {
+
+				try {
+					const info = {} as mls.stor.others.IInfo;
+					if (!data.ret || !data.ret.data.viewer) resolve(info);
+
+					info.name = data.ret.data.viewer.name;
+					info.login = data.ret.data.viewer.login;
+					info.avatarUrl = data.ret.data.viewer.avatarUrl;
+
+					resolve(info);
+
+				} catch (err:any) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+	}
+
+    private listBranchesIO(owner: string, repo: string): Promise<mls.stor.others.IBranch[]> {
+
+		return new Promise<mls.stor.others.IBranch[]>(async (resolve, reject) => {
+
+			const q = `
+			{
+                repository(owner:"${owner}", name:"${repo}") {
+                refs(refPrefix: "refs/heads/", first: 100) {
+                    edges {
+                    node {
+                        name
+                    }
+                    }
+                    
+                }
+                }
+            }
+			`;
+
+			this.fecthQl(q).then((data) => {
+
+                try {
+                    
+					if (
+						!data.ret ||
+						!data.ret.data.repository.refs ||
+						!data.ret.data.repository.refs.edges) resolve([]);
+
+					const b: mls.stor.others.IBranch[] = [];
+
+					data.ret.data.repository.refs.edges.forEach((i: any) => {
+						b.push(i.node);
+					});
+
+					resolve(b);
+
+				} catch (err:any) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+	}
+
+    private listForksIO(owner: string, repo: string): Promise<mls.stor.others.IFork[]> {
+
+		return new Promise<mls.stor.others.IFork[]>(async (resolve, reject) => {
+
+			//const info = await this.getMyKeysBranch(project);
+
+			const q = `
+			{
+				repository(owner:"${owner}", name:"${repo}") {
+					forks(first: 100) {
+						edges {
+							node {
+								nameWithOwner
+								defaultBranchRef{
+									name
+
+								}
+								createdAt
+							}
+						}
+
+					}
+				}
+			}
+			`;
+
+			this.fecthQl(q).then((data) => {
+
+				try {
+
+					if (
+						!data.ret ||
+						!data.ret.data.repository.forks ||
+						!data.ret.data.repository.forks.edges) resolve([]);
+
+					const fk: mls.stor.others.IFork[] = [];
+					data.ret.data.repository.forks.edges.forEach((i: any) => {
+						fk.push(i.node);
+					});
+
+					resolve(fk);
+
+				} catch (err:any) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+	}
+
+    private listPullRequestsIO(owner: string, repo: string): Promise<mls.stor.others.IPullRequest[]> {
+
+		return new Promise<mls.stor.others.IPullRequest[]>(async (resolve, reject) => {
+
+			const qLastCommit = `{
+					repository(owner:"${owner}", name:"${repo}") {
+						pullRequests(first: 100) {
+							edges {
+								node {
+									id
+									title
+									body
+									state
+									url
+									createdAt
+									mergedAt
+							    closedAt
+									author {
+										login
+									}
+								}
+							}
+						}
+					}
+				}`;
+
+			this.fecthQl(qLastCommit).then((data) => {
+
+				try {
+
+					if (
+						!data.ret ||
+						!data.ret.data.repository.pullRequests ||
+						!data.ret.data.repository.pullRequests.edges) resolve([]);
+
+					const pr: mls.stor.others.IPullRequest[] = [];
+
+					data.ret.data.repository.pullRequests.edges.forEach((i: any) => {
+
+						pr.push(i.node);
+
+					});
+
+					resolve(pr);
+
+				} catch (err:any) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+
+	}
+
+    private reviewPullRequestIO(options: { owner: string, repo: string, idRequest: string, isApproved: boolean }): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			try {
+
+				let q = '';
+
+				if (options.isApproved) {
+
+					q = `
+					mutation {
+						addPullRequestReview(input: {pullRequestId: "${options.idRequest}", event: APPROVE}) {
+							pullRequestReview {
+								id
+								state
+							}
+						}
+					}
+				`;
+
+				} else {
+
+					q = `
+					mutation() {
+							closePullRequest(input: {pullRequestId: "${options.idRequest}"}) {
+								pullRequest {
+									id
+									state
+								}
+							}
+						}
+					`;
+
+				}
+
+				const data = await this.fecthQl(q);
+
+				const ret = !data.ret.data || !data.ret.data.addPullRequestReview;
+
+				resolve(!ret);
+
+			} catch (e:any) {
+
+				reject(new Error(e.message));
+
+			}
+
+		});
+
+	}
+
+    private createPullRequestIO(option: { owner: string, repo: string, branch: string, title: string, description: string }): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			try {
+
+				const project = mls.actual[5].project;
+				if (!project) throw new Error('Not set project actual');
+
+				const uB = dL.getMyKeysBranch(project);
+
+				const idProject = await this.getIdProjectIO(0, uB.owner, uB.repo);
+
+				let head = uB.owner !== option.owner ? `${option.owner}:${option.branch}` : option.branch;
+
+				const q = `
+					mutation {
+						createPullRequest(input: {
+							baseRefName:"${uB.branch}",
+							headRefName: "${head}",
+							title: "${option.title}",
+							body: "${option.description}",
+							repositoryId: "${idProject}"
+						}) {
+							pullRequest {
+								id
+								url
+							}
+						}
+					}
+				`;
+
+                const data = await this.fecthQl(q);
+                
+				const ret = !data.ret.data || !data.ret.data.createPullRequest || !data.ret.data.createPullRequest.pullRequest || !data.ret.data.createPullRequest.pullRequest || !data.ret.data.createPullRequest.pullRequest.id;
+
+				resolve(!ret);
+
+			} catch (e:any) {
+
+				reject(new Error(e.message));
+
+			}
+
+		});
+
+    }
+    
+    private createNewBranchIO(option: { owner: string, repo: string, branch: string, newBranch: string }): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			try {
+
+				const idProject = await this.getIdProjectIO(0, option.owner, option.repo);
+				const oid = await this.getOidLastCommitFromInfoIO(option.owner, option.repo, option.branch);
+
+				const q = `
+					mutation {
+						 createRef(input: {repositoryId: "${idProject}", name: "refs/heads/${option.newBranch}", oid: "${oid}"}) {
+							ref {
+								id
+								name
+							}
+						}
+					}
+				`;
+
+				const data = await this.fecthQl(q);
+
+				const ret = !data.ret.data || !data.ret.data.createRef || !data.ret.data.createRef.ref || !data.ret.data.createRef.ref.id;
+
+				resolve(!ret);
+
+			} catch (e:any) {
+
+				reject(new Error(e.message));
+
+			}
+
+		});
+
+	}
+
+    private checkBranchExistenceIO(owner: string, repo: string, branchName: string): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			const qLastCommit = `{
+					repository(owner:"${owner}", name:"${repo}") {
+						ref(qualifiedName: "${branchName}") {
+							id
+						}
+					}
+				}`;
+
+			this.fecthQl(qLastCommit).then((data) => {
+
+				try {
+
+					if (!data.ret || !data.ret.data.repository || !data.ret.data.repository.ref || !data.ret.data.repository.ref.id) resolve(false);
+					resolve(true);
+
+				} catch (err:any) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+
+	}
+
+    private getHistoryContentIO(project: number, oid: string): Promise<string> {
+
+		return new Promise<string>(async (resolve, reject) => {
+
+			const info = await dL.getMyKeysBranch(project);
+			const query = `
+				query {
+					repository(owner:"${info.owner}", name: "${info.repo}") {
+						object(oid: "${oid}") {
+							
+							... on Blob {
+								
+								byteSize
+								id
+								oid
+								text
+								
+							}	
+						}	
+					}
+				}`;
+
+			this.fecthQl(query).then((data) => {
+
+				try {
+
+					if (
+						!data.ret ||
+						!data.ret.data.repository.object || !data.ret.data.repository.object.text) resolve('');
+
+					resolve(data.ret.data.repository.object.text);
+
+				} catch (err) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+
+	}
+
+    private getFilesIO(project: number, fileName: string): Promise<string> {
+
+        return new Promise(async (resolve, reject) => {
+
+            try {
+
+                const info = dL.getMyKeysBranch(project);
+
+                let ret = null;
+
+                const q = `query {
+					repository(owner:"${info.owner}", name:"${info.repo}") {
+						object(expression: "HEAD:${fileName}") {	
+							... on Blob {
+								byteSize
+								oid
+								text
+							}	
+						}	
+					}
+				}`;
+
+                const data = await this.fecthQl(q);
+
+                if (!data.ret.data.repository || !data.ret.data.repository.object) {
+                    reject(new Error('File not found:' + fileName));
+                    return;
+                }
+
+                ret = data.ret.data.repository.object.text as string;
+                resolve(ret);
+
+            } catch (e: any) {
+
+                reject(new Error(e.message));
+
+            }
+
+        });
+    }
+
+
+    private async getFilesRestIO(project: number, oid: string, extension: string): Promise<Blob> {
+
+        const info = await dL.getMyKeysBranch(project);
+
+        try {
+
+            const ret = await (await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/git/blobs/${oid}`, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    Authorization: 'bearer ' + this.mKey,
+                },
+                referrerPolicy: 'no-referrer'
+            })).json();
+
+            const b64 = ret && ret.content ? ret.content : 'Erro';
+            if (!b64 || b64 === 'Erro') return b64;
+
+            const blob = await dL.base64ToBlob(b64, extension, oid);
+            return blob as any;
+
+        } catch (e: any) {
+
+            return e.message;
+
+        }
+
+    }
+
+    private saveMultipleFilesIO(project: number, add: { path: string, content: string | Blob }[], del: { path: string }[], msg: string): Promise<boolean> {
+
+        return new Promise<boolean>(async (resolve, reject) => {
+
+            try {
+
+                const info = await dL.getMyKeysBranch(project, true);
+
+                const oid = await this.getOidLastCommitIO(project);
+
+                const aAdd: string[] = [];
+                const aDel: string[] = [];
+
+                add.forEach((i) => {
+                    aAdd.push(`{path: "${i.path}", contents: "${i.content}"}`);
+                });
+
+                del.forEach((i) => {
+                    aDel.push(`{path: "${i.path}"}`);
+                });
+
+                const auxAdd = aAdd.length > 0 ? `additions: [ 	${aAdd.join(', ')} ]` : '';
+                const auxDel = aDel.length > 0 ? `deletions: [ 	${aDel.join(', ')} ]` : '';
+
+                if (auxAdd === '' && auxDel === '') {
+                    resolve(true);
+                    return;
+                }
+
+                const q = `mutation {
+					createCommitOnBranch(
+						input: {
+							fileChanges: {
+								${auxAdd === '' ? '' : auxAdd + ', '}
+								${auxDel}
+							}, 
+							branch: {
+								repositoryNameWithOwner: "${info.owner}/${info.repo}", 
+								branchName: "${info.branch}"
+							}, 
+							expectedHeadOid: "${oid}", 
+							message: {headline: "${msg}", body: "${msg}"}
+						}
+					) {
+						commit {
+							abbreviatedOid
+						}
+					}
+				}`;
+
+                const data = await this.fecthQl(q);
+
+                const ret = data.ret.data && data.ret.data.createCommitOnBranch && data.ret.data.createCommitOnBranch.commit && data.ret.data.createCommitOnBranch.commit.abbreviatedOid;
+
+                resolve(ret);
+
+            } catch (e: any) {
+
+                reject(new Error(e.message));
+
+            }
+
+        });
+
+    }
+
+
+    private getFilesRepoIO(project: number): Promise<any> {
+
+        return new Promise(async (resolve, reject) => {
+
+            try {
+
+                const info = await dL.getMyKeysBranch(project);
+
+                let aux = '';
+
+                for (let i = 0; i < 4; i++) {
+                    aux = aux + `
+                        ... on TreeEntry{
+                            object{
+                                # Top-level.
+                                ... on Tree {
+                                    entries {
+                                        name
+                                        oid
+                                        path
+                                        type	
+                                        size
+                    
+                    `
+                }
+                for (let i = 0; i < 4; i++) {
+                    aux = aux + `
+                                }
+                            }
+                        }
+                    }
+                    `
+                }
+
+                const q = `query repository {
+					repository(owner:"${info.owner}", name:"${info.repo}") {
+							object(expression: "HEAD:") {
+								# Top-level.
+								... on Tree {
+									entries {
+										name
+										oid
+										path
+										type
+										size	
+										${aux}
+							        }	
+						        }
+                            }
+                        }		
+					}`;
+
+                const data = await this.fecthQl(q);
+
+                resolve(data.ret);
+
+            } catch (e: any) {
+
+                reject(new Error(e.message));
+            }
+
+        });
+
+    }
+
+    private getHistoryIO(project: number, nivel: string, fileName: string, oid: string): Promise<any[]> {
+
+        return new Promise<any[]>(async (resolve, reject) => {
+            const info = await dL.getMyKeysBranch(project);
+            const query = `
+			query {
+				repository(owner: "${info.owner}", name: "${info.repo}") {
+					
+					ref(qualifiedName: "main") {
+						target {
+							... on Commit {
+								history(first: 20, path:"l${nivel}/${fileName}", before:"${oid}") {
+									pageInfo {
+										hasNextPage
+										endCursor
+									}
+									edges {
+										node {
+											additions
+              				deletions
+											author{
+												avatarUrl
+												name
+											}
+											authoredDate
+											message
+											
+											file(path:"l${nivel}/${fileName}"){
+												object{
+													... on Blob {
+														oid
+
+													}	
+												}
+											}
+											
+											
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}`;
+
+            this.fecthQl(query).then((data) => {
+
+                try {
+
+                    if (
+                        !data.ret ||
+                        !data.ret.data.repository.ref || !data.ret.data.repository.ref.target ||
+                        !data.ret.data.repository.ref.target.history.edges) resolve([]);
+
+                    resolve(data.ret.data.repository.ref.target.history.edges);
+
+                } catch (err) {
+
+                    reject(err);
+
+                }
+
+            }).catch((e: Error) => {
+
+                reject(e);
+
+            });
+
+        });
+
+    }
+
+    private getVersionFromFilesIO(options: { owner: string, repo: string, branchName: string, files: mls.stor.IFileInfo[] }): Promise<{ [key: string]: string } | undefined> {
+
+		return new Promise<{ [key: string]: string } | undefined>(async (resolve, reject) => {
+
+			let auxStr = '';
+
+			options.files.forEach((f) => {
+
+				const aux = f.folder === '' || f.folder.endsWith('/') ? '' : '/';
+				const aux2 = f.extension.startsWith('.') ? '' : '.';
+				const auxLevelPath = f.level === 0 ? '' : `l${f.level}/`;
+				const path = `${auxLevelPath}` + f.folder.replace(/\\/g, '/') + aux + f.shortName + aux2 + f.extension;
+				const key = '_'+(mls.stor.getKeyToFiles(f.project, f.level, f.shortName, f.folder, f.extension).replace(/\./g,''));
+
+				auxStr = `
+                    ${auxStr}
+                    ${key}: object(expression: "${options.branchName}:${path}") {
+                        ... on Blob {
+                            oid
+                        }
+                    }
+				`
+
+			});
+
+			if (!auxStr) reject(new Error('Not found str'));
+
+			const q = `
+                query {
+                    repository(owner: "${options.owner}", name: "${options.repo}") {
+                        ${auxStr}
+                    }
+                }
+			`;
+
+			this.fecthQl(q).then((data) => {
+
+				try {
+
+					if (!data.ret || !data.ret.data.repository) resolve(undefined);
+
+					const ret:any = {};
+
+					options.files.forEach((f) => {
+
+						const keyv = mls.stor.getKeyToFiles(f.project, f.level, f.shortName, f.folder, f.extension);
+						const key = '_' + (keyv.replace(/\./g, ''));
+
+						if (data.ret.data.repository[key]) ret[keyv] = data.ret.data.repository[key].oid;
+
+					});
+
+					resolve(ret);
+
+				} catch (err:any) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+
+	}
+
+    private getOidLastCommitFromInfoIO(owner: string, repo: string, branch: string): Promise<string> {
+
+		return new Promise<string>(async (resolve, reject) => {
+
+			const qLastCommit = `{
+					repository(owner:"${owner}", name:"${repo}") {
+						ref(qualifiedName: "${branch}") {
+							target {
+								... on Commit {
+									history(first: 1) {
+										nodes {
+											oid
+										}
+									}
+								}
+							}
+						}
+					}
+				}`;
+
+			this.fecthQl(qLastCommit).then((data) => {
+
+				try {
+
+					if (
+						!data.ret ||
+						!data.ret.data.repository.ref ||
+						!data.ret.data.repository.ref.target.history.nodes) resolve('');
+					const lastCommit = data.ret.data.repository.ref.target.history.nodes[0].oid;
+					resolve(lastCommit);
+
+				} catch (err:any) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+
+    }
+    
+    private getIdProjectIO(project: number, owner: string = '', repo: string = ''): Promise<string> {
+
+		return new Promise<string>(async (resolve, reject) => {
+
+			let info
+
+			if (!project) info = { owner, repo }
+			else info = await dL.getMyKeysBranch(project);
+
+			const qLastCommit = `{
+					repository(owner:"${info.owner}", name:"${info.repo}") {
+						id
+					}
+				}`;
+
+			this.fecthQl(qLastCommit).then((data) => {
+
+				try {
+
+					if (!data.ret || !data.ret.data.repository || !data.ret.data.repository.id) resolve('');
+					resolve(data.ret.data.repository.id);
+
+				} catch (err:any) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+
+    }
+    
+    private getOidLastCommitIO(project: number, getCurrentBranch: boolean = true): Promise<string> {
+
+        return new Promise<string>(async (resolve, reject) => {
+
+            const info = await dL.getMyKeysBranch(project, getCurrentBranch);
+
+            const qLastCommit = `{
+					repository(owner:"${info.owner}", name:"${info.repo}") {
+						ref(qualifiedName: "${info.branch}") {
+							target {
+								... on Commit {
+									history(first: 1) {
+										nodes {
+											oid
+										}
+									}
+								}
+							}
+						}
+					}
+				}`;
+
+            this.fecthQl(qLastCommit).then((data) => {
+
+                try {
+
+                    if (
+                        !data.ret ||
+                        !data.ret.data.repository.ref ||
+                        !data.ret.data.repository.ref.target.history.nodes) resolve('');
+                    const lastCommit = data.ret.data.repository.ref.target.history.nodes[0].oid;
+                    resolve(lastCommit);
+
+                } catch (err) {
+
+                    reject(err);
+
+                }
+
+            }).catch((e: Error) => {
+
+                reject(e);
+
+            });
+
+        });
+
+    }
+}
