@@ -28,10 +28,11 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
             return;
         }
         const args: ITaskFileInfo = JSON.parse(taskRoot.args);
-
-        const mfile = mls.l2.editor.mfiles[args.fileName];
-        if (!mfile && !((mfile as any).modelHTML)) {
-            this.taskChild.trace.push(new Date().toISOString() + ': no mfile find to this file');
+        // args.fileName, ex: _100111_shortName
+        const { project, shortName } = mls.l2.getPath(args.fileName);
+        const models: mls.editor.IModels | undefined = mls.editor.getModels(project, shortName);
+        if (!models || !models.html) {
+            this.taskChild.trace.push(new Date().toISOString() + `: no model html find to this file: ${args.fileName}`);
             this.notifyCompleteByStatus('error', '');
             return;
         }
@@ -44,21 +45,19 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
         }
 
         const html = this.extractHtml(result);
-
-        const model: monaco.editor.ITextModel = (mfile as any).modelHTML;
-        this.original = model.getValue();
+        this.original = models.html.model.getValue();
 
         const startLineNumber = 1;
         const startColumn = 1;
-        const endLineNumber = model.getLineCount();
-        const endColumn = model.getLineMaxColumn(endLineNumber);
+        const endLineNumber = models.html.model.getLineCount();
+        const endColumn = models.html.model.getLineMaxColumn(endLineNumber);
         const newText = html;
         const editOperation = {
             range: new monaco.Range(startLineNumber, startColumn, endLineNumber, endColumn),
             text: newText,
             forceMoveMarkers: true
         };
-        model.pushEditOperations([], [editOperation], () => null);
+        models.html.model.pushEditOperations([], [editOperation], () => null);
         this.notifyCompleteByStatus('ok', '');
 
     }

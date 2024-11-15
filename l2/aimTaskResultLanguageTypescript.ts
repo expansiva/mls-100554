@@ -19,12 +19,14 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
             return;
         }
         const args: ITaskFileInfo = JSON.parse(taskRoot.args);
-        const mfile = mls.l2.editor.mfiles[args.fileName];
-        if (!mfile) {
-            this.taskChild.trace.push(new Date().toISOString() + ': no mfile find to this file');
+        const { project, shortName } = mls.l2.getPath(args.fileName);
+        const models: mls.editor.IModels | undefined = mls.editor.getModels(project, shortName);
+        if (!models || !models.ts) {
+            this.taskChild.trace.push(new Date().toISOString() + `: no model ts find to this file: ${args.fileName}`);
             this.notifyCompleteByStatus('error', '');
             return;
         }
+        const model = models.ts.model;
 
         const result = this.taskChild._tempResult;
         if (!result) {
@@ -40,8 +42,6 @@ export class AimTaskResultLanguageTypescript extends AimTaskBase {
         }
 
         const ts = this.extractScript(result);
-        console.info(args.detailsi18n);
-        const model = mfile.model;
         const startLineNumber = args.detailsi18n.startLine + 1;
         const startColumn = 1;
         const endLineNumber = args.detailsi18n.endLine - 1;;

@@ -878,18 +878,21 @@ export class ServiceDsStyles extends ServiceBase {
 
         await this.saveStyleLess(params.less, style);
 
-        const mfile = mls.l2.editor['mfiles'][this.componentName];
-        if (mfile && mfile.compilerResults) {
-            mfile.compilerResults.modelNeedCompile = true;
-            await mls.l2.editor.getCompilerResultTS(mfile, true);
-            const enhancement = await mls.l2.enhancement.getEnhancementInstance(mfile);
-            if (enhancement) await enhancement.onAfterChange(mfile);
-            const searchString = 'css';
-            const replacementString = '';
-            const regex = new RegExp(searchString, 'g');
-            const modifiedString = mfile.compilerResults['cacheVersion'].replace(regex, replacementString);
-            mfile.compilerResults['cacheVersion'] = modifiedString + 'css' + Math.floor(Math.random() * (1000 - 9999999 + 1)) + 9999999;
-            if (mfile.compilerResults.prodJS) await mls.stor.cache.AddMfileIfNeed(mfile);
+        const models = mls.editor.models[this.componentName];
+        if (models.ts && models.ts.compilerResults) {
+            models.ts.compilerResults.modelNeedCompile = true;
+            await mls.l2.typescript.compileAndPostProcess(
+                models.ts,
+                true /* run after compile */,
+                true /* save cache */);
+            // const enhancement = await mls.l2.enhancement.getEnhancementModule(models.ts.storFile);
+            // if (enhancement) await enhancement.onAfterChange(models.ts);
+            // const searchString = 'css';
+            // const replacementString = '';
+            // const regex = new RegExp(searchString, 'g');
+            // const modifiedString = models.ts.compilerResults['cacheVersion'].replace(regex, replacementString);
+            // mfile.compilerResults['cacheVersion'] = modifiedString + 'css' + Math.floor(Math.random() * (1000 - 9999999 + 1)) + 9999999;
+            // if (mfile.compilerResults.prodJS) await mls.stor.cache.AddMfileIfNeed(mfile);
         }
 
         return params.less;

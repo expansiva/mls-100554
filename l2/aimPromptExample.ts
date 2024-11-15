@@ -10,31 +10,6 @@ export class AimPromptExample extends CollabLitElement {
     @property({ type: String }) text = "example";
     @property({ type: String }) for = "";
 
-    static styles = css`
-        .prompt-suggestion {
-            display: inline-block;
-            padding: 10px;
-            margin: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #f0f0f0;
-            cursor: pointer;
-            font-family: Arial, sans-serif;
-            transition: background-color 0.3s;
-            color: black;
-        }
-
-        .prompt-suggestion:hover {
-            background-color: #e0e0e0;
-        }
-
-        aim-prompt-100554 {
-            display: block;
-            margin: 20px 0;
-            font-weight: bold;
-        }
-    `;
-
     handleClick() {
         const aimPromptElement = document.querySelector(this.for);
         if (aimPromptElement) {

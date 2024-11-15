@@ -141,17 +141,13 @@ export class ServicePreviewAddStyle extends LitElement {
     private async getGroup() {
 
         mls.actual[0].setFullName(this.widget);
-        const model = mls.l2.editor.get({ project: mls.actual[0].project as any, shortName: mls.actual[0].path as any });
-
-        if (!model || !model.compilerResults) return;
-        if (!model.compilerResults.tripleSlashMLS) return;
-        const { variables } = model.compilerResults.tripleSlashMLS;
-        if (!variables) return;
-
-        const { groupName } = variables;
+        const project = +(mls.actual[0].project || "0");
+        const shortName = mls.actual[0].path || "";
+        const models = mls.editor.getModels(project, shortName);
+        const groupName = models?.ts?.compilerResults?.tripleSlashMLS?.variables.groupName;
         if (!groupName) return;
-
         this.groupName = groupName
+        
     }
 
     private async initds() {

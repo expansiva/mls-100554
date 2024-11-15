@@ -8,7 +8,7 @@ import * as libCommom from './_100554_libCommom';
 export abstract class ServiceBase extends CollabLitElement {
 
     // @property({ type: Number, reflect: true })
-    get level(): number { return +(this.getAttribute('level') || 7) as mls.Level };
+    get level(): mls.Level { return +(this.getAttribute('level') || 7) as mls.Level };
 
     @property({ type: String, reflect: true })
     public position: 'left' | 'right' = 'left';

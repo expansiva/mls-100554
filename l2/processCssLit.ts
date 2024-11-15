@@ -3,15 +3,14 @@
 import { compileStyleUsingMFile } from './_100554_enhancementStyle';
 import { generateCompactTimestamp } from './_100554_libCommom';
 
-export async function injectStyle(models: mls.editor.IModels, theme: string): Promise<void> {
-    injectStyleWithoutShadowRoot(models, theme);
+export async function injectStyle(modelTS: mls.editor.IModelTS, theme: string): Promise<void> {
+    injectStyleWithoutShadowRoot(modelTS, theme);
 }
 
-export async function injectStyleWithoutShadowRoot(models: mls.editor.IModels, theme: string): Promise<void> {
-
-    const modelTS = models.ts;
-    const modelStyle = models.style;
-    if (!modelStyle || !modelTS) return;
+export async function injectStyleWithoutShadowRoot(modelTS: mls.editor.IModelTS, theme: string): Promise<void> {
+    if (!modelTS) return;
+    const modelStyle = mls.editor.getModels(modelTS.storFile.project, modelTS.storFile.shortName)?.style;
+    if (!modelStyle) return;
 
     const css = await compileStyleUsingMFile(modelStyle, ':root', theme);
     if (!css) return;

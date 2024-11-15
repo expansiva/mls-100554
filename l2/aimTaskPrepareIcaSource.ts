@@ -47,18 +47,17 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
                     return;
                 }
                 const fullName = mls.actual[2].getFullName();
-                const mfile = mls.l2.editor.mfiles[fullName];
-                if (!mfile) {
-                    reject('Not found mfile');
+                const models: mls.editor.IModels | undefined = mls.editor.getModels(project, path);
+                if (!models || !models.ts || !models.ts.compilerResults) {
+                    reject('Not found models ts compiled');
                     return;
                 }
 
-                const tps = mfile.compilerResults?.tripleSlashMLS;
+                const tps = models.ts.compilerResults.tripleSlashMLS;
                 if (!tps) {
                     reject('Not found tripleSlashMLS in mfile compilerResults');
                     return;
                 }
-
                 
                 const activeServiceOp = info.actServiceOp;
                 if (activeServiceOp.tagName !== 'SERVICE-SOURCE-100554') {
