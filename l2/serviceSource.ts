@@ -523,6 +523,7 @@ export class ServiceSource100554 extends ServiceBase {
     private onProjectLoadedEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
         if (ev.level !== this.level) return;
         if (!ev.desc) return;
+        if (this.position === 'right') return;
         try {
             const projectLoadedInfo = JSON.parse(ev.desc) as mls.events.IProjectLoaded;
             await this.readProjectTypescriptAndCompile(projectLoadedInfo.project, '', projectLoadedInfo.needCompile);
@@ -698,6 +699,7 @@ export class ServiceSource100554 extends ServiceBase {
             this.showActiveModel();
             await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true);
         } else {
+            console.info(fileModels);
             this.activeModels = fileModels;
             mls.editor.editors[this.position] = fileModels;
             const modelTs = this.activeModels.ts?.model;
@@ -1579,7 +1581,15 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 if (enhancementInstanceLess && this.activeModels) await enhancementInstanceLess.onAfterChange(this.activeModels);
 
                 modelValue = removeTokensFromSource(modelValue);
-                if (this.activeModels && this.activeModels.ts) mls.editor.forceModelUpdate(this.activeModels.ts.model);
+                if (this.activeModels && this.activeModels.ts) {
+
+                    if (this.activeModels.ts.compilerResults) {
+                        this.activeModels.ts.compilerResults.modelNeedCompile = true;
+                    }
+                    await mls.l2.typescript.compileAndPostProcess(this.activeModels.ts, true, true);
+
+                }
+
                 const lastemitter = window.globalState.less[this.position]?.emitter || 'editor';
                 if (this.lessCSS && this._ed1) {
 

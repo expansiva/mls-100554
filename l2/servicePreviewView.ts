@@ -131,7 +131,7 @@ export class ServicePreviewView extends LitElement {
                 <div class="phone" style="width:${this.widthP}px; height:${this.heightP}px">
                     <div class="phone_mic"></div>
                     <div class="phone_screen">
-                        <iframe style="width:100%; height:100%; border:none; display:none"  src="/_100554_servicePreview" @load="${this.load}" ></iframe>
+                        <iframe style="width:100%; height:100%; border:none; display:none"  src="/_100554_servicePreview?t=${Date.now()}" @load="${this.load}" ></iframe>
                     </div>
                     <div class="phone_button"></div>
                 </div>
@@ -148,7 +148,7 @@ export class ServicePreviewView extends LitElement {
             return html`
             
             <iframe
-                style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview"
+                style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview?t=${Date.now()}"
                 @load="${this.load}" >
             
             </iframe>`;
