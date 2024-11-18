@@ -11,10 +11,10 @@ import { dispatchEventConciliate } from './_100554_wcdCommandBase';
 @customElement('wcd-toolbox-item-action-code-language-100554')
 export class WcdToolboxItemActionCodeLanguage extends WcdToolboxItemBase {
 
-    public myParent: WCDToolboxMethodos | undefined;
-    public elMain: HTMLElement | undefined;
-    public elICA: IcaLitElementBaseMethods | undefined;
-    public args: string | undefined;
+    public myParent: WCDToolboxMethodos | undefined | any;
+    public elMain: HTMLElement | undefined | any;
+    public elICA: IcaLitElementBaseMethods | undefined | any;
+    public args: string | undefined | any;
 
     @property() languages: string[] = [];
     @property() actualLanguage: string = ''

@@ -41,7 +41,7 @@ export class WcdDialogEmbedLink100554 extends CollabLitElement {
             await execute({
                 args: { url: this.link },
                 overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
-                selectedIca: window.wcdState.elICA,
+                selectedIca: window.wcdState.elICA as any,
             });
         }
 

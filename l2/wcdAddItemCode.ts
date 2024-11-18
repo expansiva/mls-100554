@@ -61,7 +61,7 @@ export class WcdAddItemCode100554 extends CollabLitElement {
         await commandCode.execute({
             args: {},
             overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: window.wcdState.elICA,
+            selectedIca: window.wcdState.elICA as any,
         });
     }
 

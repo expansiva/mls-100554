@@ -108,7 +108,7 @@ export class WcdDialogVideo100554 extends LitElement {
         await execute({
             args: { src: item.src },
             overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: window.wcdState.elICA,
+            selectedIca: window.wcdState.elICA as any,
         });
 
     }

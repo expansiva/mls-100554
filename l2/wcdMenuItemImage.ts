@@ -68,7 +68,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
                 newSize: 'full'
             },
             overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: window.wcdState.elICA,
+            selectedIca: window.wcdState.elICA as any,
         });
 
     }
@@ -82,7 +82,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
                 newSize: 'outset'
             },
             overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: window.wcdState.elICA,
+            selectedIca: window.wcdState.elICA as any,
         });
 
     }
@@ -96,7 +96,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
                 newSize: 'inset'
             },
             overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: window.wcdState.elICA,
+            selectedIca: window.wcdState.elICA as any,
         });
     }
 

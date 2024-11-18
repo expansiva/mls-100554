@@ -104,7 +104,7 @@ export class WcdDialogImageUnsplash100554 extends CollabLitElement {
         await execute({
             args: { src: item.urls.full },
             overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: window.wcdState.elICA,
+            selectedIca: window.wcdState.elICA as any,
         });
 
     }

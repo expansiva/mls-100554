@@ -13,9 +13,9 @@ export abstract class WcdToolboxItemBase extends CollabLitElement implements WCD
 
     constructor() {
         super();
-        this.myParent = window.wcdState.myParent;
+        this.myParent = window.wcdState.myParent as any;
         this.elMain = window.wcdState.elMain;
-        this.elICA = window.wcdState.elICA;
+        this.elICA = window.wcdState.elICA as any;
         
     }
 

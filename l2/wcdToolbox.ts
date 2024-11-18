@@ -143,9 +143,9 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         this.setDefaultToolBoxOptions();
 
         window.wcdState = {
-            elICA: this.elICA,
+            elICA: this.elICA as any,
             myParent: this,
-            elMain: this.elMain,
+            elMain: this.elMain as any,
         };
 
         for await (let i of actions) {
