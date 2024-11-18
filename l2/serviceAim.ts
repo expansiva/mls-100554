@@ -57,6 +57,7 @@ export class ServiceAim100554 extends ServiceBase {
         this.setEvents();
     }
 
+
     @property() activeTab: ITabType = 'All';
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
     @property({ reflect: true }) actionToOpen: string = '';
