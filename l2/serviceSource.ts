@@ -699,7 +699,6 @@ export class ServiceSource100554 extends ServiceBase {
             this.showActiveModel();
             await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true);
         } else {
-            console.info(fileModels);
             this.activeModels = fileModels;
             mls.editor.editors[this.position] = fileModels;
             const modelTs = this.activeModels.ts?.model;

@@ -103,8 +103,6 @@ export class ServiceAim100554 extends ServiceBase {
 
     get invertedPosition() { return this.position === 'left' ? 'right' : 'left' };
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     public onClickLink = (op: string): boolean => {
         if (op === 'opColumns') return this.showConfigColumns();
         if (this.menu.setMode) this.menu.setMode('initial');
