@@ -477,6 +477,7 @@ export class ServiceSource100554 extends ServiceBase {
     private onModelChange = (e: monaco.editor.IModelContentChangedEvent, activeModel: mls.editor.IModelTS, storFile: mls.stor.IFileInfo): void => {
         // some changes is to simulate changes to force compile
 
+        console.info('change ts')
         clearTimeout(this._onChangedContent);
         this._onChangedContent = window.setTimeout(async () => {
             await this.updateModelStatus(activeModel, true);
@@ -862,7 +863,6 @@ export class ServiceSource100554 extends ServiceBase {
     private async changeStatusFile(modelBaseTS: mls.editor.IModelTS, storFile: mls.stor.IFileInfo, variables: mls.common.tripleslash.ITripleSlashVariables | undefined, hasError: boolean): Promise<void> {
 
         if (!storFile) return; // new file dont have storFile ???
-        const oldStatus = storFile.status;
         storFile.hasError = hasError;
         const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
         if (sameContent) {
@@ -873,9 +873,9 @@ export class ServiceSource100554 extends ServiceBase {
             await mls.stor.localStor.setContent(storFile, await this.getValueInfo(modelBaseTS));
         }
 
-        if (oldStatus !== storFile.status || storFile.status === 'changed') {
-            let position: 'left' | 'right';
 
+        if (storFile.status !== 'nochange') {
+            let position: 'left' | 'right';
             const idLeft = mls.editor.editors.left?.ts?.model.id;
             const idActive = modelBaseTS.model.id
             if (idLeft === idActive) position = 'left';

@@ -133,7 +133,7 @@ export class LessAst {
 
         // Match for a property within an open selector block, e.g., color: red;
         if (this.stack.length > 0) {
-            const propertyMatch = line.match(/^\s*(.+?)\s*:\s*(.+?)\s*;$/);
+            const propertyMatch = line.trim().match(/^\s*(.+?)\s*:\s*(.+?)\s*;$/);
             if (propertyMatch) {
                 const property = propertyMatch[1].trim();
                 const value = propertyMatch[2].trim();

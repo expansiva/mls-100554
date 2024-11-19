@@ -132,7 +132,7 @@ export class ServiceDetail100554 extends ServiceBase {
     //----------IMPLEMENTS-------------------
 
     private setEvents(): void {
-        mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['PluginDetails'], (ev) => this.onPluginDetails(ev));
+        mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['PluginDetails'], (ev) => this.onPluginDetails(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
     }

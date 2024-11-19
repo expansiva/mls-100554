@@ -37,73 +37,73 @@ const messages: { [key: string]: MessageType } = {
 const lang = getMessageKey(messages);
 let msg: MessageType = messages[lang];
 
-// export const getAddNewFileDetails = () => {
-//     return [
-//         {
-//             title: msg.title1,
-//             description: msg.desc1,
-//             tags: ["lit", "html", "component"],
-//             example: ``,
-//             aimActionSuggest: ""
-//         },
-//         {
-//             title: msg.title2,
-//             description: msg.desc2,
-//             tags: ["lit", "html", "page"],
-//             example: `
-// import { CollabPageElement } from './_100554_collabPageElement'
-// import { customElement } from 'lit/decorators.js';
+export const getAddNewFileDetails = () => {
+    return [
+        {
+            title: msg.title1,
+            description: msg.desc1,
+            tags: ["lit", "html", "component"],
+            example: ``,
+            aimActionSuggest: ""
+        },
+        {
+            title: msg.title2,
+            description: msg.desc2,
+            tags: ["lit", "html", "page"],
+            example: `
+ import { CollabPageElement } from './_100554_collabPageElement'
+ import { customElement } from 'lit/decorators.js';
 
-// @customElement('[tagName]')
-// export class [className] extends CollabPageElement {
+ @customElement('[tagName]')
+ export class [className] extends CollabPageElement {
 
-//     initPage() {
-//         window.globalState = {
-//             tables: {
-//                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
-//             },
-//             newUser: {
-//                 name: '',
-//                 age: 0,
-//                 city: '',
-//                 sex: ''
-//             },
-//             sum: 0,
-//         };
-//     }
+     initPage() {
+         window.globalState = {
+             tables: {
+                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
+             },
+             newUser: {
+                 name: '',
+                 age: 0,
+                 city: '',
+                 sex: ''
+             },
+             sum: 0,
+         };
+     }
 
-//     /// **collab_events_start**
-//     handleClickbuttonSum() {
-//         // here or code for event
-//     }
+     /// **collab_events_start**
+     handleClickbuttonSum() {
+         // here or code for event
+     }
 
-// }`,
-//             aimActionSuggest: ""
-//         },
-//         {
-//             title: msg.title3,
-//             description: msg.desc3,
-//             tags: ["lit", "html", "component"],
-//             example: `
-// import { html, css, LitElement } from 'lit'; 
-// import { customElement, property } from 'lit/decorators.js';
+ }`,
+            aimActionSuggest: ""
+        },
+        {
+            title: msg.title3,
+            description: msg.desc3,
+            tags: ["lit", "html", "component"],
+            example: `
+ import { html, css, LitElement } from 'lit'; 
+ import { customElement, property } from 'lit/decorators.js';
 
-// @customElement('[tagName]')
-// export class [className] extends LitElement {
+ @customElement('[tagName]')
+ export class [className] extends LitElement {
     
-//     static styles = css\`[[mls_getDefaultDesignSystem]]\`;
+     static styles = css\`[[mls_getDefaultDesignSystem]]\`;
 
-//     @property() 
-//     name: string = 'Somebody';
+     @property() 
+     name: string = 'Somebody';
 
-//     render() {
-//         return html\`<p> Hello, \${ this.name } !</p>\`;
-//     }
-// }`,
-//             aimActionSuggest: "_100554_aimActionAddIca"
-//         }
-//     ]
-// }
+     render() {
+         return html\`<p> Hello, \${ this.name } !</p>\`;
+     }
+ }`,
+            aimActionSuggest: "_100554_aimActionAddIca"
+        }
+    ]
+}
 
 export const requires: mls.l2.enhancement.IRequire[] = [
     {
