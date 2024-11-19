@@ -1,15 +1,26 @@
 /// <mls shortName="pluginSystemTheme" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, svg, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
 /// **collab_i18n_start**
 const message_pt = {
+    alterarLabel: 'Alterar',
+    themeLabel: 'Tema',
+    themeOptDark: 'Escuro',
+    themeOptLight: 'Claro',
+    themeOptDf: 'Padrão',
 }
 
 const message_en = {
+    alterarLabel: 'Change',
+    themeLabel: 'Theme',
+    themeOptDark: 'Dark',
+    themeOptLight: 'Light',
+    themeOptDf: 'Default',
+
 }
 
 type MessageType = typeof message_en;
@@ -38,6 +49,9 @@ export class PluginSystemTheme100554 extends PluginBaseModule {
     private msg: MessageType = messages['en'];
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
+    @property() actualTheme: string = 'default';
+    @query('.select-theme') selectTheme: HTMLSelectElement | undefined;
+
 
     firstUpdated() {
         if (!this.autoPrepare) return;
@@ -54,11 +68,51 @@ export class PluginSystemTheme100554 extends PluginBaseModule {
     render(): TemplateResult {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
+        this.getUserSettings();
 
         return html`
             <div class="plugin-container">
-                Theme
+                  <details open> 
+                <summary>${this.msg.themeLabel}</summary>
+                <div>
+                    <select style="width:200px" .value=${this.actualTheme} class="select-theme">
+                        <option value="default">${this.msg.themeOptDf}</option>
+                        <option value="dark">${this.msg.themeOptDark}</option>
+                        <option value="light">${this.msg.themeOptLight}</option>
+                    </select>
+                    <button style="margin-top:1rem" @click=${this.handleChangeThemeClick}>${this.msg.alterarLabel}</button>
+                </div>
+            </details>
             </div>
         `;
     }
+
+
+    private handleChangeThemeClick() {
+        if (!this.selectTheme) return;
+        const theme = this.selectTheme.value;
+        this.setUserTheme(theme);
+        location.reload();
+    }
+
+    private getUserSettings() {
+        let userTheme = this.getUserTheme();
+        if (!userTheme) userTheme = this.getUserThemeOS();
+        this.actualTheme = userTheme;
+
+    }
+
+    private setUserTheme(theme: string) {
+        localStorage.setItem('_100554_serviceUserSettings_theme', theme);
+    }
+
+    private getUserTheme() {
+        return localStorage.getItem('_100554_serviceUserSettings_theme');
+    }
+
+    private getUserThemeOS() {
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return isDarkMode ? 'dark' : 'light';
+    }
+
 }

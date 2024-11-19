@@ -55,7 +55,7 @@ export class PluginSystemNotification100554 extends PluginBaseModule {
 
         return html`
             <div class="plugin-container">
-                Notification
+                Notification ( In develpoment )
             </div>
         `;
     }

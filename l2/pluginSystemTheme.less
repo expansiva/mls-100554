@@ -1,10 +1,64 @@
 /// <mls shortName="pluginSystemTheme" project="100554" enhancement="enhancementStyle" />
-				
+
 plugin-system-theme-100554 {
-                
- // Here your less
-                
-}//Start Less Tokens
+
+    font-family: @font-family-primary;
+    font-size: @font-size-16;
+    font-weight: @font-weight-normal;
+    line-height: 1.5;
+    color: @text-primary-color;
+    background-color: @bg-primary-color;
+
+    .plugin-container {
+        padding: .5rem;
+
+        details>div {
+            margin-left: 1rem;
+            margin-top: .3rem;
+        }
+    }
+
+    button {
+        background-color: @bg-secondary-color-lighter;
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0px 1px 3px 0px @grey-color;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: .2rem;
+        font-weight: 700;
+        align-items: center;
+        height: 40px;
+        transition: height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        padding: 0.5rem;
+        color: @text-primary-color;
+        cursor: pointer;
+
+        &:hover {
+            background-color: @grey-color-light;
+        }
+    }
+
+    input,
+    select,
+    textarea {
+        display: block;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #000000;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        outline: none;
+    }
+
+}
+
+
+//Start Less Tokens
 @text-primary-color-lighter: #535353;
 @text-primary-color-lighter-hover: #5f5f5f;
 @text-primary-color-lighter-focus: #4a4a4a;

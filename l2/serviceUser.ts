@@ -57,7 +57,7 @@ export class ServiceUser100554 extends ServiceBase {
         actions: {
         },
         icons: {
-            Settings: 'Settings;e521',
+            Settings: 'Settings;f013',
         },
         iconDefault: 'Settings',
         iconMenuType: 'full',

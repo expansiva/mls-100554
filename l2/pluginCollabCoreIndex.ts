@@ -106,20 +106,6 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 widget: '_100554_serviceUser'
             },
             {
-                category: 'Services',
-                scope: ['l0ServicesRight'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceUserSettings'
-            },
-            {
-                category: 'Services',
-                scope: ['l0ServicesRight'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_serviceNotification'
-            },
-            {
                 category: 'Components',
                 scope: ['l5Explore'],
                 priority: 1,
