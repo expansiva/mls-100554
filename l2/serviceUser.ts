@@ -1,6 +1,6 @@
 /// <mls shortName="serviceUser" project="100554" enhancement="_100554_enhancementLitService" groupName="other" />
 
-import { html, repeat } from 'lit';
+import { html, repeat, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
@@ -30,12 +30,13 @@ export class ServiceUser100554 extends ServiceBase {
 
     @property() activeTab: IScenery = 'Settings';
 
-    @query('details') firstDetails: HTMLDetailsExplore | undefined;
+    @property() plugin: string = '';
 
+    @query('collab-panel-100554') collabPanel: LitElement | undefined;
 
     public details: IService = {
         icon: '&#xf4fe',
-        state: 'foreground',
+        state: 'background',
         position: 'right',
         tooltip: 'User',
         visible: true,
@@ -75,11 +76,24 @@ export class ServiceUser100554 extends ServiceBase {
 
     }
 
-    async firstUpdated() {
-        this.setMyData();
-        if (this.activeTab === 'Settings') {
+    async updated(changedP: any) {
+        super.updated(changedP);
+        if (this.plugin !== "" && this.collabPanel && this.visible === 'true') {
             await this.updateComplete;
-            if (this.firstDetails) this.firstDetails.click();
+            await this.collabPanel.updateComplete;
+            const item = this.querySelector(`collab-panel-item-100554[widget="${this.plugin}"]`) as HTMLElement;
+            if (item) item.click();
+        }
+    }
+
+    async firstUpdated() {
+        await this.setMyData();
+        await this.updateComplete;
+        if (this.plugin && this.collabPanel) {
+            await this.collabPanel.updateComplete;
+            const item = this.querySelector(`collab-panel-item-100554[widget="${this.plugin}"]`) as HTMLElement;
+            if (item) item.click();
+            this.plugin = '';
         }
     }
 
