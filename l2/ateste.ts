@@ -25,7 +25,7 @@ export class SimpleGreeting extends CollabLitElement {
 
     render() {
 
-        return html`<div class="cls1"><h1>Hello world santiago 2</h1></div>`;
+        return html`<div class="cls1"><h1>Hello world santiago 8</h1></div>`;
     }
 
 
