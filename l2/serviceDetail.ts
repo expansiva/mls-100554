@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 import { getAllWebComponentsInSource } from './_100554_libCompile';
-import { convertTagToFileName } from './_100554_utilsLit';
+import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
 
 @customElement('service-detail-100554')
 export class ServiceDetail100554 extends ServiceBase {
@@ -112,9 +112,11 @@ export class ServiceDetail100554 extends ServiceBase {
     firstUpdated() {
         if (this.widget) {
             const { project, shortName } = mls.l2.getPath(this.widget);
+            const tag = convertFileNameToTag(this.widget);
             const info: mls.events.IPluginDetail = {
                 project,
                 shortName,
+                htmlText: `<${tag}></${tag}>`
             };
             this.showPluginContent(info);
         }
