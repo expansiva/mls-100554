@@ -9,9 +9,9 @@ import { convertTagToFileName } from './_100554_utilsLit';
 @customElement('service-detail-100554')
 export class ServiceDetail100554 extends ServiceBase {
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     @property({ type: String }) msize = '';
+    @property({ type: String }) widget = '';
+
 
     @query('#contentPlugin') contentPlugin: HTMLDivElement | undefined;
 
@@ -108,6 +108,17 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     //----------COMPONENT------------------
+
+    firstUpdated() {
+        if (this.widget) {
+            const { project, shortName } = mls.l2.getPath(this.widget);
+            const info: mls.events.IPluginDetail = {
+                project,
+                shortName,
+            };
+            this.showPluginContent(info);
+        }
+    }
 
     createRenderRoot() {
         return this;
