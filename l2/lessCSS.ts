@@ -126,8 +126,11 @@ export class LessCSS {
     }
 
     private initStateIfNeeded() {
+
+
         if (!window.globalState) window.globalState = {};
         if (!window.globalState.less) window.globalState.less = {};
+        if (!window.globalState.globalStateManagment) return;
 
         window.globalState.less = {
             left: {},

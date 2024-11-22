@@ -477,7 +477,6 @@ export class ServiceSource100554 extends ServiceBase {
     private onModelChange = (e: monaco.editor.IModelContentChangedEvent, activeModel: mls.editor.IModelTS, storFile: mls.stor.IFileInfo): void => {
         // some changes is to simulate changes to force compile
 
-        console.info('change ts')
         clearTimeout(this._onChangedContent);
         this._onChangedContent = window.setTimeout(async () => {
             await this.updateModelStatus(activeModel, true);
