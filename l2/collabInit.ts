@@ -4,54 +4,74 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 
-
 @customElement('collab-init-100554')
 export class CollabSelectOneWithDescription100554 extends CollabLitElement {
 
-    private actualProject: number = 0;
+    private actualProject: number | undefined = 0;
 
-    get isAnonymoys(): boolean { return this.getAttribute('isAnonymous') === 'true' }
-
-    get avatarUrl(): string { return this.getAttribute('avatarUrl') || '' }
-
-    constructor() {
-        super();
-        this.actualProject = mls.actual[5].project || 0;
+    /**
+     * Indicates if the user is anonymous based on the `isAnonymous` attribute.
+     * @returns `true` if the user is anonymous; otherwise, `false`.
+     */
+    get isAnonymoys(): boolean {
+        return this.getAttribute('isAnonymous') === 'true';
     }
 
+    /**
+     * Retrieves the avatar URL from the `avatarUrl` attribute.
+     * @returns The URL of the avatar, or an empty string if not defined.
+     */
+    get avatarUrl(): string {
+        return this.getAttribute('avatarUrl') || '';
+    }
+
+
+    /**
+     * Retrieves the base Project from the `baseProject` attribute.
+     * @returns The URL of the avatar, or an empty string if not defined.
+     */
+    get baseProject(): number {
+        return +(this.getAttribute('baseProject') || 100554);
+    }
+
+    /**
+     * Lit lifecycle method called after the component is first updated.
+     * Initializes the component's configuration.
+     */
     firstUpdated() {
         this.init();
     }
+
 
     render() {
         return html``;
     }
 
     /**
-     * Initializes the configuration of life cycle for the system.
+     * Initializes the configuration for the component, setting drivers, theme, language, and tokens.
      */
-    private init(): void {
-
+    private async init() {
         this.setDriver();
         const language = this.setAndGetBaseUrl();
         this.setHTMLLang(language);
         this.setTheme();
         this.setTokensCss();
-        this.enableNav(this.avatarUrl, language, this.isAnonymoys)
+        this.actualProject = this.setProjectActual();
+        this.setOrgActual(this.actualProject);
+        const services = await this.getServices()
+        this.enableNav(this.avatarUrl, language, services, this.isAnonymoys);
     }
 
     /**
-     * Asynchronous method responsible for loading and setting up collaboration drivers.
+     * Loads and sets up collaboration drivers asynchronously.
      */
     private async setDriver(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: drivers collab');
-
         await this.instanceDriverGitHub();
     }
 
     /**
-     * Asynchronous method that imports, instantiates, and registers the GitHub driver in the system.
-     * 
+     * Instantiates and registers the GitHub collaboration driver asynchronously.
      */
     private async instanceDriverGitHub(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: driver github');
@@ -61,6 +81,10 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
         if (!driverInstanceGitHub) mls.stor.others.addDriver(instanceGitHub);
     }
 
+    /**
+     * Sets the base URL for the project and retrieves the user's language.
+     * @returns The user's language (e.g., 'en-US', 'pt-BR').
+     */
     private setAndGetBaseUrl(): string {
         if (window.traceLifeCycle) console.info('setting: baseUrl');
         const language = this.getUserLanguageOrDefault();
@@ -75,6 +99,10 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
         return language;
     }
 
+    /**
+     * Retrieves the user's preferred language or defaults to 'en-US'.
+     * @returns The user's language.
+     */
     private getUserLanguageOrDefault(): string {
         const navigatorLanguage = this.getNavigatorLanguage();
         const acceptLanguages = ['en-US', 'pt-BR'];
@@ -88,42 +116,64 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
             }
         }
         return rcLanguage;
-    };
+    }
 
-    private getNavigatorLanguage() {
+    /**
+     * Retrieves the browser's language setting.
+     * @returns The browser's language.
+     */
+    private getNavigatorLanguage(): string {
         const lg = navigator.language ? navigator.language : '';
         return lg;
-    };
+    }
 
-    private setHTMLLang(lang: string) {
+    /**
+     * Sets the `lang` attribute of the HTML `<html>` element.
+     * @param lang The language code to set (e.g., 'en-US').
+     */
+    private setHTMLLang(lang: string): void {
         if (window.traceLifeCycle) console.info('setting: htmlLang');
         const htmlEl = document.documentElement;
         if (htmlEl) htmlEl.lang = lang;
-    };
+    }
 
-    private setTheme() {
+    /**
+     * Sets the theme for the application based on user settings or OS preferences.
+     */
+    private setTheme(): void {
         if (window.traceLifeCycle) console.info('setting: theme');
         const theme = this.getTheme();
         const htmlEl = document.documentElement;
         if (theme === 'dark' && htmlEl) {
             htmlEl.setAttribute('data-theme', 'dark');
         }
-    };
+    }
 
-    private getTheme() {
+    /**
+     * Retrieves the theme from user settings or defaults to the OS preference.
+     * @returns The theme ('dark' or 'light').
+     */
+    private getTheme(): string {
         let theme = localStorage.getItem('_100554_serviceUserSettings_theme');
         if (!theme || theme === 'default') {
             theme = this.getUserThemeOS();
         }
         return theme;
-    };
+    }
 
-    private getUserThemeOS() {
+    /**
+     * Retrieves the user's OS theme preference.
+     * @returns The OS theme preference ('dark' or 'light').
+     */
+    private getUserThemeOS(): string {
         const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         return isDarkMode ? 'dark' : 'light';
-    };
+    }
 
-    private async setTokensCss() {
+    /**
+     * Sets CSS tokens for light and dark themes by retrieving data from a cache.
+     */
+    private async setTokensCss(): Promise<void> {
         if (window.traceLifeCycle) console.info('setting: tokens');
 
         const cacheDsName = '/local/_100554_ds/collabDesignsystem/collabDesignsystem.json';
@@ -174,32 +224,152 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
         style.textContent = all;
         style.id = 'collab-tokens';
         document.head.appendChild(style);
+    }
 
-    };
+    /**
+     * Configures navigation settings, including avatar and status, for the collaboration interface.
+     * @param avatarUrl The URL of the avatar.
+     * @param language The user's language.
+     * @param isAnonymous Indicates whether the user is anonymous.
+     */
+    private enableNav(avatarUrl: string, language: string, services: IServices, isAnonymous: boolean): void {
+        const collabNav1 = document.querySelector('collab-nav-1') as ICollabNav1;
+        if (!collabNav1) return;
+        if (avatarUrl) collabNav1.changeIconToImage(7, avatarUrl, { text: language, img: this.flags[language] });
+        const state = isAnonymous ? 'anonymous' : 'enabled';
+        if (window.traceLifeCycle) console.info(`setting: status collab-nav-1 : ${state}`);
+        collabNav1.services = services;
+        collabNav1.setAttribute('status', state);
+    }
 
     private flags: { [key: string]: string } = {
         'en-US': './l3/_100529_/images/estados-unidos.png',
         'pt-BR': './l3/_100529_/images/brasil.png',
     };
 
-    private enableNav(avatarUrl: string, language: string, isAnonymous: boolean) {
+    private getLastProjectSelected(): number | undefined {
+        const lhLastPrj = localStorage.getItem('l5-last-project');
+        const lastPrj = lhLastPrj ? Number.parseInt(lhLastPrj, 10) : undefined;
+        return lastPrj;
+    }
 
-        const collabNav1 = document.querySelector('collab-nav-1') as ICollabNav1;
-        if (!collabNav1) return;
-        if (avatarUrl) collabNav1.changeIconToImage(7, avatarUrl, { text: language, img: this.flags[language] });
-        const state = isAnonymous ? 'anonymous' : 'enabled';
-        if (window.traceLifeCycle) console.info(`setting: status collab-nav-1 : ${state}`);
-        collabNav1.setAttribute('status', state);
+    private setProjectActual() {
+        const project = this.getLastProjectSelected();
+        if (project) mls.actual[5].project = project || 0;
+        return project;
+    }
 
-    };
+    private setOrgActual(project: number | undefined) {
+        if (!project) return;
+        const orgIndex = mls.l5.getProjectOrgIndex(project);
+        mls.l5.setActualOrg(orgIndex);
+    }
+
+    private anonymousServices: IServices = {
+        services: [
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            ';_100554_serviceDetail,',
+        ]
+    }
+
+    private async getServices(): Promise<IServices> {
+
+        if (this.isAnonymoys) {
+            return this.anonymousServices;
+        }
+
+        let project: number = this.actualProject || 0;
+        if (!project) project = this.baseProject;
+
+        await mls.plugin.loadAll(project, true);
+
+        const levels = [0, 1, 2, 3, 4, 5, 6, 7];
+        const rc: ITempServices = {
+            0: { Left: [], Right: [] },
+            1: { Left: [], Right: [] },
+            2: { Left: [], Right: [] },
+            3: { Left: [], Right: [] },
+            4: { Left: [], Right: [] },
+            5: { Left: [], Right: [] },
+            6: { Left: [], Right: [] },
+            7: { Left: [], Right: [] },
+        };
+
+        const positions: ['Left', 'Right'] = ['Left', 'Right'];
+
+        levels.forEach((level) => {
+            positions.forEach((position) => {
+                const scope = `l${level}Services${position}`;
+                const services = mls.plugin.getAllMenuActions(project, { scope } as any);
+                const sorted = services.sort((a: mls.plugin.MenuAction, b: mls.plugin.MenuAction) => (a.priority || 1) - (b.priority || 1));
+                sorted.forEach((service: mls.plugin.MenuAction) => {
+                    if (service && service.widget) {
+                        rc[level][position].push(service.widget);
+                    }
+                });
+            });
+        });
+
+        const rc2: string[] = ['', '', '', '', '', '', '', ''];
+
+        const areAllPositionsEmpty = this.areAllPositionsEmpty(rc);
+        if (areAllPositionsEmpty) {
+            return {
+                services: [],
+            };
+        }
+
+        Object.entries(rc).forEach((entry) => {
+            const [level, value] = entry;
+            const left = value.Left.join(',');
+            const right = value.Right.join(',');
+            rc2[+level] = left + ';' + right;
+        });
+
+        return {
+            services: rc2,
+        };
+    }
+
+    private areAllPositionsEmpty(rc: ITempServices): boolean {
+        for (const level in rc) {
+            var hasBarProperty = Object.prototype.hasOwnProperty.call(rc, "level");
+            if (hasBarProperty) {
+                const { Left, Right } = rc[level];
+                if (Left.length > 0 || Right.length > 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
 
 }
 
 interface ICollabNav1 extends HTMLElement {
     changeIconToImage: (level: number, avatarUrl: string, additional?: { text: string, img?: string }) => void
+    services: IServices
 }
 
+interface IServices {
+    services: string[],
+}
+
+interface ITempServices {
+    [key: number]: ITempServicesItem
+}
+
+interface ITempServicesItem {
+    Left: string[],
+    Right: string[]
+}
 interface IUserSettings {
     language: string,
 }
