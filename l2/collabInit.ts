@@ -1,7 +1,7 @@
 /// <mls shortName="collabInit" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 
 @customElement('collab-init-100554')
@@ -13,7 +13,7 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
      * Indicates if the user is anonymous based on the `isAnonymous` attribute.
      * @returns `true` if the user is anonymous; otherwise, `false`.
      */
-    get isAnonymoys(): boolean {
+    get isAnonymous(): boolean {
         return this.getAttribute('isAnonymous') === 'true';
     }
 
@@ -48,24 +48,29 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
     }
 
     /**
-     * Initializes the configuration for the component, setting drivers, theme, language, and tokens.
+     * Initializes the system life cycle.
+     * To show logs using: https://collab.codes/?traceLifeCycle=true
      */
     private async init() {
-        this.setDriver();
+
+        this.setDrivers();
         const language = this.setAndGetBaseUrl();
         this.setHTMLLang(language);
         this.setTheme();
         this.setTokensCss();
         this.actualProject = this.setProjectActual();
         this.setOrgActual(this.actualProject);
-        const services = await this.getServices()
-        this.enableNav(this.avatarUrl, language, services, this.isAnonymoys);
+        await this.loadProjectBase();
+        await this.loadLastProject();
+        const services = await this.getServices();
+        this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
+
     }
 
     /**
      * Loads and sets up collaboration drivers asynchronously.
      */
-    private async setDriver(): Promise<void> {
+    private async setDrivers(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: drivers collab');
         await this.instanceDriverGitHub();
     }
@@ -233,6 +238,8 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
      * @param isAnonymous Indicates whether the user is anonymous.
      */
     private enableNav(avatarUrl: string, language: string, services: IServices, isAnonymous: boolean): void {
+        if (window.traceLifeCycle) console.info('enableNav: collab-nav-1');
+
         const collabNav1 = document.querySelector('collab-nav-1') as ICollabNav1;
         if (!collabNav1) return;
         if (avatarUrl) collabNav1.changeIconToImage(7, avatarUrl, { text: language, img: this.flags[language] });
@@ -247,23 +254,63 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
         'pt-BR': './l3/_100529_/images/brasil.png',
     };
 
+    /**
+     * Retrieves the last selected project ID from localStorage.
+     * @returns The last selected project ID as a number, or `undefined` if not found.
+     */
     private getLastProjectSelected(): number | undefined {
+        if (window.traceLifeCycle) console.info('getLastProjectSelected');
         const lhLastPrj = localStorage.getItem('l5-last-project');
         const lastPrj = lhLastPrj ? Number.parseInt(lhLastPrj, 10) : undefined;
         return lastPrj;
     }
 
-    private setProjectActual() {
+    /**
+     * Sets the actual project in the `mls` structure based on the last selected project.
+     * @returns The last selected project ID as a number, or `undefined` if not found.
+     */
+    private setProjectActual(): number | undefined {
+        if (window.traceLifeCycle) console.info('setProjectActual');
         const project = this.getLastProjectSelected();
         if (project) mls.actual[5].project = project || 0;
         return project;
     }
 
-    private setOrgActual(project: number | undefined) {
+    /**
+     * Sets the current organization in the `mls` structure based on the provided project ID.
+     * @param project The project ID to determine the organization index.
+     */
+    private setOrgActual(project: number | undefined): void {
+        if (window.traceLifeCycle) console.info(`setOrgActual for project: ${project}`);
         if (!project) return;
         const orgIndex = mls.l5.getProjectOrgIndex(project);
         mls.l5.setActualOrg(orgIndex);
     }
+
+    /**
+     * Asynchronously loads the base project information if it is not already loaded.
+     * Utilizes the `mls.stor.server.loadProjectInfoIfNeeded` method with the base project ID.
+     * @returns A promise that resolves when the base project information is loaded.
+     */
+    private async loadProjectBase() {
+        if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
+        await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
+    }
+    
+    /**
+     * Loads the information of the last accessed project if it exists.
+     * If the `actualProject` is defined, it attempts to load the project's information
+     * from the server using the `loadProjectInfoIfNeeded` method.
+     * 
+     * Optionally logs the lifecycle trace if the global `traceLifeCycle` is enabled.
+     * 
+     * @returns A promise that resolves when the project information has been loaded.
+     */
+    private async loadLastProject() {
+        if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
+        if (this.actualProject) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
+    }
+
 
     private anonymousServices: IServices = {
         services: [
@@ -278,16 +325,30 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
         ]
     }
 
+    /**
+     * Retrieves a list of services for the current project, either for anonymous users or regular users.
+     * If the user is anonymous, it returns the `anonymousServices`. Otherwise, it loads project-specific
+     * services by fetching and sorting the available menu actions for different levels and positions (Left/Right).
+     * 
+     * @returns A promise that resolves to an object containing an array of services, sorted by priority.
+     * The services are categorized by levels and positions (Left/Right) and are returned as a semicolon-separated
+     * string for each level.
+     */
     private async getServices(): Promise<IServices> {
 
-        if (this.isAnonymoys) {
+        if (window.traceLifeCycle) console.info(`init getServices`);
+
+        if (this.isAnonymous) {
+            if (window.traceLifeCycle) console.info(`getServices: Anonymous`);
             return this.anonymousServices;
         }
 
         let project: number = this.actualProject || 0;
         if (!project) project = this.baseProject;
 
-        await mls.plugin.loadAll(project, true);
+        if (window.traceLifeCycle) console.info(`getServices using index project: ${project}`);
+
+        await mls.plugin.loadAll(project, false);
 
         const levels = [0, 1, 2, 3, 4, 5, 6, 7];
         const rc: ITempServices = {
@@ -337,6 +398,14 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
         };
     }
 
+    /**
+     * Checks whether all the service positions (Left and Right) for each level are empty.
+     * It iterates through the `rc` object and checks if both Left and Right arrays are empty for each level.
+     * 
+     * @param rc - An object that contains services categorized by levels and positions (Left/Right).
+     * @returns A boolean indicating whether all positions (Left and Right) are empty. 
+     *         Returns `true` if all positions are empty, `false` otherwise.
+     */
     private areAllPositionsEmpty(rc: ITempServices): boolean {
         for (const level in rc) {
             var hasBarProperty = Object.prototype.hasOwnProperty.call(rc, "level");
