@@ -1035,7 +1035,7 @@ export class ServiceSave extends ServiceBase {
 
             const driver = mls.stor.others.getDefaultDriver(mls.actual[5].project as number);
 
-            if (!driver || !(driver as any).getVersionFromFiles) return;
+            if (!driver  || !array  || !(driver as any).getVersionFromFiles) return;
 
             const info = await (driver as any).getVersionFromFiles(this.owner, this.repo, this.branch, array);
 
