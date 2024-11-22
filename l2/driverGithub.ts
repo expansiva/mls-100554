@@ -2,7 +2,7 @@
 
 import * as dL from './_100554_driverLib';
 
-export class driver_github_100554 extends mls.stor.others.DriverIOBase {
+export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
     public shortName: string = 'GitHub';
     public project: number = 100554;
