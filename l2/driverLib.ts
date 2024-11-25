@@ -40,7 +40,7 @@ export function getMyKeysBranch(project: number, needVerifyBranch: boolean = fal
 
         if (!mls.stor.projects[project]) throw new Error('Not found projectInfo:' + project);
 
-        if (needVerifyBranch && project !== 100554) {
+        if (needVerifyBranch) {
             const uB = getBranchCurrent(project);
             if (uB) return { branch: uB.branch, owner: uB.owner, repo: uB.repo };
         }
