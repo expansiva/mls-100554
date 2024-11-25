@@ -529,6 +529,7 @@ export class CollabNewProject extends CollabLitElement {
                 dsName: projectName,
                 widgetIOName: '_100529_config_ds_default',
             }],
+            links: [],
             languages: []
         };
 
