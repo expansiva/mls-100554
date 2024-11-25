@@ -5,7 +5,7 @@ import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 
 @customElement('collab-init-100554')
-export class CollabSelectOneWithDescription100554 extends CollabLitElement {
+export class CollabInit extends CollabLitElement {
 
     private actualProject: number | undefined = 0;
 
@@ -328,20 +328,15 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
      *
      */
     private checkURLParams() {
-        if (this.isAnonymous) {
-            this.openLogin();
-            return;
-        }
         const urlParams = new URLSearchParams(window.location.search);
         const details = urlParams.get('details');
-        if (details === 'privacyPolicy') this.openPolicyPrivacy();
-        if (details === 'termsOfService') this.openTerms();
+        if (details === 'privacyPolicy') return this.openPolicyPrivacy();
+        if (details === 'termsOfService') return this.openTerms();
+        if (this.isAnonymous) return this.openLogin();
     }
 
     /**
      * Opens the privacy policy in the service Details.
-     * @private
-     * @returns {void}
     */
     private openPolicyPrivacy() {
         this.setDetailsInitialPlugin('_100554_pluginSystemPrivacyPolicy');
@@ -349,8 +344,6 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
 
     /**
      * Opens the terms of use in the service Details.
-     * @private
-     * @returns {void}
     */
     private openTerms() {
         this.setDetailsInitialPlugin('_100554_pluginSystemTermsOfService');
@@ -358,8 +351,6 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
 
     /**
      * Opens the login screen in the service Details.
-     * @private
-     * @returns {void}
     */
     private openLogin() {
         this.setDetailsInitialPlugin('_100554_pluginCollabLogin');
@@ -485,7 +476,6 @@ interface ICollabState2 {
 interface IHTMLCollabNav3 extends HTMLElement {
     args: Record<string, string>
 }
-
 
 interface IHTMLCollabMessages extends HTMLElement {
     show: () => void,
