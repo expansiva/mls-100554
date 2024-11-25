@@ -28,6 +28,8 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-project-100554')
 export class ServiceProject100554 extends ServiceBase {
 
+    private defaultProject = 100554;
+
     private msg: MessageType = messages['en'];
 
     @property() activeTab: IScenery = 'Explore';
@@ -224,8 +226,8 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     private async getExploreData() {
-        const { project } = mls.actual[5]
-        if (!project) throw new Error('No project selected');
+        let { project } = mls.actual[5]
+        if (!project) project = this.defaultProject;
         await mls.plugin.loadAll(project, true);
         this.explories = mls.plugin.getAllMenuActions(project, { scope: 'l5Explore' } as any);
 

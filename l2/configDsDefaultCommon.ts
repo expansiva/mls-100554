@@ -12,7 +12,7 @@ export class Common {
     private dsIO: DesignSystemIO;
 
     public getUser(): string {
-        return localStorage.getItem('loginUser') || '';
+        return (mls.api as any)['common'].getCookie("loginUser") || '';
     }
 
     public getDateNow(): string {
@@ -130,7 +130,7 @@ export class Common {
                     description: list[theme].description
                 }
             }
-            
+
             const cats = Object.keys(list[theme]);
             cats.forEach((cat) => {
                 if (obj && !obj[cat as TokensCategories] && cat !== 'description') {
@@ -466,7 +466,7 @@ export class Common {
         if (!extension.startsWith('.')) extension = '.' + extension;
         const fileKey = this.getStorFileName(shortName, fullpath, extension);
         const file = mls.stor.files[fileKey];
-        if (!file) throw new Error('Invalid file');
+        if (!file) return null;
 
         const inLc = file.inLocalStorage;
         if (forceOriginal) file.inLocalStorage = false;
@@ -475,7 +475,7 @@ export class Common {
             return content;
         }
 
-        if (!file.getValueInfo) throw new Error('Invalid getValueInfo');
+        if (!file.getValueInfo) return null;
         const contentInfo = await file.getValueInfo();
         file.inLocalStorage = inLc;
         return contentInfo.content as string;

@@ -3,6 +3,7 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
+import { getConfigProject, createConfigFile } from './_100554_libProjectConfig'
 
 @customElement('collab-init-100554')
 export class CollabInit extends CollabLitElement {
@@ -64,6 +65,7 @@ export class CollabInit extends CollabLitElement {
         this.showMessagesIfNeeded();
         const services = await this.getServices();
         this.checkURLParams();
+        this.initProjectLocalIfNeeded();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
     }
 
@@ -272,7 +274,7 @@ export class CollabInit extends CollabLitElement {
     private setProjectActual(): number | undefined {
         if (window.traceLifeCycle) console.info('setProjectActual');
         const project = this.getLastProjectSelected();
-        if (project) mls.actual[5].project = project || 0;
+        mls.actual[5].project = project || 0;
         return project;
     }
 
@@ -451,6 +453,12 @@ export class CollabInit extends CollabLitElement {
         };
     }
 
+    private async initProjectLocalIfNeeded() {
+        const { project } = mls.actual[5];
+        if (project !== 0) return;
+        const configProjectAnonymous = await getConfigProject(0);
+        if (!configProjectAnonymous) await createConfigFile(0);
+    }
 
 
 }
