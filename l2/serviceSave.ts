@@ -11,6 +11,8 @@ import { getConfigProject, updateConfigProject } from './_100554_libProjectConfi
 initServiceSaveaddBranch();
 /// **collab_i18n_start**
 const message_pt = {
+    openPullrequest: 'Pull request Abertos',
+    needComment: 'Precisa de um comentario para o pullrequest',
     updateChanges: 'Atualizar alterações',
     comments: 'Comentários',
     update: 'Atualizar',
@@ -28,6 +30,8 @@ const message_pt = {
 }
 
 const message_en = {
+    openPullrequest: 'Open pull requests',
+    needComment: 'Need a comment for the pullrequest',
     updateChanges: 'Update Changes',
     comments: 'Comments',
     update: 'Update',
@@ -63,10 +67,13 @@ export class ServiceSave extends ServiceBase {
     private repo: string = '';
     private branch: string = '';
 
+    private listPull: any[] = [];
+
     private scenery: string = 'save';
 
     @property() itens: any = undefined;
     @property() error: string = '';
+    @property() pullrequestNumber: string = 'Pull request';
 
     createRenderRoot() {
         return this;
@@ -193,6 +200,10 @@ export class ServiceSave extends ServiceBase {
 
         }
 
+        if (this.scenery === 'listPull') {
+            return this.renderListPull();
+        }
+
         if (this.scenery !== 'save') {
             return this.renderBlockScenery();
         }
@@ -212,6 +223,27 @@ export class ServiceSave extends ServiceBase {
             `
 
         }
+    }
+
+    renderListPull() {
+        return html`
+            <div>
+                <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { this.scenery = 'save'; this.requestUpdate() }}">
+                    ${collab_branch} Voltar
+                </button>
+                <h3>${this.myMessage.openPullrequest}</h3>
+                <ul style="list-style: decimal;">
+                    ${repeat(this.listPull, ((key: any) => key.id) as any, ((k: any, index: any) => { return this.renderItemListPull(k, index); }) as any)}
+                </ul>
+            </div>
+
+        `;
+    }
+
+    renderItemListPull(i: any, index: number) {
+        return html`<li>
+            <a href="${i.url}" style="text-decoration: underline; cursor: pointer;" target="_blank">${i.title} (${i.author.login})</a>
+        </li>`;
     }
 
     renderBlockScenery() {
@@ -252,14 +284,18 @@ export class ServiceSave extends ServiceBase {
                     <span>${this.branch}</span> 
                 </div>
 
-                <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { if (this.menu.setMenuActive) this.menu.setMenuActive('opBranch') }}">
+                <button style=" display: none; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { if (this.menu.setMenuActive) this.menu.setMenuActive('opBranch') }}">
                     ${collab_branch} Change
                 </button>
 
-                ${this.renderShowPullrequest()}
+                <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { this.loadListPullRequest(); }}">
+                    ${collab_branch} ${this.pullrequestNumber}
+                </button>
+
+                
 
             </div>
-        `
+        `//${this.renderShowPullrequest()}
     }
 
     renderShowPullrequest() {
@@ -520,6 +556,8 @@ export class ServiceSave extends ServiceBase {
 
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
+
+            await this.setNumPullRequest()
 
             for (const fKey of filesKeys) {
 
@@ -789,7 +827,264 @@ export class ServiceSave extends ServiceBase {
 
     private forceSaveL5ProjectFile: boolean = false;
 
+    //Sempre que salvar vai gerar um novo branch no usuario e solicitar um pullrequest.
     private async onSave(e: MouseEvent) {
+        try {
+
+            e.stopPropagation();
+
+
+            const el = e.target as HTMLButtonElement;
+            if (!el) return;
+            const father = el.closest('sectionsave') as HTMLDivElement;
+            if (!father) return;
+
+            const txt = father.querySelector('textarea') as HTMLTextAreaElement;
+
+            if (!txt.value) {
+                throw new Error(this.myMessage.needComment);
+            }
+
+            this.showLoader(true);
+
+            if (!mls.l5.actualOrg) throw new Error('No organization selected');
+            const prj = mls.actual[5].project;
+            if (!prj) throw new Error('Not found project actual');
+
+            const actualOrg = Object.keys(mls.stor.orgs)[mls.l5.actualOrg];
+            const config = await getConfigProject(prj, true);
+
+            if (!config) throw new Error('Not found config file in this project');
+            const configOrg = config.orgName;
+
+            if (actualOrg !== configOrg) {
+                config.orgName = actualOrg;
+                await updateConfigProject(prj, config);
+                this.forceSaveL5ProjectFile = true;
+            }
+
+            const msg = txt.value;
+            const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
+
+            const oldOwner = this.owner;
+            const oldRepo = this.repo;
+            const oldBranch = this.branch;
+
+            await this.fireCreateForkOrUpdate();
+            console.info('gerou o fork');
+
+            await this.fireCreateNewBranch();
+            console.info('gerou o branche');
+
+            await this.onSavenewPullrequest(array, msg);
+            console.info('gerou o push');
+
+            await this.firePullrequest(msg);
+            console.info('gerou o pullrequest');
+
+            txt.value = '';
+            this.clearLocalHIstoryCurrentInfoDriver();
+
+            this.owner = oldOwner;
+            this.repo = oldRepo;
+            this.branch = oldBranch;
+
+            await this.setInfos();
+            this.fireEvents();
+            this.showLoader(false);
+
+        } catch (err: any) {
+            this.error = err.message;
+            this.showLoader(false);
+            console.info('Error onSave:', err);
+        }
+    }
+
+    private async onSavenewPullrequest(ar: mls.stor.IFileInfo[], msg: string) {
+
+        if (ar.length <= 0) return;
+        try {
+
+
+            const arrSet: mls.stor.IFileInfo[] = [];
+
+            ar.forEach((i) => {
+
+                i.inLocalStorage = false;
+                if (!i.onAction) i.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdate(i);
+
+                arrSet.push(i);
+
+            });
+
+            if (arrSet.length > 0) {
+                await mls.stor.setContents(arrSet, msg);
+            }
+
+            return;
+
+        } catch (e: any) {
+
+            this.error = e.message;
+
+        }
+
+    }
+
+    private async fireCreateForkOrUpdate() {
+
+        try {
+
+            const prj = mls.actual[5].project;
+            if (!prj) throw new Error('Not found project actual');
+
+            const info = this.getLocalHIstoryCurrentInfoDriver();
+            const driver = mls.stor.others.getDefaultDriver(prj);
+
+            const user = await driver.getUserInfo();
+            info.login = user.login;
+
+            const isForkExist = await (driver as any).checkForkIO(this.owner, this.repo, info.login);
+
+            if (!isForkExist) {
+
+                console.info('criou um novo fork');
+                const ret = await driver.createFork(info.login, this.repo, this.owner, info.login);
+
+                if (!ret) throw new Error('Error create fork');
+
+                this.owner = info.login;
+                this.branch = 'main';
+
+            } else {
+
+                console.info('atualizou fork');
+                const opt = {
+                    repoOrigin:this.repo,
+                    ownerOrigin:this.owner,
+                    branchOrigin:'main',
+                    repoDest:this.repo,
+                    ownerDest:info.login,
+                    branchDest:'main',
+                }
+
+                const ret = await (driver as any).syncFork(opt);
+
+                if(!ret) throw new Error('Error sync fork');
+                this.owner = info.login;
+
+            }
+
+        } catch (e: any) {
+
+            this.error = e.message;
+            this.showLoader(false);
+            console.info('Error fireCreateForkOrUpdate: ' + e.message);
+            throw new Error('Error fireCreateForkOrUpdate: ' + e.message);
+
+        }
+
+    }
+
+    private async fireCreateNewBranch() {
+
+        try {
+
+            const prj = mls.actual[5].project;
+            if (!prj) throw new Error('Not found project actual');
+
+            const driver = mls.stor.others.getDefaultDriver(prj);
+
+            const user = await driver.getUserInfo();
+            const login = user.login;
+
+            const newBranch = login + '_' + Date.now().toString();
+            const ret = await driver.createNewBranch({ owner: this.owner, repo: this.repo, branch: this.branch, newBranch: newBranch });
+
+            if (!ret) throw new Error('Error create Branch');
+
+            this.branch = newBranch;
+            this.setLocalHIstoryCurrentInfoDriver();
+
+        } catch (err: any) {
+            throw new Error('fireCreateNewBranch' + err.message)
+        }
+
+    }
+
+    private async firePullrequest(msg: string) {
+        try {
+
+            const prj = mls.actual[5].project;
+            if (!prj) throw new Error('Not found project actual');
+
+            const driver = mls.stor.others.getDefaultDriver(prj);
+
+            const opt = {
+                owner: this.owner,
+                repo: this.repo,
+                branch: this.branch,
+                title: msg,
+                description: msg
+            }
+            const ret = await driver.createPullRequest(opt);
+
+            if (!ret) throw new Error('Error Pull request');
+
+
+
+        } catch (err: any) {
+            throw new Error('firePullrequest' + err.message);
+
+        }
+    }
+
+    private async setNumPullRequest() {
+
+        const prj = mls.actual[5].project;
+        if (!prj) throw new Error('Not found project actual');
+
+        const driver = mls.stor.others.getDefaultDriver(prj);
+
+        this.showLoader(true);
+        const ret = await driver.listPullRequests(this.owner, this.repo);
+
+        if (ret && ret.length > 0) {
+            this.pullrequestNumber = 'Pull request (' + ret.length + ')';
+        } else {
+            this.pullrequestNumber = 'Pull request';
+        }
+    }
+
+
+    private async loadListPullRequest() {
+
+        try {
+
+            const prj = mls.actual[5].project;
+            if (!prj) throw new Error('Not found project actual');
+
+            const driver = mls.stor.others.getDefaultDriver(prj);
+
+            this.showLoader(true);
+            const ret = await driver.listPullRequests(this.owner, this.repo);
+            this.listPull = ret;
+
+            this.scenery = 'listPull';
+            this.requestUpdate();
+            this.showLoader(false);
+
+        } catch (err: any) {
+            this.scenery = 'save';
+            this.requestUpdate();
+            this.showLoader(false);
+
+        }
+
+    }
+
+    //Manter para no futuro implementarmos o modo de salvar direto no repo.
+    private async onSave_withOutPullRequest(e: MouseEvent) {
 
         try {
 
@@ -890,6 +1185,21 @@ export class ServiceSave extends ServiceBase {
 
         }
 
+
+    }
+
+    private clearLocalHIstoryCurrentInfoDriver(): void {
+
+        const prj = mls.actual[5].project;
+        if (!prj) throw new Error('Not found project actual');
+
+        let str = localStorage.getItem('InfoCurrentDriver');
+        if (!str) str = '{}';
+
+        const info: any = JSON.parse(str);
+        if (info[prj]) delete info[prj];
+
+        localStorage.setItem('InfoCurrentDriver', JSON.stringify(info));
 
     }
 
@@ -1035,7 +1345,7 @@ export class ServiceSave extends ServiceBase {
 
             const driver = mls.stor.others.getDefaultDriver(mls.actual[5].project as number);
 
-            if (!driver  || !array  || !(driver as any).getVersionFromFiles) return;
+            if (!driver || !(driver as any).getVersionFromFiles) return;
 
             const info = await (driver as any).getVersionFromFiles(this.owner, this.repo, this.branch, array);
 
