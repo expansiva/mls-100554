@@ -249,7 +249,7 @@ export class ServicePreview100554 extends ServiceBase {
             const storFileHTML = mls.stor.files[keyToFileInfo];
 
             if (fileAction.action === 'open') this.setModel(storFileHTML);
-            
+
             if (mls.istrace) console.info('is preview repaint:' + this.watch);
             if (fileAction.action === 'open' && this.watch) {
                 this.loading = true;
@@ -430,21 +430,27 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async setLanguages() {
         const { project } = mls.actual[5];
-        if (!project) throw new Error('Invalid project');
-        const config = await getConfigProject(project);
-
-        if (!config || !config.languages || config.languages.length === 0) {
+        if (!project) {
             this.languages = {
                 'English_en': { acronym: 'en', name: 'English' }
             }
         } else {
-            config.languages.forEach((entry, index) => {
-                this.languages[`${entry.name}_${entry.language}`] = {
-                    acronym: entry.language,
-                    name: entry.name,
+            const config = await getConfigProject(project);
+
+            if (!config || !config.languages || config.languages.length === 0) {
+                this.languages = {
+                    'English_en': { acronym: 'en', name: 'English' }
                 }
-            });
+            } else {
+                config.languages.forEach((entry, index) => {
+                    this.languages[`${entry.name}_${entry.language}`] = {
+                        acronym: entry.language,
+                        name: entry.name,
+                    }
+                });
+            }
         }
+
 
         if (this.menu.buttons) this.menu.buttons.btVariations = this.msg.variations + `;f1ab:menu-flags:${Object.keys(this.languages).join(',')}`;
         if (this.menu.refresh) this.menu.refresh();
