@@ -4,141 +4,149 @@ import * as dL from './_100554_driverLib';
 
 export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
-    public shortName: string = 'GitHub';
-    public project: number = 100554;
-    public driverVersion: string = '1.0.0.1';
+	public shortName: string = 'GitHub';
+	public project: number = 100554;
+	public driverVersion: string = '1.0.0.2';
 
-    constructor() {
+	constructor() {
 
-        super();
-        if (mls.istrace) console.info('gitDriver: ' + this.driverVersion);
+		super();
+		if (mls.istrace) console.info('gitDriver: ' + this.driverVersion);
 
-    }
+	}
 
-    get mKey(): string {
+	get mKey(): string {
 
-        const _mKey = localStorage.getItem('keyGitHub');
-        if (!_mKey) throw new Error('Please configure your key git hub');
-        return _mKey;
+		const _mKey = localStorage.getItem('keyGitHub');
+		if (!_mKey) throw new Error('Please configure your key git hub');
+		return _mKey;
 
-    }
+	}
 
 
-    public getContents = (project: number, fileInfos: mls.stor.IFileInfo[]): Promise<mls.stor.IRegGetContents[]> => {
-        return this._getContents(project, fileInfos);
-    }
+	public getContents = (project: number, fileInfos: mls.stor.IFileInfo[]): Promise<mls.stor.IRegGetContents[]> => {
+		return this._getContents(project, fileInfos);
+	}
 
-    public setContents = (project: number, fileInfos: mls.stor.IFileInfo[], comments: string | null): Promise<boolean> => {
-        return this._setContents(project, fileInfos, comments);
-    };
+	public setContents = (project: number, fileInfos: mls.stor.IFileInfo[], comments: string | null): Promise<boolean> => {
+		return this._setContents(project, fileInfos, comments);
+	};
 
-    public loadFilesInfo(project: number): Promise<mls.cbe.IPrjSourcesFiles[]> {
-        return this._loadFilesInfo(project);
-    }
+	public loadFilesInfo(project: number): Promise<mls.cbe.IPrjSourcesFiles[]> {
+		return this._loadFilesInfo(project);
+	}
 
-    public getHistory(fileInfo: mls.stor.IFileInfo): Promise<mls.stor.IHistory[] | null> {
-        return this._getHistory(fileInfo)
-    }
+	public getHistory(fileInfo: mls.stor.IFileInfo): Promise<mls.stor.IHistory[] | null> {
+		return this._getHistory(fileInfo)
+	}
 
-    public getHistoryContent(fileInfo: mls.stor.IFileInfo, ref: string): Promise<string | null> {
-        return this._getHistoryContent(fileInfo, ref)
-    }
+	public getHistoryContent(fileInfo: mls.stor.IFileInfo, ref: string): Promise<string | null> {
+		return this._getHistoryContent(fileInfo, ref)
+	}
 
-    public getUrl(file: mls.stor.IFileInfo): string {
-        return this._getUrl(file);
-    }
+	public getUrl(file: mls.stor.IFileInfo): string {
+		return this._getUrl(file);
+	}
 
-    public getVersionFromFiles(options: { owner: string; repo: string; branchName: string; files: mls.stor.IFileInfo[]; }): Promise<{ [key: string]: string; } | undefined> {
-        return this.getVersionFromFilesIO(options);
-    }
+	public getVersionFromFiles(options: { owner: string; repo: string; branchName: string; files: mls.stor.IFileInfo[]; }): Promise<{ [key: string]: string; } | undefined> {
+		return this.getVersionFromFilesIO(options);
+	}
 
-    public checkBranchExistence(owner: string, repo: string, branchName: string): Promise<boolean> {
-        throw this.checkBranchExistenceIO(owner, repo, branchName);
-    }
+	public checkBranchExistence(owner: string, repo: string, branchName: string): Promise<boolean> {
+		throw this.checkBranchExistenceIO(owner, repo, branchName);
+	}
 
-    public createNewBranch(option: { owner: string; repo: string; branch: string; newBranch: string; }): Promise<boolean> {
-        return this.createNewBranchIO(option);
-    }
+	public createNewBranch(option: { owner: string; repo: string; branch: string; newBranch: string; }): Promise<boolean> {
+		return this.createNewBranchIO(option);
+	}
 
-    public createPullRequest(options: { owner: string; repo: string; title: string; branch: string; description: string; }): Promise<boolean> {
-        return this.createPullRequestIO(options);
-    }
+	public createPullRequest(options: { owner: string; repo: string; title: string; branch: string; description: string; }): Promise<boolean> {
+		return this.createPullRequestIO(options);
+	}
 
-    public reviewPullRequest(options: { owner: string; repo: string; branch: string; idRequest: string; isApproved: boolean; }): Promise<boolean> {
-        return this.reviewPullRequestIO(options);
-    }
+	public reviewPullRequest(options: { owner: string; repo: string; branch: string; idRequest: string; isApproved: boolean; }): Promise<boolean> {
+		return this.reviewPullRequestIO(options);
+	}
 
-    public listPullRequests(owner: string, repo: string): Promise<mls.stor.others.IPullRequest[]> {
-        return this.listPullRequestsIO(owner, repo);
-    }
+	public listPullRequests(owner: string, repo: string): Promise<mls.stor.others.IPullRequest[]> {
+		return this.listPullRequestsIO(owner, repo);
+	}
 
-    public listForks(owner: string, repo: string): Promise<mls.stor.others.IFork[]> {
-        return this.listForksIO(owner, repo);
-    }
+	public listForks(owner: string, repo: string): Promise<mls.stor.others.IFork[]> {
+		return this.listForksIO(owner, repo);
+	}
 
-    public listBranches(owner: string, repo: string): Promise<mls.stor.others.IBranch[]> {
-        return this.listBranchesIO(owner, repo);
-    }
+	public listBranches(owner: string, repo: string): Promise<mls.stor.others.IBranch[]> {
+		return this.listBranchesIO(owner, repo);
+	}
 
-    public getUserInfo(): Promise<mls.stor.others.IInfo> {
-        return this.getUserInfoIO();
-    }
+	public getUserInfo(): Promise<mls.stor.others.IInfo> {
+		return this.getUserInfoIO();
+	}
 
-    public getOrganizations(login: string): Promise<mls.stor.others.IOrg[]> {
-        return this.getOrganizationsIO(login);
-    }
+	public getOrganizations(login: string): Promise<mls.stor.others.IOrg[]> {
+		return this.getOrganizationsIO(login);
+	}
 
-    public createRepository(login: string, repo: string, organization: string, description: string, visibility: "PUBLIC" | "PRIVATE" | "INTERNAL"): Promise<boolean> {
-        return this.createRepositoryIO(login, repo, organization, description, visibility);
-    }
+	public createRepository(login: string, repo: string, organization: string, description: string, visibility: "PUBLIC" | "PRIVATE" | "INTERNAL"): Promise<boolean> {
+		return this.createRepositoryIO(login, repo, organization, description, visibility);
+	}
 
-    public deleteRepository(repo: string, organization: string): Promise<boolean> {
-        return this.deleteRepositoryIO(repo, organization);
-    }
+	public deleteRepository(repo: string, organization: string): Promise<boolean> {
+		return this.deleteRepositoryIO(repo, organization);
+	}
 
-    public createFork(login: string, repoOri: string, orgOri: string, orgDest: string): Promise<boolean> {
-        return this.createForkIO(login, repoOri, orgOri, orgDest);
-    }
+	public createFork(login: string, repoOri: string, orgOri: string, orgDest: string): Promise<boolean> {
+		return this.createForkIO(login, repoOri, orgOri, orgDest);
+	}
 
-    public renameRepository(owner: string, repo: string, newName: string): Promise<boolean> {
-        return this.renameRepositoryIO(owner, repo, newName);
-    }
+	public renameRepository(owner: string, repo: string, newName: string): Promise<boolean> {
+		return this.renameRepositoryIO(owner, repo, newName);
+	}
 
-    public createFileInRepo(owner: string, repo: string, path: string, content: string | Uint8Array): Promise<boolean> {
-        return this.createFileInRepoIO(owner, repo, path, content);
-    }
+	public createFileInRepo(owner: string, repo: string, path: string, content: string | Uint8Array): Promise<boolean> {
+		return this.createFileInRepoIO(owner, repo, path, content);
+	}
 
-    public changeVisibility(owner: string, repo: string, visibility: "PUBLIC" | "PRIVATE" | "INTERNAL"): Promise<boolean> {
-        return this.changeVisibilityIO(owner, repo, visibility);
-    }
+	public changeVisibility(owner: string, repo: string, visibility: "PUBLIC" | "PRIVATE" | "INTERNAL"): Promise<boolean> {
+		return this.changeVisibilityIO(owner, repo, visibility);
+	}
 
-    public verifyRepositoryNew(owner: string, repo: string, user: string): Promise<"free" | "reuse" | "wait" | "error"> {
-        return this.verifyRepositoryNewIO(owner, repo, user);
-    }
+	public verifyRepositoryNew(owner: string, repo: string, user: string): Promise<"free" | "reuse" | "wait" | "error"> {
+		return this.verifyRepositoryNewIO(owner, repo, user);
+	}
 
-    public verifyPermission(owner: string, repo: string, login: string): Promise<mls.stor.others.IPermission> {
-        return this.verifyPermissionIO(owner, repo, login);
-    }
+	public verifyPermission(owner: string, repo: string, login: string): Promise<mls.stor.others.IPermission> {
+		return this.verifyPermissionIO(owner, repo, login);
+	}
 
-    public addVariable(name: string, value: string): Promise<boolean> {
-        return this.addVariableIO(name, value);
-    }
+	public addVariable(name: string, value: string): Promise<boolean> {
+		return this.addVariableIO(name, value);
+	}
 
-    public updateVariable(name: string, value: string): Promise<boolean> {
-        return this.updateVariableIO(name, value);
-    }
+	public updateVariable(name: string, value: string): Promise<boolean> {
+		return this.updateVariableIO(name, value);
+	}
 
-    public listVariables(): Promise<{ variables: { name: string; value: string; created_at: string; updated_at: string; }[]; total_count: number; }> {
-        return this.listVariablesIO();
-    }
+	public listVariables(): Promise<{ variables: { name: string; value: string; created_at: string; updated_at: string; }[]; total_count: number; }> {
+		return this.listVariablesIO();
+	}
 
-    public delVariable(name: string): Promise<boolean> {
-        return this.delVariableIO(name);
-    }
+	public delVariable(name: string): Promise<boolean> {
+		return this.delVariableIO(name);
+	}
 
-    //---------IMPLEMENTS-----------
+	public checkFork(ownerOrigin: string, repoOrigin: string, login: string): Promise<boolean> {
+		return this.checkForkIO(ownerOrigin, repoOrigin, login);
+	}
 
-    private _getUrl(file: mls.stor.IFileInfo) {
+	public syncFork(options: { repoOrigin: string, ownerOrigin: string, branchOrigin: string, repoDest: string, ownerDest: string, branchDest: string }): Promise<boolean> {
+		return this.syncForkIO(options);
+	}
+
+	//---------IMPLEMENTS-----------
+
+	private _getUrl(file: mls.stor.IFileInfo) {
 
 		const { branch, owner, repo } = dL.getMyKeysBranch(file.project);
 
@@ -147,365 +155,365 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		return url;
 	}
 
-    private async _getContents(project: number, fileInfos: mls.stor.IFileInfo[]): Promise<mls.stor.IRegGetContents[]> {
+	private async _getContents(project: number, fileInfos: mls.stor.IFileInfo[]): Promise<mls.stor.IRegGetContents[]> {
 
-        try {
+		try {
 
-            return this.getContents2(fileInfos, []);
+			return this.getContents2(fileInfos, []);
 
-        } catch (e: any) {
+		} catch (e: any) {
 
-            throw new Error('_getContents:' + e.message);
+			throw new Error('_getContents:' + e.message);
 
-        }
+		}
 
-    }
+	}
 
-    private async getContents2(fileInfos: mls.stor.IFileInfo[], father: mls.stor.IRegGetContents[]) {
+	private async getContents2(fileInfos: mls.stor.IFileInfo[], father: mls.stor.IRegGetContents[]) {
 
-        if (fileInfos.length <= 0) return father;
+		if (fileInfos.length <= 0) return father;
 
-        const r = await this.getContent3(fileInfos[0]);
-        father.push({
-            fileInfo: fileInfos[0],
-            content: r
-        });
+		const r = await this.getContent3(fileInfos[0]);
+		father.push({
+			fileInfo: fileInfos[0],
+			content: r
+		});
 
-        if (fileInfos.length >= 1) {
+		if (fileInfos.length >= 1) {
 
-            fileInfos.splice(0, 1);
-            father = await this.getContents2(fileInfos, father);
+			fileInfos.splice(0, 1);
+			father = await this.getContents2(fileInfos, father);
 
-        }
+		}
 
-        return father;
+		return father;
 
-    }
+	}
 
-    private getContent3(fileInfo: mls.stor.IFileInfo): Promise<string | Blob | null> {
+	private getContent3(fileInfo: mls.stor.IFileInfo): Promise<string | Blob | null> {
 
-        return new Promise<string | Blob | null>(async (resolve, reject) => {
+		return new Promise<string | Blob | null>(async (resolve, reject) => {
 
-            try {
+			try {
 
-                const auxLevel = fileInfo.level === 0 ? '' : `l${fileInfo.level}/`;
-                const aux = fileInfo.folder === '' || fileInfo.folder.endsWith('/') ? '' : '/';
-                const ext = fileInfo.extension ? fileInfo.extension : '.ts';
-                const fileName = auxLevel + fileInfo.folder.replace(/\\/g, '/') + aux + fileInfo.shortName + ext;
+				const auxLevel = fileInfo.level === 0 ? '' : `l${fileInfo.level}/`;
+				const aux = fileInfo.folder === '' || fileInfo.folder.endsWith('/') ? '' : '/';
+				const ext = fileInfo.extension ? fileInfo.extension : '.ts';
+				const fileName = auxLevel + fileInfo.folder.replace(/\\/g, '/') + aux + fileInfo.shortName + ext;
 
-                let ret: any = '';
+				let ret: any = '';
 
-                if (['.html', '.ts', '.css', '.txt', '.json', '.md', '.js', '.less'].includes(ext)) {
+				if (['.html', '.ts', '.css', '.txt', '.json', '.md', '.js', '.less'].includes(ext)) {
 
-                    ret = await this.getFilesIO(fileInfo.project, fileName);
+					ret = await this.getFilesIO(fileInfo.project, fileName);
 
-                } else {
+				} else {
 
-                    ret = await this.getFilesRestIO(fileInfo.project, fileInfo.versionRef, fileInfo.extension);
+					ret = await this.getFilesRestIO(fileInfo.project, fileInfo.versionRef, fileInfo.extension);
 
-                }
-                resolve(ret);
+				}
+				resolve(ret);
 
-            } catch (e: any) {
+			} catch (e: any) {
 
-                reject(new Error(e.message));
+				reject(new Error(e.message));
 
-            }
+			}
 
-        });
+		});
 
-    }
+	}
 
-    private async _setContents(project: number, fileInfos: mls.stor.IFileInfo[], comments: string | null): Promise<boolean> {
+	private async _setContents(project: number, fileInfos: mls.stor.IFileInfo[], comments: string | null): Promise<boolean> {
 
-        try {
+		try {
 
-            return this.setContents2(fileInfos, comments);
+			return this.setContents2(fileInfos, comments);
 
-        } catch (e: any) {
+		} catch (e: any) {
 
-            throw new Error(e.message);
+			throw new Error(e.message);
 
-        }
+		}
 
-    }
+	}
 
-    private async setContents2(fileInfos: mls.stor.IFileInfo[], comments: string | null) {
+	private async setContents2(fileInfos: mls.stor.IFileInfo[], comments: string | null) {
 
-        if (fileInfos.length <= 0) return true;
+		if (fileInfos.length <= 0) return true;
 
-        let ret = false;
-        let add: { path: string, content: string | Blob }[] = [];
-        let del: { path: string }[] = [];
+		let ret = false;
+		let add: { path: string, content: string | Blob }[] = [];
+		let del: { path: string }[] = [];
 
-        for await (const f of fileInfos) {
+		for await (const f of fileInfos) {
 
-            const aux = f.folder === '' || f.folder.endsWith('/') ? '' : '/';
-            const aux2 = f.extension.startsWith('.') ? '' : '.';
-            const auxLevelPath = f.level === 0 ? '' : `l${f.level}/`;
-            const path = `${auxLevelPath}` + f.folder.replace(/\\/g, '/') + aux + f.shortName + aux2 + f.extension;
+			const aux = f.folder === '' || f.folder.endsWith('/') ? '' : '/';
+			const aux2 = f.extension.startsWith('.') ? '' : '.';
+			const auxLevelPath = f.level === 0 ? '' : `l${f.level}/`;
+			const path = `${auxLevelPath}` + f.folder.replace(/\\/g, '/') + aux + f.shortName + aux2 + f.extension;
 
-            if (f.status === 'deleted') {
+			if (f.status === 'deleted') {
 
-                del.push({ path });
+				del.push({ path });
 
-            } else if (['changed', 'new', 'nochange'].includes(f.status)) {
+			} else if (['changed', 'new', 'nochange'].includes(f.status)) {
 
-                add = await this.setContentAddFile(f, path, add);
+				add = await this.setContentAddFile(f, path, add);
 
-            } else if (f.status === 'renamed') {
+			} else if (f.status === 'renamed') {
 
-                const info = f.getValueInfo ? await f.getValueInfo() : undefined;
+				const info = f.getValueInfo ? await f.getValueInfo() : undefined;
 
-                if (!info) continue;
+				if (!info) continue;
 
-                const fileNameOld = `${auxLevelPath}` + f.folder.replace(/\\/g, '/') + aux + info.originalShortName + f.extension;
+				const fileNameOld = `${auxLevelPath}` + f.folder.replace(/\\/g, '/') + aux + info.originalShortName + f.extension;
 
-                add = await this.setContentAddFile(f, path, add);
-                del.push({ path: fileNameOld });
+				add = await this.setContentAddFile(f, path, add);
+				del.push({ path: fileNameOld });
 
-            } else throw new Error('Status invalid');
+			} else throw new Error('Status invalid');
 
-        }
+		}
 
-        try {
+		try {
 
-            ret = await this.saveMultipleFilesIO(fileInfos[0].project, add, del, comments as string);
+			ret = await this.saveMultipleFilesIO(fileInfos[0].project, add, del, comments as string);
 
-            await this.afterSave(fileInfos);
+			await this.afterSave(fileInfos);
 
-            return ret;
+			return ret;
 
-        } catch (e: any) {
+		} catch (e: any) {
 
-            throw new Error('Error:' + e.message);
+			throw new Error('Error:' + e.message);
 
-        }
+		}
 
-    }
+	}
 
-    private async afterSave(fileInfos: mls.stor.IFileInfo[]) {
+	private async afterSave(fileInfos: mls.stor.IFileInfo[]) {
 
-        try {
+		try {
 
-            for await (const f of fileInfos) {
+			for await (const f of fileInfos) {
 
-                if (f.onAction) {
+				if (f.onAction) {
 
-                    await f.onAction('aftersave');
+					await f.onAction('aftersave');
 
-                }
+				}
 
-            }
+			}
 
-        } catch (e: any) {
+		} catch (e: any) {
 
-            console.info('Erro onAftersace:' + e.message);
+			console.info('Erro onAftersace:' + e.message);
 
-        }
-    }
+		}
+	}
 
-    private async setContentAddFile(
-        f: mls.stor.IFileInfo,
-        path: string,
-        add: { path: string, content: string | Blob }[]):
-        Promise<{ path: string, content: string | Blob }[]> {
+	private async setContentAddFile(
+		f: mls.stor.IFileInfo,
+		path: string,
+		add: { path: string, content: string | Blob }[]):
+		Promise<{ path: string, content: string | Blob }[]> {
 
-        let cont = await this.verifyAndGetContent(f);
+		let cont = await this.verifyAndGetContent(f);
 
-        if (typeof cont !== 'string') {
+		if (typeof cont !== 'string') {
 
-            cont = await dL.fileToBase64(cont as File);
-            [, cont] = cont.split('base64,');
+			cont = await dL.fileToBase64(cont as File);
+			[, cont] = cont.split('base64,');
 
-        } else cont = dL.base64EncodeUnicode(cont);//btoa(cont);
+		} else cont = dL.base64EncodeUnicode(cont);//btoa(cont);
 
-        add.push({ path, content: cont as string });
+		add.push({ path, content: cont as string });
 
-        return add;
+		return add;
 
-    }
+	}
 
-    private async verifyAndGetContent(fileInfo: mls.stor.IFileInfo) {
+	private async verifyAndGetContent(fileInfo: mls.stor.IFileInfo) {
 
-        const oldV = fileInfo.inLocalStorage;
-        fileInfo.inLocalStorage = true;
+		const oldV = fileInfo.inLocalStorage;
+		fileInfo.inLocalStorage = true;
 
-        if (fileInfo.getValueInfo) {
+		if (fileInfo.getValueInfo) {
 
-            const cont = (await fileInfo.getValueInfo()).content;
-            fileInfo.inLocalStorage = oldV;
-            return cont;
+			const cont = (await fileInfo.getValueInfo()).content;
+			fileInfo.inLocalStorage = oldV;
+			return cont;
 
-        }
+		}
 
-        const cont = await fileInfo.getContent();
-        fileInfo.inLocalStorage = oldV;
-        return cont;
+		const cont = await fileInfo.getContent();
+		fileInfo.inLocalStorage = oldV;
+		return cont;
 
-    }
+	}
 
 
-    private async _loadFilesInfo(project: number): Promise<mls.cbe.IPrjSourcesFiles[]> {
-        return new Promise<any[]>(async (resolve, reject) => {
+	private async _loadFilesInfo(project: number): Promise<mls.cbe.IPrjSourcesFiles[]> {
+		return new Promise<any[]>(async (resolve, reject) => {
 
-            try {
+			try {
 
-                let projectDriver = 'mls';
-                let projectURL = '';
+				let projectDriver = 'mls';
+				let projectURL = '';
 
-                const obj = mls.l5.getProjectDetails(project);
-                if (!obj || !obj.value) throw new Error('Error loadFilesInfo getProjectDetails in:' + project);
+				const obj = mls.l5.getProjectDetails(project);
+				if (!obj || !obj.value) throw new Error('Error loadFilesInfo getProjectDetails in:' + project);
 
-                const json = JSON.parse(obj.value);
-                if (!json) throw new Error('Error loadFilesInfo getProjectDetails .value json in:' + project);
+				const json = JSON.parse(obj.value);
+				if (!json) throw new Error('Error loadFilesInfo getProjectDetails .value json in:' + project);
 
-                if (!json.projectURL && json.l5_actionPrjSettings) {
+				if (!json.projectURL && json.l5_actionPrjSettings) {
 
-                    projectDriver = json.l5_actionPrjSettings.projectDriver || 'mls';
-                    projectURL = json.l5_actionPrjSettings.projectURL || '';
+					projectDriver = json.l5_actionPrjSettings.projectDriver || 'mls';
+					projectURL = json.l5_actionPrjSettings.projectURL || '';
 
-                } else if (json.projectURL) {
+				} else if (json.projectURL) {
 
-                    projectDriver = json.projectDriver || 'mls';
-                    projectURL = json.projectURL || '';
+					projectDriver = json.projectDriver || 'mls';
+					projectURL = json.projectURL || '';
 
-                } else {
-                    throw new Error('Error loadFilesInfo project info:' + project);
-                }
+				} else {
+					throw new Error('Error loadFilesInfo project info:' + project);
+				}
 
-                (mls as any).stor.projects[project] = {
-                    project,
-                    projectDriver,
-                    projectURL,
-                };
+				(mls as any).stor.projects[project] = {
+					project,
+					projectDriver,
+					projectURL,
+				};
 
-                const ret = await this.getFilesRepo(project);
-                return ret;
+				const ret = await this.getFilesRepo(project);
+				return ret;
 
-            } catch (e: any) {
-                reject(new Error(e.message));
-            }
+			} catch (e: any) {
+				reject(new Error(e.message));
+			}
 
-        });
-    }
+		});
+	}
 
-    private getFilesRepo(project: number): Promise<mls.cbe.IPrjSourcesFiles[]> {
+	private getFilesRepo(project: number): Promise<mls.cbe.IPrjSourcesFiles[]> {
 
-        return new Promise<mls.cbe.IPrjSourcesFiles[]>(async (resolve, reject) => {
+		return new Promise<mls.cbe.IPrjSourcesFiles[]>(async (resolve, reject) => {
 
-            try {
+			try {
 
-                const data = await this.getFilesRepoIO(project);
-                let ret: any[] = [];
+				const data = await this.getFilesRepoIO(project);
+				let ret: any[] = [];
 
-                if (!data.data.repository.object) resolve(ret);
+				if (!data.data.repository.object) resolve(ret);
 
-                if (data.data.repository.object.entries.length <= 0) resolve(ret);
+				if (data.data.repository.object.entries.length <= 0) resolve(ret);
 
-                data.data.repository.object.entries.forEach((obj1: any) => {
+				data.data.repository.object.entries.forEach((obj1: any) => {
 
-                    ret = this.auxLoadFilesInfo2Reenter(obj1, ret);
+					ret = this.auxLoadFilesInfo2Reenter(obj1, ret);
 
-                });
-                resolve(ret);
+				});
+				resolve(ret);
 
-            } catch (e) {
+			} catch (e) {
 
-                reject(e);
+				reject(e);
 
-            }
+			}
 
-        });
+		});
 
-    }
+	}
 
-    private auxLoadFilesInfo2Reenter(obj: any, arr: any[]): any[] {
+	private auxLoadFilesInfo2Reenter(obj: any, arr: any[]): any[] {
 
-        if (!obj.object || !obj.object.entries) {
+		if (!obj.object || !obj.object.entries) {
 
-            if (obj.type === 'blob') {
+			if (obj.type === 'blob') {
 
-                arr.push(
-                    {
-                        ShortPath: 'l0/' + obj.name,
-                        versionRef: obj.oid,
-                        Length: obj.size,
-                    }
-                );
+				arr.push(
+					{
+						ShortPath: 'l0/' + obj.name,
+						versionRef: obj.oid,
+						Length: obj.size,
+					}
+				);
 
-            }
+			}
 
-            return (arr);
-        }
+			return (arr);
+		}
 
-        obj.object.entries.forEach((obj2: any) => {
+		obj.object.entries.forEach((obj2: any) => {
 
-            if (obj2.type === 'blob') {
+			if (obj2.type === 'blob') {
 
-                arr.push(
-                    {
-                        ShortPath: obj2.path.startsWith('l') ? obj2.path : 'l0/' + obj2.path,
-                        versionRef: obj2.oid,
-                        Length: obj2.size,
-                    }
-                );
+				arr.push(
+					{
+						ShortPath: obj2.path.startsWith('l') ? obj2.path : 'l0/' + obj2.path,
+						versionRef: obj2.oid,
+						Length: obj2.size,
+					}
+				);
 
-            } else {
+			} else {
 
-                this.auxLoadFilesInfo2Reenter(obj2, arr);
+				this.auxLoadFilesInfo2Reenter(obj2, arr);
 
-            }
+			}
 
-        });
+		});
 
-        return (arr);
-    }
+		return (arr);
+	}
 
 
-    private _getHistory(file: mls.stor.IFileInfo): Promise<mls.stor.IHistory[]> {
-        return new Promise<mls.stor.IHistory[]>(async (resolve, reject) => {
+	private _getHistory(file: mls.stor.IFileInfo): Promise<mls.stor.IHistory[]> {
+		return new Promise<mls.stor.IHistory[]>(async (resolve, reject) => {
 
-            try {
+			try {
 
-                if (file.status === 'new') resolve([]);
+				if (file.status === 'new') resolve([]);
 
-                const filename = file.shortName + (file.extension.startsWith('.') ? file.extension : '.' + file.extension);
-                const oid = file.versionRef;
-                const data = await this.getHistoryIO(file.project, file.level.toString(), filename, oid);
-                if (data.length <= 0) resolve([]);
+				const filename = file.shortName + (file.extension.startsWith('.') ? file.extension : '.' + file.extension);
+				const oid = file.versionRef;
+				const data = await this.getHistoryIO(file.project, file.level.toString(), filename, oid);
+				if (data.length <= 0) resolve([]);
 
-                const ret: mls.stor.IHistory[] = [];
+				const ret: mls.stor.IHistory[] = [];
 
-                data.forEach((i: any) => {
+				data.forEach((i: any) => {
 
-                    if (!i.node.file) return;
-                    const obj = {
-                        authorName: i.node.author.name,
-                        authorUrl: i.node.author.avatarUrl,
-                        data: i.node.authoredDate,
-                        ref: i.node.file.object.oid,
-                        message: i.node.message,
-                        additions: i.node.additions,
-                        deletions: i.node.deletions,
+					if (!i.node.file) return;
+					const obj = {
+						authorName: i.node.author.name,
+						authorUrl: i.node.author.avatarUrl,
+						data: i.node.authoredDate,
+						ref: i.node.file.object.oid,
+						message: i.node.message,
+						additions: i.node.additions,
+						deletions: i.node.deletions,
 
-                    } as mls.stor.IHistory;
+					} as mls.stor.IHistory;
 
-                    ret.push(obj);
+					ret.push(obj);
 
-                })
+				})
 
-                resolve(ret);
+				resolve(ret);
 
-            } catch (e) {
-                reject(e);
-            }
+			} catch (e) {
+				reject(e);
+			}
 
-        });
+		});
 
-    }
+	}
 
-    private _getHistoryContent(file: mls.stor.IFileInfo, ref: string): Promise<string> {
+	private _getHistoryContent(file: mls.stor.IFileInfo, ref: string): Promise<string> {
 		return new Promise<string>(async (resolve, reject) => {
 
 			try {
@@ -523,47 +531,185 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private async fecthQl(query: string, variables?: {}): Promise<{ status: number, ret: any }> {
+	private async fecthQl(query: string, variables?: {}): Promise<{ status: number, ret: any }> {
 
-        try {
+		try {
 
-            const info = {
-                url: 'https://api.github.com/graphql',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    Authorization: 'bearer ' + this.mKey
-                },
-                query: query,
-                variables: variables,
-            }
+			const info = {
+				url: 'https://api.github.com/graphql',
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'application/json',
+					Authorization: 'bearer ' + this.mKey
+				},
+				query: query,
+				variables: variables,
+			}
 
-            const dt = await dL.myFetchQL(info);
+			const dt = await dL.myFetchQL(info);
 
-            if (dt.status !== 200) {
-                throw new Error('Erro status: ' + dt.status + '; ' + dt.ret.message);
-            }
+			if (dt.status !== 200) {
+				throw new Error('Erro status: ' + dt.status + '; ' + dt.ret.message);
+			}
 
-            if (dt.ret.errors) {
-                throw new Error('Erro' + dt.ret.errors[0].message);
-            }
+			if (dt.ret.errors) {
+				throw new Error('Erro' + dt.ret.errors[0].message);
+			}
 
-            return dt;
+			return dt;
 
-        } catch (er: any) {
+		} catch (er: any) {
 
-            throw new Error('fecthQl:' + er.message);
+			throw new Error('fecthQl:' + er.message);
 
-        }
+		}
 
 
 
-    }
+	}
 
-    //-------------IO----------------
+	//-------------IO----------------
 
-    private delVariableIO(variable: string): Promise<boolean> {
+	public syncForkIO(opt: { repoOrigin: string, ownerOrigin: string, branchOrigin: string, repoDest: string, ownerDest: string, branchDest: string }): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!opt) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				let body = {} as any;
+
+				const ret1 = await (await fetch(`https://api.github.com/repos/${opt.ownerOrigin}/${opt.repoOrigin}/git/refs/heads/${opt.branchOrigin}`, {
+					method: 'GET',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer'
+				})).json();
+
+				if (ret1 && ret1.message) {
+					reject(new Error(ret1.message));
+					return;
+				}
+
+				const sha = ret1.object.sha;
+
+				if (!sha) {
+					resolve(false);
+					return;
+				}
+
+				body = {
+					base: opt.branchDest,
+					head: sha,
+					commit_message: 'Merge updates from original repository'
+				} as any;
+
+				/*const ret2 = await (await fetch(`https://api.github.com/repos/${opt.ownerDest}/${opt.repoDest}/merges`, {
+					method: 'POST',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+					body: JSON.stringify(body)
+				})).json();
+
+				if (ret2 && ret2.message) {
+					reject(new Error(ret2.message));
+					return;
+				}*/
+				const ret2 = await fetch(`https://api.github.com/repos/${opt.ownerDest}/${opt.repoDest}/merges`, {
+					method: 'POST',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + this.mKey,
+					},
+					referrerPolicy: 'no-referrer',
+					body: JSON.stringify(body)
+				});
+
+				if (![200, 201, 204].includes(ret2.status)) {
+					resolve(false);
+					return;
+				}
+
+				resolve(true);
+
+			} catch (err) {
+
+				reject(err);
+
+			}
+
+		});
+	}
+
+	public checkForkIO(ownerOrigin: string, repoOrigin: string, login: string): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			const query = `query {
+						user(login: "${login}") {
+							repositories(first: 100, isFork: true) {
+								nodes {
+									name
+									nameWithOwner
+									parent {
+										nameWithOwner
+									}
+								}
+							}
+						}
+					}`
+				;
+
+			this.fecthQl(query).then((data) => {
+
+				try {
+
+					if (!data.ret || !data.ret.data.user || !data.ret.data.user.repositories || !data.ret.data.user.repositories.nodes) resolve(false);
+
+					let ret = false;
+					const nameWithOwner = `${ownerOrigin}/${repoOrigin}`;
+					data.ret.data.user.repositories.nodes.forEach((n: any) => {
+						if (n.parent.nameWithOwner === nameWithOwner) ret = true;
+					});
+
+					resolve(ret);
+
+				} catch (err) {
+
+					reject(err);
+
+				}
+
+			}).catch((e: Error) => {
+
+				reject(e);
+
+			});
+
+		});
+
+	}
+
+	private delVariableIO(variable: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -613,7 +759,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve(true);
 
-			} catch (err:any) {
+			} catch (err: any) {
 
 				reject(err);
 
@@ -623,7 +769,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private listVariablesIO(): Promise<{ variables: { name: string, value: string, created_at: string, updated_at: string }[], total_count: number }> {
+	private listVariablesIO(): Promise<{ variables: { name: string, value: string, created_at: string, updated_at: string }[], total_count: number }> {
 
 		return new Promise<{ variables: { name: string, value: string, created_at: string, updated_at: string }[], total_count: number }>(async (resolve, reject) => {
 
@@ -663,7 +809,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve(ret as any);
 
-			} catch (err:any) {
+			} catch (err: any) {
 
 				reject(err);
 
@@ -673,7 +819,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private updateVariableIO(variable: string, secret: string): Promise<boolean> {
+	private updateVariableIO(variable: string, secret: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -729,7 +875,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve(true);
 
-			} catch (err:any) {
+			} catch (err: any) {
 
 				reject(err);
 
@@ -739,7 +885,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private addVariableIO(newVariable: string, secret: string): Promise<boolean> {
+	private addVariableIO(newVariable: string, secret: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -795,7 +941,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve(true);
 
-			} catch (err:any) {
+			} catch (err: any) {
 
 				reject(err);
 
@@ -805,7 +951,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private verifyPermissionIO(owner: string, repo: string, login: string): Promise<mls.stor.others.IPermission> {
+	private verifyPermissionIO(owner: string, repo: string, login: string): Promise<mls.stor.others.IPermission> {
 
 		return new Promise<mls.stor.others.IPermission>(async (resolve, reject) => {
 
@@ -900,7 +1046,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private verifyRepositoryNewIO(owner: string, repo: string, user: string): Promise<'free' | 'reuse' | 'wait' | 'error'> {
+	private verifyRepositoryNewIO(owner: string, repo: string, user: string): Promise<'free' | 'reuse' | 'wait' | 'error'> {
 
 		return new Promise<'free' | 'reuse' | 'wait' | 'error'>(async (resolve, reject) => {
 
@@ -986,7 +1132,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve('free');
 
-			} catch (err:any) {
+			} catch (err: any) {
 
 				reject(err);
 
@@ -996,7 +1142,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private changeVisibilityIO(owner: string, repo: string, visibility: 'PUBLIC' | 'PRIVATE' | 'INTERNAL'): Promise<boolean> {
+	private changeVisibilityIO(owner: string, repo: string, visibility: 'PUBLIC' | 'PRIVATE' | 'INTERNAL'): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1031,7 +1177,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve(true);
 
-			} catch (err:any) {
+			} catch (err: any) {
 
 				reject(err);
 
@@ -1040,7 +1186,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		});
 	}
 
-    private createFileInRepoIO(owner: string, repo: string, path: string, content: string | Uint8Array): Promise<boolean> {
+	private createFileInRepoIO(owner: string, repo: string, path: string, content: string | Uint8Array): Promise<boolean> {
 		return new Promise<boolean>(async (resolve, reject) => {
 
 			if (!repo || !owner) {
@@ -1088,7 +1234,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private renameRepositoryIO(owner: string, repo: string, newName: string): Promise<boolean> {
+	private renameRepositoryIO(owner: string, repo: string, newName: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1122,7 +1268,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve(true);
 
-			} catch (err:any) {
+			} catch (err: any) {
 
 				reject(err);
 
@@ -1132,7 +1278,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private createForkIO(login: string, repoOri: string, orgOri: string, orgDest: string): Promise<boolean> {
+	private createForkIO(login: string, repoOri: string, orgOri: string, orgDest: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1169,7 +1315,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve(true);
 
-			} catch (err:any) {
+			} catch (err: any) {
 
 				reject(err);
 
@@ -1179,7 +1325,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private deleteRepositoryIO(repo: string, organization: string): Promise<boolean> {
+	private deleteRepositoryIO(repo: string, organization: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1209,7 +1355,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve(true);
 
-			} catch (err:any) {
+			} catch (err: any) {
 
 				reject(err);
 
@@ -1219,7 +1365,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private createRepositoryIO(login: string, repo: string, organization: string, description: string, visibility: "PUBLIC" | "PRIVATE" | "INTERNAL"): Promise<boolean> {
+	private createRepositoryIO(login: string, repo: string, organization: string, description: string, visibility: "PUBLIC" | "PRIVATE" | "INTERNAL"): Promise<boolean> {
 
 		return new Promise<boolean>((resolve, reject) => {
 
@@ -1272,7 +1418,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 					resolve(true);
 
-				} catch (err:any) {
+				} catch (err: any) {
 
 					reject(err);
 
@@ -1288,7 +1434,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private getOrganizationsIO(login: string): Promise<mls.stor.others.IOrg[]> {
+	private getOrganizationsIO(login: string): Promise<mls.stor.others.IOrg[]> {
 
 		return new Promise<mls.stor.others.IOrg[]>(async (resolve, reject) => {
 
@@ -1336,7 +1482,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 					resolve(orgs);
 
-				} catch (err:any) {
+				} catch (err: any) {
 
 					reject(err);
 
@@ -1351,7 +1497,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		});
 	}
 
-    private getUserInfoIO(): Promise<mls.stor.others.IInfo> {
+	private getUserInfoIO(): Promise<mls.stor.others.IInfo> {
 
 		return new Promise<mls.stor.others.IInfo>(async (resolve, reject) => {
 
@@ -1377,7 +1523,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 					resolve(info);
 
-				} catch (err:any) {
+				} catch (err: any) {
 
 					reject(err);
 
@@ -1392,7 +1538,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		});
 	}
 
-    private listBranchesIO(owner: string, repo: string): Promise<mls.stor.others.IBranch[]> {
+	private listBranchesIO(owner: string, repo: string): Promise<mls.stor.others.IBranch[]> {
 
 		return new Promise<mls.stor.others.IBranch[]>(async (resolve, reject) => {
 
@@ -1413,8 +1559,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			this.fecthQl(q).then((data) => {
 
-                try {
-                    
+				try {
+
 					if (
 						!data.ret ||
 						!data.ret.data.repository.refs ||
@@ -1428,7 +1574,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 					resolve(b);
 
-				} catch (err:any) {
+				} catch (err: any) {
 
 					reject(err);
 
@@ -1443,7 +1589,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		});
 	}
 
-    private listForksIO(owner: string, repo: string): Promise<mls.stor.others.IFork[]> {
+	private listForksIO(owner: string, repo: string): Promise<mls.stor.others.IFork[]> {
 
 		return new Promise<mls.stor.others.IFork[]>(async (resolve, reject) => {
 
@@ -1485,7 +1631,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 					resolve(fk);
 
-				} catch (err:any) {
+				} catch (err: any) {
 
 					reject(err);
 
@@ -1500,13 +1646,13 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		});
 	}
 
-    private listPullRequestsIO(owner: string, repo: string): Promise<mls.stor.others.IPullRequest[]> {
+	private listPullRequestsIO(owner: string, repo: string): Promise<mls.stor.others.IPullRequest[]> {
 
 		return new Promise<mls.stor.others.IPullRequest[]>(async (resolve, reject) => {
 
 			const qLastCommit = `{
 					repository(owner:"${owner}", name:"${repo}") {
-						pullRequests(first: 100) {
+						pullRequests(states: OPEN, first: 100) {
 							edges {
 								node {
 									id
@@ -1545,7 +1691,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 					resolve(pr);
 
-				} catch (err:any) {
+				} catch (err: any) {
 
 					reject(err);
 
@@ -1561,7 +1707,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private reviewPullRequestIO(options: { owner: string, repo: string, idRequest: string, isApproved: boolean }): Promise<boolean> {
+	private reviewPullRequestIO(options: { owner: string, repo: string, idRequest: string, isApproved: boolean }): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1603,7 +1749,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve(!ret);
 
-			} catch (e:any) {
+			} catch (e: any) {
 
 				reject(new Error(e.message));
 
@@ -1613,7 +1759,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private createPullRequestIO(option: { owner: string, repo: string, branch: string, title: string, description: string }): Promise<boolean> {
+	private createPullRequestIO(option: { owner: string, repo: string, branch: string, title: string, description: string }): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1645,13 +1791,13 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					}
 				`;
 
-                const data = await this.fecthQl(q);
-                
+				const data = await this.fecthQl(q);
+
 				const ret = !data.ret.data || !data.ret.data.createPullRequest || !data.ret.data.createPullRequest.pullRequest || !data.ret.data.createPullRequest.pullRequest || !data.ret.data.createPullRequest.pullRequest.id;
 
 				resolve(!ret);
 
-			} catch (e:any) {
+			} catch (e: any) {
 
 				reject(new Error(e.message));
 
@@ -1659,16 +1805,35 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		});
 
-    }
-    
-    private createNewBranchIO(option: { owner: string, repo: string, branch: string, newBranch: string }): Promise<boolean> {
+	}
+
+	private sleep(ms:number) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
+	private createNewBranchIO(option: { owner: string, repo: string, branch: string, newBranch: string }): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
 			try {
 
 				const idProject = await this.getIdProjectIO(0, option.owner, option.repo);
-				const oid = await this.getOidLastCommitFromInfoIO(option.owner, option.repo, option.branch);
+				let oid = await this.getOidLastCommitFromInfoIO(option.owner, option.repo, option.branch);
+
+				let test = 0;
+
+				if (!oid) {
+					while (test !== 2 && !oid) {
+						oid = await this.getOidLastCommitFromInfoIO(option.owner, option.repo, option.branch);
+						test++;
+						await this.sleep(200);
+					}
+				}
+
+				if (!oid) {
+					reject('Not found oid');
+					return;
+				}
 
 				const q = `
 					mutation {
@@ -1687,7 +1852,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				resolve(!ret);
 
-			} catch (e:any) {
+			} catch (e: any) {
 
 				reject(new Error(e.message));
 
@@ -1697,7 +1862,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private checkBranchExistenceIO(owner: string, repo: string, branchName: string): Promise<boolean> {
+	private checkBranchExistenceIO(owner: string, repo: string, branchName: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1716,7 +1881,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					if (!data.ret || !data.ret.data.repository || !data.ret.data.repository.ref || !data.ret.data.repository.ref.id) resolve(false);
 					resolve(true);
 
-				} catch (err:any) {
+				} catch (err: any) {
 
 					reject(err);
 
@@ -1732,7 +1897,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private getHistoryContentIO(project: number, oid: string): Promise<string> {
+	private getHistoryContentIO(project: number, oid: string): Promise<string> {
 
 		return new Promise<string>(async (resolve, reject) => {
 
@@ -1780,17 +1945,17 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private getFilesIO(project: number, fileName: string): Promise<string> {
+	private getFilesIO(project: number, fileName: string): Promise<string> {
 
-        return new Promise(async (resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 
-            try {
+			try {
 
-                const info = dL.getMyKeysBranch(project);
+				const info = dL.getMyKeysBranch(project);
 
-                let ret = null;
+				let ret = null;
 
-                const q = `query {
+				const q = `query {
 					repository(owner:"${info.owner}", name:"${info.repo}") {
 						object(expression: "HEAD:${fileName}") {	
 							... on Blob {
@@ -1802,88 +1967,88 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					}
 				}`;
 
-                const data = await this.fecthQl(q);
+				const data = await this.fecthQl(q);
 
-                if (!data.ret.data.repository || !data.ret.data.repository.object) {
-                    reject(new Error('File not found:' + fileName));
-                    return;
-                }
+				if (!data.ret.data.repository || !data.ret.data.repository.object) {
+					reject(new Error('File not found:' + fileName));
+					return;
+				}
 
-                ret = data.ret.data.repository.object.text as string;
-                resolve(ret);
+				ret = data.ret.data.repository.object.text as string;
+				resolve(ret);
 
-            } catch (e: any) {
+			} catch (e: any) {
 
-                reject(new Error(e.message));
+				reject(new Error(e.message));
 
-            }
+			}
 
-        });
-    }
+		});
+	}
 
 
-    private async getFilesRestIO(project: number, oid: string, extension: string): Promise<Blob> {
+	private async getFilesRestIO(project: number, oid: string, extension: string): Promise<Blob> {
 
-        const info = await dL.getMyKeysBranch(project);
+		const info = await dL.getMyKeysBranch(project);
 
-        try {
+		try {
 
-            const ret = await (await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/git/blobs/${oid}`, {
-                method: 'GET',
-                mode: 'cors',
-                cache: 'no-cache',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    Authorization: 'bearer ' + this.mKey,
-                },
-                referrerPolicy: 'no-referrer'
-            })).json();
+			const ret = await (await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/git/blobs/${oid}`, {
+				method: 'GET',
+				mode: 'cors',
+				cache: 'no-cache',
+				credentials: 'same-origin',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					Authorization: 'bearer ' + this.mKey,
+				},
+				referrerPolicy: 'no-referrer'
+			})).json();
 
-            const b64 = ret && ret.content ? ret.content : 'Erro';
-            if (!b64 || b64 === 'Erro') return b64;
+			const b64 = ret && ret.content ? ret.content : 'Erro';
+			if (!b64 || b64 === 'Erro') return b64;
 
-            const blob = await dL.base64ToBlob(b64, extension, oid);
-            return blob as any;
+			const blob = await dL.base64ToBlob(b64, extension, oid);
+			return blob as any;
 
-        } catch (e: any) {
+		} catch (e: any) {
 
-            return e.message;
+			return e.message;
 
-        }
+		}
 
-    }
+	}
 
-    private saveMultipleFilesIO(project: number, add: { path: string, content: string | Blob }[], del: { path: string }[], msg: string): Promise<boolean> {
+	private saveMultipleFilesIO(project: number, add: { path: string, content: string | Blob }[], del: { path: string }[], msg: string): Promise<boolean> {
 
-        return new Promise<boolean>(async (resolve, reject) => {
+		return new Promise<boolean>(async (resolve, reject) => {
 
-            try {
+			try {
 
-                const info = await dL.getMyKeysBranch(project, true);
+				const info = await dL.getMyKeysBranch(project, true);
 
-                const oid = await this.getOidLastCommitIO(project);
+				const oid = await this.getOidLastCommitIO(project);
 
-                const aAdd: string[] = [];
-                const aDel: string[] = [];
+				const aAdd: string[] = [];
+				const aDel: string[] = [];
 
-                add.forEach((i) => {
-                    aAdd.push(`{path: "${i.path}", contents: "${i.content}"}`);
-                });
+				add.forEach((i) => {
+					aAdd.push(`{path: "${i.path}", contents: "${i.content}"}`);
+				});
 
-                del.forEach((i) => {
-                    aDel.push(`{path: "${i.path}"}`);
-                });
+				del.forEach((i) => {
+					aDel.push(`{path: "${i.path}"}`);
+				});
 
-                const auxAdd = aAdd.length > 0 ? `additions: [ 	${aAdd.join(', ')} ]` : '';
-                const auxDel = aDel.length > 0 ? `deletions: [ 	${aDel.join(', ')} ]` : '';
+				const auxAdd = aAdd.length > 0 ? `additions: [ 	${aAdd.join(', ')} ]` : '';
+				const auxDel = aDel.length > 0 ? `deletions: [ 	${aDel.join(', ')} ]` : '';
 
-                if (auxAdd === '' && auxDel === '') {
-                    resolve(true);
-                    return;
-                }
+				if (auxAdd === '' && auxDel === '') {
+					resolve(true);
+					return;
+				}
 
-                const q = `mutation {
+				const q = `mutation {
 					createCommitOnBranch(
 						input: {
 							fileChanges: {
@@ -1904,35 +2069,35 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					}
 				}`;
 
-                const data = await this.fecthQl(q);
+				const data = await this.fecthQl(q);
 
-                const ret = data.ret.data && data.ret.data.createCommitOnBranch && data.ret.data.createCommitOnBranch.commit && data.ret.data.createCommitOnBranch.commit.abbreviatedOid;
+				const ret = data.ret.data && data.ret.data.createCommitOnBranch && data.ret.data.createCommitOnBranch.commit && data.ret.data.createCommitOnBranch.commit.abbreviatedOid;
 
-                resolve(ret);
+				resolve(ret);
 
-            } catch (e: any) {
+			} catch (e: any) {
 
-                reject(new Error(e.message));
+				reject(new Error(e.message));
 
-            }
+			}
 
-        });
+		});
 
-    }
+	}
 
 
-    private getFilesRepoIO(project: number): Promise<any> {
+	private getFilesRepoIO(project: number): Promise<any> {
 
-        return new Promise(async (resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 
-            try {
+			try {
 
-                const info = await dL.getMyKeysBranch(project);
+				const info = await dL.getMyKeysBranch(project);
 
-                let aux = '';
+				let aux = '';
 
-                for (let i = 0; i < 4; i++) {
-                    aux = aux + `
+				for (let i = 0; i < 4; i++) {
+					aux = aux + `
                         ... on TreeEntry{
                             object{
                                 # Top-level.
@@ -1945,17 +2110,17 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
                                         size
                     
                     `
-                }
-                for (let i = 0; i < 4; i++) {
-                    aux = aux + `
+				}
+				for (let i = 0; i < 4; i++) {
+					aux = aux + `
                                 }
                             }
                         }
                     }
                     `
-                }
+				}
 
-                const q = `query repository {
+				const q = `query repository {
 					repository(owner:"${info.owner}", name:"${info.repo}") {
 							object(expression: "HEAD:") {
 								# Top-level.
@@ -1973,24 +2138,24 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
                         }		
 					}`;
 
-                const data = await this.fecthQl(q);
+				const data = await this.fecthQl(q);
 
-                resolve(data.ret);
+				resolve(data.ret);
 
-            } catch (e: any) {
+			} catch (e: any) {
 
-                reject(new Error(e.message));
-            }
+				reject(new Error(e.message));
+			}
 
-        });
+		});
 
-    }
+	}
 
-    private getHistoryIO(project: number, nivel: string, fileName: string, oid: string): Promise<any[]> {
+	private getHistoryIO(project: number, nivel: string, fileName: string, oid: string): Promise<any[]> {
 
-        return new Promise<any[]>(async (resolve, reject) => {
-            const info = await dL.getMyKeysBranch(project);
-            const query = `
+		return new Promise<any[]>(async (resolve, reject) => {
+			const info = await dL.getMyKeysBranch(project);
+			const query = `
 			query {
 				repository(owner: "${info.owner}", name: "${info.repo}") {
 					
@@ -2032,34 +2197,34 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 				}
 			}`;
 
-            this.fecthQl(query).then((data) => {
+			this.fecthQl(query).then((data) => {
 
-                try {
+				try {
 
-                    if (
-                        !data.ret ||
-                        !data.ret.data.repository.ref || !data.ret.data.repository.ref.target ||
-                        !data.ret.data.repository.ref.target.history.edges) resolve([]);
+					if (
+						!data.ret ||
+						!data.ret.data.repository.ref || !data.ret.data.repository.ref.target ||
+						!data.ret.data.repository.ref.target.history.edges) resolve([]);
 
-                    resolve(data.ret.data.repository.ref.target.history.edges);
+					resolve(data.ret.data.repository.ref.target.history.edges);
 
-                } catch (err) {
+				} catch (err) {
 
-                    reject(err);
+					reject(err);
 
-                }
+				}
 
-            }).catch((e: Error) => {
+			}).catch((e: Error) => {
 
-                reject(e);
+				reject(e);
 
-            });
+			});
 
-        });
+		});
 
-    }
+	}
 
-    private getVersionFromFilesIO(options: { owner: string, repo: string, branchName: string, files: mls.stor.IFileInfo[] }): Promise<{ [key: string]: string } | undefined> {
+	private getVersionFromFilesIO(options: { owner: string, repo: string, branchName: string, files: mls.stor.IFileInfo[] }): Promise<{ [key: string]: string } | undefined> {
 
 		return new Promise<{ [key: string]: string } | undefined>(async (resolve, reject) => {
 
@@ -2071,7 +2236,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 				const aux2 = f.extension.startsWith('.') ? '' : '.';
 				const auxLevelPath = f.level === 0 ? '' : `l${f.level}/`;
 				const path = `${auxLevelPath}` + f.folder.replace(/\\/g, '/') + aux + f.shortName + aux2 + f.extension;
-				const key = '_'+(mls.stor.getKeyToFiles(f.project, f.level, f.shortName, f.folder, f.extension).replace(/\./g,''));
+				const key = '_' + (mls.stor.getKeyToFiles(f.project, f.level, f.shortName, f.folder, f.extension).replace(/\./g, ''));
 
 				auxStr = `
                     ${auxStr}
@@ -2100,7 +2265,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 					if (!data.ret || !data.ret.data.repository) resolve(undefined);
 
-					const ret:any = {};
+					const ret: any = {};
 
 					options.files.forEach((f) => {
 
@@ -2113,7 +2278,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 					resolve(ret);
 
-				} catch (err:any) {
+				} catch (err: any) {
 
 					reject(err);
 
@@ -2129,7 +2294,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-    private getOidLastCommitFromInfoIO(owner: string, repo: string, branch: string): Promise<string> {
+	private getOidLastCommitFromInfoIO(owner: string, repo: string, branch: string): Promise<string> {
 
 		return new Promise<string>(async (resolve, reject) => {
 
@@ -2160,7 +2325,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					const lastCommit = data.ret.data.repository.ref.target.history.nodes[0].oid;
 					resolve(lastCommit);
 
-				} catch (err:any) {
+				} catch (err: any) {
 
 					reject(err);
 
@@ -2174,9 +2339,9 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		});
 
-    }
-    
-    private getIdProjectIO(project: number, owner: string = '', repo: string = ''): Promise<string> {
+	}
+
+	private getIdProjectIO(project: number, owner: string = '', repo: string = ''): Promise<string> {
 
 		return new Promise<string>(async (resolve, reject) => {
 
@@ -2198,7 +2363,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					if (!data.ret || !data.ret.data.repository || !data.ret.data.repository.id) resolve('');
 					resolve(data.ret.data.repository.id);
 
-				} catch (err:any) {
+				} catch (err: any) {
 
 					reject(err);
 
@@ -2212,15 +2377,15 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		});
 
-    }
-    
-    private getOidLastCommitIO(project: number, getCurrentBranch: boolean = true): Promise<string> {
+	}
 
-        return new Promise<string>(async (resolve, reject) => {
+	private getOidLastCommitIO(project: number, getCurrentBranch: boolean = true): Promise<string> {
 
-            const info = await dL.getMyKeysBranch(project, getCurrentBranch);
+		return new Promise<string>(async (resolve, reject) => {
 
-            const qLastCommit = `{
+			const info = await dL.getMyKeysBranch(project, getCurrentBranch);
+
+			const qLastCommit = `{
 					repository(owner:"${info.owner}", name:"${info.repo}") {
 						ref(qualifiedName: "${info.branch}") {
 							target {
@@ -2236,30 +2401,30 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					}
 				}`;
 
-            this.fecthQl(qLastCommit).then((data) => {
+			this.fecthQl(qLastCommit).then((data) => {
 
-                try {
+				try {
 
-                    if (
-                        !data.ret ||
-                        !data.ret.data.repository.ref ||
-                        !data.ret.data.repository.ref.target.history.nodes) resolve('');
-                    const lastCommit = data.ret.data.repository.ref.target.history.nodes[0].oid;
-                    resolve(lastCommit);
+					if (
+						!data.ret ||
+						!data.ret.data.repository.ref ||
+						!data.ret.data.repository.ref.target.history.nodes) resolve('');
+					const lastCommit = data.ret.data.repository.ref.target.history.nodes[0].oid;
+					resolve(lastCommit);
 
-                } catch (err) {
+				} catch (err) {
 
-                    reject(err);
+					reject(err);
 
-                }
+				}
 
-            }).catch((e: Error) => {
+			}).catch((e: Error) => {
 
-                reject(e);
+				reject(e);
 
-            });
+			});
 
-        });
+		});
 
-    }
+	}
 }
