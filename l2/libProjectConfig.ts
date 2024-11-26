@@ -106,7 +106,7 @@ async function _createConfigFile(project: number) {
         plugins: {},
         reasons: {},
         services: [],
-        links: [],
+        links:[],
         servicesConfigEnabled: false,
     }
     const content = JSON.stringify(newConfig);
