@@ -73,9 +73,9 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
         const lang = this.father?.getMessageKey(messages);
         this.msg = lang ? messages[lang] : message_en;
 
-        const { project } = mls.actual[5];
+        const { project } = mls.actual[5] || 0;
         return html`
-            ${project ? this.renderAdd(project as number)
+            ${project !== undefined ? this.renderAdd(project)
                 : html`${this.msg.please}`
             }
         `;
@@ -163,7 +163,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
             if (!this.father) return;
 
             const { project } = mls.actual[5];
-            if (!project) throw new Error('No project selected');
+            if (project === undefined) throw new Error('No project selected');
             if (!this.enhancementModules) throw new Error('No modules enhancement loaded');
 
             const name = this.inputShortName.value
