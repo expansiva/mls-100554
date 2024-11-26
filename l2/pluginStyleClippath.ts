@@ -2,7 +2,9 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement,getMessageKey } from './_100554_collabLitElement'
+import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { CollabLitElement, getMessageKey } from './_100554_collabLitElement'
+import { ICSSState } from './_100554_lessCSS';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -31,8 +33,10 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-clippath-100554')
-export class PluginStyleClipath extends CollabLitElement {
+export class PluginStyleClipath extends IcaLitElement {
 
+    @propertyDataSource() state: ICSSState | undefined;
+    @property() position: 'left' | 'right' = 'left';
     @property() showFull: string = 'false';
 
     render() {
@@ -46,7 +50,7 @@ export class PluginStyleClipath extends CollabLitElement {
                 ${repeat(this.arrayGallery, ((key: any) => key) as any,
             ((css: any, index: any) => {
                 return html`
-                            <div .gallery=${css.css}>
+                            <div class="itemgallery" .gallery=${css.css} @click="${this.handleChangeCss}">
                                 <div class="gallery-item" style="${css.css}" .gallery=${css.css}></div>
                                 <div .gallery=${css.css}></div>
                             </div>
@@ -56,6 +60,32 @@ export class PluginStyleClipath extends CollabLitElement {
             </div>
         
         `
+    }
+
+    private timeonChange = -1;
+    private handleChangeCss(e: KeyboardEvent) {
+
+        e.stopPropagation();
+        let el = e.target as HTMLElement;
+        if (!el.classList.contains('itemgallery')) {
+            el = el.closest('.itemgallery') as HTMLElement;
+        }
+
+        let css = (el as any).gallery;
+        if (!el || !css) return;
+        css = css.replace('clip-path:', '').trim();
+
+        clearTimeout(this.timeonChange);
+        this.timeonChange = setTimeout(() => {
+            this.setState(css);
+
+        }, 100);
+    }
+
+    private setState(css:string) {
+        window.globalState.less[this.position].emitter = 'helper';
+        const styles = window.globalState.less[this.position].lessCSS.styles;
+        styles.clipPath = css;
     }
 
     private arrayGallery = [
