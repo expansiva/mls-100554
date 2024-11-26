@@ -75,6 +75,13 @@ export async function createConfigFile(project: number): Promise<mls.l5_common.P
     let configFile = mls.stor.files[key];
     if (configFile) throw new Error('config file already exists');
     const config = await _createConfigFile(project);
+
+    if (!projectConfig[project]) {
+        projectConfig[project] = {
+            config,
+            versionRef: ''
+        }
+    }
     projectConfig[project].config = config;
     return projectConfig[project].config;
 }
@@ -82,8 +89,20 @@ export async function createConfigFile(project: number): Promise<mls.l5_common.P
 async function _createConfigFile(project: number) {
     const newConfig: mls.l5_common.ProjectConfig = {
         orgName: '',
-        designSystems: [],
-        languages: [],
+        designSystems: [
+            {
+                dsIndex: "0",
+                dsName: "localDesignSystem",
+                widgetIOName: "_100554_configDsDefault"
+            }
+        ],
+        languages: [
+            {
+                language: "en",
+                name: "English",
+                path: "/"
+            }
+        ],
         plugins: {},
         reasons: {},
         services: [],
