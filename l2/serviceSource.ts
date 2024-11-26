@@ -8,6 +8,10 @@ import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
 import { getAddNewFileDetails, removeTokensFromSource, getTokensLess } from './_100554_enhancementStyle';
 import { LessCSS } from "./_100554_lessCSS";
+import './_100554_collabSpliterVerticalVarFixed';
+import './_100554_collabSpliterHorizontalVarFixed';
+import './_100554_aimPromptTypescript';
+import './_100554_cssHelperIndex';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
