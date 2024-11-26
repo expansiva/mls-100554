@@ -7,6 +7,7 @@ import { propertyDataSource } from './_100554_icaLitElement';
 import { PluginStyleIndexItem } from './_100554_pluginStyleIndexItem';
 import { IHelpers, IMode } from './_100554_cssHelperIndexBase';
 import { ICSSState } from './_100554_lessCSS';
+import './_100554_pluginStyleIndexItem';
 
 /// **collab_i18n_start**
 const message_pt = {
