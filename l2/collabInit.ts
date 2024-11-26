@@ -3,9 +3,10 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
+import { getConfigProject, createConfigFile } from './_100554_libProjectConfig'
 
 @customElement('collab-init-100554')
-export class CollabSelectOneWithDescription100554 extends CollabLitElement {
+export class CollabInit extends CollabLitElement {
 
     private actualProject: number | undefined = 0;
 
@@ -52,7 +53,6 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
      * To show logs using: https://collab.codes/?traceLifeCycle=true
      */
     private async init() {
-
         this.setDrivers();
         const language = this.setAndGetBaseUrl();
         this.setHTMLLang(language);
@@ -62,9 +62,11 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
         this.setOrgActual(this.actualProject);
         await this.loadProjectBase();
         await this.loadLastProject();
+        this.showMessagesIfNeeded();
         const services = await this.getServices();
+        this.checkURLParams();
+        this.initProjectLocalIfNeeded();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
-
     }
 
     /**
@@ -240,7 +242,7 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
     private enableNav(avatarUrl: string, language: string, services: IServices, isAnonymous: boolean): void {
         if (window.traceLifeCycle) console.info('enableNav: collab-nav-1');
 
-        const collabNav1 = document.querySelector('collab-nav-1') as ICollabNav1;
+        const collabNav1 = document.querySelector('collab-nav-1') as IHTMLCollabNav1;
         if (!collabNav1) return;
         if (avatarUrl) collabNav1.changeIconToImage(7, avatarUrl, { text: language, img: this.flags[language] });
         const state = isAnonymous ? 'anonymous' : 'enabled';
@@ -272,7 +274,7 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
     private setProjectActual(): number | undefined {
         if (window.traceLifeCycle) console.info('setProjectActual');
         const project = this.getLastProjectSelected();
-        if (project) mls.actual[5].project = project || 0;
+        mls.actual[5].project = project || 0;
         return project;
     }
 
@@ -296,7 +298,7 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
         if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
         await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
     }
-    
+
     /**
      * Loads the information of the last accessed project if it exists.
      * If the `actualProject` is defined, it attempts to load the project's information
@@ -311,6 +313,66 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
         if (this.actualProject) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
     }
 
+    /**
+     * Checks for the presence of a `<collab-sticky-notification>` element on the page.
+     * If found, it invokes the `show()` method on the element to display notifications.
+     */
+    private showMessagesIfNeeded() {
+        const collabMessages = document.querySelector('collab-sticky-notification') as IHTMLCollabMessages;
+        if (collabMessages) collabMessages.show();
+    }
+
+    /**
+     * Checks the URL parameters and performs actions based on their values.
+     * - If the user is anonymous, opens the login dialog.
+     * - If the `details` parameter is `privacyPolicy`, opens the privacy policy details.
+     * - If the `details` parameter is `termsOfService`, opens the terms of service details.
+     *
+     */
+    private checkURLParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const details = urlParams.get('details');
+        if (details === 'privacyPolicy') return this.openPolicyPrivacy();
+        if (details === 'termsOfService') return this.openTerms();
+        if (this.isAnonymous) return this.openLogin();
+    }
+
+    /**
+     * Opens the privacy policy in the service Details.
+    */
+    private openPolicyPrivacy() {
+        this.setDetailsInitialPlugin('_100554_pluginSystemPrivacyPolicy');
+    }
+
+    /**
+     * Opens the terms of use in the service Details.
+    */
+    private openTerms() {
+        this.setDetailsInitialPlugin('_100554_pluginSystemTermsOfService');
+    }
+
+    /**
+     * Opens the login screen in the service Details.
+    */
+    private openLogin() {
+        this.setDetailsInitialPlugin('_100554_pluginCollabLogin');
+    }
+
+    /**
+     * Sets up the initial plugin for the details view by modifying the state of the application's
+     * toolbar and navigation components.
+     *
+     */
+    private setDetailsInitialPlugin(plugin: string) {
+        Promise.all(['collab-nav-2', 'collab-nav-3'].map((wc) => customElements.whenDefined(wc))).then(async () => {
+            const page = document.querySelector('collab-page');
+            const toolbar = page?.querySelector(`collab-nav-2[toolbarposition="right"]`) as IHTMLCollabNav2;
+            const nav3 = page?.querySelector('collab-nav-3[toolbarposition="right"]') as IHTMLCollabNav3;
+            if (!toolbar || !nav3) return;
+            nav3.args = { widget: plugin };
+            toolbar.state[7].right = '_100554_serviceDetail';
+        })
+    }
 
     private anonymousServices: IServices = {
         services: [
@@ -379,13 +441,6 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
 
         const rc2: string[] = ['', '', '', '', '', '', '', ''];
 
-        const areAllPositionsEmpty = this.areAllPositionsEmpty(rc);
-        if (areAllPositionsEmpty) {
-            return {
-                services: [],
-            };
-        }
-
         Object.entries(rc).forEach((entry) => {
             const [level, value] = entry;
             const left = value.Left.join(',');
@@ -398,33 +453,41 @@ export class CollabSelectOneWithDescription100554 extends CollabLitElement {
         };
     }
 
-    /**
-     * Checks whether all the service positions (Left and Right) for each level are empty.
-     * It iterates through the `rc` object and checks if both Left and Right arrays are empty for each level.
-     * 
-     * @param rc - An object that contains services categorized by levels and positions (Left/Right).
-     * @returns A boolean indicating whether all positions (Left and Right) are empty. 
-     *         Returns `true` if all positions are empty, `false` otherwise.
-     */
-    private areAllPositionsEmpty(rc: ITempServices): boolean {
-        for (const level in rc) {
-            var hasBarProperty = Object.prototype.hasOwnProperty.call(rc, "level");
-            if (hasBarProperty) {
-                const { Left, Right } = rc[level];
-                if (Left.length > 0 || Right.length > 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
+    private async initProjectLocalIfNeeded() {
+        const { project } = mls.actual[5];
+        if (project !== 0) return;
+        const configProjectAnonymous = await getConfigProject(0);
+        if (!configProjectAnonymous) await createConfigFile(0);
     }
 
 
 }
 
-interface ICollabNav1 extends HTMLElement {
+interface IHTMLCollabNav1 extends HTMLElement {
     changeIconToImage: (level: number, avatarUrl: string, additional?: { text: string, img?: string }) => void
     services: IServices
+}
+
+interface IHTMLCollabNav2 extends HTMLElement {
+    state: ICollabState
+
+}
+interface ICollabState {
+    [key: number]: ICollabState2
+}
+
+interface ICollabState2 {
+    left: string,
+    right: string,
+}
+
+interface IHTMLCollabNav3 extends HTMLElement {
+    args: Record<string, string>
+}
+
+interface IHTMLCollabMessages extends HTMLElement {
+    show: () => void,
+    close: () => void
 }
 
 interface IServices {
