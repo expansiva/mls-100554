@@ -2,6 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { Window } from './_100554_icaState';
 @customElement('teste-page-ica-100554') 
 export class IcaTestPage100554 extends LitElement {
  
@@ -12,7 +13,7 @@ export class IcaTestPage100554 extends LitElement {
     render() {
 
         
-        window.globalState = {
+        (window as any as Window).globalState = {
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }]
             },

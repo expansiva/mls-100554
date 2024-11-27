@@ -3,6 +3,7 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
+import { Window } from './_100554_icaState';
 
 @customElement('ica-deep-linking-100554')
 export class IcaDeepLinking100554 extends IcaLitElement {
@@ -25,7 +26,7 @@ export class IcaDeepLinking100554 extends IcaLitElement {
         const pathToChange = this.findParameterReferences(allElements, Array.from(params));
         for (let changes of pathToChange) {
             this.trace.push(`Set state: key => ${changes.key} value => ${changes.value} `);
-            window.globalStateManagment.setState(changes.key, changes.value)
+            (window as any as Window).globalStateManagment.setState(changes.key, changes.value)
         }
     }
 
@@ -33,7 +34,7 @@ export class IcaDeepLinking100554 extends IcaLitElement {
         const fields: IField[] = [];
 
         parameters.forEach(param => {
-            const paramName = param.key.split('.').pop(); // Pegando apenas o último nó do nome do parâmetro
+            const paramName = param.key.split('.').pop(); // Pegando apenas o Ãºltimo nÃ³ do nome do parÃ¢metro
             elements.forEach(element => {
                 const attributes = element.getAttributeNames();
                 attributes.forEach(attribute => {

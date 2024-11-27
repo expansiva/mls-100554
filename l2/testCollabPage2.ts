@@ -3,12 +3,12 @@
 import { html, css } from 'lit';
 import { CollabPageElement, getEventName } from './_100554_collabPageElement'
 import { customElement, property } from 'lit/decorators.js';
-
+import { Window } from './_100554_icaState';
 @customElement('test-collab-page2-100554')
 export class TestCollabPage2100554 extends CollabPageElement {
 
     initPage() {
-        window.globalState.users = [{
+        (window as any as Window).globalState.users = [{
             name: 'Wagner',
             age: 63,
             city: 'SP',
