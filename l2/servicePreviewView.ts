@@ -374,11 +374,11 @@ export class ServicePreviewView extends LitElement {
         if (!iframe.contentDocument || !this.models) return;
         let txt = await this.getFileContent();
 
-        if (this.lastHTML === txt) {
+        /*if (this.lastHTML === txt) {
             const h = this.lastCompiledUrl;
             this.lastCompiledUrl = h;
             return;
-        }
+        }*/
 
         this.lastHTML = txt;
         iframe.contentDocument.body.innerHTML = txt;
