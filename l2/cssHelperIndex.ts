@@ -32,6 +32,11 @@ export class CssHelperIndex extends IcaLitElement {
 
     private msg: MessageType = messages['en'];
 
+    private minValueToOpen = {
+        'full': 3,
+        'expanded': 10,
+    }
+
     @property() helpers: IHelpers[] = [];
     @property() avaliablePlugins: IHelpers[] = [];
 
@@ -163,7 +168,7 @@ export class CssHelperIndex extends IcaLitElement {
             });
         });
 
-        const mode: IMode = rc.length < 3 ? 'full' : (rc.length < 7 ? 'expanded' : 'collapsed');
+        const mode: IMode = rc.length < this.minValueToOpen.full ? 'full' : (rc.length < this.minValueToOpen.expanded ? 'expanded' : 'collapsed');
         rc.forEach((help) => help.mode = mode);
         return rc;
 
@@ -191,10 +196,12 @@ export class CssHelperIndex extends IcaLitElement {
     }
 
     openIfNeeded() {
+
         this.allPluginsEls.forEach((pluginEl) => {
             pluginEl.requestUpdate();
-            if (pluginEl.help.mode === "expanded" || pluginEl.help.mode === "full") {
-                pluginEl.open();
+            const mode = pluginEl.getAttribute('mode');
+            if (mode === "collapsed" && pluginEl.help && pluginEl.help?.mode !== "collapsed") {
+                pluginEl.open(pluginEl.help.mode);
             }
         })
     }
