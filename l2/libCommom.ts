@@ -1,7 +1,7 @@
 /// <mls shortName="libCommom" project="100554" enhancement="_blank" groupName="other" />
 import { getMessageKey } from "./_100554_collabLitElement";
 import { getAllWebComponentsInSource } from './_100554_libCompile';
-import { convertTagToFileName , convertFileNameToTag } from './_100554_utilsLit';
+import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
 
 
 /// **collab_i18n_start**
@@ -91,15 +91,15 @@ export function getMyKeysBranch(project: number): { branch: string, owner: strin
 }
 
 export function generateCompactTimestamp() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-based, so +1
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-  return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-based, so +1
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+    return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
 }
 
 
@@ -168,7 +168,7 @@ export function escapeHTML(str: string) {
 }
 
 
-export function openService(service: string, position: 'left' | 'right', level: number, args ?: Record<string, string>) {
+export function openService(service: string, position: 'left' | 'right', level: number, args?: Record<string, string>) {
     let page = document.querySelector('collab-page');
     if (!page) return;
     const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
@@ -192,7 +192,7 @@ export function openService(service: string, position: 'left' | 'right', level: 
         }
     }
     if (item) item.click();
-    
+
     return;
 }
 
@@ -250,7 +250,34 @@ export async function loadFileHTMLInContainer(el: HTMLElement, shortName: string
 
 }
 
+export function convertColorToHex(color: string) {
+
+    const element = document.createElement('div');
+    element.style.color = color.trim();
+    document.body.appendChild(element);
+    const computedColor = window.getComputedStyle(element).color;
+    document.body.removeChild(element);
+
+    if (!computedColor || !computedColor.startsWith('rgb')) {
+        throw new Error(`Invalid color value: ${color}`);
+    }
+
+    const match = computedColor.match(/\d+/g);
+    if (!match) return undefined;
+    const rgbMatch = match.map(Number);
+    const [r, g, b] = rgbMatch;
+
+    return (
+        '#' +
+        [r, g, b]
+            .map((val) => val.toString(16).padStart(2, '0'))
+            .join('')
+            .toUpperCase()
+    );
+}
+
+
 export async function compileLess() {
-    
+
 }
 
