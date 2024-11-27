@@ -57,9 +57,9 @@ export class CollabDSInputRange extends IcaLitElement {
     //---------IMPLEMENTS-------------
 
     private onlyNumber(str: string): string {
-        const regexNum = /(\d+(?:\.\d+)?)/;
+        const regexNum = /-?\d+(?:\.\d+)?/;
         const res = str.match(regexNum);
-        return res && (res as any)[0] ? (res as any)[0] as string : '';
+        return res ? res[0] : '';
     }
 
     private onlyTxt(str: string): string {
@@ -81,7 +81,7 @@ export class CollabDSInputRange extends IcaLitElement {
         e.stopPropagation();
         let input = this.querySelector('input[type="number"]') as HTMLInputElement;
         let sel = this.querySelector('select') as HTMLSelectElement;
-        if (!input || !sel ) return;
+        if (!input || !sel) return;
         this.value = input.value + sel.value;
 
         this.fireEvents(
