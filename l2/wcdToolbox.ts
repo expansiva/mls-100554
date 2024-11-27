@@ -6,6 +6,7 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { CollabLitElement } from './_100554_collabLitElement';
 import { ServiceBase } from './_100554_serviceBase';
 import { WCDToolboxMethodos, WCDToolboxItemMethodos } from './_100554_wcdTypes';
+import { Window } from './_100554_wcdState';
 import * as tps from './_100554_icaTypes';
 
 export function initWCDToolbox() {
@@ -144,7 +145,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
         window.wcdState = {
             elICA: this.elICA as any,
-            myParent: this,
+            myParent: this as any,
             elMain: this.elMain as any,
         };
 

@@ -1,9 +1,17 @@
 /// <mls shortName="wcdState" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import {WCDToolboxMethodos} from './_100554_wcdTypes';
+import { WCDToolboxMethodos } from './_100554_wcdTypes';
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 
-declare global {
+export interface Window {
+    wcdState: {
+        myParent: WCDToolboxMethodos | undefined;
+        elMain: HTMLElement | undefined;
+        elICA: IcaLitElementBaseMethods | undefined;
+    }
+}
+
+/*declare global {
     interface Window {
         wcdState: {
             myParent: WCDToolboxMethodos | undefined;
@@ -13,4 +21,4 @@ declare global {
     }
 }
 
-export { };
+export { };*/
