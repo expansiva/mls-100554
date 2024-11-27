@@ -4,6 +4,7 @@ import { html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { collab_video } from './_100554_collabIcons';
 import { CollabLitElement } from "./_100554_collabLitElement";
+import { Window } from './_100554_wcdState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -52,11 +53,11 @@ export class WcdAddItemVideo100554 extends CollabLitElement {
     }
 
     private showHelper() {
-        if (!window.wcdState) throw new Error('Invalid window.wcdState');
-        if (!window.wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!(window as any as Window).wcdState) throw new Error('Invalid window.wcdState');
+        if (!(window as any as Window).wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
 
-        window.wcdState.myParent.onclick = null;
-        window.wcdState.myParent.setIconsWcdToolbox(
+        ((window as any as Window).wcdState.myParent as any).onclick = null;
+        (window as any as Window).wcdState.myParent?.setIconsWcdToolbox(
             [
                 {
                     name: 'backButton'

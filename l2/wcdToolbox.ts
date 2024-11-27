@@ -61,7 +61,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
 
     disconnectedCallback() {
-        window.wcdState = {
+        (window as any as Window).wcdState = {
             elICA: undefined,
             myParent: undefined,
             elMain: undefined,
@@ -143,7 +143,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
         this.setDefaultToolBoxOptions();
 
-        window.wcdState = {
+        (window as any as Window).wcdState = {
             elICA: this.elICA as any,
             myParent: this as any,
             elMain: this.elMain as any,

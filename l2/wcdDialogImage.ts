@@ -5,7 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { getDSInstance, DesignSystemIO, IAssetsInfo } from './_100554_libDesignSystem';
 import { execute } from './_100554_wcdCommandAddImage';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
-
+import { Window } from './_100554_wcdState';
 @customElement('wcd-dialog-image-100554')
 export class WcdDialogImage100554 extends LitElement {
 
@@ -33,11 +33,11 @@ export class WcdDialogImage100554 extends LitElement {
     }
 
     private recalculeIcaHeight() {
-        if (!window.wcdState) throw new Error('Invalid window.wcdState');
-        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        if (!(window as any as Window).wcdState) throw new Error('Invalid window.wcdState');
+        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
         const height = this.getBoundingClientRect()?.height;
-        if (this.lastHeight === undefined) this.lastHeight = window.wcdState.elICA.style.height;
-        window.wcdState.elICA.style.height = height + 'px';
+        if (this.lastHeight === undefined) this.lastHeight = (window as any as Window).wcdState?.elICA?.style.height;
+        ((window as any as Window).wcdState.elICA as any).style.height  = height + 'px';
     }
 
     private async getImages(project: number) {
@@ -100,14 +100,14 @@ export class WcdDialogImage100554 extends LitElement {
 
     private async handleClickGallery(item: IImageItem) {
 
-        if (!window.wcdState) throw new Error('Invalid window.wcdState');
-        if (!window.wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
-        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        if (!(window as any as Window).wcdState) throw new Error('Invalid window.wcdState');
+        if (!(window as any as Window).wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
 
         await execute({
             args: { src: item.src },
-            overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: window.wcdState.elICA as any,
+            overlay: (window as any as Window).wcdState.myParent?.parentElement?.parentElement as WCDOverlayMethods,
+            selectedIca: (window as any as Window).wcdState.elICA as any,
         });
 
     }
@@ -120,9 +120,9 @@ export class WcdDialogImage100554 extends LitElement {
     }
 
     disconnectedCallback() {
-        if (!window.wcdState) throw new Error('Invalid window.wcdState');
-        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
-        window.wcdState.elICA.style.height = this.lastHeight || '';
+        if (!(window as any as Window).wcdState) throw new Error('Invalid window.wcdState');
+        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        ((window as any as Window).wcdState.elICA as any).style.height = this.lastHeight || '';
         super.disconnectedCallback();
     }
 
