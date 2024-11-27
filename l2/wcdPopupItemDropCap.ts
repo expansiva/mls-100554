@@ -3,7 +3,7 @@
 import { html, svg, LitElement, render, css, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { WCDPopupItem } from './_100554_wcdPopupItem'
-
+import { Window } from './_100554_wcdState';
 @customElement('wcd-popup-item-drop-cap-100554')
 export class WCDPopupItemDropCap extends WCDPopupItem {
 
@@ -28,14 +28,14 @@ export class WCDPopupItemDropCap extends WCDPopupItem {
   }
   handleClick() {
 
-    if (!window.wcdState.elMain) throw new Error('Invalid wcdState.elMain');
-    if (!window.wcdState.elICA) throw new Error('Invalid wcdState.elICA');
+    if (!(window as any as Window).wcdState.elMain) throw new Error('Invalid wcdState.elMain');
+    if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid wcdState.elICA');
 
-    const wcdContent = window.wcdState.myParent?.querySelector('#edittextwcd');
+    const wcdContent = (window as any as Window).wcdState.myParent?.querySelector('#edittextwcd');
     if (!wcdContent) throw new Error('Invalid wcdContent id: #edittextwcd');
 
-    window.wcdState.elICA.classList.toggle('dropcap');
-    window.wcdState.elMain.classList.toggle('dropcap');
+    (window as any as Window).wcdState.elICA?.classList.toggle('dropcap');
+    (window as any as Window).wcdState.elMain?.classList.toggle('dropcap');
     wcdContent.classList.toggle('dropcap');
 
   }

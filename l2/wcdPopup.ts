@@ -3,6 +3,7 @@
 import { html, LitElement, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { WCDToolboxItemEditTextMethodos, WCDPopupMethodos } from './_100554_wcdTypes';
+import { Window } from './_100554_wcdState';
 
 export function initWcdPopup(): boolean {
   return true;
@@ -132,7 +133,7 @@ export class WCDPopup extends LitElement implements WCDPopupMethodos {
   checkIsValidDropCap(): boolean {
     const contentEditable = this.parentElement?.querySelector('[contenteditable="true"]') as HTMLElement;
     if (!contentEditable) return false;
-    if (!window.wcdState.elMain || window.wcdState.elMain.getAttribute('type') !== "p") return false;
+    if (!(window as any as Window).wcdState.elMain || (window as any as Window).wcdState.elMain?.getAttribute('type') !== "p") return false;
     const isFirstWordSelected = this.isFirstWordSelected(contentEditable);
     return isFirstWordSelected;
   }
