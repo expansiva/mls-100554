@@ -1,6 +1,7 @@
 /// <mls shortName="lessCSS" project="100554" enhancement="_blank" />
 
 import { LessAst } from "./_100554_lessAST";
+import { Window } from './_100554_icaState';
 
 export class LessCSS {
     lessAST: LessAst;
@@ -79,65 +80,65 @@ export class LessCSS {
 
         this.refresh();
 
-        if (!window.globalState
-            || !window.globalStateManagment
-            || !window.globalState.less
-            || !window.globalState.less[this.position]) return;
+        if (!(window as any as Window).globalState
+            || !(window as any as Window).globalStateManagment
+            || !(window as any as Window).globalState.less
+            || !(window as any as Window).globalState.less[this.position]) return;
 
         const selector = this.lessAST.findSelectorByLine(lineNumber);
         if (!selector) {
             this.clearState();
-            window.globalStateManagment.setState(`less.${this.position}`, { ...window.globalState.less[this.position] });
+            (window as any as Window).globalStateManagment.setState(`less.${this.position}`, { ...(window as any as Window).globalState.less[this.position] });
             return;
         }
 
         this.setSelector(selector);
         const info = this.lessAST.findInfoByLine(selector, lineNumber);
-        window.globalState.less[this.position].selector = selector;
-        window.globalState.less[this.position].key = info?.key;
-        window.globalState.less[this.position].value = info?.value;
-        window.globalState.less[this.position].emitter = emitter;
-        window.globalState.less[this.position].lineNumber = lineNumber;
-        window.globalState.less[this.position].lessCSS = this;
-        window.globalStateManagment.setState(`less.${this.position}`, { ...window.globalState.less[this.position] });
+        (window as any as Window).globalState.less[this.position].selector = selector;
+        (window as any as Window).globalState.less[this.position].key = info?.key;
+        (window as any as Window).globalState.less[this.position].value = info?.value;
+        (window as any as Window).globalState.less[this.position].emitter = emitter;
+        (window as any as Window).globalState.less[this.position].lineNumber = lineNumber;
+        (window as any as Window).globalState.less[this.position].lessCSS = this;
+        (window as any as Window).globalStateManagment.setState(`less.${this.position}`, { ...(window as any as Window).globalState.less[this.position] });
 
     }
 
     private clearState() {
-        if (!window.globalState
-            || !window.globalState.less
-            || !window.globalState.less[this.position]) return;
+        if (!(window as any as Window).globalState
+            || !(window as any as Window).globalState.less
+            || !(window as any as Window).globalState.less[this.position]) return;
 
-        window.globalState.less[this.position].lessCSS = undefined;
-        window.globalState.less[this.position].key = undefined;
-        window.globalState.less[this.position].value = undefined;
-        window.globalState.less[this.position].selector = undefined;
+        (window as any as Window).globalState.less[this.position].lessCSS = undefined;
+        (window as any as Window).globalState.less[this.position].key = undefined;
+        (window as any as Window).globalState.less[this.position].value = undefined;
+        (window as any as Window).globalState.less[this.position].selector = undefined;
     }
 
     private updateState() {
-        if (!window.globalState
-            || !window.globalStateManagment
-            || !window.globalState.less
-            || !window.globalState.less[this.position]) return;
+        if (!(window as any as Window).globalState
+            || !(window as any as Window).globalStateManagment
+            || !(window as any as Window).globalState.less
+            || !(window as any as Window).globalState.less[this.position]) return;
 
-        window.globalState.less[this.position].lessCSS = this;
-        window.globalState.less[this.position].lessCSS.styles = this.styles;
-        window.globalStateManagment.setState(`less.${this.position}`, { ...window.globalState.less[this.position] });
+        (window as any as Window).globalState.less[this.position].lessCSS = this;
+        (window as any as Window).globalState.less[this.position].lessCSS.styles = this.styles;
+        (window as any as Window).globalStateManagment.setState(`less.${this.position}`, { ...(window as any as Window).globalState.less[this.position] });
     }
 
     private initStateIfNeeded() {
 
 
-        if (!window.globalState) window.globalState = {};
-        if (!window.globalState.less) window.globalState.less = {};
-        if (!window.globalState.globalStateManagment) return;
+        if (!(window as any as Window).globalState) (window as any as Window).globalState = {};
+        if (!(window as any as Window).globalState.less) (window as any as Window).globalState.less = {};
+        if (!(window as any as Window).globalState.globalStateManagment) return;
 
-        window.globalState.less = {
+        (window as any as Window).globalState.less = {
             left: {},
             right: {}
         };
 
-        window.globalState.less[this.position] = {
+        (window as any as Window).globalState.less[this.position] = {
             lessCSS: this,
             emitter: 'editor',
             key: undefined,
@@ -147,7 +148,7 @@ export class LessCSS {
             uri: this._url,
         };
 
-        window.globalStateManagment.setState(`less.${this.position}`, { ...window.globalState.less[this.position] });
+        (window as any as Window).globalStateManagment.setState(`less.${this.position}`, { ...(window as any as Window).globalState.less[this.position] });
 
     }
 

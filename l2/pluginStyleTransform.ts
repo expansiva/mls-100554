@@ -10,7 +10,7 @@ import { getMessageKey } from './_100554_collabLitElement';
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
 import { ICSSState } from './_100554_lessCSS';
-
+import { Window } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -173,8 +173,8 @@ export class PluginStyleTransform extends IcaLitElement {
     }
 
     private setState() {
-        window.globalState.less[this.position].emitter = 'helper';
-        const styles: CSSStyleDeclaration = window.globalState.less[this.position].lessCSS.styles;
+        (window as any as Window).globalState.less[this.position].emitter = 'helper';
+        const styles: CSSStyleDeclaration = (window as any as Window).globalState.less[this.position].lessCSS.styles;
         styles.transform = this.transform || '';
     }
 

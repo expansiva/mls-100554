@@ -8,6 +8,7 @@ import { IcaLitElement } from './_100554_icaLitElement';
 import { IWCDParams } from '_100554_serviceIca'
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { getConfigProject } from './_100554_libProjectConfig';
+import { Window } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -339,8 +340,8 @@ export class ServicePreview100554 extends ServiceBase {
         this.lang = this.languages[opMenu].acronym;
         const variation = Object.keys(this.languages).indexOf(opMenu);
 
-        window.globalVariation = !isNaN(variation) ? variation : 0;
-        if (window.top) window.top.window.globalVariation = !isNaN(variation) ? variation : 0;
+        (window as any as Window).globalVariation = !isNaN(variation) ? variation : 0;
+        if (window.top) (window.top.window as any as Window).globalVariation = !isNaN(variation) ? variation : 0;
 
         if (this.level === 7) this.requestUpdateAllIcaComponentsInPage();
         else this.onReloader();
@@ -514,7 +515,7 @@ export class ServicePreview100554 extends ServiceBase {
 
         elements.forEach((el) => {
             if (el.tagName.split('-').length > 1 && (el as IcaLitElement).globalVariation !== undefined) {
-                (el as IcaLitElement).globalVariation = window.globalVariation;
+                (el as IcaLitElement).globalVariation = (window as any as Window).globalVariation;
             }
         });
     }
