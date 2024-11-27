@@ -2,9 +2,16 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { CollabLitElement, getMessageKey } from './_100554_collabLitElement';
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
+import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { getMessageKey } from './_100554_collabLitElement';
+import { CollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputRange';
+import { ICSSState } from './_100554_lessCSS';
+import { convertColorToHex } from './_100554_libCommom';
+
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -37,7 +44,7 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 
-export const tags = ['column*'];
+export const tags = ['column*', 'break-inside'];
 
 export function getDescription() {
     const lang = getMessageKey(messages);
@@ -45,9 +52,27 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-column-100554')
-export class PluginStyleColumn extends CollabLitElement {
+export class PluginStyleColumn extends IcaLitElement {
 
     @property() showFull: string = 'true';
+    @propertyDataSource() state: ICSSState | undefined;
+
+    @property() position: 'left' | 'right' = 'left';
+
+
+    @property() columnCount: string | undefined;
+    @property() columnWidth: string | undefined;
+    @property() columnGap: string | undefined;
+    @property() columnSpan: string | undefined;
+
+    @property() columnRule: string | undefined;
+    @property() columnRuleColor: string | undefined;
+    @property() columnRuleStyle: string | undefined;
+    @property() columnRuleWidth: string | undefined;
+
+    @property() breakInside: string | undefined;
+
+    @queryAll('collab-ds-input-select-color-100554') columnRuleInputs: CollabDsInputSelectColor[] | undefined;
 
     private msg: MessageType = messages['en'];
 
@@ -55,14 +80,104 @@ export class PluginStyleColumn extends CollabLitElement {
 
     private tpBorder = ['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset', 'hidden', 'inherit', 'initial', 'unset'];
 
-    private arrayGallery = [
-        '',
-        'column-count: 2;',
-        'column-count: 2; column-gap: 20px; column-rule-width: 1px; column-rule-style: dashed;',
-        'column-count: 3;',
-        'column-count: 2; column-rule-width: 1px; column-rule-style: solid;'
+    handleIcaStateChange(_key: string, _value: ICSSState) {
+        if (_key !== `less.${this.position}` || !_value) return;
+        if (_value.emitter === 'helper') return;
+        this._onIcaStateChange();
+    }
 
-    ];
+    private _onIcaStateChange() {
+        if (!this.state || !this.state.lessCSS) return;
+        const rule = this.findCSSRuleInIframe(this.state.lessCSS.selector);
+        if (!rule) return;
+        this.setValues(rule);
+    }
+
+    private setValues(rule: CSSStyleRule): void {
+
+        const props = ['column-count', 'column-width', 'column-gap', 'column-span', 'column-rule-color', 'column-rule-style', 'column-rule-width', 'break-inside'];
+
+        if (rule.style) {
+            for (let i = 0; i < rule.style.length; i++) {
+                const propertyName = rule.style[i];
+                if (props.includes(propertyName)) {
+                    const propertyValue = rule.style.getPropertyValue(propertyName);
+                    const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(propertyName);
+                    if (!convertedProp) return;
+                    (this as any)[convertedProp] = propertyValue;
+                }
+            }
+        }
+
+    }
+
+
+    private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
+
+        const json = this.state?.lessCSS?.lessAST.ast[ruleSelector];
+        if (!json) return null;
+
+        const properties = Object.entries(json)
+            .filter(([key]) => !key.startsWith('_'))
+            .sort(([, a], [, b]) => (a as { line: number }).line - (b as { line: number }).line);
+
+        let ruleText = properties.map(([key, item]) => `${key}: ${(item as { value: string }).value};`).join(' ');
+        const selector = ruleSelector;
+        const cssStyleSheet = new CSSStyleSheet();
+        const ruleIndex = cssStyleSheet.insertRule(`${selector} { ${ruleText} }`, 0);
+        const cssStyleRule = cssStyleSheet.cssRules[ruleIndex];
+        return cssStyleRule as CSSStyleRule;
+
+    }
+
+    private setColumnRuleValues() {
+        const aux: { [key: string]: Function } = {
+            'column-rule': (value: string) => { this.columnRule = value },
+        }
+
+        this.columnRuleInputs?.forEach((bdInp) => {
+            const prop = bdInp.getAttribute('prop');
+            if (!prop) return;
+            aux[prop](bdInp.value);
+        })
+    }
+
+
+    private setState() {
+        this.setColumnRuleValues();
+        window.globalState.less[this.position].emitter = 'helper';
+        const styles: CSSStyleDeclaration = window.globalState.less[this.position].lessCSS.styles;
+        styles.columnCount = this.columnCount || '';
+        styles.columnGap = this.columnGap || '';
+        styles.columnSpan = this.columnSpan || '';
+        styles.columnWidth = this.columnWidth || '';
+        styles.columnRuleColor = this.columnRuleColor || '';
+        styles.columnRuleStyle = this.columnRuleStyle || '';
+        styles.columnRuleWidth = this.columnRuleWidth || '';
+        styles.breakInside = this.breakInside || '';
+
+    }
+
+    private timeonChange = -1;
+    private handleChange(e: KeyboardEvent) {
+        console.info('handleChange')
+        clearTimeout(this.timeonChange);
+        const el = e.detail ? (e.detail as any).target : e.target as HTMLInputElement;
+        const prop = el.getAttribute('prop');
+        if (!prop) return;
+        const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(prop);
+        if (!convertedProp) return;
+        this.timeonChange = setTimeout(() => {
+            if (convertedProp === 'columnRule') {
+                this.columnRuleWidth = (el as any).valueInput;
+                this.columnRuleColor = (el as any).valueColor;
+                this.columnRuleStyle = (el as any).valueSelect;
+
+            } else (this as any)[convertedProp] = el.value;
+            this.setState();
+        }, 100);
+
+    }
 
     render() {
 
@@ -87,48 +202,82 @@ export class PluginStyleColumn extends CollabLitElement {
                 <div class="group">
                     <span>${this.msg.columnsCount}</span>
                     <div class="group-edit">
-                        <collab-ds-input-range-100554 prop="column-count" value="0px" useSelect="false" ></collab-ds-input-range-100554>
+                        <collab-ds-input-range-100554 
+                        prop="column-count" 
+                        value=${this.columnCount}
+                        useSelect="false" 
+                        @onchange=${(e: KeyboardEvent) => this.handleChange(e)}
+                        ></collab-ds-input-range-100554>
                     </div>
 
                     <span>${this.msg.columnsWidth}</span>
                     <div class="group-edit">
-                        <collab-ds-input-range-100554 prop="column-width" value="0px" .arraySelect=${this.tpMeasures}  ></collab-ds-input-range-100554>
+                        <collab-ds-input-range-100554
+                        prop="column-width"
+                        value=${this.columnWidth}
+                        .arraySelect=${this.tpMeasures}  
+                        @onchange=${(e: KeyboardEvent) => this.handleChange(e)}
+                        ></collab-ds-input-range-100554>
                     </div>
 
                     <span>${this.msg.columnsGap}</span>
                     <div class="group-edit">
-                        <collab-ds-input-range-100554 prop="column-gap" value="0px" .arraySelect=${this.tpMeasures}  ></collab-ds-input-range-100554>
+                        <collab-ds-input-range-100554
+                        prop="column-gap" 
+                        value=${this.columnGap}
+                        .arraySelect=${this.tpMeasures} 
+                        @onchange=${(e: KeyboardEvent) => this.handleChange(e)}
+                        ></collab-ds-input-range-100554>
                     </div>
 
                     <span>${this.msg.columnsRule}</span>
                     <div class="group-edit">
-                        <collab-ds-input-select-color-100554 prop="column-rule" valueInput="0px" .arrayInputSelect=${this.tpMeasures} .arraySelect=${this.tpBorder} valueSelect="none" group="border" ></collab-ds-input-select-color-100554>
+                        <collab-ds-input-select-color-100554
+                        prop="column-rule" 
+                        _valueInput=${this.columnRuleWidth}
+                        _valueSelect=${this.columnRuleStyle}
+                        _valueColor=${convertColorToHex(this.columnRuleColor || '')}
+                        .arrayInputSelect=${this.tpMeasures} 
+                        .arraySelect=${this.tpBorder} 
+                        @onchange=${(e: KeyboardEvent) => this.handleChange(e)}
+                        ></collab-ds-input-select-color-100554>
                     </div>
 
                     <span>${this.msg.columnSpan}</span>
                     <div class="group-edit">
-                        <select class="group-select"  prop="column-span">
-                            <option value=""></option>
-                            <option value="row">Row</option>
-                            <option value="row-reverse">Row Reverse</option>
-                            <option value="column">Column</option>
-                            <option value="column-reverse">Column Reverse</option>
+                        <select 
+                            class="group-select"  
+                            prop="column-span"
+                            .value=${this.columnSpan}
+                            @change=${(e: KeyboardEvent) => this.handleChange(e)}
+                        >
+                                <option value=""></option>
+                                <option value="none" ?selected=${this.columnSpan === 'none'}>none </option>
+                                <option value="all" ?selected=${this.columnSpan === 'all'} >all</option>
+                                <option value="inherit" ?selected=${this.columnSpan === 'inherit'}inherit</option>
+                                <option value="initial" ?selected=${this.columnSpan === 'initial'}>initial</option>
+                                <option value="unset" ?selected=${this.columnSpan === 'unset'}>unset</option>
                         </select>   
                     </div>
                     
                     <span>${this.msg.breakInside}</span>
                     <div class="group-edit">
-                        <select class="group-select"  prop="break-inside">
+                        <select 
+                            class="group-select"  
+                            prop="break-inside"      
+                            .value=${this.breakInside}
+                            @change=${(e: KeyboardEvent) => this.handleChange(e)}
+                        >
                             <option value=""></option>
-                            <option value="none">none</option>
-                            <option value="auto">auto</option>
-                            <option value="avoid">avoid</option>
-                            <option value="avoid-page">avoid-page</option>
-                            <option value="avoid-column">avoid-column</option>
-                            <option value="avoid-region">avoid-region</option>
-                            <option value="inherit">inherit</option>
-                            <option value="initial">initial</option>
-                            <option value="unset">unset</option>
+                            <option value="none" ?selected=${this.breakInside === 'none'}>none</option>
+                            <option value="auto" ?selected=${this.breakInside === 'auto'}>auto</option>
+                            <option value="avoid" ?selected=${this.breakInside === 'avoid'}>avoid</option>
+                            <option value="avoid-page" ?selected=${this.breakInside === 'avoid-page'}>avoid-page</option>
+                            <option value="avoid-column" ?selected=${this.breakInside === 'avoid-column'}>avoid-column</option>
+                            <option value="avoid-region" ?selected=${this.breakInside === 'avoid-region'}>avoid-region</option>
+                            <option value="inherit" ?selected=${this.breakInside === 'inherit'}>inherit</option>
+                            <option value="initial" ?selected=${this.breakInside === 'initial'}>initial</option>
+                            <option value="unset" ?selected=${this.breakInside === 'unset'}>unset</option>
                         </select>   
                     </div>
                 </div>
@@ -140,10 +289,10 @@ export class PluginStyleColumn extends CollabLitElement {
 
         return html`
             <div class="gallery">
-             ${repeat(this.arrayGallery, ((key: any) => key) as any,
-            ((css: any, index: any) => {
+             ${repeat(this.gallery, ((key: string) => key) as any,
+            ((galleryItem: IGallery, index: number) => {
                 return html`
-                        <h5 class="gallery-item" style="${css}" .gallery=${css}>Lorem ipsum dolor sit amet, consectetur adipisicing elit,sed do eiusmod tempor incididunt ut labore et dolore.</h5>
+                        <h5 class="gallery-item" style="${galleryItem.style}" @click=${() => { this.onGalleryClick(galleryItem) }} >Lorem ipsum dolor sit amet, consectetur adipisicing elit,sed do eiusmod tempor incididunt ut labore et dolore.</h5>
                         `;
             }) as any
         )}
@@ -152,4 +301,90 @@ export class PluginStyleColumn extends CollabLitElement {
         `
     }
 
+    private async onGalleryClick(item: IGallery) {
+        this.breakInside = item.state.breakInside;
+        this.columnCount = item.state.columnCount;
+        this.columnGap = item.state.columnGap;
+        this.columnRuleColor = item.state.columnRuleColor;
+        this.columnRuleStyle = item.state.columnRuleStyle;
+        this.columnRuleWidth = item.state.columnRuleWidth;
+        this.columnSpan = item.state.columnSpan;
+        this.columnWidth = item.state.columnWidth;
+        await this.updateComplete;
+        this.setState();
+    }
+
+
+    private gallery: IGallery[] = [
+
+        {
+            style: 'column-count: 2;',
+            state: {
+                breakInside: '',
+                columnCount: '2',
+                columnGap: '',
+                columnRuleColor: '',
+                columnRuleStyle: '',
+                columnRuleWidth: '',
+                columnSpan: '',
+                columnWidth: '',
+            }
+        },
+        {
+            style: 'column-count: 3;',
+            state: {
+                breakInside: '',
+                columnCount: '3',
+                columnGap: '',
+                columnRuleColor: '',
+                columnRuleStyle: '',
+                columnRuleWidth: '',
+                columnSpan: '',
+                columnWidth: '',
+            }
+        },
+        {
+            style: 'column-count: 2; column-gap: 20px; column-rule-width: 1px; column-rule-style: dashed;',
+            state: {
+                breakInside: '',
+                columnCount: '2',
+                columnGap: '20px',
+                columnRuleColor: '',
+                columnRuleStyle: 'dashed',
+                columnRuleWidth: '1px',
+                columnSpan: '',
+                columnWidth: '',
+            }
+        }, {
+            style: 'column-count: 2; column-rule-width: 1px; column-rule-style: solid;',
+            state: {
+                breakInside: '',
+                columnCount: '2',
+                columnGap: '',
+                columnRuleColor: '',
+                columnRuleStyle: 'solid',
+                columnRuleWidth: '1px',
+                columnSpan: '',
+                columnWidth: '',
+            }
+        }
+    ]
+
+
 }
+
+interface IGallery {
+    style: string,
+    state: {
+        columnCount: string,
+        columnWidth: string,
+        columnGap: string,
+        columnSpan: string,
+        columnRuleColor: string,
+        columnRuleStyle: string,
+        columnRuleWidth: string,
+        breakInside: string,
+
+    }
+}
+

@@ -3,6 +3,7 @@
 import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
+import { convertColorToHex } from './_100554_libCommom';
 
 export function initCollabDsInputSelectColor() { };
 
@@ -13,15 +14,27 @@ export class CollabDsInputSelectColor extends CollabLitElement {
 
     set value(str) { this.configSetValue(str) };
 
+    get valueInput(): string { return this._valueInput; };
+
+    set valueInput(str) { this._valueInput = str };
+
+    get valueSelect(): string { return this._valueSelect; };
+
+    set valueSelect(str) { this._valueSelect = str };
+
+    get valueColor(): string { return this._valueColor; };
+
+    set valueColor(str) { this._valueColor = convertColorToHex(str) || '#000000' };
+
     public arrayInputSelect: string[] = [];
 
     public arraySelect: string[] = [];
 
-    @property() valueInput: string = '';
+    @property() _valueInput: string = '';
 
-    @property() valueSelect: string = '';
+    @property() _valueSelect: string = '';
 
-    @property() valueColor: string = '';
+    @property() _valueColor: string = '';
 
     @property() prop: string = '';
 
@@ -43,88 +56,88 @@ export class CollabDsInputSelectColor extends CollabLitElement {
     renderInput() {
         return html`
             <div>
-                <input type="search" .value="${this.onlyNumber(this.valueInput)}" @input="${this.allChange}">
+                <input type="search" .value="${this.onlyNumber(this._valueInput)}" @input="${this.allChange}">
                 <select @change="${this.allChange}" .value="px">
-                    ${repeat( this.arrayInputSelect, ((key: any) => key) as any,
-                        ((k: any, index: any) => {
+                    ${repeat(this.arrayInputSelect, ((key: any) => key) as any,
+            ((k: any, index: any) => {
 
-                            return html`<option value="${k}">${k}</option>`;
+                return html`<option value="${k}">${k}</option>`;
 
-                        }) as any
-                    )}
+            }) as any
+        )}
                 </select>
             </div>
         `
     }
 
-    renderSelect() { 
+    renderSelect() {
         return html`
             <select @change="${this.allChange}" .value="px" prop="${this.prop}">
-                    ${repeat( this.arraySelect, ((key: any) => key) as any,
-                        ((k: any, index: any) => {
+                    ${repeat(this.arraySelect, ((key: any) => key) as any,
+            ((k: any, index: any) => {
 
-                            return html`<option value="${k}">${k}</option>`;
+                return html`<option value="${k}">${k}</option>`;
 
-                        }) as any
-                    )}
+            }) as any
+        )}
             </select>
         `
     }
 
-    renderColor() { 
+    renderColor() {
         return html`
-            <input type="color" .value="${this.valueColor}" @input="${this.allChange}">
+            <input type="color" .value="${this._valueColor}" @input="${this.allChange}">
         `
     }
 
     updated() {
-        
+
         const sel = this.querySelector('div select') as HTMLSelectElement;
-        if (sel) sel.value = this.onlyTxt(this.valueInput); 
+        if (sel) sel.value = this.onlyTxt(this._valueInput);
 
         const sel2 = this.querySelector('select[prop]') as HTMLSelectElement;
-        if (sel2) sel2.value = this.onlyTxt(this.valueSelect); 
+        if (sel2) sel2.value = this.onlyTxt(this._valueSelect);
     }
 
     //---------IMPLEMENTS-------------
 
-    private configGetValue(): string{
+    private configGetValue(): string {
 
         let ret = '';
 
-        if (this.useInput === 'true' && this.valueInput) ret = this.valueInput;
+        if (this.useInput === 'true' && this._valueInput) ret = this._valueInput;
         else if (this.useInput === 'true') ret = '0px';
 
-        if (this.useSelect === 'true' && this.valueSelect) ret += ' '+this.valueSelect;
+        if (this.useSelect === 'true' && this._valueSelect) ret += ' ' + this._valueSelect;
         else if (this.useSelect === 'true') ret = ' none';
 
-        if (this.useColor === 'true' && this.valueColor) ret += ' '+this.valueColor;
+        if (this.useColor === 'true' && this._valueColor) ret += ' ' + this._valueColor;
         else if (this.useColor === 'true') ret = ' #ffffff';
 
         return ret.trim();
 
     }
 
-    private configSetValue(str:string){
+    private configSetValue(str: string) {
 
         if (!str) return;
         const array = str.split(' ');
-        
+
         if (this.useInput === 'true' && array.length >= 1) {
-            this.valueInput = array[0];
+            this._valueInput = array[0];
             array.splice(0, 1);
         }
 
         if (this.useSelect === 'true' && array.length >= 1) {
-            this.valueSelect = array[0];
+            this._valueSelect = array[0];
             array.splice(0, 1);
         }
 
         if (this.useColor === 'true' && array.length >= 1) {
-            this.valueColor = array[0];
+            this._valueColor = array[0];
             array.splice(0, 1);
         }
-        
+
     }
 
     private onlyNumber(str: string): string {
@@ -151,17 +164,17 @@ export class CollabDsInputSelectColor extends CollabLitElement {
         const ret = [];
 
         if (this.useInput) {
-            this.valueInput = input.value + sel.value;
+            this._valueInput = input.value + sel.value;
             ret.push({ tp: 'input', value: input.value + sel.value });
         }
 
         if (this.useSelect) {
-            this.valueSelect = sel2.value;
+            this._valueSelect = sel2.value;
             ret.push({ tp: 'select', value: sel2.value });
         }
 
         if (this.useColor) {
-            this.valueColor = color.value;
+            this._valueColor = color.value;
             ret.push({ tp: 'color', value: color.value });
         }
 
