@@ -2,8 +2,11 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
+import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
 import { CollabLitElement, getMessageKey } from './_100554_collabLitElement';
+import { ICSSState } from './_100554_lessCSS';
 import './_100554_collabDsInputRange';
+
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -43,7 +46,7 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-export const tags = ['flex*', 'gap', 'align-items', 'justify-content'];
+export const tags = ['flex*', 'gap', 'align-items', 'justify-content', 'flex-direction', 'flex-wrap', 'align-content'];
 
 export function getDescription() {
     const lang = getMessageKey(messages);
@@ -51,12 +54,20 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-flex-100554')
-export class PluginStyleFlex extends CollabLitElement {
+export class PluginStyleFlex extends IcaLitElement {
 
     private msg: MessageType = messages['en'];
+        
+    @propertyDataSource() state: ICSSState | undefined;
+    @property() position: 'left' | 'right' = 'left';
 
     @property() showFull: string = 'true';
 
+    handleIcaStateChange(_key: string, _value: ICSSState) {
+        if (_key !== `less.${this.position}` || !_value) return;
+        if (_value.emitter === 'helper') return;
+        this._onIcaStateChange();
+    }
 
     render() {
 
@@ -83,7 +94,7 @@ export class PluginStyleFlex extends CollabLitElement {
             
                 <span>${this.msg.display}</span>
                   <div class="group-edit">
-                    <select prop="display">
+                    <select prop="display" @change="${this.handleChangeCss}">
                         <option value=""></option>
                         <option value="flex">Flex</option>
                         <option value="inline-flex">Inline Flex</option>
@@ -92,7 +103,7 @@ export class PluginStyleFlex extends CollabLitElement {
 
                 <span>${this.msg.flexDirection}</span>
                 <div class="group-edit">
-                    <select class="group-select" prop="flex-direction">
+                    <select class="group-select" prop="flex-direction" @change="${this.handleChangeCss}">
                         <option value=""></option>
                         <option value="row">Row</option>
                         <option value="row-reverse">Row Reverse</option>
@@ -103,7 +114,7 @@ export class PluginStyleFlex extends CollabLitElement {
 
                 <span>${this.msg.flexWrap}</span>
                 <div class="group-edit">
-                    <select class="group-select" prop="flex-wrap">
+                    <select class="group-select" prop="flex-wrap" @change="${this.handleChangeCss}">
                         <option value=""></option>
                         <option value="nowrap">Nowrap</option>
                         <option value="wrap">Wrap</option>
@@ -113,7 +124,7 @@ export class PluginStyleFlex extends CollabLitElement {
 
                 <span>${this.msg.justifyContent}</span>
                 <div class="group-edit">
-                    <select class="group-select" prop="justify-content">
+                    <select class="group-select" prop="justify-content" @change="${this.handleChangeCss}">
                         <option value=""></option>
                         <option value="flex-start">Flex start</option>
                         <option value="flex-end">Flex end</option>
@@ -125,7 +136,7 @@ export class PluginStyleFlex extends CollabLitElement {
 
                 <span>${this.msg.alignItems}</span>
                 <div class="group-edit">
-                    <select class="group-select" prop="align-items">
+                    <select class="group-select" prop="align-items" @change="${this.handleChangeCss}">
                         <option value=""></option>
                         <option value="flex-start">Flex start</option>
                         <option value="flex-end">Flex end</option>
@@ -137,7 +148,7 @@ export class PluginStyleFlex extends CollabLitElement {
 
                 <span>${this.msg.alignContent}</span>
                 <div class="group-edit">
-                    <select class="group-select" prop="align-content">
+                    <select class="group-select" prop="align-content" @change="${this.handleChangeCss}">
                         <option value=""></option>
                         <option value="flex-start">Flex start</option>
                         <option value="flex-end">Flex end</option>
@@ -198,7 +209,7 @@ export class PluginStyleFlex extends CollabLitElement {
                 ${repeat(this.arrayGallery.slice(0, 4), ((key: any) => key) as any,
             ((css: any, index: any) => {
 
-                return html`<div class="gallery-item-1" style="${css}" .gallery=${css}>
+                return html`<div class="itemgallery gallery-item-1" style="${css}" @click="${this.handleChangeGalleryCss}" .gallery=${css}>
                             <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
                             <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
                             <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
@@ -210,7 +221,7 @@ export class PluginStyleFlex extends CollabLitElement {
                 ${repeat(this.arrayGallery.slice(4, 8), ((key: any) => key) as any,
             ((css: any, index: any) => {
 
-                return html`<div class="gallery-item-2" style="${css}" .gallery=${css}>
+                return html`<div class="itemgallery gallery-item-2" @click="${this.handleChangeGalleryCss}" style="${css}" .gallery=${css}>
                     <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
                     <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
                     <span style="background: #363636; padding: 0.5rem; margin: 0.25rem;" .gallery=${css}></span>
@@ -220,6 +231,72 @@ export class PluginStyleFlex extends CollabLitElement {
             </div>
         
         `
+    }
+
+
+    private _onIcaStateChange() {
+        if (!this.state || !this.state.lessCSS) return;
+        this.setValues();
+    }
+
+    private setValues(): void {
+
+        const json:any = this.state?.lessCSS?.lessAST.ast[this.state?.selector || ''];
+        if (!json) return;
+
+        const all = this.querySelectorAll('*[prop]');
+        Array.from(all).forEach((i:any) => {
+            const prop = i.getAttribute('prop');
+            if (!json[prop]) return;
+            const v = json[prop].value;
+            i.value = v;
+        });
+
+    }
+
+    private timeonChange = -1;
+    private handleChangeCss(e: KeyboardEvent) {
+
+        e.stopPropagation();
+        let el = e.target as any;
+        let prop = el.getAttribute('prop') || '';
+        clearTimeout(this.timeonChange);
+        this.timeonChange = setTimeout(() => {
+            this.setState(prop, el.value);
+
+        }, 100);
+    }
+
+    private handleChangeGalleryCss(e: KeyboardEvent) {
+
+        e.stopPropagation();
+        let el = e.target as HTMLElement;
+        if (!el.classList.contains('itemgallery')) {
+            el = el.closest('.itemgallery') as HTMLElement;
+        }
+
+        let css:string = (el as any).gallery;
+        if (!el || !css) return;
+
+        clearTimeout(this.timeonChange);
+        this.timeonChange = setTimeout(() => {
+
+            const allItens = css.split(';');
+            allItens.forEach((i) => {
+
+                const [prop, v] = i.split(':');
+                if (!prop.trim() || !v.trim()) return;
+                this.setState(prop.trim(), v.trim());
+            })
+            
+        }, 100);
+    }
+
+    private setState(prop: string, css: string) {
+        prop = this.state?.lessCSS?.lessAST.toCamelCaseProperty(prop) || '';
+        window.globalState.less[this.position].emitter = 'helper';
+        const styles = window.globalState.less[this.position].lessCSS.styles;
+        styles[prop] = css;
     }
 
     private arrayGallery = [
