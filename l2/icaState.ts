@@ -8,12 +8,18 @@ export interface GlobalState {
 }
 
 // Extend the Window interface
-declare global {
+/*declare global {
   export interface Window {
     globalState: GlobalState;
     globalStateManagment: IcaState;
     globalVariation: number;
   }
+}*/
+
+export interface Window {
+  globalState: GlobalState;
+  globalStateManagment: IcaState;
+  globalVariation: number;
 }
 
 /**
