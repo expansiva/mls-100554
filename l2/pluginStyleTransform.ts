@@ -1,9 +1,16 @@
 /// <mls shortName="pluginStyleTransform" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement, getMessageKey } from './_100554_collabLitElement'
+import { html, repeat } from 'lit';
+import { customElement, property, queryAll } from 'lit/decorators.js';
+import './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputRange';
+import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { getMessageKey } from './_100554_collabLitElement';
+import './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputRange';
+import { ICSSState } from './_100554_lessCSS';
+
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -47,34 +54,143 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-transform-100554')
-export class PluginStyleTransform extends CollabLitElement {
+export class PluginStyleTransform extends IcaLitElement {
 
-    @property() showFull: string = 'false';
+    @property() showFull: string = 'true';
+    @propertyDataSource() state: ICSSState | undefined;
+    @property() position: 'left' | 'right' = 'left';
+    @property() transform: string | undefined;
+
+    @property() scaleX: string | undefined;
+    @property() scaleY: string | undefined;
+    @property() rotate: string | undefined;
+    @property() translateX: string | undefined;
+    @property() translateY: string | undefined;
+    @property() skewX: string | undefined;
+    @property() skewY: string | undefined;
+
+    @queryAll('collab-ds-input-range-100554') columnRuleInputs: HTMLInputElement[] | undefined;
 
     private msg: MessageType = messages['en'];
 
-    private arrayGallery = [
-        '',
-        'transform: scale(1.5);',
-        'transform: rotate(90deg);',
-        'transform: rotate(181deg);',
-        'transform: rotate(270deg);',
-        'transform: skew(50deg);',
-        'transform: skew(50deg, -50deg);',
-        'transform: skew(-50deg, 0deg);',
-        'transform: skew(-50deg, 50deg);',
-        'transform: translateX(20px);',
-        'transform: scale(0.75);',
-        'transform: scaleX(1.2);',
-        'transform: scaleY(1.8);',
-        'transform: rotate(45deg);',
-        'transform: rotate(-45deg);',
-        'transform: rotate3d(1, 1, 0, 60deg);',
-        'transform: skewX(30deg);',
-        'transform: skewY(-15deg);',
-        'transform: rotate3d(0, 1, 0, 180deg);',
+    handleIcaStateChange(_key: string, _value: ICSSState) {
+        if (_key !== `less.${this.position}` || !_value) return;
+        if (_value.emitter === 'helper') return;
+        this._onIcaStateChange();
+    }
 
-    ];
+    private _onIcaStateChange() {
+        if (!this.state || !this.state.lessCSS) return;
+        const rule = this.findCSSRuleInIframe(this.state.lessCSS.selector);
+        if (!rule) return;
+        this.setValues(rule);
+    }
+
+    private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
+
+        const json = this.state?.lessCSS?.lessAST.ast[ruleSelector];
+        if (!json) return null;
+
+        const properties = Object.entries(json)
+            .filter(([key]) => !key.startsWith('_'))
+            .sort(([, a], [, b]) => (a as { line: number }).line - (b as { line: number }).line);
+
+        let ruleText = properties.map(([key, item]) => `${key}: ${(item as { value: string }).value};`).join(' ');
+        const selector = ruleSelector;
+        const cssStyleSheet = new CSSStyleSheet();
+        const ruleIndex = cssStyleSheet.insertRule(`${selector} { ${ruleText} }`, 0);
+        const cssStyleRule = cssStyleSheet.cssRules[ruleIndex];
+        return cssStyleRule as CSSStyleRule;
+
+    }
+
+    private setValues(rule: CSSStyleRule) {
+
+        if (rule.style) {
+            for (let i = 0; i < rule.style.length; i++) {
+                const propertyName = rule.style[i];
+                if (propertyName === 'transform') {
+                    const propertyValue = rule.style.getPropertyValue(propertyName);
+                    const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(propertyName);
+                    if (!convertedProp) return;
+                    (this as any)[convertedProp] = propertyValue;
+                }
+            }
+        }
+        const auxFilter: any = {
+            scaleX: '',
+            scaleY: '',
+            rotate: '',
+            translateX: '',
+            translateY: '',
+            skewX: '',
+            skewY: '',
+        }
+
+        const filter = this.transform?.split(')') || [];
+        filter.forEach((item) => {
+
+            if (!item) return;
+            const prop = item.substring(0, item.indexOf('(')).trim();
+            item = item.substring(item.indexOf('('), item.length);
+            if (prop.indexOf('scale') >= 0 || prop.indexOf('translate') >= 0 || prop.indexOf('skew') >= 0) {
+
+                item.split(',').forEach((vl, index) => {
+
+                    if (!vl) return;
+                    const num = vl.match(/[\.-\d]/g)?.join('');
+                    const prefx = index === 0 ? 'X' : 'Y';
+                    if (auxFilter[prop + prefx] !== undefined) auxFilter[prop + prefx] = num;
+
+                });
+
+            } else {
+                const num = item.match(/[\.-\d]/g)?.join('');
+                if (auxFilter[prop] !== undefined) auxFilter[prop] = num;
+            }
+
+        });
+
+        this.scaleX = auxFilter.scaleX;
+        this.scaleY = auxFilter.scaleY;
+        this.rotate = auxFilter.rotate;
+        this.translateX = auxFilter.translateX;
+        this.translateY = auxFilter.translateY;
+        this.skewX = auxFilter.skewX;
+        this.skewY = auxFilter.skewY;
+
+    }
+
+    private mountValue(): void {
+
+        let value = '';
+        if (this.scaleX || this.scaleY) value += 'scale(' + (this.scaleX ? this.scaleX : '1') + (this.scaleY ? ', ' + this.scaleY : '') + ')';
+        if (this.rotate) value += this.rotate ? ' rotate(' + this.rotate + 'deg)' : '';
+        if (this.translateX || this.translateY) value += 'translate(' + (this.translateX ? this.translateX + 'px' : '0px') + (this.translateY ? ', ' + this.translateY : ', 0') + 'px)';
+        if (this.skewX || this.skewY) value += 'skew(' + (this.skewX ? this.skewX + 'deg' : '0deg') + (this.skewY ? ', ' + this.skewY : ', 0') + 'deg)';
+        this.transform = value;
+        this.setState();
+    }
+
+    private setState() {
+        window.globalState.less[this.position].emitter = 'helper';
+        const styles: CSSStyleDeclaration = window.globalState.less[this.position].lessCSS.styles;
+        styles.transform = this.transform || '';
+    }
+
+    private timeonChangeProp = -1;
+
+    private handleChange(e: KeyboardEvent) {
+        clearTimeout(this.timeonChangeProp);
+        const el = e.detail ? (e.detail as any).target : e.target as HTMLInputElement;
+        const prop = el.getAttribute('prop');
+        if (!prop) return;
+        this.timeonChangeProp = setTimeout(() => {
+            (this as any)[prop] = el.value;
+            this.mountValue();
+        }, 100);
+    }
+
 
     render() {
         const lang = this.getMessageKey(messages);
@@ -100,31 +216,31 @@ export class PluginStyleTransform extends CollabLitElement {
             <div class="group">
                 <span>${this.msg.scaleX}</span>
                 <div class="group-edit">
-                    <collab-ds-input-range-100554 prop="scaleX" value="0px" useSelect="false"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 @onchange=${this.handleChange} prop="scaleX" value=${this.scaleX} useSelect="false"></collab-ds-input-range-100554>
                 </div>
                 <span>${this.msg.scaleY}</span>
                 <div class="group-edit">
-                    <collab-ds-input-range-100554 prop="scaleY" value="0px" useSelect="false"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 @onchange=${this.handleChange} prop="scaleY" value=${this.scaleY} useSelect="false"></collab-ds-input-range-100554>
                 </div>
                 <span>${this.msg.skewX}</span>
                 <div class="group-edit">
-                    <collab-ds-input-range-100554 prop="skewX" value="0px" useSelect="false"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 @onchange=${this.handleChange} prop="skewX" value=${this.skewX} useSelect="false"></collab-ds-input-range-100554>
                 </div>
                 <span>${this.msg.skewY}</span>
                 <div class="group-edit">
-                    <collab-ds-input-range-100554 prop="skewY" value="0px" useSelect="false"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 @onchange=${this.handleChange} prop="skewY" value=${this.skewY} useSelect="false"></collab-ds-input-range-100554>
                 </div>
                 <span>${this.msg.translateX}</span>
                 <div class="group-edit">
-                    <collab-ds-input-range-100554 prop="translateX" value="0px" useSelect="false"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 @onchange=${this.handleChange} prop="translateX" value=${this.translateX} useSelect="false"></collab-ds-input-range-100554>
                 </div>
                 <span>${this.msg.translateY}</span>
                 <div class="group-edit">
-                    <collab-ds-input-range-100554 prop="translateY" value="0px" useSelect="false"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 @onchange=${this.handleChange} prop="translateY" value=${this.translateY} useSelect="false"></collab-ds-input-range-100554>
                 </div>
                 <span>${this.msg.rotate}</span>
                 <div class="group-edit">
-                    <collab-ds-input-range-100554 prop="rotate" value="0px" useSelect="false"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 @onchange=${this.handleChange} prop="rotate" value=${this.rotate} useSelect="false"></collab-ds-input-range-100554>
                 </div>
             </div>
         `;
@@ -133,9 +249,9 @@ export class PluginStyleTransform extends CollabLitElement {
     renderGallery() {
         return html`
             <div class="gallery">
-                ${repeat(this.arrayGallery, ((key: any) => key) as any,
-            ((css: any, index: any) => {
-                return html`<h5 style="${css}" .gallery=${css}>Item</h5>`;
+                ${repeat(this.gallery, ((key: any) => key) as any,
+            ((galleryItem: IGallery, index: number) => {
+                return html`<h5 style="${galleryItem.style}" @click=${() => { this.onGalleryClick(galleryItem) }}>Item</h5>`;
             }) as any
         )}
             </div>
@@ -143,4 +259,85 @@ export class PluginStyleTransform extends CollabLitElement {
         `
     }
 
+    private async onGalleryClick(item: IGallery) {
+        this.transform = item.state.transform;
+        await this.updateComplete;
+        this.setState();
+    }
+
+    private gallery: IGallery[] = [
+        {
+            state: { transform: 'scale(1.5)' },
+            style: 'transform: scale(1.5);'
+        },
+        {
+            state: { transform: 'rotate(90deg)' },
+            style: 'transform: rotate(90deg);'
+        },
+        {
+            state: { transform: 'rotate(181deg)' },
+            style: 'transform: rotate(181deg);'
+        },
+        {
+            state: { transform: 'rotate(270deg)' },
+            style: 'transform: rotate(270deg);'
+        },
+        {
+            state: { transform: 'skew(50deg)' },
+            style: 'transform: skew(50deg);'
+        },
+        {
+            state: { transform: 'skew(50deg, -50deg)' },
+            style: 'transform: skew(50deg, -50deg);'
+        },
+        {
+            state: { transform: 'skew(-50deg, 0deg)' },
+            style: 'transform: skew(-50deg, 0deg);'
+        },
+        {
+            state: { transform: 'skew(-50deg, 50deg)' },
+            style: 'transform: skew(-50deg, 50deg);'
+        },
+        {
+            state: { transform: 'translateX(20px)' },
+            style: 'transform: translateX(20px);'
+        },
+        {
+            state: { transform: 'scale(0.75)' },
+            style: 'transform: scale(0.75);'
+        },
+        {
+            state: { transform: 'scaleX(1.2)' },
+            style: 'transform: scaleX(1.2);'
+        },
+        {
+            state: { transform: 'scaleX(1.8)' },
+            style: 'transform: scaleX(1.8);'
+        },
+        {
+            state: { transform: 'rotate(45deg)' },
+            style: 'transform: rotate(45deg);'
+        },
+        {
+            state: { transform: 'rotate(-45deg)' },
+            style: 'transform: rotate(-45deg);'
+        },
+        {
+            state: { transform: 'skewX(30deg)' },
+            style: 'transform: skewX(30deg);'
+        },
+        {
+            state: { transform: 'skewY(-15deg)' },
+            style: 'transform: skewY(-15deg);'
+        },
+
+    ];
+
+}
+
+interface IGallery {
+    style: string,
+    state: {
+        transform: string,
+    }
 }

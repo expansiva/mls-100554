@@ -160,7 +160,6 @@ export class PluginStyleColumn extends IcaLitElement {
 
     private timeonChange = -1;
     private handleChange(e: KeyboardEvent) {
-        console.info('handleChange')
         clearTimeout(this.timeonChange);
         const el = e.detail ? (e.detail as any).target : e.target as HTMLInputElement;
         const prop = el.getAttribute('prop');
