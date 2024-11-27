@@ -3,6 +3,7 @@
 import { PropertyDeclaration } from 'lit';
 import { property } from 'lit/decorators.js';
 import { IcaState } from './_100554_icaState';
+import { Window } from './_100554_icaState';
 
 export const state1 = new IcaState();
 
@@ -32,7 +33,7 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
         if (typeof value === 'string' && value.includes('{{')) {
           // Handle template literals for dynamic data binding
           this[`_${key}`] = this.parseCompositeData(value, true);
-          if (!window.globalStateManagment) (window as any)['globalStateManagment'] = state1;
+          if (!(window as any as Window).globalStateManagment) (window as any)['globalStateManagment'] = state1;
 
         } else {
           // Handle static values
@@ -96,7 +97,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           const stateKey = value.replace(/[{{}}]/g, '').trim();
           if (this.hasOwnProperty('stateKeys')) this.stateKeys.add(key + ';' + stateKey);
           this[`_${key}`] = state1.getState(stateKey);
-          if (!window.globalStateManagment) (window as any)['globalStateManagment'] = state1;
+          if (!(window as any as Window).globalStateManagment) (window as any)['globalStateManagment'] = state1;
         } else if (typeof value === 'string' && ((value.startsWith('[') || value.startsWith('{')) && (value.endsWith(']') || value.endsWith('}')))) {
           // initialization ex options="[{ key: 'm', value: 'male' }, { key: 'f', value: 'female' }, { key: 'o', value: 'other' }]"
           // Parse JSON string for static data

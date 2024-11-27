@@ -2,7 +2,8 @@
 
 import { html, css, LitElement, PropertyValueMap } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { collab_chevron_right, collab_chevron_left } from './_100554_collabIcons'
+import { collab_chevron_right, collab_chevron_left } from './_100554_collabIcons';
+import { Window } from './_100554_icaState';
 
 @customElement('collab-panel-helper-100554')
 export class CollabPanelHelper100554 extends LitElement {
@@ -31,7 +32,7 @@ export class CollabPanelHelper100554 extends LitElement {
             const plg = changedProperties.get('plugin');
             if (plg === this.plugin) return;
             console.info(`Renderizar plugin: ${this.plugin}`);
-            console.info({tokensInfo: window.globalState?.cssTokens})
+            console.info({tokensInfo: (window as any as Window).globalState?.cssTokens})
         }
     }
 
