@@ -11,11 +11,12 @@ export class CollabInit extends CollabLitElement {
     private actualProject: number | undefined = 0;
 
     /**
-     * Indicates if the user is anonymous based on the `isAnonymous` attribute.
+     * Indicates if the user is anonymous based on the cookie loginUser
      * @returns `true` if the user is anonymous; otherwise, `false`.
      */
     get isAnonymous(): boolean {
-        return this.getAttribute('isAnonymous') === 'true';
+        const cookieUser = mls.api.common.getCookie('loginUser');
+        return cookieUser === 'anonymous' || !cookieUser;
     }
 
     /**
