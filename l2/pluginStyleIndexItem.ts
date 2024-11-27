@@ -21,12 +21,13 @@ export class PluginStyleIndexItem extends CollabLitElement {
 
     @property({ reflect: false }) help: IHelpers | undefined;
     @property() position: 'left' | 'right' = 'left';
-    @property() mode: 'collapsed' | 'expanded' | 'full' = 'collapsed';
+    @property({ reflect: true }) mode: 'collapsed' | 'expanded' | 'full' = 'collapsed';
 
     @property() pluginLoaded: boolean = false;
 
-    public async open() {
+    public async open(mode: 'expanded' | 'full') {
         const container = this.querySelector('.plugin-item-container') as HTMLElement;
+        this.mode = mode;
         this.openPlugin(container, this.help, false);
     }
 
@@ -120,6 +121,9 @@ export class PluginStyleIndexItem extends CollabLitElement {
             this.mode = 'expanded'
             await this.handleOpenPlugin(e, this.help);
         }
+
+        this.help.mode = this.mode;
+
     }
 
     handleFullClick(e: MouseEvent) {
@@ -130,10 +134,12 @@ export class PluginStyleIndexItem extends CollabLitElement {
         if (this.mode === 'full') {
             this.mode = 'collapsed';
             this.handleOpenPlugin(e, this.help, true);
-            return;
+        } else {
+            this.mode = 'full';
+            this.handleOpenPlugin(e, this.help)
         }
-        this.mode = 'full';
-        this.handleOpenPlugin(e, this.help)
+
+        this.help.mode = this.mode;
 
     }
 
