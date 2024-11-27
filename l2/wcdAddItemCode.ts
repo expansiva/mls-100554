@@ -6,7 +6,7 @@ import { collab_code } from './_100554_collabIcons';
 import { CollabLitElement } from "./_100554_collabLitElement";
 import * as commandCode from './_100554_wcdCommandAddCodeBlock';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
-
+import { Window } from './_100554_wcdState';
 /// **collab_i18n_start**
 const message_pt = {
     code: 'Adicionar um novo bloco de código',
@@ -55,13 +55,13 @@ export class WcdAddItemCode100554 extends CollabLitElement {
     }
 
     private async handleCodeClick() {
-        if (!window.wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
-        if (!window.wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        if (!(window as any as Window).wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
 
         await commandCode.execute({
             args: {},
-            overlay: window.wcdState.myParent.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: window.wcdState.elICA as any,
+            overlay: (window as any as Window).wcdState.myParent?.parentElement?.parentElement as WCDOverlayMethods,
+            selectedIca: (window as any as Window).wcdState.elICA as any,
         });
     }
 
