@@ -1,7 +1,7 @@
 /// <mls shortName="pluginStyleIndexItem" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { html, unsafeHTML } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IHelpers } from './_100554_cssHelperIndexBase';
 import { convertFileNameToTag } from './_100554_utilsLit'
@@ -19,22 +19,15 @@ import {
 @customElement('plugin-style-index-item-100554')
 export class PluginStyleIndexItem extends CollabLitElement {
 
-    @property() help: IHelpers = {
-        description: '',
-        liked: false,
-        likedAnimation: false,
-        mode: 'collapsed',
-        name: '',
-        priority: 0,
-        showInfo: false,
-        tags: [],
-        widget: ''
-    };
-
+    @property({ reflect: false }) help: IHelpers | undefined;
     @property() position: 'left' | 'right' = 'left';
+    @property({ reflect: true }) mode: 'collapsed' | 'expanded' | 'full' = 'collapsed';
 
-    public async open() {
+    @property() pluginLoaded: boolean = false;
+
+    public async open(mode: 'expanded' | 'full') {
         const container = this.querySelector('.plugin-item-container') as HTMLElement;
+        this.mode = mode;
         this.openPlugin(container, this.help, false);
     }
 
@@ -44,31 +37,31 @@ export class PluginStyleIndexItem extends CollabLitElement {
             <div class="plugin-item" .data=${this.help} >
                 
                 <div class="plugin-item-header">
-                    <span>${this.help.name}</span>
+                    <span>${this.help?.name}</span>
                     <div class="plugin-item-icons">
                         <i
-                            class="i-expanded ${this.help.mode === 'full' || this.help.mode === 'expanded' ? 'open' : ''}"
-                            @click=${(e: MouseEvent) => { this.handleExpandedClick(e, this.help); }}
+                            class="i-expanded ${this.mode === 'full' || this.mode === 'expanded' ? 'open' : ''}"
+                            @click=${(e: MouseEvent) => { this.handleExpandedClick(e); }}
                         >${collab_chevron_right}</i>
 
                         <i
-                            class="i-full ${this.help.mode === 'full' ? 'open' : ''}"
-                            @click=${(e: MouseEvent) => { this.handleFullClick(e, this.help); }}
+                            class="i-full ${this.mode === 'full' ? 'open' : ''}"
+                            @click=${(e: MouseEvent) => { this.handleFullClick(e); }}
                         
                         >${collab_angles_right}</i>
                         <i
-                            class="i-question ${this.help.showInfo ? 'info' : ''}"
-                            @click=${(e: MouseEvent) => { this.handleInfoClick(e, this.help); }}
+                            class="i-question ${this.help?.showInfo ? 'info' : ''}"
+                            @click=${(e: MouseEvent) => { this.handleInfoClick(e); }}
                         >${collab_question}</i>
                         <i
-                            class="i-like ${this.help.liked ? 'liked' : ''} ${this.help.likedAnimation ? 'likedAnimation' : ''}"
-                            @click=${(e: MouseEvent) => { this.handleLikeClick(e, this.help); }}
-                        >${this.help.liked ? collab_heart : collab_heart_o}
+                            class="i-like ${this.help?.liked ? 'liked' : ''} ${this.help?.likedAnimation ? 'likedAnimation' : ''}"
+                            @click=${(e: MouseEvent) => { this.handleLikeClick(e); }}
+                        >${this.help?.liked ? collab_heart : collab_heart_o}
                         </i>
                     </div>
                 </div>
                 
-                ${this.help.showInfo ? html`
+                ${this.help?.showInfo ? html`
                     <div class="plugin-item-info">
                         <i>${collab_info_circle}</i>
                         <span>${this.help.widget}</span>
@@ -78,16 +71,16 @@ export class PluginStyleIndexItem extends CollabLitElement {
                 `: ''}
 
                 <div
-                    class="plugin-item-container ${this.help.mode === 'expanded' ? 'expanded' : ''}"
-                    style="${this.help.mode !== 'collapsed' ? 'display:block;' : 'display:none;'}"
-
+                    class="plugin-item-container ${this.help?.mode === 'expanded' ? 'expanded' : ''}"
+                    style="${this.help?.mode !== 'collapsed' ? 'display:block;' : 'display:none;'}"
                 >
                 </div>            
 
             </div>`
     }
 
-    private async openPlugin(container: HTMLElement, help: IHelpers, close: boolean) {
+    private async openPlugin(container: HTMLElement, help: IHelpers | undefined, close: boolean) {
+        if (!help) return;
 
         if (close) {
             container.style.display = 'none';
@@ -98,14 +91,13 @@ export class PluginStyleIndexItem extends CollabLitElement {
             const tag = convertFileNameToTag(help.widget);
             const item = document.createElement(tag);
             item.setAttribute('state', `{{ less.${this.position} }}`);
-            item.setAttribute('showFull', help.mode === 'full' ? 'true' : 'false');
+            item.setAttribute('showFull', this.mode === 'full' ? 'true' : 'false');
             container.appendChild(item);
         } else {
             const item = container.children[0] as HTMLElement;
-            item.setAttribute('showFull', help.mode === 'full' ? 'true' : 'false');
+            item.setAttribute('showFull', this.mode === 'full' ? 'true' : 'false');
         }
         container.style.display = 'block';
-
     }
 
     async handleOpenPlugin(e: MouseEvent, help: IHelpers, close: boolean = false) {
@@ -119,42 +111,55 @@ export class PluginStyleIndexItem extends CollabLitElement {
         this.openPlugin(container, help, close);
     }
 
-    handleExpandedClick(e: MouseEvent, help: IHelpers) {
-        if (help.mode === 'expanded' || help.mode === 'full') {
-            help.mode = 'collapsed';
-            this.requestUpdate();
-            this.handleOpenPlugin(e, help, true);
-            return;
+    async handleExpandedClick(e: MouseEvent) {
+        e.stopPropagation();
+        if (!this.help) return;
+        if (this.mode === 'expanded' || this.mode === 'full') {
+            this.mode = 'collapsed'
+            this.handleOpenPlugin(e, this.help, true);
+        } else {
+            this.mode = 'expanded'
+            await this.handleOpenPlugin(e, this.help);
         }
-        help.mode = 'expanded';
-        this.requestUpdate();
-        this.handleOpenPlugin(e, help);
-    }
 
-    handleFullClick(e: MouseEvent, help: IHelpers) {
-        if (help.mode === 'full') {
-            help.mode = 'collapsed';
-            this.requestUpdate();
-            this.handleOpenPlugin(e, help, true);
-            return;
-        }
-        help.mode = 'full';
-        this.requestUpdate();
-        this.handleOpenPlugin(e, help)
+        this.help.mode = this.mode;
 
     }
 
-    async handleLikeClick(e: MouseEvent, help: IHelpers) {
-        help.liked = !help.liked;
-        help.likedAnimation = help.liked;
+    handleFullClick(e: MouseEvent) {
+
+        e.stopPropagation();
+        if (!this.help) return;
+
+        if (this.mode === 'full') {
+            this.mode = 'collapsed';
+            this.handleOpenPlugin(e, this.help, true);
+        } else {
+            this.mode = 'full';
+            this.handleOpenPlugin(e, this.help)
+        }
+
+        this.help.mode = this.mode;
+
+    }
+
+    async handleLikeClick(e: MouseEvent) {
+        e.stopPropagation();
+        if (!this.help) return;
+
+        this.help.liked = !this.help.liked;
+        this.help.likedAnimation = this.help.liked;
         this.requestUpdate();
         setTimeout(() => {
-            help.likedAnimation = false;
+            if (!this.help) return;
+            this.help.likedAnimation = false;
         }, 1000);
     }
 
-    async handleInfoClick(e: MouseEvent, help: IHelpers) {
-        help.showInfo = !help.showInfo;
+    async handleInfoClick(e: MouseEvent) {
+        if (!this.help) return;
+        e.stopPropagation();
+        this.help.showInfo = !this.help.showInfo;
         this.requestUpdate();
     }
 
