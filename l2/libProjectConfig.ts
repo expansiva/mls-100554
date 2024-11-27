@@ -7,13 +7,17 @@ const LEVEL = 5;
 const EXTENSION = '.json';
 
 export async function clearLocalChanges(project: number) {
+
     if (project === undefined) return;
     const key = mls.stor.getKeyToFiles(project, LEVEL, FILENAME, '', EXTENSION);
     let configFile = mls.stor.files[key];
     if (!configFile) return;
     const config = await getConfigProject(project, true);
     if (!config) return;
-    updateConfigProject(project, config)
+    await mls.stor.localStor.setContent(configFile, {
+        contentType: 'string',
+        content: null
+    });
     configFile.inLocalStorage = false;
 }
 
@@ -106,7 +110,7 @@ async function _createConfigFile(project: number) {
         plugins: {},
         reasons: {},
         services: [],
-        links:[],
+        links: [],
         servicesConfigEnabled: false,
     }
     const content = JSON.stringify(newConfig);
