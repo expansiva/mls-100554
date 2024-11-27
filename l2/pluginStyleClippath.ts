@@ -5,6 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
 import { CollabLitElement, getMessageKey } from './_100554_collabLitElement'
 import { ICSSState } from './_100554_lessCSS';
+import { Window } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -83,8 +84,8 @@ export class PluginStyleClipath extends IcaLitElement {
     }
 
     private setState(css:string) {
-        window.globalState.less[this.position].emitter = 'helper';
-        const styles = window.globalState.less[this.position].lessCSS.styles;
+        (window as any as Window).globalState.less[this.position].emitter = 'helper';
+        const styles = (window as any as Window).globalState.less[this.position].lessCSS.styles;
         styles.clipPath = css;
     }
 

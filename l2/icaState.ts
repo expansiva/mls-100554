@@ -67,7 +67,7 @@ export class IcaState {
     if (isTrace) console.info('setState key: ' + key + ' value=', value, ", oldValue=", oldValue)
     if (oldValue !== value) {
       this.stateMap.set(key, value);
-      setPathValue(window.globalState, key, value);
+      setPathValue((window as any as Window).globalState, key, value);
       this.notify(key);
     }
   }
@@ -78,7 +78,7 @@ export class IcaState {
   getState(key: string): any {
     const value = this.stateMap.get(key);
     if (isTrace) console.info('getState key: ' + key + ' value=', value);
-    return getPathValue(window.globalState, key);
+    return getPathValue((window as any as Window).globalState, key);
   }
 
   /**

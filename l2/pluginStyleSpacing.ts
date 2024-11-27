@@ -7,7 +7,7 @@ import { getMessageKey } from './_100554_collabLitElement';
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
 import { ICSSState } from './_100554_lessCSS';
-
+import { Window } from './_100554_icaState';
 import {
     collab_lock,
     collab_lock_open,
@@ -364,9 +364,9 @@ export class PluginStyleSpacing extends IcaLitElement {
 
     updateMargins(margin: string | { [key: string]: string }) {
 
-        window.globalState.less[this.position].emitter = 'helper';
+        (window as any as Window).globalState.less[this.position].emitter = 'helper';
 
-        const styles = window.globalState.less[this.position].lessCSS.styles;
+        const styles = (window as any as Window).globalState.less[this.position].lessCSS.styles;
         if (typeof margin === 'string') {
             styles.marginTop = styles.marginRight = styles.marginBottom = styles.marginLeft = '';
             styles.margin = margin;
@@ -382,9 +382,9 @@ export class PluginStyleSpacing extends IcaLitElement {
 
     updatePadding(padding: string | { [key: string]: string }) {
 
-        window.globalState.less[this.position].emitter = 'helper';
+        (window as any as Window).globalState.less[this.position].emitter = 'helper';
 
-        const styles = window.globalState.less[this.position].lessCSS.styles;
+        const styles = (window as any as Window).globalState.less[this.position].lessCSS.styles;
         if (typeof padding === 'string') {
             styles.paddingTop = styles.paddingRight = styles.paddingBottom = styles.paddingLeft = '';
             styles.padding = padding;
