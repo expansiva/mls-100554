@@ -3,6 +3,8 @@
 import { html, repeat, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import './_100554_collabPanel';
+import './_100554_collabPanelItem';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -36,7 +38,7 @@ export class ServiceUser100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf4fe',
-        state: 'background',
+        state: 'foreground',
         position: 'right',
         tooltip: 'User',
         visible: true,
@@ -88,6 +90,7 @@ export class ServiceUser100554 extends ServiceBase {
 
     async firstUpdated() {
         await this.setMyData();
+        this.requestUpdate();
         await this.updateComplete;
         if (this.plugin && this.collabPanel) {
             await this.collabPanel.updateComplete;
