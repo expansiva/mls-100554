@@ -152,9 +152,9 @@ export const getDesignDetails = (modelTS: mls.editor.IModelTS): Promise<mls.l2.e
 
 export const onAfterChange = async (modelTS: mls.editor.IModelTS): Promise<void> => {
 
+
     try {
         setCodeLens(modelTS);
-        // validateStyle(mfile);
         if (validateTagName(modelTS)) {
             mls.events.fireFileAction('statusOrErrorChanged', modelTS.storFile, 'left');
             mls.events.fireFileAction('statusOrErrorChanged', modelTS.storFile, 'right');
