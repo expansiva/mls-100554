@@ -2,11 +2,16 @@
 
 import * as dL from './_100554_driverLib';
 
+let _initString: string = "";
+export function init(initString: string) {
+	_initString = initString;
+}
+
 export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
-    public shortName: string = 'GitLab';
+    public shortName: mls.l5_common.Provider = 'gitlab';
     public project: number = 100554;
-    public driverVersion: string = '1.0.0.1';
+    public driverVersion: string = '1.0.0.2';
 
     constructor() {
 
@@ -17,8 +22,9 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
     get mKey(): string {
 
-        const _mKey = localStorage.getItem('keyGitLab'); // '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'
-        if (!_mKey) throw new Error('Please configure your key gitlab'); // must be a throw
+        if (_initString) return _initString;
+        const _mKey = localStorage.getItem('keyGitLab');
+        if (!_mKey) throw new Error('Please configure your key gitlab');
         return _mKey;
 
     }
