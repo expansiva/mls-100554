@@ -148,8 +148,9 @@ export class ServiceUser100554 extends ServiceBase {
         let array: any[] = [];
         await mls.plugin.loadAll(prj, false);
         array = mls.plugin.getAllMenuActions(prj, { scope: 'l5UserSettings' } as any);
-        array.forEach((item: mls.plugin.MenuAction) => {
+        array.forEach((item: any) => {
             const cat = item.category as string;
+            item.mode = 'tag';
             if (!this.data[cat]) this.data[cat] = [item]
             else this.data[cat].push(item);
         });

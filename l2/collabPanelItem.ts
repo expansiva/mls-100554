@@ -2,15 +2,16 @@
 
 import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { convertTagToFileName } from './_100554_utilsLit';
+import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
 import { CollabLitElement } from './_100554_collabLitElement';
 
 @customElement('collab-panel-item-100554')
 export class CollabPanelItem extends CollabLitElement {
 
-    @property({ type: String, reflect: true }) widget: string  = '';
+    @property({ type: String, reflect: true }) widget: string = '';
     @property({ type: String, reflect: true }) badge: string = '';
-    @property({ type: String, reflect: true }) loading: string  = 'loading';
+    @property({ type: String, reflect: true }) loading: string = 'loading';
+    @property({ type: String, reflect: true }) mode: 'html' | 'tag' = 'html';
 
     private myInfo: mls.plugin.IPluginData | undefined;
 
@@ -23,7 +24,7 @@ export class CollabPanelItem extends CollabLitElement {
     firstUpdated() {
 
         this.setMyInfo();
-        
+
     }
 
     render() {
@@ -37,7 +38,7 @@ export class CollabPanelItem extends CollabLitElement {
             </collab-panel-item-badge>
         `);
 
-        this.setAttribute('filter', this.myInfo?.title +'');
+        this.setAttribute('filter', this.myInfo?.title + '');
 
         return html`
             <collab-panel-item class="${this.loading}">
@@ -63,36 +64,40 @@ export class CollabPanelItem extends CollabLitElement {
 
         parent = parent.parentElement as HTMLElement;
         if (!parent) return;
-        
+
         const elActive = parent.querySelector('.active');
         if (elActive) elActive.classList.remove('active');
 
         this.classList.add('active');
 
         mls.actual[0].setFullName(this.widget);
+        const options = {
+            shortName: mls.actual[0].path,
+            project: mls.actual[0].project,
+            htmlText: ''
+        }
+
+        if (this.mode === 'tag') {
+            const tag = convertFileNameToTag(this.widget);
+            options.htmlText = `<${tag}></${tag}>`
+        }
+
         mls.events.fire(
             mls.actualLevel as any,
             'PluginDetails' as any,
-            JSON.stringify(
-                {
-                    shortName: mls.actual[0].path,
-                    project: mls.actual[0].project
-                }
-            ),
+            JSON.stringify(options),
             0
         );
-        
+
     }
 
     private async setMyInfo() {
         if (!this.widget) return;
-
         const file = convertTagToFileName(this.widget);
         const modulePlugin = await import('./' + file);
-
         this.myInfo = modulePlugin.pluginData;
         this.setAttribute('loading', '');
-        
+
     }
 
 }
