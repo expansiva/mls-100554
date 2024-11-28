@@ -104,19 +104,8 @@ export class PluginStyleTransform extends IcaLitElement {
 
     }
 
-    private setValues(rule: CSSStyleRule) {
+    private setValues2() {
 
-        if (rule.style) {
-            for (let i = 0; i < rule.style.length; i++) {
-                const propertyName = rule.style[i];
-                if (propertyName === 'transform') {
-                    const propertyValue = rule.style.getPropertyValue(propertyName);
-                    const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(propertyName);
-                    if (!convertedProp) return;
-                    (this as any)[convertedProp] = propertyValue;
-                }
-            }
-        }
         const auxFilter: any = {
             scaleX: '',
             scaleY: '',
@@ -140,7 +129,9 @@ export class PluginStyleTransform extends IcaLitElement {
                     if (!vl) return;
                     const num = vl.match(/[\.-\d]/g)?.join('');
                     const prefx = index === 0 ? 'X' : 'Y';
-                    if (auxFilter[prop + prefx] !== undefined) auxFilter[prop + prefx] = num;
+                    const hasprefix = prop.endsWith('X') || prop.endsWith('Y')
+                    const key = hasprefix ? prop : prop + prefx;
+                    if (auxFilter[key] !== undefined) auxFilter[key] = num;
 
                 });
 
@@ -158,6 +149,25 @@ export class PluginStyleTransform extends IcaLitElement {
         this.translateY = auxFilter.translateY;
         this.skewX = auxFilter.skewX;
         this.skewY = auxFilter.skewY;
+    }
+
+
+    private setValues(rule: CSSStyleRule) {
+
+        if (rule.style) {
+            for (let i = 0; i < rule.style.length; i++) {
+                const propertyName = rule.style[i];
+                if (propertyName === 'transform') {
+                    const propertyValue = rule.style.getPropertyValue(propertyName);
+                    const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(propertyName);
+                    if (!convertedProp) return;
+                    (this as any)[convertedProp] = propertyValue;
+                }
+            }
+        }
+
+        this.setValues2();
+
 
     }
 
@@ -261,6 +271,7 @@ export class PluginStyleTransform extends IcaLitElement {
 
     private async onGalleryClick(item: IGallery) {
         this.transform = item.state.transform;
+        this.setValues2();
         await this.updateComplete;
         this.setState();
     }
