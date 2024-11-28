@@ -276,6 +276,16 @@ export function convertColorToHex(color: string) {
     );
 }
 
+export async function getEnhancementName(file: { project: number, shortName: string }): Promise<string> {
+    const key = mls.l2.getKey({ project: file.project, shortName: file.shortName });
+    const mmodel = mls.editor.models[key];
+    if (!mmodel || !mmodel.ts) throw new Error('model invalid');
+    if (!mmodel.ts.compilerResults) throw new Error('model ts not compiled yet');
+    const enhacementName = mmodel.ts.compilerResults.tripleSlashMLS?.variables.enhancement
+    if (!enhacementName) throw new Error('enhacementName not valid');
+    return enhacementName;
+}
+
 
 export async function compileLess() {
 
