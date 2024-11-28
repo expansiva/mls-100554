@@ -14,7 +14,7 @@ export class CollabPanel extends CollabLitElement {
     @property({ type: Boolean, reflect: true }) open = true;
     @property({ reflect: true }) icon = '';
 
-    public myData: mls.plugin.MenuAction[] = [];
+    public myData: IPluginMenuAction[] = [];
 
     //---------COMPONENT-------------
 
@@ -30,7 +30,7 @@ export class CollabPanel extends CollabLitElement {
 
         const category = this.myData[0].category;
 
-        if(!this.icon) this.icon = this.open ? unsafeHTML(this.minus) : unsafeHTML(this.plus);
+        if (!this.icon) this.icon = this.open ? unsafeHTML(this.minus) : unsafeHTML(this.plus);
 
         return html`
             <details open="${this.open}">
@@ -40,31 +40,31 @@ export class CollabPanel extends CollabLitElement {
                 </summary>
                 <collab-panel-content>
                     ${repeat(this.myData, (
-                        (key: mls.plugin.MenuAction, idx: number) => key.widget + idx) as any,
-                        ((item: mls.plugin.MenuAction, index: any) => {
+            (key: IPluginMenuAction, idx: number) => key.widget + idx) as any,
+            ((item: IPluginMenuAction, index: any) => {
 
-                            return this.renderItem(item, index);
+                return this.renderItem(item, index);
 
-                        }) as any
-                    )}
+            }) as any
+        )}
                 </collab-panel-content>
             </details>
         `;
     }
 
-    renderItem(item: mls.plugin.MenuAction, index: number) {
+    renderItem(item: IPluginMenuAction, index: number) {
 
         return html`
-            <collab-panel-item-100554 widget="${item.widget}">
+            <collab-panel-item-100554 widget=${item.widget} mode=${item.mode}>
             </collab-panel-item-100554>
         `
     }
-    
+
 
     //---------IMPLEMENT-------------
 
     private changeSummary(): void {
-    
+
         this.icon = !this.detail?.open ? unsafeHTML(this.minus) : unsafeHTML(this.plus);
     }
 
@@ -72,5 +72,10 @@ export class CollabPanel extends CollabLitElement {
 
     private plus = '<svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/></svg>'
 
-    
+
+}
+
+
+interface IPluginMenuAction extends mls.plugin.MenuAction {
+    mode: 'html' | 'tag'
 }
