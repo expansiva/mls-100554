@@ -306,7 +306,7 @@ export class CollabInit extends CollabLitElement {
     private async loadProjectBase() {
         if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
         await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
-        await mls.stor.server.unzipSourcesIfNeeded(this.baseProject);
+        // await mls.stor.server.unzipSourcesIfNeeded(this.baseProject);
     }
 
     /**
