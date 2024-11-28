@@ -76,6 +76,7 @@ export class CollabInit extends CollabLitElement {
     private async setDrivers(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: drivers collab');
         await this.instanceDriverGitHub();
+        await this.instanceDriverGitLab();
     }
 
     /**
@@ -85,8 +86,16 @@ export class CollabInit extends CollabLitElement {
         if (window.traceLifeCycle) console.info('loading: driver github');
         const { DriverGitHub } = await import('./_100554_driverGithub');
         const instanceGitHub = new DriverGitHub();
-        const driverInstanceGitHub = mls.stor.others.getDriver(instanceGitHub.project, instanceGitHub.shortName);
-        if (!driverInstanceGitHub) mls.stor.others.addDriver(instanceGitHub);
+        const driverInstanceGitHub = mls.stor.others.getDriver('github');
+        if (!driverInstanceGitHub) mls.stor.others.addDriver(instanceGitHub, 'github');
+    }
+
+    private async instanceDriverGitLab(): Promise<void> {
+        if (window.traceLifeCycle) console.info('loading: driver gitlab');
+        const { DriverGitLab } = await import('./_100554_driverGitlab');
+        const instanceGitLab = new DriverGitLab();
+        const driverInstanceGitLab = mls.stor.others.getDriver('gitlab');
+        if (!driverInstanceGitLab) mls.stor.others.addDriver(instanceGitLab, 'gitlab');
     }
 
     /**

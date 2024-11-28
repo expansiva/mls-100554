@@ -2,11 +2,16 @@
 
 import * as dL from './_100554_driverLib';
 
+let _initString: string = "";
+export function init(initString: string) {
+	_initString = initString;
+}
+
 export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
-	public shortName: string = 'GitHub';
+	public shortName: mls.l5_common.Provider = 'github';
 	public project: number = 100554;
-	public driverVersion: string = '1.0.0.2';
+	public driverVersion: string = '1.0.0.3';
 
 	constructor() {
 
@@ -17,6 +22,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	get mKey(): string {
 
+		if (_initString) return _initString;
 		const _mKey = localStorage.getItem('keyGitHub');
 		if (!_mKey) throw new Error('Please configure your key git hub');
 		return _mKey;
