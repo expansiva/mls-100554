@@ -271,7 +271,8 @@ export class CollabInit extends CollabLitElement {
      */
     private getLastProjectSelected(): number | undefined {
         if (window.traceLifeCycle) console.info('getLastProjectSelected');
-        const lhLastPrj = localStorage.getItem('l5-last-project');
+        const lhLastPrj = localStorage.getItem('l5-last-project') || this.baseProject.toString();
+        localStorage.setItem('l5-last-project', lhLastPrj);
         const lastPrj = lhLastPrj ? Number.parseInt(lhLastPrj, 10) : undefined;
         return lastPrj;
     }
@@ -306,7 +307,6 @@ export class CollabInit extends CollabLitElement {
     private async loadProjectBase() {
         if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
         await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
-        // await mls.stor.server.unzipSourcesIfNeeded(this.baseProject);
     }
 
     /**
@@ -320,12 +320,6 @@ export class CollabInit extends CollabLitElement {
      */
     private async loadLastProject() {
         if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
-        if (!this.actualProject) {
-            this.actualProject = this.baseProject;
-            localStorage.setItem('l5-last-project', this.actualProject.toString());
-            return;
-        }
-
         if (this.actualProject) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
     }
 
