@@ -54,8 +54,8 @@ export class CollabInit extends CollabLitElement {
      * To show logs using: https://collab.codes/?traceLifeCycle=true
      */
     private async init() {
+        this.setDrivers();
         const language = this.setAndGetBaseUrl();
-        await this.setDrivers();
         this.setHTMLLang(language);
         this.setTheme();
         this.setTokensCss();
@@ -66,7 +66,6 @@ export class CollabInit extends CollabLitElement {
         this.showMessagesIfNeeded();
         const services = await this.getServices();
         this.checkURLParams();
-        this.initProjectLocalIfNeeded();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
     }
 
@@ -84,8 +83,7 @@ export class CollabInit extends CollabLitElement {
      */
     private async instanceDriverGitHub(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: driver github');
-        const widget = mls.l5_common.providerWidgets['github'];
-        const { DriverGitHub } = await import(widget);
+        const { DriverGitHub } = await import('./_100554_driverGithub');
         const instanceGitHub = new DriverGitHub();
         const driverInstanceGitHub = mls.stor.others.getDriver('github');
         if (!driverInstanceGitHub) mls.stor.others.addDriver(instanceGitHub, 'github');
@@ -93,8 +91,7 @@ export class CollabInit extends CollabLitElement {
 
     private async instanceDriverGitLab(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: driver gitlab');
-        const widget = mls.l5_common.providerWidgets['gitlab'];
-        const { DriverGitLab } = await import(widget);
+        const { DriverGitLab } = await import('./_100554_driverGitlab');
         const instanceGitLab = new DriverGitLab();
         const driverInstanceGitLab = mls.stor.others.getDriver('gitlab');
         if (!driverInstanceGitLab) mls.stor.others.addDriver(instanceGitLab, 'gitlab');
@@ -309,6 +306,7 @@ export class CollabInit extends CollabLitElement {
     private async loadProjectBase() {
         if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
         await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
+        await mls.stor.server.unzipSourcesIfNeeded(this.baseProject);
     }
 
     /**
@@ -322,6 +320,12 @@ export class CollabInit extends CollabLitElement {
      */
     private async loadLastProject() {
         if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
+        if (!this.actualProject) {
+            this.actualProject = this.baseProject;
+            localStorage.setItem('l5-last-project', this.actualProject.toString());
+            return;
+        }
+
         if (this.actualProject) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
     }
 
