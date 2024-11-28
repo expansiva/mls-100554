@@ -2,9 +2,10 @@
 
 import * as dL from './_100554_driverLib';
 
-let _initString: string = "";
+let mKey = "";
+
 export function init(initString: string) {
-	_initString = initString;
+	mKey = atob(initString);
 }
 
 export class DriverGitHub extends mls.stor.others.DriverIOBase {
@@ -17,18 +18,9 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		super();
 		if (mls.istrace) console.info('gitDriver: ' + this.driverVersion);
+		mKey = localStorage.getItem('keyGitHub') || mKey;
 
 	}
-
-	get mKey(): string {
-
-		if (_initString) return _initString;
-		const _mKey = localStorage.getItem('keyGitHub');
-		if (!_mKey) throw new Error('Please configure your key git hub');
-		return _mKey;
-
-	}
-
 
 	public getContents = (project: number, fileInfos: mls.stor.IFileInfo[]): Promise<mls.stor.IRegGetContents[]> => {
 		return this._getContents(project, fileInfos);
@@ -547,7 +539,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 				headers: {
 					'Content-Type': 'application/json',
 					Accept: 'application/json',
-					Authorization: 'bearer ' + this.mKey
+					Authorization: 'bearer ' + mKey
 				},
 				query: query,
 				variables: variables,
@@ -597,7 +589,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer'
 				})).json();
@@ -627,7 +619,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mkey,
 					},
 					referrerPolicy: 'no-referrer',
 					body: JSON.stringify(body)
@@ -644,7 +636,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 					body: JSON.stringify(body)
@@ -741,7 +733,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 				});
@@ -796,7 +788,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 				});
@@ -856,7 +848,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 					body: JSON.stringify(body)
@@ -922,7 +914,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 					body: JSON.stringify(body)
@@ -975,7 +967,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 				});
@@ -1076,7 +1068,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 				})).json();
@@ -1098,7 +1090,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 				})).json();
@@ -1170,7 +1162,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 					body: JSON.stringify(body)
@@ -1217,7 +1209,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 					body: JSON.stringify(body)
@@ -1261,7 +1253,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 					body: JSON.stringify(body)
@@ -1308,7 +1300,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
 					body: JSON.stringify(body)
@@ -1349,7 +1341,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + this.mKey,
+						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer'
 				});
@@ -2006,7 +1998,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 				credentials: 'same-origin',
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded',
-					Authorization: 'bearer ' + this.mKey,
+					Authorization: 'bearer ' + mKey,
 				},
 				referrerPolicy: 'no-referrer'
 			})).json();
