@@ -54,8 +54,8 @@ export class CollabInit extends CollabLitElement {
      * To show logs using: https://collab.codes/?traceLifeCycle=true
      */
     private async init() {
-        this.setDrivers();
         const language = this.setAndGetBaseUrl();
+        await this.setDrivers();
         this.setHTMLLang(language);
         this.setTheme();
         this.setTokensCss();
@@ -84,7 +84,8 @@ export class CollabInit extends CollabLitElement {
      */
     private async instanceDriverGitHub(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: driver github');
-        const { DriverGitHub } = await import('./_100554_driverGithub');
+        const widget = mls.l5_common.providerWidgets['github'];
+        const { DriverGitHub } = await import(widget);
         const instanceGitHub = new DriverGitHub();
         const driverInstanceGitHub = mls.stor.others.getDriver('github');
         if (!driverInstanceGitHub) mls.stor.others.addDriver(instanceGitHub, 'github');
@@ -92,7 +93,8 @@ export class CollabInit extends CollabLitElement {
 
     private async instanceDriverGitLab(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: driver gitlab');
-        const { DriverGitLab } = await import('./_100554_driverGitlab');
+        const widget = mls.l5_common.providerWidgets['gitlab'];
+        const { DriverGitLab } = await import(widget);
         const instanceGitLab = new DriverGitLab();
         const driverInstanceGitLab = mls.stor.others.getDriver('gitlab');
         if (!driverInstanceGitLab) mls.stor.others.addDriver(instanceGitLab, 'gitlab');

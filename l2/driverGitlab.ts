@@ -2,9 +2,10 @@
 
 import * as dL from './_100554_driverLib';
 
-let _initString: string = "";
+let mKey = "";
+
 export function init(initString: string) {
-	_initString = initString;
+	mKey = atob(initString);
 }
 
 export class DriverGitLab extends mls.stor.others.DriverIOBase {
@@ -17,18 +18,9 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
         super();
         if (mls.istrace) console.info('gitDriver: ' + this.driverVersion);
+		mKey = localStorage.getItem('keyGitLab') || mKey;
 
     }
-
-    get mKey(): string {
-
-        if (_initString) return _initString;
-        const _mKey = localStorage.getItem('keyGitLab');
-        if (!_mKey) throw new Error('Please configure your key gitlab');
-        return _mKey;
-
-    }
-
 
     public getContents = (project: number, fileInfos: mls.stor.IFileInfo[]): Promise<mls.stor.IRegGetContents[]> => {
         return this._getContents(project, fileInfos);
@@ -442,7 +434,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
-                    Authorization: 'bearer ' + this.mKey
+                    Authorization: 'bearer ' + mKey
                 },
                 query: query,
                 variables: variables,
@@ -480,7 +472,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     headers: {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
-                        Authorization: 'bearer ' + this.mKey
+                        Authorization: 'bearer ' + mKey
                     }
 
                 }).then((r) => {
@@ -726,7 +718,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'PRIVATE-TOKEN': this.mKey
+                            'PRIVATE-TOKEN': mKey
                         },
                         body: JSON.stringify({
                             source_branch: opt.branchOrigin,
@@ -753,7 +745,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
-                            'PRIVATE-TOKEN': this.mKey
+                            'PRIVATE-TOKEN': mKey
                         }
                     }
                 );
@@ -821,7 +813,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 });
@@ -871,7 +863,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 });
@@ -955,7 +947,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer',
                     body: JSON.stringify(body)
@@ -1019,7 +1011,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer',
                     body: JSON.stringify(body)
@@ -1074,7 +1066,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer',
                 })).json();
@@ -1187,7 +1179,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer',
                 })).json();
@@ -1249,7 +1241,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer',
                     body: JSON.stringify(obj)
@@ -1423,7 +1415,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer',
                     body: JSON.stringify(obj)
@@ -1463,7 +1455,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer',
                     body: JSON.stringify(obj)
@@ -1504,7 +1496,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 })).json();
@@ -1555,7 +1547,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer',
                     body: JSON.stringify(obj)
@@ -1596,7 +1588,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 })).json();
@@ -1646,7 +1638,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 })).json();
@@ -1690,7 +1682,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 })).json();
@@ -1744,7 +1736,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 })).json();
@@ -1802,7 +1794,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 })).json();
@@ -1874,7 +1866,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 })).json();
@@ -1926,7 +1918,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer',
                     body: JSON.stringify(obj)
@@ -1973,7 +1965,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer',
                     body: JSON.stringify(obj)
@@ -2015,7 +2007,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 })).json();
@@ -2054,7 +2046,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'bearer ' + this.mKey,
+                        Authorization: 'bearer ' + mKey,
                     },
                     referrerPolicy: 'no-referrer'
                 })).json();
