@@ -66,7 +66,6 @@ export class CollabInit extends CollabLitElement {
         this.showMessagesIfNeeded();
         const services = await this.getServices();
         this.checkURLParams();
-        this.initProjectLocalIfNeeded();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
     }
 
@@ -272,7 +271,8 @@ export class CollabInit extends CollabLitElement {
      */
     private getLastProjectSelected(): number | undefined {
         if (window.traceLifeCycle) console.info('getLastProjectSelected');
-        const lhLastPrj = localStorage.getItem('l5-last-project');
+        const lhLastPrj = localStorage.getItem('l5-last-project') || this.baseProject.toString();
+        localStorage.setItem('l5-last-project', lhLastPrj);
         const lastPrj = lhLastPrj ? Number.parseInt(lhLastPrj, 10) : undefined;
         return lastPrj;
     }
