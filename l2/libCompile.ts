@@ -125,7 +125,8 @@ async function loadMyNeedsToCompile(
         //const enhacementName = getEnhacementName(ipath);
         const enhacementName = await getEnhancementFromFetch(ipath);
         if (!enhacementName) throw new Error('enhacementName not valid');
-
+        if (enhacementName === '_blank') return;
+        
         if (!myModules[enhacementName]) {
 
             mls.actual[0].setFullName(enhacementName);
@@ -195,16 +196,16 @@ async function getEnhancementFromFetch(file: { project: number, shortName: strin
 
     const url = `/_${file.project}_${file.shortName}`;
     const txt = await (await fetch(url)).text();
-    const line = txt.split('\n')[0];
+    const lines = txt.split('\n');
 
-    const mlsLine = line.trim().indexOf('<mls') > -1;
+    const mlsLine = lines.find(line => line.trim().startsWith('/// <mls '));;
 
     if (!mlsLine) {
         throw new Error(`Not found tag <mls> in ${url}` );
     }
 
     // Regex para capturar o valor do atributo enhancement
-    const enhancementMatch = line.match(/enhancement="([^"]+)"/);
+    const enhancementMatch = mlsLine.match(/enhancement="([^"]+)"/);
 
     if (!enhancementMatch) {
         throw new Error('Not found attr "enhancement" in '+url);
