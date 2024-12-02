@@ -5,13 +5,23 @@ import { customElement, property } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 
 /// **collab_i18n_start**
+
 const message_pt = {
   title1: 'Bem vindo!',
-  title2: 'Sua Jornada inicia no',
+  title2: 'no', 
   title3: 'Collab Codes!',
-  lblGoogle: 'Continuar com o Google',
-  lblGitHub: 'Continuar com o GitHub',
-  lblGitLab: 'Continuar com o GitLab',
+  google_canSignIn: 'Continuar com o Google',
+  google_canDisconnect: 'Desconectar do Google',
+  google_canAdd: 'Adicionar Google',
+  google_connected: 'Conectado com o Google',
+  github_canSignIn: 'Continuar com o GitHub',
+  github_canDisconnect: 'Desconectar do GitHub',
+  github_canAdd: 'Adicionar GitHub',
+  github_connected: 'Conectado com o GitHub',
+  gitlab_canSignIn: 'Continuar com o GitLab',
+  gitlab_canDisconnect: 'Desconectar do GitLab',
+  gitlab_canAdd: 'Adicionar GitLab',
+  gitlab_connected: 'Conectado com o GitLab',
   lblFoot1: 'Ao entrar, você concorda com nossos ',
   lblFoot2: 'Termos de Serviço',
   lblFoot3: ' e ',
@@ -19,22 +29,32 @@ const message_pt = {
   or1: " (com repositório) ",
   or2: " ou (sem repositório) ",
   or3: " ou ",
-  logoff: 'Sair'
+  logoff: 'Sair',
 };
 
 const message_en = {
   title1: 'Welcome!',
-  title2: 'Your journey starts at',
+  title2: ' at ',
   title3: 'Collab Codes!',
-  lblGoogle: 'Sign in with Google',
-  lblGitHub: 'Sign in with GitHub',
-  lblGitLab: 'Sign in with GitLab',
+  google_canSignIn: 'Sign in with Google',
+  google_canDisconnect: 'Disconnect from Google',
+  google_canAdd: 'Add Google',
+  google_connected: 'Connected with Google',
+  github_canSignIn: 'Sign in with GitHub',
+  github_canDisconnect: 'Disconnect from GitHub',
+  github_canAdd: 'Add GitHub',
+  github_connected: 'Connected with GitHub',
+  gitlab_canSignIn: 'Sign in with GitLab',
+  gitlab_canDisconnect: 'Disconnect from GitLab',
+  gitlab_canAdd: 'Add GitLab',
+  gitlab_connected: 'Connected with GitLab',
   lblFoot1: 'By signing in, you agree to our ',
   lblFoot2: 'Terms of Service',
   lblFoot3: ' and ',
   lblFoot4: 'Privacy Policy',
   or1: " (with repository) ",
-  or2: " or (without repository) ",  or3: ' or ',
+  or2: " or (without repository) ",
+  or3: " or ",
   logoff: 'Logoff',
 };
 
@@ -49,46 +69,90 @@ const messages: { [key: string]: MessageType } = {
 export class PluginCollabLogin100554 extends PluginBaseModule {
 
   private msg: MessageType = messages['en'];
+  private googleState = ''
 
   render() {
     const lang = this.getMessageKey(messages);
     this.msg = messages[lang];
+
     return html`
-      <div class="login-container">
-        <div class="login-title">${this.msg.title1}
-          <div>${this.msg.title2}</div>
-          <div>${this.msg.title3}</div>
-        </div>
-        <div class="divider">
-          <span>${this.msg.or1}</span>
-        </div>
-        <button class="login-button github" @click="${this.gitHubLogin}">
-          ${this.githubIcon()} ${this.msg.lblGitHub}
-        </button>
-        <button class="login-button gitlab" @click="${this.gitLabLogin}">
-          ${this.gitlabIcon()} ${this.msg.lblGitLab}
-        </button>
-        <div class="divider">
-          <span>${this.msg.or2}</span>
-        </div>
-        <button class="login-button google" @click="${this.googleLogin}">
-          ${this.googleIcon()} ${this.msg.lblGoogle}
-        </button>
-        <div class="divider">
-          <span>${this.msg.or3}</span>
-        </div>
-        <button class="login-button logoff" @click="${this.logoff}">
-          ${this.LogoffIcon()} ${this.msg.logoff}
-        </button>
-        <div class="footer">
-          ${this.msg.lblFoot1}<a href="/terms">${this.msg.lblFoot2}</a>${this.msg.lblFoot3}<a href="/privacy">${this.msg.lblFoot4}</a>.
-        </div>
-      </div>
-    `;
+    <div class="login-container">
+      ${this.renderTitle()}
+      ${this.renderDivider(this.msg.or1)}
+      ${this.renderButton('github', this.githubIcon(), this.gitHubLogin)}
+      ${this.renderButton('gitlab', this.gitlabIcon(), this.gitLabLogin)}
+      ${this.renderDivider(this.msg.or2)}
+      ${this.renderButton('google', this.googleIcon(), this.googleLogin)}
+      ${this.renderLogOff('logoff', this.LogoffIcon(), this.logoff)}
+      ${this.renderFooter()}
+    </div>
+  `;
   }
 
-  logoff() {
+  renderTitle() {
+    return html`
+    <div class="login-title">
+      ${this.msg.title1}
+      <div>${this.msg.title2}</div>
+      <div>${this.msg.title3}</div>
+    </div>
+  `;
+  }
 
+  renderDivider(text: string) {
+    return html`
+    <div class="divider">
+      <span>${text}</span>
+    </div>
+  `;
+  }
+
+  renderButton(provider: mls.cbe.Provider, icon: TemplateResult, clickHandler: () => void) {
+    const lbl: string = `${provider}_${this.getState(provider)}`;
+    return html`
+    <button class="login-button ${provider}" @click="${clickHandler}">
+      ${icon} ${(this.msg as any)[lbl]}
+    </button>
+  `;
+  }
+
+  renderLogOff(text: string, icon: TemplateResult, clickHandler: () => void) {
+    if (mls.l0.providersConnected.length < 1) return html``;
+    return html`
+      ${this.renderDivider(this.msg.or3)}
+    <button class="login-button logoff" @click="${clickHandler}">
+      ${icon} ${this.msg.logoff}
+    </button>
+  `;
+  }
+
+  renderFooter() {
+    return html`
+    <div class="footer">
+      ${this.msg.lblFoot1}
+      <a href="/?details=termsOfService">${this.msg.lblFoot2}</a>
+      ${this.msg.lblFoot3}
+      <a href="/?details=privacyPolicy">${this.msg.lblFoot4}</a>.
+    </div>
+  `;
+  }
+  
+  logoff() {
+      document.cookie = `loginUser=anonymous; path=/; secure; samesite=strict;`;
+      window.location.reload();
+  }
+
+  getState(provider: mls.cbe.Provider): StateProvider {
+    if (mls.api.common.getCookie('loginUser') === 'anonymous') return 'canSignIn';
+    if (this.isProviderConnected(provider)) {
+      if (mls.l0.providersConnected.length > 1) return 'canDisconnect';
+      return 'connected';
+    }
+    return 'canAdd';
+  }
+
+  isProviderConnected(provider: mls.cbe.Provider): boolean {
+    return mls.l0.providersConnected.includes(provider);
   }
 
   googleLogin() {
@@ -172,4 +236,6 @@ export const pluginData: mls.plugin.IPluginData = {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110.94 122.88"><title>lookup</title><path fill="currentColor" d="M19.26,40.53a2.74,2.74,0,0,1-2.59-2.82,2.69,2.69,0,0,1,2.59-2.82H63.41A2.72,2.72,0,0,1,66,37.71a2.68,2.68,0,0,1-2.58,2.82ZM79.41,66a24.82,24.82,0,0,1,20.78,38.41l10.75,11.71-7.42,6.77-10.36-11.4A24.82,24.82,0,1,1,79.41,66Zm13.2,11.62a18.66,18.66,0,1,0,5.47,13.2,18.66,18.66,0,0,0-5.47-13.2Zm-73.32-22a2.73,2.73,0,0,1-2.58-2.82A2.68,2.68,0,0,1,19.29,50H41.37A2.74,2.74,0,0,1,44,52.84a2.68,2.68,0,0,1-2.58,2.82ZM82.76,17.14H92a6.64,6.64,0,0,1,6.61,6.61V55.18c-.2,2.07-5.27,2.1-5.7,0V23.75a.92.92,0,0,0-.94-.94H82.73V55.18c-.49,1.88-4.72,2.16-5.67,0V6.61a.92.92,0,0,0-.94-.94H6.58a1,1,0,0,0-.68.27,1,1,0,0,0-.26.67V85.18a1,1,0,0,0,.26.67,1,1,0,0,0,.68.27H43.36c2.86.29,3,5.23,0,5.67H21.5v10.53a.92.92,0,0,0,.94.94H43.36c2.07.23,2.74,4.94,0,5.67H22.48a6.62,6.62,0,0,1-6.61-6.61V91.79H6.61a6.49,6.49,0,0,1-4.66-2A6.56,6.56,0,0,1,0,85.18V6.61A6.49,6.49,0,0,1,2,2,6.55,6.55,0,0,1,6.61,0H76.16a6.51,6.51,0,0,1,4.66,2,6.54,6.54,0,0,1,1.94,4.66V17.14ZM19.26,25.4a2.74,2.74,0,0,1-2.59-2.82,2.69,2.69,0,0,1,2.59-2.82H63.41A2.73,2.73,0,0,1,66,22.58a2.69,2.69,0,0,1-2.58,2.82Z"/></svg>
     `;
   }
-};    
+};
+
+type StateProvider = 'connected' | 'canSignIn' | 'canDisconnect' | 'canAdd';
