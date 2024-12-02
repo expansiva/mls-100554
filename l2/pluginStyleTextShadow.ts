@@ -70,8 +70,9 @@ export class PluginStyleTextShadow extends IcaLitElement {
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
     handleIcaStateChange(_key: string, _value: ICSSState) {
-        if (_key !== `less.${this.position}` || !_value) return;
+        if (_key !== `less.${this.position}` || !_value || !_value.key) return;
         if (_value.emitter === 'helper') return;
+        if (!tags.includes(_value.key)) return;
         this._onIcaStateChange();
     }
 
@@ -79,7 +80,6 @@ export class PluginStyleTextShadow extends IcaLitElement {
         if (!this.state || !this.state.lessCSS) return;
         const rule = this.findCSSRuleInIframe(this.state.lessCSS.selector);
         if (!rule) return;
-        console.info('setValue')
         this.setValues(rule);
     }
 
