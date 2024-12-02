@@ -74,8 +74,9 @@ export class PluginStyleTransform extends IcaLitElement {
     private msg: MessageType = messages['en'];
 
     handleIcaStateChange(_key: string, _value: ICSSState) {
-        if (_key !== `less.${this.position}` || !_value) return;
+        if (_key !== `less.${this.position}` || !_value || !_value.key) return;
         if (_value.emitter === 'helper') return;
+        if (!tags.includes(_value.key)) return;
         this._onIcaStateChange();
     }
 
