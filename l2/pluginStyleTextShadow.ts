@@ -1,10 +1,16 @@
 /// <mls shortName="pluginStyleTextShadow" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
-import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { CollabLitElement, getMessageKey } from './_100554_collabLitElement';
+import { html, repeat } from 'lit';
+import { customElement, property, queryAll } from 'lit/decorators.js';
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
+import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { getMessageKey } from './_100554_collabLitElement';
+import './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputRange';
+import { ICSSState } from './_100554_lessCSS';
+import { convertColorToHex } from './_100554_libCommom';
+import { Window } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -47,13 +53,103 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-text-shadow-100554')
-export class PluginStyleTextShadow extends CollabLitElement {
+export class PluginStyleTextShadow extends IcaLitElement {
 
-    @property() showFull: string = 'false';
+    @property() showFull: string = 'true';
+    @propertyDataSource() state: ICSSState | undefined;
+    @property() position: 'left' | 'right' = 'left';
+    @property() textShadow: string | undefined;
+
+    @property() offSetX: string | undefined;
+    @property() offSetY: string | undefined;
+    @property() textBlur: string | undefined;
+    @property() color: string | undefined;
 
     private msg: MessageType = messages['en'];
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
+
+    handleIcaStateChange(_key: string, _value: ICSSState) {
+        if (_key !== `less.${this.position}` || !_value) return;
+        if (_value.emitter === 'helper') return;
+        this._onIcaStateChange();
+    }
+
+    private _onIcaStateChange() {
+        if (!this.state || !this.state.lessCSS) return;
+        const rule = this.findCSSRuleInIframe(this.state.lessCSS.selector);
+        if (!rule) return;
+        console.info('setValue')
+        this.setValues(rule);
+    }
+
+    private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
+
+        const json = this.state?.lessCSS?.lessAST.ast[ruleSelector];
+        if (!json) return null;
+
+        const properties = Object.entries(json)
+            .filter(([key]) => !key.startsWith('_'))
+            .sort(([, a], [, b]) => (a as { line: number }).line - (b as { line: number }).line);
+
+        let ruleText = properties.map(([key, item]) => `${key}: ${(item as { value: string }).value};`).join(' ');
+        const selector = ruleSelector;
+        const cssStyleSheet = new CSSStyleSheet();
+        const ruleIndex = cssStyleSheet.insertRule(`${selector} { ${ruleText} }`, 0);
+        const cssStyleRule = cssStyleSheet.cssRules[ruleIndex];
+        return cssStyleRule as CSSStyleRule;
+
+    }
+
+    private setValues(rule: CSSStyleRule) {
+
+        if (rule.style) {
+            for (let i = 0; i < rule.style.length; i++) {
+                const propertyName = rule.style[i];
+                if (propertyName === 'text-shadow') {
+                    const propertyValue = rule.style.getPropertyValue(propertyName);
+                    const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(propertyName);
+                    if (!convertedProp) return;
+                    (this as any)[convertedProp] = propertyValue;
+                }
+            }
+        }
+        this.setValues2();
+    }
+
+
+    private setValues2() {
+
+        const auxTextShadow: any = {
+            offSetX: '',
+            offSetY: '',
+            color: '',
+            blur: '',
+        }
+
+        let value = this.textShadow;
+        if (!value) return;
+
+        if (value.indexOf('rgb') >= 0) {
+            auxTextShadow.color = value.substring(value.indexOf('rgb'), value.indexOf(')') + 1);
+            value = value.replace(auxTextShadow.color, '').trim();
+        } else if (value.indexOf('#') >= 0) {
+            auxTextShadow.color = value.substring(value.indexOf('#'), value.indexOf(' ') + 1).trim();
+            value = value.replace(auxTextShadow.color, '').trim();
+        } else if (/[a-z]/.test(value.substring(0, 1))) {
+            auxTextShadow.color = value.substring(value.indexOf(value.substring(0, 2)), value.indexOf(' ') + 1).trim();
+            value = value.replace(auxTextShadow.color, '').trim();
+        }
+
+        const arrayValues = value.split(' ');
+        this.offSetX = arrayValues[0] || '';
+        this.offSetY = arrayValues[1] || '';
+        this.textBlur = arrayValues[2] || '';
+        this.color = auxTextShadow.color;
+
+    }
+
+
 
     private arrayGallery = [
         '',
@@ -79,6 +175,38 @@ export class PluginStyleTextShadow extends CollabLitElement {
         'text-shadow: 0px 1px 1px #999, 0px 2px 2px #666;',
     ];
 
+    private mountValue(): void {
+        let value = '';
+        if (this.offSetX) value = this.offSetX;
+        if (this.offSetY) value += ' ' + this.offSetY;
+        if (this.textBlur) value += ' ' + this.textBlur;
+        if (this.color) value += ' ' + this.color;
+        this.textShadow = value;
+        this.setState();
+    }
+
+
+    private setState() {
+        (window as any as Window).globalState.less[this.position].emitter = 'helper';
+        const styles: CSSStyleDeclaration = (window as any as Window).globalState.less[this.position].lessCSS.styles;
+        styles.textShadow = this.textShadow || '';
+    }
+
+    private timeonChangeProp = -1;
+
+    private handleChange(e: KeyboardEvent) {
+        console.info('change');
+        clearTimeout(this.timeonChangeProp);
+        const el = e.detail ? (e.detail as any).target : e.target as HTMLInputElement;
+        const prop = el.getAttribute('prop');
+        if (!prop) return;
+        this.timeonChangeProp = setTimeout(() => {
+            (this as any)[prop] = el.value;
+            this.mountValue();
+        }, 100);
+    }
+
+
     render() {
 
         const lang = this.getMessageKey(messages);
@@ -96,28 +224,51 @@ export class PluginStyleTextShadow extends CollabLitElement {
         `;
     }
 
+
+
     renderColumn() {
         return html`
             <div>
                 <div class="group">
                     <span>${this.msg.xOffset}</span>
                     <div class="group-edit">
-                        <collab-ds-input-range-100554 prop="x" value="0px" .arraySelect=${this.tpMeasures}  ></collab-ds-input-range-100554>
+                        <collab-ds-input-range-100554
+                            prop="offSetX"
+                            value=${this.offSetX}
+                            .arraySelect=${this.tpMeasures}  
+                            @onchange=${this.handleChange}
+                        ></collab-ds-input-range-100554>
                     </div>
 
                     <span>${this.msg.yOffset}</span>
                     <div class="group-edit">
-                        <collab-ds-input-range-100554 prop="y" value="0px" .arraySelect=${this.tpMeasures}  ></collab-ds-input-range-100554>
+                        <collab-ds-input-range-100554
+                            prop="offSetY"
+                            value=${this.offSetY}
+                            .arraySelect=${this.tpMeasures}  
+                            @onchange=${this.handleChange}
+                        ></collab-ds-input-range-100554>
                     </div>
 
                     <span>${this.msg.blur}</span>
                     <div class="group-edit">
-                        <collab-ds-input-range-100554 prop="blur" value="0px" .arraySelect=${this.tpMeasures}  ></collab-ds-input-range-100554>
+                        <collab-ds-input-range-100554
+                            prop="textBlur"
+                            value=${this.textBlur}
+                            .arraySelect=${this.tpMeasures}  
+                            @onchange=${this.handleChange}
+                        ></collab-ds-input-range-100554>
                     </div>
                     
                     <span>${this.msg.color}</span>
                     <div class="group-edit">
-                        <collab-ds-input-select-color-100554 prop="color" useInput="false" useSelect="false" ></collab-ds-input-select-color-100554>
+                        <collab-ds-input-select-color-100554 
+                            prop="color" 
+                            useInput="false"
+                            useSelect="false" 
+                            _valueColor=${convertColorToHex(this.color || '')}
+                            @onchange=${this.handleChange}
+                        ></collab-ds-input-select-color-100554>
                     </div>
                 </div>
             </div>
@@ -125,19 +276,113 @@ export class PluginStyleTextShadow extends CollabLitElement {
     }
 
     renderGallery() {
-
         return html`
             <div class="gallery">
-                ${repeat(this.arrayGallery, ((key: any) => key) as any,
-            ((css: any, index: any) => {
-                return html`
-                        <h5 style="${css}" .gallery=${css}>Text</h5>
-                        `;
+                ${repeat(this.gallery, ((key: any) => key) as any,
+            ((galleryItem: IGallery, index: number) => {
+                return html`<h5 style="${galleryItem.style}" @click=${() => { this.onGalleryClick(galleryItem) }}>Item</h5>`;
             }) as any
         )}
             </div>
-        
-        `
+         `
     }
 
+    private async onGalleryClick(item: IGallery) {
+        this.textShadow = item.state.textShadow;
+        this.setValues2();
+        await this.updateComplete;
+        this.setState();
+    }
+
+    private gallery: IGallery[] = [
+        {
+            state: { textShadow: '2px 2px' },
+            style: 'text-shadow: 2px 2px;'
+        },
+        {
+            state: { textShadow: '2px 2px 5px' },
+            style: 'text-shadow: 2px 2px 5px;'
+        },
+        {
+            state: { textShadow: '0 0 3px' },
+            style: 'textShadow: 0 0 3px;'
+        },
+        {
+            state: { textShadow: '3px 3px 3px' },
+            style: 'text-shadow: 3px 3px 3px;'
+        },
+        {
+            state: { textShadow: '3px -3px 3px' },
+            style: 'text-shadow: 3px -3px 3px;'
+        },
+        {
+            state: { textShadow: '1px 1px 2px #000' },
+            style: 'text-shadow: 1px 1px 2px #000;'
+        },
+        {
+            state: { textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)' },
+            style: 'text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);'
+        },
+        {
+            state: { textShadow: '-2px 2px 4px #333' },
+            style: 'text-shadow: -2px 2px 4px #333;'
+        },
+        {
+            state: { textShadow: '0 0 5px #f00' },
+            style: 'text-shadow: 0 0 5px #f00;'
+        },
+        {
+            state: { textShadow: '4px 4px 6px rgba(50, 50, 50, 0.75)' },
+            style: 'text-shadow: 4px 4px 6px rgba(50, 50, 50, 0.75);'
+        },
+        {
+            state: { textShadow: '-3px -3px 4px #888' },
+            style: 'text-shadow: -3px -3px 4px #888;'
+        },
+        {
+            state: { textShadow: '5px 5px 10px #ff6347' },
+            style: 'text-shadow: 5px 5px 10px #ff6347;'
+        },
+        {
+            state: { textShadow: '1px 2px 0 #000, 2px 3px 0 #ff0' },
+            style: 'text-shadow: 1px 2px 0 #000, 2px 3px 0 #ff0;'
+        },
+        {
+            state: { textShadow: '0 0 10px rgba(255, 255, 255, 0.3)' },
+            style: 'text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);'
+        },
+        {
+            state: { textShadow: '2px 2px 8px #006400' },
+            style: 'text-shadow: 2px 2px 8px #006400;'
+        },
+        {
+            state: { textShadow: '6px 6px 10px #0000ff' },
+            style: 'text-shadow: 6px 6px 10px #0000ff;'
+        },
+        {
+            state: { textShadow: '0 0 2px #ccc, 2px 2px 4px #000' },
+            style: 'text-shadow: 0 0 2px #ccc, 2px 2px 4px #000;'
+        },
+        {
+            state: { textShadow: '-1px -1px 3px #555' },
+            style: 'text-shadow: -1px -1px 3px #555;'
+        },
+        {
+            state: { textShadow: '2px 2px 5px rgba(100, 100, 100, 0.5)' },
+            style: 'text-shadow: 2px 2px 5px rgba(100, 100, 100, 0.5);'
+        },
+        {
+            state: { textShadow: '0px 1px 1px #999, 0px 2px 2px #666' },
+            style: 'text-shadow: 0px 1px 1px #999, 0px 2px 2px #666;'
+        },
+
+    ];
+
+}
+
+interface IGallery {
+    style: string,
+    state: {
+        textShadow: string,
+    }
 }
