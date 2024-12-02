@@ -56,7 +56,6 @@ export class PluginStyleColumn extends IcaLitElement {
 
     @property() showFull: string = 'true';
     @propertyDataSource() state: ICSSState | undefined;
-
     @property() position: 'left' | 'right' = 'left';
 
 
