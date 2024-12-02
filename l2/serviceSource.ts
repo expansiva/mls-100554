@@ -8,6 +8,7 @@ import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
 import { getAddNewFileDetails, removeTokensFromSource, getTokensLess } from './_100554_enhancementStyle';
 import { LessCSS } from "./_100554_lessCSS";
+import { getEnhancementName } from './_100554_libCommom';
 import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
 import './_100554_aimPromptTypescript';
@@ -856,8 +857,13 @@ export class ServiceSource100554 extends ServiceBase {
 
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
-            const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule({ project, shortName }).catch((e) => undefined);
-            if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
+            const enhacementName = await getEnhancementName({ project, shortName }).catch((e) => undefined);
+            if (enhacementName) {
+                const path = mls.l2.getPath(enhacementName);
+                const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => undefined);
+                if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
+            }
+
             hasError = modelBaseTS.storFile.hasError;
         }
 

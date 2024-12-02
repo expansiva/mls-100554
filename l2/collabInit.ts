@@ -66,7 +66,6 @@ export class CollabInit extends CollabLitElement {
         this.showMessagesIfNeeded();
         const services = await this.getServices();
         this.checkURLParams();
-        this.initProjectLocalIfNeeded();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
     }
 
@@ -76,6 +75,7 @@ export class CollabInit extends CollabLitElement {
     private async setDrivers(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: drivers collab');
         await this.instanceDriverGitHub();
+        await this.instanceDriverGitLab();
     }
 
     /**
@@ -85,8 +85,16 @@ export class CollabInit extends CollabLitElement {
         if (window.traceLifeCycle) console.info('loading: driver github');
         const { DriverGitHub } = await import('./_100554_driverGithub');
         const instanceGitHub = new DriverGitHub();
-        const driverInstanceGitHub = mls.stor.others.getDriver(instanceGitHub.project, instanceGitHub.shortName);
-        if (!driverInstanceGitHub) mls.stor.others.addDriver(instanceGitHub);
+        const driverInstanceGitHub = mls.stor.others.getDriver('github');
+        if (!driverInstanceGitHub) mls.stor.others.addDriver(instanceGitHub, 'github');
+    }
+
+    private async instanceDriverGitLab(): Promise<void> {
+        if (window.traceLifeCycle) console.info('loading: driver gitlab');
+        const { DriverGitLab } = await import('./_100554_driverGitlab');
+        const instanceGitLab = new DriverGitLab();
+        const driverInstanceGitLab = mls.stor.others.getDriver('gitlab');
+        if (!driverInstanceGitLab) mls.stor.others.addDriver(instanceGitLab, 'gitlab');
     }
 
     /**
@@ -263,7 +271,8 @@ export class CollabInit extends CollabLitElement {
      */
     private getLastProjectSelected(): number | undefined {
         if (window.traceLifeCycle) console.info('getLastProjectSelected');
-        const lhLastPrj = localStorage.getItem('l5-last-project');
+        const lhLastPrj = localStorage.getItem('l5-last-project') || this.baseProject.toString();
+        localStorage.setItem('l5-last-project', lhLastPrj);
         const lastPrj = lhLastPrj ? Number.parseInt(lhLastPrj, 10) : undefined;
         return lastPrj;
     }

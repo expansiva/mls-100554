@@ -9,7 +9,7 @@ import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
 import { convertColorToHex } from './_100554_libCommom';
 import { ICSSState } from './_100554_lessCSS';
-
+import { Window } from './_100554_icaState'
 
 import {
     collab_lock,
@@ -138,17 +138,13 @@ export class PluginStyleBorder extends IcaLitElement {
         this.msg = messages[lang];
 
         return html`
-
-        ${this.showFull === 'true' ?
-                html`
                 ${this.renderBorderGallery()}
-                ${this.renderBorder()}
-                ${this.renderBorderRadius()}
-            ` :
-                html`
-                ${this.renderBorderGallery()}
-            `
-            }
+                <div style=${this.showFull === 'false' ? 'display:none' : 'display:block'} >
+                    ${this.renderBorder()}
+                </div>
+                <div style=${this.showFull === 'false' ? 'display:none' : 'display:block'} >
+                    ${this.renderBorderRadius()}
+                </div>
         `;
     }
 
@@ -368,7 +364,6 @@ export class PluginStyleBorder extends IcaLitElement {
             'border-top': (value: string) => { this.borderTop = value },
             'border-left': (value: string) => { this.borderLeft = value },
             'border-right': (value: string) => { this.borderRight = value },
-
         }
         this.borderInputs?.forEach((bdInp) => {
             const prop = bdInp.getAttribute('prop');
@@ -424,9 +419,9 @@ export class PluginStyleBorder extends IcaLitElement {
     private updateBorderRadius(borderRadius: string | { [key: string]: string }) {
         if (borderRadius === undefined) return;
 
-        window.globalState.less[this.position].emitter = 'helper';
+        (window as unknown as Window).globalState.less[this.position].emitter = 'helper';
 
-        const styles: CSSStyleDeclaration = window.globalState.less[this.position].lessCSS.styles;
+        const styles: CSSStyleDeclaration = (window as unknown as Window).globalState.less[this.position].lessCSS.styles;
         if (typeof borderRadius === 'string') {
             styles.borderTopLeftRadius = styles.borderTopRightRadius = styles.borderBottomLeftRadius = styles.borderBottomRightRadius = '';
             styles.borderRadius = borderRadius;
@@ -443,9 +438,9 @@ export class PluginStyleBorder extends IcaLitElement {
     private updateBorder(border: string | { [key: string]: string }) {
         if (border === undefined) return;
 
-        window.globalState.less[this.position].emitter = 'helper';
+        (window as unknown as Window).globalState.less[this.position].emitter = 'helper';
 
-        const styles: CSSStyleDeclaration = window.globalState.less[this.position].lessCSS.styles;
+        const styles: CSSStyleDeclaration = (window as unknown as Window).globalState.less[this.position].lessCSS.styles;
 
         styles.breakInside
 
@@ -512,6 +507,7 @@ export class PluginStyleBorder extends IcaLitElement {
     }
 
     private async onGalleryClick(item: IGallery) {
+
         this.borderLeftWidth = item.state.borderLeftWidth;
         this.borderRightWidth = item.state.borderRightWidth;
         this.borderTopWidth = item.state.borderTopWidth;
