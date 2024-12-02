@@ -147,7 +147,7 @@ export class LessAst {
                 this.ast[currentSelector][property] = {
                     value,
                     line: lineNr,
-                    column: line.indexOf(value)
+                    column: this.findColumn(line, value) || line.lastIndexOf(value)
                 };
                 return;
             }
@@ -163,6 +163,44 @@ export class LessAst {
             }
             this.stack.pop(); // Move out of the current selector level
         }
+    }
+
+    /**
+     * Finds the column index where the given `value` starts in the provided `line`.
+     *
+     * This method calculates the precise position of the `value` in the string `line` 
+     * after the first occurrence of a colon (`:`), considering any leading spaces. 
+     * If the `value` is not found or the colon is absent, it returns undefined.
+     *
+     * @param {string} line - The line of text to be searched.
+     * @param {string} value - The target string to locate within the `line`.
+     * @returns {number} - The zero-based index of the starting position of `value` in `line`, 
+     *                     or undefined if the colon or value is not found.
+     *
+     * @example
+     * // Example 1:
+     * const line = "        text-shadow: 3em -8em 3em;";
+     * const value = "3em -8em 3em";
+     * findColumn(line, value); // Returns: 23
+     *
+     * // Example 2:
+     * const line = "        flex-wrap: wrap;";
+     * const value = "wrap";
+     * findColumn(line, value); // Returns: 21
+     *
+     * // Example 3:
+     * const line = "invalid line without colon";
+     * const value = "anything";
+     * findColumn(line, value); // Returns: undefined
+     */
+    private findColumn(line: string, value: string): number | undefined {
+        const colonIndex = line.indexOf(':');
+        if (colonIndex === -1) return;
+        const afterColon = line.slice(colonIndex + 1);
+        const trimmedStartIndex = afterColon.search(/\S/);
+        const valueStartIndex = afterColon.indexOf(value);
+        if (valueStartIndex === -1) return;
+        return colonIndex + trimmedStartIndex + valueStartIndex;
     }
 
     /**
@@ -376,6 +414,7 @@ export class LessAst {
     }
 
     public saveProperty(selector: string, property: string, newValue: string | undefined): boolean {
+
         property = this.toKebabCaseProperty(property);
         const prop = this.ast[selector]?.[property]; // Reuse `prop` throughout the function
 
