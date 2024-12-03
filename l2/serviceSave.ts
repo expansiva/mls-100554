@@ -26,6 +26,7 @@ const message_pt = {
     errorCreatePull: 'Erro ao tentar criar pull request',
     msgBlockAll: 'Você não tem acesso a este repositorio, por fvor entre em contato com o admin do projeto',
     msgBlock: 'Você não tem acesso de escrita neste repositorio, caso deseje criar um fork clique no botão abaixo',
+    pullrequestOk: 'Pull request realizado com sucesso',
 
 }
 
@@ -45,6 +46,7 @@ const message_en = {
     errorCreatePull: 'Error when trying to create pull request',
     msgBlockAll: 'You do not have access to this repository, please contact the project admin',
     msgBlock: 'You do not have write access to this repository, if you wish to create a fork click the button below',
+    pullrequestOk:'Pull request completed successfully'
 }
 
 type MessageType = typeof message_en;
@@ -841,6 +843,7 @@ export class ServiceSave extends ServiceBase {
 
             await this.setInfos();
             this.fireEvents();
+            window.collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 5000, autoClose: true });
             this.showLoader(false);
 
         } catch (err: any) {
