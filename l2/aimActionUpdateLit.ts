@@ -57,7 +57,7 @@ export class AimActionUpdateLit extends AimActionBase {
         // call LLM on server with prompt
         this.addTaskAndWaitForCompletion(taskRoot, {
             mode: 'initializing',
-            title: 'exec prompt',
+            title: args.title || 'exec prompt',
             ref: args.fileRef,
             widget: '_100554_aimTaskExecLLM',
             agent: this.assistant,
@@ -109,8 +109,27 @@ export class AimActionUpdateLit extends AimActionBase {
         if (!eModel || !eModel.ts) throw new Error('invalid fileRef in taskRoot, model dont exists: ' + fileRef);
         if (modelType !== 'ts') throw new Error('invalid modelType in taskRoot, must be "ts": ' + key);
         const model = eModel.ts?.model;
-        model.setValue(ts);
+        this.updateModelWithUndo(model, ts);
     }
+
+    updateModelWithUndo = (model: monaco.editor.ITextModel, value: string) => {
+        if (!model || model.isDisposed()) {
+            throw new Error('Invalid model');
+        }
+        if (typeof value !== 'string') {
+            throw new Error('Invalid value. Expected a string');
+        }
+
+        model.pushEditOperations(
+            [],
+            [{
+                range: model.getFullModelRange(),
+                text: value,
+                forceMoveMarkers: true
+            }],
+            () => null
+        );
+    };    
 
     async loadModelTS(fileRef: string) {
         // fileRef, ex _[project]_shortName
