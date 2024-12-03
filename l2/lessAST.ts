@@ -72,12 +72,13 @@ export class LessAst {
     public ast: ILessAST;
     url: string;
     monacoDriver: MonacoDriver;
+
     // Track the selector hierarchy
     stack: string[] = [];
 
-    constructor(url: string) {
+    constructor(url: string, editor: monaco.editor.IStandaloneCodeEditor) {
         this.url = url;
-        this.monacoDriver = new MonacoDriver();
+        this.monacoDriver = new MonacoDriver(editor);
         this.ast = { root: {} };
         this.parse();
     }

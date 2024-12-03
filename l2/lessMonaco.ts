@@ -1,9 +1,17 @@
 /// <mls shortName="lessMonaco" project="100554" enhancement="_blank" />
 
+const _editor = Symbol("ignoredProperty");
+
 /**
  * class to interface with monaco models
  */
 export class MonacoDriver {
+
+    [_editor]: monaco.editor.IStandaloneCodeEditor | undefined;
+
+    constructor(editor: monaco.editor.IStandaloneCodeEditor) {
+        this[_editor] = editor;
+    }
 
     public getLines = (url: string): string[] => {
         const model = monaco.editor.getModel(monaco.Uri.parse(url));
@@ -17,15 +25,23 @@ export class MonacoDriver {
      * Returns true if the operation is successful.
      */
     public insertLine = (url: string, lineNr: number, line: string): boolean => {
+
         const model = monaco.editor.getModel(monaco.Uri.parse(url));
         if (!model || model.isDisposed()) throw new Error(`Invalid model ${url}`);
-        
+
         const position = new monaco.Position(lineNr, 1);
         model.pushEditOperations(
             [], // Undo stack will automatically handle this.
             [{ range: new monaco.Range(lineNr, 1, lineNr, 1), text: line + '\n', forceMoveMarkers: true }],
             () => null
         );
+        
+        if (this[_editor]) {
+            this[_editor].setSelection(
+                new monaco.Selection(lineNr, 1, lineNr, line.length + 1)
+            );
+        }
+
         return true;
     }
 
@@ -51,15 +67,16 @@ export class MonacoDriver {
         );
         return true;
     }
-    
+
     /**
      * Updates a specified line at a particular column.
      * Returns true if the operation is successful.
      */
     public updateLine = (url: string, lineNr: number, columnNr: number, newText: string): boolean => {
+
         const model = monaco.editor.getModel(monaco.Uri.parse(url));
         if (!model || model.isDisposed()) throw new Error(`Invalid model ${url}`);
-        
+
         const lineContent = model.getLineContent(lineNr);
         const startColumn = columnNr;
         const endColumn = lineContent.length + 1;;
@@ -84,7 +101,7 @@ export class MonacoDriver {
         const model = monaco.editor.getModel(monaco.Uri.parse(url));
         if (!model || model.isDisposed()) throw new Error(`Invalid model ${url}`);
         model.pushStackElement(); // Marks the end of a grouped edit
-    }    
+    }
 
 }
 
