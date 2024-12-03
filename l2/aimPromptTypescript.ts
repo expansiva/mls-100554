@@ -1,4 +1,4 @@
-/// <mls shortName="aimPromptTypescript" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="aimPromptTypescript" project="100554" enhancement="_100554_enhancementLit" />
 
 import { html, css, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -17,13 +17,12 @@ const dataForDetails: mls.events.IPluginDetail = {
 const modelType: mls.editor.ModelType = 'ts';
 const languageid: string = 'typescript';
 
-
 /// **collab_i18n_start**
 const message_pt = {
     btnSend: 'Enviar',
     placeHolder: 'Digite sua pergunta...' 
 }
-   
+
 const message_en = {
     btnSend: 'Send',
     placeHolder: 'Enter your question...'
@@ -33,24 +32,24 @@ type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
-    'pt': message_pt
+    'pt': message_pt,
 }
 /// **collab_i18n_end**
-@customElement('aim-prompt-typescript-100554')
-export class aimPromptTypeScript extends IcaLitElement {
 
+@customElement('aim-prompt-typescript-100554')
+export class AimPromptTypeScript extends IcaLitElement {
 
     private msg: MessageType = messages['en'];
 
     /**
-     * This widget can be used in 3 contexts:
+     * This widget can be used in 4 contexts:
      * - in the editor -> renderMode = 'editor'
      * - in service detail -> renderMode = 'detail'
      * - in preview (default) -> renderMode = 'desenv'
      */
-    @property ({ type: "string" }) renderMode: 'editor' | 'detail' | 'desenv' = "desenv";
+    @property({ type: "string" }) renderMode: 'editor' | 'detail' | 'desenv' = "desenv";
 
-    /** 
+    /**
      * Model key used to find the file and model.
      * Example: _100111_file1 (without extension).
      * If modelKey === "", show input.
@@ -61,7 +60,6 @@ export class aimPromptTypeScript extends IcaLitElement {
      * Text being edited.
      */
     @property({ type: "string", reflect: true }) text = "";
-
     @property({ type: Boolean }) isLoaded = false;    
 
     async connectedCallback() {
@@ -71,20 +69,24 @@ export class aimPromptTypeScript extends IcaLitElement {
     }
 
     render(): TemplateResult {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
 
         if (!this.isLoaded) {
             return html`<p>Loading...</p>`;
         }
+        if (this.renderMode === "desenv") {
+            return html`${this.renderChoiceModelKey()}
+            <hr>
+            ${this.renderTask()}`;
+        }
 
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
-        const isError = !this.validateModelKey();
-        const isButtonDisabled = isError || this.text.trim() === '';
+        this.validateModelKey();
+        console.log('isButtonDisabled', this.isError, this.text.trim().length)
+        const isButtonDisabled = this.isError || this.text.trim() === '';
         
         return html
             `
-            ${this.taskid >= 0 ? this.renderTask() : ''}
-            ${this.renderChoiceModelKey(isError)}
             <div class="aim-prompt-search-container">
                 <textarea
                     rows="1"
@@ -94,7 +96,7 @@ export class aimPromptTypeScript extends IcaLitElement {
                     class="aim-prompt-search-input"
                     id="searchInput"
                     @focus="${this.handleFocus}"
-                    @input="${this.handleInput}"
+                    @input="${this.refreshHeight}"
                 ></textarea>
                 <button class="search-button"
                   @click="${this.handleClick}"
@@ -103,12 +105,16 @@ export class aimPromptTypeScript extends IcaLitElement {
             </div>`;
     }
 
-    renderChoiceModelKey(isError: boolean): TemplateResult {
+    isError: boolean = true;
+
+    renderChoiceModelKey(): TemplateResult {
         // Only if in desenv
         // User inputs the modelKey.
         // After validation, show input in red if there is an error.
         if (this.renderMode !== "desenv") return html``;
-        const borderColor = isError ? 'border-color: red;' : '';
+
+        this.validateModelKey();
+        const borderColor = this.isError ? 'border-color: red;' : '';
 
         return html`
             <div class="model-key-container">
@@ -116,17 +122,21 @@ export class aimPromptTypeScript extends IcaLitElement {
                 <input
                     id="modelKeyInput"
                     type="text"
+                    readonly
+                    disabled
                     class="model-key-input"
-                    placeholder="example: _${dataForDetails.project}_${dataForDetails.shortName}"
                     style="${borderColor}"
+                    value="${this.getActualWidget()}"
                     @input="${(e: Event) => this.modelKey = (e.target as HTMLInputElement).value}"
                 />
-                ${isError ? html`<p class="error-message">Invalid model key</p>` : ''}
+                ${this.isError ? html`<p class="error-message">source not loaded in editor</p>` : ''}
             </div>
         `;
     }
 
     renderTask(): TemplateResult {
+        if (this.taskid <= 0) return html``;
+
         return html`
         <br>
         <hr>
@@ -137,10 +147,13 @@ export class aimPromptTypeScript extends IcaLitElement {
         <br>`;
     }
 
-    validateModelKey(): boolean {
-        // return true if all ok
-        const modelKey: string = (this.querySelector("#modelKeyInput") as HTMLInputElement)?.value || '';
-        return !(!modelKey || !mls.editor.models[modelKey]?.ts);
+    getActualWidget(): string {
+        const actualLeft: any = (mls.actual[2] as any) ?.left;
+        return `_${actualLeft?.project}_${actualLeft?.shortName}`;
+    }
+
+    validateModelKey(): void {
+        this.isError = (!mls.editor.models[this.getActualWidget()]?.ts);
     }
 
     private handleFocus(event: KeyboardEvent) {
@@ -148,14 +161,12 @@ export class aimPromptTypeScript extends IcaLitElement {
         mls.events.fire(mls.actualLevel, 'PluginDetails', JSON.stringify(dataForDetails))
     }
 
-    private handleInput(event: Event) {
-        const textarea = event.target as HTMLTextAreaElement;
+    private refreshHeight() {
+        const textarea = this.parentElement?.querySelector("#searchInput") as HTMLTextAreaElement | null;
+        if (!textarea) throw new Error('field searchInput not found');
         this.text = textarea.value;
-        // 1 - Update height.
         textarea.style.height = 'auto';
         textarea.style.height = `${textarea.scrollHeight}px`;
-        // 2 - Update all components with the same modelKey.
-        // todo: Implement this logic
     }        
 
     taskid: number = -1;
@@ -163,8 +174,8 @@ export class aimPromptTypeScript extends IcaLitElement {
     private async handleClick() {
         const textarea = this.parentElement?.querySelector("#searchInput") as HTMLTextAreaElement | null;
         if (!textarea) throw new Error('field searchInput not found');
-        const isError = !this.validateModelKey();
-        if (isError || textarea.value.length < 5) return;
+        this.validateModelKey();
+        if (this.isError && textarea.value.length < 5) return;
 
         const fileRef = this.modelKey;
         let error: string = "";
@@ -182,6 +193,9 @@ export class aimPromptTypeScript extends IcaLitElement {
             modelType: modelType,
             fileRef
         });
+
+        textarea.value = error;
+        this.refreshHeight();
         this.requestUpdate();
     }
 
@@ -206,6 +220,7 @@ export class aimPromptTypeScript extends IcaLitElement {
 
         const source = model.model.getValue();
         if (source.length < 10) throw new Error('invalid ${languageid} file');
+        userPrompt = this.verifyPromptWithCmd(userPrompt);
         return `
         ${userPrompt}
 
@@ -214,6 +229,20 @@ export class aimPromptTypeScript extends IcaLitElement {
         \`\`\`
         `;
         
+    }
+
+    verifyPromptWithCmd(userPrompt: string): string {
+        if (userPrompt.trim() === "/review") {
+            return `
+            Review the code below and add comments directly on the relevant lines of the code.
+. Add comments immediately after the observed issue, starting with "// review: [moderate | critical]".
+. Use Clean Code principles to analyze: clarity, meaningful names, simplicity, organization, maintainability, and best practices.
+. Validate function and variable names, and check if the code adheres to the Single Responsibility Principle.
+. Suggest improvements without altering the structure of the code.
+. Provide suggestions only for issues classified as moderate or critical.
+. Return comments in language: ${navigator.language}`
+        }
+        return userPrompt;
     }
 
 }
