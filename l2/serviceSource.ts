@@ -1450,17 +1450,20 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         if (mode === '.less') {
             this.lessCSS = new LessCSS(uri.toString(), this.position);
+            const lineNumber = this.lessCSS.lessAST.findFirstSelectorAfterRoot(this.lessCSS.lessAST.ast);
+            if (lineNumber && this._ed1) {
+                const range = new monaco.Range(lineNumber, 1, lineNumber, 1);
+                this._ed1.setSelection(range);
+            }
         }
 
         if (open && this._ed1 && this.activeModels) {
             this._ed1.setModel(model);
-            // mls.editor.editors[this.position] = this.activeModels;
             this.restaureViewState();
             this.updatedMSizeEditor();
         }
 
         if (mode === '.html' && this._ed1 && this._ed1.getModel()?.id !== model.id) {
-            // mls.events.fireFileAction('modeCreated', storFile, this.position);
             this.registerProviderHTML();
         }
 

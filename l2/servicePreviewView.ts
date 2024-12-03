@@ -386,6 +386,10 @@ export class ServicePreviewView extends LitElement {
         (iframe.contentDocument.body as any)['service'] = this.father;
 
         const ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
+        if (ret.errors.length > 0) {
+            this.father.setError(`Error(${ret.errors.length}) when compiling:${ret.errors[0].error}`);
+            console.info('Errors in compile', ret.errors)
+        }
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
         this.mountCSS(iframe);

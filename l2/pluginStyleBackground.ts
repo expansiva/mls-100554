@@ -1,8 +1,15 @@
 /// <mls shortName="pluginStyleBackground" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement, getMessageKey } from './_100554_collabLitElement'
+import { html, repeat } from 'lit';
+import { customElement, property, queryAll } from 'lit/decorators.js';
+import './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputRange';
+import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { getMessageKey } from './_100554_collabLitElement';
+import './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputRange';
+import { ICSSState } from './_100554_lessCSS';
+import { Window } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -39,22 +46,34 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 
-export const tags = ['background', 'background-color', 'color', 'border-color'];
+export const tags = ['background'];
 export function getDescription() {
     const lang = getMessageKey(messages);
     return messages[lang].description;
 }
 
 @customElement('plugin-style-background-100554')
-export class PluginCssTokens extends CollabLitElement {
+export class PluginCssTokens extends IcaLitElement {
 
     private msg: MessageType = messages['en'];
 
-    @property() showFull: string = 'false';
-
+    @property() showFull: string = 'true';
+    @property() position: 'left' | 'right' = 'left';
     @property() info: IMyInfoBackground = { tp: 'background', aux: '', itens: [] };
-
     @property() css: string = '';
+    @propertyDataSource() state: ICSSState | undefined;
+
+    handleIcaStateChange(_key: string, _value: ICSSState) {
+        if (_key !== `less.${this.position}` || !_value || !_value.key) return;
+        if (_value.emitter === 'helper') return;
+        if (!tags.includes(_value.key)) return;
+        this._onIcaStateChange();
+    }
+
+    private _onIcaStateChange() {
+        if (!this.state || !this.state.lessCSS || !this.state.value) return;
+        this.configString(this.state.value);
+    }
 
     render() {
 
@@ -69,7 +88,7 @@ export class PluginCssTokens extends CollabLitElement {
 
         
             <div class="showtransparent"></div>
-            <div class="showres" style="${this.css}"></div>
+            <div class="showres" style="background:${this.css}"></div>
             <div class="showConfigContainer" >
                 
                 <div class="showConfig" >
@@ -364,8 +383,7 @@ export class PluginCssTokens extends CollabLitElement {
     private onChangeProp(index: string) {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
-            if (!this.shadowRoot) return;
-            const el = this.shadowRoot.querySelector('.groupEdit[index="' + index + '"]')
+            const el = this.querySelector('.groupEdit[index="' + index + '"]')
             if (!el) return;
             this.changeValues(el as HTMLDivElement, index);
         }, 500);
@@ -375,8 +393,7 @@ export class PluginCssTokens extends CollabLitElement {
         clearTimeout(this.timeonChangeProp);
         this.timeonChangeProp = setTimeout(() => {
 
-            if (!this.shadowRoot) return;
-            const el = this.shadowRoot.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
+            const el = this.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
             this.info.aux = el.value + 'deg';
             this.mountMyValue();
 
@@ -384,7 +401,6 @@ export class PluginCssTokens extends CollabLitElement {
     }
 
     private changeValues(el: HTMLDivElement, idx: string): void {
-
 
         const elC = el.querySelector('input[prop="color"]') as HTMLInputElement;
         const elT = el.querySelector('input[prop="transp"]') as HTMLInputElement;
@@ -395,24 +411,20 @@ export class PluginCssTokens extends CollabLitElement {
         this.info.itens[idx as any].value = elC.value;
         this.info.itens[idx as any].transp = elT.value;
         this.info.itens[idx as any].stop = elS.value;
-
         this.info.itens.sort((a: any, b: any) => a.stop - b.stop);
-
         this.mountMyValue();
 
     }
 
     private mountMyValue(): void {
 
-        const aux = 'background:';
         let text = '';
 
         if (this.info.tp === 'background' && this.info.itens.length > 0) {
             text = this.hexToRgba(this.info.itens[0].value, +this.info.itens[0].transp / 100);
         } else if (this.info.itens.length > 0) {
-            text = `${this.info.tp}( ${this.info.aux},`
+            text = `${this.info.tp.trim()}(${this.info.aux.trim()},`
             this.info.itens.forEach((i, idx) => {
-
                 const aux = idx === this.info.itens.length - 1 ? '' : ',';
                 text = text + ` ${this.hexToRgba(i.value, +i.transp / 100)} ${i.stop}%${aux}`
             });
@@ -421,16 +433,16 @@ export class PluginCssTokens extends CollabLitElement {
 
         }
 
-        this.css = aux + text;
+        this.css = text;
         this.info = Object.assign({}, this.info);
-        //this.emitEvent({ key: 'background', value: text });
+        this.setState();
 
     }
 
-
-    private myMsg = {
-        columnsCount: 'Columns Count',
-
+    private setState() {
+        (window as any as Window).globalState.less[this.position].emitter = 'helper';
+        const styles: CSSStyleDeclaration = (window as any as Window).globalState.less[this.position].lessCSS.styles;
+        styles.background = this.css || '';
     }
 
     private arrayGallery = [
@@ -474,29 +486,9 @@ export class PluginCssTokens extends CollabLitElement {
 
 }
 
-interface ICursorChangeEventsObj {
-    emitter: 'left'
-    helper: string,
-}
-
-interface IEventsSelectedObj {
-    service: string[]
-    isComponent: boolean
-}
-
-interface IEventsObj {
-    emitter: 'right' | 'left' | 'right-get',
-    helper: string,
-    value: IBlockLessLine[],
-}
 
 interface IMyInfoBackground {
     tp: string,
     aux: string,
     itens: { value: string, transp: string, stop: string }[]
-}
-
-interface IBlockLessLine {
-    key: string,
-    value: string,
 }

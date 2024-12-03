@@ -14,10 +14,10 @@ const message_pt = {
     openPullrequest: 'Pull request Abertos',
     needComment: 'Precisa de um comentario para o pullrequest',
     updateChanges: 'Atualizar alterações',
-    comments: 'Comentários',
+    comments: 'Comentários', 
     update: 'Atualizar',
     fileChanges: 'Alterações de arquivos',
-    noItemsToSave: 'Nenhum item para salvar',
+    noItemsToSave: 'Sem itens para salvar.',
     msgPullRequest: 'Este projeto utiliza pull requests, todas as alterações serão salvas no branch do seu usuário, para criar um pull request clique no botão',
     createPullRequest: "Criar pull request",
     create: 'Criar',
@@ -67,13 +67,10 @@ export class ServiceSave extends ServiceBase {
     private repo: string = '';
     private branch: string = '';
 
-    private listPull: any[] = [];
-
     private scenery: string = 'save';
 
     @property() itens: any = undefined;
     @property() error: string = '';
-    @property() pullrequestNumber: string = 'Pull request';
 
     createRenderRoot() {
         return this;
@@ -186,8 +183,6 @@ export class ServiceSave extends ServiceBase {
         this.init();
     }
 
-
-
     render() {
 
         const lang = this.getMessageKey(messages);
@@ -198,10 +193,6 @@ export class ServiceSave extends ServiceBase {
             setTimeout(() => this.error = '', 3000);
             return html`${this.error}`;
 
-        }
-
-        if (this.scenery === 'listPull') {
-            return this.renderListPull();
         }
 
         if (this.scenery !== 'save') {
@@ -223,27 +214,6 @@ export class ServiceSave extends ServiceBase {
             `
 
         }
-    }
-
-    renderListPull() {
-        return html`
-            <div>
-                <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { this.scenery = 'save'; this.requestUpdate() }}">
-                    ${collab_branch} Voltar
-                </button>
-                <h3>${this.myMessage.openPullrequest}</h3>
-                <ul style="list-style: decimal;">
-                    ${repeat(this.listPull, ((key: any) => key.id) as any, ((k: any, index: any) => { return this.renderItemListPull(k, index); }) as any)}
-                </ul>
-            </div>
-
-        `;
-    }
-
-    renderItemListPull(i: any, index: number) {
-        return html`<li>
-            <a href="${i.url}" style="text-decoration: underline; cursor: pointer;" target="_blank">${i.title} (${i.author.login})</a>
-        </li>`;
     }
 
     renderBlockScenery() {
@@ -288,34 +258,16 @@ export class ServiceSave extends ServiceBase {
                     ${collab_branch} Change
                 </button>
 
-                <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { this.loadListPullRequest(); }}">
-                    ${collab_branch} ${this.pullrequestNumber}
-                </button>
-
-                
-
             </div>
-        `//${this.renderShowPullrequest()}
+        `
     }
 
-    renderShowPullrequest() {
-
-        if (this.owner === this.mainowner &&
-            this.repo === this.mainrepo &&
-            this.branch === this.mainbranch) return html``;
-
-        return html`
-        <button style=" display: flex; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; background: #007bff; color: #fff; position: absolute; right: 0px;" @click="${this.fireOnPullrequest}">
-            <svg width="16" height="16" fill="#fff" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"></path></svg>
-            Pull request
-        </button>
-        `;
-    }
+    
 
     renderNoItens() {
         return html`
-            <sectionnosave>
-                <span>${this.myMessage.noItemsToSave}</span> 
+            <sectionnosave style="padding:1rem">
+                <span>${unsafeHTML(this.myMessage.noItemsToSave)}</span> 
             </sectionnosave>  
         
         `
@@ -557,8 +509,6 @@ export class ServiceSave extends ServiceBase {
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
 
-            await this.setNumPullRequest()
-
             for (const fKey of filesKeys) {
 
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
@@ -745,6 +695,7 @@ export class ServiceSave extends ServiceBase {
         try {
 
             this.showLoader(true);
+            this.fireEventsDetails();
             await this.setInfos();
             this.showLoader(false);
 
@@ -832,7 +783,6 @@ export class ServiceSave extends ServiceBase {
         try {
 
             e.stopPropagation();
-
 
             const el = e.target as HTMLButtonElement;
             if (!el) return;
@@ -1037,50 +987,6 @@ export class ServiceSave extends ServiceBase {
             throw new Error('firePullrequest' + err.message);
 
         }
-    }
-
-    private async setNumPullRequest() {
-
-        const prj = mls.actual[5].project;
-        if (!prj) throw new Error('Not found project actual');
-
-        const driver = mls.stor.others.getDefaultDriver(prj);
-
-        this.showLoader(true);
-        const ret = await driver.listPullRequests(this.owner, this.repo);
-
-        if (ret && ret.length > 0) {
-            this.pullrequestNumber = 'Pull request (' + ret.length + ')';
-        } else {
-            this.pullrequestNumber = 'Pull request';
-        }
-    }
-
-
-    private async loadListPullRequest() {
-
-        try {
-
-            const prj = mls.actual[5].project;
-            if (!prj) throw new Error('Not found project actual');
-
-            const driver = mls.stor.others.getDefaultDriver(prj);
-
-            this.showLoader(true);
-            const ret = await driver.listPullRequests(this.owner, this.repo);
-            this.listPull = ret;
-
-            this.scenery = 'listPull';
-            this.requestUpdate();
-            this.showLoader(false);
-
-        } catch (err: any) {
-            this.scenery = 'save';
-            this.requestUpdate();
-            this.showLoader(false);
-
-        }
-
     }
 
     //Manter para no futuro implementarmos o modo de salvar direto no repo.
@@ -1440,7 +1346,24 @@ export class ServiceSave extends ServiceBase {
         params.position = this.position as ('right' | 'left');
 
         mls.events.fire([5], ['FileAction'], JSON.stringify(params), time);
+        this.fireEventsDetails();
 
+    }
+
+    private fireEventsDetails() {
+
+        const options = {
+            shortName: undefined,
+            project: undefined,
+            htmlText: '<plugin-pullrequest-100554 autoPrepare="true"></plugin-pullrequest-100554>'
+        }
+
+        mls.events.fire(
+            mls.actualLevel as any,
+            'PluginDetails' as any,
+            JSON.stringify(options),
+            0
+        );
     }
 
 

@@ -10,7 +10,7 @@ export function init(initString: string) {
 
 export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
-	public shortName: mls.l5_common.Provider = 'github';
+	public shortName: mls.cbe.Provider = 'github';
 	public project: number = 100554;
 	public driverVersion: string = '1.0.0.3';
 
