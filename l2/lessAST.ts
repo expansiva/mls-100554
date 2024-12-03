@@ -516,6 +516,30 @@ export class LessAst {
     }
 
     /**
+     * Finds the start line of the first selector after the root in a JSON representation of a stylesheet.
+     * 
+     * @param json - A JSON object representing a stylesheet, where keys are selectors and values contain metadata.
+     * @param tagName - The tag name to exclude from the search.
+     * @returns The start line of the first selector after the root, or `null` if no such selector exists.
+     */
+    public findFirstSelectorAfterRoot(ast: Record<string, any>): number | null {
+        const rootEndLine = ast.root?._endLine ?? 0; // End line of the root selector
+        let closestSelector: string | null = null;
+
+        for (const [key, value] of Object.entries(ast)) {
+            if (key === 'root') continue;
+            if (value._startLine > rootEndLine) {
+                if (!closestSelector || value._startLine < ast[closestSelector]._startLine) {
+                    closestSelector = key;
+                }
+            }
+        }
+
+        return closestSelector ? ast[closestSelector]._startLine : null;
+    }
+
+
+    /**
      * Inserts a new selector into the AST and the Monaco model if it does not exist.
      * - Example: If the AST only contains ".cl1" and `newSelectorLESS` is ".cl1 .cl2 &:hover",
      *   the function will:
