@@ -29,7 +29,12 @@ export class MeuTeste extends CollabLitElement {
     }
     render() {
 
-        return html`<div class="cls1"><h1>Página do Lucas</h1><button id="btn1">clique aqui</button><p id="pg1">${this.texto()}</p></div>`;
+        return html`
+        <div class="cls1">
+            <h1>Página do Lucas</h1>
+            <button id="btn1">clique aqui</button>
+            <p id="pg1">${this.texto()}</p>
+        </div>`;
         
     }
 
