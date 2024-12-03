@@ -3,16 +3,29 @@
 import { LessAst } from "./_100554_lessAST";
 import { Window } from './_100554_icaState';
 
+/**
+ * A unique symbol used as a key for properties that should be ignored during JSON serialization.
+ * 
+ * Properties defined with this symbol as a key will not appear in the output of `JSON.stringify`,
+ * ensuring that the property is excluded from serialization while avoiding key collisions.
+ * 
+ * @const {symbol} ignoredProperty - A unique symbol for marking non-serializable properties.
+ */
+const _editor = Symbol("ignoredProperty");
+
 export class LessCSS {
     lessAST: LessAst;
     selector: string;
     position: "left" | "right" = "left";
+    [_editor]: monaco.editor.IStandaloneCodeEditor | undefined;
     _url: string = '';
 
     public styles: CSSStyleDeclaration;
 
-    constructor(url: string, position: "left" | "right" = "left") {
-        this.lessAST = new LessAst(url);
+    constructor(url: string, editor: monaco.editor.IStandaloneCodeEditor, position: "left" | "right" = "left") {
+
+        this.lessAST = new LessAst(url, editor);
+        this[_editor] = editor;
         this.selector = '';
         this.position = position;
         this._url = url;
@@ -35,6 +48,9 @@ export class LessCSS {
 
             }
         });
+    }
+
+    public setEditor(editor: monaco.editor.IStandaloneCodeEditor) {
     }
 
     /**
@@ -70,7 +86,9 @@ export class LessCSS {
     }
 
     public refresh() {
-        this.lessAST = new LessAst(this._url);
+        if (this[_editor]) {
+            this.lessAST = new LessAst(this._url, this[_editor]);
+        }
         this.setSelector(this.selector);
     }
 

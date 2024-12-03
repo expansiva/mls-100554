@@ -1448,10 +1448,11 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         if (!model) model = await this.getOrCreateModelHtmlOrCss(storFile, fileInfo);
 
-        if (mode === '.less') {
-            this.lessCSS = new LessCSS(uri.toString(), this.position);
+        if (mode === '.less' && this._ed1) {
+            this.lessCSS = new LessCSS(uri.toString(), this._ed1, this.position);
+            this.lessCSS.setEditor(this._ed1);
             const lineNumber = this.lessCSS.lessAST.findFirstSelectorAfterRoot(this.lessCSS.lessAST.ast);
-            if (lineNumber && this._ed1) {
+            if (lineNumber) {
                 const range = new monaco.Range(lineNumber, 1, lineNumber, 1);
                 this._ed1.setSelection(range);
             }
@@ -1607,7 +1608,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
                     const uri = this.getUri(`_${modelBase.storFile.project}_${modelBase.storFile.shortName}`, '.less');
                     const lastSelector = this.lessCSS.selector;
-                    this.lessCSS = new LessCSS(uri.toString(), this.position);
+                    this.lessCSS = new LessCSS(uri.toString(), this._ed1, this.position);
+                    this.lessCSS.setEditor(this._ed1);
                     this.lessCSS.setSelector(lastSelector);
                     const monacoPosition = this._ed1.getPosition();
                     if (!monacoPosition) return;
