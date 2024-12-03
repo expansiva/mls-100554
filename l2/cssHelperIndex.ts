@@ -46,7 +46,7 @@ export class CssHelperIndex extends IcaLitElement {
     @property({ reflect: true }) actualValue: string | undefined = '';
     @property({ reflect: true }) actualSelector: string | undefined = '';
     @property() actualLineNumber: number | undefined;
-
+    private isFirtsLoading: boolean = true;
     @propertyDataSource() state: ICSSState | undefined;
 
     @queryAll('plugin-style-index-item-100554') allPluginsEls!: PluginStyleIndexItem[];
@@ -64,7 +64,6 @@ export class CssHelperIndex extends IcaLitElement {
         if (lineNumber && key) {
             this.actualProp = key;
             this.actualValue = value;
-            this.openIfNeeded();
 
         } else {
             this.actualProp = '';
@@ -74,12 +73,21 @@ export class CssHelperIndex extends IcaLitElement {
     }
 
     async updated(changedProperties: any) {
-
         if (changedProperties.has('actualProp') || changedProperties.has('actualValue') || changedProperties.has('actualLineNumber')) {
+            this.avaliablePlugins = this.mergeHelpersArrays(this.avaliablePlugins, this.helpers);
             this.helpers = this.filterByProp(this.avaliablePlugins, this.actualProp, this.actualValue).sort((a, b) => a.priority - b.priority);
-            await this.updateComplete;
-            this.openIfNeeded();
         }
+    }
+
+    private mergeHelpersArrays(a: IHelpers[], b: IHelpers[]): IHelpers[] {
+        const mergedMap = new Map<string, IHelpers>();
+        for (const item of a) {
+            mergedMap.set(item.name, { ...item });
+        }
+        for (const item of b) {
+            mergedMap.set(item.name, { ...mergedMap.get(item.name), ...item });
+        }
+        return Array.from(mergedMap.values());
     }
 
     async firstUpdated(a: any) {
@@ -88,7 +96,6 @@ export class CssHelperIndex extends IcaLitElement {
         this.avaliablePlugins = avaliablePlugins;
         const helpers = this.filterByProp(this.avaliablePlugins, this.actualProp, this.actualValue);
         this.helpers = helpers;
-        // this.helpers = avaliablePlugins;
         await this.updateComplete;
     }
 
@@ -101,6 +108,7 @@ export class CssHelperIndex extends IcaLitElement {
         const helpers: IHelpers[] = []
 
         for await (let plugin of allPlugins) {
+
             const instance = await import(`./${plugin.widget}`);
             let description: string = '';
 
@@ -120,7 +128,7 @@ export class CssHelperIndex extends IcaLitElement {
                 mode: 'collapsed',
                 liked: false,
                 likedAnimation: false,
-                showInfo: false
+                showInfo: false,
             };
             helpers.push(obj);
         }
@@ -169,8 +177,16 @@ export class CssHelperIndex extends IcaLitElement {
             });
         });
 
-        const mode: IMode = rc.length < this.minValueToOpen.full ? 'full' : (rc.length < this.minValueToOpen.expanded ? 'expanded' : 'collapsed');
-        rc.forEach((help) => help.mode = mode);
+        if (this.isFirtsLoading) {
+            this.isFirtsLoading = false;
+            const mode: IMode = rc.length < this.minValueToOpen.full ? 'full' : (rc.length < this.minValueToOpen.expanded ? 'expanded' : 'collapsed');
+            rc.forEach((help) => {
+                const sameHelp = this.avaliablePlugins.find((item) => item.widget === help.widget);
+                if (sameHelp) sameHelp.mode = mode;
+                help.mode = mode
+            });
+        }
+
         return rc;
 
     }
@@ -193,18 +209,7 @@ export class CssHelperIndex extends IcaLitElement {
     }
 
     renderHelper(help: IHelpers, index: number) {
-        return html`<plugin-style-index-item-100554 position="${this.position}" .help=${help}></plugin-style-index-item-100554>`
-    }
-
-    openIfNeeded() {
-
-        this.allPluginsEls.forEach((pluginEl) => {
-            pluginEl.requestUpdate();
-            const mode = pluginEl.getAttribute('mode');
-            if (mode === "collapsed" && pluginEl.help && pluginEl.help?.mode !== "collapsed") {
-                pluginEl.open(pluginEl.help.mode);
-            }
-        })
+        return html`<plugin-style-index-item-100554 position="${this.position}" mode=${help.mode} .help=${help}></plugin-style-index-item-100554>`
     }
 
 }

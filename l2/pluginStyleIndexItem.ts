@@ -15,7 +15,6 @@ import {
     collab_info_circle
 } from './_100554_collabIcons'
 
-
 @customElement('plugin-style-index-item-100554')
 export class PluginStyleIndexItem extends CollabLitElement {
 
@@ -25,10 +24,11 @@ export class PluginStyleIndexItem extends CollabLitElement {
 
     @property() pluginLoaded: boolean = false;
 
-    public async open(mode: 'expanded' | 'full') {
-        const container = this.querySelector('.plugin-item-container') as HTMLElement;
-        this.mode = mode;
-        this.openPlugin(container, this.help, false);
+    firstUpdated() {
+        if (this.mode !== 'collapsed') {
+            const container = this.querySelector('.plugin-item-container') as HTMLElement;
+            this.openPlugin(container, this.help, false);
+        }
     }
 
     render() {
@@ -127,10 +127,8 @@ export class PluginStyleIndexItem extends CollabLitElement {
     }
 
     handleFullClick(e: MouseEvent) {
-
         e.stopPropagation();
         if (!this.help) return;
-
         if (this.mode === 'full') {
             this.mode = 'collapsed';
             this.handleOpenPlugin(e, this.help, true);
