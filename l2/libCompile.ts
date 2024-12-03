@@ -122,16 +122,18 @@ async function loadMyNeedsToCompile(
         if (!project || !path) return;
 
         const ipath = { project, shortName: path };
-        const enhacementName = getEnhacementName(ipath);
+        //const enhacementName = getEnhacementName(ipath);
+        const enhacementName = await getEnhancementFromFetch(ipath);
         if (!enhacementName) throw new Error('enhacementName not valid');
-
+        if (enhacementName === '_blank') return;
+        
         if (!myModules[enhacementName]) {
 
             mls.actual[0].setFullName(enhacementName);
             const ipathenhacement = { project: mls.actual[0].project || 0, shortName: mls.actual[0].path || '' };
 
             const mModule = await mls.l2.enhancement.getEnhancementModule(ipathenhacement);
-            
+
             myModules[enhacementName] = {
                 jsMap: false,
                 mModule
@@ -180,14 +182,38 @@ async function loadMyNeedsToCompile(
 
 }
 
-function getEnhacementName(file: {project:number,shortName:string}): string {
-    const key = mls.l2.getKey({ project:file.project, shortName: file.shortName });
+function getEnhacementName(file: { project: number, shortName: string }): string {
+    const key = mls.l2.getKey({ project: file.project, shortName: file.shortName });
     const mmodel = mls.editor.models[key];
     if (!mmodel || !mmodel.ts) throw new Error('model invalid');
     if (!mmodel.ts.compilerResults) throw new Error('model ts not compiled yet');
     const enhacementName = mmodel.ts.compilerResults.tripleSlashMLS?.variables.enhancement
     if (!enhacementName) throw new Error('enhacementName not valid');
     return enhacementName;
+}
+
+async function getEnhancementFromFetch(file: { project: number, shortName: string }) {
+
+    const url = `/_${file.project}_${file.shortName}`;
+    const txt = await (await fetch(url)).text();
+    const lines = txt.split('\n');
+
+    const mlsLine = lines.find(line => line.trim().startsWith('/// <mls '));;
+
+    if (!mlsLine) {
+        throw new Error(`Not found tag <mls> in ${url}` );
+    }
+
+    // Regex para capturar o valor do atributo enhancement
+    const enhancementMatch = mlsLine.match(/enhancement="([^"]+)"/);
+
+    if (!enhancementMatch) {
+        throw new Error('Not found attr "enhancement" in '+url);
+    }
+
+    // Retorna o valor do atributo enhancement
+    return enhancementMatch[1];
+    
 }
 
 async function getJSImporMap(myImportsMap: string[], enhacementName: string, myModules: any) {

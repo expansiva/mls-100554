@@ -163,17 +163,17 @@ export class CollabDsInputSelectColor extends CollabLitElement {
 
         const ret = [];
 
-        if (this.useInput) {
+        if (this.useInput === 'true') {
             this._valueInput = input.value + sel.value;
             ret.push({ tp: 'input', value: input.value + sel.value });
         }
 
-        if (this.useSelect) {
+        if (this.useSelect === 'true') {
             this._valueSelect = sel2.value;
             ret.push({ tp: 'select', value: sel2.value });
         }
 
-        if (this.useColor) {
+        if (this.useColor === 'true') {
             this._valueColor = color.value;
             ret.push({ tp: 'color', value: color.value });
         }

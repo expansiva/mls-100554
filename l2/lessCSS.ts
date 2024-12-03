@@ -9,8 +9,6 @@ export class LessCSS {
     position: "left" | "right" = "left";
     _url: string = '';
 
-    private _styles: CSSStyleDeclaration | undefined;
-
     public styles: CSSStyleDeclaration;
 
     constructor(url: string, position: "left" | "right" = "left") {
