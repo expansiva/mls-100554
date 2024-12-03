@@ -843,7 +843,7 @@ export class ServiceSave extends ServiceBase {
 
             await this.setInfos();
             this.fireEvents();
-            window.collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 1000 });
+            window.collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 5000, autoClose: true });
             this.showLoader(false);
 
         } catch (err: any) {
