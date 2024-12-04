@@ -2,7 +2,7 @@
 
 import { CollabPageElement } from './_100554_collabPageElement'
 import { customElement } from 'lit/decorators.js';
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 
  @customElement('cteste-100554')
  export class Cteste100554 extends CollabPageElement {
@@ -11,7 +11,7 @@ import { Window } from './_100554_icaState';
     
         console.info('teste em Cteste100554');
 
-        (window as any as Window).globalState = {
+        globalState._ica = {
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
             },

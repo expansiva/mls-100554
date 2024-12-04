@@ -6,7 +6,7 @@ import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { initWcdPopup } from './_100554_wcdPopup';
 import { WCDPopupMethodos } from './_100554_wcdTypes';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
-import { Window } from './_100554_wcdState';
+import { globalWcd } from './_100554_wcdState';
 
 @customElement('wcd-toolbox-item-action-edit-text-100554')
 export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
@@ -318,7 +318,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (actualElMain !== this.elMain) {
             this.elMain = actualElMain;
-            (window as any as Window).wcdState.elMain = actualElMain;
+            globalWcd.elMain = actualElMain;
         }
 
         const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;

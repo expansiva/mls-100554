@@ -16,11 +16,41 @@ export interface GlobalState {
   }
 }*/
 
-export interface Window {
-  globalState: GlobalState;
+
+export const globalState: {
+  _ica: GlobalState;
   globalStateManagment: IcaState;
   globalVariation: number;
-}
+} = {} as any;
+
+
+Object.defineProperty(globalState, '_ica', {
+  get: function () {
+    return (window as any)._ica;
+  },
+  set: function (v: GlobalState) {
+    (window as any)._ica = v;
+  }
+});
+
+Object.defineProperty(globalState, 'globalStateManagment', {
+  get: function () {
+    return (window as any).globalStateManagment;
+  },
+  set: function (v: IcaState) {
+    (window as any).globalStateManagment = v;
+  }
+});
+
+Object.defineProperty(globalState, 'globalVariation', {
+  get: function () {
+    return (window as any).globalVariation;
+  },
+  set: function (v: number) {
+    (window as any).globalVariation = v;
+  }
+});
+
 
 /**
  * Function to retrieve nested property values using a path string.
@@ -67,7 +97,7 @@ export class IcaState {
     if (isTrace) console.info('setState key: ' + key + ' value=', value, ", oldValue=", oldValue)
     if (oldValue !== value) {
       this.stateMap.set(key, value);
-      setPathValue((window as any as Window).globalState, key, value);
+      setPathValue(globalState._ica, key, value);
       this.notify(key);
     }
   }
@@ -78,7 +108,7 @@ export class IcaState {
   getState(key: string): any {
     const value = this.stateMap.get(key);
     if (isTrace) console.info('getState key: ' + key + ' value=', value);
-    return getPathValue((window as any as Window).globalState, key);
+    return getPathValue(globalState._ica, key);
   }
 
   /**

@@ -9,7 +9,7 @@ import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
 import { convertColorToHex } from './_100554_libCommom';
 import { ICSSState } from './_100554_lessCSS';
-import { Window } from './_100554_icaState'
+import { globalState } from './_100554_icaState'
 
 import {
     collab_lock,
@@ -419,9 +419,9 @@ export class PluginStyleBorder extends IcaLitElement {
     private updateBorderRadius(borderRadius: string | { [key: string]: string }) {
         if (borderRadius === undefined) return;
 
-        (window as unknown as Window).globalState.less[this.position].emitter = 'helper';
+        globalState._ica.less[this.position].emitter = 'helper';
 
-        const styles: CSSStyleDeclaration = (window as unknown as Window).globalState.less[this.position].lessCSS.styles;
+        const styles: CSSStyleDeclaration = globalState._ica.less[this.position].lessCSS.styles;
         if (typeof borderRadius === 'string') {
             styles.borderTopLeftRadius = styles.borderTopRightRadius = styles.borderBottomLeftRadius = styles.borderBottomRightRadius = '';
             styles.borderRadius = borderRadius;
@@ -438,9 +438,9 @@ export class PluginStyleBorder extends IcaLitElement {
     private updateBorder(border: string | { [key: string]: string }) {
         if (border === undefined) return;
 
-        (window as unknown as Window).globalState.less[this.position].emitter = 'helper';
+        globalState._ica.less[this.position].emitter = 'helper';
 
-        const styles: CSSStyleDeclaration = (window as unknown as Window).globalState.less[this.position].lessCSS.styles;
+        const styles: CSSStyleDeclaration = globalState._ica.less[this.position].lessCSS.styles;
 
         styles.breakInside
 

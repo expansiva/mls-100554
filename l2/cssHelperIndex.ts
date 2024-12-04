@@ -7,7 +7,8 @@ import { propertyDataSource } from './_100554_icaLitElement';
 import { PluginStyleIndexItem } from './_100554_pluginStyleIndexItem';
 import { IHelpers, IMode } from './_100554_cssHelperIndexBase';
 import { ICSSState } from './_100554_lessCSS';
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
+
 import './_100554_pluginStyleIndexItem';
 
 /// **collab_i18n_start**
@@ -139,10 +140,10 @@ export class CssHelperIndex extends IcaLitElement {
 
     private filterByProp(helpers: IHelpers[], actualProp: string | undefined, actualValue: string | undefined): IHelpers[] {
 
-        if (!(window as any as Window).globalState?.less
-            || !(window as any as Window).globalState.less[this.position]
-            || !(window as any as Window).globalState.less[this.position].selector
-            || !(window as any as Window).globalState.less[this.position].lineNumber) return [];
+        if (!globalState._ica?.less
+            || !globalState._ica.less[this.position]
+            || !globalState._ica.less[this.position].selector
+            || !globalState._ica.less[this.position].lineNumber) return [];
 
         const rc = helpers.filter(helper => {
             return helper.tags.some(helperTag => {

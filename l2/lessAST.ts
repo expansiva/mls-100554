@@ -99,6 +99,8 @@ export class LessAst {
      */
     private parseLine = (lineNr: number, line: string): void => {
 
+        line = line.replace(/(?<!:)\/\/.*|\/\*[\s\S]*?\*\//g, ''); // remove coments from a line
+
         // Match for a token definition, e.g., @color-primary: #ff0000;
         const tokenMatch = line.match(/^(@\S+)\s*:\s*(.+?)\s*;$/);
         if (tokenMatch) {

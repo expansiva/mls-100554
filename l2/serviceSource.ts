@@ -13,7 +13,7 @@ import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
 import './_100554_aimPromptTypescript';
 import './_100554_cssHelperIndex';
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -578,6 +578,7 @@ export class ServiceSource100554 extends ServiceBase {
         };
 
         const onOpen = async (): Promise<void> => {
+            this.isStyleFirstOpen = true;
             const storFile = getStorFile();
             const storFileHTML = getStorFileHTML();
             const storFileCss = getStorFileCss();
@@ -1448,20 +1449,13 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         if (!model) model = await this.getOrCreateModelHtmlOrCss(storFile, fileInfo);
 
-        if (mode === '.less' && this._ed1) {
-            this.lessCSS = new LessCSS(uri.toString(), this._ed1, this.position);
-            this.lessCSS.setEditor(this._ed1);
-            const lineNumber = this.lessCSS.lessAST.findFirstSelectorAfterRoot(this.lessCSS.lessAST.ast);
-            if (lineNumber) {
-                const range = new monaco.Range(lineNumber, 1, lineNumber, 1);
-                this._ed1.setSelection(range);
-            }
-        }
-
         if (open && this._ed1 && this.activeModels) {
             this._ed1.setModel(model);
             this.restaureViewState();
             this.updatedMSizeEditor();
+            if (mode === '.less') {
+                this.initModelStyle(uri, model);
+            }
         }
 
         if (mode === '.html' && this._ed1 && this._ed1.getModel()?.id !== model.id) {
@@ -1470,6 +1464,21 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         return storFile;
 
+    }
+
+    private isStyleFirstOpen: boolean = true;
+    private initModelStyle(uri: monaco.Uri, model: monaco.editor.ITextModel) {
+        if (!this._ed1) return;
+        this.lessCSS = new LessCSS(uri.toString(), this._ed1, this.position);
+        this.lessCSS.setEditor(this._ed1);
+        const lineNumber = this.lessCSS.lessAST.findFirstSelectorAfterRoot(this.lessCSS.lessAST.ast);
+        if (lineNumber && this.isStyleFirstOpen) {
+            this.isStyleFirstOpen = false;
+            const line = model.getLineContent(lineNumber)
+            this._ed1.setSelection(
+                new monaco.Selection(lineNumber, 1, lineNumber, line.length + 1)
+            );
+        }
     }
 
     private async prepareInitialLess(shortName: string, project: number) {
@@ -1603,7 +1612,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
                 }
 
-                const lastemitter = (window as any as Window).globalState.less[this.position]?.emitter || 'editor';
+                const lastemitter = globalState._ica.less[this.position]?.emitter || 'editor';
                 if (this.lessCSS && this._ed1) {
 
                     const uri = this.getUri(`_${modelBase.storFile.project}_${modelBase.storFile.shortName}`, '.less');
@@ -1697,9 +1706,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
     connectedCallback() {
         super.connectedCallback();
-        if (!(window as any as Window).globalState) (window as any as Window).globalState = {};
-        if (!(window as any as Window).globalState.less) {
-            (window as any as Window).globalState.less = {
+        if (!globalState._ica) globalState._ica = {};
+        if (!globalState._ica.less) {
+            globalState._ica.less = {
                 left: {},
                 right: {},
             }

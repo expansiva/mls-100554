@@ -2,13 +2,13 @@
 
 import { CollabPageElement } from './_100554_collabPageElement'
 import { customElement } from 'lit/decorators.js';
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 
 @customElement('test-charts-100554')
 export class TestCharts100554 extends CollabPageElement {
 
     initPage() {
-        (window as any as Window).globalState = {
+        globalState._ica = {
             plugin1: {
                 chart: {
                     legend: {},
