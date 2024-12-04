@@ -2,15 +2,15 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js'; 
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 
 @customElement('ica-page-story-100554')
 export class IcaPageMedium100554 extends CollabPageElement {
 
     initPage() {
-        (window as any as Window).globalState = {
+        globalState._ica = {
             
-        };
+        }; 
     }
 
     /// **collab_events_start**

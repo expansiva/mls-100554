@@ -1,8 +1,8 @@
-/// <mls shortName="pluginStyleSpacing" project="100554" enhancement="enhancementStyle" />
-				
-plugin-style-spacing-100554 {
-                
- width: 100%;
+/// <mls shortName="pluginStyleMargin" project="100554" enhancement="enhancementStyle" />
+
+plugin-style-margin-100554 {
+
+    width: 100%;
     display: block;
     font-family: @font-family-primary;
     font-size: @font-size-16;
@@ -66,10 +66,11 @@ plugin-style-spacing-100554 {
         flex-wrap: wrap;
         cursor: pointer;
 
-        .box{
+        .box {
             background-color: @bg-primary-color;
-            border: 1px solid @text-primary-color;
-            >div{
+            border: 1px dashed @text-primary-color;
+
+            >div {
                 background-color: @text-primary-color;
                 width: 40px;
                 height: 40px;
@@ -77,8 +78,10 @@ plugin-style-spacing-100554 {
             }
         }
     }
-                
+
 }
+
+
 //Start Less Tokens
 @text-primary-color-lighter: #535353;
 @text-primary-color-lighter-hover: #5f5f5f;

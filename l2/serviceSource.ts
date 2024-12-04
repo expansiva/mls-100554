@@ -13,7 +13,7 @@ import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
 import './_100554_aimPromptTypescript';
 import './_100554_cssHelperIndex';
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -1612,7 +1612,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
                 }
 
-                const lastemitter = (window as any as Window).globalState.less[this.position]?.emitter || 'editor';
+                const lastemitter = globalState._ica.less[this.position]?.emitter || 'editor';
                 if (this.lessCSS && this._ed1) {
 
                     const uri = this.getUri(`_${modelBase.storFile.project}_${modelBase.storFile.shortName}`, '.less');
@@ -1706,9 +1706,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
     connectedCallback() {
         super.connectedCallback();
-        if (!(window as any as Window).globalState) (window as any as Window).globalState = {};
-        if (!(window as any as Window).globalState.less) {
-            (window as any as Window).globalState.less = {
+        if (!globalState._ica) globalState._ica = {};
+        if (!globalState._ica.less) {
+            globalState._ica.less = {
                 left: {},
                 right: {},
             }
