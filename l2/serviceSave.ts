@@ -14,7 +14,7 @@ const message_pt = {
     openPullrequest: 'Pull request Abertos',
     needComment: 'Precisa de um comentario para o pullrequest',
     updateChanges: 'Atualizar alterações',
-    comments: 'Comentários', 
+    comments: 'Comentários',
     update: 'Atualizar',
     fileChanges: 'Alterações de arquivos',
     noItemsToSave: 'Sem itens para salvar.',
@@ -26,6 +26,7 @@ const message_pt = {
     errorCreatePull: 'Erro ao tentar criar pull request',
     msgBlockAll: 'Você não tem acesso a este repositorio, por fvor entre em contato com o admin do projeto',
     msgBlock: 'Você não tem acesso de escrita neste repositorio, caso deseje criar um fork clique no botão abaixo',
+    pullrequestOk: 'Pull request realizado com sucesso',
 
 }
 
@@ -45,6 +46,7 @@ const message_en = {
     errorCreatePull: 'Error when trying to create pull request',
     msgBlockAll: 'You do not have access to this repository, please contact the project admin',
     msgBlock: 'You do not have write access to this repository, if you wish to create a fork click the button below',
+    pullrequestOk: 'Pull request completed successfully'
 }
 
 type MessageType = typeof message_en;
@@ -70,6 +72,7 @@ export class ServiceSave extends ServiceBase {
     private scenery: string = 'save';
 
     @property() itens: any = undefined;
+    @property() otherProjects: number[] = [];
     @property() error: string = '';
 
     createRenderRoot() {
@@ -124,12 +127,13 @@ export class ServiceSave extends ServiceBase {
 
     // -------------- EVENTS -------------------
 
-    private setEvents() {
+    private async setEvents() {
 
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
         this.verifyExitFileChanged();
+        await mls.stor.localDB.getAllProjects();
 
     }
 
@@ -191,7 +195,7 @@ export class ServiceSave extends ServiceBase {
         if (this.error !== '') {
 
             setTimeout(() => this.error = '', 3000);
-            return html`${this.error}`;
+            return html`${unsafeHTML(this.error)}`;
 
         }
 
@@ -204,8 +208,14 @@ export class ServiceSave extends ServiceBase {
             return html`
                 ${this.renderHeader()}
                 ${this.renderItens()}
+                ${this.renderOthersProjects()}
             `;
 
+        } else if (this.otherProjects.length > 0) {
+            return html`
+                ${this.renderHeader()}
+                ${this.renderOthersProjects()}
+            `
         } else {
 
             return html`
@@ -262,7 +272,7 @@ export class ServiceSave extends ServiceBase {
         `
     }
 
-    
+
 
     renderNoItens() {
         return html`
@@ -270,6 +280,33 @@ export class ServiceSave extends ServiceBase {
                 <span>${unsafeHTML(this.myMessage.noItemsToSave)}</span> 
             </sectionnosave>  
         
+        `
+    }
+    renderOthersProjects() {
+
+        let i = -1;
+
+        this.otherProjects.forEach((prj, idx) => {
+            if (prj === mls.actual[5].project) i = idx;
+        });
+
+        if(i >=0) this.otherProjects.splice(i, 1);
+
+        return html`
+        <sectionsave>
+            <ul>
+                ${repeat(this.otherProjects, ((key: string) => key) as any, ((k: any, index: any) => {
+                    return html`
+                            <li style="cursor: not-allowed;opacity: .5;">
+                                <div style="cursor: not-allowed;">
+                                    <span class="fatv fa-caret-righttv" style="cursor: not-allowed;"></span>
+                                    <input type="checkbox" disabled style="cursor: not-allowed;">
+                                    <label style="cursor: not-allowed;">${k}</label>
+                                </div>
+                            </li> `
+                }) as any)}
+            </ul>
+        </sectionsave>
         `
     }
 
@@ -289,15 +326,7 @@ export class ServiceSave extends ServiceBase {
                 </div>
                 <h4 class="mt-3" data-mlsline="23">${this.myMessage.fileChanges}</h4>
                 <ul>
-                    ${repeat(
-            keys,
-            ((key: any) => key) as any,
-            ((k: any, index: any) => {
-
-                return this.renderProject(k, index);
-
-            }) as any
-        )}
+                    ${repeat(keys, ((key: any) => key) as any, ((k: any, index: any) => { return this.renderProject(k, index); }) as any)}
                 </ul>
             </sectionsave>  
         
@@ -309,22 +338,14 @@ export class ServiceSave extends ServiceBase {
         const keys = Object.keys(this.itens[project]);
 
         return html`
-        <li>
+        <li class="open">
             <div>
                 <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
                 <input type="checkbox" id="l0-${index}" @click="${this.clickSetValueAllChilds}">
                 <label for="l0-${index}">${project}</label>
             </div>
             <ul>
-                ${repeat(
-            keys,
-            ((key: any) => key) as any,
-            ((k: any, indexl: any) => {
-
-                return this.renderLevels(k, project, index, indexl);
-
-            }) as any
-        )}
+                ${repeat(keys, ((key: any) => key) as any, ((k: any, indexl: any) => { return this.renderLevels(k, project, index, indexl); }) as any)}
             </ul>
         </li>
         `;
@@ -347,49 +368,40 @@ export class ServiceSave extends ServiceBase {
         const keys = Object.keys(objP[level]);
 
         return html`
-        <li>
+        <li class="open">
             <div>
                 <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
                 <input type="checkbox" id="l0-${project}-${index}" @click="${this.clickSetValueAllChilds}">
                 <label for="l0-${project}-${index}">l${level}</label>
             </div>
             <ul>
-                ${repeat(
-            keys,
-            ((key: any) => key) as any,
-            ((k: any, index3: any) => {
-                const objL = objP[level];
-                const objDS = objL[k];
-                const itens = objDS ? objDS as [] : [];
-                return html`
-                                <li>
-                                    <div>
-                                        <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
-                                        <input type="checkbox" id="l0-${project}-${index}-${index3}" @click="${this.clickSetValueAllChilds}">
-                                        <label for="l0-${project}-${index}-${index3}">${k}</label>
-                                    </div>
-                                    <ul>                        
-                                        ${repeat(
-                    itens,
-                    ((item: any) => item) as any,
-                    ((i: any, indexI: any) => {
-
-                        return this.renderItem(i, indexP, index, indexI);
-
-                    }) as any
-                )}
-                                    </ul>
-                                </li>
-                            `
-
-            }) as any
-        )}
+                ${repeat(keys, ((key: any) => key) as any, ((k: any, index3: any) => {
+            const objL = objP[level];
+            const objDS = objL[k];
+            const itens = objDS ? objDS as [] : [];
+            return this.renderLevel4(itens, project, indexP, index, index3, k);
+        }) as any)
+            }
             </ul>
         </li>
         `;
 
     }
 
+    renderLevel4(itens: any[], project: string, indexP: number, index: number, index3: number, k: any) {
+        return html`
+            <li>
+                <div>
+                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
+                    <input type="checkbox" id="l0-${project}-${index}-${index3}" @click="${this.clickSetValueAllChilds}">
+                    <label for="l0-${project}-${index}-${index3}">${k}</label>
+                </div>
+                <ul>                        
+                    ${repeat(itens, ((item: any) => item) as any, ((i: any, indexI: any) => { return this.renderItem(i, indexP, index, indexI); }) as any)}
+                </ul>
+            </li>
+        `;
+    }
 
     renderLevelsDefault(level: string, project: string, indexP: number, index: number) {
 
@@ -397,23 +409,14 @@ export class ServiceSave extends ServiceBase {
         let itens = objP[+level] as Iitem[];
         itens = itens.sort((a, b) => a.text.localeCompare(b.text));
         return html`
-        <li>
+        <li class="open">
             <div>
-                <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
-                <input type="checkbox" id="l0-${project}-${index}" @click="${this.clickSetValueAllChilds}">
-                <label for="l0-${project}-${index}">l${level}</label>
+                <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > </span>
+                <input type = "checkbox" id = "l0-${project}-${index}" @click="${this.clickSetValueAllChilds}"/>
+                <label for= "l0-${project}-${index}" > l${level} </label>
             </div>
-            <ul>
-                ${repeat(
-            itens,
-            ((item: any) => item) as any,
-            ((i: any, indexI: any) => {
-
-                return this.renderItem(i, indexP, index, indexI);
-
-            }) as any
-        )}
-            </ul>
+                <ul> ${repeat(itens, ((item: any) => item) as any, ((i: any, indexI: any) => { return this.renderItem(i, indexP, index, indexI); }) as any)}
+                </ul>
         </li>
         `;
 
@@ -422,18 +425,17 @@ export class ServiceSave extends ServiceBase {
     renderItem(item: Iitem, indexP: number, indexL: number, index: number) {
 
         return html`
-        <li style="padding-left: 1.1rem;" > 
+        <li style="padding-left: 1.1rem;">
             <div>
                 ${item.disabled || item.onlyFather
                 ? html`<input type="checkbox" id="l0-${indexP}-${indexL}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
                 : html`<input type="checkbox" id="l0-${indexP}-${indexL}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
             }
-                
-                <label for="l0-${indexP}-${indexL}-${index}">
-                
+                <label for= "l0-${indexP}-${indexL}-${index}" >
+
                     ${item.text}
                     ${unsafeHTML(item.span)}
-                
+
                 </label>
             </div>
         </li>
@@ -508,6 +510,7 @@ export class ServiceSave extends ServiceBase {
 
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
+            this.otherProjects = await mls.stor.localDB.getAllProjects();
 
             for (const fKey of filesKeys) {
 
@@ -516,8 +519,9 @@ export class ServiceSave extends ServiceBase {
                     /*(!file.inLocalStorage && file.status === 'nochange') ||
                     file.status === 'nochange' ||*/
                     (!file.inLocalStorage && file.status !== 'deleted') ||
-                    file.project === 0 ||
-                    file.project !== mls.actual[5].project) continue;
+                    file.project === 0 || file.project !== mls.actual[5].project
+                    ) continue;
+            
 
                 const pj = file.project;
                 const level = file.level;
@@ -557,10 +561,11 @@ export class ServiceSave extends ServiceBase {
                 this.toogleBadge(false, '_100554_serviceSave');
             }
 
-        } catch {
+        } catch (e: any) {
 
             this.itens = undefined;
-            // setar error;
+            this.error = e.message;
+            this.setError(e.message);
 
         }
 
@@ -582,7 +587,7 @@ export class ServiceSave extends ServiceBase {
 
         let disabled = false;
 
-        let span = `<span style="font-size: 12px; color: #7678a6; margin-left: 5px;" class="fa ${this.oIcon[item.status].icon}" title="${this.oIcon[item.status].title}"></span>`;
+        let span = `<span style = "font-size: 12px; color: #7678a6; margin-left: 5px;" class="fa ${this.oIcon[item.status].icon}" title = "${this.oIcon[item.status].title}" > </span>`;
 
         if (item.hasError && item.status !== 'deleted') {
             span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px; height: 16px;" class="fa fa-bug" title="Error"></span>';
@@ -701,6 +706,7 @@ export class ServiceSave extends ServiceBase {
 
         } catch (e: any) {
             this.error = e.message;
+            this.setError(e.message);
             this.showLoader(false);
         }
     }
@@ -731,6 +737,7 @@ export class ServiceSave extends ServiceBase {
         } catch (e: any) {
 
             this.error = e.message;
+            this.setError(e.message);
             this.showLoader(false);
             console.info('Error fireOnPullrequest');
 
@@ -770,6 +777,7 @@ export class ServiceSave extends ServiceBase {
         } catch (e: any) {
 
             this.error = e.message;
+            this.setError(e.message);
             this.showLoader(false);
             console.info('Error onCreateFork');
 
@@ -841,10 +849,12 @@ export class ServiceSave extends ServiceBase {
 
             await this.setInfos();
             this.fireEvents();
+            window.collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 5000, autoClose: true });
             this.showLoader(false);
 
         } catch (err: any) {
             this.error = err.message;
+            this.setError(err.message);
             this.showLoader(false);
             console.info('Error onSave:', err);
         }
@@ -876,6 +886,7 @@ export class ServiceSave extends ServiceBase {
         } catch (e: any) {
 
             this.error = e.message;
+            this.setError(e.message);
 
         }
 
@@ -910,17 +921,17 @@ export class ServiceSave extends ServiceBase {
 
                 console.info('atualizou fork');
                 const opt = {
-                    repoOrigin:this.repo,
-                    ownerOrigin:this.owner,
-                    branchOrigin:'main',
-                    repoDest:this.repo,
-                    ownerDest:info.login,
-                    branchDest:'main',
+                    repoOrigin: this.repo,
+                    ownerOrigin: this.owner,
+                    branchOrigin: 'main',
+                    repoDest: this.repo,
+                    ownerDest: info.login,
+                    branchDest: 'main',
                 }
 
                 const ret = await (driver as any).syncFork(opt);
 
-                if(!ret) throw new Error('Error sync fork');
+                if (!ret) throw new Error('Error sync fork');
                 this.owner = info.login;
 
             }
@@ -928,9 +939,10 @@ export class ServiceSave extends ServiceBase {
         } catch (e: any) {
 
             this.error = e.message;
+            this.setError(e.message);
             this.showLoader(false);
             console.info('Error fireCreateForkOrUpdate: ' + e.message);
-            throw new Error('Error fireCreateForkOrUpdate: ' + e.message);
+            throw new Error(e.message + ' in: fireCreateForkOrUpdate');
 
         }
 
@@ -957,7 +969,7 @@ export class ServiceSave extends ServiceBase {
             this.setLocalHIstoryCurrentInfoDriver();
 
         } catch (err: any) {
-            throw new Error('fireCreateNewBranch' + err.message)
+            throw new Error(err.message + ' in: fireCreateNewBranch')
         }
 
     }
@@ -984,7 +996,7 @@ export class ServiceSave extends ServiceBase {
 
 
         } catch (err: any) {
-            throw new Error('firePullrequest' + err.message);
+            throw new Error(err.message + ' in: firePullrequest');
 
         }
     }
@@ -1050,6 +1062,7 @@ export class ServiceSave extends ServiceBase {
 
                 } catch (e: any) {
                     this.error = e.message;
+                    this.setError(e.message);
                     this.showLoader(false);
                 }
 
@@ -1058,6 +1071,7 @@ export class ServiceSave extends ServiceBase {
         } catch (e: any) {
 
             this.error = e.message;
+            this.setError(e.message);
             this.showLoader(false);
             console.info('Error onSave');
 
@@ -1218,6 +1232,7 @@ export class ServiceSave extends ServiceBase {
         } catch (e: any) {
 
             this.error = e.message;
+            this.setError(e.message);
 
         }
 
