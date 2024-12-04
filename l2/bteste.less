@@ -1,14 +1,15 @@
 /// <mls shortName="bteste" project="100554" enhancement="enhancementStyle" />
 		
 bteste-100554 {
+	font-family: @font-family-primary;
 	header {
 		h1 {
 			background: rgba(56, 81, 112, 1);
 			padding: 2rem;
-			color: #ffffff;
+			color: @warning-color;
+			font-weight: @font-weight-light;
 		}
 		p {
-
 			border-top: none #403F3F;
 			border-left: 8px ridge #8E44AD;
 			border-bottom: none #403F3F;
@@ -16,25 +17,32 @@ bteste-100554 {
 			padding: 2rem;
 			margin-bottom: 4em;
 		}
+		margin-bottom: 50px;
 	}
 	main {
 
 		display: flex;
-		justify-content: space-between;
+		justify-content: center;
 		flex-direction: row;
+		flex-wrap: wrap;
+		row-gap: 1em;
+		gap: 1em;
 		section {
 			border: 1px solid;
-			width: 12em;
+			min-width: 12em;
+			max-width: 250px;
 			padding-left: 1em;
 			padding-right: 1em;
 			padding-bottom: 1em;
 			h2	{
 				text-align: center;
+				background: url('imagem.png');
 				background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
 				color: white;
 			}
 			p {
 				text-align: justify;
+				line-height: 1.3;
 			}
 		}
 		
@@ -46,12 +54,16 @@ bteste-100554 {
 		border-bottom: none #403F3F;
 		border-right: 1px solid #7A962C;
 		border-top: 2px solid #5f52a3;
+		position: relative;
         h1 {
 
             flex: 1;
 			text-shadow: 0 0 5px #f00;
             color: @text-secondary-color;
-			transform: skew(-45deg, 0deg);
+			transform: skew(10deg);
+			text-align: center;
+			border: 5px dashed #32557F;
+
         }
         p {
 
@@ -64,20 +76,21 @@ bteste-100554 {
 			padding-bottom: 20px;
 			padding-top: 20px;
 			column-rule-color: #403f3f;
+			margin: 0 10px;
         }
 		
 		border-top-right-radius: 113px;
 		border-top-left-radius: 112px;
 		border-bottom-right-radius: 113px;
 		border-bottom-left-radius: 113px;
+		padding-left: 2em;
+		padding-right: 2em;
+		padding-bottom: 2em;
     }
 	
-	@media (max-width: 768px) {
-		bteste-100554 main section {
-			width: 100%;
-		}
-	}
 }
+
+
 
 
 //Start Less Tokens
