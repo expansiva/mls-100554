@@ -53,7 +53,7 @@ export class PluginPullrequest extends PluginBaseModule {
         this.msg = messages[lang];
 
         if (this.error !== '') {
-            setTimeout(() => this.error = '', 3000);
+            setTimeout(() => this.error = '', 9900);
             return html`<h3 style="color:red">${this.error}</h3>`;
         }
         if (this.itens.length <= 0)

@@ -46,7 +46,7 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 
-export const tags = ['background'];
+export const tags = ['background', 'background-image'];
 export function getDescription() {
     const lang = getMessageKey(messages);
     return messages[lang].description;
@@ -63,16 +63,19 @@ export class PluginCssTokens extends IcaLitElement {
     @property() css: string = '';
     @propertyDataSource() state: ICSSState | undefined;
 
+    private actualKey: string = 'background';
+
     handleIcaStateChange(_key: string, _value: ICSSState) {
         if (_key !== `less.${this.position}` || !_value || !_value.key) return;
         if (_value.emitter === 'helper') return;
         if (!tags.includes(_value.key)) return;
+        this.actualKey = _value.key;
         this._onIcaStateChange();
     }
 
     private _onIcaStateChange() {
         if (!this.state || !this.state.lessCSS || !this.state.value) return;
-        this.configString(this.state.value);
+        this.configString(`${this.state.key} : ${this.state.value}`);
     }
 
     render() {
@@ -197,6 +200,7 @@ export class PluginCssTokens extends IcaLitElement {
         const el = e.target as any;
         if (!el) return;
         const css = el['gallery'];
+        this.actualKey = 'background';
         this.configString(css);
         this.mountMyValue();
     }
@@ -442,7 +446,7 @@ export class PluginCssTokens extends IcaLitElement {
     private setState() {
         (window as any as Window).globalState.less[this.position].emitter = 'helper';
         const styles: CSSStyleDeclaration = (window as any as Window).globalState.less[this.position].lessCSS.styles;
-        styles.background = this.css || '';
+        styles[this.actualKey as any] = this.css || '';
     }
 
     private arrayGallery = [

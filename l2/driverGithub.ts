@@ -547,6 +547,10 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			const dt = await dL.myFetchQL(info);
 
+			if (dt.status === 401) {
+				throw new Error(`Conecte no "gitHub", faça SignIn no "gitHub" para permitir salvar nos repositórios<br/>É importante salvar nos repositórios para permitir históricos e evitar perca de dados.`);
+			}
+
 			if (dt.status !== 200) {
 				throw new Error('Erro status: ' + dt.status + '; ' + dt.ret.message);
 			}
@@ -559,7 +563,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		} catch (er: any) {
 
-			throw new Error('fecthQl:' + er.message);
+			throw new Error('fecthQl: ' + er.message);
 
 		}
 
@@ -738,6 +742,10 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					referrerPolicy: 'no-referrer',
 				});
 
+				if (retFetch.status === 401) {
+					throw new Error(`Conecte no "gitHub", faça SignIn no "gitHub" para permitir salvar nos repositórios<br/>É importante salvar nos repositórios para permitir históricos e evitar perca de dados.`);
+				}
+
 				if (retFetch.status === 404) {
 					resolve(false);
 					return;
@@ -854,6 +862,10 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					body: JSON.stringify(body)
 				});
 
+				if (retFetch.status === 401) {
+					throw new Error(`Conecte no "gitHub", faça SignIn no "gitHub" para permitir salvar nos repositórios<br/>É importante salvar nos repositórios para permitir históricos e evitar perca de dados.`);
+				}
+
 				if (retFetch.status === 404) {
 					resolve(false);
 					return;
@@ -920,6 +932,10 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					body: JSON.stringify(body)
 				});
 
+				if (retFetch.status === 401) {
+					throw new Error(`Conecte no "gitHub", faça SignIn no "gitHub" para permitir salvar nos repositórios<br/>É importante salvar nos repositórios para permitir históricos e evitar perca de dados.`);
+				}
+
 				if (retFetch.status === 404) {
 					resolve(false);
 					return;
@@ -971,6 +987,10 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					},
 					referrerPolicy: 'no-referrer',
 				});
+
+				if (retFetch.status === 401) {
+					throw new Error(`Conecte no "gitHub", faça SignIn no "gitHub" para permitir salvar nos repositórios<br/>É importante salvar nos repositórios para permitir históricos e evitar perca de dados.`);
+				}
 
 				if (retFetch.status === 404) {
 					resolve({
@@ -1078,6 +1098,10 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					return;
 				}
 
+				if (retRepo.status === '401') {
+					throw new Error(`Conecte no "gitHub", faça SignIn no "gitHub" para permitir salvar nos repositórios<br/>É importante salvar nos repositórios para permitir históricos e evitar perca de dados.`);
+				}
+
 				if (retRepo && retRepo.message && retRepo.status === '404') {
 					resolve('free');
 					return;
@@ -1094,6 +1118,10 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					},
 					referrerPolicy: 'no-referrer',
 				})).json();
+
+				if (ret.status === '401') {
+					throw new Error(`Conecte no "gitHub", faça SignIn no "gitHub" para permitir salvar nos repositórios<br/>É importante salvar nos repositórios para permitir históricos e evitar perca de dados.`);
+				}
 
 				if (ret && ret.message && ret.status === '404') {
 					resolve('error');
@@ -1805,7 +1833,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-	private sleep(ms:number) {
+	private sleep(ms: number) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
