@@ -5,7 +5,8 @@ import { customElement } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
 import * as commandChangeImage from './_100554_wcdCommandChangeSizeImage';
-import { Window } from './_100554_wcdState';
+import { globalWcd } from './_100554_wcdState';
+
 @customElement('wcd-menu-item-image-100554')
 export class WcdAdd100554 extends WcdToolboxItemBase {
 
@@ -60,43 +61,43 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
     //---------------IMPLEMENTS----------------
 
     async clickBig() {
-        if (!(window as any as Window).wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
-        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        if (!globalWcd.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
 
         await commandChangeImage.execute({
             args: {
                 newSize: 'full'
             },
-            overlay: (window as any as Window).wcdState.myParent?.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: (window as any as Window).wcdState.elICA as any,
+            overlay: globalWcd.myParent?.parentElement?.parentElement as WCDOverlayMethods,
+            selectedIca: globalWcd.elICA as any,
         });
 
     }
 
     async clickCenter() {
-        if (!(window as any as Window).wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
-        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        if (!globalWcd.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
 
         await commandChangeImage.execute({
             args: {
                 newSize: 'outset'
             },
-            overlay: (window as any as Window).wcdState.myParent?.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: (window as any as Window).wcdState.elICA as any,
+            overlay: globalWcd.myParent?.parentElement?.parentElement as WCDOverlayMethods,
+            selectedIca: globalWcd.elICA as any,
         });
 
     }
 
     async clickNormal() {
-        if (!(window as any as Window).wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
-        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        if (!globalWcd.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
 
         await commandChangeImage.execute({
             args: {
                 newSize: 'inset'
             },
-            overlay: (window as any as Window).wcdState.myParent?.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: (window as any as Window).wcdState.elICA as any,
+            overlay: globalWcd.myParent?.parentElement?.parentElement as WCDOverlayMethods,
+            selectedIca: globalWcd.elICA as any,
         });
     }
 
