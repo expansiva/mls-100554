@@ -156,6 +156,7 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
   }
 
   googleLogin() {
+    if (this.verifyDisconnect('google')) return;
     const clientid = '870551353501-mk6renhaoi3h2tt75n9n5ihudeot8e46.apps.googleusercontent.com';
     const urlBack = 'https://collab.codes?source=google';
     const access_type: 'online' | 'offline' = 'offline';
@@ -170,6 +171,7 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
   }
 
   gitHubLogin() {
+    if (this.verifyDisconnect('github')) return;
     const clientId = 'Ov23liz6csr4BVqknUlF';
     const redirectUri = encodeURIComponent('https://collab.codes?source=github');
     const scope = 'repo read:user user:email';
@@ -180,6 +182,7 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
   }
 
   gitLabLogin() {
+    if (this.verifyDisconnect('gitlab')) return;
     const clientId = '2569db7a06cbd602e6215d850484bdb8bbb6cdace59717015827fd53ed61c565';
     const redirectUri = encodeURIComponent('https://collab.codes?source=gitlab');
     const scope = 'read_user api';
@@ -187,6 +190,12 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
     localStorage.setItem('pluginCollabLogin', state)
     const url = `https://gitlab.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
     window.location.href = url;
+  }
+
+  verifyDisconnect(provider: mls.cbe.Provider): boolean {
+    if (this.getState(provider) !== 'canDisconnect') return false;
+    window.location.href = `/?source=${provider}&function=disconnect`;
+    return true;
   }
 
   generateRandomState(): string {
