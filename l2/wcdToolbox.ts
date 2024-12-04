@@ -6,7 +6,8 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { CollabLitElement } from './_100554_collabLitElement';
 import { ServiceBase } from './_100554_serviceBase';
 import { WCDToolboxMethodos, WCDToolboxItemMethodos } from './_100554_wcdTypes';
-import { Window } from './_100554_wcdState';
+import { globalWcd } from './_100554_wcdState';
+
 import * as tps from './_100554_icaTypes';
 
 export function initWCDToolbox() {
@@ -61,11 +62,9 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
 
     disconnectedCallback() {
-        (window as any as Window).wcdState = {
-            elICA: undefined,
-            myParent: undefined,
-            elMain: undefined,
-        };
+        globalWcd.elICA = undefined;
+        globalWcd.myParent = undefined;
+        globalWcd.elMain = undefined;
         super.disconnectedCallback();
         if (this.resizeObserver) this.resizeObserver.disconnect();
     }
@@ -143,12 +142,10 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
         this.setDefaultToolBoxOptions();
 
-        (window as any as Window).wcdState = {
-            elICA: this.elICA as any,
-            myParent: this as any,
-            elMain: this.elMain as any,
-        };
-
+        globalWcd.elICA = this.elICA;
+        globalWcd.myParent = this;
+        globalWcd.elMain = this.elMain;
+        
         for await (let i of actions) {
 
             if (defaultActions[i.name]) {
