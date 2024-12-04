@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { collab_link } from './_100554_collabIcons';
 import { CollabLitElement } from "./_100554_collabLitElement";
-import { Window } from './_100554_wcdState';
+import { globalWcd } from './_100554_wcdState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -53,11 +53,11 @@ export class WcdAddItemEmbed100554 extends CollabLitElement {
     }
 
     private showHelper() {
-        if (!(window as any as Window).wcdState) throw new Error('Invalid window.wcdState');
-        if (!(window as any as Window).wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!globalWcd) throw new Error('Invalid window.wcdState');
+        if (!globalWcd.myParent) throw new Error('Invalid window.wcdState.myParent');
 
-        ((window as any as Window).wcdState.myParent as any).onclick = null;
-        (window as any as Window).wcdState.myParent?.setIconsWcdToolbox(
+        (globalWcd.myParent as any).onclick = null;
+        globalWcd.myParent?.setIconsWcdToolbox(
             [
                 {
                     name: 'backButton'
