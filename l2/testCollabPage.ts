@@ -3,7 +3,7 @@
 import { html, css, LitElement} from 'lit';
 import { CollabPageElement, getEventName } from './_100554_collabPageElement'
 import { customElement, property } from 'lit/decorators.js';
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 
 @customElement('test-collab-page-100554')
 export class TestCollabPage100554 extends CollabPageElement {
@@ -12,7 +12,7 @@ export class TestCollabPage100554 extends CollabPageElement {
     initPage() {
         
         console.info(getEventName('click', 'input2', 'mobile'));
-        (window as any as Window).globalState = {
+        globalState._ica = {
             wcdAddEventSelected: '',
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
