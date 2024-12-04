@@ -5,7 +5,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { execute } from './_100554_wcdCommandAddImage';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { CollabLitElement } from './_100554_collabLitElement'
-import { Window } from './_100554_wcdState';
+import { globalWcd } from './_100554_wcdState';
+
 /// **collab_i18n_start**
 const message_pt = {
     loading: 'Carregando...',
@@ -97,30 +98,30 @@ export class WcdDialogImageUnsplash100554 extends CollabLitElement {
     }
 
     private async handleGalleryClick(item: IUnsplashImage) {
-        if (!(window as any as Window).wcdState) throw new Error('Invalid window.wcdState');
-        if (!(window as any as Window).wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
-        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        if (!globalWcd) throw new Error('Invalid window.wcdState');
+        if (!globalWcd.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
 
         await execute({
             args: { src: item.urls.full },
-            overlay: (window as any as Window).wcdState.myParent?.parentElement?.parentElement as WCDOverlayMethods,
-            selectedIca: (window as any as Window).wcdState.elICA as any,
+            overlay: globalWcd.myParent?.parentElement?.parentElement as WCDOverlayMethods,
+            selectedIca: globalWcd.elICA as any,
         });
 
     }
 
     private recalculeIcaHeight() {
-        if (!(window as any as Window).wcdState) throw new Error('Invalid window.wcdState');
-        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        if (!globalWcd) throw new Error('Invalid window.wcdState');
+        if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
         const height = this.getBoundingClientRect()?.height;
-        if (this.lastHeight === undefined) this.lastHeight = ((window as any as Window).wcdState.elICA as any).style.height;
-        ((window as any as Window).wcdState.elICA as any).style.height = height + 'px';
+        if (this.lastHeight === undefined) this.lastHeight = (globalWcd.elICA as any).style.height;
+        (globalWcd.elICA as any).style.height = height + 'px';
     }
 
     disconnectedCallback() {
-        if (!(window as any as Window).wcdState) throw new Error('Invalid window.wcdState');
-        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
-        ((window as any as Window).wcdState.elICA as any).style.height = this.lastHeight || '';
+        if (!globalWcd) throw new Error('Invalid window.wcdState');
+        if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
+        (globalWcd.elICA as any).style.height = this.lastHeight || '';
         super.disconnectedCallback();
     }
 

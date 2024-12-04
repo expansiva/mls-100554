@@ -3,23 +3,46 @@
 import { html, css } from 'lit';
 import { CollabPageElement, getEventName } from './_100554_collabPageElement'
 import { customElement, property } from 'lit/decorators.js';
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 @customElement('test-collab-page2-100554')
 export class TestCollabPage2100554 extends CollabPageElement {
 
     initPage() {
-        (window as any as Window).globalState.users = [{
-            name: 'Wagner',
-            age: 63,
-            city: 'SP',
-            sex: 'm'
-        },
-        {
-            name: 'Guilherme',
-            age: 28,
-            city: 'SP',
-            sex: 'm'
-        }]
+        if (globalState._ica) {
+            globalState._ica = {
+                ...globalState._ica,
+                ...{
+                    users: [{
+                        name: 'Wagner',
+                        age: 63,
+                        city: 'SP',
+                        sex: 'm'
+                    },
+                    {
+                        name: 'Guilherme',
+                        age: 28,
+                        city: 'SP',
+                        sex: 'm'
+                    }]
+                }
+            }
+
+        } else {
+            globalState._ica = {
+                users: [{
+                    name: 'Wagner',
+                    age: 63,
+                    city: 'SP',
+                    sex: 'm'
+                },
+                {
+                    name: 'Guilherme',
+                    age: 28,
+                    city: 'SP',
+                    sex: 'm'
+                }]
+            }
+        }
     }
 
 

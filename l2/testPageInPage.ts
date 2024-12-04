@@ -2,14 +2,14 @@
 
 import { CollabPageElement } from './_100554_collabPageElement'
 import { customElement } from 'lit/decorators.js';
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 
 @customElement('test-page-in-page-100554')
 export class TestPageICAFull extends CollabPageElement {
 
     initPage() {
     
-        (window as any as Window).globalState = {
+        globalState._ica = {
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
             },
@@ -22,15 +22,16 @@ export class TestPageICAFull extends CollabPageElement {
             sum: 0,
             
         };
+        
     }
 
     /// **collab_events_start**
     handleClickbtnSomarDesktop() {
-        (window as any as Window).globalStateManagment.setState('sum', (window as any as Window).globalState.sum + 1);
+        globalState.globalStateManagment.setState('sum', globalState._ica.sum + 1);
     }
 
     handleClickbtnSubtrairDesktop() {
-        (window as any as Window).globalStateManagment.setState('sum', (window as any as Window).globalState.sum - 1);
+        globalState.globalStateManagment.setState('sum', globalState._ica.sum - 1);
     }
     
 }

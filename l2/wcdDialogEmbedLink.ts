@@ -5,7 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { execute } from './_100554_wcdCommandAddEmbedLink';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { Window } from './_100554_wcdState';
+import { globalWcd } from './_100554_wcdState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -34,15 +34,15 @@ export class WcdDialogEmbedLink100554 extends CollabLitElement {
 
     private async handleKeyDown(event: KeyboardEvent) {
         event.stopPropagation();
-        if (!(window as any as Window).wcdState) throw new Error('Invalid window.wcdState');
-        if (!(window as any as Window).wcdState.myParent) throw new Error('Invalid window.wcdState.myParent');
-        if (!(window as any as Window).wcdState.elICA) throw new Error('Invalid window.wcdState.elICA');
+        if (!globalWcd) throw new Error('Invalid window.wcdState');
+        if (!globalWcd.myParent) throw new Error('Invalid window.wcdState.myParent');
+        if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
 
         if (event.key === 'Enter') {
             await execute({
                 args: { url: this.link },
-                overlay: (window as any as Window).wcdState.myParent?.parentElement?.parentElement as WCDOverlayMethods,
-                selectedIca: (window as any as Window).wcdState.elICA as any,
+                overlay: globalWcd.myParent?.parentElement?.parentElement as WCDOverlayMethods,
+                selectedIca: globalWcd.elICA as any,
             });
         }
 

@@ -10,7 +10,7 @@ import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
 import { ICSSState } from './_100554_lessCSS';
 import { convertColorToHex } from './_100554_libCommom';
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -187,8 +187,8 @@ export class PluginStyleTextShadow extends IcaLitElement {
 
 
     private setState() {
-        (window as any as Window).globalState.less[this.position].emitter = 'helper';
-        const styles: CSSStyleDeclaration = (window as any as Window).globalState.less[this.position].lessCSS.styles;
+        globalState._ica.less[this.position].emitter = 'helper';
+        const styles: CSSStyleDeclaration = globalState._ica.less[this.position].lessCSS.styles;
         styles.textShadow = this.textShadow || '';
     }
 

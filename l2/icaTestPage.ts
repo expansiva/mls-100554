@@ -2,7 +2,7 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getFormComponentsEvents, getEventDescription, getFormComponentsDescription } from './_100554_icaBaseDescription'
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 
 @customElement('ica-test-page-100554')
 export class IcaTestPage100554 extends LitElement {
@@ -13,7 +13,7 @@ export class IcaTestPage100554 extends LitElement {
 
     render() {
         console.info(getFormComponentsEvents('forms', 'input', 'number'));
-        (window as any as Window).globalState = {
+        globalState._ica = {
             wcdAddEventSelected: '',
             tables: {
                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
