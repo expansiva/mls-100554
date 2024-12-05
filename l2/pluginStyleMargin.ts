@@ -1,4 +1,4 @@
-/// <mls shortName="pluginStyleSpacing" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="pluginStyleMargin" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
@@ -7,7 +7,9 @@ import { getMessageKey } from './_100554_collabLitElement';
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
 import { ICSSState } from './_100554_lessCSS';
+
 import { globalState } from './_100554_icaState';
+
 import {
     collab_lock,
     collab_lock_open,
@@ -15,36 +17,28 @@ import {
     collab_margin_top,
     collab_margin_left,
     collab_margin_right,
-    collab_padding_bottom,
-    collab_padding_top,
-    collab_padding_left,
-    collab_padding_right,
-
-
 } from './_100554_collabIcons'
 
 /// **collab_i18n_start**
 const message_pt = {
     all: 'Group',
     margin: 'Margin',
-    padding: 'Padding',
     top: 'Superior',
     left: 'Esquerda',
     bottom: 'Inferior',
     right: 'Direita',
-    description: 'Este plugin permite ajustar margens e preenchimentos (margin e padding) de maneira simples e intuitiva. Ideal para desenvolvedores que buscam precisão no espaçamento dos elementos, ele facilita a definição de distâncias internas e externas para garantir um layout consistente e bem estruturado.'
+    description: 'Este plugin permite ajustar margens de maneira simples e intuitiva. Ideal para desenvolvedores que buscam precisão no espaçamento dos elementos, ele facilita a definição de distâncias internas e externas para garantir um layout consistente e bem estruturado.'
 
 }
 
 const message_en = {
     all: 'Group',
     margin: 'Margin',
-    padding: 'Padding',
     top: 'Top',
     left: 'Left',
     bottom: 'Bottom',
     right: 'Right',
-    description: 'This plugin enables easy and intuitive adjustments of margins and paddings. Ideal for developers seeking precise element spacing, it streamlines the setup of inner and outer distances to ensure a consistent and well-structured layout.'
+    description: 'This plugin enables easy and intuitive adjustments of margins.Ideal for developers seeking precise element spacing, it streamlines the setup of inner and outer distances to ensure a consistent and well-structured layout.'
 }
 
 type MessageType = typeof message_en;
@@ -56,14 +50,14 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 
-export const tags = ['margin*', 'padding*'];
+export const tags = ['margin*'];
 export function getDescription() {
     const lang = getMessageKey(messages);
     return messages[lang].description;
 }
 
 
-@customElement('plugin-style-spacing-100554')
+@customElement('plugin-style-margin-100554')
 export class PluginStyleSpacing extends IcaLitElement {
 
     private msg: MessageType = messages['en'];
@@ -73,22 +67,15 @@ export class PluginStyleSpacing extends IcaLitElement {
 
     @property() showFull: string = 'true';
     @property() marginLocked: boolean = false;
-    @property() paddingLocked: boolean = false;
 
     @property() marginLeft: string | undefined;
     @property() marginRight: string | undefined;
     @property() marginTop: string | undefined;
     @property() marginBottom: string | undefined;
-    @property() paddingLeft: string | undefined;
-    @property() paddingRight: string | undefined;
-    @property() paddingTop: string | undefined;
-    @property() paddingBottom: string | undefined;
 
 
-    @query('#helper-border-radius-lock') inputLockP: HTMLInputElement | undefined;
-    @query('#helper-border-lock') inputLockM: HTMLInputElement | undefined;
+    @query('#helper-margin-lock') inputLockM: HTMLInputElement | undefined;
     @queryAll('collab-ds-input-range-100554[group="margin"]') marginInputs: HTMLInputElement[] | undefined;
-    @queryAll('collab-ds-input-range-100554[group="padding"]') paddingInputs: HTMLInputElement[] | undefined;
 
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
@@ -109,7 +96,6 @@ export class PluginStyleSpacing extends IcaLitElement {
                 html`
                 ${this.renderGallery()}
                 ${this.renderMargin()}
-                ${this.renderPadding()}
             ` :
                 html`
                 ${this.renderGallery()}
@@ -122,8 +108,8 @@ export class PluginStyleSpacing extends IcaLitElement {
         return html`
             <h5 class="helper-group-title" >${this.msg.margin}</h5>
             <div class="helper-group-lock">
-                <input id="helper-border-lock" type="checkbox" @change=${this.handleChangeLockMargin}>
-                <label for="helper-border-lock"> ${this.msg.all}</label>
+                <input id="helper-margin-lock" type="checkbox" @change=${this.handleChangeLockMargin}>
+                <label for="helper-margin-lock"> ${this.msg.all}</label>
                 <i>${this.marginLocked ? collab_lock : collab_lock_open}</i>
             </div>
 
@@ -172,67 +158,6 @@ export class PluginStyleSpacing extends IcaLitElement {
                         @onchange="${(e: KeyboardEvent) => this.handleChangeMargin(e)}"
                     ></collab-ds-input-range-100554>
 
-                </div>
-            </div>
-
-        `
-    }
-
-    renderPadding() {
-        return html`
-            <h5 class="helper-group-title" >${this.msg.padding}</h5>
-                <div class="helper-group-lock">
-                <input id="helper-border-radius-lock" type="checkbox" @change=${this.handleChangeLockPadding}>
-                <label for="helper-border-radius-lock"> ${this.msg.all}</label>
-                <i>${this.paddingLocked ? collab_lock : collab_lock_open}</i>
-            </div>
-
-            <div class="group">
-
-                <div class="group-edit">
-                    <i data-tooltip="${this.msg.top}">${collab_padding_top}</i>
-                    <collab-ds-input-range-100554
-                        prop="padding-top"
-                        value=${this.paddingTop}
-                        .arraySelect=${this.tpMeasures}  
-                        group="padding"
-                        @onchange="${(e: KeyboardEvent) => this.handleChangePadding(e)}"
-                    ></collab-ds-input-range-100554>
-                </div>
-
-                <div class="group-edit">
-                    <i data-tooltip="${this.msg.left}">${collab_padding_left}</i>
-                    <collab-ds-input-range-100554
-                        prop="padding-left"
-                        value=${this.paddingLeft}
-                        .arraySelect=${this.tpMeasures} 
-                        group="padding"
-                        @onchange="${(e: KeyboardEvent) => this.handleChangePadding(e)}"
-                    ></collab-ds-input-range-100554>    
-
-                </div>
-
-                <div class="group-edit">
-                    <i data-tooltip="${this.msg.bottom}">${collab_padding_bottom}</i>
-                    <collab-ds-input-range-100554
-                        prop="padding-bottom"
-                        value=${this.paddingBottom}
-                        .arraySelect=${this.tpMeasures} 
-                        group="padding"
-                        @onchange="${(e: KeyboardEvent) => this.handleChangePadding(e)}"
-                    ></collab-ds-input-range-100554> 
-
-                </div>
-
-                <div class="group-edit">
-                    <i data-tooltip="${this.msg.right}">${collab_padding_right}</i>
-                    <collab-ds-input-range-100554
-                        prop="padding-right"
-                        value=${this.paddingRight}
-                        .arraySelect=${this.tpMeasures} 
-                        group="padding"
-                        @onchange="${(e: KeyboardEvent) => this.handleChangePadding(e)}"
-                    ></collab-ds-input-range-100554> 
                 </div>
             </div>
 
@@ -288,36 +213,6 @@ export class PluginStyleSpacing extends IcaLitElement {
         }, 100);
     }
 
-    private timeonChangePadding = -1;
-    private handleChangePadding(e: KeyboardEvent) {
-
-        clearTimeout(this.timeonChangePadding);
-        const el = (e.detail as any).target as HTMLInputElement;
-        const prop = el.getAttribute('prop');
-        if (!prop) return;
-        const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(prop);
-        this.timeonChangePadding = setTimeout(() => {
-            if (!this.paddingLocked) {
-                if (!convertedProp) return;
-                (this as any)[convertedProp] = el.value;
-                this.setState();
-                return;
-            }
-            this.paddingInputs?.forEach((inp) => {
-                if (inp === el) return;
-                inp.value = el.value;
-            });
-            this.paddingBottom = this.paddingLeft = this.paddingRight = this.paddingTop = el.value;
-            this.setState();
-
-        }, 100);
-    }
-
-    private handleChangeLockPadding() {
-        if (!this.inputLockP) return;
-        this.paddingLocked = this.inputLockP.checked;
-    }
-
     private handleChangeLockMargin() {
         if (!this.inputLockM) return;
         this.marginLocked = this.inputLockM.checked;
@@ -328,12 +223,8 @@ export class PluginStyleSpacing extends IcaLitElement {
         const allMargin = [this.marginTop, this.marginLeft, this.marginBottom, this.marginRight];
         const areMarginsAllEqual = allMargin.every(value => value === allMargin[0]);
         const areMarginPairsEqual = (this.marginTop === this.marginBottom) && (this.marginLeft === this.marginRight);
-        const allPadding = [this.paddingTop, this.paddingLeft, this.paddingBottom, this.paddingRight];
-        const arePaddingsAllEqual = allPadding.every(value => value === allPadding[0]);
-        const arePaddingPairsEqual = (this.paddingTop === this.paddingBottom) && (this.paddingLeft === this.paddingRight);
 
         let marginValue: any;
-        let paddingValue: any;
 
         if (areMarginsAllEqual) marginValue = this.marginTop;
         else if (areMarginPairsEqual) marginValue = `${this.marginTop} ${this.marginRight}`;
@@ -346,19 +237,7 @@ export class PluginStyleSpacing extends IcaLitElement {
             };
         }
 
-        if (arePaddingsAllEqual) paddingValue = this.paddingTop;
-        else if (arePaddingPairsEqual) paddingValue = `${this.paddingTop} ${this.paddingRight}`;
-        else {
-            paddingValue = {
-                paddingTop: this.paddingTop,
-                paddingRight: this.paddingRight,
-                paddingBottom: this.paddingBottom,
-                paddingLeft: this.paddingLeft,
-            };
-        }
-
         this.updateMargins(marginValue);
-        this.updatePadding(paddingValue);
 
     }
 
@@ -380,31 +259,12 @@ export class PluginStyleSpacing extends IcaLitElement {
 
     }
 
-    updatePadding(padding: string | { [key: string]: string }) {
-
-        globalState._ica.less[this.position].emitter = 'helper';
-
-        const styles = globalState._ica.less[this.position].lessCSS.styles;
-        if (typeof padding === 'string') {
-            styles.paddingTop = styles.paddingRight = styles.paddingBottom = styles.paddingLeft = '';
-            styles.padding = padding;
-        } else {
-            styles.padding = '';
-            styles.paddingTop = padding.paddingTop || '';
-            styles.paddingRight = padding.paddingRight || '';
-            styles.paddingBottom = padding.paddingBottom || '';
-            styles.paddingLeft = padding.paddingLeft || '';
-        }
-
-    }
-
-
     private setValues(rule: CSSStyleRule): void {
 
         if (rule.style) {
             for (let i = 0; i < rule.style.length; i++) {
                 const propertyName = rule.style[i];
-                if (propertyName.startsWith('margin-') || propertyName.startsWith('padding-')) {
+                if (propertyName.startsWith('margin-')) {
                     const propertyValue = rule.style.getPropertyValue(propertyName);
                     const el = this.querySelector(`collab-ds-input-range-100554[prop="${propertyName}"]`) as HTMLInputElement;
                     const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(propertyName);
@@ -453,8 +313,6 @@ export class PluginStyleSpacing extends IcaLitElement {
         { style: 'margin-bottom: 10px', state: { marginBottom: '10px', marginTop: '', marginLeft: '', marginRight: '' } },
 
     ];
-
-
 
 }
 

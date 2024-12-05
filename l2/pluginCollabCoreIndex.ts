@@ -203,12 +203,21 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             },
 
             {
-                category: 'Spacing',
+                category: 'Margin',
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleSpacing'
+                widget: '_100554_pluginStyleMargin'
             },
+
+            {
+                category: 'Padding',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStylePadding'
+            },
+
 
             {
                 category: 'Flex',
