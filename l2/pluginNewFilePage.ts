@@ -7,6 +7,7 @@ import { IcaLitElement } from './_100554_icaLitElement';
 import { getMessageKey } from "./_100554_collabLitElement";
 import { propertyDataSource } from './_100554_icaLitElement';
 import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget } from "./_100554_pluginNewFileBase";
+import { ServiceBase } from './_100554_serviceBase';
 import './_100554_wcCode';
 
 
@@ -18,7 +19,8 @@ const message_pt = {
     shortName: "Nome",
     header: "Criar uma pagina",
     btnCreate: 'Criar arquivo',
-    loading: 'Criando arquivo...'
+    loading: 'Criando arquivo...',
+    error: 'Nome do arquivo em branco ou invalido'
 }
 
 const message_en = {
@@ -28,7 +30,8 @@ const message_en = {
     shortName: "ShortName",
     header: "Create a page",
     btnCreate: 'Create file',
-    loading: 'Creating File...'
+    loading: 'Creating File...',
+    error: 'Blank or invalid file name'
 }
 
 type MessageType = typeof message_en;
@@ -59,6 +62,8 @@ export class PluginNewFilePage extends IcaLitElement {
 
     @property() loading: boolean = false;
 
+    private service = this.closest('service-detail-100554') as ServiceBase;
+
     private template: string = `
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
@@ -68,7 +73,7 @@ import { globalState } from './_100554_icaState';
  export class [className] extends CollabPageElement {
 
      initPage() {
-         window.globalState = {
+          globalState._ica = {
              tables: {
                  sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
              },
@@ -105,7 +110,10 @@ import { globalState } from './_100554_icaState';
     }
 
     private async handleAddFile() {
-        if (!this.project || !this.shortName) return;
+        if (!this.project || !this.shortName) {
+            this.service.setError(msg.error)
+            return;
+        };
         this.loading = true;
         try {
             await createNewFile(this.project, this.position, this.shortName, this.enhancement, this.getTemplate());

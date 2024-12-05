@@ -19,7 +19,8 @@ const message_pt = {
     shortName: "Nome",
     header: "Criar um web component em Lit",
     btnCreate: 'Criar arquivo',
-    loading: 'Criando arquivo...'
+    loading: 'Criando arquivo...',
+    error: 'Nome do arquivo em branco ou invalido'
 }
 
 const message_en = {
@@ -29,7 +30,9 @@ const message_en = {
     shortName: "ShortName",
     header: "Create a web component in Lit",
     btnCreate: 'Create file',
-    loading: 'Creating File...'
+    loading: 'Creating File...',
+    error: 'Blank or invalid file name'
+
 }
 
 type MessageType = typeof message_en;
@@ -62,6 +65,8 @@ export class PluginNewFileWebComponent extends IcaLitElement {
 
     @property() aimActionSuggest: string = '_100554_aimActionAddIca';
 
+    private service = this.closest('service-detail-100554') as ServiceBase;
+
     private template: string = `
  import { html, css } from 'lit'; 
  import { customElement, property } from 'lit/decorators.js';
@@ -93,14 +98,16 @@ export class PluginNewFileWebComponent extends IcaLitElement {
     }
 
     private async handleAddFile() {
-        if (!this.project || !this.shortName) return;
+        if (!this.project || !this.shortName) {
+            this.service.setError(msg.error)
+            return;
+        };
         this.loading = true;
         try {
             await createNewFile(this.project, this.position, this.shortName, this.enhancement, this.getTemplate(), false);
-            const service = this.closest('service-detail-100554') as ServiceBase;
-            if (service) {
+            if (this.service) {
                 openService('_100554_serviceAim', 'right', 2);
-                const opInstance = service.nav3Service?.getActiveInstance('right');
+                const opInstance = this.service.nav3Service?.getActiveInstance('right');
                 if (opInstance) {
                     opInstance.setAttribute('actiontoopen', this.aimActionSuggest)
                 }
