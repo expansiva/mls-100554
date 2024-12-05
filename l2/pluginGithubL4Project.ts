@@ -8,7 +8,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 
 import 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.3/Sortable.min.js';
 
-export const pluginData: mls.plugin.IPluginData = { 
+export const pluginData: mls.plugin.IPluginData = {
     title: "GitHub Projects",
     getSvg(): TemplateResult {
         return svg`
@@ -21,10 +21,9 @@ export const pluginData: mls.plugin.IPluginData = {
 export class PluginGithubL4Project extends CollabLitElement {
 
     private repositoryId: string = '';
-    private error: string = '';
+    
     private userInfo: gitIO.IInfo | undefined;
     private req: gitIO.IReq | undefined;
-
 
     private myLabels: gitIO.ILabel[] = [];
     private myUsers: gitIO.IAssignees[] = [];
@@ -36,6 +35,7 @@ export class PluginGithubL4Project extends CollabLitElement {
 
     private sort: any[] = [];
 
+    @property() error: string = '';
     @property() scenary: string = 'list';
     @property() isLoader: boolean = true;
     @property() autoClick: string = 'false';
@@ -46,13 +46,6 @@ export class PluginGithubL4Project extends CollabLitElement {
     @query('contentstatus') contentstatus: HTMLElement | undefined;
     @query('contentviewissue') contentviewissue: HTMLElement | undefined;
 
-    get mKey(): string {
-
-        const _mKey = localStorage.getItem('keyGitHub');
-        if (!_mKey) throw new Error('Please configure your key git hub');
-        return _mKey;
-
-    }
 
     async prepare() {
         this.setInfos();
@@ -91,8 +84,8 @@ export class PluginGithubL4Project extends CollabLitElement {
     }
 
     renderError(): TemplateResult {
-
-        return html`<h3 style="color:red">${this.error}</h3>`
+ 
+        return html`<h3 style=" padding: 2rem; text-align: center;">${this.error}</h3>`
     }
 
     //---LIST
@@ -270,10 +263,10 @@ export class PluginGithubL4Project extends CollabLitElement {
             <itemstatusissues .info=${p} @click=${this.showViewIssue}>
                 <div style="display: flex; flex-wrap: wrap; gap: .2rem;">
                     ${repeat(p.issue.labels, ((key: gitIO.ILabel) => key.id) as any, ((l: gitIO.ILabel, index: any) => {
-                            return html`
+            return html`
                                 <contentlabel style="background:#${l.color}3b; color:#${l.color}; border: 1px solid #${l.color}">${l.name}</contentlabel>
                                 `
-                    }) as any )}
+        }) as any)}
                     
                 </div>
                 <div>
@@ -282,10 +275,10 @@ export class PluginGithubL4Project extends CollabLitElement {
                 <div style="display: flex; flex-wrap: wrap; gap: .2rem;align-items: center; justify-content: flex-end;">
 
                     ${repeat(p.issue.assignees, ((key: gitIO.IAssignees) => key.avatarUrl) as any, ((a: gitIO.IAssignees, index: any) => {
-                            return html`
+            return html`
                                 <img src="${a.avatarUrl}" title="${a.login}">
                                 `
-                    }) as any)}
+        }) as any)}
                     
                 </div>
             </itemstatusissues>
@@ -332,16 +325,16 @@ export class PluginGithubL4Project extends CollabLitElement {
                         <label style="font-size: 13px;">Members:</label>
                         <div style="display: flex; gap: .5rem; flex-wrap: wrap;">
                             ${repeat(this.viewIssue.issue.assignees, ((key: gitIO.IAssignees) => key.avatarUrl) as any, ((a: gitIO.IAssignees, index: any) => {
-                                return html`<img style="width: 37px; border-radius: 50%;" src="${a.avatarUrl}" title="${a.login}"/>`
-                            }) as any)}
+            return html`<img style="width: 37px; border-radius: 50%;" src="${a.avatarUrl}" title="${a.login}"/>`
+        }) as any)}
                         </div>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: .3rem;height: 65px;">
                         <label style="font-size: 13px;">Labels:</label>
                         <div style="display: flex; gap: .5rem; flex-wrap: wrap;">
                             ${repeat(this.viewIssue.issue.labels, ((key: gitIO.ILabel) => key.id) as any, ((l: gitIO.ILabel, index: any) => {
-                                return this.renderLabelsInTask(l)
-                            }) as any)}
+            return this.renderLabelsInTask(l)
+        }) as any)}
                         </div>
                     </div>
                 </div>
@@ -370,8 +363,8 @@ export class PluginGithubL4Project extends CollabLitElement {
                     </div>
                     <div style="display: flex; flex-direction: column; gap: .5rem; margin-top: 3rem;">
                         ${repeat(this.viewIssue.issue.comments, ((key: gitIO.IComments) => key.id) as any, ((c: gitIO.IComments, index: any) => {
-                            return this.renderComentsInTask(c)
-                        }) as any)}
+            return this.renderComentsInTask(c)
+        }) as any)}
                     </div>
                 </div>
             </div>
@@ -528,9 +521,9 @@ export class PluginGithubL4Project extends CollabLitElement {
             </div>
             <contentlistissues>
                 ${repeat(this.listIssues, ((key: gitIO.IIssues) => key.id) as any, ((k: gitIO.IIssues, index: any) => {
-                        return this.renderListItemIssues(k, index);
-                    }) as any
-                )}
+            return this.renderListItemIssues(k, index);
+        }) as any
+        )}
             </contentlistissues>
         `
 
@@ -544,15 +537,15 @@ export class PluginGithubL4Project extends CollabLitElement {
                 <h3>${item.title}</h3>
                 <contentlabels>
                     ${repeat(item.labels, ((key: gitIO.ILabel) => key.name) as any, ((k: gitIO.ILabel, index: any) => {
-                        return html`
+            return html`
                             <contentlabel style="background:#${k.color}3b; color:#${k.color}; border: 1px solid #${k.color}">
                                 ${k.name}
                             </contentlabel>`;
-                    }) as any)}
+        }) as any)}
                 </contentlabels>
             </div>
             <span>
-                #${item.numberIssues} opened on ${new Date(item.createdAt).toLocaleString()} by ${item.author}  <span style="margin-left:1rem">project: ${!item.project? 'none yet' : item.project.title}</span>
+                #${item.numberIssues} opened on ${new Date(item.createdAt).toLocaleString()} by ${item.author}  <span style="margin-left:1rem">project: ${!item.project ? 'none yet' : item.project.title}</span>
                 <contentthumb style="float:right" title="add" @click="${this.addIssueInProject}">
                     ${unsafeHTML(this.myIcons.plus)}
                 </contentthumb>
@@ -565,18 +558,24 @@ export class PluginGithubL4Project extends CollabLitElement {
 
     private async setInfos() {
 
-        await this.initInfoProject();
-        if (!this.req) return;
-        this.repositoryId = await gitIO.getRepositoryId(this.req);
-        this.userInfo = await gitIO.getUserInfoIO(this.req);
-        this.myProjcts = await gitIO.getProjects(this.req);
-        this.myLabels = await gitIO.getLabels(this.req);
-        this.myUsers = await gitIO.getUsers(this.req);
+        try {
+
+            await this.initInfoProject();
+            if (!this.req) return; 
+            this.repositoryId = await gitIO.getRepositoryId(this.req);
+            this.userInfo = await gitIO.getUserInfoIO(this.req);
+            this.myProjcts = await gitIO.getProjects(this.req);
+            this.myLabels = await gitIO.getLabels(this.req); 
+            this.myUsers = await gitIO.getUsers(this.req);
 
 
-        await this.isAutoClick();
-        this.isLoader = false;
-        this.requestUpdate();
+            await this.isAutoClick();
+            this.isLoader = false;
+            this.requestUpdate();
+
+        } catch (e: any) {
+            this.error = e.message;
+        }
 
     }
 
@@ -588,8 +587,7 @@ export class PluginGithubL4Project extends CollabLitElement {
         const info = getMyKeysBranch(prj);
         if (!info) return;
 
-        this.req = {
-            mkey: this.mKey,
+        this.req = { 
             owner: info.owner,//"santiagoExpansiva", //info.owner,
             repo: info.repo,//"testGit", //info.repo,
             branch: info.branch,
@@ -710,9 +708,9 @@ export class PluginGithubL4Project extends CollabLitElement {
     private async listAllIssues(e: MouseEvent) {
 
         try {
-            
+
             if (!this.req) return;
-            let listIssues: gitIO.IIssues[] = await gitIO.getIssues(this.req); 
+            let listIssues: gitIO.IIssues[] = await gitIO.getIssues(this.req);
 
             listIssues = listIssues.filter((l) => l.project === undefined);
 
@@ -720,11 +718,11 @@ export class PluginGithubL4Project extends CollabLitElement {
             this.scenary = 'listAddIssues'
 
 
-        
-        } catch (err:any) {
+
+        } catch (err: any) {
             console.info('listAllIssues:' + err.message)
         }
-        
+
     }
 
     private async addIssue(e: MouseEvent) {
@@ -1108,19 +1106,19 @@ export class PluginGithubL4Project extends CollabLitElement {
     //-----ICONS------
 
     private myIcons = {
-        plus: `<svg style="width:13px;fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/></svg>`,
+        plus: `<svg style="width:13px;fill:var(--github-color-primary)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/></svg>`,
         git: `<svg style="width:20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3 .3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5 .3-6.2 2.3zm44.2-1.7c-2.9 .7-4.9 2.6-4.6 4.9 .3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3 .7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3 .3 2.9 2.3 3.9 1.6 1 3.6 .7 4.3-.7 .7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3 .7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3 .7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>`,
         bars: `<svg style="width:20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M448 64c0-17.7-14.3-32-32-32L32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32zm0 256c0-17.7-14.3-32-32-32L32 288c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32zM0 192c0 17.7 14.3 32 32 32l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 160c-17.7 0-32 14.3-32 32zM448 448c0-17.7-14.3-32-32-32L32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32z"/></svg>`,
         list: `<svg style="width:20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M40 48C26.7 48 16 58.7 16 72l0 48c0 13.3 10.7 24 24 24l48 0c13.3 0 24-10.7 24-24l0-48c0-13.3-10.7-24-24-24L40 48zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32l288 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L192 64zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l288 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-288 0zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l288 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-288 0zM16 232l0 48c0 13.3 10.7 24 24 24l48 0c13.3 0 24-10.7 24-24l0-48c0-13.3-10.7-24-24-24l-48 0c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24l0 48c0 13.3 10.7 24 24 24l48 0c13.3 0 24-10.7 24-24l0-48c0-13.3-10.7-24-24-24l-48 0z"/></svg>`,
         close: `<svg style="width: 18px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>`,
-        table: `<svg style="width:15px;fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 256l0-96 160 0 0 96L64 256zm0 64l160 0 0 96L64 416l0-96zm224 96l0-96 160 0 0 96-160 0zM448 256l-160 0 0-96 160 0 0 96zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32z"/></svg>`,
-        card: `<svg style="width:15px;fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96l0 32 576 0 0-32c0-35.3-28.7-64-64-64L64 32zM576 224L0 224 0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-192zM112 352l64 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-64 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm112 16c0-8.8 7.2-16 16-16l128 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-128 0c-8.8 0-16-7.2-16-16z"/></svg>`,
-        back2: `<svg style="width:15px;fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M352 96l64 0c17.7 0 32 14.3 32 32l0 256c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c53 0 96-43 96-96l0-256c0-53-43-96-96-96l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32zm-9.4 182.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L242.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"/></svg>`,
+        table: `<svg style="width:15px;fill:var(--github-color-primary)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 256l0-96 160 0 0 96L64 256zm0 64l160 0 0 96L64 416l0-96zm224 96l0-96 160 0 0 96-160 0zM448 256l-160 0 0-96 160 0 0 96zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32z"/></svg>`,
+        card: `<svg style="width:15px;fill:var(--github-color-primary)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96l0 32 576 0 0-32c0-35.3-28.7-64-64-64L64 32zM576 224L0 224 0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-192zM112 352l64 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-64 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm112 16c0-8.8 7.2-16 16-16l128 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-128 0c-8.8 0-16-7.2-16-16z"/></svg>`,
+        back2: `<svg style="width:15px;fill:var(--github-color-primary)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M352 96l64 0c17.7 0 32 14.3 32 32l0 256c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c53 0 96-43 96-96l0-256c0-53-43-96-96-96l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32zm-9.4 182.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L242.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"/></svg>`,
         back: `<svg xmlns="http://www.w3.org/2000/svg" style="width:15px;" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>`,
         member: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg>`,
         label: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 80L0 229.5c0 17 6.7 33.3 18.7 45.3l176 176c25 25 65.5 25 90.5 0L418.7 317.3c25-25 25-65.5 0-90.5l-176-176c-12-12-28.3-18.7-45.3-18.7L48 32C21.5 32 0 53.5 0 80zm112 32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>`,
         trash: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z"/></svg>`,
-        eye:`<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;fill:#fff" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"/></svg>`
+        eye: `<svg xmlns="http://www.w3.org/2000/svg" style="width:12px;fill:var(--github-color-primary)" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"/></svg>`
 
     }
 }
