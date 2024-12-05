@@ -6,7 +6,7 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
-import { getAddNewFileDetails, removeTokensFromSource, getTokensLess } from './_100554_enhancementStyle';
+import { removeTokensFromSource, getTokensLess } from './_100554_enhancementStyle';
 import { LessCSS } from "./_100554_lessCSS";
 import { getEnhancementName } from './_100554_libCommom';
 import './_100554_collabSpliterVerticalVarFixed';
@@ -1483,9 +1483,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private async prepareInitialLess(shortName: string, project: number) {
 
-        const details = await getAddNewFileDetails();
         const tag = convertFileNameToTag(`_${project}_${shortName}`);
-        const newStyle = details[0].example
+        const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="enhancementStyle" />
+				\n[tag] {
+                \n // Here your less
+                \n}`
+        const newStyle = example
             .replace('[shortName]', shortName)
             .replace('[project]', project.toString())
             .replace('[tag]', tag)
