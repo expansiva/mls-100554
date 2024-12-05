@@ -338,13 +338,17 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (!this.myParent || !this.elMain) return;
 
-        if (e.key === 'Enter') {
+        /*if (e.key === 'Enter') {
             e.preventDefault();
             e.stopPropagation();
             document.execCommand('insertLineBreak');
+        }*/
+
+        if (e.shiftKey && e.key === 'Enter') {
+            e.stopPropagation();
         }
 
-        if (['Enter', 'Backspace', 'Delete', 'c', 'v', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        if (['Backspace', 'Delete', 'c', 'v', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
             this.removePopUpIfNeeded();
             e.stopPropagation();
         }

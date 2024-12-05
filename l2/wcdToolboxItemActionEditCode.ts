@@ -86,7 +86,12 @@ export class WCDToolboxItemActionEditCode extends WcdToolboxItemBase {
 
     private onKeyDown(e: KeyboardEvent) {
         if (!this.myParent || !this.elMain) return;
-        if (['Enter', 'Backspace', 'c', 'v', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        console.info(e)
+        if ([ 'Backspace', 'c', 'v', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+            e.stopPropagation();
+        }
+
+        if (e.shiftKey && e.key === 'Enter') {
             e.stopPropagation();
         }
 
