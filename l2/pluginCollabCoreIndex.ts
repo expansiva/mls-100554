@@ -306,6 +306,34 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginSystemTermsOfService'
             },
+            {
+                category: 'Page',
+                scope: ['l2NewFile'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginNewFilePage'
+            },
+            {
+                category: 'Service',
+                scope: ['l2NewFile'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginNewFileService'
+            },
+            {
+                category: 'Component',
+                scope: ['l2NewFile'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginNewFileWebComponent'
+            },
+            {
+                category: 'Blank',
+                scope: ['l2NewFile'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginNewFileBlank'
+            },
 
         ];
     }

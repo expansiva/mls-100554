@@ -5,15 +5,15 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase } from './_100554_serviceBase';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { getAttributeDefinitionsLit, getFormComponentsDescription } from './_100554_icaBaseDescription';
-
-export const initServiceListFilesAdd = () => {
-}
+import { IDetails } from "./_100554_pluginNewFileBase";
+import { propertyDataSource } from './_100554_icaLitElement';
+import { globalState } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
     labelProject: "Projeto",
-    labelShortName: "Nome curto",
+    labelShortName: "Nome",
+    invalidName: "Nome invalido",
     labelType: "Por favor, selecione um modelo abaixo ou clique",
     btnAdd: "Adicionar",
     btnCancel: "Cancelar",
@@ -23,6 +23,7 @@ const message_pt = {
 const message_en = {
     labelProject: "Project",
     labelShortName: "Shortname",
+    invalidName: "Invalid shortName",
     labelType: "Please select a template below or click",
     btnAdd: "Add",
     btnCancel: "cancel",
@@ -40,27 +41,34 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-list-files-add-100554')
 export class ServiceListFilesAdd100554 extends CollabLitElement {
 
+    private defaultProject = 100554;
+
     private msg: MessageType = messages['en'];
 
     @property() level: number = -1;
     @property() error: string = '';
     @property() position: string = '';
     @property() father?: ServiceBase | undefined;
-    @property() templates: ITemplateDetails[] = [];
+    @property() plugins: IPlugins[] = [];
     @property({ type: Boolean, }) loading: boolean = true;
-
+    @propertyDataSource() shortName: string | undefined;
     @query('#iptShortName') inputShortName: HTMLInputElement | undefined;
 
     private enhancementModules: IEnhancementModules | undefined = {};
 
+
     async connectedCallback() {
         super.connectedCallback();
-        await this.init();
 
+        if (!globalState._ica) globalState._ica = {};
+        if (!globalState._ica.l2) globalState._ica.l2 = {};
+        if (!globalState._ica.l2.addFile) globalState._ica.l2.addFile = { shortName: '', project: 0 };
+        await this.init();
     }
 
     private async init() {
-        await this.getTemplates();
+        const plugins = await this.getPlugins();
+        this.plugins = await this.getPluginsInfo(plugins);
         this.loading = false;
     }
 
@@ -74,6 +82,8 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
         this.msg = lang ? messages[lang] : message_en;
 
         const { project } = mls.actual[5] || 0;
+        globalState.globalStateManagment.setState('l2.addFile.project', project);
+
         return html`
             ${project !== undefined ? this.renderAdd(project)
                 : html`${this.msg.please}`
@@ -92,7 +102,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
                     </div>
                     <div>
                         <label>${this.msg.labelShortName}:</label>
-                        <input type="text" id="iptShortName"/>
+                        <input value=${this.shortName} type="text" id="iptShortName" @input=${this.handleInputInput}/>
                         <span>${this.error}</span>
                     </div>
                 </div>
@@ -116,9 +126,9 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
              ${this.loading
                 ? html`<p>Loading...</p>`
                 :
-                this.templates.map((template) => {
+                this.plugins.map((template) => {
                     return html`
-                        <div  class="template-item" @click=${() => { this.add(template) }}>
+                        <div  class="template-item" @click=${() => { this.handleClickTemplate(template) }}>
                             <div class="template-item-content">
                                 <div class="template-item-title">${template.title}</div>
                                 <div class="template-item-body">
@@ -138,224 +148,43 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     }
 
-    //--------------- IMPLEMENTS----------------
-
-    private async getTemplates() {
-        const temp = await this.getAllEnhacementsTemplates();
-        this.templates = [...temp || []];
+    private handleInputInput(e: KeyboardEvent) {
+        const target = e.target as HTMLInputElement;
+        if (!target) return;
+        const { project } = mls.actual[5];
+        if (project === undefined) throw new Error('No project selected');
+        const name = this.inputShortName?.value || '';
+        this.error = '';
+        const isValidName = this.getNewNameAndValid(project as number, name);
+        if (!isValidName) {
+            this.error = this.msg.invalidName;
+            return;
+        }
+        globalState.globalStateManagment.setState('l2.addFile.shortName', target.value);
     }
+
+    private handleClickTemplate(plugin: IPlugins) {
+
+        const tag = convertFileNameToTag(plugin.widget);
+        const options = {
+            shortName: mls.actual[0].path,
+            project: mls.actual[0].project,
+            htmlText: `<${tag} position=${this.position} project="{{ l2.addFile.project }}" shortName="{{ l2.addFile.shortName }}"></${tag}>`
+        }
+
+        mls.events.fire(2, 'PluginDetails', JSON.stringify(options), 0);
+
+    }
+
+    //--------------- IMPLEMENTS----------------
 
     private clickCancel(): void {
         if (!this.father) return;
         (this.father as any).mode = 'list';
     }
 
-    private showLoader(loader: boolean): void {
-        if (!this.father) return
-        (this.father as any).loading = loader;
-    }
-
-    private async add(template: ITemplateDetails) {
-
-        try {
-
-            if (!this.inputShortName) return;
-            if (!this.father) return;
-
-            const { project } = mls.actual[5];
-            if (project === undefined) throw new Error('No project selected');
-            if (!this.enhancementModules) throw new Error('No modules enhancement loaded');
-
-            const name = this.inputShortName.value
-            const newName = this.getNewNameAndValid(project as number, name);
-            const params = {} as mls.events.IFileAction;
-
-            if (!template.enhancementKey) throw new Error('No enhancementKey in template');
-            const fEnh = this.enhancementModules[template.enhancementKey];
-
-            if (!fEnh) {
-                this.showLoader(false);
-                throw new Error('No enhancement founded');
-            };
-
-            this.showLoader(true);
-
-            const ts = this.createContentNewFile(fEnh, template.example, name, project);
-
-            params.action = 'new' as typeof params.action;
-            params.level = +this.level;
-            params.project = mls.actual[5].project as any;
-            params.newProject = mls.actual[5].project;
-            params.shortName = newName;
-            params.newshortName = newName;
-            params.folder = '';
-            params.newfolder = '';
-            params.newEnhancement = fEnh ? `_${fEnh.storFile.project}_${fEnh.storFile.shortName}` : '_blank';
-            params.extension = '.ts';
-            params.newTSSource = ts;
-
-            mls.actual[this.level].setFullName('_' + params.project + '_' + params.shortName);
-            (mls.actual[this.level as any] as any)[this.position as any] = {
-                project: params.project,
-                shortName: params.shortName
-            } as any;
-
-            await this.fireComunication(params);
-            const posInv = this.position === 'left' ? 'right' : 'left';
-            if (template.aimActionSuggest) {
-                this.father?.openService('_100554_serviceAim', posInv, 2);
-                const opInstance = this.father?.nav3Service?.getActiveInstance(posInv);
-                if (opInstance) {
-                    opInstance.setAttribute('actiontoopen', template.aimActionSuggest)
-                }
-            }
-
-            this.showLoader(false);
-            this.saveLocalHistory(params.project, params.shortName, params.extension, params.folder);
-            (this.father as any).mode = 'list';
-
-        } catch (e: any) {
-            setTimeout(() => {
-                this.showLoader(false);
-                this.error = e.message;
-            }, 200);
-        }
-    }
-
-    private createContentNewFile(enhecementModule: IEnhancementModule, template: string, name: string, project: number): string {
-        let ret = '';
-        const grp = 'other'
-
-        let newExample = '';
-
-        newExample = this.checkIfAsIcaAndCreateIfNeeded(name, project);
-        if (!newExample) {
-            newExample = template;
-            newExample = this.changeTagName(newExample, convertFileNameToTag(`_${project}_${name}`));
-            newExample = this.changeClassName(newExample, project as number, name);
-            newExample = this.changeWidget(newExample, project as number, name);
-        }
-
-        ret = `/// <mls shortName="${name}" project="${project}" enhancement="_${enhecementModule.storFile.project}_${enhecementModule.storFile.shortName}" groupName="${grp}" />\n${newExample}\n`;
-        return ret;
-    }
-
-    private checkIfAsIcaAndCreateIfNeeded(name: string, project: number) {
-
-        if (project !== 100554) return '';
-        if (!name.startsWith('ica')) return '';
-        if (!name.endsWith('Base')) return '';
-
-        let parts = this.splitStringByUppercase(name.substring(0, name.length - 4));
-        if (parts.length < 4) return '';
-
-        parts = parts.map((part) => this.capitalizeFirstLetter(part));
-
-        let ica, root, subgroup, finalgroup = ''
-
-        ica = parts.shift() as string;
-        root = parts.shift() as string;
-        subgroup = parts.shift() as string;
-        finalgroup = parts.join(' ') as string;
-
-        const desc = getFormComponentsDescription(root, subgroup, finalgroup);
-        if (!desc) return '';
-
-        return this.createTemplateIca(root, subgroup, finalgroup);
-    }
-
-    private splitStringByUppercase(str: string) {
-        return str.split(/(?=[A-Z])/);
-    }
-
-    private capitalizeFirstLetter(str: string) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    private createTemplateIca(root: string, subgroup: string, finalgroup: string) {
-
-        function formatProperty(propertyString: string): string {
-            // Regex para capturar o nome da propriedade e seu tipo
-            const regex = /@property\((?:[^\)]*)\)?\s*([\w]+):\s*([\w| ]+);/;
-            const match = propertyString.match(regex);
-
-            if (match) {
-                const [, propertyName, propertyType] = match;
-                return `abstract ${propertyName}: ${propertyType};`;
-            }
-
-            // Retorna a string original se não corresponder ao formato esperado
-            return propertyString;
-        }
-
-        const props = getAttributeDefinitionsLit(root, subgroup, finalgroup);
-        const res = props.map(line => {
-            let cleanedLine = formatProperty(line);
-            cleanedLine = cleanedLine.replace(/=.+?;/, ';'); // Remove tudo após o "=" até o próximo ";"
-            cleanedLine = 'abstract ' + cleanedLine;
-            return cleanedLine;
-        });
-
-        const fg = finalgroup.replace(/\s/g, '');
-        const className = `Ica${root}${subgroup}${fg}Base`;
-        const extend = 'IcaLitElement';
-        const extendFile = './_100554_icaLitElement';
-
-        const interfaces = new Map();
-
-        res.forEach((str: string, index: number) => {
-            const matches = str.match(/abstract (\w+): ('.*?'(?: \| '.*?')*)/);
-            if (matches && matches.length >= 3) {
-                const propName = matches[1];
-                const types = matches[2].match(/'[^']+'/g);
-                if (types && types.length > 1) {
-                    const interfaceName = `I${propName.charAt(0).toUpperCase() + propName.slice(1)}`;
-                    interfaces.set(interfaceName, types);
-                    res[index] = `abstract ${propName}: ${interfaceName} | undefined; // ${matches.input}`;
-                }
-            }
-        });
-
-        let interfaceString = '';
-        interfaces.forEach((types, interfaceName) => {
-            interfaceString += `export type ${interfaceName} = ${types.join(' | ')};\n`;
-        });
-
-
-        const temp = `
-import { ${extend} } from '${extendFile}';
-
-export abstract class ${className} extends ${extend} {
-    
-    ${res.join('\n\t')}
-
-}
-
-${[interfaceString].join('\n')}
-`
-        return temp;
-
-    }
-
-    private saveLocalHistory(project: number, shortName: string, extension: string, folder: string): void {
-
-        const info = localStorage.getItem('mlsInfoHistoryL' + this.level);
-        const res: any[] = info ? JSON.parse(info) : [];
-        let idx = -1;
-        res.forEach((i: any, index) => {
-            if (i.project !== project || i.shortName !== shortName) return;
-            idx = index;
-        });
-
-        if (idx >= 0) res.splice(idx, 1);
-        res.unshift({ project, shortName, extension, folder });
-        if (res.length > 10) res.length = 10;
-        localStorage.setItem('mlsInfoHistoryL' + this.level, JSON.stringify(res));
-
-    }
-
-    private getNewNameAndValid(prj: number, name: string): string {
-        if (name === '' || !name || name === null) throw new Error('Invalid name ');
+    private getNewNameAndValid(prj: number, name: string): boolean {
+        if (name === '' || !name || name === null) return false;
         const isValidName = this.isValidNewName({
             shortName: name,
             project: prj,
@@ -363,8 +192,8 @@ ${[interfaceString].join('\n')}
             folder: '',
             extension: '.ts'
         });
-        if (!isValidName) throw new Error('Invalid name ');
-        return name;
+        if (!isValidName) return false;
+        return true;
     }
 
     private isValidNewName(obj: { shortName: string, project: number, level: number, extension: string, folder: string }): boolean {
@@ -383,100 +212,34 @@ ${[interfaceString].join('\n')}
         return !mls.stor.files[key] && !find;
 
     }
-
-    private changeClassName(source: string, project: number, shortname: string): string {
-        const newClassName = shortname.charAt(0).toUpperCase() + shortname.substring(1, shortname.length) + project.toString();
-        const outputString = source.replace(/\[className\]/g, newClassName);
-        return outputString;
+    private async getPlugins(): Promise<mls.plugin.MenuAction[]> {
+        let { project } = mls.actual[5];
+        if (!project) project = this.defaultProject;
+        await mls.plugin.loadAll(project, true);
+        const plugins = mls.plugin.getAllMenuActions(project, { scope: 'l2NewFile' } as any);
+        return plugins;
     }
 
-    private changeWidget(source: string, project: number, shortname: string): string {
-        const newWidget = `_${project.toString()}_${shortname}`;
-        const outputString = source.replace(/\[widgetName\]/g, newWidget);
-        return outputString;
-    }
+    private async getPluginsInfo(plugins: mls.plugin.MenuAction[]): Promise<IPlugins[]> {
+        const rc: IPlugins[] = [];
+        for await (const plugin of plugins) {
+            const instance = await import(`./${plugin.widget}`);
+            if (!instance.details ||
+                typeof instance.details !== 'object' ||
+                !['title', 'description', 'tags'].every(prop => prop in instance.details)
+            ) continue;
 
-    private changeTagName(source: string, tagName: string): string {
-        const outputString = source.replace(/\[tagName\]/g, tagName);
-        return outputString;
-    }
-
-    private getEnhacementsDetails(): IEnhancementDetails[] {
-
-        const array: IEnhancementDetails[] = [];
-        const keys = Object.keys(mls.stor.files);
-        keys.forEach((i) => {
-            const f = mls.stor.files[i];
-            if (f.level !== +this.level || !f.shortName.startsWith('enhancement') || f.extension !== '.ts') return;
-            const opt: IEnhancementDetails = {
-                key: `${f.project}_${f.shortName}`,
-                value: i
+            const details: IDetails = instance.details;
+            const item: IPlugins = {
+                ...details,
+                widget: plugin.widget,
+                category: plugin.category,
             }
-            array.push(opt);
-        });
 
-        return [...array];
-    }
+            rc.push(item);
 
-    private async getAllEnhacementsTemplates() {
-
-        let templates: ITemplateDetails[] = [];
-        const enhancementDetails = this.getEnhacementsDetails();
-        this.enhancementModules = await this.getEnhacementsInstancies(enhancementDetails);
-
-        if (!this.enhancementModules) return templates;
-
-        for await (let entry of Object.entries(this.enhancementModules)) {
-            const [entryKey, entryValue] = entry;
-
-            if (!((entryValue.instance as any).getAddNewFileDetails)) continue;
-            const temp: ITemplateDetails[] = await (entryValue.instance as any).getAddNewFileDetails();
-
-            temp.forEach((t) => t.enhancementKey = entryKey);
-            templates = [...templates, ...temp]
         }
-
-        // Object.entries(this.enhancementModules).map((entry) => {
-        //     const [entryKey, entryValue] = entry;
-
-        //     if (!((entryValue.instance as any).getAddNewFileDetails)) return;
-        //     const temp: ITemplateDetails[] = await(entryValue.instance as any).getAddNewFileDetails();
-
-        //     temp.forEach((t) => t.enhancementKey = entryKey);
-        //     templates = [...templates, ...temp]
-        // });
-
-
-        return templates;
-    }
-
-    private async getEnhacementsInstancies(enhancementDetails: IEnhancementDetails[]) {
-
-        const enhancementModules: IEnhancementModules = {};
-
-        for await (let details of enhancementDetails) {
-
-            const { value, key } = details;
-            const storFile = mls.stor.files[value];
-            if (!storFile) return;
-            const { project, shortName } = storFile;
-            let enhancementModule = await mls.l2.enhancement.getEnhancementModule({ project, shortName });
-            if (!enhancementModule) continue;
-
-            enhancementModules[key] = {
-                instance: enhancementModule,
-                storFile: storFile
-            }
-        }
-
-        return enhancementModules;
-    }
-
-    private async fireComunication(obj: any) {
-
-        obj.position = this.position;
-        await mls.events.fire([+this.level as any], ['FileAction'], JSON.stringify(obj), 0);
-
+        return rc;
     }
 
 }
@@ -502,6 +265,11 @@ interface ITemplateDetails {
     example: string,
     aimActionSuggest: string,
     enhancementKey?: string,
+}
+
+interface IPlugins extends IDetails {
+    widget: string,
+    category: string | null
 }
 
 
