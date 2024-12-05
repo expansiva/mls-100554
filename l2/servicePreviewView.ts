@@ -333,9 +333,11 @@ export class ServicePreviewView extends LitElement {
     private setTheme(iframe: HTMLIFrameElement) {
         const isLight = this.father.light;
         const html = iframe.contentDocument?.querySelector('html');
+        const meta = iframe.contentDocument?.querySelector('meta[name="color-scheme"]');
         if (!isLight && html) {
             html.setAttribute('data-theme', 'dark');
-        }
+        } 
+        if (meta) meta.remove();
     }
 
     private setDevice(iframe: HTMLIFrameElement) {
@@ -373,7 +375,6 @@ export class ServicePreviewView extends LitElement {
 
         if (!iframe.contentDocument || !this.models) return;
         let txt = await this.getFileContent();
-
         /*if (this.lastHTML === txt) {
             const h = this.lastCompiledUrl;
             this.lastCompiledUrl = h;

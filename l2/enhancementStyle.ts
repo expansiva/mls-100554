@@ -6,21 +6,6 @@ import { getDSInstance, DesignSystemIO, ITokenInfo } from './_100554_libDesignSy
 
 let dsInstance: DesignSystemIO | undefined;
 
-
-export const getAddNewFileDetails = () => {
-    return [
-        {
-            title: 'Style',
-            description: 'Initial Less',
-            tags: ["less", "style"],
-            example: `/// <mls shortName="[shortName]" project="[project]" enhancement="enhancementStyle" />
-				\n[tag] {
-                \n // Here your less
-                \n}`
-        }
-    ]
-}
-
 export const requires: mls.l2.enhancement.IRequire[] = [];
 
 export const onAfterChange = (models: mls.editor.IModels) => {
