@@ -19,7 +19,7 @@ export async function addIssueInProject(req: IReq, idProject: string, idIssue: s
                 }
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         if (!ret) {
             return undefined;
@@ -27,9 +27,9 @@ export async function addIssueInProject(req: IReq, idProject: string, idIssue: s
 
         return ret.addProjectV2ItemById.item.id;
 
-    } catch (e) {
-        console.info(e);
-        return undefined;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -51,7 +51,7 @@ export async function removeIssueInProject(req: IReq, idProject: string, idIssue
                 }
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         if (!ret) {
             return false;
@@ -59,9 +59,9 @@ export async function removeIssueInProject(req: IReq, idProject: string, idIssue
 
         return true;
 
-    } catch (e) {
-        console.info(e);
-        return false;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -92,7 +92,7 @@ export async function updateFieldSelectProjects(req: IReq, idProject: string, id
 
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         if (!ret) {
             return false;
@@ -100,9 +100,9 @@ export async function updateFieldSelectProjects(req: IReq, idProject: string, id
 
         return true;
 
-    } catch (e) {
-        console.info(e);
-        return false;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -207,7 +207,7 @@ export async function getIssuesInProjects(req: IReq, idProject: string): Promise
 
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         if (!ret || !ret.node || !ret.node.items || !ret.node.items.nodes) {
             return [];
@@ -303,9 +303,9 @@ export async function getIssuesInProjects(req: IReq, idProject: string): Promise
 
         return itens;
 
-    } catch (e) {
-        console.info(e);
-        return [];
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -350,7 +350,7 @@ export async function getProjectFields(req: IReq, idProject: string): Promise<IF
 
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         if (!ret || !ret.node || !ret.node.fields || !ret.node.fields.nodes) {
             return [];
@@ -384,11 +384,10 @@ export async function getProjectFields(req: IReq, idProject: string): Promise<IF
 
         return fields;
 
-    } catch (e) {
-        console.info(e);
-        return [];
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
-
 }
 
 export async function getProjects(req: IReq): Promise<IProject[]> {
@@ -418,7 +417,7 @@ export async function getProjects(req: IReq): Promise<IProject[]> {
 
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         if (!ret || !ret.repository || !ret.repository.projectsV2 || !ret.repository.projectsV2.nodes) {
             return [];
@@ -445,9 +444,9 @@ export async function getProjects(req: IReq): Promise<IProject[]> {
 
         return prjs.sort((a, b) => { return b.number - a.number; });
 
-    } catch (e) {
+    } catch (e:any) {
         console.info(e);
-        return [];
+        throw new Error(e);
     }
 }
 
@@ -496,7 +495,7 @@ export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string
 
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         const issue = {} as IIssues;
         issue.id = ret.createIssue.issue.id;
@@ -516,9 +515,9 @@ export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string
 
         return issue;
 
-    } catch (e) {
-        console.info(e);
-        return undefined;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -541,13 +540,13 @@ export async function removeReact(req: IReq, issueid: string, reactid: string): 
                 }
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
         return true;
 
 
-    } catch (e) {
-        console.info(e);
-        return false;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -570,15 +569,15 @@ export async function addReact(req: IReq, issueid: string): Promise<string> {
                 }
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         if (!ret.addReaction || !ret.addReaction.reaction) return '';
 
         return ret.addReaction.reaction.id;
 
-    } catch (e) {
-        console.info(e);
-        return '';
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -646,7 +645,7 @@ export async function getIssues(req: IReq, state: string = 'OPEN'): Promise<IIss
                 }
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         const issues: IIssues[] = []
 
@@ -696,9 +695,9 @@ export async function getIssues(req: IReq, state: string = 'OPEN'): Promise<IIss
 
         return issues.sort((a, b) => { return b.numberIssues - a.numberIssues; });
 
-    } catch (e) {
+    } catch (e:any) {
         console.info(e)
-        return [];
+        throw new Error(e);
     }
 
 
@@ -761,7 +760,7 @@ export async function getIssue(req: IReq, id: string): Promise<IIssues | undefin
                 }
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         if (!ret || !ret.node) {
             return undefined;
@@ -801,9 +800,9 @@ export async function getIssue(req: IReq, id: string): Promise<IIssues | undefin
 
         return issue;
 
-    } catch (e) {
+    } catch (e:any) {
         console.info(e)
-        return undefined;
+        throw new Error(e);
     }
 
 
@@ -836,7 +835,7 @@ export async function addComment(req: IReq, issue: IIssues, comment: string): Pr
 
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         if (!ret || !ret.addComment || !ret.addComment.commentEdge || !ret.addComment.commentEdge.node) {
             return undefined
@@ -852,9 +851,9 @@ export async function addComment(req: IReq, issue: IIssues, comment: string): Pr
         return com;
 
 
-    } catch (e) {
-        console.info(e);
-        return undefined
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 
@@ -886,7 +885,7 @@ export async function getIssueComments(req: IReq, issue: IIssues): Promise<IComm
                 }
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         const comments: IComments[] = []
 
@@ -910,9 +909,9 @@ export async function getIssueComments(req: IReq, issue: IIssues): Promise<IComm
 
         return comments;
 
-    } catch (e) {
-        console.info(e);
-        return [];
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 
@@ -930,7 +929,7 @@ export async function getRepositoryId(req: IReq): Promise<string> {
                 }
             `;
 
-        const ret = await qlFetch(q, req.mkey);
+        const ret = await qlFetch(q);
 
         if (!ret || !ret.repository || !ret.repository.id) {
             throw new Error('Not found repositoryId');
@@ -938,9 +937,9 @@ export async function getRepositoryId(req: IReq): Promise<string> {
 
         return ret.repository.id;
 
-    } catch (e) {
-        console.info(e);
-        return '';
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 
@@ -974,13 +973,13 @@ export async function addMemberInIssue(req: IReq, issueId: string, memberId: str
                 }
             `;
 
-        await qlFetch(q, req.mkey);
+        await qlFetch(q);
 
         return true;
 
-    } catch (e) {
-        console.info(e);
-        return false;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -1014,7 +1013,7 @@ export async function addLabelInIssue(req: IReq, issueId: string, labelId: strin
                 }
             `;
 
-        let ret = await qlFetch(q, req.mkey);
+        let ret = await qlFetch(q);
         let retLabel = undefined;
 
         if (ret.addLabelsToLabelable && ret.addLabelsToLabelable.labelable && ret.addLabelsToLabelable.labelable.labels && ret.addLabelsToLabelable.labelable.labels.nodes) {
@@ -1031,9 +1030,9 @@ export async function addLabelInIssue(req: IReq, issueId: string, labelId: strin
 
         return retLabel;
 
-    } catch (e) {
-        console.info(e);
-        return undefined;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -1065,13 +1064,13 @@ export async function removeMemberInIssue(req: IReq, issueId: string, memberId: 
                 }
             `;
 
-        let ret = await qlFetch(q, req.mkey);
+        let ret = await qlFetch(q);
 
         return true;
 
-    } catch (e) {
-        console.info(e);
-        return false;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -1105,13 +1104,13 @@ export async function removeLabelInIssue(req: IReq, issueId: string, labelId: st
                 }
             `;
 
-        let ret = await qlFetch(q, req.mkey);
+        let ret = await qlFetch(q);
 
         return true;
 
-    } catch (e) {
-        console.info(e);
-        return false;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -1136,7 +1135,7 @@ export async function getLabels(req: IReq): Promise<ILabel[]> {
                 }
             `;
 
-        let ret = await qlFetch(q, req.mkey);
+        let ret = await qlFetch(q);
 
         if (ret.repository && ret.repository.labels && ret.repository.labels.nodes) {
 
@@ -1145,9 +1144,9 @@ export async function getLabels(req: IReq): Promise<ILabel[]> {
         }
         return []
 
-    } catch (e) {
-        console.info(e);
-        return [];
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 }
 
@@ -1174,7 +1173,7 @@ export async function getUsers(req: IReq): Promise<IAssignees[]> {
                 }
             `;
 
-        let ret = await qlFetch(q, req.mkey);
+        let ret = await qlFetch(q);
 
         if (!ret.repository || !ret.repository.collaborators || !ret.repository.collaborators.edges) return [];
 
@@ -1192,9 +1191,9 @@ export async function getUsers(req: IReq): Promise<IAssignees[]> {
 
         return users;
 
-    } catch (e) {
-        console.info(e);
-        return [];
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 }
 
@@ -1218,7 +1217,7 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
                 }
             `;
 
-        let ret = await qlFetch(q, req.mkey);
+        let ret = await qlFetch(q);
 
         const retLabels = {
             feature: '',
@@ -1274,9 +1273,9 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
         return retLabels;
 
 
-    } catch (e) {
-        console.info(e);
-        return undefined;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 
@@ -1306,7 +1305,7 @@ export async function createLabelIO(req: IReq, repositoryId: string, label: stri
                 }
             `;
 
-        let ret = await qlFetch(q, req.mkey);
+        let ret = await qlFetch(q);
 
         if (ret.createLabel && ret.createLabel.label) {
 
@@ -1319,9 +1318,9 @@ export async function createLabelIO(req: IReq, repositoryId: string, label: stri
 
         return undefined;
 
-    } catch (e) {
-        console.info(e);
-        return undefined;
+    } catch (e:any) {
+        console.info(e)
+        throw new Error(e);
     }
 
 }
@@ -1329,8 +1328,8 @@ export async function createLabelIO(req: IReq, repositoryId: string, label: stri
 export function getUserInfoIO(req: IReq): Promise<IInfo> {
 
     return new Promise<IInfo>(async (resolve, reject) => {
-
-        const q = `
+        try {
+            const q = `
 			{
 				viewer {
 					name
@@ -1340,52 +1339,47 @@ export function getUserInfoIO(req: IReq): Promise<IInfo> {
 			}
 			`;
 
-        myFetch(q, req.mkey).then((data) => {
+            const data = await qlFetch(q)
 
-            try {
+            const info = {} as IInfo;
+            if (!data.viewer) resolve(info);
 
-                if (data.status !== 200) {
-                    reject(new Error('Erro status: ' + data.status + '; ' + data.ret.message));
-                    return;
-                }
+            info.name = data.viewer.name;
+            info.login = data.viewer.login;
+            info.avatarUrl = data.viewer.avatarUrl;
 
-                if (data.ret.errors) {
-                    reject(new Error('Erro' + data.ret.errors[0].message));
-                    return;
-                }
+            resolve(info);
 
-                const info = {} as IInfo;
-                if (!data.ret || !data.ret.data.viewer) resolve(info);
 
-                info.name = data.ret.data.viewer.name;
-                info.login = data.ret.data.viewer.login;
-                info.avatarUrl = data.ret.data.viewer.avatarUrl;
+        } catch (e: any) {
 
-                resolve(info);
+            reject(e.message);
 
-            } catch (err) {
-
-                reject(err);
-
-            }
-
-        }).catch((e: Error) => {
-
-            reject(e);
-
-        });
+        };
 
     });
 }
 
-
-function qlFetch(query: string, mkey: string, variables?: {}): Promise<any> {
+const driver = await mls.stor.others.getDefaultDriver(mls.actual[5]?.project || 0);
+function qlFetch(query: string, variables?: {}): Promise<any> {
 
     return new Promise<any>(async (resolve, reject) => {
 
         try {
 
-            const info = await myFetch(query, mkey, variables);
+            if (!driver || driver.shortName.toLocaleLowerCase() !== 'github') {
+                throw new Error('Driver not found or driver is not of type github')
+            }
+
+            if (!(driver as any).fecthQl) {
+                throw new Error('Driver not have function fecthQl');
+            }
+
+            const info = await (driver as any).fecthQl(query, variables);
+
+            resolve(info.ret.data);
+
+            /*const info = await myFetch(query, mkey, variables);
 
             if (!info || info.status !== 200) {
                 reject(new Error('Erro status: ' + info.status + '; ' + info.ret.message));
@@ -1397,11 +1391,11 @@ function qlFetch(query: string, mkey: string, variables?: {}): Promise<any> {
                 return;
             }
 
-            resolve(info.ret.data);
+            resolve(info.ret.data);*/
 
-        } catch (er) {
+        } catch (er:any) {
 
-            reject(er);
+            reject(er.message);
 
         }
 
@@ -1435,9 +1429,9 @@ function myFetch(query: string, mKey: string, variables?: {}): Promise<{ status:
                 resolve({ status, ret: data });
             }).catch((e) => reject(e));
 
-        } catch (er) {
+        } catch (er:any) {
 
-            reject(er);
+            reject(er.message);
 
         }
 
@@ -1483,10 +1477,9 @@ export interface IFieldsProject {
 }
 
 export interface IReq {
-    mkey: string,
     owner: string,
     repo: string,
-    branch: string, 
+    branch: string,
 }
 
 export interface IIssues {
