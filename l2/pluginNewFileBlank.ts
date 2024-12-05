@@ -6,6 +6,7 @@ import { IcaLitElement } from './_100554_icaLitElement';
 import { getMessageKey } from "./_100554_collabLitElement";
 import { propertyDataSource } from './_100554_icaLitElement';
 import { IDetails, createNewFile } from "./_100554_pluginNewFileBase";
+import { ServiceBase } from './_100554_serviceBase';
 import './_100554_wcCode';
 
 /// **collab_i18n_start**
@@ -16,7 +17,8 @@ const message_pt = {
     shortName: "Nome",
     header: "Arquivo em branco",
     btnCreate: 'Criar arquivo',
-    loading: 'Criando arquivo...'
+    loading: 'Criando arquivo...',
+    error: 'Nome do arquivo em branco ou invalido'
 
 }
 
@@ -27,7 +29,8 @@ const message_en = {
     shortName: "ShortName",
     header: "Blank File",
     btnCreate: 'Create file',
-    loading: 'Creating File...'
+    loading: 'Creating File...',
+    error: 'Blank or invalid file name'
 }
 
 type MessageType = typeof message_en;
@@ -58,6 +61,8 @@ export class PluginNewFileBlank extends IcaLitElement {
 
     @property() loading: boolean = false;
 
+    private service = this.closest('service-detail-100554') as ServiceBase;
+
     private template: string = ``;
 
     private enhancement: string = `_100554_enhancementLit`;
@@ -69,7 +74,10 @@ export class PluginNewFileBlank extends IcaLitElement {
     }
 
     private async handleAddFile() {
-        if (!this.project || !this.shortName) return;
+        if (!this.project || !this.shortName) {
+            this.service.setError(msg.error)
+            return;
+        };
         this.loading = true;
         try {
             await createNewFile(this.project, this.position, this.shortName, this.enhancement, this.getTemplate());
