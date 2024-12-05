@@ -2,13 +2,13 @@
 
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
-import { Window } from './_100554_icaState';
+import { globalState } from './_100554_icaState';
 /**
  * Class extending LitElement with CollabState functionality.
  */
 export class CollabLitElement extends LitElement {
 
-  @property({ type: Number }) globalVariation: number = (window as any as Window).globalVariation || 0;
+  @property({ type: Number }) globalVariation: number = globalState.globalVariation || 0;
 
   createRenderRoot() {
     return this;
