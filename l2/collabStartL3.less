@@ -1,100 +1,140 @@
-/// <mls shortName="bteste" project="100554" enhancement="enhancementStyle" />
-		
-bteste-100554 {
-	font-family: @font-family-primary;
-	header {
-		h1 {
-			background: rgba(56, 81, 112, 1);
-			padding: 2rem;
-			color: @warning-color;
-			font-weight: @font-weight-light;
-		}
-		p {
-			border-top: none #403F3F;
-			border-left: 8px ridge #8E44AD;
-			border-bottom: none #403F3F;
-			border-right: 8px groove #16A085;
-			padding: 2rem;
-			margin-bottom: 4em;
-		}
-		margin-bottom: 50px;
-	}
-	main {
+/// <mls shortName="collabStartL3" project="100554" enhancement="enhancementStyle" />
 
-		display: flex;
-		justify-content: center;
-		flex-direction: row;
-		flex-wrap: wrap;
-		row-gap: 1em;
-		gap: 1em;
-		section {
-			border: 1px solid;
-			min-width: 12em;
-			max-width: 250px;
-			padding-left: 1em;
-			padding-right: 1em;
-			padding-bottom: 1em;
-			h2	{
-				text-align: center;
-				background: url('imagem.png');
-				background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
-				color: white;
-			}
-			p {
-				text-align: justify;
-				line-height: 1.3;
-			}
-		}
-		
-		margin-bottom: 4em;
-	}
-    div {
+collab-start-l3-100554 {
 
-		border-left: 1px solid #D33636;
-		border-bottom: none #403F3F;
-		border-right: 1px solid #7A962C;
-		border-top: 2px solid #5f52a3;
-		position: relative;
-        h1 {
+    line-height: 1.15;
+    position: relative;
+    height: 100%;
+    overflow: auto;
+    font-family: 'Cambria', serif;
+    font-size: @font-size-16;
+    font-weight: 400;
 
-            flex: 1;
-			text-shadow: 0 0 5px #f00;
-            color: @text-secondary-color;
-			transform: skew(10deg);
-			text-align: center;
-			border: 5px dashed #32557F;
 
-			background: linear-gradient(135deg, rgba(76, 76, 76, 1) 0%, rgba(89, 89, 89, 1) 12%, rgba(102, 102, 102, 1) 25%, rgba(71, 71, 71, 1) 39%, rgba(44, 44, 44, 1) 50%, rgba(0, 0, 0, 1) 51%, rgba(17, 17, 17, 1) 60%, rgba(43, 43, 43, 1) 76%, rgba(28, 28, 28, 1) 91%, rgba(19, 19, 19, 1) 100%);
-        }
-        p {
-
-			clip-path: polygon(0% 15%, 15% 15%, 15% 0%, 85% 0%, 85% 15%, 100% 15%, 100% 85%, 85% 85%, 85% 100%, 15% 100%, 15% 85%, 0% 85%);
-			column-count: 2;
-            background-color: burlywood;
-            text-align: justify;
-			column-rule-width: 1px;
-			column-rule-style: groove;
-			padding-bottom: 20px;
-			padding-top: 20px;
-			column-rule-color: #403f3f;
-			margin: 0 10px;
-        }
-		
-		border-top-right-radius: 113px;
-		border-top-left-radius: 112px;
-		border-bottom-right-radius: 113px;
-		border-bottom-left-radius: 113px;
-		padding-left: 2em;
-		padding-right: 2em;
-		padding-bottom: 2em;
+    details>summary {
+        cursor: pointer;
+        font-size: @font-size-20;
     }
-	
+
+    .collab-codes-banner {
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        position: relative;
+
+        img {
+            width: 100% !important;
+            height: auto !important;
+        }
+    }
+
+    .collab-codes-link {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        padding: 2rem;
+
+        button {
+            cursor: pointer;
+            background: none;
+            border: none;
+            text-decoration: underline;
+            color: @active-color;
+        }
+    }
+
+    .collab-codes-content {
+        padding: 0 .5rem;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 800px;
+        justify-content: center;
+
+        details {
+            margin-bottom: 1rem;
+        }
+
+        details>div {
+            padding-left: 1.5rem;
+        }
+    }
+
+    .collab-codes-contents {
+        justify-content: center;
+
+        details {
+            margin-bottom: 1rem;
+        }
+
+        details>div {
+            padding-left: 1.5rem;
+        }
+    }
+
+    .separator {
+        padding-top: 24px;
+        padding-bottom: 10px;
+        margin-top: 32px;
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: center;
+
+        >span {
+            width: 4px;
+            height: 4px;
+            background-color: @text-primary-color;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 20px;
+        }
+    }
+
+    h1 {
+        line-height: 52px;
+        font-size: 42px;
+        font-weight: 700;
+        font-style: normal;
+    }
+
+    h2 {
+        line-height: 30px;
+        font-size: 24px;
+        font-weight: 600;
+        font-style: normal;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    h7 {
+        letter-spacing: -0.011em;
+    }
+
+    ol>li,
+    ul>li {
+        margin-top: 1em;
+    }
+
+    span,
+    p,
+    li {
+        line-height: 32px;
+        font-size: 20px;
+    }
+
+    .collab_marca {
+        position: absolute;
+        bottom: 10px;
+        right: 20px;
+        opacity: 0.2;
+    }
+
 }
-
-
-
-
-
 
 //Start Less Tokens
 @text-primary-color-lighter: #535353;
