@@ -209,7 +209,7 @@ export abstract class CollabPageElement extends CollabLitElement {
         function findWebComponents(node: Node) {
             if (node instanceof HTMLElement) {
                 const tagName = node.tagName.toLowerCase();
-                if (tagName.split('-').length > 0) {
+                if (tagName.split('-').length > 1) {
                     webComponents.push(node);
                 }
 
