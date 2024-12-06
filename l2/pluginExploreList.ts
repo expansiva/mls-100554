@@ -4,6 +4,7 @@ import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance } from './_100554_libCommom';
+import './_100554_serviceListFilesAdd';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -210,8 +211,7 @@ export class PluginExploreList extends PluginBaseModule {
         <div class="groupHeader">
             <div class="groupAction"> 
                 <a @click="${this.verifyChangeInList}" id="listUpdateFiles">${this.msg.updateListVerify}</a>
-                <a @click="${this.showAdd}">${this.msg.addNewFile}</a>
-
+                ${this.position === 'left' ? html`<a @click="${this.showAdd}">${this.msg.addNewFile}</a>` : ''}
             </div>
             <div class="groupFilter">
                 

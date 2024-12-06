@@ -174,38 +174,14 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             fill: var(--text-primary-color);
         }
         wcd-add-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             width: 32px;
             height: 32px;
-            line-height: 30px;
-            padding: 0;
             background: var(--bg-primary-color-lighter);
             border-radius: 100%;
-            border: 1px solid rgba(0,0,0,.68);
-            text-decoration: none;
-            cursor: pointer;
-            vertical-align: bottom;
-            white-space: nowrap;
-            display: inline-block;
-            position: relative;
-            box-sizing: border-box;
-            letter-spacing: 0;
-            font-weight: 400;
-            font-style: normal;
-            text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: antialiased;
-            appearance: auto;
-            text-rendering: auto;
-            letter-spacing: normal;
-            word-spacing: normal;
-            line-height: normal;
-            text-transform: none;
-            text-indent: 0px;
-            text-shadow: none;
-            text-align: center;
-            box-sizing: border-box;
-            margin: 0em;
-            padding-block: 1px;
-            padding-inline: 6px;
+            border: 1px solid rgba(0, 0, 0, .68);
         }
         .add-button:not(.close) .buttons-actions-container{
             opacity: 1;
