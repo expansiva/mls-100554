@@ -82,10 +82,10 @@ export class CollabStartL1100554 extends IcaLitElement {
         return html`
         <section class="collab-codes-start">
             <div class="collab-codes-banner">
-                <img id="serviceStartL0ImageBanner" src="./l3/_100529_/images/startl1.avif" height="250" width="800" alt="banner">
+                <img id="serviceStartL1ImageBanner" src="./l3/_100529_/images/startl1.avif" height="250" width="800" alt="banner">
             </div>
             <div class="collab-codes-content">
-                <details id="serviceStartL0DetailsAbout" open="open">
+                <details id="serviceStartL1DetailsAbout" open="open">
                     <summary>${this.msg.details1}</summary>
                     <div>
                         <h1>${this.msg.module1Title}</h1>
@@ -136,7 +136,7 @@ export class CollabStartL1100554 extends IcaLitElement {
                         </div>
                     </div>
                 </details>
-                <details id="serviceStartL0DetailsNews" open="open">
+                <details id="serviceStartL1DetailsNews" open="open">
                     <summary>${this.msg.news}</summary>
                     <div>
                         <span>${this.msg.inDevelopment}</span>
