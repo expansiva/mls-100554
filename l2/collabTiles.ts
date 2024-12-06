@@ -275,8 +275,7 @@ export class CollabTiles extends LitElement {
         collab-tiles-100554{
             background-color: #bfc0edab;
             display:block;
-            overflow-y: auto;
-            height: calc(100vh - 106px);
+            height: 100%;
             padding:10px;
         }
 
