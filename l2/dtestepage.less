@@ -1,0 +1,38 @@
+/// <mls shortName="dtestepage" project="100554" enhancement="enhancementStyle" />
+				
+dtestepage-100554 {
+    font-family: @font-family-primary;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2em;
+                
+    dteste-100554 section {
+        line-height: 1.5;
+        color: @text-primary-color-darker-hover;
+        width: 15em;
+        height: 15em;
+        background: rgba(221, 221, 221, 1);
+        padding: 1em;
+
+            
+        h2 {
+            color: @bg-primary-color;
+            text-align: center;
+			background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%);
+				padding: 1.5em;
+        }
+        p {
+            text-align: justify;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            -webkit-line-clamp: 6; /* Limite de linhas */
+            line-clamp: 6; /* Para navegadores modernos */
+        }
+    }
+                
+	
+
+}
