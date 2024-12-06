@@ -174,6 +174,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             fill: var(--text-primary-color);
         }
         wcd-add-button {
+            display:inline-flex;
             width: 32px;
             height: 32px;
             line-height: 30px;

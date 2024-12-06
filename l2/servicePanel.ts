@@ -11,17 +11,6 @@ export class ServicePanel100554 extends ServiceBase {
 
     @query('servicePanel') servicePanel: HTMLElement | undefined;
 
-    static styles = css`
-        servicePanel{
-            display:flex;
-            background:#ebeff3;
-            flex-direction: column;
-            gap: .5rem;
-            align-items: center;
-            overflow-y: auto;
-        }
-    `;
-
     private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
 
     @property({ reflect: true }) inLoading = 'true';

@@ -122,7 +122,7 @@ export class WcdDialogImage100554 extends LitElement {
 
     disconnectedCallback() {
         if (!globalWcd) throw new Error('Invalid window.wcdState');
-        if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
+        if (!globalWcd.elICA) return;
         (globalWcd.elICA as any).style.height = this.lastHeight || '';
         super.disconnectedCallback();
     }
