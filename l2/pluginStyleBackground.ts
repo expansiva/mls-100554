@@ -75,33 +75,33 @@ export class PluginCssTokens extends IcaLitElement {
 
     private _onIcaStateChange() {
         if (!this.state || !this.state.lessCSS || !this.state.value) return;
-        this.configString(`${this.state.key} : ${this.state.value}`);
+        this.configString(`${this.state.value}`);
+        // this.configString(`${this.state.key} : ${this.state.value}`);
+
     }
 
     render() {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang]
-
         return html`<div class="container">${this.renderBody()}</div>`;
     }
 
     renderBody2() {
         return html`
-
         
             <div class="showtransparent"></div>
             <div class="showres" style="background:${this.css}"></div>
             <div class="showConfigContainer" >
-                
-                <div class="showConfig" >
-                    ${this.renderConfig()}
-                    ${this.renderItens()}
-                </div>
                 <div class="showConfig" >
                     <h4 style="text-align:center;margin-bottom:1rem">${this.msg.gallery}</h4>
                     ${this.renderGallery()}
                 </div>
+                <div class="showConfig" >
+                    ${this.renderConfig()}
+                    ${this.renderItens()}
+                </div>
+            
             </div>
 
         `;
@@ -264,13 +264,14 @@ export class PluginCssTokens extends IcaLitElement {
 
         if (this.info.tp === 'background') {
 
-            let cl = str.split(':')[1];
+            let cl = str.split(':')[1] || str;
             if (cl.indexOf('rgb') >= 0) cl = this.rgbaToHex(cl).vl;
             this.info.itens = [{ value: cl, transp: '100', stop: '' }]
         } else {
 
             let ar: string[] = [];
-            str = str.substr(str.indexOf('('));
+
+            str = str.substring(str.indexOf('('));
             str = this.changeStr(str);
 
             ar = str.split(',');
@@ -438,6 +439,7 @@ export class PluginCssTokens extends IcaLitElement {
         }
 
         this.css = text;
+        console.info(this.css);
         this.info = Object.assign({}, this.info);
         this.setState();
 
