@@ -16,6 +16,8 @@ export class CollabDSInputRange extends IcaLitElement {
 
     @property() value: string = '';
 
+    @property() valueInput: string = '';
+
     @property() prop: string = '';
 
     min: number = 0;
@@ -34,7 +36,7 @@ export class CollabDSInputRange extends IcaLitElement {
     renderSelect() {
         return html`
             <div>
-                <input type="number" .value="${this.onlyNumber(this.value)}" @input="${this.changeInput}"> </input>
+                <input type="text" .value="${this.onlyNumber(this.value)}" @input="${this.changeInput}" @wheel=${this.handleWhell}> </input>
                 <select @change="${this.changeSelect}" style="${this.useSelect === 'false' ? 'display:none' : ''}">
                     ${repeat(this.arraySelect, ((key: any) => key) as any,
             ((k: any, index: any) => {
@@ -48,11 +50,14 @@ export class CollabDSInputRange extends IcaLitElement {
         `;
     }
 
-    updated() {
-        const sel = this.querySelector('select') as HTMLSelectElement;
-        if (!sel) return;
-        sel.value = this.onlyTxt(this.value);
+    async updated(_changedProperties: Map<PropertyKey, unknown>) {
+        if (_changedProperties.has('value')) {
+            const sel = this.querySelector('select') as HTMLSelectElement;
+            if (!sel) return;
+            sel.value = this.onlyTxt(this.value);
+        }
     }
+
 
     //---------IMPLEMENTS-------------
 
@@ -68,7 +73,47 @@ export class CollabDSInputRange extends IcaLitElement {
         return res && (res as any)[0] ? ((res as any)[0] as string).replace('.', '') : 'px';
     }
 
+    private handleWhell(wheelEvent: WheelEvent) {
+        wheelEvent.preventDefault(); 
+        const input = wheelEvent.target as HTMLInputElement;
+
+        let currentValue = input.value.replace(',', '.');
+        if (!currentValue) currentValue = '0';
+        let isDecimal = currentValue.includes('.');
+        let parsedValue = parseFloat(currentValue);
+        let isScrollingUp = wheelEvent.deltaY < 0;
+        if (isNaN(parsedValue)) {
+            return;
+        }
+
+    
+        if (!isDecimal) parsedValue += (wheelEvent.deltaY < 0 ? 1 : -1);
+        else {
+            let decimalPart = currentValue.split('.')[1] || '';
+            let decimalLength = decimalPart.length;
+
+            if (decimalLength > 0) {
+                let factor = Math.pow(10, decimalLength);
+                if (isScrollingUp) parsedValue = (Math.floor(parsedValue * factor) + 1) / factor; // Incrementa a última casa decimal
+                else parsedValue = (Math.floor(parsedValue * factor) - 1) / factor; // Decrementa a última casa decimal
+            
+            }
+        }
+
+        input.value = parsedValue.toString();
+        this.allChange(wheelEvent as any, 'input');
+
+    }
+
     private changeInput(e: InputEvent): void {
+        const input = e.target as HTMLInputElement;
+
+        let value = input.value.replace(/[^0-9.,]/g, '');
+        let dotCount = (value.match(/\./g) || []).length;
+        if (dotCount > 1) value = value.replace(/\.(?=[^\.]*$)/, '');
+        value = value.replace(',', '.');
+        input.value = value;
+        if (value.endsWith('.')) return;
         this.allChange(e, 'input')
     }
 
@@ -76,14 +121,18 @@ export class CollabDSInputRange extends IcaLitElement {
         this.allChange(e, 'sel')
     }
 
-    private allChange(e: InputEvent, mode: string): void {
+    private async allChange(e: InputEvent, mode: string) {
 
         e.stopPropagation();
-        let input = this.querySelector('input[type="number"]') as HTMLInputElement;
+
+        let input = this.querySelector('input[type="text"]') as HTMLInputElement;
         let sel = this.querySelector('select') as HTMLSelectElement;
         if (!input || !sel) return;
-        this.value = input.value + sel.value;
 
+
+        this.value = input.value + sel.value;
+        await this.updateComplete;
+        input.setSelectionRange(input.value.length, input.value.length);
         this.fireEvents(
             {
                 key: this.prop,
