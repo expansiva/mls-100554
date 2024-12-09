@@ -35,7 +35,7 @@ export class MonacoDriver {
             [{ range: new monaco.Range(lineNr, 1, lineNr, 1), text: line + '\n', forceMoveMarkers: true }],
             () => null
         );
-        
+
         if (this[_editor]) {
             this[_editor].setSelection(
                 new monaco.Selection(lineNr, 1, lineNr, line.length + 1)
@@ -90,6 +90,13 @@ export class MonacoDriver {
             }],
             () => null
         );
+
+        if (this[_editor]) {
+            this[_editor].setSelection(
+                new monaco.Selection(lineNr, 1, lineNr, lineContent.length + 1)
+            );
+        }
+
         return true;
     }
 
