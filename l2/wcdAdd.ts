@@ -168,9 +168,12 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             position:relative;
         }
         wcd-add-button span {
+            display:flex;
             color: var(--text-primary-color);
         }
         wcd-add-button svg{
+            width:14px;
+            height:14px;
             fill: var(--text-primary-color);
         }
         wcd-add-button {
