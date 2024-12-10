@@ -20,7 +20,6 @@ const message_en = {
     themeOptDark: 'Dark',
     themeOptLight: 'Light',
     themeOptDf: 'Default',
-
 }
 
 type MessageType = typeof message_en;
