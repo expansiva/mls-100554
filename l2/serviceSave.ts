@@ -284,19 +284,13 @@ export class ServiceSave extends ServiceBase {
     }
     renderOthersProjects() {
 
-        let i = -1;
-
-        this.otherProjects.forEach((prj, idx) => {
-            if (prj === mls.actual[5].project) i = idx;
-        });
-
-        if(i >=0) this.otherProjects.splice(i, 1);
+        this.filterOtherProject();
 
         return html`
         <sectionsave>
             <ul>
                 ${repeat(this.otherProjects, ((key: string) => key) as any, ((k: any, index: any) => {
-                    return html`
+            return html`
                             <li style="cursor: not-allowed;opacity: .5;">
                                 <div style="cursor: not-allowed;">
                                     <span class="fatv fa-caret-righttv" style="cursor: not-allowed;"></span>
@@ -304,7 +298,7 @@ export class ServiceSave extends ServiceBase {
                                     <label style="cursor: not-allowed;">${k}</label>
                                 </div>
                             </li> `
-                }) as any)}
+        }) as any)}
             </ul>
         </sectionsave>
         `
@@ -445,6 +439,26 @@ export class ServiceSave extends ServiceBase {
 
     //-------- IMPLEMENTATION --------
 
+    private filterOtherProject() {
+
+        const find = (f: number | undefined) => {
+            let i = -1;
+            this.otherProjects.forEach((prj, idx) => {
+                if (prj === f) i = idx;
+            });
+
+            return i;
+        }
+
+        let f = find(mls.actual[5].project);
+        if (f >= 0) this.otherProjects.splice(f, 1);
+
+        f = find(0);
+        if (f >= 0) this.otherProjects.splice(f, 1);
+
+
+    }
+
     private async init(isSetInfoProject: boolean = true) {
 
         this.showLoader(true);
@@ -520,8 +534,8 @@ export class ServiceSave extends ServiceBase {
                     file.status === 'nochange' ||*/
                     (!file.inLocalStorage && file.status !== 'deleted') ||
                     file.project === 0 || file.project !== mls.actual[5].project
-                    ) continue;
-            
+                ) continue;
+
 
                 const pj = file.project;
                 const level = file.level;
