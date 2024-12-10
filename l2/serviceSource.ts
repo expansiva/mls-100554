@@ -583,6 +583,7 @@ export class ServiceSource100554 extends ServiceBase {
             const storFileHTML = getStorFileHTML();
             const storFileCss = getStorFileCss();
             await this.openFiles(storFileHTML, storFile, storFileCss, fileAction.position);
+            mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
             this.updatedMSizeEditor();
 
         };
@@ -1232,53 +1233,56 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async createModel(project: number, shortName: string, ext: '.ts' | '.d.ts' | '.html' | '.less', content?: string): Promise<mls.editor.IModelBase | undefined> {
 
-        let src: string | Blob | null | undefined = undefined;
-        let haveInfo: boolean = false;
-        let info: mls.stor.IFileInfoValue | null = null;
-        let storFile: mls.stor.IFileInfo | undefined;
+        try {
+            let src: string | Blob | null | undefined = undefined;
+            let haveInfo: boolean = false;
+            let info: mls.stor.IFileInfoValue | null = null;
+            let storFile: mls.stor.IFileInfo | undefined;
 
-        if (ext !== '.d.ts') {
-            const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
-            storFile = mls.stor.files[keyToFile];
-            if (!storFile) throw new Error(`Invalid file: ${ext}`);
-            if (!content) {
-                info = storFile.getValueInfo ? await storFile.getValueInfo() : null;
-                haveInfo = !!info && !!info.content;
-                src = haveInfo ? info?.content : await storFile.getContent();
-            } else src = content;
+            if (ext !== '.d.ts') {
+                const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
+                storFile = mls.stor.files[keyToFile];
+                if (!storFile) throw new Error(`Invalid file: ${ext}`);
+                if (!content) {
+                    info = storFile.getValueInfo ? await storFile.getValueInfo() : null;
+                    haveInfo = !!info && !!info.content;
+                    src = haveInfo ? info?.content : await storFile.getContent();
+                } else src = content;
 
-        } else {
-            src = content || '';
+            } else {
+                src = content || '';
+            }
+
+            if (src instanceof Blob) throw new Error(`${ext} file must be string`);
+            if (!src) throw new Error(`${ext} file is undefined`);
+
+
+
+            const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src).toString(16);
+            const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
+            const originalShortName: string | undefined = haveInfo ? info?.originalShortName : undefined;
+
+            let model: mls.editor.IModelBase | undefined;
+            if (ext === '.html' && storFile) model = mls.editor.createModelHTML(storFile, src);
+            else if (ext === '.ts' && storFile) model = mls.editor.createModelTS(storFile, src);
+            else if (ext === '.d.ts') model = mls.editor.createModelProjectDefinition(project, src);
+            else if (ext === '.less' && storFile) {
+                const lessTokens = await getTokensLess('Default');
+                const lineTokens = `//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
+                src = src.concat(lineTokens);
+                model = mls.editor.createModelStyle(storFile, src);
+            }
+
+            if (!model) throw new Error(`Model invalid`);
+            if (ext !== '.d.ts') {
+                model.originalCRC = originalCRC;
+                model.originalProject = originalProject;
+                model.originalShortName = originalShortName;
+            }
+            return model;
+        } catch (e:any) {
+            this.setError(e.message);
         }
-
-        if (src instanceof Blob) throw new Error(`${ext} file must be string`);
-        if (!src) throw new Error(`${ext} file is undefined`);
-
-
-
-        const originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src).toString(16);
-        const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
-        const originalShortName: string | undefined = haveInfo ? info?.originalShortName : undefined;
-
-        let model: mls.editor.IModelBase | undefined;
-        if (ext === '.html' && storFile) model = mls.editor.createModelHTML(storFile, src);
-        else if (ext === '.ts' && storFile) model = mls.editor.createModelTS(storFile, src);
-        else if (ext === '.d.ts') model = mls.editor.createModelProjectDefinition(project, src);
-        else if (ext === '.less' && storFile) {
-            const lessTokens = await getTokensLess('Default');
-            const lineTokens = `//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
-            src = src.concat(lineTokens);
-            model = mls.editor.createModelStyle(storFile, src);
-        }
-
-        if (!model) throw new Error(`Model invalid`);
-        if (ext !== '.d.ts') {
-            model.originalCRC = originalCRC;
-            model.originalProject = originalProject;
-            model.originalShortName = originalShortName;
-        }
-        return model;
-
     }
 
     private setModelConfEditor() {
