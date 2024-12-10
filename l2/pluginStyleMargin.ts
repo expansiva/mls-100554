@@ -274,11 +274,20 @@ export class PluginStyleSpacing extends IcaLitElement {
                 }
             }
 
-            if ([this.marginBottom, this.marginLeft, this.marginRight, this.marginTop].every(margin => margin === this.marginBottom)) {
-                this.marginLocked = true;
-            }
+            this.checkMarginsEquals();
+
         }
 
+    }
+
+    private checkMarginsEquals() {
+        if ([this.marginBottom, this.marginLeft, this.marginRight, this.marginTop].every(margin => margin === this.marginBottom)) {
+            this.marginLocked = true;
+            if (this.inputLockM) this.inputLockM.checked = true;
+        } else {
+            this.marginLocked = false;
+            if (this.inputLockM) this.inputLockM.checked = false;
+        }
     }
 
     private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
@@ -305,9 +314,7 @@ export class PluginStyleSpacing extends IcaLitElement {
         this.marginTop = item.state.marginTop;
         this.marginLeft = item.state.marginLeft;
         this.marginRight = item.state.marginRight;
-        if ([this.marginBottom, this.marginLeft, this.marginRight, this.marginTop].every(margin => margin === this.marginBottom)) {
-            this.marginLocked = true;
-        } else this.marginLocked = false;
+        this.checkMarginsEquals();
         this.setState();
     }
 
