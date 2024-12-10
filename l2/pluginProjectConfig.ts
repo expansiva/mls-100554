@@ -84,7 +84,6 @@ export class PluginProjectConfig extends PluginBaseModule {
                 ${this.renderHeader()}
                 ${this.renderBody()}
             </div>
-            <style>${this.styles}</style>
         `;
     }
 
@@ -208,74 +207,6 @@ export class PluginProjectConfig extends PluginBaseModule {
         return monaco.Uri.parse(`file://server/${shortFN}_${PluginProjectConfig.modelCount}.ts`);
     }
 
-
-
-    private styles = `
-        plugin-project-config-100554 {
-            font-family: @font-family-primary;
-            display: block;
-            height: calc(100% - 55px);
-            overflow: auto;
-            background: @bg-primary-color;
-            font-size: @font-size-16;
-        }
-
-        .plugin-body{
-            height:100%;
-            width: -webkit-fill-available;
-            padding:1rem;
-            overflow:hidden;
-        }
-        .plugin-container {
-            padding: 10px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            height:100%;
-            width:100%;
-        }
-
-        header {
-            margin-left: 16px;
-        }
-        
-        header > div{
-            display:flex;
-            gap:.5rem;
-        }
-        icon {
-            margin-right: 10px;
-        }
-
-        h2 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0;
-            color: #333;
-        }
-        button{
-            background-color: var(--bg-secondary-color-lighter);
-            border-radius: 8px;
-            border:none;
-            box-shadow: 0px 1px 3px 0px var(--grey-color);
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            gap:.2rem;
-            font-weight: 700;
-            align-items: center;
-            height: 40px;
-            transition: height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-            padding: 0.5rem;
-            color: @text-primary-color;
-            cursor:pointer;
-        }
-        button:hover{
-            background-color: var(--grey-color-light);
-        }
-    `;
 
 }
 
