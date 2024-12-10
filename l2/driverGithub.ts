@@ -533,6 +533,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		try {
 
+			this.verifyMKey();
+
 			const info = {
 				url: 'https://api.github.com/graphql',
 				method: 'POST',
@@ -586,6 +588,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				let body = {} as any;
 
+				this.verifyMKey();
+
 				const ret1 = await (await fetch(`https://api.github.com/repos/${opt.ownerOrigin}/${opt.repoOrigin}/git/refs/heads/${opt.branchOrigin}`, {
 					method: 'GET',
 					mode: 'cors',
@@ -616,23 +620,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					commit_message: 'Merge updates from original repository'
 				} as any;
 
-				/*const ret2 = await (await fetch(`https://api.github.com/repos/${opt.ownerDest}/${opt.repoDest}/merges`, {
-					method: 'POST',
-					mode: 'cors',
-					cache: 'no-cache',
-					credentials: 'same-origin',
-					headers: {
-						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + mkey,
-					},
-					referrerPolicy: 'no-referrer',
-					body: JSON.stringify(body)
-				})).json();
-
-				if (ret2 && ret2.message) {
-					reject(new Error(ret2.message));
-					return;
-				}*/
+				
 				const ret2 = await fetch(`https://api.github.com/repos/${opt.ownerDest}/${opt.repoDest}/merges`, {
 					method: 'POST',
 					mode: 'cors',
@@ -722,6 +710,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			try {
 
+				this.verifyMKey();
+
 				const prj = mls.actual[5].project;
 				if (!prj) {
 					reject(new Error('Not Found project!'));
@@ -781,6 +771,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			try {
 
+				this.verifyMKey();
+
 				const prj = mls.actual[5].project;
 				if (!prj) {
 					reject(new Error('Not Found project!'));
@@ -835,6 +827,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			}
 
 			try {
+
+				this.verifyMKey();
 
 				const prj = mls.actual[5].project;
 				if (!prj) {
@@ -906,6 +900,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			try {
 
+				this.verifyMKey();
+
 				const prj = mls.actual[5].project;
 				if (!prj) {
 					reject(new Error('Not Found project!'));
@@ -975,6 +971,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			}
 
 			try {
+
+				this.verifyMKey();
 
 				const retFetch = await fetch(`https://api.github.com/repos/${owner}/${repo}/collaborators/${login}/permission`, {
 					method: 'GET',
@@ -1081,6 +1079,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			try {
 
+				this.verifyMKey();
+
 				const retRepo = await (await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
 					method: 'GET',
 					mode: 'cors',
@@ -1179,6 +1179,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			try {
 
+				this.verifyMKey();
+
 				const body = {
 					private: visibility === 'PRIVATE'
 				};
@@ -1221,6 +1223,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			}
 
 			try {
+
+				this.verifyMKey();
 
 				if (typeof (content) !== 'string') throw new Error('Not implemented');
 				content = dL.base64EncodeUnicode(content);
@@ -1274,6 +1278,9 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			};
 
 			try {
+
+				this.verifyMKey();
+
 				const ret = await (await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
 					method: 'PATCH',
 					mode: 'cors',
@@ -1314,6 +1321,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			}
 
 			try {
+
+				this.verifyMKey();
 
 				let body = {} as any;
 
@@ -1362,6 +1371,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			try {
 
+				this.verifyMKey();
+				
 				const ret = await fetch(`https://api.github.com/repos/${organization}/${repo}`, {
 					method: 'DELETE',
 					mode: 'cors',
@@ -2019,6 +2030,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		try {
 
+			this.verifyMKey(); 
 			const ret = await (await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/git/blobs/${oid}`, {
 				method: 'GET',
 				mode: 'cors',
@@ -2043,6 +2055,10 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		}
 
+	}
+
+	private verifyMKey() {
+		if(!mKey) throw new Error('Please connect to github!')
 	}
 
 	private saveMultipleFilesIO(project: number, add: { path: string, content: string | Blob }[], del: { path: string }[], msg: string): Promise<boolean> {
