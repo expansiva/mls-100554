@@ -32,7 +32,6 @@ export const pluginData: mls.plugin.IPluginData = {
     }
 };
 
-
 @customElement('plugin-system-language-100554')
 export class PluginSystemLanguage100554 extends PluginBaseModule {
 
