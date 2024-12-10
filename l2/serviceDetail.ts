@@ -12,7 +12,6 @@ export class ServiceDetail100554 extends ServiceBase {
     @property({ type: String }) msize = '';
     @property({ type: String }) widget = '';
 
-
     @query('#contentPlugin') contentPlugin: HTMLDivElement | undefined;
 
     private plugin: { shortName: string, project: number } = {} as any;
@@ -191,6 +190,7 @@ export class ServiceDetail100554 extends ServiceBase {
     private onPluginDetails(ev: mls.events.IEvent) {
         if (!ev.desc) throw new Error('Error on PluginDetails event, invalid desc');
         this.openMe();
+        if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
         const data: mls.events.IPluginDetail = JSON.parse(ev.desc);
         this.showPluginContent(data);
     }
@@ -200,8 +200,9 @@ export class ServiceDetail100554 extends ServiceBase {
         if (!info.project || !info.shortName) {
             if (!info.htmlText) throw new Error(`Error on PluginDetails events, invalid data: ${info.project} ${info.shortName}`);
         }
-
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
+        
+        this.plugin = info;
         const content: string = info.htmlText ? info.htmlText : await this.getHtmlFromPlugin(info);
         this.updateContentPluginWithScripts(content);
     }
@@ -210,7 +211,6 @@ export class ServiceDetail100554 extends ServiceBase {
         const keyFile = mls.stor.getKeyToFiles(info.project, 2, info.shortName, '', '.html');
         const storFile = mls.stor.files[keyFile];
         if (!storFile) return 'Not found storFile:' + JSON.stringify(info);
-        this.plugin = info;
         const content = await storFile.getContent();
         if (typeof content !== 'string') return `Error on content of _${info.project}_${info.shortName}`;
         return content;

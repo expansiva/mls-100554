@@ -379,7 +379,7 @@ export class CoachMarks100554 extends CollabLitElement {
 
 }
 
-interface ICoachMarks {
+export interface ICoachMarks {
     key: string,
     transparency: ITransparency,
     fontSize: string,

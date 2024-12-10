@@ -8,7 +8,6 @@ import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
 import { ICSSState } from './_100554_lessCSS';
 import { globalState } from './_100554_icaState';
-
 import {
     collab_lock,
     collab_lock_open,
@@ -274,11 +273,21 @@ export class PluginStylePadding extends IcaLitElement {
                 }
             }
 
-            if ([this.paddingBottom, this.paddingLeft, this.paddingRight, this.paddingTop].every(padding => padding === this.paddingBottom)) {
-                this.paddingLocked = true;
-            }
+            this.checkPaddingEquals();
         }
 
+    }
+
+
+    private checkPaddingEquals() {
+
+        if ([this.paddingBottom, this.paddingLeft, this.paddingRight, this.paddingTop].every(padding => padding === this.paddingBottom)) {
+            this.paddingLocked = true;
+            if (this.inputLockP) this.inputLockP.checked = true;
+        } else {
+            this.paddingLocked = false;
+            if (this.inputLockP) this.inputLockP.checked = false;
+        }
     }
 
     private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
@@ -304,9 +313,7 @@ export class PluginStylePadding extends IcaLitElement {
         this.paddingTop = item.state.paddingTop;
         this.paddingLeft = item.state.paddingLeft;
         this.paddingRight = item.state.paddingRight;
-        if ([this.paddingBottom, this.paddingLeft, this.paddingRight, this.paddingTop].every(padding => padding === this.paddingBottom)) {
-            this.paddingLocked = true;
-        } else this.paddingLocked = false;
+        this.checkPaddingEquals();
         this.setState();
     }
 

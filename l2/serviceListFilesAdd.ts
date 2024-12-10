@@ -17,7 +17,9 @@ const message_pt = {
     labelType: "Por favor, selecione um modelo abaixo ou clique",
     btnAdd: "Adicionar",
     btnCancel: "Cancelar",
-    please: "Por facor selecione um projeto primeiro!"
+    please: "Por facor selecione um projeto primeiro!",
+    msgInitial: "Por favor, selecione um modelo",
+
 }
 
 const message_en = {
@@ -27,7 +29,9 @@ const message_en = {
     labelType: "Please select a template below or click",
     btnAdd: "Add",
     btnCancel: "cancel",
-    please: "Please select a project first!"
+    please: "Please select a project first!",
+    msgInitial: "Please select a template",
+
 }
 
 type MessageType = typeof message_en;
@@ -54,15 +58,12 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
     @propertyDataSource() shortName: string | undefined;
     @query('#iptShortName') inputShortName: HTMLInputElement | undefined;
 
-    private enhancementModules: IEnhancementModules | undefined = {};
-
-
     async connectedCallback() {
         super.connectedCallback();
-
         if (!globalState._ica) globalState._ica = {};
         if (!globalState._ica.l2) globalState._ica.l2 = {};
         if (!globalState._ica.l2.addFile) globalState._ica.l2.addFile = { shortName: '', project: 0 };
+        globalState.globalStateManagment.setState('l2.addFile.shortName', '');
         await this.init();
     }
 
@@ -70,6 +71,16 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
         const plugins = await this.getPlugins();
         this.plugins = await this.getPluginsInfo(plugins);
         this.loading = false;
+    }
+
+    firstUpdated(_changedProperties: Map<PropertyKey, unknown>) {
+        super.firstUpdated(_changedProperties);
+        const options = {
+            shortName: '',
+            project: '',
+            htmlText: `<div>${this.msg.msgInitial}</div>`
+        }
+        mls.events.fire(2, 'PluginDetails', JSON.stringify(options), 0);
     }
 
     createRenderRoot() {
@@ -164,22 +175,26 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
     }
 
     private handleClickTemplate(plugin: IPlugins) {
-
         const tag = convertFileNameToTag(plugin.widget);
+        const { project, shortName } = mls.l2.getPath(plugin.widget);
         const options = {
-            shortName: mls.actual[0].path,
-            project: mls.actual[0].project,
+            shortName,
+            project,
             htmlText: `<${tag} position=${this.position} project="{{ l2.addFile.project }}" shortName="{{ l2.addFile.shortName }}"></${tag}>`
         }
-
         mls.events.fire(2, 'PluginDetails', JSON.stringify(options), 0);
-
     }
 
     //--------------- IMPLEMENTS----------------
 
     private clickCancel(): void {
         if (!this.father) return;
+        const options = {
+            shortName: '',
+            project: '',
+            htmlText: `<div></div>`
+        }
+        mls.events.fire(2, 'PluginDetails', JSON.stringify(options), 0);
         (this.father as any).mode = 'list';
     }
 
