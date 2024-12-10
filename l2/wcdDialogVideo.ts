@@ -10,6 +10,8 @@ import { globalWcd } from './_100554_wcdState';
 @customElement('wcd-dialog-video-100554')
 export class WcdDialogVideo100554 extends LitElement {
 
+    private lastIca: HTMLElement | undefined;
+
     private dsInstance: DesignSystemIO | undefined;
 
     @property() videos: IVideoItem[] = [];
@@ -123,12 +125,14 @@ export class WcdDialogVideo100554 extends LitElement {
 
     disconnectedCallback() {
         if (!globalWcd) throw new Error('Invalid window.wcdState');
-        if (!globalWcd.elICA) return;
-        (globalWcd.elICA as any).style.height = this.lastHeight || '';
+        if (globalWcd.elICA) (globalWcd.elICA as any).style.height = this.lastHeight || '';
+        else if (this.lastIca) this.lastIca.style.height = this.lastHeight || '';
+        
         super.disconnectedCallback();
     }
 
     render() {
+        this.lastIca = globalWcd.elICA;
         return html`
 
             <div class="container">
