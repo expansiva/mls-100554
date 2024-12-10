@@ -52,6 +52,8 @@ export class PluginCssTokens extends IcaLitElement {
 
     @property() tokens: Record<string, Record<string, Record<string, string>>> = {};
 
+    private needOrder: boolean = true;
+
     private dsInstance: DesignSystemIO | undefined;
 
     private async initDsInstance() {
@@ -63,6 +65,7 @@ export class PluginCssTokens extends IcaLitElement {
     }
 
     private async getTokensColor() {
+
         await this.initDsInstance();
         if (!this.dsInstance || !this.dsInstance.tokens) return '';
         if (!this.dsInstance) return '';
@@ -70,13 +73,33 @@ export class PluginCssTokens extends IcaLitElement {
         if (!resumeTokensByTheme) return undefined;
         const tokensColorKeys = Object.keys(resumeTokensByTheme.color);
         const filter = this.value.startsWith('@') ? this.value.substring(1, this.value.length) : this.value;
-        const res = tokensColorKeys.filter((key) => !key.startsWith('_dark') && key.indexOf(filter) > -1).map((key2) => {
+        // const res = tokensColorKeys.filter((key) => !key.startsWith('_dark') && key.indexOf(filter) > -1).map((key2) => {
+        const res = tokensColorKeys.filter((key) => !key.startsWith('_dark')).map((key2) => {
             return {
                 key: key2,
                 value: resumeTokensByTheme.color[key2]
             }
+        });
+
+        const grouping = this.groupColorsByState(res);
+        console.info({
+            needOrder: this.needOrder
         })
-        return this.groupColorsByState(res);
+        if (!this.needOrder) return grouping;
+
+        const sortedColors = Object.keys(grouping)
+            .sort((a, b) => {
+                if (filter.indexOf(a) > -1) return -1;
+                if (filter.indexOf(b) > -1) return 1;
+                return 0;
+            })
+            .reduce((result, key) => {
+                result[key] = grouping[key];
+                return result;
+            }, {} as Record<string, any>);
+
+        this.needOrder = false;
+        return sortedColors;
     }
 
     private groupColorsByState(items: { key: string, value: string }[]) {
@@ -113,7 +136,6 @@ export class PluginCssTokens extends IcaLitElement {
     }
 
     handleColorClick(key: string, value: string) {
-
         if (!this.state || !this.state.lessCSS || !this.state.selector || !this.prop) return;
         this.state.lessCSS.styles[this.prop as any] = `@${key}`;
     }
@@ -128,6 +150,8 @@ export class PluginCssTokens extends IcaLitElement {
     }
 
     async getTokens() {
+
+        if (!this.needOrder && this.tokens) return;
         const tokens = await this.getTokensColor();
         if (tokens) this.tokens = tokens;
     }
@@ -136,7 +160,7 @@ export class PluginCssTokens extends IcaLitElement {
         if (changedProperties.has('tokens')) {
             this.setTooltip();
         }
-        if (changedProperties.has('value')) {
+        if (changedProperties.has('value') && changedProperties.get('value')) {
             this.getTokens();
         }
     }
@@ -148,6 +172,10 @@ export class PluginCssTokens extends IcaLitElement {
 
     handleIcaStateChange(_key: string, _value: ICSSState) {
         if (_key !== `less.${this.position}` || !_value) return;
+        if (!_value.value?.startsWith('@')) {
+            this.needOrder = true;
+            return;
+        }
         const { key, value } = _value;
         this.prop = key || '';
         this.value = value || '';
@@ -167,7 +195,7 @@ export class PluginCssTokens extends IcaLitElement {
             return this.tokens[cat][state][variation] ? html`
                             <div
                                 @click=${() => { this.handleColorClick(`${cat}${variation !== 'default' ? '-' + variation : ''}${state !== 'default' ? '-' + state : ''}`, this.tokens[cat][state][variation]) }} 
-                                class="token-item${this.value === '@' + (cat + (variation !== 'default' ? '-' + variation : '' + (state !== 'default' ? '-' + state : ''))) ? ' selected' : ''} "
+                                class="token-item${this.value === `@${cat}${variation !== 'default' ? '-' + variation : ''}${state !== 'default' ? '-' + state : ''}` ? ' selected' : ''} "
                                 data-tooltip="${cat}${variation !== 'default' ? '-' + variation : ''}${state !== 'default' ? '-' + state : ''}"
                                 style="background-color: ${this.tokens[cat][state][variation]};border-color: ${this.tokens[cat][state][variation]}">
                             

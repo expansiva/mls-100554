@@ -21,6 +21,7 @@ const message_en = {
     'selector': 'Selector',
 }
 
+
 type MessageType = typeof message_en;
 
 const messages: { [key: string]: MessageType } = {
@@ -36,7 +37,7 @@ export class CssHelperIndex extends IcaLitElement {
 
     private minValueToOpen = {
         'full': 3,
-        'expanded': 10,
+        'expanded': 20,
     }
 
     @property() helpers: IHelpers[] = [];
@@ -126,7 +127,7 @@ export class CssHelperIndex extends IcaLitElement {
                 tags: instance.tags,
                 priority: plugin.priority || 1,
                 description,
-                mode: 'collapsed',
+                mode: 'expanded',
                 liked: false,
                 likedAnimation: false,
                 showInfo: false,
@@ -181,6 +182,7 @@ export class CssHelperIndex extends IcaLitElement {
         if (this.isFirtsLoading) {
             this.isFirtsLoading = false;
             const mode: IMode = rc.length < this.minValueToOpen.full ? 'full' : (rc.length < this.minValueToOpen.expanded ? 'expanded' : 'collapsed');
+            console.info(rc);
             rc.forEach((help) => {
                 const sameHelp = this.avaliablePlugins.find((item) => item.widget === help.widget);
                 if (sameHelp) sameHelp.mode = mode;
