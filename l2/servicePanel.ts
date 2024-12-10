@@ -187,7 +187,7 @@ export class ServicePanel100554 extends ServiceBase {
         if (!prj) return;
         let array: any[] = [];
         await mls.plugin.loadAll(prj, false);
-        array = mls.plugin.getAllMenuActions(prj, {} as any)
+        array = mls.plugin.getAllMenuActions(prj, { scope: 'l5Panel'} as any)
 
         array.forEach((item: mls.plugin.MenuAction) => {
 
