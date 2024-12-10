@@ -125,8 +125,6 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     @property() state: IServiceList = { history: [], orgs: [], projectSelected: undefined };
     @property() lastPrjId: string | null | undefined;
     @property({ type: String }) currentScenario: IScenaries = 'select';
-
-
     @queryAll('.serviceListProjects .serviceListList li') list: NodeListOf<HTMLElement> | undefined;
     @queryAll('.serviceListProjects .serviceListTitle') titleList: NodeListOf<HTMLElement> | undefined;
     @query('.l5-project-list-history') historieEl: HTMLElement | undefined;
