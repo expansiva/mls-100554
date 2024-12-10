@@ -4,20 +4,39 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 
-@customElement('coach-marks-100554') 
+export function addCoachMark(json: ICoachMarks) {
+    const coachMark = document.querySelector('coach-marks-100554') as CoachMarks100554;
+    if (!coachMark) {
+        console.info('No found coachMark');
+        return;
+    }
+
+    coachMark.info = json;
+}
+
+@customElement('coach-marks-100554')
 export class CoachMarks100554 extends CollabLitElement {
 
     @property() info: ICoachMarks | undefined;
-    @property() error: string = ''; 
+    @property() error: string = '';
 
     firstUpdated() {
         this.setInfo();
     }
 
+    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
+        if (name === 'info') {
+            this.setCoachMarks();
+            return;
+        }
+        super.attributeChangedCallback(name, oldVal, newVal);
+    }
+
     render() {
 
+        if (!this.info) return;
         if (this.error) return this.renderError();
-        setTimeout(()=> this.setCoachMarks(), 500);
+        setTimeout(() => { this.setCoachMarks() }, 500);
         return html``;
 
     }
@@ -25,7 +44,6 @@ export class CoachMarks100554 extends CollabLitElement {
     renderError() {
         return html`<h3 style="text-align:center">${this.error}</h3>`
     }
-
 
     //--------IMPLEMENTS-------
 
@@ -41,14 +59,24 @@ export class CoachMarks100554 extends CollabLitElement {
 
             this.info = j;
 
+
         } catch (e: any) {
             this.error = e.message;
         }
     }
 
-    private setCoachMarks() {
+    private setCoachMarks(force: boolean = false) {
 
         if (!this.info) return;
+
+        const l = this.inLocalStorage();
+
+        if (l && !force) {
+            this.classList.add('close');
+            return;
+        }
+
+        this.classList.remove('close');
         this.clearMe();
         this.setGlobalDefinitions()
         this.createSteps(0);
@@ -60,6 +88,48 @@ export class CoachMarks100554 extends CollabLitElement {
         Array.from(all).forEach((i) => i.remove());
     }
 
+    private close() {
+        this.innerHTML = '';
+        this.setKey();
+        this.classList.add('close');
+    }
+
+    private setKey() {
+
+        try {
+
+            if (!this.info || !this.info.key) return;
+            let t = localStorage.getItem(this.tagName.toLocaleLowerCase()) as string;
+            t = t ? t : "[]";
+            const v = JSON.parse(t);
+            if (v.includes(this.info.key)) return;
+            v.push(this.info.key);
+            localStorage.setItem(this.tagName.toLocaleLowerCase(), JSON.stringify(v));
+        } catch (e) {
+            console.info('setKey', e);
+        } 
+
+    }
+
+    private inLocalStorage(): boolean {
+
+        try {
+            
+            if (!this.info || !this.info.key) return false;
+            let t = localStorage.getItem(this.tagName.toLocaleLowerCase()) as string;
+            t = t ? t : "[]";
+            const v = JSON.parse(t);
+            if (v.includes(this.info.key)) return true;
+            return false;
+
+        } catch (e) {
+            console.info('setKey', e);
+            return false
+        }
+
+    }
+
+    private timeInterval = 0;
     private setGlobalDefinitions() {
 
         if (!this.info) return;
@@ -72,6 +142,27 @@ export class CoachMarks100554 extends CollabLitElement {
             this.style.background = this.transparency[this.info.transparency]
         } else {
             this.style.background = this.transparency.normal
+        }
+
+        if (this.info.timeClose && this.info.timeClose > 0) {
+            clearInterval(this.timeInterval);
+
+            const btn = document.createElement('button');
+            this.appendChild(btn);
+            btn.onclick = () => this.close();
+
+            let turn = this.info.timeClose + 1;
+            this.timeInterval = setInterval(() => {
+
+                if (turn <= 0) {
+                    clearInterval(this.timeInterval);
+                    this.close();
+                    return;
+                }
+
+                turn--;
+                btn.innerText = `Close(${turn})`;
+            }, 1000)
         }
 
     }
@@ -97,24 +188,27 @@ export class CoachMarks100554 extends CollabLitElement {
 
         if (!step.duration) step.duration = 0;
 
-        setTimeout(() => this.createSteps(index + 1), step.duration * 1000);
+        setTimeout(() => {
+            if (step.autoClose) item.remove();
+            this.createSteps(index + 1);
+        }, step.duration * 1000);
 
 
     }
 
-    private addAnimation(step: ICoachMarkStep, item: HTMLElement) { 
+    private addAnimation(step: ICoachMarkStep, item: HTMLElement) {
 
         if (!step.animation) return;
         if (!step.timeAnimation) step.timeAnimation = 500;
-        const loop = step.loopAni  ? 'infinite' : '';
+        const loop = step.loopAni ? 'infinite' : '';
 
         item.style.animation = `${step.animation} ${step.timeAnimation}ms ${loop}`
 
         switch (step.animation) {
             case "shake":
-                
+
                 break;
-            
+
             default:
                 return;
         }
@@ -128,11 +222,12 @@ export class CoachMarks100554 extends CollabLitElement {
 
         let svg: HTMLElement | undefined = undefined;
 
-        if (this.arrow[step.arrow]) {
+        if (step.arrow && this.arrow[step.arrow]) {
             const el = document.createElement('div');
             el.innerHTML = this.arrow[step.arrow];
             svg = el.children[0] as HTMLElement;
         }
+
         if (!step.arrow || !svg) step.arrow = '';
 
         if (svg && ['down', 'right'].includes(step.arrow)) {
@@ -199,7 +294,7 @@ export class CoachMarks100554 extends CollabLitElement {
         normal: '#0000009e',
         strong: '#000000d4'
     }
- 
+
     private arrow: any = {
         up: `<?xml version="1.0" encoding="iso-8859-1"?>
                 <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
@@ -241,7 +336,7 @@ export class CoachMarks100554 extends CollabLitElement {
                 </g>
                 </svg>`
         ,
-        right:`<?xml version="1.0" encoding="iso-8859-1"?>
+        right: `<?xml version="1.0" encoding="iso-8859-1"?>
                 <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
                 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
                 <svg  style=" fill: #fff; width: 30px; height: 30px;" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
@@ -261,7 +356,7 @@ export class CoachMarks100554 extends CollabLitElement {
                 </g>
                 </svg>`
         ,
-        left:`<?xml version="1.0" encoding="iso-8859-1"?>
+        left: `<?xml version="1.0" encoding="iso-8859-1"?>
                 <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
                 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
                 <svg  style=" fill: #fff; width: 30px; height: 30px;transform: rotateY(180deg)" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
@@ -285,20 +380,28 @@ export class CoachMarks100554 extends CollabLitElement {
 }
 
 interface ICoachMarks {
-    transparency: 'light' | 'normal' | 'strong',
-    fontSize:string,
+    key: string,
+    transparency: ITransparency,
+    fontSize: string,
+    timeClose: number,
     steps: ICoachMarkStep[]
-} 
+}
 
 interface ICoachMarkStep {
     elementRef: string,
     text: string,
-    position: 'bottom' | 'top' | 'left' | 'right',
-    marginH: number,
-    marginV: number,
-    arrow: 'down' | 'up' | 'left' | 'right' | '',
-    duration: number,
-    animation: 'flip' | 'pulse' | 'shake',
-    timeAnimation: number,
-    loopAni:boolean
+    position: IPosition,
+    marginH?: number,
+    marginV?: number,
+    arrow?: IArrown,
+    duration?: number,
+    animation?: IAnimation,
+    timeAnimation?: number,
+    loopAni?: boolean,
+    autoClose: boolean,
 }
+
+type ITransparency = 'light' | 'normal' | 'strong';
+type IPosition = 'bottom' | 'top' | 'left' | 'right';
+type IArrown = 'down' | 'up' | 'left' | 'right' | '';
+type IAnimation = 'flip' | 'pulse' | 'shake';
