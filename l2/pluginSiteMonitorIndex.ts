@@ -10,67 +10,47 @@ export class PluginSiteMonitorIndex extends PluginBaseIndex {
       return [
         {
             category: 'Site',
-            scope: ['createNewWidget'],
+            scope: ['l5Panel'],
             priority: 1,
             auth: ['admin', 'editor'],
             widget: '_100554_pluginSiteMonitorDashboardErrors'
         },
         {
             category: 'Site',
-            scope: ['createNewWidget'],
+            scope: ['l5Panel'],
             auth: ['admin', 'editor'],
             widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
         },
         {
             category: 'Site',
-            scope: ['createNewWidget'],
+            scope: ['l5Panel'],
             auth: ['admin', 'editor'],
             widget: '_100554_pluginSiteMonitorDashboardSpikes'
         },
         {
             category: 'Site',
-            scope: ['createNewWidget'],
-            auth: ['admin', 'editor'],
-            widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
-        },
-        {
-            category: 'Site',
-            scope: ['createNewWidget'],
+            scope: ['l5Panel'],
             auth: ['admin', 'author'],
             widget: '_100554_pluginSiteMonitorDashboardResponseTime'
         },
-
-        
         {
             category: 'Tools',
-            scope: ['createNewWidget'],
-            auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
-        },
-        {
-            category: 'Tools',
-            scope: ['createNewWidget'],
+            scope: ['l5Panel'],
             auth: ['admin', 'author'],
             widget: '_100554_pluginSiteMonitorDashboardRegionalLatency'
         },
         {
             category: 'Tools',
-            scope: ['createNewWidget'],
+            scope: ['l5Panel'],
             auth: ['admin', 'author'],
             widget: '_100554_pluginSiteMonitorDashboardResponseTime'
         },
         {
             category: 'Tools',
-            scope: ['createNewWidget'],
+            scope: ['l5Panel'],
             auth: ['admin', 'author'],
             widget: '_100554_pluginSiteMonitorDashboardSales'
         },
-        {
-            category: 'Site',
-            scope: ['createNewWidget'],
-            auth: ['admin', 'editor'],
-            widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
-        }
       ];
     }
 
