@@ -108,7 +108,7 @@ export class PluginStylePadding extends IcaLitElement {
         return html`
             <h5 class="helper-group-title" >${this.msg.padding}</h5>
                 <div class="helper-group-lock">
-                <input id="helper-padding-lock" type="checkbox" @change=${this.handleChangeLockPadding}>
+                <input id="helper-padding-lock" ?checked=${this.paddingLocked} type="checkbox" @change=${this.handleChangeLockPadding}>
                 <label for="helper-padding-lock"> ${this.msg.all}</label>
                 <i>${this.paddingLocked ? collab_lock : collab_lock_open}</i>
             </div>
@@ -250,10 +250,10 @@ export class PluginStylePadding extends IcaLitElement {
             styles.padding = padding;
         } else {
             styles.padding = '';
-            styles.paddingTop = padding.paddingTop || '';
-            styles.paddingRight = padding.paddingRight || '';
-            styles.paddingBottom = padding.paddingBottom || '';
-            styles.paddingLeft = padding.paddingLeft || '';
+            this.paddingTop = styles.paddingTop = padding.paddingTop || '';
+            this.paddingRight = styles.paddingRight = padding.paddingRight || '';
+            this.paddingBottom = styles.paddingBottom = padding.paddingBottom || '';
+            this.paddingLeft = styles.paddingLeft = padding.paddingLeft || '';
         }
 
     }
@@ -272,6 +272,10 @@ export class PluginStylePadding extends IcaLitElement {
                     (this as any)[convertedProp] = propertyValue;
                     if (el) el.defaultValue = propertyValue;
                 }
+            }
+
+            if ([this.paddingBottom, this.paddingLeft, this.paddingRight, this.paddingTop].every(padding => padding === this.paddingBottom)) {
+                this.paddingLocked = true;
             }
         }
 
@@ -300,6 +304,9 @@ export class PluginStylePadding extends IcaLitElement {
         this.paddingTop = item.state.paddingTop;
         this.paddingLeft = item.state.paddingLeft;
         this.paddingRight = item.state.paddingRight;
+        if ([this.paddingBottom, this.paddingLeft, this.paddingRight, this.paddingTop].every(padding => padding === this.paddingBottom)) {
+            this.paddingLocked = true;
+        } else this.paddingLocked = false;
         this.setState();
     }
 
