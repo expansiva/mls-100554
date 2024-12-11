@@ -5,6 +5,23 @@ import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { getConfigProject, createConfigFile } from './_100554_libProjectConfig'
 
+let on1CompileMonaco = true;
+export async function initCompileMonaco(project: number): Promise<boolean> {
+    if (!on1CompileMonaco) return true;
+    try {
+        await mls.editor.InitMonaco();
+        const prjModel = mls.editor.getModels(project, '');
+        if (!prjModel || !prjModel.ts) {
+            const info = await mls.stor.localDB.readPrjInfo(project);
+            mls.editor.createModelProjectDefinition(project, info.indexModules);
+        }
+        on1CompileMonaco = false;
+    } catch (err: any) {
+        throw new Error(err.message);
+    }
+    return true;
+}
+
 @customElement('collab-init-100554')
 export class CollabInit extends CollabLitElement {
 
