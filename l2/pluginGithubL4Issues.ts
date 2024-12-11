@@ -74,7 +74,7 @@ export class PluginGithubL4Issues extends CollabLitElement {
 
     renderError(): TemplateResult {
 
-        return html`<h3 style="color: #e1e1e1; padding: 2rem; text-align: center;">${this.error}</h3>`
+        return html`<h3 style="color: var(--text-primary-color); padding: 2rem; text-align: center;">${this.error}</h3>`
     }
 
 

@@ -108,7 +108,7 @@ export class PluginStyleSpacing extends IcaLitElement {
         return html`
             <h5 class="helper-group-title" >${this.msg.margin}</h5>
             <div class="helper-group-lock">
-                <input id="helper-margin-lock" type="checkbox" @change=${this.handleChangeLockMargin}>
+                <input id="helper-margin-lock" ?checked=${this.marginLocked} type="checkbox" @change=${this.handleChangeLockMargin}>
                 <label for="helper-margin-lock"> ${this.msg.all}</label>
                 <i>${this.marginLocked ? collab_lock : collab_lock_open}</i>
             </div>
@@ -251,10 +251,10 @@ export class PluginStyleSpacing extends IcaLitElement {
             styles.margin = margin;
         } else {
             styles.margin = '';
-            styles.marginTop = margin.marginTop || '';
-            styles.marginRight = margin.marginRight || '';
-            styles.marginBottom = margin.marginBottom || '';
-            styles.marginLeft = margin.marginLeft || '';
+            this.marginTop = styles.marginTop = margin.marginTop || '';
+            this.marginRight = styles.marginRight = margin.marginRight || '';
+            this.marginBottom = styles.marginBottom = margin.marginBottom || '';
+            this.marginLeft = styles.marginLeft = margin.marginLeft || '';
         }
 
     }
@@ -273,8 +273,21 @@ export class PluginStyleSpacing extends IcaLitElement {
                     if (el) el.defaultValue = propertyValue;
                 }
             }
+
+            this.checkMarginsEquals();
+
         }
 
+    }
+
+    private checkMarginsEquals() {
+        if ([this.marginBottom, this.marginLeft, this.marginRight, this.marginTop].every(margin => margin === this.marginBottom)) {
+            this.marginLocked = true;
+            if (this.inputLockM) this.inputLockM.checked = true;
+        } else {
+            this.marginLocked = false;
+            if (this.inputLockM) this.inputLockM.checked = false;
+        }
     }
 
     private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
@@ -296,10 +309,12 @@ export class PluginStyleSpacing extends IcaLitElement {
     }
 
     private onGalleryClick(item: IGallery) {
+
         this.marginBottom = item.state.marginBottom;
         this.marginTop = item.state.marginTop;
         this.marginLeft = item.state.marginLeft;
         this.marginRight = item.state.marginRight;
+        this.checkMarginsEquals();
         this.setState();
     }
 

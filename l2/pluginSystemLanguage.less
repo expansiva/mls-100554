@@ -19,7 +19,7 @@ plugin-system-language-100554 {
     }
 
     button {
-        background-color: @bg-secondary-color-lighter;
+        background-color: @active-color;
         border-radius: 8px;
         border: none;
         box-shadow: 0px 1px 3px 0px @grey-color;
@@ -32,11 +32,12 @@ plugin-system-language-100554 {
         height: 40px;
         transition: height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         padding: 0.5rem;
-        color: @text-primary-color;
+        color: #fff;
         cursor: pointer;
+        min-width: 80px;
 
         &:hover {
-            background-color: @grey-color-light;
+            background-color: @active-color-hover;
         }
     }
 
@@ -56,6 +57,8 @@ plugin-system-language-100554 {
     }
 
 }
+
+
 
 //Start Less Tokens
 @text-primary-color-lighter: #535353;

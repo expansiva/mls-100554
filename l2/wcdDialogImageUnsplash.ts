@@ -54,6 +54,8 @@ export class WcdDialogImageUnsplash100554 extends CollabLitElement {
 
     private lastHeight: string | undefined;
 
+    private lastIca: HTMLElement | undefined;
+
     private async getImages() {
 
         const encodedQuery = encodeURIComponent(this.query);
@@ -120,8 +122,8 @@ export class WcdDialogImageUnsplash100554 extends CollabLitElement {
 
     disconnectedCallback() {
         if (!globalWcd) throw new Error('Invalid window.wcdState');
-        if (!globalWcd.elICA) return;
-        (globalWcd.elICA as any).style.height = this.lastHeight || '';
+        if (globalWcd.elICA) (globalWcd.elICA as any).style.height = this.lastHeight || '';
+        else if (this.lastIca)  this.lastIca.style.height = this.lastHeight || '';
         super.disconnectedCallback();
     }
 
@@ -139,6 +141,7 @@ export class WcdDialogImageUnsplash100554 extends CollabLitElement {
 
     render() {
 
+        this.lastIca = globalWcd.elICA;
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
 
@@ -177,107 +180,6 @@ export class WcdDialogImageUnsplash100554 extends CollabLitElement {
 
         `;
     }
-
-    static styles = css`
-
-        :host{
-            display:block;
-            width:100%;
-        }
-        .container{
-            padding:1rem;
-        }
-
-        .prompt-content{
-            padding: 10px;
-            display:flex;
-            margin-bottom:1rem;
-        }
-
-        .prompt-content input {
-            border:none;
-            border-bottom: 1px solid var(--grey-color);
-            outline:none;
-            width: 100%;
-            display: block;
-            font-size: 1rem;
-            line-height: 1.5;
-            color: #000000;
-            background-color: #fff;
-            background-clip: padding-box;
-            border-radius: 0.25rem;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-        .result-info{
-            display:flex;
-            justify-content:center;
-            width:100%;
-        }
-
-        .result-info small{
-            margin-left:auto;
-            font-weight:200;
-            font-size: var(--font-size-16);
-            color: var(--grey-color-darker);
-        }
-
-        .result-info button{
-            margin-left:auto;
-            border:none;
-            background: none;
-            color: var(--text-color-primary);
-            cursor:pointer;
-        }
-
-        .gallery {
-            display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                grid-auto-rows: 200px;
-                gap: 10px;
-                padding: 10px;
-        }
-
-        .gallery .gallery-item {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, filter 0.3s ease;
-            cursor:pointer;
-            border-radius: 8px;
-            position: relative;
-        }
-
-        .gallery .gallery-item p {
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            font-size: var(--font-size-12);
-            color: #ffffff;
-            display:none;
-        }
-
-        .gallery img {
-            width: 100%;
-            height: 100%;
-            display: block;
-            border-radius: 8px;
-        }
-
-        .gallery .gallery-item:hover{
-            transform: scale(1.05);
-        }
-
-        .gallery .gallery-item:hover p{
-            display:block;
-        }
-        .gallery .gallery-item img:hover {
-            filter: brightness(0.4);
-        }
-        
-        @media (max-width: 768px) {
-            .gallery {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-        }
-    `;
 }
 
 interface IUnsplashImage {

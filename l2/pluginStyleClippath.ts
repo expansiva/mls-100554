@@ -51,7 +51,7 @@ export class PluginStyleClipath extends IcaLitElement {
                 ${repeat(this.arrayGallery, ((key: any) => key) as any,
             ((css: any, index: any) => {
                 return html`
-                            <div class="itemgallery" .gallery=${css.css} @click="${this.handleChangeCss}">
+                            <div class="itemgallery" .gallery=${css.css} .name= ${css.name} @click="${this.handleChangeCss}">
                                 <div class="gallery-item" style="${css.css}" .gallery=${css.css}></div>
                                 <div .gallery=${css.css}></div>
                             </div>
@@ -73,7 +73,8 @@ export class PluginStyleClipath extends IcaLitElement {
         }
 
         let css = (el as any).gallery;
-        if (!el || !css) return;
+        let name = (el as any).name;
+        if (!el || !css && !name) return;
         css = css.replace('clip-path:', '').trim();
 
         clearTimeout(this.timeonChange);

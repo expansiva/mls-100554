@@ -8,7 +8,6 @@ import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
 import { ICSSState } from './_100554_lessCSS';
 import { globalState } from './_100554_icaState';
-
 import {
     collab_lock,
     collab_lock_open,
@@ -108,7 +107,7 @@ export class PluginStylePadding extends IcaLitElement {
         return html`
             <h5 class="helper-group-title" >${this.msg.padding}</h5>
                 <div class="helper-group-lock">
-                <input id="helper-padding-lock" type="checkbox" @change=${this.handleChangeLockPadding}>
+                <input id="helper-padding-lock" ?checked=${this.paddingLocked} type="checkbox" @change=${this.handleChangeLockPadding}>
                 <label for="helper-padding-lock"> ${this.msg.all}</label>
                 <i>${this.paddingLocked ? collab_lock : collab_lock_open}</i>
             </div>
@@ -250,10 +249,10 @@ export class PluginStylePadding extends IcaLitElement {
             styles.padding = padding;
         } else {
             styles.padding = '';
-            styles.paddingTop = padding.paddingTop || '';
-            styles.paddingRight = padding.paddingRight || '';
-            styles.paddingBottom = padding.paddingBottom || '';
-            styles.paddingLeft = padding.paddingLeft || '';
+            this.paddingTop = styles.paddingTop = padding.paddingTop || '';
+            this.paddingRight = styles.paddingRight = padding.paddingRight || '';
+            this.paddingBottom = styles.paddingBottom = padding.paddingBottom || '';
+            this.paddingLeft = styles.paddingLeft = padding.paddingLeft || '';
         }
 
     }
@@ -273,8 +272,22 @@ export class PluginStylePadding extends IcaLitElement {
                     if (el) el.defaultValue = propertyValue;
                 }
             }
+
+            this.checkPaddingEquals();
         }
 
+    }
+
+
+    private checkPaddingEquals() {
+
+        if ([this.paddingBottom, this.paddingLeft, this.paddingRight, this.paddingTop].every(padding => padding === this.paddingBottom)) {
+            this.paddingLocked = true;
+            if (this.inputLockP) this.inputLockP.checked = true;
+        } else {
+            this.paddingLocked = false;
+            if (this.inputLockP) this.inputLockP.checked = false;
+        }
     }
 
     private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
@@ -300,6 +313,7 @@ export class PluginStylePadding extends IcaLitElement {
         this.paddingTop = item.state.paddingTop;
         this.paddingLeft = item.state.paddingLeft;
         this.paddingRight = item.state.paddingRight;
+        this.checkPaddingEquals();
         this.setState();
     }
 

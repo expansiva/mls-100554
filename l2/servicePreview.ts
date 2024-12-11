@@ -254,7 +254,7 @@ export class ServicePreview100554 extends ServiceBase {
             if (mls.istrace) console.info('is preview repaint:' + this.watch);
             if (fileAction.action === 'open' && this.watch) {
                 this.loading = true;
-                this.onReloader();
+                //this.onReloader();
                 return;
             }
 
