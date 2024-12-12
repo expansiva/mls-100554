@@ -74,13 +74,11 @@ export class CssHelperIndex extends IcaLitElement {
     }
 
     async updated(changedProperties: any) {
-        console.info(this.actualSelector)
         if ((changedProperties.has('actualProp') ||
             changedProperties.has('actualValue') ||
             changedProperties.has('actualLineNumber'))
         ) {
             if (!(this.actualSelector && (this.actualSelector.endsWith(':') || this.actualSelector.endsWith('::')))) {
-                console.info('att prop')
                 this.avaliablePlugins = this.mergeHelpersArrays(this.avaliablePlugins, this.helpers);
                 this.helpers = this.filterByProp(this.avaliablePlugins, this.actualProp, this.actualValue).sort((a, b) => a.priority - b.priority);
             }
@@ -92,8 +90,6 @@ export class CssHelperIndex extends IcaLitElement {
             this.actualSelector &&
             (this.actualSelector.endsWith(':') || this.actualSelector.endsWith('::'))
         ) {
-            console.info('att selector')
-
             this.avaliablePlugins = this.mergeHelpersArrays(this.avaliablePlugins, this.helpers);
             this.helpers = this.avaliablePlugins.filter((pl) => pl.tags.includes('pseudo:*'));
         }
@@ -200,7 +196,6 @@ export class CssHelperIndex extends IcaLitElement {
         if (this.isFirtsLoading) {
             this.isFirtsLoading = false;
             const mode: IMode = rc.length < this.minValueToOpen.full ? 'full' : (rc.length < this.minValueToOpen.expanded ? 'expanded' : 'collapsed');
-            console.info(rc);
             rc.forEach((help) => {
                 const sameHelp = this.avaliablePlugins.find((item) => item.widget === help.widget);
                 if (sameHelp) sameHelp.mode = mode;
