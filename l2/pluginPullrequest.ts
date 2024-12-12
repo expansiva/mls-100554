@@ -54,22 +54,32 @@ export class PluginPullrequest extends PluginBaseModule {
 
         if (this.error !== '') {
             setTimeout(() => this.error = '', 9900);
-            return html`<h3 style="color:red">${this.error}</h3>`;
+            return html`
+                ${this.renderHeader()}
+                <h4 style="color:red">${this.error}</h4>
+            `;
         }
         if (this.itens.length <= 0)
             return this.renderNoIntes();
         return this.renderListPull();
     }
 
+    renderHeader() {
+        return html`
+            <h3>${this.msg.openPullrequest}</h3>
+        `;
+    }
+
     renderNoIntes() {
         return html`
-            <h3>${this.msg.noItens}</h3>
+            ${this.renderHeader()}
+            <h4>${this.msg.noItens}</h4>
         `;
     }
 
     renderListPull() {
         return html`
-            <h3>${this.msg.openPullrequest}</h3>
+            ${this.renderHeader()}
             <ul style="list-style: decimal;">
                 ${repeat(this.itens, (
                     (key: mls.stor.others.IPullRequest) => key.id) as any,
