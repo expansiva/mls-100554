@@ -81,6 +81,7 @@ export class PluginStylePadding extends IcaLitElement {
     handleIcaStateChange(_key: string, _value: ICSSState) {
         if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
+        if (!_value.key || !_value.key.startsWith('padding')) return;
         this._onIcaStateChange();
     }
 

@@ -1,10 +1,10 @@
 /// <mls shortName="servicePreviewView" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement, unsafeHTML } from 'lit';
+import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
+import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
 
 export const initServicePreviewView = '';
 
@@ -131,13 +131,13 @@ export class ServicePreviewView extends LitElement {
                 <div class="phone" style="width:${this.widthP}px; height:${this.heightP}px">
                     <div class="phone_mic"></div>
                     <div class="phone_screen">
-                        <iframe style="width:100%; height:100%; border:none; display:none"  src="/_100554_servicePreview?t=${Date.now()}" @load="${this.load}" ></iframe>
+                        <iframe style="width:100%; height:100%; border:none; display:none"  src="/_100554_servicePreview" @load="${this.load}" ></iframe>
                     </div>
                     <div class="phone_button"></div>
                 </div>
                 
             `
-
+        // ?t=${Date.now()}
         } else {
 
             this.style.cssText = `
@@ -148,7 +148,7 @@ export class ServicePreviewView extends LitElement {
             return html`
             
             <iframe
-                style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview?t=${Date.now()}"
+                style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview"
                 @load="${this.load}" >
             
             </iframe>`;
@@ -256,34 +256,22 @@ export class ServicePreviewView extends LitElement {
         }
     }
 
-    private async addStyles() { // Nao utilizado mais
+    private async addStyles() {
 
-        // if (!this.models || !this.models.ts) return;
-        // const { project, shortName } = this.models.ts.storFile;
-        // let txt = await this.getFileContent();
-        // const ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
-        // const iframe = this.shadowRoot?.querySelector('iframe');
-        // if (!iframe) return;
-        // this.mountCSS(ret, iframe);
-        // this.mountTokens(ret, iframe);
-
-        // const tag = convertFileNameToTag(`_${project}_${shortName}`);
-        // const el = iframe.contentDocument?.body.querySelector(tag);
-        // if (!el) return;
-        // const css = ret.css.join(' \n');
-        // const enhacement = await this.getEnhacement();
-        // if (!enhacement) return;
-        // (enhacement as any).setStylesProcessed(css, el, tag);
+        if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument) return;
+        const { project, shortName } = this.models.style.storFile;
+        const id = convertFileNameToTag(`_${project}_${shortName}`);
+        const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
+        if (oldStyle) oldStyle.remove();
+        const newStyle = document.createElement('style');
+        const newLess = await compileStyleUsingStorFile(shortName, project, this.actualtheme);
+        if (!newLess) return;
+        newStyle.id = id;
+        newStyle.textContent = newLess;
+        window.preview.iframe.contentDocument.head.appendChild(newStyle);
+        this.stylechanged = 'false';
 
     }
-
-    // private async getEnhacement() {
-    //     if (!this.mfile) return;
-    //     const enhacementName = (this.mfile.compilerResults as any).tripleSlashMLS.variables.enhancement;
-    //     if (!enhacementName) throw new Error('enhacementName not valid');
-    //     const mModule = await mls.l2.enhancement.getEnhancementInstance(this.mfile);
-    //     return mModule;
-    // }
 
     private load(): void {
         this.showLoader(true);
@@ -336,7 +324,7 @@ export class ServicePreviewView extends LitElement {
         const meta = iframe.contentDocument?.querySelector('meta[name="color-scheme"]');
         if (!isLight && html) {
             html.setAttribute('data-theme', 'dark');
-        } 
+        }
         if (meta) meta.remove();
     }
 
@@ -547,24 +535,11 @@ export class ServicePreviewView extends LitElement {
         ifr.contentDocument.head.appendChild(styleFA);
     }
 
-    private removeOlderStyle(ifr: HTMLIFrameElement) {
-        const id = this.getIdStyle();
-        if (!ifr.contentDocument || !id) return;
-        const st = ifr.contentDocument.body.querySelectorAll(`#${id}`);
-        st.forEach((s) => s.remove());
-    }
-
     private removeOlderTokens(ifr: HTMLIFrameElement) {
         const id = this.getIdTokens();
         if (!ifr.contentDocument || !id) return;
-        const st = ifr.contentDocument.body.querySelectorAll(`#${id}`);
+        const st = ifr.contentDocument.head.querySelectorAll(`#${id}`);
         st.forEach((s) => s.remove());
-    }
-
-    private removeOlderGlobalStyle(ifr: HTMLIFrameElement) {
-        if (!ifr.contentDocument) return;
-        const st = ifr.contentDocument.body.querySelector(`#css_global`);
-        if (st) st.remove()
     }
 
     private mountCSS(ifr: HTMLIFrameElement): void {
@@ -582,12 +557,6 @@ export class ServicePreviewView extends LitElement {
         }
     }
 
-    private getIdStyle() {
-        if (!this.models || !this.models.ts) return '';
-        const { project, shortName } = this.models.ts.storFile
-        return '_' + project + '_' + shortName;
-    }
-
     private getIdTokens() {
         if (!this.models || !this.models.ts) return 'ds_tokens';
         const { project } = this.models.ts.storFile
@@ -602,7 +571,7 @@ export class ServicePreviewView extends LitElement {
             const style = document.createElement('style');
             style.textContent = css;
             style.id = this.getIdTokens();
-            ifr.contentDocument.body.appendChild(style);
+            ifr.contentDocument.head.appendChild(style);
 
         } catch (e: any) {
             console.info('Error mountTokens: ' + e.message);
@@ -803,10 +772,4 @@ export class ServicePreviewView extends LitElement {
             background: #666;
         };
     `
-}
-
-interface IInfoDesignSystem {
-    project: number,
-    level: number,
-    ds: DesignSystemIO
 }

@@ -42,8 +42,6 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-preview-100554')
 export class ServicePreview100554 extends ServiceBase {
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     @property() itens: any = undefined;
 
     @property() msize: string = '';
@@ -188,13 +186,8 @@ export class ServicePreview100554 extends ServiceBase {
 
         mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
 
-        // mls.events.addEventListener([3], ['DSStyleChanged', 'DSTokensChanged'] as any, async (ev) => {
-        //     this.onDSStyleOrTokensChanged(ev);
-        // });
+        mls.events.addListener(2, 'styleChanged' as any, this.onStyleChanged.bind(this));
 
-        // mls.events.addEventListener([3], ['DSThemeChanged'] as any, async (ev) => {
-        //     this.onDsThemeChanged(ev);
-        // });
     }
 
     private onReloader(): void {

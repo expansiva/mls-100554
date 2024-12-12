@@ -1384,7 +1384,7 @@ export class ServiceSave extends ServiceBase {
         const options = {
             shortName: undefined,
             project: undefined,
-            htmlText: '<plugin-pullrequest-100554 autoPrepare="true"></plugin-pullrequest-100554>'
+            htmlText: '<plugin-verify-error-100554 autoPrepare="true"></plugin-verify-error-100554><plugin-pullrequest-100554 autoPrepare="true"></plugin-pullrequest-100554>'
         }
 
         mls.events.fire(

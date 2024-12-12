@@ -8,7 +8,6 @@ import { PluginStyleIndexItem } from './_100554_pluginStyleIndexItem';
 import { IHelpers, IMode } from './_100554_cssHelperIndexBase';
 import { ICSSState } from './_100554_lessCSS';
 import { globalState } from './_100554_icaState';
-
 import './_100554_pluginStyleIndexItem';
 
 /// **collab_i18n_start**
@@ -58,9 +57,9 @@ export class CssHelperIndex extends IcaLitElement {
         if (_key !== `less.${this.position}` || !_value) return;
         const { key, value, selector, lineNumber } = _value;
 
+        this.actualSelector = selector;
         this.actualProp = key;
         this.actualValue = value;
-        this.actualSelector = selector;
         this.actualLineNumber = lineNumber;
 
         if (lineNumber && key) {
@@ -75,9 +74,24 @@ export class CssHelperIndex extends IcaLitElement {
     }
 
     async updated(changedProperties: any) {
-        if (changedProperties.has('actualProp') || changedProperties.has('actualValue') || changedProperties.has('actualLineNumber')) {
+        if ((changedProperties.has('actualProp') ||
+            changedProperties.has('actualValue') ||
+            changedProperties.has('actualLineNumber'))
+        ) {
+            if (!(this.actualSelector && (this.actualSelector.endsWith(':') || this.actualSelector.endsWith('::')))) {
+                this.avaliablePlugins = this.mergeHelpersArrays(this.avaliablePlugins, this.helpers);
+                this.helpers = this.filterByProp(this.avaliablePlugins, this.actualProp, this.actualValue).sort((a, b) => a.priority - b.priority);
+            }
+        }
+
+        if (changedProperties.has('actualSelector') &&
+            this.actualProp === '' &&
+            this.actualValue === '' &&
+            this.actualSelector &&
+            (this.actualSelector.endsWith(':') || this.actualSelector.endsWith('::'))
+        ) {
             this.avaliablePlugins = this.mergeHelpersArrays(this.avaliablePlugins, this.helpers);
-            this.helpers = this.filterByProp(this.avaliablePlugins, this.actualProp, this.actualValue).sort((a, b) => a.priority - b.priority);
+            this.helpers = this.avaliablePlugins.filter((pl) => pl.tags.includes('pseudo:*'));
         }
     }
 
@@ -182,7 +196,6 @@ export class CssHelperIndex extends IcaLitElement {
         if (this.isFirtsLoading) {
             this.isFirtsLoading = false;
             const mode: IMode = rc.length < this.minValueToOpen.full ? 'full' : (rc.length < this.minValueToOpen.expanded ? 'expanded' : 'collapsed');
-            console.info(rc);
             rc.forEach((help) => {
                 const sameHelp = this.avaliablePlugins.find((item) => item.widget === help.widget);
                 if (sameHelp) sameHelp.mode = mode;
