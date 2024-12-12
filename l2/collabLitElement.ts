@@ -28,7 +28,7 @@ export class CollabLitElement extends LitElement {
   loadStyle(css: string) {
     if (!css) return;
     const tagName = this.tagName.toLowerCase();
-    const alreadyAdded = document.body.querySelector(`style#${tagName}`);
+    const alreadyAdded = document.head.querySelector(`style#${tagName}`);
     if (alreadyAdded) {
       alreadyAdded.textContent = css;
       return;
@@ -36,7 +36,7 @@ export class CollabLitElement extends LitElement {
     const style = document.createElement('style');
     style.id = tagName;
     style.textContent = css;
-    document.body.appendChild(style);
+    document.head.appendChild(style);
   }
 
 }
