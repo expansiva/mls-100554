@@ -258,17 +258,19 @@ export class ServicePreviewView extends LitElement {
 
     private async addStyles() {
 
-        if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument) return;
+        if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
         const { project, shortName } = this.models.style.storFile;
         const id = convertFileNameToTag(`_${project}_${shortName}`);
         const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
-        if (oldStyle) oldStyle.remove();
+        
+        //if (oldStyle) oldStyle.remove();
         const newStyle = document.createElement('style');
         const newLess = await compileStyleUsingStorFile(shortName, project, this.actualtheme);
         if (!newLess) return;
         newStyle.id = id;
         newStyle.textContent = newLess;
         window.preview.iframe.contentDocument.head.appendChild(newStyle);
+        if (oldStyle) oldStyle.remove();
         this.stylechanged = 'false';
 
     }
@@ -454,14 +456,7 @@ export class ServicePreviewView extends LitElement {
                 window['monaco'] = window['monaco']  ? window['monaco']  : parent.monaco ? parent.monaco : top['monaco'];
 				window['l2_fieldTypes'] = window['l2_fieldTypes']  ? window['l2_fieldTypes']  : parent.l2_fieldTypes ? parent.l2_fieldTypes : top['l2_fieldTypes'];window['litDisableBundleWarning'] = true; window['collabActualLevel'] = ${this.level};
 
-                function setScrool(){
-            
-                    const scrollY = localStorage.getItem('servicePreviewScrool');
-                    if(!scrollY) return;
-                    localStorage.setItem('servicePreviewScrool', '');
-                    setTimeout(()=>{window.scrollTo(0, scrollY);},500);
-                }
-                setScrool();
+                
 				`;
             ifr.contentDocument?.body.appendChild(s);
 
