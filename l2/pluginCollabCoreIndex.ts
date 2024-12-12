@@ -217,8 +217,6 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginStylePadding'
             },
-
-
             {
                 category: 'Flex',
                 scope: ['l2StyleHelper'],
@@ -226,7 +224,21 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginStyleFlex'
             },
+            {
+                category: 'Cursor',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleCursor'
+            },
 
+            {
+                category: 'Pseudo',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginLessPseudo'
+            },
             {
                 category: 'Details',
                 scope: ['l5Project'],
