@@ -1280,7 +1280,7 @@ export class ServiceSource100554 extends ServiceBase {
                 model.originalShortName = originalShortName;
             }
             return model;
-        } catch (e:any) {
+        } catch (e: any) {
             this.setError(e.message);
         }
     }
@@ -1579,7 +1579,14 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             return;
         }
         if (storFile.status === 'renamed') {
-            (storFile as any)['originalCRC'] = mls.common.crc.crc32(model.getValue()).toString(16);
+            const models = mls.editor.getModels(storFile.project, storFile.shortName);
+            if (storFile.extension === '.less' && models && models.style) {
+                models.style.originalCRC = mls.common.crc.crc32(model.getValue()).toString(16);
+            }
+            if (storFile.extension === '.html' && models && models.html) {
+                models.html.originalCRC = mls.common.crc.crc32(model.getValue()).toString(16);
+            }
+
         }
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
         storFile.status = 'nochange';
@@ -1616,7 +1623,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                         this.activeModels.ts.compilerResults.modelNeedCompile = true;
                     }
                     await mls.l2.typescript.compileAndPostProcess(this.activeModels.ts, true, true);
-
                 }
 
                 const lastemitter = globalState._ica.less[this.position]?.emitter || 'editor';
@@ -1634,7 +1640,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 }
             }
 
-            const sameContent: boolean = (storFile as any)['originalCRC'] === mls.common.crc.crc32(modelValue).toString(16);
+            const sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelValue).toString(16);
             if (sameContent) {
                 if (storFile.status !== 'new' && storFile.status !== 'renamed') storFile.status = 'nochange';
                 if (storFile.status !== 'renamed') await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
@@ -1655,7 +1661,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             const idActive = modelBase.model.id
             if (idLeft === idActive) position = 'left';
             else position = 'right';
-            mls.events.fireFileAction('statusOrErrorChanged', storFile, position);
+
+            if (ext === '.html') mls.events.fireFileAction('statusOrErrorChanged', storFile, position);
+            else mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position, storFile }));
 
         }, 400);
     };
