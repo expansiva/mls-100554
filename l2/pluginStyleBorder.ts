@@ -40,7 +40,7 @@ const message_pt = {
     topRight: 'Superior/Direita',
     bottomLeft: 'Inferior/Esquerda',
     bottomRight: 'Inferior/Direita',
-    description: 'Um plugin poderoso projetado para manter e personalizar as propriedades das bordas sem esforço. Modifique estilos, larguras e cores de bordas com facilidade, garantindo componentes de UI consistentes e visualmente atraentes.'
+    description: 'Plugin desenvolvido para facilitar a manutenção, personalização e validação de propriedades de borda em estilos CSS, oferecendo suporte a ajustes dinâmicos e regras específicas.'
 
 }
 
@@ -58,7 +58,7 @@ const message_en = {
     topRight: 'Top/Right',
     bottomLeft: 'Bottom/Left',
     bottomRight: 'Bottom/Right',
-    description: 'A powerful plugin designed to maintain and customize border properties effortlessly. Modify border styles, widths, and colors with ease, ensuring consistent and visually appealing UI components.'
+    description: 'Plugin designed to simplify the maintenance, customization, and validation of border properties in CSS styles, providing support for dynamic adjustments and specific rules.'
 }
 
 type MessageType = typeof message_en;
@@ -153,7 +153,7 @@ export class PluginStyleBorder extends IcaLitElement {
         return html`
             <h5 class="helper-group-title" >${this.msg.border}</h5>
             <div class="helper-group-lock">
-                <input id="helper-border-lock" type="checkbox" @change=${this.handleChangeLockBorder}>
+                <input id="helper-border-lock" ?checked=${this.borderLocked} type="checkbox" @change=${this.handleChangeLockBorder}>
                 <label for="helper-border-lock"> ${this.msg.all}</label>
                 <i>${this.borderLocked ? collab_lock : collab_lock_open}</i>
             </div>
@@ -225,7 +225,7 @@ export class PluginStyleBorder extends IcaLitElement {
         return html`
             <h5 class="helper-group-title" >${this.msg.borderRadius}</h5>
                 <div class="helper-group-lock">
-                <input id="helper-border-radius-lock" type="checkbox" @change=${this.handleChangeLockBorderRadius}>
+                <input id="helper-border-radius-lock" ?checked=${this.borderRadiusLocked} type="checkbox" @change=${this.handleChangeLockBorderRadius}>
                 <label for="helper-border-radius-lock"> ${this.msg.all}</label>
                 <i>${this.borderRadiusLocked ? collab_lock : collab_lock_open}</i>
             </div>
@@ -411,8 +411,11 @@ export class PluginStyleBorder extends IcaLitElement {
             };
         }
 
+        this.checkBorderEquals();
+        this.checkBorderRadiusEquals();
         this.updateBorder(borderValue);
         this.updateBorderRadius(borderRadiusValue);
+
 
     }
 
@@ -485,9 +488,38 @@ export class PluginStyleBorder extends IcaLitElement {
                     (this as any)[convertedProp] = propertyValue;
                 }
             }
+
+            this.checkBorderEquals();
+            this.checkBorderRadiusEquals();
+
         }
 
     }
+
+    private checkBorderEquals() {
+        if (
+            [this.borderBottomColor, this.borderTopColor, this.borderRightColor, this.borderLeftColor].every(borderColor => borderColor === this.borderBottomColor) &&
+            [this.borderBottomStyle, this.borderTopStyle, this.borderRightStyle, this.borderLeftStyle].every(borderStyle => borderStyle === this.borderBottomStyle) &&
+            [this.borderBottomWidth, this.borderTopWidth, this.borderRightWidth, this.borderLeftWidth].every(borderWidth => borderWidth === this.borderBottomWidth)
+        ) {
+            this.borderLocked = true;
+            if (this.inputLock) this.inputLock.checked = true;
+        } else {
+            this.borderLocked = false;
+            if (this.inputLock) this.inputLock.checked = false;
+        }
+    }
+
+    private checkBorderRadiusEquals() {
+        if ([this.borderBottomLeftRadius, this.borderBottomRightRadius, this.borderTopLeftRadius, this.borderTopRightRadius].every(borderRadius => borderRadius === this.borderTopRightRadius)) {
+            this.borderRadiusLocked = true;
+            if (this.inputLockRadius) this.inputLockRadius.checked = true;
+        } else {
+            this.borderRadiusLocked = false;
+            if (this.inputLockRadius) this.inputLockRadius.checked = false;
+        }
+    }
+
 
     private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
 
@@ -526,6 +558,8 @@ export class PluginStyleBorder extends IcaLitElement {
         this.borderBottomLeftRadius = item.state.borderBottomLeftRadius;
         this.borderBottomRightRadius = item.state.borderBottomRightRadius;
         await this.updateComplete;
+        this.checkBorderEquals();
+        this.checkBorderRadiusEquals();
         this.setState();
     }
 
