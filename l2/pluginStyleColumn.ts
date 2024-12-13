@@ -101,7 +101,6 @@ export class PluginStyleColumn extends IcaLitElement {
             for (let i = 0; i < rule.style.length; i++) {
                 const propertyName = rule.style[i];
                 if (props.includes(propertyName)) {
-                    debugger;
                     const propertyValue = rule.style.getPropertyValue(propertyName);
                     const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(propertyName);
                     if (!convertedProp) return;
