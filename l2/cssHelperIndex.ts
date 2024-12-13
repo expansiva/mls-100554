@@ -203,6 +203,19 @@ export class CssHelperIndex extends IcaLitElement {
             });
         }
 
+        if (rc.length <= this.minValueToOpen.full) {
+            rc.forEach((help) => {
+                help.mode = 'full';
+            });
+        }
+
+        if (rc.length > this.minValueToOpen.full) {
+            rc.forEach((help) => {
+                help.mode = 'expanded';
+            });
+        }
+
+
         return rc;
 
     }

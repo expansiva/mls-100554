@@ -82,9 +82,6 @@ export class PluginCssTokens extends IcaLitElement {
         });
 
         const grouping = this.groupColorsByState(res);
-        console.info({
-            needOrder: this.needOrder
-        })
         if (!this.needOrder) return grouping;
 
         const sortedColors = Object.keys(grouping)
