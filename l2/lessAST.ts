@@ -196,14 +196,14 @@ export class LessAst {
      * const value = "anything";
      * findColumn(line, value); // Returns: undefined
      */
+
     private findColumn(line: string, value: string): number | undefined {
         const colonIndex = line.indexOf(':');
         if (colonIndex === -1) return;
         const afterColon = line.slice(colonIndex + 1);
-        const trimmedStartIndex = afterColon.search(/\S/);
         const valueStartIndex = afterColon.indexOf(value);
         if (valueStartIndex === -1) return;
-        return colonIndex + trimmedStartIndex + valueStartIndex;
+        return colonIndex + 1 + valueStartIndex;
     }
 
     /**
