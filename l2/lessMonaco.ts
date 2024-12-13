@@ -91,9 +91,12 @@ export class MonacoDriver {
             () => null
         );
 
+        const newLineContent = model.getLineContent(lineNr);
+        const newEndColumn = newLineContent.length + 1;;
+
         if (this[_editor]) {
             this[_editor].setSelection(
-                new monaco.Selection(lineNr, 1, lineNr, lineContent.length + 1)
+                new monaco.Selection(lineNr, 1, lineNr, newEndColumn)
             );
         }
 
