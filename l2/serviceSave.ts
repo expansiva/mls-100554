@@ -27,6 +27,8 @@ const message_pt = {
     msgBlockAll: 'Você não tem acesso a este repositorio, por fvor entre em contato com o admin do projeto',
     msgBlock: 'Você não tem acesso de escrita neste repositorio, caso deseje criar um fork clique no botão abaixo',
     pullrequestOk: 'Pull request realizado com sucesso',
+    errorVerify: 'Foi encontrado arquivos com erros',
+    obsVerify:'O salvamento só será permitido se não houver arquivos com erros ou se a verificação for cancelada!'
 
 }
 
@@ -46,7 +48,9 @@ const message_en = {
     errorCreatePull: 'Error when trying to create pull request',
     msgBlockAll: 'You do not have access to this repository, please contact the project admin',
     msgBlock: 'You do not have write access to this repository, if you wish to create a fork click the button below',
-    pullrequestOk: 'Pull request completed successfully'
+    pullrequestOk: 'Pull request completed successfully',
+    errorVerify: 'Files with errors were found',
+    obsVerify:'Saving will only be allowed if there are no files with errors, or the check is cancelled!'
 }
 
 type MessageType = typeof message_en;
@@ -71,6 +75,7 @@ export class ServiceSave extends ServiceBase {
 
     private scenery: string = 'save';
 
+    @property() freeToSave: boolean = false;
     @property() itens: any = undefined;
     @property() otherProjects: number[] = [];
     @property() error: string = '';
@@ -132,6 +137,7 @@ export class ServiceSave extends ServiceBase {
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
+        mls.events.addListener(5, 'FreetoSave' as any, this.onFreeToSave.bind(this));
         this.verifyExitFileChanged();
         await mls.stor.localDB.getAllProjects();
 
@@ -150,6 +156,20 @@ export class ServiceSave extends ServiceBase {
         }
 
         this.toogleBadge(true, '_100554_serviceSave');
+
+    }
+
+    private onFreeToSave: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
+
+        if (ev.type !== ('FreetoSave' as any)) return;
+        const v = JSON.parse(ev.desc as any);
+
+        if (v.free !== true) {
+            this.setError(this.myMessage.errorVerify);
+            return;
+        }
+
+        this.freeToSave = true;
 
     }
 
@@ -313,9 +333,10 @@ export class ServiceSave extends ServiceBase {
                     <div style="width:100%;" >
                         <h4 class="mt-3">${this.myMessage.comments}:</h4>
                         <textarea id="commitMessage" class="form-control" style="width:95%;" rows="2" maxlength="50"></textarea>
+                        <small style="font-size:12px;font-weight:bold">*${this.myMessage.obsVerify}</small>
                     </div>
-                    <div id="div_btn_save" class="text-right" style="width:79px; display: flex; align-items: self-end;">
-                        <button id="btn_save" class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
+                    <div id="div_btn_save" class="text-right" style="width:79px; display: flex; align-items:center;">
+                        <button id="btn_save" ?disabled=${!this.freeToSave} class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
                     </div>
                 </div>
                 <h4 class="mt-3" data-mlsline="23">${this.myMessage.fileChanges}</h4>
@@ -522,6 +543,7 @@ export class ServiceSave extends ServiceBase {
 
         try {
 
+            this.freeToSave = false;
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
             this.otherProjects = await mls.stor.localDB.getAllProjects();
