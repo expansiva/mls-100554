@@ -21,7 +21,7 @@ const message_pt = {
     blur: 'Blur ',
     spread: 'Spread',
     color: 'Cor',
-    description: 'Um plugin versátil para manter e aplicar propriedades de transformação CSS. Gerencie facilmente transformações de escala, rotação, inclinação e tradução para criar elementos de UI dinâmicos e interativos com precisão'
+    description: 'Um plugin intuitivo para gerenciar e personalizar sombras em elementos com box-shadow. Ajuste cores, deslocamento, desfoque, expansão e modo (inset/outset) de maneira simples e eficaz. Ideal para criar interfaces visuais modernas e estilosas.'
 }
 
 const message_en = {
@@ -31,7 +31,7 @@ const message_en = {
     blur: 'Blur ',
     spread: 'Spread',
     color: 'Color',
-    description: 'A versatile plugin for maintaining and applying CSS transform properties. Easily manage scale, rotate, skew, and translate transformations to create dynamic and interactive UI elements with precision.'
+    description: 'An intuitive plugin to manage and customize shadows on elements using box-shadow. Easily adjust color, offset, blur, spread, and mode (inset/outset). Perfect for crafting modern and stylish visual interfaces.'
 }
 
 type MessageType = typeof message_en;
