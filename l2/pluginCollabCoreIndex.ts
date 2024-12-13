@@ -231,7 +231,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginStyleCursor'
             },
-
+            {
+                category: 'Box Shadow',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleBoxShadow'
+            },
             {
                 category: 'Pseudo',
                 scope: ['l2StyleHelper'],
