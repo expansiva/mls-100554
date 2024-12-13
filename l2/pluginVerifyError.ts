@@ -10,12 +10,14 @@ const message_pt = {
     fileVerification: 'Verificação de arquivos',
     checkFiles: 'Verificando arquivos',
     noErros: "Nenhum erro encontrado",
+    cancel:'Cancelar verificação'
 };
 
 const message_en = {
     fileVerification: 'File verification',
     checkFiles: 'Checking files',
     noErros: 'No errors found',
+    cancel: 'Cancel verification',
 };
 
 type MessageType = typeof message_en;
@@ -29,6 +31,7 @@ const messages: { [key: string]: MessageType } = {
 export class PluginVerifyError extends PluginBaseModule {
 
     private msg = messages['en'];
+    private continueVerify = true;
 
     @property() error: string = '';
     @property() autoPrepare: boolean = false;
@@ -66,7 +69,7 @@ export class PluginVerifyError extends PluginBaseModule {
         }
 
         return this.renderErros();
-    
+
     }
 
 
@@ -75,6 +78,7 @@ export class PluginVerifyError extends PluginBaseModule {
         <div class="contentloader">
             <div class="textLoader">${this.msg.checkFiles}</div>
             <div class="loader"></div>
+            <button @click=${this.cancelVerify}>${this.msg.cancel}</button>
         </div>
         `
     }
@@ -87,7 +91,7 @@ export class PluginVerifyError extends PluginBaseModule {
 
     renderErros() {
 
-        if(this.listErrors.length <= 0) this.listErrors.push(this.msg.noErros)
+        if (this.listErrors.length <= 0) this.listErrors.push(this.msg.noErros)
         return html`
             ${this.renderHeader()}
             <ul>
@@ -98,7 +102,7 @@ export class PluginVerifyError extends PluginBaseModule {
         `
     }
 
-    renderItem(i:string) {
+    renderItem(i: string) {
         return html`
             <li>
                 ${i}
@@ -111,22 +115,46 @@ export class PluginVerifyError extends PluginBaseModule {
     async prepare() {
         try {
             this.isLoad = true;
+            
+            this.continueVerify = true;
+
             const prj = mls.actual[5].project;
             if (!prj) throw new Error('Not found project');
 
             await initCompileMonaco(prj);
-            const ret = await mls.l2.typescript.compileAll(prj);
+
+            const ret = await mls.l2.typescript.compileAll(prj, this.progressCallback.bind(this));
+
             this.listErrors = ret;
+
+            if (!this.continueVerify) this.fireEvent(true);
+            else this.fireEvent(this.listErrors.length === 0);
+
             this.isLoad = false;
-            
+
         } catch (e: any) {
             this.isLoad = false;
             this.error = e.message;
         }
-        
+
     }
 
+    private cancelVerify() {
+        this.continueVerify = false;
+    };
 
+    private progressCallback(current: number, total: number, results: string[]) {
+        return this.continueVerify;
+    }
+
+    private fireEvent(free:boolean) {
+        mls.events.fire(
+            mls.actualLevel as any,
+            'FreetoSave' as any,
+            JSON.stringify({free:free}),
+            0
+        );
+    }
 }
 
 if (!customElements.get('plugin-verify-error-100554')) {
