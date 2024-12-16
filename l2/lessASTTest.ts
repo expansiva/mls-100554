@@ -21,7 +21,9 @@ export class LessASTTest100554 extends LitElement {
     exeTest = (): string => {
         if (!this.url1) return "undefined;";
         const url = this.url1.uri.toString();
-        const lessCSS = new LessCSS(url); 
+        const edt1 = document.createElement('div');
+        const edt = monaco.editor.create(edt1)
+        const lessCSS = new LessCSS(url, edt); 
         const selector = lessCSS.lessAST.findSelectorByLine(18);
         lessCSS.setSelector(this.rootSelector);
         return `selector: ${this.rootSelector}\n${this.test2(lessCSS, this.rootSelector)}`;

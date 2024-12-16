@@ -104,7 +104,6 @@ const messages: { [key: string]: MessageType } = {
 export class CollabNewProject extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     NEWREPONAME = 'mls-new';
     VALIDADEFILE = 'validate.json';
@@ -291,7 +290,7 @@ export class CollabNewProject extends CollabLitElement {
         this.driverName = value;
 
         if (value) {
-            this.loadOrgsByDriver(value)
+            this.loadOrgsByDriver(value as mls.cbe.Provider)
         } else {
             this.orgSelected = false;
         }
@@ -307,10 +306,10 @@ export class CollabNewProject extends CollabLitElement {
         }
     }
 
-    private async loadOrgsByDriver(driver: string) {
+    private async loadOrgsByDriver(driver: mls.cbe.Provider) {
 
         try {
-            this.instanceDriver = mls.stor.others.getDriver(100529, driver);
+            this.instanceDriver = mls.stor.others.getDriver(driver);
             if (!this.instanceDriver) throw new Error('Invalid driver instance');
             this.loadingAdd1Msg = this.msg.loadingAddText1;
             const userInfo = await this.instanceDriver.getUserInfo();
