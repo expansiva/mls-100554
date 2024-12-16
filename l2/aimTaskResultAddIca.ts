@@ -83,7 +83,7 @@ export class AimTaskResulAddIca extends AimTaskBase {
         if (!this.codeDiff) return;
         this.codeDiff.actualTextResult = this.result.trim();
         this.codeDiff.actualTextDiffModified = this.result.trim();
-        const activeOpService: ServiceSource100554 = getActiveOpServiceIfIsValid(this) as ServiceSource100554;
+        const activeOpService: ServiceSource100554 = getActiveOpServiceIfIsValid(this) as any;
         if (!activeOpService) return;
 
         this.withDiff = false;
