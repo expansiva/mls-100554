@@ -92,7 +92,7 @@ export class LessCSS {
         this.setSelector(this.selector);
     }
 
-    public setStateByLine(lineNumber: number, emitter: 'editor' | 'helper' | 'preview'): void {
+    public setStateByLine(lineNumber: number, lineContent: string, emitter: 'editor' | 'helper' | 'preview'): void {
 
         this.refresh();
 
@@ -104,6 +104,7 @@ export class LessCSS {
         const selector = this.lessAST.findSelectorByLine(lineNumber);
         if (!selector) {
             this.clearState();
+            globalState._ica.less[this.position].lineContent = lineContent;
             globalState.globalStateManagment.setState(`less.${this.position}`, { ...globalState._ica.less[this.position] });
             return;
         }
@@ -111,6 +112,7 @@ export class LessCSS {
         this.setSelector(selector);
         const info = this.lessAST.findInfoByLine(selector, lineNumber);
         globalState._ica.less[this.position].selector = selector;
+        globalState._ica.less[this.position].lineContent = lineContent;
         globalState._ica.less[this.position].key = info?.key;
         globalState._ica.less[this.position].value = info?.value;
         globalState._ica.less[this.position].emitter = emitter;
@@ -174,6 +176,8 @@ export interface ICSSState {
     uri: string,
     selector: string | undefined,
     lineNumber: number | undefined,
+    lineContent: string | undefined,
+
     key: string | undefined,
     value: string | undefined,
     lessCSS: LessCSS | undefined,
