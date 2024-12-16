@@ -46,6 +46,8 @@ export class CssHelperIndex extends IcaLitElement {
     @property({ reflect: true }) actualProp: string | undefined = '';
     @property({ reflect: true }) actualValue: string | undefined = '';
     @property({ reflect: true }) actualSelector: string | undefined = '';
+    @property({ reflect: true }) actualLineContent: string | undefined = '';
+
     @property() actualLineNumber: number | undefined;
     private isFirtsLoading: boolean = true;
     @propertyDataSource() state: ICSSState | undefined;
@@ -55,12 +57,14 @@ export class CssHelperIndex extends IcaLitElement {
     handleIcaStateChange(_key: string, _value: ICSSState) {
 
         if (_key !== `less.${this.position}` || !_value) return;
-        const { key, value, selector, lineNumber } = _value;
+        const { key, value, selector, lineNumber, lineContent } = _value;
 
         this.actualSelector = selector;
         this.actualProp = key;
         this.actualValue = value;
         this.actualLineNumber = lineNumber;
+        this.actualLineContent = lineContent;
+
 
         if (lineNumber && key) {
             this.actualProp = key;
@@ -76,23 +80,42 @@ export class CssHelperIndex extends IcaLitElement {
     async updated(changedProperties: any) {
         if ((changedProperties.has('actualProp') ||
             changedProperties.has('actualValue') ||
-            changedProperties.has('actualLineNumber'))
+            changedProperties.has('actualLineNumber')
+        )
         ) {
-            if (!(this.actualSelector && (this.actualSelector.endsWith(':') || this.actualSelector.endsWith('::')))) {
+            if (
+                !(this.actualSelector && (this.actualSelector.endsWith(':') || this.actualSelector.endsWith('::'))) &&
+                !(this.actualLineContent && (this.actualLineContent.endsWith(':') || this.actualLineContent.endsWith('::')))
+            ) {
+
                 this.avaliablePlugins = this.mergeHelpersArrays(this.avaliablePlugins, this.helpers);
                 this.helpers = this.filterByProp(this.avaliablePlugins, this.actualProp, this.actualValue).sort((a, b) => a.priority - b.priority);
             }
         }
 
-        if (changedProperties.has('actualSelector') &&
+
+        if (changedProperties.has('actualLineContent') &&
             this.actualProp === '' &&
             this.actualValue === '' &&
-            this.actualSelector &&
-            (this.actualSelector.endsWith(':') || this.actualSelector.endsWith('::'))
+            (this.actualLineContent && (this.actualLineContent.endsWith(':') || this.actualLineContent.endsWith('::')) ||
+                this.actualSelector && (this.actualSelector.endsWith(':') || this.actualSelector.endsWith('::')))
         ) {
+
             this.avaliablePlugins = this.mergeHelpersArrays(this.avaliablePlugins, this.helpers);
             this.helpers = this.avaliablePlugins.filter((pl) => pl.tags.includes('pseudo:*'));
+            if (this.helpers[0]) this.helpers[0].mode = 'full';
         }
+
+        // if (changedProperties.has('actualSelector') &&
+        //     this.actualProp === '' &&
+        //     this.actualValue === '' &&
+        //     this.actualSelector &&
+        //     (this.actualSelector.endsWith(':') || this.actualSelector.endsWith('::'))
+        // ) {
+        //     this.avaliablePlugins = this.mergeHelpersArrays(this.avaliablePlugins, this.helpers);
+        //     this.helpers = this.avaliablePlugins.filter((pl) => pl.tags.includes('pseudo:*'));
+        //     if (this.helpers[0]) this.helpers[0].mode = 'full';
+        // }
     }
 
     private mergeHelpersArrays(a: IHelpers[], b: IHelpers[]): IHelpers[] {
@@ -202,6 +225,19 @@ export class CssHelperIndex extends IcaLitElement {
                 help.mode = mode
             });
         }
+
+        if (rc.length <= this.minValueToOpen.full) {
+            rc.forEach((help) => {
+                help.mode = 'full';
+            });
+        }
+
+        if (rc.length > this.minValueToOpen.full) {
+            rc.forEach((help) => {
+                help.mode = 'expanded';
+            });
+        }
+
 
         return rc;
 

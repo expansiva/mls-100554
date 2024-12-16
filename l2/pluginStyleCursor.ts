@@ -9,11 +9,11 @@ import { globalState } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
-    description: 'Um plugin versátil para manter e personalizar propriedades de clip-path CSS. Crie facilmente formas complexas e aplique-as a elementos, permitindo designs de UI exclusivos e criativos com precisão.'
+    description: 'Um plugin versátil para personalizar o cursor no seu site ou aplicativo. Altere o estilo do cursor para atender às suas necessidades, desde cursores personalizados a interações dinâmicas. Ideal para melhorar a experiência do usuário e criar interfaces únicas.'
 }
 
 const message_en = {
-    description: 'A versatile plugin for maintaining and customizing CSS clip-path properties. Easily create complex shapes and apply them to elements, enabling unique and creative UI designs with precision.'
+    description: 'A versatile plugin to customize the cursor on your website or application. Change the cursor style to suit your needs, from custom cursors to dynamic interactions. Perfect for enhancing user experience and creating unique interfaces'
 
 }
 

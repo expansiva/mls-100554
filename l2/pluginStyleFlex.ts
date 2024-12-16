@@ -20,7 +20,7 @@ const message_pt = {
     alignContent: 'Align content',
     alignSelf: 'Align self',
     order: 'Order',
-    description: 'Este plugin permite criar e ajustar colunas de texto de forma prática e eficiente. Com ele, é possível definir o número de colunas, o espaçamento entre elas e outros detalhes de formatação, proporcionando um layout organizado e facilitando a leitura.'
+    description: 'Plugin criado para gerenciar e personalizar propriedades de layout flexível em CSS, ajudando a ajustar comportamentos, alinhamentos e distribuições de forma eficiente.'
 }
 
 const message_en = {
@@ -34,7 +34,7 @@ const message_en = {
     alignContent: 'Align content',
     alignSelf: 'Align self',
     order: 'Order',
-    description: 'This plugin allows for easy and efficient creation and adjustment of text columns. It lets you set the number of columns, spacing between them, and other formatting details, providing an organized layout and enhancing readability.'
+    description: 'Plugin designed to manage and customize flexible layout properties in CSS, enabling efficient adjustments to behavior, alignment, and distribution.'
 
 }
 

@@ -82,7 +82,7 @@ export class PluginStyleColumn extends IcaLitElement {
     handleIcaStateChange(_key: string, _value: ICSSState) {
         if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
-        if (!_value.key || !_value.key.startsWith('column') || _value.key !== 'break-inside') return;
+        if (!_value.key || (!_value.key.startsWith('column')) && _value.key !== 'break-inside') return;
         this._onIcaStateChange();
     }
 
@@ -104,6 +104,7 @@ export class PluginStyleColumn extends IcaLitElement {
                     const propertyValue = rule.style.getPropertyValue(propertyName);
                     const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(propertyName);
                     if (!convertedProp) return;
+
                     (this as any)[convertedProp] = propertyValue;
                 }
             }
@@ -253,7 +254,7 @@ export class PluginStyleColumn extends IcaLitElement {
                                 <option value=""></option>
                                 <option value="none" ?selected=${this.columnSpan === 'none'}>none </option>
                                 <option value="all" ?selected=${this.columnSpan === 'all'} >all</option>
-                                <option value="inherit" ?selected=${this.columnSpan === 'inherit'}inherit</option>
+                                <option value="inherit" ?selected=${this.columnSpan === 'inherit'}>inherit</option>
                                 <option value="initial" ?selected=${this.columnSpan === 'initial'}>initial</option>
                                 <option value="unset" ?selected=${this.columnSpan === 'unset'}>unset</option>
                         </select>   

@@ -18,6 +18,7 @@ import {
 @customElement('plugin-style-index-item-100554')
 export class PluginStyleIndexItem extends CollabLitElement {
 
+
     @property({ reflect: false }) help: IHelpers | undefined;
     @property() position: 'left' | 'right' = 'left';
     @property({ reflect: true }) mode: 'collapsed' | 'expanded' | 'full' = 'collapsed';
@@ -27,6 +28,12 @@ export class PluginStyleIndexItem extends CollabLitElement {
         if (this.mode !== 'collapsed') {
             const container = this.querySelector('.plugin-item-container') as HTMLElement;
             this.openPlugin(container, this.help, false);
+        }
+    }
+
+    updated(_changedProperties: Map<PropertyKey, unknown>) {
+        if (_changedProperties.has('mode') && this.mode) {
+            this.pluginEl?.setAttribute('showFull', this.mode === 'full' ? 'true' : 'false');
         }
     }
 
@@ -78,6 +85,8 @@ export class PluginStyleIndexItem extends CollabLitElement {
             </div>`
     }
 
+    private pluginEl: HTMLElement | undefined;
+
     private async openPlugin(container: HTMLElement, help: IHelpers | undefined, close: boolean) {
         if (!help) return;
 
@@ -88,13 +97,13 @@ export class PluginStyleIndexItem extends CollabLitElement {
 
         if (container.childElementCount === 0) {
             const tag = convertFileNameToTag(help.widget);
-            const item = document.createElement(tag);
-            item.setAttribute('state', `{{ less.${this.position} }}`);
-            item.setAttribute('showFull', this.mode === 'full' ? 'true' : 'false');
-            container.appendChild(item);
+            this.pluginEl = document.createElement(tag);
+            this.pluginEl.setAttribute('state', `{{ less.${this.position} }}`);
+            this.pluginEl.setAttribute('showFull', this.mode === 'full' ? 'true' : 'false');
+            container.appendChild(this.pluginEl);
         } else {
-            const item = container.children[0] as HTMLElement;
-            item.setAttribute('showFull', this.mode === 'full' ? 'true' : 'false');
+            const item = this.pluginEl;
+            if (item) item.setAttribute('showFull', this.mode === 'full' ? 'true' : 'false');
         }
         container.style.display = 'block';
     }
