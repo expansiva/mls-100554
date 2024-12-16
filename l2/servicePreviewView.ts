@@ -38,6 +38,8 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-preview-view-100554')
 export class ServicePreviewView extends LitElement {
 
+    public infoIca: any;
+
     private msg: MessageType = messages['en'];
 
     private file: mls.stor.IFileInfo | undefined = undefined;
