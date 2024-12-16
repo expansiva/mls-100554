@@ -1026,6 +1026,8 @@ export class ServiceSource100554 extends ServiceBase {
 
                 clearTimeout(this.timeHtmlChangeCursor);
                 if (!this._ed1) return;
+                const model = this._ed1.getModel();
+
                 if (this.menu.lastIcon === 'icStyle') {
                     const position = e.position;
                     const { lineNumber } = position;
@@ -1033,14 +1035,14 @@ export class ServiceSource100554 extends ServiceBase {
                     this._ed1.updateOptions({ readOnly: isReadOnlyArea });
                     if (!isReadOnlyArea) {
                         if (this.lessCSS && this.lessCSS.setStateByLine && typeof this.lessCSS.setStateByLine === 'function') {
-                            this.lessCSS.setStateByLine(lineNumber, 'editor');
+                            const content = model?.getLineContent(lineNumber) || '';
+                            this.lessCSS.setStateByLine(lineNumber, content, 'editor');
                         }
                     }
                     return;
                 }
 
                 if (!this._ed1 || this.menu.lastIcon !== 'icHTML') return;
-                const model = this._ed1.getModel();
                 const position = e.position;
                 if (!model) return;
 
@@ -1635,7 +1637,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                     this.lessCSS.setSelector(lastSelector);
                     const monacoPosition = this._ed1.getPosition();
                     if (!monacoPosition) return;
-                    this.lessCSS.setStateByLine(monacoPosition.lineNumber, lastemitter);
+                    const lineContent = model.getLineContent(monacoPosition.lineNumber);
+                    this.lessCSS.setStateByLine(monacoPosition.lineNumber, lineContent, lastemitter);
 
                 }
             }
