@@ -33,6 +33,9 @@ export class PluginVerifyError extends PluginBaseModule {
     private msg = messages['en'];
     private continueVerify = true;
 
+    @property() find: string[] = [];
+    @property() current: string = '0';
+    @property() tot: string = '0';
     @property() error: string = '';
     @property() autoPrepare: boolean = false;
     @property() isLoad: boolean = false;
@@ -76,8 +79,15 @@ export class PluginVerifyError extends PluginBaseModule {
     renderLoad() {
         return html`
         <div class="contentloader">
-            <div class="textLoader">${this.msg.checkFiles}</div>
-            <div class="loader"></div>
+            <div class="textLoader">
+                ${this.msg.checkFiles}
+                <span>${this.current}/${this.tot}</span>
+            </div>
+            <ul>
+
+                ${repeat(this.find, ((key: string) => key) as any, ((k: any, index: any) => this.renderItem(k)) as any)}
+            
+            </ul>
             <button @click=${this.cancelVerify}>${this.msg.cancel}</button>
         </div>
         `
@@ -144,13 +154,16 @@ export class PluginVerifyError extends PluginBaseModule {
     };
 
     private progressCallback(current: number, total: number, results: string[]) {
+        this.current = current.toString();
+        this.tot = total.toString();
+        this.find = results;
         return this.continueVerify;
     }
 
     private fireEvent(free:boolean) {
         mls.events.fire(
             mls.actualLevel as any,
-            'FreetoSave' as any,
+            'ProjectCompilationComplete',
             JSON.stringify({free:free}),
             0
         );

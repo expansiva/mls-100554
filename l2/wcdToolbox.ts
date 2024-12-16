@@ -62,9 +62,10 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
 
     disconnectedCallback() {
-        globalWcd.elICA = undefined;
+        //globalWcd.elICA = undefined;
         globalWcd.myParent = undefined;
-        globalWcd.elMain = undefined;
+        globalWcd.wcdItens = undefined;
+        //globalWcd.elMain = undefined;
         super.disconnectedCallback();
         if (this.resizeObserver) this.resizeObserver.disconnect();
     }
@@ -175,6 +176,9 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
             el.className = `p ${i.position}`;
             el.style.zIndex = '9998';
             el.args = i.args;
+
+            if (!globalWcd.wcdItens) globalWcd.wcdItens = [el];
+            else globalWcd.wcdItens.push(el);
 
             this.appendChild(el);
 
