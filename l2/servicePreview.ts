@@ -9,6 +9,7 @@ import { IWCDParams } from '_100554_serviceIca'
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { globalState } from './_100554_icaState';
+import { convertTagToFileName } from './_100554_utilsLit';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -101,6 +102,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public onClickLink = (op: string): boolean => {
+        if (op === 'opAboutWCD') return this.opAboutWCD();
         if (op === 'opResultHTML') return this.showEditorHTML();
         if (op === 'opResultJS') return this.showResultJS();
 
@@ -136,6 +138,7 @@ export class ServicePreview100554 extends ServiceBase {
     public menu: IMenu = {
         title: 'Preview',
         actions: {
+            opAboutWCD: 'About this WCD',
             opResultHTML: 'Result HTML',
             opResultJS: 'Result Javascript',
         },
@@ -291,6 +294,57 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     // -------------- IMPLEMENTS-----------------
+
+    private opAboutWCD() {
+
+        if (!this.menu.setMode) return false
+        const el = document.createElement("div") as HTMLElement;
+        el.style.padding = '1rem';
+        
+        if (!window['preview'] || !window['preview'].iframe || !window['preview'].iframe.contentWindow || !(window['preview'].iframe.contentWindow as any).wcdState) {
+            el.innerHTML = `<h3>Not found any information about this page</h3>`;
+            this.menu.setMode('page', el);
+            return true;
+        };
+
+        const info = (window['preview'].iframe.contentWindow as any).wcdState;
+        const elOverlay = window['preview'].iframe.contentDocument?.body.querySelector('*[modeoverlay]');
+
+        let txt = '<h3>About this page</h3><ul>';
+
+        if (elOverlay && elOverlay.getAttribute('modeoverlay')) {
+            const n = elOverlay.getAttribute('modeoverlay') as string;
+            txt += `<li><b>Overlay:</b> ${convertTagToFileName(n)}</li>`;
+        }
+
+        if (info.elICA) {
+            txt += `<li><b>Select:</b> ${convertTagToFileName(info.elICA.tagName.toLowerCase())}</li>`;
+        }
+
+        if (info.elMain) {
+            txt += `<li><b>Element render:</b> ${convertTagToFileName(info.elMain.tagName.toLowerCase())}</li>`;
+        }
+
+        if (info.myParent) {
+            txt += `<li><b>Main wcd:</b> ${convertTagToFileName(info.myParent.tagName.toLowerCase())}</li>`;
+        }
+
+        if (info.wcdItens && info.wcdItens.length > 0) {
+            txt += `<li><b>Wcd itens:</b>`;
+            info.wcdItens.forEach((it:any) => {
+                txt += `<br/>${convertTagToFileName(it.tagName.toLowerCase())}`;
+            })
+            txt += `</li>`;
+        }
+
+        txt += `</ul>`;
+
+        el.innerHTML = txt;
+
+        this.menu.setMode('page', el);
+        return true;
+        
+    }
 
     private showEditorHTML() {
         if (this.menu.setMode) {
