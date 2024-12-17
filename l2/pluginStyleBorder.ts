@@ -141,7 +141,7 @@ export class PluginStyleBorder extends IcaLitElement {
         if (hasRuleBorderInAST) {
             this._onIcaStateChange();
         }
- 
+
     }
 
     private clear() {
@@ -557,6 +557,16 @@ export class PluginStyleBorder extends IcaLitElement {
     }
 
 
+    private replaceTokens(cssText: string) {
+        const tokens = this.state?.lessCSS?.lessAST.ast.root;
+        if (!tokens) return cssText;
+        for (const [token, { value }] of Object.entries(tokens)) {
+            const tokenRegex = new RegExp(token, 'g');
+            cssText = cssText.replace(tokenRegex, value);
+        }
+        return cssText;
+    }
+
     private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
 
         const json = this.state?.lessCSS?.lessAST.ast[ruleSelector];
@@ -567,6 +577,8 @@ export class PluginStyleBorder extends IcaLitElement {
             .sort(([, a], [, b]) => (a as { line: number }).line - (b as { line: number }).line);
 
         let ruleText = properties.map(([key, item]) => `${key}: ${(item as { value: string }).value};`).join(' ');
+        ruleText = this.replaceTokens(ruleText)
+    
         const selector = ruleSelector;
         const cssStyleSheet = new CSSStyleSheet();
         const ruleIndex = cssStyleSheet.insertRule(`${selector} { ${ruleText} }`, 0);
