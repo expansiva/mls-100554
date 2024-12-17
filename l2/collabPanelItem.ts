@@ -57,19 +57,20 @@ export class CollabPanelItem extends CollabLitElement {
 
     private clickItem(): void {
 
-        if (this.classList.contains('active')) return;
+        if (!this.classList.contains('active')) {
 
-        let parent = this.closest('collab-panel-100554') as HTMLElement;
-        if (!parent) return;
+            let parent = this.closest('collab-panel-100554') as HTMLElement;
+            if (!parent) return;
 
-        parent = parent.parentElement as HTMLElement;
-        if (!parent) return;
+            parent = parent.parentElement as HTMLElement;
+            if (!parent) return;
 
-        const elActive = parent.querySelector('.active');
-        if (elActive) elActive.classList.remove('active');
+            const elActive = parent.querySelector('.active');
+            if (elActive) elActive.classList.remove('active');
 
-        this.classList.add('active');
-
+            this.classList.add('active');
+        }
+        
         mls.actual[0].setFullName(this.widget);
         const options = {
             shortName: mls.actual[0].path,
