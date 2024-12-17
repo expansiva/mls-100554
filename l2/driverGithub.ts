@@ -615,14 +615,13 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 				}
 
 				body = {
-					base: opt.branchDest,
-					head: sha,
-					commit_message: 'Merge updates from original repository'
+					sha: sha,
+					force: true
 				} as any;
 
-				
-				const ret2 = await fetch(`https://api.github.com/repos/${opt.ownerDest}/${opt.repoDest}/merges`, {
-					method: 'POST',
+
+				const ret2 = await fetch(`https://api.github.com/repos/${opt.ownerDest}/${opt.repoDest}/git/refs/heads/${opt.branchDest}`, {
+					method: 'PATCH',
 					mode: 'cors',
 					cache: 'no-cache',
 					credentials: 'same-origin',
@@ -1372,7 +1371,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			try {
 
 				this.verifyMKey();
-				
+
 				const ret = await fetch(`https://api.github.com/repos/${organization}/${repo}`, {
 					method: 'DELETE',
 					mode: 'cors',
@@ -2030,7 +2029,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		try {
 
-			this.verifyMKey(); 
+			this.verifyMKey();
 			const ret = await (await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/git/blobs/${oid}`, {
 				method: 'GET',
 				mode: 'cors',
@@ -2058,7 +2057,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 	}
 
 	private verifyMKey() {
-		if(!mKey) throw new Error('Please connect to github!')
+		if (!mKey) throw new Error('Please connect to github!')
 	}
 
 	private saveMultipleFilesIO(project: number, add: { path: string, content: string | Blob }[], del: { path: string }[], msg: string): Promise<boolean> {
