@@ -3,8 +3,6 @@ import { LitElement } from 'lit';
 
 export type FormComponent = {
     group: string;
-    description: string;
-    prompt?: string;
     attributes?: string;
     events?: string;
 };

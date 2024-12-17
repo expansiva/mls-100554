@@ -7,7 +7,7 @@ import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { tasks, readTasks, getUserConfigs, saveUserConfigs, IAimColums } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
  
-/// **collab_i18n_start**
+/// **collab_i18n_start** 
 const message_pt = {
     loading: 'Carregando...',
     selectadd: 'por favor selecione abaixo para adicionar',
@@ -405,7 +405,7 @@ export class ServiceAim100554 extends ServiceBase {
 
     onAddTask(action: ResponseFindActions, index: number) {
         const webComponentAddHandle = `_${action.project}_${action.shortName}`;
-        const container = this.shadowRoot?.getElementById('componentContainer');
+        const container = this.querySelector('#componentContainer') as HTMLElement;
         this.loadAndRenderComponent(webComponentAddHandle, container);
     }
 
