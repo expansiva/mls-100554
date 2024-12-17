@@ -317,6 +317,18 @@ function getCssVars(themes: IDarkLight, prefix: ':host' | ':root') {
 
 }
 
+function lessToCssParser(lessCode: string): string {
+
+    const lessVariableRegex = /@([a-zA-Z0-9_-]+)(\s*default\s*([^;]+))?/g;
+    const cssCode = lessCode.replace(lessVariableRegex, (match, tokenName, _, defaultValue) => {
+        if (defaultValue) {
+            return `var(--${tokenName}, ${defaultValue.trim()})`;
+        }
+        return `var(--${tokenName})`;
+    });
+    return cssCode;
+};
+
 function replaceTokens(less: string, themes: IDarkLight, cssVars: string, includeTokens: boolean) {
 
     const { root } = themes;
@@ -327,6 +339,12 @@ function replaceTokens(less: string, themes: IDarkLight, cssVars: string, includ
     else newLess = less;
 
     Object.keys(root).forEach((key) => {
+
+        const variableName5 = `@${key}, `;
+        const escapedVariableName5 = getEscapedVariable(variableName5);
+        const pattern5 = new RegExp(`${escapedVariableName5}\\s*([^;]+);`, 'g');
+        const replacement5 = `var(--${key}, $1);`;
+        newLess = newLess.replace(pattern5, replacement5);
 
         const variableName = `@${key};`;
         const escapedVariableName = getEscapedVariable(variableName);
@@ -351,6 +369,7 @@ function replaceTokens(less: string, themes: IDarkLight, cssVars: string, includ
         const pattern4 = new RegExp(escapedVariableName4, 'g');
         const replacement4 = `var(--${key}) `;
         newLess = newLess.replace(pattern4, replacement4);
+
     });
 
     return newLess;
