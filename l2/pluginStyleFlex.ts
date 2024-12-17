@@ -57,7 +57,7 @@ export function getDescription() {
 export class PluginStyleFlex extends IcaLitElement {
 
     private msg: MessageType = messages['en'];
-        
+
     @propertyDataSource() state: ICSSState | undefined;
     @property() position: 'left' | 'right' = 'left';
 
@@ -66,8 +66,21 @@ export class PluginStyleFlex extends IcaLitElement {
     handleIcaStateChange(_key: string, _value: ICSSState) {
         if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
-        if (!_value.key || !_value.key.startsWith('flex') || !tags.includes(_value.key)) return;
-        this._onIcaStateChange();
+        if (!_value.selector || !_value.lessCSS || !_value.lessCSS.lessAST || !_value.lessCSS.lessAST.ast[_value.selector]) return;
+        const actualAst = _value.lessCSS.lessAST.ast[_value.selector];
+        if (!actualAst) return;
+        let hasRuleFlexInAST: boolean = false;
+        Object.keys(actualAst).forEach((prop) => {
+            if (prop.startsWith('flex') || tags.includes(prop)) hasRuleFlexInAST = true;
+        });
+        this.clear();
+        if (hasRuleFlexInAST) {
+            this._onIcaStateChange();
+        }
+    }
+
+    private clear() {
+        this.setValues();
     }
 
     render() {
@@ -75,16 +88,11 @@ export class PluginStyleFlex extends IcaLitElement {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         return html`
-             ${this.showFull === 'true' ?
-                html`
-                ${this.renderGallery()}
+            ${this.renderGallery()}
+            <div style=" ${this.showFull === 'true' ? 'display:block;' : 'display:none;'}">
                 ${this.renderFlex()}
                 ${this.renderFlexItem()}
-            ` :
-                html`
-                ${this.renderGallery()}
-            `
-            }
+            </div>    
         `;
     }
 
@@ -242,13 +250,16 @@ export class PluginStyleFlex extends IcaLitElement {
 
     private setValues(): void {
 
-        const json:any = this.state?.lessCSS?.lessAST.ast[this.state?.selector || ''];
+        const json: any = this.state?.lessCSS?.lessAST.ast[this.state?.selector || ''];
         if (!json) return;
 
         const all = this.querySelectorAll('*[prop]');
-        Array.from(all).forEach((i:any) => {
+        Array.from(all).forEach((i: any) => {
             const prop = i.getAttribute('prop');
-            if (!json[prop]) return;
+            if (!json[prop]) {
+                i.value = '';
+                return;
+            }
             const v = json[prop].value;
             i.value = v;
         });
@@ -276,7 +287,7 @@ export class PluginStyleFlex extends IcaLitElement {
             el = el.closest('.itemgallery') as HTMLElement;
         }
 
-        let css:string = (el as any).gallery;
+        let css: string = (el as any).gallery;
         if (!el || !css) return;
 
         clearTimeout(this.timeonChange);
@@ -289,7 +300,7 @@ export class PluginStyleFlex extends IcaLitElement {
                 if (!prop.trim() || !v.trim()) return;
                 this.setState(prop.trim(), v.trim());
             })
-            
+
         }, 100);
     }
 

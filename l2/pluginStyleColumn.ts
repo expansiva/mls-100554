@@ -82,9 +82,32 @@ export class PluginStyleColumn extends IcaLitElement {
     handleIcaStateChange(_key: string, _value: ICSSState) {
         if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
-        if (!_value.key || (!_value.key.startsWith('column')) && _value.key !== 'break-inside') return;
-        this._onIcaStateChange();
+        if (!_value.selector || !_value.lessCSS || !_value.lessCSS.lessAST || !_value.lessCSS.lessAST.ast[_value.selector]) return;
+        const actualAst = _value.lessCSS.lessAST.ast[_value.selector];
+        if (!actualAst) return;
+        let hasRuleColumnInAST: boolean = false;
+        Object.keys(actualAst).forEach((prop) => {
+            if ((prop.startsWith('column')) || prop === 'break-inside') hasRuleColumnInAST = true;
+        });
+        this.clear();
+
+        if (hasRuleColumnInAST) {
+            this._onIcaStateChange();
+        }
     }
+
+    private clear() {
+        this.columnCount = undefined;
+        this.columnWidth = undefined;
+        this.columnGap = undefined;
+        this.columnSpan = undefined;
+        this.columnRule = undefined;
+        this.columnRuleColor = undefined;
+        this.columnRuleStyle = undefined;
+        this.columnRuleWidth = undefined;
+        this.breakInside = undefined;
+    }
+
 
     private _onIcaStateChange() {
         if (!this.state || !this.state.lessCSS) return;

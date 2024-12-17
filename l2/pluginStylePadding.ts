@@ -79,10 +79,29 @@ export class PluginStylePadding extends IcaLitElement {
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
     handleIcaStateChange(_key: string, _value: ICSSState) {
+
         if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
-        if (!_value.key || !_value.key.startsWith('padding')) return;
-        this._onIcaStateChange();
+        if (!_value.selector || !_value.lessCSS || !_value.lessCSS.lessAST || !_value.lessCSS.lessAST.ast[_value.selector]) return;
+        const actualAst = _value.lessCSS.lessAST.ast[_value.selector];
+        if (!actualAst) return;
+        let hasRulePaddingInAST: boolean = false;
+        Object.keys(actualAst).forEach((prop) => {
+            if (prop.startsWith('padding')) hasRulePaddingInAST = true;
+        });
+        this.clear();
+
+        if (hasRulePaddingInAST) {
+            this._onIcaStateChange();
+        }
+
+    }
+
+    private clear() {
+        this.paddingLeft = undefined;
+        this.paddingRight = undefined;
+        this.paddingTop = undefined;
+        this.paddingBottom = undefined;
     }
 
     render() {

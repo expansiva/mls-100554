@@ -69,10 +69,31 @@ export class PluginStyleBoxShadow extends IcaLitElement {
     private msg: MessageType = messages['en'];
 
     handleIcaStateChange(_key: string, _value: ICSSState) {
-        if (_key !== `less.${this.position}` || !_value || !_value.key) return;
+        if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
-        if (!tags.includes(_value.key)) return;
-        this._onIcaStateChange();
+        if (!_value.selector || !_value.lessCSS || !_value.lessCSS.lessAST || !_value.lessCSS.lessAST.ast[_value.selector]) return;
+        const actualAst = _value.lessCSS.lessAST.ast[_value.selector];
+        if (!actualAst) return;
+        let hasRuleBoxInAST: boolean = false;
+        Object.keys(actualAst).forEach((prop) => {
+            if (tags.includes(prop)) hasRuleBoxInAST = true;
+        });
+        this.clear();
+
+        if (hasRuleBoxInAST) {
+            this._onIcaStateChange();
+        }
+    }
+
+
+    private clear() {
+        this.boxShadow = undefined;
+        this.color = undefined;
+        this.spread = undefined;
+        this.boxBlur = undefined;
+        this.offsetY = undefined;
+        this.offsetX = undefined;
+        this.shadowMode = 'outset';
     }
 
     private _onIcaStateChange() {

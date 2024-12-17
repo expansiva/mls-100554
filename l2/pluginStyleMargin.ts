@@ -82,9 +82,25 @@ export class PluginStyleSpacing extends IcaLitElement {
     handleIcaStateChange(_key: string, _value: ICSSState) {
         if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
-        if (!_value.key || !_value.key.startsWith('margin')) return;
+        if (!_value.selector || !_value.lessCSS || !_value.lessCSS.lessAST || !_value.lessCSS.lessAST.ast[_value.selector]) return;
+        const actualAst = _value.lessCSS.lessAST.ast[_value.selector];
+        if (!actualAst) return;
+        let hasRuleMarginInAST: boolean = false;
+        Object.keys(actualAst).forEach((prop) => {
+            if (prop.startsWith('margin')) hasRuleMarginInAST = true;
+        });
+        this.clear();
 
-        this._onIcaStateChange();
+        if (hasRuleMarginInAST) {
+            this._onIcaStateChange();
+        }
+    }
+
+    private clear() {
+        this.marginLeft = undefined;
+        this.marginRight = undefined;
+        this.marginTop = undefined;
+        this.marginBottom = undefined;
     }
 
     render() {
