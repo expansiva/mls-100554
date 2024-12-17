@@ -28,7 +28,7 @@ const message_pt = {
     msgBlock: 'Você não tem acesso de escrita neste repositorio, caso deseje criar um fork clique no botão abaixo',
     pullrequestOk: 'Pull request realizado com sucesso',
     errorVerify: 'Foi encontrado arquivos com erros',
-    obsVerify:'O salvamento só será permitido se não houver arquivos com erros ou se a verificação for cancelada!'
+    obsVerify: 'O salvamento só será permitido se não houver arquivos com erros ou se a verificação for cancelada!'
 
 }
 
@@ -50,7 +50,7 @@ const message_en = {
     msgBlock: 'You do not have write access to this repository, if you wish to create a fork click the button below',
     pullrequestOk: 'Pull request completed successfully',
     errorVerify: 'Files with errors were found',
-    obsVerify:'Saving will only be allowed if there are no files with errors, or the check is cancelled!'
+    obsVerify: 'Saving will only be allowed if there are no files with errors, or the check is cancelled!'
 }
 
 type MessageType = typeof message_en;
@@ -128,6 +128,9 @@ export class ServiceSave extends ServiceBase {
         } else if (visible && !reinit) {
             this.updateList();
         }
+
+        
+
     }
 
     // -------------- EVENTS -------------------
@@ -137,9 +140,17 @@ export class ServiceSave extends ServiceBase {
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(3, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(5, 'ProjectSelected', (ev) => { this.init(); });
-        mls.events.addListener(5, 'FreetoSave' as any, this.onFreeToSave.bind(this));
-        this.verifyExitFileChanged();
-        await mls.stor.localDB.getAllProjects();
+        mls.events.addListener(5, 'ProjectCompilationComplete', this.onFreeToSave.bind(this));
+        mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['LevelChanged'] as any, this.onLevelchange.bind(this));
+
+    }
+
+    private onLevelchange: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
+
+        if (!ev.desc) return;
+            const data: { to: number, from: number } = JSON.parse(ev.desc);
+
+        if(data.to === 5 ) this.verifyExitFileChanged();
 
     }
 
@@ -161,7 +172,7 @@ export class ServiceSave extends ServiceBase {
 
     private onFreeToSave: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
-        if (ev.type !== ('FreetoSave' as any)) return;
+        if (ev.type !== ('ProjectCompilationComplete' as any)) return;
         const v = JSON.parse(ev.desc as any);
 
         if (v.free !== true) {
@@ -185,14 +196,14 @@ export class ServiceSave extends ServiceBase {
 
         const array = Object.keys(mls.stor.files);
         let exist = false;
-        array.forEach((i) => {
 
+        for (let i of array) {
             const f = mls.stor.files[i];
-            if (!f) return;
+            if (!f) continue;
             if (f.project === mls.actual[5].project && f.status !== 'nochange')
                 exist = true;
-
-        });
+            if (exist) break;
+        }
 
         if (!exist) return;
         this.toogleBadge(true, '_100554_serviceSave');
@@ -1406,7 +1417,7 @@ export class ServiceSave extends ServiceBase {
         const options = {
             shortName: undefined,
             project: undefined,
-            htmlText: '<plugin-verify-error-100554 autoPrepare="true"></plugin-verify-error-100554><plugin-pullrequest-100554 autoPrepare="true"></plugin-pullrequest-100554>'
+            htmlText: '<plugin-pullrequest-100554 autoPrepare="true"></plugin-pullrequest-100554><plugin-verify-error-100554 autoPrepare="true"></plugin-verify-error-100554>'
         }
 
         mls.events.fire(
