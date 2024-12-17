@@ -56,7 +56,7 @@ export class CollabDsInputSelectColor extends CollabLitElement {
     renderInput() {
         return html`
             <div>
-                <input type="search" .value="${this.onlyNumber(this._valueInput)}" @input="${this.allChange}">
+                <input type="text" .value=${this.onlyNumber(this._valueInput)} @input=${this.changeInput} @wheel=${this.handleWhell}>
                 <select @change="${this.allChange}" .value="px">
                     ${repeat(this.arrayInputSelect, ((key: any) => key) as any,
             ((k: any, index: any) => {
@@ -141,22 +141,66 @@ export class CollabDsInputSelectColor extends CollabLitElement {
     }
 
     private onlyNumber(str: string): string {
-        const regexNum = /\d+/;
+        const regexNum = /-?\d+(?:\.\d+)?/;
         const res = str.match(regexNum);
-        return res && (res as any)[0] ? (res as any)[0] as string : '';
+        return res ? res[0] : '';
     }
 
     private onlyTxt(str: string): string {
         const regexStr = /[a-zA-Z]+/;
         const res = str.match(regexStr);
-        return res && (res as any)[0] ? (res as any)[0] as string : '';
+        return res && (res as any)[0] ? ((res as any)[0] as string).replace('.', '') : 'px';
+    }
+
+    private handleWhell(wheelEvent: WheelEvent) {
+        wheelEvent.preventDefault();
+        const input = wheelEvent.target as HTMLInputElement;
+
+        let currentValue = input.value.replace(',', '.');
+        if (!currentValue) currentValue = '0';
+        let isDecimal = currentValue.includes('.');
+        let parsedValue = parseFloat(currentValue);
+        let isScrollingUp = wheelEvent.deltaY < 0;
+        if (isNaN(parsedValue)) {
+            return;
+        }
+
+
+        if (!isDecimal) parsedValue += (wheelEvent.deltaY < 0 ? 1 : -1);
+        else {
+            let decimalPart = currentValue.split('.')[1] || '';
+            let decimalLength = decimalPart.length;
+
+            if (decimalLength > 0) {
+                let factor = Math.pow(10, decimalLength);
+                if (isScrollingUp) parsedValue = (Math.floor(parsedValue * factor) + 1) / factor; // Incrementa a última casa decimal
+                else parsedValue = (Math.floor(parsedValue * factor) - 1) / factor; // Decrementa a última casa decimal
+
+            }
+        }
+
+        input.value = parsedValue.toString();
+        this.allChange(wheelEvent as any);
+
+    }
+
+
+    private changeInput(e: InputEvent): void {
+        const input = e.target as HTMLInputElement;
+        let value = input.value.replace(/[^0-9.,]/g, '');
+        let dotCount = (value.match(/\./g) || []).length;
+        if (dotCount > 1) value = value.replace(/\.(?=[^\.]*$)/, '');
+        value = value.replace(',', '.');
+        input.value = value;
+        if (value.endsWith('.')) return;
+        this.allChange(e)
     }
 
     private allChange(e: InputEvent): void {
 
         e.stopPropagation();
 
-        let input = this.querySelector('input[type="search"]') as HTMLInputElement;
+        let input = this.querySelector('input[type="text"]') as HTMLInputElement;
         let sel = this.querySelector('select') as HTMLSelectElement;
         let sel2 = this.querySelector('select[prop]') as HTMLSelectElement;
         let color = this.querySelector('input[type="color"]') as HTMLInputElement;
