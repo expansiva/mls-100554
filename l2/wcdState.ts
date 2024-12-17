@@ -1,6 +1,6 @@
 /// <mls shortName="wcdState" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { WCDToolboxMethodos } from './_100554_wcdTypes';
+import { WCDToolboxMethodos, WCDToolboxItemMethodos } from './_100554_wcdTypes';
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 
 /*declare global {
@@ -17,6 +17,7 @@ export const globalWcd: {
     myParent: WCDToolboxMethodos | undefined;
     elMain: HTMLElement | undefined;
     elICA: IcaLitElementBaseMethods | undefined;
+    wcdItens: WCDToolboxItemMethodos[] | undefined;
 } = {} as any;
 
 Object.defineProperty(globalWcd, 'myParent', {
@@ -43,6 +44,15 @@ Object.defineProperty(globalWcd, 'elICA', {
     },
     set: function (v: IcaLitElementBaseMethods | undefined) {
         (window as any).wcdState.elICA = v;
+    }
+});
+
+Object.defineProperty(globalWcd, 'wcdItens', {
+    get: function () {
+        return (window as any).wcdState.wcdItens;
+    },
+    set: function (v: WCDToolboxItemMethodos[] | undefined) {
+        (window as any).wcdState.wcdItens = v;
     }
 });
 
