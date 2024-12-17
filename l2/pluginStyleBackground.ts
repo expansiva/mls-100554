@@ -1,6 +1,6 @@
 /// <mls shortName="pluginStyleBackground" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, repeat } from 'lit';
+import { html, repeat, classMap } from 'lit';
 import { customElement, property, queryAll } from 'lit/decorators.js';
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
@@ -66,17 +66,67 @@ export class PluginCssTokens extends IcaLitElement {
     private actualKey: string = 'background';
 
     handleIcaStateChange(_key: string, _value: ICSSState) {
-        if (_key !== `less.${this.position}` || !_value || !_value.key) return;
+        if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
-        if (!tags.includes(_value.key)) return;
-        this.actualKey = _value.key;
-        this._onIcaStateChange();
+        if (!_value.selector || !_value.lessCSS || !_value.lessCSS.lessAST || !_value.lessCSS.lessAST.ast[_value.selector]) return;
+        const actualAst = _value.lessCSS.lessAST.ast[_value.selector];
+        if (!actualAst) return;
+        let hasRuleBackgroundInAST: boolean = false;
+        this.clear();
+
+        Object.keys(actualAst).forEach((prop) => {
+            if (tags.includes(prop)) {
+                this.actualKey = prop;
+                hasRuleBackgroundInAST = true;
+            }
+        });
+
+        if (hasRuleBackgroundInAST) {
+            this._onIcaStateChange();
+        }
     }
 
+    private clear() {
+        this.css = '';
+        this.info = { tp: 'background', aux: '', itens: [] };
+    }
+
+    // private _onIcaStateChange() {
+    //     if (!this.state || !this.state.lessCSS || !this.state.value) return;
+    //     this.configString(`${this.state.value}`);
+    //     // this.configString(`${this.state.key} : ${this.state.value}`);
+
+    // }
+
     private _onIcaStateChange() {
-        if (!this.state || !this.state.lessCSS || !this.state.value) return;
-        this.configString(`${this.state.value}`);
-        // this.configString(`${this.state.key} : ${this.state.value}`);
+        if (!this.state || !this.state.lessCSS) return;
+        const rule = this.findCSSRuleInIframe(this.state.lessCSS.selector);
+        if (!rule) return;
+        this.setValues(rule);
+    }
+
+
+    private setValues(rule: CSSStyleRule): void {
+        if (rule.style && rule.style.background) {
+            this.configString(rule.style.background);
+        }
+    }
+
+    private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
+
+        const json = this.state?.lessCSS?.lessAST.ast[ruleSelector];
+        if (!json) return null;
+
+        const properties = Object.entries(json)
+            .filter(([key]) => !key.startsWith('_'))
+            .sort(([, a], [, b]) => (a as { line: number }).line - (b as { line: number }).line);
+
+        let ruleText = properties.map(([key, item]) => `${key}: ${(item as { value: string }).value};`).join(' ');
+        const selector = ruleSelector;
+        const cssStyleSheet = new CSSStyleSheet();
+        const ruleIndex = cssStyleSheet.insertRule(`${selector} { ${ruleText} }`, 0);
+        const cssStyleRule = cssStyleSheet.cssRules[ruleIndex];
+        return cssStyleRule as CSSStyleRule;
 
     }
 
@@ -89,18 +139,20 @@ export class PluginCssTokens extends IcaLitElement {
 
     renderBody2() {
         return html`
-        
-            <div class="showtransparent"></div>
-            <div class="showres" style="background:${this.css}"></div>
-            <div class="showConfigContainer" >
+
+            <div class=${classMap({ showtransparent: true, hidden: this.showFull !== 'true' })}></div>
+            <div class=${classMap({ showres: true, hidden: this.showFull !== 'true' })} style="background:${this.css}"></div>
+            <div class=${classMap({ showConfigContainer: this.showFull === 'true' })} >
                 <div class="showConfig" >
                     <h4 style="text-align:center;margin-bottom:1rem">${this.msg.gallery}</h4>
                     ${this.renderGallery()}
                 </div>
-                <div class="showConfig" >
+
+                <div class=${classMap({ showConfig: true, hidden: this.showFull !== 'true' })}>
                     ${this.renderConfig()}
                     ${this.renderItens()}
                 </div>
+            
             
             </div>
 
@@ -108,17 +160,20 @@ export class PluginCssTokens extends IcaLitElement {
     }
 
     renderBody() {
-        return html`
+        return this.renderBody2()
 
-        ${this.showFull === 'true' ?
-                html`
-                ${this.renderBody2()}
-            ` :
-                html`
-                ${this.renderGallery()}
-            `
-            }
-        `;
+
+        // return html`
+
+        // ${this.showFull === 'true' ?
+        //         html`
+        //         ${this.renderBody2()}
+        //     ` :
+        //         html`
+        //         ${this.renderGallery()}
+        //     `
+        //     }
+        // `;
     }
 
     renderConfig() {

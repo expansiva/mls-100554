@@ -74,11 +74,33 @@ export class PluginStyleTransform extends IcaLitElement {
     private msg: MessageType = messages['en'];
 
     handleIcaStateChange(_key: string, _value: ICSSState) {
-        if (_key !== `less.${this.position}` || !_value || !_value.key) return;
+        if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
-        if (!tags.includes(_value.key)) return;
-        this._onIcaStateChange();
+        if (!_value.selector || !_value.lessCSS || !_value.lessCSS.lessAST || !_value.lessCSS.lessAST.ast[_value.selector]) return;
+        const actualAst = _value.lessCSS.lessAST.ast[_value.selector];
+        if (!actualAst) return;
+        let hasRuleTransformInAST: boolean = false;
+        Object.keys(actualAst).forEach((prop) => {
+            if (prop === 'transform') hasRuleTransformInAST = true;
+        });
+        this.clear();
+
+        if (hasRuleTransformInAST) {
+            this._onIcaStateChange();
+        }
     }
+
+    private clear() {
+        this.transform = undefined;
+        this.scaleX = undefined;
+        this.scaleY = undefined;
+        this.rotate = undefined;
+        this.translateX = undefined;
+        this.translateY = undefined;
+        this.skewX = undefined;
+        this.skewY = undefined;
+    }
+
 
     private _onIcaStateChange() {
         if (!this.state || !this.state.lessCSS) return;

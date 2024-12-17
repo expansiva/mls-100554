@@ -126,12 +126,48 @@ export class PluginStyleBorder extends IcaLitElement {
     private tpBorder = ['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset', 'hidden'];
 
     handleIcaStateChange(_key: string, _value: ICSSState) {
+
         if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
-        if (!_value.key || !_value.key.startsWith('border')) return;
-        this._onIcaStateChange();
+        if (!_value.selector || !_value.lessCSS || !_value.lessCSS.lessAST || !_value.lessCSS.lessAST.ast[_value.selector]) return;
+        const actualAst = _value.lessCSS.lessAST.ast[_value.selector];
+        if (!actualAst) return;
+        let hasRuleBorderInAST: boolean = false;
+        Object.keys(actualAst).forEach((prop) => {
+            if (prop.startsWith('border')) hasRuleBorderInAST = true;
+        });
+        this.clear();
+
+        if (hasRuleBorderInAST) {
+            this._onIcaStateChange();
+        }
+ 
     }
 
+    private clear() {
+        this.borderLocked = false;
+        this.borderRadiusLocked = false;
+        this.borderLeft = undefined;
+        this.borderRight = undefined;
+        this.borderTop = undefined;
+        this.borderBottom = undefined;
+        this.borderLeftWidth = undefined;
+        this.borderRightWidth = undefined;
+        this.borderTopWidth = undefined;
+        this.borderBottomWidth = undefined;
+        this.borderLeftStyle = undefined;
+        this.borderRightStyle = undefined;
+        this.borderTopStyle = undefined;
+        this.borderBottomStyle = undefined;
+        this.borderLeftColor = undefined;
+        this.borderRightColor = undefined;
+        this.borderTopColor = undefined;
+        this.borderBottomColor = undefined;
+        this.borderTopLeftRadius = undefined;
+        this.borderTopRightRadius = undefined;
+        this.borderBottomLeftRadius = undefined;
+        this.borderBottomRightRadius = undefined;
+    }
 
     render() {
 

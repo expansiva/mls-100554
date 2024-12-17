@@ -70,10 +70,28 @@ export class PluginStyleTextShadow extends IcaLitElement {
     private tpMeasures = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax', 'ex', 'ch', 'auto'];
 
     handleIcaStateChange(_key: string, _value: ICSSState) {
-        if (_key !== `less.${this.position}` || !_value || !_value.key) return;
+        if (_key !== `less.${this.position}` || !_value) return;
         if (_value.emitter === 'helper') return;
-        if (!tags.includes(_value.key)) return;
-        this._onIcaStateChange();
+        if (!_value.selector || !_value.lessCSS || !_value.lessCSS.lessAST || !_value.lessCSS.lessAST.ast[_value.selector]) return;
+        const actualAst = _value.lessCSS.lessAST.ast[_value.selector];
+        if (!actualAst) return;
+        let hasRuleTextShadowInAST: boolean = false;
+        Object.keys(actualAst).forEach((prop) => {
+            if (prop === 'text-shadow') hasRuleTextShadowInAST = true;
+        });
+        this.clear();
+
+        if (hasRuleTextShadowInAST) {
+            this._onIcaStateChange();
+        }
+    }
+
+    private clear() {
+        this.textShadow = undefined;
+        this.offSetX = undefined;
+        this.offSetY = undefined;
+        this.textBlur = undefined;
+        this.color = undefined;
     }
 
     private _onIcaStateChange() {
