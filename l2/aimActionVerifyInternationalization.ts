@@ -2,7 +2,7 @@
 
 import { html, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { tasks, ITaskFinish, updateTaskOnServer, getInfoMyService } from './_100554_aimHelper';
+import { tasks, ITaskFinish, updateTaskOnServer, getInfoServiceAim, InfoServiceAIM } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 import { ISourceTypescriptData } from './_100554_aimTaskGetSourceLanguageTypescript';
 import { initAimSelectWidget100554 } from './_100554_aimSelectWidget';
@@ -54,10 +54,10 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     public assistant = "gpt3_typescript";
     public title = "Check Internationalization";
 
-    private info: { level: number, position: string, actServiceOp: any } | undefined;
+    private info: InfoServiceAIM | undefined;
 
     render() {
-        this.info = getInfoMyService(this);
+        this.info = getInfoServiceAim(this);
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         return super.render();
@@ -81,7 +81,7 @@ export class AimActionVerifyInternationalization extends AimActionBase {
     }
 
     private handleAdd(): void {
-        if (!this.info || (this.info.actServiceOp && this.info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554')) {
+        if (!this.info || (this.info.activeOppositeService && this.info.activeOppositeService.tagName !== 'SERVICE-SOURCE-100554')) {
             throw new Error('Invalid service opposite side');
         }
         const position = this.info.position === 'left' ? 'right' : 'left';

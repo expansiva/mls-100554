@@ -1,7 +1,7 @@
 /// <mls shortName="aimTaskDsTokens" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { customElement } from 'lit/decorators.js';
-import { getInfoMyService } from "./_100554_aimHelper";
+import { getInfoServiceAim, InfoServiceAIM } from "./_100554_aimHelper";
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { ServiceDsTokens100554 } from "_100554_serviceDsTokens";
 
@@ -25,12 +25,12 @@ class AimTaskDsTokens extends AimTaskBase {
 
         return new Promise<string>(async (resolve, reject) => {
             try {
-                const info = getInfoMyService(this);
+                const info = getInfoServiceAim(this);
                 if (!info) {
                     reject('Not found info in getFileStyle');
                     return;
                 }
-                const activeServiceOp: ServiceDsTokens100554 = info.actServiceOp;
+                const activeServiceOp: ServiceDsTokens100554 = info.activeOppositeService as ServiceDsTokens100554;
                 if (activeServiceOp.tagName !== 'SERVICE-DS-TOKENS-100554') reject('100554_ServiceDsTokens is not active in level 3');
                 const val = activeServiceOp.getEditorSource();
                 this.taskChild.ref = activeServiceOp.getActualRef() || '';

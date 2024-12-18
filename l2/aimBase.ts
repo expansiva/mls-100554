@@ -10,10 +10,6 @@ export class AimBase extends CollabLitElement {
   @property({ type: String, reflect: true }) public mode: mls.cbe.IMode = 'error';
   @property({ type: Number }) public taskIndex = -1;
 
-  createRenderRoot() {
-    return this; // dont use shadow root
-  }
-
   renderToolbar() {
     switch (this.mode) {
       case 'initializing': return this.renderToolBarInProgress();

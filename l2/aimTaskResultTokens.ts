@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
-import { getInfoMyService } from "./_100554_aimHelper";
+import { getInfoServiceAim, InfoServiceAIM } from "./_100554_aimHelper";
 // import { initCollabShowCodeSnippet100554, CollabShowCodeSnippet100554 } from './_100554_collabShowCodeSnippet';
 import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
 
@@ -74,9 +74,9 @@ export class AimTaskResultTokens extends AimTaskBase {
     }
 
     private getActiveOpServiceIfIsValid() {
-        const info = getInfoMyService(this);
+        const info = getInfoServiceAim(this);
         if (!info) return undefined;
-        const activeServiceOp: ServiceDsTokens100554 = info.actServiceOp;
+        const activeServiceOp: ServiceDsTokens100554 = info.activeOppositeService as ServiceDsTokens100554;
         if (activeServiceOp.tagName !== 'SERVICE-DS-TOKENS-100554') return undefined;
         return activeServiceOp;
     }

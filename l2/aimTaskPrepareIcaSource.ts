@@ -1,11 +1,12 @@
 /// <mls shortName="aimTaskPrepareIcaSource" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { customElement } from 'lit/decorators.js';
-import { getInfoMyService } from "./_100554_aimHelper";
+import { getInfoServiceAim, InfoServiceAIM } from "./_100554_aimHelper";
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { convertFileNameToTag } from "./_100554_utilsLit";
 import { getAttributeDefinitionsLit } from './_100554_icaBaseDescription';
 import { IArgsAddIca } from './_100554_aimActionAddIca'
+import { ServiceSource100554 } from './_100554_serviceSource';
 
 @customElement('aim-task-prepare-ica-source-100554')
 export class AimTaskPrepareIcaSource extends AimTaskBase {
@@ -35,7 +36,7 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
 
         return new Promise<string>(async (resolve, reject) => {
             try {
-                const info = getInfoMyService(this);
+                const info = getInfoServiceAim(this);
                 if (!info) {
                     reject('Not found info');
                     return;
@@ -59,8 +60,8 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
                     return;
                 }
                 
-                const activeServiceOp = info.actServiceOp;
-                if (activeServiceOp.tagName !== 'SERVICE-SOURCE-100554') {
+                const activeOppositeService = info.activeOppositeService as ServiceSource100554;
+                if (activeOppositeService?.tagName !== 'SERVICE-SOURCE-100554') {
                     reject('100554_ServiceSource is not active in level 2');
                     return;
                 }
@@ -92,7 +93,7 @@ export class ${className} extends ${extend} {
 }
 `
 
-                this.taskChild.ref = activeServiceOp.getActualRef() || '';
+                this.taskChild.ref = activeOppositeService.getActualRef() || '';
                 resolve(template);
 
             } catch (e: any) {

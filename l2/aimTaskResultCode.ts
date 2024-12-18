@@ -3,9 +3,9 @@
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { AimTaskBase } from "./_100554_aimTaskBase";
-
 import { initCollabShowCodeDiff100554, CollabShowCodeDiff } from './_100554_collabShowCodeDiff';
-import { getInfoMyService, extractScript } from './_100554_aimHelper';
+import { getInfoServiceAim, InfoServiceAIM, extractScript } from './_100554_aimHelper';
+import { ServiceSource100554 } from './_100554_serviceSource';
 
 @customElement('aim-task-result-code-100554')
 export class AimTaskResultCode extends AimTaskBase {
@@ -42,10 +42,11 @@ export class AimTaskResultCode extends AimTaskBase {
 
     private onAccept() {
         console.info('onAccept')
-        const info = getInfoMyService(this);
-        if (!info || !info.actServiceOp) return;
-        if (info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554') return;
-        info.actServiceOp.setEditorValue(this.result);
+        const info = getInfoServiceAim(this);
+        if (!info || !info.activeOppositeService) return;
+        if (info.activeOppositeService.tagName !== 'SERVICE-SOURCE-100554') return;
+        const activeOppositeService = info.activeOppositeService as ServiceSource100554;
+        activeOppositeService.setEditorValue(this.result);
     }
 
     firstUpdated(a: any) {
