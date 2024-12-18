@@ -681,11 +681,12 @@ export class ServiceSource100554 extends ServiceBase {
         const newTSSource = tsSource
             || `/// <mls shortName="${newShortName}" project="${newProject}" enhancement="${newEnhancement}" />
 				\n// typescript new file\n`;
-        await this.createModelTS1(newShortName as string, newProject as number,
+        const modelTS = await this.createModelTS1(newShortName as string, newProject as number,
             newTSSource, true);
         await this.createOrShowModelHtmlOrCss(newShortName, newProject, false, '.html');
         await this.createOrShowModelHtmlOrCss(newShortName, newProject, false, '.less');
         this.showActiveModel();
+        await mls.stor.localStor.setContent(modelTS.storFile, await this.getValueInfo(modelTS));
         this.isNewFile = false;
     }
 
@@ -1270,8 +1271,8 @@ export class ServiceSource100554 extends ServiceBase {
             else if (ext === '.d.ts') model = mls.editor.createModelProjectDefinition(project, src);
             else if (ext === '.less' && storFile) {
                 const lessTokens = await getTokensLess('Default');
-                const lineTokens = `//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
-                src = src.concat(lineTokens);
+                const lineTokens = `\n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
+                src = src.trim().concat(lineTokens);
                 model = mls.editor.createModelStyle(storFile, src);
             }
 
