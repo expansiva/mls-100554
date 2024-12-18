@@ -230,8 +230,8 @@ export class ServicePreview100554 extends ServiceBase {
         try {
 
             if (this.visible === 'false' || !this.visible) return;
-            if (ev.level !== 2 || (ev.type !== 'FileAction')) return;
-            const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
+            if (ev.level !== 2 || (ev.type !== 'FileAction') || !ev.desc) return;
+            const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
             const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
 
             if (
@@ -247,6 +247,7 @@ export class ServicePreview100554 extends ServiceBase {
             if (mls.istrace) console.info('is preview repaint:' + this.watch);
             if (fileAction.action === 'open' && this.watch) {
                 this.loading = true;
+                if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
                 //this.onReloader();
                 return;
             }
@@ -551,7 +552,7 @@ export class ServicePreview100554 extends ServiceBase {
         const consoleEl = document.createElement('collab-console-100554');
         consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
         container.appendChild(consoleEl);
-        
+
         if (this.menu.setMode) this.menu.setMode('page', container);
         return true;
     }
