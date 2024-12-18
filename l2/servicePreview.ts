@@ -1,15 +1,16 @@
 /// <mls shortName="servicePreview" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
-import { initServicePreviewView } from './_100554_servicePreviewView';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { IWCDParams } from '_100554_serviceIca'
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { globalState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
+import './_100554_collabConsole';
+import './_100554_servicePreviewView';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -19,7 +20,9 @@ const message_pt = {
     pause: 'Parar preview',
     dark: ' escuro',
     light: 'claro',
-    help: 'Ajuda'
+    help: 'Ajuda',
+    consoleA: 'Abrir console',
+    consoleD: 'Fechar console',
 }
 
 const message_en = {
@@ -29,7 +32,9 @@ const message_en = {
     pause: 'Pause preview',
     dark: 'dark',
     light: 'light',
-    help: 'Help'
+    help: 'Help',
+    consoleA: 'Open console',
+    consoleD: 'Close console',
 }
 
 type MessageType = typeof message_en;
@@ -44,15 +49,11 @@ const messages: { [key: string]: MessageType } = {
 export class ServicePreview100554 extends ServiceBase {
 
     @property() itens: any = undefined;
-
     @property() msize: string = '';
-
     @property() error: string = '';
-
     @property() watch: boolean = true;
-
+    @property() enabledConsole: boolean = false;
     @property() light: boolean = true;
-
     @property() lang: string = 'en';
 
     private msg: MessageType = messages['en'];
@@ -87,7 +88,6 @@ export class ServicePreview100554 extends ServiceBase {
             editor: undefined,
             iframe: undefined
         };
-        initServicePreviewView;
         this.setEvents();
     }
 
@@ -119,6 +119,7 @@ export class ServicePreview100554 extends ServiceBase {
     public onClickButton = (op: string, opMenu?: string): boolean => {
 
         if (op === 'btWatch') return this.toogleWatch();
+        if (op === 'btConsole') return this.toogleConsole();
         if (op === 'btHelp') return this.onHelpClick();
         if (op === 'btTheme') return this.onBtThemeClick();
 
@@ -151,6 +152,7 @@ export class ServicePreview100554 extends ServiceBase {
             btTokens: this.msg.theme + ';f53f:menu:Default,',
             btVariations: this.msg.variations + ';f1ab:menu-flags:Default,Portugues,Espanhol,Russo',
             btWatch: this.msg.pause + ';Update Preview;f04c;f04b',
+            btConsole: `${this.msg.consoleA};${this.msg.consoleD};f120;f410`,
             btHelp: this.msg.help + ';f059',
         },
         actionDefault: '', // call after close icon clicked
@@ -188,7 +190,6 @@ export class ServicePreview100554 extends ServiceBase {
         });
 
         mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
-
         mls.events.addListener(2, 'styleChanged' as any, this.onStyleChanged.bind(this));
 
     }
@@ -196,12 +197,8 @@ export class ServicePreview100554 extends ServiceBase {
     private onReloader(): void {
         clearTimeout(this.timeEvent);
         this.timeEvent = setTimeout(async () => {
-            //console.time('serviceclick');
             this.onServiceClick(true, false);
-            //console.timeEnd('serviceclick');
-            //console.time('fire');
             mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
-            //console.timeEnd('fire');
         }, 500);
     }
 
@@ -255,6 +252,7 @@ export class ServicePreview100554 extends ServiceBase {
             }
 
             if (this.watch) {
+                this.elPreview = undefined;
                 this.loading = false;
                 this.onReloader();
             }
@@ -280,6 +278,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (darkOrLight === 'dark' && this.menu.selectButton) this.menu.selectButton('btTheme');
         this.setLanguages();
         this.setTheme();
+
     }
 
     updated(changedProperties: Map<string | number | symbol, unknown>): void {
@@ -300,7 +299,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (!this.menu.setMode) return false
         const el = document.createElement("div") as HTMLElement;
         el.style.padding = '1rem';
-        
+
         if (!window['preview'] || !window['preview'].iframe || !window['preview'].iframe.contentWindow || !(window['preview'].iframe.contentWindow as any).wcdState) {
             el.innerHTML = `<h3>Not found any information about this page</h3>`;
             this.menu.setMode('page', el);
@@ -331,7 +330,7 @@ export class ServicePreview100554 extends ServiceBase {
 
         if (info.wcdItens && info.wcdItens.length > 0) {
             txt += `<li><b>Wcd itens:</b>`;
-            info.wcdItens.forEach((it:any) => {
+            info.wcdItens.forEach((it: any) => {
                 txt += `<br/>${convertTagToFileName(it.tagName.toLowerCase())}`;
             })
             txt += `</li>`;
@@ -343,7 +342,7 @@ export class ServicePreview100554 extends ServiceBase {
 
         this.menu.setMode('page', el);
         return true;
-        
+
     }
 
     private showEditorHTML() {
@@ -414,11 +413,20 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private toogleWatch(): boolean {
+        this.elPreview = undefined;
         this.watch = !this.watch;
         if (this.watch) {
             this.onReloader();
         }
         return this.watch;
+    }
+
+    private toogleConsole(): boolean {
+        this.enabledConsole = !this.enabledConsole;
+        const collabConsole = this.parentElement?.querySelector('collab-console-100554') as HTMLElement;
+        if (!collabConsole) return this.enabledConsole;
+        collabConsole.style.display = this.enabledConsole ? 'block' : 'none';
+        return !this.enabledConsole;
     }
 
     private onHelpClick(): boolean {
@@ -515,12 +523,19 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private async preview(mode: string) {
+
         if (!(mls.actual[2] as any).left) return true;
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
         this.menu.title = 'Preview: ' + fullname;
         if (this.menu.updateTitle) this.menu.updateTitle();
-
         await this.fireWcdChanges();
+        this.lastMode = mode;
+        this.lastLevel = this.level;
+
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.height = this.style.height;
 
         const doc = document.createElement('service-preview-view-100554');
         doc.setAttribute('page', fullname);
@@ -528,11 +543,16 @@ export class ServicePreview100554 extends ServiceBase {
         doc.setAttribute('mode', mode);
         doc.setAttribute('actualtheme', this.actualTheme);
         doc.setAttribute('lang', this.lang);
-
+        doc.style.flex = '1';
         (doc as any).father = this;
         this.elPreview = doc;
-        if (this.menu.setMode) this.menu.setMode('page', doc);
-        this.lastLevel = this.level;
+        container.appendChild(doc);
+
+        const consoleEl = document.createElement('collab-console-100554');
+        consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
+        container.appendChild(consoleEl);
+        
+        if (this.menu.setMode) this.menu.setMode('page', container);
         return true;
     }
 
