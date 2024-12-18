@@ -1,6 +1,6 @@
 /// <mls shortName="icaBaseDescription" project="100554" enhancement="_blank" />
 
-import * as icaBase from "./_100554_icaTypes";
+import * as icaTypes from "./_100554_icaTypes";
 import { getMessageKey } from "./_100554_collabLitElement";
 
 /// **collab_i18n_start**
@@ -188,9 +188,52 @@ const message_pt = {
   eventDescApreMessageOpen: "Evento disparado quando o elemento de messagem é exibido",
   eventDescApreMessageClose: "Evento disparado quando o elemento de messagem é fechado.",
   eventDescApreMessageDismiss: "Evento disparado quando o elemento é descartado pelo usuário.",
-}
+  attrDescName: "The name of the input, used for form submissions.",
+  attrDesc_name: "O nome do campo de entrada, usado para submissões de formulário.",
+  attrDesc_hint: "Uma dica ou texto auxiliar exibido para orientar o usuário.",
+  attrDesc_label: "O rótulo do campo de entrada, fornecendo contexto ao usuário.",
+  attrDesc_required: "Indica se o campo de entrada é obrigatório.",
+  attrDesc_disabled: "Desativa o campo de entrada, tornando-o não editável.",
+  attrDesc_maxvalue: "O valor máximo permitido para o campo de entrada.",
+  attrDesc_minvalue: "O valor mínimo permitido para o campo de entrada.",
+  attrDesc_step: "O intervalo entre os valores válidos para o campo de entrada.",
+  attrDesc_placeholder: "Texto de espaço reservado exibido quando o campo está vazio.",
+  attrDesc_pattern: "Uma expressão regular para validação do campo de entrada.",
+  attrDesc_errormessage: "Mensagem de erro personalizada exibida quando a validação falha.",
+  attrDesc_autofocus: "Foca automaticamente no campo de entrada quando a página é carregada.",
+  attrDesc_maxlength: "Especifica o número máximo de caracteres permitidos.",
+  attrDesc_minlength: "Especifica o número mínimo de caracteres exigidos.",
+  attrDesc_autoCapitalize: "Controla o comportamento de capitalização do texto ('off', 'none', 'on', 'sentences', 'words', 'characters').",
+  attrDesc_autocorrect: "Habilita ou desabilita a correção automática de texto ('off' ou 'on').",
+  attrDesc_autocomplete: "Fornece sugestões de preenchimento automático com base no contexto do campo.",
+  attrDesc_validationMessage: "Uma mensagem personalizada exibida se o campo falhar na validação.",
+  attrDesc_debounce: "Especifica um atraso (em milissegundos) para o evento `input`.",
+  attrDesc_value: "O valor atual do campo de entrada.",
+  attrDesc_options: "Uma lista de opções para o campo de entrada, geralmente usada para dropdowns ou elementos de seleção.",
+  attrDesc_selectedvalue: "O valor da opção selecionada em um dropdown ou elemento de seleção.",
+  attrDesc_inputmode: "Sugere o tipo de dado que pode ser inserido ('none', 'text', 'decimal', etc.).",
+  attrDesc_title: "O atributo título para o componente, frequentemente usado para dicas ou contexto adicional.",
+  attrDesc_icon: "Especifica um ícone a ser exibido dentro do componente.",
+  attrDesc_form: "Especifica o ID do formulário ao qual o campo de entrada está associado.",
+  attrDesc_text: "Conteúdo textual a ser exibido dentro do componente.",
+  attrDesc_src: "Especifica o URL de origem para elementos de mídia, como imagens ou vídeos.",
+  attrDesc_alt: "Texto alternativo para imagens, usado quando a imagem não pode ser exibida.",
+  attrDesc_width: "Especifica a largura do componente (por exemplo, imagens, vídeos).",
+  attrDesc_height: "Especifica a altura do componente (por exemplo, imagens, vídeos).",
+  attrDesc_autoplay: "Inicia automaticamente a reprodução de mídia quando o componente é carregado.",
+  attrDesc_controls: "Exibe controles de reprodução de mídia para elementos de vídeo ou áudio.",
+  attrDesc_loop: "Indica se a mídia deve ser reproduzida em loop ao atingir o final.",
+  attrDesc_preload: "Especifica como o navegador deve pré-carregar mídia ('auto', 'metadata', 'none').",
+  attrDesc_open: "Indica se um elemento expansível ou modal está atualmente aberto.",
+  attrDesc_language: "Especifica o idioma do conteúdo ou do componente.",
+  attrDesc_languages: "Uma lista de idiomas suportados pelo componente.",
+  attrDesc_framework: "Especifica o framework sendo usado para renderizar o componente.",
+  attrDesc_renderer: "Define o renderizador ou mecanismo de renderização usado pelo componente.",
+  attrDesc_readonly: "Torna o campo de entrada somente leitura, impedindo modificações pelo usuário.",
+};
 
 const message_en = {
+  attrDescName: "The name of the input, used for form submissions.",
   dForms: "Components for creating and manipulating forms, allowing structured data entry by the user.",
   dNavigation: "Components designed to facilitate user movement through the application, encompassing both navigation between different pages and content manipulation within the same page.",
   dApresentation: "Components designed to present static content in different formats, such as text, images, videos, sounds, and graphics.",
@@ -372,8 +415,49 @@ const message_en = {
   eventDescCalendarClose: "Event triggered when the calendar is closed.",
   eventDescApreMessageOpen: "Event triggered when the message element is displayed.",
   eventDescApreMessageClose: "Event triggered when the message element is closed.",
-  eventDescApreMessageDismiss: "Event triggered when the message element is dismissed by the user."
-}
+  eventDescApreMessageDismiss: "Event triggered when the message element is dismissed by the user.",
+  attrDesc_name: "The name of the input, used for form submissions.",
+  attrDesc_hint: "A hint or helper text displayed to guide the user.",
+  attrDesc_label: "The label for the input field, providing context to the user.",
+  attrDesc_required: "Indicates whether the input is required.",
+  attrDesc_disabled: "Disables the input field, making it uneditable.",
+  attrDesc_maxvalue: "The maximum value allowed for the input.",
+  attrDesc_minvalue: "The minimum value allowed for the input.",
+  attrDesc_step: "The interval between legal numbers in the input.",
+  attrDesc_placeholder: "Placeholder text displayed when the input is empty.",
+  attrDesc_pattern: "A regular expression for input validation.",
+  attrDesc_errormessage: "Custom error message displayed when validation fails.",
+  attrDesc_autofocus: "Automatically focuses the input field when the page loads.",
+  attrDesc_maxlength: "Specifies the maximum number of characters allowed.",
+  attrDesc_minlength: "Specifies the minimum number of characters required.",
+  attrDesc_autoCapitalize: "Controls text capitalization behavior ('off', 'none', 'on', 'sentences', 'words', or 'characters').",
+  attrDesc_autocorrect: "Enables or disables automatic text correction ('off' or 'on').",
+  attrDesc_autocomplete: "Provides autocomplete suggestions based on the input's context.",
+  attrDesc_validationMessage: "A custom message displayed if the field fails validation.",
+  attrDesc_debounce: "Specifies a delay (in milliseconds) for the `input` event.",
+  attrDesc_value: "The current value of the input field.",
+  attrDesc_options: "A list of options for the input, typically used for dropdowns or select elements.",
+  attrDesc_selectedvalue: "The value of the selected option in a dropdown or select element.",
+  attrDesc_inputmode: "Hints at the type of data that might be entered ('none', 'text', 'decimal', etc.).",
+  attrDesc_title: "The title attribute for the component, often used for tooltips or additional context.",
+  attrDesc_icon: "Specifies an icon to be displayed within the component.",
+  attrDesc_form: "Specifies the ID of the form that the input is associated with.",
+  attrDesc_text: "Text content to be displayed within the component.",
+  attrDesc_src: "Specifies the source URL for media elements such as images or videos.",
+  attrDesc_alt: "Alternative text for images, used when the image cannot be displayed.",
+  attrDesc_width: "Specifies the width of the component (e.g., images, videos).",
+  attrDesc_height: "Specifies the height of the component (e.g., images, videos).",
+  attrDesc_autoplay: "Automatically starts playback of media when the component is loaded.",
+  attrDesc_controls: "Displays media playback controls for video or audio elements.",
+  attrDesc_loop: "Indicates whether the media should loop when it reaches the end.",
+  attrDesc_preload: "Specifies how the browser should preload media ('auto', 'metadata', 'none').",
+  attrDesc_open: "Indicates whether a collapsible or modal element is currently open.",
+  attrDesc_language: "Specifies the language of the content or component.",
+  attrDesc_languages: "A list of supported languages for the component.",
+  attrDesc_framework: "Specifies the framework being used for rendering the component.",
+  attrDesc_renderer: "Defines the renderer or rendering engine used for the component.",
+  attrDesc_readonly: "Makes the input field read-only, preventing user modifications."
+};
 
 type MessageType = typeof message_en;
 
@@ -383,446 +467,467 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-const lang = getMessageKey(messages);
+let lang = getMessageKey(messages);
 let msg: MessageType = messages[lang];
 
-const icaDescriptions: icaBase.FormComponent[] = [
+const icaDescriptions: icaTypes.FormComponent[] = [
   // definition principal group 
-  { group: "Forms", description: msg.dForms },
-  { group: "Navigation", description: msg.dNavigation },
-  { group: "Apresentation", description: msg.dApresentation },
-  { group: "Layout", description: msg.dLayout },
-  { group: "Blocks", description: msg.dBlocks },
+  { group: "Forms" },
+  { group: "Navigation" },
+  { group: "Apresentation" },
+  { group: "Layout" },
+  { group: "Blocks" },
 
   // definition sub group 1 (2 itens 'a / b')
-  { group: "Forms / Input", description: msg.dFInput },
-  { group: "Forms / Records", description: msg.dFRecords },
-  { group: "Forms / Tree", description: msg.dFTree },
-  { group: "Forms / Submit", description: msg.dFSubmit },
+  { group: "Forms / Input" },
+  { group: "Forms / Records" },
+  { group: "Forms / Tree" },
+  { group: "Forms / Submit" },
 
-  { group: "Navigation / Links", description: msg.dNLinks },
-  { group: "Navigation / Content", description: msg.dNContent },
+  { group: "Navigation / Links" },
+  { group: "Navigation / Content" },
 
-  { group: "Apresentation / Text", description: msg.dAText },
-  { group: "Apresentation / Images", description: msg.dAImages },
-  { group: "Apresentation / Video", description: msg.dAVideos },
-  { group: "Apresentation / Sound", description: msg.dASound },
-  { group: "Apresentation / Charts", description: msg.dACharts },
-  { group: "Apresentation / Animations", description: msg.dAAnimations },
-  { group: "Apresentation / Embeds", description: msg.dAEmbeds },
-  { group: "Apresentation / Messages", description: msg.dAMessages },
+  { group: "Apresentation / Text" },
+  { group: "Apresentation / Images" },
+  { group: "Apresentation / Video" },
+  { group: "Apresentation / Sound" },
+  { group: "Apresentation / Charts" },
+  { group: "Apresentation / Animations" },
+  { group: "Apresentation / Embeds" },
+  { group: "Apresentation / Messages" },
 
-  { group: "Layout / Flow", description: msg.dLFlow },
-  { group: "Layout / Group", description: msg.dLGroup },
+  { group: "Layout / Flow" },
+  { group: "Layout / Group" },
 
-  { group: "Blocks / Viewer", description: msg.dBView },
-  { group: "Blocks / Plugins", description: msg.dBPlugins },
-  { group: "Blocks / Projects", description: msg.dBProjects },
+  { group: "Blocks / Viewer" },
+  { group: "Blocks / Plugins" },
+  { group: "Blocks / Projects" },
 
 
   // definition final group (3 itens 'a / b / c')
   // Input
   {
     group: "Forms / Input / Number",
-    description: msg.dFINumber,
-    prompt: "O componente, um 'Input / Form / Number', deve apresentar uma combinação de uma caixa de entrada de texto e um controle deslizante (slider). Ele deve permitir que os usuários digitem um número diretamente na caixa de entrada, ajustando o controle deslizante de acordo dentro de um intervalo mínimo e máximo pré-definido. Se o usuário inserir um número inválido, uma mensagem de erro vermelha deve aparecer abaixo do componente.",
-    attributes: "name,datasource,placeholder,label,pattern,errormessage,maxvalue,minvalue,step,required,disabled,readonly,autofocus,hint,inputmode",
+    attributes: "name,value,placeholder,label,pattern,errormessage,maxvalue,minvalue,step,required,disabled,readonly,autofocus,hint,inputmode",
     events: "change,input,focus,blur"
   },
   {
     group: "Forms / Input / String",
-    description: msg.dFIString,
-    attributes: "name,hint,label,required,disabled,readonly,maxlength,minlength,placeholder,pattern,errormessage,autofocus,autoCapitalize,autocorrect,autocomplete, datasource",
+    attributes: "name,hint,label,required,disabled,readonly,maxlength,minlength,placeholder,pattern,errormessage,autofocus,autoCapitalize,autocorrect,autocomplete,value,validationMessage,debounce",
     events: "change,input,focus,blur,invalid"
   },
   {
     group: "Forms / Input / Boolean",
-    description: msg.dFIBoolean,
+    attributes: "name,label,hint,required,disabled,readonly,autofocus,checked,errormessage",
     events: "change,focus,blur"
   },
   {
     group: "Forms / Input / Date",
-    description: msg.dFIDate,
+    attributes: "name,label,hint,required,disabled,readonly,autofocus,value,pattern,errormessage,placeholder",
     events: "change,input,focus,blur,invalid"
   },
   {
     group: "Forms / Input / Time",
-    description: msg.dFITime,
+    attributes: "name,label,hint,required,disabled,readonly,autofocus,value,pattern,errormessage,placeholder",
     events: "change,input,focus,blur,invalid"
   },
   {
     group: "Forms / Input / Date Range",
-    description: msg.dFIDateRange,
+    attributes: "name,label,hint,required,disabled,readonly,autofocus,pattern,errormessage,startValue,endValue",
     events: "change,input,focus,blur,invalid"
   },
   {
     group: "Forms / Input / Select One",
-    description: msg.dFISelectOne,
     attributes: "hint,label,required,disabled,options,selectedvalue",
     events: "change,focus,blur"
   },
   {
     group: "Forms / Input / MultiSelect",
-    description: msg.dFIMultSelect,
+    attributes: "hint,label,required,disabled,options,selectedvalue",
     events: "change,focus,blur"
   },
   {
     group: "Forms / Input / Color",
-    description: msg.dFIColor,
+    attributes: "name,label,hint,required,disabled,readonly,autofocus,value,pattern,errormessage,placeholder",
     events: "change,input,focus,blur,invalid"
   },
   {
     group: "Forms / Input / Editor",
-    description: msg.dFIEditor,
+    attributes: "name,label,hint,required,disabled,readonly,autofocus,value,errormessage",
     events: "change,input,focus,blur"
   },
   {
     group: "Forms / Input / Feedback",
-    description: msg.dFIFeedBack,
+    attributes: "name,label,hint,required,disabled,readonly,autofocus,value,errormessage",
     events: "change,input,focus,blur"
   },
   {
     group: "Forms / Input / File",
-    description: msg.dFIFile,
+    attributes: "name,label,hint,required,disabled,readonly,autofocus,errormessage,accept,multiple",
     events: "change,focus,blur"
   },
 
-  // Records
   {
     group: "Forms / Records / Table",
-    description: msg.dFRTable,
+    attributes: "data,columns,selectedRow,filterable,sortable",
     events: "row-click,cell-click,sort,filter"
   },
   {
     group: "Forms / Records / List",
-    description: msg.dFRList,
-    events: 'item-selected,focus'
+    attributes: "items,selectedItem",
+    events: "item-selected,focus"
   },
   {
     group: "Forms / Records / Timeline",
-    description: msg.dFRTimeline,
-    events: 'item-selected,focus'
+    attributes: "data,selectedItem",
+    events: "item-selected,focus"
   },
   {
     group: "Forms / Records / Cards",
-    description: msg.dFRCards,
-    events: 'click, mouseenter,mouseleave'
+    attributes: "cardsData,selectedCard",
+    events: "click,mouseenter,mouseleave"
   },
   {
     group: "Forms / Records / Map (Geo)",
-    description: msg.dFRMap,
+    attributes: "latitude,longitude,zoom,markers,mapType",
     events: "click,load,dragstart,dragend,zoom,resize,error"
   },
   {
     group: "Forms / Records / Table with Pagination",
-    description: msg.dFRPagination,
+    attributes: "data,columns,selectedRow,filterable,sortable,pageable",
     events: "row-click,cell-click,sort,filter,pagination"
   },
   {
     group: "Forms / Records / Table with Infinite Scroll",
-    description: msg.dFRInfinity,
+    attributes: "data,columns,selectedRow,filterable,sortable,infiniteScroll",
     events: "row-click,cell-click,sort,filter,loadmore"
   },
 
   // Tree
   {
     group: "Forms / Tree / Tree View",
-    description: msg.dFTView,
+    attributes: "data,selectedNode,expandedNodes",
     events: "tree-click,tree-toggle,selection-change"
   },
   {
     group: "Forms / Tree / Nested Dropdown",
-    description: msg.dFTDropdown,
+    attributes: "data,selectedValue,disabled,required,placeholder",
     events: "change,blur,focus"
   },
   {
     group: "Forms / Tree / Nested Accordions",
-    description: msg.dFTAccordions,
+    attributes: "data,expandedSections,multiExpand,disabled",
     events: "toggle"
   },
-  { group: "Forms / Tree / Tag Cloud", description: msg.dFTTags },
-  { group: "Forms / Tree / Mind Map", description: msg.dFTMap },
+  {
+    group: "Forms / Tree / Tag Cloud",
+    attributes: "tagsData,selectedTags",
+    events: "tag-click,selection-change"
+  },
+  {
+    group: "Forms / Tree / Mind Map",
+    attributes: "data,selectedNode,layout",
+    events: "node-click,expand,collapse"
+  },
 
   // Submit
   {
     group: "Forms / Submit / Submit",
-    description: msg.dFSSubmit,
     attributes: "name,title,icon,text,disabled,form",
     events: "click,submit,focus,blur"
   },
   {
     group: "Forms / Submit / Cancel",
-    description: msg.dFSCancel,
+    attributes: "name,title,icon,text,disabled,form",
     events: "click,submit,focus,blur"
   },
   {
     group: "Forms / Submit / Clear",
-    description: msg.dFSClear,
+    attributes: "name,title,icon,text,disabled,form",
     events: "click,submit,focus,blur"
   },
   {
     group: "Forms / Submit / Send External",
-    description: msg.dFSSend,
+    attributes: "name,title,icon,text,disabled,form",
     events: "click,submit,focus,blur"
   },
 
   // Links
   {
     group: "Navigation / Links / Menus",
-    description: msg.dNLMenus,
+    attributes: "items,selectedItem,openState,disabled",
     events: "select,open,close,focus,blur"
   },
   {
     group: "Navigation / Links / Button",
-    description: msg.dNLButtons,
-    events: "click,dblclick,focus,blur,mouseenter,mouseleave",
+    attributes: "name,label,disabled,icon",
+    events: "click,dblclick,focus,blur,mouseenter,mouseleave"
   },
   {
     group: "Navigation / Links / Links",
-    description: msg.dNLLinks,
+    attributes: "href,target,rel,disabled",
     events: "click,focus,blur"
   },
   {
     group: "Navigation / Links / Breadcrumbs",
-    description: msg.dNLBreadcrumbs,
+    attributes: "items,separator",
     events: "breadcrumb-click"
   },
   {
     group: "Navigation / Links / Anchors",
-    description: msg.dNLAnchors,
+    attributes: "href,target,rel,disabled",
     events: "click,focus,blur"
   },
-
   // Content
   {
     group: "Navigation / Content / Tab",
-    description: msg.dNCTab,
+    attributes: "tabs,selectedTab,disabled",
     events: "tab-changed"
   },
   {
     group: "Navigation / Content / Scenary",
-    description: msg.dNCScenary,
+    attributes: "scenes,selectedScene,disabled",
     events: "scenary-changed"
   },
   {
     group: "Navigation / Content / Stepper",
-    description: msg.dNCStepper
+    attributes: "steps,currentStep,disabled"
   },
   {
     group: "Navigation / Content / Toolbar",
-    description: msg.dNCToolbar,
+    attributes: "items,orientation,disabled",
     events: "click"
   },
   {
     group: "Navigation / Content / Accordion",
-    description: msg.dNCAccordion,
-    attributes: "open,text",
+    attributes: "open,text,multiple,disabled",
     events: "open,close,change"
   },
   {
     group: "Navigation / Content / Popup",
-    description: msg.dNCPopup,
+    attributes: "open,title,content,modal",
     events: "open,close,confirm,cancel"
   },
   {
     group: "Navigation / Content / Scrollspy",
-    description: msg.dNCScrollspy,
+    attributes: "targets,activeTarget,offset",
     events: "scroll,activate"
   },
 
   // Text
   {
     group: "Apresentation / Text / Text",
-    description: msg.dATText,
     attributes: "text,type",
     events: "click,focus,blur"
   },
   {
     group: "Apresentation / Text / Code",
-    description: msg.dATCode,
     attributes: "text,language,languages",
     events: "click"
   },
   {
     group: "Apresentation / Text / Banner",
-    description: msg.dATBanner,
+    attributes: "text,src,alt",
     events: "click,focus,blur"
   },
   {
     group: "Apresentation / Text / Quote",
-    description: msg.dATQuote,
+    attributes: "text,cite",
     events: "click,focus,blur"
   },
   {
     group: "Apresentation / Text / Rich Text",
-    description: msg.dATRich,
+    attributes: "content,editable",
     events: "click,focus,blur"
   },
 
   // Images
   {
     group: "Apresentation / Images / Images",
-    description: msg.dAIImages,
-    events: "click",
-    attributes: "src,alt,width,height"
+    attributes: "src,alt,width,height",
+    events: "click"
   },
   {
     group: "Apresentation / Images / Icons",
-    description: msg.dAIIcons,
+    attributes: "icon,name,size,color,alt",
     events: "click"
   },
   {
     group: "Apresentation / Images / Avatar",
-    description: msg.dAIAvatar,
+    attributes: "src,alt,size,shape",
     events: "click"
   },
   {
     group: "Apresentation / Images / Gallery",
-    description: msg.dAIGallery,
+    attributes: "images,selectedIndex,thumbnails,showNavigation",
     events: "item-selected,navigate-previous,navigate-next"
   },
   {
     group: "Apresentation / Images / Carousel",
-    description: msg.dAICarousel,
+    attributes: "slides,autoplay,interval,loop",
     events: "slide-click,slide-change,slide-start,slide-end"
   },
   {
     group: "Apresentation / Images / Sliders",
-    description: msg.dAISliders,
+    attributes: "slides,autoplay,interval,loop",
     events: "slide-click,slide-change,slide-start,slide-end"
   },
   {
     group: "Apresentation / Images / Maps",
-    description: msg.dAIMaps,
+    attributes: "latitude,longitude,zoom,markers,mapType",
     events: "click,load,zoom,resize"
   },
 
   // Video
   {
     group: "Apresentation / Video / Embedded Video",
-    description: msg.dAVEmbedded,
     attributes: "src,autoplay,controls,loop,preload",
     events: "click,play,pause,ended"
   },
   {
     group: "Apresentation / Video / Image Video",
-    description: msg.dAVImage,
-    events: "click,play,pause,ended",
+    attributes: "src,poster,autoplay,controls,loop,preload",
+    events: "click,play,pause,ended"
   },
   {
     group: "Apresentation / Video / Video Playlist",
-    description: msg.dAVVideo,
+    attributes: "videos,selectedVideo,autoplay,controls,loop",
     events: "click,play,pause,ended"
   },
 
   // Sound
   {
     group: "Apresentation / Sound / Player",
-    description: msg.dASPlayer,
+    attributes: "src,autoplay,controls,loop,preload",
     events: "click,play,pause,ended"
   },
   {
     group: "Apresentation / Sound / Sound Effects",
-    description: msg.dASSound,
+    attributes: "sounds,selectedSound,autoplay",
     events: "click,play,pause,ended"
   },
   {
     group: "Apresentation / Sound / Podcast Player",
-    description: msg.dASPodcast,
+    attributes: "podcastEpisodes,selectedEpisode,autoplay,controls,loop,preload",
     events: "click,play,pause,ended"
   },
 
   // Charts
   {
     group: "Apresentation / Charts / 2D",
-    description: msg.dAC2d,
-    attributes: 'framework,datasource,renderer',
-    events: "click,focus,focus,blur"
+    attributes: "framework,datasource,renderer",
+    events: "click,focus,blur"
   },
   {
     group: "Apresentation / Charts / 3D",
-    description: msg.dAC3d,
-    events: "click,focus,focus,blur"
+    attributes: "framework,datasource,renderer,options3d",
+    events: "click,focus,blur"
   },
 
   // Animations
-  { group: "Apresentation / Animations / Loading", description: msg.dAALoading },
-  { group: "Apresentation / Animations / OnClick", description: msg.dAAClick },
-  { group: "Apresentation / Animations / JavaScript Animations", description: msg.dAAJava },
-  { group: "Apresentation / Indicators", description: msg.dAAIndicators },
+  {
+    group: "Apresentation / Animations / Loading",
+    attributes: "type,size,color,duration,autoplay",
+    events: "start,end"
+  },
+  {
+    group: "Apresentation / Animations / OnClick",
+    attributes: "animationType,duration,trigger,iterations",
+    events: "animation-start,animation-end"
+  },
+  {
+    group: "Apresentation / Animations / JavaScript Animations",
+    attributes: "script,options",
+    events: "animation-start,animation-end"
+  },
+  {
+    group: "Apresentation / Indicators",
+    attributes: "type,value,max,label",
+    events: "change"
+  },
 
   // Embeds
-  { group: "Apresentation / Embeds / Social Media Posts", description: msg.dAEPost },
-  { group: "Apresentation / Embeds / Social Media Feeds", description: msg.dAEFeed },
-
+  {
+    group: "Apresentation / Embeds / Social Media Posts",
+    attributes: "url,width,height",
+    events: "load,error,click"
+  },
+  {
+    group: "Apresentation / Embeds / Social Media Feeds",
+    attributes: "url,refreshInterval,limit",
+    events: "load,refresh,error"
+  },
 
   // Messages
   {
     group: "Apresentation / Messages / Toast",
-    description: msg.dAMToast,
+    attributes: "message,type,duration,closable",
     events: "open,close,dismiss"
   },
   {
     group: "Apresentation / Messages / Alert",
-    description: msg.dAMAlert,
+    attributes: "message,type,closable",
     events: "open,close,dismiss"
   },
-  { group: "Apresentation / Messages / Snackbar", description: msg.dAMSneackbar },
+  {
+    group: "Apresentation / Messages / Snackbar",
+    attributes: "message,actionText,duration",
+    events: "open,close,dismiss"
+  },
   {
     group: "Apresentation / Messages / Modal",
-    description: msg.dAMModal,
+    attributes: "title,content,open,closable",
     events: "open,close,dismiss"
   },
   {
     group: "Apresentation / Messages / Notification",
-    description: msg.dAMNotification,
+    attributes: "message,type,duration,closable",
     events: "open,close,dismiss"
   },
   {
     group: "Apresentation / Messages / Badge",
-    description: msg.dAMBadges,
+    attributes: "text,type,icon",
     events: "click"
   },
 
   // Flow
   {
     group: "Layout / Flow / Section",
-    description: msg.dLFSection,
+    attributes: "id,class",
     events: "click,focus,blur"
   },
   {
     group: "Layout / Flow / Group",
-    description: msg.dLFGroup,
+    attributes: "id,class,direction,gap",
     events: "click,focus,blur"
   },
   {
     group: "Layout / Flow / Row",
-    description: msg.dLFRow,
+    attributes: "id,class,gap",
     events: "click,focus,blur"
   },
   {
     group: "Layout / Flow / Column",
-    description: msg.dLFColumn,
+    attributes: "id,class,gap",
     events: "click,focus,blur"
   },
   {
     group: "Layout / Flow / Grid",
-    description: msg.dLFGrid,
+    attributes: "rows,columns,gap",
     events: "click,focus,blur"
   },
   {
     group: "Layout / Flow / Adaptive",
-    description: msg.dLFAdaptive,
+    attributes: "breakpoints,layout",
     events: "click,focus,blur"
   },
   {
     group: "Layout / Flow / Split",
-    description: msg.dLFSplit,
+    attributes: "direction,ratio,gutter",
     events: "click,focus,blur"
   },
   {
     group: "Layout / Flow / Divider",
-    description: msg.dLFDivider,
     attributes: "text",
     events: "click"
   },
@@ -830,51 +935,58 @@ const icaDescriptions: icaBase.FormComponent[] = [
   // Group
   {
     group: "Layout / Group / Table",
-    description: msg.dLGTable,
+    attributes: "data,columns,striped,bordered",
     events: "click,focus,blur"
   },
   {
     group: "Layout / Group / Cards",
-    description: msg.dLGCards,
+    attributes: "cardsData,layout,spacing",
     events: "click,focus,blur"
   },
 
   // Viewer
   {
     group: "Blocks / Viewer / PDF Viewer",
-    description: msg.dBVPdf,
+    attributes: "src,page,zoom",
     events: "load,click"
   },
   {
     group: "Blocks / Viewer / Spreadsheet Viewer",
-    description: msg.dBVViwer,
+    attributes: "data,activeSheet,readonly",
     events: "load,click"
   },
   {
     group: "Blocks / Viewer / Document Viewer",
-    description: msg.dBVDocument,
+    attributes: "src,type,readonly",
     events: "load,click"
   },
 
   // Plugins
   {
     group: "Blocks / Plugins / Calendar",
-    description: msg.dBPCalendar,
+    attributes: "value,disabled,min,max",
     events: "change,month-change,year-change,open,close,hover"
   },
   {
     group: "Blocks / Plugins / Schedule",
-    description: msg.dBPSchedule,
+    attributes: "eventsData,view,selectedDate",
     events: "click"
   },
-  { group: "Blocks / Plugins / External API", description: msg.dBPExternal },
+  {
+    group: "Blocks / Plugins / External API",
+    attributes: "endpoint,params,method",
+    events: "load,error"
+  },
 
   // Projects
-  { group: "Blocks / Projects / Pages", description: msg.dBPPages },
-
+  {
+    group: "Blocks / Projects / Pages",
+    attributes: "data,selectedPage,editable",
+    events: "page-change,load,error"
+  }
 ];
 
-const attributeDefinitions: icaBase.AttributeDefinition[] = [
+const attributeDefinitions: icaTypes.AttributeDefinition[] = [
   { path: "name", lit: "@property({ type: String }) name: string | undefined;" },
   { path: "hint", lit: "@property({ type: String }) hint: string | undefined;", variations: true },
   { path: "label", lit: "@property({ type: String }) label: string | undefined;", variations: true },
@@ -892,6 +1004,8 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "autoCapitalize", lit: "@property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';" },
   { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on';" },
   { path: "autocomplete", lit: "@property({ type: String }) autocomplete: string | undefined;" },
+  { path: "validationMessage", lit: "@property({ type: String}) validationMessage: string | undefined" },
+  { path: "debounce", lit: "@property({ type: Number}) debounce: number | undefined" },
   { path: "value", lit: "@property({ type: String }) value: string | undefined;", variations: true },
   { path: "options", lit: "@property() options: OptionItem[] | undefined; // Optional path in the global JSON or a valid JSON for a list of options " },
   { path: "selectedvalue", lit: "@property() selectedvalue: string | undefined;" },
@@ -915,12 +1029,13 @@ const attributeDefinitions: icaBase.AttributeDefinition[] = [
   { path: "language", lit: "@property({ type: String ) language: string | undefined;" },
   { path: "languages", lit: "@property({ type: Array ) languages: string[] | undefined;" },
 
-  { path: "framework", lit: "@property({ type: String ) framework: string | undefined;" },
-  { path: "renderer", lit: "@property({ type: String ) renderer: string | undefined;" },
+  { path: "framework", lit: "@property({ type: String }) framework: string | undefined;" },
+  { path: "renderer", lit: "@property({ type: String }) renderer: string | undefined;" },
+  { path: "readonly", lit: "@property({ type: Boolean }) readonly: boolean | undefined;" }
 
 ];
 
-const eventsDefinitions: icaBase.EventsDefinition[] = [
+const eventsDefinitions: icaTypes.EventsDefinition[] = [
   { name: "change", desc: msg.eventDescChange },
   { name: "click", desc: msg.eventDescClick },
   { name: "dblclick", desc: msg.eventDescDoubleClick },
@@ -1015,29 +1130,49 @@ export function getDescriptionsFinalGroup(root: string, subGroup: string): strin
 }
 
 export function getFormComponentsDescription(root: string, subGroup: string | null, finalGroup: string | null): string {
-  let len = 3;
-  if (subGroup === null) len = 1;
-  else if (finalGroup === null) len = 2;
-  for (const component of icaDescriptions) {
-    const parts = component.group.split('/');
-    if (parts.length === len &&
-      parts[0].trim() === root &&
-      (subGroup === null || parts[1].trim() === subGroup) &&
-      (finalGroup === null || parts[2].trim() === finalGroup)) return component.description;
-  };
-  return "";
+  //   group: "Blocks / Projects / Pages",
+  //  description: msg.dBPPages,
+  // key = d (prefix) , B (Block) , P (Projects) e Pages -> dBPPages
+
+  lang = getMessageKey(messages); // update 
+  msg = messages[lang];
+
+  if (!subGroup) {
+    const key = `d${root.trim()}`;
+    return (msg as any)[key] || '';
+  }
+  const rootPrefix = root.trim().charAt(0).toUpperCase();
+  if (!finalGroup) {
+    const key = `d${rootPrefix}${subGroup.trim()}`;
+    return (msg as any)[key] || '';
+  }
+  const subGroupPrefix = subGroup.trim().charAt(0).toUpperCase();
+  const key = `d${rootPrefix}${subGroupPrefix}${finalGroup.trim()}`;
+  return (msg as any)[key] || '';
+
+  // let len = 3;
+  // if (subGroup === null) len = 1;
+  // else if (finalGroup === null) len = 2;
+  // for (const component of icaDescriptions) {
+  //   const parts = component.group.split('/');
+  //   if (parts.length === len &&
+  //     parts[0].trim() === root &&
+  //     (subGroup === null || parts[1].trim() === subGroup) &&
+  //     (finalGroup === null || parts[2].trim() === finalGroup)) return component.description;
+  // };
+  // return "";
 }
 
-export function getFormComponentsPrompt(root: string, subGroup: string, finalGroup: string): string {
-  for (const component of icaDescriptions) {
-    const parts = component.group.split('/');
-    if (parts.length === 3 &&
-      parts[0].trim() === root &&
-      parts[1].trim() === subGroup &&
-      parts[2].trim() === finalGroup) return component.prompt || "";
-  };
-  return "";
-}
+// export function getFormComponentsPrompt(root: string, subGroup: string, finalGroup: string): string {
+//   for (const component of icaDescriptions) {
+//     const parts = component.group.split('/');
+//     if (parts.length === 3 &&
+//       parts[0].trim() === root &&
+//       parts[1].trim() === subGroup &&
+//       parts[2].trim() === finalGroup) return component.prompt || "";
+//   };
+//   return "";
+// }
 
 export function getFormComponentsAttributes(root: string, subGroup: string, finalGroup: string): string {
   for (const component of icaDescriptions) {
@@ -1052,22 +1187,28 @@ export function getFormComponentsAttributes(root: string, subGroup: string, fina
 
 export function getAttributeDefinitions(root: string, subGroup: string, finalGroup: string): string[] {
   const rc = new Set<string>();
-  const atts: string = getFormComponentsAttributes(root, subGroup, finalGroup);
-  if (!atts) return [];
-  const obj1 = attributeDefinitions.find(def => def.path === atts);
-  if (obj1) rc.add(obj1.lit)
-  else rc.add('// ' + atts + ' dont exists')
+  const attrs = getFormComponentsAttributes(root, subGroup, finalGroup)
+  for (const att of attrs.split(',')) {
+    rc.add(att)
+  };
   return Array.from(rc);
+
 }
 
 export function getAttributeDefinitionsLit(root: string, subGroup: string, finalGroup: string): string[] {
   const rc = new Set<string>();
   const attrs = getFormComponentsAttributes(root, subGroup, finalGroup)
   for (const att of attrs.split(',')) {
-    const def = attributeDefinitions.find((item) => item.path === att);
+    const def = attributeDefinitions.find((item) => item.path.trim() === att.trim());
     if (def) rc.add(def.lit);
   };
   return Array.from(rc);
+}
+
+export function getAttributeDefinitionsDesc(attribute: string): string {
+  const key = `attrDesc_${attribute}`;
+  const desc = (msg as { [key: string]: string })[key] || '';
+  return desc;
 }
 
 export function checkAttributteHasVariation(attribute: string): boolean {
