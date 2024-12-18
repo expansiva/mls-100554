@@ -9,7 +9,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
 
     public args: string | undefined;
 
-    @property({ type: String }) buttons = 'image,unsplash,video,embed,code,part';
+    @property({ type: String }) buttons = 'image,unsplash,video,embed,code,part,add';
     @property() initialMode: 'close' | 'open' = 'close';
 
     @query('.buttons-actions') containerButtons: HTMLDivElement | undefined;
@@ -101,6 +101,9 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             case 'part':
                 await import('./_100554_wcdAddItemPart');
                 return 'wcd-add-item-part-100554';
+            case 'add':
+                await import('./_100554_wcdAddWidget');
+                return 'wcd-add-widget-100554';
             default:
                 console.error('invalid button name: "' + button + '"');
                 return null;
