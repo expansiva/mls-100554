@@ -103,7 +103,7 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
                 name: "_100554_wcdAdd",
                 level: [2, 4],
                 position: 'p-l2',
-                args: '{ "buttons" : "image,unsplash,video,embed,code,part" }',
+                args: '{ "buttons" : "image,unsplash,video,embed,code,part,add" }',
                 toolboxOptions: { background: 'none', border: 'none' }
             },
             'edit': {

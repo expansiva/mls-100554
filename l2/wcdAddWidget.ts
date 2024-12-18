@@ -1,0 +1,85 @@
+/// <mls shortName="wcdAddWidget" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+import { html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { collab_plus } from './_100554_collabIcons';
+import { CollabLitElement } from './_100554_collabLitElement'
+import { globalWcd } from './_100554_wcdState';
+
+/// **collab_i18n_start**
+const message_pt = {
+    widget: 'Adicionar um widget',
+}
+
+const message_en = {
+    widget: 'Add an widget',
+}
+
+type MessageType = typeof message_en;
+const messages: { [key: string]: MessageType } = {
+    'en': message_en,
+    'pt': message_pt
+}
+/// **collab_i18n_end**
+
+@customElement('wcd-add-widget-100554')
+export class WcdAddWidget100554 extends CollabLitElement {
+
+    private msg: MessageType = messages['en'];
+    
+
+    //-------COMPONENT----------
+
+    createRenderRoot() {
+        return this;
+    }
+
+    render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        return html`
+        <wcd-add-button @keydown=${this.handleKeyDown} @click=${this.handleClick} data-tooltip=${this.msg.widget} ><span>${collab_plus}</span></wcd-add-button>`
+    }
+
+    
+    //------IMPLEMENTS----------
+
+    private async handleClick(e: MouseEvent) {
+        e.stopPropagation();
+        this.showHelper();
+    }
+
+    private async handleKeyDown(e: KeyboardEvent) {
+        e.stopPropagation();
+        if (e.key === 'Enter') {
+            this.handleClick(new MouseEvent('click'));
+        }
+    }
+
+    private showHelper() {
+        if (!globalWcd) throw new Error('Invalid window.wcdState');
+        if (!globalWcd.myParent) throw new Error('Invalid window.wcdState.myParent');
+
+        (globalWcd.myParent as any).onclick = null;
+        globalWcd.myParent?.setIconsWcdToolbox(
+            [
+                {
+                    name: 'backButton'
+                },
+                {
+                    name: '_100554_wcdAddWidgetDialog',
+                    args: '',
+                    position: 'p-l1',
+                    level: [2],
+                    toolboxOptions: { background: '#fff', border: 'none' }
+                },
+
+            ],
+            false,
+            'size'
+        );
+
+    }
+
+}
