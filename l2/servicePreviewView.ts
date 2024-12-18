@@ -289,6 +289,8 @@ export class ServicePreviewView extends LitElement {
         }
         this.init(iframe);
         window.preview.iframe = iframe;
+        const collabConsole = this.parentElement?.querySelector('collab-console-100554') as HTMLElement;
+        (collabConsole as any).scope = iframe.contentWindow;
     }
 
     private async init(iframe: HTMLIFrameElement) {
