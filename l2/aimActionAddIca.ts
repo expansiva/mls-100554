@@ -2,10 +2,9 @@
 
 import { html, TemplateResult } from 'lit'; 
 import { customElement, query, property } from 'lit/decorators.js'; 
-import { tasks, ITaskFinish, updateTaskOnServer } from './_100554_aimHelper';
+import { tasks, ITaskFinish, updateTaskOnServer, getInfoServiceAim, InfoServiceAIM } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
-import { getInfoMyService } from "./_100554_aimHelper";
-import { getFormComponentsPrompt, getAttributeDefinitions } from './_100554_icaBaseDescription'; 
+import {  getAttributeDefinitions } from './_100554_icaBaseDescription'; 
 import { initIcaSelectGroup, IcaSelectGroup } from './_100554_icaSelectGroup';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
@@ -158,7 +157,7 @@ export class AimActionAddIca extends AimActionBase {
         if (groups.length === 3) {
             const [root, subgroup, finalgroup] = groups;
             this.showPrompt = true;
-            this.actualSuggest = getFormComponentsPrompt(root, subgroup, finalgroup);
+            // this.actualSuggest = getFormComponentsPrompt(root, subgroup, finalgroup);
             this.actualAttributes = getAttributeDefinitions(root, subgroup, finalgroup);
             this.actualGroups = groups;
         } else {
@@ -550,10 +549,10 @@ export function isValidRef(taskRoot: mls.cbe.ITaskRoot, activeOpService: Service
 }
 
 export function getActiveOpServiceIfIsValid(el: HTMLElement) {
-    const info = getInfoMyService(el);
+    const info = getInfoServiceAim(el);
     if (!info) return undefined;
-    const activeServiceOp: ServiceSource100554 = info.actServiceOp;
-    if (activeServiceOp.tagName !== 'SERVICE-SOURCE-100554') return undefined;
+    const activeServiceOp = info.activeOppositeService;
+    if (activeServiceOp?.tagName !== 'SERVICE-SOURCE-100554') return undefined;
     return activeServiceOp;
 }
 

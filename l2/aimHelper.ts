@@ -3,6 +3,8 @@
 
 export let tasks: mls.cbe.ITaskRoot[] = [];
 export let tasksProject: number = 0;
+import { ServiceBase } from './_100554_serviceBase';
+
 //let lastReadFromServer: Date | undefined = undefined;
 
 
@@ -76,39 +78,32 @@ export async function readTasks() {
   tasksProject = project;
 }
 
-export function getInfoMyService(elBase: HTMLElement): { level: number, position: string, actServiceOp: any } | undefined {
-
-  let ret;
-  try {
-    const shadowRoot = elBase.getRootNode() as any;
-    if (!shadowRoot) return ret;
-
-    const service = shadowRoot.host as any;
-    if (!service || service.tagName !== 'SERVICE-AIM-100554') return ret;
-
-    const op = service.position === 'left' ? 'right' : 'left';
-    let servOp = service.nav3Service;
-    if (!servOp) return ret;
-
-    servOp = servOp.getActiveInstance(op);
-
-    if (!servOp) return ret;
-
-    ret = {
-      level: service.level,
-      position: service.position,
-      actServiceOp: servOp
-    }
-
-    return ret;
-
-  } catch (e) {
-
-    return ret;
-
-  }
-
+export interface InfoServiceAIM {
+  level: number,
+  position: mls.IPosition,
+  activeOppositeService: HTMLElement | undefined,
 }
+
+export function getInfoServiceAim(elBase: HTMLElement): InfoServiceAIM | undefined {
+  const service = elBase.closest('service-aim-100554') as ServiceBase;
+  if (!service || service.tagName !== 'SERVICE-AIM-100554') {
+    console.log('not found service-* in this DOM');
+    return undefined;
+  }
+  const op = service.position === 'left' ? 'right' : 'left';
+  let servOp = service.nav3Service;
+  if (!servOp) {
+    console.log('not found service in opposite side');
+    return undefined;
+  }  
+  const activeOppositeService: HTMLElement | undefined = servOp.getActiveInstance(op);
+  return {
+    level: service.level,
+    position: service.position,
+    activeOppositeService
+  }
+}
+
 export function getUserConfigs(): IAimColums {
   let configs = getDefaultColumsConfigs();
   try {

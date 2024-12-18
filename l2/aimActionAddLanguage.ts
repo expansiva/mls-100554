@@ -2,12 +2,13 @@
 
 import { html, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { tasks, ITaskFinish, updateTaskOnServer, getInfoMyService } from './_100554_aimHelper';
+import { tasks, ITaskFinish, updateTaskOnServer, getInfoServiceAim, InfoServiceAIM } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 import { initAimSelectWidget100554 } from './_100554_aimSelectWidget';
 import { initAimSelectLanguage100554 } from './_100554_aimSelectLanguage';
 import { ICollabLanguage } from './_100554_collabLanguages';
 import { ITaskFileInfo, ITaskRootArgsInitial } from './_100554_aimAddLanguageBase';
+import { getActiveOpServiceIfIsValid } from './_100554_aimActionAddIca'
 
 const myName = '_100554_aimActionAddLanguage';
 
@@ -84,10 +85,10 @@ export class AimActionAddLanguage extends AimActionBase {
     public assistant = "gpt3_typescript";
     public title = "Add Language";
 
-    private info: { level: number, position: string, actServiceOp: any } | undefined;
+    private info: InfoServiceAIM | undefined;
 
     render() {
-        this.info = getInfoMyService(this);
+        this.info = getInfoServiceAim(this);
         this.level = this.info?.level || 0;
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
@@ -131,7 +132,7 @@ export class AimActionAddLanguage extends AimActionBase {
     private async handleAdd() {
 
         if (this.level === 2) {
-            if (!this.info || (this.info.actServiceOp && this.info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554')) {
+            if (!this.info || (this.info.activeOppositeService && this.info.activeOppositeService.tagName !== 'SERVICE-SOURCE-100554')) {
                 throw new Error('Invalid service opposite side');
             }
             const position = this.info.position === 'left' ? 'right' : 'left';

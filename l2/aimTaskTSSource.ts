@@ -2,8 +2,9 @@
 
 import { html, css, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ITaskFinish, getInfoMyService } from "./_100554_aimHelper";
+import { ITaskFinish, getInfoServiceAim, InfoServiceAIM } from "./_100554_aimHelper";
 import { AimTaskBase } from "./_100554_aimTaskBase";
+import { ServiceSource100554 } from "./_100554_serviceSource";
 
 @customElement('aim-task-t-s-source-100554')
 class AimTaskTSSource extends AimTaskBase {
@@ -33,11 +34,12 @@ class AimTaskTSSource extends AimTaskBase {
 
             try {
 
-                const info = getInfoMyService(this);
-                if (!info || ( info.actServiceOp && info.actServiceOp.tagName !== 'SERVICE-SOURCE-100554')) {
+                const info = getInfoServiceAim(this);
+                if (!info || ( info.activeOppositeService && info.activeOppositeService.tagName !== 'SERVICE-SOURCE-100554')) {
                     reject('Not found info in getFileSource');
                     return;
                 }
+                const activeOppositeService = info.activeOppositeService as ServiceSource100554;
 
                 const position = info.position === 'left' ? 'right' : 'left';
 
@@ -58,7 +60,7 @@ class AimTaskTSSource extends AimTaskBase {
                 }
 
                 const ret = await file.getContent();
-                this.taskChild.ref = info.actServiceOp.getActualRef();
+                this.taskChild.ref = activeOppositeService.getActualRef();
                 resolve(ret as any);
                 
             } catch (e:any) {
