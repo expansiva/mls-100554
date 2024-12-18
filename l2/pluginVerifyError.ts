@@ -83,12 +83,14 @@ export class PluginVerifyError extends PluginBaseModule {
                 ${this.msg.checkFiles}
                 <span>${this.current}/${this.tot}</span>
             </div>
+            
+            <button @click=${this.cancelVerify}>${this.msg.cancel}</button>
+
             <ul>
 
                 ${repeat(this.find, ((key: string) => key) as any, ((k: any, index: any) => this.renderItem(k)) as any)}
             
             </ul>
-            <button @click=${this.cancelVerify}>${this.msg.cancel}</button>
         </div>
         `
     }
