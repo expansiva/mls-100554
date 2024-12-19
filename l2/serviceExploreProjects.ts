@@ -246,56 +246,67 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                     <input style="width:calc(100% - 160px)" type="text" placeholder="Filter" @input=${this._filterProjects}>
                     <button style="margin-left:5px; width:150px;" @click=${this.onAddNewProjectClick}>${this.msg.btnAddNewProject}</button>
                 </div>
-                <div class="l5-project-list-history" style="${this.state.history.length === 0 ? 'display:none' : 'display: block'}">
-                    <div class="serviceListTitle">History</div>
+                ${this.renderHistory()}
+                ${this.renderList()}
+                
+            </div>
+        `
+    }
+
+    renderHistory() {
+        return html`
+            <div class="l5-project-list-history" style="${this.state.history.length === 0 ? 'display:none' : 'display: block'}">
+                <div class="serviceListTitle">History</div>
+                <ul class="serviceListList">
+                    ${this.state.history.map(
+                        (his) => html`
+                        <li class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} >
+                            <div>
+                                <span>${his.name + ' (' + his.project.toString() + ')'}</span>
+                            </div>
+                            <div style="display:flex; gap:1rem;font-size:.8rem">
+                                <span class="linkItem" ?disabled=${!his.doSelect}   @click=${() => { this.onHistoryClick(his) }}>
+                                    ${this.msg.select}
+                                </span>
+                                <span class="linkItem" ?disabled=${!his.doSelect} @click=${() => this.firedetail(his)}>
+                                    ${this.msg.detail}
+                                </span>
+                            </div>
+                        </li>
+                    `)}
+                </ul>
+            </div>
+        `;
+    }
+
+    renderList() {
+        return html`
+            <div class="serviceListProjects">
+                ${this.state.orgs.map((org) => {
+                    return html`
+                    <div class="serviceListTitle">${org.key}</div>
                     <ul class="serviceListList">
-                        ${this.state.history.map(
-                            (his) => html`
-                            <li class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} >
+                        ${org.projects.map((prj) => html`
+                            <li class=${this.lastPrjId && +this.lastPrjId === prj.project ? "selected" : ""} >
                                 <div>
-                                    <span>${his.name + ' (' + his.project.toString() + ')'}</span>
+                                    <span>${prj.name + ' (' + prj.project.toString() + ')'}</span>
                                 </div>
                                 <div style="display:flex; gap:1rem;font-size:.8rem">
-                                    <span class="linkItem"  @click=${() => { this.onHistoryClick(his) }}>
+                                    <span class="linkItem" ?disabled=${!prj.doSelect}  @click=${() => this.onProjectClick(prj)}>
                                         ${this.msg.select}
                                     </span>
-                                    <span class="linkItem" @click=${() => this.firedetail(his)}>
+                                    <span class="linkItem" ?disabled=${!prj.doSelect} @click=${() => this.firedetail(prj)}>
                                         ${this.msg.detail}
                                     </span>
                                 </div>
                             </li>
                         `)}
                     </ul>
-                </div>
-                <div class="serviceListProjects">
-                    ${this.state.orgs.map((org) => {
-            return html`
-                            <div class="serviceListTitle">${org.key}</div>
-                            <ul class="serviceListList">
-                                ${org.projects.map((prj) => html`
-                                <li class=${this.lastPrjId && +this.lastPrjId === prj.id ? "selected" : ""} >
-                                    <div>
-                                        <span>${prj.name + ' (' + prj.id.toString() + ')'}</span>
-                                    </div>
-                                    <div style="display:flex; gap:1rem;font-size:.8rem">
-                                        <span class="linkItem"  @click=${() => this.onProjectClick(prj)}>
-                                            ${this.msg.select}
-                                        </span>
-                                        <span class="linkItem" @click=${() => this.firedetail(prj)}>
-                                            ${this.msg.detail}
-                                        </span>
-                                    </div>
-                                </li>
-                            `)}
-                            </ul>
-                            `
-        })}
-                
-                </div>
+                `})}
+    
             </div>
-        `
+        `;
     }
-
 
     renderAdd() {
         return html`
@@ -339,12 +350,17 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         this.clearState();
         Object.keys(mls.stor.orgs).forEach((org, index) => {
             const { name, description, created_at, projects } = mls.stor.orgs[org].sett;
-            const prj: any[] = [];
+            const prj: IInfoPrj[] = [];
             projects.forEach((p: any) => {
                 try {
                     const json = JSON.parse(p.value);
+                    if (!p.id) return;
+                    const info = mls.l5.getProjectSettings(p.id);
+                    let doSelect = true;
+
                     let projectDriver = '';
                     let projectURL = '';
+
 
                     if (!json.projectURL && json.l5_actionPrjSettings) {
 
@@ -360,12 +376,38 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
                     if (!projectDriver || !projectURL || projectDriver === 'mls') return;
 
+                    if (!info || !info.projectDriver || !info.projectURL) doSelect = false;
+
+                    prj.push({
+                        project: p.id,
+                        name: p.name,
+                        doSelect
+                    });
+
+                    /*let projectDriver = '';
+                    let projectURL = '';
+
+
+                    if (!json.projectURL && json.l5_actionPrjSettings) {
+
+                        projectDriver = json.l5_actionPrjSettings.projectDriver || '';
+                        projectURL = json.l5_actionPrjSettings.projectURL || '';
+
+                    } else if (json.projectURL) {
+
+                        projectDriver = json.projectDriver || '';
+                        projectURL = json.projectURL || '';
+
+                    }
+
+                    if (!projectDriver || !projectURL || projectDriver === 'mls') return;*/
+
                     /*if (
                         !json.l5_actionPrjSettings ||
                         !json.l5_actionPrjSettings.projectDriver ||
-                        json.l5_actionPrjSettings.projectDriver === 'mls') return;*/
+                        json.l5_actionPrjSettings.projectDriver === 'mls') return;
 
-                    prj.push(p);
+                    prj.push(p);*/
 
                 } catch (e) {
                     //console.info('Erro to parse' + p.name);
@@ -442,14 +484,14 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         this.openExplore()
     }
 
-    private async onProjectClick(item: any) {
-        this.setProjectActual(item.id);
-        this.setOrgActual(item.id);
+    private async onProjectClick(item: IInfoPrj) {
+        this.setProjectActual(item.project);
+        this.setOrgActual(item.project);
         this.addOnHistory(item);
-        this._fireEventProjectSelected(item.id);
+        this._fireEventProjectSelected(item.project);
         this.changeScenario('details');
-        await this.loadProjectActual(item.id);
-        await mls.stor.server.unzipSourcesIfNeeded(item.id);
+        await this.loadProjectActual(item.project);
+        await mls.stor.server.unzipSourcesIfNeeded(item.project);
         this.openExplore()
     }
 
@@ -483,12 +525,13 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     
-    private addOnHistory(item: any) {
-        const indexInHistory = this.state.history.findIndex((his) => his.name === item.name && his.project === item.id);
+    private addOnHistory(item: IInfoPrj) {
+        const indexInHistory = this.state.history.findIndex((his) => his.name === item.name && his.project === item.project);
         if (indexInHistory > -1) this.state.history.splice(indexInHistory, 1);
         const historyItem: IHistory = {
-            project: item.id,
-            name: item.name
+            project: item.project,
+            name: item.name,
+            doSelect: item.doSelect
         };
         this.state.history.unshift(historyItem);
         if (this.state.history.length > 9) this.state.history.pop();
@@ -522,7 +565,13 @@ interface IStateOrg {
     name: string,
     created_at: string,
     description: string,
-    projects: any[]
+    projects: IInfoPrj[]
+}
+
+interface IInfoPrj{
+    project: number,
+    name: string,
+    doSelect:boolean,
 }
 
 interface IServiceList {
@@ -533,7 +582,8 @@ interface IServiceList {
 
 interface IHistory {
     project: number,
-    name: string
+    name: string,
+    doSelect:boolean,
 }
 interface IParamsEvent {
     emitter: 'right' | 'left',
