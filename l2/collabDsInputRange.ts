@@ -53,13 +53,26 @@ export class CollabDSInputRange extends IcaLitElement {
     async updated(_changedProperties: Map<PropertyKey, unknown>) {
         if (_changedProperties.has('value')) {
             const sel = this.querySelector('select') as HTMLSelectElement;
+            const inpt = this.querySelector('input') as HTMLInputElement;
+
             if (!sel) return;
             sel.value = this.onlyTxt(this.value);
+
+            console.info(this.cursorPosition)
+
+            setTimeout(() => {
+                const newPosition = Math.min(this.cursorPosition, inpt.value.length);
+                inpt.setSelectionRange(newPosition, newPosition);
+            }, 10);
+
         }
     }
 
 
     //---------IMPLEMENTS-------------
+
+
+    private cursorPosition: any;
 
     private onlyNumber(str: string): string {
         const regexNum = /-?\d+(?:\.\d+)?/;
@@ -74,7 +87,7 @@ export class CollabDSInputRange extends IcaLitElement {
     }
 
     private handleWhell(wheelEvent: WheelEvent) {
-        wheelEvent.preventDefault(); 
+        wheelEvent.preventDefault();
         const input = wheelEvent.target as HTMLInputElement;
 
         let currentValue = input.value.replace(',', '.');
@@ -86,7 +99,7 @@ export class CollabDSInputRange extends IcaLitElement {
             return;
         }
 
-    
+
         if (!isDecimal) parsedValue += (wheelEvent.deltaY < 0 ? 1 : -1);
         else {
             let decimalPart = currentValue.split('.')[1] || '';
@@ -96,7 +109,7 @@ export class CollabDSInputRange extends IcaLitElement {
                 let factor = Math.pow(10, decimalLength);
                 if (isScrollingUp) parsedValue = (Math.floor(parsedValue * factor) + 1) / factor; // Incrementa a última casa decimal
                 else parsedValue = (Math.floor(parsedValue * factor) - 1) / factor; // Decrementa a última casa decimal
-            
+
             }
         }
 
@@ -114,6 +127,8 @@ export class CollabDSInputRange extends IcaLitElement {
         value = value.replace(',', '.');
         input.value = value;
         if (value.endsWith('.')) return;
+        this.cursorPosition = input.selectionStart;
+
         this.allChange(e, 'input')
     }
 
