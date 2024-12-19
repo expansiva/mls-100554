@@ -1347,6 +1347,25 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					return;
 				}
 
+				// Set option delete_branch_on_merge
+				const ret2 = await (await fetch(`https://api.github.com/repos/${orgDest}/${repoOri}`, {
+					method: 'PATCH',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + mKey,
+					},
+					referrerPolicy: 'no-referrer',
+					body: JSON.stringify({ delete_branch_on_merge: true})
+				})).json();
+
+				if (ret2 && ret2.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
 				resolve(true);
 
 			} catch (err: any) {
