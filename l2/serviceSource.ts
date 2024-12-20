@@ -398,7 +398,10 @@ export class ServiceSource100554 extends ServiceBase {
 
         const oldStatus = storFile.inLocalStorage;
         storFile.inLocalStorage = false;
-        const originalValue = await storFile.getContent();
+        let originalValue: string | Blob | null = '';
+        if (storFile.status !== 'new') {
+            originalValue = await storFile.getContent();
+        }
         if (typeof originalValue !== 'string') {
             console.error('invalid content')
             return;
