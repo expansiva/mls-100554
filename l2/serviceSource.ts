@@ -14,6 +14,26 @@ import './_100554_collabSpliterHorizontalVarFixed';
 import './_100554_aimPromptTypescript';
 import './_100554_cssHelperIndex';
 import { globalState } from './_100554_icaState';
+import { propertyDataSource } from './_100554_icaLitElement';
+
+/// **collab_i18n_start**
+const message_pt = {
+    historyOpen: 'Abrir histórico',
+    historyClose: 'Fechar histórico',
+}
+
+const message_en = {
+    historyOpen: 'Open history',
+    historyClose: 'Close history',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en': message_en,
+    'pt': message_pt
+}
+/// **collab_i18n_end**
 
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
@@ -31,16 +51,22 @@ export class ServiceSource100554 extends ServiceBase {
 
     @property({ type: String }) msize = '';
     @property({ type: Boolean }) panelRightOpened = false;
-    @property({ type: String }) mode: IModes = 'icTs';
     @property({ type: String }) activeModels: mls.editor.IModels | undefined;
+    @property() isModeHistory: boolean = false;
+    @property({ type: String }) mode: IModes = 'icTs';
+
+    @property({ type: String }) currentHistorySourceWithoutSave: string | undefined;
+    @property({ type: String }) previousHistorySourceWithoutSave: string | undefined;
+
+    @propertyDataSource({ type: String }) currentHistorySource: string | undefined;
+    @propertyDataSource({ type: String }) previousHistorySource: string | undefined;
+    @propertyDataSource({ type: String }) historyLanguage: 'typescript' | 'html' | 'less' = 'typescript';
+    @propertyDataSource({ type: String }) selectedMode: 'icTs' | 'icStyle' | 'icHTML' | 'btHistory' | undefined;
 
     private MINWIDTHTPANELRIGHT = 500;
     private lessCSS: LessCSS | undefined;
     private viewState: IViewState = {};
-
-    createRenderRoot() {
-        return this;
-    }
+    private msg: MessageType = messages['en'];
 
     public onClickLink = (op: string): boolean => {
         if (op === 'opTS2') return true;
@@ -56,6 +82,9 @@ export class ServiceSource100554 extends ServiceBase {
     public onClickIcon = (op: string): void => {
         this.saveViewState();
         this.mode = op as IModes;
+        this.selectedMode = op as IModes;
+
+        if (this.isModeHistory && this.menu.selectButton) this.menu.selectButton('btHistory');
         if (op === 'icTs') this.showActiveModel();
         if (op === 'icHTML') {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
@@ -69,6 +98,11 @@ export class ServiceSource100554 extends ServiceBase {
 
     public onClickTitle = () => {
         this.openService('_100554_serviceProject', this.position, 2, { activeTab: 'Explore' });
+    }
+
+    public onClickButton = (op: string, opMenu?: string): boolean => {
+        if (op === 'btHistory') return this.toogleHistory();
+        else throw new Error('Invalid option')
     }
 
     public details: IService = {
@@ -99,6 +133,9 @@ export class ServiceSource100554 extends ServiceBase {
             icStyle: 'Style;f38b'
 
         },
+        buttons: {
+            btHistory: `${this.msg.historyOpen};${this.msg.historyClose};f017;f057`,
+        },
         actionDefault: '', // call after close icon clicked
         iconDefault: 'icTs',
         setMode: undefined, // child will set this
@@ -108,7 +145,9 @@ export class ServiceSource100554 extends ServiceBase {
         setIconActive: undefined, // child will set this
         onClickLink: this.onClickLink,
         onClickIcon: this.onClickIcon,
-        onClickTitle: this.onClickTitle
+        onClickTitle: this.onClickTitle,
+        onClickButton: this.onClickButton
+
     }
 
     public onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
@@ -123,8 +162,9 @@ export class ServiceSource100554 extends ServiceBase {
         await this.initMonaco();
         if (this.menu.setIconActive) this.menu.setIconActive('icTs');
         this.updatedMSizeEditor();
-        if (this.c2) {
-            const bgEl = this.c2.querySelector('.monaco-editor-background');
+
+        if (this.editorEl) {
+            const bgEl = this.editorEl.querySelector('.monaco-editor-background');
             if (bgEl) {
                 const bg = getComputedStyle(bgEl).backgroundColor;
                 if (bg && this.horizontalSpliter && this.verticalSpliter) {
@@ -260,12 +300,16 @@ export class ServiceSource100554 extends ServiceBase {
 
     //---------------------------------------------
 
-    @query('mls-editor-100529') private c2: HTMLElement | undefined;
+    @query('mls-editor-100529') private editorEl: HTMLElement | undefined;
+    @query('mls-editor-100529.history') private editorHistoryEl: HTMLElement | undefined;
+
     @query('collab-spliter-vertical-var-fixed-100554') private verticalSpliter: HTMLElement | undefined;
     @query('collab-spliter-horizontal-var-fixed-100554') private horizontalSpliter: HTMLElement | undefined;
 
     public last: mls.IActual | undefined = undefined;
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
+    private _edDiff: monaco.editor.IStandaloneDiffEditor | undefined;
+
     private mConfEditor: monaco.editor.ITextModel | undefined;
     private confE2(positionToolbar: string) { return `l${this.level}_${positionToolbar}`; }
 
@@ -308,6 +352,67 @@ export class ServiceSource100554 extends ServiceBase {
         if (this.viewState[keyViewState] && this.viewState[keyViewState][mode]) this._ed1.restoreViewState(this.viewState[keyViewState][mode]);
     }
 
+    private toogleHistory(): boolean {
+        this.isModeHistory = !this.isModeHistory;
+        this.updatedMSizeEditor();
+        if (!this.isModeHistory) {
+            if (this.menu && this.menu.setIconActive) this.menu.setIconActive(this.mode);
+        } else {
+            this.getHistories();
+        }
+        return !this.isModeHistory;
+    }
+
+
+    private async getHistories() {
+
+        if (this.previousHistorySource || this.currentHistorySource) {
+            this.setHistories(this.previousHistorySource || '', this.currentHistorySource || '', this.historyLanguage);
+            return;
+        }
+
+        this.setHistories('Loading...', '', 'text');
+
+        const obj: { [key: string]: 'ts' | 'html' | 'style' } = {
+            icTs: 'ts',
+            icHTML: 'html',
+            icStyle: 'style',
+        };
+        const mode: 'ts' | 'html' | 'style' = obj[this.mode];
+        if (!this.activeModels || !this.activeModels[mode]) {
+            console.error('No active model');
+            return;
+        }
+        const storFile = this.activeModels[mode]?.storFile;
+        const model = this.activeModels[mode]?.model;
+
+        if (!storFile) {
+            console.error('No storfile');
+            return;
+        };
+
+        if (!model) {
+            console.error(`No model for ${mode} file`);
+            return;
+        };
+
+        const oldStatus = storFile.inLocalStorage;
+        storFile.inLocalStorage = false;
+        const originalValue = await storFile.getContent();
+        if (typeof originalValue !== 'string') {
+            console.error('invalid content')
+            return;
+        }
+        storFile.inLocalStorage = oldStatus;
+        this.previousHistorySourceWithoutSave = originalValue;
+        this.currentHistorySourceWithoutSave = model.getValue();
+        const editorType: { [key: string]: string } = {
+            '.ts': 'typescript',
+            '.html': 'html',
+            '.less': 'less',
+        }
+        this.setHistories(this.previousHistorySourceWithoutSave || '', this.currentHistorySourceWithoutSave || '', editorType[storFile.extension]);
+    }
 
     private openRepo() {
         if (!this.menu.lastIcon) return false;
@@ -578,7 +683,6 @@ export class ServiceSource100554 extends ServiceBase {
         };
 
         const onOpen = async (): Promise<void> => {
-            this.isStyleFirstOpen = true;
             const storFile = getStorFile();
             const storFileHTML = getStorFileHTML();
             const storFileCss = getStorFileCss();
@@ -992,6 +1096,7 @@ export class ServiceSource100554 extends ServiceBase {
     private async initMonaco() {
         if (!this._ed1) {
             await this.initMonaco_Editor();
+            await this.initMonaco_EditorDiff();
             if (this.serviceContent && typeof this.serviceContent.layout === 'function') this.serviceContent.layout();
         }
     }
@@ -1064,10 +1169,11 @@ export class ServiceSource100554 extends ServiceBase {
             });
         };
 
-        if (!this.c2) return;
+        if (!this.editorEl) return;
 
-        this._ed1 = monaco.editor.create(this.c2, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
-        (this.c2 as any)['mlsEditor'] = this._ed1;
+        this._ed1 = monaco.editor.create(this.editorEl, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
+
+        (this.editorEl as any)['mlsEditor'] = this._ed1;
         mls.editor.instances[this.confE] = this._ed1;
         mls.editor.InitEditor(this._ed1);
         addEventsEditor();
@@ -1076,6 +1182,42 @@ export class ServiceSource100554 extends ServiceBase {
         this.createModelConf('// loading ...'); // model 
         // global routines dont need this._ed1
         await this.createModelTS_testFile();
+    }
+
+    private initMonaco_EditorDiff() {
+        if (!this.editorHistoryEl) return;
+        const opt = {
+            ...mls.editor.conf[this.confE] as monaco.editor.IEditorOptions,
+            automaticLayout: true,
+            renderSideBySide: false
+        };
+        this._edDiff = monaco.editor.createDiffEditor(this.editorHistoryEl, opt);
+        (this.editorHistoryEl as any)['mlsEditor'] = this._edDiff;
+        this.setHistories('no file A', 'no file B', 'typescript');
+
+    }
+
+    private setHistories(srcOriginal: string, srcModified: string, language: string) {
+        const modelOriginal = this.createOrGetModelHistory(language, srcOriginal, 'original');
+        const modelModified = this.createOrGetModelHistory(language, srcModified, 'modified');
+        if (!this._edDiff) return;
+        this._edDiff.updateOptions({ readOnly: true });
+        this._edDiff.setModel({
+            original: modelOriginal,
+            modified: modelModified,
+        });
+    }
+
+    private createOrGetModelHistory(editorType: string, src: string, tp: string) {
+        const shortFN = `SourceHistory_${this.position}_${tp}`
+        const uri = monaco.Uri.parse(`file://server/${shortFN}.ts`);
+        let model1 = monaco.editor.getModel(uri);
+        if (!model1) model1 = monaco.editor.createModel(src, editorType, uri);
+        else {
+            model1.setValue(src);
+            monaco.editor.setModelLanguage(model1, editorType);
+        }
+        return model1;
     }
 
     private extractIdValue(line: string): string | null {
@@ -1473,14 +1615,14 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     }
 
-    private isStyleFirstOpen: boolean = true;
     private initModelStyle(uri: monaco.Uri, model: monaco.editor.ITextModel) {
+
         if (!this._ed1) return;
         this.lessCSS = new LessCSS(uri.toString(), this._ed1, this.position);
         this.lessCSS.setEditor(this._ed1);
+        const actualLine = this._ed1.getPosition();
         const lineNumber = this.lessCSS.lessAST.findFirstSelectorAfterRoot(this.lessCSS.lessAST.ast);
-        if (lineNumber && this.isStyleFirstOpen) {
-            this.isStyleFirstOpen = false;
+        if (lineNumber && actualLine && actualLine.lineNumber === 1) {
             const line = model.getLineContent(lineNumber)
             this._ed1.setSelection(
                 new monaco.Selection(lineNumber, 1, lineNumber, line.length + 1)
@@ -1712,7 +1854,34 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private updatedMSizeEditor() {
-        this.c2?.setAttribute('msize', this.msize);
+        this.editorEl?.setAttribute('msize', this.msize);
+        this.editorHistoryEl?.setAttribute('msize', this.msize);
+    }
+
+    private changeMode(mode: IModes) {
+        if (!this.menu || !this.menu.setIconActive || !this.menu.selectButton) return;
+        if (mode.startsWith('ic')) {
+            if (this.isModeHistory) {
+                this.menu.selectButton('btHistory');
+            }
+            this.menu.setIconActive(mode);
+        } else {
+            this.menu.selectButton(mode);
+        }
+    }
+
+    handleIcaStateChange(_key: string, _value: any) {
+        const keyState = `serviceSource.${this.position}`;
+        if (!_key.startsWith(keyState)) return;
+        if (_key === `${keyState}.selectedMode` && ['icTs', 'icStyle', 'icHTML', 'btHistory'].includes(_value)) {
+            this.changeMode(_value);
+        }
+        if (_key === `${keyState}.currentHistorySource` ||
+            _key === `${keyState}.previousHistorySource` ||
+            _key === `${keyState}.historyLanguage`
+        ) {
+            this.setHistories(this.previousHistorySource || '', this.currentHistorySource || '', this.historyLanguage)
+        }
     }
 
     updated(changedProperties: any) {
@@ -1724,7 +1893,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
     }
     connectedCallback() {
-        super.connectedCallback();
         if (!globalState._ica) globalState._ica = {};
         if (!globalState._ica.less) {
             globalState._ica.less = {
@@ -1732,6 +1900,30 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 right: {},
             }
         }
+        if (!globalState._ica.serviceSource) {
+            globalState._ica.serviceSource = {
+                left: {
+                    selectedMode: 'icTS',
+                    currentHistorySource: '',
+                    previousHistorySource: '',
+                    historyLanguage: 'typescript',
+                },
+                right: {
+                    selectedMode: 'icTS',
+                    currentHistorySource: '',
+                    previousHistorySource: '',
+                    historyLanguage: 'typescript'
+                },
+
+            };
+        }
+        this.setAttribute('currentHistorySource', `{{serviceSource.${this.position}.currentHistorySource}}`)
+        this.setAttribute('previousHistorySource', `{{serviceSource.${this.position}.previousHistorySource}}`)
+        this.setAttribute('selectedMode', `{{serviceSource.${this.position}.selectedMode}}`);
+        this.setAttribute('historyLanguage', `{{serviceSource.${this.position}.historyLanguage}}`);
+        super.connectedCallback();
+
+
     }
 
     firstUpdated(changedProperties: any) {
@@ -1740,6 +1932,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
         this.style.display = 'block';
         return html`
              <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="#1e1e1e">
@@ -1747,9 +1942,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                     slot="top"
                     complementcolor="#1e1e1e"
                     fixedwidth="30%"
-                    fixedvisible=${this.mode !== 'icStyle' ? 'hidden' : `${this.panelRightOpened === true ? 'visible' : 'closed'}`} 
+                    fixedvisible=${this.mode !== 'icStyle' || this.isModeHistory ? 'hidden' : `${this.panelRightOpened === true ? 'visible' : 'closed'}`} 
                 >
-                    <mls-editor-100529 slot="left"></mls-editor-100529>
+                    <mls-editor-100529 style=${this.isModeHistory ? 'display:none;' : 'display:block;'} slot="left"></mls-editor-100529>
+                    <mls-editor-100529 style=${this.isModeHistory ? 'display:block;' : 'display:none;'} class="history" slot="left"></mls-editor-100529>
                     <css-helper-index-100554 state="{{ less.${this.position} }}" slot="right" position=${this.position} style="height:100%;"></css-helper-index-100554>
                     
                 </collab-spliter-horizontal-var-fixed-100554>
@@ -2077,8 +2273,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     }
 
-
 }
+
 
 interface IViewState {
     [file: string]: IViewStates
@@ -2091,3 +2287,5 @@ interface IViewStates {
 }
 
 type IModes = 'icTs' | 'icStyle' | 'icHTML';
+
+
