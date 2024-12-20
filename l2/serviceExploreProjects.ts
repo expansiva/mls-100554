@@ -171,7 +171,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
         if (this.lastPrjId && mls.actualLevel === 6 && visible) {
-            this.firedetail({ project: +this.lastPrjId, name: '' })
+            this.firedetail({ project: +this.lastPrjId, name: '', doSelect:true } as IInfoPrj)
         }
         
     }
@@ -319,7 +319,9 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
     //----------IMPLEMENTS------------------
 
-    private async firedetail(prj:{project: number, name: string}) {
+    private async firedetail(prj:IInfoPrj) {
+
+        if (!prj.doSelect) return;
 
         localStorage.setItem('serviceDetail', '{"action":"open", "prj":' + prj.project + '}');
         
@@ -475,6 +477,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     private async onHistoryClick(item: IHistory) {
+        if (!item.doSelect) return;
         this.setProjectActual(item.project);
         this.setOrgActual(item.project);
         this._fireEventProjectSelected(item.project);
@@ -485,6 +488,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     private async onProjectClick(item: IInfoPrj) {
+        if (!item.doSelect) return;
         this.setProjectActual(item.project);
         this.setOrgActual(item.project);
         this.addOnHistory(item);
