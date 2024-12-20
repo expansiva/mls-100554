@@ -5,10 +5,10 @@ import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 
 export function addCoachMark(json: ICoachMarks) {
-    const coachMark = document.querySelector('coach-marks-100554') as CoachMarks100554;
+    let coachMark = document.querySelector('coach-marks-100554') as CoachMarks100554;
     if (!coachMark) {
-        console.info('No found coachMark');
-        return;
+        coachMark = document.createElement('coach-marks-100554') as CoachMarks100554;
+        document.body.appendChild(coachMark);
     }
 
     coachMark.info = json;
@@ -24,17 +24,8 @@ export class CoachMarks100554 extends CollabLitElement {
         this.setInfo();
     }
 
-    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
-        if (name === 'info') {
-            this.setCoachMarks();
-            return;
-        }
-        super.attributeChangedCallback(name, oldVal, newVal);
-    }
-
     render() {
-
-        if (!this.info) return;
+        if (!this.info) return html``;
         if (this.error) return this.renderError();
         setTimeout(() => { this.setCoachMarks() }, 500);
         return html``;
@@ -73,6 +64,7 @@ export class CoachMarks100554 extends CollabLitElement {
 
         if (l && !force) {
             this.classList.add('close');
+            this.info = undefined;
             return;
         }
 
@@ -89,9 +81,10 @@ export class CoachMarks100554 extends CollabLitElement {
     }
 
     private close() {
-        this.innerHTML = '';
+        this.clearMe();
         this.setKey();
         this.classList.add('close');
+        this.info = undefined;
     }
 
     private setKey() {

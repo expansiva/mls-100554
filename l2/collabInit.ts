@@ -4,6 +4,7 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { getConfigProject, createConfigFile } from './_100554_libProjectConfig'
+import {initManagerCoachMark} from "./_100554_collabManagerCoachMarks";
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
@@ -84,6 +85,7 @@ export class CollabInit extends CollabLitElement {
         const services = await this.getServices();
         this.checkURLParams();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
+        
     }
 
     /**
@@ -168,6 +170,7 @@ export class CollabInit extends CollabLitElement {
         if (window.traceLifeCycle) console.info('setting: htmlLang');
         const htmlEl = document.documentElement;
         if (htmlEl) htmlEl.lang = lang;
+        initManagerCoachMark();
     }
 
     /**
