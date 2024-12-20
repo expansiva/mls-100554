@@ -1,7 +1,7 @@
 /// <mls shortName="collabSpliterHorizontalVarFixed" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, queryAll } from 'lit/decorators.js';
 import { collab_chevron_right } from './_100554_collabIcons'
 
 @customElement('collab-spliter-horizontal-var-fixed-100554')
@@ -17,8 +17,8 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
   @property() openUser: boolean | undefined;
 
 
-  @query('[slot="left"]') slotLeft: HTMLElement | undefined;
-  @query('[slot="right"]') slotRight: HTMLElement | undefined;
+  @queryAll('[slot="left"]') slotLeft: HTMLElement[] | undefined;
+  @queryAll('[slot="right"]') slotRight: HTMLElement[] | undefined;
 
 
   createRenderRoot() {
@@ -30,10 +30,9 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     if (changedProperties.has('fixedvisible')) {
       const fixedvisible = changedProperties.get('fixedvisible');
       if ((fixedvisible === 'hidden' || fixedvisible === 'closed') && (this.fixedvisible === 'visible' && this.openUser !== undefined && this.openUser === false)) {
-        console.info('passei')
         this.open = false;
       } else this.open = this.fixedvisible === 'visible' ? true : false;
-
+      this.setFixedValueInPx();
     }
 
     if (changedProperties.has('open')) {
@@ -129,13 +128,15 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
   private async updatePanelsMSize(reset: boolean = true) {
 
     if (reset) {
-      this.slotLeft?.setAttribute('msize', '');
-      this.slotRight?.setAttribute('msize', '');
+      this.slotLeft?.forEach((item) => item.setAttribute('msize', ''));
+      this.slotRight?.forEach((item) => item.setAttribute('msize', ''));
       await this.delay();
     }
     this.updateMyHeight();
-    if (this.slotLeft) this.slotLeft.setAttribute('msize', this.getMSizeLeft());
-    if (this.slotRight) this.slotRight.setAttribute('msize', this.getMSizeRight());
+    this.slotLeft?.forEach((item) => item.setAttribute('msize', this.getMSizeLeft()));
+    this.slotRight?.forEach((item) => item.setAttribute('msize', this.getMSizeRight()));
+    // if (this.slotLeft) this.slotLeft.setAttribute('msize', this.getMSizeLeft());
+    // if (this.slotRight) this.slotRight.setAttribute('msize', this.getMSizeRight());
 
   }
 
@@ -179,7 +180,6 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     const leftPane = this.querySelector('.left-pane');
     const rightPane = this.querySelector('.right-pane');
     const children = Array.from(this.children);
-    let msizeNew: string = this.msize;
 
     children.forEach(child => {
       const slotName = child.getAttribute('slot');
