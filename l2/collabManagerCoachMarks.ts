@@ -67,7 +67,7 @@ const infoMark: { [key: string]: ICoachMarks } = {
         key: "l5",
         transparency: "normal",
         fontSize: "1.1em",
-        timeClose: 8,
+        timeClose: 12,
         steps: [
             {
                 elementRef: `collab-nav-2-item[data-service="_100529_service_start"]`,
@@ -76,7 +76,7 @@ const infoMark: { [key: string]: ICoachMarks } = {
                 marginV: 25,
                 marginH: 25,
                 arrow: "up",
-                duration: 2,
+                duration: 3,
                 autoClose: true
             },
             {
@@ -86,7 +86,7 @@ const infoMark: { [key: string]: ICoachMarks } = {
                 marginV: 25,
                 marginH: 25,
                 arrow: "up",
-                duration: 2,
+                duration: 3,
                 autoClose: true
             },
             {
@@ -96,7 +96,7 @@ const infoMark: { [key: string]: ICoachMarks } = {
                 marginV: 25,
                 marginH: 25,
                 arrow: "up",
-                duration: 2,
+                duration: 3,
                 autoClose: true
             },
             {
@@ -106,7 +106,7 @@ const infoMark: { [key: string]: ICoachMarks } = {
                 marginV: 25,
                 marginH: 25,
                 arrow: "up",
-                duration: 2,
+                duration: 3,
                 autoClose: true
             },
             {
@@ -116,7 +116,7 @@ const infoMark: { [key: string]: ICoachMarks } = {
                 marginV: 25,
                 marginH: 25,
                 arrow: "up",
-                duration: 2,
+                duration: 3,
                 autoClose: true
             }
         ]
