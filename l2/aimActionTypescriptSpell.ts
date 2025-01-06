@@ -9,15 +9,15 @@ const myName = '_100554_aimActionTypescriptSpell';
 
 /// **collab_i18n_start**
 const message_pt = {
-    template_title: "Irá verificar o typescript e procurar por erros de gramática em ingles",
-    prompt_message: "Identifique todas as strings literais no seguinte código TypeScript que devem ser preparadas para internacionalização.  Não retornar explicações, apenas retorne uma 'tabela' com as colunas: texto, language (portugues | ingles | ...).",
+    template_title: "Irá verificar o TypeScript e procurar erros de gramática",
+    title_task: 'Spell Check',
     btn_cancel: "Cancelar",
     btn_confirm: "Confirmar",
 }
 
 const message_en = {
-    template_title: "Will check the TypeScript and look for grammar errors in English",
-    prompt_message: "Identify all string literals in the following TypeScript code that should be prepared for internationalization. Do not return explanations, just return a 'table' with the columns: text, language (portuguese | english | ...).",
+    template_title: "Will check the TypeScript and look for grammar mistakes",
+    title_task: 'Spell Check',
     btn_cancel: "Cancel",
     btn_confirm: "Confirm"
 }
@@ -41,7 +41,7 @@ export class AimActionTypescriptSpell extends AimActionBase {
         }]
     }
 
-    public assistant = "gpt3_typescript";
+    public assistant = "gpt_ts";
     public title = "Spell Check";
 
     language = 'english';
@@ -55,7 +55,7 @@ export class AimActionTypescriptSpell extends AimActionBase {
     private handleAdd(): void {
         const taskRoot: mls.cbe.ITaskRoot = {
             mode: 'initializing',
-            title: 'verify typescript spell / language',
+            title: this.msg.title_task,
             widget: myName,
             children: [],
             trace: [new Date().toISOString() + ': trask created at ']
@@ -82,35 +82,14 @@ export class AimActionTypescriptSpell extends AimActionBase {
     `;
     }
 
-
-    getPrompt2(source: string) {
-        const prompt = `
-Objective: Check for spelling errors in English within a TypeScript code snippet and return the findings in a formatted table.\n
-\n
-Instructions:\n
-1.Ignore everything above \n
-2. Analyze the provided TypeScript code snippet solely for spelling mistakes in English words.\n
-3. Disregard any other forms of validation or checking (such as syntax errors, code style, etc.).\n
-4. Analyze only non-typescript text\n
-5. Return the findings, no duplicates, in a table with the following columns:\n
-- Message: Original complete string.\n
-- Fix: Suggest the appropriate correction for the spelling mistake to replace the original complete string.\n
-- Detail: Provide a brief comment on the mistake, if necessary.\n
-\n
-Expected Output Format:\n
-\n
-The output should be clearly formatted as a table for easy reading.\n
-Each spelling mistake should be listed on its own line within the table.\n
-Don't return others comments, return only the table.
-\n\n${source}\n`;
-        return prompt;
-    }
-
     getPrompt(source: string) {
         const prompt = `
-${this.msg.prompt_message}
+Identify all literal strings in the TypeScript code that should be prepared for internationalization. Analyze each string for grammar errors. Return only the strings with errors in a table with the columns: text with error, correction suggestion, language (Portuguese | English | ...). Do not include explanations or strings without errors.
 
-${source}\n`;
+\`\`\` typescript
+${source}
+\`\`\`
+\n`;
         return prompt;
     }
 

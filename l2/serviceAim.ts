@@ -1,84 +1,101 @@
 /// <mls shortName="serviceAim" project="100554" enhancement="_100554_enhancementLitService" groupName="service"/>
 
-import { html, css, unsafeHTML, render, styleMap, repeat } from 'lit';
+import { html, css, unsafeHTML, render, styleMap, repeat, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IMenu, IToolbarChangeEvent } from './_100554_serviceBase';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { tasks, readTasks, getUserConfigs, saveUserConfigs, IAimColums } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
+import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import * as chatHelper from './_100554_aimChatHelper';
+import './_100554_aimChatHeader';
+import './_100554_aimChatRooms';
+import './_100554_aimChatMessages';
+import './_100554_aimChatMessage';
+
  
 /// **collab_i18n_start** 
-const message_pt = {
+const message_pt = { 
     loading: 'Carregando...',
-    selectadd: 'por favor selecione abaixo para adicionar',
-    allTasksLast: 'Todas as tarefas, últimas',
-    user: 'Usuário',
-    all: 'Todos',
-    ref: 'Ref',
+    tasks: 'Tasks',
+    titleTasks: 'Todas as tarefas de AI, últimas',
+    chats: 'Chats',
+    project: 'Projeto',
+    titleProject: 'Salas com referencias ao projeto atual',
+    docs: 'Docs',
+    titleDocs: 'Salas com documentações e guias',
     add: 'Adicionar',
+    titleAdd: 'por favor selecione abaixo para adicionar',
     notFoundReference: 'Referência não encontrada',
-    tasksByReference: 'Tarefas por referência',
     noActionsToAdd: 'Nenhuma ação para adicionar',
     selectColumnsYouWant: 'Selecione as colunas que deseja visualizar',
     save: 'Salvar',
     cancel: 'Cancelar'
 }
-
 const message_en = {
     loading: 'Loading...',
-    selectadd: 'please select below to add',
-    allTasksLast: 'All Tasks, last',
-    user: 'User',
-    all: 'All',
-    ref: 'Ref',
+    tasks: 'Tasks',
+    titleTasks: 'All AI Tasks, last',
+    chats: 'Chats',
+    project: 'Project',
+    titleProject: 'Rooms with references to the current project',
+    docs: 'Docs',
+    titleDocs: 'Rooms with documentation and guides',
     add: 'Add',
+    titleAdd: 'please select below to add',
     notFoundReference: 'Not found reference',
-    tasksByReference: 'Tasks by reference',
     noActionsToAdd: 'No Actions to Add',
     selectColumnsYouWant: 'Select the columns you want to view',
     save: 'Save',
     cancel: 'Cancel'
 }
-
 type MessageType = typeof message_en;
-
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
 /// **collab_i18n_end**
+
 @customElement('service-aim-100554')
 export class ServiceAim100554 extends ServiceBase {
 
-    private myMessage: MessageType = messages['en'];
+    private msg: MessageType = messages['en'];
 
-    constructor() {
-        super();
-        this.setEvents();
-    }
-
-    @property() activeTab: ITabType = 'All';
+    @property() activeTab: ITabType = 'Chats';
     @property({ reflect: true }) useContainerAdd = true; // scenary add list or add action 
     @property({ reflect: true }) actionToOpen: string = '';
     @property({ reflect: true }) actualServiceOpName: string = '';
     @property() isloading: boolean = true;
+    @propertyDataSource({ type: String, reflect: true }) activeRoom: string | undefined;
+    @propertyDataSource({ type: String, reflect: true }) activeMessage: string | undefined;
+    @propertyDataSource({ type: String, reflect: true }) activeFilterRooms: string | undefined;
 
     actualServiceOpLevel: number = 0;
+
+    constructor() {
+        super();
+        this.setEvents();
+        this.activeRoom = chatHelper.pathActiveRoom;
+        this.activeMessage = chatHelper.pathActiveMessage;
+        this.activeFilterRooms = chatHelper.pathActiveFilterRooms;
+    }
 
     render() {
 
         const lang = this.getMessageKey(messages);
-        this.myMessage = messages[lang];
+        this.msg = messages[lang];
 
         if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
         if (this.actionToOpen) this.activeTab = 'Add'
         switch (this.activeTab) {
-            case 'All':
-                return this.renderAll();
-            case 'User':
-                return this.renderUser();
-            case 'Ref':
-                return this.renderRef();
+            case 'Tasks':
+                return this.renderTasks();
+            case 'Chats':
+                return this.renderChats()
+            case 'Project':
+                return this.renderProject();
+            case 'Docs':
+                return this.renderDocs();
             case 'Add':
                 const renderAddResult = this.renderAdd();
                 Promise.resolve().then(() => {
@@ -92,10 +109,10 @@ export class ServiceAim100554 extends ServiceBase {
 
 
     public details: IService = {
-        icon: '&#xf03a',
+        icon: '&#xf086', // '&#xf03a',
         state: 'foreground',
         position: 'all',
-        tooltip: 'AI',
+        tooltip: 'Collab Chat',
         visible: true,
         widget: '_100554_serviceAim',
         level: [0, 2, 3, 5]
@@ -115,18 +132,19 @@ export class ServiceAim100554 extends ServiceBase {
     }
 
     public menu: IMenu = {
-        title: 'AI',
+        title: '',
         actions: {
             opColumns: 'Columns',
         },
         icons: {
-            All: `${this.myMessage.all};f560`,
-            User: `${this.myMessage.user};f007`,
-            Ref: `${this.myMessage.ref};f15b`,
-            Add: `${this.myMessage.add};2b`
+            Project: `${this.msg.project};f542`,
+            Chats: `${this.msg.chats};f007`,
+            Tasks: `${this.msg.tasks};f0ae`, // f560
+            Docs: `${this.msg.docs};f02d;`,
+            Add: `${this.msg.add};2b`,
         },
         actionDefault: '', // call after close icon clicked
-        iconDefault: 'All',
+        iconDefault: 'Chats',
         setMode: undefined, // child will set this
         onClickLink: this.onClickLink,
         onClickIcon: this.onClickIcon,
@@ -184,7 +202,7 @@ export class ServiceAim100554 extends ServiceBase {
         return arr.sort(sort);
     }
 
-    renderAll() {
+    renderTasks() {
 
         const renderTask = (taskRoot: mls.cbe.ITaskRoot, index: number) => {
             const actionName = convertFileNameToTag(taskRoot.widget);
@@ -195,9 +213,9 @@ export class ServiceAim100554 extends ServiceBase {
         const orderned = this.sortKey(tasks);
         if (mls.istrace) console.log(`serviceAim, renderAll`);
 
-        if (this.isloading) return html`<span>${this.myMessage.loading}</span>`
+        if (this.isloading) return html`<span>${this.msg.loading}</span>`
         return html`
-        <h4 class='title'>${this.myMessage.allTasksLast} (${tasks.length})</h4>
+        <h4 class='title'>${this.msg.titleTasks} (${tasks.length})</h4>
             ${repeat(
             orderned,
             ((task: mls.cbe.ITaskRoot, index: number) => task.key) as any,
@@ -206,36 +224,35 @@ export class ServiceAim100554 extends ServiceBase {
         `;
     }
 
-    renderUser() {
+    renderChats(): TemplateResult {
+        const pathRoom = this.getAttribute('activeRoom');
+        const pathMessage = this.getAttribute('activeMessage');
+        const pathFilter = this.getAttribute('activeFilterRooms');
 
-        const userName = localStorage.getItem('loginUser');
-        const renderTask = (taskRoot: mls.cbe.ITaskRoot, index: number) => {
-            if (taskRoot.userName !== userName) return;
-            const actionName = convertFileNameToTag(taskRoot.widget);
-            const sHtml = `<${actionName} mode="${taskRoot.mode}" taskIndex="${index}"/>`;
-            return html`${unsafeHTML(sHtml)}`;
+        const renderRooms = () => {
+            return html`<aim-chat-rooms-100554 activeRoom="${pathRoom}" activeMessage="${pathMessage}" activeFilterRooms="${pathFilter}"></aim-chat-rooms-100554>`;
         }
+        const renderMessages = () => {
+            return html`<aim-chat-messages-100554 activeRoom="${pathRoom}" activeMessage="${pathMessage}" activeFilterRooms="${pathFilter}"></aim-chat-messages-100554>`;
+        }
+        const renderMessage = () => {
+            return html`<aim-chat-message-100554 activeRoom="${pathRoom}" activeMessage="${pathMessage}" activeFilterRooms="${pathFilter}"></aim-chat-message-100554>`;
+        }
+        console.log('render serviceaim, activerrom=', this.activeRoom, ', activeMessage=', this.activeMessage)
 
-        const orderned = this.sortKey(tasks);
         return html`
-        <h4 class='title'>${this.myMessage.user}: ${userName} </h4>
-            ${repeat(
-            orderned,
-            ((task: mls.cbe.ITaskRoot, index: number) => index) as any,
-            ((task: mls.cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
-        )}            
+            <aim-chat-header-100554
+                activeRoom="${pathRoom}"
+                activeMessage="${pathMessage}"
+                activeFilterRooms="${pathFilter}">
+            </aim-chat-header-100554>
+            ${!this.activeRoom ? renderRooms() : !this.activeMessage ? renderMessages() : renderMessage()
+            }
         `;
-
     }
 
-    renderRef() {
-
-        let refOpr = '';
-        if (this.nav3Service) {
-            const pos = this.position === 'left' ? 'right' : 'left';
-            const op = this.nav3Service.getActiveInstance(pos);
-            if (op && op.getActualRef) refOpr = op.getActualRef();
-        }
+    renderProject() {
+        let refOpr: string = this.getRef();
 
         const renderTask = (taskRoot: mls.cbe.ITaskRoot, index: number) => {
             let hasRef = taskRoot.children.filter((c) => c.ref === refOpr);
@@ -255,13 +272,33 @@ export class ServiceAim100554 extends ServiceBase {
         });
 
         return html`
-            <h4 class='title'>${this.myMessage.tasksByReference} </h4>
+            <h4 class='title'>${this.msg.titleProject} </h4>
                 ${verifyOrderned.length > 0 ? repeat(
             orderned,
             ((task: mls.cbe.ITaskRoot, index: number) => index) as any,
             ((task: mls.cbe.ITaskRoot, index: number) => renderTask(task, index)) as any
-        ) : html`<h4>${this.myMessage.notFoundReference}</h4>`}
+        ) : html`<h4>${this.msg.notFoundReference}</h4>`}
         `;
+    }
+
+    renderDocs() {
+        return html`
+            <h4 class='title'>${this.msg.titleDocs}</h4>
+        `;
+    }
+
+    getRef(): string {
+        // return file ref in opposite side 
+        if (this.nav3Service) {
+            const pos = this.position === 'left' ? 'right' : 'left';
+            const op = this.nav3Service.getActiveInstance(pos);
+            if (op && op.getActualRef) return op.getActualRef()
+        } else {
+            // in preview ?
+            const left = (mls.actual[2] as any)['left'];
+            if (left) return `_${left.project}_${left.shortName}`
+        }
+        return '';
     }
 
     actions: ResponseFindActions[] = [];
@@ -270,18 +307,20 @@ export class ServiceAim100554 extends ServiceBase {
         super.update(changedProperties);
         if (!changedProperties.has('activeTab')) return;
         switch (this.activeTab) {
-            case 'All':
+            case 'Tasks':
                 // readTasksFromServer('all', '')
                 //     .then(() => this.sendRefreshRequest());
                 return;
-            case 'User':
+            case 'Chats':
                 // readTasksFromServer('byUser', '')
                 //     .then(() => this.sendRefreshRequest());
                 return;
-            case 'Ref':
+            case 'Project':
                 return;
             case 'Add':
                 this.setActions().then(() => this.sendRefreshRequest());
+                return;
+            case 'Docs':
                 return;
             case 'Loading':
                 return;
@@ -383,10 +422,10 @@ export class ServiceAim100554 extends ServiceBase {
 
         return html`
         <div class='addTab' >
-          <h4 class='title'>${this.myMessage.selectadd} : ${this.actualServiceOpName}</h4>
+          <h4 class='title'>${this.msg.titleAdd} : ${this.actualServiceOpName}</h4>
           <div class='ActionItemContainer'  style=${styleMap(showListStyle)}>
             ${filteredActions.length === 0
-                ? html`<div class="no-actions" style="color: #fff;">${this.myMessage.noActionsToAdd}</div>`
+                ? html`<div class="no-actions" style="color: #fff;">${this.msg.noActionsToAdd}</div>`
                 : renderItems()
             }
           </div>
@@ -415,7 +454,7 @@ export class ServiceAim100554 extends ServiceBase {
             this.useContainerAdd = true;
             return;
         }
-        this.activeTab = 'All';
+        this.activeTab = 'Project';
         this.useContainerAdd = true;
     }
 
@@ -460,7 +499,7 @@ export class ServiceAim100554 extends ServiceBase {
         this.stateColumns = getUserConfigs();
         const keys = Object.keys(this.stateColumns);
         return html`
-            ${this.myMessage.selectColumnsYouWant}
+            ${this.msg.selectColumnsYouWant}
             <div style="padding:0 1rem;">
                 ${keys.map((key: string) => {
             const isChecked = (this.stateColumns as any)[key] === true;
@@ -481,8 +520,8 @@ export class ServiceAim100554 extends ServiceBase {
         }
         )}
                 <div style="margin-top:1rem;">
-                    <button @click=${this.handleSaveColumnClick.bind(this)}>${this.myMessage.save}</button>
-                    <button @click=${this.handleCancelColumnClick.bind(this)}>${this.myMessage.cancel}</button>
+                    <button @click=${this.handleSaveColumnClick.bind(this)}>${this.msg.save}</button>
+                    <button @click=${this.handleCancelColumnClick.bind(this)}>${this.msg.cancel}</button>
                 </div>
             
             </div>
@@ -505,7 +544,7 @@ export class ServiceAim100554 extends ServiceBase {
             saveUserConfigs(this.stateColumns);
             this.activeTab = 'Loading';
             setTimeout(() => {
-                this.activeTab = 'All';
+                this.activeTab = 'Project';
                 if (this.menu.closeMenu) this.menu.closeMenu();
             }, 50)
         }
@@ -531,4 +570,5 @@ export class ServiceAim100554 extends ServiceBase {
     }
 }
 
-type ITabType = 'All' | 'User' | 'Ref' | 'Add' | 'Loading'
+
+type ITabType = 'Tasks' | 'Chats' | 'Project' | 'Add' | 'Docs' | 'Loading';
