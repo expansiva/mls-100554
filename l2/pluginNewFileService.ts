@@ -12,11 +12,11 @@ import './_100554_wcCode';
 
 /// **collab_i18n_start**
 const message_pt = {
-    title: 'Criar um service em lit',
-    description: "Criar um service em lit 3 ,que será utilizado no sistema collab.\n O Lit é um framework para criar web componentes rápidos e com atualizações dinâmicas sem ter que repintar toda a tela.\n Após criar o arquivo use a inteligência artificial para preparar o web component.",
+    title: 'Criar um service',
+    description: "Criar um service, que será utilizado no sistema collab.\nUm service no collab.codes, permite a criação de menus após selecionar o level, fica no nav2, com ícones.\nApós criar o arquivo use a inteligência artificial para preparar o service.",
     project: "Projeto",
     shortName: "Nome",
-    header: "Criar um service em Lit",
+    header: "Criar um service",
     btnCreate: 'Criar arquivo',
     loading: 'Criando arquivo...',
     error: 'Nome do arquivo em branco ou invalido'
@@ -24,7 +24,7 @@ const message_pt = {
 
 const message_en = {
     title: 'Create a service in Lit',
-    description: "Create a service in Lit 3, which will be used in the collab system.\n Lit is a framework for creating fast web components with dynamic updates without repainting the entire screen.\n After creating the file, use artificial intelligence to prepare the web component.",
+    description: "Create a service to be used in the Collab system.\nA service in collab.codes allows creating menus after selecting the level, placed in nav2 with icons.\nAfter creating the file, use artificial intelligence to prepare the service.",
     project: "Project",
     shortName: "ShortName",
     header: "Create a service in Lit",
