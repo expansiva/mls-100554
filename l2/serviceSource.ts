@@ -19,11 +19,13 @@ import { propertyDataSource } from './_100554_icaLitElement';
 /// **collab_i18n_start**
 const message_pt = {
     historyOpen: 'Abrir histórico',
+    historyOpenMoment: 'Mostrar histórico do momento',
     historyClose: 'Fechar histórico',
 }
 
 const message_en = {
     historyOpen: 'Open history',
+    historyOpenMoment: 'Display current moment history',
     historyClose: 'Close history',
 }
 
@@ -53,13 +55,15 @@ export class ServiceSource100554 extends ServiceBase {
     @property({ type: Boolean }) panelRightOpened = false;
     @property({ type: String }) activeModels: mls.editor.IModels | undefined;
     @property() isModeHistory: boolean = false;
+    @property() isModeHistoryImmediatte: boolean = false;
+
     @property({ type: String }) mode: IModes = 'icTs';
 
-    @property({ type: String }) currentHistorySourceWithoutSave: string | undefined;
-    @property({ type: String }) previousHistorySourceWithoutSave: string | undefined;
+    @property({ type: String }) currentHistorySourceWithoutSave: string | undefined = undefined;
+    @property({ type: String }) previousHistorySourceWithoutSave: string | undefined = undefined;
 
-    @propertyDataSource({ type: String }) currentHistorySource: string | undefined;
-    @propertyDataSource({ type: String }) previousHistorySource: string | undefined;
+    @propertyDataSource({ type: String }) currentHistorySource: string | undefined = undefined;;
+    @propertyDataSource({ type: String }) previousHistorySource: string | undefined = undefined;;
     @propertyDataSource({ type: String }) historyLanguage: 'typescript' | 'html' | 'less' = 'typescript';
     @propertyDataSource({ type: String }) selectedMode: 'icTs' | 'icStyle' | 'icHTML' | 'btHistory' | undefined;
 
@@ -85,6 +89,8 @@ export class ServiceSource100554 extends ServiceBase {
         this.selectedMode = op as IModes;
 
         if (this.isModeHistory && this.menu.selectButton) this.menu.selectButton('btHistory');
+        if (this.isModeHistoryImmediatte && this.menu.selectButton) this.menu.selectButton('btHistoryImmediatte');
+
         if (op === 'icTs') this.showActiveModel();
         if (op === 'icHTML') {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
@@ -102,6 +108,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     public onClickButton = (op: string, opMenu?: string): boolean => {
         if (op === 'btHistory') return this.toogleHistory();
+        if (op === 'btHistoryImmediatte') return this.toogleHistoryImmediatte();
         else throw new Error('Invalid option')
     }
 
@@ -113,6 +120,14 @@ export class ServiceSource100554 extends ServiceBase {
         position: "all",
         widget: '_100554_serviceSource',
         level: [2]
+    }
+
+    private menuButtonsMode1 = {
+        btHistory: `${this.msg.historyOpen};${this.msg.historyClose};f017;f057`,
+    }
+    private menuButtonsMode2 = {
+        btHistoryImmediatte: `${this.msg.historyOpenMoment};${this.msg.historyClose};f2f2;f057`,
+        btHistory: `${this.msg.historyOpen};${this.msg.historyClose};f017;f057`,
     }
 
     public menu: IMenu = {
@@ -133,9 +148,7 @@ export class ServiceSource100554 extends ServiceBase {
             icStyle: 'Style;f38b'
 
         },
-        buttons: {
-            btHistory: `${this.msg.historyOpen};${this.msg.historyClose};f017;f057`,
-        },
+        buttons: this.previousHistorySource && this.currentHistorySource ? this.menuButtonsMode2 : this.menuButtonsMode1,
         actionDefault: '', // call after close icon clicked
         iconDefault: 'icTs',
         setMode: undefined, // child will set this
@@ -153,6 +166,7 @@ export class ServiceSource100554 extends ServiceBase {
     public onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         this._onServiceClick(visible, reinit, el)
     }
+
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (!visible) {
@@ -363,16 +377,24 @@ export class ServiceSource100554 extends ServiceBase {
         return !this.isModeHistory;
     }
 
+    private toogleHistoryImmediatte(): boolean {
+        this.isModeHistoryImmediatte = !this.isModeHistoryImmediatte;
+        this.updatedMSizeEditor();
+        if (!this.isModeHistoryImmediatte) {
+            if (this.menu && this.menu.setIconActive) this.menu.setIconActive(this.mode);
+        } else {
+            this.getHistoriesImmediatte();
+        }
+        return !this.isModeHistoryImmediatte;
+    }
+
+    private async getHistoriesImmediatte() {
+        this.setHistories(this.previousHistorySource || '', this.currentHistorySource || '', this.historyLanguage);
+    }
 
     private async getHistories() {
 
-        if (this.previousHistorySource || this.currentHistorySource) {
-            this.setHistories(this.previousHistorySource || '', this.currentHistorySource || '', this.historyLanguage);
-            return;
-        }
-
         this.setHistories('Loading...', '', 'text');
-
         const obj: { [key: string]: 'ts' | 'html' | 'style' } = {
             icTs: 'ts',
             icHTML: 'html',
@@ -1864,9 +1886,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     private changeMode(mode: IModes) {
         if (!this.menu || !this.menu.setIconActive || !this.menu.selectButton) return;
         if (mode.startsWith('ic')) {
-            if (this.isModeHistory) {
-                this.menu.selectButton('btHistory');
-            }
+            if (this.isModeHistory) this.menu.selectButton('btHistory');
+            if (this.isModeHistoryImmediatte) this.menu.selectButton('btHistoryImmediatte');
             this.menu.setIconActive(mode);
         } else {
             this.menu.selectButton(mode);
@@ -1876,7 +1897,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     handleIcaStateChange(_key: string, _value: any) {
         const keyState = `serviceSource.${this.position}`;
         if (!_key.startsWith(keyState)) return;
-        if (_key === `${keyState}.selectedMode` && ['icTs', 'icStyle', 'icHTML', 'btHistory'].includes(_value)) {
+        if (_key === `${keyState}.selectedMode` && ['icTs', 'icStyle', 'icHTML', 'btHistory', 'btHistoryImmediatte'].includes(_value)) {
             this.changeMode(_value);
         }
         if (_key === `${keyState}.currentHistorySource` ||
@@ -1884,6 +1905,16 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             _key === `${keyState}.historyLanguage`
         ) {
             this.setHistories(this.previousHistorySource || '', this.currentHistorySource || '', this.historyLanguage)
+        }
+
+        if (_key !== `${keyState}.selectedMode`) {
+            if (this.previousHistorySource && this.currentHistorySource) {
+                this.menu.buttons = this.menuButtonsMode2;
+                if (this.menu.refresh) this.menu.refresh();
+            } else {
+                this.menu.buttons = this.menuButtonsMode1;
+                if (this.menu.refresh) this.menu.refresh();
+            }
         }
     }
 
@@ -1945,10 +1976,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                     slot="top"
                     complementcolor="#1e1e1e"
                     fixedwidth="30%"
-                    fixedvisible=${this.mode !== 'icStyle' || this.isModeHistory ? 'hidden' : `${this.panelRightOpened === true ? 'visible' : 'closed'}`} 
+                    fixedvisible=${this.mode !== 'icStyle' || this.isModeHistory || this.isModeHistoryImmediatte ? 'hidden' : `${this.panelRightOpened === true ? 'visible' : 'closed'}`} 
                 >
-                    <mls-editor-100529 style=${this.isModeHistory ? 'display:none;' : 'display:block;'} slot="left"></mls-editor-100529>
-                    <mls-editor-100529 style=${this.isModeHistory ? 'display:block;' : 'display:none;'} class="history" slot="left"></mls-editor-100529>
+                    <mls-editor-100529 style=${this.isModeHistory || this.isModeHistoryImmediatte ? 'display:none;' : 'display:block;'} slot="left"></mls-editor-100529>
+                    <mls-editor-100529 style=${this.isModeHistory || this.isModeHistoryImmediatte ? 'display:block;' : 'display:none;'} class="history" slot="left"></mls-editor-100529>
                     <css-helper-index-100554 state="{{ less.${this.position} }}" slot="right" position=${this.position} style="height:100%;"></css-helper-index-100554>
                     
                 </collab-spliter-horizontal-var-fixed-100554>
