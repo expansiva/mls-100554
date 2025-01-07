@@ -16,6 +16,7 @@ import './_100554_cssHelperIndex';
 import { globalState } from './_100554_icaState';
 import { propertyDataSource } from './_100554_icaLitElement';
 
+
 /// **collab_i18n_start**
 const message_pt = {
     historyOpen: 'Abrir histórico',
@@ -615,9 +616,8 @@ export class ServiceSource100554 extends ServiceBase {
 
         clearTimeout(this._onChangedContent);
         this._onChangedContent = window.setTimeout(async () => {
-            await this.updateModelStatus(activeModel, true);
             const ignoreChanges = (e.changes.length === 1 && e.changes[0].range.startLineNumber === 1 && e.changes[0].range.endLineNumber === 1 && e.changes[0].range.endColumn <= 2);
-            if (ignoreChanges) return;
+            await this.updateModelStatus(activeModel, !ignoreChanges);
         }, 400);
     };
 
@@ -699,22 +699,25 @@ export class ServiceSource100554 extends ServiceBase {
         };
 
         const onNew = async (): Promise<void> => {
+            this.loading = true;
             await this.newFiles(
                 fileAction.newshortName as string,
                 fileAction.newProject as number,
                 fileAction.newEnhancement as string,
                 fileAction.newTSSource as string
             );
+            this.loading = false;
         };
 
         const onOpen = async (): Promise<void> => {
+            this.loading = true;
             const storFile = getStorFile();
             const storFileHTML = getStorFileHTML();
             const storFileCss = getStorFileCss();
             await this.openFiles(storFileHTML, storFile, storFileCss, fileAction.position);
             mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
             this.updatedMSizeEditor();
-
+            this.loading = false;
         };
 
         const onDelete = async (): Promise<void> => {
@@ -827,7 +830,6 @@ export class ServiceSource100554 extends ServiceBase {
 
         let fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
 
-
         if (!fileModels) {
             await this.createModelTS2(storFileTS, true, true);
             fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
@@ -836,6 +838,10 @@ export class ServiceSource100554 extends ServiceBase {
             mls.editor.editors[this.position] = fileModels;
             this.showActiveModel();
             await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true);
+            const modelTs = this.activeModels?.ts?.model;
+            if (!modelTs) throw new Error('Invalid model TS');
+            mls.editor.forceModelUpdate(modelTs);
+
         } else {
             this.activeModels = fileModels;
             mls.editor.editors[this.position] = fileModels;
@@ -999,10 +1005,10 @@ export class ServiceSource100554 extends ServiceBase {
             hasError = modelBaseTS.storFile.hasError;
         }
 
-        await this.changeStatusFile(modelBaseTS, modelBaseTS.storFile, modelBaseTS.compilerResults?.tripleSlashMLS?.variables, hasError);
+        await this.changeStatusFile(modelBaseTS, modelBaseTS.storFile, modelBaseTS.compilerResults?.tripleSlashMLS?.variables, hasError, changed);
     }
 
-    private async changeStatusFile(modelBaseTS: mls.editor.IModelTS, storFile: mls.stor.IFileInfo, variables: mls.common.tripleslash.ITripleSlashVariables | undefined, hasError: boolean): Promise<void> {
+    private async changeStatusFile(modelBaseTS: mls.editor.IModelTS, storFile: mls.stor.IFileInfo, variables: mls.common.tripleslash.ITripleSlashVariables | undefined, hasError: boolean, changed: boolean): Promise<void> {
 
         if (!storFile) return; // new file dont have storFile ???
         storFile.hasError = hasError;
@@ -1015,8 +1021,7 @@ export class ServiceSource100554 extends ServiceBase {
             await mls.stor.localStor.setContent(storFile, await this.getValueInfo(modelBaseTS));
         }
 
-
-        if (storFile.status !== 'nochange') {
+        if (changed) {
             let position: 'left' | 'right';
             const idLeft = mls.editor.editors.left?.ts?.model.id;
             const idActive = modelBaseTS.model.id
@@ -1919,6 +1924,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     updated(changedProperties: any) {
+        super.updated(changedProperties);
         if (changedProperties.has('msize')) {
             const [w, h, t, l] = this.msize.split(',');
             if (w) this.panelRightOpened = (+w) >= this.MINWIDTHTPANELRIGHT;
