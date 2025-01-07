@@ -378,7 +378,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onBtVariationsClick(opMenu: string | undefined) {
-
+        
         if (!opMenu) return true;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         if (htmlEl) htmlEl.lang = this.languages[opMenu].acronym;
@@ -389,7 +389,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (window.top) (window.top.window as any).globalVariation = !isNaN(variation) ? variation : 0;
 
         if (this.level === 7) this.requestUpdateAllIcaComponentsInPage();
-        else this.onReloader();
+        else this.preview(this.lastMode); //this.onReloader();
         return true;
     }
 
@@ -525,7 +525,9 @@ export class ServicePreview100554 extends ServiceBase {
 
         if (!(mls.actual[2] as any).left) return true;
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
-        this.menu.title = 'Preview: ' + fullname;
+
+        //this.menu.title = 'Preview: ' + fullname;
+        this.menu.title = '';
         if (this.menu.updateTitle) this.menu.updateTitle();
         await this.fireWcdChanges();
         this.lastMode = mode;
