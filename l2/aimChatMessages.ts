@@ -3,6 +3,7 @@
 import { html, css, TemplateResult, noChange } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import './_100554_aimChatMessage';
 import * as chatHelper from './_100554_aimChatHelper';
 import * as chatMock from './_100554_aimChatMock';
 
@@ -17,12 +18,12 @@ const message_en = {
 }
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
-    'en': message_en,
-    'pt': message_pt
+  'en': message_en,
+  'pt': message_pt
 }
 /// **collab_i18n_end**
 
-          
+
 @customElement('aim-chat-messages-100554')
 export class AimChatMessages100554 extends IcaLitElement {
 
@@ -31,70 +32,65 @@ export class AimChatMessages100554 extends IcaLitElement {
   @propertyDataSource({ type: String, reflect: true }) activeFilterRooms: string | undefined;
 
   private offsetUnread = 3000;
-  private minVisibleGroups = 20000; 
+  private minVisibleGroups = 20000;
   private lazyLoadingOffset = 0;
   private scrollToUnreadMessages = true;
   private msg: MessageType = messages['en'];
-
-
-  firstUpdated() {
-    this.scrollMessages();
-  }
 
   updated() {
     this.scrollMessages();
   }
 
-  render(): TemplateResult { 
+  render(): TemplateResult {
     const lang = this.getMessageKey(messages);
     this.msg = messages[lang];
     const currentUser = chatMock.currentUser;
     const roomId = Number(this.activeRoom) || 0;
     const fm = this.groupMessagesByUserAndDate(currentUser, roomId);
 
-  const rc = html`    
+    const rc = html`    
         <div class="chat-container">
         ${this.renderLazyLoadingIfNeed(fm.showLazyLoading)}
         ${fm.groups.map((group, index) => {
-          const isUser = group.sender === currentUser.username;
+      const isUser = group.sender === currentUser.username;
 
-          const showDateHeader = index === 0 || 
-                (group.date && fm.groups[index - 1]?.date?.toDateString() !== group.date.toDateString());
+      const showDateHeader = index === 0 ||
+        (group.date && fm.groups[index - 1]?.date?.toDateString() !== group.date.toDateString());
 
-            return html`
+      return html`
               ${showDateHeader
-                ? html`<div class="message-time">${chatHelper.formatMessageTime(group.date!)}</div>`
-                : ''}
+          ? html`<div class="message-time">${chatHelper.formatMessageTime(group.date!)}</div>`
+          : ''}
               ${group.showUnreadTitle
-                ? html`<div class="unread-label" id="unread-${group.messagesId[0]}">${this.msg.unreadMessages}</div>`
-                : ''}
+          ? html`<div class="unread-label" id="unread-${group.messagesId[0]}">${this.msg.unreadMessages}</div>`
+          : ''}
               <aim-chat-message-100554
                 class="${isUser ? 'user' : 'other'}" 
                 .isUser="${isUser}"
                 .messages="${group.messagesId.map((id) =>
-                  fm.messages.find((msg) => msg.id === id)
-                )}"
+            fm.messages.find((msg) => msg.id === id)
+          )}"
               ></aim-chat-message-100554>
             `;
-        })}
+    })}
       </div>
       `;
-    return rc; 
+    return rc;
 
-}
+  }
 
   renderLazyLoadingIfNeed(showLazyLoading: boolean): TemplateResult {
     if (!showLazyLoading) return html``;
     return html`
         <div class="lazyloading"
         @click=${() => {
-            this.lazyLoadingOffset = this.lazyLoadingOffset + 10;
-            this.scrollToUnreadMessages = false;
-            this.requestUpdate();
-          }}>${this.msg.lazyLoading}</div>
+        this.lazyLoadingOffset = this.lazyLoadingOffset + 10;
+        this.scrollToUnreadMessages = false;
+        this.requestUpdate();
+      }}>${this.msg.lazyLoading}</div>
     `;
   }
-  
+
 
   private readMessages(currentUser: chatHelper.CurrentUser, roomId: number): chatHelper.ChatMessage[] {
     return chatHelper.getMessages(currentUser, chatMock.getRooms(), roomId)
@@ -167,13 +163,16 @@ export class AimChatMessages100554 extends IcaLitElement {
     return dt1 !== dt2;
   }
 
-  private scrollMessages(): void {
-    // scrool to unread messages ou start
+  private async scrollMessages() {
+    // scrool to unread messages ou sta
     if (!this.scrollToUnreadMessages) return;
     const unreadLabel = this.renderRoot.querySelector('.unread-label');
+
     if (unreadLabel) {
-      const el = unreadLabel.previousElementSibling || unreadLabel;
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const el = unreadLabel.nextElementSibling || unreadLabel;
+      const items = Array.from(this.renderRoot.querySelectorAll('aim-chat-message-100554')) as IcaLitElement[];
+      await Promise.all(items.map(item => item.updateComplete));
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
 
