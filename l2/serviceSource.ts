@@ -1889,7 +1889,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private changeMode(mode: IModes) {
-        if (!this.menu || !this.menu.setIconActive || !this.menu.selectButton) return;
+        if (!this.menu || !this.menu.setIconActive || !this.menu.selectButton || this.mode === mode) return;
         if (mode.startsWith('ic')) {
             if (this.isModeHistory) this.menu.selectButton('btHistory');
             if (this.isModeHistoryImmediatte) this.menu.selectButton('btHistoryImmediatte');
