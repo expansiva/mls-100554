@@ -30,7 +30,7 @@ export class ServiceHistories100554 extends ServiceBase {
 
     constructor() {
         super();
-        mls.events.addEventListener([2], ['HistoriesSelected' as any], (ev) => this.onSelectHistories(ev));
+        mls.events.addEventListener([2, 5], ['HistoriesSelected' as any], (ev) => this.onSelectHistories(ev));
         mls.events.addEventListener([2], ['ToolBarSelected'], (ev) => { this.onToolbarSelected(ev); });
     }
 
@@ -52,7 +52,7 @@ export class ServiceHistories100554 extends ServiceBase {
         visible: false,
         position: "all",
         widget: '_100554_serviceHistories',
-        level: [2]
+        level: [2, 5]
     }
 
     public onClickLink = (op: string): boolean => {
@@ -106,7 +106,6 @@ export class ServiceHistories100554 extends ServiceBase {
         if (!ev.desc) return;
         const params: IEventParams = JSON.parse(ev.desc);
         if (params.position === this.position) return;
-        if (params.level !== this.level) return;
 
         if (!this.serviceItemNav) return;
         this.showNav2Item(true);
@@ -118,7 +117,6 @@ export class ServiceHistories100554 extends ServiceBase {
             '.less': 'less',
         }
 
-        console.info(params.extension)
 
         const key = mls.stor.getKeyToFiles(params.project, params.level, params.shortName, params.folder, params.extension);
         const storFile = mls.stor.files[key];
