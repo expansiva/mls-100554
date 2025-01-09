@@ -20,6 +20,16 @@ export const onAfterChange = (models: mls.editor.IModels) => {
     }
 };
 
+export const onAfterMarkersChange = (models: mls.editor.IModels) => {
+    const modelStyle: mls.editor.IModelStyle | undefined = models.style;
+    if (!modelStyle) return '';
+    try {
+        verifyMarkersError(modelStyle);
+        return '';
+    } catch (e: any) {
+        throw new Error(e)
+    }
+};
 
 export const onAfterCompile = async (modelStyle: mls.editor.IModelStyle): Promise<void> => {
     return;
@@ -38,7 +48,15 @@ export const getDesignDetails = (modelStyle: mls.editor.IModelStyle): Promise<ml
 }
 
 
-export function validateStyle(modelStyle: mls.editor.IModelStyle) {
+export async function verifyMarkersError(modelStyle: mls.editor.IModelStyle) {
+    if (modelStyle && modelStyle.model) {
+        const markers = monaco.editor.getModelMarkers({ resource: modelStyle.model.uri });
+        const hasError = markers.some(marker => marker.severity === monaco.MarkerSeverity.Error);
+        modelStyle.storFile.hasError = hasError;
+    }
+}
+
+export async function validateStyle(modelStyle: mls.editor.IModelStyle) {
 
     const model: monaco.editor.ITextModel = modelStyle.model;
     const { project, shortName } = modelStyle.storFile;
@@ -47,30 +65,45 @@ export function validateStyle(modelStyle: mls.editor.IModelStyle) {
     if (!model || !storFileLess) return;
 
     storFileLess.hasError = false;
-    const value = model.getValue();
-    let text = removeTokensFromSource(value);
+    const formated = await formatTextInMemory(model);
+    let text = removeTokensFromSource(formated);
     text = removeCommentLines(text);
+
     const markers: monaco.Position[] = [];
-    const validRootSelectorClass = /^[a-zA-Z][\w-]*\.[a-zA-Z][\w-]*$/;
-    const validRootSelectorTag = /^\s*[a-zA-Z]+[\w-]*-[\w-]*\s*$/;
-    const rootRules = getRootSelectors(text);
     const tagName = convertFileNameToTag(`_${project}_${shortName}`);
-
-    if (rootRules) {
-        rootRules.forEach((rule) => {
-            const lineSelector = rule.trim().split('\n')[0].trim();
-            const selector = lineSelector.split('{')[0].trim();
-            const isSameSelectorAndTag = selector.startsWith(tagName);
-            const position = getLineByText(model, lineSelector);
-
-            if ((!isSameSelectorAndTag || (!validRootSelectorClass.test(selector) && !validRootSelectorTag.test(selector))) && position) {
-                markers.push(position);
-            }
-        });
+    const rootSelectorRegex = /^[^\s].*?{/gm;
+    const errors: string[] = [];
+    let match: RegExpExecArray | null;
+    while ((match = rootSelectorRegex.exec(text)) !== null) {
+        const selector = match[0].trim().replace(/\{$/, "").trim();
+        const isValid =
+            selector === tagName ||
+            new RegExp(`^${tagName}\\.[a-zA-Z0-9_-]+$`).test(selector);
+        if (!isValid) {
+            const position = getLineSelectorByText(model, selector);
+            if (position) markers.push(position);
+            errors.push(`Invalid root selector: "${selector}"`);
+        }
     }
 
     if (markers.length > 0) storFileLess.hasError = true;
     setErrorOnEditor(markers, model, tagName);
+}
+
+async function formatTextInMemory(model: monaco.editor.ITextModel) {
+
+    const tempModel = monaco.editor.createModel(model.getValue(), 'less');
+    const tempEditor = monaco.editor.create(document.createElement("div"), {
+        model: tempModel,
+    });
+
+    try {
+        await tempEditor.getAction('editor.action.formatDocument')?.run();
+        const formattedText = tempModel.getValue();
+        return formattedText;
+    } finally {
+        tempEditor.dispose();
+    }
 }
 
 function setErrorOnEditor(position: monaco.Position[], model: monaco.editor.ITextModel, tag: string) {
@@ -95,6 +128,20 @@ export function getLineByText(model: monaco.editor.ITextModel, searchText: strin
     for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
         const lineContent = model.getLineContent(lineNumber);
         if (lineContent.trim() === searchText) {
+            return new monaco.Position(lineNumber, 1);
+        }
+    }
+    return null;
+}
+
+export function getLineSelectorByText(model: monaco.editor.ITextModel, searchText: string) {
+    const lineCount = model.getLineCount();
+    const s1 = searchText + '{';
+    const s2 = s1.replace(/\s+/g, '');
+    for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
+        const lineContent = model.getLineContent(lineNumber);
+        const ln = lineContent.replace(/\s+/g, '').trim();
+        if (ln === s2) {
             return new monaco.Position(lineNumber, 1);
         }
     }
@@ -180,7 +227,7 @@ export async function compileStyleUsingMFile(modelStyle: mls.editor.IModelStyle,
     try {
         // let fullLess = `${tokensLess || ''}\n${val}`;
         // await compileLess(fullLess);
-        return preCompileLess(val, tokensList, theme, prefix, true);
+        return preCompileLess(val, tokensList, theme, prefix, true, modelStyle);
 
     } catch (err: any) {
         throw new Error(err.message);
@@ -221,7 +268,7 @@ function compileLess(str: string): Promise<string> {
     });
 }
 
-async function preCompileLess(less: string, tokens: ITokenInfo, theme: string, prefix: ':host' | ':root', includeTokens: boolean): Promise<string> {
+async function preCompileLess(less: string, tokens: ITokenInfo, theme: string, prefix: ':host' | ':root', includeTokens: boolean, modelStyle?: mls.editor.IModelStyle): Promise<string> {
     try {
         let newLess = '';
 
@@ -231,10 +278,6 @@ async function preCompileLess(less: string, tokens: ITokenInfo, theme: string, p
         const cssVars = getCssVars(darkAndLight, prefix);
         newLess = replaceTokens(less, darkAndLight, cssVars, false);
         newLess = await compileLess(newLess);
-
-        if (less !== '' && newLess === '') {
-            errorCompileLess(`Error: invalid less`);
-        }
         return newLess;
     } catch (e: any) {
 
@@ -242,6 +285,9 @@ async function preCompileLess(less: string, tokens: ITokenInfo, theme: string, p
         if (typeof e === 'string') errorCompileLess(e);
         else if (e && e.message) errorCompileLess(e.message);
         else errorCompileLess(`Error: invalid less`);
+        if (modelStyle && modelStyle.storFile) {
+            modelStyle.storFile.hasError = true;
+        }
 
         return '';
     }
