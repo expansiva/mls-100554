@@ -246,6 +246,7 @@ export interface IMenu {
     setIconActive?: (op: string) => void,
     setMenuActive?: (op: string) => void,
     selectButton?: (op: string) => void
+    toggleErrorIcon?: (op: string, show: boolean) => void,
     closeMenu?: Function,
     refresh?: Function,
     getLastMode?: IGetLastMode,

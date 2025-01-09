@@ -717,6 +717,7 @@ export class ServiceSource100554 extends ServiceBase {
             await this.openFiles(storFileHTML, storFile, storFileCss, fileAction.position);
             mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
             this.updatedMSizeEditor();
+            this.toogleIconsError();
             this.loading = false;
         };
 
@@ -861,7 +862,7 @@ export class ServiceSource100554 extends ServiceBase {
             if (!this._ed1) return;
             this.restaureViewState();
 
-        } catch (e:any) {
+        } catch (e: any) {
 
             this.loading = false;
             this.setError(e.message);
@@ -1022,6 +1023,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (!storFile) return; // new file dont have storFile ???
         storFile.hasError = hasError;
+        this.toogleIconsError();
         const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
         if (sameContent) {
             if (storFile.status !== 'new') storFile.status = 'nochange';
@@ -1206,6 +1208,15 @@ export class ServiceSource100554 extends ServiceBase {
                     }
                 }, 500)
 
+            });
+
+            monaco.editor.onDidChangeMarkers(async (uris) => {
+                if (this.mode !== 'icStyle' || !this.activeModels || !this.activeModels.style) return;
+                const uriActual = this.activeModels.style.model.uri.toString();
+                if (uris.some(uri => uri.toString() === uriActual)) {
+                    const enhancementInstanceLess = await import('./_100554_enhancementStyle');
+                    if (enhancementInstanceLess && this.activeModels) await enhancementInstanceLess.onAfterMarkersChange(this.activeModels);
+                }
             });
         };
 
@@ -1656,7 +1667,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     }
 
-    private initModelStyle(uri: monaco.Uri, model: monaco.editor.ITextModel) {
+    private async initModelStyle(uri: monaco.Uri, model: monaco.editor.ITextModel) {
 
         if (!this._ed1) return;
         this.lessCSS = new LessCSS(uri.toString(), this._ed1, this.position);
@@ -1668,7 +1679,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             this._ed1.setSelection(
                 new monaco.Selection(lineNumber, 1, lineNumber, line.length + 1)
             );
+            const enhancementInstanceLess = await import('./_100554_enhancementStyle')
+            if (enhancementInstanceLess && this.activeModels) await enhancementInstanceLess.onAfterChange(this.activeModels);
         }
+
     }
 
     private async prepareInitialLess(shortName: string, project: number) {
@@ -1851,6 +1865,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
             if (ext === '.html') mls.events.fireFileAction('statusOrErrorChanged', storFile, position);
             else mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position, storFile }));
+            this.toogleIconsError();
 
         }, 400);
     };
@@ -1897,6 +1912,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     private updatedMSizeEditor() {
         this.editorEl?.setAttribute('msize', this.msize);
         this.editorHistoryEl?.setAttribute('msize', this.msize);
+    }
+    private toogleIconsError() {
+        if (!this.menu || !this.menu.toggleErrorIcon || !this.activeModels) return;
+        if (this.activeModels.html && this.activeModels.html.storFile) this.menu.toggleErrorIcon('icHTML', this.activeModels.html.storFile.hasError);
+        if (this.activeModels.ts && this.activeModels.ts.storFile) this.menu.toggleErrorIcon('icTs', this.activeModels.ts.storFile.hasError);
+        if (this.activeModels.style && this.activeModels.style.storFile) this.menu.toggleErrorIcon('icStyle', this.activeModels.style.storFile.hasError);
     }
 
     private changeMode(mode: IModes) {
