@@ -450,6 +450,8 @@ export class ServiceSave extends ServiceBase {
 
     renderItem(item: Iitem, indexP: number, indexL: number, index: number) {
 
+        const aux = ['new', 'rename'].includes(item.file.status) ? '' : html`<span @click="${this.clickHistory}" .item=${item} style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer" class="fa-regular fa-clock" title="History"></span>`;
+
         return html`
         <li style="padding-left: 1.1rem;">
             <div style="align-items: center;">
@@ -462,7 +464,7 @@ export class ServiceSave extends ServiceBase {
                     ${item.text}
                     ${unsafeHTML(item.span)}
                 </label>
-                <span @click="${this.clickHistory}" .item=${item} style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer" class="fa-regular fa-clock" title="History"></span>
+                ${aux}
             </div>
         </li>
         `;
