@@ -824,40 +824,50 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async openFiles(storFileHTML: mls.stor.IFileInfo | undefined, storFileTS: mls.stor.IFileInfo, storFileCss: mls.stor.IFileInfo | undefined, position: 'left' | 'right') {
 
-        await this.createModelTS_loading();
-        this.activeThisService();
-        this.closeMenu();
+        try {
 
-        let fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
+            await this.createModelTS_loading();
+            this.activeThisService();
+            this.closeMenu();
 
-        if (!fileModels) {
-            await this.createModelTS2(storFileTS, true, true);
-            fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
-            if (!fileModels) console.info('No file models');
-            this.activeModels = fileModels;
-            mls.editor.editors[this.position] = fileModels;
-            this.showActiveModel();
-            await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true);
-            const modelTs = this.activeModels?.ts?.model;
-            if (!modelTs) throw new Error('Invalid model TS');
-            mls.editor.forceModelUpdate(modelTs);
+            let fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
 
-        } else {
-            this.activeModels = fileModels;
-            mls.editor.editors[this.position] = fileModels;
-            const modelTs = this.activeModels.ts?.model;
-            if (!modelTs) throw new Error('Invalid model TS');
-            mls.editor.forceModelUpdate(modelTs);
-            this.showActiveModel();
+            if (!fileModels) {
+                await this.createModelTS2(storFileTS, true, true);
+                fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
+                if (!fileModels) console.info('No file models');
+                this.activeModels = fileModels;
+                mls.editor.editors[this.position] = fileModels;
+                this.showActiveModel();
+                await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true);
+                const modelTs = this.activeModels?.ts?.model;
+                if (!modelTs) throw new Error('Invalid model TS');
+                mls.editor.forceModelUpdate(modelTs);
+
+            } else {
+                this.activeModels = fileModels;
+                mls.editor.editors[this.position] = fileModels;
+                const modelTs = this.activeModels.ts?.model;
+                if (!modelTs) throw new Error('Invalid model TS');
+                mls.editor.forceModelUpdate(modelTs);
+                this.showActiveModel();
+            }
+
+            [storFileCss, storFileTS, storFileHTML].forEach((storF) => {
+                if (storF && !storF.inLocalStorage && storF.isLocalVersionOutdated) storF.isLocalVersionOutdated = false;
+            });
+
+            this.saveLocalStorageLastOpen(storFileTS, position);
+            if (!this._ed1) return;
+            this.restaureViewState();
+
+        } catch (e:any) {
+
+            this.loading = false;
+            this.setError(e.message);
+
         }
 
-        [storFileCss, storFileTS, storFileHTML].forEach((storF) => {
-            if (storF && !storF.inLocalStorage && storF.isLocalVersionOutdated) storF.isLocalVersionOutdated = false;
-        });
-
-        this.saveLocalStorageLastOpen(storFileTS, position);
-        if (!this._ed1) return;
-        this.restaureViewState();
     }
 
 
@@ -1378,6 +1388,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async createModelTS2(storFile: mls.stor.IFileInfo, activedModel: boolean, compile: boolean): Promise<mls.editor.IModels> {
         // load source from repository
+
         const { project, shortName, extension } = storFile;
 
         let fileModels = mls.editor.getModels(project, shortName);
