@@ -8,7 +8,7 @@ import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
 import { getMyKeysBranch } from './_100554_libCommom';
 import { getConfigProject, updateConfigProject } from './_100554_libProjectConfig';
 
-initServiceSaveaddBranch();
+initServiceSaveaddBranch(); 
 /// **collab_i18n_start**
 const message_pt = {
     openPullrequest: 'Pull request Abertos',
@@ -129,7 +129,7 @@ export class ServiceSave extends ServiceBase {
             this.updateList();
         }
 
-        
+
 
     }
 
@@ -148,9 +148,9 @@ export class ServiceSave extends ServiceBase {
     private onLevelchange: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
         if (!ev.desc) return;
-            const data: { to: number, from: number } = JSON.parse(ev.desc);
+        const data: { to: number, from: number } = JSON.parse(ev.desc);
 
-        if(data.to === 5 ) this.verifyExitFileChanged();
+        if (data.to === 5) this.verifyExitFileChanged();
 
     }
 
@@ -452,7 +452,7 @@ export class ServiceSave extends ServiceBase {
 
         return html`
         <li style="padding-left: 1.1rem;">
-            <div>
+            <div style="align-items: center;">
                 ${item.disabled || item.onlyFather
                 ? html`<input type="checkbox" id="l0-${indexP}-${indexL}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
                 : html`<input type="checkbox" id="l0-${indexP}-${indexL}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
@@ -461,8 +461,8 @@ export class ServiceSave extends ServiceBase {
 
                     ${item.text}
                     ${unsafeHTML(item.span)}
-
                 </label>
+                <span @click="${this.clickHistory}" .item=${item} style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer" class="fa-regular fa-clock" title="History"></span>
             </div>
         </li>
         `;
@@ -470,6 +470,43 @@ export class ServiceSave extends ServiceBase {
     }
 
     //-------- IMPLEMENTATION --------
+
+    private async clickHistory(e: MouseEvent) {
+
+        try {
+            e.stopPropagation();
+            let el = e.target as HTMLElement;
+            if (!el.classList.contains('fa-clock')) {
+                el = el.closest('.fa-clock') as HTMLElement;
+            }
+
+            if (!(el as any).item) return;
+
+            const f = ((el as any).item.file as mls.stor.IFileInfo);
+            const h = await f.getHistory();
+
+            if (!h || h.length <= 0) return;
+
+            const obj = {
+                project: f.project,
+                shortName: f.shortName,
+                extension: f.extension,
+                position: 'left',
+                level: f.level,
+                folder: f.folder,
+                hashOriginal: h[0].ref,
+                hashModified: 'local',
+            }
+
+            mls.events.fire([5], 'HistoriesSelected' as any, JSON.stringify(obj), 0);
+
+        } catch (err: any) {
+
+            this.setError(err.message);
+
+        }
+
+    }
 
     private filterOtherProject() {
 
