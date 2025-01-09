@@ -93,7 +93,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             },
             {
                 category: 'Services',
-                scope: ['l2ServicesLeft', 'l2ServicesRight'],
+                scope: ['l2ServicesLeft', 'l2ServicesRight', 'l5ServicesRight'],
                 priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceHistories'
