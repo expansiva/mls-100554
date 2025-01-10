@@ -60,6 +60,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     private lastMode: string = 'icPreviewD';
 
+    private lastModePreview: string = 'desktop';
+
     private lastLevel: number = -1;
 
     private elPreview: HTMLElement | undefined = undefined;
@@ -165,7 +167,6 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public onServiceClick(visible: boolean, reinit: boolean) {
-
         if (visible && !reinit && this.menu.setIconActive) {
             this.menu.setIconActive(this.lastMode);
 
@@ -176,8 +177,9 @@ export class ServicePreview100554 extends ServiceBase {
 
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
+
         } else {
-            this.preview(this.lastMode);
+            this.onReloader();
         }
     }
 
@@ -197,7 +199,8 @@ export class ServicePreview100554 extends ServiceBase {
     private onReloader(): void {
         clearTimeout(this.timeEvent);
         this.timeEvent = setTimeout(async () => {
-            this.onServiceClick(true, false);
+            //this.onServiceClick(true, false);
+            this.preview(this.lastModePreview);
             mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
         }, 500);
     }
@@ -228,7 +231,7 @@ export class ServicePreview100554 extends ServiceBase {
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
         try {
-
+    
             if (this.visible === 'false' || !this.visible) return;
             if (ev.level !== 2 || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
@@ -250,10 +253,12 @@ export class ServicePreview100554 extends ServiceBase {
                 return;
             }
             if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
+        
             if (this.watch) {
                 this.elPreview = undefined;
                 this.loading = false;
                 this.onReloader();
+                //this.preview(this.lastModePreview)
             }
 
         } catch (e) {
@@ -378,7 +383,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onBtVariationsClick(opMenu: string | undefined) {
-        
+    
         if (!opMenu) return true;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         if (htmlEl) htmlEl.lang = this.languages[opMenu].acronym;
@@ -389,7 +394,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (window.top) (window.top.window as any).globalVariation = !isNaN(variation) ? variation : 0;
 
         if (this.level === 7) this.requestUpdateAllIcaComponentsInPage();
-        else this.preview(this.lastMode); //this.onReloader();
+        else this.onReloader();
         return true;
     }
 
@@ -412,6 +417,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private toogleWatch(): boolean {
+
         this.elPreview = undefined;
         this.watch = !this.watch;
         if (this.watch) {
@@ -523,14 +529,15 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async preview(mode: string) {
 
-        if (!(mls.actual[2] as any).left) return true;
+        if (!(mls.actual[2] as any).left || !this.watch) return true;
+        
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
 
         //this.menu.title = 'Preview: ' + fullname;
         this.menu.title = '';
         if (this.menu.updateTitle) this.menu.updateTitle();
         await this.fireWcdChanges();
-        this.lastMode = mode;
+        this.lastModePreview = mode;
         this.lastLevel = this.level;
 
         const container = document.createElement('div');
