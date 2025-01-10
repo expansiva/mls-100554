@@ -20,13 +20,41 @@ export abstract class ServiceBase extends IcaLitElement {
 
     @state() loading: boolean = false;
 
-    get serviceContent() { return this.getNav3ServiceContent(); }
+    private _nav3Service: IMlsNav3 | null | undefined;
 
-    get nav3Service() { return this.getNav3Service(); }
+    private _serviceContent: IToolbarContent | null | undefined;
 
-    get serviceItemNav() { return this.getServiceItemNav(); }
+    private _serviceItemNav: IMlsNav2Item | null | undefined;
 
-    get tooltipEl() { return this.getTooltip(); }
+    private _tooltipEl: ITooltipElement | null | undefined;
+
+    get serviceContent() {
+        if (this._serviceContent === undefined) {
+            this._serviceContent = this.getNav3ServiceContent();
+        }
+        return this._serviceContent;
+    }
+
+    get nav3Service() {
+        if (this._nav3Service === undefined) {
+            this._nav3Service = this.getNav3Service();
+        }
+        return this._nav3Service;
+    }
+
+    get serviceItemNav() {
+        if (this._serviceItemNav === undefined) {
+            this._serviceItemNav = this.getServiceItemNav();
+        }
+        return this._serviceItemNav;
+    }
+
+    get tooltipEl() {
+        if (this._tooltipEl === undefined) {
+            this._tooltipEl = this.getTooltip();
+        }
+        return this._tooltipEl;
+    }
 
     abstract details: IService;
 

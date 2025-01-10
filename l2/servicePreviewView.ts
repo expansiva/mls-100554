@@ -4,6 +4,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
+import { ServiceBase } from './_100554_serviceBase'
 import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
 
 export const initServicePreviewView = '';
@@ -139,7 +140,7 @@ export class ServicePreviewView extends LitElement {
                 </div>
                 
             `
-        // ?t=${Date.now()}
+            // ?t=${Date.now()}
         } else {
 
             this.style.cssText = `
@@ -264,7 +265,7 @@ export class ServicePreviewView extends LitElement {
         const { project, shortName } = this.models.style.storFile;
         const id = convertFileNameToTag(`_${project}_${shortName}`);
         const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
-        
+
         //if (oldStyle) oldStyle.remove();
         const newStyle = document.createElement('style');
         const newLess = await compileStyleUsingStorFile(shortName, project, this.actualtheme);
@@ -365,26 +366,38 @@ export class ServicePreviewView extends LitElement {
     }
 
     private lastHTML: string = '';
+
+    private isService: boolean = false;
+
+    private checkIfIsService(): boolean {
+        if (!this.file || !this.models || !this.models.ts) return false;
+        const txt = this.models.ts.model.getValue();
+        if (txt.indexOf('extends ServiceBase') === -1) return false;
+        return true;
+
+    }
     private async setHTml(iframe: HTMLIFrameElement) {
 
         if (!iframe.contentDocument || !this.models) return;
         let txt = await this.getFileContent();
-        /*if (this.lastHTML === txt) {
-            const h = this.lastCompiledUrl;
-            this.lastCompiledUrl = h;
-            return;
-        }*/
-
+        this.isService = this.checkIfIsService()
         this.lastHTML = txt;
-        iframe.contentDocument.body.innerHTML = txt;
+
         iframe.contentDocument.body.style.paddingTop = '10px';
         (iframe.contentDocument.body as any)['service'] = this.father;
 
-        const ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
+        let ret;
+        if (this.isService && this.file) {
+            const tag = convertFileNameToTag(`_${this.file.project}_${this.file.shortName}`);
+        }
+
+        iframe.contentDocument.body.innerHTML = txt;
+        ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
         if (ret.errors.length > 0) {
             this.father.setError(`Error(${ret.errors.length}) when compiling:${ret.errors[0].error}`);
             console.info('Errors in compile', ret.errors)
         }
+
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
         this.mountCSS(iframe);
@@ -478,18 +491,11 @@ export class ServicePreviewView extends LitElement {
     private async simulateService(info: IJSONDependence, ifr: HTMLIFrameElement) {
 
         if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
-        if (this.file && this.models && this.models.ts) {
+        if (this.isService) {
+            this.addFA(ifr);
+            this.addTooltip(ifr);
+            this.addNav3(ifr);
 
-            const txt = this.models.ts.model.getValue();
-            if (txt.indexOf('extends ServiceBase') === -1) return;
-            const tag = convertFileNameToTag(`_${this.file.project}_${this.file.shortName}`);
-            const instance = ifr.contentDocument.body.querySelector(tag);
-
-            if (instance) {
-                this.addFA(ifr);
-                this.addTooltip(ifr);
-                this.addNav3(ifr, instance);
-            }
         }
     }
 
@@ -505,24 +511,78 @@ export class ServicePreviewView extends LitElement {
         });
     }
 
-    private addNav3(ifr: HTMLIFrameElement, instance: Element) {
+    private waitForComponents(context: Window, componentNames: string[]) {
+        const promises = componentNames.map(name =>
+            context.customElements.whenDefined(name)
+        );
+        return Promise.all(promises);
+    }
+
+    private addNav3(ifr: HTMLIFrameElement) {
+
         if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
-        if (!ifr.contentWindow.customElements.get('mls-nav3-100529')) {
-            ifr.contentWindow.customElements.define('mls-nav3-100529', (window as any)['l4_html']._100529_mls_nav3);
-        }
-        ifr.contentWindow.customElements.whenDefined('mls-nav3-100529').then(() => {
-            if (!ifr.contentDocument) return;
-            const collabNav = document.createElement('collab-nav');
+        if (!ifr.contentWindow.customElements.get('mls-nav3-100529')) ifr.contentWindow.customElements.define('mls-nav3-100529', (window as any)['l4_html']._100529_mls_nav3);
+        if (!ifr.contentWindow.customElements.get('collab-nav-3')) ifr.contentWindow.customElements.define('collab-nav-3', (window as any)['l4_html']._100529_collab_nav_3);
+
+        this.waitForComponents(ifr.contentWindow, [
+            'mls-nav3-100529',
+            'collab-nav-3',
+        ]).then(async () => {
+
+            if (!ifr.contentDocument || !this.file) return;
+
+            const dataService = `_${this.file?.project}_${this.file?.shortName}`
+            const tag = convertFileNameToTag(`_${this.file.project}_${this.file.shortName}`);
+            const old = ifr.contentDocument.querySelector(tag);
+            if (!old) return;
+            await import(`./_${this.file.project}_${this.file.shortName}`);
+
+            const instance = old.cloneNode() as ServiceBase;
+            const lvl = instance.getAttribute('level') || '2';
+            old?.remove();
+            const collabNav = document.createElement('collab-nav-3');
+            collabNav.setAttribute('toolbarposition', instance.position || 'right');
+            collabNav.setAttribute('data-service', dataService);
+
+            collabNav.setAttribute('level', lvl);
+            instance.setAttribute('level', lvl);
+
+            const collabNavService = document.createElement('collab-nav-3-service');
+            collabNavService.setAttribute('data-service', dataService);
+            collabNavService.className = 'active';
+
             collabNav.style.position = 'relative';
             collabNav.style.width = '100%';
             collabNav.style.display = 'block';
 
-            (collabNav as any)['mlsWidget'] = instance;
+            (collabNavService as any).mlsWidget = instance;
             const mlsnav3 = document.createElement('mls-nav3-100529');
             mlsnav3.setAttribute('is-mls2', 'true');
-            collabNav.appendChild(mlsnav3);
-            ifr.contentDocument.body.insertBefore(collabNav, instance);
+            mlsnav3.setAttribute('toolbarposition', instance.position || 'right');
+
+            collabNav.appendChild(collabNavService);
+            collabNavService.appendChild(mlsnav3);
+
+            ifr.contentDocument.body.appendChild(collabNav);
+            mlsnav3.after(instance);
+
         });
+
+        // ifr.contentWindow.customElements.whenDefined('mls-nav3-100529').then(() => {
+        //     if (!ifr.contentDocument) return;
+        //     const collabNav = document.createElement('collab-nav');
+        //     collabNav.style.position = 'relative';
+        //     collabNav.style.width = '100%';
+        //     collabNav.style.display = 'block';
+
+        //     (collabNav as any)['mlsWidget'] = instance;
+        //     const mlsnav3 = document.createElement('mls-nav3-100529');
+        //     mlsnav3.setAttribute('is-mls2', 'true');
+        //     mlsnav3.setAttribute('toolbarposition', instance.position || 'right');
+
+        //     collabNav.appendChild(mlsnav3);
+        //     ifr.contentDocument.body.insertBefore(collabNav, instance);
+        // });
     }
 
     private addFA(ifr: HTMLIFrameElement) {
