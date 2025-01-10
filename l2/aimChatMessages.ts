@@ -37,6 +37,11 @@ export class AimChatMessages100554 extends IcaLitElement {
   private scrollToUnreadMessages = true;
   private msg: MessageType = messages['en'];
 
+  
+  firstUpdated() {
+    this.scrollMessages();
+  }
+
   updated() {
     this.scrollMessages();
   }
@@ -164,15 +169,12 @@ export class AimChatMessages100554 extends IcaLitElement {
   }
 
   private async scrollMessages() {
-    // scrool to unread messages ou sta
+    // scrool to unread messages ou start
     if (!this.scrollToUnreadMessages) return;
     const unreadLabel = this.renderRoot.querySelector('.unread-label');
-
     if (unreadLabel) {
-      const el = unreadLabel.nextElementSibling || unreadLabel;
-      const items = Array.from(this.renderRoot.querySelectorAll('aim-chat-message-100554')) as IcaLitElement[];
-      await Promise.all(items.map(item => item.updateComplete));
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const el = unreadLabel.previousElementSibling || unreadLabel;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
