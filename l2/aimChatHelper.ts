@@ -1,6 +1,6 @@
 /// <mls shortName="aimChatHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { globalState } from './_100554_icaState';
+import { globalState, initState } from './_100554_icaState';
 
 export interface ChatMessage {
   id: number;
@@ -50,7 +50,7 @@ export function getMessages(
   return room.messages
     .slice()
     .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
-    // .slice(-100);
+  // .slice(-100);
 }
 
 export function getMessagesGroup(
@@ -77,13 +77,13 @@ export function getChatRoomSummaries(
   return chatRooms
     .filter((room) => room.group === group)
     .map((room) => {
-        const lastSeenId = user.lastSeenChats[room.id] || new Date(0);
-        const unreadCount = room.messages.filter((msg) => msg.timestamp > lastSeenId).length;
-        const lastUpdate = room.messages[room.messages.length - 1]?.timestamp || new Date(0);
-        const lastMessage = room.messages[room.messages.length - 1];
-        const lastMessageSummary = lastMessage
-            ? `${lastMessage.sender}: ${lastMessage.content}`
-            : 'no msg';
+      const lastSeenId = user.lastSeenChats[room.id] || new Date(0);
+      const unreadCount = room.messages.filter((msg) => msg.timestamp > lastSeenId).length;
+      const lastUpdate = room.messages[room.messages.length - 1]?.timestamp || new Date(0);
+      const lastMessage = room.messages[room.messages.length - 1];
+      const lastMessageSummary = lastMessage
+        ? `${lastMessage.sender}: ${lastMessage.content}`
+        : 'no msg';
 
       return {
         roomName: room.roomName,
@@ -98,21 +98,21 @@ export function getChatRoomSummaries(
 }
 
 export function formatChatDate(
-    date: Date,
-    language: string = navigator.language
+  date: Date,
+  language: string = navigator.language
 ): string {
-    const now = new Date();
-    const isToday = date.toDateString() === now.toDateString();
-    const isThisWeek =
-        date >= new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  const isThisWeek =
+    date >= new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
 
-    if (isToday) {
-        return new Intl.DateTimeFormat(language, { hour: '2-digit', minute: '2-digit' }).format(date);
-    } else if (isThisWeek) {
-        return new Intl.DateTimeFormat(language, { weekday: 'long' }).format(date);
-    } else {
-        return new Intl.DateTimeFormat(language, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
-    }
+  if (isToday) {
+    return new Intl.DateTimeFormat(language, { hour: '2-digit', minute: '2-digit' }).format(date);
+  } else if (isThisWeek) {
+    return new Intl.DateTimeFormat(language, { weekday: 'long' }).format(date);
+  } else {
+    return new Intl.DateTimeFormat(language, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+  }
 }
 
 export function formatMessageTime(date: Date): string {
@@ -133,7 +133,7 @@ export function formatMessageTime(date: Date): string {
 }
 
 export function formatMessageTimeCompact(date: Date): string {
-      return `${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  return `${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 }
 
 
@@ -142,15 +142,13 @@ export const pathActiveMessage = "{{globalState.chat.activeMessage}}";
 export const pathActiveFilterRooms = "{{globalState.chat.activeFilterRooms}}";
 
 function initDataSource() {
-  if (globalState?._ica?.localState?.chat) return;
-  globalState._ica = {
-    globalState: {
-      chat: {
-        activeRoom: "",
-        activeMessage: "",
-        activeFilterRooms: ""
-      }
-    }
-  }
+  if (globalState?._ica?.globalState?.chat) return;
+  initState('globalState.chat', {
+    activeRoom: "",
+    activeMessage: "",
+    activeFilterRooms: ""
+  });
+
 }
+
 initDataSource();
