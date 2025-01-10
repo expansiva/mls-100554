@@ -51,6 +51,31 @@ Object.defineProperty(globalState, 'globalVariation', {
   }
 });
 
+/**
+ * Initializes a nested property in the global state object if it doesn't already exist.
+ * If the property exists, it retains its current value without being overwritten.
+ *
+ * @param {string} path - The dot-separated path specifying the property to initialize (e.g., "globalState.users").
+ * @param {*} value - The value to set if the property at the given path does not exist.
+ */
+export function initState(path: string, value: string | Object | Array<unknown>) {
+  const keys = path.split('.');
+  if (!globalState._ica) {
+    globalState._ica = {}
+  }
+  let current = globalState._ica;
+
+  keys.forEach((key, index) => {
+    if (!current[key]) {
+      // Create an object or set the value if it doesn't exist
+      current[key] = index === keys.length - 1 ? value : {};
+    } else if (index === keys.length - 1 && typeof current[key] === 'object' && typeof value === 'object') {
+      // Merge objects if both existing and new values are objects
+      current[key] = { ...current[key], ...value };
+    }
+    current = current[key];
+  });
+}
 
 /**
  * Function to retrieve nested property values using a path string.
