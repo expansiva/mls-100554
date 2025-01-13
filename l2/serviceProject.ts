@@ -42,10 +42,6 @@ export class ServiceProject100554 extends ServiceBase {
 
     @queryAll('.plugin-container') allContainers: HTMLDivElement[] | undefined;
 
-    createRenderRoot() {
-        return this;
-    }
-
     public details: IService = {
         icon: '&#xf542',
         state: 'foreground',
@@ -65,16 +61,39 @@ export class ServiceProject100554 extends ServiceBase {
         this.activeTab = op as IScenery;
     }
 
+    getMenuIconsByLevel(): Record<string, string> {
+        if (!this.level) return {};
+        if (!this.position) {
+            return {
+                Explore: 'Explore;e521',
+            };
+        }
+
+        if (this.level === 5) {
+            return {
+                Explore: 'Explore;e521',
+                ShowCase: 'ShowCase;f5da',
+                Admin: 'Admin;f508',
+                Plugins: 'Plugins;f1e6',
+            };
+        }
+        if (this.level === 2 && this.position === 'right') {
+            return {
+                Explore: 'Explore;e521',
+            };
+        }
+        return {
+            Explore: 'Explore;e521',
+            ShowCase: 'ShowCase;f5da',
+        };
+    }
+
+
     public menu: IMenu = {
         title: '',
         actions: {
         },
-        icons: {
-            Explore: 'Explore;e521',
-            ShowCase: 'ShowCase;f5da',
-            Admin: 'Admin;f508',
-            Plugins: 'Plugins;f1e6',
-        },
+        icons: this.getMenuIconsByLevel(),
         actionDefault: '', // call after close icon clicked
         iconDefault: 'Explore',
         iconMenuType: 'full',
@@ -117,9 +136,9 @@ export class ServiceProject100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (this.visible && this.lastLevel !== this.level) {
+        if (this.visible && this.level !== this.lastLevel) {
             this.lastLevel = this.level;
-            this.updateIconsByLevel(this.lastLevel);
+            this.updateIconsByLevel();
         }
 
         if (this.visible) {
@@ -136,33 +155,19 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     private refreshPlugins() {
-
         this.allContainers?.forEach((item) => {
             const plg = item.children[0];
             if (plg) plg.setAttribute('mode', 'list');
-        })
-        
+        });
     }
 
-    private updateIconsByLevel(level: number) {
-        if (!this.menu || !this.menu.refresh) return;
 
-        if (level === 5) {
-            this.menu.icons = {
-                Explore: 'Explore;e521',
-                ShowCase: 'ShowCase;f5da',
-                Admin: 'Admin;f508',
-                Plugins: 'Plugins;f1e6',
-            }
-        } else {
-            this.menu.icons = {
-                Explore: 'Explore;e521',
-                ShowCase: 'ShowCase;f5da',
-            }
-        }
-
+    updateIconsByLevel() {
+        if (!this.menu || !this.menu.refresh)
+            return;
+        const menu = this.getMenuIconsByLevel();
+        this.menu.icons = menu;
         this.menu.refresh();
-
     }
 
     private renderContent() {
@@ -196,7 +201,6 @@ export class ServiceProject100554 extends ServiceBase {
 
     private renderExplore() {
 
-        // this.fireEventClose('In development: Details explore');
         return html`<div>
                 ${this.explories.map((explorie, index) => {
             return html`
@@ -267,9 +271,7 @@ export class ServiceProject100554 extends ServiceBase {
 
     private renderPanel(key: string, index: number) {
         return html`
-            <collab-panel-100554 .myData=${this.myData[key]}>
-            </collab-panel-100554>
-        
+            <collab-panel-100554 .myData=${this.myData[key]}></collab-panel-100554>
         `
     }
 
@@ -389,26 +391,17 @@ export class ServiceProject100554 extends ServiceBase {
         if (!prj) return;
         let array: any[] = [];
         await mls.plugin.loadAll(prj, false);
-        array = mls.plugin.getAllMenuActions(prj, {scope:'l5Project'} as any);
-
-        /*const wc = ["_100554_pluginProjectConfig", "_100554_pluginProjectUsage", "_100554_pluginProjectInfo", "_100554_pluginProjectReadMe"]*/
-
+        array = mls.plugin.getAllMenuActions(prj, { scope: 'l5Project' } as any);
         array.forEach((item: mls.plugin.MenuAction) => {
-
-            //if (!wc.includes(item.widget)) return;
             const cat = item.category as string;
             if (!this.myData[cat]) this.myData[cat] = [item]
             else this.myData[cat].push(item);
-
         });
 
         this.requestUpdate();
 
     }
 }
-
-
-
 
 type IScenery = 'Explore' | 'ShowCase' | 'Admin' | 'Plugins'
 
