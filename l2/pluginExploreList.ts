@@ -131,7 +131,7 @@ export class PluginExploreList extends PluginBaseModule {
             this.changeList();
         });
 
-        
+
 
     }
 
@@ -733,9 +733,19 @@ export class PluginExploreList extends PluginBaseModule {
 
             this.info.tot++;
 
+            const keyHtml = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.html');
+            const keyStyle = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.less');
+            const styleFile = mls.stor.files[keyStyle];
+            const htmlFile = mls.stor.files[keyHtml];
+
+            const htmlLocal = htmlFile && mls.stor.files[keyHtml].inLocalStorage;
+            const styleLocal = styleFile && mls.stor.files[keyStyle].inLocalStorage;
+            const htmlError = htmlFile && htmlFile.hasError;
+            const styleError = styleFile && styleFile.hasError;
+
             if (sf.isLocalVersionOutdated) this.info.version++;
-            if (sf.inLocalStorage) this.info.storage++;
-            if (sf.hasError) this.info.error++;
+            if (sf.inLocalStorage ||  htmlLocal ||  styleLocal) this.info.storage++;
+            if (sf.hasError || htmlError || styleError ) this.info.error++;
 
             arraySf.push(sf);
 
