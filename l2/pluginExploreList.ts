@@ -100,29 +100,13 @@ export class PluginExploreList extends PluginBaseModule {
         this.init();
     }
 
-    createRenderRoot() {
-        return this;
-    }
-
-    firstUpdated() {
-        if (!this.autoPrepare) return;
-        this.prepare();
-        forceServiceInstance(2, '_100554_serviceSource');
-
-    }
-
-    async updated(changedProperties: Map<string | number | symbol, unknown>) {
-        super.updated(changedProperties);
-        if (changedProperties.has('mode') && this.mode === 'list') {
-            this.init();
-        }
-    }
-
     private async showAdd() {
         await import('./_100554_serviceListFilesAdd');
         this.inFilter = false;
         this.mode = 'add';
     }
+
+    //--------EVENTS----------
 
     private setEvents() {
 
@@ -143,12 +127,19 @@ export class PluginExploreList extends PluginBaseModule {
 
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
 
+        mls.events.addListener(2, 'styleChanged' as any, (ev) => {
+            this.changeList();
+        });
+
+        
+
     }
 
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
 
         if (![1, 2, 3, 4, 5].includes(ev.level) || (ev.type !== 'FileAction')) return;
         const fileAction = JSON.parse(ev.desc as any) as mls.events.IFileAction;
+
         if (
             !['statusOrErrorChanged', 'projectListChanged', 'new'].includes(fileAction.action) ||
             fileAction.project === 0
@@ -160,6 +151,26 @@ export class PluginExploreList extends PluginBaseModule {
         }, 1000);
 
 
+    }
+
+    //---------COMPONENT-------------
+
+    createRenderRoot() {
+        return this;
+    }
+
+    firstUpdated() {
+        if (!this.autoPrepare) return;
+        this.prepare();
+        forceServiceInstance(2, '_100554_serviceSource');
+
+    }
+
+    async updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('mode') && this.mode === 'list') {
+            this.init();
+        }
     }
 
     render() {
@@ -210,17 +221,17 @@ export class PluginExploreList extends PluginBaseModule {
         return html`
         <div class="groupHeader">
             <div class="groupAction"> 
-                <a @click="${this.verifyChangeInList}" id="listUpdateFiles">${this.msg.updateListVerify}</a>
+                <a @click="${this.verifyChangeInList}" id="${this.position}listUpdateFiles">${this.msg.updateListVerify}</a>
                 ${this.position === 'left' ? html`<a @click="${this.showAdd}">${this.msg.addNewFile}</a>` : ''}
             </div>
             <div class="groupFilter">
                 
                     <form>
                         <div class="groupFilterRadio">
-                            <input id="radioProjectActual" name="projectFind" type="radio" checked="checked" value="${this.projectLabel}" @click="${this.clickRadioProjectActual}">
-                            <label for="radioProjectActual">${this.projectLabel}</label>
-                            <input id="radioProjectZero" name="projectFind" type="radio" value="0" @click="${this.clickRadioProject0}">
-                            <label for="radioProjectZero">${this.msg.localProject}</label>
+                            <input id="${this.position}radioProjectActual" name="projectFind" type="radio" checked="checked" value="${this.projectLabel}" @click="${this.clickRadioProjectActual}">
+                            <label for="${this.position}radioProjectActual">${this.projectLabel}</label>
+                            <input id="${this.position}radioProjectZero" name="projectFind" type="radio" value="0" @click="${this.clickRadioProject0}">
+                            <label for="${this.position}radioProjectZero">${this.msg.localProject}</label>
                         </div>
                     </form>
                 <input name="projectFilter" type="text" placeholder="Filter" @input="${this.filterLiChange}">
@@ -371,7 +382,7 @@ export class PluginExploreList extends PluginBaseModule {
         return html`<service-list-files-add-100554 level="${this.levelFiles}" position="${this.position}" .father="${this}"></service-list-files-add-100554>`
     }
 
-    //------------ EVENTOS -----------------
+    //------------ ACTIONS -----------------
     private clickOptUndo(e: MouseEvent) {
 
         e.stopPropagation();
@@ -612,6 +623,7 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     private clickRadioProjectActual(e: MouseEvent): void {
+
         this.info.tot = 0;
         this.info.version = 0;
         this.info.storage = 0;
