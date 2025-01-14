@@ -58,8 +58,6 @@ export class CollabDSInputRange extends IcaLitElement {
             if (!sel) return;
             sel.value = this.onlyTxt(this.value);
 
-            console.info(this.cursorPosition)
-
             setTimeout(() => {
                 const newPosition = Math.min(this.cursorPosition, inpt.value.length);
                 inpt.setSelectionRange(newPosition, newPosition);
