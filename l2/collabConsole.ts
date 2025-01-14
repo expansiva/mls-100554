@@ -25,36 +25,35 @@ export class CollabConsole100554 extends IcaLitElement {
     }
 
     interceptConsole() {
-        if (!this.scope) return;
-        const originalLog = this.scope.console.log;
-        const originalWarn = this.scope.console.warn;
-        const originalError = this.scope.console.error;
-        const originalInfo = this.scope.console.info;
+        let oldLog = console.log;
+        let _scope = this.scope;
+        let _this = this;
 
+        let t0 = performance.now();
 
-        this.scope.console.log = (...args: unknown[]) => {
-            this.addLog('log', args);
-            originalLog.apply(this.scope.console, args);
+        _scope.console.log = function newLog(message: any, ...args: any) {
+            (_scope.console as any)["collab"](message, args);
         };
 
-        this.scope.console.warn = (...args: unknown[]) => {
-            this.addLog('warn', args);
-            originalWarn.apply(this.scope.console, args);
-        };
+        (_scope.console as any)["collab"] = function newLog(message: string, ...args: any) {
+            const t2 = performance.now();
+            const ms = Math.round(t2 - t0);
+            t0 = t2;
+            const newMessage = '[' + ms.toString().padStart(3) + 'ms] ' + (message ? message : "");
+            let obj: any = {};
+            (Error as any).captureStackTrace(obj, newLog);
+            console.groupCollapsed(newMessage);
+            console.info(message);
+            console.trace();
+            console.groupEnd();
+            _this.addLog.bind(_this)('log', message);
+            
+        }
 
-        this.scope.console.error = (...args: unknown[]) => {
-            this.addLog('error', args);
-            originalError.apply(this.scope.console, args);
-        };
-
-        this.scope.console.info = (...args: unknown[]) => {
-            this.addLog('info', args);
-            originalInfo.apply(this.scope.console, args);
-        };
     }
 
-    addLog(type: string, args: unknown[]) {
-        const message = args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg))).join(' ');
+    addLog(type: string, args: any) {
+        const message = typeof args === 'object' ? JSON.stringify(args) : String(args);
         this.logs = [...this.logs, { type, message }];
     }
 
