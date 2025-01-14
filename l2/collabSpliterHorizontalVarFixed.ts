@@ -16,7 +16,6 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
   @property() open: boolean = true;
   @property() openUser: boolean | undefined;
 
-
   @queryAll('[slot="left"]') slotLeft: HTMLElement[] | undefined;
   @queryAll('[slot="right"]') slotRight: HTMLElement[] | undefined;
 
@@ -138,6 +137,12 @@ export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
     // if (this.slotLeft) this.slotLeft.setAttribute('msize', this.getMSizeLeft());
     // if (this.slotRight) this.slotRight.setAttribute('msize', this.getMSizeRight());
 
+  }
+
+  public resizeItens() {
+    this.setFixedValueInPx();
+    this.slotLeft?.forEach((item) => item.setAttribute('msize', this.getMSizeLeft()));
+    this.slotRight?.forEach((item) => item.setAttribute('msize', this.getMSizeRight()));
   }
 
   _applyMSize() {

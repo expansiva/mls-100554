@@ -140,7 +140,6 @@ export class CollabSpliterVerticalVarFixed100554 extends LitElement {
           }
         });
 
-
         if (this.resizeObserver) this.resizeObserver.observe(child);
         
       }

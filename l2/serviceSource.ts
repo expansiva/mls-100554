@@ -11,11 +11,11 @@ import { LessCSS } from "./_100554_lessCSS";
 import { getEnhancementName } from './_100554_libCommom';
 import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
+
 import './_100554_aimPromptTypescript';
 import './_100554_cssHelperIndex';
 import { globalState } from './_100554_icaState';
 import { propertyDataSource } from './_100554_icaLitElement';
-
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -718,6 +718,7 @@ export class ServiceSource100554 extends ServiceBase {
             mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
             this.updatedMSizeEditor();
             this.toogleIconsError();
+            if (this.horizontalSpliter && (this.horizontalSpliter as any).resizeItens) (this.horizontalSpliter as any).resizeItens();
             this.loading = false;
         };
 
