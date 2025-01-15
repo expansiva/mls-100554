@@ -197,11 +197,11 @@ export class PluginStyleTransform extends IcaLitElement {
     private mountValue(): void {
 
         let value = '';
-        if (this.scaleX || this.scaleY) value += 'scale(' + (this.scaleX ? this.scaleX : '1') + (this.scaleY ? ', ' + this.scaleY : '') + ')';
-        if (this.rotate) value += this.rotate ? ' rotate(' + this.rotate + 'deg)' : '';
-        if (this.translateX || this.translateY) value += 'translate(' + (this.translateX ? this.translateX + 'px' : '0px') + (this.translateY ? ', ' + this.translateY : ', 0') + 'px)';
-        if (this.skewX || this.skewY) value += 'skew(' + (this.skewX ? this.skewX + 'deg' : '0deg') + (this.skewY ? ', ' + this.skewY : ', 0') + 'deg)';
-        this.transform = value;
+        if (this.scaleX || this.scaleY) value += 'scale(' + (this.scaleX ? this.scaleX : '1') + (this.scaleY ? ', ' + this.scaleY : '') + ') ';
+        if (this.rotate) value += this.rotate ? 'rotate(' + this.rotate + 'deg) ' : '';
+        if (this.translateX || this.translateY) value += 'translate(' + (this.translateX ? this.translateX + 'px' : '0px') + (this.translateY ? ', ' + this.translateY : ', 0') + 'px) ';
+        if (this.skewX || this.skewY) value += 'skew(' + (this.skewX ? this.skewX + 'deg' : '0deg') + (this.skewY ? ', ' + this.skewY : ', 0') + 'deg) ';
+        this.transform = value.trim();
         this.setState();
     }
 
