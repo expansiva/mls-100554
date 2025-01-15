@@ -100,14 +100,14 @@ export class CoachMarks100554 extends CollabLitElement {
             localStorage.setItem(this.tagName.toLocaleLowerCase(), JSON.stringify(v));
         } catch (e) {
             console.info('setKey', e);
-        } 
+        }
 
     }
 
     private inLocalStorage(): boolean {
 
         try {
-            
+
             if (!this.info || !this.info.key) return false;
             let t = localStorage.getItem(this.tagName.toLocaleLowerCase()) as string;
             t = t ? t : "[]";
@@ -165,8 +165,10 @@ export class CoachMarks100554 extends CollabLitElement {
         if (!this.info || this.info.steps.length === 0 || !this.info.steps[index]) return;
 
         const step = this.info.steps[index];
-        const ref = document.querySelector(step.elementRef) as HTMLElement;
-        if (!ref) {
+
+        let ref = step.elementRef ? document.querySelector(step.elementRef) as HTMLElement : undefined;
+
+        if (!ref && !step.positionNoRef) {
             console.info('Not found ref for item' + index);
             this.createSteps(index + 1);
             return;
@@ -244,34 +246,87 @@ export class CoachMarks100554 extends CollabLitElement {
 
     }
 
-    private positionStep(step: ICoachMarkStep, item: HTMLElement, ref: HTMLElement) {
-
-        const buttonRect = ref.getBoundingClientRect();
+    private positionStep(step: ICoachMarkStep, item: HTMLElement, ref: HTMLElement | undefined) {
 
         let top = 0;
         let left = 0;
 
-        switch (step.position) {
-            case "bottom":
-                top = buttonRect.bottom + window.scrollY;
-                left = buttonRect.left + window.scrollX;
-                break;
-            case "top":
-                top = buttonRect.top - item.offsetHeight + window.scrollY;
-                left = buttonRect.left + window.scrollX;
-                break;
-            case "left":
-                top = buttonRect.top + window.scrollY;
-                left = buttonRect.left - item.offsetWidth + window.scrollX;
-                break;
-            case "right":
-                top = buttonRect.top + window.scrollY;
-                left = buttonRect.right + window.scrollX;
-                break;
-            default:
-                console.warn("Invalid pos");
-                return;
+        if (ref) {
+
+            const buttonRect = ref.getBoundingClientRect();
+
+            switch (step.position) {
+                case "bottom":
+                    top = buttonRect.bottom + window.scrollY;
+                    left = buttonRect.left + window.scrollX;
+                    break;
+                case "top":
+                    top = buttonRect.top - item.offsetHeight + window.scrollY;
+                    left = buttonRect.left + window.scrollX;
+                    break;
+                case "left":
+                    top = buttonRect.top + window.scrollY;
+                    left = buttonRect.left - item.offsetWidth + window.scrollX;
+                    break;
+                case "right":
+                    top = buttonRect.top + window.scrollY;
+                    left = buttonRect.right + window.scrollX;
+                    break;
+                default:
+                    console.warn("Invalid pos");
+                    return;
+            }
+
+        } else if (step.positionNoRef) {
+
+            const containerRect = window.document.body.getBoundingClientRect();
+            const elementRect = item.getBoundingClientRect();
+
+            switch (step.positionNoRef) {
+                case "top-start":
+                    top = 0;
+                    left = 0;
+                    break;
+                case "top-center":
+                    top = 0;
+                    left = (containerRect.width - elementRect.width) / 2;
+                    break;
+                case "top-end":
+                    top = 0;
+                    left = containerRect.width - elementRect.width;
+                    break;
+                case "center-start":
+                    top = (containerRect.height - elementRect.height) / 2;
+                    left = 0;
+                    break;
+                case "center-center":
+                    top = (containerRect.height - elementRect.height) / 2;
+                    left = (containerRect.width - elementRect.width) / 2;
+                    break;
+                case "center-end":
+                    top = (containerRect.height - elementRect.height) / 2;
+                    left = containerRect.width - elementRect.width;
+                    break;
+                case "bottom-start":
+                    top = containerRect.height - elementRect.height;
+                    left = 0;
+                    break;
+                case "bottom-center":
+                    top = containerRect.height - elementRect.height;
+                    left = (containerRect.width - elementRect.width) / 2;
+                    break;
+                case "bottom-end":
+                    top = containerRect.height - elementRect.height;
+                    left = containerRect.width - elementRect.width;
+                    break;
+                default:
+                    console.warn("Invalid pos");
+                    return;
+            }
+
+            
         }
+
 
         if (!step.marginV) step.marginV = 0;
         if (!step.marginH) step.marginH = 0;
@@ -381,9 +436,10 @@ export interface ICoachMarks {
 }
 
 interface ICoachMarkStep {
-    elementRef: string,
+    elementRef?: string,
     text: string,
-    position: IPosition,
+    position?: IPosition,
+    positionNoRef?: IPositionNoRef,
     marginH?: number,
     marginV?: number,
     arrow?: IArrown,
@@ -396,5 +452,6 @@ interface ICoachMarkStep {
 
 type ITransparency = 'light' | 'normal' | 'strong';
 type IPosition = 'bottom' | 'top' | 'left' | 'right';
+type IPositionNoRef = 'top-start' | 'top-center' | 'top-end' | 'center-start' | 'center-center' | 'center-end' | 'bottom-start' | 'bottom-center' | 'bottom-end';
 type IArrown = 'down' | 'up' | 'left' | 'right' | '';
 type IAnimation = 'flip' | 'pulse' | 'shake';
