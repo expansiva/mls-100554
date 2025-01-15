@@ -195,6 +195,14 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             },
 
             {
+                category: 'Filter',
+                scope: ['l2StyleHelper'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginStyleFilter'
+            },
+
+            {
                 category: 'Columns',
                 scope: ['l2StyleHelper'],
                 priority: 2,
