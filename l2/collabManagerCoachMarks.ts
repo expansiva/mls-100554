@@ -34,6 +34,9 @@ let msg: MessageType = messages['en'];
 export function initManagerCoachMark() {
 
     mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['LevelChanged'] as any, onLevelchange)
+
+    mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected'] as any, onServicechange)
+
 }
 
 function onLevelchange(ev: mls.events.IEvent) {
@@ -46,6 +49,13 @@ function onLevelchange(ev: mls.events.IEvent) {
         case 5: setL5(); 
         default: undefined;
     }
+
+}
+
+function onServicechange(ev: mls.events.IEvent) {
+
+    if (!ev.desc) return;
+    const data = JSON.parse(ev.desc);
 
 }
 

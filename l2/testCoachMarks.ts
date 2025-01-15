@@ -10,14 +10,14 @@ export class TestCoachMarks100554 extends CollabPageElement {
     initPage(): void {
         this.setCoach();
         
-    }
+    } 
 
     private setCoach() {
         const btn = document.querySelector('#setCoachMark') as HTMLElement;
         if (!btn) return
         btn.onclick = () => {
             const json = {
-                key: "venda3",
+                key: "venda10",
                 transparency: "normal",
                 fontSize: "1.3em",
                 timeClose: 10,
@@ -32,16 +32,10 @@ export class TestCoachMarks100554 extends CollabPageElement {
                         autoClose: true
                     },
                     {
-                        elementRef: "#lastProduct",
-                        text: "Aqui esta a listagem dos seus itens 2",
-                        position: "bottom",
-                        marginV: 33,
-                        marginH: 80,
-                        arrow: "up",
-                        duration: 2,
-                        animation: "pulse",
-                        timeAnimation: 2000,
-                        loopAni: true
+                        
+                        text: `<iframe width="560" height="315" src="https://www.youtube.com/embed/4zyORrpBDFc?si=JHVZAfJ-Uj6ebM9r" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`,
+                        positionNoRef:'bottom-centerr',
+                        
                     },
                     {
                         elementRef: ".checkout-cta",
