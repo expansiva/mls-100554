@@ -1,18 +1,22 @@
 /// <mls shortName="pluginStyleClippath" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { html, repeat } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
-import { CollabLitElement, getMessageKey } from './_100554_collabLitElement'
+import { getMessageKey } from './_100554_collabLitElement'
 import { ICSSState } from './_100554_lessCSS';
 import { globalState } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
+    btnApply: 'Aplicar',
+    maker: 'Css clip-path criador',
     description: 'Um plugin versátil para manter e personalizar propriedades de clip-path CSS. Crie facilmente formas complexas e aplique-as a elementos, permitindo designs de UI exclusivos e criativos com precisão.'
 }
 
 const message_en = {
+    btnApply: 'Apply',
+    maker: 'Css clip-path Maker',
     description: 'A versatile plugin for maintaining and customizing CSS clip-path properties. Easily create complex shapes and apply them to elements, enabling unique and creative UI designs with precision.'
 
 }
@@ -39,9 +43,90 @@ export class PluginStyleClipath extends IcaLitElement {
     @propertyDataSource() state: ICSSState | undefined;
     @property() position: 'left' | 'right' = 'left';
     @property() showFull: string = 'false';
+    @property() clipPath: string | undefined;
+
+    @query('#svgOverlay') svgOverlay: HTMLElement | undefined;
+    @query('#output') output: HTMLTextAreaElement | undefined;
+    @query('#image') image: HTMLImageElement | undefined;
+    @query('#pointsContainer') pointsContainer: HTMLDivElement | undefined;
+
+    private msg: MessageType = messages['en'];
+
+    handleIcaStateChange(_key: string, _value: ICSSState) {
+        if (_key !== `less.${this.position}` || !_value) return;
+        if (_value.emitter === 'helper') return;
+        if (!_value.selector || !_value.lessCSS || !_value.lessCSS.lessAST || !_value.lessCSS.lessAST.ast[_value.selector]) return;
+        const actualAst = _value.lessCSS.lessAST.ast[_value.selector];
+        if (!actualAst) return;
+
+        let hasRuleClipPath: boolean = false;
+        Object.keys(actualAst).forEach((prop) => {
+            if (prop === 'clip-path') hasRuleClipPath = true;
+        });
+        this.clear();
+
+        if (hasRuleClipPath) {
+            this._onIcaStateChange();
+        }
+    }
+
+    private clear() {
+        this.clipPath = undefined;
+    }
+
+
+    private _onIcaStateChange() {
+        if (!this.state || !this.state.lessCSS) return;
+        const rule = this.findCSSRuleInIframe(this.state.lessCSS.selector);
+        if (!rule) return;
+        this.setValues(rule);
+    }
+
+    private findCSSRuleInIframe(ruleSelector: string): CSSStyleRule | null {
+
+        const json = this.state?.lessCSS?.lessAST.ast[ruleSelector];
+        if (!json) return null;
+
+        const properties = Object.entries(json)
+            .filter(([key]) => !key.startsWith('_'))
+            .sort(([, a], [, b]) => (a as { line: number }).line - (b as { line: number }).line);
+
+        let ruleText = properties.map(([key, item]) => `${key}: ${(item as { value: string }).value};`).join(' ');
+        const selector = ruleSelector;
+        const cssStyleSheet = new CSSStyleSheet();
+        const ruleIndex = cssStyleSheet.insertRule(`${selector} { ${ruleText} }`, 0);
+        const cssStyleRule = cssStyleSheet.cssRules[ruleIndex];
+        return cssStyleRule as CSSStyleRule;
+
+    }
+
+    private setValues(rule: CSSStyleRule) {
+
+        if (rule.style) {
+            for (let i = 0; i < rule.style.length; i++) {
+                const propertyName = rule.style[i];
+                if (propertyName === 'clip-path') {
+                    const propertyValue = rule.style.getPropertyValue(propertyName);
+                    const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(propertyName);
+                    if (!convertedProp) return;
+                    (this as any)[convertedProp] = propertyValue;
+                }
+            }
+        }
+
+        if (this.clipPath) this.initClipPathMaker(this.clipPath);
+
+    }
 
     render() {
-        return html`${this.renderGallery()}`;
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
+        return html`
+            ${this.renderGallery()}
+            ${this.renderPreviewEditable()}
+        `;
     }
 
     renderGallery() {
@@ -62,6 +147,153 @@ export class PluginStyleClipath extends IcaLitElement {
         
         `
     }
+
+    renderPreviewEditable() {
+        return html`
+        <h3>${this.msg.maker}</h3>
+        <div style=${this.showFull === 'false' ? 'display:none' : 'display:flex'} class="previewEditable">
+            <div id="previewWrapper">
+                <img id="image" src="./l3/_100529_/images/startl7.avif" alt="Preview">
+                <div id="pointsContainer"></div>
+            </div>
+            <textarea id="output" readonly></textarea>
+            <button @click=${this.applyChanges}> ${this.msg.btnApply} </button>
+
+        <div>
+        `
+    }
+
+    private points: any[] = [];
+    private parameters: any[] = [];
+    private currentTemplate = '';
+    private shapeType: string | undefined;
+    private outputRes: string = '';
+
+    private renderClipPath() {
+        if (!this.image || !this.output || !this.pointsContainer) return;
+
+        const startDrag = (e: MouseEvent): void => {
+            const point = e.target as HTMLElement;
+            const index = point.dataset.index;
+            if (!index) return;
+
+            const onMouseMove = (event: MouseEvent): void => {
+                if (!this.image) return;
+                const rect = this.image.getBoundingClientRect();
+                const x = ((event.clientX - rect.left) / rect.width) * 100;
+                const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+                if (this.shapeType === 'polygon') {
+                    const idx = Number(index);
+                    if (isNaN(idx)) return;
+                    this.points[idx] = [
+                        Math.min(100, Math.max(0, parseFloat(x.toFixed(2)))),
+                        Math.min(100, Math.max(0, parseFloat(y.toFixed(2))))
+                    ];
+                } else if (this.shapeType === 'circle') {
+                    const [radius, [cx, cy]] = this.parameters;
+                    if (index === 'center') {
+                        this.parameters = [radius, [x, y]];
+                    } else {
+                        const distX = x - cx;
+                        const distY = y - cy;
+                        const newRadius = Math.sqrt(distX * distX + distY * distY);
+                        this.parameters = [Math.min(100, newRadius), [cx, cy]];
+                    }
+                } else if (this.shapeType === 'ellipse') {
+                    const [[rx, ry], [cx, cy]] = this.parameters;
+                    if (index === 'x') {
+                        const newRx = Math.min(100, Math.abs(x - cx));
+                        this.parameters = [[newRx, ry], [cx, cy]];
+                    } else if (index === 'y') {
+                        const newRy = Math.min(100, Math.abs(y - cy));
+                        this.parameters = [[rx, newRy], [cx, cy]];
+                    }
+                }
+
+                this.renderClipPath();
+            };
+
+            function onMouseUp(): void {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        };
+
+        this.shapeType = this.identifyShapeType(this.currentTemplate);
+        let clipPath = '';
+
+        if (this.shapeType === 'polygon') {
+            const polygonPoints = this.points.map(([x, y]) => `${x}% ${y}%`).join(', ');
+            clipPath = `polygon(${polygonPoints})`;
+        } else if (this.shapeType === 'circle') {
+            const [radius, [cx, cy]] = this.parameters;
+            clipPath = `circle(${radius}% at ${cx}% ${cy}%)`;
+        } else if (this.shapeType === 'ellipse') {
+            const [[rx, ry], [cx, cy]] = this.parameters;
+            clipPath = `ellipse(${rx}% ${ry}% at ${cx}% ${cy}%)`;
+        }
+
+        this.image.style.clipPath = clipPath;
+        this.output.value = clipPath;
+        this.outputRes = clipPath;
+        this.pointsContainer.innerHTML = '';
+
+        if (this.shapeType === 'polygon') {
+            this.points.forEach(([x, y], index) => {
+                const point = document.createElement('div');
+                point.classList.add('draggable');
+                point.style.left = `${x}%`;
+                point.style.top = `${y}%`;
+                point.dataset.index = index.toString();
+                point.addEventListener('mousedown', startDrag);
+                this.pointsContainer?.appendChild(point);
+            });
+        } else if (this.shapeType === 'circle') {
+            const [radius, [cx, cy]] = this.parameters;
+            const point = document.createElement('div');
+            point.classList.add('draggable');
+            point.style.left = `${cx}%`;
+            point.style.top = `${cy}%`;
+            point.dataset.index = 'center';
+            point.addEventListener('mousedown', startDrag);
+            this.pointsContainer?.appendChild(point);
+
+            const pointRadius = document.createElement('div');
+            pointRadius.classList.add('draggable');
+            pointRadius.style.left = `${cx + radius}%`;
+            pointRadius.style.top = `${cy}%`;
+            pointRadius.dataset.index = 'radius';
+            pointRadius.addEventListener('mousedown', startDrag);
+            this.pointsContainer?.appendChild(pointRadius);
+
+        } else if (this.shapeType === 'ellipse') {
+
+            const [[rx, ry], [cx, cy]] = this.parameters;
+            const pointX = document.createElement('div');
+            pointX.classList.add('draggable');
+            pointX.style.left = `${cx + rx}%`;
+            pointX.style.top = `${cy}%`;
+            pointX.dataset.index = 'x';
+            pointX.addEventListener('mousedown', startDrag);
+            this.pointsContainer?.appendChild(pointX);
+
+            const pointY = document.createElement('div');
+            pointY.classList.add('draggable');
+            pointY.style.left = `${cx}%`;
+            pointY.style.top = `${cy + ry}%`;
+            pointY.dataset.index = 'y';
+            pointY.addEventListener('mousedown', startDrag);
+            this.pointsContainer?.appendChild(pointY);
+        }
+    }
+
+    private applyChanges() {
+        this.setState(this.outputRes);
+    }
+
 
     private timeonChange = -1;
     private handleChangeCss(e: KeyboardEvent) {
@@ -84,14 +316,70 @@ export class PluginStyleClipath extends IcaLitElement {
         }, 100);
     }
 
-    private setState(css:string) {
+    private setState(css: string) {
         globalState._ica.less[this.position].emitter = 'helper';
         const styles = globalState._ica.less[this.position].lessCSS.styles;
         styles.clipPath = css;
+        this.initClipPathMaker(css);
+    }
+
+    private initClipPathMaker(css: string) {
+        this.currentTemplate = css;
+        this.shapeType = this.identifyShapeType(css);
+        this.points = this.currentTemplate
+            .replace(/polygon\(|\)/g, '')
+            .split(', ')
+            .map((point) => point.split(' ').map((val) => parseFloat(val)));
+
+        this.setParameters();
+        this.renderClipPath();
+    }
+
+    private setParameters() {
+        this.parameters = [];
+        if (this.shapeType === 'ellipse') {
+            this.parameters = this.currentTemplate
+                .replace('ellipse(', '')
+                .replace(')', '')
+                .split(' at ')
+                .map((part, index) => {
+                    if (index === 0) {
+                        return part.split(' ').map((val) => parseFloat(val.replace('%', '')));
+                    } else {
+                        return part.split(' ').map((val) => parseFloat(val.replace('%', '')));
+                    }
+                });
+        }
+
+        if (this.shapeType === 'circle') {
+            this.parameters = this.currentTemplate
+                .replace('circle(', '')
+                .replace(')', '')
+                .split(' at ')
+                .map((part, index) => {
+                    if (index === 0) {
+                        return parseFloat(part.replace('%', ''));
+                    } else {
+                        return part.split(' ').map((val) => parseFloat(val.replace('%', '')));
+                    }
+                });
+
+        }
+
+    }
+
+    private identifyShapeType(clipPath: string): 'polygon' | 'circle' | 'ellipse' | undefined {
+        if (clipPath.startsWith('polygon(')) {
+            return 'polygon';
+        } else if (clipPath.startsWith('circle(')) {
+            return 'circle';
+        } else if (clipPath.startsWith('ellipse(')) {
+            return 'ellipse';
+        }
+        return undefined;
     }
 
     private arrayGallery = [
-        { css: '', name: 'none' },
         { css: 'clip-path: polygon(50% 0%, 0% 100%, 100% 100%);', name: 'triangle' },
         { css: 'clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)', name: 'trapezoid' },
         { css: 'clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%)', name: 'parallelogram' },
