@@ -334,7 +334,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     private onkeyDown(e: any) {
-
+        debugger;
 
         if (!this.myParent || !this.elMain) return;
 
@@ -348,7 +348,17 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
             e.stopPropagation();
         }
 
-        if (['Backspace', 'Delete', 'c', 'v', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        if (['c', 'v', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            this.removePopUpIfNeeded();
+            e.stopPropagation();
+        }
+
+        if (!e.shiftKey && e.key === 'Delete') {
+            this.removePopUpIfNeeded();
+            e.stopPropagation();
+        }
+
+        if (!e.shiftKey && e.key === 'Backspace') {
             this.removePopUpIfNeeded();
             e.stopPropagation();
         }
