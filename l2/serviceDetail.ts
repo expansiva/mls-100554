@@ -108,24 +108,19 @@ export class ServiceDetail100554 extends ServiceBase {
 
     //----------COMPONENT------------------
 
-    firstUpdated() {
-        if (this.widget) {
-            const { project, shortName } = mls.l2.getPath(this.widget);
-            const tag = convertFileNameToTag(this.widget);
-            const info: mls.events.IPluginDetail = {
-                project,
-                shortName,
-                htmlText: `<${tag}></${tag}>`
-            };
-            this.showPluginContent(info);
+    firstUpdated(_changedProperties: Map<PropertyKey, unknown>) {
+        super.firstUpdated(_changedProperties);
+        this.onWidgetChanged();
+    }
+
+    updated(changedProperties: Map<PropertyKey, unknown>) {
+
+        super.firstUpdated(changedProperties);
+
+        if (changedProperties.has('widget')) {
+            this.onWidgetChanged();
         }
-    }
 
-    createRenderRoot() {
-        return this;
-    }
-
-    updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
             if (!this.visible || !this.contentPlugin) return;
 
@@ -195,13 +190,26 @@ export class ServiceDetail100554 extends ServiceBase {
         this.showPluginContent(data);
     }
 
+    private onWidgetChanged() {
+        if (this.widget) {
+            const { project, shortName } = mls.l2.getPath(this.widget);
+            const tag = convertFileNameToTag(this.widget);
+            const info: mls.events.IPluginDetail = {
+                project,
+                shortName,
+                htmlText: `<${tag}></${tag}>`
+            };
+            this.showPluginContent(info);
+        }
+    }
+
     private async showPluginContent(info: mls.events.IPluginDetail) {
         // show htmlText or plugin html
         if (!info.project || !info.shortName) {
             if (!info.htmlText) throw new Error(`Error on PluginDetails events, invalid data: ${info.project} ${info.shortName}`);
         }
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
-        
+
         this.plugin = info;
         const content: string = info.htmlText ? info.htmlText : await this.getHtmlFromPlugin(info);
         this.updateContentPluginWithScripts(content);
