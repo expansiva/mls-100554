@@ -89,6 +89,8 @@ export class ServiceSave extends ServiceBase {
         this.setEvents();
     }
 
+    //---------SERVICE-------------
+
     public details: IService = {
         icon: '&#xf0c7',
         state: 'background',
@@ -662,8 +664,6 @@ export class ServiceSave extends ServiceBase {
         changed: { icon: 'fa-file-pen', title: 'Edited' },
         renamed: { icon: 'fa-clone', title: 'Renamed' },
         deleted: { icon: 'fa-xmark', title: 'Deleted' },
-        //deleted: { icon: '&#xf1f8', title: 'Deleted' },f068
-        //new: { icon: '&#xf006', title: 'New' }2b
         new: { icon: 'fa-plus', title: 'New' }
     };
 
@@ -871,6 +871,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private forceSaveL5ProjectFile: boolean = false;
+    private arrayRollback: mls.stor.IFileInfo[] =[]; // implementar
 
     //Sempre que salvar vai gerar um novo branch no usuario e solicitar um pullrequest.
     private async onSave(e: MouseEvent) {
@@ -909,6 +910,8 @@ export class ServiceSave extends ServiceBase {
 
             const msg = txt.value;
             const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
+            this.arrayRollback = array;
+
 
             const oldOwner = this.owner;
             const oldRepo = this.repo;
@@ -926,6 +929,8 @@ export class ServiceSave extends ServiceBase {
             await this.firePullrequest(msg);
             console.info('gerou o pullrequest');
 
+            await this.afterSave(array);
+
             txt.value = '';
             this.clearLocalHIstoryCurrentInfoDriver();
 
@@ -939,12 +944,38 @@ export class ServiceSave extends ServiceBase {
             this.showLoader(false);
 
         } catch (err: any) {
+
+            this.arrayRollback.forEach((i) => {
+                if (!i.inLocalStorage) i.inLocalStorage = true;
+            });
+
             this.error = err.message;
             this.setError(err.message);
             this.showLoader(false);
             console.info('Error onSave:', err);
         }
     }
+
+    private async afterSave(fileInfos: mls.stor.IFileInfo[]) {
+
+		try {
+
+			for await (const f of fileInfos) {
+
+				if (f.onAction) {
+
+					await f.onAction('aftersave');
+
+				}
+
+			}
+
+		} catch (e: any) {
+
+			console.info('Erro onAftersave:' + e.message);
+
+		}
+	}
 
     private async onSavenewPullrequest(ar: mls.stor.IFileInfo[], msg: string) {
 
@@ -1306,6 +1337,7 @@ export class ServiceSave extends ServiceBase {
             if (arrSet.length > 0) {
                 await mls.stor.setContents(arrSet, msg);
                 await this.uppVersionAfterSave(arrSet);
+                await this.afterSave(arrSet);
                 this.fireEvents(800);
             }
 
@@ -1327,6 +1359,8 @@ export class ServiceSave extends ServiceBase {
     private async afterUpdate(storFile: mls.stor.IFileInfo) {
 
         const mmodel: mls.editor.IModels | undefined = mls.editor.getModels(storFile.project, storFile.shortName);
+
+        storFile.inLocalStorage = false;
 
         if (storFile.status === 'deleted') {
             this.deleteFile(storFile);
