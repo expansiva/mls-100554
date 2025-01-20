@@ -231,7 +231,7 @@ export class ServicePreview100554 extends ServiceBase {
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
         try {
-    
+
             if (this.visible === 'false' || !this.visible) return;
             if (ev.level !== 2 || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
@@ -253,7 +253,7 @@ export class ServicePreview100554 extends ServiceBase {
                 return;
             }
             if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
-        
+
             if (this.watch) {
                 this.elPreview = undefined;
                 this.loading = false;
@@ -282,7 +282,14 @@ export class ServicePreview100554 extends ServiceBase {
         if (darkOrLight === 'dark' && this.menu.selectButton) this.menu.selectButton('btTheme');
         this.setLanguages();
         this.setTheme();
+        this.configureButtonsRight(false);
+    }
 
+    private configureButtonsRight(enabled: boolean) {
+        const buttonsR = this.nav3Service.querySelector('mls-nav3-100529 .buttons-right') as HTMLElement;
+        if (!buttonsR) return;
+        buttonsR.style.opacity = enabled ? '1' : '.2';
+        buttonsR.style.pointerEvents = enabled ? 'all' : 'none';
     }
 
     updated(changedProperties: Map<string | number | symbol, unknown>): void {
@@ -383,7 +390,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onBtVariationsClick(opMenu: string | undefined) {
-    
+
         if (!opMenu) return true;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         if (htmlEl) htmlEl.lang = this.languages[opMenu].acronym;
@@ -435,14 +442,14 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onHelpClick(): boolean {
-        this.openService('_100554_serviceIca', 'left', 4);
-        const params: IWCDParams = {
-            level: 4,
-            op: 'AboutICA',
-            position: 'left',
-            wdcPath: '',
-        }
-        mls.events.fire([4], ['WCDEvent'] as any, JSON.stringify(params), 300);
+        this.openService('_100554_servicePage', 'left', 3);
+        // const params: IWCDParams = {
+        //     level: 4,
+        //     op: 'AboutICA',
+        //     position: 'left',
+        //     wdcPath: '',
+        // }
+        // mls.events.fire([4], ['WCDEvent'] as any, JSON.stringify(params), 300);
         return true;
     }
 
@@ -530,7 +537,7 @@ export class ServicePreview100554 extends ServiceBase {
     private async preview(mode: string) {
 
         if (!(mls.actual[2] as any).left || !this.watch) return true;
-        
+
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
 
         //this.menu.title = 'Preview: ' + fullname;
@@ -559,8 +566,8 @@ export class ServicePreview100554 extends ServiceBase {
         const consoleEl = document.createElement('collab-console-100554');
         consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
         container.appendChild(consoleEl);
-
         if (this.menu.setMode) this.menu.setMode('page', container);
+        this.configureButtonsRight(true);
         return true;
     }
 
