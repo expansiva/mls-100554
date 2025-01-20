@@ -278,7 +278,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			ret = await this.saveMultipleFilesIO(fileInfos[0].project, add, del, comments as string);
 
-			await this.afterSave(fileInfos);
+			//await this.afterSave(fileInfos);
 
 			return ret;
 
@@ -306,7 +306,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		} catch (e: any) {
 
-			console.info('Erro onAftersace:' + e.message);
+			console.info('Erro onAftersave:' + e.message);
 
 		}
 	}
@@ -1437,7 +1437,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				q = `
 				mutation {
-					createRepository(input: {name: "${repo}", description: "${description}", visibility:${visibility}}) {
+					createRepository(input: {name: "${repo}", description: "${description.replace(/"/g, "'")}", visibility:${visibility}}) {
 						repository {
 							id
 							name
@@ -1452,7 +1452,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			} else {
 				q = `
 				mutation {
-					createRepository(input: {name: "${repo}", ownerId:"${organization}", description: "${description}", visibility:${visibility}}) {
+					createRepository(input: {name: "${repo}", ownerId:"${organization}", description: "${description.replace(/"/g, "'")}", visibility:${visibility}}) {
 						repository {
 							id
 							name
@@ -1834,8 +1834,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 						createPullRequest(input: {
 							baseRefName:"${uB.branch}",
 							headRefName: "${head}",
-							title: "${option.title}",
-							body: "${option.description}",
+							title: "${option.title.replace(/"/g, "'")}",
+							body: "${option.description.replace(/"/g, "'")}",
 							repositoryId: "${idProject}"
 						}) {
 							pullRequest {
@@ -2120,7 +2120,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 								branchName: "${info.branch}"
 							}, 
 							expectedHeadOid: "${oid}", 
-							message: {headline: "${msg}", body: "${msg}"}
+							message: {headline: "${msg.replace(/"/g, "'")}", body: "${msg.replace(/"/g, "'")}"}
 						}
 					) {
 						commit {
@@ -2128,7 +2128,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 						}
 					}
 				}`;
-
+				console.info('saveMultipleFilesIO');
 				const data = await this.fecthQl(q);
 
 				const ret = data.ret.data && data.ret.data.createCommitOnBranch && data.ret.data.createCommitOnBranch.commit && data.ret.data.createCommitOnBranch.commit.abbreviatedOid;
