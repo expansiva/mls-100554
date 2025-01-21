@@ -156,9 +156,7 @@ export class PluginStyleClipath extends IcaLitElement {
                 <img id="image" src="./l3/_100529_/images/startl7.avif" alt="Preview">
                 <div id="pointsContainer"></div>
             </div>
-            <textarea id="output" readonly></textarea>
-            <button @click=${this.applyChanges}> ${this.msg.btnApply} </button>
-
+            <textarea style="display:none" id="output" readonly></textarea>
         <div>
         `
     }
@@ -171,6 +169,8 @@ export class PluginStyleClipath extends IcaLitElement {
 
     private renderClipPath() {
         if (!this.image || !this.output || !this.pointsContainer) return;
+
+        let _this = this;
 
         const startDrag = (e: MouseEvent): void => {
             const point = e.target as HTMLElement;
@@ -217,6 +217,8 @@ export class PluginStyleClipath extends IcaLitElement {
             function onMouseUp(): void {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
+                _this.applyChanges.bind(_this)();
+                
             }
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
