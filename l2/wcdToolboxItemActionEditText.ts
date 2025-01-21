@@ -334,8 +334,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     private onkeyDown(e: any) {
-        debugger;
-
+        
         if (!this.myParent || !this.elMain) return;
 
         /*if (e.key === 'Enter') {

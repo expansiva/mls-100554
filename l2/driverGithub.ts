@@ -2128,7 +2128,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 						}
 					}
 				}`;
-				console.info('saveMultipleFilesIO');
+				
 				const data = await this.fecthQl(q);
 
 				const ret = data.ret.data && data.ret.data.createCommitOnBranch && data.ret.data.createCommitOnBranch.commit && data.ret.data.createCommitOnBranch.commit.abbreviatedOid;
