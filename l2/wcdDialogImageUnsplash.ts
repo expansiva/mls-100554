@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { execute } from './_100554_wcdCommandAddImage';
+import { execute, executechange } from './_100554_wcdCommandAddImage';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { CollabLitElement } from './_100554_collabLitElement'
 import { globalWcd } from './_100554_wcdState';
@@ -104,6 +104,19 @@ export class WcdDialogImageUnsplash100554 extends CollabLitElement {
         if (!globalWcd.myParent) throw new Error('Invalid window.wcdState.myParent');
         if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
 
+        const args = (this as any).args;
+
+        if (args && args === 'change') {
+
+            await executechange({
+                args: { src: item.urls.full },
+                overlay: globalWcd.myParent?.parentElement?.parentElement as WCDOverlayMethods,
+                selectedIca: globalWcd.elICA as any,
+            });
+            return;
+
+        }
+
         await execute({
             args: { src: item.urls.full },
             overlay: globalWcd.myParent?.parentElement?.parentElement as WCDOverlayMethods,
@@ -123,7 +136,7 @@ export class WcdDialogImageUnsplash100554 extends CollabLitElement {
     disconnectedCallback() {
         if (!globalWcd) throw new Error('Invalid window.wcdState');
         if (globalWcd.elICA) (globalWcd.elICA as any).style.height = this.lastHeight || '';
-        else if (this.lastIca)  this.lastIca.style.height = this.lastHeight || '';
+        else if (this.lastIca) this.lastIca.style.height = this.lastHeight || '';
         super.disconnectedCallback();
     }
 
