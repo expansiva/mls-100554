@@ -128,10 +128,10 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
             return;
         }
 
-        await this.addWCDToolbox(e.x,e.y);
-        if (this.level !== '4') return;
+        await this.addWCDToolbox(e.x, e.y);
+        if (this.level !== '3') return;
         //mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
-        mls.events.fire(4, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+        mls.events.fire(3, 'WCDEventChange' as any, `{"op":"Navigation"}`);
     }
 
     private findAncestorWithIsicaGroup(element: HTMLElement | undefined) {
