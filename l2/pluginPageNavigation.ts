@@ -5,6 +5,9 @@ import { property, queryAll } from 'lit/decorators.js';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
+import { IWCDCommand } from './_100554_wcdTypes';
+import { execute as executeDel } from './_100554_wcdCommandDel';
+import { execute as executeAddTexto } from './_100554_wcdCommandEnter';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -27,9 +30,290 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     private msg: MessageType = messages['en'];
 
-     createRenderRoot() {
-         return this;
-     }
+    constructor() {
+        super();
+        this.setEvents();
+
+        this.setVoice()
+    }
+
+    private setEvents(): void {
+        mls.events.addListener(3, 'WCDEventChange' as any, (ev) => this.onWCDEventChange(ev));
+        mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected'], (ev) => this.onlevelChange(ev));
+
+    }
+
+    private onlevelChange(ev: mls.events.IEvent) {
+
+        if (!ev.desc) return;
+        const j = JSON.parse(ev.desc);
+        if (j.level !== 3 && this.recognition) {
+            this.recognition.stop();
+            return;
+        }
+
+        if (this.recognition) this.recognition.start();
+    }
+
+    private onWCDEventChange(ev: mls.events.IEvent) {
+
+        if (this && this.forceUpdate) this.forceUpdate();
+
+    }
+
+
+    //--------COMMANDS-------------------
+
+    private commands = {
+        selecionar: {
+            item: this.cmdSelectItem.bind(this)
+        },
+
+        setar: {
+            color: this.cmdSetCor.bind(this),
+            background: this.cmdSetBackground.bind(this),
+            margem: {
+                top: (vl: string) => { this.processStyle('margin-top', vl.replace(/ /g, '')) },
+                button: (vl: string) => { this.processStyle('margin-bottom', vl.replace(/ /g, '')) },
+                botton: (vl: string) => { this.processStyle('margin-bottom', vl.replace(/ /g, '')) },
+                left: (vl: string) => { this.processStyle('margin-left', vl.replace(/ /g, '')) },
+                white: (vl: string) => { this.processStyle('margin-right', vl.replace(/ /g, '')) },
+                right: (vl: string) => { this.processStyle('margin-right', vl.replace(/ /g, '')) },
+            },
+            texto: this.setTexto.bind(this),
+        },
+
+        adicionar: {
+            elemento: {
+                texto: this.cmdAddTexto.bind(this)
+            }
+        },
+
+        deletar: this.cmdDel.bind(this)
+    }
+
+    private setTexto(vl: string) {
+
+        if (!(window as any).preview || !(window as any).preview.iframe || !(window as any).preview.iframe.contentWindow.wcdState || !(window as any).preview.iframe.contentWindow.wcdState.elICA) return;
+
+        const ica = (window as any).preview.iframe.contentWindow.wcdState.elICA
+        if (!ica || !ica.overlayRef) return;
+
+        if (ica.tagName.toLocaleLowerCase() !== 'ica-apresentation-text-text-100554') return;
+        console.info(ica);
+        ica.setAttribute('text', vl);
+        ica.requestUpdate();
+    }
+
+    private cmdDel() {
+
+        if (!(window as any).preview || !(window as any).preview.iframe || !(window as any).preview.iframe.contentWindow.wcdState || !(window as any).preview.iframe.contentWindow.wcdState.elICA) return;
+
+        const ica = (window as any).preview.iframe.contentWindow.wcdState.elICA
+        if (!ica || !ica.overlayRef) return;
+
+        const param: IWCDCommand = {
+            args: new KeyboardEvent('keydown', {
+                key: 'Del', 
+                code: 'Del',
+                keyCode: 13,
+                bubbles: true,
+                cancelable: true,
+                composed: true,
+            }),
+            overlay: ica.overlayRef.parentElement as any,
+            selectedIca: ica
+        }
+
+        executeDel(param);
+
+    }
+
+    private cmdAddTexto() {
+
+        if (!(window as any).preview || !(window as any).preview.iframe || !(window as any).preview.iframe.contentWindow.wcdState || !(window as any).preview.iframe.contentWindow.wcdState.elICA) return;
+
+        const ica = (window as any).preview.iframe.contentWindow.wcdState.elICA
+        if (!ica || !ica.overlayRef) return;
+
+        const param: IWCDCommand = {
+            args: new KeyboardEvent('keydown', {
+                key: 'Enter', 
+                code: 'Enter',
+                keyCode: 13,
+                bubbles: true,
+                cancelable: true,
+                composed: true,
+            }),
+            overlay: ica.overlayRef.parentElement as any,
+            selectedIca: ica
+        }
+
+        executeAddTexto(param);
+        this.requestUpdate();
+
+    }
+
+    private cmdSetCor(color: string) {
+
+        try {
+
+            this.processStyle('color', color);
+
+        } catch (e: any) { }
+
+    }
+
+    private cmdSetBackground(color: string) {
+
+        try {
+
+            this.processStyle('background', color);
+
+        } catch (e: any) { }
+
+    }
+
+    private processStyle(attr: string, value: string) {
+
+        const active = this.querySelector('.activeBranch') as HTMLElement;
+        if (!active) return;
+
+        const el = active.querySelector('info-item') as any;
+        if (!el) return;
+
+        const info = el.info as IInfoElCholdren;
+        if (!info) return;
+
+        const css = info.el.getAttribute('styleel');
+        const t = document.createElement('div');
+
+        t.style.cssText = css || '';
+        t.style[attr as any] = value;
+        info.el.setAttribute('styleel', t.style.cssText);
+
+    }
+
+    private cmdSelectItem(item: string) {
+
+        try {
+
+            console.info('cmdSelectItem', item);
+            const child = ((+item) - 1);
+
+            const all = this.querySelectorAll('li');
+            if (!all[child]) return;
+
+            const el = all[child].querySelector('.header') as HTMLElement;
+            if (el) el.click();
+
+        } catch (e: any) {
+
+        }
+
+    }
+
+    private recognition: any;
+    private activationWord = "comando";
+
+    private setVoice() {
+
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+
+            this.recognition = new SpeechRecognition();
+            this.recognition.lang = 'pt-BR';
+            this.recognition.interimResults = true;
+            this.recognition.continuous = true;
+
+            this.recognition.onresult = (event: any) => this.onSucessVoice(event);
+            this.recognition.onerror = (event: any) => {
+                console.error("Erro no reconhecimento de voz:", event.error);
+            };
+
+        } else {
+            console.error("API de Reconhecimento de Voz não é suportada neste navegador.");
+        }
+    }
+
+    private onSucessVoice(event: any) {
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+
+            if (event.results[i].isFinal) {
+
+                const transcript = event.results[i][0].transcript.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+
+                console.info("Comando reconhecido:", transcript);
+
+                if (transcript.startsWith(this.activationWord)) {
+                    const command = transcript.replace(this.activationWord, "").trim();
+                    this.processCommand(command);
+
+                } else {
+                    console.info(`Aguardando a palavra-chave "${this.activationWord}" para ativar.`);
+                }
+
+            }
+        }
+
+    }
+
+    private processCommand(phrase: string) {
+
+        const words = phrase.toLowerCase().split(" ");
+        let current = this.commands as any;
+
+        for (let i = 0; i < words.length; i++) {
+
+            let word = words[i];
+            if (current[word]) {
+                current = current[word];
+                if ((i + 1) === words.length && typeof current === "function") {
+                    current();
+                    return;
+                }
+
+            } else if (typeof current === "function") {
+
+                current(words.slice(i, words.length).join(' '));
+                return;
+            }
+        }
+
+        //console.error("Comando não encontrado.");
+
+    }
+
+    private startRecognition(ev: MouseEvent) {
+
+        let el = ev.target as HTMLElement;
+        if (el.tagName.toLocaleLowerCase() !== 'mic-command') {
+            el = el.closest('mic-command') as HTMLElement;
+        }
+
+        if (el.classList.contains('active')) {
+            el.classList.remove('active');
+
+            if (this.recognition) this.recognition.stop();
+
+        } else {
+            el.classList.add('active');
+
+
+            this.recognition.start();
+            console.log("Aguardando comando de voz...");
+        }
+    }
+
+
+    //-------COMPONENT----------
+
+
+    createRenderRoot() {
+        return this;
+    }
 
     render() {
         const lang = this.getMessageKey(messages);
@@ -42,12 +326,10 @@ export class PluginPageNavigation extends PluginBaseModule {
     createNavigation(array: IInfoElCholdren[]) {
 
         const obj = html`
+            <mic-command @click="${this.startRecognition}"></mic-command>
             <ul>
-                ${repeat(array, ((key: IInfoElCholdren, idx: number) => key.el.tagName + idx) as any, ((item: IInfoElCholdren, index: any) => {
-
-            return this.renderItemTree(item, index);
-
-        }) as any
+                ${repeat(array, ((key: IInfoElCholdren, idx: number) => key.el.tagName + idx) as any,
+            ((item: IInfoElCholdren, index: any) => { return this.renderItemTree(item, index); }) as any
         )}
             </ul><style>${this.myCss}</style>
         `;
@@ -118,7 +400,7 @@ export class PluginPageNavigation extends PluginBaseModule {
     private getICAComponents(): IInfoElCholdren[] {
 
         let ret: IInfoElCholdren[] = [];
-        const scope = window.preview.iframe?.contentDocument?.body;
+        const scope = window.preview?.iframe?.contentDocument?.body;
         if (!scope) return ret;
 
         const reentrance = (array: IInfoElCholdren[], element: HTMLElement) => {
@@ -473,8 +755,25 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     }
 
-
     private myCss = `
+
+        plugin-page-navigation-100554 mic-command{
+            background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d='M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L472.1 344.7c15.2-26 23.9-56.3 23.9-88.7l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 21.2-5.1 41.1-14.2 58.7L416 300.8 416 96c0-53-43-96-96-96s-96 43-96 96l0 54.3L38.8 5.1zM344 430.4c20.4-2.8 39.7-9.1 57.3-18.2l-43.1-33.9C346.1 382 333.3 384 320 384c-70.7 0-128-57.3-128-128l0-8.7L144.7 210c-.5 1.9-.7 3.9-.7 6l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            width: 20px;
+            height: 20px;
+            display: block;
+            cursor: pointer;
+        }
+
+        plugin-page-navigation-100554 mic-command.active{
+            background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d='M192 0C139 0 96 43 96 96l0 160c0 53 43 96 96 96s96-43 96-96l0-160c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6c85.8-11.7 152-85.3 152-174.4l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 70.7-57.3 128-128 128s-128-57.3-128-128l0-40z'/></svg>")!important;
+            
+        }
+
+
         plugin-page-navigation-100554{
             padding: 1rem;
             display:block;
