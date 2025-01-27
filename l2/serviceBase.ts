@@ -359,36 +359,39 @@ export type ICollabServiceClass = "separator-left" | "separator-right";
 
 // New
 
-type ITitleClickCallBack = (title: string) => void | undefined;
-type IMainClickCallBack = (value: string) => void | undefined;
-type IToolsClickCallBack = (index: number) => void | undefined;
-type ITabsClickCallBack = (tab: string) => void | undefined;
-type TSetMode = (mode: TMode | null, page?: HTMLElement) => void;
-type TGetLastMode = () => TMode;
-type TMode =
+export type ITitleClickCallBack = (title: string) => void | undefined;
+export type IMainClickCallBack = (value: string) => void | undefined;
+export type IToolsClickCallBack = (index: number) => void | undefined;
+export type ITabsClickCallBack = (index: number) => void | undefined;
+export type TSetMode = (mode: TMode | null, page?: HTMLElement) => void;
+export type TGetLastMode = () => TMode;
+export type TMode =
 	'initial' // show siblings with hamburguer icon
 	| 'page' // show page (About ...) with close icon
 	| 'editor'; // show siblings with close icon
 
-interface IOptions {
+export interface IOptions {
 	text: string,
 	icon?: string
 	class?: string
 }
 
-interface ITools {
+export interface ITools {
 	[key: string]: IToolsData
 }
 
-interface IMain {
+export interface IMain {
 	[key: string]: IOptions | string
 }
 
-interface ITabs {
-	[key: string]: IOptions | string
+export interface ITabs {
+	type: 'full' | 'onlyicon'
+	group: string,
+	selected?: number,
+	options: IOptions[]
 }
 
-interface IToolsData {
+export interface IToolsData {
 	type: 'dropdown' | 'cycle' | 'link' | 'flags-dropdown',
 	selected?: number,
 	icon?: string,
@@ -396,34 +399,30 @@ interface IToolsData {
 	options: IOptions[]
 }
 
-interface IServiceMenu {
+export interface IServiceMenu {
 
 	title: IOptions | string,
 	main: IMain,
 	tabs: ITabs,
 	tools: ITools,
 
-	mainType: 'full' | 'onlyicon'
+	onClickTitle?: ITitleClickCallBack,
+	onClickMain?: IMainClickCallBack,
+	onClickTools?: IToolsClickCallBack,
+	onClickTabs?: ITabsClickCallBack,
 
-	onClickTitle: ITitleClickCallBack,
-	onClickMain: IMainClickCallBack,
-	onClickTools: IToolsClickCallBack,
-	onClickTabs: ITabsClickCallBack,
+	setMenuActive?: (op: string) => void
+	setTabActive?: (index: number) => void,
+	toggleErrorTab?: (index: number, show: boolean) => void
+	selectButton?: (index: number) => void,
 
-	setMenuActive: (op: string) => void
-	setTabActive: (op: string) => void,
-	toggleErrorTab: (op: string, show: boolean) => void
-	selectButton: (index: number) => void,
+	mainDefault?: string,
+	lastMain?: string,
 
-	tabDefault: string,
-	mainDefault: string,
-	lastTab: string,
-	lastMain: string,
-
-	setMode: TSetMode,
-	refresh: Function,
-	closeMenu: Function,
-	getLastMode: TGetLastMode,
-	updateTitle: Function,
+	setMode?: TSetMode,
+	refresh?: Function,
+	closeMenu?: Function,
+	getLastMode?: TGetLastMode,
+	updateTitle?: Function,
 
 }
