@@ -58,7 +58,7 @@ export abstract class ServiceBase extends IcaLitElement {
 
     abstract details: IService;
 
-    abstract menu: IMenu;
+    abstract menu: IMenu | IServiceMenu;
 
     abstract onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void;
 
@@ -209,7 +209,8 @@ export abstract class ServiceBase extends IcaLitElement {
     private getNav3ServiceMenu() {
         const content = this.getNav3ServiceContent();
         if (!content) return null;
-        const nav3Menu = content.querySelector('mls-nav3-100529') as HTMLElement | null;
+        let nav3Menu = content.querySelector('mls-nav3-100529') as HTMLElement | null;
+        if(!nav3Menu) nav3Menu = content.querySelector('collab-nav-3-menu') as HTMLElement | null;
         return nav3Menu;
     }
 
@@ -351,4 +352,78 @@ export interface IToolbarChangeEvent {
 
 export type ICollabServicePosition = "left" | "right" | "all"
 export type ICollabServiceState = "foreground" | "background"
-export type ICollabServiceClass = "separator-left" | "separator-right"
+export type ICollabServiceClass = "separator-left" | "separator-right";
+
+
+
+
+// New
+
+type ITitleClickCallBack = (title: string) => void | undefined;
+type IMainClickCallBack = (value: string) => void | undefined;
+type IToolsClickCallBack = (index: number) => void | undefined;
+type ITabsClickCallBack = (tab: string) => void | undefined;
+type TSetMode = (mode: TMode | null, page?: HTMLElement) => void;
+type TGetLastMode = () => TMode;
+type TMode =
+	'initial' // show siblings with hamburguer icon
+	| 'page' // show page (About ...) with close icon
+	| 'editor'; // show siblings with close icon
+
+interface IOptions {
+	text: string,
+	icon?: string
+	class?: string
+}
+
+interface ITools {
+	[key: string]: IToolsData
+}
+
+interface IMain {
+	[key: string]: IOptions | string
+}
+
+interface ITabs {
+	[key: string]: IOptions | string
+}
+
+interface IToolsData {
+	type: 'dropdown' | 'cycle' | 'link' | 'flags-dropdown',
+	selected?: number,
+	icon?: string,
+	class?: string
+	options: IOptions[]
+}
+
+interface IServiceMenu {
+
+	title: IOptions | string,
+	main: IMain,
+	tabs: ITabs,
+	tools: ITools,
+
+	mainType: 'full' | 'onlyicon'
+
+	onClickTitle: ITitleClickCallBack,
+	onClickMain: IMainClickCallBack,
+	onClickTools: IToolsClickCallBack,
+	onClickTabs: ITabsClickCallBack,
+
+	setMenuActive: (op: string) => void
+	setTabActive: (op: string) => void,
+	toggleErrorTab: (op: string, show: boolean) => void
+	selectButton: (index: number) => void,
+
+	tabDefault: string,
+	mainDefault: string,
+	lastTab: string,
+	lastMain: string,
+
+	setMode: TSetMode,
+	refresh: Function,
+	closeMenu: Function,
+	getLastMode: TGetLastMode,
+	updateTitle: Function,
+
+}
