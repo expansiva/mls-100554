@@ -70,13 +70,16 @@ export async function validateStyle(modelStyle: mls.editor.IModelStyle) {
     text = removeCommentLines(text);
 
     const markers: monaco.Position[] = [];
-    const tagName = convertFileNameToTag(`_${project}_${shortName}`);
+    const fileName = `_${project}_${shortName}`;
+    const tagName = convertFileNameToTag(fileName);
+    const nav3MenuSelector = `collab-nav-3-service[data-service="${fileName}"]`
     const rootSelectorRegex = /^[^\s].*?{/gm;
     const errors: string[] = [];
     let match: RegExpExecArray | null;
     while ((match = rootSelectorRegex.exec(text)) !== null) {
         const selector = match[0].trim().replace(/\{$/, "").trim();
         const isValid =
+            selector === nav3MenuSelector ||
             selector === tagName ||
             new RegExp(`^${tagName}\\.[a-zA-Z0-9_-]+$`).test(selector);
         if (!isValid) {
