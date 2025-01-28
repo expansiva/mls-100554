@@ -76,12 +76,12 @@ export class ServiceSource100554 extends ServiceBase {
 
     public onClickMain(op: string) {
         if (op === 'opTS2') return;
-        if (op === 'opTheme') this.showPageTheme();
-        if (op === 'opMonacoConfig') this.showConfEditor();
-        if (op === 'opMonacoReset') this.showMonacoReset();
-        if (op === 'opHistory') this.showHistory();
-        if (op === 'opView') this.openRepo();
-        if (this.menu.setMode) this.menu.setMode('initial');
+        else if (op === 'opTheme') this.showPageTheme();
+        else if (op === 'opMonacoConfig') this.showConfEditor();
+        else if (op === 'opMonacoReset') this.showMonacoReset();
+        else if (op === 'opHistory') this.showHistory();
+        else if (op === 'opView') this.openRepo();
+        else if (this.menu.setMode) this.menu.setMode('initial');
     }
 
     public onClickTabs = (op: number): void => {
@@ -495,6 +495,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private async showHistorie2() {
+
         if (!this.menu.tabs || !this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
         const { shortName, project } = this.activeModels.ts.storFile;
 
