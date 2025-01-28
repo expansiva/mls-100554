@@ -1,4 +1,4 @@
-/// <mls shortName="wcDivider" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="wcDivider" project="100554" enhancement="_100554_enhancementLit" groupName="_100554_icaLayoutFlowDivider" />
 
 import { html, css } from 'lit'; 
 import { customElement, property } from 'lit/decorators.js';

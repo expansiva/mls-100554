@@ -25,13 +25,23 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
 
     private resizeObserver: ResizeObserver | undefined;
 
+    public listWidgetsBase = [
+        
+        {name: '_100554_wcImage'},
+        {name: '_100554_wcText' },
+        {name: '_100554_wcCode' },
+        {name: '_100554_wcVideo'},
+        
+        {name: '_100554_wcSection'},
+        {name: '_100554_wcDivider'}
+    ]
+
     private keys: { [key: string]: string } = {
         'ArrowDown': 'down',
         'ArrowLeft': 'left',
         'ArrowUp': 'up',
-        'ArrowRight': 'right'
+        'ArrowRight': 'right' 
     }
-
 
     public myKeyEvents = {
         'Enter': excCommandEnter,
