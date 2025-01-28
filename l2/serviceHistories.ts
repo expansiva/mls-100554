@@ -66,7 +66,7 @@ export class ServiceHistories100554 extends ServiceBase {
         main: {
             opHistories: 'Start',
         },
-        tabs: {},
+        tabs: undefined,
         tools: {},
         mainDefault: 'opHistories',
         onClickMain: this.onClickMain.bind(this),

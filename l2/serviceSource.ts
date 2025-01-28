@@ -459,6 +459,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private openRepo() {
+        if (!this.menu.tabs) return;
         if (this.menu.tabs.selected === undefined) return false;
         if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return false;
 
@@ -494,7 +495,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private async showHistorie2() {
-        if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
+        if (!this.menu.tabs || !this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
         const { shortName, project } = this.activeModels.ts.storFile;
 
         const div = document.createElement('div');
@@ -1182,6 +1183,7 @@ export class ServiceSource100554 extends ServiceBase {
         const addEventsEditor = () => {
             if (!this._ed1) return;
             this._ed1.onDidFocusEditorWidget(() => {
+                if (!this.menu.tabs) return '';
                 if (this.menu.tabs.selected === EToolsSource.icHTML) return;
                 mls.editor.setActiveInstance(this.level, this.position);
             });
@@ -1192,7 +1194,7 @@ export class ServiceSource100554 extends ServiceBase {
                 this._ed1?.updateOptions({ readOnly: false });
 
                 clearTimeout(this.timeHtmlChangeCursor);
-                if (!this._ed1) return;
+                if (!this._ed1 || !this.menu.tabs) return;
                 const model = this._ed1.getModel();
 
                 if (this.menu.tabs.selected === EToolsSource.icStyle) {
@@ -2136,7 +2138,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     public getActualRef(): string {
-
+        if (!this.menu.tabs) return '';
         try {
             let ret = '';
             if (!mls.actual[2] || !(mls.actual[2] as any)[this.position]) return ret;
@@ -2188,6 +2190,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private selectLineinHTML(line: number, origin: 'preview' | 'editor') {
+        if (!this.menu.tabs) return;
         if (this.menu.tabs.selected !== EToolsSource.icHTML || !this._ed1) return;
         this.lastOrigin = origin;
         if (origin === 'editor') return;
