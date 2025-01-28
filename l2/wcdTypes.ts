@@ -26,6 +26,7 @@ export interface WCDToolboxItemMethodos extends HTMLElement {
 }
 
 export interface WCDOverlayMethods extends HTMLElement {
+    listWidgetsBase: IListWidgetBase[]
     myKeyEvents: { [key: string]: Function }
     changeOverlayItemsLevel(): void
     createOverlayItems(): void;
@@ -33,6 +34,10 @@ export interface WCDOverlayMethods extends HTMLElement {
     getActionsTagsDefault(): { [key: string]: tps.ActionTag };
     refreshOverlay(): void;
     myItens: tps.IICADepths[]
+}
+
+export interface IListWidgetBase{
+    name:string
 }
 
 export interface WCDOverlayItensMethods extends HTMLElement {

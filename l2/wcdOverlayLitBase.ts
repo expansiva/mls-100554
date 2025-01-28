@@ -4,7 +4,7 @@
 import { property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { ActionTag, IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { WCDOverlayMethods, IWCDCommand, WCDToolboxMethodos } from './_100554_wcdTypes';
+import { WCDOverlayMethods, IWCDCommand, WCDToolboxMethodos, IListWidgetBase } from './_100554_wcdTypes';
 
 export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDOverlayMethods {
 
@@ -27,7 +27,9 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
         return this; // dont use shadow root
     }
 
-    //-----------IMEPLEMENTATION----------    
+    //-----------IMEPLEMENTATION----------   
+
+    abstract listWidgetsBase: IListWidgetBase[] 
 
     abstract myKeyEvents: { [key: string]: Function }
 
@@ -64,3 +66,4 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
     }
 
 }
+

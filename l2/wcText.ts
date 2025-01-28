@@ -1,4 +1,4 @@
-/// <mls shortName="wcText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="wcText" project="100554" enhancement="_100554_enhancementLit" groupName="_100554_icaApresentationTextText" />
 
 import { html, ifDefined, css , unsafeHTML} from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
