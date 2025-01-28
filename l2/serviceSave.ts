@@ -2,7 +2,7 @@
 
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IServiceMenu } from './_100554_serviceBase';
 import { collab_branch } from './_100554_collabIcons';
 import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
 import { getMyKeysBranch } from './_100554_libCommom';
@@ -101,27 +101,19 @@ export class ServiceSave extends ServiceBase {
         level: [5]
     }
 
-    public onClickLink = (op: string): boolean => {
-        if (op === 'opSave') return this.showInitial();
-        if (op === 'opBranch') return this.showBranche();
+    public onClickMain(op: string) {
+        if (op === 'opBranch') this.showBranche();
         if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
     }
 
-    public menu: IMenu = {
-        title: 'Save',
-        actions: {
-            opBranch: ''
-        },
-        icons: {},
-        actionDefault: 'opSave', // call after close icon clicked
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
+    public menu: IServiceMenu = {
+        title: '',
+        main: {},
+        tabs: {},
+        tools: {},
+        onClickMain: this.onClickMain.bind(this),
     }
 
-    private showInitial(): boolean {
-        return true;
-    }
 
     onServiceClick(visible: boolean, reinit: boolean) {
 
@@ -130,8 +122,6 @@ export class ServiceSave extends ServiceBase {
         } else if (visible && !reinit) {
             this.updateList();
         }
-
-
 
     }
 

@@ -2,7 +2,7 @@
 
 import { html, repeat, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import './_100554_collabPanel';
 import './_100554_collabPanelItem';
 
@@ -46,32 +46,29 @@ export class ServiceUser100554 extends ServiceBase {
         level: [0]
     }
 
-    public onClickLink = (op: string): boolean => {
+    public onClickMain(op: string) {
         if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
     }
 
-    public onClickIcon = (op: string): void => {
-        this.activeTab = op as IScenery;
+    public onClickTabs(op: number): void {
+        this.activeTab = EScenery[op] as IScenery;
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: '',
-        actions: {
+        main: {},
+        tabs: {
+            group: 'Mode',
+            type: 'full',
+            selected: 0,
+            options: [
+                { text: 'Settings', icon: 'f013' },
+            ]
         },
-        icons: {
-            Settings: 'Settings;f013',
-        },
-        iconDefault: 'Settings',
-        iconMenuType: 'full',
-        actionDefault: '', // call after close icon clicked
-        setMode: undefined,
-        updateTitle: undefined,
-        getLastMode: undefined,
-        lastIcon: undefined,
-        setIconActive: undefined,
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
+        tools: {},
+        onClickMain: this.onClickMain.bind(this),
+        onClickTabs: this.onClickTabs.bind(this),
+
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
@@ -161,8 +158,9 @@ export class ServiceUser100554 extends ServiceBase {
 
 }
 
-interface HTMLDetailsExplore extends HTMLDetailsElement {
-    data: mls.plugin.MenuAction
+
+enum EScenery {
+    'Settings' = 0
 }
 
 type IScenery = 'Settings'
