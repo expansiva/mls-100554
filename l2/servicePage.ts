@@ -2,7 +2,7 @@
 
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
 
 /// **collab_i18n_start**
@@ -47,45 +47,46 @@ export class ServicePage100554 extends ServiceBase {
     }
 
 
-    public onClickLink = (op: string): boolean => {
+    public onClickMain(op: string) {
         if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
     }
 
-    public onClickIcon = (op: string): void => {
-        this.activeTab = op as ITabType;
+    public onClickTabs(index: number) {
+        this.activeTab = ESceneries[index] as ITabType;
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: '',
-        actions: {
+        main: {},
+        tabs: {
+            group: 'Mode',
+            type: 'onlyicon',
+            selected: 0,
+            options: [
+                { text: 'Details', icon: '3f' },
+                { text: 'Navigation', icon: 'f041' },
+                { text: 'Properties', icon: 'f0ce' },
+                { text: 'IA', icon: 'f5dc' },
+
+            ]
         },
-        icons: {
-            icDetails: 'Details;3f',
-            icNavigation: 'Navigation;f041',
-            icProperties: 'Properties;f0ce',
-            icIA: 'IA;f5dc',
-        },
-        actionDefault: '', // call after close icon clicked
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
-        getLastMode: undefined,
-        updateTitle: undefined
+        tools: {},
+        onClickMain: this.onClickMain.bind(this),
+        onClickTabs: this.onClickTabs.bind(this),
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-    
+
     }
 
     @property() activeTab: ITabType = 'icDetails';
     @property() pluginNav: string = '';
-    @property() pluginProp: string= '';
+    @property() pluginProp: string = '';
     @property() pluginsIA: { [key: string]: mls.plugin.MenuAction[] } = {};
     @property() pluginIALoaded: boolean = false;
 
     async firstUpdated() {
-        if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
+        if (this.menu.setTabActive) this.menu.setTabActive(ESceneries[this.activeTab]);
         await this.loadPlugins();
         await this.setPluginIA();
     }
@@ -192,3 +193,9 @@ export class ServicePage100554 extends ServiceBase {
 
 export type ITabType = 'icDetails' | 'icNavigation' | 'icProperties' | 'icIA';
 
+enum ESceneries {
+    'icNavigation' = 0,
+    'icProperties' = 1,
+    'icDetails' = 2,
+    'icIA' = 3,
+} 

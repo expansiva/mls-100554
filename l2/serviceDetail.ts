@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
 
@@ -33,23 +33,19 @@ export class ServiceDetail100554 extends ServiceBase {
         level: [1, 2, 3, 4, 5, 6, 7]
     }
 
-    public onClickLink = (op: string): boolean => {
-        if (op === 'opAboutThis') return this.showAboutThis();
-        if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
+    public onClickMain(op: string) {
+        if (op === 'opAboutThis') this.showAboutThis();
+        else if (this.menu.setMode) this.menu.setMode('initial');
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: '',
-        actions: {
+        main: {
             opAboutThis: 'About this content',
         },
-        icons: {},
-        actionDefault: '', // call after close icon clicked
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
-        getLastMode: undefined,
-        updateTitle: undefined
+        tabs: {},
+        tools: {},
+        onClickMain: this.onClickMain.bind(this),
     }
 
     private showAboutThis(): boolean {
