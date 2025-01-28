@@ -109,7 +109,7 @@ export class ServiceSave extends ServiceBase {
     public menu: IServiceMenu = {
         title: '',
         main: {},
-        tabs: {},
+        tabs: undefined,
         tools: {},
         onClickMain: this.onClickMain.bind(this),
     }

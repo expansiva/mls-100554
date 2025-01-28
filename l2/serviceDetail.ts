@@ -43,7 +43,7 @@ export class ServiceDetail100554 extends ServiceBase {
         main: {
             opAboutThis: 'About this content',
         },
-        tabs: {},
+        tabs: undefined,
         tools: {},
         onClickMain: this.onClickMain.bind(this),
     }
