@@ -1,8 +1,8 @@
 /// <mls shortName="serviceProduct" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, repeat } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js'; 
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase'; 
+import { customElement, property, query } from 'lit/decorators.js';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 
 import './_100554_pluginGithubL4Project';
 import './_100554_pluginGithubL4Issues';
@@ -27,54 +27,41 @@ export class ServiceWorkspace100554 extends ServiceBase {
         level: [1, 2, 3, 4, 5, 6, 7]
     }
 
-    public onClickLink = (op: string): boolean => {
+    public onClickMain(op: string) {
         if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
     }
 
-    public onClickIcon = (op: string): void => {
-        this.activeTab = op;
+    public onClickTabs(index: number) {
+        this.activeTab = ISceneries[index]
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: '',
-        actions: {
+        main: {},
+        tabs: {
+            group: 'Mode',
+            type: 'onlyicon',
+            selected: 0,
+            options: [
+                { text: 'Requirements', icon: 'f0a6' },
+            ]
         },
-        icons: {
+        tools: {},
+        onClickMain: this.onClickMain.bind(this),
+        onClickTabs: this.onClickTabs.bind(this),
 
-            IRequirements:'Requirements;f0a6',
-            
-            
-
-        },
-        actionDefault: '', // call after close icon clicked
-        setMode: undefined, // child will set this
-        iconDefault: 'IRequirements',
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
-        getLastMode: undefined,
-        updateTitle: undefined
     }
 
     //------------COMPONENT-----------------
 
-    firstUpdated() {
-        
-    }
-
     updated(changedProperties: any) {
-
         super.updated(changedProperties);
-
         if (!this.visible) return;
-
         const [w, h] = this.msize.split(',');
-        
-        
     }
 
     render() {
@@ -98,7 +85,11 @@ export class ServiceWorkspace100554 extends ServiceBase {
         </plugin-github-l4-issues-100554>`
     }
 
-    
+
     //----------IMPLEMENTS------------------
-    
+
+}
+
+enum ISceneries {
+    'IRequirements' = 0
 }

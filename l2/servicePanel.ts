@@ -2,7 +2,7 @@
 
 import { html, css, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import './_100554_collabPanel';
 @customElement('service-panel-100554')
 export class ServicePanel100554 extends ServiceBase {
@@ -28,58 +28,49 @@ export class ServicePanel100554 extends ServiceBase {
         level: [1, 2, 3, 4, 5, 6, 7]
     }
 
-    public onClickLink = (op: string): boolean => {
+    public onClickMain(op: string) {
         if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
     }
 
-    public onClickIcon = (op: string): void => {
-        this.activeTab = op;
+    public onClickTabs(index: number) {
+        this.activeTab = ESceneries[index];
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: '',
-        actions: {
+        main: {},
+        tabs: {
+            group: 'Mode',
+            type: 'onlyicon',
+            selected: 0,
+            options: [
+                { text: 'Site', icon: 'f1c9' },
+                { text: 'History', icon: 'f233' },
+            ]
         },
-        icons: {
+        tools: {},
+        onClickMain: this.onClickMain.bind(this),
+        onClickTabs: this.onClickTabs.bind(this),
 
-            ISite: 'Site;f1c9',
-            IHistory: 'History;f233',
-
-        },
-        actionDefault: '', // call after close icon clicked
-        setMode: undefined, // child will set this
-        iconDefault: 'ISite',
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
-        getLastMode: undefined,
-        updateTitle: undefined
     }
 
     //------------COMPONENT-----------------
 
-    firstUpdated() {
+    firstUpdated(changedProperties: any) {
+        super.updated(changedProperties);
         this.setMyData();
     }
 
     updated(changedProperties: any) {
-
         super.updated(changedProperties);
-
         if (!this.visible) return;
-
         const [w, h] = this.msize.split(',');
         if (!this.servicePanel) return;
         this.servicePanel.style.height = h + 'px';
-
-    }
-
-    createRenderRoot() {
-        return this;
     }
 
     render() {
@@ -187,7 +178,7 @@ export class ServicePanel100554 extends ServiceBase {
         if (!prj) return;
         let array: any[] = [];
         await mls.plugin.loadAll(prj, false);
-        array = mls.plugin.getAllMenuActions(prj, { scope: 'l5Panel'} as any)
+        array = mls.plugin.getAllMenuActions(prj, { scope: 'l5Panel' } as any)
 
         array.forEach((item: mls.plugin.MenuAction) => {
 
@@ -199,4 +190,10 @@ export class ServicePanel100554 extends ServiceBase {
 
         this.setAttribute('inLoading', '');
     }
+}
+
+enum ESceneries {
+    'ISite' = 0,
+    'IHistory' = 1,
+
 }

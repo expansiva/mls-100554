@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { getConfigProject } from './_100554_libProjectConfig';
 import './_100554_collabTiles';
 
@@ -27,32 +27,31 @@ export class ServiceDashboard100554 extends ServiceBase {
         level: [6]
     }
 
-    public onClickLink = (op: string): boolean => {
+    public onClickMain(op: string) {
         if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
     }
 
-    public onClickIcon = (op: string): void => {
-        this.activeTab = op;
+    public onClickTabs(index: number) {
+        this.activeTab = ESceneries[index];
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: '',
-        actions: {
+        main: {},
+        tabs: {
+            group: 'Mode',
+            type: 'onlyicon',
+            selected: 0,
+            options: [
+                { text: 'Example 1', icon: 'f0e8' },
+                { text: 'Example 2', icon: 'f0e8' },
+            ]
         },
-        icons: {
-            Icon1: 'Example 1;f0e8',
-            Icon2: 'Example 2;f0e8',
-
-        },
-        actionDefault: '', // call after close icon clicked
-        iconDefault: 'Icon1',
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
-        getLastMode: undefined,
-        updateTitle: undefined
+        tools: {},
+        onClickMain: this.onClickMain.bind(this),
+        onClickTabs: this.onClickTabs.bind(this),
     }
+
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
@@ -74,7 +73,7 @@ export class ServiceDashboard100554 extends ServiceBase {
     createRenderRoot() {
         return this;
     }
-    
+
     firstUpdated() {
         this.loadAndSetPlugins();
     }
@@ -113,9 +112,9 @@ export class ServiceDashboard100554 extends ServiceBase {
 
     renderContent() {
         switch (this.activeTab) {
-            case 'Icon1':
+            case 'Example1':
                 return this.renderIcon1();
-            case 'Icon2':
+            case 'Example2':
                 return this.renderIcon2();
             default:
                 return html``;
@@ -188,7 +187,7 @@ export class ServiceDashboard100554 extends ServiceBase {
         this.pluginsDash1.sort((a, b) => {
             return Number(a.index) - Number(b.index);
         });
-        
+
         this.pluginsDash2.sort((a, b) => {
             return Number(a.index) - Number(b.index);
         });
@@ -196,7 +195,7 @@ export class ServiceDashboard100554 extends ServiceBase {
         this.requestUpdate();
     }
 
-    private getInfoPlugin(config: mls.l5_common.ProjectConfig | undefined, widgetConfig: string | undefined, widget: string, cat: string | null): { index: string, enabled: string, pos: string, widgetConfig:string } {
+    private getInfoPlugin(config: mls.l5_common.ProjectConfig | undefined, widgetConfig: string | undefined, widget: string, cat: string | null): { index: string, enabled: string, pos: string, widgetConfig: string } {
 
         const ret = { index: '99', enabled: 'true', pos: '2 2', widgetConfig: '' }
         if (!config || !widgetConfig || !cat) return ret;
@@ -206,7 +205,7 @@ export class ServiceDashboard100554 extends ServiceBase {
         widgetConfig = '_' + widgetConfig.replace('2_', '').replace('.ts', '');
 
         ret.widgetConfig = widgetConfig;
-        
+
         if (!plugin[widgetConfig] || !plugin[widgetConfig][widget] || !(plugin[widgetConfig][widget] as any)["l6Dashboard" as any] || !(plugin[widgetConfig][widget] as any)["l6Dashboard"][cat]) return ret;
 
         const pos = (plugin[widgetConfig][widget] as any)["l6Dashboard"][cat].replace('tile', '').trim();
@@ -226,6 +225,10 @@ export class ServiceDashboard100554 extends ServiceBase {
     }
 
 }
+enum ESceneries {
+    'Example1' = 0,
+    'Example2' = 1,
+}
 
 interface ITiles {
     title: string,
@@ -233,5 +236,5 @@ interface ITiles {
     position: string,
     index: string,
     enabled: string,
-    widgetConfig:string
+    widgetConfig: string
 }

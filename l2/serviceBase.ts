@@ -403,7 +403,7 @@ export interface IServiceMenu {
 
 	title: IOptions | string,
 	main: IMain,
-	tabs: ITabs,
+	tabs: ITabs | Object,
 	tools: ITools,
 
 	onClickTitle?: ITitleClickCallBack,
