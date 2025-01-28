@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
-import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle, IServiceMenu, ITools } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
 import { removeTokensFromSource, getTokensLess } from './_100554_enhancementStyle';
@@ -16,6 +16,7 @@ import './_100554_aimPromptTypescript';
 import './_100554_cssHelperIndex';
 import { globalState } from './_100554_icaState';
 import { propertyDataSource } from './_100554_icaLitElement';
+import { collab_html, collab_typescript, collab_less } from './_100554_collabIcons';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -73,31 +74,31 @@ export class ServiceSource100554 extends ServiceBase {
     private viewState: IViewState = {};
     private msg: MessageType = messages['en'];
 
-    public onClickLink = (op: string): boolean => {
-        if (op === 'opTS2') return true;
-        if (op === 'opTheme') return this.showPageTheme();
-        if (op === 'opMonacoConfig') return this.showConfEditor();
-        if (op === 'opMonacoReset') return this.showMonacoReset();
-        if (op === 'opHistory') return this.showHistory();
-        if (op === 'opView') return this.openRepo();
+    public onClickMain(op: string) {
+        if (op === 'opTS2') return;
+        if (op === 'opTheme') this.showPageTheme();
+        if (op === 'opMonacoConfig') this.showConfEditor();
+        if (op === 'opMonacoReset') this.showMonacoReset();
+        if (op === 'opHistory') this.showHistory();
+        if (op === 'opView') this.openRepo();
         if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
     }
 
-    public onClickIcon = (op: string): void => {
+    public onClickTabs = (op: number): void => {
         this.saveViewState();
-        this.mode = op as IModes;
-        this.selectedMode = op as IModes;
 
-        if (this.isModeHistory && this.menu.selectButton) this.menu.selectButton('btHistory');
-        if (this.isModeHistoryImmediatte && this.menu.selectButton) this.menu.selectButton('btHistoryImmediatte');
+        this.mode = EToolsSource[op] as IModes;
+        this.selectedMode = EToolsSource[op] as IModes;
 
-        if (op === 'icTs') this.showActiveModel();
-        if (op === 'icHTML') {
+        if (this.isModeHistory && this.menu.selectTool) this.menu.selectTool('btHistory');
+        if (this.isModeHistoryImmediatte && this.menu.selectTool) this.menu.selectTool('btHistoryImmediatte');
+
+        if (op === EToolsSource.icTs) this.showActiveModel();
+        if (op === EToolsSource.icHTML) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
             this.createOrShowModelHtmlOrCss(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.html');
         }
-        if (op === 'icStyle') {
+        if (op === EToolsSource.icStyle) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
             this.createOrShowModelHtmlOrCss(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.less');
         }
@@ -107,7 +108,7 @@ export class ServiceSource100554 extends ServiceBase {
         this.openService('_100554_serviceProject', this.position, 2, { activeTab: 'Explore' });
     }
 
-    public onClickButton = (op: string, opMenu?: string): boolean => {
+    public onClickTools(op: string) {
         if (op === 'btHistory') return this.toogleHistory();
         if (op === 'btHistoryImmediatte') return this.toogleHistoryImmediatte();
         else throw new Error('Invalid option')
@@ -123,51 +124,69 @@ export class ServiceSource100554 extends ServiceBase {
         level: [2]
     }
 
-    private menuButtonsMode1 = {
-        btHistory: `${this.msg.historyOpen};${this.msg.historyClose};f017;f057`,
-    }
-    private menuButtonsMode2 = {
-        btHistoryImmediatte: `${this.msg.historyOpenMoment};${this.msg.historyClose};f2f2;f057`,
-        btHistory: `${this.msg.historyOpen};${this.msg.historyClose};f017;f057`,
+    private menuToolsMode1: ITools = {
+        btHistory: {
+            type: 'cycle',
+            selected: 0,
+            options: [
+                { text: this.msg.historyOpen, icon: 'f017' },
+                { text: this.msg.historyClose, icon: 'f057' },
+            ]
+        },
     }
 
-    public menu: IMenu = {
+    private menuToolsMode2: ITools = {
+        btHistory: {
+            type: 'cycle',
+            selected: 0,
+            options: [
+                { text: this.msg.historyOpen, icon: 'f017' },
+                { text: this.msg.historyClose, icon: 'f057' },
+            ]
+        },
+        btHistoryImmediatte: {
+            type: 'cycle',
+            selected: 0,
+            options: [
+                { text: this.msg.historyOpenMoment, icon: 'f2f2' },
+                { text: this.msg.historyClose, icon: 'f057' },
+            ]
+        },
+    }
+
+    public menu: IServiceMenu = {
         title: {
             icon: '&#xf053',
             text: 'L2 - widget1'
         },
-        actions: {
+        main: {
             opTheme: 'Editor - Themes',
             opMonacoConfig: 'Editor - config',
             opMonacoReset: 'Editor - reset',
             opHistory: 'History',
             opView: 'View on repository',
         },
-        icons: {
-            icTs: 'Typescript;f121',
-            icHTML: 'HTML;f13b',
-            icStyle: 'Style;f38b'
-
+        tabs: {
+            group: 'Mode',
+            type: 'onlyicon',
+            selected: 0,
+            options: [
+                { text: 'Typescript', icon: collab_typescript.strings[0].trim() },
+                { text: 'HTML', icon: collab_html.strings[0].trim() },
+                { text: 'Style', icon: collab_less.strings[0].trim() },
+            ]
         },
-        buttons: this.previousHistorySource && this.currentHistorySource ? this.menuButtonsMode2 : this.menuButtonsMode1,
-        actionDefault: '', // call after close icon clicked
-        iconDefault: 'icTs',
-        setMode: undefined, // child will set this
-        updateTitle: undefined, // child will set this
-        getLastMode: undefined, // child will set this
-        lastIcon: undefined, // child will set this
-        setIconActive: undefined, // child will set this
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
-        onClickTitle: this.onClickTitle,
-        onClickButton: this.onClickButton
-
+        tools: this.previousHistorySource && this.currentHistorySource ? this.menuToolsMode2 : this.menuToolsMode1,
+        onClickMain: this.onClickMain.bind(this),
+        onClickTabs: this.onClickTabs.bind(this),
+        onClickTools: this.onClickTools.bind(this),
+        onClickTitle: this.onClickTitle.bind(this),
     }
+
 
     public onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         this._onServiceClick(visible, reinit, el)
     }
-
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (!visible) {
@@ -175,7 +194,7 @@ export class ServiceSource100554 extends ServiceBase {
             return;
         }
         await this.initMonaco();
-        if (this.menu.setIconActive) this.menu.setIconActive('icTs');
+        if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icTs);
         this.updatedMSizeEditor();
 
         if (this.editorEl) {
@@ -209,21 +228,21 @@ export class ServiceSource100554 extends ServiceBase {
     public setEditorValueByLineTs(val: string, line: number) {
         if (!this._ed1) return false;
         if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.model) return false;
-        if (this.menu.setIconActive) this.menu.setIconActive('icTs');
+        if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icTs);
         this.setValueInModelInSpecificLine(val, line);
     }
 
     public setEditorValueByLineHtml(val: string, line: number) {
         if (!this._ed1) return false;
         if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.model) return false;
-        if (this.menu.setIconActive) this.menu.setIconActive('icHTML');
+        if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icHTML);
         this.setValueInModelInSpecificLine(val, line);
     }
 
     public replaceEditorLineHTML(val: string, line: number) {
         if (!this._ed1) return false;
         if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.model) return false;
-        if (this.menu.setIconActive) this.menu.setIconActive('icHTML');
+        if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icHTML);
         this.replaceLineValueInModelInSpecificLine(val, line);
     }
 
@@ -367,26 +386,25 @@ export class ServiceSource100554 extends ServiceBase {
         if (this.viewState[keyViewState] && this.viewState[keyViewState][mode]) this._ed1.restoreViewState(this.viewState[keyViewState][mode]);
     }
 
-    private toogleHistory(): boolean {
-        this.isModeHistory = !this.isModeHistory;
+    private toogleHistory() {
         this.updatedMSizeEditor();
-        if (!this.isModeHistory) {
-            if (this.menu && this.menu.setIconActive) this.menu.setIconActive(this.mode);
+        this.isModeHistory = this.menu.tools.btHistory.selected === 1;
+        if (!this.isModeHistory && this.menu.setTabActive) {
+            this.menu.setTabActive(EToolsSource[this.mode]);
         } else {
             this.getHistories();
         }
-        return !this.isModeHistory;
     }
 
-    private toogleHistoryImmediatte(): boolean {
-        this.isModeHistoryImmediatte = !this.isModeHistoryImmediatte;
+    private toogleHistoryImmediatte() {
         this.updatedMSizeEditor();
-        if (!this.isModeHistoryImmediatte) {
-            if (this.menu && this.menu.setIconActive) this.menu.setIconActive(this.mode);
+        this.isModeHistoryImmediatte = this.menu.tools.isModeHistoryImmediatte.selected === 1;
+
+        if (!this.isModeHistoryImmediatte && this.menu.setTabActive) {
+            this.menu.setTabActive(EToolsSource[this.mode]);
         } else {
             this.getHistoriesImmediatte();
         }
-        return !this.isModeHistoryImmediatte;
     }
 
     private async getHistoriesImmediatte() {
@@ -441,16 +459,16 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private openRepo() {
-        if (!this.menu.lastIcon) return false;
+        if (this.menu.tabs.selected === undefined) return false;
         if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return false;
 
         const { shortName, project } = this.activeModels.ts.storFile;
         const obj: { [key: string]: string } = {
-            icTs: '.ts',
-            icHTML: '.html',
-            icStyle: '.less',
+            0: '.ts',
+            1: '.html',
+            2: '.less',
         };
-        const ext = obj[this.menu.lastIcon];
+        const ext = obj[this.menu.tabs.selected];
         const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
         const file = mls.stor.files[keyToFile];
         if (!file) {
@@ -486,17 +504,17 @@ export class ServiceSource100554 extends ServiceBase {
         scr.id = i2.replace('/', '');
         scr.src = i2;
         div.appendChild(scr);
-        const obj = {
-            icTs: '.ts',
-            icHTML: '.html',
-            icStyle: '.less',
+        const obj: { [key: number]: string } = {
+            0: '.ts',
+            1: '.html',
+            2: '.less',
         };
 
         const wc = document.createElement('mls-history-list-100554');
         wc.setAttribute('project', project.toString());
         wc.setAttribute('shortName', shortName);
         wc.setAttribute('level', '2');
-        if (this.menu.lastIcon) wc.setAttribute('extension', (obj as any)[this.menu.lastIcon]);
+        if (this.menu.tabs.selected !== undefined) wc.setAttribute('extension', obj[this.menu.tabs.selected]);
         wc.setAttribute('position', this.position);
         div.appendChild(wc);
         if (this.menu.setMode) this.menu.setMode('page', div);
@@ -1164,7 +1182,7 @@ export class ServiceSource100554 extends ServiceBase {
         const addEventsEditor = () => {
             if (!this._ed1) return;
             this._ed1.onDidFocusEditorWidget(() => {
-                if (this.menu.lastIcon === 'icHTML') return;
+                if (this.menu.tabs.selected === EToolsSource.icHTML) return;
                 mls.editor.setActiveInstance(this.level, this.position);
             });
 
@@ -1177,7 +1195,7 @@ export class ServiceSource100554 extends ServiceBase {
                 if (!this._ed1) return;
                 const model = this._ed1.getModel();
 
-                if (this.menu.lastIcon === 'icStyle') {
+                if (this.menu.tabs.selected === EToolsSource.icStyle) {
                     const position = e.position;
                     const { lineNumber } = position;
                     const isReadOnlyArea = this.isReadOnlyArea(lineNumber);
@@ -1191,7 +1209,7 @@ export class ServiceSource100554 extends ServiceBase {
                     return;
                 }
 
-                if (!this._ed1 || this.menu.lastIcon !== 'icHTML') return;
+                if (!this._ed1 || this.menu.tabs.selected !== EToolsSource.icHTML) return;
                 const position = e.position;
                 if (!model) return;
 
@@ -1915,20 +1933,20 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         this.editorHistoryEl?.setAttribute('msize', this.msize);
     }
     private toogleIconsError() {
-        if (!this.menu || !this.menu.toggleErrorIcon || !this.activeModels) return;
-        if (this.activeModels.html && this.activeModels.html.storFile) this.menu.toggleErrorIcon('icHTML', this.activeModels.html.storFile.hasError);
-        if (this.activeModels.ts && this.activeModels.ts.storFile) this.menu.toggleErrorIcon('icTs', this.activeModels.ts.storFile.hasError);
-        if (this.activeModels.style && this.activeModels.style.storFile) this.menu.toggleErrorIcon('icStyle', this.activeModels.style.storFile.hasError);
+        if (!this.menu || !this.menu.toggleErrorTab || !this.activeModels) return;
+        if (this.activeModels.html && this.activeModels.html.storFile) this.menu.toggleErrorTab(EToolsSource.icHTML, this.activeModels.html.storFile.hasError);
+        if (this.activeModels.ts && this.activeModels.ts.storFile) this.menu.toggleErrorTab(EToolsSource.icTs, this.activeModels.ts.storFile.hasError);
+        if (this.activeModels.style && this.activeModels.style.storFile) this.menu.toggleErrorTab(EToolsSource.icStyle, this.activeModels.style.storFile.hasError);
     }
 
-    private changeMode(mode: IModes) {
-        if (!this.menu || !this.menu.setIconActive || !this.menu.selectButton || this.mode === mode) return;
+    private changeMode(mode: IModes | IModesH) {
+        if (!this.menu || !this.menu.setTabActive || !this.menu.selectTool || this.mode === mode) return;
         if (mode.startsWith('ic')) {
-            if (this.isModeHistory) this.menu.selectButton('btHistory');
-            if (this.isModeHistoryImmediatte) this.menu.selectButton('btHistoryImmediatte');
-            this.menu.setIconActive(mode);
+            if (this.isModeHistory) this.menu.selectTool('btHistory');
+            if (this.isModeHistoryImmediatte) this.menu.selectTool('btHistoryImmediatte');
+            this.menu.setTabActive(EToolsSource[mode as IModes]);
         } else {
-            this.menu.selectButton(mode);
+            this.menu.selectTool(mode);
         }
     }
 
@@ -1947,10 +1965,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         if (_key !== `${keyState}.selectedMode`) {
             if (this.previousHistorySource && this.currentHistorySource) {
-                this.menu.buttons = this.menuButtonsMode2;
+                this.menu.tools = this.menuToolsMode2;
                 if (this.menu.refresh) this.menu.refresh();
             } else {
-                this.menu.buttons = this.menuButtonsMode1;
+                this.menu.tools = this.menuToolsMode1;
                 if (this.menu.refresh) this.menu.refresh();
             }
         }
@@ -2123,7 +2141,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             let ret = '';
             if (!mls.actual[2] || !(mls.actual[2] as any)[this.position]) return ret;
             const actual = (mls.actual[2] as any)[this.position];
-            const ext = this.menu.lastIcon === 'icTs' ? '.ts' : '.html';
+            const ext = this.menu.tabs.selected === EToolsSource.icTs ? '.ts' : '.html';
             if (!actual) return ret;
             ret = mls.stor.getKeyToFiles(actual.project, 2, actual.shortName, actual.folder, ext);
             return ret;
@@ -2170,7 +2188,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private selectLineinHTML(line: number, origin: 'preview' | 'editor') {
-        if (this.menu.lastIcon !== 'icHTML' || !this._ed1) return;
+        if (this.menu.tabs.selected !== EToolsSource.icHTML || !this._ed1) return;
         this.lastOrigin = origin;
         if (origin === 'editor') return;
         this.goToLine(line);
@@ -2204,9 +2222,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (isExistEVentInHTML) {
 
             const line = this.searchLineByStringTs(nameFc);
-            if (line && this.menu.setIconActive) {
+            if (line && this.menu.setTabActive) {
                 isExistEVentInTS = true;
-                this.menu.setIconActive('icTs');
+                this.menu.setTabActive(EToolsSource.icTs);
                 this.goToLine(line);
             }
 
@@ -2237,9 +2255,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         if (isExistEventInHTML) {
             const line = this.searchLineByStringTs(nameFc);
-            if (line && this.menu.setIconActive) {
+            if (line && this.menu.setTabActive) {
                 isExistEventInTS = true;
-                this.menu.setIconActive('icTs');
+                this.menu.setTabActive(EToolsSource.icTs);
                 this.goToLine(line);
             }
         }
@@ -2298,7 +2316,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
 
         if (!this._ed1) return;
-        if (this.menu.setIconActive) this.menu.setIconActive('icHTML');
+        if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icHTML);
+
         if (!this.activeModels.html.model) return;
         this.activeModels.html.model.setValue(html.innerHTML);
 
@@ -2348,6 +2367,16 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
 }
 
+enum EToolsHistorie {
+    'btHistory' = 0,
+    'btHistoryImmediatte' = 1,
+}
+
+enum EToolsSource {
+    'icTs' = 0,
+    'icHTML' = 1,
+    'icStyle' = 2
+}
 
 interface IViewState {
     [file: string]: IViewStates
@@ -2360,5 +2389,7 @@ interface IViewStates {
 }
 
 type IModes = 'icTs' | 'icStyle' | 'icHTML';
+type IModesH = 'btHistory' | 'btHistoryImmediatte';
+
 
 

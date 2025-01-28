@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IMenu, IServiceMenu, IOptions } from './_100554_serviceBase';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { IWCDParams } from '_100554_serviceIca'
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
@@ -17,7 +17,9 @@ const message_pt = {
     theme: 'Tema',
     variations: 'Linguagem',
     editStyle: 'Editar estilo',
-    pause: 'Parar preview',
+    pause: 'Preview Pausado',
+    run: ' Preview em execução',
+
     dark: ' escuro',
     light: 'claro',
     help: 'Ajuda',
@@ -29,7 +31,8 @@ const message_en = {
     theme: 'Theme',
     variations: 'Language',
     editStyle: 'Edit style',
-    pause: 'Pause preview',
+    pause: 'Preview Paused',
+    run: 'Running preview',
     dark: 'dark',
     light: 'light',
     help: 'Help',
@@ -58,7 +61,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
 
-    private lastMode: string = 'icPreviewD';
+    private lastMode: number = EPreview.icPreviewD;
 
     private lastModePreview: string = 'desktop';
 
@@ -77,8 +80,6 @@ export class ServicePreview100554 extends ServiceBase {
     private monacoeditor: HTMLElement | undefined;
 
     private languages: ILanguage = {}
-
-    private levels = [1, 2, 3, 4, 5, 6, 7];
 
     private timeEvent: number = -1;
 
@@ -103,81 +104,114 @@ export class ServicePreview100554 extends ServiceBase {
         level: [1, 2, 3, 4, 5, 6, 7]
     }
 
-    public onClickLink = (op: string): boolean => {
-        if (op === 'opAboutWCD') return this.opAboutWCD();
-        if (op === 'opResultHTML') return this.showEditorHTML();
-        if (op === 'opResultJS') return this.showResultJS();
-
-        return false;
+    public onClickMain(op: string) {
+        if (op === 'opAboutWCD') this.opAboutWCD();
+        else if (op === 'opResultHTML') this.showEditorHTML();
+        else if (op === 'opResultJS') this.showResultJS();
     }
 
-    public onClickIcon = (op: string): void => {
+    public onClickTabs(index: number) {
         this._ed1?.updateOptions({ readOnly: false });
-        if (op === 'icPreviewD') this.preview('desktop');
-        if (op === 'icPreviewM') this.preview('mobile');
-        this.lastMode = op;
+        if (index === EPreview.icPreviewD) this.preview('desktop');
+        if (index === EPreview.icPreviewM) this.preview('mobile');
+        this.lastMode = index;
     }
 
-    public onClickButton = (op: string, opMenu?: string): boolean => {
+    public onClickTools(op: string) {
 
-        if (op === 'btWatch') return this.toogleWatch();
-        if (op === 'btConsole') return this.toogleConsole();
-        if (op === 'btHelp') return this.onHelpClick();
-        if (op === 'btTheme') return this.onBtThemeClick();
-
-        if (['btVariations', 'btTokens'].includes(op)) {
-            this.actButton(op, opMenu);
-            return true;
-        }
+        if (op === 'watchPreview') this.toogleWatch();
+        else if (op === 'devConsole') this.toogleConsole();
+        else if (op === 'help') this.onHelpClick();
+        else if (op === 'darkLight') this.onBtDarkLightClick();
+        else if (['languages', 'theme'].includes(op)) { this.actButton(op); }
         else throw new Error('Invalid option')
     }
 
-    public async actButton(op: string, opMenu?: string) {
+    public async actButton(op: string) {
         await this.fireWcdChanges();
-        if (op === 'btVariations') return this.onBtVariationsClick(opMenu);
-        if (op === 'btTokens') return this.onBtTokensClick(opMenu);
+        if (op === 'languages') return this.onBtLanguageClick();
+        if (op === 'theme') return this.onBtThemeClick();
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: 'Preview',
-        actions: {
+        main: {
             opAboutWCD: 'About this WCD',
             opResultHTML: 'Result HTML',
             opResultJS: 'Result Javascript',
         },
-        icons: {
-            icPreviewD: 'Desktop;f390',
-            icPreviewM: 'Mobile;f3cf'
+        tabs: {
+            group: 'Mode',
+            type: 'onlyicon',
+            selected: 0,
+            options: [
+                { text: 'Desktop', icon: 'f390' },
+                { text: 'Mobile', icon: 'f3cf' },
+            ]
         },
-        buttons: {
-            btTheme: `${this.msg.light};${this.msg.dark};f185;f186`,
-            btTokens: this.msg.theme + ';f53f:menu:Default,',
-            btVariations: this.msg.variations + ';f1ab:menu-flags:Default,Portugues,Espanhol,Russo',
-            btWatch: this.msg.pause + ';Update Preview;f04c;f04b',
-            btConsole: `${this.msg.consoleA};${this.msg.consoleD};f120;f410`,
-            btHelp: this.msg.help + ';f059',
-        },
-        actionDefault: '', // call after close icon clicked
-        iconDefault: 'icPreviewD',
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
-        onClickButton: this.onClickButton
+        tools: {
+            darkLight: {
+                type: 'cycle',
+                selected: 0,
+                options: [
+                    { text: this.msg.light, icon: 'f185' },
+                    { text: this.msg.dark, icon: 'f186' },
+                ]
+            },
+            theme: {
+                type: 'dropdown',
+                icon: 'f53f',
+                selected: 0,
+                options: []
+            },
+            languages: {
+                type: 'dropdown',
+                selected: 0,
+                options: []
+            },
+            watchPreview: {
+                type: 'cycle',
+                selected: 0,
+                options: [
+                    { text: this.msg.run, icon: 'f04c' },
+                    { text: this.msg.pause, icon: 'f04b' },
+                ]
+            },
+            devConsole: {
+                type: 'cycle',
+                selected: 0,
+                options: [
+                    { text: this.msg.consoleA, icon: 'f120' },
+                    { text: this.msg.consoleD, icon: 'f410' },
+                ]
+            },
+            help: {
+                type: 'link',
+                options: [
+                    { text: this.msg.help, icon: 'f059' },
+                ]
+            },
 
+        },
+        onClickMain: this.onClickMain.bind(this),
+        onClickTabs: this.onClickTabs.bind(this),
+        onClickTools: this.onClickTools.bind(this),
     }
 
     public onServiceClick(visible: boolean, reinit: boolean) {
-        if (visible && !reinit && this.menu.setIconActive) {
-            this.menu.setIconActive(this.lastMode);
 
-        } else if (visible && reinit && this.elPreview && this.menu.setIconActive && this.lastLevel == this.level) {
-            this.menu.setIconActive(this.lastMode);
+        if (this.menu.setTabActive) this.menu.setTabActive(this.lastMode);
 
-        } if (this.elPreview) {
+        // if (visible && !reinit && this.menu.setTabActive) {
+        //     this.menu.setTabActive(this.lastMode);
+        // } else if (visible && reinit && this.elPreview && this.menu.setTabActive && this.lastLevel == this.level) {
+        //     this.menu.setTabActive(this.lastMode);
 
+        // }
+
+        if (this.elPreview) {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
-
         } else {
             this.onReloader();
         }
@@ -199,7 +233,6 @@ export class ServicePreview100554 extends ServiceBase {
     private onReloader(): void {
         clearTimeout(this.timeEvent);
         this.timeEvent = setTimeout(async () => {
-            //this.onServiceClick(true, false);
             this.preview(this.lastModePreview);
             mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
         }, 500);
@@ -279,14 +312,14 @@ export class ServicePreview100554 extends ServiceBase {
     async firstUpdated() {
         this.createEditor();
         const darkOrLight = this.getDarkLight();
-        if (darkOrLight === 'dark' && this.menu.selectButton) this.menu.selectButton('btTheme');
+        if (darkOrLight === 'dark' && this.menu.selectTool) this.menu.selectTool('darkLight');
         this.setLanguages();
         this.setTheme();
         this.configureButtonsRight(false);
     }
 
     private configureButtonsRight(enabled: boolean) {
-        const buttonsR = this.nav3Service.querySelector('mls-nav3-100529 .buttons-right') as HTMLElement;
+        const buttonsR = this.nav3Service?.querySelector('mls-nav3-100529 .buttons-right') as HTMLElement;
         if (!buttonsR) return;
         buttonsR.style.opacity = enabled ? '1' : '.2';
         buttonsR.style.pointerEvents = enabled ? 'all' : 'none';
@@ -307,14 +340,14 @@ export class ServicePreview100554 extends ServiceBase {
 
     private opAboutWCD() {
 
-        if (!this.menu.setMode) return false
+        if (!this.menu.setMode) return;
         const el = document.createElement("div") as HTMLElement;
         el.style.padding = '1rem';
 
         if (!window['preview'] || !window['preview'].iframe || !window['preview'].iframe.contentWindow || !(window['preview'].iframe.contentWindow as any).wcdState) {
             el.innerHTML = `<h3>Not found any information about this page</h3>`;
             this.menu.setMode('page', el);
-            return true;
+            return;
         };
 
         const info = (window['preview'].iframe.contentWindow as any).wcdState;
@@ -352,7 +385,7 @@ export class ServicePreview100554 extends ServiceBase {
         el.innerHTML = txt;
 
         this.menu.setMode('page', el);
-        return true;
+        return;
 
     }
 
@@ -389,9 +422,10 @@ export class ServicePreview100554 extends ServiceBase {
         return htmlEl;
     }
 
-    private onBtVariationsClick(opMenu: string | undefined) {
+    private onBtLanguageClick() {
 
-        if (!opMenu) return true;
+        if (this.menu.tools.languages.selected === undefined) return;
+        const opMenu = this.menu.tools.languages.options[this.menu.tools.languages.selected].text;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         if (htmlEl) htmlEl.lang = this.languages[opMenu].acronym;
         this.lang = this.languages[opMenu].acronym;
@@ -405,7 +439,7 @@ export class ServicePreview100554 extends ServiceBase {
         return true;
     }
 
-    private onBtThemeClick() {
+    private onBtDarkLightClick() {
         this.light = !this.light;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         if (htmlEl) {
@@ -416,41 +450,29 @@ export class ServicePreview100554 extends ServiceBase {
         return this.light;
     }
 
-    private onBtTokensClick(opMenu: string | undefined) {
-        if (!opMenu) return true;
+    private onBtThemeClick() {
+        if (this.menu.tools.theme.selected === undefined) return;
+        const opMenu = this.menu.tools.theme.options[this.menu.tools.theme.selected].text;
         this.actualTheme = opMenu;
         this.onStyleChanged();
         return true;
     }
 
-    private toogleWatch(): boolean {
-
+    private toogleWatch() {
         this.elPreview = undefined;
-        this.watch = !this.watch;
-        if (this.watch) {
-            this.onReloader();
-        }
-        return this.watch;
+        this.watch = this.menu.tools.watchPreview.selected === 0;
+        if (this.watch) this.onReloader();
     }
 
-    private toogleConsole(): boolean {
-        this.enabledConsole = !this.enabledConsole;
+    private toogleConsole() {
+        this.enabledConsole = this.menu.tools.devConsole.selected === 1;
         const collabConsole = this.parentElement?.querySelector('collab-console-100554') as HTMLElement;
-        if (!collabConsole) return this.enabledConsole;
+        if (!collabConsole) return;
         collabConsole.style.display = this.enabledConsole ? 'block' : 'none';
-        return !this.enabledConsole;
     }
 
-    private onHelpClick(): boolean {
+    private onHelpClick() {
         this.openService('_100554_servicePage', 'left', 3);
-        // const params: IWCDParams = {
-        //     level: 4,
-        //     op: 'AboutICA',
-        //     position: 'left',
-        //     wdcPath: '',
-        // }
-        // mls.events.fire([4], ['WCDEvent'] as any, JSON.stringify(params), 300);
-        return true;
     }
 
 
@@ -500,18 +522,18 @@ export class ServicePreview100554 extends ServiceBase {
         const { project } = mls.actual[5];
         if (!project) {
             this.languages = {
-                'English_en': { acronym: 'en', name: 'English' }
+                'English': { acronym: 'en', name: 'English' }
             }
         } else {
             const config = await getConfigProject(project);
 
             if (!config || !config.languages || config.languages.length === 0) {
                 this.languages = {
-                    'English_en': { acronym: 'en', name: 'English' }
+                    'English': { acronym: 'en', name: 'English' }
                 }
             } else {
                 config.languages.forEach((entry, index) => {
-                    this.languages[`${entry.name}_${entry.language}`] = {
+                    this.languages[`${entry.name}`] = {
                         acronym: entry.language,
                         name: entry.name,
                     }
@@ -519,8 +541,16 @@ export class ServicePreview100554 extends ServiceBase {
             }
         }
 
+        const languagesOptions = Object.keys(this.languages).map((lg) => {
+            const obj = this.languages[lg];
+            const newOpt: IOptions = {
+                text: obj.name,
+                class: `collab-flags ${obj.acronym}`
+            }
+            return newOpt;
+        });
 
-        if (this.menu.buttons) this.menu.buttons.btVariations = this.msg.variations + `;f1ab:menu-flags:${Object.keys(this.languages).join(',')}`;
+        if (this.menu.tools.languages) this.menu.tools.languages.options = languagesOptions;
         if (this.menu.refresh) this.menu.refresh();
     }
 
@@ -530,7 +560,14 @@ export class ServicePreview100554 extends ServiceBase {
         await this.ds.init();
         if (!this.ds || !this.ds.tokens) return;
         this.themes = Object.keys(this.ds.tokens.list);
-        if (this.menu.buttons) this.menu.buttons.btTokens = this.msg.theme + `;f53f:menu:${this.themes.join(',')}`;
+        const themesOptions = this.themes.map((th) => {
+            const newOpt: IOptions = {
+                text: th,
+            }
+            return newOpt;
+        });
+
+        if (this.menu.tools.theme) this.menu.tools.theme.options = themesOptions;
         if (this.menu.refresh) this.menu.refresh();
     }
 
@@ -637,3 +674,8 @@ export class ServicePreview100554 extends ServiceBase {
 interface ILanguage {
     [key: string]: { acronym: string, name: string }
 }
+
+enum EPreview {
+    'icPreviewD' = 0,
+    'icPreviewM' = 1
+}     

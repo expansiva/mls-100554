@@ -361,7 +361,7 @@ export type ICollabServiceClass = "separator-left" | "separator-right";
 
 export type ITitleClickCallBack = (title: string) => void | undefined;
 export type IMainClickCallBack = (value: string) => void | undefined;
-export type IToolsClickCallBack = (index: number) => void | undefined;
+export type IToolsClickCallBack = (value: string) => void | undefined;
 export type ITabsClickCallBack = (index: number) => void | undefined;
 export type TSetMode = (mode: TMode | null, page?: HTMLElement) => void;
 export type TGetLastMode = () => TMode;
@@ -414,7 +414,7 @@ export interface IServiceMenu {
 	setMenuActive?: (op: string) => void
 	setTabActive?: (index: number) => void,
 	toggleErrorTab?: (index: number, show: boolean) => void
-	selectButton?: (index: number) => void,
+	selectTool?: (op: string) => void,
 
 	mainDefault?: string,
 	lastMain?: string,
