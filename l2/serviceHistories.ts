@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -55,21 +55,21 @@ export class ServiceHistories100554 extends ServiceBase {
         level: [2, 5]
     }
 
-    public onClickLink = (op: string): boolean => {
-        if (op === 'opHistories') return this.showStart();
-        if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
+    public onClickMain(op: string) {
+        if (op === 'opHistories') this.showStart();
+        else if (this.menu.setMode) this.menu.setMode('initial');
+
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: 'Histories',
-        actions: {
+        main: {
             opHistories: 'Start',
         },
-        icons: {},
-        actionDefault: 'opHistories', // call after close icon clicked
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
+        tabs: {},
+        tools: {},
+        mainDefault: 'opHistories',
+        onClickMain: this.onClickMain.bind(this),
     }
 
     @query('mls-editor-100529')
