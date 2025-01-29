@@ -142,9 +142,6 @@ export class ServiceAim100554 extends ServiceBase {
                 { text: this.msg.tasks, icon: 'f0ae' },
                 { text: this.msg.docs, icon: 'f02d' },
                 { text: this.msg.add, icon: '2b' },
-
-
-                { text: 'Explore', icon: 'f542' },
             ]
         },
         tools: {},
