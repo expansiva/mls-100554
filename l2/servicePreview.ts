@@ -278,7 +278,12 @@ export class ServicePreview100554 extends ServiceBase {
             const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
             const storFileHTML = mls.stor.files[keyToFileInfo];
 
-            if (fileAction.action === 'open') this.setModel(storFileHTML);
+            if (fileAction.action === 'open') {
+                this.setModel(storFileHTML);
+                if (!this.watch && this.menu.selectTool) {
+                    this.menu.selectTool('watchPreview');
+                }
+            }
 
             if (mls.istrace) console.info('is preview repaint:' + this.watch);
             if (fileAction.action === 'open') {
