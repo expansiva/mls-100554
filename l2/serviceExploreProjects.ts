@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, queryAll, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import './_100554_pluginCreateNewProject'
 
 /// **collab_i18n_start**
@@ -120,7 +120,7 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceExploreProjects100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-    
+
     @property() projectCreated: boolean = false;
     @property() state: IServiceList = { history: [], orgs: [], projectSelected: undefined };
     @property() lastPrjId: string | null | undefined;
@@ -142,38 +142,37 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         level: [6]
     }
 
-    public onClickLink = (op: string): boolean => {
+    public onClickMain(op: string) {
         if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
     }
 
-    public onClickIcon = (op: string): void => {
-        this.activeTab = op;
+    public onClickTabs(index: number) {
+        this.activeTab = ETabs[index];
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: '',
-        actions: {
+        main: {},
+        tabs: {
+            group: 'Mode',
+            type: 'onlyicon',
+            selected: 0,
+            options: [
+                { text: 'My Projects', icon: 'e571' },
+                { text: 'Explore', icon: 'f542' },
+            ]
         },
-        icons: {
-            IMyProject: 'My Projects;e571',
-            IExplore: 'Explore;f542',
-        },
-        actionDefault: '', // call after close icon clicked
-        setMode: undefined, // child will set this
-        iconDefault: 'IMyProject',
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
-        getLastMode: undefined,
-        updateTitle: undefined
+        tools: {},
+        onClickMain: this.onClickMain.bind(this),
+        onClickTabs: this.onClickTabs.bind(this),
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
         if (this.lastPrjId && mls.actualLevel === 6 && visible) {
-            this.firedetail({ project: +this.lastPrjId, name: '', doSelect:true } as IInfoPrj)
+            this.firedetail({ project: +this.lastPrjId, name: '', doSelect: true } as IInfoPrj)
         }
-        
+
     }
 
     //----------EVENTS---------------------
@@ -201,7 +200,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang]
-        
+
         return html`
             ${this.renderContent()}
         `;
@@ -223,7 +222,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     renderMyProject() {
-        
+
         switch (this.currentScenario) {
             case 'select':
                 return html`
@@ -237,7 +236,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     renderSelectProject() {
-        
+
         this.getOrgsAndProjects();
         this.state.history = this.loadHistory();
         return html`
@@ -259,7 +258,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                 <div class="serviceListTitle">History</div>
                 <ul class="serviceListList">
                     ${this.state.history.map(
-                        (his) => html`
+            (his) => html`
                         <li class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} >
                             <div>
                                 <span>${his.name + ' (' + his.project.toString() + ')'}</span>
@@ -283,7 +282,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         return html`
             <div class="serviceListProjects">
                 ${this.state.orgs.map((org) => {
-                    return html`
+            return html`
                     <div class="serviceListTitle">${org.key}</div>
                     <ul class="serviceListList">
                         ${org.projects.map((prj) => html`
@@ -314,17 +313,17 @@ export class ServiceExploreProjects100554 extends ServiceBase {
             <plugin-create-new-project-100554>
             </plugin-create-new-project-100554>
         `
-        
+
     }
 
     //----------IMPLEMENTS------------------
 
-    private async firedetail(prj:IInfoPrj) {
+    private async firedetail(prj: IInfoPrj) {
 
         if (!prj.doSelect) return;
 
         localStorage.setItem('serviceDetail', '{"action":"open", "prj":' + prj.project + '}');
-        
+
         mls.events.fire(
             2 as any,
             'PluginDetails' as any,
@@ -502,7 +501,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
     private openExplore() {
         this.selectLevel(5)
-        mls.events.fire([5], ['ProjectSelected'], '');    
+        mls.events.fire([5], ['ProjectSelected'], '');
     }
 
     private setProjectActual(project: number) {
@@ -528,7 +527,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         await mls.stor.server.loadProjectInfoIfNeeded(project);
     }
 
-    
+
     private addOnHistory(item: IInfoPrj) {
         const indexInHistory = this.state.history.findIndex((his) => his.name === item.name && his.project === item.project);
         if (indexInHistory > -1) this.state.history.splice(indexInHistory, 1);
@@ -553,16 +552,11 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
 }
 
+enum ETabs {
+    'IMyProject' = 0,
+    'IExplore' = 1,
+}
 type IScenaries = 'details' | 'select' | 'add';
-
-interface IProjectSelectedParams {
-    emitter: 'left' | 'right',
-    value: number
-}
-
-export interface IProjectDetails {
-
-}
 
 interface IStateOrg {
     key: string,
@@ -572,10 +566,10 @@ interface IStateOrg {
     projects: IInfoPrj[]
 }
 
-interface IInfoPrj{
+interface IInfoPrj {
     project: number,
     name: string,
-    doSelect:boolean,
+    doSelect: boolean,
 }
 
 interface IServiceList {
@@ -587,7 +581,7 @@ interface IServiceList {
 interface IHistory {
     project: number,
     name: string,
-    doSelect:boolean,
+    doSelect: boolean,
 }
 interface IParamsEvent {
     emitter: 'right' | 'left',
