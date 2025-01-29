@@ -205,13 +205,10 @@ export class ServicePreviewView extends LitElement {
 
         if (!id || !this.shadowRoot) return undefined;
         const iframe = this.shadowRoot.querySelector('iframe');
-
         if (!iframe || !iframe.contentDocument) return undefined;
-
         const doc = iframe.contentDocument;
-
         let elements: Element[] = [];
-        // Function to traverse shadow DOM
+
         function traverseShadowRoot(element: Element) {
             if (element.tagName.toLowerCase().startsWith('ica')) {
                 elements.push(element);
@@ -265,8 +262,6 @@ export class ServicePreviewView extends LitElement {
         const { project, shortName } = this.models.style.storFile;
         const id = convertFileNameToTag(`_${project}_${shortName}`);
         const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
-
-        //if (oldStyle) oldStyle.remove();
         const newStyle = document.createElement('style');
         const newLess = await compileStyleUsingStorFile(shortName, project, this.actualtheme);
         if (!newLess) return;
@@ -494,9 +489,17 @@ export class ServicePreviewView extends LitElement {
         if (this.isService) {
             this.addFA(ifr);
             this.addTooltip(ifr);
+            this.addStyleMls(ifr);
             this.addNav3(ifr);
 
         }
+    }
+
+    private addStyleMls(ifr: HTMLIFrameElement) {
+        const styleMls = document.querySelector('style#mls-style');
+        if (!styleMls || !ifr || !ifr.contentDocument || !ifr.contentWindow) return;
+        const newStyle = styleMls.cloneNode(true);
+        ifr.contentDocument.head.appendChild(newStyle);
     }
 
     private addTooltip(ifr: HTMLIFrameElement) {
@@ -520,14 +523,22 @@ export class ServicePreviewView extends LitElement {
 
     private addNav3(ifr: HTMLIFrameElement) {
 
-        if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
-        if (!ifr.contentWindow.customElements.get('mls-nav3-100529')) ifr.contentWindow.customElements.define('mls-nav3-100529', (window as any)['l4_html']._100529_mls_nav3);
-        if (!ifr.contentWindow.customElements.get('collab-nav-3')) ifr.contentWindow.customElements.define('collab-nav-3', (window as any)['l4_html']._100529_collab_nav_3);
+        const wcToAdd = [
+            { name: '_100529_collab_nav_3', tag: 'collab-nav-3' },
+            { name: '_100529_collabNav3Menu', tag: 'collab-nav-3-menu' },
+            { name: '_100529_collab_nav_3_tools_link', tag: 'collab-nav-3-menu-tools-link' },
+            { name: '_100529_collab_nav_3_tools_cycle', tag: 'collab-nav-3-menu-tools-cycle' },
+            { name: '_100529_collab_nav_3_tools_dropdown', tag: 'collab-nav-3-menu-tools-dropdown' },
+        ]
 
-        this.waitForComponents(ifr.contentWindow, [
-            'mls-nav3-100529',
-            'collab-nav-3',
-        ]).then(async () => {
+        if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
+        wcToAdd.forEach((wc) => {
+            if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
+            if (!ifr.contentWindow.customElements.get(wc.tag)) ifr.contentWindow.customElements.define(wc.tag, (window as any)['l4_html'][wc.name]);
+        });
+
+        const allTags = wcToAdd.map((item) => item.tag);
+        this.waitForComponents(ifr.contentWindow, allTags).then(async () => {
 
             if (!ifr.contentDocument || !this.file) return;
 
@@ -556,7 +567,7 @@ export class ServicePreviewView extends LitElement {
             collabNav.style.display = 'block';
 
             (collabNavService as any).mlsWidget = instance;
-            const mlsnav3 = document.createElement('mls-nav3-100529');
+            const mlsnav3 = document.createElement('collab-nav-3-menu');
             mlsnav3.setAttribute('is-mls2', 'true');
             mlsnav3.setAttribute('toolbarposition', instance.position || 'right');
 
@@ -568,21 +579,6 @@ export class ServicePreviewView extends LitElement {
 
         });
 
-        // ifr.contentWindow.customElements.whenDefined('mls-nav3-100529').then(() => {
-        //     if (!ifr.contentDocument) return;
-        //     const collabNav = document.createElement('collab-nav');
-        //     collabNav.style.position = 'relative';
-        //     collabNav.style.width = '100%';
-        //     collabNav.style.display = 'block';
-
-        //     (collabNav as any)['mlsWidget'] = instance;
-        //     const mlsnav3 = document.createElement('mls-nav3-100529');
-        //     mlsnav3.setAttribute('is-mls2', 'true');
-        //     mlsnav3.setAttribute('toolbarposition', instance.position || 'right');
-
-        //     collabNav.appendChild(mlsnav3);
-        //     ifr.contentDocument.body.insertBefore(collabNav, instance);
-        // });
     }
 
     private addFA(ifr: HTMLIFrameElement) {
