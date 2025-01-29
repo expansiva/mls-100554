@@ -2,7 +2,7 @@
 
 import { html, css, unsafeHTML, render, styleMap, repeat, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu, IToolbarChangeEvent } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu, IToolbarChangeEvent } from './_100554_serviceBase';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { tasks, readTasks, getUserConfigs, saveUserConfigs, IAimColums } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
@@ -13,9 +13,9 @@ import './_100554_aimChatRooms';
 import './_100554_aimChatMessages';
 import './_100554_aimChatMessage';
 
- 
+
 /// **collab_i18n_start** 
-const message_pt = { 
+const message_pt = {
     loading: 'Carregando...',
     tasks: 'Tasks',
     titleTasks: 'Todas as tarefas de AI, últimas',
@@ -84,8 +84,7 @@ export class ServiceAim100554 extends ServiceBase {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-
-        if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
+        if (this.menu.setTabActive) this.menu.setTabActive(ETabs[this.activeTab ]);
         if (this.actionToOpen) this.activeTab = 'Add'
         switch (this.activeTab) {
             case 'Tasks':
@@ -120,37 +119,39 @@ export class ServiceAim100554 extends ServiceBase {
 
     get invertedPosition() { return this.position === 'left' ? 'right' : 'left' };
 
-    public onClickLink = (op: string): boolean => {
-        if (op === 'opColumns') return this.showConfigColumns();
-        if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
+    public onClickMain(op: string) {
+        if (op === 'opColumns') this.showConfigColumns();
+        else if (this.menu.setMode) this.menu.setMode('initial');
     }
 
-    public onClickIcon = (op: string): void => {
-        if (this.activeTab === op) return;
-        this.activeTab = op as ITabType;
+    public onClickTabs(index: number) {
+        if (this.activeTab === ETabs[index]) return;
+        this.activeTab = ETabs[index] as ITabType;
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: '',
-        actions: {
-            opColumns: 'Columns',
+        main: {},
+        tabs: {
+            group: 'Mode',
+            type: 'onlyicon',
+            selected: ETabs.Chats,
+            options: [
+                { text: this.msg.project, icon: 'f542' },
+                { text: this.msg.chats, icon: 'f007' },
+                { text: this.msg.tasks, icon: 'f0ae' },
+                { text: this.msg.docs, icon: 'f02d' },
+                { text: this.msg.add, icon: '2b' },
+
+
+                { text: 'Explore', icon: 'f542' },
+            ]
         },
-        icons: {
-            Project: `${this.msg.project};f542`,
-            Chats: `${this.msg.chats};f007`,
-            Tasks: `${this.msg.tasks};f0ae`, // f560
-            Docs: `${this.msg.docs};f02d;`,
-            Add: `${this.msg.add};2b`,
-        },
-        actionDefault: '', // call after close icon clicked
-        iconDefault: 'Chats',
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
-        getLastMode: undefined,
-        updateTitle: undefined
+        tools: {},
+        onClickMain: this.onClickMain.bind(this),
+        onClickTabs: this.onClickTabs.bind(this),
     }
+
 
     async onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (!visible || !reinit) return;
@@ -570,5 +571,13 @@ export class ServiceAim100554 extends ServiceBase {
     }
 }
 
+enum ETabs {
+    'Project' = 0,
+    'Chats' = 1,
+    'Tasks' = 2,
+    'Docs' = 3,
+    'Add' = 4,
+    'Loading' = 5,
+}
 
 type ITabType = 'Tasks' | 'Chats' | 'Project' | 'Add' | 'Docs' | 'Loading';
