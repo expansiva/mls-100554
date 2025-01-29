@@ -2,7 +2,7 @@
 
 import { html, css, repeat } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from './_100554_serviceBase';
 import { collab_user } from './_100554_collabIcons';
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
@@ -42,6 +42,14 @@ export class ServiceProject100554 extends ServiceBase {
 
     @queryAll('.plugin-container') allContainers: HTMLDivElement[] | undefined;
 
+    private lastActiveTabByLevel: Record<number, number> = {
+        5: ETabs.Explore,
+        4: ETabs.Explore,
+        3: ETabs.Explore,
+        2: ETabs.Explore,
+        1: ETabs.Explore,
+    }
+
     public details: IService = {
         icon: '&#xf542',
         state: 'foreground',
@@ -52,61 +60,56 @@ export class ServiceProject100554 extends ServiceBase {
         level: [5]
     }
 
-    public onClickLink = (op: string): boolean => {
+    public onClickMain(op: string) {
+
         if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
     }
 
-    public onClickIcon = (op: string): void => {
-        this.activeTab = op as IScenery;
+    public onClickTabs(index: number): void {
+        this.activeTab = ETabs[index] as IScenery;
     }
 
-    getMenuIconsByLevel(): Record<string, string> {
-        if (!this.level) return {};
+    private getMenuTabsByLevel(): IOptions[] {
+        if (!this.level) return [];
         if (!this.position) {
-            return {
-                Explore: 'Explore;e521',
-            };
+            return [
+                { text: 'Explore', icon: 'e521' }
+            ]
         }
 
         if (this.level === 5) {
-            return {
-                Explore: 'Explore;e521',
-                ShowCase: 'ShowCase;f5da',
-                Admin: 'Admin;f508',
-                Plugins: 'Plugins;f1e6',
-            };
+            return [
+                { text: 'Explore', icon: 'e521' },
+                { text: 'ShowCase', icon: 'f5da' },
+                { text: 'Admin', icon: 'f508' },
+                { text: 'Plugins', icon: 'f1e6' },
+            ]
         }
         if (this.level === 2 && this.position === 'right') {
-            return {
-                Explore: 'Explore;e521',
-            };
+            return [
+                { text: 'Explore', icon: 'e521' }
+            ]
         }
-        return {
-            Explore: 'Explore;e521',
-            ShowCase: 'ShowCase;f5da',
-        };
+        return [
+            { text: 'Explore', icon: 'e521' },
+            { text: 'ShowCase', icon: 'f5da' }
+        ]
     }
 
-
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: '',
-        actions: {
+        main: {},
+        tabs: {
+            group: 'Mode',
+            type: 'full',
+            selected: 0,
+            options: this.getMenuTabsByLevel()
         },
-        icons: this.getMenuIconsByLevel(),
-        actionDefault: '', // call after close icon clicked
-        iconDefault: 'Explore',
-        iconMenuType: 'full',
-        setMode: undefined,
-        updateTitle: undefined,
-        getLastMode: undefined,
-        lastIcon: undefined,
-        setIconActive: undefined,
-        onClickLink: this.onClickLink,
-        onClickIcon: this.onClickIcon,
-
-
+        tools: {},
+        onClickMain: this.onClickMain.bind(this),
+        onClickTabs: this.onClickTabs.bind(this),
     }
+
 
     private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
 
@@ -123,7 +126,7 @@ export class ServiceProject100554 extends ServiceBase {
         super.updated(changedProperties);
         if (changedProperties.has('activeTab') && !!changedProperties.get('activeTab')) {
 
-            if (this.menu.setIconActive) this.menu.setIconActive(this.activeTab);
+            if (this.menu.setTabActive) this.menu.setTabActive(ETabs[this.activeTab]);
             if (this.activeTab === 'Explore') {
                 await this.updateComplete;
                 if (this.firstDetails) this.firstDetails.click();
@@ -161,13 +164,14 @@ export class ServiceProject100554 extends ServiceBase {
         });
     }
 
-
-    updateIconsByLevel() {
-        if (!this.menu || !this.menu.refresh)
-            return;
-        const menu = this.getMenuIconsByLevel();
-        this.menu.icons = menu;
+    private updateIconsByLevel() {
+        if (!this.menu || !this.menu.refresh || !this.menu.tabs || !this.menu.setTabActive) return;
+        const menu = this.getMenuTabsByLevel();
+        this.menu.tabs.options = menu;
         this.menu.refresh();
+        if (this.menu.setTabActive) {
+            this.menu.setTabActive(this.lastActiveTabByLevel[this.level]);
+        }
     }
 
     private renderContent() {
@@ -403,6 +407,13 @@ export class ServiceProject100554 extends ServiceBase {
     }
 }
 
+enum ETabs {
+    'Explore' = 0,
+    'ShowCase' = 1,
+    'Admin' = 2,
+    'Plugins' = 3,
+
+}
 type IScenery = 'Explore' | 'ShowCase' | 'Admin' | 'Plugins'
 
 interface Plugin {
