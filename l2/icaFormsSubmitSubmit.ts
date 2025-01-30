@@ -19,6 +19,10 @@ export abstract class IcaFormsSubmitSubmit extends IcaLitElementBase {
         ]
     }
 
+    public setDefaultAttributes() {
+        this.setAttribute('text', `button`);
+    }
+
     public changeStateHtml(html: string): void {
         console.info(html);
     }

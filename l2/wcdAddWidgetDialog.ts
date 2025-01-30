@@ -118,9 +118,9 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
     renderItemGallery(item: IWidgets, idx: number) {
 
         return html`
-            <gallery-item @click="${this.add}" .info=${item}>
+            <gallery-item @click="${this.add}" .info=${item} title="${item.nome}">
                 ${unsafeHTML(item.svg)}
-                ${item.nome}
+                <span>${item.nome}</span>
             </gallery-item>
         `;
 
@@ -278,7 +278,10 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
 
     private filter(filter: string = '') {
 
-        const f = this.allWidgets.filter((f) => f.nome.toLowerCase().indexOf(filter) >= 0);
+        const f = this.allWidgets.filter((f) => {
+            if (filter === '') return f.priority === 0;
+            return f.nome.toLowerCase().indexOf(filter) >= 0
+        });
         this.listWidgets = f;
 
     }
@@ -362,7 +365,8 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
 
             const moduleClass = await import('/' + item.widget);
             const [cls] = Object.keys(moduleClass);
-            const extendName = Object.getPrototypeOf((moduleClass)[cls]).name
+            let extendName = Object.getPrototypeOf((moduleClass)[cls]).name as string;
+            if (extendName.endsWith('Base')) extendName = extendName.replace('Base', '');
 
             if (!extendName) return;
 
