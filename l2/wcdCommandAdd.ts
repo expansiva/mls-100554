@@ -8,7 +8,7 @@ import { countElementsWithTagName } from './_100554_wcdGlobal';
 import { globalWcd } from './_100554_wcdState';
 
 export async function executeFromTag(tagBase: string, tagMain: string, ) {
-    debugger;
+
     if (!globalWcd?.elICA) throw new Error('invalid param.selectedIca');
 
     const overlay = getOverlay();
@@ -18,6 +18,7 @@ export async function executeFromTag(tagBase: string, tagMain: string, ) {
 
     const elBase = document.createElement(tagBase) as IcaLitElementBaseMethods;
     elBase.setAttribute('widget', tagMain);
+    if ((elBase as any).setDefaultAttributes) (elBase as any).setDefaultAttributes();
 
     const allWidgets = countElementsWithTagName(overlay, tagBase);
     const id = 'widget' + (allWidgets + 1);;

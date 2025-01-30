@@ -27,6 +27,10 @@ export abstract class IcaApresentationTextCode extends IcaLitElementBase impleme
         ]
     }
 
+    public setDefaultAttributes() {
+		this.setAttribute('text', `const example = '123';`);
+	}
+
     public changeStateHtml(html: string): void {
 
     }

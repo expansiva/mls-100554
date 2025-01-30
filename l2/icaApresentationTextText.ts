@@ -46,6 +46,10 @@ export abstract class IcaApresentationTextText extends IcaLitElementBase {
 
     }
 
+    public setDefaultAttributes() {
+		this.setAttribute('text', `Write your text here.`);
+	}
+
     public changeStateHtml(html: string): void {
 
     }

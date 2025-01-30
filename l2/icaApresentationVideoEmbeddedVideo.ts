@@ -19,6 +19,10 @@ export abstract class IcaApresentationVideoEmbeddedVideo extends IcaLitElementBa
     }
 
 
+    public setDefaultAttributes() {
+        this.setAttribute('src', `/l3/100554/ds/collabDesignsystem/assets/video-collab.webm`);
+    }
+
     public changeStateHtml(html: string): void {
 
     }

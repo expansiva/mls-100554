@@ -49,6 +49,63 @@ export class PluginCollabWidgetIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_wcDivider'
             },
+
+            {
+                category: 'Widget',
+                scope: ['l3AddWidget'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_wcButtonSubmit'
+            },
+            {
+                category: 'Widget',
+                scope: ['l3AddWidget'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_wcChart'
+            },
+            {
+                category: 'Widget',
+                scope: ['l3AddWidget'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_wcColumn'
+            },
+            {
+                category: 'Widget',
+                scope: ['l3AddWidget'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_wcInputNumber'
+            },
+            {
+                category: 'Widget',
+                scope: ['l3AddWidget'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_wcInputNumberRange'
+            },
+            {
+                category: 'Widget',
+                scope: ['l3AddWidget'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_wcInputNumberWithButtons'
+            },
+            {
+                category: 'Widget',
+                scope: ['l3AddWidget'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_wcRow'
+            },
+            {
+                category: 'Widget',
+                scope: ['l3AddWidget'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_wcSelectOne'
+            },
         ];
     }
 
