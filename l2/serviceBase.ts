@@ -43,9 +43,7 @@ export abstract class ServiceBase extends IcaLitElement {
     }
 
     get serviceItemNav() {
-        if (this._serviceItemNav === undefined) {
-            this._serviceItemNav = this.getServiceItemNav();
-        }
+        this._serviceItemNav = this.getServiceItemNav();
         return this._serviceItemNav;
     }
 
@@ -210,7 +208,7 @@ export abstract class ServiceBase extends IcaLitElement {
         const content = this.getNav3ServiceContent();
         if (!content) return null;
         let nav3Menu = content.querySelector('mls-nav3-100529') as HTMLElement | null;
-        if(!nav3Menu) nav3Menu = content.querySelector('collab-nav-3-menu') as HTMLElement | null;
+        if (!nav3Menu) nav3Menu = content.querySelector('collab-nav-3-menu') as HTMLElement | null;
         return nav3Menu;
     }
 
@@ -366,63 +364,63 @@ export type ITabsClickCallBack = (index: number) => void | undefined;
 export type TSetMode = (mode: TMode | null, page?: HTMLElement) => void;
 export type TGetLastMode = () => TMode;
 export type TMode =
-	'initial' // show siblings with hamburguer icon
-	| 'page' // show page (About ...) with close icon
-	| 'editor'; // show siblings with close icon
+    'initial' // show siblings with hamburguer icon
+    | 'page' // show page (About ...) with close icon
+    | 'editor'; // show siblings with close icon
 
 export interface IOptions {
-	text: string,
-	icon?: string
-	class?: string
+    text: string,
+    icon?: string
+    class?: string
 }
 
 export interface ITools {
-	[key: string]: IToolsData
+    [key: string]: IToolsData
 }
 
 export interface IMain {
-	[key: string]: IOptions | string
+    [key: string]: IOptions | string
 }
 
 export interface ITabs {
-	type: 'full' | 'onlyicon'
-	group: string,
-	selected?: number,
-	options: IOptions[]
+    type: 'full' | 'onlyicon'
+    group: string,
+    selected?: number,
+    options: IOptions[]
 }
 
 export interface IToolsData {
-	type: 'dropdown' | 'cycle' | 'link' | 'flags-dropdown',
-	selected?: number,
-	icon?: string,
-	class?: string
-	options: IOptions[]
+    type: 'dropdown' | 'cycle' | 'link' | 'flags-dropdown',
+    selected?: number,
+    icon?: string,
+    class?: string
+    options: IOptions[]
 }
 
 export interface IServiceMenu {
 
-	title: IOptions | string,
-	main: IMain,
-	tabs: ITabs | undefined,
-	tools: ITools,
+    title: IOptions | string,
+    main: IMain,
+    tabs: ITabs | undefined,
+    tools: ITools,
 
-	onClickTitle?: ITitleClickCallBack,
-	onClickMain?: IMainClickCallBack,
-	onClickTools?: IToolsClickCallBack,
-	onClickTabs?: ITabsClickCallBack,
+    onClickTitle?: ITitleClickCallBack,
+    onClickMain?: IMainClickCallBack,
+    onClickTools?: IToolsClickCallBack,
+    onClickTabs?: ITabsClickCallBack,
 
-	setMenuActive?: (op: string) => void
-	setTabActive?: (index: number) => void,
-	toggleErrorTab?: (index: number, show: boolean) => void
-	selectTool?: (op: string) => void,
+    setMenuActive?: (op: string) => void
+    setTabActive?: (index: number) => void,
+    toggleErrorTab?: (index: number, show: boolean) => void
+    selectTool?: (op: string) => void,
 
-	mainDefault?: string,
-	lastMain?: string,
+    mainDefault?: string,
+    lastMain?: string,
 
-	setMode?: TSetMode,
-	refresh?: Function,
-	closeMenu?: Function,
-	getLastMode?: TGetLastMode,
-	updateTitle?: Function,
+    setMode?: TSetMode,
+    refresh?: Function,
+    closeMenu?: Function,
+    getLastMode?: TGetLastMode,
+    updateTitle?: Function,
 
 }
