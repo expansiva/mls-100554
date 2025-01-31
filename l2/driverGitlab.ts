@@ -1818,7 +1818,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                         closedAt: i.closed_at,
                         createdAt: i.created_at,
                         author: {
-                            login: i.merged_by.username
+                            login: i.author.username
                         }
                     }
 
