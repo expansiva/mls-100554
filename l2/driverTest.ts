@@ -12,6 +12,7 @@ export class DriverTest extends CollabLitElement {
     private instance: any | undefined;
 
     @query('#iptDriver') iptDriver: HTMLInputElement | undefined;
+    @query('#iptNameClass') iptClass: HTMLInputElement | undefined;
     @query('#selFc') selFc: HTMLSelectElement | undefined;
     @query('#showParam') showParam: HTMLElement | undefined;
     @query('#textlog') textlog: HTMLElement | undefined;
@@ -29,9 +30,15 @@ export class DriverTest extends CollabLitElement {
             <h3>Test Driver</h3>
             
             <div class="blockdriver">
-                <div class="fields">
-                    <label>Driver:</label>
-                    <input id="iptDriver" style="width:300px" type="text" value="${this.drivername}" @change="${this.changeDriver}">
+                <div style="display:flex; gap:.5rem;flex-direction:column;    align-items: end;">
+                    <div class="fields">
+                        <label>File:</label>
+                        <input id="iptDriver" style="width:300px" type="text" value="${this.drivername}" @change="${this.changeDriver}">
+                    </div>
+                    <div class="fields">
+                        <label>Class:</label>
+                        <input id="iptNameClass" style="width:300px" type="text" value="${this.drivername}" @change="${this.changeDriver}">
+                    </div>
                 </div>
                 <button @click="${this.load}">Load</button>
             </div>
@@ -79,9 +86,9 @@ export class DriverTest extends CollabLitElement {
 
     private async load() {
 
-        const prj = mls.actual[5].project;
+        //const prj = mls.actual[5].project;
 
-        if (!this.iptDriver || !this.textlog || !prj) return;
+        if (!this.iptDriver || !this.textlog || !this.iptClass) return;
 
         this.textlog.innerText = '';
 
@@ -90,9 +97,14 @@ export class DriverTest extends CollabLitElement {
             return;
         }
 
+        if (!this.iptClass.value) {
+            alert('Inform a class driver');
+            return;
+        }
+
         try {
-            const i = await import(`./_${prj}_${this.iptDriver.value}`);
-            const cls = convertFileNameToTag(`./_${prj}_${this.iptDriver.value}`).replace(/-/g, '_');
+            const i = await import(`./${this.iptDriver.value}`);
+            const cls = this.iptClass.value;
             if (!i[cls]) throw new Error('Invalid driver name');
             this.instance = new i[cls]();
             this.textlog.innerText = '\nLoad success driver';
