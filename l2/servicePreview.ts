@@ -253,14 +253,39 @@ export class ServicePreview100554 extends ServiceBase {
         }
     }
 
+    private lastStatusHasErro: boolean = false;
     private onStyleChanged() {
         if (this.elPreview) {
             this.lastLevel = this.level;
+
+            if (this.actualFile) {
+
+                const keyToFileInfo = mls.stor.getKeyToFiles(this.actualFile.project, 2, this.actualFile.shortName, this.actualFile.folder, '.less');
+
+                const less = mls.stor.files[keyToFileInfo];
+                if (less && !less.hasError && this.lastStatusHasErro) {
+
+                    if (this.watch) {
+                        this.elPreview = undefined;
+                        this.loading = false;
+                        this.onReloader();  
+                        this.lastStatusHasErro = false;                      
+                        return;
+                    }
+                    
+                } else if (less && less.hasError) {
+                    this.lastStatusHasErro = true;
+                }
+
+            }
+
+
             this.elPreview.setAttribute('stylechanged', 'true');
             this.elPreview.setAttribute('actualtheme', this.actualTheme);
         }
     }
 
+    private actualFile: mls.stor.IFileInfo | undefined;
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
         try {
@@ -280,6 +305,9 @@ export class ServicePreview100554 extends ServiceBase {
 
             if (fileAction.action === 'open') {
                 this.setModel(storFileHTML);
+
+                this.actualFile = storFileHTML;
+
                 if (!this.watch && this.menu.selectTool) {
                     this.menu.selectTool('watchPreview');
                 }
