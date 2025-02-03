@@ -4,11 +4,12 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IMenu, IServiceMenu, IOptions } from './_100554_serviceBase';
 import { IcaLitElement } from './_100554_icaLitElement';
-import { IWCDParams } from '_100554_serviceIca'
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { globalState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
+import { collab_record, collab_stop, collab_test } from './_100554_collabIcons';
+
 import './_100554_collabConsole';
 import './_100554_servicePreviewView';
 
@@ -19,12 +20,17 @@ const message_pt = {
     editStyle: 'Editar estilo',
     pause: 'Preview Pausado',
     run: ' Preview em execução',
-
     dark: ' escuro',
     light: 'claro',
     help: 'Ajuda',
     consoleA: 'Abrir console',
     consoleD: 'Fechar console',
+    testA: 'Iniciar Teste',
+    testB: 'Teste Iniciado',
+    testC: 'Ação Iniciada',
+    testRun: 'Executar',
+    testDelete: 'Excluir'
+
 }
 
 const message_en = {
@@ -38,6 +44,11 @@ const message_en = {
     help: 'Help',
     consoleA: 'Open console',
     consoleD: 'Close console',
+    testA: 'Start Test',
+    testB: 'Test Started',
+    testC: 'Action Started',
+    testRun: 'Run',
+    testDelete: 'Delete',
 }
 
 type MessageType = typeof message_en;
@@ -122,6 +133,8 @@ export class ServicePreview100554 extends ServiceBase {
         if (op === 'watchPreview') this.toogleWatch();
         else if (op === 'devConsole') this.toogleConsole();
         else if (op === 'help') this.onHelpClick();
+        else if (op === 'test') this.onBtTestClick();
+        else if (op === 'testList') this.onBtTestListClick();
         else if (op === 'darkLight') this.onBtDarkLightClick();
         else if (['languages', 'theme'].includes(op)) { this.actButton(op); }
         else throw new Error('Invalid option')
@@ -150,6 +163,21 @@ export class ServicePreview100554 extends ServiceBase {
             ]
         },
         tools: {
+            test: {
+                type: 'cycle',
+                selected: 0,
+                options: [
+                    { text: this.msg.testA, icon: collab_record.strings[0] },
+                    { text: this.msg.testB, icon: collab_record.strings[0] },
+                    { text: this.msg.testC, icon: collab_stop.strings[0].trim() },
+                ]
+            },
+            testList: {
+                type: 'dropdown',
+                icon: collab_test.strings[0].trim(),
+                selected: 0,
+                options: []
+            },
             darkLight: {
                 type: 'cycle',
                 selected: 0,
@@ -268,11 +296,11 @@ export class ServicePreview100554 extends ServiceBase {
                     if (this.watch) {
                         this.elPreview = undefined;
                         this.loading = false;
-                        this.onReloader();  
-                        this.lastStatusHasErro = false;                      
+                        this.onReloader();
+                        this.lastStatusHasErro = false;
                         return;
                     }
-                    
+
                 } else if (less && less.hasError) {
                     this.lastStatusHasErro = true;
                 }
@@ -348,6 +376,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (darkOrLight === 'dark' && this.menu.selectTool) this.menu.selectTool('darkLight');
         this.setLanguages();
         this.setTheme();
+        this.setTest();
         this.configureButtonsRight(false);
     }
 
@@ -453,6 +482,23 @@ export class ServicePreview100554 extends ServiceBase {
             ?.contentDocument
             ?.querySelector('html') as HTMLHtmlElement;
         return htmlEl;
+    }
+
+    private async setTest() {
+
+        if (this.menu.tools.testList) this.menu.tools.testList.options = [
+            { text: `${this.msg.testRun} test1` },
+            { text: `${this.msg.testDelete} test1` },
+        ];
+        if (this.menu.refresh) this.menu.refresh();
+    }
+
+    private onBtTestClick() {
+        console.info('In Develpoment')
+    }
+
+    private onBtTestListClick() {
+        console.info('In Develpoment')
     }
 
     private onBtLanguageClick() {
