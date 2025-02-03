@@ -1004,7 +1004,8 @@ export class ServiceSource100554 extends ServiceBase {
 
         };
 
-        await this.createModelTS2(storFileTS, false, true);
+        const models = await this.createModelTS2(storFileTS, false, true);
+        if (models.ts) await this.updateModelStatus(models.ts, false);
         // mls.events.fireFileAction('statusOrErrorChanged', storFileTS, this.position);
 
     }
