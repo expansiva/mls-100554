@@ -1,13 +1,11 @@
 /// <mls shortName="collabLogLine" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { collab_check, collab_circle_notch, collab_triangle_exclamation } from './_100554_collabIcons';
 
 @customElement('collab-log-line-100554')
 export class CollabLogLine100554 extends LitElement {
-
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
 
     @property() text: string = '';
 
@@ -32,5 +30,5 @@ export class CollabLogLine100554 extends LitElement {
 
 export type ILogStatus = 'waiting' | 'inprogress' | 'finish' | 'error'
 export type IIconsByStatus = {
-    [key in ILogStatus]: string;
+    [key in ILogStatus]: TemplateResult<2>;
 };
