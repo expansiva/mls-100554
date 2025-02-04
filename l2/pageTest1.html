@@ -1,33 +1,82 @@
-<page-test1-100554 modeoverlay="wcd-overlay-mode-story-100554">
-	<ica-layout-flow-section-100554 id="section1" class="full" widget="wc-section-100554">
-		<ica-apresentation-text-text-100554 id="apText1" widget="wc-text-100554"
-			text="Solicitação de Compra de Materiais" type="h2">
+<page-test1-100554
+	modeoverlay="wcd-overlay-mode-default-100554">
+	<ica-layout-flow-section-100554
+		id="section1"
+		class="full"
+		widget="wc-section-100554">
+		<ica-apresentation-text-text-100554
+			id="apText1"
+			widget="wc-text-100554"
+			text="Solicitação de Compra de Materiais"
+			type="h2">
 		</ica-apresentation-text-text-100554>
-		<ica-layout-flow-divider-100554 widget="wc-divider-line-100554" id="apDivider1">
+		<ica-layout-flow-divider-100554
+			widget="wc-divider-line-100554"
+			id="apDivider1">
 		</ica-layout-flow-divider-100554>
-		<ica-forms-input-string-100554 widget="wc-input-text-100554" label="Nome do solicitante">
+		<ica-forms-input-string-100554
+			widget="wc-input-text-100554"
+			label="Nome do solicitante"
+			id="">
 		</ica-forms-input-string-100554>
-		<ica-forms-input-select-one-100554 widget="wc-select-one-100554" label="Departamentos"
-			hint="Selecione um departamento" options="{{ tables.depto }}" selectedvalue="{{tables.depto[0].value}}">
+		<ica-forms-input-select-one-100554
+			widget="wc-select-one-100554"
+			label="Departamentos"
+			hint="Selecione um departamento"
+			options="{{ projectTest.tables.depto }}"
+			selectedvalue="{{projectTest.tables.depto[0].value}}"
+			id="">
 		</ica-forms-input-select-one-100554>
-
-		<ica-layout-flow-row-100554 widget="wc-row-100554">
-			<ica-layout-flow-column-100554 widget="wc-column-100554">
-				<ica-forms-input-select-one-100554 widget="wc-select-one-100554" label="Itens"
-					hint="Selecione um item para solicitação" options="{{ tables.products }}"
-					selectedvalue="{{tables.products[0].value}}">
+		<ica-layout-flow-row-100554
+			widget="wc-row-100554"
+			id="">
+			<ica-layout-flow-column-100554
+				widget="wc-column-100554"
+				id="">
+				<ica-forms-input-select-one-100554
+					widget="wc-select-one-100554"
+					label="Itens"
+					hint="Selecione um item para solicitação"
+					options="{{ projectTest.tables.products }}"
+					selectedvalue="{{projectTest.tables.products[0].value}}"
+					id="">
 				</ica-forms-input-select-one-100554>
 			</ica-layout-flow-column-100554>
-			<ica-layout-flow-column-100554 widget="wc-column-100554">
-				<ica-forms-input-string-100554 widget="wc-input-number-with-buttons-100554" label="Quantidade">
+			<ica-layout-flow-column-100554
+				widget="wc-column-100554"
+				id="">
+				<ica-forms-input-string-100554
+					widget="wc-input-number-with-buttons-100554"
+					label="Quantidade"
+					value="0"
+					id="">
 				</ica-forms-input-string-100554>
 			</ica-layout-flow-column-100554>
 		</ica-layout-flow-row-100554>
-		<ica-forms-input-string-100554 widget="wc-input-text-100554" label="Justificativa"></ica-forms-input-string-100554>
-		<ica-layout-flow-row-100554 widget="wc-row-100554">
-			<ica-forms-submit-submit-100554 id="btnSave" data-event="click" text="Salvar" widget="wc-button-submit-100554"></ica-forms-submit-submit-100554>
-			<ica-forms-submit-submit-100554 text="Enviar para aprovação" widget="wc-button-submit-100554"></ica-forms-submit-submit-100554>
-			<ica-forms-submit-submit-100554 text="Cancelar" widget="wc-button-submit-100554"></ica-forms-submit-submit-100554>
-		</ica-layout-flow-column-100554>
+		<ica-forms-input-string-100554
+			widget="wc-input-text-100554"
+			label="Justificativa"
+			id="">
+		</ica-forms-input-string-100554>
+		<ica-layout-flow-row-100554
+			widget="wc-row-100554"
+			id="">
+			<ica-forms-submit-submit-100554
+				id="btnSave"
+				data-event="click"
+				text="Salvar"
+				widget="wc-button-submit-100554">
+			</ica-forms-submit-submit-100554>
+			<ica-forms-submit-submit-100554
+				text="Enviar para aprovação"
+				widget="wc-button-submit-100554"
+				id="">
+			</ica-forms-submit-submit-100554>
+			<ica-forms-submit-submit-100554
+				text="Cancelar"
+				widget="wc-button-submit-100554"
+				id="">
+			</ica-forms-submit-submit-100554>
+		</ica-layout-flow-row-100554>
 	</ica-layout-flow-section-100554>
 </page-test1-100554>
