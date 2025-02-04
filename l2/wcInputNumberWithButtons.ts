@@ -82,6 +82,8 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
         let newval = +this.input.value - 1
         if (!isNaN(newval) && (this.minvalue === undefined || (newval >= this.minvalue))) {
             this.input.value = newval.toString();
+            this.value = newval;
+
         }
     }
 
@@ -91,6 +93,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
         let newval = +this.input.value + 1
         if (!isNaN(newval) && (this.maxvalue === undefined || (newval <= this.maxvalue))) {
             this.input.value = newval.toString();
+            this.value = newval;
         }
     }
 
