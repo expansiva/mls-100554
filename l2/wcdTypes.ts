@@ -26,6 +26,7 @@ export interface WCDToolboxItemMethodos extends HTMLElement {
 }
 
 export interface WCDOverlayMethods extends HTMLElement {
+    overlayItemTagName: string,
     listWidgetsBase: IListWidgetBase[]
     myKeyEvents: { [key: string]: Function }
     changeOverlayItemsLevel(): void
