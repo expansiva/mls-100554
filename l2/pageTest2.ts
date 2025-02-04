@@ -187,12 +187,13 @@ export class PageTest2100554 extends CollabPageElement {
 
     }
 
+
     /// **collab_events_start**
-    handleClickbuttonNovo() {
+    handleClickButtonNovo() {
         this.onNovo();
     }
 
-    handleSelectItemableSelect(ev:any) {
+    handleItemSelectedTableSelect(ev:any) {
         this.onSelectItemtableSelect(ev);
     }
 
