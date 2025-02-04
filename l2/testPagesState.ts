@@ -3,6 +3,49 @@ import { globalState, initState } from './_100554_icaState';
 
 export function initTestState() {
 
+    initState('projectTest.tables.solicitacoes', [
+        {
+            id: 1,
+            solicitante: 'João Silva',
+            item: 'Teclado',
+            quantidade: 2,
+            data: '2025-02-03',
+            status: 'Aprovado',
+        },
+        {
+            id: 2,
+            solicitante: 'Guilherme Santiago',
+            item: 'Cadeira',
+            quantidade: 1,
+            data: '2025-01-01',
+            status: 'Pendente',
+        },
+        {
+            id: 3,
+            solicitante: 'Guilherme Pereira',
+            item: 'Monitor',
+            quantidade: 1,
+            data: '2024-12-11',
+            status: 'Pendente',
+        },
+        {
+            id: 4,
+            solicitante: 'Bica',
+            item: 'Fones de ouvido',
+            quantidade: 1,
+            data: '2025-02-01',
+            status: 'Pendente',
+        },
+        {
+            id: 5,
+            solicitante: 'Wagner',
+            item: 'Mouse',
+            quantidade: 1,
+            data: '2025-01-11',
+            status: 'Rejeitado',
+        },
+    ])
+
     initState('projectTest.tables.fornecedores', [
         {
             empresa: 'TechParts LTDA',
