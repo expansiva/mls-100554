@@ -1,5 +1,5 @@
 <page-test2-100554
-	modeoverlay="wcd-overlay-mode-default-100554">
+	modeoverlay="wcd-overlay-mode-default-100554s">
 	<ica-layout-flow-section-100554
 		id="section1"
 		class="inset"
@@ -24,12 +24,6 @@
 			id="iptNome"
 			value="{{projectTest.page2.selecionado.empresa}}">
 		</ica-forms-input-string-100554>
-		<ica-apresentation-text-text-100554
-			widget="wc-text-100554"
-			type="p"
-			text=""
-			id="apText2">
-		</ica-apresentation-text-text-100554>
 		<ica-forms-input-string-100554
 			widget="wc-input-text-100554"
 			label="CNPJ"
@@ -57,15 +51,15 @@
 				<ica-forms-input-select-one-100554
 					widget="wc-select-one-100554"
 					id="selProds"
-					label="Produtos a
-				adicionar"
+					label="Produtos a adicionar"
 					options="{{ projectTest.tables.products }}"
-					selectedvalue="{{ projectTest.tables.products[0].value }}">
+					>
 				</ica-forms-input-select-one-100554>
 				<ica-forms-submit-submit-100554
 					widget="wc-button-submit-100554"
 					id="buttonAddProd"
-					text="Adicionar Produto">
+					text="Adicionar Produto"
+					data-event="click">
 				</ica-forms-submit-submit-100554>
 			</ica-layout-flow-column-100554>
 			<ica-layout-flow-column-100554
@@ -94,17 +88,20 @@
 				<ica-forms-submit-submit-100554
 					widget="wc-button-submit-100554"
 					id="buttonSalvar"
-					text="Salvar">
+					text="Salvar"
+					data-event="click">
 				</ica-forms-submit-submit-100554>
 				<ica-forms-submit-submit-100554
 					widget="wc-button-submit-100554"
 					id="buttonCancelar"
-					text="Cancelar">
+					text="Cancelar"
+					data-event="click">
 				</ica-forms-submit-submit-100554>
 				<ica-forms-submit-submit-100554
 					widget="wc-button-submit-100554"
 					id="buttonExcluir"
-					text="Excluir">
+					text="Excluir"
+					data-event="click">
 				</ica-forms-submit-submit-100554>
 			</ica-layout-flow-row-100554>
 		</ica-layout-flow-divider-100554>
