@@ -30,13 +30,16 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
         return this; // dont use shadow root
     }
 
+    timeoutResize: number | undefined;
+
     firstUpdated(changedProperties: Map<string | number | symbol, unknown>) {
         super.firstUpdated(changedProperties);
         if (this.resizeObserver) this.resizeObserver.disconnect();
         this.resizeObserver = new ResizeObserver(entries => {
-            for (let entry of entries) {
+            if (this.timeoutResize) clearTimeout(this.timeoutResize);
+            this.timeoutResize = setTimeout(() => {
                 this.updateSizeOverlayItems();
-            }
+            }, 500);
         });
         this.resizeObserver.observe(this);
     }
@@ -89,7 +92,7 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
 
     }
 
-     createOverlayItems(): void {
+    createOverlayItems(): void {
 
         const boundingPage = this.getBoundingClientRect();
         this.innerHTML = '';
