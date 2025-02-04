@@ -65,8 +65,15 @@ export class PageTest1100554 extends CollabPageElement {
                 "category": "Periféricos",
                 "description": "Headsets com e sem fio para comunicação e entretenimento."
             },
-        
+
         ]);
     }
+    
+    /// **collab_events_start**
+    async handleClickbtnSave(e: CustomEvent) {
+        console.info('click save')
+    }
+
+    
 
 }

@@ -1,5 +1,5 @@
 <page-test2-100554
-	modeoverlay="wcd-overlay-mode-story-100554s">
+	modeoverlay="wcd-overlay-mode-story-100554">
 	<ica-layout-flow-section-100554
 		id="section1"
 		class="inset"
@@ -16,7 +16,7 @@
 			datasource="{{page2.fornecedores}}"
 			maxcolumn="3"
 			id="tableSelect"
-			data-event="SelectItem">
+			data-event="item-selected">
 		</ica-layout-group-table-100554>
 		<ica-forms-input-string-100554
 			widget="wc-input-text-100554"
@@ -24,6 +24,12 @@
 			id="iptNome"
 			datasource="{{page2.selecionado.empresa}}">
 		</ica-forms-input-string-100554>
+		<ica-apresentation-text-text-100554
+			widget="wc-text-100554"
+			type="p"
+			text=""
+			id="apText2">
+		</ica-apresentation-text-text-100554>
 		<ica-forms-input-string-100554
 			widget="wc-input-text-100554"
 			label="CNPJ"

@@ -88,7 +88,7 @@ export class WcTableSelect100554 extends IcaLayoutGroupTableBase {
 
         const info = (el as any).info;
 
-        const evento = new CustomEvent('SelectItem', {
+        const evento = new CustomEvent('item-selected', {
             detail: info,
             bubbles: true,
             composed: true,
