@@ -815,12 +815,12 @@ const icaDescriptions: icaTypes.FormComponent[] = [
   // Charts
   {
     group: "Apresentation / Charts / 2D",
-    attributes: "framework,datasource,renderer",
+    attributes: "framework,data,renderer",
     events: "click,focus,blur"
   },
   {
     group: "Apresentation / Charts / 3D",
-    attributes: "framework,datasource,renderer,options3d",
+    attributes: "framework,data,renderer,options3d",
     events: "click,focus,blur"
   },
 

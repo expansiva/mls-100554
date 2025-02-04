@@ -8,8 +8,7 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 @customElement('wc-table-select-100554')
 export class WcTableSelect100554 extends IcaLayoutGroupTableBase {
 
-    @propertyDataSource() datasource: any[] | undefined;
-    @property() data: any[] | undefined;
+    @propertyDataSource() data: any[] | undefined;
     @property() columns: string[] | undefined;
     @property() maxcolumn: number | undefined;
     @property() striped: boolean | undefined;
@@ -17,9 +16,8 @@ export class WcTableSelect100554 extends IcaLayoutGroupTableBase {
 
 
     render() {
-        if (this.datasource) this.data = this.datasource;
-        if (!this.data || this.data.length === 0) return html``;
 
+        if (!this.data || this.data.length === 0) return html``;
         return html`
             <table>
                 <thead>

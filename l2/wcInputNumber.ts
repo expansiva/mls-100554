@@ -7,7 +7,7 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 @customElement('wc-input-number-100554')
 export class WCInputNumber extends IcaFormsInputNumberBase {
 
-    @propertyDataSource({ type: String }) datasource: number | undefined;
+    @propertyDataSource({ type: String }) value: number | undefined;
 
     @property({ type: String }) name: string | undefined;
 
@@ -58,7 +58,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
             min=${ifDefined(this.minvalue)}    
             max=${ifDefined(this.maxvalue)}
             step=${ifDefined(this.step as number)}
-            .value=${this.datasource}
+            .value=${this.value}
             ?autofocus=${this.autofocus}
             pattern=${ifDefined(this.pattern)}
             inputmode=${ifDefined(this.inputmode)}
@@ -69,7 +69,6 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
         `;
     }
 
-
     private handleChange() {
         if (!this.input) return;
         let newval = +this.input.value;
@@ -77,7 +76,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
             && (this.minvalue === undefined || (newval >= this.minvalue))
             && (this.maxvalue === undefined || (newval <= this.maxvalue))
         ) {
-            this.datasource = newval;
+            this.value = newval;
             this.error = '';
             this.requestUpdate();
         } else {

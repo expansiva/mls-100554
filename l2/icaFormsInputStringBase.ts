@@ -6,6 +6,7 @@ export abstract class IcaFormsInputStringBase extends IcaLitElement {
     
     abstract name: string | undefined;
 	abstract hint: string | undefined; // An optional descriptive hint for the field
+	abstract value: string | undefined; // An optional descriptive hint for the field
 	abstract label: string | undefined; // A label to identify this field
 	abstract required: boolean ; // Whether the field is required or optional
 	abstract disabled: boolean ; // Whether the field is ready for input or disabled

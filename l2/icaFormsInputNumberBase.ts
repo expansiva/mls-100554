@@ -6,7 +6,7 @@ export abstract class IcaFormsInputNumberBase extends IcaLitElement {
 
 	abstract hint: string | undefined; // An optional descriptive hint for the field
 	abstract label: string | undefined; // A label to identify this field
-	abstract datasource: number | undefined; // A label to identify this field
+	abstract value: number | undefined; // A label to identify this field
 	abstract required: boolean; // Whether the field is required or optional
 	abstract disabled: boolean; // Whether the field is ready for input or disabled
 	abstract maxvalue: number | undefined; // Maximum value restriction for the input

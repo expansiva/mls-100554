@@ -10,11 +10,7 @@ declare var echarts: any;
 @customElement('wc-chart-100554')
 export class WcEchartsPie100554 extends IcaApresentationCharts2DBase {
 
-    createRenderRoot() {
-        return this;
-    }
-
-    @propertyDataSource({ type: String }) datasource: any | undefined;
+    @propertyDataSource({ type: String }) data: any | undefined;
 
     @property({ type: String }) chartTitle = '';
 
@@ -61,20 +57,20 @@ export class WcEchartsPie100554 extends IcaApresentationCharts2DBase {
 
     initChart() {
         const that = this;
-        if (!this.datasource) return;
+        if (!this.data) return;
         if (this.chartTitle) {
-            if (!this.datasource.title) this.datasource.title = {};
-            this.datasource.title.text = this.chartTitle;
+            if (!this.data.title) this.data.title = {};
+            this.data.title.text = this.chartTitle;
         }
 
         this.waitForLoadIfNeeded(() => {
             if (that.myChart) {
-                that.myChart.setOption(that.datasource);
+                that.myChart.setOption(that.data);
                 return;
             }
             if (!that.main || !echarts) return;
             that.myChart = echarts.init(that.main, undefined, { renderer: this.renderer });
-            that.myChart.setOption(that.datasource);
+            that.myChart.setOption(that.data);
         });
 
     }
