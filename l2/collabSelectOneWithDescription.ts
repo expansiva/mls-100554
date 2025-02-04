@@ -27,8 +27,6 @@ const messages: { [key: string]: MessageType } = {
 @customElement('collab-select-one-with-description-100554')
 export class CollabSelectOneWithDescription100554 extends IcaLitElement {
 
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
-
     private msg: MessageType = messages['en'];
 
     @propertyDataSource({ type: String }) hint: string | undefined;
