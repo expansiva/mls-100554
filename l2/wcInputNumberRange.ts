@@ -85,7 +85,10 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
 
     private handleSliderChange(event: Event) {
         const sliderElement = event.target as HTMLInputElement;
-        if(this.input) this.input.value = sliderElement.value
+        if (this.input) {
+            this.input.value = sliderElement.value
+            this.value = +sliderElement.value;
+        }
     }
 
     private handleChange() {
