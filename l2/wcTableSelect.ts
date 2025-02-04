@@ -1,0 +1,100 @@
+/// <mls shortName="wcTableSelect" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+import { html, css, repeat } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { IcaLayoutGroupTableBase } from './_100554_icaLayoutGroupTableBase';
+import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
+
+@customElement('wc-table-select-100554')
+export class WcTableSelect100554 extends IcaLayoutGroupTableBase {
+
+    @propertyDataSource() datasource: any[] | undefined;
+    @property() data: any[] | undefined;
+    @property() columns: string[] | undefined;
+    @property() maxcolumn: number | undefined;
+    @property() striped: boolean | undefined;
+    @property() bordered: boolean | undefined;
+
+
+    render() {
+        if (this.datasource) this.data = this.datasource;
+        if (!this.data || this.data.length === 0) return html``;
+
+        return html`
+            <table>
+                <thead>
+                    <tr>
+                        ${this.renderHeader()}
+                    </tr>
+                </thead> 
+                <tbody>
+                    ${this.renderBody()}
+                </tbody>
+                
+            </table>
+        `;
+    }
+
+    renderHeader() {
+
+        if (!this.data || this.data.length === 0) return html``;
+        let header = Object.keys(this.data[0]);
+
+        let max = this.maxcolumn && this.maxcolumn > 0 ? this.maxcolumn : header.length;
+
+        header = header.slice(0, max);
+
+        return html`
+            ${repeat(header, ((key: string) => key) as any, ((k: any, index: any) => { return html`<th>${k}</th>` }) as any)}
+        `
+
+    }
+
+    renderBody() {
+
+        if (!this.data || this.data.length === 0) return html``;
+        let header = Object.keys(this.data[0]);
+
+        let max = this.maxcolumn && this.maxcolumn > 0 ? this.maxcolumn : header.length;
+
+        header = header.slice(0, max);
+
+        return html`
+            ${repeat(this.data, ((key: any, idx: number) => 'it' + idx) as any, ((k: any, index: any) => { return html`<tr .info=${{data:k, index:index}} @click=${this.selectItem}>${this.renderBodyItem(k, header)}</tr>` }) as any)}
+        `
+    }
+
+    renderBodyItem(item: any, h: string[]) {
+
+        return html`
+            ${repeat(h, ((key: string) => key) as any, ((k: any, index: any) => { return html`<td>${item[k]}</td>` }) as any)}
+        `
+
+    }
+
+
+    //---------IMPLEMENTS---------
+
+
+    private selectItem(e: MouseEvent) {
+
+        let el = e.target as HTMLElement;
+
+        if (el.tagName.toLocaleLowerCase() !== 'tr') {
+            el = el.closest('tr') as HTMLElement;
+        }
+
+        if (!el) return;
+
+        const info = (el as any).info;
+
+        const evento = new CustomEvent('SelectItem', {
+            detail: info,
+            bubbles: true,
+            composed: true,
+        });
+        this.dispatchEvent(evento);
+
+    }
+
+}

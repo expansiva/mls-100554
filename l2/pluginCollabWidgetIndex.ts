@@ -12,7 +12,7 @@ export class PluginCollabWidgetIndex extends PluginBaseIndex {
                 scope: ['l3AddWidget'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_wcText'
+                widget: '_100554_wcText' 
             },
             {
                 category: 'Widget',
@@ -83,6 +83,13 @@ export class PluginCollabWidgetIndex extends PluginBaseIndex {
                 scope: ['l3AddWidget'],
                 priority: 2,
                 auth: ['*'],
+                widget: '_100554_wcInputText'
+            },
+            {
+                category: 'Widget',
+                scope: ['l3AddWidget'],
+                priority: 2,
+                auth: ['*'],
                 widget: '_100554_wcInputNumberRange'
             },
             {
@@ -105,6 +112,13 @@ export class PluginCollabWidgetIndex extends PluginBaseIndex {
                 priority: 2,
                 auth: ['*'],
                 widget: '_100554_wcSelectOne'
+            },
+            {
+                category: 'Widget',
+                scope: ['l3AddWidget'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_wcTableSelect'
             },
         ];
     }
