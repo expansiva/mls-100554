@@ -44,6 +44,11 @@ export class CollabSpliterVerticalVarFixed100554 extends LitElement {
     }
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.resizeObserver) this.resizeObserver.disconnect();
+  }
+
   firstUpdated() {
     this._distributeContent();
     this._applyMSize();
@@ -116,6 +121,9 @@ export class CollabSpliterVerticalVarFixed100554 extends LitElement {
     }
   }
 
+  timeoutResize: number | undefined;
+
+
   _distributeContent() {
     const topPane = this.querySelector('.top-pane');
     const bottomPane = this.querySelector('.bottom-pane');
@@ -135,13 +143,18 @@ export class CollabSpliterVerticalVarFixed100554 extends LitElement {
         bottomPane.appendChild(child);
 
         this.resizeObserver = new ResizeObserver((entries) => {
-          for (let entry of entries) {
-            this.fixedheight = entry.contentRect.height.toString();
-          }
+
+          if (this.timeoutResize) clearTimeout(this.timeoutResize);
+          this.timeoutResize = setTimeout(() => {
+            for (let entry of entries) {
+              this.fixedheight = entry.contentRect.height.toString();
+            }
+          }, 500);
+
         });
 
         if (this.resizeObserver) this.resizeObserver.observe(child);
-        
+
       }
     });
   }
