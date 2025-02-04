@@ -42,7 +42,6 @@ export class WcSelectOne extends IcaFormsInputSelectOneBase {
         }
     }
 
-
     handleChange(event: Event) {
         const selectElement = event.target as HTMLSelectElement;
         this.selectedvalue = selectElement.value;
