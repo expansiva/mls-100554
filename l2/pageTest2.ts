@@ -1,7 +1,7 @@
 /// <mls shortName="pageTest2" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { CollabPageElement } from './_100554_collabPageElement';
-import { customElement } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { globalState, initState } from './_100554_icaState';
 import { initTestState } from './_100554_testPagesState';
 
@@ -22,39 +22,6 @@ export class PageTest2100554 extends CollabPageElement {
                 produtos: []
             }
         });
-
-    }
-
-    private setEvents() {
-
-
-        /*const eltableSelect = this.querySelector('#tableSelect');
-        if (eltableSelect) {
-            const evt = this.onSelectItemtableSelect.bind(this);
-            eltableSelect.addEventListener('SelectItem', evt)
-        }*/
-
-        /*const novo = this.querySelector('#buttonNovo') as HTMLElement;
-        if (novo) {
-            novo.onclick = this.onNovo.bind(this);
-        }*/
-
-        const cancelar = this.querySelector('#buttonCancelar') as HTMLElement;
-        if (cancelar) {
-            cancelar.onclick = this.onCancelar.bind(this);
-        }
-
-        const salvar = this.querySelector('#buttonSalvar') as HTMLElement;
-        if (salvar) {
-            salvar.onclick = this.onSalvar.bind(this);
-        }
-
-        const excluir = this.querySelector('#buttonExcluir') as HTMLElement;
-        if (excluir) {
-            excluir.onclick = this.onExcluir.bind(this);
-        }
-
-
 
     }
 
@@ -152,16 +119,42 @@ export class PageTest2100554 extends CollabPageElement {
 
     }
 
+    private onAddProd() {
+    
+        const selProds = this.querySelector('#selProds') as any;
+        if (!selProds) return;
+        const vl = selProds.querySelector('select').value;
+        if (globalState._ica.projectTest.page2.selecionado.produtos.includes(vl)) return;
 
-    /// **collab_events_start**
-    handleClickButtonNovo() {
-        this.onNovo();
+        globalState._ica.projectTest.page2.selecionado.produtos.push(vl);
+        globalState.globalStateManagment.setState(`projectTest.page2.selecionado.produtos`, globalState._ica.projectTest.page2.selecionado.produtos.join(', '));
+
     }
 
+
+    /// **collab_events_start**
     handleItemSelectedTableSelect(ev: any) {
         this.onSelectItemtableSelect(ev);
     }
 
+    handleClickButtonNovo() {
+        this.onNovo();
+    }
 
+    handleClickButtonSalvar() {
+        this.onSalvar();
+    }
+
+    handleClickButtonCancelar() {
+        this.onCancelar();
+    }
+
+    handleClickButtonExcluir() {
+        this.onExcluir();
+    }
+
+    handleClickButtonAddProd() {
+        this.onAddProd();
+    }
 
 }
