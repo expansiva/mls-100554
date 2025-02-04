@@ -10,6 +10,8 @@ export function initTestState() {
             item: 'Teclado',
             quantidade: 2,
             data: '2025-02-03',
+            justificativa: '',
+            depto: 'TI',
             status: 'Aprovado',
         },
         {
@@ -18,6 +20,8 @@ export function initTestState() {
             item: 'Cadeira',
             quantidade: 1,
             data: '2025-01-01',
+            justificativa: '',
+            depto: 'TI',
             status: 'Pendente',
         },
         {
@@ -26,6 +30,8 @@ export function initTestState() {
             item: 'Monitor',
             quantidade: 1,
             data: '2024-12-11',
+            justificativa: '',
+            depto: 'TI',
             status: 'Pendente',
         },
         {
@@ -34,6 +40,8 @@ export function initTestState() {
             item: 'Fones de ouvido',
             quantidade: 1,
             data: '2025-02-01',
+            justificativa: '',
+            depto: 'TI',
             status: 'Pendente',
         },
         {
@@ -42,6 +50,8 @@ export function initTestState() {
             item: 'Mouse',
             quantidade: 1,
             data: '2025-01-11',
+            justificativa: '',
+            depto: 'TI',
             status: 'Rejeitado',
         },
     ])
@@ -64,10 +74,10 @@ export function initTestState() {
     ]);
 
     initState('projectTest.tables.depto', [
-        { key: 'Tecnologia da Informação (TI)', value: 'TI' },
-        { key: 'Administração', value: 'Admin' },
-        { key: 'Contabilidade', value: 'Cont' },
-        { key: 'Recursos Humanos (RH)', value: 'RH' },
+        { key: 'Tecnologia da Informação', value: 'Tecnologia da Informação' },
+        { key: 'Administração', value: 'Administração' },
+        { key: 'Contabilidade', value: 'Contabilidade' },
+        { key: 'Recursos Humanos', value: 'Recursos Humanos' },
     ]);
 
     initState('projectTest.tables.products', [
@@ -123,3 +133,35 @@ export function initTestState() {
     ]);
 
 }
+
+export function adicionarSolicitacao(novaSolicitacao: ISolicitacao) {
+    const newObJ = { ...novaSolicitacao }
+    const data = globalState._ica.projectTest.tables.solicitacoes || [];
+    newObJ.id = getNextIdSolicitacao();
+    data.push(newObJ);
+    globalState.globalStateManagment.setState(`projectTest.tables.solicitacoes`, data);
+}
+
+export function alterarStatusSolicitacao(newStatus: TStatus, index: number) {
+    const data = globalState._ica.projectTest.tables.solicitacoes || [];
+    if (!data[index]) throw new Error('Invalid row');
+    data[index].status = newStatus;
+    globalState.globalStateManagment.setState(`projectTest.tables.solicitacoes[${index}].status`, newStatus);
+}
+
+function getNextIdSolicitacao() {
+    return globalState._ica.projectTest.tables.solicitacoes?.length + 1 || 1;
+}
+
+export interface ISolicitacao {
+    id: number,
+    solicitante: string,
+    item: string,
+    quantidade: number,
+    data: string,
+    status: TStatus,
+    depto: string,
+    justificativa: string,
+}
+
+export type TStatus = 'Pendente' | 'Aprovado' | 'Rejeitado'
