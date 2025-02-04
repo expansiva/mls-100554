@@ -8,10 +8,9 @@ import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
 @customElement('wc-input-number-with-buttons-100554')
 export class WCInputNumber extends IcaFormsInputNumberBase {
 
-
     @property({ type: String }) name: string | undefined;
 
-    @propertyDataSource({ type: String }) datasource: number | undefined;
+    @propertyDataSource({ type: String }) value: number | undefined;
 
     @property({ type: String }) placeholder: string | undefined;
 
@@ -62,7 +61,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
                 min=${ifDefined(this.minvalue)}    
                 max=${ifDefined(this.maxvalue)}
                 step=${ifDefined(this.step as number)}
-                .value=${this.datasource}
+                value=${this.value}
                 ?autofocus=${this.autofocus}
                 pattern=${ifDefined(this.pattern)}
                 inputmode=${ifDefined(this.inputmode)}
@@ -82,15 +81,16 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
         if (!this.input) return;
         let newval = +this.input.value - 1
         if (!isNaN(newval) && (this.minvalue === undefined || (newval >= this.minvalue))) {
-            this.datasource = newval;
+            this.input.value = newval.toString();
         }
     }
 
     private handlePlusClick() {
+
         if (!this.input) return;
         let newval = +this.input.value + 1
         if (!isNaN(newval) && (this.maxvalue === undefined || (newval <= this.maxvalue))) {
-            this.datasource = newval;
+            this.input.value = newval.toString();
         }
     }
 
@@ -105,7 +105,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
             && (this.minvalue === undefined || (value >= this.minvalue))
             && (this.maxvalue === undefined || (value <= this.maxvalue))
         ) {
-            this.datasource = value;
+            this.value = value;
             this.error = '';
             this.requestUpdate();
         } else {

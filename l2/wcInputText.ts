@@ -8,7 +8,7 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 @customElement('wc-input-text-100554')
 export class WcInputText100554 extends IcaFormsInputStringBase {
 
-    @propertyDataSource({ type: String }) datasource: string | undefined;
+    @propertyDataSource({ type: String }) value: string | undefined;
 
     @property({ type: String }) name: string | undefined;
 
@@ -61,7 +61,7 @@ export class WcInputText100554 extends IcaFormsInputStringBase {
             minlength=${ifDefined(this.maxlength)}
             autocomplete=${ifDefined(this.autocomplete)}
             placeholder=${ifDefined(this.placeholder)}
-            .value=${this.datasource || ''}
+            .value=${this.value || ''}
             ?autofocus=${this.autofocus}
             pattern=${ifDefined(this.pattern)}
             @input=${this.handleChange}
@@ -75,7 +75,7 @@ export class WcInputText100554 extends IcaFormsInputStringBase {
 
     handleChange(event: Event) {
         const input = event.target as HTMLInputElement;
-        this.datasource = input.value;
+        this.value = input.value;
     }
 
 }

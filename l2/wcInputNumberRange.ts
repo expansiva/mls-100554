@@ -8,7 +8,7 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 @customElement('wc-input-number-range-100554')
 export class WCInputNumber extends IcaFormsInputNumberBase {
 
-    @propertyDataSource({ type: String }) datasource: number | undefined;
+    @propertyDataSource({ type: String }) value: number | undefined;
 
     @property({ type: String }) name: string | undefined;
 
@@ -57,7 +57,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
             min=${ifDefined(this.minvalue)}    
             max=${ifDefined(this.maxvalue)}
             step=${ifDefined(this.step as number)}
-            .value=${this.datasource}
+            .value=${this.value}
             @input=${this.handleSliderChange}
         />
 
@@ -72,7 +72,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
             min=${ifDefined(this.minvalue)}    
             max=${ifDefined(this.maxvalue)}
             step=${ifDefined(this.step as number)}
-            .value=${this.datasource}
+            .value=${this.value}
             ?autofocus=${this.autofocus}
             pattern=${ifDefined(this.pattern)}
             inputmode=${ifDefined(this.inputmode)}
@@ -85,7 +85,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
 
     private handleSliderChange(event: Event) {
         const sliderElement = event.target as HTMLInputElement;
-        this.datasource =  Number(sliderElement.value);
+        if(this.input) this.input.value = sliderElement.value
     }
 
     private handleChange() {
@@ -97,7 +97,7 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
             && (this.maxvalue === undefined || (newval <= this.maxvalue))
         ) {
             if (this.range) this.range.value = newval.toString();
-            this.datasource = newval;
+            this.value = newval;
             this.error = '';
             this.requestUpdate();
         } else {
