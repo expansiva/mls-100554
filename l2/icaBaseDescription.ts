@@ -936,7 +936,7 @@ const icaDescriptions: icaTypes.FormComponent[] = [
   {
     group: "Layout / Group / Table",
     attributes: "data,columns,striped,bordered",
-    events: "click,focus,blur"
+    events: "item-selected,click,focus,blur"
   },
   {
     group: "Layout / Group / Cards",

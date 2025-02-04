@@ -287,7 +287,3 @@ export async function getEnhancementName(file: { project: number, shortName: str
 }
 
 
-export async function compileLess() {
-
-}
-

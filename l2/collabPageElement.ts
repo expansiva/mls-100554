@@ -10,6 +10,10 @@ import { convertTagToFileName } from './_100554_utilsLit'
 
 export const PREFIX_ICA_ID = 'ica_';
 
+export function toPascalCase(str: string) {
+    return str.replace(/(^\w|-\w)/g, match => match.replace('-', '').toUpperCase());
+}
+
 export abstract class CollabPageElement extends CollabLitElement {
 
     abstract initPage(): void
@@ -22,7 +26,7 @@ export abstract class CollabPageElement extends CollabLitElement {
 
     public isPage = true;
 
-    public refreshOverlay(){
+    public refreshOverlay() {
         this.checkToAddOverlay();
     }
 
@@ -67,8 +71,8 @@ export abstract class CollabPageElement extends CollabLitElement {
         return device as IDevice;
     }
 
-    
-    private setupIds():void {
+
+    private setupIds(): void {
         const icas = this.findAllElementsIca(this);
         let device: string = this.getVariationDevice();
         if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1);
@@ -82,14 +86,13 @@ export abstract class CollabPageElement extends CollabLitElement {
 
     }
 
-    private setupEvents():void {
+    private setupEvents(): void {
 
         const allWebComponentsInPage = this.getAllWebComponents(this);
-        let device: string = this.getVariationDevice();
-        if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1);
+        let device: IDevice = this.getVariationDevice();
+        if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1) as IDevice;
 
         allWebComponentsInPage.forEach((el) => {
-
             const widget = el.tagName.toLowerCase();
             customElements.whenDefined(widget).then(() => {
                 const events = el.getAttribute('data-event')?.split(' ') || [];
@@ -100,9 +103,9 @@ export abstract class CollabPageElement extends CollabLitElement {
                 events.forEach(event => {
                     // search por functions name, from specific to generic,
                     // ex: handleClick1Desktop, handleClick1, handleClick
-                    const handlerGeneric = `handle${event.charAt(0).toUpperCase() + event.slice(1)}`;
-                    const handlerSpecificID = `${handlerGeneric}${elementId}`;
-                    const handlerSpecificDevice = `${handlerSpecificID}${device}`
+                    const handlerGeneric = getEventName(event)
+                    const handlerSpecificID = getEventName(event, elementId);
+                    const handlerSpecificDevice = getEventName(event, elementId, device);
                     if (that[handlerSpecificDevice]) {
                         el.addEventListener(event, that[handlerSpecificDevice].bind(this));
                     } else if (that[handlerSpecificID]) {
@@ -116,7 +119,9 @@ export abstract class CollabPageElement extends CollabLitElement {
 
     }
 
-    private checkToAddOverlay():void {
+
+
+    private checkToAddOverlay(): void {
 
         if (this.level === '7') {
             this.overlay?.remove();
@@ -137,7 +142,7 @@ export abstract class CollabPageElement extends CollabLitElement {
 
         if (!this.modeoverlay) return;
 
-        const ok = await this.importWCDOverlay(this.modeoverlay); 
+        const ok = await this.importWCDOverlay(this.modeoverlay);
         if (!ok) return;
         this.overlay = document.createElement(this.modeoverlay) as WCDOverlayMethods;
         this.overlay.myItens = this.findAllElementsIca(this);
@@ -157,7 +162,7 @@ export abstract class CollabPageElement extends CollabLitElement {
             await import(imports);
             this.hasImport.push(imports);
             return true;
-            
+
         } catch (e) {
             console.info(e);
             return false
@@ -169,7 +174,7 @@ export abstract class CollabPageElement extends CollabLitElement {
         let elements: IICADepths[] = [];
         let elToSearch: Element | ShadowRoot = el;
 
-        const arrayEls: HTMLElement[] = []; 
+        const arrayEls: HTMLElement[] = [];
 
         function traverseShadowRoot(element: HTMLElement, depth: number) {
 
@@ -193,7 +198,7 @@ export abstract class CollabPageElement extends CollabLitElement {
 
 
 
-        if (el.shadowRoot) 
+        if (el.shadowRoot)
             elToSearch = el.shadowRoot;
         elToSearch.querySelectorAll('*').forEach((item) => {
             traverseShadowRoot(item as HTMLElement, 0); // Inicializar com profundidade 0
@@ -231,12 +236,13 @@ export abstract class CollabPageElement extends CollabLitElement {
 
 
 export function getEventName(eventName: string, elementId?: string, device?: IDevice) {
-    const handlerGeneric = `handle${eventName.charAt(0).toUpperCase() + eventName.slice(1)} `;
-    if (!elementId) return handlerGeneric;
-    const handlerSpecificID = `${handlerGeneric}${elementId} `;
+    const newId = toPascalCase(elementId || '')
+    const handlerGeneric = `handle${toPascalCase(eventName)}`;
+    if (!newId) return handlerGeneric;
+    const handlerSpecificID = `${handlerGeneric}${newId}`;
     if (!device) return handlerSpecificID;
     if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1) as IDevice;
-    const handlerSpecificDevice = `${handlerSpecificID}${device} `
+    const handlerSpecificDevice = `${handlerSpecificID}${device}`
     return handlerSpecificDevice;
 }
 
