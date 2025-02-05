@@ -2,6 +2,13 @@
 import { globalState, initState } from './_100554_icaState';
 
 export function initTestState() {
+    
+    initState('projectTest.tables.status', [
+        { key: 'Pendente', value: 'Pendente' },
+        { key: 'Aprovado', value: 'Aprovado' },
+        { key: 'Rejeitado', value: 'Rejeitado' }
+    ]);
+
 
     initState('projectTest.tables.solicitacoes', [
         {
@@ -136,16 +143,15 @@ export function initTestState() {
 
 export function adicionarSolicitacao(novaSolicitacao: ISolicitacao) {
     const newObJ = { ...novaSolicitacao }
-    const data = globalState._ica.projectTest.tables.solicitacoes || [];
+    const data = [...globalState._ica.projectTest.tables.solicitacoes] || [];
     newObJ.id = getNextIdSolicitacao();
     data.push(newObJ);
-    globalState.globalStateManagment.setState(`projectTest.tables.solicitacoes`, data);
+    globalState.globalStateManagment.setState(`projectTest.tables.solicitacoes`, data, true);
 }
 
 export function alterarStatusSolicitacao(newStatus: TStatus, index: number) {
     const data = globalState._ica.projectTest.tables.solicitacoes || [];
     if (!data[index]) throw new Error('Invalid row');
-    data[index].status = newStatus;
     globalState.globalStateManagment.setState(`projectTest.tables.solicitacoes[${index}].status`, newStatus);
 }
 
