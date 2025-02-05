@@ -26,8 +26,7 @@ const message_pt = {
     consoleA: 'Abrir console',
     consoleD: 'Fechar console',
     testA: 'Iniciar Teste',
-    testB: 'Teste Iniciado',
-    testC: 'Ação Iniciada',
+    testB: 'Finalizar Teste',
     testRun: 'Executar',
     testDelete: 'Excluir'
 
@@ -45,8 +44,7 @@ const message_en = {
     consoleA: 'Open console',
     consoleD: 'Close console',
     testA: 'Start Test',
-    testB: 'Test Started',
-    testC: 'Action Started',
+    testB: 'Stop Test',
     testRun: 'Run',
     testDelete: 'Delete',
 }
@@ -169,7 +167,6 @@ export class ServicePreview100554 extends ServiceBase {
                 options: [
                     { text: this.msg.testA, icon: collab_record.strings[0] },
                     { text: this.msg.testB, icon: collab_record.strings[0] },
-                    { text: this.msg.testC, icon: collab_stop.strings[0].trim() },
                 ]
             },
             testList: {
@@ -494,7 +491,15 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onBtTestClick() {
-        console.info('In Develpoment')
+
+        if (!this.menu || !this.menu.tools || !this.menu.tools.test || this.menu.tools.test.selected === undefined) return;
+        const selectedTest = this.menu.tools.test.selected;
+        if (selectedTest === ERecord.Play) {
+            console.info('play')
+        } else if (selectedTest === ERecord.Stop) {
+            console.info('stop')
+        }
+
     }
 
     private onBtTestListClick() {
@@ -748,6 +753,11 @@ export class ServicePreview100554 extends ServiceBase {
         return elements;
     }
 
+}
+
+enum ERecord {
+    "Stop" = 0,
+    "Play" = 1,
 }
 
 interface ILanguage {
