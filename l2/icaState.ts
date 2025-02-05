@@ -111,21 +111,64 @@ function setPathValue(obj: { [key: string]: any }, path: string, value: any): vo
 export class IcaState {
   private stateMap: Map<string, any> = new Map(); // values of variables
   private componentMap: Map<string, Set<Object>> = new Map(); // subscribes
+  private history: Array<{ timestamp: number; system: boolean; key: string; value: any }> = [];
 
   /**
-   * Update state for a given key.
+   * Updates the state for a given key.
    * @param key - The state key.
    * @param value - The new state value.
+   * @param systemChange - (optional) Set to true if setState is used in the constructor.
    */
-  setState(key: string, value: any): void {
+  setState(key: string, value: any, systemChange?: boolean): void {
+    // Default systemChange to this.inNotify if not provided
+    systemChange = systemChange ?? this.inNotify;
     const oldValue = this.stateMap.get(key);
+
     if (isTrace) console.info('setState key: ' + key + ' value=', value, ", oldValue=", oldValue)
     if (oldValue !== value) {
       this.stateMap.set(key, value);
       setPathValue(globalState._ica, key, value);
+      this.logHistory(key, value, systemChange);
       this.notify(key);
     }
   }
+
+  /**
+   * Logs the state change in history.
+   * @param key - The state key that was changed.
+   * @param value - The new state value.
+   * @param system - Indicates whether the change was made by the system.
+   */
+  private logHistory(key: string, value: any, system: boolean): void {
+    const entry = {
+      timestamp: Date.now(),
+      system,
+      key,
+      value
+    };
+
+    this.history.push(entry);
+
+    // Keep only the last 10,000 entries
+    if (this.history.length > 10000) {
+      this.history.shift();
+    }
+  }
+
+  /**
+   * Retrieves the history of state changes.
+   */
+  getHistory(): Array<{ timestamp: number; system: boolean; key: string; value: any }> {
+    return this.history;
+  }
+
+  /**
+   * clear all entries in the history
+   */
+  clearHistory() {
+    this.history = [];
+  }
+  
   /**
    * Retrieve state for a given key.
    * @param key - The state key.
@@ -164,22 +207,29 @@ export class IcaState {
     });
   }
 
+  inNotify: boolean = false;
+
   /**
    * Notify subscribed components about a state change.
    * @param key - The state key that changed.
    */
   notify(key: string): void {
 
-    Array.from(this.componentMap).find((map) => {
-      const [stateKey, arr] = map;
-      const path = stateKey.split(';')[1];
-      if (path !== key) return;
-      arr.forEach((component: any) => {
-        if ('handleIcaStateChange' in component) {
-          component['handleIcaStateChange'](key, this.getState(key));
-        }
-      });
-    })
+    try {
+      this.inNotify = true;
+      Array.from(this.componentMap).find((map) => {
+        const [stateKey, arr] = map;
+        const path = stateKey.split(';')[1];
+        if (path !== key) return;
+        arr.forEach((component: any) => {
+          if ('handleIcaStateChange' in component) {
+            component['handleIcaStateChange'](key, this.getState(key));
+          }
+        });
+      })
+    } finally {
+      this.inNotify = false;
+    }
   }
 
 
