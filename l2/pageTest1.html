@@ -17,6 +17,7 @@
 		<ica-forms-input-string-100554
 			widget="wc-input-text-100554"
 			label="Nome do solicitante"
+			value="{{ projectTest.page1.newRequest.solicitante }}"
 			id="">
 		</ica-forms-input-string-100554>
 		<ica-forms-input-select-one-100554
@@ -24,7 +25,7 @@
 			label="Departamentos"
 			hint="Selecione um departamento"
 			options="{{ projectTest.tables.depto }}"
-			selectedvalue="{{projectTest.tables.depto[0].value}}"
+			selectedvalue="{{ projectTest.page1.newRequest.depto }}"
 			id="">
 		</ica-forms-input-select-one-100554>
 		<ica-layout-flow-row-100554
@@ -38,24 +39,37 @@
 					label="Itens"
 					hint="Selecione um item para solicitação"
 					options="{{ projectTest.tables.products }}"
-					selectedvalue="{{projectTest.tables.products[0].value}}"
+					selectedvalue="{{ projectTest.page1.newRequest.item }}"
 					id="">
 				</ica-forms-input-select-one-100554>
 			</ica-layout-flow-column-100554>
 			<ica-layout-flow-column-100554
 				widget="wc-column-100554"
 				id="">
-				<ica-forms-input-string-100554
+				<ica-forms-input-number-100554
+					minvalue=1
 					widget="wc-input-number-with-buttons-100554"
 					label="Quantidade"
-					value="0"
+					value="{{ projectTest.page1.newRequest.quantidade }}"
 					id="">
-				</ica-forms-input-string-100554>
+				</ica-forms-input-number-100554>
+			</ica-layout-flow-column-100554>
+			<ica-layout-flow-column-100554
+				widget="wc-column-100554"
+				id="">
+				<ica-forms-input-number-100554
+					widget="wc-input-date-100554"
+					label="Data"
+					readonly
+					value="{{ projectTest.page1.newRequest.data }}"
+					id="">
+				</ica-forms-input-number-100554>
 			</ica-layout-flow-column-100554>
 		</ica-layout-flow-row-100554>
 		<ica-forms-input-string-100554
 			widget="wc-input-text-100554"
 			label="Justificativa"
+			value="{{ projectTest.page1.newRequest.justificativa }}"
 			id="">
 		</ica-forms-input-string-100554>
 		<ica-layout-flow-row-100554
@@ -64,18 +78,14 @@
 			<ica-forms-submit-submit-100554
 				id="btnSave"
 				data-event="click"
-				text="Salvar"
+				text="Abrir Solicitação"
 				widget="wc-button-submit-100554">
 			</ica-forms-submit-submit-100554>
 			<ica-forms-submit-submit-100554
-				text="Enviar para aprovação"
-				widget="wc-button-submit-100554"
-				id="">
-			</ica-forms-submit-submit-100554>
-			<ica-forms-submit-submit-100554
+				id="btnCancel"
 				text="Cancelar"
-				widget="wc-button-submit-100554"
-				id="">
+				data-event="click"
+				widget="wc-button-submit-100554">
 			</ica-forms-submit-submit-100554>
 		</ica-layout-flow-row-100554>
 	</ica-layout-flow-section-100554>

@@ -9,11 +9,10 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 export class WcTableSelect100554 extends IcaLayoutGroupTableBase {
 
     @propertyDataSource() data: any[] | undefined;
-    @property() columns: string[] | undefined;
+    @propertyDataSource() columns: string[] | undefined;
     @property() maxcolumn: number | undefined;
     @property() striped: boolean | undefined;
     @property() bordered: boolean | undefined;
-
 
     render() {
 
@@ -33,41 +32,27 @@ export class WcTableSelect100554 extends IcaLayoutGroupTableBase {
         `;
     }
 
+
     renderHeader() {
-
-        if (!this.data || this.data.length === 0) return html``;
-        let header = Object.keys(this.data[0]);
-
-        let max = this.maxcolumn && this.maxcolumn > 0 ? this.maxcolumn : header.length;
-
-        header = header.slice(0, max);
-
+        if (!this.data || this.data.length === 0) return html``; 
+        if (!this.columns) this.columns = Object.keys(this.data[0]);
         return html`
-            ${repeat(header, ((key: string) => key) as any, ((k: any, index: any) => { return html`<th>${k}</th>` }) as any)}
+            ${repeat(this.columns || [], ((key: string) => key) as any, ((k: any, index: any) => { return html`<th>${k}</th>` }) as any)}
         `
-
     }
 
     renderBody() {
-
         if (!this.data || this.data.length === 0) return html``;
-        let header = Object.keys(this.data[0]);
-
-        let max = this.maxcolumn && this.maxcolumn > 0 ? this.maxcolumn : header.length;
-
-        header = header.slice(0, max);
-
+        if (!this.columns) this.columns = Object.keys(this.data[0]);
         return html`
-            ${repeat(this.data, ((key: any, idx: number) => 'it' + idx) as any, ((k: any, index: any) => { return html`<tr .info=${{data:k, index:index}} @click=${this.selectItem}>${this.renderBodyItem(k, header)}</tr>` }) as any)}
+            ${repeat(this.data || [], ((key: any, idx: number) => 'it' + idx) as any, ((k: any, index: any) => { return html`<tr .info=${{ data: k, index: index }} @click=${this.selectItem}>${this.renderBodyItem(k, this.columns || [])}</tr>` }) as any)}
         `
     }
 
     renderBodyItem(item: any, h: string[]) {
-
         return html`
             ${repeat(h, ((key: string) => key) as any, ((k: any, index: any) => { return html`<td>${item[k]}</td>` }) as any)}
         `
-
     }
 
 
@@ -85,13 +70,12 @@ export class WcTableSelect100554 extends IcaLayoutGroupTableBase {
         if (!el) return;
 
         const info = (el as any).info;
-
-        const evento = new CustomEvent('item-selected', {
+        const event = new CustomEvent('item-selected', {
             detail: info,
             bubbles: true,
             composed: true,
         });
-        this.dispatchEvent(evento);
+        this.dispatchEvent(event);
 
     }
 
