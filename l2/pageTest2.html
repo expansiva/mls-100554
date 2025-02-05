@@ -14,7 +14,7 @@
 		<ica-layout-group-table-100554
 			widget="wc-table-select-100554"
 			data="{{projectTest.tables.fornecedores}}"
-			maxcolumn="3"
+			columns="{{projectTest.page2.columns}}"
 			id="tableSelect"
 			data-event="item-selected">
 		</ica-layout-group-table-100554>
@@ -52,8 +52,7 @@
 					widget="wc-select-one-100554"
 					id="selProds"
 					label="Produtos a adicionar"
-					options="{{ projectTest.tables.products }}"
-					>
+					options="{{ projectTest.tables.products }}">
 				</ica-forms-input-select-one-100554>
 				<ica-forms-submit-submit-100554
 					widget="wc-button-submit-100554"
@@ -76,34 +75,40 @@
 		<ica-layout-flow-divider-100554
 			widget="wc-divider-100554"
 			id="apDivider1">
-			<ica-layout-flow-row-100554
-				widget="wc-row-100554"
-				id="widget4">
-				<ica-forms-submit-submit-100554
-					widget="wc-button-submit-100554"
-					id="buttonNovo"
-					text="Novo"
-					data-event="click">
-				</ica-forms-submit-submit-100554>
-				<ica-forms-submit-submit-100554
-					widget="wc-button-submit-100554"
-					id="buttonSalvar"
-					text="Salvar"
-					data-event="click">
-				</ica-forms-submit-submit-100554>
-				<ica-forms-submit-submit-100554
-					widget="wc-button-submit-100554"
-					id="buttonCancelar"
-					text="Cancelar"
-					data-event="click">
-				</ica-forms-submit-submit-100554>
-				<ica-forms-submit-submit-100554
-					widget="wc-button-submit-100554"
-					id="buttonExcluir"
-					text="Excluir"
-					data-event="click">
-				</ica-forms-submit-submit-100554>
-			</ica-layout-flow-row-100554>
 		</ica-layout-flow-divider-100554>
+		<ica-layout-flow-row-100554
+			widget="wc-row-100554"
+			id="widget4">
+			<ica-forms-submit-submit-100554
+				widget="wc-button-submit-100554"
+				id="buttonNovo"
+				text="Novo"
+				data-event="click">
+			</ica-forms-submit-submit-100554>
+			<ica-forms-submit-submit-100554
+				widget="wc-button-submit-100554"
+				id="buttonSalvar"
+				text="Salvar"
+				data-event="click">
+			</ica-forms-submit-submit-100554>
+			<ica-forms-submit-submit-100554
+				widget="wc-button-submit-100554"
+				id="buttonCancelar"
+				text="Cancelar"
+				data-event="click">
+			</ica-forms-submit-submit-100554>
+			<ica-forms-submit-submit-100554
+				widget="wc-button-submit-100554"
+				id="buttonExcluir"
+				text="Excluir"
+				data-event="click">
+			</ica-forms-submit-submit-100554>
+		</ica-layout-flow-row-100554>
+		<ica-apresentation-text-text-100554
+			widget="wc-text-100554"
+			type="p"
+			text="{{projectTest.page2.error}}"
+			id="apText2">
+		</ica-apresentation-text-text-100554>
 	</ica-layout-flow-section-100554>
 </page-test2-100554>

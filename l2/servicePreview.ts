@@ -9,6 +9,7 @@ import { getConfigProject } from './_100554_libProjectConfig';
 import { globalState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_stop, collab_test } from './_100554_collabIcons';
+import { getScriptTest } from './_100554_libProcessTest';
 
 import './_100554_collabConsole';
 import './_100554_servicePreviewView';
@@ -494,12 +495,37 @@ export class ServicePreview100554 extends ServiceBase {
 
         if (!this.menu || !this.menu.tools || !this.menu.tools.test || this.menu.tools.test.selected === undefined) return;
         const selectedTest = this.menu.tools.test.selected;
+        
         if (selectedTest === ERecord.Play) {
-            console.info('play')
+            const iframe = window.preview.iframe;
+            if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment ) return;
+            const ica = (iframe.contentWindow as any).globalStateManagment;
+            ica.clearHistory();
+
         } else if (selectedTest === ERecord.Stop) {
-            console.info('stop')
+            const iframe = window.preview.iframe;
+            if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment ) return;
+            const ica = (iframe.contentWindow as any).globalStateManagment
+            const script = getScriptTest(ica);
+            this.fireEventsDetails(script);
         }
 
+    }
+
+    private fireEventsDetails(script:string) {
+
+        const options = {
+            shortName: undefined,
+            project: undefined,
+            htmlText: `<collab-process-test-100554 script='${btoa(script)}'></collab-process-test-100554>`
+        }
+
+        mls.events.fire(
+            mls.actualLevel as any,
+            'PluginDetails' as any,
+            JSON.stringify(options),
+            0
+        );
     }
 
     private onBtTestListClick() {
