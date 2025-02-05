@@ -523,7 +523,7 @@ const icaDescriptions: icaTypes.FormComponent[] = [
   },
   {
     group: "Forms / Input / Date",
-    attributes: "name,label,hint,required,disabled,readonly,autofocus,value,pattern,errormessage,placeholder",
+    attributes: "name,label,hint,required,disabled,readonly,autofocus,value,pattern,errormessage,maxvalue,minvalue",
     events: "change,input,focus,blur,invalid"
   },
   {
