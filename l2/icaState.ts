@@ -105,6 +105,13 @@ function setPathValue(obj: { [key: string]: any }, path: string, value: any): vo
   lastObj[last] = value;
 }
 
+export function setState(key: string, value: any, systemChange?: boolean): void { 
+
+  if (!globalState || !globalState.globalStateManagment) return;
+  globalState.globalStateManagment.setState(key, value, systemChange);
+
+}
+
 /**
  * Class responsible for managing shared state.
  */
