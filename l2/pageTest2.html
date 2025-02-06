@@ -16,7 +16,7 @@
 			data="{{projectTest.tables.fornecedores}}"
 			columns="{{projectTest.page2.columns}}"
 			id="tableSelect"
-			data-event="item-selected">
+			selected="{{projectTest.page2.indexSel}}">
 		</ica-layout-group-table-100554>
 		<ica-forms-input-string-100554
 			widget="wc-input-text-100554"
@@ -58,7 +58,7 @@
 					widget="wc-button-submit-100554"
 					id="buttonAddProd"
 					text="Adicionar Produto"
-					data-event="click">
+					clicked="{{projectTest.page2.addProd}}">
 				</ica-forms-submit-submit-100554>
 			</ica-layout-flow-column-100554>
 			<ica-layout-flow-column-100554
@@ -83,25 +83,25 @@
 				widget="wc-button-submit-100554"
 				id="buttonNovo"
 				text="Novo"
-				data-event="click">
+				clicked="{{projectTest.page2.newRow}}">
 			</ica-forms-submit-submit-100554>
 			<ica-forms-submit-submit-100554
 				widget="wc-button-submit-100554"
 				id="buttonSalvar"
 				text="Salvar"
-				data-event="click">
+				clicked="{{projectTest.page2.save}}">
 			</ica-forms-submit-submit-100554>
 			<ica-forms-submit-submit-100554
 				widget="wc-button-submit-100554"
 				id="buttonCancelar"
 				text="Cancelar"
-				data-event="click">
+				clicked="{{projectTest.page2.cancel}}">
 			</ica-forms-submit-submit-100554>
 			<ica-forms-submit-submit-100554
 				widget="wc-button-submit-100554"
 				id="buttonExcluir"
 				text="Excluir"
-				data-event="click">
+				clicked="{{projectTest.page2.del}}">
 			</ica-forms-submit-submit-100554>
 		</ica-layout-flow-row-100554>
 		<ica-apresentation-text-text-100554
