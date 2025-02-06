@@ -1,7 +1,8 @@
 /// <mls shortName="collabPageElement" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, PropertyValueMap } from 'lit';
 import { property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { IcaLitElement } from './_100554_icaLitElement';
+
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { IICADepths } from './_100554_icaTypes'
@@ -14,7 +15,7 @@ export function toPascalCase(str: string) {
     return str.replace(/(^\w|-\w)/g, match => match.replace('-', '').toUpperCase());
 }
 
-export abstract class CollabPageElement extends CollabLitElement {
+export abstract class CollabPageElement extends IcaLitElement {
 
     abstract initPage(): void
 

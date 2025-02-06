@@ -1,4 +1,5 @@
 /// <mls shortName="wcInputNumber" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
