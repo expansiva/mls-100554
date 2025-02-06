@@ -8,6 +8,7 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLi
 @customElement('wc-table-select-100554')
 export class WcTableSelect100554 extends IcaLayoutGroupTableBase {
 
+    @propertyDataSource() selected: number | undefined;
     @propertyDataSource() data: any[] | undefined;
     @propertyDataSource() columns: string[] | undefined;
     @property() maxcolumn: number | undefined;
@@ -70,6 +71,7 @@ export class WcTableSelect100554 extends IcaLayoutGroupTableBase {
         if (!el) return;
 
         const info = (el as any).info;
+        this.selected = info.index
         const event = new CustomEvent('item-selected', {
             detail: info,
             bubbles: true,
