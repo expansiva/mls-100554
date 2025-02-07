@@ -47,7 +47,7 @@
 				widget="wc-column-100554"
 				id="">
 				<ica-forms-input-number-100554
-					minvalue=1
+					minvalue="1"
 					widget="wc-input-number-with-buttons-100554"
 					label="Quantidade"
 					value="{{ projectTest.page1.newRequest.quantidade }}"
@@ -60,7 +60,7 @@
 				<ica-forms-input-number-100554
 					widget="wc-input-date-100554"
 					label="Data"
-					readonly
+					readonly=""
 					value="{{ projectTest.page1.newRequest.data }}"
 					id="">
 				</ica-forms-input-number-100554>
@@ -78,13 +78,15 @@
 			<ica-forms-submit-submit-100554
 				id="btnSave"
 				text="Abrir Solicitação"
-				clicked="{{ projectTest.page1.saving }}"
+				clicked-action="{{ projectTest.page1.action }}"
+				clicked-value="save"
 				widget="wc-button-submit-100554">
 			</ica-forms-submit-submit-100554>
 			<ica-forms-submit-submit-100554
 				id="btnCancel"
 				text="Cancelar"
-				clicked="{{ projectTest.page1.canceling }}"
+				clicked-action="{{ projectTest.page1.action }}"
+				clicked-value="cancel"
 				widget="wc-button-submit-100554">
 			</ica-forms-submit-submit-100554>
 		</ica-layout-flow-row-100554>

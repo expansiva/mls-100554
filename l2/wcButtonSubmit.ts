@@ -8,7 +8,9 @@ import { propertyDataSource } from './_100554_icaLitElement';
 @customElement('wc-button-submit-100554')
 export class WcButtonSubmit extends IcaFormsSubmitSubmitBase {
 
-    @propertyDataSource() clicked: boolean | undefined;
+    @propertyDataSource({ type: String, attribute: 'clicked-value' }) clickedValue: string | undefined;
+    @propertyDataSource({ type: String, attribute: 'clicked-action' }) clickedAction: string | undefined;
+
     @property({ type: String }) name: string | undefined;
     @property({ type: String }) title: string = '';
     @property({ type: String }) icon: string | undefined;
@@ -31,8 +33,7 @@ export class WcButtonSubmit extends IcaFormsSubmitSubmitBase {
     }
 
     handleClick() {
-        this.clicked = true;
+        this.clickedAction = this.clickedValue;
     }
-
 
 }
