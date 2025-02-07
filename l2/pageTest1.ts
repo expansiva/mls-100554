@@ -13,8 +13,7 @@ export class PageTest1100554 extends CollabPageElement {
 
         initTestState();
         initState('projectTest.page1', {
-            saving: false,
-            canceling: false,
+            action: '',
             newRequest: {
                 id: 0,
                 solicitante: '',
@@ -29,8 +28,7 @@ export class PageTest1100554 extends CollabPageElement {
 
         globalState.globalStateManagment.subscribe(
             [
-                'state/0;projectTest.page1.saving',
-                'state/0;projectTest.page1.canceling',
+                'state/0;projectTest.page1.action',
             ]
             , this);
 
@@ -39,12 +37,9 @@ export class PageTest1100554 extends CollabPageElement {
 
     handleIcaStateChange(_key: string, _value: any) {
 
-        if (_key === 'projectTest.page1.saving' && _value === true) {
-            this.handleClickBtnSave();
-        } else if (_key === 'projectTest.page1.canceling' && _value == true) {
-            this.handleClickBtnCancel();
-        }
-
+        if (_key !== 'projectTest.page1.action') return;
+        if (_value === 'save') this.handleClickBtnSave();
+        else if (_value === 'cancel') this.handleClickBtnCancel();
     }
 
     private clear() {
@@ -60,15 +55,17 @@ export class PageTest1100554 extends CollabPageElement {
 
 
     async handleClickBtnSave() {
+        console.info('Saving...');
         const novaSolicitacao: ISolicitacao = globalState._ica.projectTest.page1.newRequest;
         adicionarSolicitacao(novaSolicitacao);
         this.clear();
-        globalState.globalStateManagment.setState('projectTest.page1.saving', false, true);
+        globalState.globalStateManagment.setState('projectTest.page1.action', '', true);
     }
 
     async handleClickBtnCancel() {
+        console.info('Canceling...');
         this.clear();
-        globalState.globalStateManagment.setState('projectTest.page1.canceling', false, true);
+        globalState.globalStateManagment.setState('projectTest.page1.action', '', true);
     }
 
 }

@@ -20,7 +20,7 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
   return (proto: any, propName: PropertyKey): any => {
     // Define a Lit property with provided options.
     property(options)(proto, propName);
-    const attributeName = String(propName);
+    const attributeName = options?.attribute ? String(options.attribute) : String(propName);
 
     Object.defineProperty(proto, propName, {
       get() {
@@ -85,9 +85,11 @@ export function propertyDataSource(options?: PropertyDeclaration) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (proto: any, propName: PropertyKey): any => {
     // Define a Lit property with provided options.
+
+
     property(options)(proto, propName);
     // const { type } = options;
-    const attributeName = String(propName);
+    const attributeName = options?.attribute ? String(options.attribute) : String(propName);
 
     Object.defineProperty(proto, propName, {
       get() {
@@ -161,13 +163,13 @@ function getAttributeValueWithVariation(this: any, key: string): string {
   const actualVariation = this.globalVariation || 0;
   const languageByVariation = lang;
   const languageByVariationSimilar = languageByVariation.split('-')[0];
-  
+
   const defaultValue = this.getAttribute(key);
   if (actualVariation === 0) return defaultValue;
   const keyVariation = `${key}-${languageByVariation}`;
   const keyVariationSimilar = `${key}-${languageByVariationSimilar}`;
   let variationValue = this.getAttribute(keyVariation);
-  if(!variationValue) variationValue = this.getAttribute(keyVariationSimilar);
+  if (!variationValue) variationValue = this.getAttribute(keyVariationSimilar);
   return variationValue || defaultValue;
 }
 

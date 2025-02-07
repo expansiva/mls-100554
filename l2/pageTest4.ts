@@ -11,8 +11,7 @@ export class PageTest4 extends CollabPageElement {
         initTestState();
 
         initState('projectTest.page4', {
-
-            filtering: false,
+            action: '',
             filter: {
                 solicitante: '',
                 dataInicial: '',
@@ -26,14 +25,16 @@ export class PageTest4 extends CollabPageElement {
 
         globalState.globalStateManagment.subscribe(
             [
-                'state/0;projectTest.page4.filtering',
+                'state/0;projectTest.page4.action',
             ]
             , this);
 
     }
 
     handleIcaStateChange(_key: string, _value: any) {
-        if (_key === 'projectTest.page4.filtering' && _value === true) {
+        if (_key !== 'projectTest.page4.action') return;
+
+        if (_value === 'filter') {
             this.handleClickBtnFilter();
         }
     }
@@ -55,7 +56,7 @@ export class PageTest4 extends CollabPageElement {
         const data = [...globalState._ica.projectTest.tables.solicitacoes];
         const filtered = this.filterData(data, filterAtual);
         globalState.globalStateManagment.setState('projectTest.page4.actualData', filtered, true);
-        globalState.globalStateManagment.setState('projectTest.page4.filtering', false, true);
+        globalState.globalStateManagment.setState('projectTest.page4.filter', '', true);
         this.requestUpdate();
     }
 
