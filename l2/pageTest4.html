@@ -2,7 +2,7 @@
 	modeoverlay="wcd-overlay-mode-default-100554">
 	<ica-layout-flow-section-100554
 		id="section1"
-		class="inset"
+		class="full"
 		widget="wc-section-100554">
 		<ica-apresentation-text-text-100554
 			id="apText1"
@@ -33,7 +33,7 @@
                 <ica-forms-input-select-one-100554
                     widget="wc-select-one-100554"
                     label="Status"
-                    options="{{ projectTest.tables.status }}"
+                    options="{{ projectTest.page4.status }}"
                     selectedvalue="{{ projectTest.page4.filter.status }}"
                     id="">
                 </ica-forms-input-select-one-100554>
@@ -63,7 +63,7 @@
                 id="">
                 <ica-forms-submit-submit-100554
                     id="btnFilter"
-                    data-event="click"
+                    clicked="{{ projectTest.page4.filtering }}"
                     text="Filtrar"
                     widget="wc-button-submit-100554">
                 </ica-forms-submit-submit-100554>

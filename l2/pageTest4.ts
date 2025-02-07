@@ -11,16 +11,31 @@ export class PageTest4 extends CollabPageElement {
         initTestState();
 
         initState('projectTest.page4', {
+
+            filtering: false,
             filter: {
                 solicitante: '',
-                dataInicial: new Date().toISOString().split('T')[0],
+                dataInicial: '',
                 dataFinal: new Date().toISOString().split('T')[0],
-                status: 'Pendente',
+                status: '',
             },
             fields: ['id', 'solicitante', 'item', 'quantidade', 'data', 'status'],
+            status: [{ key: '', value: '' }].concat(...globalState._ica.projectTest.tables.status),
             actualData: [...globalState._ica.projectTest.tables.solicitacoes]
         });
 
+        globalState.globalStateManagment.subscribe(
+            [
+                'state/0;projectTest.page4.filtering',
+            ]
+            , this);
+
+    }
+
+    handleIcaStateChange(_key: string, _value: any) {
+        if (_key === 'projectTest.page4.filtering' && _value === true) {
+            this.handleClickBtnFilter();
+        }
     }
 
     private filterData(dados: ISolicitacao[], filtro: any) {
@@ -35,13 +50,12 @@ export class PageTest4 extends CollabPageElement {
     }
 
 
-
-    /// **collab_events_start**
-    async handleClickBtnFilter(e: CustomEvent) {
+    async handleClickBtnFilter() {
         const filterAtual = globalState._ica.projectTest.page4.filter;
         const data = [...globalState._ica.projectTest.tables.solicitacoes];
         const filtered = this.filterData(data, filterAtual);
-        globalState.globalStateManagment.setState('projectTest.page4.actualData', filtered);
+        globalState.globalStateManagment.setState('projectTest.page4.actualData', filtered, true);
+        globalState.globalStateManagment.setState('projectTest.page4.filtering', false, true);
         this.requestUpdate();
     }
 
