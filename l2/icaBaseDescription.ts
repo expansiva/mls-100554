@@ -638,7 +638,7 @@ const icaDescriptions: icaTypes.FormComponent[] = [
   },
   {
     group: "Forms / Submit / Cancel",
-    attributes: "name,title,icon,text,disabled,form",
+    attributes: "name,title,icon,text,disabled,form,clicked-value,clicked-action",
     events: "click,submit,focus,blur"
   },
   {
@@ -1031,7 +1031,11 @@ const attributeDefinitions: icaTypes.AttributeDefinition[] = [
 
   { path: "framework", lit: "@property({ type: String }) framework: string | undefined;" },
   { path: "renderer", lit: "@property({ type: String }) renderer: string | undefined;" },
-  { path: "readonly", lit: "@property({ type: Boolean }) readonly: boolean | undefined;" }
+  { path: "readonly", lit: "@property({ type: Boolean }) readonly: boolean | undefined;" },
+
+  { path: "clicked-action", lit: "@propertyDataSource({ type: String, attribute: 'clicked-action' }) clickedAction: string | undefined;" },
+  { path: "clicked-value", lit: "@propertyDataSource({ type: String, attribute: 'clicked-value' }) clickedValue: string | undefined;" }
+
 
 ];
 
