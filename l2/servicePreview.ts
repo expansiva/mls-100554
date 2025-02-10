@@ -10,6 +10,7 @@ import { globalState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_stop, collab_test } from './_100554_collabIcons';
 import { getScriptTest } from './_100554_libProcessTest';
+import { getTestByFile, deleteTestByFile } from './_100554_libCommom';
 
 import './_100554_collabConsole';
 import './_100554_servicePreviewView';
@@ -379,7 +380,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private configureButtonsRight(enabled: boolean) {
-        const buttonsR = this.nav3Service?.querySelector('mls-nav3-100529 .buttons-right') as HTMLElement;
+        const buttonsR = this.nav3Service?.querySelector('collab-nav-3-menu .tools') as HTMLElement;
         if (!buttonsR) return;
         buttonsR.style.opacity = enabled ? '1' : '.2';
         buttonsR.style.pointerEvents = enabled ? 'all' : 'none';
@@ -484,10 +485,21 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async setTest() {
 
-        if (this.menu.tools.testList) this.menu.tools.testList.options = [
-            { text: `${this.msg.testRun} test1` },
-            { text: `${this.msg.testDelete} test1` },
-        ];
+        if (!(mls.actual[2] as any).left) return;
+
+        const { project, shortName } = (mls.actual[2] as any).left;
+        const data = await getTestByFile(project, shortName, '.html');
+        const opts = data.flatMap((item, index: number) => {
+            const idx = index + 1;
+            return [
+                { text: `${idx}:${this.msg.testRun} ${item.title}` },
+                { text: `${idx}:${this.msg.testDelete} ${item.title}` },]
+        });
+
+        if (this.menu.tools.testList) {
+            this.menu.tools.testList.selected = 0;
+            this.menu.tools.testList.options = opts;
+        }
         if (this.menu.refresh) this.menu.refresh();
     }
 
@@ -495,16 +507,16 @@ export class ServicePreview100554 extends ServiceBase {
 
         if (!this.menu || !this.menu.tools || !this.menu.tools.test || this.menu.tools.test.selected === undefined) return;
         const selectedTest = this.menu.tools.test.selected;
-        
+
         if (selectedTest === ERecord.Play) {
             const iframe = window.preview.iframe;
-            if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment ) return;
+            if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
             const ica = (iframe.contentWindow as any).globalStateManagment;
             ica.clearHistory();
 
         } else if (selectedTest === ERecord.Stop) {
             const iframe = window.preview.iframe;
-            if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment ) return;
+            if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
             const ica = (iframe.contentWindow as any).globalStateManagment
             const script = getScriptTest(ica);
             this.fireEventsDetails(script);
@@ -512,7 +524,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     }
 
-    private fireEventsDetails(script:string) {
+    private fireEventsDetails(script: string) {
 
         const options = {
             shortName: undefined,
@@ -528,8 +540,25 @@ export class ServicePreview100554 extends ServiceBase {
         );
     }
 
-    private onBtTestListClick() {
-        console.info('In Develpoment')
+    private async onBtTestListClick() {
+
+        if (!(mls.actual[2] as any).left) return;
+        if (!this.menu || !this.menu.tools || !this.menu.tools.testList || this.menu.tools.testList.selected === undefined) return;
+        const { project, shortName } = (mls.actual[2] as any).left;
+        const selectedIndex = this.menu.tools.testList.selected;
+        const selectedItem = this.menu.tools.testList.options[this.menu.tools.testList.selected];
+        const indexToDelete = Number.parseInt(selectedItem.text.split(':')[0]) - 1;
+        const action = selectedIndex % 2 === 0 ? 'run' : 'delete';
+        if (action === 'run') {
+            console.info('In development');
+            return;
+        }
+
+        if (action === 'delete') {
+            await deleteTestByFile(project, shortName, '.html', indexToDelete);
+            this.setTest();
+        }
+
     }
 
     private onBtLanguageClick() {
@@ -684,8 +713,9 @@ export class ServicePreview100554 extends ServiceBase {
     private async preview(mode: string) {
 
         if (!(mls.actual[2] as any).left || !this.watch) return true;
-
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
+
+        this.setTest();
 
         //this.menu.title = 'Preview: ' + fullname;
         this.menu.title = '';
@@ -780,6 +810,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
 }
+
 
 enum ERecord {
     "Stop" = 0,
