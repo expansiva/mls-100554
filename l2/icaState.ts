@@ -194,6 +194,7 @@ export class IcaState {
   subscribe(keyOrKeys: string | string[], component: Object): void {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
     keys.forEach((key) => {
+      if (!key.includes(';')) key = `;${key}`;
       if (!this.componentMap.has(key)) {
         this.componentMap.set(key, new Set());
       }
