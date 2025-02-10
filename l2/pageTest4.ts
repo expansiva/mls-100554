@@ -2,7 +2,7 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
-import { globalState, initState } from './_100554_icaState';
+import { globalState, initState, setState } from './_100554_icaState';
 import { initTestState, ISolicitacao } from './_100554_testPagesState';
 @customElement('page-test4-100554')
 export class PageTest4 extends CollabPageElement {
@@ -25,7 +25,7 @@ export class PageTest4 extends CollabPageElement {
 
         globalState.globalStateManagment.subscribe(
             [
-                'state/0;projectTest.page4.action',
+                'projectTest.page4.action',
             ]
             , this);
 
@@ -55,8 +55,8 @@ export class PageTest4 extends CollabPageElement {
         const filterAtual = globalState._ica.projectTest.page4.filter;
         const data = [...globalState._ica.projectTest.tables.solicitacoes];
         const filtered = this.filterData(data, filterAtual);
-        globalState.globalStateManagment.setState('projectTest.page4.actualData', filtered, true);
-        globalState.globalStateManagment.setState('projectTest.page4.filter', '', true);
+        setState('projectTest.page4.actualData', filtered, true);
+        setState('projectTest.page4.filter', '', true);
         this.requestUpdate();
     }
 

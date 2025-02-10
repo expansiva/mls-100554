@@ -2,12 +2,12 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
-import { globalState, initState } from './_100554_icaState';
+import { globalState, initState, setState } from './_100554_icaState';
 import { initTestState, adicionarSolicitacao, ISolicitacao } from './_100554_testPagesState';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
 
 @customElement('page-test1-100554')
 export class PageTest1100554 extends CollabPageElement {
+
 
     initPage() {
 
@@ -28,7 +28,7 @@ export class PageTest1100554 extends CollabPageElement {
 
         globalState.globalStateManagment.subscribe(
             [
-                'state/0;projectTest.page1.action',
+                'projectTest.page1.action',
             ]
             , this);
 
@@ -43,14 +43,14 @@ export class PageTest1100554 extends CollabPageElement {
     }
 
     private clear() {
-        globalState.globalStateManagment.setState('projectTest.page1.newRequest.id', 0, true);
-        globalState.globalStateManagment.setState('projectTest.page1.newRequest.solicitante', '', true);
-        globalState.globalStateManagment.setState('projectTest.page1.newRequest.item', 'Computadores e notebooks', true);
-        globalState.globalStateManagment.setState('projectTest.page1.newRequest.quantidade', '1', true);
-        globalState.globalStateManagment.setState('projectTest.page1.newRequest.data', new Date().toISOString().split('T')[0], true);
-        globalState.globalStateManagment.setState('projectTest.page1.newRequest.status', 'Pendente', true);
-        globalState.globalStateManagment.setState('projectTest.page1.newRequest.depto', 'Tecnologia da Informação', true);
-        globalState.globalStateManagment.setState('projectTest.page1.newRequest.justificativa', '', true);
+        setState('projectTest.page1.newRequest.id', 0, true);
+        setState('projectTest.page1.newRequest.solicitante', '', true);
+        setState('projectTest.page1.newRequest.item', 'Computadores e notebooks', true);
+        setState('projectTest.page1.newRequest.quantidade', '1', true);
+        setState('projectTest.page1.newRequest.data', new Date().toISOString().split('T')[0], true);
+        setState('projectTest.page1.newRequest.status', 'Pendente', true);
+        setState('projectTest.page1.newRequest.depto', 'Tecnologia da Informação', true);
+        setState('projectTest.page1.newRequest.justificativa', '', true);
     }
 
 
@@ -59,13 +59,13 @@ export class PageTest1100554 extends CollabPageElement {
         const novaSolicitacao: ISolicitacao = globalState._ica.projectTest.page1.newRequest;
         adicionarSolicitacao(novaSolicitacao);
         this.clear();
-        globalState.globalStateManagment.setState('projectTest.page1.action', '', true);
+        setState('projectTest.page1.action', '', true);
     }
 
     async handleClickBtnCancel() {
         console.info('Canceling...');
         this.clear();
-        globalState.globalStateManagment.setState('projectTest.page1.action', '', true);
+        setState('projectTest.page1.action', '', true);
     }
 
 }
