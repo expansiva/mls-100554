@@ -17,11 +17,7 @@ export class PageTest2100554 extends CollabPageElement {
             columns:['empresa','cnpj','endereco'],
             error: '',
             indexSel: -1,
-            save: false,
-            cancel: false,
-            newRow: false,
-            del: false,
-            addProd:false,
+            action:'',
             selecionado: {
                 empresa: '',
                 cnpj: '',
@@ -32,12 +28,8 @@ export class PageTest2100554 extends CollabPageElement {
         });
 
         globalState.globalStateManagment.subscribe([
-            'data/0;projectTest.page2.indexSel',
-            'data/0;projectTest.page2.newRow',
-            'data/0;projectTest.page2.save',
-            'data/0;projectTest.page2.cancel',
-            'data/0;projectTest.page2.del',
-            'data/0;projectTest.page2.addProd'
+            'projectTest.page2.indexSel',
+            'projectTest.page2.action'
         ], this)
 
     }
@@ -49,27 +41,27 @@ export class PageTest2100554 extends CollabPageElement {
             return;
         }
 
-        if (_key === 'projectTest.page2.newRow' && _value === true) {
+        if (_key === 'projectTest.page2.action' && _value === 'newRow') {
             this.onNew();
             return;
         }
 
-        if (_key === 'projectTest.page2.save' && _value === true) {
+        if (_key === 'projectTest.page2.action' && _value === 'save') {
             this.onSave();
             return;
         }
 
-        if (_key === 'projectTest.page2.cancel' && _value === true) {
+        if (_key === 'projectTest.page2.action' && _value === 'cancel') {
             this.onCancel();
             return;
         }
 
-        if (_key === 'projectTest.page2.del' && _value === true) {
+        if (_key === 'projectTest.page2.action' && _value === 'del') {
             this.onDel();
             return;
         }
 
-        if (_key === 'projectTest.page2.addProd' && _value === true) {
+        if (_key === 'projectTest.page2.action' && _value === 'addProd') {
             this.onAddProd();
             return;
         }
@@ -87,7 +79,7 @@ export class PageTest2100554 extends CollabPageElement {
 
     onNew() {
 
-        setState('projectTest.page2.newRow', false, true);
+        setState('projectTest.page2.action', '', true);
         setState('projectTest.page2.indexSel', -1, true);
         setState('projectTest.page2.error', '', true);
 
@@ -101,7 +93,7 @@ export class PageTest2100554 extends CollabPageElement {
 
     onSave() {
 
-        setState('projectTest.page2.save', false, true);
+        setState('projectTest.page2.action', '', true);
 
         let idx = globalState._ica.projectTest.page2.indexSel;
         let ret = this.validarReg();
@@ -135,7 +127,7 @@ export class PageTest2100554 extends CollabPageElement {
 
     onCancel() {
 
-        setState('projectTest.page2.cancel', false, true);
+        setState('projectTest.page2.action', '', true);
 
         const idx = globalState._ica.projectTest.page2.indexSel;
 
@@ -155,7 +147,7 @@ export class PageTest2100554 extends CollabPageElement {
 
     onDel() {
 
-        setState('projectTest.page2.del', false, true);
+        setState('projectTest.page2.action', '', true);
 
         let idx = globalState._ica.projectTest.page2.indexSel;
 
@@ -177,7 +169,7 @@ export class PageTest2100554 extends CollabPageElement {
 
     private onAddProd() {
 
-        setState('projectTest.page2.addProd', false, true);
+        setState('projectTest.page2.action', '', true);
 
         const selProds = this.querySelector('#selProds') as any;
         if (!selProds) return;

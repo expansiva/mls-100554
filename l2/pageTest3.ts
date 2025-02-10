@@ -16,8 +16,7 @@ export class PageTest3100554 extends CollabPageElement {
             indexSel: -1,
             columns: ['id', 'solicitante', 'status'],
             error: '',
-            approve: false,
-            reject: false,
+            action:'',
             justificativa: '',
             id: -1,
             solicitante: '',
@@ -25,8 +24,7 @@ export class PageTest3100554 extends CollabPageElement {
 
         globalState.globalStateManagment.subscribe([
             'data/0;projectTest.page3.indexSel',
-            'data/0;projectTest.page3.approve',
-            'data/0;projectTest.page3.reject'
+            'data/0;projectTest.page3.action'
         ], this)
 
     }
@@ -38,12 +36,12 @@ export class PageTest3100554 extends CollabPageElement {
             return;
         }
 
-        if (_key === 'projectTest.page3.approve' && _value === true) {
+        if (_key === 'projectTest.page3.action' && _value === 'approve') {
             this.onApprove();
             return;
         }
 
-        if (_key === 'projectTest.page3.reject' && _value === true) {
+        if (_key === 'projectTest.page3.action' && _value === 'reject') {
             this.onReject();
             return;
         }
@@ -62,7 +60,7 @@ export class PageTest3100554 extends CollabPageElement {
 
     onApprove() {
 
-        setState(`projectTest.page3.approve`, false, true);
+        setState(`projectTest.page3.action`, '', true);
 
         const idx = globalState._ica.projectTest.page3.indexSel;
         const dt = [...globalState._ica.projectTest.tables.solicitacoes];
@@ -73,7 +71,7 @@ export class PageTest3100554 extends CollabPageElement {
 
     onReject() {
 
-        setState(`projectTest.page3.reject`, false, true);
+        setState(`projectTest.page3.action`, '', true);
 
         const idx = globalState._ica.projectTest.page3.indexSel;
         const jus = globalState._ica.projectTest.page3.justificativa;
