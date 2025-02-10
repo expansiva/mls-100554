@@ -286,4 +286,78 @@ export async function getEnhancementName(file: { project: number, shortName: str
     return enhacementName;
 }
 
+export async function getLocalStorageTest(): Promise<ILocalTest | undefined> {
+    const str = localStorage.getItem('collab_project_test');
+    if (!str) return undefined;
+    try {
+        const data: ILocalTest = JSON.parse(str);
+        return data
+    } catch (err: any) {
+        throw new Error('Error on parse test data');
+    }
+}
 
+export async function saveLocalStorageTest(data: ILocalTest) {
+    localStorage.setItem('collab_project_test', JSON.stringify(data));
+}
+
+export async function getTestByFile(project: number, shortName: string, ext: string): Promise<ILocalTestItem[]> {
+    let rc: ILocalTestItem[] = [];
+    try {
+        let data: ILocalTest | undefined = await getLocalStorageTest();
+        if (!data) return rc;
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
+        rc = data[key] || [];
+    } catch (err: any) {
+        throw new Error(err);
+    } finally {
+        return rc;
+    }
+}
+
+export async function deleteTestByFile(project: number, shortName: string, ext: string, index: number) {
+    const data = await getTestByFile(project, shortName, '.html');
+    if (!data) return;
+    if (index >= 0 && index < data.length) {
+        data.splice(index, 1);
+    }
+    await updateTestByFile(project, shortName, ext, data);
+}
+
+export async function updateTestByFile(project: number, shortName: string, ext: string, items: ILocalTestItem[]) {
+    const allTest = await getLocalStorageTest();
+    if (!allTest) return;
+    const key = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
+    if (!allTest[key]) return;
+    allTest[key] = items;
+    await saveLocalStorageTest(allTest);
+}
+
+export async function saveTest(key: string, script: string, title: string): Promise<string> {
+    try {
+        if (!script || !title) return 'Erro need information';
+        const lh = localStorage.getItem('collab_project_test');
+        const j: any = lh ? JSON.parse(lh) : {};
+        const info = {
+            script: btoa(script),
+            title,
+            date: new Date(Date.now()).toLocaleString()
+        };
+        if (j[key]) j[key].push(info);
+        else j[key] = [info];
+        await saveLocalStorageTest(j);
+        return 'ok';
+    } catch (e) {
+        return 'Erro to save test';
+    }
+}
+
+export interface ILocalTest {
+    [key: string]: ILocalTestItem[]
+}
+
+export interface ILocalTestItem {
+    script: string,
+    title: string,
+    date: string
+}
