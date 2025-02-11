@@ -8,9 +8,9 @@ import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { globalState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
-import { collab_record, collab_stop, collab_test } from './_100554_collabIcons';
+import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from './_100554_collabIcons';
 import { getScriptTest } from './_100554_libProcessTest';
-import { getTestByFile, deleteTestByFile } from './_100554_libCommom';
+import { getTestByFile, deleteTestByFile, ILocalTestItem } from './_100554_libCommom';
 
 import './_100554_collabConsole';
 import './_100554_servicePreviewView';
@@ -30,7 +30,8 @@ const message_pt = {
     testA: 'Iniciar Teste',
     testB: 'Finalizar Teste',
     testRun: 'Executar',
-    testDelete: 'Excluir'
+    testDelete: 'Excluir',
+    testEdit: 'Editar',
 
 }
 
@@ -49,6 +50,7 @@ const message_en = {
     testB: 'Stop Test',
     testRun: 'Run',
     testDelete: 'Delete',
+    testEdit: 'Edit',
 }
 
 type MessageType = typeof message_en;
@@ -172,9 +174,9 @@ export class ServicePreview100554 extends ServiceBase {
                 ]
             },
             testList: {
-                type: 'dropdown',
+                type: 'tree-dropdown',
                 icon: collab_test.strings[0].trim(),
-                selected: 0,
+                selected: [],
                 options: []
             },
             darkLight: {
@@ -483,21 +485,29 @@ export class ServicePreview100554 extends ServiceBase {
         return htmlEl;
     }
 
+    private actualTestList: ILocalTestItem[] = [];
+
     private async setTest() {
 
         if (!(mls.actual[2] as any).left) return;
 
         const { project, shortName } = (mls.actual[2] as any).left;
-        const data = await getTestByFile(project, shortName, '.html');
-        const opts = data.flatMap((item, index: number) => {
-            const idx = index + 1;
-            return [
-                { text: `${idx}:${this.msg.testRun} ${item.title}` },
-                { text: `${idx}:${this.msg.testDelete} ${item.title}` },]
-        });
+        this.actualTestList = await getTestByFile(project, shortName, '.html');
+
+        const opts = this.actualTestList.map((item, index: number) => {
+            return {
+                text: item.title,
+                options: [
+                    { text: this.msg.testRun, icon: collab_play.strings[0] },
+                    { text: this.msg.testDelete, icon: collab_trash.strings[0] },
+                    { text: this.msg.testEdit, icon: collab_file_pen.strings[0] },
+                ]
+            }
+        },
+        );
+
 
         if (this.menu.tools.testList) {
-            this.menu.tools.testList.selected = 0;
             this.menu.tools.testList.options = opts;
         }
         if (this.menu.refresh) this.menu.refresh();
@@ -519,17 +529,22 @@ export class ServicePreview100554 extends ServiceBase {
             if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
             const ica = (iframe.contentWindow as any).globalStateManagment
             const script = getScriptTest(ica);
-            this.fireEventsDetails(script);
+            this.fireEventsDetails(btoa(script), '', 'new');
         }
 
     }
 
-    private fireEventsDetails(script: string) {
+    private fireEventsDetails(script: string, title: string, mode: 'new' | 'edit', indexEdit?: number) {
 
         const options = {
             shortName: undefined,
             project: undefined,
-            htmlText: `<collab-process-test-100554 script='${btoa(script)}'></collab-process-test-100554>`
+            htmlText: `<collab-process-test-100554 
+                ${indexEdit !== undefined ? `editIndex=${indexEdit}` : ''}
+                mode=${mode} 
+                title=${title || "newTest"} 
+                script=${script}
+            ></collab-process-test-100554>`
         }
 
         mls.events.fire(
@@ -543,28 +558,32 @@ export class ServicePreview100554 extends ServiceBase {
     private async onBtTestListClick() {
 
         if (!(mls.actual[2] as any).left) return;
-        if (!this.menu || !this.menu.tools || !this.menu.tools.testList || this.menu.tools.testList.selected === undefined) return;
+        if (!this.menu || !this.menu.tools || !this.menu.tools.testList) return;
+        const selectedIndex = this.menu.tools.testList.selected as number[];
+
+        const [testIndex, actionIndex] = selectedIndex;
         const { project, shortName } = (mls.actual[2] as any).left;
-        const selectedIndex = this.menu.tools.testList.selected;
-        const selectedItem = this.menu.tools.testList.options[this.menu.tools.testList.selected];
-        const indexToDelete = Number.parseInt(selectedItem.text.split(':')[0]) - 1;
-        const action = selectedIndex % 2 === 0 ? 'run' : 'delete';
-        if (action === 'run') {
-            console.info('In development');
-            return;
-        }
 
-        if (action === 'delete') {
-            await deleteTestByFile(project, shortName, '.html', indexToDelete);
+        if (actionIndex === ETestActions.Run) {
+            console.info(`Run index: ${testIndex}`);
+        } else if (actionIndex === ETestActions.Delete) {
+            await deleteTestByFile(project, shortName, '.html', testIndex);
             this.setTest();
-        }
+        } else if (actionIndex === ETestActions.Edit) {
+            const actualData = this.actualTestList[testIndex];
+            if (!actualData) {
+                this.error = 'Invalid test';
+                return;
+            }
+            this.fireEventsDetails(actualData.script, actualData.title, 'edit', testIndex);
 
+        }
     }
 
     private onBtLanguageClick() {
 
         if (this.menu.tools.languages.selected === undefined) return;
-        const opMenu = this.menu.tools.languages.options[this.menu.tools.languages.selected].text;
+        const opMenu = this.menu.tools.languages.options[this.menu.tools.languages.selected as number].text;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         if (htmlEl) htmlEl.lang = this.languages[opMenu].acronym;
         this.lang = this.languages[opMenu].acronym;
@@ -591,7 +610,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private onBtThemeClick() {
         if (this.menu.tools.theme.selected === undefined) return;
-        const opMenu = this.menu.tools.theme.options[this.menu.tools.theme.selected].text;
+        const opMenu = this.menu.tools.theme.options[this.menu.tools.theme.selected as number].text;
         this.actualTheme = opMenu;
         this.onStyleChanged();
         return true;
@@ -817,6 +836,11 @@ enum ERecord {
     "Play" = 1,
 }
 
+enum ETestActions {
+    "Run" = 0,
+    "Delete" = 1,
+    "Edit" = 2
+}
 interface ILanguage {
     [key: string]: { acronym: string, name: string }
 }

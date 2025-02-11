@@ -324,7 +324,7 @@ export async function deleteTestByFile(project: number, shortName: string, ext: 
     await updateTestByFile(project, shortName, ext, data);
 }
 
-export async function updateTestByFile(project: number, shortName: string, ext: string, items: ILocalTestItem[]) {
+async function updateTestByFile(project: number, shortName: string, ext: string, items: ILocalTestItem[]) {
     const allTest = await getLocalStorageTest();
     if (!allTest) return;
     const key = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
@@ -349,6 +349,21 @@ export async function saveTest(key: string, script: string, title: string): Prom
         return 'ok';
     } catch (e) {
         return 'Erro to save test';
+    }
+}
+
+export async function updateTest(fileKey: string, index: number, script: string, title: string): Promise<string> {
+    try {
+        if (!script || !title) return 'Error invalid fields';
+        const lh = await getLocalStorageTest();
+        if (!lh || !lh[fileKey] || !lh[fileKey][index]) { return `No found data test with index: ${index}`; }
+        lh[fileKey][index].title = title;
+        lh[fileKey][index].script = btoa(script);
+        lh[fileKey][index].date = new Date(Date.now()).toLocaleString()
+        await saveLocalStorageTest(lh);
+        return 'ok';
+    } catch (e) {
+        return `Error on update test: ${index}`;
     }
 }
 
