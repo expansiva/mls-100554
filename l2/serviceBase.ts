@@ -374,6 +374,13 @@ export interface IOptions {
     class?: string
 }
 
+export interface IOptionsSubMenu {
+    text: string,
+    icon?: string,
+    class?: string,
+    options: IOptions[]
+}
+
 export interface ITools {
     [key: string]: IToolsData
 }
@@ -389,13 +396,24 @@ export interface ITabs {
     options: IOptions[]
 }
 
-export interface IToolsData {
-    type: 'dropdown' | 'cycle' | 'link' | 'flags-dropdown',
-    selected?: number,
-    icon?: string,
-    class?: string
-    options: IOptions[]
+export interface IBaseToolsData {
+    icon?: string;
+    class?: string;
 }
+
+export interface IToolsData1 extends IBaseToolsData {
+    type: 'dropdown' | 'cycle' | 'link';
+    selected?: number;
+    options: IOptions[];
+}
+
+export interface IToolsData2 extends IBaseToolsData {
+    type: 'tree-dropdown';
+    selected?: number[];
+    options: IOptionsSubMenu[];
+}
+
+type IToolsData = IToolsData1 | IToolsData2;
 
 export interface IServiceMenu {
 
