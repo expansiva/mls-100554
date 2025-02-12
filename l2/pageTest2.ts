@@ -8,7 +8,7 @@ import { initTestState } from './_100554_testPagesState';
 @customElement('page-test2-100554')
 export class PageTest2100554 extends CollabPageElement {
 
-    initPage() {
+    initPage() { 
 
         
         initTestState();
@@ -99,8 +99,6 @@ export class PageTest2100554 extends CollabPageElement {
         let ret = this.validarReg();
         if (!ret) return;
 
-        setState(`projectTest.page2.error`, '', true);
-
         const i = Object.assign({}, globalState._ica.projectTest.page2.selecionado);
 
         i.produtos = typeof i.produtos === 'string' ? i.produtos.split(', ') : i.produtos;
@@ -121,6 +119,7 @@ export class PageTest2100554 extends CollabPageElement {
         setState(`projectTest.tables.fornecedores[${idx}].endereco`, i.endereco, true);
         setState(`projectTest.tables.fornecedores[${idx}].contato`, i.contato, true);
         setState(`projectTest.tables.fornecedores[${idx}].produtos`, i.produtos, true);
+        setState(`projectTest.page2.error`, 'Dados salvos', true);
 
 
     }
