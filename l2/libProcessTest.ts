@@ -65,7 +65,7 @@ export function getScriptTest(ica: IcaState): string {
 
     const jsdoc = `/**\n${jsdocParams}\n*\n${jsdocReturns}\n*/\n\n`;
 
-    return `<mls-script title="" description="">\n${jsdoc}${ret.join('\n')}\n</mls-script>`;
+    return `<collab-test-script title="" description="">\n${jsdoc}${ret.join('\n')}\n</collab-test-script>`;
 }
 
 function processValue(vl: any): string | number {
@@ -84,7 +84,7 @@ let lineIndex = -1;
 let lineWait = -1;
 const errors: string[] = [];
 
-export function runTest(iframe: HTMLIFrameElement) {
+export function runTest(iframe: HTMLIFrameElement, script:string) {
 
     if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
 
@@ -92,7 +92,7 @@ export function runTest(iframe: HTMLIFrameElement) {
     lineIndex = -1;
     lineWait = -1;
     iframeTest = iframe;
-    lines = test.split('\n');
+    lines = script.split('\n');
     
     lineIndex = 0;
     runLine();
@@ -109,7 +109,7 @@ function runLine() {
     }
 
     const l = lines[lineIndex];
-    if (l.startsWith('/**') || l.startsWith('*') || l.trim() === '') {
+    if (l.startsWith('/**') || l.startsWith('*') || l.startsWith('<') || l.trim() === '' ) {
         lineIndex++;
         runLine();
         return;
@@ -173,20 +173,23 @@ function finisheTest() {
 function extractKeyValue(text: string) {
 
     const key = extractKey(text);
+    let vlOri: any;
     let vl: any;
     if (text.startsWith('{{')) {
-        vl = text.split('->')?.pop()?.split('//')[0].replace(/\'/g, '').trim();
+        vlOri = text.split('->')?.pop()?.split('//')[0].trim();
     } else {
-        vl = text.split('->').shift()?.replace(/\'/g, '').trim();
+        vlOri = text.split('->').shift()?.trim();
     }
+
+    vl = vlOri.replace(/\'/g, '')
 
     try {
 
         if (!isNaN(vl) && vl !== '') {
-            vl = +vl;
+            if (!String(vlOri).startsWith("'")) vl = +vl;
         } else if (vl.indexOf('{') >= 0 || vl.indexOf('[') >= 0) {
             vl = JSON.parse(vl);
-        }
+        } 
 
         return { key, vl }
     } catch (e) {
