@@ -490,10 +490,8 @@ export class ServicePreview100554 extends ServiceBase {
     private async setTest() {
 
         if (!(mls.actual[2] as any).left) return;
-
         const { project, shortName } = (mls.actual[2] as any).left;
         this.actualTestList = await getTestByFile(project, shortName, '.html');
-
         const opts = this.actualTestList.map((item, index: number) => {
             return {
                 text: item.title,
@@ -506,10 +504,10 @@ export class ServicePreview100554 extends ServiceBase {
         },
         );
 
-
         if (this.menu.tools.testList) {
             this.menu.tools.testList.options = opts;
         }
+
         if (this.menu.refresh) this.menu.refresh();
     }
 
@@ -536,13 +534,14 @@ export class ServicePreview100554 extends ServiceBase {
 
     private fireEventsDetails(script: string, title: string, mode: 'new' | 'edit', indexEdit?: number) {
 
+        const _title = title || "newTest";
         const options = {
             shortName: undefined,
             project: undefined,
             htmlText: `<collab-process-test-100554 
                 ${indexEdit !== undefined ? `editIndex=${indexEdit}` : ''}
                 mode=${mode} 
-                title=${title || "newTest"} 
+                title="${_title}" 
                 script=${script}
             ></collab-process-test-100554>`
         }
