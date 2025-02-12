@@ -9,8 +9,8 @@ import { getConfigProject } from './_100554_libProjectConfig';
 import { globalState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from './_100554_collabIcons';
-import { getScriptTest } from './_100554_libProcessTest';
-import { getTestByFile, deleteTestByFile, ILocalTestItem } from './_100554_libCommom';
+import { getScriptTest, runTest } from './_100554_libProcessTest';
+import { getTests, deleteTest, ITests } from './_100554_libCommom';
 
 import './_100554_collabConsole';
 import './_100554_servicePreviewView';
@@ -157,7 +157,7 @@ export class ServicePreview100554 extends ServiceBase {
         },
         tabs: {
             group: 'Mode',
-            type: 'onlyicon',
+            type: 'full',
             selected: 0,
             options: [
                 { text: 'Desktop', icon: 'f390' },
@@ -485,13 +485,14 @@ export class ServicePreview100554 extends ServiceBase {
         return htmlEl;
     }
 
-    private actualTestList: ILocalTestItem[] = [];
+    private actualTestList: ITests[] = [];
 
     private async setTest() {
 
         if (!(mls.actual[2] as any).left) return;
         const { project, shortName } = (mls.actual[2] as any).left;
-        this.actualTestList = await getTestByFile(project, shortName, '.html');
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
+        this.actualTestList = await getTests(key);
         const opts = this.actualTestList.map((item, index: number) => {
             return {
                 text: item.title,
@@ -527,7 +528,7 @@ export class ServicePreview100554 extends ServiceBase {
             if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
             const ica = (iframe.contentWindow as any).globalStateManagment
             const script = getScriptTest(ica);
-            this.fireEventsDetails(btoa(script), '', 'new');
+            this.fireEventsDetails(btoa(encodeURIComponent(script)), '', 'new');
         }
 
     }
@@ -564,9 +565,11 @@ export class ServicePreview100554 extends ServiceBase {
         const { project, shortName } = (mls.actual[2] as any).left;
 
         if (actionIndex === ETestActions.Run) {
-            console.info(`Run index: ${testIndex}`);
+            const actualData = this.actualTestList[testIndex];
+            this.runTest(actualData);
         } else if (actionIndex === ETestActions.Delete) {
-            await deleteTestByFile(project, shortName, '.html', testIndex);
+            const key = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
+            await deleteTest(key, this.actualTestList[testIndex].title);
             this.setTest();
         } else if (actionIndex === ETestActions.Edit) {
             const actualData = this.actualTestList[testIndex];
@@ -574,9 +577,25 @@ export class ServicePreview100554 extends ServiceBase {
                 this.error = 'Invalid test';
                 return;
             }
-            this.fireEventsDetails(actualData.script, actualData.title, 'edit', testIndex);
+            this.fireEventsDetails(btoa(encodeURIComponent(actualData.script)), actualData.title, 'edit', testIndex);
 
         }
+    }
+
+    private runTest(info: ITests) {
+
+        const iframe = window.preview.iframe;
+        if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
+        const htmlScript = info.script;
+        const el = document.createElement('div');
+        el.innerHTML = htmlScript;
+        const elScript = el.querySelector(`collab-test-script[title="${info.title}"]`) as HTMLElement;
+        const script = elScript.innerText || '';
+        if (!script) {
+            this.setError(`Erro get test script :${info.title}`)
+            return;
+        }
+        runTest(iframe, script);
     }
 
     private onBtLanguageClick() {
