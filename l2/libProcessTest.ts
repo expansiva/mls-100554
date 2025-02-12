@@ -65,7 +65,7 @@ export function getScriptTest(ica: IcaState): string {
 
     const jsdoc = `/**\n${jsdocParams}\n*\n${jsdocReturns}\n*/\n\n`;
 
-    return jsdoc + ret.join('\n');
+    return `<mls-script title="" description="">\n${jsdoc}${ret.join('\n')}\n</mls-script>`;
 }
 
 function processValue(vl: any): string | number {
@@ -150,6 +150,8 @@ function verifyLine() {
 
         if (jv !== jvl) {
             errors.push(`line:${lineIndex}, key:${info.key}, expected: ${jvl}, received: ${jv}`);
+            finisheTest();
+            return;
         }
     
     }
@@ -170,7 +172,7 @@ function finisheTest() {
 
 function extractKeyValue(text: string) {
 
-    const key = extractValue(text);
+    const key = extractKey(text);
     let vl: any;
     if (text.startsWith('{{')) {
         vl = text.split('->')?.pop()?.split('//')[0].replace(/\'/g, '').trim();
@@ -193,7 +195,7 @@ function extractKeyValue(text: string) {
 
 }
 
-function extractValue(text: string) {
+function extractKey(text: string) {
     const regex = /{{(.*?)}}/;
     const match = text.match(regex);
 
