@@ -3,7 +3,6 @@ import { getMessageKey } from "./_100554_collabLitElement";
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
 
-
 /// **collab_i18n_start**
 const message_pt = {
     updatedToday: 'atualizado hoje',
@@ -287,7 +286,7 @@ export async function getEnhancementName(file: { project: number, shortName: str
 }
 
 export async function getLocalStorageTest(): Promise<ILocalTest | undefined> {
-    const str = localStorage.getItem('collab_project_test');
+    const str = localStorage.getItem('collab_interface_test');
     if (!str) return undefined;
     try {
         const data: ILocalTest = JSON.parse(str);
@@ -298,81 +297,114 @@ export async function getLocalStorageTest(): Promise<ILocalTest | undefined> {
 }
 
 export async function saveLocalStorageTest(data: ILocalTest) {
-    localStorage.setItem('collab_project_test', JSON.stringify(data));
+    localStorage.setItem('collab_interface_test', JSON.stringify(data));
 }
 
-export async function getTestByFile(project: number, shortName: string, ext: string): Promise<ILocalTestItem[]> {
-    let rc: ILocalTestItem[] = [];
+export async function addTest(key: string, script: string): Promise<void> {
+
+    if (!script) throw new Error('script missing');
+    let data = await getLocalStorageTest();
+    if (!data) data = {};
+    const dataByKey = data[key] || '';
+    const _tempDiv = document.createElement('div');
+    _tempDiv.innerHTML = script;
+
+    const newTest = _tempDiv.querySelector('collab-test-script');
+    if (!newTest) throw new Error('invalid script');
+
+    const title = newTest.getAttribute('title');
+    if (!title) throw new Error('title cannot be blank');
+    const htmlDecoded = decodeURIComponent(atob(dataByKey));
+    if (dataByKey) {
+        _tempDiv.innerHTML = htmlDecoded;
+        const hasTest = _tempDiv.querySelector(`collab-test-script[title="${title}"]`);
+        if (hasTest) throw new Error(`Test with title: ${title} already exists`);
+    }
+
+    const finalTest = `${htmlDecoded ? htmlDecoded + '\n\n' : ''}${script}`
+    data[key] = btoa(encodeURIComponent(finalTest));
+    await saveLocalStorageTest(data);
+
+}
+
+export async function getTests(key: string): Promise<ITests[]> {
+    let rc: ITests[] = [];
     try {
         let data: ILocalTest | undefined = await getLocalStorageTest();
         if (!data) return rc;
-        const key = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
-        rc = data[key] || [];
+        const dataByKey = data[key] || '';
+        const _tempDiv = document.createElement('div');
+        _tempDiv.innerHTML = decodeURIComponent(atob(dataByKey));
+        const allTest = Array.from(_tempDiv.querySelectorAll('collab-test-script'));
+        rc = allTest.map((test) => {
+            return {
+                title: test.getAttribute('title') || '',
+                description: test.getAttribute('description') || '',
+                script: test.outerHTML
+            }
+        });
+        return rc;
+
     } catch (err: any) {
         throw new Error(err);
-    } finally {
-        return rc;
     }
 }
 
-export async function deleteTestByFile(project: number, shortName: string, ext: string, index: number) {
-    const data = await getTestByFile(project, shortName, '.html');
-    if (!data) return;
-    if (index >= 0 && index < data.length) {
-        data.splice(index, 1);
-    }
-    await updateTestByFile(project, shortName, ext, data);
-}
-
-async function updateTestByFile(project: number, shortName: string, ext: string, items: ILocalTestItem[]) {
-    const allTest = await getLocalStorageTest();
-    if (!allTest) return;
-    const key = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
-    if (!allTest[key]) return;
-    allTest[key] = items;
-    await saveLocalStorageTest(allTest);
-}
-
-export async function saveTest(key: string, script: string, title: string): Promise<string> {
+export async function deleteTest(key: string, title: string) {
     try {
-        if (!script || !title) return 'Erro need information';
-        const lh = localStorage.getItem('collab_project_test');
-        const j: any = lh ? JSON.parse(lh) : {};
-        const info = {
-            script: btoa(script),
-            title,
-            date: new Date(Date.now()).toLocaleString()
-        };
-        if (j[key]) j[key].push(info);
-        else j[key] = [info];
-        await saveLocalStorageTest(j);
-        return 'ok';
-    } catch (e) {
-        return 'Erro to save test';
+        let data: ILocalTest | undefined = await getLocalStorageTest();
+        if (!data) return;
+        let dataByKey = data[key] || '';
+        const _tempDiv = document.createElement('div');
+        _tempDiv.innerHTML = decodeURIComponent(atob(dataByKey));;
+        const itemToRemove = _tempDiv.querySelector(`collab-test-script[title="${title}"]`);
+        if (itemToRemove) itemToRemove.remove();
+        data[key] = btoa(encodeURIComponent(_tempDiv.innerHTML));
+        await saveLocalStorageTest(data);
+    } catch (err: any) {
+        throw new Error(err);
     }
+
 }
 
-export async function updateTest(fileKey: string, index: number, script: string, title: string): Promise<string> {
+export async function updateTest(key: string, oldTitle: string, newScript: string): Promise<void> {
     try {
-        if (!script || !title) return 'Error invalid fields';
-        const lh = await getLocalStorageTest();
-        if (!lh || !lh[fileKey] || !lh[fileKey][index]) { return `No found data test with index: ${index}`; }
-        lh[fileKey][index].title = title;
-        lh[fileKey][index].script = btoa(script);
-        lh[fileKey][index].date = new Date(Date.now()).toLocaleString()
-        await saveLocalStorageTest(lh);
-        return 'ok';
-    } catch (e) {
-        return `Error on update test: ${index}`;
+        let data: ILocalTest | undefined = await getLocalStorageTest();
+        if (!data) return;
+        let dataByKey = data[key] || '';
+        const _tempDiv = document.createElement('div');
+        const _tempDiv2 = document.createElement('div');
+
+        _tempDiv.innerHTML = decodeURIComponent(atob(dataByKey));
+        _tempDiv2.innerHTML = newScript;
+        const newItemUpdated = _tempDiv2.querySelector('collab-test-script');
+        if (!newItemUpdated) throw new Error('invalid new script');
+
+
+        const allScripts = Array.from(_tempDiv.querySelectorAll('collab-test-script'))
+        for (let script of allScripts) {
+            const title = script.getAttribute('title');
+            if (title !== oldTitle) continue;
+            const newTitle = newItemUpdated.getAttribute('title');
+            const same = allScripts.filter((item) => item.getAttribute('title') === newTitle && item !== script);
+            if (same.length > 0) throw new Error(`The title: ${newTitle} is already in use`);
+            script.insertAdjacentElement("afterend", newItemUpdated);
+            script.remove();
+            break;
+        }
+        data[key] = btoa(encodeURIComponent(_tempDiv.innerHTML));
+        await saveLocalStorageTest(data);
+    } catch (err: any) {
+        throw new Error(err);
     }
 }
 
 export interface ILocalTest {
-    [key: string]: ILocalTestItem[]
+    [key: string]: string
 }
 
-export interface ILocalTestItem {
-    script: string,
+export interface ITests {
     title: string,
-    date: string
+    description: string,
+    script: string,
 }
