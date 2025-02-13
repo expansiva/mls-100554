@@ -229,15 +229,6 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onServiceClick(visible: boolean, reinit: boolean) {
 
-        if (this.menu.setTabActive) this.menu.setTabActive(this.lastMode);
-
-        // if (visible && !reinit && this.menu.setTabActive) {
-        //     this.menu.setTabActive(this.lastMode);
-        // } else if (visible && reinit && this.elPreview && this.menu.setTabActive && this.lastLevel == this.level) {
-        //     this.menu.setTabActive(this.lastMode);
-
-        // }
-
         if (this.elPreview) {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
@@ -352,6 +343,7 @@ export class ServicePreview100554 extends ServiceBase {
             if (this.watch) {
                 this.elPreview = undefined;
                 this.loading = false;
+                this.setTest();
                 this.onReloader();
                 //this.preview(this.lastModePreview)
             }
@@ -752,9 +744,6 @@ export class ServicePreview100554 extends ServiceBase {
         if (!(mls.actual[2] as any).left || !this.watch) return true;
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
 
-        this.setTest();
-
-        //this.menu.title = 'Preview: ' + fullname;
         this.menu.title = '';
         if (this.menu.updateTitle) this.menu.updateTitle();
         await this.fireWcdChanges();
