@@ -20,7 +20,7 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
   return (proto: any, propName: PropertyKey): any => {
     // Define a Lit property with provided options.
     property(options)(proto, propName);
-    const attributeName = options?.attribute ? String(options.attribute) : String(propName);
+    const attributeName = options?.attribute && typeof options.attribute === 'string' ? String(options.attribute) : String(propName);
 
     Object.defineProperty(proto, propName, {
       get() {
@@ -89,7 +89,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
 
     property(options)(proto, propName);
     // const { type } = options;
-    const attributeName = options?.attribute ? String(options.attribute) : String(propName);
+    const attributeName = options?.attribute && typeof options.attribute === 'string' ? String(options.attribute) : String(propName);
 
     Object.defineProperty(proto, propName, {
       get() {
