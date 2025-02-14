@@ -8,7 +8,6 @@ import { initTestState, adicionarSolicitacao, ISolicitacao } from './_100554_tes
 @customElement('page-test1-100554')
 export class PageTest1100554 extends CollabPageElement {
 
-
     initPage() {
 
         initTestState();
