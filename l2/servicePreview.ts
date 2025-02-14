@@ -11,6 +11,7 @@ import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from './_100554_collabIcons';
 import { getScriptTest, runTest } from './_100554_libProcessTest';
 import { getTests, deleteTest, ITests } from './_100554_libCommom';
+import { addTestInMonaco } from './_100554_libManagementFileTest';
 
 import './_100554_collabConsole';
 import './_100554_servicePreviewView';
@@ -136,7 +137,7 @@ export class ServicePreview100554 extends ServiceBase {
         else if (op === 'devConsole') this.toogleConsole();
         else if (op === 'help') this.onHelpClick();
         else if (op === 'test') this.onBtTestClick();
-        else if (op === 'testList') this.onBtTestListClick();
+        else if (op === 'testList') () => { }  // this.onBtTestListClick();
         else if (op === 'darkLight') this.onBtDarkLightClick();
         else if (['languages', 'theme'].includes(op)) { this.actButton(op); }
         else throw new Error('Invalid option')
@@ -520,7 +521,10 @@ export class ServicePreview100554 extends ServiceBase {
             if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
             const ica = (iframe.contentWindow as any).globalStateManagment
             const script = getScriptTest(ica);
-            this.fireEventsDetails(btoa(encodeURIComponent(script)), '', 'new');
+
+            if (!this.actualFile) return;
+            addTestInMonaco(`_${this.actualFile.project}_${this.actualFile.shortName}`, script)
+            // this.fireEventsDetails(btoa(encodeURIComponent(script)), '', 'new');
         }
 
     }
