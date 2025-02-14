@@ -201,7 +201,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				let ret: any = '';
 
-				if (['.html', '.ts', '.css', '.txt', '.json', '.md', '.js', '.less'].includes(ext)) {
+				if (['.html', '.ts', '.test.ts', '.css', '.txt', '.json', '.md', '.js', '.less'].includes(ext)) {
 
 					ret = await this.getFilesIO(fileInfo.project, fileName);
 
