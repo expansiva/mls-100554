@@ -194,8 +194,8 @@ export class ServicePage100554 extends ServiceBase {
 export type ITabType = 'icDetails' | 'icNavigation' | 'icProperties' | 'icIA';
 
 enum ESceneries {
-    'icNavigation' = 0,
-    'icProperties' = 1,
-    'icDetails' = 2,
+    'icDetails' = 0,
+    'icNavigation' = 1,
+    'icProperties' = 2,
     'icIA' = 3,
 } 

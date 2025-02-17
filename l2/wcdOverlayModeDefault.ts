@@ -1,6 +1,5 @@
 /// <mls shortName="wcdOverlayModeDefault" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
@@ -78,7 +77,7 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
         if(page){
             page.overlay?.remove();
             page.overlay = undefined;
-            page.refreshOverlay();
+            page.refreshOverlay(); 
         }
     }
 
@@ -101,7 +100,7 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
                 name: '_100554_wcdToolboxItemActionMenu',
                 position: 'p-m0',
                 args: '{}',
-                level: [2, 4]
+                level: [2, 3]
             },
             'events': {
                 name: '_100554_wcdToolboxItemActionEvents',
@@ -111,33 +110,52 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
             },
             'add': {
                 name: "_100554_wcdAdd",
-                level: [2, 4],
+                level: [2, 3],
                 position: 'p-l2',
                 args: '{ "buttons" : "image,unsplash,video,embed,code,part,add" }',
                 toolboxOptions: { background: 'none', border: 'none' }
             },
             'edit': {
                 name: "_100554_wcdToolboxItemActionEditText",
-                level: [2, 4],
+                level: [2, 3],
                 position: 'p-l0',
                 args: ''
             },
             'title': {
                 name: "_100554_wcdToolboxItemActionTitle",
                 level: [1, 2, 3, 4, 5, 6],
-                position: 'p-title',
+                position: 'p-title-top',
                 args: ''
             },
             'edit-code': {
                 name: "_100554_wcdToolboxItemActionEditCode",
-                level: [2, 4],
+                level: [2, 3],
                 position: 'p-l0',
                 args: ''
             },
             'code-language': {
                 name: "_100554_wcdToolboxItemActionCodeLanguage",
-                level: [2, 4],
+                level: [2, 3],
                 position: 'p-l0',
+                args: ''
+            },
+
+            'margin': {
+                name: "_100554_wcdToolboxItemActionMargin",
+                level: [3],
+                position: 'p-l4',
+                args: ''
+            },
+            'padding': {
+                name: "_100554_wcdToolboxItemActionPadding",
+                level: [3],
+                position: 'p-m4',
+                args: ''
+            },
+            'size': {
+                name: "_100554_wcdToolboxItemActionSize",
+                level: [3],
+                position: 'p-r4',
                 args: ''
             },
         }
