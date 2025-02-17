@@ -775,6 +775,7 @@ export class ServicePreview100554 extends ServiceBase {
         container.appendChild(consoleEl);
         if (this.menu.setMode) this.menu.setMode('page', container);
         this.configureButtonsRight(true);
+        mls.events.fire(3, 'WCDEventChange' as any);
         return true;
     }
 

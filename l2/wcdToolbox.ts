@@ -748,6 +748,14 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
             right:-6px;
         }
 
+        .p-title-top{
+            cursor:pointer;
+            display:block;
+            position:absolute;
+            top: -17px;
+            left: -6px;
+        }
+
         .p-r4{
             cursor:pointer;
             display:block;
@@ -758,7 +766,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
         .f-button{
             cursor:pointer;
-            background:var(--bg-primary-color)!important;
+            background:#fff!important;
             padding:5px;
             border-radius:5px;
             border: 1px solid var(--grey-color-darker);

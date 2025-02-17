@@ -15,6 +15,11 @@ export abstract class IcaLayoutGroupTable extends IcaLitElementBase {
 
         let rc: ActionTag[] = [
             { name: "events" },
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
         ]
         return rc;
 

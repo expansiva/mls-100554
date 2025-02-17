@@ -14,7 +14,8 @@ export class IcaFormsInputSelectOne extends IcaLitElementBase {
             { name: "padding" },
             { name: "menu" },
             { name: "size" },
-            { name: "events" },
+			{ name: "events" },
+            { name: "title" },
         ]
     }
 

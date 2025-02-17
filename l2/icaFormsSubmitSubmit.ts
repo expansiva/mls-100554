@@ -16,6 +16,7 @@ export abstract class IcaFormsSubmitSubmit extends IcaLitElementBase {
             { name: "menu" },
             { name: "size" },
             { name: "events" },
+            { name: "title" },
         ]
     }
 
