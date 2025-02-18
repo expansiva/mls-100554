@@ -4,6 +4,7 @@ import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
+import "./_100554_wcdToolboxItemActionEditAttrOut";
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -32,9 +33,23 @@ export class ServicePage100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
 
-    createRenderRoot() {
-        return this;
+    @property() activeTab: ITabType = 'icDetails';
+    @property() pluginNav: string = '';
+    @property() pluginProp: string = '';
+    @property() pluginsIA: { [key: string]: mls.plugin.MenuAction[] } = {};
+    @property() pluginIALoaded: boolean = false;
+
+
+    constructor() {
+        super();
+        this.setEvents();
     }
+
+    private setEvents(): void {
+        mls.events.addListener(3, 'WCDEvent' as any, (ev) => this.onWCDEvent(ev));
+    }
+
+    //-------SERVICE---------------
 
     public details: IService = {
         icon: '&#xf15b',
@@ -79,12 +94,13 @@ export class ServicePage100554 extends ServiceBase {
 
     }
 
-    @property() activeTab: ITabType = 'icDetails';
-    @property() pluginNav: string = '';
-    @property() pluginProp: string = '';
-    @property() pluginsIA: { [key: string]: mls.plugin.MenuAction[] } = {};
-    @property() pluginIALoaded: boolean = false;
+    //-------COMPONENT--------------
 
+    createRenderRoot() {
+        return this;
+    }
+
+    
     async firstUpdated() {
         if (this.menu.setTabActive) this.menu.setTabActive(ESceneries[this.activeTab]);
         await this.loadPlugins();
@@ -123,7 +139,7 @@ export class ServicePage100554 extends ServiceBase {
 
     renderProperties() {
         // this.openService('_100554_servicePreview', 'right', 3);
-        return html` ${this.pluginProp ? unsafeHTML(`<${this.pluginProp} .service=${this}></${this.pluginProp}>`) : `<div>${this.msg.loading}</div>`}`;
+        return html`<wcd-toolbox-item-action-edit-attr-out-100554></wcd-toolbox-item-action-edit-attr-out-100554>`;
     }
 
     renderDetails() {
@@ -150,6 +166,8 @@ export class ServicePage100554 extends ServiceBase {
             }
         `
     }
+
+    //---------IMPLEMENTATION------------
 
     private async loadPlugins() {
 
@@ -188,7 +206,25 @@ export class ServicePage100554 extends ServiceBase {
         this.requestUpdate();
     }
 
+    private onWCDEvent(ev: mls.events.IEvent) {
 
+        if (!ev.desc) return;
+        const data: IWCDParams = JSON.parse(ev.desc);
+        if (this.menu.setTabActive) {
+            this.openMe();
+            this.menu.setTabActive(ESceneries[data.op]);
+        }
+
+    }
+
+
+}
+
+export interface IWCDParams {
+    level: number,
+    position: 'left' | 'right',
+    wdcPath: string,
+    op: ITabType,
 }
 
 export type ITabType = 'icDetails' | 'icNavigation' | 'icProperties' | 'icIA';
