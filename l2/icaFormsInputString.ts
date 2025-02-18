@@ -17,6 +17,7 @@ export abstract class IcaFormsInputNumber extends IcaLitElementBase {
             { name: "size" },
             { name: "events" },
             { name: "title" },
+            { name: "attr" },
         ]
     }
 

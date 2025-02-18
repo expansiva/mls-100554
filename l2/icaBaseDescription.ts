@@ -1267,3 +1267,22 @@ export function getAtributtes(root: string, subGroup: string, finalGroup: string
   };
   return [];
 }
+
+export function getAtributtesByTag(tag: string): string[] {
+
+  if (!tag.toLocaleLowerCase().startsWith('ica-')) return [];
+
+  const base = tag.toLocaleLowerCase().replace('ica-', '');
+  const [root, subGroup, finalGroup] = base.split('-');
+
+  if (!root || !subGroup || !finalGroup) return [];
+
+  for (const component of icaDescriptions) {
+    const parts = component.group.split('/');
+    if (parts.length === 3 &&
+      parts[0].trim().toLowerCase() === (root).toLowerCase() &&
+      parts[1].trim().toLowerCase() === (subGroup).toLowerCase() &&
+      parts[2].trim().toLowerCase() === (finalGroup).toLowerCase()) return component.attributes?.split(',') || [];
+  };
+  return [];
+}

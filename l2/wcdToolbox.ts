@@ -29,7 +29,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     public elICA: tps.IcaLitElementBaseMethods | undefined; // ica base to wcd
 
-    private wcServiceICA: ServiceBase | undefined;
+    private wcServicePage: ServiceBase | undefined;
 
     public fcBeforeBackButton: Function | undefined = undefined;
 
@@ -310,22 +310,22 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
     private _getAndSetScenaryOutDoor(op: string): Promise<HTMLElement | undefined> {
 
         return new Promise<HTMLElement | undefined>((resolve, reject) => {
-            if (this.level !== '4') resolve(undefined);
+            if (this.level !== '3') resolve(undefined);
 
-            mls.events.fire(4, 'WCDEvent' as any, `{"op":"${op}"}`);
+            //mls.events.fire(4, 'WCDEvent' as any, `{"op":"${op}"}`);
             setTimeout(() => {
 
-                if (this.wcServiceICA) {
-                    resolve((this.wcServiceICA as any).querySelector('div'));
+                if (this.wcServicePage) {
+                    resolve((this.wcServicePage as any).querySelector('div'));
                 } else {
                     const nav3 = this.getNav3();
                     if (!nav3 || !this.elMain) resolve(undefined);
 
                     const wc = (nav3 as any).getActiveInstance('left');
                     if (!wc) resolve(undefined);
-                    if (wc.tagName !== 'SERVICE-ICA-100554') resolve(undefined);
+                    if (wc.tagName !== 'SERVICE-PAGE-100554') resolve(undefined);
                     else {
-                        this.wcServiceICA = wc;
+                        this.wcServicePage = wc;
                         resolve(wc.querySelector('div'));
                     }
 

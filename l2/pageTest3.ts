@@ -5,7 +5,7 @@ import { customElement, query } from 'lit/decorators.js';
 import { globalState, initState, setState } from './_100554_icaState';
 import { initTestState } from './_100554_testPagesState';
 
-@customElement('page-test3-100554')
+@customElement('page-test3-100554') 
 export class PageTest3100554 extends CollabPageElement {
 
     initPage() {
