@@ -11,14 +11,18 @@ export class LessASTTest100554 extends LitElement {
     model1 = mls.editor.models[this.fileName].test;
     fileToTest = '_100554_tsTestAST.test.ts';
 
+    @property() result: string = '';
 
     render() {
         return html`<p>testing file: ${this.fileToTest}</p>
-         <pre style="position: relative;white-space: pre-wrap;">test: <br>${this.exeTest()}</pre>
+         <button @click=${this.exeTest}>Run all Test</button>
+
+         <pre style="position: relative;white-space: pre-wrap;">Result: <br> ${this.result} </pre>
+         
          `;
     }
 
-    exeTest = (): string => {
+    exeTest = () => {
         if (!this.model1) return "undefined;";
         const editor = mls.services['100554_serviceSource_left']._ed1;
         if (!editor) return `No find editor`;
@@ -32,10 +36,7 @@ export class LessASTTest100554 extends LitElement {
 
         const testDeleteTest = this.test6(testAST, 'Test add');
 
-
-
-
-        return `result test1: ${testAst} \n\n
+        this.result = `result test1: ${testAst} \n\n
 ${'*'.repeat(100)}\n
 result test - get integrations: ${testGetIntegrations}  \n\n\n
 ${'*'.repeat(100)}\n
@@ -49,7 +50,6 @@ result test - add integration: ${testAddIntegration}  \n\n\n
 ${'*'.repeat(100)}\n
 result test - delete test: ${testDeleteTest}  \n\n\n
 ${'*'.repeat(100)}\n
-
 
         `;
     }
