@@ -279,14 +279,17 @@ export class PluginPageNavigation extends PluginBaseModule {
     private delEl(e: MouseEvent) {
 
         e.stopPropagation();
-        const el = e.target as HTMLElement;
+        this.cmdDel();
+        setTimeout(() => { this.requestUpdate(); }, 100);
+        
+        /*const el = e.target as HTMLElement;
         if (!el) return;
         const info: IInfoElCholdren = (el.parentElement as any).info;
         if (!info) return;
 
         info.el.remove();
 
-        this.requestUpdate();
+        this.requestUpdate();*/
 
     }
 
