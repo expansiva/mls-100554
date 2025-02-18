@@ -18,8 +18,8 @@ type ASTNode = {
     name?: string;
     value?: any;
     children?: ASTNode[];
-    startLine?: number;
-    endLine?: number;
+    startLine: number;
+    endLine: number;
 };
 
 
@@ -83,6 +83,16 @@ export class TsTestAst {
     }
 
     /**
+     * Deletes a test from the AST and updates the Monaco editor.
+     * @param {String} testName - The test name to be removed.
+     * @returns {boolean} True if the test was removed successfully, false otherwise.
+     * @throws {Error} Throws an error if the test already exists or if there are issues with the AST.
+     */
+    deleteTest(testName: string) {
+        return this._deleteTest(testName);
+    }
+
+    /**
      * Adds a new integration to the test file.
      * @param {ICANIntegration} integration - The integration to be added.
      * @param {Function} fc - The function associated with the integration.
@@ -98,7 +108,7 @@ export class TsTestAst {
      * @returns {ASTNode} The generated AST from the code.
      */
     private parseTypeScript(code: string): ASTNode {
-        const ast: ASTNode = { type: 'Program', children: [] };
+        const ast: ASTNode = { type: 'Program', children: [], endLine: 0, startLine: 0 };
         const totalLines = code.split('\n').length;
         ast.startLine = 1;
         ast.endLine = totalLines;
@@ -187,39 +197,91 @@ export class TsTestAst {
 
     /**
      * Parses and retrieves the integrations from the AST's children.
-     * @returns {any[]} The parsed integrations.
+     * @returns {ICANIntegration[]} The parsed integrations.
      * @throws {Error} Throws an error if parsing the integrations fails.
      */
     private _getIntegrations(): ICANIntegration[] {
         if (!this.ast) return [];
-        const integrationsAst = this.ast.children?.find((item) => item.type === 'ArrayDeclaration' && item.name === 'integrations');
+
+        const integrationsAst = this.ast.children?.find(
+            (item) => item.type === 'ArrayDeclaration' && item.name === 'integrations'
+        );
+
         if (!integrationsAst || !integrationsAst.value) return [];
-        const validJson = integrationsAst.value.replace(/'/g, '"');
+        let rawValue = integrationsAst.value;
+
+        rawValue = rawValue
+            .replace(/([a-zA-Z0-9_]+)\s*:/g, '"$1":')
+            .replace(/'/g, '"')
+            .replace(/,\s*([\]}])/g, '$1');
+
         try {
-            const rc = eval(validJson);
-            return rc;
-        } catch (err: any) {
-            throw new Error('Error on parse integrations')
+            const parsed = JSON.parse(rawValue);
+            if (!Array.isArray(parsed)) {
+                throw new Error('Parsed integrations is not an array');
+            }
+
+            for (const integration of parsed) {
+                if (
+                    typeof integration.description !== 'string' ||
+                    typeof integration.functionName !== 'string' ||
+                    typeof integration.page !== 'string' ||
+                    typeof integration.enabled !== 'boolean' ||
+                    typeof integration.params !== 'object'
+                ) {
+                    throw new Error('Invalid integration object structure');
+                }
+            }
+
+            return parsed as ICANIntegration[];
+        } catch (err) {
+            throw new Error(`Failed to parse integrations: ${(err as Error).message}`);
         }
     }
 
+
     /**
      * Parses and retrieves the tests from the AST's children.
-     * @returns {any[]} The parsed tests.
+     * @returns {ICANTest[]} The parsed tests.
      * @throws {Error} Throws an error if parsing the tests fails.
      */
     private _getTests(): ICANTest[] {
         if (!this.ast) return [];
-        const testsAst = this.ast.children?.find((item) => item.type === 'ArrayDeclaration' && item.name === 'tests');
+
+        const testsAst = this.ast.children?.find(
+            (item) => item.type === 'ArrayDeclaration' && item.name === 'tests'
+        );
+
         if (!testsAst || !testsAst.value) return [];
-        const validJson = testsAst.value.replace(/'/g, '"');
+        let rawValue = testsAst.value;
+
+
+        rawValue = rawValue
+            .replace(/([a-zA-Z0-9_]+)\s*:/g, '"$1":')
+            .replace(/'/g, '"')
+            .replace(/,\s*([\]}])/g, '$1');
+
         try {
-            const rc = eval(validJson);
-            return rc;
-        } catch (err: any) {
-            throw new Error('Error on parse test')
+            const parsed = JSON.parse(rawValue);
+            if (!Array.isArray(parsed)) {
+                throw new Error('Parsed tests is not an array');
+            }
+
+            for (const test of parsed) {
+                if (
+                    typeof test.title !== 'string' ||
+                    typeof test.functionName !== 'string' ||
+                    typeof test.params !== 'object'
+                ) {
+                    throw new Error('Invalid test object structure');
+                }
+            }
+            return parsed as ICANTest[];
+        } catch (err) {
+            throw new Error(`Failed to parse tests: ${(err as Error).message}`);
         }
     }
+
 
     /**
      * Internal method to add a test to the AST and update the Monaco editor.
@@ -255,12 +317,54 @@ export class TsTestAst {
     }
 
     /**
-     * Deletes a test from the AST and updates the Monaco editor.
+     * Internal method to deletes a test from the AST and updates the Monaco editor.
      * @param {string} testName - The name of the test to delete.
      * @throws {Error} Throws an error if the test does not exist or deletion fails.
      */
     private _deleteTest(testName: string) {
+        this.ast = this.parse();
+        const tests = this._getTests();
+        const testToDelet = tests.find((t) => t.title === testName);
+        if (!this.modelTest) throw new Error('Invalid test model');
+        if (!testToDelet) throw new Error(`Test with title "${testName}" dont exists`);
+        const testAST = this.ast?.children?.find((ast) => ast.type === 'ArrayDeclaration' && ast.name === 'tests');
 
+        if (testAST) {
+            const index = tests.findIndex(item => item.title === testToDelet.title);
+            console.info({ index })
+            if (index !== -1) {
+                tests.splice(index, 1);
+            }
+            let newTest = JSON.stringify(tests, null, 2)
+                .replace(/"(\w+)":/g, '$1:');
+
+            newTest = `export const tests: ICANTest[] = ${newTest} \n`;
+            this.monacoDriver.replaceLines(this.modelTest.model, testAST.startLine, testAST.endLine, newTest);
+        }
+
+        this._deleteFunction(testToDelet.functionName);
+
+        this.ast = this.parse();
+        this._formatEditor(this.modelTest.model);
+        return true;
+    }
+
+    /**
+     * Intenal method to delete a function on the AST and updates the Monaco editor.
+     * @param {String} fcName - The function name to be deleted.
+     * @returns {boolean} True if the function was successfully deleted.
+     * @throws {Error} Throws an error if the test model is invalid.
+     */
+    private _deleteFunction(fcName: string) {
+
+        if (!this.modelTest) throw new Error('Invalid test model');
+        this.ast = this.parse();
+        const fcAST = this.ast?.children?.find((ast) => ast.type === 'FunctionDeclaration' && ast.name === fcName);
+        if (!fcAST) return false;
+        const countLine = (fcAST.endLine - fcAST.startLine) + 1;
+        this.monacoDriver.deleteLines(this.modelTest.model, fcAST.startLine, countLine);
+        this.monacoDriver.finishEdit(this.modelTest.model);
+        return true;
     }
 
     /**
@@ -272,8 +376,8 @@ export class TsTestAst {
     private _addIntegration(integration: ICANIntegration, fcIntegration: Function) {
         this.ast = this.parse();
         const integrations = this._getIntegrations();
-        const alreadyExist = integrations.find((t) => t.name === integration.name);
-        if (alreadyExist) throw new Error(`Integration with name "${integration.name}" already exists.`);
+        const alreadyExist = integrations.find((t) => t.description === integration.description);
+        if (alreadyExist) throw new Error(`Integration "${integration.description}" already exists.`);
         integrations.push(integration);
         const integrationNode = this.ast?.children?.find((item) => item.type === 'ArrayDeclaration' && item.name === 'integrations');
         if (!this.modelTest) throw new Error('Invalid test model');
@@ -333,13 +437,20 @@ export class TsTestAst {
 export interface ICANTest {
     title: string,
     functionName: string,
-    params: Record<string, any>
+    params: Record<string, ICANParams>
 }
 
 export interface ICANIntegration {
     enabled: boolean,
-    name: string,
+    description: string,
     page: string,
     functionName: string,
-    params: Record<string, any>
+    params: Record<string, ICANParams>
+}
+
+export interface ICANParams {
+    type: string,
+    value?: string,
+    optional?: boolean
+    description?: string
 }
