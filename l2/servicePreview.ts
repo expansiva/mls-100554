@@ -6,12 +6,11 @@ import { ServiceBase, IService, IMenu, IServiceMenu, IOptions } from './_100554_
 import { IcaLitElement } from './_100554_icaLitElement';
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { getConfigProject } from './_100554_libProjectConfig';
-import { globalState } from './_100554_icaState';
+import { globalState, setState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from './_100554_collabIcons';
-import { getScriptTest, runTest } from './_100554_libProcessTest';
-import { getTests, deleteTest, ITests } from './_100554_libCommom';
-import { addTestInMonaco } from './_100554_libManagementFileTest';
+
+import { ICANTest, TsTestAst } from './_100554_tsTestAST';
 
 import './_100554_collabConsole';
 import './_100554_servicePreviewView';
@@ -137,7 +136,7 @@ export class ServicePreview100554 extends ServiceBase {
         else if (op === 'devConsole') this.toogleConsole();
         else if (op === 'help') this.onHelpClick();
         else if (op === 'test') this.onBtTestClick();
-        else if (op === 'testList') () => { }  // this.onBtTestListClick();
+        else if (op === 'testList') this.onBtTestListClick();
         else if (op === 'darkLight') this.onBtDarkLightClick();
         else if (['languages', 'theme'].includes(op)) { this.actButton(op); }
         else throw new Error('Invalid option')
@@ -478,14 +477,15 @@ export class ServicePreview100554 extends ServiceBase {
         return htmlEl;
     }
 
-    private actualTestList: ITests[] = [];
+    private actualTestList: ICANTest[] = [];
+
+    private astTSTest: TsTestAst | undefined;
 
     private async setTest() {
 
-        if (!(mls.actual[2] as any).left) return;
-        const { project, shortName } = (mls.actual[2] as any).left;
-        const key = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
-        this.actualTestList = await getTests(key);
+        this.refreshAST();
+        if (!this.astTSTest) return;
+        this.actualTestList = this.astTSTest.getTests();
         const opts = this.actualTestList.map((item, index: number) => {
             return {
                 text: item.title,
@@ -507,25 +507,25 @@ export class ServicePreview100554 extends ServiceBase {
 
     private onBtTestClick() {
 
-        if (!this.menu || !this.menu.tools || !this.menu.tools.test || this.menu.tools.test.selected === undefined) return;
-        const selectedTest = this.menu.tools.test.selected;
+        // if (!this.menu || !this.menu.tools || !this.menu.tools.test || this.menu.tools.test.selected === undefined) return;
+        // const selectedTest = this.menu.tools.test.selected;
 
-        if (selectedTest === ERecord.Play) {
-            const iframe = window.preview.iframe;
-            if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
-            const ica = (iframe.contentWindow as any).globalStateManagment;
-            ica.clearHistory();
+        // if (selectedTest === ERecord.Play) {
+        //     const iframe = window.preview.iframe;
+        //     if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
+        //     const ica = (iframe.contentWindow as any).globalStateManagment;
+        //     ica.clearHistory();
 
-        } else if (selectedTest === ERecord.Stop) {
-            const iframe = window.preview.iframe;
-            if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
-            const ica = (iframe.contentWindow as any).globalStateManagment
-            const script = getScriptTest(ica);
+        // } else if (selectedTest === ERecord.Stop) {
+        //     const iframe = window.preview.iframe;
+        //     if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
+        //     const ica = (iframe.contentWindow as any).globalStateManagment
+        //     const script = getScriptTest(ica);
 
-            if (!this.actualFile) return;
-            addTestInMonaco(`_${this.actualFile.project}_${this.actualFile.shortName}`, script)
-            // this.fireEventsDetails(btoa(encodeURIComponent(script)), '', 'new');
-        }
+        //     if (!this.actualFile) return;
+        //     addTestInMonaco(`_${this.actualFile.project}_${this.actualFile.shortName}`, script)
+        //     // this.fireEventsDetails(btoa(encodeURIComponent(script)), '', 'new');
+        // }
 
     }
 
@@ -556,43 +556,72 @@ export class ServicePreview100554 extends ServiceBase {
         if (!(mls.actual[2] as any).left) return;
         if (!this.menu || !this.menu.tools || !this.menu.tools.testList) return;
         const selectedIndex = this.menu.tools.testList.selected as number[];
-
         const [testIndex, actionIndex] = selectedIndex;
-        const { project, shortName } = (mls.actual[2] as any).left;
 
         if (actionIndex === ETestActions.Run) {
+
             const actualData = this.actualTestList[testIndex];
-            this.runTest(actualData);
+            // this.runTest(actualData);
+
         } else if (actionIndex === ETestActions.Delete) {
-            const key = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
-            await deleteTest(key, this.actualTestList[testIndex].title);
+
+            await this.deleteTest(this.actualTestList[testIndex].title);
             this.setTest();
+
         } else if (actionIndex === ETestActions.Edit) {
+
             const actualData = this.actualTestList[testIndex];
             if (!actualData) {
                 this.error = 'Invalid test';
                 return;
             }
-            this.fireEventsDetails(btoa(encodeURIComponent(actualData.script)), actualData.title, 'edit', testIndex);
 
+            setState('serviceSource.left.selectedMode', 'icTest');
+            setTimeout(() => { this.astTSTest?.goToTest(actualData.title) }, 200)
         }
     }
 
-    private runTest(info: ITests) {
-
-        const iframe = window.preview.iframe;
-        if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
-        const htmlScript = info.script;
-        const el = document.createElement('div');
-        el.innerHTML = htmlScript;
-        const elScript = el.querySelector(`collab-test-script[title="${info.title}"]`) as HTMLElement;
-        const script = elScript.innerText || '';
-        if (!script) {
-            this.setError(`Erro get test script :${info.title}`)
-            return;
+    private async deleteTest(testName: string) {
+        this.refreshAST();
+        if (!this.astTSTest) throw new Error('Invalid AST');
+        try {
+            this.astTSTest.deleteTest(testName)
+        } catch (err: any) {
+            this.error = err.message;
         }
-        runTest(iframe, script);
     }
+
+    private refreshAST() {
+        if (!this.actualFile) return false;
+        const fileName = `_${this.actualFile.project}_${this.actualFile.shortName}`;
+        const models = mls.editor.models[fileName];
+        if (!models) {
+            this.error = `No found models for file: ${fileName}`;
+            return false;
+        }
+        if (!models.test) {
+            this.error = `No found model test in file: ${fileName}`;
+            return false;
+        }
+        const editor = mls.services['100554_serviceSource_left']._ed1;
+        this.astTSTest = new TsTestAst(models.test, editor);
+    }
+
+    // private runTest(info: ITests) {
+
+    //     const iframe = window.preview.iframe;
+    //     if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
+    //     const htmlScript = info.script;
+    //     const el = document.createElement('div');
+    //     el.innerHTML = htmlScript;
+    //     const elScript = el.querySelector(`collab-test-script[title="${info.title}"]`) as HTMLElement;
+    //     const script = elScript.innerText || '';
+    //     if (!script) {
+    //         this.setError(`Erro get test script :${info.title}`)
+    //         return;
+    //     }
+    //     runTest(iframe, script);
+    // }
 
     private onBtLanguageClick() {
 
@@ -646,7 +675,6 @@ export class ServicePreview100554 extends ServiceBase {
     private onHelpClick() {
         this.openService('_100554_servicePage', 'left', 3);
     }
-
 
     private createEditor() {
         if (!this.monacoeditor) {
@@ -780,16 +808,11 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private async fireWcdChanges() {
-
         const iframe = window.preview.iframe;
         if (!iframe) return;
-
         const wcd = iframe.contentDocument?.body.querySelector('wcd-toolbox-100554') as any;
-
         if (!wcd) return;
-
         await wcd.beforeDelete();
-
         return;
     }
 

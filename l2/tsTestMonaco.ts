@@ -101,6 +101,26 @@ export class MonacoDriver {
     }
 
     /**
+     * Moves the editor's cursor to the specified lines, selects the text between them, 
+     * and scrolls the editor to bring the selection into view.
+     *
+     * @param {monaco.editor.ITextModel} model - The text model associated with the editor.
+     * @param {number} start - The starting line number for the selection.
+     * @param {number} end - The ending line number for the selection.
+     *
+     * @returns {void}
+     */
+    public goTo(model: monaco.editor.ITextModel, start: number, end: number): void {
+        const endContent = model.getLineContent(end);
+        const newEndColumn = endContent.length + 1;
+        if (this[_editor]) {
+            const selection = new monaco.Selection(start, 1, end, newEndColumn);
+            this[_editor].setSelection(selection);
+            this[_editor].revealRangeInCenter(selection);
+        }
+    }
+
+    /**
      * Finalizes the current edit operation group, allowing all previous
      * changes to be undone as a single action.
      */

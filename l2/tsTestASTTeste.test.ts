@@ -21,10 +21,16 @@ export const tests: ICANTest[] = [
         title: "Test add 2",
         functionName: "testAddUser",
         params: {
-            solicitante: { type: 'String', value: 'Guilherme' },
-            phone: { type: 'String', value: '169999999' },
+            solicitante: {
+                type: "String",
+                value: "Guilherme"
+            },
+            phone: {
+                type: "String",
+                value: "169999999"
+            }
         }
-    },
+    }
 ]
 
 export function testAddUser(args: any): string {
