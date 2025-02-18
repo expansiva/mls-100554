@@ -23,9 +23,9 @@ export class LessASTTest100554 extends LitElement {
     }
 
     exeTest = () => {
-        if (!this.model1) return "undefined;";
+        if (!this.model1) return this.result = "undefined;";
         const editor = mls.services['100554_serviceSource_left']._ed1;
-        if (!editor) return `No find editor`;
+        if (!editor) return this.result = `No find editor`;
         const testAST = new TsTestAst(this.model1, editor);
         const testAst = this.test1(testAST);
         const testGetIntegrations = this.test2(testAST);

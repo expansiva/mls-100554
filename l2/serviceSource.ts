@@ -2016,7 +2016,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     handleIcaStateChange(_key: string, _value: any) {
         const keyState = `serviceSource.${this.position}`;
         if (!_key.startsWith(keyState)) return;
-        if (_key === `${keyState}.selectedMode` && ['icTs', 'icStyle', 'icHTML', 'btHistory', 'btHistoryImmediatte'].includes(_value)) {
+        if (_key === `${keyState}.selectedMode` && ['icTs', 'icStyle', 'icHTML', 'icTest', 'btHistory', 'btHistoryImmediatte'].includes(_value)) {
             this.changeMode(_value);
         }
         if (_key === `${keyState}.currentHistorySource` ||

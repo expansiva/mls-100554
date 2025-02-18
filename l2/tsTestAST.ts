@@ -92,6 +92,10 @@ export class TsTestAst {
         return this._deleteTest(testName);
     }
 
+    goToTest(testName: string) {
+        return this._goToTest(testName);
+    }
+
     /**
      * Adds a new integration to the test file.
      * @param {ICANIntegration} integration - The integration to be added.
@@ -101,6 +105,8 @@ export class TsTestAst {
     addIntegration(integration: ICANIntegration, fc: Function) {
         return this._addIntegration(integration, fc);
     }
+
+
 
     /**
      * Parses TypeScript code into an AST.
@@ -331,7 +337,6 @@ export class TsTestAst {
 
         if (testAST) {
             const index = tests.findIndex(item => item.title === testToDelet.title);
-            console.info({ index })
             if (index !== -1) {
                 tests.splice(index, 1);
             }
@@ -348,6 +353,19 @@ export class TsTestAst {
         this._formatEditor(this.modelTest.model);
         return true;
     }
+
+    private _goToTest(testName: string) {
+        this.ast = this.parse();
+        const tests = this._getTests();
+        const testFind = tests.find((t) => t.title === testName);
+        if (!this.modelTest) throw new Error('Invalid test model');
+        if (!testFind) throw new Error(`Test with title "${testName}" dont exists`);
+        const testAST = this.ast?.children?.find((ast) => ast.type === 'FunctionDeclaration' && ast.name === testFind.functionName);
+        if (!testAST) return false;
+        this.monacoDriver.goTo(this.modelTest.model, testAST.startLine, testAST.endLine);
+        return true;
+    }
+
 
     /**
      * Intenal method to delete a function on the AST and updates the Monaco editor.
