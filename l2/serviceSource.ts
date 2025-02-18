@@ -1495,6 +1495,12 @@ export class ServiceSource100554 extends ServiceBase {
             await this.getOrCreateModelHtmlOrCss(storFile1);
         }
 
+        const keyFileTsTest = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.test.ts');
+        let storFileTsTest = mls.stor.files[keyFileTsTest];
+        if (storFileTsTest) {
+            await this.getOrCreateModelTsTest(storFileTsTest);
+        }
+
         if (compile) await this.updateModelStatus(modelTS, false);
 
         fileModels = mls.editor.getModels(project, shortName);
