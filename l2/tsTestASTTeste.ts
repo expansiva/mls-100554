@@ -30,18 +30,24 @@ export class LessASTTest100554 extends LitElement {
         const testAddTestSameTitle = this.test4(testAST, 'Test add 2');
         const testAddIntegration = this.test5(testAST, 'adicionar usuario com todos os parametros');
 
+        const testDeleteTest = this.test6(testAST, 'Test add');
+
+
+
 
         return `result test1: ${testAst} \n\n
 ${'*'.repeat(100)}\n
-result test2 - get integrations: ${testGetIntegrations}  \n\n\n
+result test - get integrations: ${testGetIntegrations}  \n\n\n
 ${'*'.repeat(100)}\n
-result test3 - get tests: ${testGetTests}  \n\n\n
+result test - get tests: ${testGetTests}  \n\n\n
 ${'*'.repeat(100)}\n
-result test4 - add test: ${testAddTest}  \n\n\n
+result test - add test: ${testAddTest}  \n\n\n
 ${'*'.repeat(100)}\n
-result test5 - add test already existing: ${testAddTestSameTitle}  \n\n\n
+result test - add test already existing: ${testAddTestSameTitle}  \n\n\n
 ${'*'.repeat(100)}\n
-result test6 - add integration: ${testAddIntegration}  \n\n\n
+result test - add integration: ${testAddIntegration}  \n\n\n
+${'*'.repeat(100)}\n
+result test - delete test: ${testDeleteTest}  \n\n\n
 ${'*'.repeat(100)}\n
 
 
@@ -71,7 +77,9 @@ ${'*'.repeat(100)}\n
         const testNew: ICANTest = {
             functionName: 'fcTestNew',
             title,
-            params: { user: 'Guilherme ' }
+            params: {
+                user: { type: 'String', value: 'Guilherme' },
+            }
         };
 
         const fc = function fcTestNew() {
@@ -89,14 +97,17 @@ ${'*'.repeat(100)}\n
 
     }
 
-
-    test5 = (testAST: TsTestAst, name: string) => {
+    test5 = (testAST: TsTestAst, description: string) => {
         const integrationNew: ICANIntegration = {
             functionName: 'fcIntegrationNew',
-            name,
+            description,
             enabled: true,
             page: 'tsTestASTTeste',
-            params: { user: 'Guilherme ', phone: '129999999', cep: '14403923' }
+            params: {
+                user: { type: 'String', description: 'The user name' },
+                phone: { type: 'String', description: 'The user phone number' },
+                cep: { type: 'Number', description: 'The user cep', optional: true },
+            }
         };
 
         const fc = function fcIntegrationNew() {
@@ -110,6 +121,16 @@ ${'*'.repeat(100)}\n
         } catch (err: any) {
             return `${err.message}`
 
+        }
+
+    }
+
+    test6 = (testAST: TsTestAst, name: string) => {
+        try {
+            const rc = testAST.deleteTest(name);
+            return `${rc}`
+        } catch (err: any) {
+            return `${err.message}`
         }
 
     }
