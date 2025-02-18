@@ -121,6 +121,8 @@ export class ServicePreview100554 extends ServiceBase {
         if (op === 'opAboutWCD') this.opAboutWCD();
         else if (op === 'opResultHTML') this.showEditorHTML();
         else if (op === 'opResultJS') this.showResultJS();
+        else if (op === 'opResultTSTest') this.showResultTestJS();
+
     }
 
     public onClickTabs(index: number) {
@@ -153,7 +155,8 @@ export class ServicePreview100554 extends ServiceBase {
         main: {
             opAboutWCD: 'About this WCD',
             opResultHTML: 'Result HTML',
-            opResultJS: 'Result Javascript',
+            opResultJS: 'Result Typescript',
+            opResultTSTest: 'Result Typescript Test',
         },
         tabs: {
             group: 'Mode',
@@ -388,6 +391,7 @@ export class ServicePreview100554 extends ServiceBase {
             if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
             this.monacoeditor.setAttribute('msize', msize);
             if (this.pluginResultJS) this.pluginResultJS.setAttribute('msize', msize);
+            if (this.pluginResultTestJS) this.pluginResultTestJS.setAttribute('msize', msize);
         }
     }
 
@@ -462,11 +466,27 @@ export class ServicePreview100554 extends ServiceBase {
             this.pluginResultJS = document.createElement('plugin-preview-result-js-100554');
             this.pluginResultJS.setAttribute('msize', this.msize);
             this.menu.setMode('page', this.pluginResultJS);
-            this.menu.title = 'Result Javascript';
+            this.menu.title = 'Result Typescript';
             if (this.menu.updateTitle) this.menu.updateTitle();
         }
         return true;
     }
+
+    private pluginResultTestJS: HTMLElement | undefined;
+    private showResultTestJS() {
+        import('./_100554_pluginPreviewResultTestJs');
+        if (this.menu.setMode) {
+            this.pluginResultTestJS = document.createElement('plugin-preview-result-test-js-100554');
+            this.pluginResultTestJS.setAttribute('msize', this.msize);
+            this.menu.setMode('page', this.pluginResultTestJS);
+            this.menu.title = 'Result Test Typescript';
+            if (this.menu.updateTitle) this.menu.updateTitle();
+        }
+        return true;
+    }
+
+
+
 
 
     private getIframePreviewHTML(): HTMLHtmlElement | undefined {
