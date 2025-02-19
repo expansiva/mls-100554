@@ -579,10 +579,8 @@ export class ServicePreview100554 extends ServiceBase {
         const [testIndex, actionIndex] = selectedIndex;
 
         if (actionIndex === ETestActions.Run) {
-
             const actualData = this.actualTestList[testIndex];
-            // this.runTest(actualData);
-
+            this.runTest(actualData.title);
         } else if (actionIndex === ETestActions.Delete) {
 
             await this.deleteTest(this.actualTestList[testIndex].title);
@@ -606,6 +604,16 @@ export class ServicePreview100554 extends ServiceBase {
         if (!this.astTSTest) throw new Error('Invalid AST');
         try {
             this.astTSTest.deleteTest(testName)
+        } catch (err: any) {
+            this.error = err.message;
+        }
+    }
+
+    private async runTest(testName: string) {
+        this.refreshAST();
+        if (!this.astTSTest) throw new Error('Invalid AST');
+        try {
+            this.astTSTest.runTest(testName)
         } catch (err: any) {
             this.error = err.message;
         }

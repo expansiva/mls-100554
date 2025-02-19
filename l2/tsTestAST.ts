@@ -96,6 +96,10 @@ export class TsTestAst {
         return this._goToTest(testName);
     }
 
+    async runTest(testName: string) {
+        return this._runTest(testName);
+    }
+
     /**
      * Adds a new integration to the test file.
      * @param {ICANIntegration} integration - The integration to be added.
@@ -354,6 +358,33 @@ export class TsTestAst {
         return true;
     }
 
+    private async _runTest(testName:string) {
+
+        if (!this.modelTest) throw new Error('Invalid test model');
+        this.ast = this.parse();
+        const tests = this._getTests();
+        const testFind = tests.find((t) => t.title === testName);
+        if (!testFind) return false;
+        
+        const fcName = testFind.functionName;
+        const params = testFind.params;
+
+        const fileName = `./_${this.modelTest.storFile.project}_${this.modelTest.storFile.shortName}.test.ts`;
+        try {
+            const module = await import(fileName);
+            if (module[fcName] && typeof module[fcName] === 'function') {
+                await module[fcName](params);
+                return true;
+            } else {
+                throw new Error(`Function ${fcName} not found in ${fileName}`);
+            }
+        } catch (error) {
+            console.error(`Error importing ${fileName}:`, error);
+            return false;
+        }
+    }
+
+
     private _goToTest(testName: string) {
         this.ast = this.parse();
         const tests = this._getTests();
@@ -365,7 +396,6 @@ export class TsTestAst {
         this.monacoDriver.goTo(this.modelTest.model, testAST.startLine, testAST.endLine);
         return true;
     }
-
 
     /**
      * Intenal method to delete a function on the AST and updates the Monaco editor.
@@ -384,6 +414,7 @@ export class TsTestAst {
         this.monacoDriver.finishEdit(this.modelTest.model);
         return true;
     }
+
 
     /**
      * Adds a new integration to the AST and updates the Monaco editor.
