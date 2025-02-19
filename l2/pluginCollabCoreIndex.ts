@@ -295,7 +295,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginCollabLogin'
             },
-
+            {
+                category: 'System',
+                scope: ['l5UserSettings'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginSystemUser'
+            },
             {
                 category: 'System',
                 scope: ['l5UserSettings'],
