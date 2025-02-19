@@ -1,0 +1,58 @@
+/// <mls shortName="pluginSystemUser" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+import { html, svg, TemplateResult } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+import { PluginBaseModule } from './_100554_pluginBaseModule';
+
+/// **collab_i18n_start**
+const message_pt = {
+    develpoment: 'Em desenvolvimento',
+    alterarLabel: 'Alterar',
+}
+
+const message_en = {
+    develpoment: 'In Develpoment',
+    alterarLabel: 'Change',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en': message_en,
+    'pt': message_pt
+}
+/// **collab_i18n_end**
+
+export const pluginData: mls.plugin.IPluginData = {
+    title: "User Preferencies",
+    getSvg(): TemplateResult {
+        return svg`
+        <svg width="22px" height="22px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg>
+    `;
+    }
+};
+
+@customElement('plugin-system-user-100554')
+export class PluginSystemLanguage100554 extends PluginBaseModule {
+
+    private msg: MessageType = messages['en'];
+
+    @property({ type: Boolean }) autoPrepare: boolean = false;
+
+    firstUpdated() {
+        if (!this.autoPrepare) return;
+        this.prepare();
+    }
+
+    async prepare() {
+        await this.init();
+    }
+
+    private async init() { }
+
+    render(): TemplateResult {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        return html`${this.msg.develpoment}`;
+    }
+}
