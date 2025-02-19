@@ -9,6 +9,8 @@ export abstract class IcaApresentationTextText extends IcaLitElementBase {
 
     @property({ type: String }) type: string | undefined;
 
+    @property({ type: String }) text: string | undefined;
+
     public mySymbol = 'fa-t';
 
     public getActionsTags(): ActionTag[] {

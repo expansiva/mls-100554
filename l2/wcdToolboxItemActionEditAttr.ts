@@ -63,6 +63,32 @@ export class WCDToolboxItemActionEditAttr extends WcdToolboxItemBase {
         }
 
         mls.events.fire([3], 'WCDEvent' as any, JSON.stringify(params));
+        this.showHelper();
+    }
+
+    private showHelper() {
+        if (!globalWcd) throw new Error('Invalid window.wcdState');
+        if (!globalWcd.myParent) throw new Error('Invalid window.wcdState.myParent');
+
+        (globalWcd.myParent as any).onclick = null;
+        globalWcd.myParent?.setIconsWcdToolbox(
+            [
+                {
+                    name: 'backButton'
+                },
+                {
+                    name: '_100554_wcdToolboxItemActionEditAttrDialog',
+                    args: '',
+                    position: 'p-l1',
+                    level: [2,3],
+                    toolboxOptions: { background: '#fff', border: 'none' }
+                },
+
+            ],
+            false,
+            'size'
+        );
+
     }
 
     
