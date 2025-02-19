@@ -1,11 +1,13 @@
 /// <mls shortName="icaFormsInputString" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
 @customElement('ica-forms-input-string-100554')
 export abstract class IcaFormsInputNumber extends IcaLitElementBase {
+
+    @property({ type: String }) label: string | undefined;
 
     public mySymbol = 'fa-table-columns';
 
