@@ -208,7 +208,7 @@ export class ServiceDetail100554 extends ServiceBase {
 
         this.plugin = info;
         const content: string = info.htmlText ? info.htmlText : await this.getHtmlFromPlugin(info);
-        this.updateContentPluginWithScripts(content);
+        this.updateContentPluginWithScripts(content, (info as any).arguments);
     }
 
     private async getHtmlFromPlugin(info: mls.events.IPluginDetail): Promise<string> {
@@ -220,11 +220,12 @@ export class ServiceDetail100554 extends ServiceBase {
         return content;
     }
 
-    private updateContentPluginWithScripts(content: string): void {
+    private updateContentPluginWithScripts(content: string, args:any): void {
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
         this.contentPlugin.innerHTML = '';
         const allWcs = getAllWebComponentsInSource(content);
         this.contentPlugin.innerHTML = content;
+        (this.contentPlugin as any).args = args;
         allWcs.forEach((wc) => {
             const fileName = convertTagToFileName(wc);
             const script = document.createElement('script');

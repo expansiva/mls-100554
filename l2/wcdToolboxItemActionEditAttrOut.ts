@@ -75,16 +75,25 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
             <div class="atributo">
                 <label for="label">${info.attr}</label>
                 <input type="text" .info=${info} value="${info.vl}" @keydown="${this.onKeydown}">
+                ${this.renderVariation(info)}
                 
-                <details>
-                    <summary>Variações</summary>
-                    ${repeat(info.variations, ((key: IVariation) => key.attr) as any, ((k: IVariation, index: any) => { return this.renderVariation(k) }) as any)}
-                </details>
             </div>
         `
     }
 
-    renderVariation(v: IVariation) {
+    renderVariation(info: IAttr) {
+
+        if (info.variations.length <= 0) return html``;
+
+        return html`
+            <details>
+                <summary>Variações</summary>
+                ${repeat(info.variations, ((key: IVariation) => key.attr) as any, ((k: IVariation, index: any) => { return this.renderVariantItem(k) }) as any)}
+            </details>
+        `;
+    }
+
+    renderVariantItem(v: IVariation) {
         return html`
             <attrvariations>
                 <label for="${v.attr}">${v.attr}</label>

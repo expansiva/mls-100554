@@ -1,13 +1,14 @@
 /// <mls shortName="libProcessTest" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IcaState } from './_100554_icaState';
+import { ICANTest } from "./_100554_tsTestAST";
 
-export function getScriptTest(ica: IcaState): string {
+export function getScriptTest(ica: IcaState): {func:string,exe:any} | undefined {
 
     const array = ica.getHistory();
-    if (array.length <= 0) return '';
+    if (array.length <= 0) return undefined;
 
-    const params:any = {};
+    const params: any = {};
     array.forEach((h) => {
 
         if (h.system) return;
@@ -16,7 +17,7 @@ export function getScriptTest(ica: IcaState): string {
         const vl = processValue(h.value);
 
         if (!key) return;
-        params[key] = { vl, tp, ori:h.key };
+        params[key] = { vl, tp, ori: h.key };
 
     });
 
@@ -35,19 +36,19 @@ export function getScriptTest(ica: IcaState): string {
 
             const param = getParam(params, h.key);
             if (!param) return;
-            row = `setState('${h.key}', args.${param});`;
+            row = `setState('${h.key}', args.${param}.value);`;
 
         } else {
 
             row = `verifyState('${h.key}', ${vl})`;
-            if (typeof vl === "string")row = `verifyState('${h.key}', '${vl}')`;
+            if (typeof vl === "string") row = `verifyState('${h.key}', '${vl}')`;
 
         }
 
         if (lastInteraction === tipo && lastkey === h.key && lastIndex >= 0) {
             lines[lastIndex] = row;
 
-        }else {
+        } else {
 
             lines.push(row);
             lastInteraction = tipo;
@@ -58,31 +59,28 @@ export function getScriptTest(ica: IcaState): string {
 
     });
 
-    let exe = '';
+    const exe: ICANTest = {
+        functionName: '',
+        title: '',
+        params: {}
+    };
+
     Object.keys(params).forEach((k) => {
 
         const p = params[k];
         if (!p) return;
-        if (exe !== '') exe += ', ';
-        if (p.tp === 'string') exe += `${k}: '${p.vl}'`;
-        else if (p.tp === 'object') exe += `${k}: ${JSON.stringify(p.vl)}`;
-        else exe += `${k}: ${p.vl}`;
+        exe.params[k] = {type: p.tp, value:p.vl};
 
-        
+
     })
 
-    exe = `{${exe}}`;
+    const func = `export function @funcname(args: Record<string, ICANParams>): string {\ntry{\n${lines.join('\n')}\nreturn 'ok';\n}catch(e:any){\nreturn e.message;\n}\n}`
 
-    const jsdoc = `/**\n* Description\n*\n* @example\n* { page: @page, integrationName: @integration, params: ${exe} };\n*/`;
-
-    const func = ` function @integration(args: any): string {\ntry{\n${lines.join('\n')}\nreturn 'ok';\n}catch(e:any){\nreturn e.message;\n}\n}\n\nargs1 = ${exe};\naddTest(@integration, () => {\nconst result = @integration(args1);\nconsole.log('Test Result: ' + result);\n});`
-
-
-    return `${jsdoc}\n\n${func}`;
+    return {func,exe};
 
 }
 
-function getParam(params:any, key: string) {
+function getParam(params: any, key: string) {
 
     const keys = Object.keys(params);
     let ret = '';
@@ -90,7 +88,7 @@ function getParam(params:any, key: string) {
     keys.forEach((i) => {
 
         if (params[i].ori !== key) return;
-        ret = i;        
+        ret = i;
     })
 
     return ret;
@@ -107,6 +105,6 @@ function processValue(vl: any): string | number {
 }
 
 
-export function runTest(iframe: HTMLIFrameElement, script:string) {
+export function runTest(iframe: HTMLIFrameElement, script: string) {
     return;
 }
