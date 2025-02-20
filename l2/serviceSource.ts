@@ -2501,8 +2501,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         this._onChangedContentTsTest = window.setTimeout(async () => {
             let modelValue = model.getValue();
 
-            //const ok = await mls.l2.typescript.compileAndPostProcess(modelBase, false, true);
-            const ok = await mls.l2.typescript.compile(modelBase);
+            const ok = await mls.l2.typescript.compileAndPostProcess(modelBase, false, true);
+            // const ok = await mls.l2.typescript.compile(modelBase);
             let hasError = ok === false;
             storFile.hasError = hasError;
 
@@ -2520,6 +2520,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             const idActive = modelBase.model.id
             if (idLeft === idActive) position = 'left';
             else position = 'right';
+
+            mls.events.fire([2], ['tsTestChanged'] as any, JSON.stringify({ position, storFile }));
 
             this.toogleIconsError();
         })
@@ -2557,11 +2559,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private async prepareInitialTsTest(shortName: string, project: number) {
-
-        const tag = convertFileNameToTag(`_${project}_${shortName}`);
         const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />
-				\n //Test`;
-
+				\nimport { ICANTest, ICANIntegration } from './_100554_tsTestAST'; \n\nexport const integrations: ICANIntegration[] = []; \nexport const tests: ICANTest[] = [];`;
         const newTest = example
             .replace('[shortName]', shortName)
             .replace('[project]', project.toString())

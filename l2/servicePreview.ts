@@ -250,6 +250,7 @@ export class ServicePreview100554 extends ServiceBase {
 
         mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
         mls.events.addListener(2, 'styleChanged' as any, this.onStyleChanged.bind(this));
+        mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
 
     }
 
@@ -276,7 +277,7 @@ export class ServicePreview100554 extends ServiceBase {
         }
     }
 
-    private lastStatusHasErro: boolean = false;
+    private lastStatusHasError: boolean = false;
     private onStyleChanged() {
         if (this.elPreview) {
             this.lastLevel = this.level;
@@ -286,25 +287,30 @@ export class ServicePreview100554 extends ServiceBase {
                 const keyToFileInfo = mls.stor.getKeyToFiles(this.actualFile.project, 2, this.actualFile.shortName, this.actualFile.folder, '.less');
 
                 const less = mls.stor.files[keyToFileInfo];
-                if (less && !less.hasError && this.lastStatusHasErro) {
+                if (less && !less.hasError && this.lastStatusHasError) {
 
                     if (this.watch) {
                         this.elPreview = undefined;
                         this.loading = false;
                         this.onReloader();
-                        this.lastStatusHasErro = false;
+                        this.lastStatusHasError = false;
                         return;
                     }
 
                 } else if (less && less.hasError) {
-                    this.lastStatusHasErro = true;
+                    this.lastStatusHasError = true;
                 }
 
             }
 
-
             this.elPreview.setAttribute('stylechanged', 'true');
             this.elPreview.setAttribute('actualtheme', this.actualTheme);
+        }
+    }
+
+    private onTsTestChanged() {
+        if (this.watch) {
+            this.setTest();
         }
     }
 
@@ -485,10 +491,6 @@ export class ServicePreview100554 extends ServiceBase {
         return true;
     }
 
-
-
-
-
     private getIframePreviewHTML(): HTMLHtmlElement | undefined {
         if (!window.preview.iframe) throw new Error('Preview no created yet');
         const htmlEl = window.preview.iframe
@@ -634,22 +636,6 @@ export class ServicePreview100554 extends ServiceBase {
         const editor = mls.services['100554_serviceSource_left']._ed1;
         this.astTSTest = new TsTestAst(models.test, editor);
     }
-
-    // private runTest(info: ITests) {
-
-    //     const iframe = window.preview.iframe;
-    //     if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
-    //     const htmlScript = info.script;
-    //     const el = document.createElement('div');
-    //     el.innerHTML = htmlScript;
-    //     const elScript = el.querySelector(`collab-test-script[title="${info.title}"]`) as HTMLElement;
-    //     const script = elScript.innerText || '';
-    //     if (!script) {
-    //         this.setError(`Erro get test script :${info.title}`)
-    //         return;
-    //     }
-    //     runTest(iframe, script);
-    // }
 
     private onBtLanguageClick() {
 
