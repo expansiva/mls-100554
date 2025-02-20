@@ -78,7 +78,7 @@ export class TsTestAst {
      * @returns {boolean} True if the test was added successfully, false otherwise.
      * @throws {Error} Throws an error if the test already exists or if there are issues with the AST.
      */
-    addTest(test: ICANTest, fcTest: Function) {
+    addTest(test: ICANTest, fcTest: Function | string) {
         return this._addTest(test, fcTest);
     }
 
@@ -106,7 +106,7 @@ export class TsTestAst {
      * @param {Function} fc - The function associated with the integration.
      * @returns {boolean} Returns true if the integration was successfully added.
      */
-    addIntegration(integration: ICANIntegration, fc: Function) {
+    addIntegration(integration: ICANIntegration, fc: Function | string) {
         return this._addIntegration(integration, fc);
     }
 
@@ -300,7 +300,7 @@ export class TsTestAst {
      * @returns {boolean} True if the test was successfully added.
      * @throws {Error} Throws an error if the test already exists or AST information is missing.
      */
-    private _addTest(test: ICANTest, fcTest: Function) {
+    private _addTest(test: ICANTest, fcTest: Function | string) {
 
         this.ast = this.parse();
         const tests = this._getTests();
@@ -358,14 +358,14 @@ export class TsTestAst {
         return true;
     }
 
-    private async _runTest(testName:string) {
+    private async _runTest(testName: string) {
 
         if (!this.modelTest) throw new Error('Invalid test model');
         this.ast = this.parse();
         const tests = this._getTests();
         const testFind = tests.find((t) => t.title === testName);
         if (!testFind) return false;
-        
+
         const fcName = testFind.functionName;
         const params = testFind.params;
 
@@ -422,7 +422,7 @@ export class TsTestAst {
      * @param {Function} fcIntegration - The integration function to add.
      * @throws {Error} Throws an error if the integration already exists or if AST information is missing.
      */
-    private _addIntegration(integration: ICANIntegration, fcIntegration: Function) {
+    private _addIntegration(integration: ICANIntegration, fcIntegration: Function | string) {
         this.ast = this.parse();
         const integrations = this._getIntegrations();
         const alreadyExist = integrations.find((t) => t.description === integration.description);
@@ -462,12 +462,12 @@ export class TsTestAst {
      * @returns {boolean} True if the function was successfully added.
      * @throws {Error} Throws an error if AST information is missing or the test model is invalid.
      */
-    private _addFunction(fc: Function) {
+    private _addFunction(fc: Function | string) {
 
         if (!this.modelTest) throw new Error('Invalid test model');
         this.ast = this.parse();
         if (!this.ast) throw new Error('Invalid ast');
-        const fcString = fc.toString();
+        const fcString = typeof fc === 'string' ? fc : fc.toString();
         const { startLine, endLine } = this.ast;
         if (!startLine || !endLine) throw new Error('Missing information on AST "startLine" or "endLine"');
         this.monacoDriver.insertLine(this.modelTest.model, endLine + 1, fcString);
@@ -499,7 +499,7 @@ export interface ICANIntegration {
 
 export interface ICANParams {
     type: string,
-    value?: string,
+    value?: any,
     optional?: boolean
     description?: string
 }
