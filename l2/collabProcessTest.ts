@@ -3,27 +3,31 @@
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { addTest, updateTest } from './_100554_libCommom';
+import { TsTestAst } from "./_100554_tsTestAST";
 
 @customElement('collab-process-test-100554')
 export class CollabProcessTest extends CollabLitElement {
 
     @property({ type: String }) script: string = '';
-    @property({ type: String }) mode: 'new' | 'edit' = 'new';
-    @property({ type: String }) title: string = '';
-    @property({ type: String }) indexEdit: string = '';
-
     @property({ type: String }) labelError: string = '';
     @property({ type: String }) labelOk: string = '';
 
-
-
     @query('#txtScript') txtScript: HTMLTextAreaElement | undefined;
+    @query('#iptnametest') iptnametest: HTMLInputElement | undefined;
+    @query('#iptnamefunc') iptnamefunc: HTMLInputElement | undefined;
 
     render() {
         return html`
             <h3>Process Test</h3>
-            <div>
+            <div style="display:flex; gap:.5rem">
+                <div>
+                    <label style="width: 145px;">Name func:</label>
+                    <input id="iptnamefunc" type="text" @blur="${this.changeNameFunc}"></input>
+                </div>
+                <div>
+                    <label style="width: 145px;">Name test:</label>
+                    <input id="iptnametest" type="text"></input>
+                </div>                
                 <button @click="${this.onSave}">Save</button>
             </div>
             <div class="error"> ${this.labelError}</div>
@@ -47,62 +51,81 @@ export class CollabProcessTest extends CollabLitElement {
 
     // -------IMPLEMENTATION--------
 
-    private actualTestList: string[] = [];
+    private changeNameFunc(e: Event) {
+
+        if (!this.iptnamefunc || this.iptnamefunc.value == '') {
+            this.labelError = 'The function name was not provided!'
+            return;
+        }
+
+        if (!this.txtScript) {
+            this.labelError = 'Not found script';
+            return;
+        }
+
+        const vl = this.iptnamefunc?.value.trim();
+        this.txtScript.value = this.txtScript.value.replace(/@funcname/g, vl);
+
+
+    }
 
     private async onSave() {
 
-        if (this.mode === 'new') {
-            this.onNew();
+        if (!this.iptnamefunc || this.iptnamefunc.value == '') {
+            this.labelError = 'The function name was not provided!'
             return;
         }
 
-        if (this.mode === 'edit') {
-            this.onEdit();
-        }
-
-    }
-
-    private async onEdit() {
-        this.clearMsg();
-        if (!this.txtScript || !this.txtScript.value || !(mls.actual[2] as any).left) {
-            this.labelError = 'Need more information';
+        if (!this.iptnametest || this.iptnametest.value == '') {
+            this.labelError = 'The test name was not provided!'
             return;
         }
 
-        const { project, shortName } = (mls.actual[2] as any).left;
-        const key = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
-        try {
-            await updateTest(key, this.title, this.txtScript.value);
-            this.labelOk = 'Test updated sucessfully';
-        } catch (err: any) {
-            this.labelError = err.message;
-        }
-
-    }
-
-    private clearMsg() {
-        this.labelError = '';
-        this.labelOk = '';
-    }
-
-    private async onNew() {
-
-        this.clearMsg();
-        if (!this.txtScript || !this.txtScript.value || !(mls.actual[2] as any).left) {
-            this.labelError = 'Need more information';
+        if (!this.txtScript) {
+            this.labelError = 'Not found script';
             return;
         }
 
-        const actualFile = (mls.actual[2] as any).left;
-        const file = mls.stor.getKeyToFiles(actualFile.project, 2, actualFile.shortName, actualFile.folder, '.html');
+        const args = (this.parentElement as any).args;
+        if (!args) {
+            this.labelError = 'Not found args'
+            return;
+        }
+
+        args.exe.functionName = this.iptnamefunc.value.trim();
+        args.exe.title = this.iptnametest.value.trim();
+
+        this.addInEditor({ args: args.exe, script: this.txtScript.value });
+
+    }
+
+    private addInEditor(params: { args: any, script: string }) {
 
         try {
-            await addTest(file, this.txtScript.value);
-            this.labelOk = 'Test saved sucessfully';
 
-        } catch (err: any) {
-            this.labelError = err.message;
+            const editor = mls.services['100554_serviceSource_left']._ed1;
+            if (!editor) throw new Error('Not found editor');
+
+
+            const info = (mls.actual[2] as any).left;
+            const key = mls.editor.getKeyModel(info.project, info.shortName);
+
+            const model = mls.editor.models[key];
+            if (!model || !model.test) throw new Error('Not found model');
+
+            const testAST = new TsTestAst(model.test, editor);
+
+            testAST.addTest(params.args, params.script);
+
+            const sev = this.closest('service-detail-100554') as any;
+            if (!sev) return
+            sev.openService('_100554_servicePreview', 'right', sev.level);
+
+        } catch (e) {
+            console.info(e);
+
         }
-
     }
+
+
 }

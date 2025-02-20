@@ -9,6 +9,9 @@ import { getConfigProject } from './_100554_libProjectConfig';
 import { globalState, setState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from './_100554_collabIcons';
+import { getScriptTest } from './_100554_libProcessTest';
+
+
 
 import { ICANTest, TsTestAst } from './_100554_tsTestAST';
 
@@ -529,40 +532,37 @@ export class ServicePreview100554 extends ServiceBase {
 
     private onBtTestClick() {
 
-        // if (!this.menu || !this.menu.tools || !this.menu.tools.test || this.menu.tools.test.selected === undefined) return;
-        // const selectedTest = this.menu.tools.test.selected;
+        if (!this.menu || !this.menu.tools || !this.menu.tools.test || this.menu.tools.test.selected === undefined) return;
+        const selectedTest = this.menu.tools.test.selected;
 
-        // if (selectedTest === ERecord.Play) {
-        //     const iframe = window.preview.iframe;
-        //     if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
-        //     const ica = (iframe.contentWindow as any).globalStateManagment;
-        //     ica.clearHistory();
+        if (selectedTest === ERecord.Play) {
+            const iframe = window.preview.iframe;
+            if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
+            const ica = (iframe.contentWindow as any).globalStateManagment;
+            ica.clearHistory();
 
-        // } else if (selectedTest === ERecord.Stop) {
-        //     const iframe = window.preview.iframe;
-        //     if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
-        //     const ica = (iframe.contentWindow as any).globalStateManagment
-        //     const script = getScriptTest(ica);
+        } else if (selectedTest === ERecord.Stop) {
+            const iframe = window.preview.iframe;
+            if (!iframe || !iframe.contentWindow || !(iframe.contentWindow as any).globalStateManagment) return;
+            const ica = (iframe.contentWindow as any).globalStateManagment
+            const script = getScriptTest(ica);
 
-        //     if (!this.actualFile) return;
-        //     addTestInMonaco(`_${this.actualFile.project}_${this.actualFile.shortName}`, script)
-        //     // this.fireEventsDetails(btoa(encodeURIComponent(script)), '', 'new');
-        // }
+            this.fireEventsDetails(script);
+        }
 
     }
 
-    private fireEventsDetails(script: string, title: string, mode: 'new' | 'edit', indexEdit?: number) {
+    private fireEventsDetails(script: {func:string,exe:any} | undefined) {
 
-        const _title = title || "newTest";
+        if (!script) return;
+
         const options = {
             shortName: undefined,
             project: undefined,
             htmlText: `<collab-process-test-100554 
-                ${indexEdit !== undefined ? `editIndex=${indexEdit}` : ''}
-                mode=${mode} 
-                title="${_title}" 
-                script=${script}
-            ></collab-process-test-100554>`
+                script=${btoa(script.func)}
+            ></collab-process-test-100554>`,
+            arguments:script
         }
 
         mls.events.fire(

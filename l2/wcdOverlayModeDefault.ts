@@ -160,7 +160,7 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
             },
             'attr': {
                 name: "_100554_wcdToolboxItemActionEditAttr",
-                level: [3],
+                level: [2,3],
                 position: 'p-r0',
                 args: ''
             },
