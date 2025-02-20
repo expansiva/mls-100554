@@ -122,10 +122,39 @@ export class TsTestAst {
         const totalLines = code.split('\n').length;
         ast.startLine = 1;
         ast.endLine = totalLines;
+
+        const imports = this.parseImports(code);
         const arr = this.parseArrays(code);
         const fcs = this.parseFunctionNames(code);
-        ast.children = [...arr, ...fcs];
+        ast.children = [...imports, ...arr, ...fcs];
         return ast;
+    }
+
+    /**
+     * Parses imports from TypeScript code and returns an array of AST nodes.
+     * @param {string} code - The TypeScript code to parse.
+     * @returns {ASTNode[]} An array of AST nodes representing the imports in the code.
+     */
+    private parseImports(code: string): ASTNode[] {
+        const rc: ASTNode[] = [];
+        const importRegex = /import\s+(?:\{([^}]*)\}|\*\s+as\s+(\w+)|(\w+))\s+from\s+['"]([^'"]+)['"];/g;
+        let match;
+
+        while ((match = importRegex.exec(code)) !== null) {
+            const [fullMatch, namedImports, namespaceImport, defaultImport, modulePath] = match;
+            const startLine = code.substring(0, match.index).split('\n').length;
+            const endLine = startLine;
+
+            rc.push({
+                type: 'ImportDeclaration',
+                name: defaultImport || namespaceImport || namedImports?.trim() || '',
+                value: modulePath,
+                startLine,
+                endLine
+            });
+        }
+
+        return rc;
     }
 
     /**
@@ -471,9 +500,53 @@ export class TsTestAst {
         const { startLine, endLine } = this.ast;
         if (!startLine || !endLine) throw new Error('Missing information on AST "startLine" or "endLine"');
         this.monacoDriver.insertLine(this.modelTest.model, endLine + 1, fcString);
+        this.checkImports();
         this.monacoDriver.finishEdit(this.modelTest.model);
         return true;
     }
+
+    private checkImports() {
+        if (!this.modelTest) throw new Error('Invalid test model');
+        this.ast = this.parse();
+        if (!this.ast) throw new Error('Invalid ast');
+        const imports = `import { setState, verifyState } from './_100554_libManagementCan';`
+        const importItem = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_libManagementCan');
+        if (!importItem) this._addImport(imports);
+        else this._addImport(imports, importItem);
+    }
+
+    /**
+     * Adds an import statement to the TypeScript code.
+     * If an interval is provided, it replaces the existing import.
+     * Otherwise, it inserts the import after the root startLine.
+     * 
+     * @param {string} value - The import statement to add.
+     * @param {Object} [interval] - The optional start and end line to replace.
+     */
+    private _addImport(value: string, interval?: { startLine: number, endLine: number }) {
+        if (!this.modelTest || !this.ast) throw new Error('Invalid test model or AST');
+
+        const editOperations: monaco.editor.IIdentifiedSingleEditOperation[] = [];
+        const model = this.modelTest.model;
+        const rootStartLine = this.ast.startLine ?? 1;
+
+        if (interval) {
+            editOperations.push({
+                range: new monaco.Range(interval.startLine, 1, interval.endLine, model.getLineMaxColumn(interval.endLine)),
+                text: value,
+                forceMoveMarkers: true
+            });
+        } else {
+            editOperations.push({
+                range: new monaco.Range(rootStartLine + 1, 1, rootStartLine + 1, 1),
+                text: value + '\n',
+                forceMoveMarkers: true
+            });
+        }
+
+        model.pushEditOperations([], editOperations, () => null);
+    }
+
 
     private _formatEditor(model: monaco.editor.ITextModel) {
         if (!this.editor) return;
