@@ -10,9 +10,6 @@ import { globalState, setState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from './_100554_collabIcons';
 import { getScriptTest } from './_100554_libProcessTest';
-
-
-
 import { ICANTest, TsTestAst } from './_100554_tsTestAST';
 
 import './_100554_collabConsole';
@@ -313,7 +310,10 @@ export class ServicePreview100554 extends ServiceBase {
 
     private onTsTestChanged() {
         if (this.watch) {
+            this.elPreview = undefined;
+            this.loading = false;
             this.setTest();
+            this.onReloader();
         }
     }
 
@@ -514,6 +514,7 @@ export class ServicePreview100554 extends ServiceBase {
     private astTSTest: TsTestAst | undefined;
 
     private async setTest() {
+
         this.refreshAST();
         if (!this.astTSTest) return;
 
@@ -533,7 +534,7 @@ export class ServicePreview100554 extends ServiceBase {
 
         this.actualTestList = opts;
 
-        if (opts.length > 0 && this.menu.tools.testList) {
+        if (opts.length >= 0 && this.menu.tools.testList) {
             this.menu.tools.testList.options = opts;
         }
 
@@ -592,10 +593,12 @@ export class ServicePreview100554 extends ServiceBase {
         const [testIndex, actionIndex] = selectedIndex;
 
         if (actionIndex === ETestActions.Run) {
+
             const actualData = this.actualTestList[testIndex];
-            this.runTest(actualData.functionName);
+            this.runTest(actualData.functionName, testIndex);
         } else if (actionIndex === ETestActions.Delete) {
-            await this.deleteTest(this.actualTestList[testIndex].functionName);
+
+            await this.deleteTest(this.actualTestList[testIndex].functionName, testIndex);
             this.setTest();
 
         } else if (actionIndex === ETestActions.Edit) {
@@ -612,21 +615,21 @@ export class ServicePreview100554 extends ServiceBase {
         }
     }
 
-    private async deleteTest(testName: string) {
+    private async deleteTest(testName: string, indexParams: number) {
         this.refreshAST();
         if (!this.astTSTest) throw new Error('Invalid AST');
         try {
-            this.astTSTest.deleteTest(testName)
+            this.astTSTest.deleteTest(testName, indexParams)
         } catch (err: any) {
             this.error = err.message;
         }
     }
 
-    private async runTest(testName: string) {
+    private async runTest(testName: string, index: number) {
         this.refreshAST();
         if (!this.astTSTest) throw new Error('Invalid AST');
         try {
-            this.astTSTest.runTest(testName)
+            this.astTSTest.runTest(testName, index);
         } catch (err: any) {
             this.error = err.message;
         }

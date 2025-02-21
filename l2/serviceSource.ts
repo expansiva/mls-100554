@@ -128,7 +128,7 @@ export class ServiceSource100554 extends ServiceBase {
         widget: '_100554_serviceSource',
         level: [2]
     }
-
+    
     private menuToolsMode1: ITools = {
         btHistory: {
             type: 'cycle',
