@@ -441,16 +441,6 @@ export class TsTestAst {
         this.ast = this.parse();
         const tests = this._getTests();
         const testToDelete = tests.find((t) => t.functionName === functionName);
-
-
-        console.info({
-            functionName,
-            index,
-            ast: this.ast,
-            tests,
-            testToDelete
-        })
-
         if (!this.modelTest) throw new Error('Invalid test model');
         if (!testToDelete) throw new Error(`Test "${functionName}" does not exist`);
 
@@ -511,8 +501,8 @@ export class TsTestAst {
             } else {
                 throw new Error(`Function ${fcName} not found in ${fileName}`);
             }
-        } catch (error) {
-            console.error(`Error importing ${fileName}:`, error);
+        } catch (error: any) {
+            throw new Error(`Error importing ${fileName}: ${error.message}`);
             return false;
         }
     }
@@ -611,6 +601,8 @@ export class TsTestAst {
     }
 
     private checkImports() {
+
+
         if (!this.modelTest) throw new Error('Invalid test model');
         this.ast = this.parse();
         if (!this.ast) throw new Error('Invalid ast');
@@ -619,11 +611,12 @@ export class TsTestAst {
         const import2 = `import { ICANTest, ICANIntegration, ICANSchema } from './_100554_tsTestAST';`
 
         const importItem1 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_libManagementCan');
-        const importItem2 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_tsTestAST');
-
         if (!importItem1) this._addImport(import1);
         else this._addImport(import1, importItem1);
 
+        this.ast = this.parse();
+
+        const importItem2 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_tsTestAST');
         if (!importItem2) this._addImport(import2);
         else this._addImport(import2, importItem2);
     }
