@@ -87,16 +87,16 @@ export class TsTestAst {
      * @returns {boolean} True if the test was removed successfully, false otherwise.
      * @throws {Error} Throws an error if the test already exists or if there are issues with the AST.
      */
-    deleteTest(testName: string) {
-        return this._deleteTest(testName);
+    deleteTest(testName: string, index?: number) {
+        return this._deleteTest(testName, index);
     }
 
     goToTest(testName: string) {
         return this._goToTest(testName);
     }
 
-    async runTest(testName: string) {
-        return this._runTest(testName);
+    async runTest(testName: string, paramsIndex: number = 0) {
+        return this._runTest(testName, paramsIndex);
     }
 
     /**
@@ -403,7 +403,7 @@ export class TsTestAst {
      * @param {string} testName - The name of the test to delete.
      * @throws {Error} Throws an error if the test does not exist or deletion fails.
      */
-    private _deleteTest(functionName: string) {
+    private _deleteTest2(functionName: string, index?: number) {
         this.ast = this.parse();
         const tests = this._getTests();
         const testToDelet = tests.find((t) => t.functionName === functionName);
@@ -430,7 +430,68 @@ export class TsTestAst {
         return true;
     }
 
-    private async _runTest(functionName: string) {
+    /**
+ * Internal method to delete a test from the AST and update the Monaco editor.
+ * @param {string} functionName - The name of the test to delete.
+ * @param {number} [index] - (Optional) The index of the parameter to remove.
+ * @throws {Error} Throws an error if the test does not exist or deletion fails.
+ */
+    private _deleteTest(functionName: string, index?: number) {
+
+        this.ast = this.parse();
+        const tests = this._getTests();
+        const testToDelete = tests.find((t) => t.functionName === functionName);
+
+
+        console.info({
+            functionName,
+            index,
+            ast: this.ast,
+            tests,
+            testToDelete
+        })
+
+        if (!this.modelTest) throw new Error('Invalid test model');
+        if (!testToDelete) throw new Error(`Test "${functionName}" does not exist`);
+
+        const testAST = this.ast?.children?.find((ast) => ast.type === 'ArrayDeclaration' && ast.name === 'tests');
+
+        if (testAST) {
+            const testIndex = tests.findIndex(item => item.functionName === functionName);
+
+            if (testIndex !== -1) {
+                if (index === undefined) {
+
+                    tests.splice(testIndex, 1);
+                    this._deleteFunction(functionName);
+                } else {
+
+                    if (testToDelete.params?.length > index) {
+                        testToDelete.params.splice(index, 1);
+
+                        if (testToDelete.params.length === 0) {
+                            tests.splice(testIndex, 1);
+                            this._deleteFunction(functionName);
+                        }
+                    } else {
+                        throw new Error(`Index ${index} is out of bounds for test "${functionName}"`);
+                    }
+                }
+            }
+
+            let newTest = JSON.stringify(tests, null, 2).replace(/"(\w+)":/g, '$1:');
+            newTest = `export const tests: ICANTest[] = ${newTest} \n`;
+
+            this.monacoDriver.replaceLines(this.modelTest.model, testAST.startLine, testAST.endLine, newTest);
+        }
+
+        this.ast = this.parse();
+        this._formatEditor(this.modelTest.model);
+        return true;
+    }
+
+
+    private async _runTest(functionName: string, paramsIndex: number = 0) {
 
         if (!this.modelTest) throw new Error('Invalid test model');
         this.ast = this.parse();
@@ -439,9 +500,9 @@ export class TsTestAst {
         if (!testFind) return false;
 
         const fcName = testFind.functionName;
-        const params = testFind.params;
+        const params = testFind.params[paramsIndex];
 
-        const fileName = `./_${this.modelTest.storFile.project}_${this.modelTest.storFile.shortName}.test.js`;
+        const fileName = `./_${this.modelTest.storFile.project}_${this.modelTest.storFile.shortName}.test.js?cacheBuster=${Date.now()}`;
         try {
             const module = await import(fileName);
             if (module[fcName] && typeof module[fcName] === 'function') {
