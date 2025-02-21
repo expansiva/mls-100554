@@ -22,7 +22,6 @@ type ASTNode = {
     endLine: number;
 };
 
-
 /**
  * Class to parse a TypeScript test file and generate an AST.
  */
@@ -162,28 +161,74 @@ export class TsTestAst {
      * @param {string} code - The TypeScript code to parse.
      * @returns {ASTNode[]} An array of AST nodes representing the arrays in the code.
      */
+    // private parseArrays(code: string): ASTNode[] {
+    //     const rc: ASTNode[] = [];
+    //     const arrayRegex = /export\s+const\s+(\w+)\s*:\s*[\w\[\]<,>\s]*=\s*(\[[\s\S]*?\])/g;
+    //     let match;
+    //     while ((match = arrayRegex.exec(code)) !== null) {
+    //         const arrayName = match[1];
+    //         const arrayContent = match[2];
+
+    //         const startLine = code.substring(0, match.index).split('\n').length;
+    //         const endLine = startLine + arrayContent.split('\n').length - 1;
+
+    //         rc.push({
+    //             type: 'ArrayDeclaration',
+    //             name: arrayName,
+    //             value: arrayContent,
+    //             startLine,
+    //             endLine
+    //         });
+    //     }
+
+    //     return rc;
+    // }
+
+    /**
+ * Parses arrays from TypeScript code and returns an array of AST nodes.
+ * @param {string} code - The TypeScript code to parse.
+ * @returns {ASTNode[]} An array of AST nodes representing the arrays in the code.
+ */
     private parseArrays(code: string): ASTNode[] {
         const rc: ASTNode[] = [];
-        const arrayRegex = /export\s+const\s+(\w+)\s*:\s*[\w\[\]<,>\s]*=\s*(\[[\s\S]*?\])/g;
+
+        // Melhor regex: captura `export const nome: Tipo[] = [` garantindo que o `=` venha antes de `[` 
+        const arrayRegex = /export\s+const\s+(\w+)\s*:\s*[\w\[\]<,>\s]*=\s*\[/g;
+
         let match;
         while ((match = arrayRegex.exec(code)) !== null) {
             const arrayName = match[1];
-            const arrayContent = match[2];
+            const startIdx = match.index + match[0].length - 1;
 
-            const startLine = code.substring(0, match.index).split('\n').length;
-            const endLine = startLine + arrayContent.split('\n').length - 1;
+            // Localiza o fechamento correto do array `]`
+            let openBrackets = 1;
+            let endIdx = startIdx;
+            while (endIdx < code.length && openBrackets > 0) {
+                endIdx++;
+                if (code[endIdx] === "[") openBrackets++;
+                if (code[endIdx] === "]") openBrackets--;
+            }
+
+            if (openBrackets !== 0) {
+                throw new Error(`Unmatched brackets in array: ${arrayName}`);
+            }
+
+            const arrayContent = code.substring(startIdx, endIdx + 1);
+            const startLine = code.substring(0, startIdx).split("\n").length;
+            const endLine = startLine + arrayContent.split("\n").length - 1;
 
             rc.push({
-                type: 'ArrayDeclaration',
+                type: "ArrayDeclaration",
                 name: arrayName,
                 value: arrayContent,
                 startLine,
-                endLine
+                endLine,
             });
         }
 
         return rc;
     }
+
 
 
     /**
@@ -294,7 +339,6 @@ export class TsTestAst {
         if (!testsAst || !testsAst.value) return [];
         let rawValue = testsAst.value;
 
-
         rawValue = rawValue
             .replace(/([a-zA-Z0-9_]+)\s*:/g, '"$1":')
             .replace(/'/g, '"')
@@ -308,7 +352,6 @@ export class TsTestAst {
 
             for (const test of parsed) {
                 if (
-                    typeof test.title !== 'string' ||
                     typeof test.functionName !== 'string' ||
                     typeof test.params !== 'object'
                 ) {
@@ -333,8 +376,8 @@ export class TsTestAst {
 
         this.ast = this.parse();
         const tests = this._getTests();
-        const alreadyExist = tests.find((t) => t.title === test.title);
-        if (alreadyExist) throw new Error(`Test with title "${test.title}" already exists.`);
+        const alreadyExist = tests.find((t) => t.functionName === test.functionName);
+        if (alreadyExist) throw new Error(`Test "${test.functionName}" already exists.`);
         tests.push(test);
         const testNode = this.ast?.children?.find((item) => item.type === 'ArrayDeclaration' && item.name === 'tests');
         if (!this.modelTest) throw new Error('Invalid test model');
@@ -360,16 +403,16 @@ export class TsTestAst {
      * @param {string} testName - The name of the test to delete.
      * @throws {Error} Throws an error if the test does not exist or deletion fails.
      */
-    private _deleteTest(testName: string) {
+    private _deleteTest(functionName: string) {
         this.ast = this.parse();
         const tests = this._getTests();
-        const testToDelet = tests.find((t) => t.title === testName);
+        const testToDelet = tests.find((t) => t.functionName === functionName);
         if (!this.modelTest) throw new Error('Invalid test model');
-        if (!testToDelet) throw new Error(`Test with title "${testName}" dont exists`);
+        if (!testToDelet) throw new Error(`Test"${functionName}" dont exists`);
         const testAST = this.ast?.children?.find((ast) => ast.type === 'ArrayDeclaration' && ast.name === 'tests');
 
         if (testAST) {
-            const index = tests.findIndex(item => item.title === testToDelet.title);
+            const index = tests.findIndex(item => item.functionName === testToDelet.functionName);
             if (index !== -1) {
                 tests.splice(index, 1);
             }
@@ -387,12 +430,12 @@ export class TsTestAst {
         return true;
     }
 
-    private async _runTest(testName: string) {
+    private async _runTest(functionName: string) {
 
         if (!this.modelTest) throw new Error('Invalid test model');
         this.ast = this.parse();
         const tests = this._getTests();
-        const testFind = tests.find((t) => t.title === testName);
+        const testFind = tests.find((t) => t.functionName === functionName);
         if (!testFind) return false;
 
         const fcName = testFind.functionName;
@@ -414,12 +457,13 @@ export class TsTestAst {
     }
 
 
-    private _goToTest(testName: string) {
+    private _goToTest(functionName: string) {
+
         this.ast = this.parse();
         const tests = this._getTests();
-        const testFind = tests.find((t) => t.title === testName);
+        const testFind = tests.find((t) => t.functionName === functionName);
         if (!this.modelTest) throw new Error('Invalid test model');
-        if (!testFind) throw new Error(`Test with title "${testName}" dont exists`);
+        if (!testFind) throw new Error(`Test "${functionName}" dont exists`);
         const testAST = this.ast?.children?.find((ast) => ast.type === 'FunctionDeclaration' && ast.name === testFind.functionName);
         if (!testAST) return false;
         this.monacoDriver.goTo(this.modelTest.model, testAST.startLine, testAST.endLine);
@@ -509,9 +553,9 @@ export class TsTestAst {
         if (!this.modelTest) throw new Error('Invalid test model');
         this.ast = this.parse();
         if (!this.ast) throw new Error('Invalid ast');
-        
+
         const import1 = `import { setState, verifyState } from './_100554_libManagementCan';`
-        const import2 = `import { ICANTest, ICANIntegration, ICANParams } from './_100554_tsTestAST';`
+        const import2 = `import { ICANTest, ICANIntegration, ICANSchema } from './_100554_tsTestAST';`
 
         const importItem1 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_libManagementCan');
         const importItem2 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_tsTestAST');
@@ -565,9 +609,8 @@ export class TsTestAst {
 
 
 export interface ICANTest {
-    title: string,
     functionName: string,
-    params: Record<string, ICANParams>
+    params: Record<string, any>[]
 }
 
 export interface ICANIntegration {
@@ -575,12 +618,11 @@ export interface ICANIntegration {
     description: string,
     page: string,
     functionName: string,
-    params: Record<string, ICANParams>
+    schema: Record<string, ICANSchema>
 }
 
-export interface ICANParams {
+export interface ICANSchema {
     type: string,
-    value?: any,
     optional?: boolean
     description?: string
 }

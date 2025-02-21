@@ -502,33 +502,44 @@ export class ServicePreview100554 extends ServiceBase {
         return htmlEl;
     }
 
-    private actualTestList: ICANTest[] = [];
+    private actualTestList: {
+        text: string;
+        functionName: string;
+        options: {
+            text: string;
+            icon: string;
+        }[];
+    }[] = []
 
     private astTSTest: TsTestAst | undefined;
 
     private async setTest() {
-
         this.refreshAST();
         if (!this.astTSTest) return;
-        this.actualTestList = this.astTSTest.getTests();
-        const opts = this.actualTestList.map((item, index: number) => {
-            return {
-                text: item.title,
+
+        const fileTests = this.astTSTest.getTests();
+
+        const opts = fileTests.flatMap(item =>
+            item.params.map((_, indexParam) => ({
+                text: item.params.length > 1 ? `${item.functionName}(${indexParam})` : item.functionName,
+                functionName: item.functionName,
                 options: [
                     { text: this.msg.testRun, icon: collab_play.strings[0] },
                     { text: this.msg.testDelete, icon: collab_trash.strings[0] },
                     { text: this.msg.testEdit, icon: collab_file_pen.strings[0] },
                 ]
-            }
-        },
+            }))
         );
 
-        if (this.menu.tools.testList) {
+        this.actualTestList = opts;
+
+        if (opts.length > 0 && this.menu.tools.testList) {
             this.menu.tools.testList.options = opts;
         }
 
-        if (this.menu.refresh) this.menu.refresh();
+        this.menu.refresh?.();
     }
+
 
     private onBtTestClick() {
 
@@ -552,7 +563,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     }
 
-    private fireEventsDetails(script: {func:string,exe:any} | undefined) {
+    private fireEventsDetails(script: { func: string, exe: any } | undefined) {
 
         if (!script) return;
 
@@ -562,7 +573,7 @@ export class ServicePreview100554 extends ServiceBase {
             htmlText: `<collab-process-test-100554 
                 script=${btoa(script.func)}
             ></collab-process-test-100554>`,
-            arguments:script
+            arguments: script
         }
 
         mls.events.fire(
@@ -582,22 +593,22 @@ export class ServicePreview100554 extends ServiceBase {
 
         if (actionIndex === ETestActions.Run) {
             const actualData = this.actualTestList[testIndex];
-            this.runTest(actualData.title);
+            this.runTest(actualData.functionName);
         } else if (actionIndex === ETestActions.Delete) {
-
-            await this.deleteTest(this.actualTestList[testIndex].title);
+            await this.deleteTest(this.actualTestList[testIndex].functionName);
             this.setTest();
 
         } else if (actionIndex === ETestActions.Edit) {
-
             const actualData = this.actualTestList[testIndex];
             if (!actualData) {
                 this.error = 'Invalid test';
                 return;
             }
 
-            setState('serviceSource.left.selectedMode', 'icTest');
-            setTimeout(() => { this.astTSTest?.goToTest(actualData.title) }, 200)
+            if (this.level !== 2) this.selectLevel(2);
+
+            setTimeout(() => { setState('serviceSource.left.selectedMode', 'icTest'); }, 200)
+            setTimeout(() => { this.astTSTest?.goToTest(actualData.functionName) }, 200)
         }
     }
 

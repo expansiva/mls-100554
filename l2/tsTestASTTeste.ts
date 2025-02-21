@@ -22,18 +22,26 @@ export class LessASTTest100554 extends LitElement {
          `;
     }
 
+
     exeTest = () => {
         if (!this.model1) return this.result = "undefined;";
         const editor = mls.services['100554_serviceSource_left']._ed1;
         if (!editor) return this.result = `No find editor`;
         const testAST = new TsTestAst(this.model1, editor);
+        console.info({ testAST })
+
         const testAst = this.test1(testAST);
         const testGetIntegrations = this.test2(testAST);
         const testGetTests = this.test3(testAST);
+
+        // const testAddTest = '';
+        // const testAddTestSameTitle = '';
+        // const testAddIntegration= '';
+        // const testDeleteTest = '';
+
         const testAddTest = this.test4(testAST, 'new Test');
         const testAddTestSameTitle = this.test4(testAST, 'Test add 2');
         const testAddIntegration = this.test5(testAST, 'adicionar usuario com todos os parametros');
-
         const testDeleteTest = this.test6(testAST, 'Test add');
 
         this.result = `result test1: ${testAst} \n\n
@@ -76,10 +84,9 @@ ${'*'.repeat(100)}\n
     test4 = (testAST: TsTestAst, title: string) => {
         const testNew: ICANTest = {
             functionName: 'fcTestNew',
-            title,
-            params: {
-                user: { type: 'String', value: 'Guilherme' },
-            }
+            params: [{
+                user: 'String', value: 'Guilherme'
+            }]
         };
 
         const fc = function fcTestNew() {
@@ -103,7 +110,7 @@ ${'*'.repeat(100)}\n
             description,
             enabled: true,
             page: 'tsTestASTTeste',
-            params: {
+            schema: {
                 user: { type: 'String', description: 'The user name' },
                 phone: { type: 'String', description: 'The user phone number' },
                 cep: { type: 'Number', description: 'The user cep', optional: true },
