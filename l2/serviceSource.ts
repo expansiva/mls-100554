@@ -2560,7 +2560,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private async prepareInitialTsTest(shortName: string, project: number) {
         const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />
-				\nimport { ICANTest, ICANIntegration } from './_100554_tsTestAST'; \n\nexport const integrations: ICANIntegration[] = []; \nexport const tests: ICANTest[] = [];`;
+				\nimport { ICANTest, ICANIntegration, ICANParams  } from './_100554_tsTestAST'; \n\nexport const integrations: ICANIntegration[] = []; \nexport const tests: ICANTest[] = [];`;
         const newTest = example
             .replace('[shortName]', shortName)
             .replace('[project]', project.toString())

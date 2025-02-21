@@ -5,7 +5,7 @@ export function setState(path: string, value: any) {
     if (!window.preview.iframe.contentWindow) throw new Error('Invalid preview iframe contentWindow');
     if (!((window.preview.iframe.contentWindow as any)['globalStateManagment'])) throw new Error('Invalid preview stateManagment');
     try {
-        (window.preview.iframe.contentWindow as any)['globalStateManagment'].setValue(path, value);
+        (window.preview.iframe.contentWindow as any)['globalStateManagment'].setState(path, value);
         return true;
     } catch (err: any) {
         throw new Error(err.message);
@@ -18,7 +18,7 @@ export function verifyState(path: string, value: any) {
     if (!window.preview.iframe.contentWindow) throw new Error('Invalid preview iframe contentWindow');
     if (!((window.preview.iframe.contentWindow as any)['globalStateManagment'])) throw new Error('Invalid preview stateManagment');
     try {
-        let oldValue = (window.preview.iframe.contentWindow as any)['globalStateManagment'].getValue(path);
+        let oldValue = (window.preview.iframe.contentWindow as any)['globalStateManagment'].getState(path);
         let newValue = value;
         if (typeof newValue === 'object') newValue = JSON.stringify(value);
         if (typeof oldValue === 'object') newValue = JSON.stringify(oldValue);
