@@ -398,7 +398,7 @@ export class TsTestAst {
         const fcName = testFind.functionName;
         const params = testFind.params;
 
-        const fileName = `./_${this.modelTest.storFile.project}_${this.modelTest.storFile.shortName}.test.ts`;
+        const fileName = `./_${this.modelTest.storFile.project}_${this.modelTest.storFile.shortName}.test.js`;
         try {
             const module = await import(fileName);
             if (module[fcName] && typeof module[fcName] === 'function') {
@@ -509,10 +509,18 @@ export class TsTestAst {
         if (!this.modelTest) throw new Error('Invalid test model');
         this.ast = this.parse();
         if (!this.ast) throw new Error('Invalid ast');
-        const imports = `import { setState, verifyState } from './_100554_libManagementCan';`
-        const importItem = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_libManagementCan');
-        if (!importItem) this._addImport(imports);
-        else this._addImport(imports, importItem);
+        
+        const import1 = `import { setState, verifyState } from './_100554_libManagementCan';`
+        const import2 = `import { ICANTest, ICANIntegration, ICANParams } from './_100554_tsTestAST';`
+
+        const importItem1 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_libManagementCan');
+        const importItem2 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_tsTestAST');
+
+        if (!importItem1) this._addImport(import1);
+        else this._addImport(import1, importItem1);
+
+        if (!importItem2) this._addImport(import2);
+        else this._addImport(import2, importItem2);
     }
 
     /**

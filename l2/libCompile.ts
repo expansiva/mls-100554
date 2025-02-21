@@ -122,11 +122,10 @@ async function loadMyNeedsToCompile(
         if (!project || !path) return;
 
         const ipath = { project, shortName: path };
-        //const enhacementName = getEnhacementName(ipath);
         const enhacementName = await getEnhancementFromFetch(ipath);
         if (!enhacementName) throw new Error('enhacementName not valid');
         if (enhacementName === '_blank') return;
-        
+
         if (!myModules[enhacementName]) {
 
             mls.actual[0].setFullName(enhacementName);
@@ -201,19 +200,19 @@ async function getEnhancementFromFetch(file: { project: number, shortName: strin
     const mlsLine = lines.find(line => line.trim().startsWith('/// <mls '));;
 
     if (!mlsLine) {
-        throw new Error(`Not found tag <mls> in ${url}` );
+        throw new Error(`Not found tag <mls> in ${url}`);
     }
 
     // Regex para capturar o valor do atributo enhancement
     const enhancementMatch = mlsLine.match(/enhancement="([^"]+)"/);
 
     if (!enhancementMatch) {
-        throw new Error('Not found attr "enhancement" in '+url);
+        throw new Error('Not found attr "enhancement" in ' + url);
     }
 
     // Retorna o valor do atributo enhancement
     return enhancementMatch[1];
-    
+
 }
 
 async function getJSImporMap(myImportsMap: string[], enhacementName: string, myModules: any) {
@@ -235,11 +234,12 @@ async function getJSImporMap(myImportsMap: string[], enhacementName: string, myM
 }
 
 async function getJS(myImports: string[], enhacementName: string, mfile: mls.cbe.IPath, myModules: any) {
-
     if (!myModules[enhacementName]) throw new Error('Enhacement not found ');
     if (myImports.includes(`/_${mfile.project}_${mfile.shortName}`)) return;
     myImports.push(`/_${mfile.project}_${mfile.shortName}`);
-
+    const keyTestFile = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, '', '.test.ts');
+    const storFileTest = mls.stor.files[keyTestFile];
+    if (storFileTest) myImports.push(`/_${mfile.project}_${mfile.shortName}.test.js`);
 }
 
 

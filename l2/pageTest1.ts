@@ -9,7 +9,6 @@ import { initTestState, adicionarSolicitacao, ISolicitacao } from './_100554_tes
 export class PageTest1100554 extends CollabPageElement {
 
     initPage() {
-
         initTestState();
         initState('projectTest.page1', {
             action: '',
