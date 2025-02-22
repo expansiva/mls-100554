@@ -13,8 +13,8 @@ export class CollabProcessTest extends CollabLitElement {
     @property({ type: String }) labelOk: string = '';
 
     @query('#txtScript') txtScript: HTMLTextAreaElement | undefined;
-    @query('#iptnametest') iptnametest: HTMLInputElement | undefined;
     @query('#iptnamefunc') iptnamefunc: HTMLInputElement | undefined;
+    @query('#checkintegration') checkintegration: HTMLInputElement | undefined;
 
     render() {
         return html`
@@ -23,11 +23,11 @@ export class CollabProcessTest extends CollabLitElement {
                 <div>
                     <label style="width: 145px;">Name func:</label>
                     <input id="iptnamefunc" type="text" @blur="${this.changeNameFunc}"></input>
-                </div>
+                </div> 
                 <div>
-                    <label style="width: 145px;">Name test:</label>
-                    <input id="iptnametest" type="text"></input>
-                </div>                
+                    <label style="width: 163px;">Create integration:</label>
+                    <input id="checkintegration" type="checkbox" ></input>
+                </div>              
                 <button @click="${this.onSave}">Save</button>
             </div>
             <div class="error"> ${this.labelError}</div>
@@ -76,11 +76,6 @@ export class CollabProcessTest extends CollabLitElement {
             return;
         }
 
-        if (!this.iptnametest || this.iptnametest.value == '') {
-            this.labelError = 'The test name was not provided!'
-            return;
-        }
-
         if (!this.txtScript) {
             this.labelError = 'Not found script';
             return;
@@ -93,13 +88,37 @@ export class CollabProcessTest extends CollabLitElement {
         }
 
         args.exe.functionName = this.iptnamefunc.value.trim();
-        args.exe.title = this.iptnametest.value.trim();
+        const params = this.createObjeTest(args.exe);
 
-        this.addInEditor({ args: args.exe, script: this.txtScript.value });
+        this.addInEditor({ args: params, script: this.txtScript.value, integration: args.exe });
+
+
 
     }
 
-    private addInEditor(params: { args: any, script: string }) {
+    private createObjeTest(info: any): { functionName: string, params: any[] } {
+
+        const ret = {
+            functionName: info.functionName,
+            params: []
+        }
+
+        const ex: any = {};
+        Object.keys(info.schema).forEach((k) => {
+
+            if (ex[k]) return;
+
+            ex[k] = info.schema[k].value;
+            delete info.schema[k].value;
+
+        });
+
+        (ret.params as any).push(ex);
+        return ret;
+
+    }
+
+    private addInEditor(params: { args: any, script: string, integration: any }) {
 
         try {
 
@@ -116,6 +135,10 @@ export class CollabProcessTest extends CollabLitElement {
             const testAST = new TsTestAst(model.test, editor);
 
             testAST.addTest(params.args, params.script);
+
+            if (this.checkintegration && this.checkintegration.checked) {
+                testAST.addIntegration(params.integration, '');
+            }
 
             const sev = this.closest('service-detail-100554') as any;
             if (!sev) return
