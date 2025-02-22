@@ -36,7 +36,7 @@ export function getScriptTest(ica: IcaState): {func:string,exe:any} | undefined 
 
             const param = getParam(params, h.key);
             if (!param) return;
-            row = `setState('${h.key}', args.${param}.value);`;
+            row = `setState('${h.key}', args.${param});`;
 
         } else {
 
@@ -59,22 +59,24 @@ export function getScriptTest(ica: IcaState): {func:string,exe:any} | undefined 
 
     });
 
-    const exe: ICANTest = {
+    const exe: any = {
         functionName: '',
-        title: '',
-        params: {}
+        description: '',
+        page: '',
+        enabled: true,
+        schema: {}
     };
 
     Object.keys(params).forEach((k) => {
 
         const p = params[k];
         if (!p) return;
-        exe.params[k] = {type: p.tp, value:p.vl};
+        exe.schema[k] = {type: p.tp, value:p.vl};
 
 
     })
 
-    const func = `export function @funcname(args: Record<string, ICANParams>): string {\ntry{\n${lines.join('\n')}\nreturn 'ok';\n}catch(e:any){\nreturn e.message;\n}\n}`
+    const func = `export function @funcname(args: Record<string, any>): string {\ntry{\n${lines.join('\n')}\nreturn 'ok';\n}catch(e:any){\nreturn e.message;\n}\n}`
 
     return {func,exe};
 
