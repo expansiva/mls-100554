@@ -91,10 +91,47 @@ export class TsTestAst {
         return this._deleteTest(testName, index);
     }
 
+    /**
+     * Navigate to the specified test function within the Monaco Editor.
+     * 
+     * This function parses the AST to locate the test function declaration and moves 
+     * the cursor to its position in the Monaco Editor.
+     * 
+     * @param {string} functionName - The name of the test function to navigate to.
+     * @throws {Error} Throws an error if the test model is invalid or if the specified test does not exist.
+     * @returns {boolean} Returns `true` if the test function was found and navigation was successful, otherwise `false`.
+     */
     goToTest(testName: string) {
         return this._goToTest(testName);
     }
 
+    /**
+     * Retrieves test function information without executing it.
+     * 
+     * This function searches for the specified test function in the AST, extracts 
+     * its name, parameters, and associated test file name, and returns this information.
+     * 
+     * @param {string} functionName - The name of the test function.
+     * @param {number} paramsIndex - The index of the parameters set to retrieve.
+     * @throws {Error} Throws an error if the test model is invalid.
+     * @returns {ITestInfo | undefined} An object containing test metadata, or `undefined` if the test is not found.
+     */
+    getTestInfo(functionName: string, paramsIndex: number = 0) {
+        return this._getTestInfo(functionName, paramsIndex)
+    }
+
+    /**
+    * Executes a test function dynamically imported from a test file.
+    * 
+    * This function locates the test in the AST, retrieves its parameters, and dynamically 
+    * imports the corresponding test file. The specified function is then executed with 
+    * the given parameters.
+    * 
+    * @param {string} functionName - The name of the test function to execute.
+    * @param {number} [paramsIndex=0] - The index of the parameters set to use when executing the function.
+    * @throws {Error} Throws an error if the test model is invalid, the function is not found, or the import fails.
+    * @returns {Promise<string>} Resolves with the result of the executed function.
+    */
     async runTest(testName: string, paramsIndex: number = 0) {
         return this._runTest(testName, paramsIndex);
     }
@@ -108,8 +145,6 @@ export class TsTestAst {
     addIntegration(integration: ICANIntegration, fc: Function | string) {
         return this._addIntegration(integration, fc);
     }
-
-
 
     /**
      * Parses TypeScript code into an AST.
@@ -161,38 +196,9 @@ export class TsTestAst {
      * @param {string} code - The TypeScript code to parse.
      * @returns {ASTNode[]} An array of AST nodes representing the arrays in the code.
      */
-    // private parseArrays(code: string): ASTNode[] {
-    //     const rc: ASTNode[] = [];
-    //     const arrayRegex = /export\s+const\s+(\w+)\s*:\s*[\w\[\]<,>\s]*=\s*(\[[\s\S]*?\])/g;
-    //     let match;
-    //     while ((match = arrayRegex.exec(code)) !== null) {
-    //         const arrayName = match[1];
-    //         const arrayContent = match[2];
-
-    //         const startLine = code.substring(0, match.index).split('\n').length;
-    //         const endLine = startLine + arrayContent.split('\n').length - 1;
-
-    //         rc.push({
-    //             type: 'ArrayDeclaration',
-    //             name: arrayName,
-    //             value: arrayContent,
-    //             startLine,
-    //             endLine
-    //         });
-    //     }
-
-    //     return rc;
-    // }
-
-    /**
- * Parses arrays from TypeScript code and returns an array of AST nodes.
- * @param {string} code - The TypeScript code to parse.
- * @returns {ASTNode[]} An array of AST nodes representing the arrays in the code.
- */
     private parseArrays(code: string): ASTNode[] {
-        const rc: ASTNode[] = [];
 
-        // Melhor regex: captura `export const nome: Tipo[] = [` garantindo que o `=` venha antes de `[` 
+        const rc: ASTNode[] = [];
         const arrayRegex = /export\s+const\s+(\w+)\s*:\s*[\w\[\]<,>\s]*=\s*\[/g;
 
         let match;
@@ -200,7 +206,6 @@ export class TsTestAst {
             const arrayName = match[1];
             const startIdx = match.index + match[0].length - 1;
 
-            // Localiza o fechamento correto do array `]`
             let openBrackets = 1;
             let endIdx = startIdx;
             while (endIdx < code.length && openBrackets > 0) {
@@ -480,34 +485,86 @@ export class TsTestAst {
         return true;
     }
 
+    /**
+    * Internal method to executes a test function dynamically imported from a test file.
+    * 
+    * This function locates the test in the AST, retrieves its parameters, and dynamically 
+    * imports the corresponding test file. The specified function is then executed with 
+    * the given parameters.
+    * 
+    * @param {string} functionName - The name of the test function to execute.
+    * @param {number} [paramsIndex=0] - The index of the parameters set to use when executing the function.
+    * @throws {Error} Throws an error if the test model is invalid, the function is not found, or the import fails.
+    * @returns {Promise<string>} Resolves with the result of the executed function.
+    */
+    private async _runTest(functionName: string, paramsIndex: number = 0): Promise<string> {
 
-    private async _runTest(functionName: string, paramsIndex: number = 0) {
-
-        if (!this.modelTest) throw new Error('Invalid test model');
+        if (!this.modelTest || !window.preview.iframe || !window.preview.iframe.contentWindow) throw new Error('Invalid test model');
         this.ast = this.parse();
         const tests = this._getTests();
         const testFind = tests.find((t) => t.functionName === functionName);
-        if (!testFind) return false;
+        if (!testFind) throw new Error(`Test ${functionName} not found`);
 
         const fcName = testFind.functionName;
         const params = testFind.params[paramsIndex];
+        const fileName = `./_${this.modelTest.storFile.project}_${this.modelTest.storFile.shortName}.test.js?cacheBuster=${Date.now()}`
+        let module;
 
-        const fileName = `./_${this.modelTest.storFile.project}_${this.modelTest.storFile.shortName}.test.js?cacheBuster=${Date.now()}`;
         try {
-            const module = await import(fileName);
-            if (module[fcName] && typeof module[fcName] === 'function') {
-                await module[fcName](params);
-                return true;
-            } else {
-                throw new Error(`Function ${fcName} not found in ${fileName}`);
-            }
-        } catch (error: any) {
-            throw new Error(`Error importing ${fileName}: ${error.message}`);
-            return false;
+            module = await import(fileName);
+        } catch (err: any) {
+            throw new Error(err.message);
         }
+
+
+        if (!module[fcName]) throw new Error(`Function ${fcName} not found in ${fileName}`);
+        const result = await module[fcName](params);
+        return result;
+
+    }
+
+    /**
+     * Internal method to retrieves test function information without executing it.
+     * 
+     * This function searches for the specified test function in the AST, extracts 
+     * its name, parameters, and associated test file name, and returns this information.
+     * 
+     * @param {string} functionName - The name of the test function.
+     * @param {number} paramsIndex - The index of the parameters set to retrieve.
+     * @throws {Error} Throws an error if the test model is invalid.
+     * @returns {ITestInfo | undefined} An object containing test metadata, or `undefined` if the test is not found.
+     */
+    private _getTestInfo(functionName: string, paramsIndex: number): ITestInfo | undefined {
+        if (!this.modelTest || !window.preview.iframe || !window.preview.iframe.contentWindow) throw new Error('Invalid test model');
+        this.ast = this.parse();
+        const tests = this._getTests();
+        const testFind = tests.find((t) => t.functionName === functionName);
+        if (!testFind) return;
+
+        const fcName = testFind.functionName;
+        const params = testFind.params[paramsIndex];
+        const fileName = `./_${this.modelTest.storFile.project}_${this.modelTest.storFile.shortName}.test.js?cacheBuster=${Date.now()}`;
+
+        const info: ITestInfo = {
+            fileName,
+            functionName: fcName,
+            params,
+        };
+
+        return info;
     }
 
 
+    /**
+     * Internal method to navigate to the specified test function within the Monaco Editor.
+     * 
+     * This function parses the AST to locate the test function declaration and moves 
+     * the cursor to its position in the Monaco Editor.
+     * 
+     * @param {string} functionName - The name of the test function to navigate to.
+     * @throws {Error} Throws an error if the test model is invalid or if the specified test does not exist.
+     * @returns {boolean} Returns `true` if the test function was found and navigation was successful, otherwise `false`.
+     */
     private _goToTest(functionName: string) {
 
         this.ast = this.parse();
@@ -607,7 +664,7 @@ export class TsTestAst {
         this.ast = this.parse();
         if (!this.ast) throw new Error('Invalid ast');
 
-        const import1 = `import { setState, verifyState } from './_100554_libManagementCan';`
+        const import1 = `import { initState, setState, verifyState, watchState } from './_100554_libManagementCan';`
         const import2 = `import { ICANTest, ICANIntegration, ICANSchema } from './_100554_tsTestAST';`
 
         const importItem1 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_libManagementCan');
@@ -661,6 +718,11 @@ export class TsTestAst {
     }
 }
 
+export interface ITestInfo {
+    fileName: string,
+    functionName: string,
+    params: Record<string, any>,
+}
 
 export interface ICANTest {
     functionName: string,

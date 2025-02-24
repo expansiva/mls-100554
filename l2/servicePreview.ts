@@ -11,8 +11,9 @@ import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from './_100554_collabIcons';
 import { getScriptTest } from './_100554_libProcessTest';
 import { ICANTest, TsTestAst } from './_100554_tsTestAST';
-
 import './_100554_collabConsole';
+import './_100554_collabResultTest';
+
 import './_100554_servicePreviewView';
 
 /// **collab_i18n_start**
@@ -69,6 +70,7 @@ export class ServicePreview100554 extends ServiceBase {
     @property() error: string = '';
     @property() watch: boolean = true;
     @property() enabledConsole: boolean = false;
+    @property() enabledTest: boolean = false;
     @property() light: boolean = true;
     @property() lang: string = 'en';
 
@@ -585,6 +587,17 @@ export class ServicePreview100554 extends ServiceBase {
         );
     }
 
+    private addTestResultItem(title: string, status: string, clear = true) {
+        const item = document.createElement('collab-result-test-100554');
+        item.setAttribute('testName', title);
+        item.setAttribute('status', status);
+        const collabResult = this.parentElement?.querySelector('collab-result-container-100554') as HTMLElement;
+        if (clear) collabResult.innerHTML = '';
+        collabResult.appendChild(item);
+        this.openTestResults();
+        return item;
+    }
+
     private async onBtTestListClick() {
 
         if (!(mls.actual[2] as any).left) return;
@@ -593,9 +606,21 @@ export class ServicePreview100554 extends ServiceBase {
         const [testIndex, actionIndex] = selectedIndex;
 
         if (actionIndex === ETestActions.Run) {
-
             const actualData = this.actualTestList[testIndex];
-            this.runTest(actualData.functionName, testIndex);
+            this.refreshAST();
+            if (!this.astTSTest) throw new Error('Invalid AST');
+            const testItem = this.addTestResultItem(actualData.functionName, 'running')
+            try {
+                const result = await this.astTSTest.runTest(actualData.functionName, testIndex);
+                testItem.setAttribute('resultStatus', 'pass');
+                testItem.setAttribute('result', result);
+            } catch (err: any) {
+                testItem.setAttribute('resultStatus', 'failed');
+                testItem.setAttribute('result', err.message);
+            } finally {
+                testItem.setAttribute('status', 'finished');
+            }
+
         } else if (actionIndex === ETestActions.Delete) {
 
             await this.deleteTest(this.actualTestList[testIndex].functionName, testIndex);
@@ -620,16 +645,6 @@ export class ServicePreview100554 extends ServiceBase {
         if (!this.astTSTest) throw new Error('Invalid AST');
         try {
             this.astTSTest.deleteTest(testName, indexParams)
-        } catch (err: any) {
-            this.error = err.message;
-        }
-    }
-
-    private async runTest(testName: string, index: number) {
-        this.refreshAST();
-        if (!this.astTSTest) throw new Error('Invalid AST');
-        try {
-            this.astTSTest.runTest(testName, index);
         } catch (err: any) {
             this.error = err.message;
         }
@@ -698,6 +713,20 @@ export class ServicePreview100554 extends ServiceBase {
         const collabConsole = this.parentElement?.querySelector('collab-console-100554') as HTMLElement;
         if (!collabConsole) return;
         collabConsole.style.display = this.enabledConsole ? 'block' : 'none';
+    }
+
+    private openTestResults() {
+        this.enabledTest = true;
+        const collabResult = this.parentElement?.querySelector('collab-result-container-100554') as HTMLElement;
+        if (!collabResult) return;
+        collabResult.style.display = 'block';
+    }
+
+    private closeTestResults() {
+        this.enabledTest = false;
+        const collabResult = this.parentElement?.querySelector('collab-result-container-100554') as HTMLElement;
+        if (!collabResult) return;
+        collabResult.style.display = 'none';
     }
 
     private onHelpClick() {
@@ -829,6 +858,12 @@ export class ServicePreview100554 extends ServiceBase {
         const consoleEl = document.createElement('collab-console-100554');
         consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
         container.appendChild(consoleEl);
+
+        const testResultEl = document.createElement('collab-result-container-100554');
+        testResultEl.style.display = this.enabledTest ? 'block' : 'none';
+        container.appendChild(testResultEl);
+
+
         if (this.menu.setMode) this.menu.setMode('page', container);
         this.configureButtonsRight(true);
         mls.events.fire(3, 'WCDEventChange' as any);

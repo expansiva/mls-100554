@@ -1,44 +1,56 @@
-/// <mls shortName="servicePreview" project="100554" enhancement="enhancementStyle" />
-collab-nav-3-service[data-service="_100554_servicePreview"] {
-    collab-nav-3-menu-tools-cycle[key="test"][selected="0"] svg {
-        color: @grey-color-darker;
-        fill: @grey-color-darker;
-    }
+/// <mls shortName="collabResultTest" project="100554" enhancement="enhancementStyle" />
 
-    collab-nav-3-menu-tools-cycle[key="test"][selected="1"] svg {
-        color: @error-color;
-        fill: @error-color;
-        animation: pulse 1s infinite;
-    }
+collab-result-test-100554 {
 
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+
+
+    .test-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: Arial, sans-serif;
+
+
+        details>summary {
+            cursor: pointer;
+            margin-left: .2rem;
         }
 
-        50% {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+        details>div {
+            margin-top: 1rem;
+            margin-left: 1.5rem;
+
+        }
+    }
+
+    .loading {
+        font-size: 24px;
+        animation: spin 5s linear infinite;
+    }
+
+    .result {
+        font-size: 16px;
+
+        &.pass {
+            color: @success-color;
+        }
+
+        &.failed {
+            color: @error-color;
+            fill: var(--error-color);
+        }
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
         }
 
         100% {
-            transform: scale(1);
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            transform: rotate(360deg);
         }
     }
 
-    collab-result-container-100554 {
-        display: block;
-        height: 200px;
-        overflow: auto;
-        padding: 1rem;
-        background: #f4f4f4;
-    }
-}
-
-service-preview-100554 {
-    
 }
 
 //Start Less Tokens
