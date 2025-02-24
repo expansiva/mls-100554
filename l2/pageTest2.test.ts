@@ -6,7 +6,7 @@ import { ICANTest, ICANIntegration } from './_100554_tsTestAST';
 export const integrations: ICANIntegration[] = [];
 export const tests: ICANTest[] = [
     {
-        functionName: "testEditEmpresaCNPJ",
+        functionName: "testEditCNPJ",
         params: [
             {
                 indexSel: 0,
@@ -15,13 +15,28 @@ export const tests: ICANTest[] = [
             },
             {
                 indexSel: 0,
+                cnpj: "89.237.988/0001-10",
+                action: "save"
+            },
+        ]
+    },
+    {
+        functionName: "testEditCNPJInvalid",
+        params: [
+            {
+                indexSel: 1,
                 cnpj: "24234234",
                 action: "save"
-            }
+            },
+            {
+                indexSel: 1,
+                cnpj: "11.704.863/0001-17",
+                action: "save"
+            },
         ]
     }
 ]
-export function testEditEmpresaCNPJ(args: Record<string, any>): string {
+export function testEditCNPJ(args: Record<string, any>): string {
 
     initState('projectTest.page2', {
         labelError: '',
@@ -33,6 +48,21 @@ export function testEditEmpresaCNPJ(args: Record<string, any>): string {
     setState('projectTest.page2.selecionado.cnpj', args.cnpj);
     setState('projectTest.page2.action', args.action);
     verifyState('projectTest.page2.labelOk', 'Dados salvos');
+
+    return 'ok, test pass'
+}
+
+export function testEditCNPJInvalid(args: Record<string, any>): string {
+
+    initState('projectTest.page2', {
+        labelError: '',
+        labelOk: '',
+    });
+
+    setState('projectTest.page2.indexSel', args.indexSel);
+    setState('projectTest.page2.selecionado.cnpj', args.cnpj);
+    setState('projectTest.page2.action', args.action);
+    verifyState('projectTest.page2.labelError', 'CNPJ invalido');
 
     return 'ok, test pass'
 }

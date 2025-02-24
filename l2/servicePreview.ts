@@ -507,6 +507,7 @@ export class ServicePreview100554 extends ServiceBase {
     private actualTestList: {
         text: string;
         functionName: string;
+        index: number,
         options: {
             text: string;
             icon: string;
@@ -526,6 +527,7 @@ export class ServicePreview100554 extends ServiceBase {
             item.params.map((_, indexParam) => ({
                 text: item.params.length > 1 ? `${item.functionName}(${indexParam})` : item.functionName,
                 functionName: item.functionName,
+                index: indexParam,
                 options: [
                     { text: this.msg.testRun, icon: collab_play.strings[0] },
                     { text: this.msg.testDelete, icon: collab_trash.strings[0] },
@@ -611,7 +613,7 @@ export class ServicePreview100554 extends ServiceBase {
             if (!this.astTSTest) throw new Error('Invalid AST');
             const testItem = this.addTestResultItem(actualData.functionName, 'running')
             try {
-                const result = await this.astTSTest.runTest(actualData.functionName, testIndex);
+                const result = await this.astTSTest.runTest(actualData.functionName, actualData.index);
                 testItem.setAttribute('resultStatus', 'pass');
                 testItem.setAttribute('result', result);
             } catch (err: any) {
