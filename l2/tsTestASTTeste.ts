@@ -7,6 +7,7 @@ import { TsTestAst, ICANIntegration, ICANTest } from "./_100554_tsTestAST";
 @customElement('ts-test-a-s-t-teste-100554')
 export class LessASTTest100554 extends LitElement {
 
+
     fileName = '_100554_tsTestASTTeste'
     model1 = mls.editor.models[this.fileName].test;
     fileToTest = '_100554_tsTestAST.test.ts';
@@ -21,7 +22,6 @@ export class LessASTTest100554 extends LitElement {
          
          `;
     }
-
 
     exeTest = () => {
         if (!this.model1) return this.result = "undefined;";

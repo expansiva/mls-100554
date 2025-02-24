@@ -8,16 +8,16 @@ import { initTestState } from './_100554_testPagesState';
 @customElement('page-test2-100554')
 export class PageTest2100554 extends CollabPageElement {
 
-    initPage() { 
+    initPage() {
 
-        
         initTestState();
-        
         initState('projectTest.page2', {
-            columns:['empresa','cnpj','endereco'],
+            labelError: '',
+            labelOk: '',
+            columns: ['empresa', 'cnpj', 'endereco'],
             error: '',
             indexSel: -1,
-            action:'',
+            action: '',
             selecionado: {
                 empresa: '',
                 cnpj: '',
@@ -68,7 +68,7 @@ export class PageTest2100554 extends CollabPageElement {
 
     }
 
-    onSelectItemtableSelect(idx:number) {
+    onSelectItemtableSelect(idx: number) {
 
         setState('projectTest.page2.selecionado.empresa', globalState._ica.projectTest.tables.fornecedores[idx].empresa, true);
         setState('projectTest.page2.selecionado.cnpj', globalState._ica.projectTest.tables.fornecedores[idx].cnpj, true);
@@ -79,10 +79,11 @@ export class PageTest2100554 extends CollabPageElement {
 
     onNew() {
 
+        setState('projectTest.page2.labelError', '', true);
+        setState('projectTest.page2.labelOk', '', true);
         setState('projectTest.page2.action', '', true);
         setState('projectTest.page2.indexSel', -1, true);
         setState('projectTest.page2.error', '', true);
-
         setState('projectTest.page2.selecionado.empresa', '', true);
         setState('projectTest.page2.selecionado.cnpj', '', true);
         setState('projectTest.page2.selecionado.endereco', '', true);
@@ -91,7 +92,11 @@ export class PageTest2100554 extends CollabPageElement {
 
     }
 
-    onSave() {
+    delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async onSave() {
 
         setState('projectTest.page2.action', '', true);
 
@@ -114,12 +119,15 @@ export class PageTest2100554 extends CollabPageElement {
 
         }
 
+
+        // await this.delay(5000);
         setState(`projectTest.tables.fornecedores[${idx}].empresa`, i.empresa, true);
         setState(`projectTest.tables.fornecedores[${idx}].cnpj`, i.cnpj, true);
         setState(`projectTest.tables.fornecedores[${idx}].endereco`, i.endereco, true);
         setState(`projectTest.tables.fornecedores[${idx}].contato`, i.contato, true);
         setState(`projectTest.tables.fornecedores[${idx}].produtos`, i.produtos, true);
-        setState(`projectTest.page2.error`, 'Dados salvos', true);
+        setState(`projectTest.page2.labelOk`, 'Dados salvos', true);
+
 
 
     }
@@ -192,7 +200,7 @@ export class PageTest2100554 extends CollabPageElement {
         let vcnpj = this.validarCNPJ(globalState._ica.projectTest.page2.selecionado.cnpj);
 
         if (!vcnpj) {
-            setState(`projectTest.page2.error`, 'CNPJ invalido', true);
+            setState(`projectTest.page2.labelError`, 'CNPJ invalido', true);
             return false;
         }
 
@@ -205,7 +213,7 @@ export class PageTest2100554 extends CollabPageElement {
         })
 
         if (!cnpjv) {
-            setState(`projectTest.page2.error`, 'Fornecedor já cadastrado', true);
+            setState(`projectTest.page2.labelError`, 'Fornecedor já cadastrado', true);
             return false;
         }
 
