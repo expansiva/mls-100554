@@ -119,16 +119,12 @@ export class PageTest2100554 extends CollabPageElement {
 
         }
 
-
-        // await this.delay(5000);
         setState(`projectTest.tables.fornecedores[${idx}].empresa`, i.empresa, true);
         setState(`projectTest.tables.fornecedores[${idx}].cnpj`, i.cnpj, true);
         setState(`projectTest.tables.fornecedores[${idx}].endereco`, i.endereco, true);
         setState(`projectTest.tables.fornecedores[${idx}].contato`, i.contato, true);
         setState(`projectTest.tables.fornecedores[${idx}].produtos`, i.produtos, true);
         setState(`projectTest.page2.labelOk`, 'Dados salvos', true);
-
-
 
     }
 
@@ -209,7 +205,7 @@ export class PageTest2100554 extends CollabPageElement {
         let cnpjv = true;
         globalState._ica.projectTest.tables.fornecedores.forEach((f: any) => {
             const cnpjf = f.cnpj.replace(/[^\d]/g, '');
-            if (cnpj === cnpjf) cnpjv = false;
+            if (cnpj === cnpjf && globalState._ica.projectTest.page2.selecionado.empresa !== f.empresa) cnpjv = false;
         })
 
         if (!cnpjv) {
