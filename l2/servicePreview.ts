@@ -8,7 +8,7 @@ import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { globalState, setState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
-import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from './_100554_collabIcons';
+import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
 import { getScriptTest } from './_100554_libProcessTest';
 import { ICANTest, TsTestAst } from './_100554_tsTestAST';
 import './_100554_collabConsole';
@@ -33,6 +33,7 @@ const message_pt = {
     testRun: 'Executar',
     testDelete: 'Excluir',
     testEdit: 'Editar',
+    runAllTest: 'Todos os testes'
 
 }
 
@@ -52,6 +53,8 @@ const message_en = {
     testRun: 'Run',
     testDelete: 'Delete',
     testEdit: 'Edit',
+    runAllTest: 'All testes'
+
 }
 
 type MessageType = typeof message_en;
@@ -536,10 +539,22 @@ export class ServicePreview100554 extends ServiceBase {
             }))
         );
 
-        this.actualTestList = opts;
+        const optAllTests = [{
+            text: this.msg.runAllTest,
+            functionName: '',
+            index: -1,
+            options: [
+                { text: this.msg.testRun, icon: collab_play.strings[0] }
+            ]
+
+        }]
+
+        const rcOpts = opts.length > 0 ? [...optAllTests, ...opts] : opts;
+
+        this.actualTestList = rcOpts;
 
         if (opts.length >= 0 && this.menu.tools.testList) {
-            this.menu.tools.testList.options = opts;
+            this.menu.tools.testList.options = rcOpts;
         }
 
         this.menu.refresh?.();
@@ -594,11 +609,43 @@ export class ServicePreview100554 extends ServiceBase {
         item.setAttribute('testName', title);
         item.setAttribute('status', status);
         const collabResult = this.parentElement?.querySelector('collab-result-container-100554') as HTMLElement;
-        if (clear) collabResult.innerHTML = '';
+        if (clear) collabResult.querySelectorAll('collab-result-test-100554').forEach((item) => item.remove());
         collabResult.appendChild(item);
         this.openTestResults();
         return item;
     }
+
+    private async runTest(actualData: any, clear: boolean) {
+        if (!this.astTSTest) throw new Error('Invalid AST');
+        const testItem = this.addTestResultItem(actualData.functionName, 'running', clear);
+        try {
+            const result = await this.astTSTest.runTest(actualData.functionName, actualData.index);
+            testItem.setAttribute('resultStatus', 'pass');
+            testItem.setAttribute('result', result);
+        } catch (err: any) {
+            testItem.setAttribute('resultStatus', 'failed');
+            testItem.setAttribute('result', err.message);
+            throw new Error();
+        } finally {
+            testItem.setAttribute('status', 'finished');
+        }
+    }
+
+
+    private async runAllTests() {
+        for (let i = 0; i < this.actualTestList.length; i++) {
+            const data = this.actualTestList[i];
+            if (data.index === -1) continue;
+            if (!data.functionName) continue;
+
+            try {
+                await this.runTest(data, i === 1 ? true : false);
+            } catch (error) {
+                break;
+            }
+        }
+    }
+
 
     private async onBtTestListClick() {
 
@@ -606,30 +653,27 @@ export class ServicePreview100554 extends ServiceBase {
         if (!this.menu || !this.menu.tools || !this.menu.tools.testList) return;
         const selectedIndex = this.menu.tools.testList.selected as number[];
         const [testIndex, actionIndex] = selectedIndex;
+        const actualData = this.actualTestList[testIndex];
 
         if (actionIndex === ETestActions.Run) {
-            const actualData = this.actualTestList[testIndex];
+
             this.refreshAST();
             if (!this.astTSTest) throw new Error('Invalid AST');
-            const testItem = this.addTestResultItem(actualData.functionName, 'running')
-            try {
-                const result = await this.astTSTest.runTest(actualData.functionName, actualData.index);
-                testItem.setAttribute('resultStatus', 'pass');
-                testItem.setAttribute('result', result);
-            } catch (err: any) {
-                testItem.setAttribute('resultStatus', 'failed');
-                testItem.setAttribute('result', err.message);
-            } finally {
-                testItem.setAttribute('status', 'finished');
+
+            if (actualData.index === -1) {
+                this.runAllTests();
+                return;
             }
+
+            this.runTest(actualData, true);
 
         } else if (actionIndex === ETestActions.Delete) {
 
-            await this.deleteTest(this.actualTestList[testIndex].functionName, testIndex);
+            await this.deleteTest(actualData.functionName, actualData.index);
             this.setTest();
 
         } else if (actionIndex === ETestActions.Edit) {
-            const actualData = this.actualTestList[testIndex];
+
             if (!actualData) {
                 this.error = 'Invalid test';
                 return;
@@ -721,7 +765,7 @@ export class ServicePreview100554 extends ServiceBase {
         this.enabledTest = true;
         const collabResult = this.parentElement?.querySelector('collab-result-container-100554') as HTMLElement;
         if (!collabResult) return;
-        collabResult.style.display = 'block';
+        collabResult.style.display = 'flex';
     }
 
     private closeTestResults() {
@@ -861,15 +905,28 @@ export class ServicePreview100554 extends ServiceBase {
         consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
         container.appendChild(consoleEl);
 
-        const testResultEl = document.createElement('collab-result-container-100554');
-        testResultEl.style.display = this.enabledTest ? 'block' : 'none';
+        const testResultEl = this.createTestElement();
         container.appendChild(testResultEl);
-
 
         if (this.menu.setMode) this.menu.setMode('page', container);
         this.configureButtonsRight(true);
         mls.events.fire(3, 'WCDEventChange' as any);
         return true;
+    }
+
+    private createTestElement() {
+        const testResultEl = document.createElement('collab-result-container-100554');
+        const testResultElActions = document.createElement('div');
+        const actionClose = document.createElement('i');
+        actionClose.className = 'fa fa-times';
+        actionClose.onclick = () => {
+            this.closeTestResults();
+        }
+        testResultElActions.appendChild(actionClose);
+        testResultEl.style.display = this.enabledTest ? 'block' : 'none';
+        testResultEl.appendChild(testResultElActions);
+
+        return testResultEl;
     }
 
     private async fireWcdChanges() {

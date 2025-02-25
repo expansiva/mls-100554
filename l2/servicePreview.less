@@ -29,17 +29,27 @@ collab-nav-3-service[data-service="_100554_servicePreview"] {
     }
 
     collab-result-container-100554 {
-        display: block;
+        display: flex;
         height: 200px;
         overflow: auto;
         padding: 1rem;
         background: #f4f4f4;
+        flex-direction: column;
+        gap: .6rem;
+
+        >div {
+            display: flex;
+            justify-content: end;
+            padding: 0 1rem;
+
+            i {
+                cursor: pointer;
+            }
+        }
     }
 }
 
-service-preview-100554 {
-    
-}
+service-preview-100554 {}
 
 //Start Less Tokens
 @text-primary-color-lighter: #535353;

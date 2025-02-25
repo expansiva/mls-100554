@@ -128,7 +128,7 @@ export class ServiceSource100554 extends ServiceBase {
         widget: '_100554_serviceSource',
         level: [2]
     }
-    
+
     private menuToolsMode1: ITools = {
         btHistory: {
             type: 'cycle',
@@ -2560,7 +2560,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private async prepareInitialTsTest(shortName: string, project: number) {
         const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />
-				\nimport { ICANTest, ICANIntegration, ICANParams  } from './_100554_tsTestAST'; \n\nexport const integrations: ICANIntegration[] = []; \nexport const tests: ICANTest[] = [];`;
+				\nimport { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST'; \n\nexport const integrations: ICANIntegration[] = []; \nexport const tests: ICANTest[] = [];`;
         const newTest = example
             .replace('[shortName]', shortName)
             .replace('[project]', project.toString())
