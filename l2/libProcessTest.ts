@@ -77,9 +77,9 @@ export function getScriptTest(ica: IcaState): { func: string, exe: any } | undef
 
     let name = '';
     if (mls.actual[2]) name = (mls.actual[2] as any).left.shortName;
-    if (name !== '') name = `watchState('[pathTo].labelError', '[Expected Value])`;
+    if (name !== '') name = `watchState('[pathTo].labelError', '[Expected Value]');`;
 
-    const func = `export function @funcname(args: Record<string, any>): string {\n${name}\n${lines.join('\n')}\nreturn 'ok';\n}`
+    const func = `export function @funcname(args: Record<string, any>): string {\n${name}\n${lines.join(';\n')}\nreturn 'ok';\n}`
 
     return { func, exe };
 
