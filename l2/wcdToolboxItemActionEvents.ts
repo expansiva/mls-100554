@@ -35,6 +35,7 @@ export class WcdToolboxItemActionEvents extends WcdToolboxItemBase {
 
     render() {
 
+        this.title = 'Events';
         return unsafeHTML(`<collab-select-one-with-description-100554></collab-select-one-with-description-100554>`)
     }
 

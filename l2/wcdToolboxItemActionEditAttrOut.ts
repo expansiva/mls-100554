@@ -108,12 +108,15 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
 
     renderAddVariation(info: IAttr) {
         const array = Object.keys(this.languages);
+
+        if (array.length <= 1) return;
+
         return html`
             <addvariation .info=${info}>
                 <span @click="${this.clickOptVariation}">+</span> 
                 <addvariationitem>
                     <select>
-                        ${repeat(array, ((key: string) => key) as any, ((k: string, index: any) => { return this.renderOptVariant(k) }) as any)}
+                        ${repeat(array, ((key: string) => key) as any, ((k: string, index: any) => { return this.renderOptVariant(k, index) }) as any)}
                     </select>
                     <button @click="${this.clickAddVariation}">+</button>
                 <addvariationitem>
@@ -122,10 +125,19 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
         `
     } 
 
-    renderOptVariant(v: string) {
+    renderOptVariant(v: string, index: number) {
+
+        let stl = '';
         const i = this.languages[v]; 
+        let item = i.name;
+
+        if (index === 0) {
+            stl = 'display:none';
+            item = '';
+        }
+
         return html`
-            <option value="${v}">${i.name}</option>
+            <option value="${v}" style="${stl}">${item}</option>
         
         `
     }
