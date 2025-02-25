@@ -113,6 +113,7 @@ export class ServiceHistories100554 extends ServiceBase {
 
         const editorType: { [key: string]: string } = {
             '.ts': 'typescript',
+            '.test.ts': 'typescript',
             '.html': 'html',
             '.less': 'less',
         }

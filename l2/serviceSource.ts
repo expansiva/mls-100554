@@ -9,14 +9,15 @@ import { formatHtml, sync } from './_100554_collabDOMSync';
 import { removeTokensFromSource, getTokensLess } from './_100554_enhancementStyle';
 import { LessCSS } from "./_100554_lessCSS";
 import { getEnhancementName } from './_100554_libCommom';
-import './_100554_collabSpliterVerticalVarFixed';
-import './_100554_collabSpliterHorizontalVarFixed';
-
-import './_100554_aimPromptTypescript';
-import './_100554_cssHelperIndex';
 import { globalState } from './_100554_icaState';
 import { propertyDataSource } from './_100554_icaLitElement';
 import { collab_html, collab_typescript, collab_less, collab_fileTest } from './_100554_collabIcons';
+
+import './_100554_collabSpliterVerticalVarFixed';
+import './_100554_collabSpliterHorizontalVarFixed';
+import './_100554_aimPromptTypescript';
+import './_100554_cssHelperIndex';
+
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -464,7 +465,7 @@ export class ServiceSource100554 extends ServiceBase {
             '.ts': 'typescript',
             '.html': 'html',
             '.less': 'less',
-            '.test.test': 'typescript',
+            '.test.ts': 'typescript',
 
         }
         this.setHistories(this.previousHistorySourceWithoutSave || '', this.currentHistorySourceWithoutSave || '', editorType[storFile.extension]);
