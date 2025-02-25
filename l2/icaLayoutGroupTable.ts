@@ -14,12 +14,12 @@ export abstract class IcaLayoutGroupTable extends IcaLitElementBase {
     public getActionsTags(): ActionTag[] {
 
         let rc: ActionTag[] = [
-            { name: "events" },
             { name: "margin" },
             { name: "padding" },
-            { name: "menu" },
+            { name: "menu"},
             { name: "size" },
             { name: "title" },
+            
         ]
         return rc;
 
