@@ -70,6 +70,9 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
 
         try {
 
+            if (!item.item.startsWith('_') || !item.level || (this.myParent && this.myParent.level && !item.level.includes(+this.myParent.level))) return;
+
+
             let file = item.item;
             if (!this.isLoad.includes(file)) {
                 if (!file.startsWith('./')) file = './' + file;
@@ -79,6 +82,11 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
             const tag = convertFileNameToTag(item.item)
             const el = document.createElement(tag);
             (el as any).args = item.args;
+            el.style.cssText = `
+                border:none!important;
+                border-radius:0px!important; 
+                background:transparent!important;
+            `
 
             const f = document.createElement('wcd-toolbox-item-menu');
             f.appendChild(el);
@@ -139,4 +147,5 @@ interface IWCDMenu100554 {
 interface IWCDMenuItem100554 {
     item: string,
     args: string,
+    level: number[]
 }
