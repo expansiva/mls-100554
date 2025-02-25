@@ -39,7 +39,6 @@ export abstract class IcaApresentationTextText extends IcaLitElementBase {
             { name: "padding" },
             { name: "menu" },
             { name: "size" },
-            { name: "events" },
             { name: "edit", args: '{"tp":"edit", "attr":"text"}' },
             { name: "title" },
         ]
