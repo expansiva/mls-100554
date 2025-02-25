@@ -88,6 +88,31 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
     }
 
     public getActionsTagsDefault(): { [key: string]: ActionTag } {
+
+        const menu = {
+            itens: [
+                {
+                    item: '_100554_wcdToolboxItemActionEvents',
+                    args: '',
+                    level: [2],
+                },
+                {
+                    item: '_100554_wcdToolboxItemActionEditAttr',
+                    args: '',
+                    level: [3],
+                },
+                {
+                    item: '_100554_wcdToolboxItemActionDelete',
+                    args: '',
+                    level: [3],
+                },
+                {
+                    item: '_100554_wcdToolboxItemActionAdd',
+                    args: '',
+                    level: [3],
+                }
+            ]
+        }
         
         return {
             'backButton': {
@@ -99,7 +124,7 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
             'menu': {
                 name: '_100554_wcdToolboxItemActionMenu',
                 position: 'p-m0',
-                args: '{}',
+                args: JSON.stringify(menu),
                 level: [2, 3]
             },
             'events': {
