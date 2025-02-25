@@ -88,6 +88,26 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
     }
 
     public getActionsTagsDefault(): { [key: string]: ActionTag } {
+
+        const menu = {
+            itens: [
+                {
+                    item: '_100554_wcdToolboxItemActionEvents',
+                    args: '',
+                    level: [2],
+                },
+                {
+                    item: '_100554_wcdToolboxItemActionEditAttr',
+                    args: '',
+                    level: [3],
+                },
+                {
+                    item: '_100554_wcdToolboxItemActionDelete',
+                    args: '',
+                    level: [3],
+                }
+            ]
+        }
         
         return {
             'backButton': {
@@ -99,19 +119,19 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
             'menu': {
                 name: '_100554_wcdToolboxItemActionMenu',
                 position: 'p-m0',
-                args: '{}',
-                level: [2, 4]
+                args: JSON.stringify(menu),
+                level: [2, 3]
             },
             'add': {
                 name: "_100554_wcdAdd",
-                level: [2, 4],
+                level: [2, 3],
                 position: 'p-l2',
                 args: '{ "buttons" : "image,unsplash,video,embed,code,part,add" }',
                 toolboxOptions: { background: 'none', border: 'none' }
             },
             'edit': {
                 name: "_100554_wcdToolboxItemActionEditText",
-                level: [2, 4],
+                level: [2, 3],
                 position: 'p-l0',
                 args: ''
             },
@@ -123,13 +143,13 @@ export class WcdOverlayModeStory extends WcdOverlayLitBase {
             },
             'edit-code': {
                 name: "_100554_wcdToolboxItemActionEditCode",
-                level: [2, 4],
+                level: [2, 3],
                 position: 'p-l0',
                 args: ''
             },
             'code-language': {
                 name: "_100554_wcdToolboxItemActionCodeLanguage",
-                level: [2, 4],
+                level: [2, 3],
                 position: 'p-l0',
                 args: ''
             },

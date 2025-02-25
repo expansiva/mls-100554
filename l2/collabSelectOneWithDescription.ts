@@ -4,9 +4,9 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
 import { IcaLitElement } from './_100554_icaLitElement';
-import { collab_plus } from './_100554_collabIcons';
+import { collab_bolt } from './_100554_collabIcons';
 
-export const initCollabSelectOneWithDescription = '';
+export const initCollabSelectOneWithDescription = ''; 
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -48,7 +48,7 @@ export class CollabSelectOneWithDescription100554 extends IcaLitElement {
         this.defaultMsg = this.msg.defaultMsg;
 
         return html`
-            <div class="select_toogle" tabindex="1" @blur=${this.onBlur} @click=${this.onIconClick}>${collab_plus}</div>
+            <div class="select_toogle" tabindex="1" @blur=${this.onBlur} @click=${this.onIconClick}>${collab_bolt}</div>
             <div tabindex="0" @blur=${this.onBlur} class="select_container">
                 <ul>
                     ${this.renderOpt()}

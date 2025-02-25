@@ -146,7 +146,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         globalWcd.elICA = this.elICA;
         globalWcd.myParent = this;
         globalWcd.elMain = this.elMain;
-        
+
         for await (let i of actions) {
 
             if (defaultActions[i.name]) {
@@ -361,7 +361,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
                     if (!this.elMain || attr === 'false') return;
                     this.updateSize(this.elMain, this, true);
 
-                }, 500)
+                }, 100)
             }
         });
         this.resizeObserver.observe(this.elICA);
