@@ -1,9 +1,9 @@
 /// <mls shortName="libProcessTest" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IcaState } from './_100554_icaState';
-import { ICANTest } from "./_100554_tsTestAST";
+import { ICANTest, ICANIntegration } from "./_100554_tsTestAST";
 
-export function getScriptTest(ica: IcaState): {func:string,exe:any} | undefined {
+export function getScriptTest(ica: IcaState): { func: string, exe: any } | undefined {
 
     const array = ica.getHistory();
     if (array.length <= 0) return undefined;
@@ -71,18 +71,17 @@ export function getScriptTest(ica: IcaState): {func:string,exe:any} | undefined 
 
         const p = params[k];
         if (!p) return;
-        exe.schema[k] = {type: p.tp, value:p.vl};
+        exe.schema[k] = { type: p.tp, value: p.vl };
 
-
-    })
+    });
 
     let name = '';
     if (mls.actual[2]) name = (mls.actual[2] as any).left.shortName;
-    if (name !== '') name = `// watchState('${name}.labelError')`;
+    if (name !== '') name = `watchState('[pathTo].labelError', '[Expected Value])`;
 
-    const func = `export function @funcname(args: Record<string, any>): string {\ntry{\n${name}\n${lines.join('\n')}\nreturn 'ok';\n}catch(e:any){\nreturn e.message;\n}\n}`
+    const func = `export function @funcname(args: Record<string, any>): string {\n${name}\n${lines.join('\n')}\nreturn 'ok';\n}`
 
-    return {func,exe};
+    return { func, exe };
 
 }
 
@@ -92,7 +91,6 @@ function getParam(params: any, key: string) {
     let ret = '';
 
     keys.forEach((i) => {
-
         if (params[i].ori !== key) return;
         ret = i;
     })
@@ -101,13 +99,10 @@ function getParam(params: any, key: string) {
 }
 
 function processValue(vl: any): string | number {
-
     if (typeof vl === "string" || typeof vl === "number") {
         return vl;
     }
-
     return JSON.stringify(vl);
-
 }
 
 

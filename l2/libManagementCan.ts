@@ -68,7 +68,6 @@ export function initState(path?: string, value?: string | object | unknown[]) {
  * @throws {Error} - Throws an error if the update fails.
  */
 export function setState(path: string, value: any): boolean {
-    console.info(`setState: ${path} => ${value}`);
     const stateManager = getStateManager();
     stateManager.setState(path, value);
     validateWatchedStates();
@@ -85,8 +84,6 @@ export function setState(path: string, value: any): boolean {
  * @throws {Error} - Throws an error if the state does not match.
  */
 export function verifyState(path: string, value: any): boolean {
-
-    console.info(`verifyState: ${path} => ${value}`);
 
     const stateManager = getStateManager();
     let oldValue = stateManager.getState(path);
@@ -112,8 +109,6 @@ export function verifyState(path: string, value: any): boolean {
  */
 export function watchState(path: string, value: any): void {
 
-    console.info(`watchState: ${path} => ${value}`);
-
     if (value === null) {
         watchedStates.delete(path);
     } else {
@@ -129,7 +124,6 @@ export function watchState(path: string, value: any): void {
  */
 function validateWatchedStates(): void {
     const stateManager = getStateManager();
-    console.info(`validateWatchedStates: ${stateManager}`);
 
     for (const [path, expectedValue] of watchedStates.entries()) {
 
@@ -137,8 +131,6 @@ function validateWatchedStates(): void {
         let expected = expectedValue;
         if (typeof expected === 'object') expected = JSON.stringify(expected);
         if (typeof currentValue === 'object') currentValue = JSON.stringify(currentValue);
-
-        console.info(`validateWatchedStates ${path}: Expected: ${expectedValue} => currentValue:${currentValue}`);
 
         if (currentValue !== expected) {
             throw new Error(`Test failed: path "${path}" changed. Expected: "${expected}" got: "${currentValue}"`);
