@@ -12,6 +12,8 @@ export class PageTest1100554 extends CollabPageElement {
         initTestState();
         initState('projectTest.page1', {
             action: '',
+            labelError: '',
+            labelOk: '',
             newRequest: {
                 id: 0,
                 solicitante: '',
@@ -53,15 +55,23 @@ export class PageTest1100554 extends CollabPageElement {
 
 
     async handleClickBtnSave() {
-        console.info('Saving...');
         const novaSolicitacao: ISolicitacao = globalState._ica.projectTest.page1.newRequest;
+        if (!novaSolicitacao.solicitante) {
+            setState(`projectTest.page1.labelError`, 'O solicitante não deve pode ser em branco', true);
+            return;
+        }
+        if (novaSolicitacao.quantidade < 1) {
+            setState(`projectTest.page1.labelError`, 'A quantidade minima deve ser 1', true);
+            return;
+        }
         adicionarSolicitacao(novaSolicitacao);
         this.clear();
         setState('projectTest.page1.action', '', true);
+        setState(`projectTest.page1.labelOk`, 'Dados salvos', true);
+
     }
 
     async handleClickBtnCancel() {
-        console.info('Canceling...');
         this.clear();
         setState('projectTest.page1.action', '', true);
     }
