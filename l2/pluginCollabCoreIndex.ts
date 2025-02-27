@@ -289,6 +289,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 widget: '_100554_pluginProjectFindFiles'
             },
             {
+                category: 'Helpers',
+                scope: ['l5Project'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginProjectRunTest'
+            },
+            {
                 category: 'Profile',
                 scope: ['l5UserSettings'],
                 priority: 1,

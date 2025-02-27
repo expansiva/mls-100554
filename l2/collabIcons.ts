@@ -1,5 +1,4 @@
 /// <mls shortName="collabIcons" project="100554" enhancement="_100554_enhancementLit" />
-
 import { svg } from 'lit';
 
 export const collab_test = svg`<svg width="50" height="50" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="#000000" fill="none"><rect x="8.33" y="10.82" width="47.34" height="34.38" rx="2.02"/><line x1="8.33" y1="38.66" x2="55.67" y2="38.66"/><path d="M23.05,53.18a6.67,6.67,0,0,0,3.55-8"/><path d="M41.84,53.18a6.66,6.66,0,0,1-3.55-8"/><line x1="17.5" y1="53.18" x2="46.5" y2="53.18" stroke-linecap="round"/><polyline points="16.8 19.18 19.7 21.21 23.29 16.16"/><polyline points="16.38 28.98 19.27 31 22.86 25.95"/><line x1="28.6" y1="19.48" x2="49.42" y2="19.48"/><line x1="28.6" y1="29.66" x2="49.42" y2="29.66"/></svg>`
@@ -198,10 +197,6 @@ export const collab_pen_nib = svg`
 
 export const collab_plus = svg`
     <svg width="15" height="15" xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d='M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z'/></svg>
-`;
-
-export const collab_bolt = svg`
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288l111.5 0L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7l-111.5 0L349.4 44.6z"/></svg>
 `;
 
 export const collab_pencil = svg`

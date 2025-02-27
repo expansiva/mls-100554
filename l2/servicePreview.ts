@@ -253,7 +253,7 @@ export class ServicePreview100554 extends ServiceBase {
             this.onModelHTMLCreated(ev);
         });
 
-        mls.events.addListener(2, 'FileAction', this.onMLSFileAction.bind(this));
+        mls.events.addEventListener([2, 5], ['FileAction'], this.onMLSFileAction.bind(this));
         mls.events.addListener(2, 'styleChanged' as any, this.onStyleChanged.bind(this));
         mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
 
@@ -325,12 +325,14 @@ export class ServicePreview100554 extends ServiceBase {
     private actualFile: mls.stor.IFileInfo | undefined;
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
-        try {
 
-            if (this.visible === 'false' || !this.visible) return;
-            if (ev.level !== 2 || (ev.type !== 'FileAction') || !ev.desc) return;
+
+        try {
+            if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
-            const eventsValid = ['open', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
+            if ((this.visible === 'false' || !this.visible) && !((fileAction.action as any) === 'openBackground')) return;
+
+            const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
 
             if (
                 fileAction.position === this.position ||
@@ -340,7 +342,7 @@ export class ServicePreview100554 extends ServiceBase {
             const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
             const storFileHTML = mls.stor.files[keyToFileInfo];
 
-            if (fileAction.action === 'open') {
+            if (fileAction.action === 'open' || (fileAction.action as any) === 'openBackground') {
                 this.setModel(storFileHTML);
 
                 this.actualFile = storFileHTML;
@@ -351,10 +353,23 @@ export class ServicePreview100554 extends ServiceBase {
             }
 
             if (mls.istrace) console.info('is preview repaint:' + this.watch);
+
+
+            if (fileAction.action as any === 'openBackground') {
+                this.elPreview = undefined;
+                this.preview('desktop')
+                return;
+            }
+
+
+
             if (fileAction.action === 'open') {
                 this.loading = true;
                 return;
             }
+
+
+
             if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
 
             if (this.watch) {
