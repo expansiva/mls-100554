@@ -313,8 +313,14 @@ export class ServicePreviewView extends LitElement {
             const html = iframe.contentDocument?.querySelector('html');
             if (html) html.lang = this.lang;
             if (iframe.contentDocument) iframe.contentDocument.body.style.paddingTop = '55px';
-
             this.showLoader(false);
+
+            this.dispatchEvent(new CustomEvent('preview-loaded', {
+                detail: { shortName: this.models.ts?.storFile.shortName , project: this.models.ts?.storFile.project },
+                bubbles: true,
+                composed: true,
+            }));
+
         } catch (e: any) {
             this.error = e.message;
             this.showLoader(false);

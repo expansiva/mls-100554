@@ -21,6 +21,8 @@ export abstract class CollabPageElement extends IcaLitElement {
 
     @property({ type: String, reflect: true }) modeoverlay: string = '';
 
+    @property() initPageComplete: boolean = false;
+
     @property({ type: String, reflect: true }) level: string = mls.actualLevel.toString() || '7';
 
     public overlay: WCDOverlayMethods | undefined;
@@ -41,7 +43,7 @@ export abstract class CollabPageElement extends IcaLitElement {
         return this; // dont use shadow root
     }
 
-    firstUpdated(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
+    async firstUpdated(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         setTimeout(() => {
             this.checkToAddOverlay();
@@ -49,7 +51,8 @@ export abstract class CollabPageElement extends IcaLitElement {
 
         this.setupIds();
         this.setupEvents();
-        this.initPage();
+        await this.initPage();
+        this.initPageComplete = true;
 
     }
 

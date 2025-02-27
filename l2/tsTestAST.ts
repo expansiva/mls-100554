@@ -499,7 +499,7 @@ export class TsTestAst {
     */
     private async _runTest(functionName: string, paramsIndex: number = 0): Promise<string> {
 
-        if (!this.modelTest || !window.preview.iframe || !window.preview.iframe.contentWindow) throw new Error('Invalid test model');
+        if (!this.modelTest) throw new Error('Invalid test model');
         this.ast = this.parse();
         const tests = this._getTests();
         const testFind = tests.find((t) => t.functionName === functionName);

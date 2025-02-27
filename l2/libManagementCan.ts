@@ -93,7 +93,7 @@ export function verifyState(path: string, value: any): boolean {
     if (typeof oldValue === 'object') oldValue = JSON.stringify(oldValue);
 
     if (oldValue !== newValue) {
-        throw new Error(`Test failed: result: "${newValue}", expected: "${oldValue}"`);
+        throw new Error(`Test failed: expected: "${newValue}", got: "${oldValue}"`);
     }
 
     validateWatchedStates();

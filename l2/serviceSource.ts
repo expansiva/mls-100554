@@ -217,6 +217,14 @@ export class ServiceSource100554 extends ServiceBase {
         }
     }
 
+    public async createModels(storFile: mls.stor.IFileInfo) {
+        let fileModels = mls.editor.getModels(storFile.project, storFile.shortName);
+        if (!fileModels) {
+            await this.createModelTS2(storFile, false, false);
+        }
+    }
+
+
     //---------- Handling Editor --------
 
     public getEditorValue() {
