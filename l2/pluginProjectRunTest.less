@@ -2,7 +2,6 @@
 
 plugin-project-run-test-100554 {
 
-
     font-family: @font-family-primary;
     font-size: @font-size-16;
     font-weight: @font-weight-normal;
@@ -38,7 +37,7 @@ plugin-project-run-test-100554 {
     }
 
     .progress-container {
-        
+
         margin: 1rem 0;
         width: 100%;
         background-color: #eee;
@@ -51,6 +50,29 @@ plugin-project-run-test-100554 {
         width: 0%;
         background-color: #007bff;
         transition: width 0.3s ease-in-out;
+    }
+
+    .test-result{
+        .failed  {
+            color: @error-color;
+        }
+        .success  {
+            color: @success-color;
+        }
+    }
+
+    .summary-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        small, h3 {
+            display: inline-block;
+        }
+    }
+
+    .container-test {
+        padding-top: .5rem;
+        margin-left: 1rem;
     }
 
     collab-result-container-100554 {

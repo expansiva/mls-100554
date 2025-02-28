@@ -6,6 +6,7 @@ import { forceServiceInstance } from './_100554_libCommom'
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { ICANTest, ICANIntegration, TsTestAst } from './_100554_tsTestAST';
 import { CollabPageElement } from './_100554_collabPageElement';
+import { collab_fileTest } from './_100554_collabIcons';
 
 import './_100554_collabResultTest';
 
@@ -34,9 +35,7 @@ const messages: { [key: string]: MessageType } = {
 export const pluginData: mls.plugin.IPluginData = {
     title: "Run Tests",
     getSvg(): TemplateResult {
-        return svg`
-     <svg height="22px" width="22px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
-    `;
+        return collab_fileTest;
     }
 };
 
@@ -101,16 +100,21 @@ export class PluginProjectRunTest extends PluginBaseModule {
     }
 
     private async exec() {
-        this.progress = 0;
+        this.clear();
         const models = await this.createModelsIfNeeded(this.filesWithTest);
         const tests = await this.getTestsByFile(models);
         this.totalTest = this.countTotalTests(tests);
         await forceServiceInstance(5, '_100554_servicePreview');
-        this.runAllTests(tests);
+        await this.runAllTests(tests);
+        this.onFinishTest();
     }
 
     private clear() {
         if (this.collabResultContainer) this.collabResultContainer.innerHTML = '';
+        this.progress = 0;
+        this.actualAllPagesTests = 0;
+        this.totalTest = 0;
+
     }
 
     private countTotalTests(tests: ITests) {
@@ -202,15 +206,28 @@ export class PluginProjectRunTest extends PluginBaseModule {
 
         const containerTest = document.createElement('div');
         containerTest.className = 'container-test';
+
+        const details = document.createElement('details');
+        details.open = false;
+        const summary = document.createElement('summary');
+        const summaryContent = document.createElement('div')
+        summaryContent.className = 'summary-title'
+
         span.innerHTML = `${this.msg.page}: ${pageName}`;
         span.style.display = 'inline-block';
 
+        const result = document.createElement('small')
+        result.className = 'test-result';
 
-        el.appendChild(icon);
-        el.appendChild(span);
-        el.appendChild(br);
 
-        el.appendChild(containerTest);
+        details.appendChild(summary);
+        details.appendChild(containerTest);
+        summaryContent.appendChild(span);
+        summaryContent.appendChild(icon);
+        summaryContent.appendChild(result);
+        summary.appendChild(summaryContent);
+        el.appendChild(details);
+
         return el;
     }
 
@@ -246,12 +263,13 @@ export class PluginProjectRunTest extends PluginBaseModule {
             this.collabResultContainer?.appendChild(container);
             const containerTestDiv = container.querySelector('.container-test') as HTMLDivElement;
             const icon = container.querySelector('.icon') as HTMLElement;
+            const result = container.querySelector('.test-result') as HTMLElement;
 
             this.fireEvents(testData.storFile);
             await this.waitForPreviewLoaded();
             const iframe = window.preview.iframe;
             if (iframe) await this.waitForLitComponentsInIframe(iframe);
-            // await this.delay(1000);
+            // await this.delay(5000);
 
             let totalTest = 0;
             let success = 0;
@@ -276,13 +294,16 @@ export class PluginProjectRunTest extends PluginBaseModule {
                 }
             }
 
-            const resume = document.createElement('h5');
-            resume.innerHTML = `${totalTest} tests executed — ${success} passed, ${failed} failed.`
-            const hr = document.createElement('hr');
-            this.collabResultContainer?.appendChild(resume);
-            this.collabResultContainer?.appendChild(hr);
+            const resume = this.createResume(totalTest, success, failed);
+            result.appendChild(resume);
 
         }
+    }
+
+    private createResume(totalTest: number, success: number, failed: number) {
+        const resume = document.createElement('span');
+        resume.innerHTML = `${totalTest} tests executed — ${success > 0 ? '<i class="success fa fa-check"></i>' : ''} ${success} passed, ${failed > 0 ? '<i class="failed fa fa-times"></i>' : ''} ${failed} failed.`
+        return resume;
     }
 
     private waitForPreviewLoaded(): Promise<void> {
@@ -294,7 +315,7 @@ export class PluginProjectRunTest extends PluginBaseModule {
     private async waitForLitComponentsInIframe(iframe: HTMLIFrameElement): Promise<void> {
         return new Promise((resolve) => {
             const iframeDoc = iframe.contentWindow?.document;
-            if (!iframeDoc) return resolve(); // Se o iframe não estiver pronto, resolvemos imediatamente.
+            if (!iframeDoc) return resolve();
 
             const checkLitComponents = async () => {
 
@@ -344,6 +365,13 @@ export class PluginProjectRunTest extends PluginBaseModule {
         } as any;
 
         mls.events.fire([5], ['FileAction'], JSON.stringify(params), 0);
+    }
+
+    private onFinishTest() {
+        (mls.actual[2] as any).left = undefined;
+        window.preview.iframe?.remove();
+        window.preview.iframe = undefined;
+
     }
 
 }
