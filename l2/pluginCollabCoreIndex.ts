@@ -373,6 +373,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginNewFileBlank'
             },
+            {
+                category: 'Preview',
+                scope: ['l3PreviewAttr'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginAttrDataset'
+            },
 
         ];
     }
