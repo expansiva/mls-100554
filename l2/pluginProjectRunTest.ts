@@ -48,6 +48,12 @@ export class PluginProjectRunTest extends PluginBaseModule {
 
     @property() progress: number = 0;
     @property() totalTest: number = 0;
+    @property() totalTestPass: number = 0;
+    @property() totalTestFailed: number = 0;
+
+    @property() startTime: number = 0;
+    @property() endTime: number = 0;
+
     @property() actualAllPagesTests = 0;
     @property() filesWithTest: string[] = []
 
@@ -101,11 +107,32 @@ export class PluginProjectRunTest extends PluginBaseModule {
 
     private async exec() {
         this.clear();
+        this.startTime = performance.now();
+
+        console.info("[DEBUG] Start:", new Date().toISOString());
+
+        const modelsStart = performance.now();
         const models = await this.createModelsIfNeeded(this.filesWithTest);
+        console.info(`[DEBUG] createModelsIfNeeded took ${(performance.now() - modelsStart).toFixed(2)}ms`);
+
+        const testsStart = performance.now();
         const tests = await this.getTestsByFile(models);
+        console.info(`[DEBUG] getTestsByFile took ${(performance.now() - testsStart).toFixed(2)}ms`);
+
         this.totalTest = this.countTotalTests(tests);
+
+        const forceServiceStart = performance.now();
         await forceServiceInstance(5, '_100554_servicePreview');
+        console.info(`[DEBUG] forceServiceInstance took ${(performance.now() - forceServiceStart).toFixed(2)}ms`);
+
+        const runTestsStart = performance.now();
         await this.runAllTests(tests);
+        console.info(`[DEBUG] runAllTests took ${(performance.now() - runTestsStart).toFixed(2)}ms`);
+
+        this.endTime = performance.now();
+
+        console.info("[DEBUG] End:", new Date().toISOString());
+
         this.onFinishTest();
     }
 
@@ -114,7 +141,10 @@ export class PluginProjectRunTest extends PluginBaseModule {
         this.progress = 0;
         this.actualAllPagesTests = 0;
         this.totalTest = 0;
-
+        this.totalTestPass = 0;
+        this.totalTestFailed = 0;
+        this.startTime = 0;
+        this.endTime = 0;
     }
 
     private countTotalTests(tests: ITests) {
@@ -282,8 +312,10 @@ export class PluginProjectRunTest extends PluginBaseModule {
                     if (!data.functionName) continue;
                     try {
                         await this.runTest(data, j, testData.ast, containerTestDiv);
+                        this.totalTestPass++;
                         success++;
                     } catch (error) {
+                        this.totalTestFailed++;
                         failed++;
                         continue;
                     } finally {
@@ -303,6 +335,31 @@ export class PluginProjectRunTest extends PluginBaseModule {
     private createResume(totalTest: number, success: number, failed: number) {
         const resume = document.createElement('span');
         resume.innerHTML = `${totalTest} tests executed — ${success > 0 ? '<i class="success fa fa-check"></i>' : ''} ${success} passed, ${failed > 0 ? '<i class="failed fa fa-times"></i>' : ''} ${failed} failed.`
+        return resume;
+    }
+
+    private createResumeFinal(totalTest: number, success: number, failed: number, start: number, end: number) {
+
+        const executionTimeMs = end - start;
+        const executionTime = executionTimeMs >= 1000
+            ? `${(executionTimeMs / 1000).toFixed(2)}s`
+            : `${executionTimeMs.toFixed(2)}ms`;
+
+        const avgTestTime = (totalTest > 0) ? (executionTimeMs / totalTest).toFixed(2) : 'N/A';
+        const failRate = (totalTest > 0) ? ((failed / totalTest) * 100).toFixed(1) : '0';
+
+        const message = `
+    <b>Result:</b> ${totalTest} tests executed — 
+    ${success > 0 ? '<i class="success fa fa-check"></i>' : ''} <b>${success} passed</b>, 
+    ${failed > 0 ? '<i class="failed fa fa-times"></i>' : ''} <b>${failed} failed.</b> 
+    <br><b>Execution Time:</b> ${executionTime} 
+    <br><b>Average Time per Test:</b> ${avgTestTime} ms
+    <br><b>Failure Rate:</b> ${failRate}% 
+`;
+
+        const resume = document.createElement('span');
+        resume.className = 'final-resume';    
+        resume.innerHTML = message;
         return resume;
     }
 
@@ -368,10 +425,14 @@ export class PluginProjectRunTest extends PluginBaseModule {
     }
 
     private onFinishTest() {
+
+
+        const resume = this.createResumeFinal(this.totalTest, this.totalTestPass, this.totalTestFailed, this.startTime, this.endTime);
+        this.collabResultContainer?.appendChild(resume);
+
         (mls.actual[2] as any).left = undefined;
         window.preview.iframe?.remove();
         window.preview.iframe = undefined;
-
     }
 
 }

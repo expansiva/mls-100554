@@ -52,20 +52,28 @@ plugin-project-run-test-100554 {
         transition: width 0.3s ease-in-out;
     }
 
-    .test-result{
-        .failed  {
-            color: @error-color;
-        }
-        .success  {
-            color: @success-color;
-        }
+    .final-resume {
+        border: 1px solid #cecece;
+        padding: 1rem;
+        margin-top: 1rem;
+
+    }
+
+    .failed {
+        color: @error-color;
+    }
+
+    .success {
+        color: @success-color;
     }
 
     .summary-title {
         display: inline-flex;
         align-items: center;
         gap: 1rem;
-        small, h3 {
+
+        small,
+        h3 {
             display: inline-block;
         }
     }
