@@ -3,7 +3,6 @@
 import { initState, setState, verifyState, watchState } from './_100554_libManagementCan';
 import { ICANTest, ICANIntegration } from './_100554_tsTestAST';
 
-
 export const integrations: ICANIntegration[] = [];
 export const tests: ICANTest[] = [
     {
@@ -26,7 +25,7 @@ export const tests: ICANTest[] = [
         params: [
             {
                 indexSel: 1,
-                cnpj: "89.237.988/0001-10",
+                cnpj: "1111111",
                 action: "save"
             },
             {
