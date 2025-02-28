@@ -61,7 +61,7 @@ export class WcdToolboxItemActionEditAttrDialog extends CollabLitElement {
         (globalWcd.myParent as any).setAttribute('needresize', 'false');
         //(globalWcd.myParent as any).style.overflowY = 'auto';
         (globalWcd.myParent as any).style.height = heighttot+'px';
-        (globalWcd.elICA as any).style.height = heighttot + 'px';
+        (globalWcd.elICA as any).style.height = (heighttot + height) + 'px';
         
         (globalWcd.myParent as any).style.top = height + 5 + 'px'; 
     }

@@ -1,164 +1,50 @@
-/// <mls shortName="wcdToolboxItemActionEditAttrOut" project="100554" enhancement="enhancementStyle" />
+/// <mls shortName="wcdToolboxItemActionEditVariation" project="100554" enhancement="enhancementStyle" />
 
-wcd-toolbox-item-action-edit-attr-out-100554 {
+wcd-toolbox-item-action-edit-variation-100554 {
 
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: Arial, sans-serif;
-    }
+    width: 100%;
 
-    .sidebar {
+
+
+    addvariation {
         width: 100%;
-        background: #fff;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        overflow-y: auto;
-    }
-
-    .sidebar h2 {
-        font-size: 18px;
-        margin-bottom: 15px;
-        color: #333;
-    }
-
-    .atributo {
-        background: #f9f9f9;
-        border: 1px solid #ddd;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 5px;
-    }
-
-    .atributo label {
-        font-size: 14px;
-        font-weight: bold;
         display: flex;
+        gap: 1rem;
         align-items: center;
-        justify-content: flex-start;
-        gap: .5rem;
-        margin-bottom: 5px;
-    }
-
-    toolbareditt{
-        display: flex;
-        flex-direction: column;
-    }
-
-    blockplugins {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: .3rem;
-        padding-left: .3rem;
-        margin-top: .3rem;
-        background: #eeeeee;
-    }
-
-    toolbaredittbody{
-        background: #ffffff;
-        padding: .3rem;
-    }
-
-    pluginitem {
-        height: 25px;
-        width: 25px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    pluginitem svg {
-
-        width: 15px !important;
-        height: 15px !important;
-        cursor: pointer;
-    }
-
-    pluginitem.active {
-
-        background-color: #ffffff;
-    }
-
-    .atributo input {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 14px;
-    }
-
-    attrvariations {
-        display: block;
         margin-top: .5rem;
-
-        label {
-            font-size: 12px !important;
-            padding-left: 3px;
-        }
     }
 
-    /*details {
-        margin-top: 5px;
-        background: #eee;
-        padding: 5px;
-        border-radius: 4px;
-    }
-
-    summary {
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        //display: flex;
-        //align-items: center;
-        //justify-content: space-between;
+    addvariationitem {
+        display: flex;
+        gap: .5rem;
+        align-items: center;
+        height: 19px;
+        width: 100%;
 
         select {
+            width: calc(100% - 30px);
             border: 1px solid #a6a4a4;
             border-radius: 3px;
             height: 19px;
             outline: none;
         }
 
-        addvariation {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            float: right;
+        button {
+            padding: 0 .3rem;
+            background-color: #1890FF;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            width: 25px;
+
         }
 
-        addvariationitem {
-            display: flex;
-            gap: .5rem;
-            align-items: center;
-            width: 0px;
-            height: 19px;
-            opacity: 0;
-            transform: width 0.6s ease-out, opacity 0.6s ease-out;
+        button:hover {
+            opacity: .5;
 
-            button {
-                padding: 0 .3rem;
-                background-color: #1890FF;
-                color: white;
-                border: none;
-                border-radius: 2px;
-                cursor: pointer;
-
-            }
-
-            button:hover {
-                opacity: .5;
-
-            }
         }
-
-        addvariation.active addvariationitem {
-            width: max-content;
-            opacity: 1;
-            transition: width 0.6s ease-out, opacity 0.6s ease-out;
-        }
-    }*/
+    }
 
 }
 
