@@ -12,26 +12,43 @@ export class CollabConsole100554 extends IcaLitElement {
     @property({ type: String }) status: 'pending' | 'running' | 'finished' = 'pending';
     @property({ type: String }) resultStatus: 'pass' | 'failed' = 'pass';
     @property({ type: String }) result = '';
+    @property() timeResult: number = 0;
+
+    timeStart: number = 0;
+    timeEnd: number = 0;
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {
         super.updated(changedProperties);
     }
 
     private renderRunning() {
+        this.timeStart = performance.now();
         return html`
                 <span class="loading">${collab_spinner_clock}</span>
                 <span>${this.testName}</span>
         `
     }
 
+
     private renderFinished() {
+        this.timeEnd = performance.now();
+
+        this.timeResult = this.timeEnd - this.timeStart;
+
         return html`
-                <details open class="result">
-                    <summary>${this.testName}</summary>
+                <details style="width:100%" open class="result">
+                    <summary>
+                        ${this.testName} 
+                        <small style="flex:1; text-align:end;">
+                            ${this.timeResult >= 1000
+                            ? `(${(this.timeResult / 1000).toFixed(2)}s)`
+                            : `(${this.timeResult.toFixed(2)}ms)`}
+                        </small>
+                        <i class="result ${this.resultStatus}">${this.resultStatus === 'pass' ? collab_check : collab_xmark}</i>
+                    </summary>
                     <div>
-                        <div>
-                            <i class="result ${this.resultStatus}">${this.resultStatus === 'pass' ? collab_check : collab_xmark}</i>
-                            <span>Result: ${this.result}</span>
+                        <div style="display:flex; align-items:center;">
+                            <pre>${this.result}</pre>
                         </div>                    
                     </div>
                 </details>

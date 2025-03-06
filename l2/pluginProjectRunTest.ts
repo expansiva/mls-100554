@@ -228,11 +228,14 @@ export class PluginProjectRunTest extends PluginBaseModule {
 
     private createPageContainer(pageName: string) {
         const el = document.createElement('div');
+
+        const testProgress = document.createElement('small');
+        testProgress.className = 'test-progress';
+
         const icon = document.createElement('i');
         icon.className = 'icon fa-solid fa-spinner'
 
         const span = document.createElement('h3');
-        const br = document.createElement('br');
 
         const containerTest = document.createElement('div');
         containerTest.className = 'container-test';
@@ -253,7 +256,9 @@ export class PluginProjectRunTest extends PluginBaseModule {
         details.appendChild(summary);
         details.appendChild(containerTest);
         summaryContent.appendChild(span);
+        summaryContent.appendChild(testProgress);
         summaryContent.appendChild(icon);
+
         summaryContent.appendChild(result);
         summary.appendChild(summaryContent);
         el.appendChild(details);
@@ -292,7 +297,8 @@ export class PluginProjectRunTest extends PluginBaseModule {
             const container = this.createPageContainer(testData.storFile.shortName);
             this.collabResultContainer?.appendChild(container);
             const containerTestDiv = container.querySelector('.container-test') as HTMLDivElement;
-            const icon = container.querySelector('.icon') as HTMLElement;
+            const iconLoader = container.querySelector('.icon') as HTMLElement;
+            const testProgress = container.querySelector('.test-progress') as HTMLElement;
             const result = container.querySelector('.test-result') as HTMLElement;
 
             this.fireEvents(testData.storFile);
@@ -301,10 +307,12 @@ export class PluginProjectRunTest extends PluginBaseModule {
             if (iframe) await this.waitForLitComponentsInIframe(iframe);
             // await this.delay(5000);
 
-            let totalTest = 0;
+            let totalTest = testData.tests.reduce((acc, item) => acc + item.params.length, 0);
             let success = 0;
             let failed = 0;
+            let totalTestExecuted = 0;
 
+            testProgress.innerHTML = `(0/${totalTest})`;
             for (let i = 0; i < testData.tests.length; i++) {
                 const data = testData.tests[i];
 
@@ -319,12 +327,16 @@ export class PluginProjectRunTest extends PluginBaseModule {
                         failed++;
                         continue;
                     } finally {
-                        totalTest++;
+                        totalTestExecuted++;
                         this.actualAllPagesTests++;
-                        icon.remove();
+                        testProgress.innerHTML = `(${totalTestExecuted}/${totalTest})`;
+
                     }
                 }
+
             }
+
+            iconLoader.remove();
 
             const resume = this.createResume(totalTest, success, failed);
             result.appendChild(resume);
@@ -358,7 +370,7 @@ export class PluginProjectRunTest extends PluginBaseModule {
 `;
 
         const resume = document.createElement('span');
-        resume.className = 'final-resume';    
+        resume.className = 'final-resume';
         resume.innerHTML = message;
         return resume;
     }
