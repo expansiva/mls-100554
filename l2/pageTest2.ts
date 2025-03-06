@@ -5,7 +5,6 @@ import { customElement, query } from 'lit/decorators.js';
 import { globalState, initState, setState } from './_100554_icaState';
 import { initTestState } from './_100554_testPagesState';
 
-
 @customElement('page-test2-100554')
 export class PageTest2100554 extends CollabPageElement {
 
@@ -102,8 +101,12 @@ export class PageTest2100554 extends CollabPageElement {
         setState('projectTest.page2.action', '', true);
 
         let idx = globalState._ica.projectTest.page2.indexSel;
-        let ret = this.validarReg();
-        if (!ret) return;
+
+        const isValidNameEmpresa = this.validarNomeEmpresa(globalState._ica.projectTest.page2.selecionado.empresa);
+        if (!isValidNameEmpresa) return;
+
+        let isValidCNPJ = this.validarReg();
+        if (!isValidCNPJ) return;
 
         const i = Object.assign({}, globalState._ica.projectTest.page2.selecionado);
 
@@ -214,6 +217,28 @@ export class PageTest2100554 extends CollabPageElement {
             return false;
         }
 
+
+        return true;
+    }
+
+    private validarNomeEmpresa(empresa: string): boolean {
+
+        const trimmedName = empresa.trim();
+
+        if (trimmedName.length === 0) {
+            setState(`projectTest.page2.labelError`, 'O nome da empresa não pode estar vazio', true);
+            return false;
+        }
+
+        if (/^\d+$/.test(trimmedName)) {
+            setState(`projectTest.page2.labelError`, 'O nome da empresa não pode conter apenas números', true);
+            return false;
+        }
+
+        if (/[^a-zA-Z0-9 &.\-_]/.test(trimmedName)) {
+            setState(`projectTest.page2.labelError`, 'O nome da empresa não pode conter caracteres especiais', true);
+            return false;
+        }
 
         return true;
     }

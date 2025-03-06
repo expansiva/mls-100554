@@ -66,14 +66,14 @@ export function initTestState() {
     initState('projectTest.tables.fornecedores', [
         {
             empresa: 'TechParts LTDA',
-            cnpj: '12.345.678/0001-90',
+            cnpj: '89.237.988/0001-10',
             endereco: 'Rua A, 123',
             contato: '(11) 99999 - 9999',
             produtos: ['Monitores', 'Teclados']
         },
         {
             empresa: 'MoveisOffice',
-            cnpj: '98.765.432 / 0001 - 10',
+            cnpj: '98.765.432/0001-10',
             endereco: 'Rua B, 456',
             contato: '(21) 88888 - 8888',
             produtos: ['Mesas', 'Cadeiras']
