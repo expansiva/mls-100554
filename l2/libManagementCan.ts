@@ -76,30 +76,42 @@ export function setState(path: string, value: any): boolean {
 
 /**
  * Verifies if the current state at a given path matches the expected value.
+ * Optionally retries the verification within a specified time frame.
  * Also validates all watched states.
  * 
  * @param {string} path - The state path to verify.
  * @param {any} value - The expected value.
+ * @param {IVerifyOptions} [options] - Optional settings for retry attempts.
  * @returns {boolean} - Returns true if the state matches the expected value.
- * @throws {Error} - Throws an error if the state does not match.
+ * @throws {Error} - Throws an error if the state does not match within the given time frame.
  */
-export function verifyState(path: string, value: any): boolean {
+export function verifyState(path: string, value: any, options?: IVerifyOptions): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        const stateManager = getStateManager();
+        let newValue = typeof value === 'object' ? JSON.stringify(value) : value;
+        let startTime = Date.now();
 
-    const stateManager = getStateManager();
-    let oldValue = stateManager.getState(path);
-    let newValue = value;
+        const checkState = () => {
+            let oldValue = stateManager.getState(path);
+            if (typeof oldValue === 'object') oldValue = JSON.stringify(oldValue);
 
-    if (typeof newValue === 'object') newValue = JSON.stringify(value);
-    if (typeof oldValue === 'object') oldValue = JSON.stringify(oldValue);
+            if (oldValue === newValue) {
+                validateWatchedStates();
+                resolve(true);
+                return;
+            }
 
-    if (oldValue !== newValue) {
-        throw new Error(`Test failed: expected: "${newValue}", got: "${oldValue}"`);
-    }
+            if (Date.now() - startTime >= (options?.timeout ?? 0)) {
+                reject(new Error(`Test failed: expected: "${newValue}", got: "${oldValue}"`));
+                return;
+            }
 
-    validateWatchedStates();
-    return true;
+            setTimeout(checkState, options?.retryInterval ?? 100);
+        };
+
+        checkState();
+    });
 }
-
 /**
  * Registers or unregisters a state to be watched.
  * If the value is `null`, the state is removed from observation.
@@ -173,4 +185,11 @@ function getState(): {} {
 interface IPreviewWindow extends Window {
     globalStateManagment: IcaState
     _ica: {},
+}
+
+interface IVerifyOptions {
+    /** Maximum time (in milliseconds) before giving up. */
+    timeout?: number;
+    /** Interval (in milliseconds) between each verification attempt. */
+    retryInterval?: number;
 }
