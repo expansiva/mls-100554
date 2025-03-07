@@ -8,9 +8,10 @@
 			id="apText1"
 			widget="wc-text-100554"
 			text="Fornecedores"
-			text-en="Suppliers"
+			text-en="Suppliers 2"
 			type="h2"
-			class="story-title">
+			class="story-title"
+			text-es="Spanish">
 		</ica-apresentation-text-text-100554>
 		<ica-layout-group-table-100554
 			widget="wc-table-select-100554"
@@ -21,13 +22,13 @@
 		</ica-layout-group-table-100554>
 		<ica-forms-input-string-100554
 			widget="wc-input-text-100554"
-			label="Nome da empresa teste"
+			label="Nome da empresa"
 			id="iptNome"
-			value="{{projectTest.page2.selecionado.empresa}}">
+			value="{{projectTest.tables.fornecedores[0].empresa}}">
 		</ica-forms-input-string-100554>
 		<ica-forms-input-string-100554
 			widget="wc-input-text-100554"
-			label="CNPJ 3"
+			label="CNPJ"
 			id="iptCnpj"
 			value="{{projectTest.page2.selecionado.cnpj}}">
 		</ica-forms-input-string-100554>
@@ -84,7 +85,7 @@
 			<ica-forms-submit-submit-100554
 				widget="wc-button-submit-100554"
 				id="buttonNovo"
-				text="Novo teste"
+				text="Novo"
 				clicked-value="newRow"
 				clicked-action="{{projectTest.page2.action}}">
 			</ica-forms-submit-submit-100554>
