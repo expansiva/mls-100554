@@ -66,7 +66,7 @@ export class WcdAddItemUnsplash100554 extends CollabLitElement {
                     name: '_100554_wcdDialogImageUnsplash',
                     args: '',
                     position: 'p-l1',
-                    level: [2],
+                    level: [1,2,3,4,5,6,7],
                     toolboxOptions: { background: '#fff', border: 'none' }
                 },
 
