@@ -67,7 +67,8 @@ export const tests: ICANTest[] = [
     },
 ]
 
-export function testEditCNPJ(args: Record<string, any>): string {
+
+export async function testEditCNPJ(args: Record<string, any>): Promise<string> {
 
     initState('projectTest.page2', {
         labelError: '',
@@ -78,7 +79,7 @@ export function testEditCNPJ(args: Record<string, any>): string {
     setState('projectTest.page2.indexSel', args.indexSel);
     setState('projectTest.page2.selecionado.cnpj', args.cnpj);
     setState('projectTest.page2.action', args.action);
-    verifyState('projectTest.page2.labelOk', 'Dados salvos');
+    await verifyState('projectTest.page2.labelOk', 'Dados salvos', { timeout: 10000, retryInterval: 100 });
 
     return 'ok, test pass'
 }

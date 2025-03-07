@@ -9,7 +9,7 @@ import { initTestState } from './_100554_testPagesState';
 export class PageTest2100554 extends CollabPageElement {
 
     initPage() {
-
+        
         initTestState();
         initState('projectTest.page2', {
             labelError: '',
@@ -123,11 +123,14 @@ export class PageTest2100554 extends CollabPageElement {
 
         }
 
+
         setState(`projectTest.tables.fornecedores[${idx}].empresa`, i.empresa, true);
         setState(`projectTest.tables.fornecedores[${idx}].cnpj`, i.cnpj, true);
         setState(`projectTest.tables.fornecedores[${idx}].endereco`, i.endereco, true);
         setState(`projectTest.tables.fornecedores[${idx}].contato`, i.contato, true);
         setState(`projectTest.tables.fornecedores[${idx}].produtos`, i.produtos, true);
+        
+        await this.delay(5000);
         setState(`projectTest.page2.labelOk`, 'Dados salvos', true);
 
     }

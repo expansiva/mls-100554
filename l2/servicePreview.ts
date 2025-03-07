@@ -237,11 +237,14 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onServiceClick(visible: boolean, reinit: boolean) {
 
+
+
         if (this.elPreview) {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
         } else {
             this.onReloader();
+
         }
     }
 
@@ -325,12 +328,10 @@ export class ServicePreview100554 extends ServiceBase {
     private actualFile: mls.stor.IFileInfo | undefined;
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
-
-
         try {
             if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
-            if ((this.visible === 'false' || !this.visible) && !((fileAction.action as any) === 'openBackground')) return;
+            // if ((this.visible === 'false') && !((fileAction.action as any) === 'openBackground')) return;
 
             const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
 
@@ -535,7 +536,7 @@ export class ServicePreview100554 extends ServiceBase {
     private astTSTest: TsTestAst | undefined;
 
     private async setTest() {
-
+        
         this.refreshAST();
         if (!this.astTSTest) return;
 

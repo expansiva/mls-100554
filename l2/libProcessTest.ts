@@ -5,59 +5,110 @@ import { ICANTest, ICANIntegration } from "./_100554_tsTestAST";
 
 export function getScriptTest(ica: IcaState): { func: string, exe: any } | undefined {
 
-    const array = ica.getHistory();
-    if (array.length <= 0) return undefined;
+    const stateHistories = ica.getHistory();
+    if (stateHistories.length <= 0) return undefined;
 
-    const params: any = {};
-    array.forEach((h) => {
+    const params: Record<string, IParams> = {};
+    const keysCont: Record<string, number> = {};
 
-        if (h.system) return;
-        const key = h.key.split('.').pop();
-        const tp = typeof h.value;
-        const vl = processValue(h.value);
+    stateHistories.forEach((stateHistory, index) => {
 
-        if (!key) return;
-        params[key] = { vl, tp, ori: h.key };
+        if (stateHistory.system) return;
+        const paramKey = stateHistory.key.split('.').pop();
+        const paramType = typeof stateHistory.value;
+        const paramValue = processValue(stateHistory.value);
+
+        if (!paramKey) return;
+        let resultKey = paramKey;
+        if (params[paramKey]) resultKey = `${paramKey}_${keysCont[paramKey]}`;
+        params[resultKey] = {
+            paramValue,
+            paramType,
+            paramOri: stateHistory.key,
+            history: stateHistory
+        };
+
+        if (!keysCont[paramKey]) keysCont[paramKey] = 1;
+        else keysCont[paramKey] += 1;
+
+        (stateHistory as any).paramKey = resultKey;
 
     });
 
 
     const lines: string[] = [];
-    let lastkey = '';
+
+    let lastPath = '';
+    let lastKey = '';
+
     let lastInteraction = '';
     let lastIndex = -1;
-    array.forEach((h) => {
 
-        const tipo = h.system ? "System" : "User";
-        const vl = processValue(h.value);
+
+    stateHistories.forEach((history) => {
+
+        const interationType = history.system ? "System" : "User";
+        const vl = processValue(history.value);
         let row = '';
 
-        if (!h.system) {
+        if (!history.system) {
 
-            const param = getParam(params, h.key);
+            const param = getParam(params, (history as any).paramKey);
             if (!param) return;
-            row = `setState('${h.key}', args.${param});`;
+            row = `setState('${history.key}', args.${param})`;
 
         } else {
-
-            row = `verifyState('${h.key}', ${vl})`;
-            if (typeof vl === "string") row = `verifyState('${h.key}', '${vl}')`;
-
+            
+            row = `verifyState('${history.key}', ${vl})`;
+            if (typeof vl === "string") row = `verifyState('${history.key}', '${vl}')`;
         }
 
-        if (lastInteraction === tipo && lastkey === h.key && lastIndex >= 0) {
+        if (lastInteraction === interationType && lastPath === history.key && lastKey === (history as any).paramKey && lastIndex >= 0) {
+
             lines[lastIndex] = row;
 
         } else {
-
             lines.push(row);
-            lastInteraction = tipo;
-            lastkey = h.key;
+            lastInteraction = interationType;
+            lastPath = history.key;
+            lastKey = (history as any).paramKey;
             lastIndex = lines.length - 1;
-
         }
 
     });
+
+    // array.forEach((h) => {
+
+    //     const tipo = h.system ? "System" : "User";
+    //     const vl = processValue(h.value);
+    //     let row = '';
+
+    //     if (!h.system) {
+
+    //         const param = getParam(params, h.key);
+    //         if (!param) return;
+    //         row = `setState('${h.key}', args.${param});`;
+
+    //     } else {
+
+    //         row = `verifyState('${h.key}', ${vl})`;
+    //         if (typeof vl === "string") row = `verifyState('${h.key}', '${vl}')`;
+
+    //     }
+
+    //     if (lastInteraction === tipo && lastkey === h.key && lastIndex >= 0) {
+    //         lines[lastIndex] = row;
+
+    //     } else {
+
+    //         lines.push(row);
+    //         lastInteraction = tipo;
+    //         lastkey = h.key;
+    //         lastIndex = lines.length - 1;
+
+    //     }
+
+    // });
 
     const exe: any = {
         functionName: '',
@@ -71,7 +122,7 @@ export function getScriptTest(ica: IcaState): { func: string, exe: any } | undef
 
         const p = params[k];
         if (!p) return;
-        exe.schema[k] = { type: p.tp, value: p.vl };
+        exe.schema[k] = { type: p.paramType, value: p.paramValue };
 
     });
 
@@ -86,15 +137,12 @@ export function getScriptTest(ica: IcaState): { func: string, exe: any } | undef
 }
 
 function getParam(params: any, key: string) {
-
     const keys = Object.keys(params);
     let ret = '';
-
     keys.forEach((i) => {
-        if (params[i].ori !== key) return;
+        if (i !== key) return;
         ret = i;
-    })
-
+    });
     return ret;
 }
 
@@ -106,6 +154,14 @@ function processValue(vl: any): string | number {
 }
 
 
-export function runTest(iframe: HTMLIFrameElement, script: string) {
-    return;
+interface IParams {
+    paramValue: string | number,
+    paramType: string,
+    paramOri: string,
+    history: {
+        timestamp: number;
+        system: boolean;
+        key: string;
+        value: any;
+    }
 }
