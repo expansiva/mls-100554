@@ -11,7 +11,7 @@ import { execute as excCommandCopy } from './_100554_wcdCommandCopy';
 import { execute as excCommandNext } from './_100554_wcdCommandSelectNext';
 import { execute as excCommandUndo } from './_100554_wcdCommandUndo';
 import './_100554_wcdOverlayModeDefaultItem';
-import { CollabPageElement } from './_100554_collabPageElement';
+import { CollabPageElement } from './_100554_collabPageElement'; 
 
 @customElement('wcd-overlay-mode-default-100554')
 export class WcdOverlayModeDefault extends WcdOverlayLitBase {

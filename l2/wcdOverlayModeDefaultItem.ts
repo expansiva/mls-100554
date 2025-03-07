@@ -173,9 +173,10 @@ export class WcdOverlayModeDefaultItem extends LitElement implements WCDOverlayI
         wcd.setAttribute('initialclick', `${x},${y}`);
         wcd.lastHelper = '';
 
-        const tag =wcd.elICA ? wcd.elICA.getActionsTags() : [];
-        
-        if (tag.length > 0 && tag.filter((i) => i.name === 'add').length <= 0) wcd.style.boxShadow = '0px 0px 2px 2px var(--bg-primary-color-darker-disabled)';
+        const tag = wcd.elICA ? wcd.elICA.getActionsTags() : [];
+        const test = tag.filter((i) => i.name === 'add').length <= 0;
+
+        if (test) wcd.style.boxShadow = '0px 0px 2px 2px var(--bg-primary-color-darker-disabled)';
 
         this.appendChild(wcd);
     }
