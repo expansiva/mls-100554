@@ -67,7 +67,7 @@ export class PageTest2100554 extends CollabPageElement {
         }
 
     }
-
+    
     onSelectItemtableSelect(idx: number) {
 
         setState('projectTest.page2.selecionado.empresa', globalState._ica.projectTest.tables.fornecedores[idx].empresa, true);
