@@ -1,6 +1,6 @@
 /// <mls shortName="pageTest2" project="100554" enhancement="_blank" />
 
-import { initState, setState, verifyState, watchState } from './_100554_libManagementCan';
+import { initState, setState, verifyState, watchState, waitingState } from './_100554_libManagementCan';
 import { ICANTest, ICANIntegration, ICANSchema } from './_100554_tsTestAST';
 
 export const integrations: ICANIntegration[] = [];
@@ -79,7 +79,8 @@ export async function testEditCNPJ(args: Record<string, any>): Promise<string> {
   setState('projectTest.page2.indexSel', args.indexSel);
   setState('projectTest.page2.selecionado.cnpj', args.cnpj);
   setState('projectTest.page2.action', args.action);
-  await verifyState('projectTest.page2.labelOk', 'Dados salvos', { timeout: 10000, retryInterval: 100 });
+
+  await waitingState('projectTest.page2.labelOk', 'Dados salvos');
 
   return 'ok, test pass'
 }
