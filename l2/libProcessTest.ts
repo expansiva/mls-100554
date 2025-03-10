@@ -11,16 +11,28 @@ export function getScriptTest(ica: IcaState): { func: string, exe: any } | undef
     const params: Record<string, IParams> = {};
     const keysCont: Record<string, number> = {};
 
+    let lastParam = '';
+
     stateHistories.forEach((stateHistory, index) => {
 
-        if (stateHistory.system) return;
         const paramKey = stateHistory.key.split('.').pop();
         const paramType = typeof stateHistory.value;
         const paramValue = processValue(stateHistory.value);
 
         if (!paramKey) return;
+        if (stateHistory.system) {
+            lastParam = paramKey;
+            return;
+        }
+
         let resultKey = paramKey;
-        if (params[paramKey]) resultKey = `${paramKey}_${keysCont[paramKey]}`;
+        if (!keysCont[paramKey]) keysCont[paramKey] = 0;
+
+        if (params[paramKey] && lastParam && lastParam !== resultKey) {
+            keysCont[paramKey] += 1;
+            resultKey = `${paramKey}_${keysCont[paramKey]}`;
+        }
+
         params[resultKey] = {
             paramValue,
             paramType,
@@ -28,10 +40,9 @@ export function getScriptTest(ica: IcaState): { func: string, exe: any } | undef
             history: stateHistory
         };
 
-        if (!keysCont[paramKey]) keysCont[paramKey] = 1;
-        else keysCont[paramKey] += 1;
 
         (stateHistory as any).paramKey = resultKey;
+        lastParam = resultKey;
 
     });
 
@@ -58,7 +69,7 @@ export function getScriptTest(ica: IcaState): { func: string, exe: any } | undef
             row = `setState('${history.key}', args.${param})`;
 
         } else {
-            
+
             row = `verifyState('${history.key}', ${vl})`;
             if (typeof vl === "string") row = `verifyState('${history.key}', '${vl}')`;
         }
