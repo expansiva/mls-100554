@@ -3,6 +3,8 @@
 import { IcaState, GlobalState } from './_100554_icaState';
 
 const watchedStates = new Map<string, any>();
+const waitingPromises: Map<string, { value: any, resolve: () => void, reject: (err: Error) => void }> = new Map();
+
 
 /**
  * Initializes or updates a global state at a specified path.
@@ -19,7 +21,10 @@ const watchedStates = new Map<string, any>();
  * @param {string | object | unknown[]} [value] - The value to assign at the specified path.
  */
 export function initState(path?: string, value?: string | object | unknown[]) {
+
     watchedStates.clear();
+    waitingPromises.clear();
+
     let globalState: GlobalState = getState();
     const stateManager = getStateManager();
 
@@ -56,6 +61,7 @@ export function initState(path?: string, value?: string | object | unknown[]) {
     }
 
     setNestedState(path, value);
+
 }
 
 
@@ -70,7 +76,6 @@ export function initState(path?: string, value?: string | object | unknown[]) {
 export function setState(path: string, value: any): boolean {
     const stateManager = getStateManager();
     stateManager.setState(path, value);
-    validateWatchedStates();
     return true;
 }
 
@@ -96,7 +101,6 @@ export function verifyState(path: string, value: any, options?: IVerifyOptions):
             if (typeof oldValue === 'object') oldValue = JSON.stringify(oldValue);
 
             if (oldValue === newValue) {
-                validateWatchedStates();
                 resolve(true);
                 return;
             }
@@ -112,6 +116,44 @@ export function verifyState(path: string, value: any, options?: IVerifyOptions):
         checkState();
     });
 }
+
+/**
+ * Registers a function to wait until the state at a given path reaches the specified value.
+ *
+ * @param {string} path - The path of the state to wait for.
+ * @param {any} value - The expected value of the state.
+ * @returns {Promise<void>} - A promise that resolves once the state value matches the expected value.
+ */
+export function waitingState(path: string, value: any): Promise<void> {
+    return new Promise((resolve, reject) => {
+        waitingPromises.set(path, { value, resolve, reject });
+    });
+}
+
+/**
+ * Validates whether the current state matches the expected value for any registered waiting state.
+ * If the state does not match the expected value, the function stops observing and throws an error.
+ *
+ * @param {IcaState} stateManager - The state manager that holds the global state.
+ * @throws {Error} - Throws an error if the state at a given path does not match the expected value.
+ */
+function validateWaitingStates(stateManager: IcaState): void {
+    for (const [path, { value, resolve, reject }] of waitingPromises.entries()) {
+        const currentValue = stateManager.getState(path);
+
+        // Check if the current value matches the expected value
+        if (JSON.stringify(currentValue) === JSON.stringify(value)) {
+            resolve(); // Resolve the promise once the value matches
+            waitingPromises.delete(path); // Remove the waiting function
+        } else {
+            // If the value does not match, stop observing and throw an error
+            waitingPromises.delete(path);
+            const msg = `Waiting state validation failed: path "${path}" has value "${currentValue}", expected: "${value}"`
+            reject(new Error(msg));
+        }
+    }
+}
+
 /**
  * Registers or unregisters a state to be watched.
  * If the value is `null`, the state is removed from observation.
@@ -167,20 +209,43 @@ function getStateManager(): IcaState {
 }
 
 /**
- * Retrieves the global state  from the preview iframe.
- * 
- * @returns {any} - The global state.
- * @throws {Error} - Throws an error if the preview iframe or state is not available.
-*/
+ * Retrieves the global state and wraps it in a Proxy to intercept changes and validate waiting states.
+ *
+ * @returns {any} - The proxied state object.
+ * @throws {Error} - Throws an error if the preview iframe or state management is invalid.
+ */
 function getState(): {} {
-
     if (!window.preview.iframe) throw new Error('Invalid preview iframe');
     if (!window.preview.iframe.contentWindow) throw new Error('Invalid preview iframe contentWindow');
 
     const state = (window.preview.iframe.contentWindow as IPreviewWindow)._ica;
     if (!state) throw new Error('Invalid preview stateManagment');
-    return state;
+
+    function createProxy(obj: any): any {
+        if (typeof obj !== 'object' || obj === null) {
+            return obj;
+        }
+        return new Proxy(obj, {
+            set(target, key, value) {
+                target[key] = createProxy(value);
+
+                validateWaitingStates(getStateManager());
+                validateWatchedStates();
+
+
+                return true;
+            },
+            get(target, key) {
+                const result = target[key];
+                return createProxy(result);
+            }
+        });
+    }
+
+    const proxiedState = createProxy(state);
+    return proxiedState;
 }
+
 
 interface IPreviewWindow extends Window {
     globalStateManagment: IcaState
@@ -193,3 +258,4 @@ interface IVerifyOptions {
     /** Interval (in milliseconds) between each verification attempt. */
     retryInterval?: number;
 }
+
