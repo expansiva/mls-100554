@@ -104,6 +104,9 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
             case 'add':
                 await import('./_100554_wcdAddWidget');
                 return 'wcd-add-widget-100554';
+            case 'del':
+                await import('./_100554_wcdAddItemDel');
+                return 'wcd-add-item-del-100554';
             default:
                 console.error('invalid button name: "' + button + '"');
                 return null;
