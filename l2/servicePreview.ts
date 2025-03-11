@@ -260,6 +260,8 @@ export class ServicePreview100554 extends ServiceBase {
         mls.events.addListener(2, 'styleChanged' as any, this.onStyleChanged.bind(this));
         mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
 
+        mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['LevelChanged'] as any, this.onLevelChange.bind(this));
+
     }
 
     private onReloader(): void {
@@ -314,6 +316,20 @@ export class ServicePreview100554 extends ServiceBase {
             this.elPreview.setAttribute('stylechanged', 'true');
             this.elPreview.setAttribute('actualtheme', this.actualTheme);
         }
+    }
+
+    private onLevelChange(ev: mls.events.IEvent) {
+
+        if (!ev.desc) return;
+        const data: { to: number, from: number } = JSON.parse(ev.desc);
+
+        if (data.to === 7 || data.from === 7) {
+            if (this.watch) {
+                this.onReloader();
+            }
+
+        }
+
     }
 
     private onTsTestChanged() {
@@ -536,7 +552,7 @@ export class ServicePreview100554 extends ServiceBase {
     private astTSTest: TsTestAst | undefined;
 
     private async setTest() {
-        
+
         this.refreshAST();
         if (!this.astTSTest) return;
 
