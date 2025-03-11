@@ -137,7 +137,7 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
                 name: "_100554_wcdAdd",
                 level: [2, 3],
                 position: 'p-l2',
-                args: '{ "buttons" : "image,unsplash,video,embed,code,part,add" }',
+                args: '{ "buttons" : "image,unsplash,video,embed,code,part,add,del" }',
                 toolboxOptions: { background: 'none', border: 'none' }
             },
             'edit': {
