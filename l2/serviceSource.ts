@@ -1107,9 +1107,11 @@ export class ServiceSource100554 extends ServiceBase {
         storFile.hasError = hasError;
         this.toogleIconsError();
         const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
-        if (sameContent && changed) {
-            if (storFile.status !== 'new') storFile.status = 'nochange';
-            await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
+        if (sameContent) {
+            if (storFile.status !== 'new') {
+                storFile.status = 'nochange';
+                await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
+            }
         } else {
             if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
             await mls.stor.localStor.setContent(storFile, await this.getValueInfo(modelBaseTS));
