@@ -34,14 +34,20 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
 
     firstUpdated(changedProperties: Map<string | number | symbol, unknown>) {
         super.firstUpdated(changedProperties);
-        if (this.resizeObserver) this.resizeObserver.disconnect();
-        this.resizeObserver = new ResizeObserver(entries => {
-            if (this.timeoutResize) clearTimeout(this.timeoutResize);
-            this.timeoutResize = setTimeout(() => {
-                this.updateSizeOverlayItems();
-            }, 500);
-        });
-        this.resizeObserver.observe(this);
+
+
+        if (typeof ResizeObserver !== "undefined") {
+            if (this.resizeObserver) this.resizeObserver.disconnect();
+            this.resizeObserver = new ResizeObserver(entries => {
+                if (this.timeoutResize) clearTimeout(this.timeoutResize);
+                this.timeoutResize = setTimeout(() => {
+                    this.updateSizeOverlayItems();
+                }, 500);
+            });
+            this.resizeObserver.observe(this);
+        } else {
+            window.collabMessages.add('ResizeObserver não suportado neste dispositivo.', 'error');
+        }
     }
 
     disconnectedCallback() {
@@ -124,21 +130,40 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
 
     private updateSizeOverlayItems() {
 
-        const items = Array.from(this.children) as WCDOverlayItensMethods[];
-        const boundingPage = this.getBoundingClientRect();
-        items.forEach((item) => {
-            if (!item.info) return;
-            const { x, y, height, width } = item.info.element.getBoundingClientRect();
-            item.info.x = x;
-            item.info.y = y;
-            item.info.height = height;
-            item.info.width = width;
-            const pos = getPosition(item.info, boundingPage);
-            item.style.width = pos.width;
-            item.style.height = pos.height;
-            item.style.top = pos.top;
-            item.style.left = pos.left;
+        requestAnimationFrame(() => {
+            const items = Array.from(this.children) as WCDOverlayItensMethods[];
+            const boundingPage = this.getBoundingClientRect();
+
+            items.forEach((item) => {
+                if (!item.info) return;
+                const { x, y, height, width } = item.info.element.getBoundingClientRect();
+                item.info.x = x;
+                item.info.y = y;
+                item.info.height = height;
+                item.info.width = width;
+                const pos = getPosition(item.info, boundingPage);
+                item.style.width = pos.width;
+                item.style.height = pos.height;
+                item.style.top = pos.top;
+                item.style.left = pos.left;
+            });
         });
+
+        // const items = Array.from(this.children) as WCDOverlayItensMethods[];
+        // const boundingPage = this.getBoundingClientRect();
+        // items.forEach((item) => {
+        //     if (!item.info) return;
+        //     const { x, y, height, width } = item.info.element.getBoundingClientRect();
+        //     item.info.x = x;
+        //     item.info.y = y;
+        //     item.info.height = height;
+        //     item.info.width = width;
+        //     const pos = getPosition(item.info, boundingPage);
+        //     item.style.width = pos.width;
+        //     item.style.height = pos.height;
+        //     item.style.top = pos.top;
+        //     item.style.left = pos.left;
+        // });
     }
 
 }
