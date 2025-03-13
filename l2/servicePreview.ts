@@ -438,6 +438,13 @@ export class ServicePreview100554 extends ServiceBase {
             this.monacoeditor.setAttribute('msize', msize);
             if (this.pluginResultJS) this.pluginResultJS.setAttribute('msize', msize);
             if (this.pluginResultTestJS) this.pluginResultTestJS.setAttribute('msize', msize);
+            const pageOverlay = window.preview.iframe?.contentDocument?.body.querySelector('*[modeoverlay]');
+            if (!pageOverlay) return;
+            const pageOverlayName = pageOverlay.getAttribute('modeoverlay');
+            if (!pageOverlayName) return;
+            const wcdOverlay = pageOverlay.querySelector(pageOverlayName);
+            if (wcdOverlay) wcdOverlay.setAttribute('msize', msize);
+
         }
     }
 
