@@ -4,6 +4,7 @@ import { html,  } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
+import { globalWcd } from './_100554_wcdState';
 
 
 @customElement('wcd-toolbox-item-action-menu-100554')
@@ -74,6 +75,9 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
 
 
             let file = item.item;
+
+            if (file === '_100554_wcdToolboxItemActionAdd' && item.args === 'child' && globalWcd.elICA && !(globalWcd.elICA as any).allowAddChild) return;
+
             if (!this.isLoad.includes(file)) {
                 if (!file.startsWith('./')) file = './' + file;
                 await import(file);
