@@ -39,6 +39,10 @@ export class PluginSystemLanguage100554 extends PluginBaseModule {
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
 
+    @property({ type: Boolean }) consoleEnabled: boolean = false;
+
+    @query('#console-input') inputConsole: HTMLInputElement | undefined;
+
     firstUpdated() {
         if (!this.autoPrepare) return;
         this.prepare();
@@ -48,11 +52,29 @@ export class PluginSystemLanguage100554 extends PluginBaseModule {
         await this.init();
     }
 
-    private async init() { }
+    private async init() {
+        const collabConsole = document.querySelector('collab-console') as HTMLElement;
+        if (collabConsole) {
+            const show = collabConsole.getAttribute('show') === 'true';
+            this.consoleEnabled = show;
+        }
+
+    }
+
+    private onChangeConsoleEnabled() {
+        const collabConsole = document.querySelector('collab-console') as HTMLElement;
+        if (collabConsole && this.inputConsole) {
+            collabConsole.setAttribute('show', `${this.inputConsole.checked ? 'true' : 'false'}`)
+        }
+    }
 
     render(): TemplateResult {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        return html`${this.msg.develpoment}`;
+        return html
+            `<div style="display:flex;align-items:center;">
+            <label for="console-input"> Enable develpoment console</label>
+            <input @change=${this.onChangeConsoleEnabled} .checked=${this.consoleEnabled} id="console-input" style="cursor:pointer;" type="checkbox"></input>
+        </div>`;
     }
 }
