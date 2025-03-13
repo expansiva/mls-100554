@@ -129,7 +129,7 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     render() {
-        return html`<div style="overflow:auto;height:100%;padding:1rem" id="contentPlugin"></div>`;
+        return html`<div style="overflow:auto;height: calc(100% - 2rem);padding:1rem" id="contentPlugin"></div>`;
     }
 
     //----------IMPLEMENTS-------------------
