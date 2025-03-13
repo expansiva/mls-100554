@@ -110,6 +110,11 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
                     item: '_100554_wcdToolboxItemActionAdd',
                     args: '',
                     level: [3],
+                },
+                {
+                    item: '_100554_wcdToolboxItemActionAdd',
+                    args: 'child',
+                    level: [2, 3],
                 }
             ]
         }
