@@ -1,13 +1,12 @@
 /// <mls shortName="pluginPageNavigation" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
-import { property, queryAll } from 'lit/decorators.js';
+import { html, repeat, TemplateResult } from 'lit';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
 import { execute as executeDel } from './_100554_wcdCommandDel';
-import { execute as executeAddTexto } from './_100554_wcdCommandEnter';
+import { move } from './_100554_wcdCommandMove';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -73,13 +72,13 @@ export class PluginPageNavigation extends PluginBaseModule {
         return html`<h3 style="padding:1rem">${this.msg.noItens}<h3>`;
     }
 
-    createNavigation(array: IInfoElCholdren[]) {
+    createNavigation(array: IInfoElChildren[]) {
         //<mic-command @click="${this.startRecognition}"></mic-command>
         const obj = html`
             
             <ul>
-                ${repeat(array, ((key: IInfoElCholdren, idx: number) => key.el.tagName + idx) as any,
-            ((item: IInfoElCholdren, index: any) => { return this.renderItemTree(item, index); }) as any
+                ${repeat(array, ((key: IInfoElChildren, idx: number) => key.el.tagName + idx) as any,
+            ((item: IInfoElChildren, index: any) => { return this.renderItemTree(item, index); }) as any
         )}
             </ul>
         `;
@@ -88,7 +87,7 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     }
 
-    renderItemTree(item: IInfoElCholdren, idx: string) {
+    renderItemTree(item: IInfoElChildren, idx: string) {
 
         const name = convertTagToFileName(item.el.tagName.toLocaleLowerCase());
         const cls = (item.el as any).renderType === 'editactive' ? 'activeBranch' : '';
@@ -112,26 +111,31 @@ export class PluginPageNavigation extends PluginBaseModule {
 
         return html`
             <li>
-                <div id="${name + idx}" .info=${item} @mouseover="${this.mouseOver}" @mouseleave="${this.mouseLeave}" class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
-                    <info-item .info=${item}><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${name}</info-item>
-                    <div class="dragDropcontainer">
-                        <span class="dbefore fa fa-arrow-up"></span>
-                        <span class="din fa fa-arrow-turn-down"></span>
-                        <span class="dAfter fa fa-arrow-down"></span>
-                    </div>
-                    <div class="groupHiddenList" .info=${item} @click="${this.clickGroupHidden}">
-                        <span class="mls-gpbtnslider-item fa fa-up-down-left-right" title="move" @click="${this.activeMove}" style="display:none"></span>
-                        
+                <div 
+                    .info=${item}
+                    draggable="true"
+                    id="${name + idx}"                      
+                    class="header ${cls} ${this.dropTarget === item ? 'drop-target' : ''}" 
+                    @mouseover="${this.mouseOver}" 
+                    @mouseleave="${this.mouseLeave}" 
+                    @click="${(e: MouseEvent) => this.selectItem(e, item)}"
+
+                    @dragstart=${(e: DragEvent) => this.handleDragStart(e, item)}
+                    @dragover=${(e: DragEvent) => this.handleDragOver(e, item, e.currentTarget as HTMLElement)}
+                    @dragleave=${(e: DragEvent) => this.handleDragLeave(e, e.currentTarget as HTMLElement)}
+                    @drop=${this.handleDrop}
+                    
+                >
+                    <info-item .info=${item}>
+                        <span class="fa ${mySymbol}" style="margin-right:.5rem"></span>
+                        ${name}
+                    </info-item>
+                    <div class="groupHiddenList" .info=${item}  @click="${this.clickGroupHidden}" >
                         <span class="mls-gpbtnslider-item fa fa-trash" @click="${this.delEl}" title="remove"></span>
                     </div>
                 </div>
                 <ul>
-                    ${repeat(item.children, ((c: IInfoElCholdren, idx: number) => c.el.tagName + idx) as any, ((i: any, idxI: any) => {
-
-            return this.renderItemTree(i, idx + '_' + idxI);
-
-        }) as any
-        )}
+                    ${repeat(item.children, ((c: IInfoElChildren, idx: number) => c.el.tagName + idx) as any, ((i: any, idxI: any) => { return this.renderItemTree(i, idx + '_' + idxI); }) as any)}
                 </ul>
             </li>
         `;
@@ -147,15 +151,15 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     }
 
-    private getICAComponents(): IInfoElCholdren[] {
+    private getICAComponents(): IInfoElChildren[] {
 
-        let ret: IInfoElCholdren[] = [];
+        let ret: IInfoElChildren[] = [];
         const scope = window.preview?.iframe?.contentDocument?.body;
         if (!scope) return ret;
 
-        const reentrance = (array: IInfoElCholdren[], element: HTMLElement) => {
+        const reentrance = (array: IInfoElChildren[], element: HTMLElement) => {
 
-            let info: IInfoElCholdren | undefined;
+            let info: IInfoElChildren | undefined;
             const tag = element.tagName.toLowerCase();
             if (tag.startsWith('ica') && !tag.startsWith('ica-page-overlay')) {
                 info = { el: element as IcaLitElementBaseMethods, children: [] as any };
@@ -194,7 +198,7 @@ export class PluginPageNavigation extends PluginBaseModule {
 
 
     private idLastClick: string = '';
-    private selectItem(e: MouseEvent, item: IInfoElCholdren): void {
+    private selectItem(e: MouseEvent, item: IInfoElChildren): void {
 
         e.stopPropagation();
         let target = e.target as HTMLElement;
@@ -251,223 +255,11 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     }
 
-    private setLock(e: MouseEvent) {
-
-        e.stopPropagation();
-        const el = e.target as HTMLElement;
-        if (!el) return;
-        const info: IInfoElCholdren = (el.parentElement as any).info;
-        if (!info) return;
-
-        const isGroup = (el.className.indexOf('fa-lock-open') < 0);
-        info.el.setAttribute('isFCAGroup', (!isGroup).toString());
-
-        let lock = 'fa-lock-open';
-        if (!isGroup) {
-            lock = 'fa-lock';
-        }
-
-        el.classList.remove('fa-lock');
-        el.classList.remove('fa-lock-open');
-        el.title = lock === 'fa-lock' ? 'lock' : 'lock open';
-        el.classList.add(lock);
-
-        this.requestUpdate();
-
-    }
-
     private delEl(e: MouseEvent) {
 
         e.stopPropagation();
         this.cmdDel();
         setTimeout(() => { this.requestUpdate(); }, 100);
-        
-        /*const el = e.target as HTMLElement;
-        if (!el) return;
-        const info: IInfoElCholdren = (el.parentElement as any).info;
-        if (!info) return;
-
-        info.el.remove();
-
-        this.requestUpdate();*/
-
-    }
-
-    private activeMove(e: MouseEvent) {
-
-        e.stopPropagation();
-        const el = e.target as HTMLElement;
-        if (!el) return;
-        const info: IInfoElCholdren = (el.parentElement as any).info;
-        if (!info) return;
-
-        const wc = info.el.querySelector('wcd-toolbox-100554') as HTMLElement;
-        if (!wc || !wc.shadowRoot) return;
-
-        const move = wc.shadowRoot.querySelector('wcd-toolbox-item-action-move-100554') as HTMLElement;
-        if (move) move.click();
-
-        setTimeout(() => {
-
-            this.setDragDrop(info.el);
-
-        }, 500);
-
-
-    }
-
-    private setDragDrop(active: HTMLElement): void {
-
-        const dragStart = (e: MouseEvent, el: HTMLElement) => {
-            e.stopPropagation();
-            if (!(el as any).info) return;
-            el.style.opacity = '0.4';
-        };
-
-        const dragEnter = (e: MouseEvent, el: HTMLElement) => {
-            e.stopPropagation();
-            const elLast = this.querySelector('.overdragdrop') as HTMLElement;
-            if (elLast) elLast.classList.remove('overdragdrop');
-            el.classList.add('overdragdrop');
-        };
-
-        const dragLeave = (e: MouseEvent, el: HTMLElement) => {
-            e.stopPropagation();
-            //el.classList.remove('overdragdrop');
-        };
-
-        const dragOver = (e: MouseEvent, el: HTMLElement) => {
-            e.stopPropagation();
-            e.preventDefault();
-            (e as any).dataTransfer.dropEffect = 'move';
-            return false;
-        };
-
-        const dragDrop = (e: MouseEvent, el: HTMLElement, mode: HTMLElement) => {
-            e.stopPropagation();
-            if (!(el as any).info) return;
-            mode.click();
-
-            return false;
-        };
-
-        const dragEnd = (e: MouseEvent, el: HTMLElement) => {
-            e.stopPropagation();
-            try {
-                //mls.events.fire(2,'DSStyleChanged','{"emitter":"left"}',500);
-
-                Array.from(listItens).forEach((el: any) => {
-
-                    el.removeAttribute('draggable');
-                    el.classList.remove('overdragdrop');
-                    el.style.opacity = '';
-                    el.ondragstart = () => { };
-                    el.ondragenter = () => { };
-                    el.ondragover = () => { };
-                    el.ondragleave = () => { };
-
-                    const elbefore = el.querySelector('.dbefore') as HTMLElement;
-                    const elafter = el.querySelector('.dAfter') as HTMLElement;
-                    const elinn = el.querySelector('.din') as HTMLElement;
-
-                    if (elbefore) {
-                        elbefore.removeAttribute('draggable');
-                        elbefore.ondrop = (e: MouseEvent) => { };
-                    }
-                    if (elafter) {
-                        elafter.removeAttribute('draggable');
-                        elafter.ondrop = (e: MouseEvent) => { };
-                    }
-                    if (elinn) {
-                        elinn.removeAttribute('draggable');
-                        elinn.ondrop = (e: MouseEvent) => { };
-                    }
-
-                    const cont = el.querySelector('.dragDropcontainer') as HTMLElement;
-
-                    if (cont) {
-                        cont.classList.remove('b');
-                        cont.classList.remove('a');
-                        cont.classList.remove('i');
-                    }
-
-                    if (el.info) {
-
-                        const elBase = el.info.el;
-                        if (!elBase) return;
-                        if (elBase.getAttribute('renderType') === 'editactive') return;
-
-                        elBase.style.position = '';
-                        const content = elBase.querySelector(':scope > wcd-dragdrop-aux');
-                        if (!content) return;
-                        content.remove();
-
-                    }
-
-                });
-
-            } catch (e) {
-                this.requestUpdate();
-            }
-
-
-
-        };
-
-        const addEventsDragAndDrop = (el: HTMLElement) => {
-
-            if (!(el as any).info) return;
-
-            const rtp = (el as any).info.el.getAttribute('rendertype');
-            const wcd = (el as any).info.el.querySelector(':scope > wcd-dragdrop-aux');
-
-            if (!wcd && rtp === 'edit') return;
-
-            const before = wcd ? wcd.querySelector('wcd-dragdrop-aux-before') : undefined;
-            const after = wcd ? wcd.querySelector('wcd-dragdrop-aux-after') : undefined;
-            const inn = wcd ? wcd.querySelector('wcd-dragdrop-aux-in') : undefined;
-
-            const elbefore = el.querySelector('.dbefore') as HTMLElement;
-            const elafter = el.querySelector('.dAfter') as HTMLElement;
-            const elinn = el.querySelector('.din') as HTMLElement;
-
-            const cont = el.querySelector('.dragDropcontainer') as HTMLElement;
-            if (cont && before) cont.classList.add('b');
-            if (cont && after) cont.classList.add('a');
-            if (cont && inn) cont.classList.add('i');
-
-            if (active === (el as any).info.el) {
-                el.ondragstart = (e: MouseEvent) => dragStart(e, el);
-            }
-
-            if (active !== (el as any).info.el) {
-                el.ondragenter = (e: MouseEvent) => dragEnter(e, el);
-                el.ondragover = (e: MouseEvent) => dragOver(e, el);
-                el.ondragleave = (e: MouseEvent) => dragLeave(e, el);
-                if (before && elbefore) {
-                    elbefore.setAttribute('draggable', 'true');
-                    elbefore.ondrop = (e: MouseEvent) => dragDrop(e, el, before);
-                }
-                if (after && elafter) {
-                    elafter.setAttribute('draggable', 'true');
-                    elafter.ondrop = (e: MouseEvent) => dragDrop(e, el, after);
-                }
-                if (inn && elinn) {
-                    elinn.setAttribute('draggable', 'true');
-                    elinn.ondrop = (e: MouseEvent) => dragDrop(e, el, inn);
-                }
-            }
-
-            el.ondragend = (e: MouseEvent) => dragEnd(e, el);
-
-        }
-
-        const listItens = this.querySelectorAll('.header');
-
-        Array.from(listItens).forEach((el) => {
-            el.setAttribute('draggable', 'true');
-            addEventsDragAndDrop(el as HTMLElement);
-        });
 
     }
 
@@ -508,49 +300,6 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     }
 
-    //--------COMMANDS-------------------
-
-    private commands = {
-        selecionar: {
-            item: this.cmdSelectItem.bind(this)
-        },
-
-        setar: {
-            color: this.cmdSetCor.bind(this),
-            background: this.cmdSetBackground.bind(this),
-            margem: {
-                top: (vl: string) => { this.processStyle('margin-top', vl.replace(/ /g, '')) },
-                button: (vl: string) => { this.processStyle('margin-bottom', vl.replace(/ /g, '')) },
-                botton: (vl: string) => { this.processStyle('margin-bottom', vl.replace(/ /g, '')) },
-                left: (vl: string) => { this.processStyle('margin-left', vl.replace(/ /g, '')) },
-                white: (vl: string) => { this.processStyle('margin-right', vl.replace(/ /g, '')) },
-                right: (vl: string) => { this.processStyle('margin-right', vl.replace(/ /g, '')) },
-            },
-            texto: this.setTexto.bind(this),
-        },
-
-        adicionar: {
-            elemento: {
-                texto: this.cmdAddTexto.bind(this)
-            }
-        },
-
-        deletar: this.cmdDel.bind(this)
-    }
-
-    private setTexto(vl: string) {
-
-        if (!(window as any).preview || !(window as any).preview.iframe || !(window as any).preview.iframe.contentWindow.wcdState || !(window as any).preview.iframe.contentWindow.wcdState.elICA) return;
-
-        const ica = (window as any).preview.iframe.contentWindow.wcdState.elICA
-        if (!ica || !ica.overlayRef) return;
-
-        if (ica.tagName.toLocaleLowerCase() !== 'ica-apresentation-text-text-100554') return;
-        console.info(ica);
-        ica.setAttribute('text', vl);
-        ica.requestUpdate();
-    }
-
     private cmdDel() {
 
         if (!(window as any).preview || !(window as any).preview.iframe || !(window as any).preview.iframe.contentWindow.wcdState || !(window as any).preview.iframe.contentWindow.wcdState.elICA) return;
@@ -560,7 +309,7 @@ export class PluginPageNavigation extends PluginBaseModule {
 
         const param: IWCDCommand = {
             args: new KeyboardEvent('keydown', {
-                key: 'Del', 
+                key: 'Del',
                 code: 'Del',
                 keyCode: 13,
                 bubbles: true,
@@ -575,190 +324,103 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     }
 
-    private cmdAddTexto() {
 
-        if (!(window as any).preview || !(window as any).preview.iframe || !(window as any).preview.iframe.contentWindow.wcdState || !(window as any).preview.iframe.contentWindow.wcdState.elICA) return;
 
-        const ica = (window as any).preview.iframe.contentWindow.wcdState.elICA
-        if (!ica || !ica.overlayRef) return;
+    private draggedItem: IInfoElChildren | null = null;
+    private dropTarget: IInfoElChildren | null = null;
+    private dropPosition: 'above' | 'below' | 'inside' | null = null;
 
-        const param: IWCDCommand = {
-            args: new KeyboardEvent('keydown', {
-                key: 'Enter', 
-                code: 'Enter',
-                keyCode: 13,
-                bubbles: true,
-                cancelable: true,
-                composed: true,
-            }),
-            overlay: ica.overlayRef.parentElement as any,
-            selectedIca: ica
+    private handleDragStart(event: DragEvent, item: IInfoElChildren) {
+        event.stopPropagation();
+        this.draggedItem = item;
+        event.dataTransfer!.effectAllowed = 'move';
+        setTimeout(() => this.requestUpdate(), 0);
+    }
+
+    private handleDragOver(event: DragEvent, item: IInfoElChildren, element: HTMLElement) {
+
+        event.stopPropagation();
+        event.preventDefault();
+        event.dataTransfer!.dropEffect = 'move';
+
+        const rect = element.getBoundingClientRect();
+        const offsetY = event.clientY - rect.top;
+        const height = rect.height;
+
+        const li = element.closest('li');
+        if (!li) return;
+
+        if (offsetY < (height * 0.3)) {
+            this.dropPosition = 'above';
+            element.style.border = "";
+            li.style.border = "";
+            li.style.borderTop = "2px solid blue";
+
+
+        } else if (offsetY > (height * 0.6)) {
+            this.dropPosition = 'below';
+            element.style.border = "";
+            li.style.border = "";
+            li.style.borderBottom = "2px solid blue";
+
+
+        } else {
+            this.dropPosition = 'inside';
+            li.style.border = "";
+            element.style.border = "2px solid blue";
         }
 
-        executeAddTexto(param);
+        this.dropTarget = item;
         this.requestUpdate();
-
     }
 
-    private cmdSetCor(color: string) {
+    private handleDragLeave(event: DragEvent, element: HTMLElement) {
+
+        const li = element.closest('li');
+        if (!li) return;
+        li.style.border = "";
+        element.style.border = "";
+    }
+
+    private handleDrop(event: DragEvent) {
 
         try {
 
-            this.processStyle('color', color);
+            event.preventDefault();
+            if (!this.draggedItem || !this.dropTarget) return;
+            move(this.draggedItem.el, this.dropTarget.el, this.dropPosition || 'below');
 
-        } catch (e: any) { }
 
-    }
+        } catch (e:any) {
 
-    private cmdSetBackground(color: string) {
+            console.info(e.message);
 
-        try {
+        } finally {
 
-            this.processStyle('background', color);
+            const element = event.target as HTMLElement;
+            element.style.border = "";
 
-        } catch (e: any) { }
+            const li = element.closest('li');
+            if (li) li.style.border = "";
 
-    }
+            this.draggedItem = null;
+            this.dropTarget = null;
+            this.dropPosition = null;
 
-    private processStyle(attr: string, value: string) {
-
-        const active = this.querySelector('.activeBranch') as HTMLElement;
-        if (!active) return;
-
-        const el = active.querySelector('info-item') as any;
-        if (!el) return;
-
-        const info = el.info as IInfoElCholdren;
-        if (!info) return;
-
-        const css = info.el.getAttribute('styleel');
-        const t = document.createElement('div');
-
-        t.style.cssText = css || '';
-        t.style[attr as any] = value;
-        info.el.setAttribute('styleel', t.style.cssText);
-
-    }
-
-    private cmdSelectItem(item: string) {
-
-        try {
-
-            console.info('cmdSelectItem', item);
-            const child = ((+item) - 1);
-
-            const all = this.querySelectorAll('li');
-            if (!all[child]) return;
-
-            const el = all[child].querySelector('.header') as HTMLElement;
-            if (el) el.click();
-
-        } catch (e: any) {
-
+            setTimeout(() => { this.requestUpdate(); }, 500);
         }
 
-    }
-
-    private recognition: any;
-    private activationWord = "comando";
-
-    private setVoice() {
-
-        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-        if (SpeechRecognition) {
-
-            this.recognition = new SpeechRecognition();
-            this.recognition.lang = 'pt-BR';
-            this.recognition.interimResults = true;
-            this.recognition.continuous = true;
-
-            this.recognition.onresult = (event: any) => this.onSucessVoice(event);
-            this.recognition.onerror = (event: any) => {
-                console.error("Erro no reconhecimento de voz:", event.error);
-            };
-
-        } else {
-            console.error("API de Reconhecimento de Voz não é suportada neste navegador.");
-        }
-    }
-
-    private onSucessVoice(event: any) {
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-
-            if (event.results[i].isFinal) {
-
-                const transcript = event.results[i][0].transcript.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-
-                console.info("Comando reconhecido:", transcript);
-
-                if (transcript.startsWith(this.activationWord)) {
-                    const command = transcript.replace(this.activationWord, "").trim();
-                    this.processCommand(command);
-
-                } else {
-                    console.info(`Aguardando a palavra-chave "${this.activationWord}" para ativar.`);
-                }
-
-            }
-        }
 
     }
 
-    private processCommand(phrase: string) {
 
-        const words = phrase.toLowerCase().split(" ");
-        let current = this.commands as any;
-
-        for (let i = 0; i < words.length; i++) {
-
-            let word = words[i];
-            if (current[word]) {
-                current = current[word];
-                if ((i + 1) === words.length && typeof current === "function") {
-                    current();
-                    return;
-                }
-
-            } else if (typeof current === "function") {
-
-                current(words.slice(i, words.length).join(' '));
-                return;
-            }
-        }
-
-        //console.error("Comando não encontrado.");
-
-    }
-
-    private startRecognition(ev: MouseEvent) {
-
-        let el = ev.target as HTMLElement;
-        if (el.tagName.toLocaleLowerCase() !== 'mic-command') {
-            el = el.closest('mic-command') as HTMLElement;
-        }
-
-        if (el.classList.contains('active')) {
-            el.classList.remove('active');
-
-            if (this.recognition) this.recognition.stop();
-
-        } else {
-            el.classList.add('active');
-
-
-            this.recognition.start();
-            console.log("Aguardando comando de voz...");
-        }
-    }
 
 
 }
 
-interface IInfoElCholdren {
+interface IInfoElChildren {
     el: IcaLitElementBaseMethods,
-    children: IInfoElCholdren[]
+    children: IInfoElChildren[]
 }
 
 if (!customElements.get('plugin-page-navigation-100554')) {

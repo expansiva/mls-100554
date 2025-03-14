@@ -22,6 +22,13 @@ plugin-page-navigation-100554 {
 
     }
 
+    .dragging {
+      opacity: 0.5;
+    }
+    .drop-target {
+      background: #d3f9d8;
+    }
+
     ul li .header {
         border: 1px solid transparent;
         padding: .4rem;
@@ -31,40 +38,6 @@ plugin-page-navigation-100554 {
     ul li .header:hover {
         border: 1px solid #d4d4d4;
 
-    }
-
-    ul li .header .dragDropcontainer {
-        display: none;
-        gap: 0.5rem;
-    }
-
-    ul li .header.overdragdrop {
-        display: flex !important;
-        justify-content: space-between;
-    }
-
-    ul li .header.overdragdrop .dragDropcontainer {
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    ul li .header .dragDropcontainer span {
-        display: none;
-        justify-content: center;
-        align-items: center;
-        width: 20px;
-    }
-
-    ul li .header .dragDropcontainer.b .dbefore {
-        display: flex !important;
-    }
-
-    ul li .header .dragDropcontainer.i .din {
-        display: flex !important;
-    }
-
-    ul li .header .dragDropcontainer.a .dAfter {
-        display: flex !important;
     }
 
     ul li div.activeBranch {
