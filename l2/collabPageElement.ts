@@ -29,6 +29,12 @@ export abstract class CollabPageElement extends IcaLitElement {
 
     public isPage = true;
 
+    public recreateOverlay() {
+        this.overlay?.remove();
+        this.overlay = undefined;
+        this.createOverlay();
+    }
+
     public refreshOverlay() {
         this.checkToAddOverlay();
     }
