@@ -6,9 +6,7 @@ import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { ServiceBase } from './_100554_serviceBase'
 import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
-
-
-export const initServicePreviewView = '';
+import { IcaLitElement } from './_100554_icaLitElement';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -37,8 +35,9 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
+
 @customElement('service-preview-view-100554')
-export class ServicePreviewView extends LitElement {
+export class ServicePreviewView extends IcaLitElement {
 
     public infoIca: any;
 
@@ -71,16 +70,16 @@ export class ServicePreviewView extends LitElement {
     @property() lastCompiledUrl: string = '';
 
     @property() widthP: string = '300';
-    @property() heightP: string = '600';
 
-    //-----------EVENTS-----------------
+    @property() heightP: string = '600';
 
     private setEventsCollab(): void {
         mls.events.addListener(2, 'WidgetAction', this.onWidgetActionEvents.bind(this));
     }
 
-    //---------COMPONENTS---------------
-
+    createRenderRoot() {
+        return this;
+    }
 
     connectedCallback() {
         super.connectedCallback();
@@ -111,15 +110,9 @@ export class ServicePreviewView extends LitElement {
         this.watch = this.father.watch;
 
         if (this.mode === 'mobile') {
-            this.style.cssText = `
-                width:100%;
-                height:100vh;
-                min-height:700px;
-                display: flex!important;
-                flex-direction: column;
-                align-items: center;
-                padding-top:.5rem;
-            `;
+
+            this.classList.remove('desktop');
+            this.classList.add('mobile');
             return html` 
                 
                 <div class="groupSetMobile">
@@ -141,16 +134,13 @@ export class ServicePreviewView extends LitElement {
                 </div>
                 
             `
-            // ?t=${Date.now()}
+
         } else {
 
-            this.style.cssText = `
-                display: block;
-                width: 100%;
-                height: 100%;
-            `;
+            this.classList.add('desktop');
+            this.classList.remove('mobile');
+
             return html`
-            
             <iframe
                 style="width:100%; height:100%; border:none; display:none" src="/_100554_servicePreview"
                 @load="${this.load}" >
@@ -181,8 +171,8 @@ export class ServicePreviewView extends LitElement {
 
     private selectIdinPreview(id: string, origin: 'editor' | 'preview'): void {
 
-        if (!id || !this.shadowRoot) return;
-        const iframe = this.shadowRoot.querySelector('iframe');
+        if (!id) return;
+        const iframe = this.querySelector('iframe');
         if (!iframe || !iframe.contentDocument) return;
 
         if (origin !== 'editor') return;
@@ -204,8 +194,8 @@ export class ServicePreviewView extends LitElement {
 
     private findElementsStartingWithIca(id: string): Element | undefined {
 
-        if (!id || !this.shadowRoot) return undefined;
-        const iframe = this.shadowRoot.querySelector('iframe');
+        if (!id) return undefined;
+        const iframe = this.querySelector('iframe');
         if (!iframe || !iframe.contentDocument) return undefined;
         const doc = iframe.contentDocument;
         let elements: Element[] = [];
@@ -238,8 +228,7 @@ export class ServicePreviewView extends LitElement {
     }
 
     private fireChangeICA(): void {
-        if (!this.shadowRoot) return;
-        const iframe = this.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
+        const iframe = this.querySelector('iframe') as HTMLIFrameElement;
         if (!iframe || !iframe.contentDocument) return;
         this.changeLevelIca(iframe.contentDocument.body);
     }
@@ -275,9 +264,9 @@ export class ServicePreviewView extends LitElement {
     }
 
     private load(): void {
+
         this.showLoader(true);
-        if (!this.shadowRoot) return;
-        const iframe = this.shadowRoot.querySelector('iframe') as HTMLIFrameElement;
+        const iframe = this.querySelector('iframe') as HTMLIFrameElement;
         const head = iframe.contentDocument?.querySelector('head');
         if (head) {
             const base = document.createElement('base');
@@ -288,6 +277,7 @@ export class ServicePreviewView extends LitElement {
         window.preview.iframe = iframe;
         const collabConsole = this.parentElement?.querySelector('collab-console-100554') as HTMLElement;
         (collabConsole as any).scope = iframe.contentWindow;
+
     }
 
     private async init(iframe: HTMLIFrameElement) {
@@ -311,12 +301,23 @@ export class ServicePreviewView extends LitElement {
             await this.setHTml(iframe);
             iframe.style.display = '';
             const html = iframe.contentDocument?.querySelector('html');
-            if (html) html.lang = this.lang;
-            if (iframe.contentDocument) iframe.contentDocument.body.style.paddingTop = '55px';
-            this.showLoader(false);
 
+            if (html) {
+                html.lang = this.lang;
+                html.style.overflow = 'hidden';
+                html.style.height = '100%';
+            }
+
+            if (iframe.contentDocument) {
+                iframe.contentDocument.body.style.paddingTop = '55px';
+                iframe.contentDocument.body.style.overflow = 'auto';
+                iframe.contentDocument.body.style.margin = '0';
+                iframe.contentDocument.body.style.height = 'calc(100% - 55px)';
+            }
+
+            this.showLoader(false);
             this.dispatchEvent(new CustomEvent('preview-loaded', {
-                detail: { shortName: this.models.ts?.storFile.shortName , project: this.models.ts?.storFile.project },
+                detail: { shortName: this.models.ts?.storFile.shortName, project: this.models.ts?.storFile.project },
                 bubbles: true,
                 composed: true,
             }));
@@ -385,7 +386,6 @@ export class ServicePreviewView extends LitElement {
         this.isService = this.checkIfIsService()
         this.lastHTML = txt;
 
-        iframe.contentDocument.body.style.paddingTop = '10px';
         (iframe.contentDocument.body as any)['service'] = this.father;
 
         let ret;
@@ -408,14 +408,10 @@ export class ServicePreviewView extends LitElement {
     }
 
     private async getFileContent(): Promise<string> {
+
         let txt = '<h3>' + this.msg.configure + '</h3>';
-
-        if (this.file && this.file.getValueInfo)
-            txt = (await this.file.getValueInfo()).content as string;
-
-        if (this.file && txt === null)
-            txt = await this.file.getContent() as string;
-
+        if (this.file && this.file.getValueInfo) txt = (await this.file.getValueInfo()).content as string;
+        if (this.file && txt === null) txt = await this.file.getContent() as string;
         return txt;
 
     }
@@ -448,7 +444,6 @@ export class ServicePreviewView extends LitElement {
                     script.onload = resolve;
                     script.onerror = reject;
                     ifr.contentDocument?.body.appendChild(script);
-
                 });
             };
 
@@ -459,9 +454,7 @@ export class ServicePreviewView extends LitElement {
             return nextScript;
         }
 
-
         try {
-
 
             if (info.importsJs.length <= 0 || !ifr.contentDocument) return;
             const s = document.createElement('script') as HTMLScriptElement;
@@ -498,7 +491,6 @@ export class ServicePreviewView extends LitElement {
             this.addTooltip(ifr);
             this.addStyleMls(ifr);
             this.addNav3(ifr);
-
         }
     }
 
@@ -607,12 +599,9 @@ export class ServicePreviewView extends LitElement {
     private mountCSS(ifr: HTMLIFrameElement): void {
         try {
             if (!ifr.contentDocument) return;
-            let cls = '';
-            if (this.mode === 'mobile') cls = this.scrollMobile;
             const style = document.createElement('style');
-            style.textContent = ' \n' + cls;
             ifr.contentDocument.body.className = 'scroll-custom';
-            ifr.contentDocument.body.style.width = '98%';
+            ifr.contentDocument.body.style.width = '100%';
             ifr.contentDocument.body.appendChild(style);
         } catch (e: any) {
             console.info('Error mountCSS: ' + e.message);
@@ -666,7 +655,7 @@ export class ServicePreviewView extends LitElement {
     public cleanTree(): string {
 
         let ret = '';
-        const iframe = this.shadowRoot?.querySelector('iframe');
+        const iframe = this.querySelector('iframe');
         if (!iframe) return '';
         const div = document.createElement('div');
         const divRet = document.createElement('div');
@@ -720,8 +709,8 @@ export class ServicePreviewView extends LitElement {
             } else {
                 this.cleanTree3(father, child as HTMLElement);
             }
-
         }
+
     }
 
 
