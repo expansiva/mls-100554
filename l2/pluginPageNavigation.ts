@@ -7,6 +7,7 @@ import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
 import { execute as executeDel } from './_100554_wcdCommandDel';
 import { move } from './_100554_wcdCommandMove';
+import { canMoveElement } from './_100554_icaBaseDescription2';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -123,7 +124,7 @@ export class PluginPageNavigation extends PluginBaseModule {
                     @dragstart=${(e: DragEvent) => this.handleDragStart(e, item)}
                     @dragover=${(e: DragEvent) => this.handleDragOver(e, item, e.currentTarget as HTMLElement)}
                     @dragleave=${(e: DragEvent) => this.handleDragLeave(e, e.currentTarget as HTMLElement)}
-                    @drop=${this.handleDrop}
+                    @drop=${(e: DragEvent) => this.handleDrop(e, e.currentTarget as HTMLElement)}
                     
                 >
                     <info-item .info=${item}>
@@ -343,6 +344,8 @@ export class PluginPageNavigation extends PluginBaseModule {
         event.preventDefault();
         event.dataTransfer!.dropEffect = 'move';
 
+        if (!this.draggedItem) return;
+
         const rect = element.getBoundingClientRect();
         const offsetY = event.clientY - rect.top;
         const height = rect.height;
@@ -350,24 +353,29 @@ export class PluginPageNavigation extends PluginBaseModule {
         const li = element.closest('li');
         if (!li) return;
 
-        if (offsetY < (height * 0.3)) {
+        const parentICA = item.el.getIcaParent(item.el);
+
+        if (offsetY < (height * 0.3) && parentICA) {
+            const canMove = canMoveElement(this.draggedItem?.el.tagName, parentICA.tagName)
             this.dropPosition = 'above';
             element.style.border = "";
             li.style.border = "";
-            li.style.borderTop = "2px solid blue";
+            li.style.borderTop = "2px solid " + (canMove?'blue':'red');
 
 
-        } else if (offsetY > (height * 0.6)) {
+        } else if (offsetY > (height * 0.6) && parentICA) {
+            const canMove = canMoveElement(this.draggedItem?.el.tagName, parentICA.tagName)
             this.dropPosition = 'below';
             element.style.border = "";
             li.style.border = "";
-            li.style.borderBottom = "2px solid blue";
+            li.style.borderBottom = "2px solid " + (canMove?'blue':'red');
 
 
         } else {
+            const canMove = canMoveElement(this.draggedItem?.el.tagName, item.el.tagName)
             this.dropPosition = 'inside';
             li.style.border = "";
-            element.style.border = "2px solid blue";
+            element.style.border = "2px solid "+ (canMove?'blue':'red');
         }
 
         this.dropTarget = item;
@@ -377,12 +385,11 @@ export class PluginPageNavigation extends PluginBaseModule {
     private handleDragLeave(event: DragEvent, element: HTMLElement) {
 
         const li = element.closest('li');
-        if (!li) return;
-        li.style.border = "";
+        if (li) li.style.border = "";
         element.style.border = "";
     }
 
-    private handleDrop(event: DragEvent) {
+    private handleDrop(event: DragEvent, element: HTMLElement) {
 
         try {
 
@@ -396,8 +403,6 @@ export class PluginPageNavigation extends PluginBaseModule {
             console.info(e.message);
 
         } finally {
-
-            const element = event.target as HTMLElement;
             element.style.border = "";
 
             const li = element.closest('li');
