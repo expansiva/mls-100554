@@ -86,7 +86,7 @@ export class PluginSiteMonitorDashboardResponseTime extends PluginBaseModule {
                 .replace(/>/g, "&gt;");
         }
 
-        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" datasource="${escapeHTML(data)}"></wc-chart-100554>`;
+        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" data="${escapeHTML(data)}"></wc-chart-100554>`;
 
     }
 
