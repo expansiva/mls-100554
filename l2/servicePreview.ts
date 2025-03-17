@@ -10,10 +10,9 @@ import { globalState, setState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
 import { getScriptTest } from './_100554_libProcessTest';
-import { ICANTest, TsTestAst } from './_100554_tsTestAST';
+import { TsTestAst } from './_100554_tsTestAST';
 import './_100554_collabConsole';
 import './_100554_collabResultTest';
-
 import './_100554_servicePreviewView';
 
 /// **collab_i18n_start**
@@ -77,6 +76,8 @@ export class ServicePreview100554 extends ServiceBase {
     @property() light: boolean = true;
     @property() lang: string = 'en';
 
+    @query('#preview-container') previewContent: HTMLElement | undefined;
+
     private msg: MessageType = messages['en'];
 
     private lastMode: number = EPreview.icPreviewD;
@@ -127,7 +128,6 @@ export class ServicePreview100554 extends ServiceBase {
         else if (op === 'opResultHTML') this.showEditorHTML();
         else if (op === 'opResultJS') this.showResultJS();
         else if (op === 'opResultTSTest') this.showResultTestJS();
-
     }
 
     public onClickTabs(index: number) {
@@ -237,14 +237,11 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onServiceClick(visible: boolean, reinit: boolean) {
 
-
-
         if (this.elPreview) {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
         } else {
             this.onReloader();
-
         }
     }
 
@@ -252,14 +249,10 @@ export class ServicePreview100554 extends ServiceBase {
 
     private setEvents() {
 
-        mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => {
-            this.onModelHTMLCreated(ev);
-        });
-
+        mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => { this.onModelHTMLCreated(ev); });
         mls.events.addEventListener([2, 5], ['FileAction'], this.onMLSFileAction.bind(this));
         mls.events.addListener(2, 'styleChanged' as any, this.onStyleChanged.bind(this));
         mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
-
         mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['LevelChanged'] as any, this.onLevelChange.bind(this));
 
     }
@@ -327,7 +320,6 @@ export class ServicePreview100554 extends ServiceBase {
             if (this.watch) {
                 this.onReloader();
             }
-
         }
 
     }
@@ -378,14 +370,10 @@ export class ServicePreview100554 extends ServiceBase {
                 return;
             }
 
-
-
             if (fileAction.action === 'open') {
                 this.loading = true;
                 return;
             }
-
-
 
             if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
 
@@ -409,7 +397,7 @@ export class ServicePreview100554 extends ServiceBase {
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        return html``;
+        return html`<div style="height:100%;" id="preview-container"></div>`;
     }
 
     async firstUpdated() {
@@ -420,13 +408,6 @@ export class ServicePreview100554 extends ServiceBase {
         this.setTheme();
         this.setTest();
         this.configureButtonsRight(false);
-    }
-
-    private configureButtonsRight(enabled: boolean) {
-        const buttonsR = this.nav3Service?.querySelector('collab-nav-3-menu .tools') as HTMLElement;
-        if (!buttonsR) return;
-        buttonsR.style.opacity = enabled ? '1' : '.2';
-        buttonsR.style.pointerEvents = enabled ? 'all' : 'none';
     }
 
     updated(changedProperties: Map<string | number | symbol, unknown>): void {
@@ -449,6 +430,13 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     // -------------- IMPLEMENTS-----------------
+
+    private configureButtonsRight(enabled: boolean) {
+        const buttonsR = this.nav3Service?.querySelector('collab-nav-3-menu .tools') as HTMLElement;
+        if (!buttonsR) return;
+        buttonsR.style.opacity = enabled ? '1' : '.2';
+        buttonsR.style.pointerEvents = enabled ? 'all' : 'none';
+    }
 
     private opAboutWCD() {
 
@@ -927,7 +915,7 @@ export class ServicePreview100554 extends ServiceBase {
         const container = document.createElement('div');
         container.style.display = 'flex';
         container.style.flexDirection = 'column';
-        container.style.height = this.style.height;
+        container.style.height = '100%'; // this.style.height;
 
         const doc = document.createElement('service-preview-view-100554');
         doc.setAttribute('page', fullname);
@@ -947,7 +935,11 @@ export class ServicePreview100554 extends ServiceBase {
         const testResultEl = this.createTestElement();
         container.appendChild(testResultEl);
 
-        if (this.menu.setMode) this.menu.setMode('page', container);
+        if (!this.previewContent) return;
+        this.previewContent.innerHTML = '';
+        this.previewContent.appendChild(container);
+
+        // if (this.menu.setMode) this.menu.setMode('page', container);
         this.configureButtonsRight(true);
         mls.events.fire(3, 'WCDEventChange' as any);
         return true;
