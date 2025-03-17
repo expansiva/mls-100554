@@ -77,10 +77,6 @@ export class ServicePreviewView extends IcaLitElement {
         mls.events.addListener(2, 'WidgetAction', this.onWidgetActionEvents.bind(this));
     }
 
-    createRenderRoot() {
-        return this;
-    }
-
     connectedCallback() {
         super.connectedCallback();
         this.setEventsCollab();
@@ -309,10 +305,13 @@ export class ServicePreviewView extends IcaLitElement {
             }
 
             if (iframe.contentDocument) {
-                iframe.contentDocument.body.style.paddingTop = '55px';
-                iframe.contentDocument.body.style.overflow = 'auto';
+                iframe.contentDocument.body.style.padding = '35px';
+                iframe.contentDocument.body.style.overflowY = 'auto';
+                iframe.contentDocument.body.style.overflowX = 'hidden';
                 iframe.contentDocument.body.style.margin = '0';
-                iframe.contentDocument.body.style.height = 'calc(100% - 55px)';
+                iframe.contentDocument.body.style.height = 'calc(100% - 70px)';
+                iframe.contentDocument.body.style.width = 'calc(100% - 70px)';
+
             }
 
             this.showLoader(false);
@@ -713,114 +712,4 @@ export class ServicePreviewView extends IcaLitElement {
 
     }
 
-
-    static styles = css`
-        :host{
-            position:relative;
-        }
-
-        .watchDesktop{
-            position: absolute;
-            background: white;
-            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 2px 2px;
-            top: 3px;
-            right: 46px;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .groupSetMobile{
-            display:flex;
-            width:300px;
-            gap:.8rem;
-            justify-content: center;
-            align-items: center;
-            margin-bottom:1rem;
-        }
-
-        .groupSetMobile div{
-            display:flex;
-            flex-direction: column;
-            
-        }
-
-        .groupSetMobile label{
-            font-size:.8rem;
-            font-weight:bold;
-        }
-
-        .groupSetMobile input{
-            border:1px solid #cac7c7;
-            outline:none;
-            width:100px;
-            height:20px;
-            border-radius:5px;
-        }
-
-        .phone {
-            z-index: 1;
-            padding: 0 0.5rem;
-            border: 0.25rem solid #404040;
-            border-radius: 1rem;
-            display: flex;
-            flex-direction: column;
-            //box-shadow: 0.5rem 0.5rem rgba(0, 0, 0, 0.3);
-            box-shadow:0px 5px 3px 3px rgba(0, 0, 0, 0.3);
-            background:white;
-        }
-
-        .phone_mic {
-            height: 0.25rem;
-            width: 4rem;
-            margin: 1rem auto;
-            border-radius: 999rem;
-            background-color: #505050;
-        }
-
-        .phone_screen {
-            position: relative;
-            flex: 1 0 auto;
-            border: 1px solid #505050;
-            border-radius:5px;
-        }
-
-        .phone_screen iframe{
-            border-radius:5px;
-        }
-        
-        .phone_button {
-            width: 1.5rem;
-            height: 1.5rem;
-            border: 2px solid #505050;
-            border-radius: 50%;
-            margin: 1rem auto;
-        }
-    
-    `;
-
-    private scrollMobile = `
-        .scroll-custom::-webkit-scrollbar {
-            width: 5px;
-        }
-        .scroll-custom::-webkit-scrollbar-track {
-            background: #ddd;
-        }
-        .scroll-custom::-webkit-scrollbar-thumb {
-            background: #666;
-        }
-        .scroll-custom::scrollbar {
-            width: 2px;
-        }
-        .scroll-custom::scrollbar-track {
-            background: #ddd;
-        }
-        .scroll-custom::scrollbar-thumb {
-            background: #666;
-        };
-    `
 }
