@@ -3,10 +3,11 @@
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit';
+import { CollabLitElement } from './_100554_collabLitElement';
 
 
 @customElement('collab-tiles-item-100554')
-export class CollabTilesItem extends LitElement {
+export class CollabTilesItem extends CollabLitElement {
 
     private startX: number = 0;
     private startY: number = 0;
@@ -14,6 +15,7 @@ export class CollabTilesItem extends LitElement {
     private startHeight: number = 0;
 
     public myinfo: ITilesItem | undefined;
+    
 
     @property({ type: String, reflect: true }) position = '';
     @property({ type: String, reflect: true }) plugin = '';
@@ -79,10 +81,7 @@ export class CollabTilesItem extends LitElement {
             <collabtileitemcontent style="${this.mode !== 'plugin' ? 'display:none;' : 'height:100%; width:100%;overflow:hidden;'}">
             </collabtileitemcontent>
             ${aux}
-            <style>
 
-                ${this.myCss}
-            </style>
         `
 
     }
@@ -205,184 +204,7 @@ export class CollabTilesItem extends LitElement {
 
     }
 
-    private myCss = `
 
-        collab-tiles-item-100554{
-            position:relative;
-        }
-
-        collabtileitemresize{
-            content: ' ';
-            bottom: 0px;
-            right: 0px;
-            width:10px;
-            height:10px;
-            background:#fff;
-            border-radius:50%;
-            box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);
-            position: absolute;
-            transform: translate(40%, 40%);
-            cursor: se-resize;
-        }
-
-        collabtileenabled{
-            top: 0px;
-            left: 0px;
-            width:18px;
-            height:18px;
-            background:#fff;
-            border-radius:50%;
-            position: absolute;
-            transform: translate(-40%, -40%);
-            box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color:#000;
-        }
-
-        @-webkit-keyframes enter {
-            0% {
-                opacity: 0;
-                top: -10px;
-            }
-            5% {
-                opacity: 1;
-                top: 0px;
-            }
-            50.9% {
-                opacity: 1;
-                top: 0px;
-            }
-            55.9% {
-                opacity: 0;
-                top: 10px;
-            }
-        }
-        @keyframes enter {
-            0% {
-                opacity: 0;
-                top: -10px;
-            }
-            5% {
-                opacity: 1;
-                top: 0px;
-            }
-            50.9% {
-                opacity: 1;
-                top: 0px;
-            }
-            55.9% {
-                opacity: 0;
-                top: 10px;
-            }
-        }
-        @-moz-keyframes enter {
-            0% {
-                opacity: 0;
-                top: -10px;
-            }
-            5% {
-                opacity: 1;
-                top: 0px;
-            }
-            50.9% {
-                opacity: 1;
-                top: 0px;
-            }
-            55.9% {
-                opacity: 0;
-                top: 10px;
-            }
-        }
-        
-        collab-tiles-item-100554 .loader {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            background: #00000029;
-            padding: 1rem;
-            border-radius: 5px;
-            transform: translate(-50%, -50%);
-        }
-
-        collab-tiles-item-100554 .square {
-            background: white;
-            width: 15px;
-            height: 15px;
-            float: left;
-            top: -10px;
-            margin-right: 5px;
-            margin-top: 5px;
-            position: relative;
-            opacity: 0;
-            -webkit-animation: enter 6s infinite;
-            animation: enter 6s infinite;
-        }
-
-        collab-tiles-item-100554 .enter {
-            top: 0px;
-            opacity: 1;
-        }
-
-        collab-tiles-item-100554 .square:nth-child(1) {
-            -webkit-animation-delay: 1.8s;
-            -moz-animation-delay: 1.8s;
-            animation-delay: 1.8s;
-        }
-
-        collab-tiles-item-100554 .square:nth-child(2) {
-            -webkit-animation-delay: 2.1s;
-            -moz-animation-delay: 2.1s;
-            animation-delay: 2.1s;
-        }
-
-        collab-tiles-item-100554 .square:nth-child(3) {
-            -webkit-animation-delay: 2.4s;
-            -moz-animation-delay: 2.4s;
-            animation-delay: 2.4s;
-            background: #7e70d2;
-        }
-
-        collab-tiles-item-100554 .square:nth-child(4) {
-            -webkit-animation-delay: 0.9s;
-            -moz-animation-delay: 0.9s;
-            animation-delay: 0.9s;
-        }
-
-        collab-tiles-item-100554 .square:nth-child(5) {
-            -webkit-animation-delay: 1.2s;
-            -moz-animation-delay: 1.2s;
-            animation-delay: 1.2s;
-        }
-
-        collab-tiles-item-100554 .square:nth-child(6) {
-            -webkit-animation-delay: 1.5s;
-            -moz-animation-delay: 1.5s;
-            animation-delay: 1.5s;
-        }
-
-        collab-tiles-item-100554 .square:nth-child(8) {
-            -webkit-animation-delay: 0.3s;
-            -moz-animation-delay: 0.3s;
-            animation-delay: 0.3s;
-        }
-
-        collab-tiles-item-100554 .square:nth-child(9) {
-            -webkit-animation-delay: 0.6s;
-            -moz-animation-delay: 0.6s;
-            animation-delay: 0.6s;
-        }
-
-        collab-tiles-item-100554 .clear {
-            clear: both;
-        }
-
-        collab-tiles-item-100554 .last {
-            margin-right: 0;
-        }
-    `
 
 }
 

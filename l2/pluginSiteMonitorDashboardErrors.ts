@@ -85,7 +85,7 @@ export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
             }],
         }
         await this.updateComplete;
-        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" datasource=${JSON.stringify(this.chartData)}></wc-chart-100554>`;
+        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" data=${JSON.stringify(this.chartData)}></wc-chart-100554>`;
 
     }
 

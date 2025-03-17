@@ -1,12 +1,14 @@
 /// <mls shortName="collabTiles" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, LitElement, repeat } from 'lit';
+import { CollabLitElement } from './_100554_collabLitElement';
+
 import { customElement, property, query } from 'lit/decorators.js';
 import { getConfigProject, updateConfigProjectPlugins } from './_100554_libProjectConfig';
 import './_100554_collabTilesItem';
 import 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.3/Sortable.min.js';//https://github.com/SortableJS/Sortable/blob/master/Sortable.js
 @customElement('collab-tiles-100554')
-export class CollabTiles extends LitElement {
+export class CollabTiles extends CollabLitElement {
 
     @property({ type: String, reflect: true }) config = 'close';
 
@@ -40,7 +42,6 @@ export class CollabTiles extends LitElement {
             }) as any
         )}
             </collab-tiles>
-            <style>${this.myCss}</style>
         `;
     }
 
@@ -271,58 +272,6 @@ export class CollabTiles extends LitElement {
         this.tilesItens = Object.assign([], this.tilesItens);
     }
 
-    private myCss = `
-        collab-tiles-100554{
-            background-color: #bfc0edab;
-            display:block;
-            height: 100%;
-            padding:10px;
-        }
-
-        collab-tiles-100554 .collabtilesconfigiten{
-            background: none;
-            border: none;
-            box-shadow: none;
-            cursor:pointer;
-        }
-
-        collab-tiles-100554 .collabtilesconfigiten:hover{
-            background: none;
-            border: none;
-            box-shadow: none;
-            fill:#7d00ff;
-            color:#7d00ff;
-        }
-
-        collab-tiles-100554 collab-tiles{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            grid-auto-rows: 100px;
-            gap: 10px;
-        }
-
-        collab-tiles-100554 collab-tiles-item-100554{
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.2rem;
-            text-align: center;
-        }
-
-        
-        collab-tiles-100554.break-800 collab-tiles{
-            display:flex;
-            flex-direction:column;
-        }
-        collab-tiles-100554.break-800 collab-tiles-item-100554 {
-            grid-area: none !important;
-            height: 300px;
-        }
-        
-    `
 
 }
 

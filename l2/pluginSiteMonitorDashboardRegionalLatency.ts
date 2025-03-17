@@ -104,7 +104,7 @@ export class PluginSiteMonitorDashboardRegionalLatency extends PluginBaseModule 
                 .replace(/>/g, "&gt;");
         }
 
-        if (this.bar) this.bar.innerHTML = `<wc-chart-100554 renderer="svg" datasource="${escapeHTML(dataBar)}"></wc-chart-100554>`;
+        if (this.bar) this.bar.innerHTML = `<wc-chart-100554 renderer="svg" data="${escapeHTML(dataBar)}"></wc-chart-100554>`;
         // if (this.map) this.map.innerHTML = `<wc-chart-100554 renderer="svg" datasource="${escapeHTML(dataMap)}"></wc-chart-100554>`;
 
 
