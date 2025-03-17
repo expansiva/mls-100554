@@ -2,6 +2,7 @@
 
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { canMoveElement } from './_100554_icaBaseDescription2';
 
 
 export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMethods, pos: 'above' | 'below' | 'inside') {
@@ -11,6 +12,7 @@ export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMeth
 
     const father = target.parentElement as HTMLElement;
     const child = el.querySelector('#' + target.id);
+    const parentICA = target.getIcaParent(target);
 
     if (el === target || child) {
         throw new Error('Not possible move');
@@ -18,14 +20,13 @@ export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMeth
 
     switch (pos) {
         case 'above':
-            father.insertBefore(el, target);
+            insertAbove(father, el, target, parentICA);
             break;
         case 'below':
-            father.insertBefore(el, target.nextSibling);
+            insertBelow(father, el, target, parentICA);
             break;
         case 'inside':
-            const elIn = target.querySelector(target.widget || '');
-            if (elIn) elIn.appendChild(el);
+            insertInside(el, target);
             break;
         default:
             '';
@@ -33,5 +34,32 @@ export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMeth
 
     dispatchEventConciliate();
     page.recreateOverlay();
+
+}
+
+function insertAbove(father: HTMLElement, el: HTMLElement, target: HTMLElement, parentICA: IcaLitElementBaseMethods | undefined) {
+
+    if (!parentICA) return;
+    const canMove = canMoveElement(el.tagName, parentICA.tagName);
+    if (!canMove) throw new Error('Movement not permitted');
+    father.insertBefore(el, target);
+
+}
+
+function insertBelow(father: HTMLElement, el: HTMLElement, target: HTMLElement, parentICA: IcaLitElementBaseMethods | undefined) {
+
+    if (!parentICA) return;
+    const canMove = canMoveElement(el.tagName, parentICA.tagName);
+    if (!canMove) throw new Error('Movement not permitted');
+    father.insertBefore(el, target.nextSibling);
+
+}
+
+function insertInside(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMethods) {
+
+    const canMove = canMoveElement(el.tagName, target.tagName);
+    if (!canMove) throw new Error('Movement not permitted');
+    const elIn = target.querySelector(target.widget || '');
+    if (elIn) elIn.appendChild(el);
 
 }
