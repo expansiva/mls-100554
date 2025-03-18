@@ -2513,6 +2513,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             let modelValue = model.getValue();
 
             const ok = await mls.l2.typescript.compileAndPostProcess(modelBase, false, true);
+
+            console.info('compile result: ' + ok);
             // const ok = await mls.l2.typescript.compile(modelBase);
             let hasError = ok === false;
             storFile.hasError = hasError;
