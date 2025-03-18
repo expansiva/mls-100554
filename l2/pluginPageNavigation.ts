@@ -33,8 +33,6 @@ export class PluginPageNavigation extends PluginBaseModule {
     constructor() {
         super();
         this.setEvents();
-
-        //this.setVoice()
     }
 
     private setEvents(): void {
@@ -74,7 +72,6 @@ export class PluginPageNavigation extends PluginBaseModule {
     }
 
     createNavigation(array: IInfoElChildren[]) {
-        //<mic-command @click="${this.startRecognition}"></mic-command>
         const obj = html`
             
             <ul>
@@ -125,6 +122,10 @@ export class PluginPageNavigation extends PluginBaseModule {
                     @dragover=${(e: DragEvent) => this.handleDragOver(e, item, e.currentTarget as HTMLElement)}
                     @dragleave=${(e: DragEvent) => this.handleDragLeave(e, e.currentTarget as HTMLElement)}
                     @drop=${(e: DragEvent) => this.handleDrop(e, e.currentTarget as HTMLElement)}
+
+                    @touchstart=${(e: TouchEvent) => this.handleTouchStart(e, item)}
+                    @touchmove=${(e: TouchEvent) => this.handleTouchMove(e, item, e.currentTarget as HTMLElement)}
+                    @touchend=${(e: TouchEvent) => this.handleTouchEnd(e, e.currentTarget as HTMLElement)}
                     
                 >
                     <info-item .info=${item}>
@@ -356,26 +357,26 @@ export class PluginPageNavigation extends PluginBaseModule {
         const parentICA = item.el.getIcaParent(item.el);
 
         if (offsetY < (height * 0.3) && parentICA) {
-            const canMove = canMoveElement(this.draggedItem?.el.tagName, parentICA.tagName)
+            const canMove = canMoveElement(this.draggedItem.el, parentICA)
             this.dropPosition = 'above';
             element.style.border = "";
             li.style.border = "";
-            li.style.borderTop = "2px solid " + (canMove?'blue':'red');
+            li.style.borderTop = "2px solid " + (canMove ? 'blue' : 'red');
 
 
         } else if (offsetY > (height * 0.6) && parentICA) {
-            const canMove = canMoveElement(this.draggedItem?.el.tagName, parentICA.tagName)
+            const canMove = canMoveElement(this.draggedItem.el, parentICA)
             this.dropPosition = 'below';
             element.style.border = "";
             li.style.border = "";
-            li.style.borderBottom = "2px solid " + (canMove?'blue':'red');
+            li.style.borderBottom = "2px solid " + (canMove ? 'blue' : 'red');
 
 
         } else {
-            const canMove = canMoveElement(this.draggedItem?.el.tagName, item.el.tagName)
+            const canMove = canMoveElement(this.draggedItem.el, item.el)
             this.dropPosition = 'inside';
             li.style.border = "";
-            element.style.border = "2px solid "+ (canMove?'blue':'red');
+            element.style.border = "2px solid " + (canMove ? 'blue' : 'red');
         }
 
         this.dropTarget = item;
@@ -398,7 +399,7 @@ export class PluginPageNavigation extends PluginBaseModule {
             move(this.draggedItem.el, this.dropTarget.el, this.dropPosition || 'below');
 
 
-        } catch (e:any) {
+        } catch (e: any) {
 
             console.info(e.message);
 
@@ -418,7 +419,32 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     }
 
+    private lasElementMove: undefined | HTMLElement;
 
+    private handleTouchStart(event: TouchEvent, item: IInfoElChildren) {
+        event.preventDefault();
+        this.draggedItem = item;
+    }
+
+    private handleTouchMove(event: TouchEvent, item: IInfoElChildren, element: HTMLElement) {
+        
+        event.preventDefault();
+
+        if (this.lasElementMove !== element) {
+            this.lasElementMove = element;
+            this.handleDragLeave(event as any, element);
+        }
+
+        this.handleDragOver(event as any, item, element as HTMLElement);
+        
+    }
+
+    private handleTouchEnd(event: TouchEvent, element: HTMLElement) {
+
+        event.preventDefault();
+        this.handleDrop(event as any, element);
+        
+    }
 
 
 }
