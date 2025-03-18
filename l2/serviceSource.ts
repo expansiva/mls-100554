@@ -1086,18 +1086,27 @@ export class ServiceSource100554 extends ServiceBase {
 
         modelBaseTS.storFile.hasError = false;
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
-            console.log('compile result: ' + ok);
+        console.log('compile result: ' + ok);
 
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
             const enhacementName = await getEnhancementName({ project, shortName }).catch((e) => undefined);
+            console.log('compile getEnhancementName: ' + enhacementName);
+
             if (enhacementName) {
                 const path = mls.l2.getPath(enhacementName);
                 const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => undefined);
+                console.log('compile enhancementInstance: ' + enhancementInstance);
+
                 if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
+                console.log('compile onAfterChange has Error: ' + modelBaseTS.storFile.hasError);
+
+
             }
 
             hasError = modelBaseTS.storFile.hasError;
+            console.log('compile result has Error: ' + hasError);
+
         }
 
         await this.changeStatusFile(modelBaseTS, modelBaseTS.storFile, modelBaseTS.compilerResults?.tripleSlashMLS?.variables, hasError, changed);
