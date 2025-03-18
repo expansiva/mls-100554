@@ -1096,7 +1096,7 @@ export class ServiceSource100554 extends ServiceBase {
             if (enhacementName) {
                 const path = mls.l2.getPath(enhacementName);
                 const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.log('Error on getEnhancementModule: '+ e.message); return undefined});
-                console.log('compile enhancementInstance: ' + enhancementInstance);
+                console.log('compile has enhancementInstance: ' + !!enhancementInstance);
 
                 if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
                 console.log('compile onAfterChange has Error: ' + modelBaseTS.storFile.hasError);
