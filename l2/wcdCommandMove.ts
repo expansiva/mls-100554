@@ -40,7 +40,7 @@ export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMeth
 function insertAbove(father: HTMLElement, el: HTMLElement, target: HTMLElement, parentICA: IcaLitElementBaseMethods | undefined) {
 
     if (!parentICA) return;
-    const canMove = canMoveElement(el.tagName, parentICA.tagName);
+    const canMove = canMoveElement(el as IcaLitElementBaseMethods, parentICA);
     if (!canMove) throw new Error('Movement not permitted');
     father.insertBefore(el, target);
 
@@ -49,7 +49,7 @@ function insertAbove(father: HTMLElement, el: HTMLElement, target: HTMLElement, 
 function insertBelow(father: HTMLElement, el: HTMLElement, target: HTMLElement, parentICA: IcaLitElementBaseMethods | undefined) {
 
     if (!parentICA) return;
-    const canMove = canMoveElement(el.tagName, parentICA.tagName);
+    const canMove = canMoveElement(el as IcaLitElementBaseMethods, parentICA);
     if (!canMove) throw new Error('Movement not permitted');
     father.insertBefore(el, target.nextSibling);
 
@@ -57,7 +57,7 @@ function insertBelow(father: HTMLElement, el: HTMLElement, target: HTMLElement, 
 
 function insertInside(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMethods) {
 
-    const canMove = canMoveElement(el.tagName, target.tagName);
+    const canMove = canMoveElement(el as IcaLitElementBaseMethods, target);
     if (!canMove) throw new Error('Movement not permitted');
     const elIn = target.querySelector(target.widget || '');
     if (elIn) elIn.appendChild(el);
