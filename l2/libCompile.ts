@@ -193,7 +193,7 @@ function getEnhacementName(file: { project: number, shortName: string }): string
 
 async function getEnhancementFromFetch(file: { project: number, shortName: string }) {
 
-    const url = `/_${file.project}_${file.shortName}`;
+    const url = `/_${file.project}_${file.shortName}?t=${Date.now()}`;
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
