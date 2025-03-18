@@ -123,8 +123,8 @@ export class PluginPageNavigation extends PluginBaseModule {
                     @dragleave=${(e: DragEvent) => this.handleDragLeave(e, e.currentTarget as HTMLElement)}
                     @drop=${(e: DragEvent) => this.handleDrop(e, e.currentTarget as HTMLElement)}
 
-                    @touchstart=${(e: TouchEvent) => this.handleTouchStart(e, item)}
-                    @touchmove=${(e: TouchEvent) => this.handleTouchMove(e, item, e.currentTarget as HTMLElement)}
+                    @touchstart=${(e: TouchEvent) => this.handleTouchStart(e, item, e.currentTarget as HTMLElement)}
+                    @touchmove=${(e: TouchEvent) => this.handleTouchMove(e, item)}
                     @touchend=${(e: TouchEvent) => this.handleTouchEnd(e, e.currentTarget as HTMLElement)}
                     
                 >
@@ -421,19 +421,29 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     }
 
-    private lasElementMove: undefined | HTMLElement;
+    private lastElementMove: undefined | HTMLElement;
 
-    private handleTouchStart(event: TouchEvent, item: IInfoElChildren) {
+    private handleTouchStart(event: TouchEvent, item: IInfoElChildren, el:HTMLElement) {
         event.preventDefault();
+        el.click();
         this.draggedItem = item;
     }
 
-    private handleTouchMove(event: TouchEvent, item: IInfoElChildren, element: HTMLElement) {
-        
+    private handleTouchMove(event: TouchEvent, item: IInfoElChildren) {
+
         event.preventDefault();
 
-        if (this.lasElementMove !== element) {
-            this.lasElementMove = element;
+        const touch = event.touches[0];
+        let element = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
+
+        if (element && !element.classList.contains('header')) {
+            element = element.closest('.header') as HTMLElement;
+        }
+
+        if (!element) return;
+
+        if (this.lastElementMove !== element) {
+            this.lastElementMove = element;
 
             const li = element.closest('li');
             if (li) li.style.border = "";
@@ -441,15 +451,14 @@ export class PluginPageNavigation extends PluginBaseModule {
         }
 
         this.handleDragOver(event as any, item, element as HTMLElement);
-        
+
     }
 
     private handleTouchEnd(event: TouchEvent, element: HTMLElement) {
 
         event.preventDefault();
-        console.info('aqui');
         this.handleDrop(event as any, element);
-        
+
     }
 
 
