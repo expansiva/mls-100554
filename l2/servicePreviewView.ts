@@ -288,6 +288,10 @@ export class ServicePreviewView extends IcaLitElement {
                 || this.models.style?.storFile.hasError
                 || this.models.html?.storFile.hasError) {
 
+                console.log('Errors in html:' + this.models?.html?.storFile.hasError);
+                console.log('Errors in style:' + this.models?.style?.storFile.hasError);
+                console.log('Errors in ts:' + this.models?.ts?.storFile.hasError);
+
                 this.error = this.msg.errorCompile;
                 this.showLoader(false);
                 this.renderError();
@@ -394,6 +398,7 @@ export class ServicePreviewView extends IcaLitElement {
 
         iframe.contentDocument.body.innerHTML = txt;
         ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
+
         if (ret.errors.length > 0) {
             this.father.setError(`Error(${ret.errors.length}) when compiling:${ret.errors[0].error}`);
             console.log('Errors in compile:', JSON.stringify(ret.errors));
