@@ -343,7 +343,7 @@ export class PluginPageNavigation extends PluginBaseModule {
 
         event.stopPropagation();
         event.preventDefault();
-        event.dataTransfer!.dropEffect = 'move';
+        //event.dataTransfer!.dropEffect = 'move';
 
         if (!this.draggedItem) return;
 
