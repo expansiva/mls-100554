@@ -396,7 +396,7 @@ export class ServicePreviewView extends IcaLitElement {
         ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
         if (ret.errors.length > 0) {
             this.father.setError(`Error(${ret.errors.length}) when compiling:${ret.errors[0].error}`);
-            console.info('Errors in compile', ret.errors)
+            console.log('Errors in compile', ret.errors)
         }
 
         this.mountJSImporMap(ret, iframe);
