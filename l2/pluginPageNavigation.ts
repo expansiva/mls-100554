@@ -440,8 +440,10 @@ export class PluginPageNavigation extends PluginBaseModule {
             element = element.closest('.header') as HTMLElement;
         }
 
-        if (!element) return;
+        if (!element || !(element as any).info) return;
 
+        item = (element as any).info;
+        
         if (this.lastElementMove !== element) {
             this.lastElementMove = element;
 
