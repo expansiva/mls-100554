@@ -195,9 +195,12 @@ async function getEnhancementFromFetch(file: { project: number, shortName: strin
 
     const url = `/_${file.project}_${file.shortName}`;
     const txt = await (await fetch(url)).text();
-    const lines = txt.split('\n');
+    const lines = txt.split('\n')
+
 
     const mlsLine = lines.find(line => line.trim().startsWith('/// <mls '));;
+
+    console.log('mlsLine' + mlsLine)
 
     if (!mlsLine) {
         throw new Error(`Not found tag <mls> in ${url}`);
