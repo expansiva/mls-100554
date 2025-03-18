@@ -335,7 +335,7 @@ export class PluginPageNavigation extends PluginBaseModule {
     private handleDragStart(event: DragEvent, item: IInfoElChildren) {
         event.stopPropagation();
         this.draggedItem = item;
-        event.dataTransfer!.effectAllowed = 'move';
+        //event.dataTransfer!.effectAllowed = 'move';
         setTimeout(() => this.requestUpdate(), 0);
     }
 
