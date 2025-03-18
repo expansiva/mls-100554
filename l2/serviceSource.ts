@@ -1083,8 +1083,10 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (!modelBaseTS.storFile) throw new Error('Invalid stor file');
         const { project, shortName } = modelBaseTS.storFile;
+
         modelBaseTS.storFile.hasError = false;
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
+            console.log('compile result: ' + ok);
 
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
@@ -2510,11 +2512,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         clearTimeout(this._onChangedContentTsTest);
         this._onChangedContentTsTest = window.setTimeout(async () => {
+
             let modelValue = model.getValue();
 
             const ok = await mls.l2.typescript.compileAndPostProcess(modelBase, false, true);
 
-            console.log('compile result: ' + ok);
+
             // const ok = await mls.l2.typescript.compile(modelBase);
             let hasError = ok === false;
             storFile.hasError = hasError;
