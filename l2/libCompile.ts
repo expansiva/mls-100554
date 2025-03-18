@@ -194,13 +194,15 @@ function getEnhacementName(file: { project: number, shortName: string }): string
 async function getEnhancementFromFetch(file: { project: number, shortName: string }) {
 
     const url = `/_${file.project}_${file.shortName}`;
-    const txt = await (await fetch(url)).text();
-    const lines = txt.split('\n')
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+    }
+    const txt = await response.text();
+    const lines = txt.replace(/\r\n/g, '\n').split('\n');
 
 
     const mlsLine = lines.find(line => line.trim().startsWith('/// <mls '));;
-
-    console.log('mlsLine' + mlsLine)
 
     if (!mlsLine) {
         throw new Error(`Not found tag <mls> in ${url}`);
