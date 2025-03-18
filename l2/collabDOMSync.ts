@@ -7,58 +7,7 @@ export function sync() {
     if (!model) return;
     const newHTMLOnlyICA = clearTree(window.preview.iframe)
     const formatedNewHTML = formatHtml(newHTMLOnlyICA);
-    const formatedOldHTML = formatHtml(model.getValue());
-    const formatedNewHTMLArr = formatedNewHTML.split('\n');
-    const formatedOldHTMLArr = formatedOldHTML.split('\n');
-
-    if (formatedNewHTMLArr.length === formatedOldHTMLArr.length) {
-        const diffs = getDiffs(formatedOldHTMLArr, formatedNewHTMLArr);
-        applyDiffs(model, diffs);
-    } else {
-        setValueInModeKeepingUndo2(model, formatedNewHTML);
-    }
-}
-
-function getDiffs(originalLines: string[], modifiedLines: string[]) {
-    const diffs: IDiffs[] = [];
-    originalLines.forEach((line, index) => {
-        if (line !== modifiedLines[index]) {
-            diffs.push({
-                lineNumber: index + 1,
-                originalLine: line,
-                modifiedLine: modifiedLines[index]
-            });
-        }
-    });
-    return diffs;
-}
-
-function applyDiffs(originalModel: monaco.editor.ITextModel, diffs: IDiffs[]) {
-
-    const editor = window.preview.editor;
-    if (!editor) throw new Error('No find editor');
-    editor.setModel(originalModel);
-    const edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
-
-    diffs.forEach(diff => {
-        if (!diff.lineNumber) return;
-        const lines = originalModel.getLineCount();
-        let lineContent = 0;
-
-        if (diff.lineNumber <= lines) lineContent = originalModel.getLineLength(diff.lineNumber);
-        else lineContent = diff.modifiedLine?.length || 0;
-
-        let range: monaco.Range;
-        range = new monaco.Range(diff.lineNumber, 1, diff.lineNumber, lineContent + 1)
-        const edit: monaco.editor.IIdentifiedSingleEditOperation = {
-            range,
-            text: diff.modifiedLine || '',
-            forceMoveMarkers: true,
-        }
-        edits.push(edit);
-    });
-
-    editor.executeEdits('my-source', edits);
+    setValueInModeKeepingUndo2(model, formatedNewHTML);
 
 }
 
@@ -130,6 +79,49 @@ export function formatHtml(html: string) {
         .join('\n');
 
     return result;
+}
+
+function getDiffs(originalLines: string[], modifiedLines: string[]) {
+    const diffs: IDiffs[] = [];
+    originalLines.forEach((line, index) => {
+        if (line !== modifiedLines[index]) {
+            diffs.push({
+                lineNumber: index + 1,
+                originalLine: line,
+                modifiedLine: modifiedLines[index]
+            });
+        }
+    });
+    return diffs;
+}
+
+function applyDiffs(originalModel: monaco.editor.ITextModel, diffs: IDiffs[]) {
+
+    const editor = window.preview.editor;
+    if (!editor) throw new Error('No find editor');
+    editor.setModel(originalModel);
+    const edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
+
+    diffs.forEach(diff => {
+        if (!diff.lineNumber) return;
+        const lines = originalModel.getLineCount();
+        let lineContent = 0;
+
+        if (diff.lineNumber <= lines) lineContent = originalModel.getLineLength(diff.lineNumber);
+        else lineContent = diff.modifiedLine?.length || 0;
+
+        let range: monaco.Range;
+        range = new monaco.Range(diff.lineNumber, 1, diff.lineNumber, lineContent + 1)
+        const edit: monaco.editor.IIdentifiedSingleEditOperation = {
+            range,
+            text: diff.modifiedLine || '',
+            forceMoveMarkers: true,
+        }
+        edits.push(edit);
+    });
+
+    editor.executeEdits('my-source', edits);
+
 }
 
 function clearTree(iframe: HTMLIFrameElement): string {
