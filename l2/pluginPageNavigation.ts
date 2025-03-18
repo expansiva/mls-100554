@@ -339,7 +339,7 @@ export class PluginPageNavigation extends PluginBaseModule {
         setTimeout(() => this.requestUpdate(), 0);
     }
 
-    private handleDragOver(event: DragEvent, item: IInfoElChildren, element: HTMLElement) {
+    private handleDragOver(event: DragEvent | TouchEvent, item: IInfoElChildren, element: HTMLElement) {
 
         event.stopPropagation();
         event.preventDefault();
@@ -347,8 +347,10 @@ export class PluginPageNavigation extends PluginBaseModule {
 
         if (!this.draggedItem) return;
 
+        let clientY = 'clientY' in event ? event.clientY : event.touches[0].clientY;
+
         const rect = element.getBoundingClientRect();
-        const offsetY = event.clientY - rect.top;
+        const offsetY = clientY - rect.top;
         const height = rect.height;
 
         const li = element.closest('li');
@@ -432,7 +434,10 @@ export class PluginPageNavigation extends PluginBaseModule {
 
         if (this.lasElementMove !== element) {
             this.lasElementMove = element;
-            this.handleDragLeave(event as any, element);
+
+            const li = element.closest('li');
+            if (li) li.style.border = "";
+            element.style.border = "";
         }
 
         this.handleDragOver(event as any, item, element as HTMLElement);
@@ -442,6 +447,7 @@ export class PluginPageNavigation extends PluginBaseModule {
     private handleTouchEnd(event: TouchEvent, element: HTMLElement) {
 
         event.preventDefault();
+        console.info('aqui');
         this.handleDrop(event as any, element);
         
     }
