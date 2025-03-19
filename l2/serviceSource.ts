@@ -1116,7 +1116,19 @@ export class ServiceSource100554 extends ServiceBase {
             }*/
             const response1 = await fetch(url);
             if (!response1.ok) console.info(`Fetch after compile: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
-            await this.delay(2000);
+
+            await this.delay(3000);
+
+            const cacheName = 'mls-v2';
+            const cache = await caches.open(cacheName);
+            const keys = await cache.keys();
+            const match = keys.filter((request) => request.url.includes(`/local/_${project}_${shortName}.js`));
+            if (!match || match.length === 0) console.info(`Code not found in cache for service: _${project}_${shortName}`);
+            else {
+                const response = await cache.match(match[match.length - 1]);
+                const jsCode = await response?.text();
+                console.info('cache founded: ' + jsCode)
+            }
 
             const response2 = await fetch(url);
             if (!response2.ok) console.info(`Fetch after compile delay: Failed to fetch ${url}: ${response2.status} ${response2.statusText}`);
