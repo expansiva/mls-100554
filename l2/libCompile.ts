@@ -139,17 +139,6 @@ async function loadMyNeedsToCompile(
             };
 
         }
-        /*const enhacementName = await mls.l2.enhancement.getEnhancementVariable(ipath);
-        if (!enhacementName) throw new Error('enhacementName not valid');
-
-        if (!myModules[enhacementName]) {
-            const mModule = await mls.l2.enhancement.getEnhancementInstance(ipath);
-            myModules[enhacementName] = {
-                jsMap: false,
-                mModule
-            };
-
-        }*/
 
         await getJSImporMap(myImportsMap, enhacementName, myModules);
         await getJS(myImports, enhacementName, ipath, myModules);
@@ -193,30 +182,49 @@ function getEnhacementName(file: { project: number, shortName: string }): string
 
 async function getEnhancementFromFetch(file: { project: number, shortName: string }) {
 
-    const url = `/_${file.project}_${file.shortName}?t=${Date.now()}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+
+    const cacheName = 'mls-v2';
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    const url = `/local/_${file.project}_${file.shortName}.js`
+
+    const match = keys.filter((request) => request.url.includes(url));
+    if (!match || match.length === 0) console.info(`Code not found in cache : _${file.project}_${file.shortName}`);
+    else {
+        const response = await cache.match(match[match.length - 1]);
+        const txt = await response?.text();
+        if (!txt) throw new Error(`Not found tag <mls> in ${url}`);
+        const lines = txt.replace(/\r\n/g, '\n').split('\n');
+        const mlsLine = lines.find(line => line.trim().startsWith('/// <mls '));
+
+        if (!mlsLine) throw new Error(`Not found tag <mls> in ${url}`);
+        const enhancementMatch = mlsLine.match(/enhancement="([^"]+)"/);
+        if (!enhancementMatch) throw new Error('Not found attr "enhancement" in ' + url);
+        return enhancementMatch[1];
     }
-    const txt = await response.text();
-    const lines = txt.replace(/\r\n/g, '\n').split('\n');
 
+    // const url = `/_${file.project}_${file.shortName}?t=${Date.now()}`;
+    // const response = await fetch(url);
+    // if (!response.ok) {
+    //     throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+    // }
+    // const txt = await response.text();
+    // const lines = txt.replace(/\r\n/g, '\n').split('\n');
+    // const mlsLine = lines.find(line => line.trim().startsWith('/// <mls '));;
 
-    const mlsLine = lines.find(line => line.trim().startsWith('/// <mls '));;
+    // if (!mlsLine) {
+    //     throw new Error(`Not found tag <mls> in ${url}`);
+    // }
 
-    if (!mlsLine) {
-        throw new Error(`Not found tag <mls> in ${url}`);
-    }
+    // // Regex para capturar o valor do atributo enhancement
+    // const enhancementMatch = mlsLine.match(/enhancement="([^"]+)"/);
 
-    // Regex para capturar o valor do atributo enhancement
-    const enhancementMatch = mlsLine.match(/enhancement="([^"]+)"/);
+    // if (!enhancementMatch) {
+    //     throw new Error('Not found attr "enhancement" in ' + url);
+    // }
 
-    if (!enhancementMatch) {
-        throw new Error('Not found attr "enhancement" in ' + url);
-    }
-
-    // Retorna o valor do atributo enhancement
-    return enhancementMatch[1];
+    // // Retorna o valor do atributo enhancement
+    // return enhancementMatch[1];
 
 }
 
