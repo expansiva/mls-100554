@@ -1108,7 +1108,7 @@ export class ServiceSource100554 extends ServiceBase {
                 const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });
 
                 console.info(`Start onAfterChange`);
-                if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
+                // if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
                 console.info(`End onAfterChange`);
                 const response1 = await fetch(url);
                 if (!response1.ok) console.info(`Fetch after onAfterChange: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
