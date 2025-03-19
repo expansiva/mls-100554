@@ -1084,10 +1084,12 @@ export class ServiceSource100554 extends ServiceBase {
         if (!modelBaseTS.storFile) throw new Error('Invalid stor file');
         const { project, shortName } = modelBaseTS.storFile;
 
+        if (project === 0 && (shortName === 'loading' || shortName === 'testFile')) return;
+
         modelBaseTS.storFile.hasError = false;
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
 
-        
+
         const url = `/_${project}_${shortName}`;
         const response = await fetch(url);
         if (!response.ok) {
