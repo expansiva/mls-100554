@@ -1084,7 +1084,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async updateModelStatus(modelBaseTS: mls.editor.IModelTS, changed: boolean): Promise<void> {
 
-
+        (mls as any)['isTrace'] = true;
         if (!modelBaseTS.storFile) throw new Error('Invalid stor file');
         const { project, shortName } = modelBaseTS.storFile;
         const url = `/_${project}_${shortName}`;
@@ -1103,22 +1103,14 @@ export class ServiceSource100554 extends ServiceBase {
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
 
-            /*const enhacementName = await getEnhancementName({ project, shortName }).catch((e) => undefined);
+            const enhacementName = await getEnhancementName({ project, shortName }).catch((e) => undefined);
             if (enhacementName) {
                 const path = mls.l2.getPath(enhacementName);
                 const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });
                 if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
-
-                const response1 = await fetch(url);
-                if (!response1.ok) console.info(`Fetch after onAfterChange: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
-
-
-            }*/
-            const response1 = await fetch(url);
-            if (!response1.ok) console.info(`Fetch after compile: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
+            }
 
             await this.delay(3000);
-
             const cacheName = 'mls-v2';
             const cache = await caches.open(cacheName);
             const keys = await cache.keys();
@@ -1134,6 +1126,9 @@ export class ServiceSource100554 extends ServiceBase {
             if (!response2.ok) console.info(`Fetch after compile delay: Failed to fetch ${url}: ${response2.status} ${response2.statusText}`);
 
             hasError = modelBaseTS.storFile.hasError;
+
+            (mls as any)['isTrace'] = false;
+
         }
 
         await this.changeStatusFile(modelBaseTS, modelBaseTS.storFile, modelBaseTS.compilerResults?.tripleSlashMLS?.variables, hasError, changed);
