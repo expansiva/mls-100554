@@ -1095,7 +1095,10 @@ export class ServiceSource100554 extends ServiceBase {
 
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
 
-        console.info(modelBaseTS.compilerResults?.trace.join('/n'))
+        console.info(modelBaseTS.compilerResults?.trace.join('\n'))
+        console.info('----------------------------------------------------------');
+        console.info(modelBaseTS.compilerResults?.errors.join('\n'))
+
 
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
