@@ -18,176 +18,176 @@ export const icaDescriptions: IIcaDescriptions = {
     //-----ICA-FORMS-----
     "ica-forms-content-form": {
         attributes: ["action", "method", "novalidate", "autocomplete", "disabled", "enctype", "name", "target", "validateOnChange", "autosave"],
-        allowedChildren: ["ica-forms-", "ica-layout-flow-section"],
+        allowedChildren: ["ica-forms-*", "ica-layout-flow-section"],
         allowedParents: [],
         description: "form component provides enhanced control over form submission, validation, and customization"
     },
     "ica-forms-input-number": {
         attributes: ["name", "value", "placeholder", "label", "pattern", "errormessage", "maxvalue", "minvalue", "step", "required", "disabled", "readonly", "autofocus", "hint", "inputmode", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Allows the user to input numerical values, with support for minimum and maximum limits."
     },
     "ica-forms-input-string": {
         attributes: ["name", "hint", "label", "required", "disabled", "readonly", "maxlength", "minlength", "placeholder", "pattern", "errormessage", "autofocus", "autoCapitalize", "autocorrect", "autocomplete", "value", "validationMessage", "debounce", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Field for free text, with configurable validations such as maximum length and regular expressions."
     },
     "ica-forms-input-boolean": {
         attributes: ["name", "label", "hint", "required", "disabled", "readonly", "autofocus", "checked", "errormessage", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Component for binary choice, like switches or checkboxes, ideal for yes/no settings."
     },
     "ica-forms-input-date": {
         attributes: ["name", "label", "hint", "required", "disabled", "readonly", "autofocus", "value", "pattern", "errormessage", "maxvalue", "minvalue", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Date selector, with configuration options to limit periods."
     },
     "ica-forms-input-time": {
         attributes: ["name", "label", "hint", "required", "disabled", "readonly", "autofocus", "value", "pattern", "errormessage", "placeholder", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Allows the user to select a time, with support for different time formats."
     },
     "ica-forms-input-date-range": {
         attributes: ["name", "label", "hint", "required", "disabled", "readonly", "autofocus", "pattern", "errormessage", "startValue", "endValue", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Component for selecting date ranges, useful for period filters."
     },
     "ica-forms-input-select-one": {
         attributes: ["hint", "label", "required", "disabled", "options", "selectedvalue", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Selector for a single option among many, which can be presented as a dropdown, combobox, etc."
     },
     "ica-forms-input-multiselect": {
         attributes: ["hint", "label", "required", "disabled", "options", "selectedvalue", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Allows multiple option selection, ideal for filters or advanced settings."
     },
     "ica-forms-input-color": {
         attributes: ["name", "label", "hint", "required", "disabled", "readonly", "autofocus", "value", "pattern", "errormessage", "placeholder", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Color picker, with support for different color formats (RGB, HEX, etc.)."
     },
     "ica-forms-input-editor": {
         attributes: ["name", "label", "hint", "required", "disabled", "readonly", "autofocus", "value", "errormessage", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Rich text editor, allowing basic formatting (bold, italic) and insertion of elements like lists and tables."
     },
     "ica-forms-input-feedback": {
         attributes: ["name", "label", "hint", "required", "disabled", "readonly", "autofocus", "value", "errormessage", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "For rating or thumbs up/down (approval or disapproval), allowing the user to express opinions simply."
     },
     "ica-forms-input-file": {
         attributes: ["name", "label", "hint", "required", "disabled", "readonly", "autofocus", "errormessage", "accept", "multiple", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "For attaching a file, with support for drag and drop and upload progress visualization."
     },
     "ica-forms-records-table": {
         attributes: ["data", "columns", "selectedRow", "filterable", "sortable", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Displays data in table format, with support for sorting and filtering."
     },
     "ica-forms-records-list": {
         attributes: ["items", "selectedItem", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "List of items, customizable to display summarized or detailed information."
     },
     "ica-forms-records-timeline": {
         attributes: ["data", "selectedItem", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Presents events or records in a timeline, facilitating the visualization of sequences or histories."
     },
     "ica-forms-records-cards": {
         attributes: ["cardsData", "selectedCard", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Data presented in cards, ideal for visual summaries with images or icons."
     },
     "ica-forms-records-map": {
         attributes: ["latitude", "longitude", "zoom", "markers", "mapType", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Displays geographic information on a map, supporting markers and custom regions."
     },
     "ica-forms-records-table-with-pagination": {
         attributes: ["data", "columns", "selectedRow", "filterable", "sortable", "pageable", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Data table with pagination, to manage large data sets without overloading the interface."
     },
     "ica-forms-records-table-with-infinite-scroll": {
         attributes: ["data", "columns", "selectedRow", "filterable", "sortable", "infiniteScroll", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Table that automatically loads more data as the user scrolls the page, for smooth navigation through large data sets."
     },
     "ica-forms-tree-tree-view": {
         attributes: ["data", "selectedNode", "expandedNodes", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Hierarchical data structure that allows for expansion and contraction of nodes, useful for categories or organizational structures."
     },
     "ica-forms-tree-nested-dropdown": {
         attributes: ["data", "selectedValue", "disabled", "required", "placeholder", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Nested dropdowns that allow selection at multiple levels of a hierarchy."
     },
     "ica-forms-tree-nested-accordions": {
         attributes: ["data", "expandedSections", "multiExpand", "disabled", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Nested accordions to organize content or categories into multiple layers, facilitating navigation in complex structures."
     },
     "ica-forms-tree-tag-cloud": {
         attributes: ["tagsData", "selectedTags", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Set of tags or keywords representing frequency or importance, allowing dynamic editing and organization."
     },
     "ica-forms-tree-mind-map": {
         attributes: ["data", "selectedNode", "layout", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Mind map for organizing and visualizing ideas or concepts in a radial structure, facilitating editing and expansion of related concepts."
     },
     "ica-forms-submit-submit": {
         attributes: ["name", "title", "icon", "text", "disabled", "form", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Button to submit the form. When clicked, it collects and sends the form data to the server or designated handler. Essential for finalizing user data entry."
     },
     "ica-forms-submit-cancel": {
         attributes: ["name", "title", "icon", "text", "disabled", "form", "clicked-value", "clicked-action", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Button to cancel the form operation, allowing the user to abort their action and typically return to the previous state or screen. Helps ensure safe navigation without data submission."
     },
     "ica-forms-submit-clear": {
         attributes: ["name", "title", "icon", "text", "disabled", "form", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Button to clear all form fields, removing user inputs. Useful in long or complex forms where reset may be necessary."
     },
     "ica-forms-submit-send-external": {
         attributes: ["name", "title", "icon", "text", "disabled", "form", "eventBinding"],
         allowedChildren: ["!*"],
-        allowedParents: ["^ica-forms-content-form"],
+        allowedParents: ["**ica-forms-content-form"],
         description: "Mechanism for sending form data to an external system or website. Used for integrations with third-party APIs or for collecting information across different platforms. Must ensure user data security and privacy."
     },
 
@@ -469,7 +469,7 @@ export const icaDescriptions: IIcaDescriptions = {
     //-----ICA-LAYOUT----------
     "ica-layout-flow-section": {
         attributes: ["id", "class", "eventBinding"],
-        allowedChildren: ["ica-layout-"],
+        allowedChildren: ["ica-layout-*"],
         allowedParents: [],
         description: "Divides content into logical and distinct sections, facilitating organization and understanding by the user."
     },
@@ -690,7 +690,7 @@ export function canMoveElement( element: IcaLitElementBaseMethods, newParent: Ic
     
     const parentCanHaveChild = dNewParent.allowedChildren.some(childPattern => {
         
-        if (childPattern.endsWith("-")) {
+        if (childPattern.endsWith("-*")) {
             return elementTag.startsWith(childPattern.slice(0, -1));
         }
 
@@ -701,10 +701,10 @@ export function canMoveElement( element: IcaLitElementBaseMethods, newParent: Ic
     
     const childCanHaveParent = dElement.allowedParents.some(parentPattern => {
 
-        const searchParents = parentPattern.startsWith('^');
-        parentPattern = parentPattern.replace('^', '');
+        const searchParents = parentPattern.startsWith('**');
+        parentPattern = parentPattern.replace('**', '');
 
-        if (parentPattern.endsWith("-")) {
+        if (parentPattern.endsWith("-*")) {
             return newParentTag.startsWith(parentPattern.slice(0, -1));
         }
 
