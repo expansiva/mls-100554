@@ -1086,27 +1086,25 @@ export class ServiceSource100554 extends ServiceBase {
 
         modelBaseTS.storFile.hasError = false;
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
-        console.log('compile result: ' + ok);
+
+        
+        const url = `/_${project}_${shortName}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.info(`Fetch after compile: Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+        }
 
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
             const enhacementName = await getEnhancementName({ project, shortName }).catch((e) => undefined);
-            console.log('compile getEnhancementName: ' + enhacementName);
 
             if (enhacementName) {
                 const path = mls.l2.getPath(enhacementName);
-                const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.log('Error on getEnhancementModule: '+ e.message); return undefined});
-                console.log('compile has enhancementInstance: ' + !!enhancementInstance);
-
+                const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });
                 if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
-                console.log('compile onAfterChange has Error: ' + modelBaseTS.storFile.hasError);
-
 
             }
-
             hasError = modelBaseTS.storFile.hasError;
-            console.log('compile result has Error: ' + hasError);
-
         }
 
         await this.changeStatusFile(modelBaseTS, modelBaseTS.storFile, modelBaseTS.compilerResults?.tripleSlashMLS?.variables, hasError, changed);
