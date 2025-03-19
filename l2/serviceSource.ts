@@ -1095,6 +1095,8 @@ export class ServiceSource100554 extends ServiceBase {
 
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
 
+        console.info(modelBaseTS.compilerResults?.trace.join('/n'))
+
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
 
@@ -1115,7 +1117,7 @@ export class ServiceSource100554 extends ServiceBase {
 
             const response2 = await fetch(url);
             if (!response2.ok) console.info(`Fetch after compile delay: Failed to fetch ${url}: ${response2.status} ${response2.statusText}`);
-            
+
             hasError = modelBaseTS.storFile.hasError;
         }
 
