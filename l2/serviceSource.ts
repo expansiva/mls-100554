@@ -1081,20 +1081,23 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async updateModelStatus(modelBaseTS: mls.editor.IModelTS, changed: boolean): Promise<void> {
 
+
         if (!modelBaseTS.storFile) throw new Error('Invalid stor file');
         const { project, shortName } = modelBaseTS.storFile;
+        const url = `/_${project}_${shortName}`;
+
+        console.info(`Start updateModelStatus ${project} ${shortName}`);
 
         if (project === 0 && (shortName === 'loading' || shortName === 'testFile')) return;
 
         modelBaseTS.storFile.hasError = false;
+
+        console.info(`Start Compiling ${project} ${shortName}`);
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
+        console.info(`End Compiling with result ${ok}`);
 
-
-        const url = `/_${project}_${shortName}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            console.info(`Fetch after compile: Failed to fetch ${url}: ${response.status} ${response.statusText}`);
-        }
+        const response1 = await fetch(url);
+        if (!response1.ok) console.info(`Fetch after compile: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
 
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
@@ -1103,7 +1106,13 @@ export class ServiceSource100554 extends ServiceBase {
             if (enhacementName) {
                 const path = mls.l2.getPath(enhacementName);
                 const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });
+
+                console.info(`Start onAfterChange`);
                 if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
+                console.info(`End onAfterChange`);
+                const response1 = await fetch(url);
+                if (!response1.ok) console.info(`Fetch after onAfterChange: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
+
 
             }
             hasError = modelBaseTS.storFile.hasError;
@@ -1118,14 +1127,25 @@ export class ServiceSource100554 extends ServiceBase {
         storFile.hasError = hasError;
         this.toogleIconsError();
         const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
+
+        console.info(`Chech same content: ${sameContent}`);
+
         if (sameContent) {
             if (storFile.status !== 'new') {
                 storFile.status = 'nochange';
                 await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
+                console.info(`Clear local storage`);
+
             }
         } else {
             if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
             await mls.stor.localStor.setContent(storFile, await this.getValueInfo(modelBaseTS));
+            console.info(`Set content local storage`);
+
+            const url = `/_${storFile.project}_${storFile.shortName}`;
+            const response1 = await fetch(url);
+            if (!response1.ok) console.info(`Fetch after compile: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
+
         }
 
         if (changed) {
@@ -1134,6 +1154,12 @@ export class ServiceSource100554 extends ServiceBase {
             const idActive = modelBaseTS.model.id
             if (idLeft === idActive) position = 'left';
             else position = 'right';
+
+            const url = `/_${storFile.project}_${storFile.shortName}`;
+            const response1 = await fetch(url);
+            if (!response1.ok) console.info(`Fetch after compile: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
+            if (response1.ok) console.info(`File ${url} exist in chache yet`);
+            console.info(`Fire statusOrErrorChanged`);
             mls.events.fireFileAction('statusOrErrorChanged', storFile, position);
         }
     }
