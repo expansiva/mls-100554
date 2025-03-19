@@ -459,7 +459,7 @@ export class PluginPageNavigation extends PluginBaseModule {
     private handleTouchEnd(event: TouchEvent, element: HTMLElement) {
 
         event.preventDefault();
-        this.handleDrop(event as any, element);
+        this.handleDrop(event as any, this.lastElementMove || element);
 
     }
 
