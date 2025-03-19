@@ -1078,6 +1078,9 @@ export class ServiceSource100554 extends ServiceBase {
     private closeMenu() {
         if (this.menu.closeMenu) this.menu.closeMenu()
     }
+    delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     private async updateModelStatus(modelBaseTS: mls.editor.IModelTS, changed: boolean): Promise<void> {
 
@@ -1086,35 +1089,33 @@ export class ServiceSource100554 extends ServiceBase {
         const { project, shortName } = modelBaseTS.storFile;
         const url = `/_${project}_${shortName}`;
 
-        console.info(`Start updateModelStatus ${project} ${shortName}`);
-
         if (project === 0 && (shortName === 'loading' || shortName === 'testFile')) return;
 
         modelBaseTS.storFile.hasError = false;
 
-        console.info(`Start Compiling ${project} ${shortName}`);
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
-        console.info(`End Compiling with result ${ok}`);
-
-        const response1 = await fetch(url);
-        if (!response1.ok) console.info(`Fetch after compile: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
 
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
-            const enhacementName = await getEnhancementName({ project, shortName }).catch((e) => undefined);
 
+            /*const enhacementName = await getEnhancementName({ project, shortName }).catch((e) => undefined);
             if (enhacementName) {
                 const path = mls.l2.getPath(enhacementName);
                 const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });
+                if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
 
-                console.info(`Start onAfterChange`);
-                // if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
-                console.info(`End onAfterChange`);
                 const response1 = await fetch(url);
                 if (!response1.ok) console.info(`Fetch after onAfterChange: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
 
 
-            }
+            }*/
+            const response1 = await fetch(url);
+            if (!response1.ok) console.info(`Fetch after compile: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
+            await this.delay(2000);
+
+            const response2 = await fetch(url);
+            if (!response2.ok) console.info(`Fetch after compile delay: Failed to fetch ${url}: ${response2.status} ${response2.statusText}`);
+            
             hasError = modelBaseTS.storFile.hasError;
         }
 
