@@ -1084,21 +1084,14 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async updateModelStatus(modelBaseTS: mls.editor.IModelTS, changed: boolean): Promise<void> {
 
-        (mls as any)['isTrace'] = true;
         if (!modelBaseTS.storFile) throw new Error('Invalid stor file');
         const { project, shortName } = modelBaseTS.storFile;
-        const url = `/_${project}_${shortName}`;
-
+    
         if (project === 0 && (shortName === 'loading' || shortName === 'testFile')) return;
 
         modelBaseTS.storFile.hasError = false;
 
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
-
-        console.info(modelBaseTS.compilerResults?.trace.join('\n'))
-        console.info('----------------------------------------------------------');
-        console.info(modelBaseTS.compilerResults?.errors.join('\n'))
-
 
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
@@ -1110,24 +1103,22 @@ export class ServiceSource100554 extends ServiceBase {
                 if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
             }
 
-            await this.delay(3000);
-            const cacheName = 'mls-v2';
-            const cache = await caches.open(cacheName);
-            const keys = await cache.keys();
-            const match = keys.filter((request) => request.url.includes(`/local/_${project}_${shortName}.js`));
-            if (!match || match.length === 0) console.info(`Code not found in cache for service: _${project}_${shortName}`);
-            else {
-                const response = await cache.match(match[match.length - 1]);
-                const jsCode = await response?.text();
-                console.info('cache founded: ' + jsCode)
-            }
+            // await this.delay(3000);
+            // const cacheName = 'mls-v2';
+            // const cache = await caches.open(cacheName);
+            // const keys = await cache.keys();
+            // const match = keys.filter((request) => request.url.includes(`/local/_${project}_${shortName}.js`));
+            // if (!match || match.length === 0) console.info(`Code not found in cache for service: _${project}_${shortName}`);
+            // else {
+            //     const response = await cache.match(match[match.length - 1]);
+            //     const jsCode = await response?.text();
+            //     console.info('cache founded: ' + jsCode)
+            // }
 
-            const response2 = await fetch(url);
-            if (!response2.ok) console.info(`Fetch after compile delay: Failed to fetch ${url}: ${response2.status} ${response2.statusText}`);
+            // const response2 = await fetch(url);
+            // if (!response2.ok) console.info(`Fetch after compile delay: Failed to fetch ${url}: ${response2.status} ${response2.statusText}`);
 
             hasError = modelBaseTS.storFile.hasError;
-
-            (mls as any)['isTrace'] = false;
 
         }
 
@@ -1141,24 +1132,15 @@ export class ServiceSource100554 extends ServiceBase {
         this.toogleIconsError();
         const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
 
-        console.info(`Chech same content: ${sameContent}`);
 
         if (sameContent) {
             if (storFile.status !== 'new') {
                 storFile.status = 'nochange';
                 await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
-                console.info(`Clear local storage`);
-
             }
         } else {
             if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
             await mls.stor.localStor.setContent(storFile, await this.getValueInfo(modelBaseTS));
-            console.info(`Set content local storage`);
-
-            const url = `/_${storFile.project}_${storFile.shortName}`;
-            const response1 = await fetch(url);
-            if (!response1.ok) console.info(`Fetch after compile: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
-
         }
 
         if (changed) {
@@ -1167,12 +1149,6 @@ export class ServiceSource100554 extends ServiceBase {
             const idActive = modelBaseTS.model.id
             if (idLeft === idActive) position = 'left';
             else position = 'right';
-
-            const url = `/_${storFile.project}_${storFile.shortName}`;
-            const response1 = await fetch(url);
-            if (!response1.ok) console.info(`Fetch after compile: Failed to fetch ${url}: ${response1.status} ${response1.statusText}`);
-            if (response1.ok) console.info(`File ${url} exist in chache yet`);
-            console.info(`Fire statusOrErrorChanged`);
             mls.events.fireFileAction('statusOrErrorChanged', storFile, position);
         }
     }
