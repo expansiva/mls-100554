@@ -423,7 +423,7 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     private lastElementMove: undefined | HTMLElement;
 
-    private handleTouchStart(event: TouchEvent, item: IInfoElChildren, el:HTMLElement) {
+    private handleTouchStart(event: TouchEvent, item: IInfoElChildren, el: HTMLElement) {
         event.preventDefault();
         el.click();
         this.draggedItem = item;
@@ -443,13 +443,20 @@ export class PluginPageNavigation extends PluginBaseModule {
         if (!element || !(element as any).info) return;
 
         item = (element as any).info;
-        
-        if (this.lastElementMove !== element) {
-            this.lastElementMove = element;
 
+        if (this.lastElementMove !== element) {
+
+            if (this.lastElementMove) {
+                let lil = this.lastElementMove.closest('li');
+                if (lil) lil.style.border = "";
+                this.lastElementMove.style.border = "";
+            }
+
+            this.lastElementMove = element;
             const li = element.closest('li');
             if (li) li.style.border = "";
             element.style.border = "";
+            
         }
 
         this.handleDragOver(event as any, item, element as HTMLElement);
