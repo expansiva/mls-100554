@@ -1088,10 +1088,8 @@ export class ServiceSource100554 extends ServiceBase {
         const { project, shortName } = modelBaseTS.storFile;
     
         if (project === 0 && (shortName === 'loading' || shortName === 'testFile')) return;
-
         modelBaseTS.storFile.hasError = false;
-
-        const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, false);
+        const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
 
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
