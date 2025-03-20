@@ -20,7 +20,17 @@ export async function injectStyleWithoutShadowRoot(modelTS: mls.editor.IModelTS,
         modelTS.compilerResults.prodJS = newJs;
         mls.stor.cache.clearObsoleteCache();
         modelTS.compilerResults.cacheVersion = generateCompactTimestamp();
-        mls.stor.cache.AddMfileIfNeed(modelTS as any);
+        // mls.stor.cache.AddMfileIfNeed(modelTS as any);
+
+        const { project, shortName, folder } = modelTS.storFile;
+        mls.stor.cache.addIfNeed({
+            content: newJs,
+            extension: '.js',
+            folder,
+            project,
+            shortName,
+            version: modelTS.compilerResults.cacheVersion,
+        });
     }
 }
 
@@ -94,6 +104,7 @@ function replaceBackTicks(originalString: string): string {
     const stringWithSingleQuotes = originalString.replace(/`/g, "'");
     return stringWithSingleQuotes;
 }
+
 
 function decodeString(cssString: string) {
     try {
