@@ -22,7 +22,7 @@ export async function injectStyleWithoutShadowRoot(modelTS: mls.editor.IModelTS,
         mls.stor.cache.clearObsoleteCache();
         modelTS.compilerResults.cacheVersion = generateCompactTimestamp();
 
-        await delay(100);
+        // await delay(100);
         await mls.l2.typescript.compileAndPostProcess(modelTS, false, true);
 
         // mls.stor.cache.AddMfileIfNeed(modelTS as any);
