@@ -105,6 +105,7 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
             this.createOverlayItem(item, this as HTMLElement, boundingPage);
         });
 
+        setTimeout(()=>this.updateSizeOverlayItems(),100)
     }
 
     changeOverlayItemsLevel(): void {
