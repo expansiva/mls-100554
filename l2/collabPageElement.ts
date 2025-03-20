@@ -159,6 +159,8 @@ export abstract class CollabPageElement extends IcaLitElement {
         this.overlay.createOverlayItems();
         this.appendChild(this.overlay as HTMLElement);
 
+        mls.events.fire(3, 'WCDEventChange' as any);
+
     }
 
     private hasImport: string[] = [];
