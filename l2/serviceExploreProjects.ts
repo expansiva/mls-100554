@@ -259,15 +259,15 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                 <ul class="serviceListList">
                     ${this.state.history.map(
             (his) => html`
-                        <li class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} >
+                        <li ?disabled=${!his.doSelect} class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} >
                             <div>
                                 <span>${his.name + ' (' + his.project.toString() + ')'}</span>
                             </div>
                             <div style="display:flex; gap:1rem;font-size:.8rem">
-                                <span class="linkItem" ?disabled=${!his.doSelect}   @click=${() => { this.onHistoryClick(his) }}>
+                                <span class="linkItem" @click=${() => { this.onHistoryClick(his) }}>
                                     ${this.msg.select}
                                 </span>
-                                <span class="linkItem" ?disabled=${!his.doSelect} @click=${() => this.firedetail(his)}>
+                                <span class="linkItem" @click=${() => this.firedetail(his)}>
                                     ${this.msg.detail}
                                 </span>
                             </div>
@@ -286,15 +286,15 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                     <div class="serviceListTitle">${org.key}</div>
                     <ul class="serviceListList">
                         ${org.projects.map((prj) => html`
-                            <li class=${this.lastPrjId && +this.lastPrjId === prj.project ? "selected" : ""} >
+                            <li ?disabled=${!prj.doSelect} class=${this.lastPrjId && +this.lastPrjId === prj.project ? "selected" : ""} >
                                 <div>
                                     <span>${prj.name + ' (' + prj.project.toString() + ')'}</span>
                                 </div>
                                 <div style="display:flex; gap:1rem;font-size:.8rem">
-                                    <span class="linkItem" ?disabled=${!prj.doSelect}  @click=${() => this.onProjectClick(prj)}>
+                                    <span class="linkItem" @click=${() => this.onProjectClick(prj)}>
                                         ${this.msg.select}
                                     </span>
-                                    <span class="linkItem" ?disabled=${!prj.doSelect} @click=${() => this.firedetail(prj)}>
+                                    <span class="linkItem" @click=${() => this.firedetail(prj)}>
                                         ${this.msg.detail}
                                     </span>
                                 </div>
