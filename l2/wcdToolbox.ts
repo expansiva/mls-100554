@@ -45,6 +45,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     // ------------ COMPONENT-------------------
 
+
     createRenderRoot() {
         return this; // dont use shadow root
     }
@@ -66,6 +67,9 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         globalWcd.myParent = undefined;
         globalWcd.wcdItens = undefined;
         //globalWcd.elMain = undefined;
+        if (this.parentElement && (this.parentElement as any).fcRemoveWcd)
+            (this.parentElement as any).fcRemoveWcd();
+            
         super.disconnectedCallback();
         if (this.resizeObserver) this.resizeObserver.disconnect();
     }

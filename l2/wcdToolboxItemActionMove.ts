@@ -11,6 +11,7 @@ import { getPosition } from './_100554_icaGlobal';
 @customElement('wcd-toolbox-item-action-move-100554')
 export class WCDToolboxItemActionMove extends WcdToolboxItemBase {
 
+    private forceUpdate = true;
     public args: string | undefined;
     public elSiblings: IcaLitElementBaseMethods[] | undefined;
     private sort: any;
@@ -28,7 +29,7 @@ export class WCDToolboxItemActionMove extends WcdToolboxItemBase {
 
     disconnectedCallback() {
 
-        if (this.elSiblings) {
+        if (this.elSiblings && this.forceUpdate) {
             this.recreateOverlay();
             this.removeEvents();
         }
@@ -82,8 +83,6 @@ export class WCDToolboxItemActionMove extends WcdToolboxItemBase {
 
         const p = s === 'left' ? 'p-l2' : 'p-m3';
 
-        this.myParent.fcBeforeBackButton = this.recreateOverlay
-
         this.myParent.setIconsWcdToolbox(
             [
                 {
@@ -99,7 +98,6 @@ export class WCDToolboxItemActionMove extends WcdToolboxItemBase {
             false,
             'false'
         )
-
 
     }
 
@@ -247,12 +245,12 @@ export class WCDToolboxItemActionMove extends WcdToolboxItemBase {
     private handleDrop(event: DragEvent, element: WCDOverlayItensMethods) {
 
         if (!this.draggedItem || !this.draggedItem.info) return;
+        this.forceUpdate = false;
         updateOverlay(this.draggedItem.info.element);
 
     }
 
     private recreateOverlay() {
-
         if (!this.elICA ) return;
         updateOverlay(this.elICA);
     }
