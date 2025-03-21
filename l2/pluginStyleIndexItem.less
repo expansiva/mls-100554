@@ -32,13 +32,17 @@ plugin-style-index-item-100554 {
                     height: 20px;
                     user-select: none;
                     cursor: pointer;
+                    svg {
+                        fill: @text-primary-color;
+                    }
 
                     &:hover {
                         font-weight: @font-weight-bold;
-
+                        
                         svg {
                             transform: scale(1.3);
                         }
+
                     }
                 }
 
@@ -99,7 +103,11 @@ plugin-style-index-item-100554 {
         }
 
         .plugin-item-info {
+            
             padding: @space-16;
+            svg {
+                fill: @text-primary-color;
+            }
         }
 
         .plugin-item-desc {
@@ -121,9 +129,6 @@ plugin-style-index-item-100554 {
     }
 
 }
-
-
-
 
 //Start Less Tokens
 @text-primary-color-lighter: #535353;

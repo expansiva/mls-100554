@@ -18,7 +18,6 @@ import {
 @customElement('plugin-style-index-item-100554')
 export class PluginStyleIndexItem extends CollabLitElement {
 
-
     @property({ reflect: false }) help: IHelpers | undefined;
     @property() position: 'left' | 'right' = 'left';
     @property({ reflect: true }) mode: 'collapsed' | 'expanded' | 'full' = 'collapsed';

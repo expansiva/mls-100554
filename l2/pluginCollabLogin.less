@@ -1,62 +1,61 @@
 /// <mls shortName="pluginCollabLogin" project="100554" enhancement="enhancementStyle" />
-				
+
 plugin-collab-login-100554 {
-                
-    :host {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background-color: #000;
-      color: #fff;
-      font-family: 'Arial', sans-serif;
-    }
 
-    .login-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #111;
-      padding: 2rem;
-      border-radius: 12px;
-      width: 320px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
 
-    .login-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 1.5rem;
-      text-align: center;
-      line-height: 1.5;
-    }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: var(--bg-primary-color);
+  color: @text-primary-color;
+  font-family: 'Arial', sans-serif;
 
-    .login-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      padding: 0.75rem 1rem;
-      margin: 0.5rem 0;
-      font-size: 1rem;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.2s ease, opacity 0.2s ease;
-    }
 
-    .login-button svg {
-      margin-right: 0.5rem;
-      height: 20px;
-      width: 20px;
-    }
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: @bg-primary-color;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 320px;
+  }
 
-    .login-button:hover {
-      transform: scale(1.10);
-      opacity: 0.9;
-    }
+  .login-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .login-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .login-button svg {
+    margin-right: 0.5rem;
+    height: 20px;
+    width: 20px;
+  }
+
+  .login-button:hover {
+    transform: scale(1.10);
+    opacity: 0.9;
+  }
 
   .logoff {
     background-color: #d9534f;
@@ -68,61 +67,59 @@ plugin-collab-login-100554 {
     opacity: 0.9;
     transform: scale(1.05);
   }
-    .google {
-      background-color: #aaa;
-      color: #fff;
-    }
 
-    .github {
-      background-color: #333;
-      color: #fff;
-    }
+  .google {
+    background-color: #aaa;
+    color: #fff;
+  }
 
-    .gitlab {
-      background-color: #333;
-      color: #fff;
-    }
+  .github {
+    background-color: #333;
+    color: #fff;
+  }
 
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: 1rem 0;
-      width: 100%;
-    }
+  .gitlab {
+    background-color: #333;
+    color: #fff;
+  }
 
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: #333;
-    }
+  .divider {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+    width: 100%;
+  }
 
-    .divider span {
-      margin: 0 0.5rem;
-      color: #aaa;
-      font-size: 0.875rem;
-    }
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #333;
+  }
 
-    .footer {
-      margin-top: 1.5rem;
-      font-size: 0.75rem;
-      color: #555;
-    }
+  .divider span {
+    margin: 0 0.5rem;
+    color: #aaa;
+    font-size: 0.875rem;
+  }
 
-    .footer a {
-      color: #aaa;
-      text-decoration: none;
-    }
+  .footer {
+    margin-top: 1.5rem;
+    font-size: 0.75rem;
+    color: #555;
+  }
 
-    .footer a:hover {
-      text-decoration: underline;
-    }
+  .footer a {
+    color: #aaa;
+    text-decoration: none;
+  }
 
-                
+  .footer a:hover {
+    text-decoration: underline;
+  }
+
+
 }
-
-
-
 
 
