@@ -86,17 +86,29 @@ service-explore-projects-100554 {
                 justify-content: space-between;
                 align-items: center;
 
+                &[disabled] {
+                    opacity: .5;
+                    cursor:not-allowed;
+                    .linkItem {
+                        font-weight: @font-weight-normal;
+                        cursor: not-allowed;
+                        &:hover{
+                            text-decoration: none;
+                        }
+                    }
+                }
+
+                &:hover, &.selected {
+                    background: @grey-color;
+                    .linkItem{
+                        font-weight: @font-weight-bolder;
+                        color: @link-color-hover;
+                    }
+                }
+
                 div {
                     display: flex;
                     gap: .5rem;
-                }
-
-                &:hover {
-                    background: #f7f7f7;
-                }
-
-                &.selected {
-                    background: #e3e3e3;
                 }
 
                 .serviceListChanged {
@@ -120,15 +132,8 @@ service-explore-projects-100554 {
                     cursor: pointer;
                 }
 
-                .linkItem[disabled] {
-                    opacity: .5;
-                    cursor:not-allowed;
-                    //pointer-events: none;
-                }
-
                 .linkItem:hover {
                     text-decoration: underline;
-
                 }
             }
         }
