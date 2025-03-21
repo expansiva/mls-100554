@@ -14,7 +14,6 @@ const message_pt = {
 
 const message_en = {
     description: 'A versatile plugin to customize the cursor on your website or application. Change the cursor style to suit your needs, from custom cursors to dynamic interactions. Perfect for enhancing user experience and creating unique interfaces'
-
 }
 
 type MessageType = typeof message_en;

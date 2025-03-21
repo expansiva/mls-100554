@@ -26,7 +26,6 @@ export class CollabDSInputRange extends IcaLitElement {
 
     render() {
 
-        //${this.renderInput()}
         return html`
             ${this.renderSelect()}
             

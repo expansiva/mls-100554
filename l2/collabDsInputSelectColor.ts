@@ -45,7 +45,6 @@ export class CollabDsInputSelectColor extends CollabLitElement {
     @property() useColor: string = 'true';
 
     render() {
-
         return html`    
             ${this.useInput === 'true' ? this.renderInput() : ''}
             ${this.useSelect === 'true' ? this.renderSelect() : ''}
