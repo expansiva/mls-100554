@@ -4,7 +4,6 @@ import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
 import { canMoveElement } from './_100554_icaBaseDescription2';
 
-
 export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMethods, pos: 'above' | 'below' | 'inside', update: boolean = true) {
 
     const page = el.closest('*[modeoverlay]') as any;
@@ -39,14 +38,15 @@ export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMeth
 
 }
 
+
 export function updateOverlay(el: IcaLitElementBaseMethods) {
 
     const page = el.closest('*[modeoverlay]') as any;
     if (!page) throw new Error('Not found overlay');
-
     dispatchEventConciliate();
     page.recreateOverlay();
-    
+
+
 }
 
 function insertAbove(father: HTMLElement, el: HTMLElement, target: HTMLElement, parentICA: IcaLitElementBaseMethods | undefined) {

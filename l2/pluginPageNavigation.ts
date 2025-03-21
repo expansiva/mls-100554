@@ -52,7 +52,9 @@ export class PluginPageNavigation extends PluginBaseModule {
 
     private onWCDEventChange(ev: mls.events.IEvent) {
 
-        if (this && this.forceUpdate) this.forceUpdate();
+        if (this && this.forceUpdate) {
+            setTimeout(()=> this.forceUpdate(),150);
+        }
 
     }
 
@@ -75,7 +77,7 @@ export class PluginPageNavigation extends PluginBaseModule {
         const obj = html`
             
             <ul>
-                ${repeat(array, ((key: IInfoElChildren, idx: number) => key.el.tagName + idx) as any,
+                ${repeat(array, ((key: IInfoElChildren, idx: number) => key.id) as any,
             ((item: IInfoElChildren, index: any) => { return this.renderItemTree(item, index); }) as any
         )}
             </ul>
@@ -88,21 +90,7 @@ export class PluginPageNavigation extends PluginBaseModule {
     renderItemTree(item: IInfoElChildren, idx: string) {
 
         const name = convertTagToFileName(item.el.tagName.toLocaleLowerCase());
-        const cls = (item.el as any).renderType === 'editactive' ? 'activeBranch' : '';
-
-        if (this.idLastClick === name + idx) { // Verifico se preciso forçar um click
-
-            setTimeout(() => {
-
-                const active = this.querySelector('.activeBranch') as HTMLElement;
-                if (active) active.classList.remove('activeBranch');
-
-                this.idLastClick = '';
-                item.el.click();
-
-            }, 200);
-
-        }
+        const cls = (item.el as any).renderType === 'editactive' ? 'activeBranch' : '';       
 
         let mySymbol = 'fa-cubes'
         if ((item.el as any).mySymbol) mySymbol = (item.el as any).mySymbol;
@@ -149,6 +137,7 @@ export class PluginPageNavigation extends PluginBaseModule {
     //-------- IMPLEMENTATION --------------
 
     public forceUpdate(): void {
+        
         this.requestUpdate();
 
     }
@@ -164,7 +153,7 @@ export class PluginPageNavigation extends PluginBaseModule {
             let info: IInfoElChildren | undefined;
             const tag = element.tagName.toLowerCase();
             if (tag.startsWith('ica') && !tag.startsWith('ica-page-overlay')) {
-                info = { el: element as IcaLitElementBaseMethods, children: [] as any };
+                info = { el: element as IcaLitElementBaseMethods, id: element.id, children: [] as any };
                 array.push(info);
             }
 
@@ -199,7 +188,7 @@ export class PluginPageNavigation extends PluginBaseModule {
     }
 
 
-    private idLastClick: string = '';
+    //private idLastClick: string = '';
     private selectItem(e: MouseEvent, item: IInfoElChildren): void {
 
         e.stopPropagation();
@@ -211,23 +200,28 @@ export class PluginPageNavigation extends PluginBaseModule {
         if (!target) return;
 
         const active = this.querySelector('.activeBranch') as HTMLElement;
-        if (active && active === target) return;
+        if (active && active === target) {
+            return;
+        }
+
         if (active) active.classList.remove('activeBranch');
 
-        target.classList.add('activeBranch');
+        //target.classList.add('activeBranch');
 
         item.el.style.border = '';
-        const father = item.el.closest('*[rendertype="editactive"]');
+        item.el.overlayRef?.click();
+        item.el.overlayRef?.scrollIntoView({ block: 'center' });
+        /*const father = item.el.closest('*[rendertype="editactive"]');
         if (father) {
 
-            this.idLastClick = target.id;
+            this.idLastClick = item.id;
             item.el.overlayRef?.click();
             item.el.overlayRef?.scrollIntoView({ block: 'center' });
 
         } else {
             item.el.overlayRef?.click();
             item.el.overlayRef?.scrollIntoView({ block: 'center' });
-        }
+        }*/
 
     }
 
@@ -475,6 +469,7 @@ export class PluginPageNavigation extends PluginBaseModule {
 
 interface IInfoElChildren {
     el: IcaLitElementBaseMethods,
+    id:string,
     children: IInfoElChildren[]
 }
 

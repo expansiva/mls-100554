@@ -1,18 +1,14 @@
 /// <mls shortName="wcdOverlayModeStoryItem" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement, PropertyValueMap, unsafeHTML } from 'lit';
+import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import {  initWCDToolbox} from './_100554_wcdToolbox';
-import { WCDOverlayItensMethods, WCDOverlayMethods, WCDToolboxMethodos } from './_100554_wcdTypes';
+import { WcdOverlayItemLitBase } from './_100554_wcdOverlayItemLitBase';
+import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { IICADepths } from './_100554_icaTypes';
 import { getPosition } from './_100554_icaGlobal';
 
-export function initWcdOverlayModeStoryItem(): boolean {
-    return true;
-}
-
 @customElement('wcd-overlay-mode-story-item-100554')
-export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayItensMethods {
+export class WcdOverlayModeStoryItem extends WcdOverlayItemLitBase  {
 
     @property() info: IICADepths | undefined;
 
@@ -24,28 +20,12 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
 
     public overlay: WCDOverlayMethods | undefined;
 
-    constructor() {
-        super();
-        initWCDToolbox();
-    }
+    public fcCallBackClick = (e:MouseEvent)=>{};
+    public fcCallBackLeave = (e:MouseEvent)=>{};
+    public fcCallBackOver = (e:MouseEvent)=>{}; 
+
 
     //---------COMPONENT--------------
-
-    createRenderRoot() {
-        return this; // dont use shadow root
-    }
-
-    firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
-        super.firstUpdated(_changedProperties);
-        this.setEvents();
-    }
-
-    updated(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
-        super.updated(changedProperties);
-        if (changedProperties.has('level') && changedProperties.get('level') !== undefined) {
-            this.checkToChangeWCD();
-        }
-    }
 
     render() {
 
@@ -67,151 +47,5 @@ export class WcdOverlayModeStoryItem extends LitElement implements WCDOverlayIte
         return html`${unsafeHTML(aux)}`;
     }
 
-    //---------IMPLEMENTS--------------
-
-    private setEvents() {
-        this.onmouseover = (e) => {
-            this.onIcaOverlayItemOver(e);
-        };
-        this.onmouseleave = (e) => {
-            this.onIcaOverlayItemLeave(e);
-        };
-        this.onclick = (e) => {
-            this.onIcaOverlayItemClick(e);
-        };
-    }
-
-    private onIcaOverlayItemLeave(e: MouseEvent) {
-        this.style.opacity = '';
-        this.style.background = '';
-    }
-
-    private onIcaOverlayItemOver(e: MouseEvent) {
-        const wcdOther = this.parentElement?.querySelector('wcd-toolbox-100554') as HTMLElement;
-        if (wcdOther) {
-            const elSelected = wcdOther.parentElement as WcdOverlayModeStoryItem;
-            if (this.isOverlapping(elSelected, this)) {
-                return;
-            }
-        }
-
-        const wcd = this.querySelector('wcd-toolbox-100554');
-        if (wcd) return;
-        this.style.background = '#d3e3fd';
-        this.style.opacity = '.3'
-    }
-
-    private isOverlapping(el1: WcdOverlayModeStoryItem, el2: WcdOverlayModeStoryItem): boolean {
-
-        const rect1 = el1.getBoundingClientRect();
-        const rect2 = el2.getBoundingClientRect();
-
-        return !(
-            rect1.top > rect2.bottom ||
-            rect1.right < rect2.left ||
-            rect1.bottom < rect2.top ||
-            rect1.left > rect2.right
-        );
-    }
-
-    private async onIcaOverlayItemClick(e: MouseEvent) {
-        e.stopPropagation();
-        const origin = (e.detail as any).origin;
-        if (origin !== "editor") this.selectOnHTML();
-
-        const iHave = this.querySelector('wcd-toolbox-100554');
-        if (iHave) return;
-
-        const group = this.findAncestorWithIsicaGroup(this.info?.element);
-        if(group && (group as any).overlayRef){
-            (group as any).overlayRef.click();
-            return;
-        }
-
-        await this.addWCDToolbox(e.x, e.y);
-        if (this.level !== '3') return;
-        //mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
-        mls.events.fire(3, 'WCDEventChange' as any, `{"op":"Navigation"}`);
-    }
-
-    private findAncestorWithIsicaGroup(element: HTMLElement | undefined) {
-
-        while (element) {
-            if (element !== this.info?.element && element.hasAttribute && element.hasAttribute('isicagroup') && element.getAttribute('isicagroup') === 'true') {
-                return element;
-            }
-
-            if (element.parentNode) {
-                element = element.parentNode as HTMLElement;
-            } else if ((element as any).host) {
-                // If inside a shadow DOM, move up to the host
-                element = (element as any).host as HTMLElement;
-            } else {
-                // Reached the top of the DOM tree
-                break;
-            }
-        }
-
-        return null;
-    }
-
-    private async addWCDToolbox(x:number= 0,y:number= 0) {
-        if (!this.overlay || !this.info || !this.level) return;
-
-        this.style.opacity = '';
-        this.style.background = '';
-
-        const iHaveEvents = this.querySelector('.itemHasEvent') as HTMLElement;
-        if (iHaveEvents) {
-            iHaveEvents.style.display = 'none';
-        }
-
-        const wcds = this.overlay.querySelectorAll('wcd-toolbox-100554');
-        wcds.forEach((wc) => {
-            const pr = wc.closest('wcd-overlay-mode-story-item-100554') as WcdOverlayModeStoryItem;
-            if (pr && pr.info) pr.info.element.setAttribute('renderType', 'edit');
-            const oelHaveEvents = pr.querySelector('.itemHasEvent') as HTMLElement;
-            if(oelHaveEvents) oelHaveEvents.style.display = 'flex'
-            wc.remove()
-        });
-        const wcd = document.createElement('wcd-toolbox-100554') as WCDToolboxMethodos;
-        wcd.setAttribute('level', this.level);
-        wcd.elICA = this.info.element;
-        this.info.element.setAttribute('renderType', 'editactive')
-        wcd.setAttribute('initialclick', `${x},${y}`);
-        wcd.lastHelper = '';
-
-        this.appendChild(wcd);
-    }
-
-    private selectOnHTML(): void {
-
-        if (!this.info || !this.info.element) return;
-        const level = this.info.element.getAttribute('level');
-        if (level !== '2') return;
-
-        const id = this.info.element.getAttribute('idel');
-        if (!id) return;
-        const infoL2 = (mls.actual[2] as any).left as any;
-        const name = mls.l2.getKey({ project: infoL2.project, shortName: infoL2.shortName });
-        const models = mls.editor.models[name];
-        if (!models || !models.html) return;
-
-        const model = models.html.model;
-        const line = model.findMatches(`id="${id}"`, false, false, false, null, true);
-        if (!line || !line[0]) return;
-        const { startLineNumber } = line[0].range;
-
-        mls.events.fire(2, 'WidgetAction' as any, `{"op":"SelectLine", "line":${startLineNumber}, "origin":"preview"}`);
-
-    }
-
-    private async checkToChangeWCD() {
-
-        const wcd = this.querySelector('wcd-toolbox-100554') as WCDToolboxMethodos;
-        if (!wcd) return;
-        if (!this.info || !this.info.element) return;
-        await this.addWCDToolbox();
-    }
 
 }
