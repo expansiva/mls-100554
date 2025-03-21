@@ -69,7 +69,7 @@ const messages: { [key: string]: MessageType } = {
 export class PluginCollabLogin100554 extends PluginBaseModule {
 
   private msg: MessageType = messages['en'];
-  private googleState = ''
+  private googleState = '';
 
   render() {
     const lang = this.getMessageKey(messages);
