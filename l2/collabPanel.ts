@@ -10,7 +10,6 @@ import { CollabLitElement } from './_100554_collabLitElement';
 export class CollabPanel extends CollabLitElement {
 
     @query('details') detail: HTMLDetailsElement | undefined;
-
     @property({ type: Boolean, reflect: true }) open = true;
     @property({ reflect: true }) icon = '';
 
