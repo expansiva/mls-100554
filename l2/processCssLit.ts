@@ -11,7 +11,7 @@ export async function injectStyleWithoutShadowRoot(modelTS: mls.editor.IModelTS,
     if (!modelTS) return;
     const modelStyle = mls.editor.getModels(modelTS.storFile.project, modelTS.storFile.shortName)?.style;
     if (!modelStyle) return;
-    
+
 
     const css = await compileStyleUsingMFile(modelStyle, ':root', theme);
     if (!css) return;
@@ -21,9 +21,14 @@ export async function injectStyleWithoutShadowRoot(modelTS: mls.editor.IModelTS,
         modelTS.compilerResults.prodJS = newJs;
         mls.stor.cache.clearObsoleteCache();
         modelTS.compilerResults.cacheVersion = generateCompactTimestamp();
+        
+        await delay(200);
+        let { project, shortName, folder, extension } = modelTS.storFile;
+        const version = modelTS.compilerResults.cacheVersion;
+        extension = extension.replace('.ts', '.js');
+        await mls.stor.cache.addIfNeed({ project, folder, shortName, version, content: newJs, extension });
 
-        await delay(100);
-        await mls.l2.typescript.compileAndPostProcess(modelTS, false, true);
+        //await mls.l2.typescript.compileAndPostProcess(modelTS, false, true);
 
         // mls.stor.cache.AddMfileIfNeed(modelTS as any);
 
@@ -40,8 +45,8 @@ export async function injectStyleWithoutShadowRoot(modelTS: mls.editor.IModelTS,
 }
 
 function delay(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function addLineInConstructor(code: string, lineToAdd: string): string {
 
