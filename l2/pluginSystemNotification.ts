@@ -3,7 +3,6 @@
 import { html, css, svg, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
 
 /// **collab_i18n_start**
 const message_pt = {

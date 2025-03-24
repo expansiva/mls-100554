@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IMenu, IServiceMenu, IOptions } from './_100554_serviceBase';
+import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_serviceBase';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { getConfigProject } from './_100554_libProjectConfig';
