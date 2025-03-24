@@ -757,7 +757,9 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onBtDarkLightClick() {
+        
         this.light = !this.light;
+        if (!(mls.actual[2] as any).left || !this.watch) return this.light;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         if (htmlEl) {
             if (this.light) htmlEl.removeAttribute('data-theme');
