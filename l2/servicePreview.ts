@@ -952,6 +952,7 @@ export class ServicePreview100554 extends ServiceBase {
         const testResultElActions = document.createElement('div');
         const actionClose = document.createElement('i');
         actionClose.className = 'fa fa-times';
+        actionClose.style.color = '#000000';
         actionClose.onclick = () => {
             this.closeTestResults();
         }
