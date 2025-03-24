@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
-import { ServiceBase, IService, IToolbarContent, IMenu, IMenuTitle, IServiceMenu, ITools } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions, ITools } from './_100554_serviceBase';
 import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
 import { removeTokensFromSource, getTokensLess } from './_100554_enhancementStyle';
@@ -1222,7 +1222,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (!this._ed1 || !this.menu.getLastMode) return false;
         const changedFile: boolean = this.menu.title !== shortName;
-        (this.menu.title as IMenuTitle).text = `_${project}_${shortName}`;
+        (this.menu.title as IOptions).text = `_${project}_${shortName}`;
         const lastMode = this.menu.getLastMode();
         if (changedFile && lastMode !== 'initial') {
             // user choice another file, goto initial editor
