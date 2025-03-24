@@ -92,11 +92,6 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
         const menu = {
             itens: [
                 {
-                    item: '_100554_wcdToolboxItemActionEvents',
-                    args: '',
-                    level: [2],
-                },
-                {
                     item: '_100554_wcdToolboxItemActionEditAttr',
                     args: '',
                     level: [3],
