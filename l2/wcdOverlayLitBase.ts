@@ -36,6 +36,16 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
 
     firstUpdated(changedProperties: Map<string | number | symbol, unknown>) {
         super.firstUpdated(changedProperties);
+        if (typeof ResizeObserver !== 'undefined') {
+            if (this.resizeObserver) this.resizeObserver.disconnect();
+            this.resizeObserver = new ResizeObserver(entries => {
+                if (this.timeoutResize) clearTimeout(this.timeoutResize);
+                this.timeoutResize = setTimeout(() => {
+                    this.updateSizeOverlayItems();
+                })
+            });
+            this.resizeObserver.observe(this);
+        }
         this.updateSizeOverlayItems();
     }
 
@@ -90,7 +100,7 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
         }
 
         if (this.myKeyEvents[e.key]) {
-            param.selectedIca = el.elICA;//as IcaLitElementBase;
+            param.selectedIca = el.elICA;
             this.myKeyEvents[e.key](param);
         }
 
@@ -105,16 +115,14 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
             this.createOverlayItem(item, this as HTMLElement, boundingPage);
         });
 
-        setTimeout(()=>this.updateSizeOverlayItems(),100)
+        setTimeout(() => this.updateSizeOverlayItems(), 100)
     }
 
     changeOverlayItemsLevel(): void {
-
         if (!this) return;
         Array.from(this.children).forEach((item) => {
             item.setAttribute('level', this.level);
         });
-
     }
 
     private createOverlayItem(icaInfo: IICADepths, content: HTMLElement, boundingPage: DOMRect): void {
@@ -132,7 +140,6 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
         requestAnimationFrame(() => {
             const items = Array.from(this.children) as WCDOverlayItensMethods[];
             const boundingPage = this.getBoundingClientRect();
-
             items.forEach((item) => {
                 if (!item.info) return;
                 const { x, y, height, width } = item.info.element.getBoundingClientRect();
@@ -151,4 +158,3 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
     }
 
 }
-
