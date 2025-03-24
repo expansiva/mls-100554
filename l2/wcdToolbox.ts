@@ -7,6 +7,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 import { ServiceBase } from './_100554_serviceBase';
 import { WCDToolboxMethodos, WCDToolboxItemMethodos } from './_100554_wcdTypes';
 import { globalWcd } from './_100554_wcdState';
+import { execute as excCommandDel } from './_100554_wcdCommandDel';
 
 import * as tps from './_100554_icaTypes';
 
@@ -69,7 +70,9 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         //globalWcd.elMain = undefined;
         if (this.parentElement && (this.parentElement as any).fcRemoveWcd)
             (this.parentElement as any).fcRemoveWcd();
-            
+
+        this.verifyNeedDel();
+
         super.disconnectedCallback();
         if (this.resizeObserver) this.resizeObserver.disconnect();
     }
@@ -81,10 +84,9 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         this._renderAction();
 
     }
-
+ 
     render() {
         return html`
-        <style>${this.css}</style>
          <wcd-toolbox-aux-background></wcd-toolbox-aux-background>
         `;
     }
@@ -99,7 +101,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         }
 
         await new Promise((resolve) => setTimeout(resolve, 500));
-        
+
     }
 
     public updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean): void {
@@ -500,8 +502,8 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
             elChange.style.top = `${top - 1}px`;
         }
 
-        elChange.style.width = `${width }px`;
-        elChange.style.height = `${height +1 }px`;
+        elChange.style.width = `${width}px`;
+        elChange.style.height = `${height + 1}px`;
         elChange.style.display = display;
 
     }
@@ -595,259 +597,28 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     }
 
-    //--------------CSS--------------------
+    private verifyNeedDel() {
 
-    //static styles = css` #c8c8c8c2; border:1px solid #d3cece;
-    private css = `
+        if (!this.elICA || !this.elICA.overlayRef) return;
+        const acts = this.elICA.getActionsTags()
 
-        wcd-toolbox-100554{
-            display:block;
-            
-            position:absolute;
-            user-select:none;
-            background: transparent;
+        if (acts.some((a) => a.name === 'add')) {
+            const param = {
+                args: new KeyboardEvent('keydown', {
+                    key: 'Del',
+                    code: 'Del',
+                    keyCode: 13,
+                    bubbles: true,
+                    cancelable: true,
+                    composed: true,
+                }),
+                overlay: this.elICA.overlayRef.parentElement as any,
+                selectedIca: globalWcd.elICA
+            }
+
+            excCommandDel(param);
         }
+    }
 
-        .wcdBackButton{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-2rem;
-            right:0px
-        }
-
-        .p-l0{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-2rem;
-            left:-6px
-        }
-
-        .p-l1{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-6px;
-            left:-6px
-        }
-
-        .p-l2{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:50%;
-            left:-6px;
-            transform: translateY(-50%);
-        }
-
-        .p-l3{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-6px;
-            left:-6px;
-        }
-
-        .p-l4{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-2rem;
-            left:0px;
-        }
-
-        .p-l5{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:50%;
-            left:-23px;
-            transform: translateY(-50%);
-        }
-
-        .p-m0{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-2rem;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .p-m1{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-6px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .p-m2{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .p-m3{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-6px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .p-m4{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-2rem;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .p-r0{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-2rem;
-            right:-6px
-        }
-
-        .p-r1{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:-6px;
-            right:-6px
-        }
-
-        .p-r2{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top:50%;
-            right:-6px;
-            transform: translateY(-50%);
-        }
-
-        .p-r3{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-6px;
-            right:-6px;
-        }
-
-        .p-title{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-16px;
-            right:-6px;
-        }
-
-        .p-title-top{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            top: -17px;
-            left: -6px;
-        }
-
-        .p-r4{
-            cursor:pointer;
-            display:block;
-            position:absolute;
-            bottom:-2rem;
-            right:-6px;
-        }
-
-        .f-button{
-            cursor:pointer;
-            background:#fff!important;
-            padding:5px;
-            border-radius:5px;
-            border: 1px solid var(--grey-color-darker);
-            width: 15px;
-            height: 15px;
-            display: flex;
-
-        }
-
-        .f-circle{
-            width:10px;
-            height:10px;
-            background:#fff;
-            border-radius:50%;
-            box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);
-        }
-        
-
-        .f-square{
-            width:23px;
-            height:7px;
-            background:#fff;
-            border-radius:3px;
-            box-shadow: 0 0 4px 1px rgba(57,76,96,.15), 0 0 0 1px rgba(43,59,74,.3);
-        }
-
-        .p-l1.f-square{
-            top:-4px;
-            left:-4px
-        }
-
-        .p-l2.f-square{
-            top:50%;
-            left:-4px;
-            width:7px;
-            height:23px;
-        }
-
-        .p-l3.f-square{
-            bottom:-4px;
-            left:-4px;
-        }
-
-        .p-m1.f-square{
-            top:-4px;
-            width:23px;
-            height:7px;
-        }
-
-        .p-m2.f-square{
-            width:23px;
-            height:7px;
-        }
-
-        .p-m3.f-square{
-            bottom:-4px;
-            width:23px;
-            height:7px;
-        }
-
-        .p-r1.f-square{
-            top:-4px;
-            right:-4px
-        }
-
-        .p-r2.f-square{
-            right:-4px;
-            width:7px;
-            height:23px;
-        }
-
-        .p-r3.f-square{
-            bottom:-4px;
-            right:-4px;
-        }
-
-
-    `;
 
 }
