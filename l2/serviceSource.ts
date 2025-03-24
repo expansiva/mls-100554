@@ -2253,7 +2253,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     //--------------WidgetAction--------------
 
-    private lastScenario = '';
     private lastOrigin = 'editor';
     private onWidgetActionEvents(ev: mls.events.IEvent) {
 
@@ -2269,18 +2268,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             case 'SelectLine':
                 this.selectLineinHTML(json.line, json.origin);
                 break;
-            case 'OpenScenario':
-                this.openScenario(json);
-                break;
-            case 'CreateOrSetEvent':
-                this.createOrSetEvent(json);
-                break;
-            case 'CreateOrSetEventPR':
-                this.createOrSetEventPR(json);
-                break;
             default:
                 console.info('Erro: opção invalida');
-
         }
 
     }
@@ -2291,130 +2280,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         this.lastOrigin = origin;
         if (origin === 'editor') return;
         this.goToLine(line);
-    }
-
-    private openScenario(json: any) {
-        (window as any).infoScenarioInsertOrCreateEvent = {
-            id: json.id,
-            value: json.value
-        };
-        this.lastScenario = json.widget;
-        this.addScenario(json.widget);
-    }
-
-    private closeScenario() {
-        if (!this.lastScenario) return;
-        this.removeScenario(this.lastScenario);
-    }
-
-    private createOrSetEvent(json: any) {
-
-        //{"op":"CreateOrSetEvent", "id":"test", "event":"click", "device":"desktop"}
-        let isExistEVentInHTML = this.isEventExist(json.id, json.event);
-        let isExistEVentInTS = false;
-        const nameFc = getEventName(json.event, json.id, json.device);
-        if (isExistEVentInHTML) {
-
-            const line = this.searchLineByStringTs(nameFc);
-            if (line && this.menu.setTabActive) {
-                isExistEVentInTS = true;
-                this.menu.setTabActive(EToolsSource.icTs);
-                this.goToLine(line);
-            }
-
-        }
-
-        if (!isExistEVentInTS) {
-
-            if (!isExistEVentInHTML) this.setEventInHTml(json.id, json.event);
-            setTimeout(() => {
-                const str = `private ${nameFc}(){\n//Edit here your event ${json.event} code\n\n}`;
-                const line = this.searchLineByStringTs('/// **collab_events_start**');
-                if (!line) throw new Error('Not found collab_events_start');
-                this.setEditorValueByLineTs(str, line + 1);
-            }, 500);
-
-        }
-
-        this.closeScenario();
-
-    }
-
-    private createOrSetEventPR(json: any) {
-
-        //{"op":"CreateOrSetEvent", "id":"test", "event":"click", "device":"desktop", "func":""}
-        let isExistEventInHTML = this.isEventExist(json.id, json.event);
-        let isExistEventInTS = false;
-        const nameFc = getEventName(json.event, json.id, json.device);
-
-        if (isExistEventInHTML) {
-            const line = this.searchLineByStringTs(nameFc);
-            if (line && this.menu.setTabActive) {
-                isExistEventInTS = true;
-                this.menu.setTabActive(EToolsSource.icTs);
-                this.goToLine(line);
-            }
-        }
-
-        if (!isExistEventInTS) {
-            if (!isExistEventInHTML) this.setEventInHTml(json.id, json.event);
-            setTimeout(() => {
-                const str = `private ${nameFc}${json.func}`;
-                const line = this.searchLineByStringTs('/// **collab_events_start**');
-                if (!line) throw new Error('Not found collab_events_start');
-                this.setEditorValueByLineTs(str, line + 1);
-            }, 500);
-        }
-
-        this.closeScenario();
-
-    }
-
-    private isEventExist(id: string, event: string): boolean {
-
-        let isExist = false;
-        const strHtml = this.getEditorHTMLValue();
-        const html = document.createElement('div');
-        html.innerHTML = strHtml;
-        const el = html.querySelector('#' + id) as HTMLElement;
-        if (el && el.dataset && el.dataset.event) {
-            const events = el.dataset.event.split(' ');
-            isExist = events.includes(event);
-        }
-        return isExist;
-
-    }
-
-    private setEventInHTml(id: string, event: string) {
-
-        if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile || !this.activeModels.html.model) return;
-
-        const strHtml = this.getEditorHTMLValue();
-        const html = document.createElement('div');
-        html.innerHTML = strHtml;
-
-        const el = html.querySelector('#' + id) as HTMLElement;
-        if (!el) return;
-        if (el.dataset && el.dataset.event) {
-
-            const events = el.dataset.event.split(' ');
-            if (!events.includes(event)) {
-                events.push(event);
-                el.dataset.event = events.join(' ');
-            }
-
-        } else {
-
-            el.setAttribute('data-event', event);
-
-        }
-
-        if (!this._ed1) return;
-        if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icHTML);
-
-        if (!this.activeModels.html.model) return;
-        this.activeModels.html.model.setValue(html.innerHTML);
-
     }
 
     private registerProviderHTML() {

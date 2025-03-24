@@ -7,7 +7,6 @@ import * as libCommom from './_100554_libCommom';
 @customElement('service-base-100554')
 export abstract class ServiceBase extends IcaLitElement {
 
-    // @property({ type: Number, reflect: true })
     get level(): mls.Level { return +(this.getAttribute('level') || 7) as mls.Level };
 
     @property({ type: String, reflect: true })
@@ -56,7 +55,7 @@ export abstract class ServiceBase extends IcaLitElement {
 
     abstract details: IService;
 
-    abstract menu: IMenu | IServiceMenu;
+    abstract menu: IServiceMenu;
 
     abstract onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void;
 
@@ -104,31 +103,6 @@ export abstract class ServiceBase extends IcaLitElement {
         libCommom.selectLevel(level);
     }
 
-    public addScenario(page: string, fullscreen: boolean = false) {
-        const nav3 = this.getNav3ServiceMenu();
-        if (!nav3) return;
-        let scenarios = nav3.getAttribute('scenarios')
-        if (!scenarios) scenarios = page;
-        else scenarios = `${scenarios},${page}`;
-        nav3.setAttribute('scenarios', scenarios);
-        if (fullscreen) this.setFullScreen(this.level, this.position);
-    }
-
-    public removeScenario(page: string, fullscreen?: boolean) {
-        const nav3 = this.getNav3ServiceMenu();
-        if (!nav3) return;
-        let scenarios = nav3.getAttribute('scenarios')
-        if (!scenarios) return;
-        const arrayScenarios = scenarios.split(',');
-        const newArrayScenarios = arrayScenarios.filter(element => element !== page);
-        if (newArrayScenarios.length === 0) nav3.removeAttribute('scenarios');
-        else nav3.setAttribute('scenarios', newArrayScenarios.join(','));
-        if (fullscreen) this.setFullScreen(this.level, this.position);
-        else if (fullscreen === false) this.setFullScreen(this.level, 'default');
-    }
-
-
-    // Internal
     connectedCallback() {
         super.connectedCallback();
         (this as any)['mlsWidget'] = this;
@@ -234,58 +208,6 @@ export abstract class ServiceBase extends IcaLitElement {
 
 }
 
-export interface IMenuKeyValue {
-    [key: string]: string
-}
-export interface IIconsKeyValue {
-    [key: string]: string
-}
-
-export interface IButtonsKeyValue {
-    [key: string]: string
-}
-
-export type IClickLinkCallBack = (op: string) => boolean | undefined;
-export type IClickIconCallBack = (op: string) => void | undefined;
-export type IClickTitleCallBack = (title: string) => void | undefined;
-export type IClickButtonCallBack = (op: string, opMenu?: string) => boolean;
-
-export type ISetMode = (mode: IMode | null, page?: HTMLElement) => void;
-export type IGetLastMode = () => IMode;
-export type IMode =
-    'initial' // show siblings with hamburguer icon
-    | 'page' // show page (About ...) with close icon
-    | 'editor'; // show siblings with close icon
-
-export interface IMenu {
-    title: IMenuTitle | string,
-    actions: IMenuKeyValue,
-    icons: IIconsKeyValue,
-    buttons?: IButtonsKeyValue,
-
-    actionDefault?: string,
-    iconDefault?: string,
-    onClickTitle?: IClickTitleCallBack,
-    onClickLink?: IClickLinkCallBack,
-    onClickIcon?: IClickIconCallBack,
-    onClickButton?: IClickButtonCallBack,
-    setMode?: ISetMode,
-    setIconActive?: (op: string) => void,
-    setMenuActive?: (op: string) => void,
-    selectButton?: (op: string) => void
-    toggleErrorIcon?: (op: string, show: boolean) => void,
-    closeMenu?: Function,
-    refresh?: Function,
-    getLastMode?: IGetLastMode,
-    lastIcon?: string,
-    updateTitle?: Function,
-    iconMenuType?: 'full' | 'onlyicon',
-}
-
-export interface IMenuTitle {
-    text: string,
-    icon: string
-}
 
 export interface IToolbarContent extends HTMLElement {
     layout: Function
