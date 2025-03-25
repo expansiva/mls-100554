@@ -5,7 +5,7 @@ import { AimTaskBase } from "./_100554_aimTaskBase";
 import { getDataInternationalization } from './_100554_aimTaskGetSourceLanguageTypescript';
 import { ITaskFileInfo, ITaskRootArgsInitial } from './_100554_aimAddLanguageBase';
 import { ICollabLanguage } from './_100554_collabLanguages';
-import { checkAttributteHasVariation } from './_100554_icaBaseDescription';
+import { checkAttributteHasVariation } from './_100554_icaBaseDescription2';
 
 @customElement('aim-task-get-source-languages-100554')
 export class AimTaskGetSourceLanguages extends AimTaskBase {

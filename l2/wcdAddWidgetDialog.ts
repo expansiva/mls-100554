@@ -8,12 +8,8 @@ import { globalWcd } from './_100554_wcdState';
 import { executeFromTag, getOverlay } from './_100554_wcdCommandAdd';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import {
-    getDescriptionsRootGroup,
-    getDescriptionsFinalGroup,
-    getDescriptionsSubGroup,
-    getFormComponentsDescription,
-} from './_100554_icaBaseDescription';
-
+    getGroups
+} from './_100554_icaBaseDescription2';
 
 
 /// **collab_i18n_start**
@@ -141,12 +137,12 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
     }
 
     private renderGroupsRoot() {
-        const groups = getDescriptionsRootGroup();
+        const groups = getGroups();
 
         return html`
         <div class="group-container">
 
-            ${repeat(groups, ((key: string) => 'gp_' + key) as any,
+            ${repeat(Object.keys(groups), ((key: string) => 'gp_' + key) as any,
             ((k: string, index: any) => {
                 return html`
                     <div class="group-item" @click=${() => { this.onClickRootGroup(k) }}>
@@ -161,12 +157,11 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
     private renderSubGroups() {
 
         const [, rootSelected] = this.actualBreadCrumb;
-        const groups = getDescriptionsSubGroup(rootSelected);
+        const groups = getGroups();
 
         return html`
         <div class="group-container">
-            ${groups.map((subGroup) => {
-
+            ${Object.keys(groups[rootSelected]).map((subGroup) => {
             return html`
             <div class="group-item" @click=${() => { this.onClickSubGroup(rootSelected, subGroup) }}>
                 <span class="group-title">${subGroup}</span>
@@ -180,10 +175,13 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
 
     private renderFinalGruops() {
         const [, rootSelected, subGroupSelected] = this.actualBreadCrumb;
-        const groups = getDescriptionsFinalGroup(rootSelected, subGroupSelected);
+        const groups = getGroups();
+        console.info(groups)
+        console.info(Object.keys(groups[rootSelected][subGroupSelected]));
+
         return html`
         <div class="group-container">
-            ${groups.map((finalGroup) => {
+            ${groups[rootSelected][subGroupSelected].map((finalGroup) => {
 
             return html`
                 <div class="group-item" @click=${() => { this.onClickFinalGroup(rootSelected, subGroupSelected, finalGroup) }}>
@@ -257,16 +255,11 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
     }
 
     private onClickFinalGroup(rootGroup: string, subGroup: string, finalGroup: string) {
-        this.actualBreadCrumb = [this.rootBread, rootGroup, subGroup, finalGroup];
+        this.actualBreadCrumb = [rootGroup, subGroup, finalGroup];
         this.actualMode = 'empty';
-        this.listWidgets = this.allWidgets.filter((i) => i.cat.indexOf(this.actualBreadCrumb.join('').replace('root', '')) >= 0);
+        this.listWidgets = this.allWidgets.filter((i) => i.tagBase.indexOf(this.actualBreadCrumb.join('-')) >= 0);
         this.requestUpdate();
-
     }
-
-
-
-
 
 
     private async handleKeyDown(event: KeyboardEvent) {

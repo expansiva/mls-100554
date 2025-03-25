@@ -649,32 +649,67 @@ export function getDefinitionByTag(tag: string): ComponentDescription | undefine
 }
 
 export function checkAttributteHasVariation(attribute: string): boolean {
-  const attr = attributeDefinitions.find((attr) => attr.path === attribute);
-  if (!attr) return false;
-  return attr.variations === true;
+    const attr = attributeDefinitions.find((attr) => attr.path === attribute);
+    if (!attr) return false;
+    return attr.variations === true;
 }
 
-export function getAttributeDefinitions(root: string, subGroup: string, finalGroup: string): string[] {
-  const rc = new Set<string>();
-  const attrs = getFormComponentsAttributes(root, subGroup, finalGroup)
-  for (const att of attrs.split(',')) {
-    rc.add(att)
-  };
-  return Array.from(rc);
-
+export function getAttributeDefinitions(tag: string): string[] {
+    const rc = new Set<string>();
+    tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
+    if (!tag.toLocaleLowerCase().startsWith('ica-')) return [];
+    if (!icaDescriptions[tag]) return [];
+    const attrs = icaDescriptions[tag].attributes;
+    for (const att of attrs) {
+        rc.add(att)
+    };
+    return Array.from(rc);
 }
 
-export function getAttributeDefinitionsLit(root: string, subGroup: string, finalGroup: string): string[] {
-  const rc = new Set<string>();
-  const attrs = getFormComponentsAttributes(root, subGroup, finalGroup)
-  for (const att of attrs.split(',')) {
-    const def = attributeDefinitions.find((item) => item.path.trim() === att.trim());
-    if (def) rc.add(def.lit);
-  };
-  return Array.from(rc);
+export function getAttributeDefinitionsLit(tag: string): string[] {
+    const rc = new Set<string>();
+    tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
+    if (!tag.toLocaleLowerCase().startsWith('ica-')) return [];
+    if (!icaDescriptions[tag]) return [];
+    const attrs = icaDescriptions[tag].attributes;
+
+    for (const att of attrs) {
+        const def = attributeDefinitions.find((item) => item.path.trim() === att.trim());
+        if (def) rc.add(def.lit);
+    };
+    return Array.from(rc);
 }
 
-export function canMoveElement( element: IcaLitElementBaseMethods, newParent: IcaLitElementBaseMethods): boolean {
+export function getGroups(): Record<string, Record<string, string[]>> {
+    return transformIcaDescriptions(icaDescriptions)
+}
+
+function transformIcaDescriptions(icaDescriptions: IIcaDescriptions): Record<string, Record<string, string[]>> {
+    const result: Record<string, Record<string, string[]>> = {};
+    
+    Object.keys(icaDescriptions).forEach((key) => {
+        const parts = key.split("-").slice(1); 
+
+        if (parts.length < 2) return; 
+        const [category, type] = parts;
+        const rest = parts.slice(2).join("-");
+        
+        if (!result[category]) {
+            result[category] = {};
+        }
+        
+        if (!result[category][type]) {
+            result[category][type] = [];
+        }
+        
+        result[category][type].push(rest || type);
+    });
+    
+    return result;
+}
+
+
+export function canMoveElement(element: IcaLitElementBaseMethods, newParent: IcaLitElementBaseMethods): boolean {
 
     const elementTag = removeProjectNumberSegment(element.tagName.toLocaleLowerCase());
     const newParentTag = removeProjectNumberSegment(newParent.tagName.toLocaleLowerCase());
@@ -682,14 +717,13 @@ export function canMoveElement( element: IcaLitElementBaseMethods, newParent: Ic
     const dElement = icaDescriptions[elementTag];
     const dNewParent = icaDescriptions[newParentTag];
 
-    if (!dElement || !dNewParent) return false; 
-
+    if (!dElement || !dNewParent) return false;
     if (dNewParent.allowedChildren.includes("!*")) {
         return false;
     }
-    
+
     const parentCanHaveChild = dNewParent.allowedChildren.some(childPattern => {
-        
+
         if (childPattern.endsWith("-*")) {
             return elementTag.startsWith(childPattern.slice(0, -1));
         }
@@ -698,7 +732,7 @@ export function canMoveElement( element: IcaLitElementBaseMethods, newParent: Ic
     });
 
     if (!parentCanHaveChild && dNewParent.allowedChildren.length > 0) return false;
-    
+
     const childCanHaveParent = dElement.allowedParents.some(parentPattern => {
 
         const searchParents = parentPattern.startsWith('**');
@@ -709,64 +743,27 @@ export function canMoveElement( element: IcaLitElementBaseMethods, newParent: Ic
         }
 
         if (searchParents && parentPattern !== newParentTag) {
-            return hasParentWithPrefix(newParent,parentPattern);    
+            return hasParentWithPrefix(newParent, parentPattern);
         }
 
         return parentPattern === newParentTag;
     });
 
-    if (!childCanHaveParent && dElement.allowedParents.length > 0) return false; 
+    if (!childCanHaveParent && dElement.allowedParents.length > 0) return false;
 
     return true;
-    
+
 }
 
 function hasParentWithPrefix(element: HTMLElement, prefix: string): boolean {
 
     let parent = element.parentElement;
-    
     while (parent) {
         if (parent.tagName.toLowerCase().startsWith(prefix)) {
             return true;
         }
         parent = parent.parentElement;
     }
-    
     return false;
 }
 
-//-------FUNCTIONS OLDS
-
-export function getDescriptionsRootGroup(): string[] {
-    return ['Descriptions Root Group obsolete'];
-}
-
-export function getDescriptionsSubGroup(root: string): string[] {
-  return ['Descriptions Sub Group obsolete'];
-}
-
-export function getDescriptionsFinalGroup(root: string, subGroup: string): string[] {
-  return ['Descriptions Final Group obsolete'];
-}
-
-export function getFormComponentsDescription(root: string, subGroup: string | null, finalGroup: string | null): string {
-  return 'Form Components Description obsolete'
-}
-
-
-
-export function getFormComponentsAttributes(root: string, subGroup: string, finalGroup: string): string {
-  return "Form Components Attributes obsolete";
-}
-
-export function getEventDescription(root: string, subGroup: string, finalGroup: string, event: string): string {
-    return 'Event description obsolete'
-}
-
-export function getFormComponentsEvents(root: string, subGroup: string, finalGroup: string): string {
-    return 'Event obsolete'
-}
-
-export function getAttributeDefinitionsDesc(attribute: string): string {
-  return 'Attribute Definitions obsolete'
-}
