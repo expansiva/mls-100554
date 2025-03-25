@@ -4,6 +4,7 @@ import { PluginBaseIndex } from './_100554_pluginBaseIndex';
 
 export class PluginCollabCoreIndex extends PluginBaseIndex {
 
+
     public getMenus(): mls.plugin.MenuAction[] {
 
         return [

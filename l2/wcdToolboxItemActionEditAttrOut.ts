@@ -5,7 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
-import { getAtributtesByTag, checkAttributteHasVariation } from './_100554_icaBaseDescription';
+import { getAtributtesByTag, checkAttributteHasVariation } from './_100554_icaBaseDescription2';
 import "./_100554_wcdToolboxItemActionEditVariation";
 
 

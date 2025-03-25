@@ -4,7 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { getInfoServiceAim, InfoServiceAIM } from "./_100554_aimHelper";
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { convertFileNameToTag } from "./_100554_utilsLit";
-import { getAttributeDefinitionsLit } from './_100554_icaBaseDescription';
+import { getAttributeDefinitionsLit } from './_100554_icaBaseDescription2';
 import { IArgsAddIca } from './_100554_aimActionAddIca'
 import { ServiceSource100554 } from './_100554_serviceSource';
 
@@ -17,7 +17,7 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
 
     getSource() {
 
-        const promp: string | undefined= this.taskChild.prompt;
+        const promp: string | undefined = this.taskChild.prompt;
         if (!promp) {
             this.notifyCompleteByStatus('error', 'Invalid data in prompt');
             return;
@@ -59,7 +59,7 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
                     reject('Not found tripleSlashMLS in mfile compilerResults');
                     return;
                 }
-                
+
                 const activeOppositeService = info.activeOppositeService as ServiceSource100554;
                 if (activeOppositeService?.tagName !== 'SERVICE-SOURCE-100554') {
                     reject('100554_ServiceSource is not active in level 2');
@@ -73,7 +73,7 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
                 const importFile = `_100554_ica${group}`;
                 const extend = `Ica${group}`;
                 const [root, subgroup, finalgroup] = data.group;
-                const props = getAttributeDefinitionsLit(root, subgroup, finalgroup);
+                const props = getAttributeDefinitionsLit(`${root}-${subgroup}-${finalgroup}`);
 
                 const template = `
 /// <mls shortName="${tps.variables.shortName}" project="${tps.variables.project}" enhancement="${tps.variables.enhancement}" groupName="${group}" />

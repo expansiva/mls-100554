@@ -2,13 +2,10 @@
 
 import { html, unsafeHTML } from 'lit';
 import { property } from 'lit/decorators.js';
-
 import { IcaLitElement } from './_100554_icaLitElement';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import * as tps from './_100554_icaTypes';
 import * as globalIca from './_100554_icaGlobal';
-import * as myDefinition from './_100554_icaBaseDescription';
-
 
 export abstract class IcaLitElementBase extends IcaLitElement implements tps.IcaLitElementBaseMethods {
 
@@ -62,7 +59,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
     ): void {
         super.attributeChangedCallback(name, oldValue, newValue);
         if (!this.excludesProps.includes(name) && oldValue !== newValue && newValue) {
-            this.updateAttrInWc(name,newValue)
+            this.updateAttrInWc(name, newValue)
         }
     }
 
@@ -294,7 +291,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
 
     private getAttributes() {
 
-        const language = (this.closest('html') as HTMLHtmlElement)?.lang || 'en';    
+        const language = (this.closest('html') as HTMLHtmlElement)?.lang || 'en';
         const attributes = [];
         const attributeNames = this.getAttributeNames();
 
@@ -372,18 +369,21 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
 
     getMyEvents(): string {
         if (!this.myInfos) this.myInfos = this.getMyInfos();
-        return myDefinition.getFormComponentsEvents(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup);
+        return '';
+        // return myDefinition.getFormComponentsEvents(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup);
     }
 
     getDefinitionFromEvent(event: string): string {
         if (!this.myInfos) this.myInfos = this.getMyInfos();
-        return myDefinition.getEventDescription(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup, event);
+        return '';
+        // return myDefinition.getEventDescription(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup, event);
     }
 
     getAtributtes(): string[] {
 
         if (!this.myInfos) this.myInfos = this.getMyInfos();
-        return myDefinition.getAtributtes(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup);
+        return [];
+        //return myDefinition.getAtributtes(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup);
     }
 
 }
