@@ -5,6 +5,17 @@
 import { getTokensCss } from './_100554_designSystemBase';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 
+export const getDependenciesByHtmlFile = (file: mls.stor.IFileInfo, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
+    return new Promise<IJSONDependence>(async (resolve, reject) => {
+        try {
+            const ret = await getDependenciesFile(file, 'byHtml', html, theme, withCss);
+            resolve(ret)
+        } catch (e) {
+            reject(e);
+        }
+    });
+}
+
 export const getDependenciesByHtml = (models: mls.editor.IModels, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
         try {
@@ -60,6 +71,39 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
     const tag = convertFileNameToTag(`_${project}_${shortName}`);
     if (!tags.includes(tag)) tags.push(tag);
     tags = await getTagsInTypescript(models.ts, tags);
+
+    await loadMyNeedsToCompile(
+        tags,
+        myImportsMap,
+        myImports,
+        myErrors,
+        myModules,
+    );
+
+    let tokens: string | undefined = await getTokens({ project, shortName }, theme);
+    return {
+        file: filename,
+        wcComponents: tags,
+        importsMap: myImportsMap,
+        importsJs: myImports,
+        globalCss: '',
+        tokens,
+        errors: myErrors
+    }
+}
+
+async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, html: string, theme: string, withCss: boolean = false) {
+
+    const { project, shortName } = file;
+
+    const myImportsMap: string[] = [];
+    const myImports: string[] = [];
+    const myErrors: { tag: string, error: string }[] = [];
+    const myModules = {};
+    let tags = extrairTagsCustomizadas(html);
+
+    const tag = convertFileNameToTag(`_${project}_${shortName}`);
+    if (!tags.includes(tag)) tags.push(tag);
 
     await loadMyNeedsToCompile(
         tags,

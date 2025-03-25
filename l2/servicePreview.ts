@@ -235,6 +235,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onServiceClick(visible: boolean, reinit: boolean) {
 
+        if (!visible) return;
+
         if (this.elPreview) {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
@@ -338,7 +340,6 @@ export class ServicePreview100554 extends ServiceBase {
             if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
             // if ((this.visible === 'false') && !((fileAction.action as any) === 'openBackground')) return;
-
             const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
 
             if (
