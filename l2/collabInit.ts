@@ -3,8 +3,9 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { getConfigProject, createConfigFile } from './_100554_libProjectConfig'
-import {initManagerCoachMark} from "./_100554_collabManagerCoachMarks";
+import { getConfigProject, createConfigFile } from './_100554_libProjectConfig';
+import { initManagerCoachMark } from "./_100554_collabManagerCoachMarks";
+import { getTokensCss } from './_100554_designSystemBase';
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
@@ -22,6 +23,7 @@ export async function initCompileMonaco(project: number): Promise<boolean> {
     }
     return true;
 }
+
 
 @customElement('collab-init-100554')
 export class CollabInit extends CollabLitElement {
@@ -85,7 +87,7 @@ export class CollabInit extends CollabLitElement {
         const services = await this.getServices();
         this.checkURLParams();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
-        
+
     }
 
     /**
@@ -210,54 +212,12 @@ export class CollabInit extends CollabLitElement {
      * Sets CSS tokens for light and dark themes by retrieving data from a cache.
      */
     private async setTokensCss(): Promise<void> {
+        
         if (window.traceLifeCycle) console.info('setting: tokens');
-
-        const cacheDsName = '/local/_100554_ds/collabDesignsystem/collabDesignsystem.json';
-        const themeName = 'Default';
-        const cacheName = 'mls-v2';
-        const cache = await caches.open(cacheName);
-        const keys = await cache.keys();
-        const match = keys.filter((request) => request.url.includes(cacheDsName));
-        if (!match || match.length === 0) return;
-        const response = await cache.match(match[match.length - 1]);
-        if (!response) return;
-        const responseText = await response.text();
-        if (!responseText || typeof responseText !== 'string') return;
-        const ds = JSON.parse(responseText);
-        const tokens = ds.tokens.items;
-        if (!tokens || tokens.length === 0) return;
-        const tokenByTheme = tokens.find((t: any) => t.themeName === themeName);
-        if (!tokenByTheme) return;
-
-        let cssLight = ':root {\n';
-        let cssDark = '[data-theme="dark"] {\n';
-
-        function convertValue(value: string): string {
-            const tokenRegex = /@([a-zA-Z0-9-]+)/g;
-            return value.replace(tokenRegex, (_, token) => `var(--${token})`);
-        }
-
-        function processCategory(category: any) {
-            Object.entries(category).forEach(([key, value]) => {
-                value = convertValue(value as string);
-                if (key.startsWith('_dark-')) {
-                    const tokenName = key.replace('_dark-', '');
-                    cssDark += `\t--${tokenName}: ${value};\n`;
-                } else {
-                    cssLight += `\t--${key}: ${value};\n`;
-                }
-            });
-        }
-
-        if (tokenByTheme.color) processCategory(tokenByTheme.color);
-        if (tokenByTheme.typography) processCategory(tokenByTheme.typography);
-        if (tokenByTheme.global) processCategory(tokenByTheme.global);
-        cssLight += '}\n';
-        cssDark += '}\n';
-        const all = cssLight + cssDark;
+        const tokensCss = await getTokensCss(this.baseProject, 'Default');
 
         const style = document.createElement('style');
-        style.textContent = all;
+        style.textContent = tokensCss;
         style.id = 'collab-tokens';
         document.head.appendChild(style);
     }
