@@ -45,10 +45,16 @@ export async function createNewFile(project: number, position: string, shortName
         shortName: params.shortName
     };
 
-    await mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);
+    if (mls.actualLevel == 1) {
+        await mls.events.fire([1], ['FileAction'], JSON.stringify(params), 0);
+        if (position === 'left' && openPreview ) openService('_100554_servicePreviewL1', 'right', 1);
+    } else {
+        await mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);
+        if (position === 'left' && openPreview ) openService('_100554_servicePreview', 'right', 2);
+    }
+    
     saveLocalHistory(params.project, 2, params.shortName, params.extension, params.folder);
-    if (position === 'left' && openPreview ) openService('_100554_servicePreview', 'right', 2);
-
+    
 }
 
 function saveLocalHistory(project: number, level: number, shortName: string, extension: string, folder: string): void {
