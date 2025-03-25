@@ -3,7 +3,7 @@
 
 export async function getTokens(project: number): Promise<IDesignSystemTokens[]> {
     const fileName = `./_${project}_designSystem`;
-    const instance: IDesignSystem = await import(fileName);
+    const instance: IDesignSystem = await import(`${fileName}?${Date.now()}`);
     if (!instance) throw new Error(`Invalid ds file: ${fileName}`);
     return instance.tokens || [];
 }
@@ -45,7 +45,7 @@ export function preCompileLess(less: string, tokensLess: string, theme: string, 
     }
 }
 
-async function compileLess(str: string): Promise<string> {
+export async function compileLess(str: string): Promise<string> {
 
     return new Promise((resolve, reject) => {
         if (!str || str.trim().length < 1) resolve('');
@@ -57,7 +57,7 @@ async function compileLess(str: string): Promise<string> {
     });
 }
 
-async function _preCompileLess(less: string, tokens: IDesignSystemTokens[], theme: string, prefix: ':host' | ':root', includeTokens: boolean): Promise<string> {
+export async function _preCompileLess(less: string, tokens: IDesignSystemTokens[], theme: string, prefix: ':host' | ':root', includeTokens: boolean): Promise<string> {
     let newLess = '';
     for (let tokenInfo of tokens) {
         if (tokenInfo.themeName !== theme) continue;

@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_serviceBase';
 import { IcaLitElement } from './_100554_icaLitElement';
-import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
+import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { globalState, setState } from './_100554_icaState';
 import { convertTagToFileName } from './_100554_utilsLit';
@@ -91,8 +91,6 @@ export class ServicePreview100554 extends ServiceBase {
     private themes: string[] = ['Default'];
 
     private actualTheme = 'Default';
-
-    private ds: DesignSystemIO | undefined;
 
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
 
@@ -887,11 +885,11 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private async setTheme() {
-        const dsIndex = mls.actual[3].mode && +this.level !== 2 ? mls.actual[3].mode : 0;
-        this.ds = await getDSInstance(mls.actual[5].project as any, dsIndex);
-        await this.ds.init();
-        if (!this.ds || !this.ds.tokens) return;
-        this.themes = Object.keys(this.ds.tokens.list);
+
+        const project = mls.actual[5].project;
+        if (!project) return;
+        const tokens = await getTokens(project)
+        this.themes = tokens.map((item) => item.themeName);
         const themesOptions = this.themes.map((th) => {
             const newOpt: IOptions = {
                 text: th,

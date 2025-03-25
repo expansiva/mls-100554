@@ -4,9 +4,9 @@ import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions, ITools } from './_100554_serviceBase';
-import { getEventName } from './_100554_collabPageElement'
 import { formatHtml, sync } from './_100554_collabDOMSync';
-import { removeTokensFromSource, getTokensLess } from './_100554_enhancementStyle';
+import { removeTokensFromSource } from './_100554_enhancementStyle';
+import { getTokensLess } from './_100554_designSystemBase';
 import { LessCSS } from "./_100554_lessCSS";
 import { getEnhancementName } from './_100554_libCommom';
 import { globalState } from './_100554_icaState';
@@ -1086,7 +1086,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (!modelBaseTS.storFile) throw new Error('Invalid stor file');
         const { project, shortName } = modelBaseTS.storFile;
-    
+
         if (project === 0 && (shortName === 'loading' || shortName === 'testFile')) return;
         modelBaseTS.storFile.hasError = false;
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
@@ -1255,15 +1255,12 @@ export class ServiceSource100554 extends ServiceBase {
 
     private monacoGlobalInitialized = false;
     private async initMonaco_GlobalEditor(): Promise<void> {
-
         this.loadMonacoConfigurations();
-
         if (this.monacoGlobalInitialized) return;
         this.monacoGlobalInitialized = true;
         this.loadMonacoThemeFromLocalStorage();
         this.updateMonacoGlobalTheme();
         mls.editor.InitMonaco();
-
     }
 
     private timeHtmlChangeCursor: number = 0;
@@ -1580,7 +1577,7 @@ export class ServiceSource100554 extends ServiceBase {
             else if (ext === '.test.ts' && storFile) model = mls.editor.createModelTest(storFile, src);
             else if (ext === '.d.ts') model = mls.editor.createModelProjectDefinition(project, src);
             else if (ext === '.less' && storFile) {
-                const lessTokens = await getTokensLess('Default');
+                const lessTokens = await getTokensLess(project, 'Default');
                 const lineTokens = `\n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
                 src = src.trim().concat(lineTokens);
                 model = mls.editor.createModelStyle(storFile, src);

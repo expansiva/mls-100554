@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
+import { getDependenciesByHtml, getTokens, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { ServiceBase } from './_100554_serviceBase'
 import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
@@ -244,17 +244,22 @@ export class ServicePreviewView extends IcaLitElement {
 
     private async addStyles() {
 
+        console.info('addStyles');
+
         if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
         const { project, shortName } = this.models.style.storFile;
         const id = convertFileNameToTag(`_${project}_${shortName}`);
         const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
         const newStyle = document.createElement('style');
         const newLess = await compileStyleUsingStorFile(shortName, project, this.actualtheme);
-        if (!newLess) return;
-        newStyle.id = id;
-        newStyle.textContent = newLess;
-        window.preview.iframe.contentDocument.head.appendChild(newStyle);
-        if (oldStyle) oldStyle.remove();
+        if (newLess) {
+            newStyle.id = id;
+            newStyle.textContent = newLess;
+            window.preview.iframe.contentDocument.head.appendChild(newStyle);
+            if (oldStyle) oldStyle.remove();
+        }
+        const tokens = await getTokens({ project, shortName }, this.actualtheme)
+        this.mountTokens(tokens || '');
         this.stylechanged = 'false';
 
     }
@@ -407,7 +412,7 @@ export class ServicePreviewView extends IcaLitElement {
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
         this.mountCSS(iframe);
-        this.mountTokens(ret, iframe);
+        this.mountTokens(ret.tokens || '');
 
     }
 
@@ -623,15 +628,17 @@ export class ServicePreviewView extends IcaLitElement {
         return '_' + project + '_ds_tokens';
     }
 
-    private mountTokens(info: IJSONDependence, ifr: HTMLIFrameElement): void {
+    private mountTokens(tokens: string): void {
         try {
-            if (!ifr.contentDocument) return;
-            this.removeOlderTokens(ifr);
-            const css = info.tokens[0];
+            const iframe = window.preview.iframe;
+            if (!iframe || !iframe.contentDocument) return;
+            this.removeOlderTokens(iframe);
+            const css = tokens || '';
+            if (!css) return;
             const style = document.createElement('style');
             style.textContent = css;
             style.id = this.getIdTokens();
-            ifr.contentDocument.head.appendChild(style);
+            iframe.contentDocument.head.appendChild(style);
 
         } catch (e: any) {
             console.info('Error mountTokens: ' + e.message);

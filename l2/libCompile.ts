@@ -1,6 +1,8 @@
 /// <mls shortName="libCompile" project="100554" enhancement="_blank" />
 
-import { getDSInstance } from './_100554_libDesignSystem'
+// import { getDSInstance } from './_100554_libDesignSystem'
+
+import { getTokensCss } from './_100554_designSystemBase';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 
 export const getDependenciesByHtml = (models: mls.editor.IModels, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
@@ -51,8 +53,6 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
 
     const myImportsMap: string[] = [];
     const myImports: string[] = [];
-    const myCss: string[] = [];
-    let myTokens: string[] = [];
     const myErrors: { tag: string, error: string }[] = [];
     const myModules = {};
     let tags = extrairTagsCustomizadas(html);
@@ -65,22 +65,18 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
         tags,
         myImportsMap,
         myImports,
-        myCss,
-        myTokens,
         myErrors,
         myModules,
-        withCss,
-        theme
     );
 
+    let tokens: string | undefined = await getTokens({ project, shortName }, theme);
     return {
         file: filename,
         wcComponents: tags,
         importsMap: myImportsMap,
         importsJs: myImports,
-        css: myCss,
         globalCss: '',
-        tokens: myTokens,
+        tokens,
         errors: myErrors
     }
 }
@@ -106,15 +102,11 @@ async function loadMyNeedsToCompile(
     tags: string[],
     myImportsMap: string[],
     myImports: string[],
-    myCss: string[],
-    myTokens: string[],
     myErrors: { tag: string, error: string }[],
     myModules: any,
-    compileCss: boolean,
-    theme: string) {
+) {
 
     try {
-
         if (tags.length <= 0) return;
         const name = convertTagToFileName(tags[0]);
         mls.actual[0].setFullName(name);
@@ -142,7 +134,6 @@ async function loadMyNeedsToCompile(
 
         await getJSImporMap(myImportsMap, enhacementName, myModules);
         await getJS(myImports, enhacementName, ipath, myModules);
-        await getTokens(myTokens, ipath, theme);
 
     } catch (e: any) {
 
@@ -157,12 +148,8 @@ async function loadMyNeedsToCompile(
                 tags,
                 myImportsMap,
                 myImports,
-                myCss,
-                myTokens,
                 myErrors,
                 myModules,
-                compileCss,
-                theme
             );
         }
 
@@ -170,46 +157,7 @@ async function loadMyNeedsToCompile(
 
 }
 
-function getEnhacementName(file: { project: number, shortName: string }): string {
-    const key = mls.l2.getKey({ project: file.project, shortName: file.shortName });
-    const mmodel = mls.editor.models[key];
-    if (!mmodel || !mmodel.ts) throw new Error('model invalid');
-    if (!mmodel.ts.compilerResults) throw new Error('model ts not compiled yet');
-    const enhacementName = mmodel.ts.compilerResults.tripleSlashMLS?.variables.enhancement
-    if (!enhacementName) throw new Error('enhacementName not valid');
-    return enhacementName;
-}
-
 async function getEnhancementFromFetch(file: { project: number, shortName: string }) {
-
-
-    // const cacheName = 'mls-v2';
-    // const cache = await caches.open(cacheName);
-    // const keys = await cache.keys();
-    // const url = `/local/_${file.project}_${file.shortName}.js`;
-
-    // console.info(`Get cache: ${url}`);
-
-    // const match = keys.filter((request) => request.url.includes(url));
-    // if (!match || match.length === 0) {
-    //     console.info(`Code not found in cache : _${file.project}_${file.shortName}`);
-    //     throw new Error(`Code not found in cache : _${file.project}_${file.shortName}`)
-    // }
-
-    // const response = await cache.match(match[match.length - 1]);
-    // const txt = await response?.text();
-    // console.info(`Get cache txt : ${txt}`);
-
-    // if (!txt) throw new Error(`Not found tag <mls> in ${url}`);
-    // const lines = txt.replace(/\r\n/g, '\n').split('\n');
-    // const mlsLine = lines.find(line => line.trim().startsWith('/// <mls '));
-
-    // if (!mlsLine) throw new Error(`Not found tag <mls> in ${url}`);
-    // const enhancementMatch = mlsLine.match(/enhancement="([^"]+)"/);
-    // if (!enhancementMatch) throw new Error('Not found attr "enhancement" in ' + url);
-    // console.info(`enhancementName for url ${url} = ${enhancementMatch[1]}`)
-    // return enhancementMatch[1];
-
 
     const url = `/_${file.project}_${file.shortName}`;
     const response = await fetch(url);
@@ -261,12 +209,12 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.cbe
 }
 
 
-async function getTokens(myTokens: string[], mfile: mls.cbe.IPath, theme: string) {
+export async function getTokens(mfile: mls.cbe.IPath, theme: string) {
+
     try {
-        const ds = await getDSInstance(mfile.project, 0);
-        if (!ds || !ds.tokens) return;
-        const tokens = await ds.tokens.getTokensCss(theme);
-        myTokens.push(tokens);
+        const tokens = await getTokensCss(mfile.project, theme);
+        return tokens;
+
     } catch (e: any) {
         if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
     }
@@ -285,8 +233,6 @@ export interface IJSONDependence {
     wcComponents: string[],
     importsMap: string[],
     importsJs: string[],
-    css: string[],
-    globalCss: string | undefined,
-    tokens: string[],
+    tokens: string | undefined,
     errors: { tag: string, error: string }[]
 }
