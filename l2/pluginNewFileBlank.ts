@@ -57,7 +57,7 @@ export class PluginNewFileBlank extends IcaLitElement {
 
     @propertyDataSource({ attribute: true }) project: number | undefined;
 
-    @property() position: string = 'left';
+    @property() position: 'left' | 'right' = 'left';
 
     @property() loading: boolean = false;
 

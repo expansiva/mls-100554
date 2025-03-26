@@ -754,7 +754,9 @@ export class ServiceSource100554 extends ServiceBase {
                 fileAction.newshortName as string,
                 fileAction.newProject as number,
                 fileAction.newEnhancement as string,
-                fileAction.newTSSource as string
+                fileAction.newTSSource as string,
+                (fileAction as any).newHTMLSource as string
+
             );
             this.loading = false;
         };
@@ -868,7 +870,7 @@ export class ServiceSource100554 extends ServiceBase {
         this.onMLSEvents(ev);
     }
 
-    private async newFiles(newShortName: string, newProject: number, newEnhancement: string, tsSource: string) {
+    private async newFiles(newShortName: string, newProject: number, newEnhancement: string, tsSource: string, htmlSource?: string) {
 
         this.isNewFile = true;
         this.activeThisService();
@@ -878,7 +880,7 @@ export class ServiceSource100554 extends ServiceBase {
 				\n// typescript new file\n`;
         const modelTS = await this.createModelTS1(newShortName as string, newProject as number,
             newTSSource, true);
-        await this.createOrShowModelHtmlOrCss(newShortName, newProject, false, '.html');
+        await this.createOrShowModelHtmlOrCss(newShortName, newProject, false, '.html', htmlSource);
         await this.createOrShowModelHtmlOrCss(newShortName, newProject, false, '.less');
         this.showActiveModel();
         await mls.stor.localStor.setContent(modelTS.storFile, await this.getValueInfo(modelTS));
@@ -1743,7 +1745,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     // HTML LESS
 
-    private async createOrShowModelHtmlOrCss(shortName: string, project: number, open: boolean, mode: '.html' | '.less', fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
+    private async createOrShowModelHtmlOrCss(shortName: string, project: number, open: boolean, mode: '.html' | '.less', source: string = '', fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
 
         const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', mode);
         let storFile = mls.stor.files[key];
@@ -1752,7 +1754,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 const newLess = await this.prepareInitialLess(shortName, project);
                 await this.createStorFile(project, shortName, newLess, mode);
             } else {
-                await this.createStorFile(project, shortName, `<h1>_${project}_${shortName}</h1>`, mode);
+                const newHTML = await this.prepareInitiaHTML(source, shortName, project);
+                await this.createStorFile(project, shortName, newHTML, mode);
             }
             storFile = mls.stor.files[key];
         }
@@ -1810,6 +1813,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             .replace('[tag]', tag)
 
         return newStyle;
+    }
+
+    private async prepareInitiaHTML(source: string, shortName: string, project: number) {
+        if (source) return source;
+        const newHTML = `<h1>_${project}_${shortName}</h1>`
+        return newHTML;
     }
 
     private async createStorFile(project: number, shortName: string, content: string, extension: string) {

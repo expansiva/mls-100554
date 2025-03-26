@@ -59,7 +59,7 @@ export class PluginNewFileWebComponent extends IcaLitElement {
 
     @propertyDataSource({ attribute: true }) project: number | undefined;
 
-    @property() position: string = 'left';
+    @property() position: 'left' | 'right' = 'left';
 
     @property() loading: boolean = false;
 
@@ -104,7 +104,7 @@ export class PluginNewFileWebComponent extends IcaLitElement {
         };
         this.loading = true;
         try {
-            await createNewFile(this.project, this.position, this.shortName, this.enhancement, this.getTemplate(), false);
+            await createNewFile(this.project, this.position, this.shortName, this.enhancement, this.getTemplate(), undefined, false);
             if (this.service) {
                 openService('_100554_serviceAim', 'right', 2);
                 const opInstance = this.service.nav3Service?.getActiveInstance('right');

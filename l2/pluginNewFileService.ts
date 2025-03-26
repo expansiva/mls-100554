@@ -58,7 +58,7 @@ export class PluginNewFileService extends IcaLitElement {
 
     @propertyDataSource({ attribute: true }) project: number | undefined;
 
-    @property() position: string = 'left';
+    @property() position: 'left' | 'right' = 'left';
 
     @property() loading: boolean = false;
 
@@ -67,7 +67,7 @@ export class PluginNewFileService extends IcaLitElement {
     private template: string = `
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 
 @customElement('[tagName]')
 export class [className] extends ServiceBase {
@@ -86,7 +86,7 @@ export class [className] extends ServiceBase {
         return false;
     }
 
-    public menu: IMenu = {
+    public menu: IServiceMenu = {
         title: 'Example',
         actions: {
         },

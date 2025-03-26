@@ -23,7 +23,7 @@ export function changeTagName(source: string, tagName: string): string {
     return outputString;
 }
 
-export async function createNewFile(project: number, position: string, shortName: string, enhancement: string, source: string, openPreview: boolean = true) {
+export async function createNewFile(project: number, position: 'left' | 'right', shortName: string, enhancement: string, source: string, sourceHTML?: string, openPreview: boolean = true) {
     const params = {} as mls.events.IFileAction;
 
     params.action = 'new' as typeof params.action;
@@ -37,7 +37,9 @@ export async function createNewFile(project: number, position: string, shortName
     params.newEnhancement = enhancement || '_blank';
     params.extension = '.ts';
     params.newTSSource = source;
-    (params as any).position = position;
+
+    if (sourceHTML) (params as any).newHTMLSource = sourceHTML;
+    params.position = position;
 
     mls.actual[2].setFullName('_' + params.project + '_' + params.shortName);
     (mls.actual[2] as any)[position] = {
@@ -47,14 +49,14 @@ export async function createNewFile(project: number, position: string, shortName
 
     if (mls.actualLevel == 1) {
         await mls.events.fire([1], ['FileAction'], JSON.stringify(params), 0);
-        if (position === 'left' && openPreview ) openService('_100554_servicePreviewL1', 'right', 1);
+        if (position === 'left' && openPreview) openService('_100554_servicePreviewL1', 'right', 1);
     } else {
         await mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);
-        if (position === 'left' && openPreview ) openService('_100554_servicePreview', 'right', 2);
+        if (position === 'left' && openPreview) openService('_100554_servicePreview', 'right', 2);
     }
-    
+
     saveLocalHistory(params.project, 2, params.shortName, params.extension, params.folder);
-    
+
 }
 
 function saveLocalHistory(project: number, level: number, shortName: string, extension: string, folder: string): void {
