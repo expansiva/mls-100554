@@ -176,9 +176,7 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
     private renderFinalGruops() {
         const [, rootSelected, subGroupSelected] = this.actualBreadCrumb;
         const groups = getGroups();
-        console.info(groups)
-        console.info(Object.keys(groups[rootSelected][subGroupSelected]));
-
+        
         return html`
         <div class="group-container">
             ${groups[rootSelected][subGroupSelected].map((finalGroup) => {

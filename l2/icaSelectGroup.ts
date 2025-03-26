@@ -1,18 +1,15 @@
 /// <mls shortName="icaSelectGroup" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { CollabLitElement } from './_100554_collabLitElement'
+
 import {
-    getDescriptionsRootGroup,
-    getDescriptionsFinalGroup,
-    getDescriptionsSubGroup,
-    getFormComponentsDescription,
-} from './_100554_icaBaseDescription';
-export function initIcaSelectGroup() {
-    return true;
-}
+    getGroups
+} from './_100554_icaBaseDescription2';
+
 @customElement('ica-select-group-100554')
-export class IcaSelectGroup extends LitElement {
+export class IcaSelectGroup extends CollabLitElement {
 
     private rootBread: string = '';
 
@@ -90,15 +87,13 @@ export class IcaSelectGroup extends LitElement {
     }
 
     private renderGroupsRoot() {
-        const groups = getDescriptionsRootGroup();
+        const groups = getGroups();
         return html`
         <div class="group-container">
-            ${groups.map((group) => {
-            const desc = getFormComponentsDescription(group, null, null);
+            ${Object.keys(groups).map((group) => {
             return html`
             <div class="group-item" @click=${() => { this.onClickRootGroup(group) }}>
                 <span class="group-title">${group}</span>
-                <span class="group-desc">${desc}</span>
             </div>
         `
         })}
@@ -109,16 +104,14 @@ export class IcaSelectGroup extends LitElement {
     private renderSubGroups() {
 
         const [, rootSelected] = this.actualBreadCrumb;
-        const groups = getDescriptionsSubGroup(rootSelected);
-
+        const groups = getGroups();
+    
         return html`
         <div class="group-container">
-            ${groups.map((subGroup) => {
-            const desc = getFormComponentsDescription(rootSelected, subGroup, null);
+            ${Object.keys(groups[rootSelected]).map((subGroup) => {
             return html`
             <div class="group-item" @click=${() => { this.onClickSubGroup(rootSelected, subGroup) }}>
                 <span class="group-title">${subGroup}</span>
-                <span class="group-desc">${desc}</span>
             </div>
         `
         })}
@@ -128,15 +121,15 @@ export class IcaSelectGroup extends LitElement {
 
     private renderFinalGruops() {
         const [, rootSelected, subGroupSelected] = this.actualBreadCrumb;
-        const groups = getDescriptionsFinalGroup(rootSelected, subGroupSelected);
+        const groups = getGroups();
+
         return html`
         <div class="group-container">
-            ${groups.map((finalGroup) => {
-            const desc = getFormComponentsDescription(rootSelected, subGroupSelected, finalGroup);
+            ${groups[rootSelected][subGroupSelected].map((finalGroup) => {
+        
             return html`
                 <div class="group-item" @click=${() => { this.onClickFinalGroup(rootSelected, subGroupSelected, finalGroup) }}>
                     <span class="group-title">${finalGroup}</span>
-                    <span class="group-desc">${desc}</span>
                 </div>
             `
         })}
@@ -181,47 +174,6 @@ export class IcaSelectGroup extends LitElement {
         "selectICA": "Select ICA",
     }
 
-    static styles = css`
-        :host{
-            font-size: 16px;
-        }
-        .group-container{
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(20em, 1fr));
-            grid-template-rows: max-content;
-            gap: 1em;
-            padding: 1em;
-        }
-        .group-item {
-            cursor: pointer;
-            width: 20em;
-            background-color: rgb(243, 229, 245);
-            box-shadow: rgba(55, 27, 61, 0.18) 7px 7px 2px 0px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            border-radius: 4px;
-            padding: 1rem;
-        }
-        .group-title{
-            font-weight:bold;
-            text-transform: uppercase;
-        }
-        .group-desc{
-            margin-top: .3rem;
-        }
-        .breadcrumb {
-            padding: 1em;
-        }
-        .breadcrumb a{
-            text-decoration:none;
-        }
-        .breadcrumb a:visited {
-            color: #1890FF;
-            text-decoration: inherit;
-        }
-    `;
 }
 
 type IActualModeGroup = 'root' | 'subgroup' | 'finalgroup' | 'empty'

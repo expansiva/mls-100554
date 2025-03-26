@@ -5,7 +5,7 @@ import { customElement, query, property } from 'lit/decorators.js';
 import { tasks, ITaskFinish, updateTaskOnServer, getInfoServiceAim, InfoServiceAIM } from './_100554_aimHelper';
 import { AimActionBase, AimActionRules } from './_100554_aimActionBase';
 import {  getAttributeDefinitions } from './_100554_icaBaseDescription2'; 
-import { initIcaSelectGroup, IcaSelectGroup } from './_100554_icaSelectGroup';
+import { IcaSelectGroup } from './_100554_icaSelectGroup';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
 const myName = '_100554_aimActionAddIca' ; 
@@ -75,11 +75,6 @@ const messages: { [key: string]: MessageType } = {
 export class AimActionAddIca extends AimActionBase {
 
     private msg: MessageType = messages['en'];
-
-    constructor() {
-        super();
-        initIcaSelectGroup();
-    }
 
     public getRules(): AimActionRules[] {
         return [{
