@@ -20,7 +20,9 @@ const message_pt = {
     header: "Criar uma pagina",
     btnCreate: 'Criar arquivo',
     loading: 'Criando arquivo...',
-    error: 'Nome do arquivo em branco ou invalido'
+    error: 'Nome do arquivo em branco ou invalido',
+    errorPageName: 'O nome do arquivo deve começar com "page"',
+
 }
 
 const message_en = {
@@ -31,7 +33,9 @@ const message_en = {
     header: "Create a page",
     btnCreate: 'Create file',
     loading: 'Creating File...',
-    error: 'Blank or invalid file name'
+    error: 'Blank or invalid file name',
+    errorPageName: 'File name must start with "page"',
+
 }
 
 type MessageType = typeof message_en;
@@ -58,7 +62,7 @@ export class PluginNewFilePage extends IcaLitElement {
 
     @propertyDataSource({ attribute: true }) project: number | undefined;
 
-    @property() position: string = 'left';
+    @property() position: 'left' | 'right' = 'left';
 
     @property() loading: boolean = false;
 
@@ -87,11 +91,6 @@ import { globalState } from './_100554_icaState';
          };
      }
 
-     /// **collab_events_start**
-     handleClickbuttonSum() {
-         // here or code for event
-     }
-
  }`;
 
 
@@ -99,7 +98,7 @@ import { globalState } from './_100554_icaState';
 
     private groupName: string = `other`;
 
-    private getTemplate(): string {
+    private getTemplateTS(): string {
         let newExample = this.template;
         if (this.shortName && this.project) {
             newExample = changeTagName(newExample, convertFileNameToTag(`_${this.project}_${this.shortName}`));
@@ -109,14 +108,27 @@ import { globalState } from './_100554_icaState';
         return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" />\n${newExample}\n`;;
     }
 
+    private getTemplateHTML(): string {
+        const tagName = convertFileNameToTag(`_${this.project}_${this.shortName}`);
+        return `<${tagName} modeoverlay="wcd-overlay-mode-default-100554">\n\t<ica-layout-flow-section-100554 id="section1" class="inset" widget="wc-section-100554">
+		\n\t\t<ica-apresentation-text-text-100554 id="apText1" widget="wc-text-100554" text="In development" type="h2">
+		</ica-apresentation-text-text-100554>
+	\n\t</ica-layout-flow-section-100554>
+</${tagName}>`;
+    }
+
     private async handleAddFile() {
         if (!this.project || !this.shortName) {
-            this.service.setError(msg.error)
+            this.service.setError(msg.error);
             return;
         };
+        if (!this.shortName.startsWith('page')) {
+            this.service.setError(msg.errorPageName);
+            return;
+        }
         this.loading = true;
         try {
-            await createNewFile(this.project, this.position, this.shortName, this.enhancement, this.getTemplate());
+            await createNewFile(this.project, this.position, this.shortName, this.enhancement, this.getTemplateTS(), this.getTemplateHTML());
         } catch (e: any) {
             this.loading = false;
         }
@@ -139,7 +151,9 @@ import { globalState } from './_100554_icaState';
                         <button @click=${this.handleAddFile}>${msg.btnCreate}</button>
                     </div>
 
-                    <wc-code-100554 language="typescript" text="${this.getTemplate()}"></wc-code-100554>
+                    <wc-code-100554 language="typescript" text="${this.getTemplateTS()}"></wc-code-100554>
+                    <wc-code-100554 language="html" text="${this.getTemplateHTML()}"></wc-code-100554>
+
                 
                 </div>`
             }
