@@ -4,7 +4,7 @@ import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand, WCDOverlayMethods } from './_100554_wcdTypes';
 import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
 import { PREFIX_ICA_ID } from './_100554_collabPageElement';
-import { findParentElementWithTagName, getSiblingsAfter, countElementsWithTagName } from './_100554_wcdGlobal';
+import { findParentElementWithTagName, getSiblingsAfter, getSiblingsBefore, countElementsWithTagName } from './_100554_wcdGlobal';
 
 export async function execute(param: IWCDCommand) {
 
@@ -31,7 +31,10 @@ export async function execute(param: IWCDCommand) {
 
     if (oldSize === 'inset' && (args.newSize === 'full' || args.newSize === 'outset')) {
 
-        const siblings = getSiblingsAfter(param.selectedIca);
+        const siblingsAfter = getSiblingsAfter(param.selectedIca);
+        const siblingsBefore = getSiblingsBefore(param.selectedIca);
+        const siblings = siblingsAfter.concat(siblingsBefore);
+
         if (!previousSection && !nextSectionIsInset && siblings.length === 0) {
 
             const [wc] = parentSection.children;
@@ -48,8 +51,8 @@ export async function execute(param: IWCDCommand) {
             sectionImage.classList.add(args.newSize);
             parentSection.insertAdjacentElement('afterend', sectionImage);
 
-            if (siblings.length > 0) {
-                const sectionAfter = addSection(icaSectionTagName, wcSectionTagName, param.overlay, siblings);
+            if (siblingsAfter.length > 0) {
+                const sectionAfter = addSection(icaSectionTagName, wcSectionTagName, param.overlay, siblingsAfter);
                 sectionAfter.classList.add('inset');
                 sectionImage.insertAdjacentElement('afterend', sectionAfter);
                 const isEmpty = (parentSection?.children[0]?.children || []).length === 0;

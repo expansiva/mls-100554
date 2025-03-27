@@ -79,6 +79,29 @@ export function getSiblingsAfter(element: HTMLElement): HTMLElement[] {
     return siblings;
 }
 
+
+/**
+ * Retrieves all sibling elements that come before a specified element in the DOM.
+ *
+ * This function collects all siblings of the given element that appear before it in the DOM order.
+ * It starts from the immediate next sibling and continues until there are no more siblings.
+ *
+ * @param element - The HTML element whose siblings before it are to be retrieved. Must be of type `HTMLElement`.
+ * @returns An array of `HTMLElement` objects representing the siblings that come before the specified element.
+ *
+ */
+export function getSiblingsBefore(element: HTMLElement): HTMLElement[] {
+    const siblings: HTMLElement[] = [];
+    let sibling = element.previousElementSibling;
+
+    while (sibling) {
+        siblings.push(sibling as HTMLElement);
+        sibling = sibling.previousElementSibling;
+    }
+
+    return siblings;
+}
+
 /**
  * Counts the number of elements with a specific tag name starting from a base element,
  * including elements within shadow roots.
