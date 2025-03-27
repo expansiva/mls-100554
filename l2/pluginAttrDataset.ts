@@ -46,8 +46,10 @@ export class PluginAttrDataSet extends PluginBaseModule {
     //--------COMPONENT------------
 
     render() {
+
+        // <style>${this.css}</style>
         return html`
-            <style>${this.css}</style>
+            
 
             <h3>Item:</h3>
             <div style="display:flex; align-items: center; gap: .5rem; margin-bottom:1rem;">
@@ -91,7 +93,6 @@ export class PluginAttrDataSet extends PluginBaseModule {
     //-------IMPLEMENTS-------------
 
     private setConfig() {
-
         const evento = new CustomEvent('setconfig', {
             detail: { vl: `{{${this.selectedPath}}}` },
             bubbles: true,
@@ -114,7 +115,6 @@ export class PluginAttrDataSet extends PluginBaseModule {
     private selectItem(path: string) {
         path = this.formatPath(path);
         this.selectedPath = path;
-        console.log('Item selecionado:', path);
     }
 
     private formatPath(path: string): string {
