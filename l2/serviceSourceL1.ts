@@ -15,7 +15,6 @@ export class ServiceSourceL1100554 extends ServiceBase {
     @property({ type: String }) msize = '';
 
 
-
     //--------VARIABLES-----------
 
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
@@ -24,6 +23,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
     //-----------INIT------------
 
+    get getKeyEditor() { return 'l1_left' };
     get confE() { return `l${this.level}_${this.position}`; }
 
     constructor() {
@@ -108,6 +108,9 @@ export class ServiceSourceL1100554 extends ServiceBase {
         if (!ev.desc) return;
         const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
         if (fileAction.position !== this.position) return;
+        const eventsValid = ['new', 'open', 'delete', 'undo', 'rename', 'clone'];
+
+        if (!eventsValid.includes(fileAction.action)) return;
 
         await this.initMonaco(); // init if needed
         switch (fileAction.action) {
@@ -196,8 +199,6 @@ export class ServiceSourceL1100554 extends ServiceBase {
         const storFile = this.getStorFile(fileAction);
 
         await this.openFiles(storFile, fileAction.position);
-        const st = { ...storFile, level:1 };
-        mls.events.fireFileAction('statusOrErrorChanged', st, this.position);
         this.updatedMSizeEditor();
         this.loading = false;
     }
@@ -421,6 +422,8 @@ export class ServiceSourceL1100554 extends ServiceBase {
         return true;
     }
 
+    
+
     private async openFiles(storFileTS: mls.stor.IFileInfo, position: 'left' | 'right') {
 
         try {
@@ -434,16 +437,15 @@ export class ServiceSourceL1100554 extends ServiceBase {
                 fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
                 if (!fileModels) console.info('No file models');
                 this.activeModels = fileModels;
-                mls.editor.editors[this.position] = fileModels;
+                (mls.editor.editors as any)[this.getKeyEditor] = fileModels;
                 this.showActiveModel();
-                await this.readProjectTypescriptAndCompile(storFileTS.project, storFileTS.shortName, true);
                 const modelTs = this.activeModels?.ts?.model;
                 if (!modelTs) throw new Error('Invalid model TS');
                 mls.editor.forceModelUpdate(modelTs);
 
             } else {
                 this.activeModels = fileModels;
-                mls.editor.editors[this.position] = fileModels;
+                (mls.editor.editors as any)[this.getKeyEditor] = fileModels;
                 const modelTs = this.activeModels.ts?.model;
                 if (!modelTs) throw new Error('Invalid model TS');
                 mls.editor.forceModelUpdate(modelTs);
@@ -491,54 +493,6 @@ export class ServiceSourceL1100554 extends ServiceBase {
         } catch (e) {
             localStorage.setItem('_100554_serviceSourceL1', JSON.stringify({}));
         }
-
-    }
-
-    private static projectsLoaded: number[] = [];
-    private async readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true): Promise<void> {
-        // load all typescripts dependencies (in development) of project , except shortName
-        if (ServiceSourceL1100554.projectsLoaded.includes(project)) return;
-        if (mls.istrace) console.log('loading files from project ' + project);
-        ServiceSourceL1100554.projectsLoaded.push(project);
-        const promises: Promise<mls.editor.IModels>[] = [];
-        const keys: string[] = Object.keys(mls.stor.files);
-
-        if ((window as any).traceLivecicle) console.info('creating: files model ', project);
-
-        for (const key of keys) {
-            const storFile = mls.stor.files[key];
-            if (storFile.project === project
-                && storFile.level === 2
-                && storFile.extension === '.ts'
-                && (mls.istrace || storFile.inLocalStorage)
-                && storFile.shortName !== shortName) {
-                promises.push(this.createModelBE2(storFile, false, false));
-            }
-        }
-
-        const info = await mls.stor.localDB.readPrjInfo(100554);
-        if (info && info.indexModules && info.indexModules !== '') {
-            promises.push(this.createProjectModel(project, info.indexModules));
-        }
-
-        if (mls.istrace) console.time('creating models');
-        await Promise.all(promises);
-        if (mls.istrace) console.timeEnd('creating models');
-
-        if (needCompile) {
-            // await mls.l2.editor.compileAllProjectIfNeed(project, true);
-            //await mls.l2.typescript.compileAll(project);
-        }
-    }
-
-    private async createProjectModel(project: number, contentTS: string): Promise<mls.editor.IModels> {
-
-        let projectModel = mls.editor.getModels(project, '');
-        if (projectModel && projectModel.ts) return projectModel;
-        const ftype = ".d.ts";
-        const modelsBase = await this.createModel(project, '', ftype, contentTS)
-        if (!modelsBase) throw new Error(`invalid mls.editor.models for file: _${project}_.d.ts`);
-        return projectModel as mls.editor.IModels;
 
     }
 
@@ -612,7 +566,9 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
         clearTimeout(this._onChangedContent);
         this._onChangedContent = window.setTimeout(async () => {
+            
             const ignoreChanges = (e.changes.length === 1 && e.changes[0].range.startLineNumber === 1 && e.changes[0].range.endLineNumber === 1 && e.changes[0].range.endColumn <= 2);
+            
             await this.updateModelStatus(activeModel, !ignoreChanges);
         }, 400);
     };
@@ -635,8 +591,6 @@ export class ServiceSourceL1100554 extends ServiceBase {
                 const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });
                 if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
             }
-
-
 
             hasError = modelBaseBE.storFile.hasError;
 
@@ -679,13 +633,9 @@ export class ServiceSourceL1100554 extends ServiceBase {
             if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
             await mls.stor.localStor.setContent(storFile, await this.getValueInfo(modelBaseBE));
         }
-
+        
         if (changed) {
-            let position: 'left' | 'right';
-            const idLeft = mls.editor.editors.left?.ts?.model.id;
-            const idActive = modelBaseBE.model.id
-            if (idLeft === idActive) position = 'left';
-            else position = 'right';
+            const position = 'left';
             const st = { ...storFile, level: 1 };
             mls.events.fireFileAction('statusOrErrorChanged', st, position);
         }
@@ -768,7 +718,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
         const { shortName, project, status } = this.activeModels.ts.storFile;
 
         const model = this.activeModels.ts.model;
-        mls.editor.editors[this.position] = this.activeModels;
+        (mls.editor.editors as any)[this.getKeyEditor] = this.activeModels;
 
         if (!this._ed1 || !this.menu.getLastMode) return false;
         const changedFile: boolean = this.menu.title !== shortName;

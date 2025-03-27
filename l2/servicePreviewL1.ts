@@ -1,35 +1,37 @@
 /// <mls shortName="servicePreviewL1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { getDependenciesByHtmlFile, IJSONDependence} from './_100554_libCompile';
+import { getDependenciesByHtmlFile, IJSONDependence } from './_100554_libCompile';
 import { IService, IServiceMenu, IToolbarContent, ServiceBase } from './_100554_serviceBase';
-import "./_100554_collabConsoleL1"; 
- 
+import "./_100554_collabConsoleL1";
+
 @customElement('service-preview-l1-100554')
 export class ServicePreviewL1100554 extends ServiceBase {
 
     constructor() {
         super();
-        this.setEvents(); 
+        this.setEvents();
     }
 
     //--------PROPERTS------------ 
+    @query('#preview-container-l1') elContent: HTMLElement | undefined;
 
-    @property() msize: string = '';
-    
+    //@property() msize: string = '';
+    @property() error: string = '';
+    @property() watch: boolean = true;
+
     //--------VARIABLES-----------
-    private error = '';
+
     private timeEvent: number = -1;
     private actualFile: mls.stor.IFileInfo | undefined;
     private actualFileKey: string | undefined;
     private actualTheme = 'Default';
 
 
-    
     //---------SERVICE------------
     public details: IService = {
         icon: '&#xf06e',
-        state: 'foreground',
+        state: 'background',
         position: 'right',
         tooltip: 'Preview L1',
         visible: true,
@@ -41,28 +43,43 @@ export class ServicePreviewL1100554 extends ServiceBase {
         title: 'Preview L1',
         main: {},
         tabs: undefined,
-        tools: {},
-        onClickMain: ()=>{},
-        onClickTabs: ()=>{},
-        onClickTools: ()=>{},
+        tools: {
+            watchPreview: {
+                type: 'cycle',
+                selected: 0,
+                options: [
+                    { text: 'run', icon: 'f04c' },
+                    { text: 'pause', icon: 'f04b' },
+                ]
+            },
+        },
+        onClickMain: () => { },
+        onClickTabs: () => { },
+        onClickTools: this.onClickTools.bind(this),
     }
 
-    onServiceClick(visible: boolean,reinit: boolean,el: IToolbarContent|null): void {
+    public onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null): void {
 
-    } 
+    }
+
+    public onClickTools(op: string) {
+
+        if (op === 'watchPreview') this.toogleWatch();
+        else throw new Error('Invalid option')
+    }
 
     //--------EVENTS-------------
 
     private setEvents() {
 
-        mls.events.addEventListener([1], ['FileAction'], this.onMLSFileAction.bind(this));    
+        mls.events.addEventListener([1], ['FileAction'], this.onMLSFileAction.bind(this));
 
     }
 
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
         try {
-        
+            
             if (![1].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
 
@@ -73,13 +90,13 @@ export class ServicePreviewL1100554 extends ServiceBase {
                 !eventsValid.includes(fileAction.action)
             ) return;
 
-            if (mls.istrace) console.info('is preview repaint:');
+            if (mls.istrace) console.info('is preview l1 repaint:');
 
             const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.ts');
             const storFile = mls.stor.files[keyToFileInfo];
 
             if (!storFile) return;
-
+            this.openMe();
             this.actualFileKey = keyToFileInfo;
             this.actualFile = storFile;
             this.onReloader();
@@ -97,21 +114,64 @@ export class ServicePreviewL1100554 extends ServiceBase {
     }
 
     render() {
+
         this.style.display = 'block';
         if (!this.actualFile) return html`No file selected`;
 
-        if (this.error) return html`<h1 style="color:red">${this.error}</h1>`
-    
-        return html`<iframe style="height:100%; width: 100%;" id="preview-container-l1" src="/_100554_servicePreviewL1" @load="${this.load}"></iframe>`;
+        const hasError = this.error != '';
+        const stErro = hasError ? 'color:red' : 'display:none';
+        const stContent = hasError ? 'display:none' : 'height: 100%;';
+
+        return html`
+        <h1 style="${stErro}">${this.error}</h1>
+        <div style="${stContent}" id="preview-container-l1"></div>`;
+
     }
 
     //--------IMPLEMENTS---------
 
+
     private load(): void {
 
+        if (!this.watch) return
+
+        if (!this.elContent) {
+            this.error = 'Not found content';
+            return;
+        }
+
+        if (!this.actualFile || this.actualFile.hasError) {
+
+            this.error = 'Erro no file:' + this.actualFileKey;
+            return;
+        }
+
+        Array.from(this.elContent.children).forEach((i) => i.remove());
+
+        const iframe = document.createElement('iframe') as HTMLIFrameElement;
+        iframe.style.cssText = `height:100%; width: 100%; border:none`;
+        iframe.src = '/_100554_servicePreviewL1';
+        iframe.onload = () => this.configIframe(iframe);
+
+        (window as any).previewL1 = iframe;
+        this.elContent.appendChild(iframe);
+
+    }
+
+    private toogleWatch() {
+        this.watch = this.menu.tools.watchPreview.selected === 0;
+        if (this.watch) this.onReloader();
+    }
+
+    private configIframe(iframe: HTMLIFrameElement) {
+
+        if (!iframe.contentDocument) {
+            this.error = 'Not found contentDocument';
+            return;
+        };
+
         this.loading = true;
-        const iframe = this.querySelector('iframe') as HTMLIFrameElement;
-        const head = iframe.contentDocument?.querySelector('head');
+        const head = iframe.contentDocument.querySelector('head');
         if (head) {
             const base = document.createElement('base');
             base.href = document.baseURI;
@@ -119,19 +179,12 @@ export class ServicePreviewL1100554 extends ServiceBase {
         }
 
         this.initFrame(iframe);
-    
+
     }
 
     private async initFrame(iframe: HTMLIFrameElement) {
 
         try {
-            
-            if (!this.actualFile || this.actualFile.hasError) {
-
-                this.error = 'Erro no file:'+ this.actualFileKey;
-                this.loading = false;
-                return;
-            }
 
             await this.setHTml(iframe);
 
@@ -166,7 +219,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
         if (!iframe.contentDocument || !this.actualFile) return;
 
-        let txt = `<collab-console-l1-100554 file="${this.actualFileKey}"></collab-console-l1-100554>`; 
+        let txt = `<collab-console-l1-100554 file="${this.actualFileKey}"></collab-console-l1-100554>`;
 
 
         iframe.contentDocument.body.innerHTML = txt;
@@ -180,7 +233,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
         this.mountJSImporMap(ret, iframe);
         this.mountJS(ret, iframe);
         this.mountCSS(iframe);
-        this.mountTokens(ret.tokens || '');
+        this.mountTokens(iframe, ret.tokens || '');
 
     }
 
@@ -265,9 +318,8 @@ export class ServicePreviewL1100554 extends ServiceBase {
         }
     }
 
-    private mountTokens(tokens: string): void {
+    private mountTokens(iframe: HTMLIFrameElement, tokens: string): void {
         try {
-            const iframe = window.preview.iframe;
             if (!iframe || !iframe.contentDocument) return;
             this.removeOlderTokens(iframe);
             const css = tokens || '';
@@ -283,7 +335,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
     }
 
     private getIdTokens() {
-        if (!this.actualFile ) return 'ds_tokens';
+        if (!this.actualFile) return 'ds_tokens';
         const { project } = this.actualFile
         return '_' + project + '_ds_tokens';
     }
@@ -296,7 +348,15 @@ export class ServicePreviewL1100554 extends ServiceBase {
     }
 
     private onReloader(): void {
+
+        if (!this.watch) return
+
+        if (this.error !== '') this.error = '';
+
         clearTimeout(this.timeEvent);
-        this.load();
+        this.timeEvent = setTimeout(() => {
+            this.load();
+        }, 500)
+
     }
 }
