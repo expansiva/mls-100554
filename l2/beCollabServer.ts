@@ -37,7 +37,7 @@ export class BECollabServer {
         const r = (this.routes as any)[method];
 
         if (!r || !r[path]) {
-            return event.source.postMessage({ id, error: "Rota não encontrada: " + path }, "*");
+            return event.source.postMessage({ id, error: "Route not found: " + path }, "*");
         }
 
         try {
