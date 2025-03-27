@@ -46,32 +46,35 @@ export function updateOverlay(el: IcaLitElementBaseMethods) {
     dispatchEventConciliate();
     page.recreateOverlay();
 
-
 }
 
-function insertAbove(father: HTMLElement, el: HTMLElement, target: HTMLElement, parentICA: IcaLitElementBaseMethods | undefined) {
+function insertAbove(father: HTMLElement, el: HTMLElement, target: HTMLElement, parentICA: IcaLitElementBaseMethods | undefined): boolean {
 
-    if (!parentICA) return;
+    if (!parentICA) return false;
     const canMove = canMoveElement(el as IcaLitElementBaseMethods, parentICA);
-    if (!canMove) throw new Error('Movement not permitted');
+    if (!canMove) return false;
     father.insertBefore(el, target);
+    return true;
 
 }
 
-function insertBelow(father: HTMLElement, el: HTMLElement, target: HTMLElement, parentICA: IcaLitElementBaseMethods | undefined) {
+function insertBelow(father: HTMLElement, el: HTMLElement, target: HTMLElement, parentICA: IcaLitElementBaseMethods | undefined): boolean {
 
-    if (!parentICA) return;
+    if (!parentICA) return false;
     const canMove = canMoveElement(el as IcaLitElementBaseMethods, parentICA);
-    if (!canMove) throw new Error('Movement not permitted');
+    if (!canMove) return false;
     father.insertBefore(el, target.nextSibling);
+    return true;
+
 
 }
 
-function insertInside(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMethods) {
+function insertInside(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMethods): boolean {
 
     const canMove = canMoveElement(el as IcaLitElementBaseMethods, target);
-    if (!canMove) throw new Error('Movement not permitted');
+    if (!canMove) return false;
     const elIn = target.querySelector(target.widget || '');
     if (elIn) elIn.appendChild(el);
+    return true;
 
 }
