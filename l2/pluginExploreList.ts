@@ -4,8 +4,8 @@ import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance } from './_100554_libCommom';
-import './_100554_serviceListFilesAdd';
-
+import './_100554_serviceListFilesAdd';  
+  
 /// **collab_i18n_start**
 const message_pt = {
     updateListVerify: "atualizar lista/verificar",
@@ -131,8 +131,13 @@ export class PluginExploreList extends PluginBaseModule {
             this.changeList();
         });
 
+        mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected'], (ev) => this.onlevelChange(ev));
 
 
+    }
+
+    private onlevelChange(ev: mls.events.IEvent) {
+        this.changeList();
     }
 
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
@@ -420,7 +425,7 @@ export class PluginExploreList extends PluginBaseModule {
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
         this.setHistory(mfile);
-        selectLevel(2);
+        if (mls.actualLevel != 1) selectLevel(2);
         this.fireEvents('open', mfile, {});
 
     }
@@ -508,17 +513,23 @@ export class PluginExploreList extends PluginBaseModule {
 
         if (['open'].includes(action)) {
 
-            mls.actual[this.levelFiles as any].setFullName(`_${file.project}_${file.shortName}`);
-            (mls.actual[this.levelFiles as any] as any)[this.position as any] = {
+            const lv = mls.actualLevel == 1 ? 1 : this.levelFiles;
+
+            mls.actual[lv as any].setFullName(`_${file.project}_${file.shortName}`);
+            (mls.actual[lv as any] as any)[this.position as any] = {
                 project: file.project,
                 shortName: file.shortName,
-                extension: file.extension,
+                extension: file.extension, 
                 folder: file.folder,
             } as any;
 
         }
 
-        mls.events.fire([(+(this.levelFiles as any) as any)], ['FileAction'], JSON.stringify(params), timeout);
+        if (mls.actualLevel == 1) {
+            mls.events.fire([1], ['FileAction'], JSON.stringify(params), timeout);
+        } else {
+            mls.events.fire([(+(this.levelFiles as any) as any)], ['FileAction'], JSON.stringify(params), timeout);
+        }
 
         if (['open'].includes(action)) return;
         this.changeList(100);
@@ -535,7 +546,7 @@ export class PluginExploreList extends PluginBaseModule {
         info.project = mls.actual[5].project as number;
         info.level = 2;
         info.needCompile = true;
-
+        
         mls.events.fire([(+(this.levelFiles as any) as any)], ['ProjectLoaded'], JSON.stringify(info), 0);
 
     }
@@ -739,6 +750,16 @@ export class PluginExploreList extends PluginBaseModule {
                 sf.extension !== ext
             ) continue;
 
+            if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
+                continue;
+            }
+            else if (mls.actualLevel === 3 && !sf.shortName.startsWith('page')) {
+                continue;
+            }
+            else if ([2, 4, 5, 6, 7].includes(mls.actualLevel) && sf.shortName.startsWith('be')) {
+                continue;
+            }
+
             this.info.tot++;
 
             const keyHtml = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.html');
@@ -760,8 +781,8 @@ export class PluginExploreList extends PluginBaseModule {
             if (sf.isLocalVersionOutdated) this.info.version++;
             if (sf.inLocalStorage || htmlLocal || styleLocal || testLocal) this.info.storage++;
             if (sf.hasError || htmlError || styleError || testError) this.info.error++;
-            arraySf.push(sf);
 
+            arraySf.push(sf);
         }
 
         return arraySf;
@@ -785,7 +806,16 @@ export class PluginExploreList extends PluginBaseModule {
             }
 
             if (!mls.stor.files[key] || (i.project !== +this.project && +this.project !== 0)) continue;
-            arraySfHistory.push(mls.stor.files[key]);
+
+            if (mls.actualLevel == 1 && i.shortName.startsWith('be')) {
+                arraySfHistory.push(mls.stor.files[key]);
+            }
+            else if (mls.actualLevel == 3 && i.shortName.startsWith('page')) {
+                arraySfHistory.push(mls.stor.files[key]);
+            }
+            else if ([2, 4, 5, 6, 7].includes(mls.actualLevel) && !i.shortName.startsWith('be')) {
+                arraySfHistory.push(mls.stor.files[key]);
+            }
 
         }
 

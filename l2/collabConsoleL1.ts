@@ -12,6 +12,9 @@ export class CollabConsoleL1100554 extends CollabLitElement {
 
     @property() file: string | undefined;
 
+    firstUpdated() {
+        this.configLog();
+    }
 
     //-----COMPOENENT-----------
     render() {
@@ -31,21 +34,32 @@ export class CollabConsoleL1100554 extends CollabLitElement {
     //-------IMPLEMENTS----------
 
     private onKeyDown(event: KeyboardEvent) {
-        console.info('a')
         if (event.key === "Enter") this.execute();
     }
 
     private execute() {
 
         if (!this.inputBox || !this.output) return;
-        const command = this.inputBox.value.trim();
+        let command = this.inputBox.value.trim();
         this.inputBox.value = "";
 
         if (command) {
             this.output.innerHTML += `<div><span class="prompt">$</span> ${command}</div>`;
 
             try {
-                let result = eval(command);
+                if (!(window as any).consoleScope) (window as any).consoleScope = {};
+                let result;
+                if (command.startsWith("let ") || command.startsWith("const ") || command.startsWith("var ")) {
+
+                    const varName = command.split(/\s+/)[1].split("=")[0].trim();
+                    command = command.split("=")[1].trim();
+                    const res = eval(command);
+                    (window as any).consoleScope[varName] = res
+                    result = res;
+
+                } else result = new Function("with (window.consoleScope) { return " + command + "; }")();
+
+                if (typeof result === 'object') result = JSON.stringify(result);
                 this.output.innerHTML += `<div><span class="prompt">&lt;</span> ${result}</div>`;
 
             } catch (error: any) {
@@ -55,5 +69,19 @@ export class CollabConsoleL1100554 extends CollabLitElement {
         }
     }
 
+    private configLog() {
+
+        const originalLog = console.log;
+
+        console.log =  (...args) => {
+
+            if (!this.inputBox || !this.output) return;
+
+            const message = args.map(arg => typeof arg === "object" ? JSON.stringify(arg) : arg).join(" ");
+
+            this.output.innerHTML += `<div><span class="prompt">&lt;</span> ${message}</div>`;
+            originalLog.apply(console, args);
+        };
+    }
 
 }
