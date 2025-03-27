@@ -132,12 +132,6 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
                 args: JSON.stringify(menu),
                 level: [2, 3]
             },
-            'events': {
-                name: '_100554_wcdToolboxItemActionEvents',
-                position: 'p-r1',
-                args: '',
-                level: [2]
-            },
             'add': {
                 name: "_100554_wcdAdd",
                 level: [2, 3],
