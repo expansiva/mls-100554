@@ -8,7 +8,6 @@ import { dispatchEventConciliate } from './_100554_wcdCommandBase';
 import { getAtributtesByTag, checkAttributteHasVariation } from './_100554_icaBaseDescription2';
 import "./_100554_wcdToolboxItemActionEditVariation";
 
-
 @customElement('wcd-toolbox-item-action-edit-attr-out-100554')
 export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
 
@@ -20,7 +19,6 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
         hasVariation: false,
         variations: []
     };
-
 
     public args: string | undefined;
     private mode: 'loading' | 'notFound' | 'show' = 'loading';

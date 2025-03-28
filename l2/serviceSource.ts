@@ -1651,23 +1651,38 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private loadConfEditorFromLocalStorage() {
-        const json: string | null = localStorage.getItem('mlsConfEditor');
-        if (json) {
-            mls.editor.loadConfFromJSON(json);
-        }
+        const info = this.getLocalStorageInfo();
+        const json = info.confEditor;
+        mls.editor.loadConfFromJSON(json);
     }
 
     private saveConfEditorToLocalStorage() {
-        localStorage.setItem('mlsConfEditor', JSON.stringify(mls.editor.conf));
+        const info = this.getLocalStorageInfo();
+        info.confEditor = JSON.stringify(mls.editor.conf);
+        this.saveLocalStorageInfo(info);
+    }
+
+    private getActualTheme(): 'dark' | 'light' {
+        const html = this.closest('html');
+        if (!html) return 'light';
+        const dataTheme = html.getAttribute('data-theme') as 'dark' | 'light' | null;
+        return dataTheme || 'light';
     }
 
     private loadMonacoThemeFromLocalStorage(): void {
-        if (!mls.editor.themeName) mls.editor.setThemeName(localStorage.getItem('mlsConfTheme'));
+        const info = this.getLocalStorageInfo();
+        const theme = this.getActualTheme();
+        if (!mls.editor.themeName) mls.editor.setThemeName(info.confTheme[theme]);
     }
 
     private saveMonacoGlobalThemeToLS(): void {
-        localStorage.setItem('mlsConfTheme', mls.editor.themeName);
+        const info = this.getLocalStorageInfo();
+        const theme = this.getActualTheme();
+        info.confTheme[theme] = mls.editor.themeName;
+        this.saveLocalStorageInfo(info);
+
     }
+
 
     private getConfEditorToTypescript(): string {
         return `/// <mls shortName="config_monaco_editor" project="0" enhancement="_blank" />
@@ -2054,6 +2069,310 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
     }
 
+    private saveLocalStorageLastOpen(storFile: mls.stor.IFileInfo, position: string) {
+
+        const infoByUser = this.getLocalStorageInfo();
+        let lastOpened = infoByUser.lastOpened;
+        const keyLocal = this.confE;
+        if (!lastOpened[keyLocal]) lastOpened[keyLocal] = {
+            extension: '',
+            folder: '',
+            level: 0,
+            project: 0,
+            shortName: ''
+        };
+        lastOpened[keyLocal].project = storFile.project;
+        lastOpened[keyLocal].shortName = storFile.shortName;
+        lastOpened[keyLocal].extension = storFile.extension;
+        lastOpened[keyLocal].level = storFile.level;
+        lastOpened[keyLocal].folder = storFile.folder;
+        this.saveLocalStorageInfo(infoByUser);
+
+    }
+
+    private openLastFile(level: number, position: string): boolean {
+
+
+        try {
+            const infoByUser = this.getLocalStorageInfo();
+            let lastOpened = infoByUser.lastOpened;
+            const keyLocal = this.confE;
+            if (!lastOpened[keyLocal]) return false;
+
+            const { project, shortName } = lastOpened[keyLocal];
+            const models = mls.editor.getModels(project, shortName);
+            if (!models) return false;
+            this.activeModels = models;
+            mls.actual[this.level].setFullName(`_${project}_${shortName}`);
+
+            (mls.actual[this.level] as any)[position] = {
+                project,
+                shortName,
+                extension: '.ts',
+                folder: ''
+            }
+            return true;
+
+        } catch (e) {
+            return false;
+        }
+
+    }
+
+    public getActualRef(): string {
+        if (!this.menu.tabs) return '';
+        try {
+            let ret = '';
+            if (!mls.actual[2] || !(mls.actual[2] as any)[this.position]) return ret;
+            const actual = (mls.actual[2] as any)[this.position];
+            const ext = this.menu.tabs.selected === EToolsSource.icTs ? '.ts' : '.html';
+            if (!actual) return ret;
+            ret = mls.stor.getKeyToFiles(actual.project, 2, actual.shortName, actual.folder, ext);
+            return ret;
+
+        } catch (e) {
+            return '';
+        }
+
+    }
+
+
+    //--------------WidgetAction--------------
+
+    private lastOrigin = 'editor';
+    private onWidgetActionEvents(ev: mls.events.IEvent) {
+
+        if (this.position === 'right') return;
+        if (ev.level !== this.level) return;
+        if (!ev.desc) return;
+        const json = JSON.parse(ev.desc);
+        switch (json.op) {
+            case 'SelectWidget':
+                break;
+            case 'SelectLine':
+                this.selectLineinHTML(json.line, json.origin);
+                break;
+            default:
+                console.info('Erro: opção invalida');
+        }
+    }
+
+    private selectLineinHTML(line: number, origin: 'preview' | 'editor') {
+        if (!this.menu.tabs) return;
+        if (this.menu.tabs.selected !== EToolsSource.icHTML || !this._ed1) return;
+        this.lastOrigin = origin;
+        if (origin === 'editor') return;
+        this.goToLine(line);
+    }
+
+    private registerProviderHTML() {
+        monaco.languages.registerDocumentFormattingEditProvider('html', {
+            provideDocumentFormattingEdits: (model) => {
+                const value = model.getValue();
+                const formattedValue = formatHtml(value);
+                return [{
+                    range: model.getFullModelRange(),
+                    text: formattedValue
+                }];
+            }
+        });
+    }
+
+    private isHTMLSystemChange: boolean = false;
+    private syncDom: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
+        if (this.position === 'right') return;
+        try {
+            this.isHTMLSystemChange = true;
+            sync();
+
+        } catch (e) {
+            console.error('Error on syncDom: ', e);
+        }
+    }
+
+    private async checkToCreateModelHTML(ev: mls.events.IEvent) {
+
+        if (!ev.desc) return;
+        if (this.position === 'right') return;
+        try {
+            const iPath: mls.cbe.IPath = JSON.parse(ev.desc);
+            if (!iPath || !iPath.project || !iPath.shortName) return;
+            const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
+            const storFile = mls.stor.files[keyStorFile];
+            if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile)
+            await this.getOrCreateModelHtmlOrCss(storFile);
+        } catch (err: any) {
+            throw new Error(err);
+        }
+
+    }
+
+    // Model Test
+
+    private async createOrShowModelTsTest(shortName: string, project: number, open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
+
+        const ext = '.test.ts'
+        const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', ext);
+        let storFile = mls.stor.files[key];
+        if (!storFile) {
+            const newTest = await this.prepareInitialTsTest(shortName, project);
+            await this.createStorFile(project, shortName, newTest, ext);
+            storFile = mls.stor.files[key];
+        }
+
+        const uri = this.getUri(`_${project}_${shortName}`, ext);
+        let model = monaco.editor.getModel(uri);
+
+        if (!model) model = await this.getOrCreateModelTsTest(storFile, fileInfo);
+
+        if (open && this._ed1 && this.activeModels) {
+            this._ed1.setModel(model);
+            this.restaureViewState();
+            this.updatedMSizeEditor();
+        }
+
+        return storFile;
+
+    }
+
+    private async getOrCreateModelTsTest(storFile: mls.stor.IFileInfo, fileInfo?: mls.stor.IFileInfoValue): Promise<monaco.editor.ITextModel> {
+
+        const { project, shortName, extension } = storFile;
+
+        const content = fileInfo ? fileInfo.content : await storFile.getContent();
+        if (content instanceof Blob) throw new Error('test file must be string');
+        if (!content) throw new Error('test file is undefined');
+
+        const ext = extension as TExtensions;
+        const modelBase = await this.createModel(project, shortName, ext);
+        if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}${ext}`);
+        const { model } = modelBase;
+
+        const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
+        modelBase.originalCRC = originalCRC;
+
+        if (storFile.status === 'renamed' && fileInfo) {
+            this.setEventsModelTsTest(modelBase, fileInfo.originalShortName as string, fileInfo.originalProject as number);
+            model.setValue(fileInfo.content as string);
+        } else {
+            this.setEventsModelTsTest(modelBase, storFile.shortName, storFile.project);
+        }
+        return model;
+    }
+
+    private setEventsModelTsTest(modelBase: mls.editor.IModelBase, shortName: string, project: number): void {
+        const { storFile, model, originalCRC } = modelBase;
+        if (!storFile) throw new Error(`Invalid stor file for: ${project}_${shortName}`);
+        storFile.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdateTsTest(storFile, model);
+        storFile.getValueInfo = () => this.getValueInfoTsTest(
+            model,
+            shortName,
+            project,
+            originalCRC
+        );
+
+        if (!model) return;
+        model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelTsTestChange(e, modelBase, storFile, model));
+    }
+
+    private _onChangedContentTsTest: number | undefined = undefined;
+    private onModelTsTestChange(e: monaco.editor.IModelContentChangedEvent, modelBase: mls.editor.IModelBase, storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel): void {
+
+        clearTimeout(this._onChangedContentTsTest);
+        this._onChangedContentTsTest = window.setTimeout(async () => {
+
+            let modelValue = model.getValue();
+            const ok = await mls.l2.typescript.compileAndPostProcess(modelBase, false, true);
+            let hasError = ok === false;
+            storFile.hasError = hasError;
+
+            const sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelValue).toString(16);
+            if (sameContent) {
+                if (storFile.status !== 'new' && storFile.status !== 'renamed') storFile.status = 'nochange';
+                if (storFile.status !== 'renamed') await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
+            } else {
+                if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
+                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: modelValue });
+            }
+
+            let position: 'left' | 'right';
+            const idLeft = mls.editor.editors.left?.test?.model.id;
+            const idActive = modelBase.model.id
+            if (idLeft === idActive) position = 'left';
+            else position = 'right';
+
+            mls.events.fire([2], ['tsTestChanged'] as any, JSON.stringify({ position, storFile }));
+
+            this.toogleIconsError();
+        })
+    };
+
+    private async afterUpdateTsTest(storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel) {
+
+        if (storFile.status === 'deleted') {
+            await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+            const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
+            delete mls.stor.files[keyFiles];
+            return;
+        }
+        if (storFile.status === 'renamed') {
+            const models = mls.editor.getModels(storFile.project, storFile.shortName);
+            if (models && models.test) {
+                models.test.originalCRC = mls.common.crc.crc32(model.getValue()).toString(16);
+            }
+        }
+
+        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+        storFile.status = 'nochange';
+    }
+
+
+    private getValueInfoTsTest = async (activeModel: monaco.editor.ITextModel, originalShortName: string, originalProject: number, originalCRC: string | undefined): Promise<mls.stor.IFileInfoValue> => {
+        const rc: mls.stor.IFileInfoValue = {
+            content: activeModel.getValue(),
+            contentType: 'string',
+            originalShortName,
+            originalProject,
+            originalCRC
+        };
+        return rc;
+    }
+
+    private async prepareInitialTsTest(shortName: string, project: number) {
+        const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />
+				\nimport { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST'; \n\nexport const integrations: ICANIntegration[] = []; \nexport const tests: ICANTest[] = [];`;
+        const newTest = example
+            .replace('[shortName]', shortName)
+            .replace('[project]', project.toString())
+
+        return newTest;
+    }
+
+    private getLocalStorageInfo(): ILocalStorageServiceSource {
+        const ls = localStorage.getItem('serviceSource');
+        if (ls) return JSON.parse(ls);
+
+        const oldConfigEditor: string | null = localStorage.getItem('mlsConfEditor');
+
+        const rc = {
+            confTheme: { light: 'VS', dark: 'VS Dark' },
+            confEditor: oldConfigEditor ? oldConfigEditor : '',
+            lastOpened: {},
+        };
+
+        if (oldConfigEditor) {
+            this.saveLocalStorageInfo(rc);
+            localStorage.removeItem('mlsConfEditor');
+        }
+
+        return rc;
+    }
+
+    private saveLocalStorageInfo(data: ILocalStorageServiceSource): void {
+        localStorage.setItem('serviceSource', JSON.stringify(data));
+    }
+
+
     handleIcaStateChange(_key: string, _value: any) {
         const keyState = `serviceSource.${this.position}`;
         if (!_key.startsWith(keyState)) return;
@@ -2174,309 +2493,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         return html``;
     }
 
-    private saveLocalStorageLastOpen(storFile: mls.stor.IFileInfo, position: string) {
-        try {
-
-            let last = localStorage.getItem('_100554_serviceSource');
-            last = last ? last : '{}';
-            const info = JSON.parse(last);
-            const keyLocal = 'last_' + this.level + '_' + position;
-
-            if (info[keyLocal]) {
-                info[keyLocal].project = storFile.project;
-                info[keyLocal].shortName = storFile.shortName;
-                info[keyLocal].extension = storFile.extension;
-                info[keyLocal].level = storFile.level;
-                info[keyLocal].folder = storFile.folder;
-            } else {
-                info[keyLocal] = {
-                    project: storFile.project,
-                    shortName: storFile.shortName,
-                    extension: storFile.extension,
-                    level: storFile.level,
-                    folder: storFile.folder,
-                }
-            }
-
-            localStorage.setItem('_100554_serviceSource', JSON.stringify(info));
-
-        } catch (e) {
-            localStorage.setItem('_100554_serviceSource', JSON.stringify({}));
-        }
-
-    }
-
-    private openLastFile(level: number, position: string): boolean {
-
-        try {
-            let last = localStorage.getItem('_100554_serviceSource');
-            last = last ? last : '{}';
-            const info = JSON.parse(last);
-            const keyLocal = 'last_' + level + '_' + position;
-            if (!info[keyLocal]) return false;
-
-
-            const project = +info[keyLocal].project;
-            const shortName = info[keyLocal].shortName;
-
-            const models = mls.editor.getModels(project, shortName);
-            if (!models) return false;
-
-            this.activeModels = models;
-            mls.actual[this.level].setFullName(`_${info[keyLocal].project}_${info[keyLocal].shortName}`);
-            (mls.actual[this.level] as any)[position] = {
-                project,
-                shortName,
-                extension: '.ts',
-                folder: ''
-            }
-
-            return true;
-
-        } catch (e) {
-            return false;
-        }
-
-    }
-
-    public getActualRef(): string {
-        if (!this.menu.tabs) return '';
-        try {
-            let ret = '';
-            if (!mls.actual[2] || !(mls.actual[2] as any)[this.position]) return ret;
-            const actual = (mls.actual[2] as any)[this.position];
-            const ext = this.menu.tabs.selected === EToolsSource.icTs ? '.ts' : '.html';
-            if (!actual) return ret;
-            ret = mls.stor.getKeyToFiles(actual.project, 2, actual.shortName, actual.folder, ext);
-            return ret;
-
-        } catch (e) {
-            return '';
-        }
-
-    }
-
-
-    //--------------WidgetAction--------------
-
-    private lastOrigin = 'editor';
-    private onWidgetActionEvents(ev: mls.events.IEvent) {
-
-        if (this.position === 'right') return;
-        if (ev.level !== this.level) return;
-        if (!ev.desc) return;
-
-        const json = JSON.parse(ev.desc);
-
-        switch (json.op) {
-            case 'SelectWidget':
-                break;
-            case 'SelectLine':
-                this.selectLineinHTML(json.line, json.origin);
-                break;
-            default:
-                console.info('Erro: opção invalida');
-        }
-
-    }
-
-    private selectLineinHTML(line: number, origin: 'preview' | 'editor') {
-        if (!this.menu.tabs) return;
-        if (this.menu.tabs.selected !== EToolsSource.icHTML || !this._ed1) return;
-        this.lastOrigin = origin;
-        if (origin === 'editor') return;
-        this.goToLine(line);
-    }
-
-    private registerProviderHTML() {
-        monaco.languages.registerDocumentFormattingEditProvider('html', {
-            provideDocumentFormattingEdits: (model) => {
-                const value = model.getValue();
-                const formattedValue = formatHtml(value);
-                return [{
-                    range: model.getFullModelRange(),
-                    text: formattedValue
-                }];
-            }
-        });
-    }
-
-    private isHTMLSystemChange: boolean = false;
-    private syncDom: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
-        if (this.position === 'right') return;
-        try {
-            this.isHTMLSystemChange = true;
-            sync();
-
-        } catch (e) {
-            console.error('Error on syncDom: ', e);
-        }
-    }
-
-    private async checkToCreateModelHTML(ev: mls.events.IEvent) {
-
-        if (!ev.desc) return;
-        if (this.position === 'right') return;
-        try {
-            const iPath: mls.cbe.IPath = JSON.parse(ev.desc);
-            if (!iPath || !iPath.project || !iPath.shortName) return;
-            const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
-            const storFile = mls.stor.files[keyStorFile];
-            if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile)
-            await this.getOrCreateModelHtmlOrCss(storFile);
-        } catch (err: any) {
-            throw new Error(err);
-        }
-
-    }
-
-
-
-    // Model Test
-
-    private async createOrShowModelTsTest(shortName: string, project: number, open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
-
-        const ext = '.test.ts'
-        const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', ext);
-        let storFile = mls.stor.files[key];
-        if (!storFile) {
-            const newTest = await this.prepareInitialTsTest(shortName, project);
-            await this.createStorFile(project, shortName, newTest, ext);
-            storFile = mls.stor.files[key];
-        }
-
-        const uri = this.getUri(`_${project}_${shortName}`, ext);
-        let model = monaco.editor.getModel(uri);
-
-        if (!model) model = await this.getOrCreateModelTsTest(storFile, fileInfo);
-
-        if (open && this._ed1 && this.activeModels) {
-            this._ed1.setModel(model);
-            this.restaureViewState();
-            this.updatedMSizeEditor();
-        }
-
-        return storFile;
-
-    }
-
-    private async getOrCreateModelTsTest(storFile: mls.stor.IFileInfo, fileInfo?: mls.stor.IFileInfoValue): Promise<monaco.editor.ITextModel> {
-
-        const { project, shortName, extension } = storFile;
-
-        const content = fileInfo ? fileInfo.content : await storFile.getContent();
-        if (content instanceof Blob) throw new Error('test file must be string');
-        if (!content) throw new Error('test file is undefined');
-
-        const ext = extension as TExtensions;
-        const modelBase = await this.createModel(project, shortName, ext);
-        if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}${ext}`);
-        const { model } = modelBase;
-
-        const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
-        modelBase.originalCRC = originalCRC;
-
-        if (storFile.status === 'renamed' && fileInfo) {
-            this.setEventsModelTsTest(modelBase, fileInfo.originalShortName as string, fileInfo.originalProject as number);
-            model.setValue(fileInfo.content as string);
-        } else {
-            this.setEventsModelTsTest(modelBase, storFile.shortName, storFile.project);
-        }
-        return model;
-    }
-
-    private setEventsModelTsTest(modelBase: mls.editor.IModelBase, shortName: string, project: number): void {
-        const { storFile, model, originalCRC } = modelBase;
-        if (!storFile) throw new Error(`Invalid stor file for: ${project}_${shortName}`);
-        storFile.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdateTsTest(storFile, model);
-        storFile.getValueInfo = () => this.getValueInfoTsTest(
-            model,
-            shortName,
-            project,
-            originalCRC
-        );
-
-        if (!model) return;
-        model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelTsTestChange(e, modelBase, storFile, model));
-    }
-
-    private _onChangedContentTsTest: number | undefined = undefined;
-    private onModelTsTestChange(e: monaco.editor.IModelContentChangedEvent, modelBase: mls.editor.IModelBase, storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel): void {
-
-        clearTimeout(this._onChangedContentTsTest);
-        this._onChangedContentTsTest = window.setTimeout(async () => {
-
-            let modelValue = model.getValue();
-
-            const ok = await mls.l2.typescript.compileAndPostProcess(modelBase, false, true);
-
-
-            // const ok = await mls.l2.typescript.compile(modelBase);
-            let hasError = ok === false;
-            storFile.hasError = hasError;
-
-            const sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelValue).toString(16);
-            if (sameContent) {
-                if (storFile.status !== 'new' && storFile.status !== 'renamed') storFile.status = 'nochange';
-                if (storFile.status !== 'renamed') await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
-            } else {
-                if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
-                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: modelValue });
-            }
-
-            let position: 'left' | 'right';
-            const idLeft = mls.editor.editors.left?.test?.model.id;
-            const idActive = modelBase.model.id
-            if (idLeft === idActive) position = 'left';
-            else position = 'right';
-
-            mls.events.fire([2], ['tsTestChanged'] as any, JSON.stringify({ position, storFile }));
-
-            this.toogleIconsError();
-        })
-    };
-
-    private async afterUpdateTsTest(storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel) {
-
-        if (storFile.status === 'deleted') {
-            await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-            const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
-            delete mls.stor.files[keyFiles];
-            return;
-        }
-        if (storFile.status === 'renamed') {
-            const models = mls.editor.getModels(storFile.project, storFile.shortName);
-            if (models && models.test) {
-                models.test.originalCRC = mls.common.crc.crc32(model.getValue()).toString(16);
-            }
-        }
-
-        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-        storFile.status = 'nochange';
-    }
-
-
-    private getValueInfoTsTest = async (activeModel: monaco.editor.ITextModel, originalShortName: string, originalProject: number, originalCRC: string | undefined): Promise<mls.stor.IFileInfoValue> => {
-        const rc: mls.stor.IFileInfoValue = {
-            content: activeModel.getValue(),
-            contentType: 'string',
-            originalShortName,
-            originalProject,
-            originalCRC
-        };
-        return rc;
-    }
-
-    private async prepareInitialTsTest(shortName: string, project: number) {
-        const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />
-				\nimport { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST'; \n\nexport const integrations: ICANIntegration[] = []; \nexport const tests: ICANTest[] = [];`;
-        const newTest = example
-            .replace('[shortName]', shortName)
-            .replace('[project]', project.toString())
-
-        return newTest;
-    }
-
 }
 
 enum EToolsSource {
@@ -2495,7 +2511,14 @@ interface IViewStates {
     html: monaco.editor.ICodeEditorViewState | null,
     style: monaco.editor.ICodeEditorViewState | null,
     test: monaco.editor.ICodeEditorViewState | null,
+}
 
+interface ILocalStorageServiceSource {
+    confTheme: { dark: string, light: string },
+    confEditor: string,
+    lastOpened: {
+        [key: string]: { extension: string, folder: string, level: number, project: number, shortName: string }
+    }
 }
 
 type IModes = 'icTs' | 'icStyle' | 'icHTML' | 'icTest';
