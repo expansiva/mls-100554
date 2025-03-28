@@ -1,12 +1,10 @@
 /// <mls shortName="collabPageElement" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
 import { html, PropertyValueMap } from 'lit';
 import { property } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
-
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { WCDOverlayMethods } from './_100554_wcdTypes';
-import { IICADepths } from './_100554_icaTypes'
-
+import { WCDOverlayMethods  } from './_100554_wcdTypes';
+import { IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes'
 import { convertTagToFileName } from './_100554_utilsLit'
 
 export const PREFIX_ICA_ID = 'ica_';
@@ -56,7 +54,7 @@ export abstract class CollabPageElement extends IcaLitElement {
         }, 500);
 
         this.setupIds();
-        this.setupEvents();
+        // this.setupEvents();
         await this.initPage();
         this.initPageComplete = true;
 
@@ -76,17 +74,9 @@ export abstract class CollabPageElement extends IcaLitElement {
 
     //--------IMPLEMENTS------------
 
-    private getVariationDevice(): IDevice {
-        const device = (document.documentElement.getAttribute('data-device') || 'desktop').toLowerCase();
-        return device as IDevice;
-    }
-
 
     private setupIds(): void {
         const icas = this.findAllElementsIca(this);
-        let device: string = this.getVariationDevice();
-        if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1);
-
         icas.forEach((item) => {
             const oldId = item.element.id;
             const icaId = `${PREFIX_ICA_ID}${item.element.id}`;
@@ -95,41 +85,6 @@ export abstract class CollabPageElement extends IcaLitElement {
         });
 
     }
-
-    private setupEvents(): void {
-
-        const allWebComponentsInPage = this.getAllWebComponents(this);
-        let device: IDevice = this.getVariationDevice();
-        if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1) as IDevice;
-
-        allWebComponentsInPage.forEach((el) => {
-            const widget = el.tagName.toLowerCase();
-            customElements.whenDefined(widget).then(() => {
-                const events = el.getAttribute('data-event')?.split(' ') || [];
-                if (!events || events.length === 0) return;
-                const elementId = el.getAttribute('idel') || el.getAttribute('id');
-                if (!elementId) return;
-                const that = this as any;
-                events.forEach(event => {
-                    // search por functions name, from specific to generic,
-                    // ex: handleClick1Desktop, handleClick1, handleClick
-                    const handlerGeneric = getEventName(event)
-                    const handlerSpecificID = getEventName(event, elementId);
-                    const handlerSpecificDevice = getEventName(event, elementId, device);
-                    if (that[handlerSpecificDevice]) {
-                        el.addEventListener(event, that[handlerSpecificDevice].bind(this));
-                    } else if (that[handlerSpecificID]) {
-                        el.addEventListener(event, that[handlerSpecificID].bind(this));
-                    } else if (that[handlerGeneric]) {
-                        el.addEventListener(event, that[handlerGeneric].bind(this));
-                    }
-                });
-            })
-        })
-
-    }
-
-
 
     private checkToAddOverlay(): void {
 
@@ -151,14 +106,12 @@ export abstract class CollabPageElement extends IcaLitElement {
     private async createOverlay() {
 
         if (!this.modeoverlay) return;
-
         const ok = await this.importWCDOverlay(this.modeoverlay);
         if (!ok) return;
         this.overlay = document.createElement(this.modeoverlay) as WCDOverlayMethods;
         this.overlay.myItens = this.findAllElementsIca(this);
         this.overlay.createOverlayItems();
         this.appendChild(this.overlay as HTMLElement);
-
         mls.events.fire(3, 'WCDEventChange' as any,JSON.stringify({op:'recreateOverlay'}));
 
     }
@@ -192,7 +145,7 @@ export abstract class CollabPageElement extends IcaLitElement {
 
             if (element.tagName.toLowerCase().startsWith('ica') && !arrayEls.includes(element)) {
                 const { x, y, height, width } = element.getBoundingClientRect();
-                elements.push({ element: element as IcaLitElementBase, depth, x, y, height, width, opacity: element.style.opacity });
+                elements.push({ element: element as IcaLitElementBaseMethods, depth, x, y, height, width, opacity: element.style.opacity });
                 arrayEls.push(element);
                 return;
             }
@@ -220,42 +173,5 @@ export abstract class CollabPageElement extends IcaLitElement {
 
     }
 
-    private getAllWebComponents(root: HTMLElement): HTMLElement[] {
-        const webComponents: HTMLElement[] = [];
-
-        function findWebComponents(node: Node) {
-            if (node instanceof HTMLElement) {
-                const tagName = node.tagName.toLowerCase();
-                if (tagName.split('-').length > 1) {
-                    webComponents.push(node);
-                }
-
-                // Check if the element has a shadow root
-                if (node.shadowRoot) {
-                    node.shadowRoot.childNodes.forEach(childNode => findWebComponents(childNode));
-                }
-            }
-
-            node.childNodes.forEach(childNode => findWebComponents(childNode));
-        }
-
-        findWebComponents(root);
-        return webComponents;
-    }
-
-
 }
 
-
-export function getEventName(eventName: string, elementId?: string, device?: IDevice) {
-    const newId = toPascalCase(elementId || '')
-    const handlerGeneric = `handle${toPascalCase(eventName)}`;
-    if (!newId) return handlerGeneric;
-    const handlerSpecificID = `${handlerGeneric}${newId}`;
-    if (!device) return handlerSpecificID;
-    if (device.length > 0) device = device.charAt(0).toUpperCase() + device.slice(1) as IDevice;
-    const handlerSpecificDevice = `${handlerSpecificID}${device}`
-    return handlerSpecificDevice;
-}
-
-export type IDevice = 'desktop' | 'mobile' | 'others'

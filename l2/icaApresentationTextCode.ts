@@ -3,10 +3,9 @@
 import { customElement, property } from 'lit/decorators.js';
 import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { IcaApresentationTextCodeBase } from './_100554_icaApresentationTextCodeBase';
 
 @customElement('ica-apresentation-text-code-100554')
-export abstract class IcaApresentationTextCode extends IcaLitElementBase implements IcaApresentationTextCodeBase {
+export abstract class IcaApresentationTextCode extends IcaLitElementBase {
 
     @property({ type: String, reflect: true }) language = 'typescript';
 
