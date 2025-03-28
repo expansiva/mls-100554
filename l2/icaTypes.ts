@@ -1,6 +1,6 @@
 /// <mls shortName="icaTypes" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { LitElement } from 'lit';
 
+import { LitElement } from 'lit';
 export type FormComponent = {
     group: string;
     attributes?: string;
@@ -81,10 +81,6 @@ export interface IcaLitElementBaseMethods extends LitElement {
     getICAComponents(scope: HTMLElement): IcaLitElementBaseMethods[];
     getMyScope(): IcaLitElementBaseMethods | HTMLElement | undefined;
     getIcaParent(target: HTMLElement): IcaLitElementBaseMethods | undefined;
-    getMyInfos(): { root: string, subGroup: string, finalGroup: string };
-    getMyEvents(): string;
-    getDefinitionFromEvent(event: string): string;
-    getAtributtes(): string[];
 }
 
 export interface IICADepths {
