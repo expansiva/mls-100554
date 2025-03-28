@@ -35,7 +35,6 @@ export class PluginPullrequest extends PluginBaseModule {
     @property() error: string = '';
     @property() autoPrepare: boolean = false;
 
-
     //-----COMPONENT---------
     createRenderRoot() {
         return this;
