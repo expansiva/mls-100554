@@ -305,15 +305,13 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
                 attributes.push({
                     name: attrName,
                     value: attrValue
-                })
+                });
             }
         }
 
         const attrsByVariation = this.filterAttributes(attributes, language);
         let attributesStr = '';
         attrsByVariation.forEach((item) => attributesStr += `${item.name}="${item.value}"`)
-        //  console.info({ el: this, variation, attributes, attrsByVariation });
-
         return attributesStr;
 
     }
@@ -340,50 +338,6 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
             }
         });
         return aux;
-    }
-
-
-    private myInfos: { root: string, subGroup: string, finalGroup: string } | undefined;
-    getMyInfos(): { root: string, subGroup: string, finalGroup: string } {
-
-        // Remove os caracteres iniciais e finais não desejados
-        let cleanedInput = this.tagName.toLocaleLowerCase().replace(/^ica-|-\d+$/g, '');
-
-        let root: string, subgroup: string, finalgroup: string;
-
-        // Divide a string em partes usando '-'
-        let parts = cleanedInput.split('-');
-        if (parts.length < 3) throw new Error('Invalid ica tag name');
-
-        root = parts.shift() as string;
-        subgroup = parts.shift() as string;
-        finalgroup = parts.join(' ') as string;
-
-        // Retorna o objeto mapeando as partes apropriadas
-        return {
-            root: root || '',
-            subGroup: subgroup || '',
-            finalGroup: finalgroup || ''
-        };
-    }
-
-    getMyEvents(): string {
-        if (!this.myInfos) this.myInfos = this.getMyInfos();
-        return '';
-        // return myDefinition.getFormComponentsEvents(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup);
-    }
-
-    getDefinitionFromEvent(event: string): string {
-        if (!this.myInfos) this.myInfos = this.getMyInfos();
-        return '';
-        // return myDefinition.getEventDescription(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup, event);
-    }
-
-    getAtributtes(): string[] {
-
-        if (!this.myInfos) this.myInfos = this.getMyInfos();
-        return [];
-        //return myDefinition.getAtributtes(this.myInfos.root, this.myInfos.subGroup, this.myInfos.finalGroup);
     }
 
 }
