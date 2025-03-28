@@ -335,14 +335,17 @@ export class ServiceSave extends ServiceBase {
                 <div id="Save_menu_action" style="display:flex;">
                     <div style="width:100%;" >
                         <h4 class="mt-3">${this.myMessage.comments}:</h4>
-                        <textarea id="commitMessage" class="form-control" style="width:95%;" rows="2" maxlength="50"></textarea>
+                        <div style="display:flex; gap:1rem; align-items:center;">
+                            <textarea id="commitMessage" class="form-control" style="max-width:600px;"  maxlength="50"></textarea>
+                            <button id="btn_save" ?disabled=${!this.freeToSave} class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
+            
+                        </div>
                         <small style="font-size:12px;font-weight:bold">*${this.myMessage.obsVerify}</small>
                     </div>
-                    <div id="div_btn_save" class="text-right" style="width:79px; display: flex; align-items:center;">
-                        <button id="btn_save" ?disabled=${!this.freeToSave} class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
-                    </div>
                 </div>
+        
                 <h4 class="mt-3" data-mlsline="23">${this.myMessage.fileChanges}</h4>
+                
                 <ul>
                     ${repeat(keys, ((key: any) => key) as any, ((k: any, index: any) => { return this.renderProject(k, index); }) as any)}
                 </ul>
