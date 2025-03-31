@@ -1,5 +1,115 @@
 /// <mls shortName="designSystemBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+export const acceptedImages = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"];
+export const acceptedVideos = [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"]
+
+export async function getImages(project: number): Promise<mls.stor.IFileInfo[]> {
+    const folder = 'assets';
+    const imagesFiles = Object.values(mls.stor.files).filter((file) => {
+        return file.project === project && file.folder === folder && acceptedImages.includes(file.extension);
+    });
+    return imagesFiles || [];
+}
+
+export async function getVideos(project: number): Promise<mls.stor.IFileInfo[]> {
+    const folder = 'assets';
+    const videosFiles = Object.values(mls.stor.files).filter((file) => {
+        return file.project === project && file.folder === folder && acceptedVideos.includes(file.extension);
+    });
+    return videosFiles || [];
+}
+
+export async function addAssets(project: number, file: File): Promise<boolean> {
+
+    const folder = 'assets';
+    const shortName = file.name;
+    const newShortName = shortName.replace(/_/g, '-');
+    const ext = newShortName.split('.').pop();
+    const extension = `.${ext}`;
+    if (!extension) throw new Error('Invalid extension');
+    if (!acceptedImages.includes(extension) && !acceptedVideos.includes(extension)) throw new Error(`Invalid extension. Valid extensions: ${acceptedImages.join(',')},${acceptedVideos.join(',')}, `);
+
+    const extensionIndex = newShortName.lastIndexOf('.');
+    const fileNameWithoutExtension = newShortName.slice(0, extensionIndex);
+
+    const assetsByName = Object.keys(mls.stor.files).find((key) => {
+        const stor = mls.stor.files[key];
+        return stor.project === project
+            && stor.folder === folder
+            && stor.shortName === fileNameWithoutExtension
+            && stor.extension === extension
+    });
+
+    if (assetsByName) throw new Error(`assets: ${folder}/${newShortName} already exists`);
+    try {
+        await createNewAssets(project, fileNameWithoutExtension, extension, folder, file)
+        return true;
+    } catch (err: any) {
+        throw new Error(`Error on add new asset: ${err.message}`)
+    }
+}
+
+async function createNewAssets(project: number, shortName: string, extension: string, folder: string, content: string | Blob | null): Promise<mls.stor.IFileInfo> {
+
+    const params = {
+        project,
+        level: 3,
+        shortName,
+        extension,
+        versionRef: '0',
+        folder
+    };
+
+    const file = await mls.stor.addOrUpdateFile(params);
+    if (!file) throw new Error('Error on update or add File');
+    file.status = 'new';
+    file.getValueInfo = () => _getValueInfo(file);
+    file.onAction = (action: mls.stor.IFileInfoAction) => _onAction(action, file);
+    const contentType = typeof content === 'string' ? 'string' : 'blob';
+    const fileInfo: mls.stor.IFileInfoValue = {
+        content,
+        contentType,
+    };
+    await mls.stor.localStor.setContent(file, fileInfo);
+    return file;
+}
+
+async function _getValueInfo(
+    file: mls.stor.IFileInfo,
+    originalShortName?: string,
+    originalFolder?: string,
+    originalProject?: number,
+    originalCRC?: string,
+): Promise<mls.stor.IFileInfoValue> {
+
+    file.inLocalStorage = file.status !== 'nochange';
+    const content = await file.getContent();
+    const contentType = typeof content === 'string' ? 'string' : 'blob';
+    const obj: mls.stor.IFileInfoValue = {
+        content,
+        contentType,
+        originalShortName,
+        originalFolder,
+        originalProject,
+        originalCRC,
+    };
+    return obj;
+}
+
+async function _onAction(action: mls.stor.IFileInfoAction, storFile: mls.stor.IFileInfo): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        if (action === 'aftersave') {
+            storFile.status = 'nochange';
+            storFile.inLocalStorage = false;
+            const fileInfoValue: mls.stor.IFileInfoValue = {
+                content: null,
+                contentType: undefined,
+            };
+            mls.stor.localStor.setContent(storFile, fileInfoValue);
+        }
+        return resolve();
+    });
+}
 
 export async function getTokens(project: number): Promise<IDesignSystemTokens[]> {
     const fileName = `./_${project}_designSystem`;
