@@ -612,8 +612,8 @@ export class ServiceSave extends ServiceBase {
                 if (!obj[level] && level === 3) {
 
                     const nNivel = file.folder.split('/');
-                    if (nNivel.length >= 2) {
-                        obj[level] = { [nNivel[1]]: [await this.configItem(file)] }
+                    if (nNivel.length >= 1) {
+                        obj[level] = { [nNivel[0]]: [await this.configItem(file)] }
                     }
 
                 } else if (!obj[level]) {
@@ -623,9 +623,9 @@ export class ServiceSave extends ServiceBase {
 
                     const nNivel = file.folder.split('/');
                     const obj3 = obj[level];
-                    if (nNivel.length >= 2 && obj3[nNivel[1]]) {
+                    if (nNivel.length >= 1 && obj3[nNivel[0]]) {
 
-                        obj3[nNivel[1]].push(await this.configItem(file))
+                        obj3[nNivel[0]].push(await this.configItem(file))
                     }
 
                 } else {
@@ -687,7 +687,7 @@ export class ServiceSave extends ServiceBase {
             file: item,
             text: mountText,
             span: span,
-            onlyFather: item.level === 3,
+            onlyFather: false,
             disabled: disabled,
         }
 
