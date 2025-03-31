@@ -12,7 +12,7 @@ export abstract class IcaApresentationVideoEmbeddedVideoBase extends IcaLitEleme
 
     async firstUpdated(changedProperties: Map<string | number | symbol, unknown>) {
         super.firstUpdated(changedProperties);
-        if (this.src && this.src.startsWith('/l3') && window['mls']) {
+        if (this.src && this.src.startsWith('/') && window['mls']) {
             const newSrc = await this.getUrlL3(this.src);
             if (newSrc) this.src = newSrc;
         }

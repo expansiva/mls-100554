@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { getDSInstance, DesignSystemIO, IAssetsInfo } from './_100554_libDesignSystem';
+import { getVideos, addAssets } from './_100554_designSystemBase';
 import { execute } from './_100554_wcdCommandAddVideo';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { globalWcd } from './_100554_wcdState';
@@ -12,18 +12,11 @@ export class WcdDialogVideo100554 extends LitElement {
 
     private lastIca: HTMLElement | undefined;
 
-    private dsInstance: DesignSystemIO | undefined;
-
     @property() videos: IVideoItem[] = [];
 
     @query('#file-input') inputFile: HTMLInputElement | undefined;
 
     private project: number | undefined;
-
-    private async initDsInstance(project: number, dsIndex: number) {
-        this.dsInstance = await getDSInstance(project, dsIndex);
-        await this.dsInstance.init();
-    }
 
     private lastHeight: string | undefined;
 
@@ -31,7 +24,6 @@ export class WcdDialogVideo100554 extends LitElement {
         const { project } = mls.actual[5];
         if (!project) return;
         this.project = project;
-        await this.initDsInstance(project, 0);
         this.videos = await this.getVideos(project);
     }
 
@@ -44,35 +36,28 @@ export class WcdDialogVideo100554 extends LitElement {
     }
 
     private async getVideos(project: number) {
-        if (!this.dsInstance || !this.dsInstance.assets) return [];
+
         const videos: IVideoItem[] = [];
-        const list = this.dsInstance.assets.list;
+        const list = await getVideos(project);
 
         for await (const item of Object.entries(list)) {
             const [key, value] = item;
-            const src = `/l3/${project}/${value.path}/${value.shortname}`;
-            if (value.type === 'video') {
-                const srcCache = await this.getUrlL3(src) || '';
-                const newVideoAssetsItem: IVideoItem = {
-                    ...value,
-                    src,
-                    srcCache
-                }
-                videos.push(newVideoAssetsItem);
+            const src = `/${value.project}/l3/${value.folder}/${value.shortName}${value.extension}`;
+            const srcCache = await this.getUrlL3(value) || '';
+            const newImageAssetsItem: IVideoItem = {
+                ...value,
+                src,
+                srcCache
             }
+            videos.push(newImageAssetsItem);
+
         }
+
 
         return videos;
     }
 
-    private async getUrlL3(src: string) {
-        const parts = src.split('/');
-        const folderNumber = parts[2];
-        const dsNumber = "3";
-        const remainingParts = parts.slice(3).join('_');
-        const result = `${folderNumber}_${dsNumber}_${remainingParts}`;
-        const storFile = mls.stor.files[result];
-        if (!storFile) throw new Error('Invalid url');
+    private async getUrlL3(storFile: mls.stor.IFileInfo) {
         const urlCache = await storFile.saveContentInCacheIfNeed();
         return urlCache;
     }
@@ -90,10 +75,8 @@ export class WcdDialogVideo100554 extends LitElement {
     }
 
     private async addVideo(file: File) {
-        if (!this.dsInstance || !this.dsInstance.assets || !this.project) return;
-        const dsName = this.dsInstance.dsname;
-        const path = `ds/${dsName}/assets`
-        await this.dsInstance.assets.add(path, file.name, [], '', 'video', file);
+        if (!this.project) return;
+        await addAssets(this.project, file);
         this.videos = await this.getVideos(this.project);
         await this.updateComplete;
         const last = this.videos[this.videos.length - 1];
@@ -127,7 +110,7 @@ export class WcdDialogVideo100554 extends LitElement {
         if (!globalWcd) throw new Error('Invalid window.wcdState');
         if (globalWcd.elICA) (globalWcd.elICA as any).style.height = this.lastHeight || '';
         else if (this.lastIca) this.lastIca.style.height = this.lastHeight || '';
-        
+
         super.disconnectedCallback();
     }
 
@@ -138,11 +121,11 @@ export class WcdDialogVideo100554 extends LitElement {
             <div class="container">
                 <div class="actions-buttons">
                     <button @click=${this.onUploadClick}>Upload</button>
-                    <input @change=${this.onChangeImage} type="file" id="file-input" accept="image/*" style="display: none;">
+                    <input @change=${this.onChangeImage} type="file" id="file-input" accept="video/*" style="display: none;">
                 </div>
                 <div class="gallery">
                     ${this.videos.map((video) => {
-            return html`<video controls @click=${(ev: MouseEvent) => { this.handleClickGallery(video, ev) }} src=${video.srcCache} alt=${video.description}></video>`
+            return html`<video controls @click=${(ev: MouseEvent) => { this.handleClickGallery(video, ev) }} src=${video.srcCache} alt=${video.shortName}></video>`
         })}
                 </div>
 
@@ -220,7 +203,8 @@ export class WcdDialogVideo100554 extends LitElement {
     `;
 }
 
-interface IVideoItem extends IAssetsInfo {
+interface IVideoItem extends mls.stor.IFileInfo {
     src: string,
     srcCache: string,
 }
+

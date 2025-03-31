@@ -2,10 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-// import { getDSInstance, DesignSystemIO, IAssetsInfo } from './_100554_libDesignSystem';
-
 import { getImages, addAssets } from './_100554_designSystemBase';
-
 import { execute } from './_100554_wcdCommandAddImage';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { globalWcd } from './_100554_wcdState';
@@ -78,10 +75,9 @@ export class WcdDialogImage100554 extends LitElement {
     }
 
     private async addImage(file: File) {
-        const { project } = mls.actual[5];
-        if (!project) return;
-        await addAssets(project, file);
-        this.images = await this.getImages(project);
+        if (!this.project) return;
+        await addAssets(this.project, file);
+        this.images = await this.getImages(this.project);
         await this.updateComplete;
         const last = this.images[this.images.length - 1];
         this.handleClickGallery(last);
