@@ -2,7 +2,10 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { getDSInstance, DesignSystemIO, IAssetsInfo } from './_100554_libDesignSystem';
+// import { getDSInstance, DesignSystemIO, IAssetsInfo } from './_100554_libDesignSystem';
+
+import { getImages, addAssets } from './_100554_designSystemBase';
+
 import { execute } from './_100554_wcdCommandAddImage';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { globalWcd } from './_100554_wcdState';
@@ -12,18 +15,11 @@ export class WcdDialogImage100554 extends LitElement {
 
     private lastIca: HTMLElement | undefined;
 
-    private dsInstance: DesignSystemIO | undefined;
-
     @property() images: IImageItem[] = [];
 
     @query('#file-input') inputFile: HTMLInputElement | undefined;
 
     private project: number | undefined;
-
-    private async initDsInstance(project: number, dsIndex: number) {
-        this.dsInstance = await getDSInstance(project, dsIndex);
-        await this.dsInstance.init();
-    }
 
     private lastHeight: string | undefined;
 
@@ -31,7 +27,6 @@ export class WcdDialogImage100554 extends LitElement {
         const { project } = mls.actual[5];
         if (!project) return;
         this.project = project;
-        await this.initDsInstance(project, 0);
         this.images = await this.getImages(project);
     }
 
@@ -40,39 +35,31 @@ export class WcdDialogImage100554 extends LitElement {
         if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
         const height = this.getBoundingClientRect()?.height;
         if (this.lastHeight === undefined) this.lastHeight = globalWcd?.elICA?.style.height;
-        (globalWcd.elICA as any).style.height  = height + 'px';
+        (globalWcd.elICA as any).style.height = height + 'px';
     }
 
     private async getImages(project: number) {
-        if (!this.dsInstance || !this.dsInstance.assets) return [];
+
         const images: IImageItem[] = [];
-        const list = this.dsInstance.assets.list;
+        const list = await getImages(project);
 
         for await (const item of Object.entries(list)) {
             const [key, value] = item;
-            const src = `/l3/${project}/${value.path}/${value.shortname}`;
-            if (value.type === 'image') {
-                const srcCache = await this.getUrlL3(src) || '';
-                const newImageAssetsItem: IImageItem = {
-                    ...value,
-                    src,
-                    srcCache
-                }
-                images.push(newImageAssetsItem);
+            const src = `/${value.project}/l3/${value.folder}/${value.shortName}${value.extension}`;
+            const srcCache = await this.getUrlL3(value) || '';
+            const newImageAssetsItem: IImageItem = {
+                ...value,
+                src,
+                srcCache
             }
+            images.push(newImageAssetsItem);
+
         }
 
         return images;
     }
 
-    private async getUrlL3(src: string) {
-        const parts = src.split('/');
-        const folderNumber = parts[2];
-        const dsNumber = "3";
-        const remainingParts = parts.slice(3).join('_');
-        const result = `${folderNumber}_${dsNumber}_${remainingParts}`;
-        const storFile = mls.stor.files[result];
-        if (!storFile) throw new Error('Invalid url');
+    private async getUrlL3(storFile: mls.stor.IFileInfo) {
         const urlCache = await storFile.saveContentInCacheIfNeed();
         return urlCache;
     }
@@ -91,11 +78,10 @@ export class WcdDialogImage100554 extends LitElement {
     }
 
     private async addImage(file: File) {
-        if (!this.dsInstance || !this.dsInstance.assets || !this.project) return;
-        const dsName = this.dsInstance.dsname;
-        const path = `ds/${dsName}/assets`
-        await this.dsInstance.assets.add(path, file.name, [], '', 'image', file);
-        this.images = await this.getImages(this.project);
+        const { project } = mls.actual[5];
+        if (!project) return;
+        await addAssets(project, file);
+        this.images = await this.getImages(project);
         await this.updateComplete;
         const last = this.images[this.images.length - 1];
         this.handleClickGallery(last);
@@ -125,7 +111,7 @@ export class WcdDialogImage100554 extends LitElement {
     disconnectedCallback() {
         if (!globalWcd) throw new Error('Invalid window.wcdState');
         if (globalWcd.elICA) (globalWcd.elICA as any).style.height = this.lastHeight || '';
-        else if (this.lastIca)  this.lastIca.style.height = this.lastHeight || '';
+        else if (this.lastIca) this.lastIca.style.height = this.lastHeight || '';
         super.disconnectedCallback();
     }
 
@@ -139,7 +125,7 @@ export class WcdDialogImage100554 extends LitElement {
                 </div>
                 <div class="gallery">
                     ${this.images.map((image) => {
-            return html`<img @click=${() => { this.handleClickGallery(image) }} src=${image.srcCache} alt=${image.description}></img>`
+            return html`<img @click=${() => { this.handleClickGallery(image) }} src=${image.srcCache} alt=${image.shortName}></img>`
         })}
                 </div>
 
@@ -218,7 +204,7 @@ export class WcdDialogImage100554 extends LitElement {
     `;
 }
 
-interface IImageItem extends IAssetsInfo {
+interface IImageItem extends mls.stor.IFileInfo {
     src: string,
     srcCache: string,
 }

@@ -19,12 +19,8 @@ export abstract class IcaApresentationVideoEmbeddedVideoBase extends IcaLitEleme
     }
 
     private async getUrlL3(src: string) {
-        //Example Url =>  /l3/100554/ds/collabDesignsystem/assets/4e6a2cd7abfd6a977ccda9e00507fc5d.jpg
-        const parts = src.split('/');
-        const folderNumber = parts[2];
-        const dsNumber = "3";
-        const remainingParts = parts.slice(3).join('_');
-        const result = `${folderNumber}_${dsNumber}_${remainingParts}`;
+        //Example Url => /100554/l3/assets/video1 => 100554_3_assets_video1
+        const result = src.replace(/^\/(\d+)\/l(\d+)\//, '$1_$2_').replace(/\//g, '_');
         const storFile = mls.stor.files[result];
         if (!storFile) throw new Error('Invalid url');
         const urlCache = await storFile.saveContentInCacheIfNeed()
