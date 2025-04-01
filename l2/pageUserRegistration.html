@@ -1,0 +1,45 @@
+<page-user-registration-100554 modeoverlay="wcd-overlay-mode-default-100554s">
+    <ica-layout-flow-section-100554 id="section1" class="inset" widget="wc-section-100554">
+        <ica-apresentation-text-text-100554 id="apText1" widget="wc-text-100554" text="User Registration" type="h2"
+            class="story-title"> 
+        </ica-apresentation-text-text-100554> 
+        <ica-layout-flow-row-100554 widget="wc-row-100554" id="widget44">
+            <ica-layout-flow-column-100554 widget="wc-column-100554" id="widget45">
+                <ica-layout-group-table-100554 widget="wc-table-select-100554"
+                    data="{{projectTest.pageUserRegistration.users}}"
+                    columns="{{projectTest.pageUserRegistration.columns}}" id="tableSelect"
+                    selected="{{projectTest.pageUserRegistration.indexSel}}">
+                </ica-layout-group-table-100554>
+                <ica-forms-submit-submit-100554 widget="wc-button-submit-100554" id="buttonAdd" text="Add"
+                    clicked-value="add" clicked-action="{{projectTest.pageUserRegistration.action}}">
+                </ica-forms-submit-submit-100554>
+            </ica-layout-flow-column-100554>
+        </ica-layout-flow-row-100554>
+        <ica-forms-content-form-100554 widget="wc-form-100554" id="contentForm">
+            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Id" id="iptId"
+                value="{{projectTest.pageUserRegistration.selected.id}}">
+            </ica-forms-input-string-100554>
+            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="User name:" id="iptUser"
+                value="{{projectTest.pageUserRegistration.selected.user}}">
+            </ica-forms-input-string-100554>
+            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Status" id="iptStatus"
+                value="{{projectTest.pageUserRegistration.selected.status}}">
+            </ica-forms-input-string-100554>
+            <ica-layout-flow-row-100554 widget="wc-row-100554" id="widget4">
+                <ica-forms-submit-submit-100554 widget="wc-button-submit-100554" id="buttonSalvar" text="Save"
+                    clicked-value="save" clicked-action="{{projectTest.pageUserRegistration.action}}">
+                </ica-forms-submit-submit-100554>
+                <ica-forms-submit-submit-100554 widget="wc-button-submit-100554" id="buttonSalvar" text="Cancel"
+                    clicked-value="cancel" clicked-action="{{projectTest.pageUserRegistration.action}}">
+                </ica-forms-submit-submit-100554>
+                <ica-forms-submit-submit-100554 widget="wc-button-submit-100554" id="buttonCancelar" text="Delete"
+                    clicked-value="del" clicked-action="{{projectTest.pageUserRegistration.action}}">
+                </ica-forms-submit-submit-100554>
+            </ica-layout-flow-row-100554>
+        </ica-forms-content-form-100554>
+        <ica-apresentation-text-text-100554 widget="wc-text-100554" type="p"
+            text="{{projectTest.pageUserRegistration.msg}}" id="labelError">
+        </ica-apresentation-text-text-100554>
+
+    </ica-layout-flow-section-100554>
+</page-user-registration-100554>
