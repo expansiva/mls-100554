@@ -2,7 +2,7 @@
 
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
-import { canMoveElement } from './_100554_icaBaseDescription2';
+import { canMoveElement } from './_100554_icaBaseDescription';
 
 export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMethods, pos: 'above' | 'below' | 'inside', update: boolean = true) {
 

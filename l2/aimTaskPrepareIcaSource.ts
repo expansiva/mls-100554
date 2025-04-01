@@ -4,7 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { getInfoServiceAim, InfoServiceAIM } from "./_100554_aimHelper";
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { convertFileNameToTag } from "./_100554_utilsLit";
-import { getAttributeDefinitionsLit } from './_100554_icaBaseDescription2';
+import { getAttributeDefinitionsLit } from './_100554_icaBaseDescription';
 import { IArgsAddIca } from './_100554_aimActionAddIca'
 import { ServiceSource100554 } from './_100554_serviceSource';
 
