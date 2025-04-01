@@ -1,7 +1,6 @@
 /// <mls shortName="icaTestPage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getFormComponentsEvents, getEventDescription, getFormComponentsDescription } from './_100554_icaBaseDescription'
 import { globalState } from './_100554_icaState';
 
 @customElement('ica-test-page-100554')
@@ -12,7 +11,7 @@ export class IcaTestPage100554 extends LitElement {
     }`;
 
     render() {
-        console.info(getFormComponentsEvents('forms', 'input', 'number'));
+    
         globalState._ica = {
             wcdAddEventSelected: '',
             tables: {
