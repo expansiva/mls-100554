@@ -3,7 +3,7 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { getImages, addAssets } from './_100554_designSystemBase';
-import { execute } from './_100554_wcdCommandAddImage';
+import { execute, executechange } from './_100554_wcdCommandAddImage';
 import { WCDOverlayMethods } from './_100554_wcdTypes';
 import { globalWcd } from './_100554_wcdState';
 
@@ -88,6 +88,19 @@ export class WcdDialogImage100554 extends LitElement {
         if (!globalWcd) throw new Error('Invalid window.wcdState');
         if (!globalWcd.myParent) throw new Error('Invalid window.wcdState.myParent');
         if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
+
+        const args = (this as any).args;
+
+        if (args && args === 'change') {
+
+            await executechange({
+                args: { src: item.src },
+                overlay: globalWcd.myParent?.parentElement?.parentElement as WCDOverlayMethods,
+                selectedIca: globalWcd.elICA as any,
+            });
+            return;
+
+        }
 
         await execute({
             args: { src: item.src },

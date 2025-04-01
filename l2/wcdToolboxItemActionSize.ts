@@ -266,21 +266,13 @@ export class WCDToolboxItemActionSize extends WcdToolboxItemBase {
 
         if (ret === '') {
 
-            ret = `{"width":"${this.elMain.style.width}", "height":"${this.elMain.style.height}"}`;
-
-            if (this.args === 'width') ret = `{"width":"${this.elMain.style.width}"}`;
-
-            if (this.args === 'height') ret = `{"height":"${this.elMain.style.height}"}`;
+            ret = `width: ${this.elMain.style.width}; height: ${this.elMain.style.height};`
+            if (this.args === 'width') ret = `width: ${this.elMain.style.width};`
+            if (this.args === 'height') ret = `height: ${this.elMain.style.height};`
 
         }
 
-        const evento = new CustomEvent('onChange', {
-            detail: { valor: `{"tp":"style","style":${ret} }` },
-            bubbles: true,
-            composed: true
-        });
-
-        this.dispatchEvent(evento);
+        this.myParent.setStyle(ret);
 
     }
 

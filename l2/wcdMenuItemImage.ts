@@ -17,7 +17,7 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
     render() {
 
         this.style.display = 'flex';
-        
+
         switch (this.args) {
             case ('normal'):
                 return this.renderNormal();
@@ -79,13 +79,18 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
         if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
 
         (globalWcd.myParent as any).onclick = null;
+        let defaultDialogImage = '_100554_wcdDialogImageUnsplash';
+
+        const src = globalWcd.elICA.getAttribute('src');
+        if (!src || src.startsWith('/')) defaultDialogImage = '_100554_wcdDialogImage'
+
         globalWcd.myParent?.setIconsWcdToolbox(
             [
                 {
                     name: 'backButton'
                 },
                 {
-                    name: '_100554_wcdDialogImageUnsplash',
+                    name: defaultDialogImage,
                     args: 'change',
                     position: 'p-l1',
                     level: [2],

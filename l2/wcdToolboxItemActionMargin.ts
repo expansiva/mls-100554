@@ -317,23 +317,14 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
 
         if (ret === '') {
 
-            if (this.args === 'top') ret = `{"marginTop":"${this.elMain.style.marginTop}"}`;
-
-            if (this.args === 'bottom') ret = `{"marginBottom":"${this.elMain.style.marginBottom}"}`;
-
-            if (this.args === 'left') ret = `{"marginLeft":"${this.elMain.style.marginLeft}"}`;
-
-            if (this.args === 'right') ret = `{"marginRight":"${this.elMain.style.marginRight}"}`;
+            if (this.args === 'top') ret = `margin-top":"${this.elMain.style.marginTop};`;
+            if (this.args === 'bottom') ret = `margin-bottom":"${this.elMain.style.marginBottom};`;
+            if (this.args === 'left') ret = `margin-left":"${this.elMain.style.marginLeft};`;
+            if (this.args === 'right') ret = `margin-right":"${this.elMain.style.marginRight};`;
 
         }
 
-        const evento = new CustomEvent('onChange', {
-            detail: { valor: `{"tp":"style","style":${ret} }` },
-            bubbles: true,
-            composed: true
-        });
-
-        this.dispatchEvent(evento);
+        this.myParent.setStyle(ret);
 
     }
 

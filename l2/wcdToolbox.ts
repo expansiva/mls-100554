@@ -8,6 +8,7 @@ import { ServiceBase } from './_100554_serviceBase';
 import { WCDToolboxMethodos, WCDToolboxItemMethodos } from './_100554_wcdTypes';
 import { globalWcd } from './_100554_wcdState';
 import { execute as excCommandDel } from './_100554_wcdCommandDel';
+import { dispatchEventConciliate } from './_100554_wcdCommandBase';
 
 import * as tps from './_100554_icaTypes';
 
@@ -84,7 +85,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         this._renderAction();
 
     }
- 
+
     render() {
         return html`
          <wcd-toolbox-aux-background></wcd-toolbox-aux-background>
@@ -128,6 +129,25 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         return this._updateBackgroundAuxSize(tp);
     }
 
+    private _settimetouSetStyle: number = 0;
+    public setStyle(style: string): void {
+        if (!this.elICA) return;
+        const styleEl = this.elICA.getAttribute('styleel');
+        if (!styleEl) this.elICA.setAttribute('styleel', style);
+        else {
+            const newStyle = styleEl.trim().endsWith(';') ? styleEl.trim() + style : `${styleEl};${style}`;
+
+            const elTemp = document.createElement('span');
+            elTemp.style.cssText = newStyle;
+            this.elICA.setAttribute('styleel', elTemp.style.cssText);
+            elTemp.remove();
+        }
+
+        if (this._settimetouSetStyle) clearTimeout(this._settimetouSetStyle);
+        this._settimetouSetStyle = setTimeout(() => {
+            dispatchEventConciliate();
+        }, 500);
+    }
 
     //---------------IMPLEMENTATION----------------
 

@@ -34,13 +34,14 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 @customElement('wcd-toolbox-item-action-padding-100554')
-export class WCDToolboxItemActionPadding extends WcdToolboxItemBase { 
+export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
 
-    private myMsg: MessageType = messages['en'];
+    private msg: MessageType = messages['en'];
 
     public args: string | undefined;
 
     private elExternal: HTMLElement | undefined;
+
     private startX: number = 0;
     private startY: number = 0;
     private startTop: number = 0;
@@ -50,7 +51,6 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
 
     //-------COMPONENT---------------------
 
-    //-------COMPONENT---------------------
 
     createRenderRoot() {
         return this;
@@ -60,8 +60,8 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
 
         super.updated(changedProperties);
         if (!this.elMain || !this.myParent) return;
-        
-        if (this.args && ['top', 'bottom', 'left', 'right'].includes(this.args)){
+
+        if (this.args && ['top', 'bottom', 'left', 'right'].includes(this.args)) {
             this.onmousedown = (e) => this.initDragging(e);
             this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
             this.myParent.updateBackgroundAuxSize('show');
@@ -184,21 +184,21 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
         return html`
             <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
                 <p style=" margin-bottom: 5px;">A propriedade <b>padding</b> define uma a distância entre o conteúdo de um elemento e suas bordas</p>
-                <h4 style="display:flex; gap:1.5rem;margin:0px" >${this.myMsg.padding}<input type="checkbox" prop="padding"></h4>
+                <h4 style="display:flex; gap:1.5rem;margin:0px" >${this.msg.padding}<input type="checkbox" prop="padding"></h4>
                 <div style="display:flex; gap:.5rem">
-                    <div style="width:70px">${this.myMsg.top}</div>
+                    <div style="width:70px">${this.msg.top}</div>
                     <input prop="paddingTop" type="text" .value="${this.elMain.style.paddingTop}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div>
                 <div style="display:flex; gap:.5rem">
-                    <div style="width:70px">${this.myMsg.right}</div>
+                    <div style="width:70px">${this.msg.right}</div>
                     <input prop="paddingRight" type="text" .value="${this.elMain.style.paddingRight}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div> 
                 <div style="display:flex; gap:.5rem">
-                    <div style="width:70px">${this.myMsg.bottom}</div>
+                    <div style="width:70px">${this.msg.bottom}</div>
                     <input prop="paddingBottom" type="text" .value="${this.elMain.style.paddingBottom}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div>
                 <div style="display:flex; gap:.5rem">
-                    <div style="width:70px">${this.myMsg.left}</div>
+                    <div style="width:70px">${this.msg.left}</div>
                     <input prop="paddingLeft" type="text" .value="${this.elMain.style.paddingLeft}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div>
                 
@@ -229,10 +229,8 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
 
             this.elMain.style.padding = el.value;
             ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'].forEach((pr: string) => {
-
                 const field = el.closest('.myAuxGroup')?.querySelector(`input[prop="${pr}"]`) as HTMLInputElement;
                 if (field) field.value = el.value;
-
             });
 
             this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
@@ -290,7 +288,7 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
             this.renderOutdoorScenary();
             this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
             this.myParent.updateBackgroundAuxSize('show');
-            
+
         }
 
 
@@ -326,23 +324,14 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
 
         if (ret === '') {
 
-            if (this.args === 'top') ret = `{"paddingTop":"${this.elMain.style.paddingTop}"}`;
-
-            if (this.args === 'bottom') ret = `{"paddingBottom":"${this.elMain.style.paddingBottom}"}`;
-
-            if (this.args === 'left') ret = `{"paddingLeft":"${this.elMain.style.paddingLeft}"}`;
-
-            if (this.args === 'right') ret = `{"paddingRight":"${this.elMain.style.paddingRight}"}`;
+            if (this.args === 'top') ret = `padding-top: ${this.elMain.style.paddingTop}; `;
+            if (this.args === 'bottom') ret = `padding-bottom:${this.elMain.style.paddingBottom}; `;
+            if (this.args === 'left') ret = `padding-left: ${this.elMain.style.paddingLeft}; `;
+            if (this.args === 'right') ret = `padding-right: ${this.elMain.style.paddingRight}; `;
 
         }
-
-        const evento = new CustomEvent('onChange', {
-            detail: { valor: `{"tp":"style","style":${ret} }` },
-            bubbles: true,
-            composed: true
-        });
-
-        this.dispatchEvent(evento);
+        
+        this.myParent.setStyle(ret);
 
     }
 
