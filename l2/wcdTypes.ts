@@ -9,13 +9,13 @@ export interface WCDToolboxMethodos extends HTMLElement {
     elMain: HTMLElement | undefined; // component from ica render
     elICA: tps.IcaLitElementBaseMethods | undefined; // ica base to wcd
     fcBeforeBackButton: Function | undefined;
-
     updateSize(elBase: HTMLElement, elChange: HTMLElement, changePosition: boolean): void;
     getAndSetScenaryOutDoor(op: string): Promise<HTMLElement | undefined>;
     backNavigationScenaryOutdoor(): void;
     setIconsWcdToolbox(act: tps.ActionTag[], useSelf: boolean, updataSize: 'false' | 'size' | 'padding'): void;
     updateBaseNoPadding(elBase: HTMLElement, elChange: HTMLElement): void;
     updateBackgroundAuxSize(tp: 'show' | 'hide'): void;
+    setStyle(style: string):void;
 }
 
 export interface WCDToolboxItemMethodos extends HTMLElement {
