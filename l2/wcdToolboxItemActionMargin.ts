@@ -237,7 +237,7 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
             });
 
             this.myParent.updateSize(this.elMain, this.myParent, true);
-            this.fireEvent(`{"margin":"${this.elMain.style.padding}"}`);
+            this.fireEvent(`margin: ${this.elMain.style.padding};`);
             return;
 
         }
@@ -317,10 +317,10 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
 
         if (ret === '') {
 
-            if (this.args === 'top') ret = `margin-top":"${this.elMain.style.marginTop};`;
-            if (this.args === 'bottom') ret = `margin-bottom":"${this.elMain.style.marginBottom};`;
-            if (this.args === 'left') ret = `margin-left":"${this.elMain.style.marginLeft};`;
-            if (this.args === 'right') ret = `margin-right":"${this.elMain.style.marginRight};`;
+            if (this.args === 'top') ret = `margin-top: ${this.elMain.style.marginTop};`;
+            if (this.args === 'bottom') ret = `margin-bottom: ${this.elMain.style.marginBottom};`;
+            if (this.args === 'left') ret = `margin-left: ${this.elMain.style.marginLeft};`;
+            if (this.args === 'right') ret = `margin-right: ${this.elMain.style.marginRight};`;
 
         }
 
