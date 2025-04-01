@@ -6,7 +6,7 @@ import { CollabLitElement } from './_100554_collabLitElement'
 
 import {
     getGroups
-} from './_100554_icaBaseDescription2';
+} from './_100554_icaBaseDescription';
 
 @customElement('ica-select-group-100554')
 export class IcaSelectGroup extends CollabLitElement {

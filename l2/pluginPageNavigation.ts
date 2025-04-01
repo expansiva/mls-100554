@@ -7,7 +7,7 @@ import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
 import { execute as executeDel } from './_100554_wcdCommandDel';
 import { move } from './_100554_wcdCommandMove';
-import { canMoveElement } from './_100554_icaBaseDescription2';
+import { canMoveElement } from './_100554_icaBaseDescription';
 
 /// **collab_i18n_start**
 const message_pt = {

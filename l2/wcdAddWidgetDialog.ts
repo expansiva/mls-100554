@@ -9,7 +9,7 @@ import { executeFromTag, getOverlay } from './_100554_wcdCommandAdd';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import {
     getGroups
-} from './_100554_icaBaseDescription2';
+} from './_100554_icaBaseDescription';
 
 
 /// **collab_i18n_start**
