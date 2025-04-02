@@ -13,7 +13,7 @@ export async function injectStyleWithoutShadowRoot(modelTS: mls.editor.IModelTS,
     if (!modelStyle) return;
 
 
-    const css = await compileStyleUsingMFile(modelStyle, ':root', theme);
+    const css = await compileStyleUsingMFile(modelStyle, theme);
     if (!css) return;
     if (modelTS && modelTS.compilerResults) {
         const newJs = addLineInConstructor(modelTS.compilerResults.prodJS, `if(this.loadStyle) this.loadStyle(\`${css}\`);`);
