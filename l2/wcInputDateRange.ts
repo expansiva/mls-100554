@@ -2,9 +2,10 @@
 
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { IcaLitElement } from './_100554_icaLitElement'
 
 @customElement('wc-input-date-range-100554')
-export class WCInputDateRange extends LitElement {
+export class WCInputDateRange extends IcaLitElement {
 
     @property({ type: String }) name: string = '';
 
