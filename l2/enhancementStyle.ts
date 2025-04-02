@@ -2,7 +2,7 @@
 
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { getCssWithoutTag } from './_100554_processCssLit'
-import { getTokens, IDesignSystemTokens, _preCompileLess, compileLess } from './_100554_designSystemBase'
+import { preCompileLess as compileLess } from './_100554_designSystemBase'
 
 export const requires: mls.l2.enhancement.IRequire[] = [];
 
@@ -187,23 +187,23 @@ export function isCommentLine(line: string) {
     return line.trim().startsWith('/*') && line.trim().endsWith('*/');
 }
 
-export async function compileStyleUsingMFile(modelStyle: mls.editor.IModelStyle, prefix: ':host' | ':root', theme: string = 'Default') {
+export async function compileStyleUsingMFile(modelStyle: mls.editor.IModelStyle, theme: string = 'Default') {
     const model: monaco.editor.ITextModel = modelStyle.model;
     const { project, shortName } = modelStyle.storFile;
     const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, '', '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!model || !storFileLess) return;
-    const tokensList = await getTokens(project);
     let val = model.getValue();
     val = removeTokensFromSource(val);
     val = removeCommentLines(val);
 
     try {
-        return preCompileLess(val, tokensList, theme, prefix, false, modelStyle);
+        return preCompileLess(project, val, theme, modelStyle);
     } catch (err: any) {
         throw new Error(err.message);
     }
 }
+
 
 export async function compileStyleUsingStorFile(shortName: string, project: number, theme: string = 'Default') {
 
@@ -211,7 +211,6 @@ export async function compileStyleUsingStorFile(shortName: string, project: numb
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!storFileLess) return;
 
-    const tokensList = await getTokens(project);
     let val = await storFileLess.getContent();
     if (!val || typeof val !== 'string') return '';
 
@@ -219,19 +218,18 @@ export async function compileStyleUsingStorFile(shortName: string, project: numb
     val = removeCommentLines(val);
 
     try {
-        return preCompileLess(val, tokensList, theme, ':root', false);
+        return preCompileLess(project, val, theme);
     } catch (err: any) {
         throw new Error(err.message);
     }
 }
 
 
-async function preCompileLess(less: string, tokens: IDesignSystemTokens[], theme: string, prefix: ':host' | ':root', includeTokens: boolean, modelStyle?: mls.editor.IModelStyle): Promise<string> {
+async function preCompileLess(project: number, less: string, theme: string, modelStyle?: mls.editor.IModelStyle): Promise<string> {
 
     try {
 
-        let newLess = await _preCompileLess(less, tokens, theme, prefix, includeTokens)
-        newLess = await compileLess(newLess);
+        let newLess = await compileLess(project, less, theme)
         return newLess;
 
     } catch (e: any) {

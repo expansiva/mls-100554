@@ -134,24 +134,19 @@ export async function getTokensLess(project: number, theme: string): Promise<str
 }
 
 export async function getTokensCss(project: number, theme: string): Promise<string> {
-    const tokens = await getTokens(project)
-    const tokensLess = await getTokensLess(project, theme);
+
+    const tokens = await getTokens(project);
+    const prefix = ':root';
     try {
-        const tokensCss = await preCompileLess('', tokensLess, theme, tokens, ':root');
+        const tokenInfo = tokens.find((item) => item.themeName === theme);
+        if (!tokenInfo) return '';
+        const allTokens = { ...tokenInfo.color, ...tokenInfo.typography, ...tokenInfo.global };
+        const darkAndLight = getDarkAndLight(allTokens);
+        const cssVars = getCssVars(darkAndLight, prefix);
+        const tokensCss = convertLessTokensToCss(cssVars, darkAndLight['root']);
         return tokensCss;
     } catch (err: any) {
         throw new Error(`Error on compile tokens Less: ${err.message}`);
-    }
-}
-
-export function preCompileLess(less: string, tokensLess: string, theme: string, tokens: IDesignSystemTokens[], prefix: ':host' | ':root', includeTokens: boolean = true) {
-    try {
-        const fullLess = `${tokensLess}\n${less}`;
-        compileLess(fullLess);
-        return _preCompileLess(less, tokens, theme, prefix, includeTokens);
-
-    } catch (err: any) {
-        throw new Error(err.message);
     }
 }
 
@@ -167,16 +162,24 @@ export async function compileLess(str: string): Promise<string> {
     });
 }
 
-export async function _preCompileLess(less: string, tokens: IDesignSystemTokens[], theme: string, prefix: ':host' | ':root', includeTokens: boolean): Promise<string> {
-    let newLess = '';
-    for (let tokenInfo of tokens) {
-        if (tokenInfo.themeName !== theme) continue;
+export async function preCompileLess(project: number, less: string, theme: string): Promise<string> {
+
+    const tokens = await getTokens(project);
+    const prefix = ':root';
+
+    try {
+        const tokenInfo = tokens.find((item) => item.themeName === theme);
+        if (!tokenInfo) return '';
         const allTokens = { ...tokenInfo.color, ...tokenInfo.typography, ...tokenInfo.global };
         const darkAndLight = getDarkAndLight(allTokens);
-        const cssVars = getCssVars(darkAndLight, prefix);
-        newLess = replaceTokens(less, darkAndLight, cssVars, includeTokens);
+        const newLess = convertLessTokensToCss(less, darkAndLight['root']);
+        const tokensLess = await getTokensLess(project, theme);
+        const res = await compileLess(`${newLess}\n${tokensLess}`)
+        return res;
+    } catch (err: any) {
+        throw new Error(`Error on pre compile tokens Less: ${err.message}`);
     }
-    return newLess;
+
 }
 
 function getDarkAndLight(allTokens: IKeyValueToken): IDarkLight {
@@ -229,48 +232,26 @@ function getCssVars(themes: IDarkLight, prefix: ':host' | ':root') {
 
 }
 
-function replaceTokens(less: string, themes: IDarkLight, cssVars: string, includeTokens: boolean) {
+function convertLessTokensToCss(less: string, tokens: IKeyValueToken): string {
+    const lessTokens = new Set(Object.keys(tokens));
 
-    const { root } = themes;
-    if (!root) return less;
+    return less.replace(/@([a-zA-Z0-9-_]+)/g, (match, token, offset, fullText) => {
+        if (!lessTokens.has(token)) {
+            return match;
+        }
 
-    let newLess: string;
-    if (includeTokens) newLess = cssVars + '\n' + less;
-    else newLess = less;
+        // Verifica se está dentro de uma media query
+        const beforeText = fullText.slice(0, offset);
+        const insideMediaQuery = /@media\s*\([^{}]*$/.test(beforeText);
 
-    Object.keys(root).forEach((key) => {
+        if (insideMediaQuery) {
+            return match;
+        }
 
-        const variableName = `@${key};`;
-        const escapedVariableName = getEscapedVariable(variableName);
-        const pattern = new RegExp(escapedVariableName, 'g');
-        const replacement = `var(--${key});`;
-        newLess = newLess.replace(pattern, replacement);
-
-        const variableName2 = `@${key},`;
-        const escapedVariableName2 = getEscapedVariable(variableName2);
-        const pattern2 = new RegExp(escapedVariableName2, 'g');
-        const replacement2 = `var(--${key}),`;
-        newLess = newLess.replace(pattern2, replacement2);
-
-        const variableName3 = `(@${key}`;
-        const escapedVariableName3 = getEscapedVariable(variableName3);
-        const pattern3 = new RegExp(escapedVariableName3, 'g');
-        const replacement3 = `(var(--${key})`;
-        newLess = newLess.replace(pattern3, replacement3);
-
-        const variableName4 = `@${key} `;
-        const escapedVariableName4 = getEscapedVariable(variableName4);
-        const pattern4 = new RegExp(escapedVariableName4, 'g');
-        const replacement4 = `var(--${key}) `;
-        newLess = newLess.replace(pattern4, replacement4);
+        return `var(--${token})`;
     });
-
-    return newLess;
 }
 
-function getEscapedVariable(variableName: string): string {
-    return variableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 
 export interface IDesignSystemTokens {
