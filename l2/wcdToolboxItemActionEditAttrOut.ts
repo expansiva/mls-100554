@@ -5,7 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
-import { getAtributtesByTag, checkAttributteHasVariation } from './_100554_icaBaseDescription';
+import { getAtributtesByTag, checkAttributteHasVariation, getDescriptionAttr } from './_100554_icaBaseDescription';
 import "./_100554_wcdToolboxItemActionEditVariation";
 
 @customElement('wcd-toolbox-item-action-edit-attr-out-100554')
@@ -17,6 +17,7 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
         attr: '',
         vl: '',
         hasVariation: false,
+        description: '',
         variations: []
     };
 
@@ -87,6 +88,7 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
             <div class="atributo">
                 <label for="label">${info.attr}</label>
                 <input type="text" .info=${info} value="${info.vl}" @keydown="${this.onKeydown}">
+                <small>${info.description}</small>
                 ${this.renderToolbar(info)}
                 
             </div>
@@ -277,6 +279,7 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
                     attr: a,
                     vl: vl || '',
                     hasVariation: checkAttributteHasVariation(a),
+                    description: getDescriptionAttr(a),
                     variations: []
                 }
 
@@ -424,9 +427,10 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
 }
 
 interface IAttr {
-    attr: string,
+    attr: string, 
     vl: string,
     hasVariation: boolean;
+    description:string,
     variations: IVariation[]
 }
 

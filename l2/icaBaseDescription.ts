@@ -566,50 +566,43 @@ export const icaDescriptions: IIcaDescriptions = {
 }
 
 const attributeDefinitions = [
-    { path: "eventBinding", lit: "@propertyDataSource() eventBinding: EventBinding | undefined;" },
-    { path: "name", lit: "@property({ type: String }) name: string | undefined;" },
-    { path: "hint", lit: "@property({ type: String }) hint: string | undefined;", variations: true },
-    { path: "label", lit: "@property({ type: String }) label: string | undefined;", variations: true },
-    { path: "required", lit: "@property({ type: Boolean }) required: boolean;" },
-    { path: "disabled", lit: "@property({ type: Boolean }) disabled: boolean;" },
-    { path: "maxvalue", lit: "@property({ type: Number }) maxvalue: number | undefined;" },
-    { path: "minvalue", lit: "@property({ type: Number }) minvalue: number | undefined;" },
-    { path: "step", lit: "@property({ type: Number }) step: number | undefined;" },
-    { path: "placeholder", lit: "@property({ type: String }) placeholder: string| undefined;", variations: true },
-    { path: "pattern", lit: "@property({ type: String }) pattern: string| undefined;" },
-    { path: "errormessage", lit: "@property({ type: String }) errormessage: string| undefined;", variations: true },
-    { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean;" },
-    { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined;" },
-    { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined;" },
-    { path: "autoCapitalize", lit: "@property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';" },
-    { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on';" },
-    { path: "autocomplete", lit: "@property({ type: String }) autocomplete: string | undefined;" },
-    { path: "validationMessage", lit: "@property({ type: String}) validationMessage: string | undefined" },
-    { path: "debounce", lit: "@property({ type: Number}) debounce: number | undefined" },
-    { path: "value", lit: "@property({ type: String }) value: string | undefined;", variations: true },
-    { path: "options", lit: "@property() options: OptionItem[] | undefined; // Optional path in the global JSON or a valid JSON for a list of options " },
-    { path: "selectedvalue", lit: "@property() selectedvalue: string | undefined;" },
-    { path: "inputmode", lit: " @property({ type: String }) inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = 'none';" },
-    { path: "title", lit: "@property({ type: String }) title: string;", variations: true },
-    { path: "icon", lit: "@property({ type: String }) icon: string | undefined;" },
-    { path: "form", lit: "@property({ type: String }) form: string | undefined;" },
-    { path: "text", lit: "@property({ type: String }) text: string | undefined;", variations: true },
-    { path: "src", lit: "@property({ type: String }) src: string | undefined;" },
-    { path: "alt", lit: "@property() alt: string | undefined;", variations: true },
-    { path: "width", lit: "@property() width: string | undefined;" },
-    { path: "height", lit: "@property() height: string | undefined;" },
-    { path: "autoplay", lit: "@property() autoplay: boolean = false;" },
-    { path: "controls", lit: "@property() controls: boolean = true;" },
-    { path: "loop", lit: "@property() loop: boolean = false;" },
-    { path: "preload", lit: "@property() loop: 'auto' | 'metadata' | 'none' = 'auto';" },
-    { path: "open", lit: "@property({ type: Boolean }) open = false;" },
-    { path: "language", lit: "@property({ type: String ) language: string | undefined;" },
-    { path: "languages", lit: "@property({ type: Array ) languages: string[] | undefined;" },
-    { path: "framework", lit: "@property({ type: String }) framework: string | undefined;" },
-    { path: "renderer", lit: "@property({ type: String }) renderer: string | undefined;" },
-    { path: "readonly", lit: "@property({ type: Boolean }) readonly: boolean | undefined;" },
-    { path: "clicked-action", lit: "@propertyDataSource({ type: String, attribute: 'clicked-action' }) clickedAction: string | undefined;" },
-    { path: "clicked-value", lit: "@propertyDataSource({ type: String, attribute: 'clicked-value' }) clickedValue: string | undefined;" }
+    { path: "eventBinding", lit: "@propertyDataSource() eventBinding: EventBinding | undefined;", desc: "Defines event binding for the component." },
+    { path: "name", lit: "@property({ type: String }) name: string | undefined;", desc: "Identifier name of the element." },
+    { path: "hint", lit: "@property({ type: String }) hint: string | undefined;", "variations": true, desc: "Hint or suggestion displayed to the user." },
+    { path: "label", lit: "@property({ type: String }) label: string | undefined;", "variations": true, desc: "Label associated with the element." },
+    { path: "required", lit: "@property({ type: Boolean }) required: boolean;", desc: "Indicates if the field is required." },
+    { path: "disabled", lit: "@property({ type: Boolean }) disabled: boolean;", desc: "Defines whether the element is disabled." },
+    { path: "maxvalue", lit: "@property({ type: Number }) maxvalue: number | undefined;", desc: "Maximum allowed value for the field." },
+    { path: "minvalue", lit: "@property({ type: Number }) minvalue: number | undefined;", desc: "Minimum allowed value for the field." },
+    { path: "step", lit: "@property({ type: Number }) step: number | undefined;", desc: "Defines the step interval for allowed values." },
+    { path: "placeholder", lit: "@property({ type: String }) placeholder: string| undefined;", "variations": true, desc: "Text displayed in the field before user input." },
+    { path: "pattern", lit: "@property({ type: String }) pattern: string| undefined;", desc: "Regular expression for field validation." },
+    { path: "errormessage", lit: "@property({ type: String }) errormessage: string| undefined;", "variations": true, desc: "Error message displayed when validation fails." },
+    { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean;", desc: "Indicates if the field receives automatic focus." },
+    { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined;", desc: "Maximum number of characters allowed." },
+    { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined;", desc: "Minimum number of characters required." },
+    { path: "autoCapitalize", lit: "@property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';", desc: "Controls automatic text capitalization." },
+    { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on';", desc: "Defines whether autocorrect is enabled." },
+    { path: "autocomplete", lit: "@property({ type: String }) autocomplete: string | undefined;", desc: "Suggests values based on previous inputs." },
+    { path: "validationMessage", lit: "@property({ type: String}) validationMessage: string | undefined", desc: "Custom validation error message." },
+    { path: "debounce", lit: "@property({ type: Number}) debounce: number | undefined", desc: "Delay time before executing events." },
+    { path: "value", lit: "@property({ type: String }) value: string | undefined;", "variations": true, desc: "Current value of the field." },
+    { path: "options", lit: "@property() options: OptionItem[] | undefined;", desc: "List of available options for selection." },
+    { path: "selectedvalue", lit: "@property() selectedvalue: string | undefined;", desc: "Currently selected value from options." },
+    { path: "inputmode", lit: "@property({ type: String }) inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = 'none';", desc: "Expected input type for the field." },
+    { path: "title", lit: "@property({ type: String }) title: string;", "variations": true, desc: "Title or tooltip of the element." },
+    { path: "icon", lit: "@property({ type: String }) icon: string | undefined;", desc: "Icon associated with the element." },
+    { path: "form", lit: "@property({ type: String }) form: string | undefined;", desc: "Identifier of the form the element belongs to." },
+    { path: "text", lit: "@property({ type: String }) text: string | undefined;", "variations": true, desc: "Text displayed in the element." },
+    { path: "src", lit: "@property({ type: String }) src: string | undefined;", desc: "URL of the media or image source." },
+    { path: "alt", lit: "@property() alt: string | undefined;", "variations": true, desc: "Alternative text for images." },
+    { path: "width", lit: "@property() width: string | undefined;", desc: "Width of the element." },
+    { path: "height", lit: "@property() height: string | undefined;", desc: "Height of the element." },
+    { path: "autoplay", lit: "@property() autoplay: boolean = false;", desc: "Defines whether media starts automatically." },
+    { path: "controls", lit: "@property() controls: boolean = true;", desc: "Defines whether media controls are displayed." },
+    { path: "loop", lit: "@property() loop: boolean = false;", desc: "Indicates if media should repeat." },
+    { path: "preload", lit: "@property() loop: 'auto' | 'metadata' | 'none' = 'auto';", desc: "Defines how media is preloaded." },
+    { path: "open", lit: "@property({ type: Boolean }) open = false;", desc: "Defines whether an element (like a modal) is open." }
 ];
 
 function removeProjectNumberSegment(input: string): string {
@@ -634,6 +627,13 @@ export function getDefinitionByTag(tag: string): ComponentDescription | undefine
     if (!tag.toLocaleLowerCase().startsWith('ica-')) return;
     if (!icaDescriptions[tag]) return;
     return icaDescriptions[tag];
+
+}
+
+export function getDescriptionAttr(attribute: string): string  {
+    const attr = attributeDefinitions.find((attr) => attr.path === attribute);
+    if (!attr) return '';
+    return attr.desc; 
 
 }
 
@@ -675,25 +675,25 @@ export function getGroups(): Record<string, Record<string, string[]>> {
 
 function transformIcaDescriptions(icaDescriptions: IIcaDescriptions): Record<string, Record<string, string[]>> {
     const result: Record<string, Record<string, string[]>> = {};
-    
-    Object.keys(icaDescriptions).forEach((key) => {
-        const parts = key.split("-").slice(1); 
 
-        if (parts.length < 2) return; 
+    Object.keys(icaDescriptions).forEach((key) => {
+        const parts = key.split("-").slice(1);
+
+        if (parts.length < 2) return;
         const [category, type] = parts;
         const rest = parts.slice(2).join("-");
-        
+
         if (!result[category]) {
             result[category] = {};
         }
-        
+
         if (!result[category][type]) {
             result[category][type] = [];
         }
-        
+
         result[category][type].push(rest || type);
     });
-    
+
     return result;
 }
 
