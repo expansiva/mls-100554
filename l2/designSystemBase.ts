@@ -240,11 +240,19 @@ function convertLessTokensToCss(less: string, tokens: IKeyValueToken): string {
             return match;
         }
 
-        // Verifica se está dentro de uma media query
         const beforeText = fullText.slice(0, offset);
         const insideMediaQuery = /@media\s*\([^{}]*$/.test(beforeText);
 
-        if (insideMediaQuery) {
+        const lessFunctions = [
+            "lighten", "darken", "saturate", "desaturate", "fadein", "fadeout", "fade",
+            "spin", "mix", "tint", "shade", "contrast", "ceil", "floor", "round", "abs",
+            "sqrt", "pow", "mod", "min", "max", "escape", "e", "unit", "convert",
+            "extract", "length"
+        ];
+
+        const insideLessFunction = new RegExp(`(${lessFunctions.join("|")})\\s*\\([^()]*$`, "i").test(beforeText);
+
+        if (insideMediaQuery || insideLessFunction) {
             return match;
         }
 
