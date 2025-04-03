@@ -1,10 +1,8 @@
 /// <mls shortName="wcdToolboxItemActionEditAttr" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, render } from 'lit';
+import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { WCDPopupMethodos } from './_100554_wcdTypes';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
 import { globalWcd } from './_100554_wcdState';
 
 @customElement('wcd-toolbox-item-action-edit-attr-100554')

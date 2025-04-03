@@ -1,11 +1,9 @@
 /// <mls shortName="collabIcaConfigAttributes" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement, repeat } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { convertTagToFileName } from './_100554_utilsLit';
+import { html, repeat } from 'lit';
+import { customElement } from 'lit/decorators.js';
 import { ServiceBase } from './_100554_serviceBase';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { IcaLitElementBase } from './_100554_icaLitElementBase'; 
 
 export const initCollabICATree = '';
 
@@ -75,7 +73,6 @@ export class CollabICAAttributes extends CollabLitElement {
                     }) as any
                 )}
             </ul>
-            <style>${this.myCss}</style>
         `;
 
         return obj;
@@ -149,8 +146,5 @@ export class CollabICAAttributes extends CollabLitElement {
        
        this.myAttributes = ret;
     }
-
-    
-    private myCss = ``;
 
 }

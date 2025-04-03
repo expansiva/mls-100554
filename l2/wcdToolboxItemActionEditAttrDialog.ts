@@ -2,7 +2,6 @@
 
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { IListWidgetBase } from './_100554_wcdTypes';
 import { CollabLitElement } from './_100554_collabLitElement'
 import { globalWcd } from './_100554_wcdState';
 import './_100554_wcdToolboxItemActionEditAttrOut';
