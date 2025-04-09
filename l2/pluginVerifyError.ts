@@ -10,7 +10,7 @@ const message_pt = {
     fileVerification: 'Verificação de arquivos',
     checkFiles: 'Verificando arquivos',
     noErros: "Nenhum erro encontrado",
-    cancel:'Cancelar verificação'
+    cancel: 'Cancelar verificação'
 };
 
 const message_en = {
@@ -123,7 +123,7 @@ export class PluginVerifyError extends PluginBaseModule {
     async prepare() {
         try {
             this.isLoad = true;
-            
+
             this.continueVerify = true;
 
             const prj = mls.actual[5].project;
@@ -134,7 +134,8 @@ export class PluginVerifyError extends PluginBaseModule {
             const ret = await mls.l2.typescript.compileAll(prj, this.progressCallback.bind(this));
 
             this.listErrors = ret;
-
+            this.setFilesErros(this.listErrors);
+            
             if (!this.continueVerify) this.fireEvent(true);
             else this.fireEvent(this.listErrors.length === 0);
 
@@ -144,6 +145,29 @@ export class PluginVerifyError extends PluginBaseModule {
             this.isLoad = false;
             this.error = e.message;
         }
+
+    }
+
+    private setFilesErros(array: string[]) {
+
+        const ret: mls.stor.IFileInfo[] = [];
+        const itens = array.map(str => str.replace(/^--- Error compiling\s+/, ''));
+
+        itens.forEach((f) => {
+
+            let pr = f.substring(1).split("_")[0];
+            let prID: number = Number(pr);
+            if (isNaN(prID)) prID = 0; // error
+            let path = f.substring(pr.length + 2);
+            const key = mls.stor.getKeyToFiles(prID, 2, path, '', '.ts');
+            if (mls.stor.files[key]) {
+                mls.stor.files[key].hasError = true;
+                ret.push(mls.stor.files[key]);
+            }
+
+        })
+
+        return ret;
 
     }
 
@@ -158,11 +182,11 @@ export class PluginVerifyError extends PluginBaseModule {
         return this.continueVerify;
     }
 
-    private fireEvent(free:boolean) {
+    private fireEvent(free: boolean) {
         mls.events.fire(
             mls.actualLevel as any,
             'ProjectCompilationComplete',
-            JSON.stringify({free:free}),
+            JSON.stringify({ free: free }),
             0
         );
     }
