@@ -702,13 +702,17 @@ export class PluginExploreList extends PluginBaseModule {
             const isClick = el.innerText === 'updated';
             if (isClick) return;
             el.innerText = 'updated';
-            await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
+
+            /*await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
             const key = Object.keys(mls.stor.files)?.filter((item) => item.indexOf((mls.actual[5].project as number).toString()) >= 0);
 
             if (key.length > 0) {
                 this.fireEvents('projectListChanged', mls.stor.files[key[0]], {}, 500);
                 mls.events.fireFileAction('updatedOnServer', mls.stor.files[key[0]], 'left', undefined, undefined, undefined, undefined, 600);
-            }
+            }*/
+
+            const ret = await mls.l2.typescript.compileAll(mls.actual[5].project as number);
+            this.setFilesErros(ret);
 
             this.changeList(500);
 
@@ -720,6 +724,29 @@ export class PluginExploreList extends PluginBaseModule {
         } catch (e: any) {
             console.info('Error verifyChangeInList2:' + e.message);
         }
+
+    }
+
+    private setFilesErros(array: string[]) {
+
+        const ret: mls.stor.IFileInfo[] = [];
+        const itens = array.map(str => str.replace(/^--- Error compiling\s+/, ''));
+
+        itens.forEach((f) => {
+
+            let pr = f.substring(1).split("_")[0];
+            let prID: number = Number(pr);
+            if (isNaN(prID)) prID = 0; // error
+            let path = f.substring(pr.length + 2);
+            const key = mls.stor.getKeyToFiles(prID, 2, path, '', '.ts');
+            if (mls.stor.files[key]) {
+                mls.stor.files[key].hasError = true;
+                ret.push(mls.stor.files[key]);
+            }
+
+        })
+
+        return ret;
 
     }
 
