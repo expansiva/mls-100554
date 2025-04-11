@@ -21,7 +21,7 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
 
         this.info?.element.setAttribute('renderType', 'edit');
         this.removeAttribute('rendertype');
-        
+
     }
 
     //---------COMPONENT--------------
@@ -55,11 +55,15 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
 
     private onIcaOverlayItemOver(e: MouseEvent) {
 
+
+
         const wcdOther = this.parentElement?.querySelector('wcd-toolbox-100554') as HTMLElement;
 
         if (wcdOther) {
             const elSelected = wcdOther.parentElement as WcdOverlayItemLitBase;
-            if (this.isOverlapping(elSelected, this)) {
+            const isOverlapping = this.isOverlapping(elSelected, this);
+            if (isOverlapping) {
+                console.info({ isOverlapping })
                 return;
             }
         }
@@ -189,13 +193,10 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
 
         const rect1 = el1.getBoundingClientRect();
         const rect2 = el2.getBoundingClientRect();
-
-        return !(
-            rect1.top > rect2.bottom ||
-            rect1.right < rect2.left ||
-            rect1.bottom < rect2.top ||
-            rect1.left > rect2.right
-        );
+        const horizontalOverlap = rect1.left < rect2.right && rect1.right > rect2.left;
+        const verticalOverlap = rect1.top < rect2.bottom && rect1.bottom > rect2.top;
+        return horizontalOverlap && verticalOverlap;
+        
     }
 
     private async checkToChangeWCD() {
