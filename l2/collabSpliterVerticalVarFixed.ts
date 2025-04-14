@@ -85,9 +85,26 @@ export class CollabSpliterVerticalVarFixed100554 extends LitElement {
     return newMsize.join(',');
   }
 
-  private updatePanelsMSize() {
-    if (this.slotTop) this.slotTop.setAttribute('msize', this.getMSizeTop());
-    if (this.slotBottom) this.slotBottom.setAttribute('msize', this.getMSizeBottom());
+  public updatePanelsMSize() {
+
+    this.forceRefreshMsize(this.slotTop);
+    this.forceRefreshMsize(this.slotBottom);
+
+    setTimeout(() => {
+      this.slotTop?.setAttribute('msize', this.getMSizeTop());
+      this.slotBottom?.setAttribute('msize', this.getMSizeBottom());
+    }, 50)
+
+  }
+
+  private forceRefreshMsize(el: HTMLElement | undefined) {
+    if (!el) return;
+    const msize = el.getAttribute('msize');
+    if (!msize) return;
+    let [w, h, t, l] = msize.split(',');
+    l = ((+l) + 1).toString();
+    el.setAttribute('msize', [w, h, t, l].join(','))
+
   }
 
   _applyMSize() {

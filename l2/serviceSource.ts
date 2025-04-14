@@ -12,6 +12,8 @@ import { getEnhancementName } from './_100554_libCommom';
 import { globalState } from './_100554_icaState';
 import { propertyDataSource } from './_100554_icaLitElement';
 import { collab_html, collab_typescript, collab_less, collab_fileTest } from './_100554_collabIcons';
+import { CollabSpliterVerticalVarFixed100554 } from './_100554_collabSpliterVerticalVarFixed';
+
 
 import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
@@ -114,7 +116,7 @@ export class ServiceSource100554 extends ServiceBase {
         this.openService('_100554_serviceProject', this.position, 2, { activeTab: 'Explore' });
     }
 
-    public onClickTools(op: string) {
+    public onClickTools(op: string): void {
         if (op === 'btHistory') return this.toogleHistory();
         if (op === 'btHistoryImmediatte') return this.toogleHistoryImmediatte();
         else throw new Error('Invalid option')
@@ -352,7 +354,7 @@ export class ServiceSource100554 extends ServiceBase {
     @query('mls-editor-100529') private editorEl: HTMLElement | undefined;
     @query('mls-editor-100529.history') private editorHistoryEl: HTMLElement | undefined;
 
-    @query('collab-spliter-vertical-var-fixed-100554') private verticalSpliter: HTMLElement | undefined;
+    @query('collab-spliter-vertical-var-fixed-100554') private verticalSpliter: CollabSpliterVerticalVarFixed100554 | undefined;
     @query('collab-spliter-horizontal-var-fixed-100554') private horizontalSpliter: HTMLElement | undefined;
 
     public last: mls.IActual | undefined = undefined;
@@ -412,6 +414,8 @@ export class ServiceSource100554 extends ServiceBase {
         } else {
             this.getHistories();
         }
+
+        this.verticalSpliter?.updatePanelsMSize();
     }
 
     private toogleHistoryImmediatte() {
@@ -423,9 +427,12 @@ export class ServiceSource100554 extends ServiceBase {
         } else {
             this.getHistoriesImmediatte();
         }
+
     }
 
     private async getHistoriesImmediatte() {
+        await this.updateComplete;
+        this.updatedMSizeEditor();
         this.setHistories(this.previousHistorySource || '', this.currentHistorySource || '', this.historyLanguage);
     }
 
@@ -2049,6 +2056,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         this.editorEl?.setAttribute('msize', this.msize);
         this.editorHistoryEl?.setAttribute('msize', this.msize);
     }
+
+
     private toogleIconsError() {
         if (!this.menu || !this.menu.toggleErrorTab || !this.activeModels) return;
         if (this.activeModels.html && this.activeModels.html.storFile) this.menu.toggleErrorTab(EToolsSource.icHTML, this.activeModels.html.storFile.hasError);
