@@ -81,21 +81,16 @@ export class [className] extends ServiceBase {
         level: [5]
     }
 
-    public onClickLink = (op: string): boolean => {
+    public onClickMain(op: string): void {
         if (this.menu.setMode) this.menu.setMode('initial');
-        return false;
     }
 
     public menu: IServiceMenu = {
         title: 'Example',
-        actions: {
-        },
-        icons: {},
-        actionDefault: '', // call after close icon clicked
-        setMode: undefined, // child will set this
-        onClickLink: this.onClickLink,
-        getLastMode: undefined,
-        updateTitle: undefined
+        main: {},
+        tools: {},
+        tabs: undefined,
+        onClickMain: this.onClickMain.bind(this),
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
