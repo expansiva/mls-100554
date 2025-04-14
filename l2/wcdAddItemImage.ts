@@ -66,7 +66,7 @@ export class WcdAddItemImage100554 extends CollabLitElement {
                     args: '',
                     position: 'p-l1',
                     level: [1,2,3,4,5,6,7],
-                    toolboxOptions: { background: '#fff', border: 'none' }
+                    toolboxOptions: { border: 'none' }
                 },
 
             ],
