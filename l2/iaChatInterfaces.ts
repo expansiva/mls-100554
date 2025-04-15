@@ -1,5 +1,42 @@
 /// <mls shortName="iaChatInterfaces" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+export const StatusCodeOk = 200;
+export const StatusCodeNotModified = 304;
+export const StatusCodeNotAuthenticated = 401;
+export const StatusCodeBadRequest = 400;
+export const StatusCodeUnauthorized = 401;
+export const StatusCodeNotFound = 404;
+export const StatusCodeForbidden = 403;
+export const StatusCodeConflict = 409;
+export const StatusCodeServerError = 500;
+export const StatusCodeNotImplemented = 501;
+
+export interface RequestBase {
+  action: string;
+}
+
+export interface ResponseGetTaskUpdate extends ResponseBase {
+  task: TaskData;
+}
+
+export interface ResponseBase {
+  statusCode: typeof StatusCodeOk | typeof StatusCodeNotModified | typeof StatusCodeNotAuthenticated | typeof StatusCodeBadRequest | typeof StatusCodeNotFound | typeof StatusCodeServerError | typeof StatusCodeConflict; // 200, 401, 400, 404, 409, 500
+  msg?: string; // error message from 400 or 500 status code
+}
+
+export interface RequestAddMessageAI extends RequestBase {
+  action: "addMessageAI";
+  userId: string;
+  threadId: string;
+  message: string;
+  inputAI: IAMessageInputType[];
+}
+
+export interface ResponseAddMessageAI extends ResponseBase {
+  message: Message;
+  task: TaskData;
+}
+
 
 export interface User {
   userId: string; // compact UTC format `yyyyMMddHHmmss.nnn` unique sorted index, nnn is a sequence number
@@ -16,6 +53,7 @@ export interface Thread {
   history: { action: string, user: string, by?: string, timestamp: string }[];
   languages: string[];
 }
+
 
 export interface Message {
   threadId: string;
