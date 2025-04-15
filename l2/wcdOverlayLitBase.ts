@@ -123,6 +123,7 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
         Array.from(this.children).forEach((item) => {
             item.setAttribute('level', this.level);
         });
+        this.updateSizeOverlayItems();
     }
 
     private createOverlayItem(icaInfo: IICADepths, content: HTMLElement, boundingPage: DOMRect): void {
