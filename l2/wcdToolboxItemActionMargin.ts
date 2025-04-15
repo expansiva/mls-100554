@@ -51,6 +51,13 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
 
     //-------COMPONENT---------------------
 
+    disconnectedCallback() {
+        if (this.elExternal && this.hasRenderOutdoor) {
+            render('', this.elExternal);
+        }
+        super.disconnectedCallback();
+    }
+
     createRenderRoot() {
         return this;
     }
@@ -88,6 +95,7 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
     }
 
     renderButton() {
+        this.title = 'Margin';
         this.onclick = (e) => this.clickButton(e);
         this.classList.add('f-button');
         return html`<svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M192 32h64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H384l0 352c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-352H288V448c0 17.7-14.3 32-32 32s-32-14.3-32-32V352H192c-88.4 0-160-71.6-160-160s71.6-160 160-160z"/></svg>`;
@@ -157,31 +165,39 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
             'size'
         )
 
+        this.hasRenderOutdoor = false;
+
         const params = {
-            level: 4,
+            level: 3,
             position: 'right',
             wdcPath: this.myParent.title,
             op: 'Styles',
         }
 
-        mls.events.fire([4], 'WCDEvent' as any, JSON.stringify(params))
+        mls.events.fire([3], 'WCDEvent' as any, JSON.stringify(params))
     }
 
 
     //------EXTERAL SCENARY----------------
 
+    private hasRenderOutdoor = false;
     private async renderOutdoorScenary() {
 
-        if (!this.myParent || this.myParent.level !== '4') return;
+        if (!this.myParent || this.myParent.level !== '3') return;
 
         this.elExternal = await this.myParent.getAndSetScenaryOutDoor('Styles');
         if (!this.elExternal) return;
+        
+        if (!this.hasRenderOutdoor) render('', this.elExternal);
+        this.hasRenderOutdoor = true;
+
         render(this.renderMargin(), this.elExternal); // external scneary
         
     }
 
     private renderMargin() {
         if (!this.elMain) return html``;
+
         return html`
             <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
                 <p style=" margin-bottom: 5px;">A propriedade <b>margin</b> do CSS define a área de margem nos quatro lados do elemento. </p>

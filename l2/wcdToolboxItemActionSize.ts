@@ -49,6 +49,13 @@ export class WCDToolboxItemActionSize extends WcdToolboxItemBase {
 
     //------COMPONENT-------------------
 
+    disconnectedCallback() {
+        if (this.elExternal && this.hasRenderOutdoor) {
+            render('', this.elExternal);
+        }
+        super.disconnectedCallback();
+    }
+
     createRenderRoot() {
         return this;
     }
@@ -134,23 +141,27 @@ export class WCDToolboxItemActionSize extends WcdToolboxItemBase {
         )
 
         const params = {
-            level: 4,
+            level: 3,
             position: 'right',
             wdcPath: this.myParent.title,
             op: 'Styles',
         }
 
-        mls.events.fire([4], 'WCDEvent' as any, JSON.stringify(params))
+        mls.events.fire([3], 'WCDEvent' as any, JSON.stringify(params))
     }
 
     //------EXTERAL SCENARY----------------
 
+    private hasRenderOutdoor = false;
     private async renderOutdoorScenary() {
 
-        if (!this.myParent || this.myParent.level !== '4') return;
+        if (!this.myParent || this.myParent.level !== '3') return;
 
         this.elExternal = await this.myParent.getAndSetScenaryOutDoor('Styles');
         if (!this.elExternal) return;
+
+        if (!this.hasRenderOutdoor) render('', this.elExternal);
+        this.hasRenderOutdoor = true;
 
         render(this.renderSize(), this.elExternal);
 
