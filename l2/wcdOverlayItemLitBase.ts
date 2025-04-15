@@ -63,7 +63,6 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
             const elSelected = wcdOther.parentElement as WcdOverlayItemLitBase;
             const isOverlapping = this.isOverlapping(elSelected, this);
             if (isOverlapping) {
-                console.info({ isOverlapping })
                 return;
             }
         }
@@ -116,6 +115,8 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
             iHaveEvents.style.display = 'none';
         }
 
+        let lestCssWcd = '';
+
         const overlayItens = this.overlay.querySelectorAll('*[rendertype="editactive"]');
         (overlayItens).forEach((ovI) => {
 
@@ -128,8 +129,11 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
             const oelHaveEvents = overlayItem.querySelector('.itemHasEvent') as HTMLElement;
             if (oelHaveEvents) oelHaveEvents.style.display = 'flex'
 
-            const wc = overlayItem.querySelector('wcd-toolbox-100554');
-            if (wc) wc.remove();
+            const wc = overlayItem.querySelector('wcd-toolbox-100554') as HTMLElement;
+            if (wc) {
+                lestCssWcd = wc.style.cssText;
+                wc.remove();
+            }
 
         });
 
@@ -140,6 +144,7 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
         wcd.setAttribute('initialclick', `${x},${y}`);
         wcd.lastHelper = '';
 
+        if(lestCssWcd) wcd.style.cssText = lestCssWcd;
         this.setAttribute('rendertype', 'editactive');
         this.appendChild(wcd);
     }
