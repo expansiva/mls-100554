@@ -4,6 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { TaskData, AIStepStatus } from './_100554_iaChatInterfaces';
+
 import {
     collab_money,
     collab_pause,
@@ -13,7 +14,8 @@ import {
     collab_triangle_exclamation,
     collab_check,
     collab_bug
-} from './_100554_collabIcons'
+} from './_100554_collabIcons';
+
 import { getTotalCost, getInternalStatus } from './_100554_iaChatBase';
 
 @customElement('widget-ai-task-100554')

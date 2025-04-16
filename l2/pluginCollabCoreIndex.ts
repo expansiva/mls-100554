@@ -4,7 +4,7 @@ import { PluginBaseIndex } from './_100554_pluginBaseIndex';
 
 export class PluginCollabCoreIndex extends PluginBaseIndex {
 
-    public getMenus(): mls.plugin.MenuAction[] { 
+    public getMenus(): mls.plugin.MenuAction[] {
 
         return [
             {
@@ -28,12 +28,20 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_serviceDetail'
             },
+            // {
+            //     category: 'Services',
+            //     scope: ['l7ServicesRight', 'l6ServicesRight', 'l5ServicesRight', 'l4ServicesRight', 'l3ServicesRight', 'l2ServicesRight', 'l1ServicesRight'],
+            //     priority: 3,
+            //     auth: ['*'],
+            //     widget: '_100554_serviceAim'
+            // },
+
             {
                 category: 'Services',
                 scope: ['l7ServicesRight', 'l6ServicesRight', 'l5ServicesRight', 'l4ServicesRight', 'l3ServicesRight', 'l2ServicesRight', 'l1ServicesRight'],
                 priority: 3,
                 auth: ['*'],
-                widget: '_100554_serviceAim'
+                widget: '_100554_serviceCollabMessages'
             },
             {
                 category: 'Services',
