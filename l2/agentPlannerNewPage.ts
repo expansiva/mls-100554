@@ -1,15 +1,22 @@
 /// <mls shortName="agentPlannerNewPage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAMessageInputType, TaskData, AIPayload } from './_100554_iaChatInterfaces';
+import { IAMessageInputType, TaskData, AIPayload, AIAfterPrompt } from './_100554_iaChatInterfaces';
 
 export const visibility: 'public' | 'private' = 'public'
 export function beforePrompt(task: TaskData, payload: AIPayload | null | undefined): IAMessageInputType[] {
   return startPrompt((payload as any).prompt);
 }
 
-export function afterPrompt(task: TaskData, payload: AIPayload[] | null | undefined): string {
-  console.info({ afterPromptAgentPlannerNewPage: payload });
-  return ''
+export async function afterPrompt(task: TaskData, payload: AIPayload | null | undefined): Promise<AIAfterPrompt[]> {
+
+  const ret: AIAfterPrompt[] = [];
+
+  if (!payload) return ret;
+
+  ret.push({ agent:'agenteCreateHtml1', nextprompt: payload, stepFather: payload.stepId || 0 })
+  
+  return ret
+
 }
 
 export function getDescriptions(): string {
@@ -29,9 +36,9 @@ Com base no prompt original do usuário, sua tarefa é:
 2. Escolher o nome da página.
 3. Determinar o tipo da página, usando o enum \`PageType\`.
 4. Verificar se há APIs, states ou dados existentes que podem ser usados. Caso não existam, deve sugerir o que precisa ser criado e aguardar uma confirmação ou complementação do usuário.
-5. Especificar cada campo necessário (widgets).
+5. Especificar cada campo necessário (widgets), se o usuario não passar os campos, coloque os campos que você achar necessario para o funcionamento da pagina.
 6. Definir restrições e requerimentos técnicos ou funcionais.
-7. Se os dados forem suficientes, preparar a chamada para o agente \`agentCreateNewPage\`.
+7. Se os dados forem suficientes, preparar a chamada para o agente \`agenteCreateHtml1\`.
 8. Se necessário, peça mais informações ao usuário usando o tipo \`clarification\`. Sempre que possível, inclua um \`htmlForm\` com campos e respostas prontas (como botões, selects ou inputs) para facilitar a interação. O formulário será exibido ao usuário e os dados enviados serão incluídos automaticamente no próximo prompt.  Se for necessária uma \`clarification\`, retorne **apenas essa subtarefa**. Não crie outros agentes ou ferramentas até que a resposta do usuário seja recebida.
 `
     },
@@ -44,9 +51,9 @@ Você deve retornar **apenas um dos seguintes formatos** no array JSON:
 [
   {
     "type": "flexible",
-    "agentName": "agentCreateNewPage",
+    "agentName": "agenteCreateHtml1",
     "taskTitle": string,
-    "prompt": string,
+    "prompt": string, // original do usuario
     "pageName": string,
     "pageType": "crud" | "report" | "dashboard" | "form" | "search" | "workflow" | "config" | "association",
     "loadContext": false,
@@ -59,7 +66,10 @@ Você deve retornar **apenas um dos seguintes formatos** no array JSON:
         "description": string
       }
     ]
-  },
+  }
+]
+ou
+[
   {
     "type": "clarification",
     "clarificationMessage": string,
@@ -76,7 +86,7 @@ Você deve retornar **apenas um dos seguintes formatos** no array JSON:
       type: 'system',
       content: `## Regras adicionais:
 	•	O campo widgets é obrigatório se for criar a página.
-- O Nome da página deve ser no formato pageXxx , onde ‘page’ é o sufixo obrigatório.
+  •	O Nome da página que você criar deve ser no formato pageXxx , onde ‘page’ é o sufixo obrigatório.
 	•	Cada widget deve conter:
 	•	name: identificador curto
 	•	binding: no formato "{{[pageName].[name]}}" (não confundir com bindings reais dos states)

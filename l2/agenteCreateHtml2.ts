@@ -1,14 +1,30 @@
 /// <mls shortName="agenteCreateHtml2" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAMessageInputType, TaskData, AIPayload } from './_100554_iaChatInterfaces';
+import { IAMessageInputType, TaskData, AIPayload, AIAfterPrompt } from './_100554_iaChatInterfaces';
 
 export const visibility: 'public' | 'private' = 'private'
-export function beforePrompt(stepId: number, task: TaskData): IAMessageInputType[] {
-    return []
+
+export function beforePrompt(task: TaskData, payload: AIPayload | null | undefined): IAMessageInputType[] {
+    const j = Object.assign({}, payload) as any;
+    delete j.agentName;
+    delete j.interaction;
+    delete j.rags;
+    delete j.type;
+    delete j.status;
+
+  return startPrompt(JSON.stringify(j));
 }
 
-export function afterPrompt(stepId: number, task: TaskData): string {
-    return ''
+export async function afterPrompt(task: TaskData, payload: AIPayload | null | undefined): Promise<AIAfterPrompt[]> {
+
+  const ret: AIAfterPrompt[] = [];
+
+  if (!payload) return ret;
+
+  ret.push({ agent:'agenteCreateHtml3', nextprompt: payload, stepFather: payload.stepId })
+  
+  return ret
+
 }
 
 export function getDescriptions(): string {
@@ -39,11 +55,13 @@ Você é um desenvolvedor de interface. Sua tarefa é transformar a estrutura co
             content: `##SAÍDA
 
 A saída será um JSON com os mesmos campos da entrada do usurio, agora enriquecido com:
+    •	"agentName" deve ser "agenteCreateHtml3",
 	•	webComponent
 	•	id
 	•	atributos: dicionário com os atributos do componente (ex: value, visible), cada um contendo:
 	•	valor
 	•	computed (true/false)
+    •	type deve ser "flexible" nunca coloque em portugues "tipo"
 
 Se o componente necessário não existir na lista, crie um nome apropriado e adicione uma observação com um aviso.`
         },
@@ -609,9 +627,7 @@ Se o componente necessário não existir na lista, crie um nome apropriado e adi
         allowedChildren: [],
         allowedParents: [],
         description: "Allows the embedding of entire pages or specific components within the current application. Useful for integrating additional functionality or information without the need for external navigation."
-    }
-
-}`
+    } }`
         },
         {
             type: 'system',
@@ -623,6 +639,141 @@ No atributo  allowedChildren e allowedParents
 - Pode ser encontrado também itens que começam com **, exemplo "**ica-forms-content-form" isso significa que o item não precisar ser filho direto do elemento, porem tem q estar debaixo desse elemento
 
 -Pode encontrar também o item "!*", isso significa que esse componente não aceita filho nenhum`
+        },
+        {
+            type: 'system',
+            content: `##EXEMPLO SAIDA
+
+            tem que ser um json
+{
+  "type":"flexible", // campo obrigatorio e deve ser flexible
+
+  "pagina": "Login",
+  "modoInicial": "edicao",
+  "fluxo": "O usuário pode inserir suas credenciais e clicar em 'Entrar' para acessar o sistema. Se o usuário não possui conta, deve haver a opção de se registrar.",
+  "secoes": [
+    {
+      "nome": "credenciais",
+      "descricao": "Campos para inserção de dados de login",
+      "campos": [
+        {
+          "nome": "usuario",
+          "intencao": "capturar nome de usuário ou e-mail para login",
+          "webComponent": "ica-forms-input-string",
+          "id": "campo-usuario",
+          "atributos": {
+            "value": "{page1.usuario}",
+            "required": {
+              "valor": "true",
+              "computed": false
+            },
+            "readonly": {
+              "valor": "false",
+              "computed": false
+            },
+            "placeholder": {
+              "valor": "Digite seu usuário ou e-mail",
+              "computed": false
+            }
+          }
+        },
+        {
+          "nome": "senha",
+          "intencao": "capturar senha do usuário para autenticação",
+          "webComponent": "ica-forms-input-string",
+          "id": "campo-senha",
+          "atributos": {
+            "value": "{page1.senha}",
+            "required": {
+              "valor": "true",
+              "computed": false
+            },
+            "readonly": {
+              "valor": "false",
+              "computed": false
+            },
+            "placeholder": {
+              "valor": "Digite sua senha",
+              "computed": false
+            },
+            "type": {
+              "valor": "password",
+              "computed": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "nome": "acoes",
+      "descricao": "Botões de ação para login",
+      "campos": [
+        {
+          "nome": "botaoEntrar",
+          "intencao": "autenticar o usuário com as credenciais fornecidas",
+          "webComponent": "ica-forms-submit-submit",
+          "id": "botao-entrar",
+          "atributos": {
+            "text": {
+              "valor": "Entrar",
+              "computed": false
+            },
+            "disabled": {
+              "valor": "false",
+              "computed": false
+            },
+            "eventBinding": {
+              "valor": "onSubmit",
+              "computed": true
+            }
+          }
+        },
+        {
+          "nome": "linkRegistrar",
+          "intencao": "direcionar o usuário para a página de registro, caso não tenha uma conta",
+          "webComponent": "ica-navigation-links-links",
+          "id": "link-registrar",
+          "atributos": {
+            "href": {
+              "valor": "/registrar",
+              "computed": false
+            },
+            "text": {
+              "valor": "Registrar-se",
+              "computed": false
+            },
+            "eventBinding": {
+              "valor": "onNavigateToRegister",
+              "computed": true
+            }
+          }
+        },
+        {
+          "nome": "linkEsqueciSenha",
+          "intencao": "permitir ao usuário solicitar a recuperação da senha, caso tenha esquecido",
+          "webComponent": "ica-navigation-links-links",
+          "id": "link-esqueci-senha",
+          "atributos": {
+            "href": {
+              "valor": "/recuperar-senha",
+              "computed": false
+            },
+            "text": {
+              "valor": "Esqueci a senha",
+              "computed": false
+            },
+            "eventBinding": {
+              "valor": "onNavigateToRecoverPassword",
+              "computed": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+            
+            `
         },
         {
             type: 'human',
