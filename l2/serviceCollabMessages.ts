@@ -4,6 +4,15 @@ import { addCoachMark, ICoachMarks } from './_100554_coachMarks';
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { propertyDataSource } from './_100554_icaLitElement';
+
+import * as chatHelper from './_100554_aimChatHelper';
+import './_100554_aimChatHeader';
+import './_100554_aimChatRooms';
+import './_100554_aimChatMessages';
+import './_100554_aimChatMessage';
+import './_100554_wcImage';
+
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -13,20 +22,8 @@ const message_pt = {
     docs: 'Docs',
     connect: 'Conectar',
     apps: 'Apps',
-
-    titleTasks: 'Todas as tarefas de AI, últimas',
-    chats: 'Chats',
-    project: 'Projeto',
-    titleProject: 'Salas com referencias ao projeto atual',
-    titleDocs: 'Salas com documentações e guias',
-    add: 'Adicionar',
-    titleAdd: 'por favor selecione abaixo para adicionar',
-    notFoundReference: 'Referência não encontrada',
-    noActionsToAdd: 'Nenhuma ação para adicionar',
-    selectColumnsYouWant: 'Selecione as colunas que deseja visualizar',
-    save: 'Salvar',
-    cancel: 'Cancelar'
 }
+
 const message_en = {
     loading: 'Loading...',
     crm: 'CRM',
@@ -34,20 +31,8 @@ const message_en = {
     docs: 'Docs',
     connect: 'Connect',
     apps: 'Apps',
-
-    titleTasks: 'All AI Tasks, last',
-    chats: 'Chats',
-    project: 'Project',
-    titleProject: 'Rooms with references to the current project',
-    titleDocs: 'Rooms with documentation and guides',
-    add: 'Add',
-    titleAdd: 'please select below to add',
-    notFoundReference: 'Not found reference',
-    noActionsToAdd: 'No Actions to Add',
-    selectColumnsYouWant: 'Select the columns you want to view',
-    save: 'Save',
-    cancel: 'Cancel'
 }
+
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
@@ -55,21 +40,31 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-
 @customElement('service-collab-messages-100554')
 export class ServiceCollabMessages100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
 
     @property() activeTab: ITabType = 'CRM';
+    @propertyDataSource({ type: String, reflect: true }) activeRoom: string | undefined;
+    @propertyDataSource({ type: String, reflect: true }) activeMessage: string | undefined;
+    @propertyDataSource({ type: String, reflect: true }) activeFilterRooms: string | undefined;
+
+    constructor() {
+        super();
+        this.activeRoom = chatHelper.pathActiveRoom;
+        this.activeMessage = chatHelper.pathActiveMessage;
+        this.activeFilterRooms = chatHelper.pathActiveFilterRooms;
+    }
+
 
     public details: IService = {
         icon: '&#xf086',
         state: 'foreground',
-        position: 'all',
-        tooltip: 'Collab Chat',
+        position: 'right',
+        tooltip: 'Collab Messages',
         visible: true,
-        widget: '_100554_serviceAim',
+        widget: '_100554_serviceCollabMessages',
         level: [0, 2, 3, 5]
     }
 
@@ -125,46 +120,78 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     renderCRM() {
-
+        this.execCoachMarks('CRM');
         return html`CRM`
     }
 
     renderTasks() {
-        const infoMark: ICoachMarks = {
-            key: "serviceCollabMessageTasks",
-            transparency: "normal",
-            fontSize: "1.1em",
-            timeClose: 12,
-            steps: [
-                {
-                    elementRef: `collab-nav-3-menu li[data-tooltip="Tasks"]`,
-                    text: 'Teste',
-                    position: "bottom",
-                    marginV: 25,
-                    marginH: 25,
-                    arrow: "up",
-                    duration: 3,
-                    autoClose: true
-                },
-            ]
-        }
-        addCoachMark(infoMark);
+        this.execCoachMarks('Tasks');
 
-        return html`Tasks`
+        const pathRoom = this.getAttribute('activeRoom');
+        const pathMessage = this.getAttribute('activeMessage');
+        const pathFilter = this.getAttribute('activeFilterRooms');
+
+        const renderRooms = () => {
+            return html`<aim-chat-rooms-100554 activeRoom="${pathRoom}" activeMessage="${pathMessage}" activeFilterRooms="${pathFilter}"></aim-chat-rooms-100554>`;
+        }
+        const renderMessages = () => {
+            return html`<aim-chat-messages-100554 activeRoom="${pathRoom}" activeMessage="${pathMessage}" activeFilterRooms="${pathFilter}"></aim-chat-messages-100554>`;
+        }
+        const renderMessage = () => {
+            return html`<aim-chat-message-100554 activeRoom="${pathRoom}" activeMessage="${pathMessage}" activeFilterRooms="${pathFilter}"></aim-chat-message-100554>`;
+        }
+        console.log('render servicecollabmessages, activerrom=', this.activeRoom, ', activeMessage=', this.activeMessage)
+
+        return html`
+            <aim-chat-header-100554
+                activeRoom="${pathRoom}"
+                activeMessage="${pathMessage}"
+                activeFilterRooms="${pathFilter}">
+            </aim-chat-header-100554>
+            ${!this.activeRoom ? renderRooms() : !this.activeMessage ? renderMessages() : renderMessage()
+            }
+        `;
+
     }
 
     renderApps() {
+        this.execCoachMarks('Apps');
         return html`Apps`
     }
 
     renderDocs() {
+        this.execCoachMarks('Docs');
         return html`Docs`
     }
 
     renderConnect() {
+        this.execCoachMarks('Connect');
         return html`Connect`
     }
 
+
+    execCoachMarks(name: string) {
+        const infoMark: ICoachMarks = {
+            key: `serviceCollabMessage${name}`,
+            transparency: "normal",
+            fontSize: "1.1em",
+            timeClose: 15,
+            steps: [
+                {
+                    elementRef: `collab-nav-3-menu li[data-tooltip="${name}"]`,
+                    text: `<div style="padding:1rem;"><wc-image-100554 src="/100554/l3/assets/coachMarkCollabMessages${name}.png"  style="display: block; max-width: 100%; height: auto;"></wc-image-100554></div>`,
+                    position: "bottom",
+                    marginV: 25,
+                    marginH: 25,
+                    arrow: "up",
+                    duration: 15,
+                    autoClose: true,
+
+                },
+            ]
+        }
+        addCoachMark(infoMark);
+    }
 
 }
 
