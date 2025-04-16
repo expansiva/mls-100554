@@ -1,59 +1,71 @@
 /// <mls shortName="agenteCreateHtml1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAMessageInputType, TaskData, AIPayload } from './_100554_iaChatInterfaces';
+import { IAMessageInputType, TaskData, AIPayload, AIAfterPrompt } from './_100554_iaChatInterfaces';
 
 export const visibility: 'public' | 'private' = 'private'
-export function beforePrompt(stepId: number, task: TaskData): IAMessageInputType[] {
-    return []
+
+export function beforePrompt(task: TaskData, payload: AIPayload | null | undefined): IAMessageInputType[] {
+  return startPrompt(JSON.stringify(payload));
 }
 
-export function afterPrompt(stepId: number, task: TaskData): string {
-    return ''
+export async function afterPrompt(task: TaskData, payload: AIPayload | null | undefined): Promise<AIAfterPrompt[]> {
+
+  const ret: AIAfterPrompt[] = [];
+
+  if (!payload) return ret;
+
+  ret.push({ agent: 'agenteCreateHtml2', nextprompt: payload, stepFather: payload.stepId })
+
+  return ret
+
 }
 
 export function getDescriptions(): string {
 
-    return `Entender a intenção da página com base nos requisitos e no prompt do usuário..`
+  return `Entender a intenção da página com base nos requisitos e no prompt do usuário..`
 }
 
 export function startPrompt(userPrompt: string): IAMessageInputType[] {
-    return [
-        {
-            type: 'system',
-            content: `
+  return [
+    {
+      type: 'system',
+      content: `
 Você é um analista de interface. Sua tarefa é entender a intenção da página com base nos requisitos e no prompt do usuário.
 
 Seu objetivo é gerar uma estrutura conceitual da interface, sem mapear componentes técnicos nem definir estados, bindings ou web components. Apenas descreva o que a página deve conter e qual o propósito de cada elemento.
 `
-        },
-        {
-            type: 'system',
-            content: `##Diretrizes para a Resposta
+    },
+    {
+      type: 'system',
+      content: `##Diretrizes para a Resposta
 
 -Para cada seção da interface, defina:
 -Nome da seção
 -Descrição (opcional)
 -Lista de campos ou ações
 -Nome lógico (ex: nome, email, botaoSalvar)
--Intenção (ex: capturar nome do cliente, permitir salvar o formulário)`
-        },
-        {
-            type: 'system',
-            content: `##Descreva o comportamento geral da página, incluindo:
+-Intenção (ex: capturar nome do cliente, permitir salvar o formulário)
+`
+    },
+    {
+      type: 'system',
+      content: `##Descreva o comportamento geral da página, incluindo:
 
 -Nome da página
 -Modo inicial (ex: visualizacao ou edicao)
 -Regras de fluxo (ex: salvar somente após clicar em “editar”)
 
 *Importante: Não inclua nomes de web components, atributos HTML, bindings ou lógica de estado.`
-        },
-        {
-            type: 'system',
-            content: `##Saída Esperada
+    },
+    {
+      type: 'system',
+      content: `##Saída Esperada
 
 A resposta deve ser um JSON estruturado contendo as informações da interface.
-
+•	"agentName" deve ser "agenteCreateHtml2",
 {
+  "type": "flexible",
+  "agentName": "agenteCreateHtml2",
   "pagina": "Cadastro de Cliente",
   "modoInicial": "visualizacao",
   "fluxo": "Permite visualizar os dados inicialmente. O botão 'Editar' ativa os campos para edição. A alteração só é salva após clicar em 'Salvar'.",
@@ -100,10 +112,11 @@ A resposta deve ser um JSON estruturado contendo as informações da interface.
     }
   ]
 }`
-        },
-        {
-            type: 'human',
-            content: userPrompt
-        },
-    ]
+    },
+
+    {
+      type: 'human',
+      content: userPrompt
+    },
+  ]
 }

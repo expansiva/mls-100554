@@ -1,7 +1,6 @@
 /// <mls shortName="agentPlanner1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAMessageInputType, TaskData, AIPayload } from './_100554_iaChatInterfaces';
-import { execUpdateStepStatus, execAddTaskAIInteraction } from './_100554_iaChatBase';
+import { AgentBase, IAMessageInputType, TaskData, AIPayload, AIAfterPrompt } from './_100554_iaChatInterfaces';
 
 
 export const visibility: 'public' | 'private' = 'private'
@@ -10,49 +9,30 @@ export function beforePrompt(task: TaskData, payload: AIPayload | null | undefin
     return []
 }
 
-export async function afterPrompt(task: TaskData, payload: AIPayload[] | null | undefined) {
+export async function afterPrompt(task: TaskData, payload: AIPayload[] | null | undefined): Promise<AIAfterPrompt[]> {
 
-    console.info({
-        afterPromptAgentPlanner1: payload
-    })
+    const ret: AIAfterPrompt[] = [];
 
-    if (!payload) return;
+    if (!payload) return ret;
+
     for await (let payloadItem of payload) {
 
         if (payloadItem.type === 'agent') {
             const hasAllKeys = ['agentName', 'title', 'prompt'].every((key) => key in payloadItem);
+
             if (!hasAllKeys && task.messageid_created) {
                 console.info('Invalid keys on payload');
-                await execUpdateStepStatus(task.messageid_created, task.PK, payloadItem.stepId, 'failed');
                 continue;
             }
 
             const agent = payloadItem.agentName;
-            //TODO: verificar se é um agente válido
-            const instanceAgent = await import(`./_100554_${agent}`);
-            if (!instanceAgent) {
-                console.info(`Invalid instance for agent : ${agent} `);
-                continue;
-            }
-
-            if (!instanceAgent.beforePrompt || typeof instanceAgent.beforePrompt !== 'function') {
-                console.info('Invalid function beforePrompt');
-                continue;
-            }
-
-            const inputs = instanceAgent.beforePrompt(task, payloadItem);
-            if (!inputs || !task.messageid_created) {
-                console.info('Invalid inputs or task messageid');
-                continue;
-            }
-            const interaction = await execAddTaskAIInteraction(inputs, task.messageid_created, task.PK, payloadItem.stepId);
-            await instanceAgent.afterPrompt(task, interaction);
+            ret.push({ agent, nextprompt: payloadItem, stepFather: payloadItem.stepId })
 
         }
 
     }
 
-    return ''
+    return ret
 }
 
 function getDescriptions(): string {
@@ -88,15 +68,16 @@ export function startPrompt(userPrompt: string): IAMessageInputType[] {
         {
             type: 'system',
             content: `
-Você é um planejador que irá coordenar agentes e ferramentas para executar tarefas complexas com base no prompt do usuário.
+Você é um coordenador de agentes e ferramentas para executar tarefas complexas com base no prompt do usuário.
 
-Seu objetivo é analisar o prompt do usuário e decidir o próximo passo.
+Seu unico objetivo é analisar o prompt do usuário e decidir qual agente chamar.
 
-1. Se faltar informações importantes para continuar, retorne apenas uma subtarefa do tipo \`clarification\`. Sempre que possível, inclua um \`htmlForm\` com campos e opções para facilitar a resposta do usuário.
+1. Se faltar informações apenas para decidir o agente ou a resposta, retorne apenas uma subtarefa do tipo \`clarification\`. Sempre que possível, inclua um \`htmlForm\` com campos e opções para facilitar a resposta do usuário.
 2. Se a tarefa puder ser resolvida diretamente com uma resposta, retorne uma subtarefa do tipo \`result\`.
 3. Decida qual agente, ferramenta ou base de conhecimento (RAG) será executado no próximo passo.
 4. Nunca retorne múltiplas subtarefas. Retorne **apenas uma subtarefa por vez** neste passo inicial.
-
+5. Se retornar um agent, no atributo prompt, deve se repetir o prompt do usuario.
+6. Lembre seu unico objetivo é identificar qual agente chamar, não elabore mais coisas
 `
         },
         {
@@ -122,7 +103,7 @@ JSON:
     "type": "agent",
     "agentName": string,
     “title": string,
-    "prompt": string,
+    "prompt": string, // prompt original do usuario
     "rags": string[] | null
   },
   {

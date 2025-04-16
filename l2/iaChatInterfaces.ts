@@ -192,3 +192,16 @@ export interface AIFlexibleResultStep extends AIStep {
   result: any; // Flexible JSON result, parsed and handled by afterPrompt function
 }
 
+
+export interface AIAfterPrompt{
+  agent: string,
+  nextprompt: any,
+  stepFather:number,
+}
+
+export interface AgentBase{
+  visibility: 'public' | 'private',
+  beforePrompt(task: TaskData, payload: AIPayload | null | undefined): IAMessageInputType[],
+  afterPrompt(task: TaskData, payload: AIPayload[] | null | undefined): Promise<AIAfterPrompt[]>,
+  startPrompt(userPrompt: string): IAMessageInputType[]
+}

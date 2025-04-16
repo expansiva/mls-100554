@@ -1,14 +1,31 @@
 /// <mls shortName="agenteCreateHtml3" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAMessageInputType, TaskData, AIPayload } from './_100554_iaChatInterfaces';
+import { IAMessageInputType, TaskData, AIPayload, AIAfterPrompt } from './_100554_iaChatInterfaces';
 
 export const visibility: 'public' | 'private' = 'private'
-export function beforePrompt(stepId: number, task: TaskData): IAMessageInputType[] {
-    return []
+
+export function beforePrompt(task: TaskData, payload: AIPayload | null | undefined): IAMessageInputType[] {
+    const j = Object.assign({}, payload) as any;
+    delete j.agentName;
+    delete j.interaction;
+    delete j.rags;
+    delete j.stepId;
+    delete j.type;
+    delete j.status;
+
+    return startPrompt(JSON.stringify(j));
 }
 
-export function afterPrompt(stepId: number, task: TaskData): string {
-    return ''
+export async function afterPrompt(task: TaskData, payload: AIPayload | null | undefined): Promise<AIAfterPrompt[]> {
+
+    const ret: AIAfterPrompt[] = [];
+     
+    if (!payload) return ret;
+
+    ret.push({ agent: 'agentCreateTs', nextprompt: payload, stepFather: payload.stepId })
+
+    return ret
+
 }
 
 export function getDescriptions(): string {
@@ -620,8 +637,12 @@ No atributo  allowedChildren e allowedParents
         },
         {
             type: 'system',
-            content: `##Saída esperada
+            content: `##Saída esperada um json
 
+        {
+            "type": "flexible",
+            "resulthtml": "{html gerado}"	
+        }
  HTML completo e limpo, utilizando apenas web components, com os atributos preenchidos e comentários para os estados computados ou observações específicas. Não se deve adicionar tag html, head ou body apenas webcomponentes`
         },
         {
