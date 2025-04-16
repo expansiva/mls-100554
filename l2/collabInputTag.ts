@@ -2,15 +2,14 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { IcaLitElement } from './_100554_icaLitElement';
 
 export function initCollabInputTag() {
     return true;
 }
 
 @customElement('collab-input-tag-100554')
-export class CollabInputTag extends LitElement {
-
-    static styles = css`[[mls_getDefaultDesignSystem]]`;
+export class CollabInputTag extends IcaLitElement {
 
     @property()
     tags: string[] = [];
@@ -48,7 +47,7 @@ export class CollabInputTag extends LitElement {
             if (this.input) this.input.value = '';
             this.requestUpdate();
         } else {
-            const element = this.shadowRoot?.querySelector('[data-index="' + this.tags.indexOf(tag) + '"]') as HTMLElement;
+            const element = this.querySelector('[data-index="' + this.tags.indexOf(tag) + '"]') as HTMLElement;
             element.classList.add('duplicate');
             setTimeout(() => {
                 element.classList.remove('duplicate');
@@ -75,7 +74,8 @@ export class CollabInputTag extends LitElement {
 
     private onInputKeyDown(event: KeyboardEvent) {
     
-    
+        event.stopImmediatePropagation();
+        
         if (!this.input) return;
         const { value } = this.input;
         if (event.keyCode === 13) {
@@ -104,7 +104,7 @@ export class CollabInputTag extends LitElement {
                 ${this.tags.map((tag: string, index: number) => {
                     return html`
                         <div data-index=${index} class="tag">
-                            <div class="remove">x</div>
+
                             ${tag}
                         </div>
                     `

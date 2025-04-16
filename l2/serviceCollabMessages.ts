@@ -6,6 +6,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { propertyDataSource } from './_100554_icaLitElement';
 import './_100554_wcImage';
+import './_100554_collabInputTag';
+import './_100554_collabTasks';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -60,7 +62,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     public onClickMain(op: string) {
         if (op === 'opReset') this.resetOnBoarding();
-        else if (this.menu.setMode) this.menu.setMode('initial');
     }
 
 
@@ -74,16 +75,16 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     public menu: IServiceMenu = {
         title: '',
         main: {
-            opReset: { text: 'Reset onboarding', icon: 'f2ea' }
+            opReset: { text: 'Reset onboarding', icon: 'f2ea' },
         },
         tools: {
             toolAdd: {
-                type: 'cycle',
-                selected: 0,
+                type: 'link',
                 options: [
-                    { text: 'Add', icon: '2b' },
+                    { text: 'Add Thread', icon: '2b' },
                 ]
             }
+
         },
         tabs: {
             group: 'Mode',
@@ -138,7 +139,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     renderTasks() {
         this.execCoachMarks('Tasks');
-        return html`Tasks`
+        return html`<collab-tasks-100554></collab-tasks-100554>`
     }
 
     renderApps() {
@@ -155,14 +156,53 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         this.execCoachMarks('Connect');
         return html`Connect`
     }
-
+    
     renderAdd() {
-        return html`Add`
+        return html`
+        <div class="section-add">
+            <label>Thread name:
+                <input type="text" name="name" required>
+            </label>
+
+            <label> Visibility:
+                <select name="visibility" required>
+                    <option value="public">Pública</option>
+                    <option value="private">Privada</option>
+                    <option value="company">Empresa</option>
+                    <option value="team">Equipe</option>
+                </select>
+            </label>
+
+            <label> Group:
+                <select name="group" required>
+                    <option value="CRM">CRM</option>
+                    <option value="TASK">TASK</option>
+                    <option value="DOCS">DOCS</option>
+                    <option value="CONNECT">CONNECT</option>
+                    <option value="APPS">APPS</option>
+                </select>
+            </label>
+
+            <label> Languages:
+                <collab-input-tag-100554 type="text" id="languageInput"></collab-input-tag-100554>
+                <small> Detected and updated based on the languages of participating users.</small>
+            </label>
+
+            <div class="language-list" id="languageList"></div>
+
+            <button style="margin-top: 20px;">Adicionar</button>
+    
+        
+        </div>`
     }
 
 
     private openAdd() {
+        console.info('Open add')
         this.activeTab = 'Add';
+        if (this.menu.tabs) this.menu.tabs.selected = ETabs.Add;
+        if (this.menu.closeMenu) this.menu.closeMenu();
+
     }
 
     private execCoachMarks(name: string) {
