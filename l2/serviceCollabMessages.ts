@@ -5,14 +5,7 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { propertyDataSource } from './_100554_icaLitElement';
-
-import * as chatHelper from './_100554_aimChatHelper';
-import './_100554_aimChatHeader';
-import './_100554_aimChatRooms';
-import './_100554_aimChatMessages';
-import './_100554_aimChatMessage';
 import './_100554_wcImage';
-
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -50,14 +43,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     @propertyDataSource({ type: String, reflect: true }) activeMessage: string | undefined;
     @propertyDataSource({ type: String, reflect: true }) activeFilterRooms: string | undefined;
 
-    constructor() {
-        super();
-        this.activeRoom = chatHelper.pathActiveRoom;
-        this.activeMessage = chatHelper.pathActiveMessage;
-        this.activeFilterRooms = chatHelper.pathActiveFilterRooms;
-    }
-
-
     public details: IService = {
         icon: '&#xf086',
         state: 'foreground',
@@ -73,10 +58,33 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         this.activeTab = ETabs[index] as ITabType;
     }
 
+    public onClickMain(op: string) {
+        if (op === 'opReset') this.resetOnBoarding();
+        else if (this.menu.setMode) this.menu.setMode('initial');
+    }
+
+
+    public onClickTools(op: string) {
+
+        if (op === 'toolAdd') this.openAdd();
+        else throw new Error('Invalid option')
+    }
+
+
     public menu: IServiceMenu = {
         title: '',
-        main: {},
-        tools: {},
+        main: {
+            opReset: { text: 'Reset onboarding', icon: 'f2ea' }
+        },
+        tools: {
+            toolAdd: {
+                type: 'cycle',
+                selected: 0,
+                options: [
+                    { text: 'Add', icon: '2b' },
+                ]
+            }
+        },
         tabs: {
             group: 'Mode',
             type: 'onlyicon',
@@ -89,7 +97,9 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                 { text: this.msg.apps, icon: 'f7d9' },
             ]
         },
+        onClickMain: this.onClickMain.bind(this),
         onClickTabs: this.onClickTabs.bind(this),
+        onClickTools: this.onClickTools.bind(this),
 
     }
 
@@ -114,6 +124,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                 return this.renderDocs();
             case 'Connect':
                 return this.renderConnect();
+            case 'Add':
+                return this.renderAdd();
             default:
                 return html``;
         }
@@ -126,32 +138,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     renderTasks() {
         this.execCoachMarks('Tasks');
-
-        const pathRoom = this.getAttribute('activeRoom');
-        const pathMessage = this.getAttribute('activeMessage');
-        const pathFilter = this.getAttribute('activeFilterRooms');
-
-        const renderRooms = () => {
-            return html`<aim-chat-rooms-100554 activeRoom="${pathRoom}" activeMessage="${pathMessage}" activeFilterRooms="${pathFilter}"></aim-chat-rooms-100554>`;
-        }
-        const renderMessages = () => {
-            return html`<aim-chat-messages-100554 activeRoom="${pathRoom}" activeMessage="${pathMessage}" activeFilterRooms="${pathFilter}"></aim-chat-messages-100554>`;
-        }
-        const renderMessage = () => {
-            return html`<aim-chat-message-100554 activeRoom="${pathRoom}" activeMessage="${pathMessage}" activeFilterRooms="${pathFilter}"></aim-chat-message-100554>`;
-        }
-        console.log('render servicecollabmessages, activerrom=', this.activeRoom, ', activeMessage=', this.activeMessage)
-
-        return html`
-            <aim-chat-header-100554
-                activeRoom="${pathRoom}"
-                activeMessage="${pathMessage}"
-                activeFilterRooms="${pathFilter}">
-            </aim-chat-header-100554>
-            ${!this.activeRoom ? renderRooms() : !this.activeMessage ? renderMessages() : renderMessage()
-            }
-        `;
-
+        return html`Tasks`
     }
 
     renderApps() {
@@ -169,8 +156,19 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         return html`Connect`
     }
 
+    renderAdd() {
+        return html`Add`
+    }
 
-    execCoachMarks(name: string) {
+
+    private openAdd() {
+        this.activeTab = 'Add';
+    }
+
+    private execCoachMarks(name: string) {
+
+        if (this.visible === 'false') return;
+
         const infoMark: ICoachMarks = {
             key: `serviceCollabMessage${name}`,
             transparency: "normal",
@@ -193,6 +191,23 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         addCoachMark(infoMark);
     }
 
+    private resetOnBoarding() {
+        const ls = localStorage.getItem('coach-marks-100554');
+        if (!ls) return;
+        const data: string[] = JSON.parse(ls);
+
+        ['CRM', 'Tasks', 'Docs', 'Connect', 'Apps'].forEach((tab) => {
+            const indexToRemove = data.findIndex((item) => item === `serviceCollabMessage${tab}`);
+            if (indexToRemove !== -1) {
+                data.splice(indexToRemove, 1);
+            }
+        });
+
+        localStorage.setItem('coach-marks-100554', JSON.stringify(data));
+        if (this.menu.setMode) this.menu.setMode('initial');
+    }
+
+
 }
 
 enum ETabs {
@@ -201,7 +216,9 @@ enum ETabs {
     'Docs' = 2,
     'Connect' = 3,
     'Apps' = 4,
+    'Add' = 5,
+
 }
 
-type ITabType = 'CRM' | 'Tasks' | 'Docs' | 'Connect' | 'Apps';
+type ITabType = 'CRM' | 'Tasks' | 'Docs' | 'Connect' | 'Apps' | 'Add';
 
