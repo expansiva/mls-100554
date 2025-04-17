@@ -640,7 +640,7 @@ No atributo  allowedChildren e allowedParents
             content: `##Saída esperada um json
 
         {
-            "type": "flexible",
+            "type": "flexible", // campo obrigatorio e ter que ser "flexible"
             "resulthtml": "{html gerado}"	
         }
  HTML completo e limpo, utilizando apenas web components, com os atributos preenchidos e comentários para os estados computados ou observações específicas. Não se deve adicionar tag html, head ou body apenas webcomponentes`

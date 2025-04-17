@@ -4,20 +4,24 @@ import * as iaChat from './_100554_iaChatInterfaces';
 import * as plannermain from './_100554_agentPlanner1';
 
 export let url = 'https://collab.codes/msg'; 
-export let userId = '20250306212720.1000';
-export let threadId = '20250304200000.1000';
+export let userId = '20250417120844.1000';
+export let threadId = '20250417133813.1000'; 
 
 export async function getTask(messageId: string, taskId: string,): Promise<iaChat.TaskData> {
     return execGetTaskUpdate(messageId, taskId);
 }
 
-export async function execNewPrompt(prompt: string): Promise<iaChat.TaskData> {
+/*export async function execNewPrompt(prompt: string): Promise<iaChat.TaskData> {
     return _execNewPrompt(prompt);
+}*/
+
+export async function execPromptByTaskStep(msgId:string, taskPK:string, agenteName:string, step:number, prompt: any): Promise<iaChat.TaskData> {
+    return _execPromptByTaskStep(msgId,taskPK, agenteName, step, prompt);
 }
 
 //--------IMPLEMENTS---------
 
-async function _execNewPrompt(prompt: string): Promise<iaChat.TaskData> {
+/*async function _execNewPrompt(prompt: string): Promise<iaChat.TaskData> {
     const inputs = plannermain.startPrompt(prompt);
     const tagInitial = await execAddTask(inputs, prompt);
     if (!tagInitial) throw new Error('Error create tag');
@@ -25,6 +29,17 @@ async function _execNewPrompt(prompt: string): Promise<iaChat.TaskData> {
     console.info({ executou: 'agentPlanner1', resultado: tagInitial.iaCompressed?.interaction?.payload });
     return await _execNextPass(tagInitial, after);
 
+}*/
+
+async function _execPromptByTaskStep(msgId: string, taskPK: string, agenteName: string, step: number, prompt: any): Promise<iaChat.TaskData> {
+
+    const task = await execGetTaskUpdate(msgId, taskPK); 
+    const after: iaChat.AIAfterPrompt[] = [{
+        agent: agenteName,
+        nextprompt: prompt,
+        stepFather: step
+    }];
+    return await _execNextPass(task, after);
 }
 
 async function _execNextPass(task: iaChat.TaskData, steps: iaChat.AIAfterPrompt[]): Promise<iaChat.TaskData> {
@@ -110,7 +125,7 @@ async function execUpdateStepStatus(
     stepId: number,
     status: iaChat.AIStepStatus
 ) {
-    const result = await callAPI<any>(url, {
+    const result = await mls.api.msgUpdateStepStatus( {
         action: "updateStepStatus",
         userId,
         messageId,
@@ -126,7 +141,7 @@ async function execGetTaskUpdate(
     messageId: string,
     taskId: string,
 ): Promise<iaChat.TaskData> {
-    const result = await callAPI<iaChat.ResponseGetTaskUpdate>(url, {
+    const result = await  mls.api.msgGetTaskUpdate({
         action: "getTaskUpdate",
         userId,
         messageId,
@@ -140,7 +155,7 @@ async function execAddTask(
     inputAI: iaChat.IAMessageInputType[],
     message: string
 ): Promise<iaChat.ResponseAddMessageAI['task']> {
-    const result = await callAPI<iaChat.ResponseAddMessageAI>(url, {
+    const result = await mls.api.msgAddMessageAI({
         action: 'addMessageAI',
         userId,
         threadId,
@@ -158,7 +173,7 @@ async function execAddTaskAIInteraction(
     parentStepId: number,
 ): Promise<iaChat.ResponseAddMessageAI['task']> {
 
-    const result = await callAPI<iaChat.ResponseAddMessageAI>(url, {
+    const result = await mls.api.msgAddTaskAIInteraction({
         action: "addTaskAIInteraction",
         userId,
         messageId,
@@ -168,22 +183,4 @@ async function execAddTaskAIInteraction(
     });
 
     return result.task;
-}
-
-async function callAPI<T = any>(url: string, body: Record<string, any>, method: 'POST' | 'GET' = 'POST'): Promise<T> {
-    const response = await fetch(url, {
-        method,
-        credentials: 'omit',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: method === 'POST' ? JSON.stringify(body) : undefined,
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erro na requisição: ${response.status} - ${errorText}`);
-    }
-
-    return await response.json();
 }
