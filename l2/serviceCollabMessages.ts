@@ -1,12 +1,14 @@
 /// <mls shortName="serviceCollabMessages" project="100554" enhancement="_100554_enhancementLitService" groupName="other" />
 
 import { addCoachMark, ICoachMarks } from './_100554_coachMarks';
-import { html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { html, css, LitElement } from 'lit';
+import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { propertyDataSource } from './_100554_icaLitElement';
+import { CollbaMessagesAddResponse } from './_100554_collabMessagesAdd';
+
+import './_100554_collabMessagesAdd';
+import './_100554_collabMessagesConnect';
 import './_100554_wcImage';
-import './_100554_collabInputTag';
 import './_100554_collabTasks';
 
 /// **collab_i18n_start** 
@@ -41,9 +43,11 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     private msg: MessageType = messages['en'];
 
     @property() activeTab: ITabType = 'CRM';
-    @propertyDataSource({ type: String, reflect: true }) activeRoom: string | undefined;
-    @propertyDataSource({ type: String, reflect: true }) activeMessage: string | undefined;
-    @propertyDataSource({ type: String, reflect: true }) activeFilterRooms: string | undefined;
+
+    @state() userPerfil: mls.msg.User | undefined;
+    @state() userThreads: IThreadData = {
+
+    }
 
     public details: IService = {
         icon: '&#xf086',
@@ -66,11 +70,9 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
 
     public onClickTools(op: string) {
-
         if (op === 'toolAdd') this.openAdd();
         else throw new Error('Invalid option')
     }
-
 
     public menu: IServiceMenu = {
         title: '',
@@ -108,7 +110,59 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     }
 
+    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
+        super.firstUpdated(changedProperties);
+        this.userPerfil = await this.getUser();
+    }
+
     render() {
+
+        const a: mls.msg.RequestAddThread = {
+            action: 'addThread',
+            name: 'Test',
+            group: 'TASK',
+            languages: [],
+            status: 'active',
+            userId: '',
+            visibility: 'private'
+        }
+
+        const b: mls.msg.RequestAddMessage = {
+            action: 'addMessage',
+            content: 'Ola',
+            threadId: '',
+            userId: ''
+        }
+
+
+        const c: mls.msg.RequestAddMessageAI = {
+            action: 'addMessageAI',
+            inputAI: [{ content: '', type: 'system' }],
+            message: 'CRIAR UM WIDGET',
+            threadId: '',
+            userId: ''
+        }
+
+        const d: mls.msg.RequestGetNextMessages = {
+            action: 'getNextMessages',
+            lastOrderAt: '',
+            threadId: '',
+            userId: ''
+        }
+
+        const e: mls.msg.RequestGetThreadUpdate = {
+            action: 'getThreadUpdate',
+            threadId: '20250417135645.1000',
+            userId: '20250417120841.1000'
+        }
+
+        const f: mls.msg.RequestAddUserInThread = {
+            action: 'addUserInThread',
+            auth: 'write',
+            userIdOrName: '20250417120844.1000',
+            threadId: '20250417135645.1000',
+            userId: '20250417120841.1000'
+        }
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
@@ -154,56 +208,91 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     renderConnect() {
         this.execCoachMarks('Connect');
-        return html`Connect`
+        this.updateThreads();
+        console.info(this.userThreads)
+        return html`<collab-messages-connect-100554 
+            .userThreads=${{
+                CONNECT: Object.keys(this.userThreads)
+                    .filter((key) => this.userThreads[key].group === 'CONNECT')
+                    .map((key) => this.userThreads[key])
+            }} 
+            userId=${this.userPerfil?.userId} 
+        ></collab-messages-connect-100554>`
     }
-    
+
+
     renderAdd() {
         return html`
-        <div class="section-add">
-            <label>Thread name:
-                <input type="text" name="name" required>
-            </label>
-
-            <label> Visibility:
-                <select name="visibility" required>
-                    <option value="public">Pública</option>
-                    <option value="private">Privada</option>
-                    <option value="company">Empresa</option>
-                    <option value="team">Equipe</option>
-                </select>
-            </label>
-
-            <label> Group:
-                <select name="group" required>
-                    <option value="CRM">CRM</option>
-                    <option value="TASK">TASK</option>
-                    <option value="DOCS">DOCS</option>
-                    <option value="CONNECT">CONNECT</option>
-                    <option value="APPS">APPS</option>
-                </select>
-            </label>
-
-            <label> Languages:
-                <collab-input-tag-100554 type="text" id="languageInput"></collab-input-tag-100554>
-                <small> Detected and updated based on the languages of participating users.</small>
-            </label>
-
-            <div class="language-list" id="languageList"></div>
-
-            <button style="margin-top: 20px;">Adicionar</button>
-    
-        
-        </div>`
+            <collab-messages-add-100554 
+                userId=${this.userPerfil?.userId} 
+                .afterAdd=${this.onAfterAdd}
+            ></collab-messages-add-100554>`
     }
+
 
 
     private openAdd() {
-        console.info('Open add')
         this.activeTab = 'Add';
         if (this.menu.tabs) this.menu.tabs.selected = ETabs.Add;
         if (this.menu.closeMenu) this.menu.closeMenu();
+    }
+
+    private onAfterAdd(response: CollbaMessagesAddResponse) {
+        if (!response.ok) {
+            this.setError(response.msg || 'Error on add thread');
+            console.error(response.msg);
+            return;
+        }
+    }
+
+    private async getUser(): Promise<mls.msg.User> {
+        try {
+            const response = await mls.api.msgGetUserUpdate({ action: 'getUserUpdate', userId: "" });
+            return response.user;
+        } catch (err: any) {
+            this.setError(err.message);
+            throw new Error(err.message);
+        }
+    }
+
+
+    private async updateThreads() {
+        if (!this.userPerfil?.userId) {
+            this.setError('Invalid userId');
+            return;
+        }
+
+        const userId = this.userPerfil.userId;
+        const userThreads: string[] = this.userPerfil.threads;
+
+        for await (let threadId of userThreads) {
+            if (this.userThreads[threadId]) {
+                return;
+            }
+
+            const threadInfo = await this.getThreadInfo(threadId, userId);
+            this.userThreads[threadId] = threadInfo;
+        }
+
+        this.requestUpdate();
 
     }
+
+    private async getThreadInfo(threadId: string, userId: string): Promise<mls.msg.Thread> {
+        try {
+            const response = await mls.api.msgGetThreadUpdate({
+                action: 'getThreadUpdate',
+                threadId,
+                userId
+            });
+            return response.thread;
+
+        } catch (err: any) {
+            this.setError('Erro ao buscar threads: ' + err);
+            throw new Error(err.message)
+        }
+    }
+
 
     private execCoachMarks(name: string) {
 
@@ -250,6 +339,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
 }
 
+type IThreadData = { [key: string]: mls.msg.Thread }
 enum ETabs {
     'CRM' = 0,
     'Tasks' = 1,
