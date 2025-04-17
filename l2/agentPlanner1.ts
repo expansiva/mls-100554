@@ -1,5 +1,130 @@
 /// <mls shortName="agentPlanner1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+import { AgentBase, IAgentBase } from './_100554_iaAgentBase';
+
+export class agentPlanner1 extends AgentBase implements IAgentBase {
+
+    public task: mls.msg.TaskData | undefined;
+    public visibility: 'public' | 'private' = 'private';
+
+    public getPrompt(prompt: string | undefined): mls.msg.IAMessageInputType[] {
+        return this.getMyImputs(prompt || '');
+    }
+
+    public async afterPrompt(payload: mls.msg.AIPayload[] | null | undefined): Promise<void> {
+        return this._afterPrompt(payload);
+    }
+
+    //---------IMPLEMENTS-------------
+
+    private async _afterPrompt(payload: mls.msg.AIPayload[] | null | undefined): Promise<void> {
+
+        if (!payload) return;
+
+        for await (let payloadItem of payload) {
+
+            switch (payloadItem.type) {
+                case 'agent': await this.runAgent(payloadItem); break;
+                default: break;
+            }
+
+        }
+    }
+
+    private async runAgent(payload: mls.msg.AIAgentStep) {
+
+        const hasAllKeys = ['agentName', 'title', 'prompt'].every((key) => key in payload);
+
+        if (!hasAllKeys) {
+            console.info('Invalid keys on payload');
+            return;
+        }
+        
+        await this.executeAgent(payload.agentName, payload.prompt, payload.stepId)
+
+    }
+
+    private getDescriptions(): string {
+        const listAgents = [
+            { agent: 'agentPlannerNewPage', description: 'planejamento para a criação de novas páginas no sistema, será pedido mais informações ao usuário se necessário.' },
+            { agent: 'agentPlannerNewWidget', description: 'planejamento para a criação de componentes/widgets, será pedido mais informações ao usuário se necessário.' },
+            { agent: 'agentPlannerNewAPI', description: 'criação de endpoints ou APIs, será pedido mais informações ao usuário se necessário.' },
+            { agent: 'agentSupportExternal', description: 'suporte para usuários externos. Executar rag1 antes de enviar o prompt.' },
+            { agent: 'agentSupportInternal', description: 'suporte para usuários internos. Executar os RAGs rag1 e rag2 antes de enviar o prompt.' },
+        ]
+
+        return `Agentes disponíveis:\n${listAgents.map((item) => `•	${item.agent}:${item.description}`).join('\n')}`
+    }
+
+    private getMyImputs(prompt: string): mls.msg.IAMessageInputType[] {
+
+        return [
+            {
+                type: 'system',
+                content: `
+Você é um coordenador de agentes e ferramentas para executar tarefas complexas com base no prompt do usuário.
+
+Seu unico objetivo é analisar o prompt do usuário e decidir qual agente chamar.
+
+1. Se faltar informações apenas para decidir o agente ou a resposta, retorne apenas uma subtarefa do tipo \`clarification\`. Sempre que possível, inclua um \`htmlForm\` com campos e opções para facilitar a resposta do usuário.
+2. Se a tarefa puder ser resolvida diretamente com uma resposta, retorne uma subtarefa do tipo \`result\`.
+3. Decida qual agente, ferramenta ou base de conhecimento (RAG) será executado no próximo passo.
+4. Nunca retorne múltiplas subtarefas. Retorne **apenas uma subtarefa por vez** neste passo inicial.
+5. Se retornar um agent, no atributo prompt, deve se repetir o prompt do usuario.
+6. Lembre seu unico objetivo é identificar qual agente chamar, não elabore mais coisas
+`
+            },
+            {
+                type: 'system',
+                content: this.getDescriptions()
+            },
+            {
+                type: 'system',
+                content: `
+Você deve retornar um array de objetos no formato JSON. Cada objeto representa uma subtarefa, com **apenas um dos seguintes formatos**:
+Não altere o atributo prompt, use sempre o do usuario.
+JSON:
+\`\`\` json
+[
+  {
+    "type": "agent",
+    "agentName": string,
+    “title": string,
+    "prompt": string, // prompt original do usuario
+    "rags": string[] | null
+  },
+  {
+    "type": "tool",
+    "toolName": string,
+    “title": string,
+    "args": string // JSON stringified
+  },
+  {
+    "type": "clarification",
+    "clarificationMessage": string,
+    "htmlForm?": string // Optional HTML form shown to the user. The submitted data will be included in the prompt of the next interaction.
+  },
+  {
+     "type": "result",
+     “result”: string
+  }
+]
+\`\`\`
+`
+            },
+
+            {
+                type: 'human',
+                content: prompt || ''
+            },
+        ];
+
+    }
+
+}
+
+
+/*
 import { AgentBase, IAMessageInputType, TaskData, AIPayload, AIAfterPrompt } from './_100554_iaChatInterfaces';
 
 
@@ -132,3 +257,4 @@ JSON:
         },
     ]
 }
+*/
