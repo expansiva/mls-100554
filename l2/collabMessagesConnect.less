@@ -2,10 +2,12 @@
 
 collab-messages-connect-100554 {
 
-    display: block;
+    display: flex;
+    flex-direction: column;
     padding: 1rem 0;
+    height: 100%;
 
-    .header{
+    .header {
         height: 30px;
         background-color: @grey-color-lighter;
         cursor: pointer;
@@ -103,7 +105,149 @@ collab-messages-connect-100554 {
             }
         }
 
+
     }
+
+    .chat-container {
+
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        padding: 10px;
+        width: calc(100% - 20px);
+        // height: calc(100% - 100px);
+        overflow-y: auto;
+        max-height: 100%;
+
+        .message-time {
+            text-align: center;
+            font-size: .85rem;
+            color: gray;
+            margin-bottom: 5px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            margin-bottom: 10px;
+
+            &.user {
+                align-items: flex-end;
+            }
+
+            .message-row {
+                max-width: 80%;
+                margin-bottom: 3px;
+                margin-right: 50px;
+                margin-left: 50px;
+
+                .message-card {
+                    display: flex;
+                    flex-direction: column;
+                    background-color: #f9f9f9;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    padding: 1rem;
+                    position: relative;
+
+                    &.user {
+                        background-color: #daf8cb;
+                        align-self: flex-end;
+                    }
+
+                    .message-title {
+                        color: #be069c;
+                    }
+
+                    .message-content {
+                        padding-right: 4em;
+                        margin-top: .4rem;
+                    }
+
+                    .message-footer {
+                        font-size: .75rem;
+                        color: gray;
+                        position: absolute;
+                        bottom: 5px;
+                        right: 10px;
+                        text-align: right;
+                    }
+                }
+            }
+
+            .message-group {
+                display: contents;
+            }
+
+        }
+
+    }
+
+    .wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background-color: var(--grey-color-light);
+        padding: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        height: 100px;
+
+        textarea {
+            padding: 10px 15px;
+            border: 1px solid #d1d1d1;
+            background-color: #fff;
+            color: #000;
+            font-size: 14px;
+            transition: border-color .3s ease;
+            width: 100%;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .suggestions {
+            position: absolute;
+            bottom: 53%;
+            left: 5%;
+            right: 0;
+            background: white;
+            border: 1px solid #ccc;
+            z-index: 10;
+            display: block;
+            width: 200px;
+            border-radius: 10px;
+        }
+
+        .suggestion {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .suggestion:hover {
+            background: #f0f0f0;
+        }
+
+        button {
+            margin-left: 8px;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 9999px;
+            background-color: #ddd;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color .3s ease;
+        }
+
+        button:disabled {
+            background-color: #e0e0e0;
+            cursor: not-allowed;
+        }
+    }
+
+
 
 }
 

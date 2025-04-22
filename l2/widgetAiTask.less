@@ -2,7 +2,6 @@
 
 widget-ai-task-100554 {
 
-    display: block;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     overflow: hidden;
     cursor: pointer;
@@ -10,13 +9,18 @@ widget-ai-task-100554 {
     margin-left: 50px;
     background-color: #fff;
     color: #000000;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
 
     .card {
         display: block;
         padding: @space-16;
+        width: 100%;
+        position: relative;
 
         .task-icon {
-    
+
             &.failed {
                 fill: @error-color;
             }
@@ -36,6 +40,19 @@ widget-ai-task-100554 {
             justify-content: space-between;
             gap: 1rem;
             align-items: center;
+
+            .card-user {
+                color: #be069c;
+            }
+
+            .card-time {
+                font-size: .75rem;
+                color: gray;
+                position: absolute;
+                bottom: 0px;
+                right: 10px;
+                text-align: right;
+            }
 
             .card-title {
                 font-size: @font-size-12;
@@ -79,7 +96,7 @@ widget-ai-task-100554 {
                 border: 1px solid;
                 padding: 0 .3rem;
                 border-radius: 4px;
-
+                white-space: nowrap;
                 &.todo {
                     color: @grey-color-darker;
                 }

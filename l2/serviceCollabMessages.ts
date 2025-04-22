@@ -5,7 +5,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { CollbaMessagesAddResponse } from './_100554_collabMessagesAdd';
-
+import { listThreads, addThread, syncThreads, listUsers, syncUsers } from './_100554_msgDBController';
 import './_100554_collabMessagesAdd';
 import './_100554_collabMessagesConnect';
 import './_100554_wcImage';
@@ -112,6 +112,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
+        this.getThreadFromLocalDB();
         this.userPerfil = await this.getUser();
     }
 
@@ -138,7 +139,9 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         const c: mls.msg.RequestAddMessageAI = {
             action: 'addMessageAI',
             inputAI: [{ content: '', type: 'system' }],
-            message: 'CRIAR UM WIDGET',
+            agentName: '',
+            taskTitle: '',
+            userMessage: '',
             threadId: '',
             userId: ''
         }
@@ -156,6 +159,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             userId: '20250417120841.1000'
         }
 
+
         const f: mls.msg.RequestAddUserInThread = {
             action: 'addUserInThread',
             auth: 'write',
@@ -163,6 +167,14 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             threadId: '20250417135645.1000',
             userId: '20250417120841.1000'
         }
+
+        const g: mls.msg.RequestGetTaskUpdate = {
+            action: 'getTaskUpdate',
+            taskId: '',
+            messageId: '',
+            userId: '20250417120841.1000'
+        }
+
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
@@ -208,12 +220,14 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     renderConnect() {
         this.execCoachMarks('Connect');
+        this.getThreadFromLocalDB();
         this.updateThreads();
-        console.info(this.userThreads)
+
         return html`<collab-messages-connect-100554 
+            style="height:${this.style.height}"
             .userThreads=${{
                 CONNECT: Object.keys(this.userThreads)
-                    .filter((key) => this.userThreads[key].group === 'CONNECT')
+                    .filter((key) => this.userThreads[key].thread.group === 'CONNECT')
                     .map((key) => this.userThreads[key])
             }} 
             userId=${this.userPerfil?.userId} 
@@ -243,6 +257,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             console.error(response.msg);
             return;
         }
+
+        if (response.data) addThread(response.data)
     }
 
     private async getUser(): Promise<mls.msg.User> {
@@ -269,23 +285,61 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             if (this.userThreads[threadId]) {
                 return;
             }
-
             const threadInfo = await this.getThreadInfo(threadId, userId);
             this.userThreads[threadId] = threadInfo;
         }
+
+        const arrThreads = Object.keys(this.userThreads).map((key) => {
+            return this.userThreads[key].thread
+        });
+
+        const addedUserIds = new Set<string>();
+        const uniqueUsers: mls.msg.User[] = [];
+
+        Object.values(this.userThreads).forEach(thread => {
+            thread.users.forEach(user => {
+                if (!addedUserIds.has(user.userId)) {
+                    addedUserIds.add(user.userId);
+                    uniqueUsers.push(user);
+                }
+            });
+        });
+
+        syncThreads(arrThreads);
+        syncUsers(uniqueUsers);
 
         this.requestUpdate();
 
     }
 
-    private async getThreadInfo(threadId: string, userId: string): Promise<mls.msg.Thread> {
+    private async getThreadFromLocalDB() {
+        const threads = await listThreads();
+        const users = await listUsers();
+
+        for (let thread of threads) {
+            if (this.userThreads[thread.threadId]) {
+                return;
+            }
+            const threadUsers: mls.msg.User[] = [];
+            thread.users.forEach((user) => {
+                const userDB = users.find((us) => us.userId === user.userId);
+                if (userDB) threadUsers.push(userDB);
+            })
+            this.userThreads[thread.threadId] = {
+                thread: thread,
+                users: threadUsers
+            }
+        }
+    }
+
+    private async getThreadInfo(threadId: string, userId: string): Promise<IThreadInfo> {
         try {
             const response = await mls.api.msgGetThreadUpdate({
                 action: 'getThreadUpdate',
                 threadId,
                 userId
             });
-            return response.thread;
+            return response;
 
         } catch (err: any) {
             this.setError('Erro ao buscar threads: ' + err);
@@ -339,7 +393,13 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
 }
 
-type IThreadData = { [key: string]: mls.msg.Thread }
+type IThreadData = { [key: string]: IThreadInfo }
+
+interface IThreadInfo {
+    thread: mls.msg.Thread,
+    users: mls.msg.User[]
+}
+
 enum ETabs {
     'CRM' = 0,
     'Tasks' = 1,
