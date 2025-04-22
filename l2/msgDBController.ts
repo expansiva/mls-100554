@@ -7,7 +7,10 @@ export function openDB(): Promise<IDBDatabase> {
         request.onupgradeneeded = (event) => {
             const db = (event.target as IDBOpenDBRequest).result;
             if (!db.objectStoreNames.contains("threads")) {
-                db.createObjectStore("threads", { keyPath: "id" });
+                db.createObjectStore("threads", { keyPath: "threadId" });
+            }
+            if (!db.objectStoreNames.contains("users")) {
+                db.createObjectStore("users", { keyPath: "userId" });
             }
         };
 
@@ -16,7 +19,7 @@ export function openDB(): Promise<IDBDatabase> {
     });
 }
 
-export async function listThreads() {
+export async function listThreads(): Promise<mls.msg.ThreadPerformanceCache[]> {
     const db = await openDB();
     const tx = db.transaction("threads", "readonly");
     const store = tx.objectStore("threads");
@@ -48,8 +51,6 @@ export async function addThread(thread: mls.msg.Thread): Promise<void> {
     });
 }
 
-
-
 export async function syncThreads(threadsFromServer: mls.msg.Thread[]): Promise<void> {
 
     const db = await openDB();
@@ -59,7 +60,16 @@ export async function syncThreads(threadsFromServer: mls.msg.Thread[]): Promise<
 
         try {
             for (const thread of threadsFromServer) {
-                store.put(thread);
+
+                const threadCache: mls.msg.ThreadPerformanceCache = {
+                    ...thread,
+                    lastMessage: '',
+                    lastMessageTime: '',
+                    unreadCount: 0,
+                    lastSync: getCompactUTC()
+                }
+
+                store.put(threadCache);
             }
         } catch (err) {
             reject(`Erro ao inserir threads: ${err}`);
@@ -68,6 +78,63 @@ export async function syncThreads(threadsFromServer: mls.msg.Thread[]): Promise<
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject("Erro na transação de sincronização");
         tx.onabort = () => reject("Transação de sincronização abortada");
+    });
+}
+
+export async function listUsers(): Promise<mls.msg.User[]> {
+    const db = await openDB();
+    const tx = db.transaction("users", "readonly");
+    const store = tx.objectStore("users");
+
+    return new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Erro ao listar usuários");
+    });
+}
+
+export async function addUser(user: mls.msg.User): Promise<void> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("users", "readwrite");
+        const store = tx.objectStore("users");
+        store.put(user);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject("Erro ao adicionar usuário");
+        tx.onabort = () => reject("Transação de usuário abortada");
+    });
+}
+
+export async function syncUsers(usersFromServer: mls.msg.User[]): Promise<void> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("users", "readwrite");
+        const store = tx.objectStore("users");
+
+        try {
+            for (const user of usersFromServer) {
+                store.put(user); // Assumindo que user.userId está presente
+            }
+        } catch (err) {
+            reject(`Erro ao inserir usuários: ${err}`);
+        }
+
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject("Erro na transação de sincronização de usuários");
+        tx.onabort = () => reject("Transação de sincronização de usuários abortada");
+    });
+}
+
+export async function getUser(userId: string): Promise<mls.msg.User | undefined> {
+    const db = await openDB();
+    const tx = db.transaction("users", "readonly");
+    const store = tx.objectStore("users");
+
+    return new Promise((resolve, reject) => {
+        const request = store.get(userId);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Erro ao buscar usuário");
     });
 }
 
