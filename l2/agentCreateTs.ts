@@ -1,46 +1,99 @@
 /// <mls shortName="agentCreateTs" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAMessageInputType, TaskData, AIPayload, AIAfterPrompt } from './_100554_iaChatInterfaces';
+import { IAgent } from './_100554_aiAgentBase';
 
-export const visibility: 'public' | 'private' = 'private'
+import {
+    getNextPendingStepByAgentName,
+    getNextInProgressStepByAgentName,
+    calculateStepsStatistics,
+    updateStepStatus
+} from "./_100554_aiAgentHelper";
 
-export function beforePrompt(task: TaskData, payload: AIPayload | null | undefined): IAMessageInputType[] {
+import {
+    startNewAiTask,
+    executeNextStep,
+    startNewInteractionInAiTask
+} from "./_100554_aiAgentOrchestration";
 
-    const j = Object.assign({}, payload) as any;
-    delete j.agentName;
-    delete j.interaction;
-    delete j.rags;
-    delete j.stepId;
-    delete j.type;
-    delete j.status;
+const agentName = "agentCreateTs";
 
-    return startPrompt(JSON.stringify(j));
-}
-
-export async function afterPrompt(task: TaskData, payload: AIPayload | null | undefined): Promise<AIAfterPrompt[]> {
-
-    const ret: AIAfterPrompt[] = [];
-
-    return ret
-
-}
-
-export function getDescriptions(): string {
-
-    return `Especialista em desenvolvimento de Web Components usando TypeScript e Lit. Sua função é criar um arquivo TypeScript que define um Web Component para comandar uma página.`
-}
-
-export function startPrompt(userPrompt: string): IAMessageInputType[] {
-    return [
-        {
-            type: 'system',
-            content: `
-Você é um especialista em desenvolvimento de Web Components usando TypeScript e Lit. Sua função é criar um arquivo TypeScript que define um Web Component para comandar uma página
-`
+export function createAgent(): IAgent {
+    return {
+        agentName,
+        agentDescription: "Especialista em desenvolvimento de Web Components usando TypeScript e Lit. Sua função é criar um arquivo TypeScript que define um Web Component para comandar uma página.",
+        visibility: "private",
+        async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
+            return _beforePrompt(context);
         },
-        {
-            type: 'system',
-            content: `## REGRAS
+        async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
+            return _afterPrompt(context);
+        }
+    };
+}
+
+const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+    const taskTitle = "Planning";
+
+    if (!context || !context.message) throw new Error("Invalid context");
+
+    if (!context.task) {
+        // using temporary context, create a new task
+        const inputs = await getPrompts(context.message.content, null);
+        await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
+    } else {
+
+        const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
+        if (!step) {
+            throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
+        }
+        context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+        const inputs = await getPrompts(JSON.stringify(step.prompt), step.rags);
+        await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
+    }
+}
+
+
+const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+    if (!context || !context.message || !context.task) throw new Error("Invalid context");
+    const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
+    if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
+    const { flexible } = calculateStepsStatistics([step], true);
+    if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
+    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    await executeNextStep(context);
+}
+
+
+export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
+    if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
+    const prompts: mls.msg.IAMessageInputType[] = [];
+
+    prompts.push(systemMainInstruction());
+    prompts.push(systemRulesInstruction());
+    prompts.push(systemFile1Instruction());
+    prompts.push(systemExampleInstruction());
+    prompts.push(systemOutInstruction());
+    prompts.push({
+        type: 'human',
+        content: prompt
+    });
+    return prompts;
+}
+
+function systemMainInstruction(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `
+Você é um especialista em desenvolvimento de Web Components usando TypeScript e Lit. Sua função é criar um arquivo TypeScript que define um Web Component para comandar uma página.
+`
+    }
+}
+
+
+function systemRulesInstruction(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `## REGRAS
 
  - A pagina deve estender do arquivo _100554_collabPageElement
  - Será usado o Lit versão 3 
@@ -53,11 +106,14 @@ Você é um especialista em desenvolvimento de Web Components usando TypeScript 
  - O state deve ser criado respeitando sua sequencia exemplo value="{{pageCadastro.dadosVeiculo.placa}}" na função 
     initState('pageCadastro', {{dadosVeiculo:{{placa:""}}}})
 `
-        },
-        {
-            type: 'system',
-            content: ` 
-##ARQUIVO _100554_collabPageElement
+    }
+}
+
+
+function systemFile1Instruction(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `##ARQUIVO _100554_collabPageElement
 
 /// <mls shortName="collabPageElement" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
@@ -234,11 +290,15 @@ export abstract class CollabPageElement extends IcaLitElement {
 
     }
 
-}`
-        },
-        {
-            type: 'system',
-            content: `## PAGINA DE EXEMPLO
+}
+`
+    }
+}
+
+function systemExampleInstruction(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `## PAGINA DE EXEMPLO
 
 /// <mls shortName="pageTest1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
@@ -276,24 +336,37 @@ export class PageTest1100554 extends CollabPageElement {
         // ação botão cancel
     }
 
-}`
-        },
-        {
-            type: 'system',
-            content: `## SAIDA ESPERADA  um json
+}
+`
+    }
+}
 
-        {
-            "type": "result",
-            "resulthtml": "{html base}"	,
-            "resultts": "{o codigo ts gerado}"	,
-        }
-        
-O código TS deve ser devolvido, seguindo todas as especificações.`
-        },
+function systemOutInstruction(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `##Saída Esperada 
+A resposta deve ser um JSON estruturado contendo as informações da interface. Preencha os campos com os dados passados pelo usuario você deve preencher somente "fileTS"
+O codigo TS criado deve se colocar no atributo "fileTS" dentro do JSON de exemplo passado abaixo,
+lembrando tem que responder no padrão abaixo:
 
-        {
-            type: 'human',
-            content: userPrompt
-        },
-    ]
+\`\`\`json
+[
+  {
+    "type": "result", // campo obrigatorio
+    "taskTitle": string,// O mesmo que veio na requisição do usuario
+    "promptUser": string, // O mesmo que veio na requisição do usuario
+    "result":{
+      "pageName": string, // O mesmo que veio na requisição do usuario
+      "pageType": "crud" | "report" | "dashboard" | "form" | "search" | "workflow" | "config" | "association", // O mesmo que veio na requisição do usuario
+      "loadContext": boolean,    // O mesmo que veio na requisição do usuario 
+      "modoInicial": string, // O mesmo que veio na requisição do usuario
+      "fluxo": string, // O mesmo que veio na requisição do usuario
+      "fileHTML":"<div><div>",// O mesmo que veio na requisição do usuario
+      "fileTS":"{codigo ts}" // preencha com o codigo gerado
+    }
+  }
+]
+
+\`\`\``
+    }
 }

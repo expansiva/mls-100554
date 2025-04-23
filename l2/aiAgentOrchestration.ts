@@ -31,7 +31,7 @@ export async function startNewAiTask(
         if (value.statusCode !== 200) {
             throw new Error("Error on addMessageAI: " + (value.msg || ''));
         }
-
+        
         const ret = value as mls.msg.ResponseAddMessageAI;
 
         context.task = ret.task;
@@ -39,7 +39,7 @@ export async function startNewAiTask(
 
         console.log(JSON.stringify(context, null, 2));
 
-        afterPrompt(context);
+        await afterPrompt(context);
     } catch (error: any) {
         console.error(`[startNewAiTask] ${error.message || error}`);
     }
@@ -47,7 +47,7 @@ export async function startNewAiTask(
 
 type AfterPrompt = (context: mls.msg.ExecutionContext) => Promise<void>;
 
-export async function startNewInteractionInAiTask(agentName: string, taskTitle: string, inputAI: mls.msg.IAMessageInputType[], context: mls.msg.ExecutionContext, afterPrompt: AfterPrompt): Promise<void> {
+export async function startNewInteractionInAiTask(agentName: string, taskTitle: string, inputAI: mls.msg.IAMessageInputType[], context: mls.msg.ExecutionContext, afterPrompt: AfterPrompt, stepFather:number): Promise<void> {
     try {
         if (!context || !context.message || !context.task) throw new Error("Invalid context");
         if (!agentName) throw new Error("addNewInteractionInAiTask: agentName is null");
@@ -57,25 +57,29 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
             userId: context.task.owner,
             messageId: context.task.messageid_created,
             taskId: context.task.PK,
-            parentStepId: 0,
+            parentStepId: stepFather,
             inputAI
         }
-
+        
         const value = await mls.api.msgAddTaskAIInteraction(args);
 
         if (!value) {
             throw new Error("Error on return addTaskAIInteraction, no return");
         }
-        if (value.statusCode !== mls.msg.StatusCodeOk) {
+        if (value.statusCode !== 200) {
             throw new Error("Error on addTaskAIInteraction: " + (value.msg || ''));
         }
 
-        const ret = value as mls.msg.ResponseAddMessageAI;
+        //const ret = value as mls.msg.ResponseAddMessageAI; Retorno errado
+        const ret = value as mls.msg.ResponseAddTaskAIInteraction
 
-        context = {
-            message: ret.message,
+        /*context = {
+            message: context.message,
             task: ret.task
-        };
+        };*/
+
+        context.task = ret.task;
+
         console.log(JSON.stringify(context, null, 2));
 
         await afterPrompt(context);
@@ -108,7 +112,6 @@ export async function executeNextStep(context: mls.msg.ExecutionContext): Promis
         console.error("max steps reached");
         return;
     }
-
 
     switch (step.type) {
         case "agent": return executeNextAgent(context, step);
@@ -216,7 +219,8 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
     if (!step.agentName) throw new Error("Agent name is missing");
 
     try {
-        const fileJS = `./${step.agentName}.js`;
+        //const fileJS = `./${step.agentName}.js`;
+        const fileJS = `./_100554_${step.agentName}`;
         const module = await import(fileJS);
         if (typeof module.createAgent !== "function") throw new Error(`createAgent function not found in ${fileJS}`);
         const agent = module.createAgent();
