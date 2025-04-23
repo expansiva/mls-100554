@@ -46,7 +46,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context || !context.message) throw new Error("Invalid context");
     if (!context.task) {
         // using temporary context, create a new task
-        const inputs = getPrompts(context.message.content, null);
+        const inputs = await getPrompts(context.message.content, null);
         await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
     } else {
         const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
@@ -54,10 +54,10 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
             throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
         }
         context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
-        const inputs = getPrompts(step.prompt, step.rags);
-        await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt);
+        const inputs = await getPrompts(step.prompt, step.rags);
+        await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
     }
-}
+}  
 
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
@@ -69,13 +69,13 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     await executeNextStep(context);
 }
 
-export function getPrompts(prompt: string | undefined, rags: string[] | null): mls.msg.IAMessageInputType[] {
+export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
     if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
     const prompts: mls.msg.IAMessageInputType[] = [];
     prompts.push(systemMainInstruction());
     prompts.push(systemAgentsAvailable());
     prompts.push(systemRagsAvailable());
-    prompts.push(systemToolsAvailable());
+    prompts.push(await systemToolsAvailable());
     addRAGAdditionalInformation(rags, prompts); // optional
     prompts.push(systemReturnJsonFormat());
     prompts.push({
@@ -97,6 +97,7 @@ Seu único objetivo é analisar o prompt do usuário e decidir qual agente chama
 4. Nunca retorne múltiplas subtarefas. Retorne **apenas uma subtarefa por vez** neste passo inicial.
 5. Se retornar um agent, no atributo prompt, deve repetir o prompt original do usuário.
 6. Lembre: seu único objetivo é identificar qual agente chamar, não elaborar mais conteúdos.
+7. Lembre-se não altere o prompt do usuário.
 `
     };
 }
