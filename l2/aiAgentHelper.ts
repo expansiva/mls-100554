@@ -1,6 +1,5 @@
 /// <mls shortName="aiAgentHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-
 /**
  * Helper function to collect all steps from a task in a flat array
  */
@@ -39,6 +38,18 @@ export const getNextPendentStep = (task: mls.msg.TaskData): mls.msg.AIPayload | 
   const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
   return allSteps.find(step => step.status === 'pending') || null;
 };
+
+export const getNextResultStep = (task: mls.msg.TaskData): mls.msg.AIResultStep | null => {
+  const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
+  const agentSteps = allSteps.filter((step): step is mls.msg.AIResultStep => step.type === 'result');
+  return agentSteps.find(step => step.status === 'completed') || null;
+}
+
+export const getNextClarificationStep = (task: mls.msg.TaskData): mls.msg.AIClarificationStep | null => {
+  const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
+  const agentSteps = allSteps.filter((step): step is mls.msg.AIClarificationStep => step.type === 'clarification');
+  return agentSteps.find(step => step.status === 'waiting_for_user') || null;
+}
 
 export const getNextPendingStepByAgentName = (task: mls.msg.TaskData, agentName: string): mls.msg.AIAgentStep | null => {
   const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
