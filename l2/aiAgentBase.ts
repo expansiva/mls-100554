@@ -4,8 +4,8 @@ export interface IAgent {
   visibility: 'public' | 'private';
   agentName: string;
   agentDescription: string;
-  beforePrompt(context: mls.msg.ExecutionContext | string, userId:string,threadId:string): Promise<void>;
-  afterPrompt(context: mls.msg.ExecutionContext, userId:string,threadId:string): Promise<void>;
+  beforePrompt(context: mls.msg.ExecutionContext): Promise<void>;
+  afterPrompt(context: mls.msg.ExecutionContext): Promise<void>;
 }
 
 export interface ITool {

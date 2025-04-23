@@ -5,7 +5,10 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
 import { collab_chevron_left, collab_arrow_up_long } from './_100554_collabIcons';
 
-import { agentPlanner1 } from './_100554_agentPlanner1';
+import { createAgent, getPrompts } from './_100554_agentPlanner1';
+import * as orc from './_100554_aiAgentOrchestration';
+import { getTemporaryContext } from './_100554_aiAgentHelper';
+
 
 import './_100554_widgetAiTask';
 
@@ -110,11 +113,12 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
                         const dateFormated = this.formatTimestamp(message.createAt);
                         const userName = this.actualThread?.users.find((user) => user.userId === message.senderId)?.name || message.senderId;
+                        const cls = message.senderId === this.userId ? 'user' : 'system';
 
                         return html`
                                 ${message.taskId
                                 ? html`
-                                        <div class="message ${message.senderId === this.userId ? 'user' : 'system'}">
+                                        <div class="message ${cls}">
                                             <widget-ai-task-100554 
                                                 taskTitle=${message.content}
                                                 taskTime=${dateFormated.time}
@@ -124,10 +128,10 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                                         </div>`
 
                                 : html`
-                                        <div class="message ${message.senderId === this.userId ? 'user' : 'system'}">
+                                        <div class="message ${cls}">
                                             <div class="message-group">
                                                 <div class="message-row">
-                                                <div class="message-card user">
+                                                <div class="message-card ${cls}">
                                                     <div class="message-title">@${userName}</div>
                                                     <div class="message-content">${message.content}</div>
                                                     <div class="message-footer">${dateFormated.time}</div>
@@ -376,11 +380,19 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
     private async addMessageIA(prompt: string) {
         if (!this.userId || !this.actualThread) return;
 
-        // const instance = new agentPlanner1(this.actualThread.thread.threadId, this.userId);
-        // const ip = instance.getPrompt(prompt);
-        // let task = await instance.executePrompt(prompt, ip);
+        const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, prompt);
+        const agent = createAgent();
+        await agent.beforePrompt(context);
+
+        console.info(context)
+
+        this.text = '';
+        this.requestUpdate();
+
 
     }
+
+    
 
 }
 
