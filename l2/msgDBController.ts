@@ -12,12 +12,126 @@ export function openDB(): Promise<IDBDatabase> {
             if (!db.objectStoreNames.contains("users")) {
                 db.createObjectStore("users", { keyPath: "userId" });
             }
+
+            if (!db.objectStoreNames.contains("tasks")) {
+                db.createObjectStore("tasks", { keyPath: "PK" });
+            }
+
+            if (!db.objectStoreNames.contains("messages")) {
+                const messageStore = db.createObjectStore("messages", { keyPath: "messageId" });
+                messageStore.createIndex("byThreadId", "threadId", { unique: false });
+            }
         };
 
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject("Erro ao abrir o IndexedDB");
     });
 }
+
+export async function addMessages(messages: mls.msg.Message[]): Promise<void> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("messages", "readwrite");
+        const store = tx.objectStore("messages");
+
+        for (const message of messages) {
+            const newMessage = {
+                ...message,
+                messageId: `${message.createAt}/${message.threadId}`,
+            };
+            store.put(newMessage);
+        }
+
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject("Erro ao adicionar mensagens");
+        tx.onabort = () => reject("Transação abortada ao adicionar mensagens");
+    });
+}
+
+export async function addMessage(message: mls.msg.Message): Promise<void> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("messages", "readwrite");
+        const store = tx.objectStore("messages");
+        const newMessage = {
+            ...message,
+            messageId: `${message.createAt}/${message.threadId}`,
+        }
+        store.put(newMessage);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject("Erro ao adicionar task");
+        tx.onabort = () => reject("Transação abortada");
+    });
+}
+
+export async function getMessage(messageId: string): Promise<mls.msg.Message | undefined> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("messages", "readonly");
+        const store = tx.objectStore("messages");
+        const request = store.get(messageId);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Erro ao buscar mensagem");
+    });
+}
+
+
+export async function getMessagesByThreadId(threadId: string): Promise<mls.msg.Message[]> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("messages", "readonly");
+        const store = tx.objectStore("messages");
+        const index = store.index("byThreadId");
+        const request = index.getAll(IDBKeyRange.only(threadId));
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Erro ao buscar mensagens por threadId");
+    });
+}
+
+export async function addTask(task: mls.msg.TaskData): Promise<void> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("tasks", "readwrite");
+        const store = tx.objectStore("tasks");
+        store.put(task);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject("Erro ao adicionar task");
+        tx.onabort = () => reject("Transação abortada");
+    });
+}
+
+export async function getTask(taskId: string): Promise<mls.msg.TaskData | undefined> {
+    const db = await openDB();
+    const tx = db.transaction("tasks", "readonly");
+    const store = tx.objectStore("tasks");
+
+    return new Promise((resolve, reject) => {
+        const request = store.get(taskId);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Erro ao buscar task");
+    });
+}
+
+
+export async function syncTask(taskFromServer: mls.msg.TaskData): Promise<void> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("tasks", "readwrite");
+        const store = tx.objectStore("tasks");
+        store.put(taskFromServer);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject("Erro na transação de sincronização de task");
+        tx.onabort = () => reject("Transação de sincronização de task abortada");
+    });
+}
+
 
 export async function listThreads(): Promise<mls.msg.ThreadPerformanceCache[]> {
     const db = await openDB();
@@ -48,6 +162,40 @@ export async function addThread(thread: mls.msg.Thread): Promise<void> {
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject("Erro ao adicionar thread");
         tx.onabort = () => reject("Transação abortada");
+    });
+}
+
+export async function updateThread(
+    threadId: string,
+    lastMessage: string,
+    lastMessageTime: string,
+    unreadCount: number
+): Promise<mls.msg.ThreadPerformanceCache> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("threads", "readwrite");
+        const store = tx.objectStore("threads");
+        const request = store.get(threadId);
+
+        request.onsuccess = () => {
+            const thread = request.result;
+
+            if (!thread) {
+                reject(`Thread com ID ${threadId} não encontrada.`);
+                return;
+            }
+
+            thread.lastMessage = lastMessage;
+            thread.lastMessageTime = lastMessageTime;
+            thread.unreadCount = unreadCount;
+            thread.lastSync = getCompactUTC(); // atualiza o timestamp de sync também
+            const updateRequest = store.put(thread);
+            updateRequest.onsuccess = () => resolve(thread);
+            updateRequest.onerror = () => reject("Erro ao atualizar a thread");
+        };
+
+        request.onerror = () => reject("Erro ao buscar a thread");
     });
 }
 

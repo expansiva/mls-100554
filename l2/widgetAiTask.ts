@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
-import { TaskData, AIStepStatus } from './_100554_iaChatInterfaces';
+import { getTask } from './_100554_msgDBController';
 
 import {
     collab_money,
@@ -16,7 +16,7 @@ import {
     collab_bug
 } from './_100554_collabIcons';
 
-import { getTotalCost, getInternalStatus } from './_100554_iaChatBase';
+import { getTotalCost } from './_100554_iaChatBase';
 
 @customElement('widget-ai-task-100554')
 export class WidgetAiTask100554 extends IcaLitElement {
@@ -24,48 +24,28 @@ export class WidgetAiTask100554 extends IcaLitElement {
     // @property() status: 'todo' | 'in progress' | 'done' | 'paused' | 'waitingforuser' = 'in progress';
 
     @property() taskid: string = '';
-    @property() taskTitle: string = '';
-    @property() taskUserName: string = '';
-    @property() taskTime: string = '';
-
-    @state() task: TaskData | undefined;
-
+    @property() messageid: string = '';
+    @state() task: mls.msg.TaskData | undefined;
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
         if (changedProperties.has('taskid') && changedProperties.get('taskid') !== '') {
-            this.getTask(this.taskid);
+            this.getTaskLocal(this.taskid);
         }
     }
 
     render() {
 
-        const statusFake = 'in progress';
-        const priceFake = '0.0001'; ///<span class="card-price"> ${collab_money}${getTotalCost(this.task)}</span>
+        const status = this.task ? this.task.status : 'in progress';
+        const price = this.task ? getTotalCost(this.task) : '0.00';
+        const title = this.task ? this.task.title : '...';
 
         return html`<div @click=${this.onCardClick} class="card"> 
             <div class="card-header">
                 ${this.renderIconTask()}
-                <span class="card-user">@${this.taskUserName}</span>
-                <span class="card-title">${this.taskTitle}</span>
-                <span class="card-status ${statusFake.split(' ').join('-')}">${statusFake}</span>
-                <span class="card-price"> ${collab_money}${priceFake}</span>
-                <span class="card-time"> ${this.taskTime}</span>
-
-                <div class="card-actions">
-                    ${['in progress', 'waitingforuser', 'todo'].includes(statusFake)
-                ? html`
-                    <i>${collab_pause}</i>
-                    <i>${collab_stop}</i>`
-                : ['paused'].includes(statusFake)
-                    ? html`
-                        <i>${collab_play}</i>
-                        <i>${collab_stop}</i>`
-                    : html``
-            }
-                    
-                </div>
-
+                    <span class="card-status ${status.split(' ').join('-')}">${status}</span>
+                    <span class="card-title"> ${title}</span>
+                    <span class="card-price"> ${collab_money}${price}</span>
             </div>
          </div>`;
     }
@@ -74,26 +54,30 @@ export class WidgetAiTask100554 extends IcaLitElement {
     renderIconTask() {
         const taskObj = {
             'pending': collab_clock,
-            'in_progress': collab_clock,
-            'completed': collab_check,
+            'paused': collab_pause,
+            'todo': collab_clock,
+            'in progress': collab_clock,
+            'done': collab_check,
             'failed': collab_bug,
-            'waiting_for_user': collab_triangle_exclamation
+            'waitingforuser': collab_triangle_exclamation
         }
 
-        if (!this.task) return;
 
-        const internalStatus = getInternalStatus(this.task);
-        if (!internalStatus) return '';
+        if (!this.task) return html`<spanclass="task-icon in progress ">${collab_clock}</span>`;
+        return html`<span class="task-icon ${this.task.status.split(' ').join('-')} ">${taskObj[this.task.status]}</span>`;
 
-        return html`<span @click= ${(e: MouseEvent) => { e.stopPropagation(); this.onStatusClick(e, internalStatus) }} class="task-icon ${internalStatus.status}">${taskObj[internalStatus.status]}</span>`
+        // const internalStatus = getInternalStatus(this.task);
+        // if (!internalStatus) return '';
+
+        // return html`<spanclass="task-icon ${internalStatus.status}">${taskObj[internalStatus.status]}</span>`
     }
 
-    private getTask(taskId: string) {
-        
+    private async getTaskLocal(taskId: string) {
+        const task = await getTask(taskId);
+        if (task) this.task = task;
     }
 
-
-    private onStatusClick(ev: MouseEvent, data: { status: AIStepStatus, stepId: number }) {
+    private onStatusClick(ev: MouseEvent, data: { status: mls.msg.AIStepStatus, stepId: number }) {
 
         const event = new CustomEvent('taskclick', {
             detail: { stepId: data.stepId },
