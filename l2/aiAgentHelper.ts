@@ -1,5 +1,6 @@
 /// <mls shortName="aiAgentHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+
 /**
  * Helper function to collect all steps from a task in a flat array
  */
@@ -7,7 +8,6 @@ export const getAllSteps = (firstStep: mls.msg.AIPayload[] | undefined): mls.msg
   if (!firstStep || firstStep.length < 1) {
     return [];
   }
-
   const allSteps: mls.msg.AIPayload[] = [];
   const queue: mls.msg.AIPayload[] = [...firstStep];
 
@@ -52,6 +52,25 @@ export const getNextInProgressStepByAgentName = (task: mls.msg.TaskData, agentNa
   return agentSteps.find(step => step.status === 'in_progress' && step.agentName === agentName) || null;
 }
 
+export const getInteractionStepId = (task: mls.msg.TaskData, stepId: number): number | null => {
+  // nextSteps []
+  // | interaction
+  // | | nextsSteps []
+  // ...
+  // this routine find the parent interaction stepId
+  const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
+  if (!allSteps) return null;
+
+  for (const step of allSteps) {
+    if (!step.interaction || !step.interaction.payload) continue;
+    if (step.interaction.payload.length < 1) continue;
+    if (step.interaction.payload.find(s => s.stepId === stepId)) return step.stepId;
+  }
+
+  return null;
+}
+
+
 export type StatisticsAITask = {
   agents: number, tools: number, clarification: number, result: number, flexible: number,
   totalCost: number, totalSteps: number,
@@ -72,6 +91,25 @@ export const calculateStepsStatistics = (steps: mls.msg.AIPayload[], removeFirst
   };
 };
 
+export const calculateStepsByFilter = (task: mls.msg.TaskData, filter: Record<string, any>): number => {
+  const allSteps: mls.msg.AIPayload[] = getAllSteps(task.iaCompressed?.nextSteps);
+  // example: calculateStepsByFilter(task, { toolName: "abc "})
+  let result = 0;
+  for (const step of allSteps) {
+    let allPropertiesMatch: boolean = true;
+    for (const [key, value] of Object.entries(filter)) {
+      const value2 = (step as any)[key];
+      if (value2 !== value) {
+        allPropertiesMatch = false;
+        break; // exit for
+      }
+    }
+    if (allPropertiesMatch) result += 1;
+  }
+  return result;
+};
+
+
 export const getTemporaryContext = (threadId: string, userId: string, prompt: string): mls.msg.ExecutionContext => {
   // create temporary context
   const context: mls.msg.ExecutionContext = {
@@ -87,28 +125,52 @@ export const getTemporaryContext = (threadId: string, userId: string, prompt: st
   return context;
 };
 
-
 export function safeParseArgs(args: string): Record<string, any> {
-  if (!args) {
-    throw new Error("No args provided");
+  // must accept entries like
+  // { a: 5, b: 4 }
+  // a:5,b:4
+  // a=5, b=4
+  if (!args) throw new Error("No args provided");
+
+  let input = args.trim();
+
+  if (input.startsWith("{")) {
+    try {
+      return JSON.parse(input);
+    } catch (e) {
+      throw new Error("Invalid JSON format");
+    }
   }
-  let normalizedArgs = args.trim();
-  if (!normalizedArgs.startsWith('{')) {
-    normalizedArgs = `{${normalizedArgs}}`;
+
+  if (input.includes("=") && !input.includes(":")) {
+    input = input.replace(/([a-zA-Z0-9_]+)\s*=/g, '"$1":');
+  } else {
+    input = input.replace(/(^|,)\s*([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
   }
+
+  if (!input.startsWith("{")) {
+    input = `{${input}}`;
+  }
+
   try {
-    // error example: "a:1, b:2" => "{a:1, b:2}" => '{"a":1, "b":2}'
-    normalizedArgs = normalizedArgs.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
-    return JSON.parse(normalizedArgs);
-  } catch (error) {
+    return JSON.parse(input);
+  } catch (e) {
     throw new Error("Invalid args format, cannot parse.");
   }
 }
 
-export function argsValidator(args: Record<string, any>, schema: Record<string, { type: string, description?: string }>): void {
+export function argsValidator(
+  args: Record<string, any>,
+  schema: Record<string, { type: string, description?: string; optional?: boolean }>
+): void {
   for (const key in schema) {
+    const isOptional = schema[key].optional === true;
+
     if (!(key in args)) {
-      throw new Error(`Missing argument: ${key}`);
+      if (!isOptional) {
+        throw new Error(`Missing argument: ${key}`);
+      }
+      continue; // ok se for opcional
     }
 
     const expectedType = schema[key].type;
@@ -118,4 +180,47 @@ export function argsValidator(args: Record<string, any>, schema: Record<string, 
       throw new Error(`Invalid type for argument '${key}': expected '${expectedType}', got '${actualType}'`);
     }
   }
+}
+
+export const updateStepStatus = async (task: mls.msg.TaskData, stepId: number, status: mls.msg.AIStepStatus, traceMsg?: string): Promise<mls.msg.TaskData> => {
+  const args: mls.msg.RequestUpdateStepStatus = {
+    "action": "updateStepStatus",
+    "userId": task.owner || '',
+    "messageId": task.messageid_created || '',
+    "taskId": task.PK,
+    stepId,
+    status,
+    traceMsg
+  };
+  const ret = await mls.api.msgUpdateStepStatus(args);
+  if (!ret || ret.statusCode !== 200) throw new Error("error on AI update status , stoped");
+  return (ret as mls.msg.ResponseUpdateStepStatus).task;
+}
+
+export async function appendPromptToInteraction(
+  userId: string,
+  messageId: string | undefined,
+  taskId: string,
+  interactionStepId: number,
+  inputAI: mls.msg.IAMessageInputType[],
+  stepdIdToChangeStatus: number,
+  newStatus: mls.msg.AIStepStatus
+): Promise<mls.msg.TaskData | undefined> {
+  if (!messageId) throw new Error("Message ID is undefined");
+  if (!taskId) throw new Error("Task ID is undefined");
+  const args: mls.msg.RequestAppendPromptToInteraction = {
+    action: "appendPromptToInteraction",
+    userId,
+    messageId,
+    taskId,
+    interactionStepId,
+    inputAI,
+    stepdIdToChangeStatus,
+    newStatus
+  }
+
+  const ret = await mls.api.msgAppendPromptToInteraction(args);
+  if (!ret || ret.statusCode !== 200) throw new Error("error on AI update status , stoped");
+  return (ret as mls.msg.ResponseUpdateStepStatus).task;
+
 }
