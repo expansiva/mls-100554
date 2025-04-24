@@ -37,8 +37,7 @@ export async function createNewFile(project: number, position: 'left' | 'right',
     params.newEnhancement = enhancement || '_blank';
     params.extension = '.ts';
     params.newTSSource = source;
-
-    if (sourceHTML) (params as any).newHTMLSource = sourceHTML;
+    if (sourceHTML) params.newHtmlSource = sourceHTML;
     params.position = position;
 
     mls.actual[2].setFullName('_' + params.project + '_' + params.shortName);

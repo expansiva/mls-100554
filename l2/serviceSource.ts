@@ -762,8 +762,7 @@ export class ServiceSource100554 extends ServiceBase {
                 fileAction.newProject as number,
                 fileAction.newEnhancement as string,
                 fileAction.newTSSource as string,
-                (fileAction as any).newHTMLSource as string
-
+                fileAction.newHtmlSource as string
             );
             this.loading = false;
         };
