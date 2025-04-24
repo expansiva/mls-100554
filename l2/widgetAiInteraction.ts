@@ -3,13 +3,7 @@
 import { html, css, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
-
-
-import { getNextResultStep, getNextClarificationStep } from './_100554_aiAgentHelper';
-
-import { collab_chevron_right } from './_100554_collabIcons';
-
-// import { getInteractionByStep } from './_100554_iaChatBase';
+import { getNextResultStep, getNextClarificationStep, getInteractionStepId, getStepById } from './_100554_aiAgentHelper';
 
 @customElement('widget-ai-interaction-100554')
 export class WidgetAiInteraction100554 extends IcaLitElement {
@@ -19,7 +13,6 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
     @property() stepid: string = '';
     @property({ attribute: false }) seen = new Set<string>();
     @property() breadcrumb: IBreadCrumb[] = [];
-
 
     render() {
 
@@ -194,6 +187,18 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
     }
 
     private renderClarification(payload: mls.msg.AIClarificationStep) {
+
+        if (!this.task) return;
+        const parentInteraction = getInteractionStepId(this.task, payload.stepId);
+        if (parentInteraction) {
+            const interaction = getStepById(this.task, parentInteraction);
+            console.info({
+                parentInteraction,
+                interaction
+            })
+
+        }
+
         return html`
             <div class="clarification">
                 <p><strong>Clarification:</strong> ${payload.clarificationMessage}</p>

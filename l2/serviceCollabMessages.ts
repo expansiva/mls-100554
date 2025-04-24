@@ -160,6 +160,9 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         }
 
 
+        let xx:mls.msg.UserAuth = 'write'
+
+
         const f: mls.msg.RequestAddUserInThread = {
             action: 'addUserInThread',
             auth: 'write',
@@ -263,7 +266,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     private async getUser(): Promise<mls.msg.User> {
         try {
-            const response = await mls.api.msgGetUserUpdate({ action: 'getUserUpdate', userId: "" });
+            const response = await mls.api.msgGetUserUpdate({ userId: "" });
             return response.user;
         } catch (err: any) {
             this.setError(err.message);
@@ -335,7 +338,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     private async getThreadInfo(threadId: string, userId: string): Promise<IThreadInfo> {
         try {
             const response = await mls.api.msgGetThreadUpdate({
-                action: 'getThreadUpdate',
                 threadId,
                 userId
             });
