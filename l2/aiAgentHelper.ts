@@ -121,7 +121,7 @@ export const calculateStepsByFilter = (task: mls.msg.TaskData, filter: Record<st
 };
 
 
-export const getTemporaryContext = (threadId: string, userId: string, prompt: string): mls.msg.ExecutionContext => {
+export const getTemporaryContext = (threadId: string, userId: string, prompt: string, cb?: (context: mls.msg.ExecutionContext) => void): mls.msg.ExecutionContext => {
   // create temporary context
   const context: mls.msg.ExecutionContext = {
     task: undefined,
@@ -133,7 +133,11 @@ export const getTemporaryContext = (threadId: string, userId: string, prompt: st
       content: prompt.trim(),
     }
   };
-  return context;
+
+  return createDeepObservable(context, () => {
+    if (cb) cb(context);
+  });
+  // return context;
 };
 
 export function safeParseArgs(args: string): Record<string, any> {
@@ -234,4 +238,23 @@ export async function appendPromptToInteraction(
   if (!ret || ret.statusCode !== 200) throw new Error("error on AI update status , stoped");
   return (ret as mls.msg.ResponseUpdateStepStatus).task;
 
+}
+
+function createDeepObservable(obj: any, callback: () => void): any {
+  const handler: ProxyHandler<any> = {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (value && typeof value === 'object' && value !== null) {
+        return createDeepObservable(value, callback);
+      }
+      return value;
+    },
+    set(target, prop, value, receiver) {
+      const result = Reflect.set(target, prop, value, receiver);
+      callback();
+      return result;
+    }
+  };
+
+  return new Proxy(obj, handler);
 }

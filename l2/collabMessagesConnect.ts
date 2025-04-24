@@ -8,6 +8,9 @@ import { createAgent } from './_100554_agentPlanner1';
 import { getTemporaryContext } from './_100554_aiAgentHelper';
 import { addTask, syncTask, addMessages, addMessage, getMessagesByThreadId, updateThread } from './_100554_msgDBController';
 import { formatTimestamp } from './_100554_iaChatBase';
+import {
+    collab_user_plus
+} from './_100554_collabIcons';
 
 import './_100554_widgetAiInteraction';
 import './_100554_widgetAiTask';
@@ -15,10 +18,20 @@ import './_100554_widgetAiTask';
 /// **collab_i18n_start** 
 const message_pt = {
     loading: 'Carregando...',
+    btnAddParticipant: 'Adicionar participante',
+    labelUserId: 'Nome do usuario ou Id',
+    labelPermission: 'Autoridade:',
+    errorFieldsAddParticipant: 'Preencha todos os campos!',
+    successAddParticipant: 'Usuário adicionado com sucesso',
 }
 
 const message_en = {
     loading: 'Loading...',
+    btnAddParticipant: 'Add Participant',
+    labelUserId: 'User id or name',
+    labelPermission: 'Auth:',
+    errorFieldsAddParticipant: 'Fill in all fields!',
+    successAddParticipant: 'User added sucessfully'
 }
 
 type MessageType = typeof message_en;
@@ -34,31 +47,52 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
     @query('#prompt_input') promptInput: HTMLTextAreaElement | undefined;
     @query('#unread') private unreadEl!: HTMLDivElement | undefined;
+    @query('.chat-container') private messageContainer!: HTMLDivElement | undefined;
 
     @property() userId: string | undefined;
 
     @property() activeScenerie: IScenery = 'list';
     @property() actualThread: IThreadInfo | undefined;
     @property() actualTask: mls.msg.TaskData | undefined;
-    @property() actualMessages: mls.msg.Message[] = [];
+    @property() actualMessages: IMessage[] = [];
     @property() actualMessagesParsed: IMessageGrouped = {};
     @property() isSending: boolean = false;
     @property() isLoadingMessages: boolean = false;
 
+    @property() isAddParticipant: boolean = false;
+    @property() labelOkAddParticipant: string = '';
+    @property() labelErrorAddParticipant: string = '';
+    @property() userIdOrName = '';
+    @property() auth: mls.msg.UserAuth = 'write';
+
+
     @state() private text: string = '';
-    @state() private suggestions: string[] = [];
-    @state() private mentionList = ['collabIA'];
-    @state() private showSuggestions = false;
+
 
     @property({ attribute: false }) userThreads: IThread = {
         CONNECT: [{ "thread": { "history": [{ "action": "created", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "update_group", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_language ${language}", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120844.1000", "timestamp": "20250417172252" }, { "action": "add_user", "userId": "20250417004803.1000", "timestamp": "20250417174719" }], "languages": ["pt"], "status": "active", "visibility": "private", "group": "CONNECT", "threadId": "20250417135645.1000", "users": [{ "userId": "20250417120841.1000", "auth": "admin" }, { "userId": "20250417120844.1000", "auth": "write" }, { "userId": "20250417004803.1000", "auth": "write" }], "name": "" }, "users": [{ "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active" }, { "threads": ["20250417133813.1000", "20250417180232.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active" }, { "threads": ["20250417135645.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active" }] }]
     };
+
+    private savedScrollTop = 0;
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
 
         if (this.unreadEl) {
             this.unreadEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        if (changedProperties.has('activeScenerie')
+            && (changedProperties.get('activeScenerie') === 'task' || changedProperties.get('activeScenerie') === 'addParticipant')
+            && this.activeScenerie === 'details') {
+            this.restoreScrollPosition();
+        }
+
+        if (changedProperties.has('actualMessagesParsed') && changedProperties.get('actualMessagesParsed') !== undefined) {
+            if (this.messageContainer) {
+                this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
+            }
         }
     }
 
@@ -67,36 +101,61 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
     }
 
     render() {
-
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
 
         if (this.activeScenerie === 'loading') {
-            return html`<div class="loading">${this.msg.loading}</div>`
+            return html`<div class="loading">${this.msg.loading}</div>`;
         }
 
         return html`
-            <div class="header">
-                ${this.activeScenerie === 'task'
-                ? html`<span @click=${this.onTitleClick}>${collab_chevron_left} Task: ${this.actualTask?.PK || ''}</span>`
-                : this.activeScenerie === 'details'
-                    ? html`<span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.actualThread?.thread.name || this.actualThread?.thread.threadId}</span>`
-                    : this.activeScenerie === 'list'
-                        ? html`Threads`
-                        : ''
-            }
-                </div>
-
-                ${this.activeScenerie === 'list'
-                ? this.renderListThreads()
-                : this.activeScenerie === 'details'
-                    ? this.renderChatMessages()
-                    : this.activeScenerie === 'task'
-                        ? this.renderTaskDetails()
-                        : ''
-            }
-        `
+        ${this.renderHeader()}
+        ${this.renderContent()}
+    `;
     }
+
+    private renderHeader() {
+        switch (this.activeScenerie) {
+            case 'task':
+                return html`
+                <div class="header">
+                    <span @click=${this.onTitleClick}>${collab_chevron_left} Task: ${this.actualTask?.PK || ''}</span>
+                </div>`;
+            case 'details':
+                return html`
+                <div class="header">
+                    <span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.actualThread?.thread.name || this.actualThread?.thread.threadId}</span>
+                    <div class="header-actions">
+                        <span @click=${this.onAddParticipantClick}>${collab_user_plus}</span>
+                    </div>
+                </div>`;
+            case 'list':
+                return html`<div class="header">Threads</div>`;
+            case 'addParticipant':
+                return html`
+                <div class="header">
+                    <span @click=${this.onTitleClick}>${collab_chevron_left} ${this.msg.btnAddParticipant}</span>
+                </div>`;
+            default:
+                return null;
+        }
+    }
+
+    private renderContent() {
+        switch (this.activeScenerie) {
+            case 'list':
+                return this.renderListThreads();
+            case 'details':
+                return this.renderChatMessages();
+            case 'task':
+                return this.renderTaskDetails();
+            case 'addParticipant':
+                return this.renderAddParticipant();
+            default:
+                return null;
+        }
+    }
+
 
     private renderChatMessages() {
         return html`
@@ -105,83 +164,64 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
             const threadMessages = this.actualMessagesParsed[key];
             const messageTime = this.parseLocalDate(key);
             return html`
-                        <div class="message-time">${messageTime.date}</div>
-                        ${threadMessages.map((message) => {
+                    <div class="message-time">${messageTime.date}</div>
+                            ${threadMessages.map((message) => {
                 const dateFormated = formatTimestamp(message.createAt);
                 const userName = this.actualThread?.users.find((user) => user.userId === message.senderId)?.name || message.senderId;
                 const cls = message.senderId === this.userId ? 'user' : 'system';
                 return html`
-                                <div class="message ${cls}">
-                                    <div class="message-group">
-                                        <div class="message-row">
-                                            <div class="message-card ${cls}">
-                                                <div class="message-title">@${userName}</div>
-                                                <div class="message-content">${message.content}</div>
-                                                <div class="message-footer">${dateFormated.time}</div>
-                                                ${message.taskId
+                    <div class="message ${cls}">
+                        <div class="message-group">
+                            <div class="message-row">
+                                <div class="message-card ${cls}">
+                                    <div class="message-title">@${userName}</div>
+                                    <div class="message-content">${message.content}</div>
+                                    <div class="message-footer">${dateFormated?.time}</div>
+                    ${message.taskId
                         ? html`
-                                                    <div class="message-ai">
-                                                            <widget-ai-task-100554 
-                                                                messageId=${message.createAt}
-                                                                taskId=${message.taskId}
-                                                                @taskclick=${() => this.onTaskClick(message?.taskId || '', message.threadId, message.createAt)}
-                                                                >
-                                                            </widget-ai-task-100554>
-                                                    </div>
-                                                                        `
+                            <div class="message-ai">
+                                <widget-ai-task-100554 
+                                    messageId=${message.createAt}
+                                    .context= ${message.context}
+                                    lastChanged= ${message.lastChanged}
+                                    taskId=${message.taskId}
+                                    @taskclick=${() => this.onTaskClick(message?.taskId || '', message.threadId, message.createAt)}
+                                    >
+                                </widget-ai-task-100554>
+                            </div>                                            `
                         : html``}
-                                            </div>
-                                                
-                                        </div>
-                            
-                                </div>
-                            </div> 
-                    `
-
+                                    </div>        
+                                </div>    
+                            </div>
+                    </div>`
             })}`
-
-
         })}
+        ${this.isLoadingMessages ? html`<div class="unread-messages" id="unread">Loading messages...</div>` : html``}
+        </div> 
 
-                ${this.isLoadingMessages
-                ? html`<div class="unread-messages" id="unread">Loading messages...</div>`
-                : html``
-            }
-                </div> 
-                   <div class="wrapper">
-                        <textarea
-                            .value=${this.text}
-                            @input=${this.handleInput}
-                            id="prompt_input"
-                            ?readonly=${this.isSending}
-                            placeholder="Digite aqui... (@ para menções)"
-                        >
-                        </textarea>
-                        ${this.showSuggestions
-                ? html`
-                                <div class="suggestions">
-                                    ${this.suggestions.map(
-                    (s) => html`
-                                        <div class="suggestion" @click=${() => this.selectSuggestion(s)}>
-                                        ${s}
-                                        </div>
-                                    `
-                )}
-                                </div>
-                                `
-                : null}
-                        <button 
-                            @click=${this.handleSend} 
-                            ?disabled=${this.isSending}
-                            >
-                            ${this.isSending
-                ? html`<span class="loader"></span>`
-                : collab_arrow_up_long
-            }
-                            </button>
-
-                    </div>
+        ${this.renderPrompt()}
                 `
+    }
+
+    private renderPrompt() {
+        return html`
+        </div> 
+            <div class="wrapper">
+                <textarea
+                    .value=${this.text}
+                    @input=${this.handleInput}
+                    @keydown=${this.handleKeyDown}
+                    id="prompt_input"
+                    ?readonly=${this.isSending}
+                    placeholder="Digite aqui... (@ para menções)">
+                </textarea>
+                <button 
+                    @click=${this.handleSend} 
+                    ?disabled=${this.isSending}
+                    >
+                    ${this.isSending ? html`<span class="loader"></span>` : collab_arrow_up_long}
+                </button>
+        </div>`
     }
 
     private renderListThreads() {
@@ -194,10 +234,10 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                             <div class="thread-content">
                                 <div class="thread-item-header">
                                     <span class="thread-name">${item.thread.name || item.thread.threadId}</span>
-                                    <span class="last-update">${item.thread.lastMessageTime ? formatTimestamp(item.thread.lastMessageTime).date : formatTimestamp(item.thread.history[0].timestamp).date}</span>
+                                    <span class="last-update">${item.thread.lastMessageTime ? formatTimestamp(item.thread.lastMessageTime)?.date : formatTimestamp(item.thread.history[0].timestamp)?.date}</span>
                                 </div>
                                 <div class="thread-summary">
-                                <span class="last-message">${item.thread.lastMessage || ''}</span>
+                                    <span class="last-message">${item.thread.lastMessage || ''}</span>
                                     ${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
                                 </div>
                             </div>
@@ -208,13 +248,91 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
     }
 
     private renderTaskDetails() {
-
-        //stepId=${this.stepIdSelected}
         return html`
             <widget-ai-interaction-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK} .payloads=${this.actualTask?.iaCompressed?.nextSteps}></widget-ai-interaction-100554>
         `
     }
 
+
+
+    private renderAddParticipant() {
+        return html`
+        <div class="add-participant">
+            <label>
+                ${this.msg.labelUserId}
+                <input 
+                    type="text"
+                    .value=${this.userIdOrName}
+                    @input=${(e: Event) => this.userIdOrName = (e.target as HTMLInputElement).value}
+                />
+            </label>
+
+            <label>
+                ${this.msg.labelPermission}
+                <select
+                    .value=${this.auth}
+                    @change=${(e: Event) => (this.auth as string) = (e.target as HTMLSelectElement).value}
+                >
+                    <option value="admin">Admin</option>
+                    <option value="moderator">Moderator</option>
+                    <option value="none">None</option>
+                    <option value="read">Read</option>
+                    <option value="write">Write</option>
+                </select>
+            </label>
+
+            <button
+                @click=${this.onSubmitAddParticipant}
+                ?disabled=${this.isAddParticipant}
+            >
+                ${this.isAddParticipant ? html`<span class="loader"></span>` : this.msg.btnAddParticipant}
+            </button>
+            
+            ${this.labelOkAddParticipant ? html`<small class="add-participant-ok">${this.labelOkAddParticipant}<small>` : ''}
+            ${this.labelErrorAddParticipant ? html`<small class="add-participant-error">${this.labelErrorAddParticipant}<small>` : ''}
+        </div>
+    `;
+    }
+
+    private async onSubmitAddParticipant() {
+
+        this.labelErrorAddParticipant = '';
+        this.labelOkAddParticipant = '';
+
+        if (!this.actualThread || !this.userId) {
+            return;
+        }
+        if (!this.userIdOrName || !this.auth) {
+            this.labelErrorAddParticipant = this.msg.errorFieldsAddParticipant
+            return;
+        }
+
+        this.isAddParticipant = true;
+
+        try {
+            const response = await mls.api.msgAddUserInThread({
+                auth: this.auth,
+                userIdOrName: this.userIdOrName,
+                threadId: this.actualThread?.thread.threadId,
+                userId: this.userId,
+            });
+
+            if (response.statusCode !== 200) {
+                this.labelErrorAddParticipant = `${response.msg}`;
+                this.isAddParticipant = false;
+                return;
+            }
+            this.labelOkAddParticipant = `${this.msg.successAddParticipant}`;
+            this.userIdOrName = '';
+            this.auth = 'write';
+            this.isAddParticipant = false;
+
+        } catch (error: any) {
+            console.error('Error on add user:', error);
+            this.labelErrorAddParticipant = error.message;
+            this.isAddParticipant = false;
+        }
+    }
 
     private async getMessages(thread: mls.msg.Thread, lastOrderAt: string = ''): Promise<mls.msg.Message[]> {
 
@@ -223,7 +341,6 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         }
 
         const response = await mls.api.msgGetNextMessages({
-            action: 'getNextMessages',
             lastOrderAt,
             threadId: thread.threadId,
             userId: this.userId
@@ -263,7 +380,6 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         };
     }
 
-
     private async onThreadClick(threadInfo: IThreadInfo) {
 
         this.activeScenerie = 'loading';
@@ -277,8 +393,8 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         try {
 
             const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
-            this.actualMessages = [...this.actualMessages, ...messages];
-            //this.actualMessages = messages;
+            //this.actualMessages = [...this.actualMessages, ...messages];
+            this.actualMessages = this.mergeMessages(this.actualMessages, messages);
             addMessages(messages);
 
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
@@ -295,14 +411,29 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                 actualMessagesParsed: this.actualMessagesParsed
             });
 
-
         } catch (err: any) {
             throw new Error('Error on loading messages: ' + err.message);
         } finally {
             this.isLoadingMessages = false;
-
         }
 
+    }
+
+    private mergeMessages(
+        array1: mls.msg.Message[],
+        array2: mls.msg.Message[]
+    ): mls.msg.Message[] {
+
+        const map = new Map<string, mls.msg.Message>();
+        for (const item of array1) {
+            map.set(`${item.createAt}/${item.threadId}`, item);
+        }
+
+        for (const item of array2) {
+            map.set(`${item.createAt}/${item.threadId}`, { ...map.get(`${item.createAt}/${item.threadId}`), ...item });
+        }
+
+        return Array.from(map.values());
     }
 
     private onTitleClick() {
@@ -314,70 +445,65 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
             this.activeScenerie = 'list';
             return;
         }
-
-    }
-
-    private handleInput(e: Event) {
-        const target = e.target as HTMLTextAreaElement;
-        this.text = target.value;
-
-        const cursorPos = target.selectionStart;
-        const textBeforeCursor = this.text.slice(0, cursorPos);
-
-        if (textBeforeCursor.startsWith('@')) {
-            const match = textBeforeCursor.match(/^@(\w*)$/);
-
-            if (match) {
-                const query = match[1].toLowerCase();
-                this.suggestions = this.mentionList.filter(opt =>
-                    opt.toLowerCase().startsWith(query)
-                );
-                this.showSuggestions = this.suggestions.length > 0;
-            } else {
-                this.showSuggestions = false;
-            }
-        } else {
-            this.showSuggestions = false;
+        if (this.activeScenerie === 'addParticipant') {
+            this.activeScenerie = 'details';
+            return;
         }
     }
 
-    private selectSuggestion(option: string) {
-        const textarea = this.renderRoot.querySelector('textarea');
-        if (!textarea) return;
+    private onAddParticipantClick() {
+        this.saveScrollPosition();
+        this.activeScenerie = 'addParticipant';
+    }
 
-        const cursorPos = textarea.selectionStart;
-        const textBefore = this.text.slice(0, cursorPos);
-        const match = textBefore.match(/@(\w*)$/);
-        const beforeMention = this.text.slice(0, match?.index);
-        const afterText = this.text.slice(cursorPos);
-        this.text = `${beforeMention}@${option} ${afterText}`;
-        this.showSuggestions = false;
-        textarea.value = this.text;
-        textarea.focus();
+    private handleInput(e: Event) {
+
+        const target = e.target as HTMLTextAreaElement;
+        const cursorPos = target.selectionStart;
+        const value = target.value;
+        const textBeforeCursor = value.slice(0, cursorPos);
+        const lines = textBeforeCursor.split('\n');
+        const currentLine = lines[lines.length - 1];
+
+        if (currentLine === '@@') {
+            const afterText = value.slice(cursorPos);
+            const newText = value.slice(0, cursorPos - 2) + '@@ ' + afterText;
+            this.text = newText;
+            requestAnimationFrame(() => {
+                target.value = this.text;
+                const newCursorPos = cursorPos + 1;
+                target.selectionStart = target.selectionEnd = newCursorPos;
+            });
+        } else {
+            this.text = value;
+        }
     }
 
     private async handleSend() {
 
         if (this.isSending) return;
         const trimmed = this.text.trim();
-        const mentionMatch = trimmed.match(/^@(\w+)/);
-        const mention = mentionMatch ? mentionMatch[1] : null;
+        const mentionMatch = trimmed.match(/^@@\s?(.*)/);
+        const mention = mentionMatch ? mentionMatch[1].trim() : null;
         if (!this.text) return;
         this.isSending = true;
 
         try {
             if (!mention) {
                 await this.addMessage(this.text);
-            }
-            else if (mention && mention === 'collabIA') {
+            } else {
                 await this.addMessageIA(this.text);
             }
         } catch (err: any) {
-            throw new Error(err.message)
-        } finally {
-            this.isSending = false;
+            throw new Error(err.message);
         }
+    }
 
+    private handleKeyDown(e: KeyboardEvent) {
+        if (e.key === "Enter" && !e.shiftKey && !this.isSending) {
+            e.preventDefault();
+            this.handleSend();
+        }
     }
 
     private async addMessage(prompt: string) {
@@ -392,31 +518,85 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
         const response = await mls.api.msgAddMessage(params);
         const { content, createAt, orderAt, senderId, threadId } = response.message;
-
         this.updateMessage(content, createAt, orderAt, senderId, threadId);
+        this.isSending = false;
 
     }
+
 
     private async addMessageIA(prompt: string) {
         if (!this.userId || !this.actualThread) return;
 
         const text = this.preparePromptIA(prompt);
 
-        const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, text);
+        const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, text, async (ctx) => {
+            await this.updateMessageAI(ctx);
+            if (ctx.task) {
+                await addTask(ctx.task);
+            }
+        });
+
         const agent = createAgent();
         await agent.beforePrompt(context);
 
-        const { content, createAt, orderAt, senderId, threadId, taskId } = context.message;
-        if (context.task) await addTask(context.task);
-        this.updateMessage(content, createAt, orderAt, senderId, threadId, taskId);
+        // const { content, createAt, orderAt, senderId, threadId, taskId } = context.message;
+        // if (context.task) await addTask(context.task);
+        //this.updateMessage(content, createAt, orderAt, senderId, threadId, taskId);
 
     }
 
-    private preparePromptIA(prompt: string) {
-        return prompt.replace('@collabIA', '');
+    private async updateMessageAI(context: mls.msg.ExecutionContext) {
+
+        if (!context.message && !context.task) return;
+        const { content, createAt, orderAt, senderId, threadId, taskId } = context.message;
+
+        let messageAdded = this.actualMessages.find((item) =>
+            item.content === content &&
+            item.senderId === senderId &&
+            item.createAt === createAt &&
+            item.threadId === threadId
+        )
+
+        if (!messageAdded) {
+            const newMessage: mls.msg.Message = {
+                content,
+                createAt,
+                orderAt,
+                senderId,
+                threadId,
+            }
+            const thread = await updateThread(threadId, content, createAt, 0);
+            if (this.actualThread) this.actualThread.thread = thread;
+            if (taskId) newMessage.taskId = taskId;
+            this.actualMessages.push({ context, lastChanged: new Date().getTime(), ...newMessage });
+            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+            this.text = '';
+            await addMessage(newMessage);
+            this.isSending = false;
+            this.requestUpdate();
+
+        } else {
+            messageAdded.content = content;
+            messageAdded.senderId = senderId;
+            messageAdded.createAt = createAt;
+            messageAdded.threadId = threadId;
+            messageAdded.orderAt = orderAt;
+            messageAdded.context = context;
+            messageAdded.lastChanged = new Date().getTime();
+
+            const cloned = structuredClone(messageAdded);
+            delete cloned.context;
+            delete cloned.lastChanged;
+
+            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+            await addMessage(cloned);
+            this.requestUpdate();
+        }
+
     }
 
     private async updateMessage(content: string, createAt: string, orderAt: string, senderId: string, threadId: string, taskId?: string) {
+
         const newMessage: mls.msg.Message = {
             content,
             createAt,
@@ -425,6 +605,8 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
             threadId,
         }
 
+        const thread = await updateThread(threadId, content, createAt, 0);
+        if (this.actualThread) this.actualThread.thread = thread;
         if (taskId) newMessage.taskId = taskId;
         this.actualMessages.push(newMessage);
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
@@ -434,11 +616,14 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
     }
 
+    private preparePromptIA(prompt: string) {
+        return prompt.replace('@@', '');
+    }
+
     private async onTaskClick(taskId: string, messageId: string, threadId: string,) {
+        this.saveScrollPosition();
         this.activeScenerie = 'loading';
         const task = await this.getTaskUpdate(taskId, threadId, messageId);
-
-        task.status
         syncTask(task);
         this.actualTask = task;
         this.activeScenerie = 'task';
@@ -451,7 +636,6 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
         const taskData = await mls.api.msgGetTaskUpdate(
             {
-                action: 'getTaskUpdate',
                 taskId,
                 messageId: `${createdAt}/${threadId}`,
                 userId: this.userId
@@ -459,10 +643,21 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         );
 
         if (taskData.statusCode !== 200) throw new Error("error on AI get taskUpdate , stoped");
+
         return taskData.task;
     }
 
+    private saveScrollPosition() {
+        if (this.messageContainer) {
+            this.savedScrollTop = this.messageContainer.scrollTop;
+        }
+    }
 
+    private restoreScrollPosition() {
+        if (this.messageContainer) {
+            this.messageContainer.scrollTop = this.savedScrollTop;
+        }
+    }
 
 }
 
@@ -476,7 +671,11 @@ interface IThreadInfo {
     thread: mls.msg.ThreadPerformanceCache,
     users: mls.msg.User[]
 }
+interface IMessage extends mls.msg.Message {
+    context?: mls.msg.ExecutionContext,
+    lastChanged?: number,
+}
 
-type IMessageGrouped = { [key: string]: mls.msg.Message[] }
+type IMessageGrouped = { [key: string]: IMessage[] }
 type IThread = { CONNECT: IThreadInfo[] }
-type IScenery = 'list' | 'details' | 'loading' | 'task'
+type IScenery = 'list' | 'details' | 'loading' | 'task' | 'addParticipant'
