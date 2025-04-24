@@ -1,38 +1,94 @@
 /// <mls shortName="agentCreatePluginConfigTs" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { AgentBase, IAgentBase } from './_100554_iaAgentBase';
+import { IAgent, svg_agent } from './_100554_aiAgentBase';
 
-export class agentCreatePluginConfigTs extends AgentBase implements IAgentBase {
+import {
+  getNextPendingStepByAgentName,
+  getNextInProgressStepByAgentName,
+  calculateStepsStatistics,
+  updateStepStatus
+} from "./_100554_aiAgentHelper";
 
-    public task: mls.msg.TaskData | undefined;
-    public visibility: 'public' | 'private' = 'private';
+import {
+  startNewAiTask,
+  executeNextStep,
+  startNewInteractionInAiTask
+} from "./_100554_aiAgentOrchestration";
 
-    public getPrompt(prompt: string | undefined): mls.msg.IAMessageInputType[] {
-        return this.getMyImputs(prompt || '');
+const agentName = "agentCreatePluginConfigTs";
+
+export function createAgent(): IAgent {
+  return {
+    agentName,
+    avatar_url:svg_agent,
+    agentDescription: "Especialista em desenvolvimento de plugins usando TypeScript e Lit",
+    visibility: "private",
+    async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
+      return _beforePrompt(context);
+    },
+    async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
+      return _afterPrompt(context);
     }
+  };
+}
 
-    public async afterPrompt(payload: mls.msg.AIPayload[] | null | undefined): Promise<void> {
-        return this._afterPrompt(payload);
+const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+  const taskTitle = "Planning";
+
+  if (!context || !context.message) throw new Error("Invalid context");
+
+  if (!context.task) {
+    // using temporary context, create a new task
+    const inputs = await getPrompts(context.message.content, null);
+    await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
+  } else {
+
+    const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
+    if (!step) {
+      throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
     }
+    context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+    const inputs = await getPrompts(step.prompt, step.rags);
+    await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
+  }
+}
 
-    //---------IMPLEMENTS-------------
+const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+  if (!context || !context.message || !context.task) throw new Error("Invalid context");
+  const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
+  if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
+  const { flexible } = calculateStepsStatistics([step], true);
+  if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
+  context.task = await updateStepStatus(context.task, step.stepId, "completed");
+  await executeNextStep(context);
+}
 
-    private async _afterPrompt(payload: mls.msg.AIPayload[] | null | undefined): Promise<void> {
+export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
+  if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
+  const prompts: mls.msg.IAMessageInputType[] = [];
 
-    }
+  prompts.push(systemMainInstruction());
+    prompts.push(systemRulesInstruction());
+  prompts.push(systemOutInstruction());
+  prompts.push({
+    type: 'human',
+    content: prompt
+  });
+  return prompts;
+}
 
-    private getMyImputs(prompt: string): mls.msg.IAMessageInputType[] {
-
-        return [
-            {
-                type: 'system',
-                content: `
-Você é um especialista em desenvolvimento de plugins usando TypeScript e Lit. Sua função é criar um arquivo TypeScript que define um web Component que será um plugin e implementar a lógica de acordo com o prompt
+function systemMainInstruction(): mls.msg.IAMessageInputType {
+  return {
+    type: 'system',
+    content: `Você é um especialista em desenvolvimento de plugins usando TypeScript e Lit. Sua função é criar um arquivo TypeScript que define um web Component que será um plugin e implementar a lógica de acordo com o prompt
 `
-            },
-            {
-                type: 'system',
-                content: `## REGRAS
+  }
+}
+
+function systemRulesInstruction(): mls.msg.IAMessageInputType {
+  return {
+    type: 'system',
+    content: `## REGRAS
 
  - O plugin deve estender do arquiv _100554_pluginBaseModule
  - Será usado o Lit versão 3 
@@ -40,10 +96,13 @@ Você é um especialista em desenvolvimento de plugins usando TypeScript e Lit. 
  - Não criar styles css nesse momento
  - Definir um svg de acordo com a funcionalidade do plugin
  - A primeira linha do arquivo .ts deve ser o tripleslash conforme a regra : /// <mls shortName="{{nome_da_pagina}}" project="{{projeto}}" enhancement="_100554_enhancementLit" `
-            },
-            {
-                type: 'system',
-                content: `## MODELO DE EXEMPLO
+  }
+}
+
+function systemOutInstruction(): mls.msg.IAMessageInputType {
+  return {
+    type: 'system',
+    content: `## MODELO DE SAÍDA
 
 \`\`\`typescript
 
@@ -77,14 +136,7 @@ export class PageTest1100554 extends PluginBaseModule {
     }
 
 }
-\`\`\``
-            },
-            {
-                type: 'human',
-                content: prompt || ''
-            },
-        ]
-
-    }
-
+\`\`\`
+`
+  }
 }

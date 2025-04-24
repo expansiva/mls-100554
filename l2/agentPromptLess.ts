@@ -1,56 +1,99 @@
 /// <mls shortName="agentPromptLess" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { AgentBase, IAgentBase } from './_100554_iaAgentBase';
+import { IAgent, svg_agent } from './_100554_aiAgentBase';
 
-export class agentPromptLess extends AgentBase implements IAgentBase {
+import {
+  getNextPendingStepByAgentName,
+  getNextInProgressStepByAgentName,
+  calculateStepsStatistics,
+  updateStepStatus
+} from "./_100554_aiAgentHelper";
 
-  public task: mls.msg.TaskData | undefined;
-  public visibility: 'public' | 'private' = 'private';
+import {
+  startNewAiTask,
+  executeNextStep,
+  startNewInteractionInAiTask
+} from "./_100554_aiAgentOrchestration";
 
-  public getPrompt(prompt: string | undefined): mls.msg.IAMessageInputType[] {
-    return this.getMyImputs(prompt || '');
+const agentName = "agentPromptLess";
+
+export function createAgent(): IAgent {
+  return {
+    agentName,
+    avatar_url:svg_agent,
+    agentDescription: "Responsável por criar os estilos '.less'",
+    visibility: "private",
+    async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
+      return _beforePrompt(context);
+    },
+    async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
+      return _afterPrompt(context);
+    }
+  };
+}
+
+const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+  const taskTitle = "Planning";
+
+  if (!context || !context.message) throw new Error("Invalid context");
+
+  if (!context.task) {
+    // using temporary context, create a new task
+    const inputs = await getPrompts(context.message.content, null);
+    await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
+  } else {
+
+    const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
+    if (!step) {
+      throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
+    }
+    context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+    const inputs = await getPrompts(step.prompt, step.rags);
+    await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
   }
+}
 
-  public async afterPrompt(payload: mls.msg.AIPayload[] | null | undefined): Promise<void> {
-    return this._afterPrompt(payload);
-  }
+const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+  if (!context || !context.message || !context.task) throw new Error("Invalid context");
+  const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
+  if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
+  const { flexible } = calculateStepsStatistics([step], true);
+  if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
+  context.task = await updateStepStatus(context.task, step.stepId, "completed");
+  await executeNextStep(context);
+}
 
-  //---------IMPLEMENTS-------------
+export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
+  if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
+  const prompts: mls.msg.IAMessageInputType[] = [];
 
-  private async _afterPrompt(payload: mls.msg.AIPayload[] | null | undefined): Promise<void> {
+  prompts.push(systemMainInstruction());
+  prompts.push(systemRulesInstruction());
+  prompts.push({
+    type: 'human',
+    content: '`##HTML base (compacto, sem conteúdo):'
+  });
+  prompts.push({
+    type: 'human',
+    content: prompt
+  });
+  return prompts;
+}
 
-  }
-
-  private getMyImputs(prompt: string): mls.msg.IAMessageInputType[] {
-
-    return [
-      {
-        type: 'system',
-            content: `
+function systemMainInstruction(): mls.msg.IAMessageInputType {
+  return {
+    type: 'system',
+    content: `
 Você é responsável por criar os estilos ".less" para a estrutura abaixo.
 Use as classes como referência. Estilos devem ser organizados, claros e responsivos. O escopo é local ao componente "wc-input-date-range-100554".
 `
-      },
-      {
-        type: 'system',
-        content: `###HTML base (compacto, sem conteúdo):
+  }
+}
 
-\`\`\`html
-  <label class="form-control-label"></label>
-  <div class="input_container">
-         <input class="input_control initial" type="date">
-         <span  class="input_control divider_textl"></span>
-           <input class="input_control final" type="date" >
-        </div>
-        <small class="form_hint"></small>
-        <div class="form_error_message"></div>
-</div>
-\`\`\`
-`
-      },
-      {
-        type: 'system',
-          content: `
+function systemRulesInstruction(): mls.msg.IAMessageInputType {
+  return {
+    type: 'system',
+    content: `## REGRAS
 O less gerado deve inserido dentro da tag do componente.
 Tambem é possivel ter variaçoẽs desse less, que deverá ser definido da seguinte forma:
 
@@ -177,13 +220,5 @@ wc-input-date-range-100554 {{}}
 //EndLess Tokens
 \`\`\`
 `
-      },
-      {
-        type: 'human',
-        content: prompt || ''
-      },
-    ]
-
   }
-
 }

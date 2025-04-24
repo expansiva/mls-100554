@@ -1,6 +1,6 @@
 /// <mls shortName="agentPlanner1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent } from './_100554_aiAgentBase';
+import { IAgent, svg_agent } from './_100554_aiAgentBase';
 
 import {
     getNextPendingStepByAgentName,
@@ -30,6 +30,7 @@ const agentName = "agentPlanner1";
 export function createAgent(): IAgent {
     return {
         agentName,
+        avatar_url:svg_agent,
         agentDescription: "first agent for general prompts",
         visibility: "private",
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
