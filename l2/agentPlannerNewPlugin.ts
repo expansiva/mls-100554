@@ -1,32 +1,87 @@
 /// <mls shortName="agentPlannerNewPlugin" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { AgentBase, IAgentBase } from './_100554_iaAgentBase';
+import { IAgent, svg_agent } from './_100554_aiAgentBase';
 
-export class agentPlannerNewPlugin extends AgentBase implements IAgentBase {
+import {
+  getNextPendingStepByAgentName,
+  getNextInProgressStepByAgentName,
+  calculateStepsStatistics,
+  updateStepStatus
+} from "./_100554_aiAgentHelper";
 
-    public task: mls.msg.TaskData | undefined;
-    public visibility: 'public' | 'private' = 'private';
+import {
+  startNewAiTask,
+  executeNextStep,
+  startNewInteractionInAiTask
+} from "./_100554_aiAgentOrchestration";
 
-    public getPrompt(prompt: string | undefined): mls.msg.IAMessageInputType[] {
-        return this.getMyImputs(prompt || '');
+const agentName = "agentPlannerNewPlugin";
+
+export function createAgent(): IAgent {
+  return {
+    agentName,
+    avatar_url:svg_agent,
+    agentDescription: "Planejador responsável por definir os detalhes de criação de  um novo plugin no sistema",
+    visibility: "public",
+    async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
+      return _beforePrompt(context);
+    },
+    async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
+      return _afterPrompt(context);
     }
+  };
+}
 
-    public async afterPrompt(payload: mls.msg.AIPayload[] | null | undefined): Promise<void> {
-        return this._afterPrompt(payload);
+const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+  const taskTitle = "Planning";
+
+  if (!context || !context.message) throw new Error("Invalid context");
+
+  if (!context.task) {
+    // using temporary context, create a new task
+    const inputs = await getPrompts(context.message.content, null);
+    await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
+  } else {
+
+    const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
+    if (!step) {
+      throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
     }
+    context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+    const inputs = await getPrompts(step.prompt, step.rags);
+    await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
+  }
+}
 
-    //---------IMPLEMENTS-------------
+const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+  if (!context || !context.message || !context.task) throw new Error("Invalid context");
+  const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
+  if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
+  const { flexible } = calculateStepsStatistics([step], true);
+  if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
+  context.task = await updateStepStatus(context.task, step.stepId, "completed");
+  await executeNextStep(context);
+}
 
-    private async _afterPrompt(payload: mls.msg.AIPayload[] | null | undefined): Promise<void> {
+export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
+  if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
+  const prompts: mls.msg.IAMessageInputType[] = [];
 
-    }
+  prompts.push(systemMainInstruction());
+  prompts.push(systemRulesInstruction()); 
+  prompts.push(systemRules2Instruction());
+  prompts.push(systemOutInstruction());
+  prompts.push({
+    type: 'human',
+    content: prompt
+  });
+  return prompts;
+}
 
-    private getMyImputs(prompt: string): mls.msg.IAMessageInputType[] {
-
-        return [
-            {
-                type: 'system',
-                content: `
+function systemMainInstruction(): mls.msg.IAMessageInputType {
+  return {
+    type: 'system',
+    content: `
 Você é um planejador responsável por definir os detalhes de criação de  um novo plugin no sistema.
 
 Com base no prompt original do usuário, sua tarefa é:
@@ -36,52 +91,15 @@ Com base no prompt original do usuário, sua tarefa é:
 6. Definir restrições e requerimentos técnicos ou funcionais.
 7. Se os dados forem suficientes, preparar a chamada para o agente "agentCreateNewPlugin".
 8. Se faltar qualquer informação, retornar uma "clarificationMessage".
-9. Entender se é um plugin interno usado  para configuração do próprio sistema de desenvolvimento                
+9. Entender se é um plugin interno usado  para configuração do próprio sistema de desenvolvimento  
 `
-            },
-            {
-                type: 'system',
-                content: `
-## Formato de saída:
-
-Você deve retornar **apenas um dos seguintes formatos** no array JSON:
-
-\`\`\`json
-  {{
-     "type": "agent",
-    "agentName": "agentCreateNewPlugin",
-    "taskTitle": string,
-    "prompt": string,
-    "pluginName": string,
-    "pluginDescription": string,
-    "pluginIconSvg": string, // retorna um svg para exemplificar esse plugin
-    "pluginType": "fullstack" | "dev-only" | "frontend" | "middleware" | "config"
-    "requirements": string,
   }
-\`\`\`
+}
 
-ou
-\`\`\`json
-  {{
-    "type": "clarification",
-    "clarificationMessage": string,
-    "htmlForm?": string // Optional HTML form shown to the user. The submitted data will be included in the prompt of the next interaction.
-  },
-\`\`\`                
-`
-            },
-            {
-                type: 'system',
-                content: `
-## Plugins já existentes no projeto, não utilizar os seguintes nomes:
-
-['pluginNewProject', 'pluginExplore']
-`
-            },
-            {
-                type: 'system',
-                content: `
-##Classifique o tipo de plugin de acordo com as informações:
+function systemRulesInstruction(): mls.msg.IAMessageInputType {
+  return {
+    type: 'system',
+    content: `##Classifique o tipo de plugin de acordo com as informações:
 Estamos em um sistema de desenvolvimento(collab.codes) que cria sistemas para o usuario.
 
 Para determinar o tipo adequado de plugin com base no prompt do usuário, utilize as seguintes definições e critérios:
@@ -190,21 +208,48 @@ Critérios para Seleção:
    - Plugin que permite a criação dinâmica de novas páginas.
    - Plugin que adiciona novas funcionalidades ao próprio sistema de desenvolvimento(collab-codes).
 `
-            },
-            {
-                type: 'system',
-                content: `
-## Regras adicionais:
+  }
+}
+
+function systemRules2Instruction(): mls.msg.IAMessageInputType {
+  return {
+    type: 'system',
+    content: `## Regras adicionais:
 	•	O nome da plugin deve ser no formato pluginXxx , onde ‘plugin’ é o sufixo obrigatório.
 	•	Se o tipo da plugin estiver ambíguo, retorne uma clarificationMessage solicitando mais detalhes ao usuário.
 `
-            },
-            {
-                type: 'human',
-                content: prompt || ''
-            },
-        ]
+  }
+}
 
-    }
+function systemOutInstruction(): mls.msg.IAMessageInputType {
+  return {
+    type: 'system',
+    content: `## Formato de saída:
 
+Você deve retornar **apenas um dos seguintes formatos** no array JSON:
+
+\`\`\`json
+  {{
+     "type": "agent",
+    "agentName": "agentCreateNewPlugin",
+    "taskTitle": string,
+    "prompt": string,
+    "pluginName": string,
+    "pluginDescription": string,
+    "pluginIconSvg": string, // retorna um svg para exemplificar esse plugin
+    "pluginType": "fullstack" | "dev-only" | "frontend" | "middleware" | "config"
+    "requirements": string,
+  }
+\`\`\`
+
+ou
+\`\`\`json
+  {{
+    "type": "clarification",
+    "clarificationMessage": string,
+    "htmlForm?": string // Optional HTML form shown to the user. The submitted data will be included in the prompt of the next interaction.
+  },
+\`\`\`  
+`
+  }
 }

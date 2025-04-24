@@ -31,13 +31,13 @@ export async function startNewAiTask(
         if (value.statusCode !== 200) {
             throw new Error("Error on addMessageAI: " + (value.msg || ''));
         }
-        
+
         const ret = value as mls.msg.ResponseAddMessageAI;
 
         context.task = ret.task;
         context.message = ret.message;
 
-        console.log(JSON.stringify(context, null, 2));
+        if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
 
         await afterPrompt(context);
     } catch (error: any) {
@@ -60,7 +60,7 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
             parentStepId: stepFather,
             inputAI
         }
-        
+
         const value = await mls.api.msgAddTaskAIInteraction(args);
 
         if (!value) {
@@ -80,13 +80,15 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
 
         context.task = ret.task;
 
-        console.log(JSON.stringify(context, null, 2));
+        if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
 
         await afterPrompt(context);
 
 
     }
     catch (error: any) {
+        if (context && context.task && stepFather)
+            await updateStepStatus(context.task, stepFather, "failed");
         console.error(`[startNewInteractionInAiTask] ${error.message || error}`);
     }
 }
@@ -154,7 +156,7 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
         const traceMsg = `Error executing tool ${step.toolName}: ${rc.error}`;
         console.error(traceMsg);
         context.task = await updateStepStatus(context.task, step.stepId, "failed", traceMsg);
-        console.log(JSON.stringify(context.task, null, 2));
+        if ((mls as any).istraceAgent) console.log(JSON.stringify(context.task, null, 2));
         return;
     }
 
@@ -176,7 +178,7 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
 
         context.task = await appendPromptToInteraction(userId, messageId, taskId, interactionStepId, inputAI, stepdIdToChangeStatus, newStatus);
 
-        console.log(JSON.stringify(context.task, null, 2));
+        if ((mls as any).istraceAgent) console.log(JSON.stringify(context.task, null, 2));
     }
 
     return executeNextStep(context);
@@ -193,7 +195,8 @@ export async function executeTool(toolName: string, args: string): Promise<IExec
         return rc;
     };
     try {
-        const fileJS = `./${toolName}.js`;
+        //const fileJS = `./${toolName}.js`;
+        const fileJS = `./_100554_${toolName}`;
         const module = await import(fileJS);
         if (typeof module.createTool !== "function") throw new Error(`createTool function not found in ${fileJS}`);
         const tool = module.createTool();
@@ -235,7 +238,7 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
 async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.msg.AIResultStep) {
     if (!context || !context.task) throw new Error("Invalid context");
 
-    console.log("result:", step.result);
+    if ((mls as any).istraceAgent) console.log("result:", step.result);
     context.task = await updateStepStatus(context.task, step.stepId, "completed");
     return executeNextStep(context);
 
@@ -245,7 +248,7 @@ async function executeNextClarification(context: mls.msg.ExecutionContext, step:
     if (!context || !context.task) throw new Error("Invalid context");
     if (!step.clarificationMessage) throw new Error("clarification message is missing");
 
-    console.log("clarification:", step.clarificationMessage);
+    if ((mls as any).istraceAgent) console.log("clarification:", step.clarificationMessage);
     context.task = await updateStepStatus(context.task, step.stepId, "waiting_for_user");
 
 }

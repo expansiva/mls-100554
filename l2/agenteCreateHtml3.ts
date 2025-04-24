@@ -1,7 +1,7 @@
 /// <mls shortName="agenteCreateHtml3" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 
-import { IAgent } from './_100554_aiAgentBase';
+import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { systemComponentsInstruction, systemRulesComponentsInstruction } from './_100554_aiPrompts';
 
 import {
@@ -22,6 +22,7 @@ const agentName = "agenteCreateHtml3";
 export function createAgent(): IAgent {
     return {
         agentName,
+        avatar_url:svg_agent,
         agentDescription: "Gerar o HTML completo da página com base no modelo técnico da interface (JSON enriquecido).",
         visibility: "private",
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
@@ -99,6 +100,8 @@ Sua tarefa é transformar esse modelo em uma estrutura HTML usando exclusivament
 	•	Use o nome do webComponent
 	•	Aplique o id informado
 	•	Adicione os atributos conforme especificado (ex: value="{{...}}", visible="{{...}}")
+    •	O atributo "widget" é obrigatorio, deve ser preenchido conforme o json dos componentes.
+    •	No atributo "widget" preencha conforme o campo "widgetDefault" caso esteja preenchido.
 	•	Quando um atributo tiver computed: true, adicione um comentário no HTML informando que esse valor depende de lógica implementada no .ts
 	•	Se existir um campo comentario, adicione-o como comentário acima do elemento
 	•	Estruture a página em um container principal, seções, colunas e linhas conforme a separação por seções

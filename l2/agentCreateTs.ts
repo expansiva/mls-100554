@@ -1,18 +1,21 @@
 /// <mls shortName="agentCreateTs" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent } from './_100554_aiAgentBase';
+import { IAgent, svg_agent } from './_100554_aiAgentBase';
+import { preferModelType } from './_100554_aiPrompts'; 
+import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget } from "./_100554_pluginNewFileBase";
 
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
     calculateStepsStatistics,
-    updateStepStatus
+    updateStepStatus,
+    getNextPendentStep
 } from "./_100554_aiAgentHelper";
 
 import {
     startNewAiTask,
     executeNextStep,
-    startNewInteractionInAiTask
+    startNewInteractionInAiTask    
 } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentCreateTs";
@@ -20,6 +23,7 @@ const agentName = "agentCreateTs";
 export function createAgent(): IAgent {
     return {
         agentName,
+        avatar_url:svg_agent,
         agentDescription: "Especialista em desenvolvimento de Web Components usando TypeScript e Lit. Sua função é criar um arquivo TypeScript que define um Web Component para comandar uma página.",
         visibility: "private",
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
@@ -60,7 +64,27 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     const { flexible } = calculateStepsStatistics([step], true);
     if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
     context.task = await updateStepStatus(context.task, step.stepId, "completed");
-    await executeNextStep(context);
+
+    await addFile(context);
+    await executeNextStep(context);    
+    
+}
+
+async function addFile(context: mls.msg.ExecutionContext) {
+    if (!context || !context.task) throw new Error('Not found context to create files');
+    const step = getNextPendentStep(context.task);
+
+    if (!step || step.type !== 'result') throw new Error('Invalid step in create files');
+
+    if (!step.result || !(step.result as any).fileHTML || !(step.result as any).fileTS || !(step.result as any).pageName) throw new Error('Not found "fileHTML" or "fileTS" or "pageName" in create files');
+    
+    const pageName = (step.result as any).pageName;
+    const fileHTML = (step.result as any).fileHTML;
+    const fileTS = (step.result as any).fileTS;
+    const project = mls.actual[5].project || 100554;
+    const enhancement = '_100554_enhancementLit';
+    await createNewFile(project, 'right', pageName, enhancement, fileTS, fileHTML, false);
+    console.info('Aqui', { fileTS, fileHTML, pageName});
 }
 
 
@@ -70,19 +94,19 @@ export async function getPrompts(prompt: string | undefined, rags: string[] | nu
 
     prompts.push(systemMainInstruction());
     prompts.push(systemRulesInstruction());
-    prompts.push(systemFile1Instruction());
+    //prompts.push(systemFile1Instruction());
     prompts.push(systemExampleInstruction());
     prompts.push(systemOutInstruction());
     prompts.push({
         type: 'human',
-        content: prompt
+        content: '##JSON BASE \n\n' + prompt
     });
     return prompts;
 }
 
 function systemMainInstruction(): mls.msg.IAMessageInputType {
     return {
-        type: 'system',
+        type: 'system',//${preferModelType("cost")}
         content: `
 Você é um especialista em desenvolvimento de Web Components usando TypeScript e Lit. Sua função é criar um arquivo TypeScript que define um Web Component para comandar uma página.
 `
@@ -98,10 +122,10 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
  - A pagina deve estender do arquivo _100554_collabPageElement
  - Será usado o Lit versão 3 
  - Não se deve usar shadow DOM 
- - Deve se iniciar o state de acordo com a necessidade do html base
+ - Deve se iniciar o state de acordo com a necessidade do html base que se encontra no JSON do usuario no campo "fileHTML"
  - Levar em consideração o exemplo, para seguir o padrão
  - A primeira linha do arquivo .ts deve ser o tripleslach conforme a regra
- - // <mls shortName="{{nome_da_pagina}}" project="{{projeto}}" enhancement="_100554_enhancementLit" 
+ - /// <mls shortName="{{nome_da_pagina}}" project="{{projeto}}" enhancement="_100554_enhancementLit"/> 
  - O componente não deve ter render
  - O state deve ser criado respeitando sua sequencia exemplo value="{{pageCadastro.dadosVeiculo.placa}}" na função 
     initState('pageCadastro', {{dadosVeiculo:{{placa:""}}}})
@@ -182,7 +206,7 @@ export abstract class CollabPageElement extends IcaLitElement {
         if (changedProperties.has('level') && changedProperties.get('level') !== undefined) {
             this.checkToAddOverlay();
         }
-    }
+    } 
 
     render() {
         this.style.position = 'relative';
@@ -347,7 +371,8 @@ function systemOutInstruction(): mls.msg.IAMessageInputType {
         content: `##Saída Esperada 
 A resposta deve ser um JSON estruturado contendo as informações da interface. Preencha os campos com os dados passados pelo usuario você deve preencher somente "fileTS"
 O codigo TS criado deve se colocar no atributo "fileTS" dentro do JSON de exemplo passado abaixo,
-lembrando tem que responder no padrão abaixo:
+* Lembrando tem que responder no padrão abaixo, todos os campos são obrigatorios;
+* É de suma importancia o retorno do campo "fileTS" com o codigo gerado;
 
 \`\`\`json
 [
@@ -361,7 +386,7 @@ lembrando tem que responder no padrão abaixo:
       "loadContext": boolean,    // O mesmo que veio na requisição do usuario 
       "modoInicial": string, // O mesmo que veio na requisição do usuario
       "fluxo": string, // O mesmo que veio na requisição do usuario
-      "fileHTML":"<div><div>",// O mesmo que veio na requisição do usuario
+      "fileHTML":string,// O mesmo que veio na requisição do usuario fileHTML
       "fileTS":"{codigo ts}" // preencha com o codigo gerado
     }
   }

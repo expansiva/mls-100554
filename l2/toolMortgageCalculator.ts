@@ -1,12 +1,13 @@
 /// <mls shortName="toolMortgageCalculator" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { ITool } from './_100554_aiAgentBase';
+import { ITool, svg_tool } from './_100554_aiAgentBase';
 
 const toolName = "toolMortgageCalculator";
 
 export function createTool(): ITool {
     return {
-        toolName,
+        toolName, 
+        tool_url: svg_tool,
         description: "Calcula a parcela mensal de um financiamento imobiliário usando a Tabela Price com juros anuais fixos de 13%",
         argsSchema: {
             valorImovel: { type: "number", description: "Valor total do imóvel" },

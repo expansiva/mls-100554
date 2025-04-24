@@ -1,6 +1,6 @@
 /// <mls shortName="agenteCreateHtml2" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent } from './_100554_aiAgentBase';
+import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { systemComponentsInstruction } from './_100554_aiPrompts';
 
 import {
@@ -21,6 +21,7 @@ const agentName = "agenteCreateHtml2";
 export function createAgent(): IAgent {
     return {
         agentName,
+        avatar_url:svg_agent,
         agentDescription: "Transformar a estrutura conceitual da interface em um modelo técnico pronto para geração de HTML com web components e bindings de state.",
         visibility: "private",
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
