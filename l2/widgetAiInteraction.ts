@@ -1,9 +1,9 @@
 /// <mls shortName="widgetAiInteraction" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
-import { getNextResultStep, getNextClarificationStep, getInteractionStepId, getStepById } from './_100554_aiAgentHelper';
+import { getNextResultStep, getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById } from './_100554_aiAgentHelper';
 
 @customElement('widget-ai-interaction-100554')
 export class WidgetAiInteraction100554 extends IcaLitElement {
@@ -14,6 +14,16 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
     @property({ attribute: false }) seen = new Set<string>();
     @property() breadcrumb: IBreadCrumb[] = [];
 
+    @query('.direct-clarification form') formClarification: HTMLFormElement | undefined;
+
+    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
+        super.firstUpdated(changedProperties);
+        console.info(this.formClarification)
+        if (this.formClarification) {
+            this.formClarification.addEventListener('submit', this.handleFormSubmit.bind(this));
+        }
+    }
+
     render() {
 
         if (!this.payloads) return html``;
@@ -22,6 +32,12 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
             this.breadcrumb = [
                 { data: this.payloads, title: 'root' }
             ];
+        }
+
+        let isClarificationPending: boolean = false;
+        if (this.task) {
+            const nextStepPending = getNextPendentStep(this.task);
+            if (nextStepPending?.type === 'clarification') isClarificationPending = true;
         }
 
         console.info({
@@ -35,15 +51,12 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
                 <span @click=${() => this.onBreadcrumbClick(index)}>${step.title}</span>   
             `)}
         </div>
-
-
         <div class="payload-content">
             ${this.payloads.map((payload) => {
             return html`
                 <div>
                     ${this.renderPayload(payload)}
-                </div>
-                        `
+                </div>`
         })}
         </div>
 
@@ -52,12 +65,30 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
                 : html``
             }
 
-        ${this.task?.status === "waitingforuser"
+        ${isClarificationPending
                 ? this.renderDirectClarification()
                 : html``
             }
 
         `
+    }
+
+    private handleFormSubmit(e: Event) {
+
+        e.preventDefault();
+        if (!this.task) return;
+
+        const nextStepPending = getNextPendentStep(this.task);
+        if (!nextStepPending || nextStepPending?.type !== 'clarification') return;
+        const message = nextStepPending.clarificationMessage
+
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+        const prompt = Array.from(formData.entries())
+            .map(([key, value]) => `${key}: ${value}`)
+            .join('\n');
+
+        console.info('Prompt gerado:', `${message}\n\n${prompt}`);
     }
 
     private renderDirectResult() {
@@ -71,7 +102,7 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
         if (!this.task) throw new Error('Invalid task');
         const payload = getNextClarificationStep(this.task);
         if (!payload) return html``;
-        return this.renderClarification(payload)
+        return html`<div class="direct-clarification">${this.renderClarification(payload)}</div>`
     }
 
     private renderPayload(payload: mls.msg.AIPayload, isDirect: boolean = false): TemplateResult<1> {

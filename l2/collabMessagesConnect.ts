@@ -3,17 +3,18 @@
 import { html, css } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
-import { collab_chevron_left, collab_arrow_up_long } from './_100554_collabIcons';
+import { collab_chevron_left, collab_user_plus, collab_gear } from './_100554_collabIcons';
 import { createAgent } from './_100554_agentPlanner1';
 import { getTemporaryContext } from './_100554_aiAgentHelper';
 import { addTask, syncTask, addMessages, addMessage, getMessagesByThreadId, updateThread } from './_100554_msgDBController';
 import { formatTimestamp } from './_100554_iaChatBase';
-import {
-    collab_user_plus
-} from './_100554_collabIcons';
+import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt'
 
 import './_100554_widgetAiInteraction';
 import './_100554_widgetAiTask';
+import './_100554_collabMessagesPrompt';
+import './_100554_collabMessagesAvatar';
+
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -23,6 +24,7 @@ const message_pt = {
     labelPermission: 'Autoridade:',
     errorFieldsAddParticipant: 'Preencha todos os campos!',
     successAddParticipant: 'Usuário adicionado com sucesso',
+    threadDetails: 'Detalhes da sala'
 }
 
 const message_en = {
@@ -31,7 +33,9 @@ const message_en = {
     labelUserId: 'User id or name',
     labelPermission: 'Auth:',
     errorFieldsAddParticipant: 'Fill in all fields!',
-    successAddParticipant: 'User added sucessfully'
+    successAddParticipant: 'User added sucessfully',
+    threadDetails: 'Thread details'
+
 }
 
 type MessageType = typeof message_en;
@@ -45,35 +49,32 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
     private msg: MessageType = messages['en'];
 
-    @query('#prompt_input') promptInput: HTMLTextAreaElement | undefined;
+    @query('collab-messages-prompt-100554') collabMessagesPrompt: CollabMessagesPrompt100554 | undefined;
     @query('#unread') private unreadEl!: HTMLDivElement | undefined;
     @query('.chat-container') private messageContainer!: HTMLDivElement | undefined;
 
     @property() userId: string | undefined;
-
     @property() activeScenerie: IScenery = 'list';
     @property() actualThread: IThreadInfo | undefined;
     @property() actualTask: mls.msg.TaskData | undefined;
     @property() actualMessages: IMessage[] = [];
     @property() actualMessagesParsed: IMessageGrouped = {};
-    @property() isSending: boolean = false;
     @property() isLoadingMessages: boolean = false;
-
     @property() isAddParticipant: boolean = false;
     @property() labelOkAddParticipant: string = '';
     @property() labelErrorAddParticipant: string = '';
     @property() userIdOrName = '';
     @property() auth: mls.msg.UserAuth = 'write';
 
-
-    @state() private text: string = '';
-
-
     @property({ attribute: false }) userThreads: IThread = {
         CONNECT: [{ "thread": { "history": [{ "action": "created", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "update_group", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_language ${language}", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120844.1000", "timestamp": "20250417172252" }, { "action": "add_user", "userId": "20250417004803.1000", "timestamp": "20250417174719" }], "languages": ["pt"], "status": "active", "visibility": "private", "group": "CONNECT", "threadId": "20250417135645.1000", "users": [{ "userId": "20250417120841.1000", "auth": "admin" }, { "userId": "20250417120844.1000", "auth": "write" }, { "userId": "20250417004803.1000", "auth": "write" }], "name": "" }, "users": [{ "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active" }, { "threads": ["20250417133813.1000", "20250417180232.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active" }, { "threads": ["20250417135645.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active" }] }]
     };
 
     private savedScrollTop = 0;
+    private messagesLimit = 5;
+    private messagesOffset = 0;
+    private isLoadingMoreMessages = false;
+
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
@@ -84,7 +85,10 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         }
 
         if (changedProperties.has('activeScenerie')
-            && (changedProperties.get('activeScenerie') === 'task' || changedProperties.get('activeScenerie') === 'addParticipant')
+            && (changedProperties.get('activeScenerie') === 'task'
+                || changedProperties.get('activeScenerie') === 'addParticipant'
+                || changedProperties.get('activeScenerie') === 'threadDetails'
+            )
             && this.activeScenerie === 'details') {
             this.restoreScrollPosition();
         }
@@ -126,7 +130,9 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                 <div class="header">
                     <span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.actualThread?.thread.name || this.actualThread?.thread.threadId}</span>
                     <div class="header-actions">
+                        <span @click=${this.onThreadDetailsClick}>${collab_gear}</span>
                         <span @click=${this.onAddParticipantClick}>${collab_user_plus}</span>
+                        
                     </div>
                 </div>`;
             case 'list':
@@ -135,6 +141,11 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                 return html`
                 <div class="header">
                     <span @click=${this.onTitleClick}>${collab_chevron_left} ${this.msg.btnAddParticipant}</span>
+                </div>`;
+            case 'threadDetails':
+                return html`
+                <div class="header">
+                    <span @click=${this.onTitleClick}>${collab_chevron_left} ${this.msg.threadDetails}</span>
                 </div>`;
             default:
                 return null;
@@ -151,6 +162,8 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                 return this.renderTaskDetails();
             case 'addParticipant':
                 return this.renderAddParticipant();
+            case 'threadDetails':
+                return this.renderThreadDetails();
             default:
                 return null;
         }
@@ -159,7 +172,7 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
     private renderChatMessages() {
         return html`
-            <div class="chat-container">    
+            <div class="chat-container" @scroll=${this.onChatScroll}>    
                 ${Object.keys(this.actualMessagesParsed).map((key) => {
             const threadMessages = this.actualMessagesParsed[key];
             const messageTime = this.parseLocalDate(key);
@@ -168,6 +181,8 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                             ${threadMessages.map((message) => {
                 const dateFormated = formatTimestamp(message.createAt);
                 const userName = this.actualThread?.users.find((user) => user.userId === message.senderId)?.name || message.senderId;
+                const userAvatar = this.actualThread?.users.find((user) => user.userId === message.senderId)?.avatar_url || '';
+
                 const cls = message.senderId === this.userId ? 'user' : 'system';
                 return html`
                     <div class="message ${cls}">
@@ -177,22 +192,23 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                                     <div class="message-title">@${userName}</div>
                                     <div class="message-content">${message.content}</div>
                                     <div class="message-footer">${dateFormated?.time}</div>
-                    ${message.taskId
+                                    ${message.taskId
                         ? html`
-                            <div class="message-ai">
-                                <widget-ai-task-100554 
-                                    messageId=${message.createAt}
-                                    .context= ${message.context}
-                                    lastChanged= ${message.lastChanged}
-                                    taskId=${message.taskId}
-                                    @taskclick=${() => this.onTaskClick(message?.taskId || '', message.threadId, message.createAt)}
-                                    >
-                                </widget-ai-task-100554>
-                            </div>                                            `
+                                            <div class="message-ai">
+                                                <widget-ai-task-100554 
+                                                    messageId=${message.createAt}
+                                                    .context= ${message.context}
+                                                    lastChanged= ${message.lastChanged}
+                                                    taskId=${message.taskId}
+                                                    @taskclick=${() => this.onTaskClick(message?.taskId || '', message.threadId, message.createAt)}
+                                                    >
+                                                </widget-ai-task-100554>
+                                            </div>                                            `
                         : html``}
-                                    </div>        
-                                </div>    
-                            </div>
+                                </div> 
+                                ${cls === 'system' ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''} 
+                            </div>    
+                        </div>
                     </div>`
             })}`
         })}
@@ -204,24 +220,7 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
     }
 
     private renderPrompt() {
-        return html`
-        </div> 
-            <div class="wrapper">
-                <textarea
-                    .value=${this.text}
-                    @input=${this.handleInput}
-                    @keydown=${this.handleKeyDown}
-                    id="prompt_input"
-                    ?readonly=${this.isSending}
-                    placeholder="Digite aqui... (@ para menções)">
-                </textarea>
-                <button 
-                    @click=${this.handleSend} 
-                    ?disabled=${this.isSending}
-                    >
-                    ${this.isSending ? html`<span class="loader"></span>` : collab_arrow_up_long}
-                </button>
-        </div>`
+        return html`<collab-messages-prompt-100554 .allUsers=${this.actualThread?.users || []} .onSend=${this.handleSend.bind(this)} ></collab-messages-prompt-100554>`
     }
 
     private renderListThreads() {
@@ -249,11 +248,12 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
     private renderTaskDetails() {
         return html`
-            <widget-ai-interaction-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK} .payloads=${this.actualTask?.iaCompressed?.nextSteps}></widget-ai-interaction-100554>
-        `
+            <widget-ai-interaction-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK} .payloads=${this.actualTask?.iaCompressed?.nextSteps}></widget-ai-interaction-100554>`
     }
 
-
+    private renderThreadDetails() {
+        return html`In develpoment`
+    }
 
     private renderAddParticipant() {
         return html`
@@ -293,6 +293,32 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         </div>
     `;
     }
+
+
+    private async onChatScroll(e: Event) {
+        const container = e.target as HTMLElement;
+
+        // Se está no topo
+        if (container.scrollTop === 0 && !this.isLoadingMoreMessages && this.actualThread) {
+            this.isLoadingMoreMessages = true;
+
+            const previousHeight = container.scrollHeight;
+
+            const newOffset = this.messagesOffset + this.messagesLimit;
+            const newMessages = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, newOffset);
+
+            this.messagesOffset = newOffset;
+
+            this.actualMessages = this.mergeMessages(newMessages, this.actualMessages);
+            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+            await this.updateComplete;
+            const newHeight = container.scrollHeight;
+            container.scrollTop = newHeight - previousHeight;
+
+            this.isLoadingMoreMessages = false;
+        }
+    }
+
 
     private async onSubmitAddParticipant() {
 
@@ -383,8 +409,10 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
     private async onThreadClick(threadInfo: IThreadInfo) {
 
         this.activeScenerie = 'loading';
+        this.messagesOffset = 0;
         this.actualThread = threadInfo;
-        const messagesInDb = await getMessagesByThreadId(threadInfo.thread.threadId);
+        const messagesInDb = await getMessagesByThreadId(threadInfo.thread.threadId, 5, 0);
+
         this.actualMessages = messagesInDb;
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         this.activeScenerie = 'details';
@@ -445,7 +473,7 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
             this.activeScenerie = 'list';
             return;
         }
-        if (this.activeScenerie === 'addParticipant') {
+        if (this.activeScenerie === 'addParticipant' || this.activeScenerie === 'threadDetails') {
             this.activeScenerie = 'details';
             return;
         }
@@ -456,54 +484,23 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         this.activeScenerie = 'addParticipant';
     }
 
-    private handleInput(e: Event) {
-
-        const target = e.target as HTMLTextAreaElement;
-        const cursorPos = target.selectionStart;
-        const value = target.value;
-        const textBeforeCursor = value.slice(0, cursorPos);
-        const lines = textBeforeCursor.split('\n');
-        const currentLine = lines[lines.length - 1];
-
-        if (currentLine === '@@') {
-            const afterText = value.slice(cursorPos);
-            const newText = value.slice(0, cursorPos - 2) + '@@ ' + afterText;
-            this.text = newText;
-            requestAnimationFrame(() => {
-                target.value = this.text;
-                const newCursorPos = cursorPos + 1;
-                target.selectionStart = target.selectionEnd = newCursorPos;
-            });
-        } else {
-            this.text = value;
-        }
+    private onThreadDetailsClick() {
+        this.saveScrollPosition();
+        this.activeScenerie = 'threadDetails';
     }
 
-    private async handleSend() {
-
-        if (this.isSending) return;
-        const trimmed = this.text.trim();
-        const mentionMatch = trimmed.match(/^@@\s?(.*)/);
-        const mention = mentionMatch ? mentionMatch[1].trim() : null;
-        if (!this.text) return;
-        this.isSending = true;
+    private async handleSend(value: string, opt: { isSpecialMention: boolean }) {
 
         try {
-            if (!mention) {
-                await this.addMessage(this.text);
+            if (!opt.isSpecialMention) {
+                await this.addMessage(value);
             } else {
-                await this.addMessageIA(this.text);
+                await this.addMessageIA(value);
             }
         } catch (err: any) {
             throw new Error(err.message);
         }
-    }
 
-    private handleKeyDown(e: KeyboardEvent) {
-        if (e.key === "Enter" && !e.shiftKey && !this.isSending) {
-            e.preventDefault();
-            this.handleSend();
-        }
     }
 
     private async addMessage(prompt: string) {
@@ -519,10 +516,8 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         const response = await mls.api.msgAddMessage(params);
         const { content, createAt, orderAt, senderId, threadId } = response.message;
         this.updateMessage(content, createAt, orderAt, senderId, threadId);
-        this.isSending = false;
 
     }
-
 
     private async addMessageIA(prompt: string) {
         if (!this.userId || !this.actualThread) return;
@@ -538,10 +533,6 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
         const agent = createAgent();
         await agent.beforePrompt(context);
-
-        // const { content, createAt, orderAt, senderId, threadId, taskId } = context.message;
-        // if (context.task) await addTask(context.task);
-        //this.updateMessage(content, createAt, orderAt, senderId, threadId, taskId);
 
     }
 
@@ -570,9 +561,12 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
             if (taskId) newMessage.taskId = taskId;
             this.actualMessages.push({ context, lastChanged: new Date().getTime(), ...newMessage });
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
-            this.text = '';
             await addMessage(newMessage);
-            this.isSending = false;
+            if (this.collabMessagesPrompt) {
+                this.collabMessagesPrompt.text = '';
+                this.collabMessagesPrompt.isSending = false;
+
+            }
             this.requestUpdate();
 
         } else {
@@ -610,7 +604,6 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         if (taskId) newMessage.taskId = taskId;
         this.actualMessages.push(newMessage);
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
-        this.text = '';
         addMessage(newMessage);
         this.requestUpdate();
 
@@ -678,4 +671,4 @@ interface IMessage extends mls.msg.Message {
 
 type IMessageGrouped = { [key: string]: IMessage[] }
 type IThread = { CONNECT: IThreadInfo[] }
-type IScenery = 'list' | 'details' | 'loading' | 'task' | 'addParticipant'
+type IScenery = 'list' | 'details' | 'loading' | 'task' | 'addParticipant' | 'threadDetails'
