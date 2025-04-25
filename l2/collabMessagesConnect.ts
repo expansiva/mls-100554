@@ -256,6 +256,10 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
     }
 
     private renderAddParticipant() {
+
+        this.labelErrorAddParticipant = '';
+        this.labelOkAddParticipant = '';
+
         return html`
         <div class="add-participant">
             <label>
