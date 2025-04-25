@@ -15,7 +15,6 @@ import './_100554_widgetAiTask';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
 
-
 /// **collab_i18n_start** 
 const message_pt = {
     loading: 'Carregando...',

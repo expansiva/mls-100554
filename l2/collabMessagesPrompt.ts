@@ -12,13 +12,11 @@ export class CollabMessagesPrompt100554 extends IcaLitElement {
     @property() isSending: boolean = false;
     @property({ type: Function }) onSend: Function | undefined;
     @query('textarea') textArea: HTMLTextAreaElement | undefined;
-
     @state() text: string = '';
     @state() mentionActive = false;
     @state() mentionQuery = '';
     @state() mentionSuggestions: mls.msg.User[] = [];
     @state() mentionIndex = 0;
-
     @property() allUsers:mls.msg.User[] = [];
 
     render() {
