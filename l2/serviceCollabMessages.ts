@@ -115,8 +115,9 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
-        this.getThreadFromLocalDB();
         this.userPerfil = await this.getUser();
+        await this.getThreadFromLocalDB();
+        this.updateThreads();
     }
 
     render() {
@@ -169,9 +170,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     renderConnect() {
         this.execCoachMarks('Connect');
-        this.getThreadFromLocalDB();
-        this.updateThreads();
-
         return html`<collab-messages-connect-100554 
             style="height:${this.style.height}"
             .userThreads=${{
@@ -232,32 +230,14 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
         for await (let threadId of userThreads) {
             if (this.userThreads[threadId]) {
-                return;
+                continue;
             }
             const threadInfo = await this.getThreadInfo(threadId, userId);
             this.userThreads[threadId] = threadInfo;
+            syncThreads([threadInfo.thread]);
+            syncUsers(threadInfo.users);
+
         }
-
-        const arrThreads = Object.keys(this.userThreads).map((key) => {
-            return this.userThreads[key].thread
-        });
-
-        const addedUserIds = new Set<string>();
-        const uniqueUsers: mls.msg.User[] = [];
-
-        Object.values(this.userThreads).forEach(thread => {
-            thread.users.forEach(user => {
-                if (!addedUserIds.has(user.userId)) {
-                    addedUserIds.add(user.userId);
-                    uniqueUsers.push(user);
-                }
-            });
-        });
-
-        syncThreads(arrThreads);
-        syncUsers(uniqueUsers);
-
-        this.requestUpdate();
 
     }
 

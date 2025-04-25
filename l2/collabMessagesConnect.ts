@@ -6,7 +6,7 @@ import { IcaLitElement } from './_100554_icaLitElement';
 import { collab_chevron_left, collab_user_plus, collab_gear } from './_100554_collabIcons';
 import { createAgent } from './_100554_agentPlanner1';
 import { getTemporaryContext } from './_100554_aiAgentHelper';
-import { addTask, syncTask, addMessages, addMessage, getMessagesByThreadId, updateThread } from './_100554_msgDBController';
+import { addTask, syncTask, addMessages, addMessage, getAllMessagesByThreadId, updateThread, syncUsers, syncThreads } from './_100554_msgDBController';
 import { formatTimestamp } from './_100554_iaChatBase';
 import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt'
 
@@ -172,7 +172,7 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
     private renderChatMessages() {
         return html`
-            <div class="chat-container" @scroll=${this.onChatScroll}>    
+            <div class="chat-container">    
                 ${Object.keys(this.actualMessagesParsed).map((key) => {
             const threadMessages = this.actualMessagesParsed[key];
             const messageTime = this.parseLocalDate(key);
@@ -298,14 +298,15 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
     private async onChatScroll(e: Event) {
         const container = e.target as HTMLElement;
 
-        // Se está no topo
         if (container.scrollTop === 0 && !this.isLoadingMoreMessages && this.actualThread) {
             this.isLoadingMoreMessages = true;
 
             const previousHeight = container.scrollHeight;
 
             const newOffset = this.messagesOffset + this.messagesLimit;
-            const newMessages = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, newOffset);
+            //const newMessages = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, newOffset);
+            const newMessages = await getAllMessagesByThreadId(this.actualThread.thread.threadId);
+
 
             this.messagesOffset = newOffset;
 
@@ -411,33 +412,38 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         this.activeScenerie = 'loading';
         this.messagesOffset = 0;
         this.actualThread = threadInfo;
-        const messagesInDb = await getMessagesByThreadId(threadInfo.thread.threadId, 5, 0);
-
+        const messagesInDb = await getAllMessagesByThreadId(threadInfo.thread.threadId);
         this.actualMessages = messagesInDb;
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         this.activeScenerie = 'details';
 
         this.isLoadingMessages = true;
         try {
-
             const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
-            //this.actualMessages = [...this.actualMessages, ...messages];
             this.actualMessages = this.mergeMessages(this.actualMessages, messages);
             addMessages(messages);
 
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             const lastMessage = this.actualMessages.length > 0 ? this.actualMessages[this.actualMessages.length - 1] : undefined;
 
-            if (lastMessage) {
-                const thread = await updateThread(threadInfo.thread.threadId, lastMessage.content, lastMessage.createAt, 0);
-                threadInfo.thread = thread;
-            }
-
             console.info({
                 actual: this.actualThread,
                 actualMessages: this.actualMessages,
                 actualMessagesParsed: this.actualMessagesParsed
             });
+
+            if (!this.userId || !this.actualThread.thread.threadId) return;
+            const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId)
+            await syncThreads([threadByServer.thread]);
+
+            if (lastMessage && threadByServer) {
+                const thread = await updateThread(threadByServer.thread.threadId, lastMessage.content, lastMessage.createAt, 0);
+                threadInfo.thread = thread;
+            }
+
+            threadInfo.users = threadByServer.users;
+            syncUsers(threadInfo.users);
+
 
         } catch (err: any) {
             throw new Error('Error on loading messages: ' + err.message);
@@ -638,6 +644,18 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         if (taskData.statusCode !== 200) throw new Error("error on AI get taskUpdate , stoped");
 
         return taskData.task;
+    }
+
+    private async getThreadInfo(threadId: string, userId: string): Promise<IThreadInfo> {
+        try {
+            const response = await mls.api.msgGetThreadUpdate({
+                threadId,
+                userId
+            });
+            return response;
+        } catch (err: any) {
+            throw new Error(err.message)
+        }
     }
 
     private saveScrollPosition() {
