@@ -9,7 +9,6 @@ import { collab_user } from './_100554_collabIcons';
 export class CollabMessagesAvatar100554 extends IcaLitElement {
 
     @property() avatar: string = '';
-
     render() {
         return html`
         <div class="avatar">
