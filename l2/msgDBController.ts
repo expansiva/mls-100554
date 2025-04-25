@@ -79,8 +79,47 @@ export async function getMessage(messageId: string): Promise<mls.msg.Message | u
     });
 }
 
+export async function getMessagesByThreadId(
+  threadId: string,
+  limit: number = 15,
+  offset: number = 0
+): Promise<mls.msg.Message[]> {
+  const db = await openDB();
 
-export async function getMessagesByThreadId(threadId: string): Promise<mls.msg.Message[]> {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("messages", "readonly");
+    const store = tx.objectStore("messages");
+    const index = store.index("byThreadId");
+
+    const range = IDBKeyRange.only(threadId);
+    const request = index.openCursor(range, "prev"); // "prev" = mais recentes primeiro
+
+    const messages: mls.msg.Message[] = [];
+    let skipped = 0;
+
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor || messages.length >= limit) {
+        resolve(messages);
+        return;
+      }
+
+      if (skipped < offset) {
+        skipped++;
+        cursor.continue();
+        return;
+      }
+
+      messages.push(cursor.value);
+      cursor.continue();
+    };
+
+    request.onerror = () => reject("Erro ao buscar mensagens por threadId com paginação");
+  });
+}
+
+
+export async function getAllMessagesByThreadId(threadId: string): Promise<mls.msg.Message[]> {
     const db = await openDB();
     return new Promise((resolve, reject) => {
         const tx = db.transaction("messages", "readonly");

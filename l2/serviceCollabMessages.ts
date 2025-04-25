@@ -10,6 +10,8 @@ import './_100554_collabMessagesAdd';
 import './_100554_collabMessagesConnect';
 import './_100554_wcImage';
 import './_100554_collabTasks';
+import './_100554_collabMessagesSettings';
+
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -43,11 +45,10 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     private msg: MessageType = messages['en'];
 
     @property() activeTab: ITabType = 'CRM';
+    @property() activeScenerie: IScenery = 'tabs';
 
     @state() userPerfil: mls.msg.User | undefined;
-    @state() userThreads: IThreadData = {
-
-    }
+    @state() userThreads: IThreadData = {}
 
     public details: IService = {
         icon: '&#xf086',
@@ -66,8 +67,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     public onClickMain(op: string) {
         if (op === 'opReset') this.resetOnBoarding();
+        if (op === 'opSettings') this.openSettings();
     }
-
 
     public onClickTools(op: string) {
         if (op === 'toolAdd') this.openAdd();
@@ -78,6 +79,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         title: '',
         main: {
             opReset: { text: 'Reset onboarding', icon: 'f2ea' },
+            opSettings: { text: 'Settings', icon: 'f085' },
+
         },
         tools: {
             toolAdd: {
@@ -118,71 +121,14 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     render() {
 
-        const a: mls.msg.RequestAddThread = {
-            action: 'addThread',
-            name: 'Test',
-            group: 'TASK',
-            languages: [],
-            status: 'active',
-            userId: '',
-            visibility: 'private'
-        }
-
-        const b: mls.msg.RequestAddMessage = {
-            action: 'addMessage',
-            content: 'Ola',
-            threadId: '',
-            userId: ''
-        }
-
-
-        const c: mls.msg.RequestAddMessageAI = {
-            action: 'addMessageAI',
-            inputAI: [{ content: '', type: 'system' }],
-            agentName: '',
-            taskTitle: '',
-            userMessage: '',
-            threadId: '',
-            userId: ''
-        }
-
-        const d: mls.msg.RequestGetNextMessages = {
-            action: 'getNextMessages',
-            lastOrderAt: '',
-            threadId: '',
-            userId: ''
-        }
-
-        const e: mls.msg.RequestGetThreadUpdate = {
-            action: 'getThreadUpdate',
-            threadId: '20250417135645.1000',
-            userId: '20250417120841.1000'
-        }
-
-
-        let xx:mls.msg.UserAuth = 'write'
-
-
-        const f: mls.msg.RequestAddUserInThread = {
-            action: 'addUserInThread',
-            auth: 'write',
-            userIdOrName: '20250417120844.1000',
-            threadId: '20250417135645.1000',
-            userId: '20250417120841.1000'
-        }
-
-        const g: mls.msg.RequestGetTaskUpdate = {
-            action: 'getTaskUpdate',
-            taskId: '',
-            messageId: '',
-            userId: '20250417120841.1000'
-        }
-
-
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         if (this.menu.setTabActive) this.menu.setTabActive(ETabs[this.activeTab]);
+        return this.renderTabs();
+    }
 
+
+    renderTabs() {
         switch (this.activeTab) {
             case 'CRM':
                 return this.renderCRM();
@@ -392,6 +338,17 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         if (this.menu.setMode) this.menu.setMode('initial');
     }
 
+    private openSettings() {
+        if (this.menu.setTabActive) this.menu.setTabActive(-1);
+
+        if (this.menu.setMode) {
+            const settings = document.createElement('collab-messages-settings-100554');
+            (settings as any)['serviceBase'] = this;
+            this.menu.setMode('page', settings);
+        }
+        return true;
+    }
+
 
 }
 
@@ -409,8 +366,8 @@ enum ETabs {
     'Connect' = 3,
     'Apps' = 4,
     'Add' = 5,
-
 }
 
-type ITabType = 'CRM' | 'Tasks' | 'Docs' | 'Connect' | 'Apps' | 'Add';
 
+type ITabType = 'CRM' | 'Tasks' | 'Docs' | 'Connect' | 'Apps' | 'Add';
+type IScenery = 'tabs' | 'settings'

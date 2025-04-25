@@ -1,0 +1,43 @@
+/// <mls shortName="collabMessagesAvatar" project="100554" enhancement="enhancementStyle" />
+
+collab-messages-avatar-100554 {
+
+    display: block;
+    position: relative;
+
+    .avatar {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        gap: .4rem;
+        align-items: center;
+        top: 8px;
+        left: -30px;
+
+        img {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .avatar-placeholder {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+
+            svg {
+                width: 12px;
+                height: 12px;
+            }
+        }
+    }
+}
+

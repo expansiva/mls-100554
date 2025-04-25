@@ -4,6 +4,8 @@ import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { getTask } from './_100554_msgDBController';
+import { getNextPendentStep } from './_100554_aiAgentHelper';
+
 
 import {
     collab_money,
@@ -11,7 +13,6 @@ import {
     collab_bell,
     collab_chevron_right,
     collab_clock,
-    collab_triangle_exclamation,
     collab_check,
     collab_bug
 } from './_100554_collabIcons';
@@ -46,7 +47,6 @@ export class WidgetAiTask100554 extends IcaLitElement {
     @property() lastChanged: string = '';
 
     @state() task: mls.msg.TaskData | undefined;
-
     @state() context: mls.msg.ExecutionContext | undefined;
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
@@ -90,7 +90,8 @@ export class WidgetAiTask100554 extends IcaLitElement {
     }
 
     renderIconTask() {
-        const taskObj = {
+        const taskObj: any = {
+            '': html``,
             'pending': collab_clock,
             'paused': collab_pause,
             'todo': collab_clock,
@@ -101,12 +102,18 @@ export class WidgetAiTask100554 extends IcaLitElement {
                     <span class="icon-wrapper">
                         ${collab_bell}
                         <span class="notification-badge">1</span>
-                    </span>`
+                    </span>`,
+        }
+        let status = '';
+        if (this.task) {
+            status = this.task.status;
+            const nextStepPending = getNextPendentStep(this.task);
+            if (nextStepPending?.type === 'clarification') status = 'waitingforuser'
+
         }
 
-
         if (!this.task) return html`<spanclass="task-icon in progress ">${collab_clock}</span>`;
-        return html`<span class="task-icon ${this.task.status.split(' ').join('-')} ">${taskObj[this.task.status]}</span>`;
+        return html`<span class="task-icon ${status.split(' ').join('-')} ">${taskObj[status]}</span>`;
 
     }
 
