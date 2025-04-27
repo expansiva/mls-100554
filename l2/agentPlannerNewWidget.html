@@ -1,1 +1,155 @@
-<h1>_100554_agentPlannerNewWidget</h1>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clarification Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    .section {
+      background: #fff;
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .section h2 {
+      margin-top: 0;
+    }
+    .property, .requirement {
+      margin-left: 20px;
+      margin-top: 5px;
+    }
+    .buttons {
+      margin-top: 30px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .cancel {
+      background-color: #ccc;
+    }
+    .continue {
+      background-color: #4CAF50;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div id="content2"></div>
+
+<div class="buttons">
+  <button class="cancel" onclick="handleAction('cancel')">Cancelar</button>
+  <button class="continue" onclick="handleAction('continue')">Continuar</button>
+</div>
+
+<script type="module">
+  import { postBackClarification } from "./_100554_aiAgentOrchestration";
+
+  const clarificationData = {
+    "type": "clarification",
+    "taskId": 1234,
+    "stepId": 333555,
+    "clarificationMessage": "Definição do widget date-picker-range para seleção de intervalo de datas com limites e bloqueios.",
+    "json": [
+      {
+        "sectionName": "resume",
+        "description": "Widget para seleção de intervalo de datas, com suporte a limites mínimos e máximos e bloqueio de datas específicas, ideal para reservas e agendamentos."
+      },
+      {
+        "sectionName": "widgetName",
+        "description": "Nome do Widget",
+        "widgetName": "wcDatePickerRangeCustom"
+      },
+      {
+        "sectionName": "properties",
+        "description": "Propriedades do widget",
+        "properties": [
+          { "propertyName": "startValue", "description": "Data inicial do intervalo selecionado", "isEssencial": "true" },
+          { "propertyName": "endValue", "description": "Data final do intervalo selecionado", "isEssencial": "true" },
+          { "propertyName": "minvalue", "description": "Data mínima permitida para seleção", "isEssencial": "false" },
+          { "propertyName": "maxvalue", "description": "Data máxima permitida para seleção", "isEssencial": "false" },
+          { "propertyName": "blockedDates", "description": "Lista de datas específicas bloqueadas para seleção (essencial)", "isEssencial": "true" },
+          { "propertyName": "label", "description": "Rótulo para o campo de seleção", "isEssencial": "false" },
+          { "propertyName": "hint", "description": "Dica para o usuário sobre o uso do widget", "isEssencial": "false" },
+          { "propertyName": "required", "description": "Define se o campo é obrigatório", "isEssencial": "false" },
+          { "propertyName": "disabled", "description": "Define se o widget está desabilitado", "isEssencial": "false" },
+          { "propertyName": "readonly", "description": "Define se o widget é somente leitura", "isEssencial": "false" },
+          { "propertyName": "autofocus", "description": "Define se o widget recebe foco automaticamente", "isEssencial": "false" },
+          { "propertyName": "pattern", "description": "Padrão para validação da data", "isEssencial": "false" },
+          { "propertyName": "errormessage", "description": "Mensagem exibida em caso de erro de validação", "isEssencial": "false" },
+          { "propertyName": "eventBinding", "description": "Eventos para interação com o widget", "isEssencial": "false" }
+        ]
+      },
+      {
+        "sectionName": "requirements",
+        "description": "Requisitos para este widget, altere se necessário",
+        "requirements": [
+          "Must support selection of a date range with start and end dates",
+          "Must allow setting minimum and maximum selectable dates",
+          "Must allow blocking specific dates from selection",
+          "Must provide clear validation and error messages",
+          "Must support keyboard navigation and accessibility standards",
+          "Must allow disabling and readonly modes",
+          "Must emit events on date selection changes"
+        ]
+      }
+    ]
+  };
+
+  const contentDiv = document.getElementById('content2');
+
+  function renderClarification(data) {
+  console.log('render')
+    data.json.forEach(section => {
+      const sectionEl = document.createElement('div');
+      sectionEl.className = 'section';
+
+      const title = document.createElement('h2');
+      title.textContent = section.sectionName;
+      sectionEl.appendChild(title);
+
+      const description = document.createElement('p');
+      description.textContent = section.description;
+      sectionEl.appendChild(description);
+
+      if (section.properties) {
+        section.properties.forEach(prop => {
+          const propEl = document.createElement('div');
+          propEl.className = 'property';
+          propEl.textContent = `• ${prop.propertyName}: ${prop.description} (Essencial: ${prop.isEssencial})`;
+          sectionEl.appendChild(propEl);
+        });
+      }
+
+      if (section.requirements) {
+        section.requirements.forEach(req => {
+          const reqEl = document.createElement('div');
+          reqEl.className = 'requirement';
+          reqEl.textContent = `- ${req}`;
+          sectionEl.appendChild(reqEl);
+        });
+      }
+
+      contentDiv.appendChild(sectionEl);
+    });
+  }
+
+  async function handleAction(action) {
+    await postBackClarification(action, clarificationData.taskId, clarificationData.stepId);
+  }
+  renderClarification(clarificationData);
+</script>
+
+</body>
+</html>

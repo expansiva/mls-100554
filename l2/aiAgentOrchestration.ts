@@ -249,6 +249,14 @@ async function executeNextClarification(context: mls.msg.ExecutionContext, step:
     if (!step.clarificationMessage) throw new Error("clarification message is missing");
 
     if ((mls as any).istraceAgent) console.log("clarification:", step.clarificationMessage);
-    context.task = await updateStepStatus(context.task, step.stepId, "waiting_for_user");
+    // context.task = await updateStepStatus(context.task, step.stepId, "waiting_for_user");
 
 }
+
+export async function postBackClarification(action: "continue" | "cancel", taskId: number, stepId: number) {
+ console.log("postBackClarification, taskId: ", taskId , ", stepId:" , stepId);
+ // find by taskid
+ // call afterClarification do agente correto
+ // se action === cancel, para a task
+}
+
