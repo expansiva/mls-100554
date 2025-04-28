@@ -71,6 +71,7 @@ export async function getPrompts(prompt: string | undefined, rags: string[] | nu
 
     prompts.push(systemMainInstruction());
     prompts.push(systemTaskInstruction());
+    prompts.push(systemExampleInstruction());
     prompts.push(systemComponentsInstruction());
     prompts.push(systemRulesComponentsInstruction());
     prompts.push(systemOutInstruction());
@@ -107,6 +108,24 @@ Sua tarefa é transformar esse modelo em uma estrutura HTML usando exclusivament
 	•	Estruture a página em um container principal, seções, colunas e linhas conforme a separação por seções
     •	Siga a regra fornecida na descrição dos componentes
     •	Todo o lugar que for setado o state deve se usar duas "{{" para abrir e fechar o comando
+    •	Nas tags dos elementos "ica" se deve adicionar o sufixo -100554 exemplo: 'ica-layout-flow-section' = 'ica-layout-flow-section-100554'
+`
+    }
+}
+
+function systemExampleInstruction(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `##Exemplo
+
+Exemplo de como o HTML deve ser gerado:
+
+<ica-layout-flow-section-100554 id="section1" class="inset" widget="wc-section-100554">
+	<ica-apresentation-text-text-100554 id="apText1" widget="wc-text-100554" text="Solicitação de Compra de Materiais" type="h2">
+	</ica-apresentation-text-text-100554>
+	<ica-layout-flow-divider-100554 widget="wc-divider-line-100554" id="apDivider1">
+	</ica-layout-flow-divider-100554>
+<ica-layout-flow-section-100554>
 `
     }
 }

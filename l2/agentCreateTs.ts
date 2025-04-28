@@ -2,7 +2,7 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { preferModelType } from './_100554_aiPrompts'; 
-import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget } from "./_100554_pluginNewFileBase";
+import { createNewFile } from "./_100554_pluginNewFileBase";
 
 import {
     getNextPendingStepByAgentName,
