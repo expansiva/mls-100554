@@ -478,6 +478,8 @@ export class ServicePreviewView extends IcaLitElement {
 				window['l2_fieldTypes'] = window['l2_fieldTypes']  ? window['l2_fieldTypes']  : parent.l2_fieldTypes ? parent.l2_fieldTypes : top['l2_fieldTypes'];window['litDisableBundleWarning'] = true; window['collabActualLevel'] = ${this.level};
 
                 window['previewL1'] = window['previewL1']  ? window['previewL1']  : parent.previewL1 ? parent.previewL1 : top['previewL1'];
+
+                window['preview'] = window['preview']  ? window['preview']  : parent.preview ? parent.preview : top['preview'];
 				`;
             ifr.contentDocument?.body.appendChild(s);
 
