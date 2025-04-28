@@ -11,6 +11,17 @@ export function sync() {
 
 }
 
+export function updateHTML(html:string) {
+
+    if (!window.preview.editor || !window.preview.iframe) return;
+    const model = window.preview.editor.getModel();
+    if (!model) return;
+    const newHTMLOnlyICA = html
+    const formatedNewHTML = formatHtml(newHTMLOnlyICA);
+    setValueInModeKeepingUndo2(model, formatedNewHTML);
+
+}
+
 function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent: string) {
     const editor = window.preview.editor;
     if (!editor)
