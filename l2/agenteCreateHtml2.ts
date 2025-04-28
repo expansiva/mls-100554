@@ -123,7 +123,7 @@ No atributo  allowedChildren e allowedParents
 function systemOutInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
-        content: `##EXEMPLO SAIDA
+        content: `##EXEMPLO SAÍDA
 A resposta deve ser um JSON estruturado contendo as informações da interface.
 
 {
