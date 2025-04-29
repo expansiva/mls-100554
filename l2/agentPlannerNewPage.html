@@ -1,1 +1,126 @@
-<h1>_100554_agentPlannerNewPage</h1>
+<style>
+    .agentPlannerNewPageClarification {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #F9F9F9;
+        font-size: var(--font-size-12);
+    }
+
+    .section {
+        background: #fff;
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .section h2 {
+        margin-top: 0;
+    }
+
+    .property,
+    .requirement {
+        margin-left: 20px;
+        margin-top: 5px;
+        width: calc(100% - 20px);
+    }
+
+    .buttons {
+        margin-top: 30px;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin-right: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .cancel {
+        background-color: #ccc;
+    }
+
+    .continue {
+        background-color: #4CAF50;
+        color: white;
+    }
+</style>
+<div class="agentPlannerNewPageClarification">
+    <div id="content2"></div>
+    <div class="buttons">
+        <button class="cancel">Cancelar</button>
+        <button class="continue">Continuar</button>
+    </div>
+</div>
+<script type="module">
+    import { postBackClarification } from "/_100554_aiAgentOrchestration";
+  //**startClarificationData
+  const clarificationData = {
+    "type": "clarification",
+    "taskId": 1234,
+    "stepId": 333555,
+    "clarificationMessage": "Definição do widget date-picker-range para seleção de intervalo de datas com limites e bloqueios.",
+    "json": [
+        {
+            "sectionName": "pageName",
+            "description": "Nome da pagina",
+            "value": "[nomedapagina]"
+        },
+        {
+            "sectionName": "requirements",
+            "description": "requisitos para esta pagina, altere se necessário",
+            "value": [
+                "[exemplo 1 - Suporte para autenticação de usuário]",
+                "[exemplo 2 - Validação de campos de entrada]"
+            ]
+        }
+    ]
+  };
+//**endClarificationData
+  function renderClarification(data) {
+    console.info('render');
+    const contentDiv = document.getElementById('content2');
+    console.info(contentDiv)
+    data.json.forEach(section => {
+      const sectionEl = document.createElement('div');
+      sectionEl.className = 'section';
+      const title = document.createElement('h2');
+      title.textContent = section.sectionName;
+      sectionEl.appendChild(title);
+      const description = document.createElement('p');
+      description.textContent = section.description;
+      sectionEl.appendChild(description);
+      if(section.sectionName === 'pageName'){
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = section.value;
+        input.oninput = () => {
+          section.value = input.value;
+        };
+        sectionEl.appendChild(input);
+      }
+      if (section.sectionName === 'requirements') {
+          const reqEl = document.createElement('textarea');
+          reqEl.className = 'requirement';
+          reqEl.rows = section.value.length;
+          reqEl.value = ' -' + section.value.join('\n -');
+          reqEl.oninput = ()=> {
+              section.value = reqEl.value.split('\n');
+          };
+          sectionEl.appendChild(reqEl);
+      }
+      contentDiv.appendChild(sectionEl);
+    });
+  }
+  function setupButtonListeners() {
+    document.querySelector('.cancel')?.addEventListener('click', () => handleAction('cancel'));
+    document.querySelector('.continue')?.addEventListener('click', () => handleAction('continue'));
+  }
+  async function handleAction(action) {
+    await postBackClarification(action, clarificationData);
+  }
+  renderClarification(clarificationData);
+  setupButtonListeners();
+</script>

@@ -6,7 +6,8 @@ import {
   getNextPendingStepByAgentName,
   getNextInProgressStepByAgentName,
   calculateStepsStatistics,
-  updateStepStatus
+  updateStepStatus,
+  getStepById
 } from "./_100554_aiAgentHelper";
 
 import {
@@ -20,7 +21,7 @@ const agentName = "agentPlannerNewPage";
 export function createAgent(): IAgent {
   return {
     agentName,
-    avatar_url:svg_agent,
+    avatar_url: svg_agent,
     agentDescription: "Responsável por definir os detalhes de criação de uma nova página no sistema",
     visibility: "private",
     async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
@@ -28,8 +29,14 @@ export function createAgent(): IAgent {
     },
     async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
       return _afterPrompt(context);
+    },
+    async beforeClarification(context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> {
+      return _beforeClarification(context, stepId);
+    },
+    async afterClarification(context: mls.msg.ExecutionContext, stepId: number, data: any): Promise<void> {
+      return _afterClarification(context, stepId, data);
     }
-  };
+  }
 }
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
@@ -61,6 +68,92 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
   if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
   context.task = await updateStepStatus(context.task, step.stepId, "completed");
   await executeNextStep(context);
+}
+
+const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> => {
+
+  if (!context.task) throw new Error("[_beforeClarification] Invalid context.task");
+  const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
+  if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
+  if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
+  const project = 100554;
+  const keyFile = mls.stor.getKeyToFiles(project, 2, agentName, '', '.html');
+  const storFile = mls.stor.files[keyFile];
+  if (!storFile) return null;
+  const content = await storFile.getContent();
+  if (!content || typeof content !== 'string') return null;
+  const element = prepareHtmlClarification(content, step.json, context.task.PK, stepId, step.clarificationMessage);
+  return element;
+}
+
+const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number, data: any): Promise<void> => {
+
+  if (!context || !context.message || !context.task) throw new Error("Invalid context");
+  if (!data.json) throw new Error("Invalid json after clarification");
+  console.info({
+    _afterClarification: {
+      context,
+      stepId,
+      data
+    }
+  });
+  const newPrompt = JSON.stringify(data.json);
+  console.info({ newPrompt })
+  const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
+  if (!step) {
+    throw new Error(`[${agentName}] beforePrompt: No found step: ${stepId} for this agent.`);
+  }
+  
+  //context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+  
+  //notifyTaskChange(context);
+
+  // Todo: chamar que agente ?
+  const newStep: mls.msg.AIAgentStep = {
+    type: "agent",
+    agentName,
+    interaction: null,
+    nextSteps: null,
+    status: "pending",
+    stepId: step.stepId + 1,
+    prompt: newPrompt,
+    rags:null
+  }
+
+  // await executeNextStep(context);
+}
+
+function prepareHtmlClarification(
+  content: string,
+  json: string | object,
+  taskId: string,
+  stepId: number,
+  clarificationMessage: string
+): HTMLDivElement {
+  const div: HTMLDivElement = document.createElement('div');
+  const jsonStr = typeof json === 'object'
+    ? JSON.stringify(json, null, 2)
+    : json;
+  const clarificationTemplate = `//**startClarificationData
+  const clarificationData = {
+    "type": "clarification",
+    "taskId": '[TaskId]',
+    "stepId": '[StepId]',
+    "clarificationMessage": '[clarificationMessage]',
+    "json": [Json]
+  };
+//**endClarificationData`;
+  const updatedBlockContent = content.replace(
+    /\/\/\*\*startClarificationData[\s\S]*?\/\/\*\*endClarificationData/,
+    clarificationTemplate
+  );
+  const finalContent = updatedBlockContent
+    .replace(/\[TaskId\]/g, taskId)
+    .replace(/\[StepId\]/g, stepId.toString())
+    .replace(/\[clarificationMessage\]/g, clarificationMessage)
+    .replace(/\[Json\]/g, jsonStr);
+  div.innerHTML = finalContent;
+  return div;
 }
 
 export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
@@ -144,9 +237,31 @@ ou
   {
     "type": "clarification",
     "clarificationMessage": string,
-   "htmlForm?": string // Optional HTML form shown to the user. The submitted data will be included in the prompt of the next interaction.
+    "json": TClarification
   }
 ]
-\`\`\``
+\`\`\`
+
+definição de TClarification
+\`\`\`json
+[
+    
+  {
+    "sectionName": "pageName",
+    "description": "Nome da pagina",
+    "value": "[nomedapagina]"
+  },
+  {
+    "sectionName": "requirements",
+    "description": "requisitos para esta pagina, altere se necessário",
+    "value": [
+      "[exemplo 1 - Suporte para autenticação de usuário]",
+      "[exemplo 2 - Validação de campos de entrada]"
+    ]
+  }
+]
+\`\`\`
+
+`
   }
 }
