@@ -1,6 +1,8 @@
 /// <mls shortName="aiAgentOrchestration" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { argsValidator, calculateStepsByFilter, updateStepStatus, calculateStepsStatistics, getInteractionStepId, getNextPendentStep, safeParseArgs, appendPromptToInteraction } from "./_100554_aiAgentHelper";
+import { argsValidator, calculateStepsByFilter, updateStepStatus, calculateStepsStatistics, getInteractionStepId, getNextPendentStep, safeParseArgs, appendPromptToInteraction, getStepById } from "./_100554_aiAgentHelper";
+
+import { getTask, getMessage, syncTask } from "./_100554_msgDBController";
 
 export async function startNewAiTask(
     agentName: string,
@@ -235,6 +237,23 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
     }
 }
 
+async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep, functionName: string, stepId: number): Promise<any> {
+    if (!context || !context.task) throw new Error("[executeAgentFunction] Invalid context");
+    if (!step.agentName) throw new Error("[executeAgentFunction] Agent name is missing");
+
+    try {
+        //const fileJS = `./${step.agentName}.js`;
+        const fileJS = `./_100554_${step.agentName}`;
+        const module = await import(fileJS);
+        if (typeof module.createAgent !== "function") throw new Error(`[executeAgentFunction] createAgent function not found in ${fileJS}`);
+        const agent = module.createAgent();
+        if (typeof agent[functionName] !== "function") throw new Error(`[executeAgentFunction] ${functionName} function not found in ${fileJS}`);
+        return await agent[functionName](context, stepId);
+    } catch (error: any) {
+        console.error(`[executeAgentFunction] ${error.message || error}`);
+    }
+}
+
 async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.msg.AIResultStep) {
     if (!context || !context.task) throw new Error("Invalid context");
 
@@ -253,30 +272,73 @@ async function executeNextClarification(context: mls.msg.ExecutionContext, step:
 
 }
 
+export async function getAgentContext(taskId: string): Promise<{
+    context: mls.msg.ExecutionContext,
+    interaction: mls.msg.AIAgentStep,
+    step: mls.msg.AIPayload
+}> {
+    const task: mls.msg.TaskData | undefined = await getTask(taskId);
+    if (!task || !task.messageid_created) throw new Error("[getAgentContext] Invalid taskId" + taskId);
+    const step = getNextPendentStep(task);
+    if (!step) throw new Error("[getAgentContext] No pending step")
+    if (step.type !== "clarification" && step.type !== "tool") throw new Error("[getAgentContext] No pending clarification or tool step");
+    const interactionId: number | null = getInteractionStepId(task, step.stepId);
+    if (!interactionId) throw new Error("[getAgentContext] Not found interactionId in pending step")
+    const interaction: mls.msg.AIPayload | null = getStepById(task, interactionId);
+    if (!interaction || interaction.type !== "agent") throw new Error("[getAgentContext] Clarification or tool step not bellow a agent");
+    const messageId: string = task.messageid_created.split("/")[1].trim();
+    const message: mls.msg.Message | undefined = await getMessage(messageId);
+    if (!message) throw new Error("[getAgentContext] Message not found:" + messageId)
+    const context: mls.msg.ExecutionContext = {
+        message,
+        task
+    }
+    return { context, interaction, step };
+}
+
+export async function getClarification(taskId: string): Promise<HTMLDivElement | null> {
+    const ret = await getAgentContext(taskId);
+    if (ret.step.type !== "clarification") throw new Error("[getClarification] Clarification step not not found");
+    return await executeAgentFunction(ret.context, ret.interaction, "beforeClarification", ret.step.stepId);
+}
+
 export async function postBackClarification(
     action: "continue" | "cancel",
-    clarification: unknown
+    clarification: object
 ) {
-    if (
-        typeof clarification === "object" &&
-        clarification !== null &&
-        "taskId" in clarification &&
-        "stepId" in clarification
-    ) {
-        const { taskId, stepId } = clarification as { taskId: number; stepId: number };
-        console.log(
-            "postBackClarification:",
-            "action:", action,
-            ", taskId:", taskId,
-            ", stepId:", stepId
-        );
+    if (typeof clarification !== "object" ||
+        !clarification) throw new Error("[postBackClarification] Invalid call arguments");
 
-        // find by taskid
-        // call afterClarification do agente correto
-        // se action === cancel, para a task
-    } else {
-        console.error("Clarification inválido:", clarification);
+    function findTaskId(obj: any): string | null {
+        if (typeof obj !== "object" || obj === null) return null;
+        if ("taskId" in obj && typeof obj.taskId === "string") return obj.taskId;
+
+        for (const key in obj) {
+            const result = findTaskId(obj[key]);
+            if (result) return result;
+        }
+
+        return null;
     }
+    const taskId: string | null = findTaskId(clarification);
+    if (!taskId) throw new Error("[postBackClarification] Invalid call arguments, no taskId");
+    const ret = await getAgentContext(taskId);
+    if (action === "cancel") {
+        const messageId: string = ret.context.message.createAt;
+        const resp = await mls.api.msgUpdateStepStatus({
+            messageId,
+            status: "failed",
+            stepId: ret.step.stepId,
+            taskId,
+            userId: ret.context.message.senderId, // todo: usar userId from localstor
+            traceMsg: "user cancel the task"
+        });
+        await syncTask(resp.task);
+        // todo: send event to serviceCollabMessages , task changed
+        return;
+    }
+    if (ret.step.type !== "clarification") throw new Error("[getClarification] Clarification step not not found");
+    return await executeAgentFunction(ret.context, ret.interaction, "afterClarification", ret.step.stepId);
 }
 
 
