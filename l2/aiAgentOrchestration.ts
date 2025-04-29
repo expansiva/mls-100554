@@ -102,18 +102,26 @@ export async function addNewStep(context: mls.msg.ExecutionContext, parentStep: 
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     if (!context.task.messageid_created) throw new Error("addNewInteractionInAiTask: context.task.messageid_created is null");
 
-    const response = await mls.api.msgAddTaskAISteps({
-        userId: getUserIdLocalStorage() || context.message.senderId,
-        parentStepId: parentStep,
-        steps,
-        taskId: context.task.PK,
-        messageId: context.task.messageid_created
-    });
+    try {
+        const response = await mls.api.msgAddTaskAISteps({
+            userId: getUserIdLocalStorage() || context.message.senderId,
+            parentStepId: parentStep,
+            steps,
+            taskId: context.task.PK,
+            messageId: context.task.messageid_created
+        });
 
-    context.task = response.task;
-    context.task = await updateStepStatus(context.task, parentStep, "completed");
-    notifyTaskChange(context);
-    executeNextStep(context);
+        context.task = response.task;
+        context.task = await updateStepStatus(context.task, parentStep, "completed");
+        notifyTaskChange(context);
+        executeNextStep(context);
+
+    } catch (error: any) {
+        if (context && context.task && parentStep) {
+            setFailedStatus(context, parentStep);
+        }
+        console.error(`[startNewInteractionInAiTask] ${error.message || error}`);
+    }
 
 }
 
