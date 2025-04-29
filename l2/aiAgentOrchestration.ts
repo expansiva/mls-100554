@@ -47,7 +47,7 @@ export async function startNewAiTask(
 
 type AfterPrompt = (context: mls.msg.ExecutionContext) => Promise<void>;
 
-export async function startNewInteractionInAiTask(agentName: string, taskTitle: string, inputAI: mls.msg.IAMessageInputType[], context: mls.msg.ExecutionContext, afterPrompt: AfterPrompt, stepFather:number): Promise<void> {
+export async function startNewInteractionInAiTask(agentName: string, taskTitle: string, inputAI: mls.msg.IAMessageInputType[], context: mls.msg.ExecutionContext, afterPrompt: AfterPrompt, stepFather: number): Promise<void> {
     try {
         if (!context || !context.message || !context.task) throw new Error("Invalid context");
         if (!agentName) throw new Error("addNewInteractionInAiTask: agentName is null");
@@ -253,10 +253,31 @@ async function executeNextClarification(context: mls.msg.ExecutionContext, step:
 
 }
 
-export async function postBackClarification(action: "continue" | "cancel", taskId: number, stepId: number) {
- console.log("postBackClarification, taskId: ", taskId , ", stepId:" , stepId);
- // find by taskid
- // call afterClarification do agente correto
- // se action === cancel, para a task
+export async function postBackClarification(
+    action: "continue" | "cancel",
+    clarification: unknown
+) {
+    if (
+        typeof clarification === "object" &&
+        clarification !== null &&
+        "taskId" in clarification &&
+        "stepId" in clarification
+    ) {
+        const { taskId, stepId } = clarification as { taskId: number; stepId: number };
+        console.log(
+            "postBackClarification:",
+            "action:", action,
+            ", taskId:", taskId,
+            ", stepId:", stepId
+        );
+
+        // find by taskid
+        // call afterClarification do agente correto
+        // se action === cancel, para a task
+    } else {
+        console.error("Clarification inválido:", clarification);
+    }
 }
+
+
 

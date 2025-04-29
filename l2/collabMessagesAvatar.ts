@@ -9,6 +9,17 @@ import { collab_user } from './_100554_collabIcons';
 export class CollabMessagesAvatar100554 extends IcaLitElement {
 
     @property() avatar: string = '';
+    @property({ type: String }) width = '30px';
+    @property({ type: String }) height = '30px';
+
+    updated(changedProperties: Map<string, any>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('width') || changedProperties.has('height')) {
+            this.style.setProperty('--avatar-width', this.width);
+            this.style.setProperty('--avatar-height', this.height);
+        }
+    }
+
     render() {
         return html`
         <div class="avatar">

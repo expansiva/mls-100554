@@ -74,7 +74,6 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
     private messagesOffset = 0;
     private isLoadingMoreMessages = false;
 
-
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
 

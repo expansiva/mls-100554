@@ -45,7 +45,7 @@ export class CollabMessagesPrompt100554 extends IcaLitElement {
                         class="${i === this.mentionIndex ? 'active' : ''}"
                         @click=${() => this.selectMention(s.name)}
                     >
-                        ${s.avatar_url ? html`<collab-messages-avatar-100554 avatar=${s.avatar_url}></collab-messages-avatar-100554>` : ''}
+                        ${s.avatar_url ? html`<collab-messages-avatar-100554 width="20px" height="20px" avatar=${s.avatar_url}></collab-messages-avatar-100554>` : ''}
                         ${s.name}
                     </li>
                 `)}
@@ -143,7 +143,6 @@ export class CollabMessagesPrompt100554 extends IcaLitElement {
 
         if (finalText.startsWith('@@')) {
             isSpecialMention = true;
-            finalText = finalText.replace(/^@@/, '');
         }
 
         if (this.onSend && typeof this.onSend === 'function') {
