@@ -121,7 +121,7 @@ export const calculateStepsByFilter = (task: mls.msg.TaskData, filter: Record<st
 };
 
 
-export const getTemporaryContext = (threadId: string, userId: string, prompt: string, cb?: (context: mls.msg.ExecutionContext) => void): mls.msg.ExecutionContext => {
+export const getTemporaryContext = (threadId: string, userId: string, prompt: string): mls.msg.ExecutionContext => {
   // create temporary context
   const context: mls.msg.ExecutionContext = {
     task: undefined,
@@ -133,11 +133,7 @@ export const getTemporaryContext = (threadId: string, userId: string, prompt: st
       content: prompt.trim(),
     }
   };
-
-  return createDeepObservable(context, () => {
-    if (cb) cb(context);
-  });
-  // return context;
+  return context;
 };
 
 export function safeParseArgs(args: string): Record<string, any> {
@@ -240,21 +236,92 @@ export async function appendPromptToInteraction(
 
 }
 
-function createDeepObservable(obj: any, callback: () => void): any {
-  const handler: ProxyHandler<any> = {
-    get(target, prop, receiver) {
-      const value = Reflect.get(target, prop, receiver);
-      if (value && typeof value === 'object' && value !== null) {
-        return createDeepObservable(value, callback);
-      }
-      return value;
-    },
-    set(target, prop, value, receiver) {
-      const result = Reflect.set(target, prop, value, receiver);
-      callback();
-      return result;
+const USER_ID_KEY = 'collabMessages_userId';
+
+export function saveUserIdLocalStorage(userId: string): void {
+  localStorage.setItem(USER_ID_KEY, userId);
+}
+
+export function getUserIdLocalStorage(): string | null {
+  return localStorage.getItem(USER_ID_KEY);
+}
+
+export function notifyTaskChange(context: mls.msg.ExecutionContext): void {
+  const event = new CustomEvent('task-change', {
+    detail: context,
+    bubbles: true,
+    composed: true
+  });
+  window.dispatchEvent(event);
+}
+
+export function dispatchDetailsTaskClose(): void {
+  const event = new CustomEvent('task-details-close', {
+    bubbles: true,
+    composed: true
+  });
+  window.dispatchEvent(event);
+}
+
+
+export function getTotalCost(task: mls.msg.TaskData): string {
+
+  let tot = 0;
+  const nextSteps = task.iaCompressed?.nextSteps;
+  if (!nextSteps || nextSteps.length === 0) return tot.toFixed(4);
+
+  const sumCosts = (interaction: mls.msg.AIInteraction) => {
+    tot += interaction.cost ? interaction.cost : 0;
+    if (interaction.payload && interaction.payload.length > 0) {
+      interaction.payload.forEach((p) => {
+        if (p.interaction) sumCosts(p.interaction);
+        if (p.nextSteps) {
+          p.nextSteps.forEach((p1) => {
+            if (p1.interaction) sumCosts(p1.interaction);
+          });
+        }
+      });
+
     }
   };
 
-  return new Proxy(obj, handler);
+  nextSteps.forEach((step) => {
+    if (step.interaction) sumCosts(step.interaction);
+  })
+
+  return tot.toFixed(4);
 }
+
+export function formatTimestamp(timestamp: string) {
+    if (!timestamp || timestamp.length < 14) {
+        return;
+    }
+    const year = timestamp.slice(0, 4);
+    const month = timestamp.slice(4, 6);
+    const day = timestamp.slice(6, 8);
+    const hour = timestamp.slice(8, 10);
+    const minute = timestamp.slice(10, 12);
+    const second = timestamp.slice(12, 14);
+    const utcDate = new Date(Date.UTC(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day),
+        parseInt(hour),
+        parseInt(minute),
+        parseInt(second)
+    ));
+
+    const localYear = utcDate.getFullYear();
+    const localMonth = (utcDate.getMonth() + 1).toString().padStart(2, '0');
+    const localDay = utcDate.getDate().toString().padStart(2, '0');
+    const localHour = utcDate.getHours().toString().padStart(2, '0');
+    const localMinute = utcDate.getMinutes().toString().padStart(2, '0');
+    const localSecond = utcDate.getSeconds().toString().padStart(2, '0');
+
+    const date = `${localYear}-${localMonth}-${localDay}`;
+    const time = `${localHour}:${localMinute}:${localSecond}`;
+    const dateFull = `${date} ${time}`;
+    return { dateFull, date, time };
+}
+
+

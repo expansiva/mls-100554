@@ -3,7 +3,7 @@
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getListFilesStart, systemReturnJsonFormat, preferModelType } from './_100554_aiPrompts';
 import { icaDescriptions } from './_100554_icaBaseDescription';
-import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, calculateStepsStatistics, updateStepStatus } from "./_100554_aiAgentHelper";
+import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, notifyTaskChange } from "./_100554_aiAgentHelper";
 import { startNewAiTask, executeNextStep, postBackClarification, startNewInteractionInAiTask } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentPlannerNewWidget";
@@ -21,8 +21,11 @@ export function createAgent(): IAgent {
         async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _afterPrompt(context);
         },
-        async afterClarification(context: mls.msg.ExecutionContext, stepId: number): Promise<void> {
-            return _afterClarification(context, stepId);
+        async afterClarification(context: mls.msg.ExecutionContext, stepId: number, data: object): Promise<void> {
+            return _afterClarification(context, stepId, data as ClarificationData);
+        },
+        async beforeClarification(context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> {
+            return _beforeClarification(context, stepId);
         }
     }
 };
@@ -35,7 +38,6 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context.task) {
         // using temporary context, create a new task
         const inputs = await getPrompts(context.message.content, null);
-        console.log('before prompt', inputs);
         await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
     } else {
 
@@ -50,7 +52,9 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 }
 
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
+    
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
     const resultStep: mls.msg.AIPayload | undefined = step.nextSteps?.[0];
@@ -71,8 +75,41 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     // await executeNextStep(context);
 }
 
-const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<void> => {
+const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number, data: ClarificationData): Promise<void> => {
+
+    if (!context || !context.message || !context.task) throw new Error("Invalid context");
+    if (!data.json) throw new Error("Invalid json after clarification");
+
+    const newPrompt = generatePromptFromJson(data.json);
+
+    const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
+    if (!step) {
+        throw new Error(`[${agentName}] beforePrompt: No found step: ${stepId} for this agent.`);
+    }
+    context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+    notifyTaskChange(context);
+
+    // se chamar o mesmo, entrar em loop, pois o prompt nunca retorna um type="agent";
+
 }
+
+const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> => {
+
+    if (!context.task) throw new Error("[_beforeClarification] Invalid context.task");
+    const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
+    if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
+    if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
+    const project = 100554;
+    const keyFile = mls.stor.getKeyToFiles(project, 2, agentName, '', '.html');
+    const storFile = mls.stor.files[keyFile];
+    if (!storFile) return null;
+    const content = await storFile.getContent();
+    if (!content || typeof content !== 'string') return null;
+    const element = prepareHtmlClarification(content, step.json, context.task.PK, stepId, step.clarificationMessage);
+    return element;
+
+}
+
 
 export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
     if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
@@ -185,4 +222,83 @@ function systemICAComponentsList(): mls.msg.IAMessageInputType {
 ${getICADescription()}
 `
     }
+}
+
+function prepareHtmlClarification(
+    content: string,
+    json: string | object,
+    taskId: string,
+    stepId: number,
+    clarificationMessage: string
+): HTMLDivElement {
+    const div: HTMLDivElement = document.createElement('div');
+
+    const jsonStr = typeof json === 'object'
+        ? JSON.stringify(json, null, 2)
+        : json;
+
+
+    const clarificationTemplate = `//**startClarificationData
+  const clarificationData = {
+    "type": "clarification",
+    "taskId": '[TaskId]',
+    "stepId": '[StepId]',
+    "clarificationMessage": '[clarificationMessage]',
+    "json": [Json]
+  };
+//**endClarificationData`;
+
+    const updatedBlockContent = content.replace(
+        /\/\/\*\*startClarificationData[\s\S]*?\/\/\*\*endClarificationData/,
+        clarificationTemplate
+    );
+
+    const finalContent = updatedBlockContent
+        .replace(/\[TaskId\]/g, taskId)
+        .replace(/\[StepId\]/g, stepId.toString())
+        .replace(/\[clarificationMessage\]/g, clarificationMessage)
+        .replace(/\[Json\]/g, jsonStr);
+
+    div.innerHTML = finalContent;
+    return div;
+}
+
+export function generatePromptFromJson(json: any[]): string {
+    const resume = json.find(s => s.sectionName === 'resume');
+    const widgetName = json.find(s => s.sectionName === 'widgetName')?.widgetName;
+    const properties = json.find(s => s.sectionName === 'properties')?.properties || [];
+    const requirements = json.find(s => s.sectionName === 'requirements')?.requirements || [];
+
+    const result: any = {
+        widgetName: widgetName,
+        resume: resume?.description,
+        properties: properties.map((p: any) => ({
+            propertyName: p.propertyName || '',
+            description: p.description || '',
+            isEssencial: p.isEssencial === 'true',
+        })),
+        requirements: requirements
+    };
+
+    return JSON.stringify(result, null, 2);
+}
+
+
+interface ClarificationJson {
+    sectionName: string;
+    description: string;
+    widgetName?: string;
+    properties?: {
+        propertyName: string;
+        description: string;
+        isEssencial: string;
+    }[];
+    requirements?: string[];
+};
+
+interface ClarificationData {
+    json: ClarificationJson[],
+    taskId: string,
+    stepId: number,
+    clarificationMessage: string
 }

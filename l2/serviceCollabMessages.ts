@@ -5,7 +5,9 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { CollbaMessagesAddResponse } from './_100554_collabMessagesAdd';
-import { listThreads, addThread, syncThreads, listUsers, syncUsers } from './_100554_msgDBController';
+import { saveUserIdLocalStorage } from "./_100554_aiAgentHelper";
+
+import { listThreads, addThread, updateThreads, listUsers, updateUsers } from './_100554_msgDBController';
 import './_100554_collabMessagesAdd';
 import './_100554_collabMessagesConnect';
 import './_100554_wcImage';
@@ -116,6 +118,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         this.userPerfil = await this.getUser();
+        saveUserIdLocalStorage(this.userPerfil.userId);
         await this.getThreadFromLocalDB();
         this.updateThreads();
     }
@@ -234,8 +237,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             }
             const threadInfo = await this.getThreadInfo(threadId, userId);
             this.userThreads[threadId] = threadInfo;
-            syncThreads([threadInfo.thread]);
-            syncUsers(threadInfo.users);
+            updateThreads([threadInfo.thread]);
+            updateUsers(threadInfo.users);
         }
 
         this.requestUpdate();
@@ -329,7 +332,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         }
         return true;
     }
-
 
 }
 
