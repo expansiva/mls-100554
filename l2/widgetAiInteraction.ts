@@ -1,6 +1,6 @@
 /// <mls shortName="widgetAiInteraction" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, TemplateResult } from 'lit';
+import { html, css, TemplateResult, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { getNextResultStep, getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById } from './_100554_aiAgentHelper';
@@ -12,27 +12,22 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
     @property() task: mls.msg.TaskData | undefined = undefined;
     @property() stepid: string = '';
     @property({ attribute: false }) seen = new Set<string>();
-    @property() breadcrumb: IBreadCrumb[] = [];
 
-    @query('.direct-clarification form') formClarification: HTMLFormElement | undefined;
+    @property() interactionClarification: mls.msg.AIAgentStep | undefined;
+
+    @query('.direct-clarification') directClarification: HTMLElement | undefined;
+    @query('.direct-clarification .content') directClarificationContent: HTMLElement | undefined;
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
-        console.info(this.formClarification)
-        if (this.formClarification) {
-            this.formClarification.addEventListener('submit', this.handleFormSubmit.bind(this));
+        if (this.interactionClarification) {
+            this.getHTMLFromAgent(this.interactionClarification.agentName);
         }
     }
 
     render() {
 
         if (!this.payloads) return html``;
-
-        if (this.breadcrumb.length === 0) {
-            this.breadcrumb = [
-                { data: this.payloads, title: 'root' }
-            ];
-        }
 
         let isClarificationPending: boolean = false;
         if (this.task) {
@@ -46,20 +41,15 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
         })
 
         return html`        
-        <div class="breadcrumb">
-            ${this.breadcrumb.map((step, index) => html`
-                <span @click=${() => this.onBreadcrumbClick(index)}>${step.title}</span>   
-            `)}
-        </div>
-        <div class="payload-content">
-            ${this.payloads.map((payload) => {
-            return html`
-                <div>
-                    ${this.renderPayload(payload)}
-                </div>`
-        })}
-        </div>
-
+        <details class="details-task">
+            <summary>Details</summary>
+            <div>
+                ${this.renderTaskInfo()}
+                ${this.renderlLongMemory()}
+                ${this.renderTaskInteractions()}
+            </div>
+        </details>
+        
         ${this.task?.status === "done"
                 ? this.renderDirectResult()
                 : html``
@@ -71,24 +61,6 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
             }
 
         `
-    }
-
-    private handleFormSubmit(e: Event) {
-
-        e.preventDefault();
-        if (!this.task) return;
-
-        const nextStepPending = getNextPendentStep(this.task);
-        if (!nextStepPending || nextStepPending?.type !== 'clarification') return;
-        const message = nextStepPending.clarificationMessage
-
-        const form = e.target as HTMLFormElement;
-        const formData = new FormData(form);
-        const prompt = Array.from(formData.entries())
-            .map(([key, value]) => `${key}: ${value}`)
-            .join('\n');
-
-        console.info('Prompt gerado:', `${message}\n\n${prompt}`);
     }
 
     private renderDirectResult() {
@@ -105,6 +77,48 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
         return html`<div class="direct-clarification">${this.renderClarification(payload)}</div>`
     }
 
+    private renderlLongMemory() {
+        if (!this.task || !this.task.iaCompressed?.longMemory) return html``
+        return html`
+            <h4>LongMemory</h4>
+            <ul>
+                ${Object.keys(this.task.iaCompressed?.longMemory).map((key) => {
+            return html`<li>${key}:${this.task?.iaCompressed?.longMemory[key]}</li>`
+        })}
+            </ul>
+        `
+    }
+
+    private renderTaskInfo() {
+        return html`
+            <div class="task-info">
+                <ul>
+                    <li>
+                        <span>Id:</span>
+                        <span>${this.task?.PK}</span>
+                    </li>
+                    <li>
+                        <span>Status:</span>
+                        <span>${this.task?.status}</span>
+                    </li>
+                </ul>                
+            </div>
+        `
+    }
+
+    private renderTaskInteractions() {
+        return html`
+            <div class="payload-content">
+                ${this.payloads?.map((payload) => {
+            return html`
+                                    <div>
+                                        ${this.renderPayload(payload)}
+                                    </div>`
+        })}
+            </div>
+        `
+    }
+
     private renderPayload(payload: mls.msg.AIPayload, isDirect: boolean = false): TemplateResult<1> {
 
         switch (payload.type) {
@@ -115,12 +129,17 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
                         ${this.renderAgent(payload)}
                     </details>`
             case 'tool':
-                return html``
+                return html`
+                    <details ?open=${isDirect} >
+                        <summary>${payload.type}</summary>
+                        ${this.renderTool(payload)}
+                    </details>
+                `
             case 'clarification':
                 return html`
                     <details ?open=${isDirect} >
                         <summary>${payload.type}</summary>
-                        ${this.renderClarification(payload)}
+                        ${this.renderClarificationDetails(payload)}
                     </details>
                 `
             case 'result':
@@ -173,7 +192,6 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
                             </div>
                         </details>`
                 : html``
-
             }
                 
             </div>`
@@ -181,6 +199,7 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
 
     private renderNextSteps(steps: mls.msg.AIStep[], stepId: number) {
         return html` 
+        <div>
             <details>
                 <summary>Next Steps</summary>
                 <div>
@@ -190,72 +209,95 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
         })}       
                     </ul>
                 </div> 
-            </details>`
+            </details>
+        </div> 
+            `
     }
 
     private onNextStepClick(interaction: mls.msg.AIInteraction | null | undefined, stepId: number) {
         if (!interaction || !interaction.payload) return;
-        this.breadcrumb = [...this.breadcrumb, { title: `Interaction: ${stepId}`, data: interaction.payload }];
         this.requestUpdate();
-    }
-
-    private onBreadcrumbClick(index: number) {
-        // this.breadcrumb = this.breadcrumb.slice(0, index + 1);
-        // this.interaction = this.breadcrumb[this.breadcrumb.length - 1].data;
     }
 
     private renderAgent(payload: mls.msg.AIAgentStep) {
         return html`
             ${payload.interaction ? this.renderInteration(payload.interaction, payload.stepId) : html``}
-            ${payload.nextSteps ? this.renderNextSteps(payload.nextSteps, payload.stepId) : html``}
+            ${payload.nextSteps && payload.nextSteps.length > 0 ? this.renderNextSteps(payload.nextSteps, payload.stepId) : html``}
         `;
 
     }
 
     private renderTool(payload: mls.msg.AIToolStep) {
-        return html``;
+        return html`
+            <div class="clarification-details">
+                <pre>${JSON.stringify(payload)}</pre>
+            </div>`;
+
+    }
+
+    private renderClarificationDetails(payload: mls.msg.AIClarificationStep) {
+        return html`
+            <div class="clarification-details">
+                <pre>${JSON.stringify(payload)}</pre>
+            </div>`;
 
     }
 
     private renderClarification(payload: mls.msg.AIClarificationStep) {
 
-        if (!this.task) return;
+        if (!this.task) return html`Invalid task`;
         const parentInteraction = getInteractionStepId(this.task, payload.stepId);
-        if (parentInteraction) {
-            const interaction = getStepById(this.task, parentInteraction);
-            console.info({
-                parentInteraction,
-                interaction
-            })
-
-        }
-
-        return html`
-            <div class="clarification">
-                <p><strong>Clarification:</strong> ${payload.clarificationMessage}</p>
-                ${payload.htmlForm
-                ? html`<div .innerHTML=${payload.htmlForm}></div>`
-                : html`<form>
-                        <textarea></textarea>
-                        <button>Enviar<button>
-                    </form>
-            </div>
-            
-            `}
-      `;
+        if (!parentInteraction) return html`No found parentInteraction ${payload.stepId} on task: ${this.task.PK} `;
+        const interaction = getStepById(this.task, parentInteraction) as mls.msg.AIAgentStep;
+        this.interactionClarification = interaction;
+        if (!interaction) return html`Invalid interaction id:${parentInteraction} on task: ${this.task.PK} `
+        if (!interaction.agentName) return html`Invalid agent name for step id:${interaction.stepId} on task: ${this.task.PK} `
+        return html`<div class="content"> Processing...</div>`
 
     }
 
     private renderResult(payload: mls.msg.AIResultStep) {
         return html`
+            <div class="result">
+                <pre>${typeof payload.result === 'object' ? JSON.stringify(payload.result) : payload.result}</pre>
+            </div>`;
+    }
 
-        <div class="result">
-            <pre>${payload.result}</pre>
-        </div>
-        
+    private async getHTMLFromAgent(agentName: string): Promise<void> {
+        if (!this.directClarificationContent) return;
+        const project = 100554;
+        const keyFile = mls.stor.getKeyToFiles(project, 2, agentName, '', '.html');
+        const storFile = mls.stor.files[keyFile];
+        if (!storFile) this.directClarificationContent.innerHTML = `Agent: ${project}_${agentName} not found`;
+        const content = await storFile.getContent();
+        if (typeof content !== 'string') this.directClarificationContent.innerHTML = `Content must be string`;
+        else {
+            this.directClarificationContent.innerHTML = content;
+            this.executeHTMLClarificationScript();
+        }
 
-        `;
+    }
 
+    private executeHTMLClarificationScript() {
+        this.directClarification?.querySelectorAll('script').forEach(oldScript => {
+
+            const newScript = document.createElement('script');
+            newScript.type = oldScript.type || 'text/javascript';
+            if (!newScript.type) {
+                newScript.type = 'text/javascript';
+            }
+
+            if (oldScript.hasAttribute('type') && oldScript.getAttribute('type') === 'module') {
+                newScript.type = 'module';
+            }
+
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            oldScript.replaceWith(newScript);
+        });
     }
 
 }

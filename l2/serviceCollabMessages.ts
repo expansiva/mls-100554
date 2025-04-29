@@ -236,8 +236,9 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             this.userThreads[threadId] = threadInfo;
             syncThreads([threadInfo.thread]);
             syncUsers(threadInfo.users);
-
         }
+
+        this.requestUpdate();
 
     }
 

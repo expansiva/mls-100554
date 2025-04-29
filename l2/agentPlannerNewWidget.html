@@ -1,60 +1,63 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clarification Page</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f9f9f9;
-    }
-    .section {
-      background: #fff;
-      margin-bottom: 20px;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .section h2 {
-      margin-top: 0;
-    }
-    .property, .requirement {
-      margin-left: 20px;
-      margin-top: 5px;
-    }
-    .buttons {
-      margin-top: 30px;
-    }
-    button {
-      padding: 10px 20px;
-      margin-right: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .cancel {
-      background-color: #ccc;
-    }
-    .continue {
-      background-color: #4CAF50;
-      color: white;
-    }
-  </style>
-</head>
-<body>
+<style>
+  .agentPlannerNewWidgetClarification {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f9f9f9;
+    font-size: var(--font-size-12);
+  }
 
-<div id="content2"></div>
+  .section {
+    background: #fff;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 
-<div class="buttons">
-  <button class="cancel" onclick="handleAction('cancel')">Cancelar</button>
-  <button class="continue" onclick="handleAction('continue')">Continuar</button>
+  .section h2 {
+    margin-top: 0;
+  }
+
+  .property,
+  .requirement {
+    margin-left: 20px;
+    margin-top: 5px;
+    width: calc(100% - 20px);
+  }
+
+  .buttons {
+    margin-top: 30px;
+  }
+
+  button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .cancel {
+    background-color: #ccc;
+  }
+
+  .continue {
+    background-color: #4CAF50;
+    color: white;
+  }
+</style>
+
+<div class="agentPlannerNewWidgetClarification">
+  <div id="content2"></div>
+  <div class="buttons">
+    <button class="cancel">Cancelar</button>
+    <button class="continue">Continuar</button>
+  </div>
 </div>
 
 <script type="module">
-  import { postBackClarification } from "./_100554_aiAgentOrchestration";
+  import { postBackClarification } from "/_100554_aiAgentOrchestration";
 
   const clarificationData = {
     "type": "clarification",
@@ -69,7 +72,7 @@
       {
         "sectionName": "widgetName",
         "description": "Nome do Widget",
-        "widgetName": "wcDatePickerRangeCustom"
+        "widgetName": "wcDataPickerRange",
       },
       {
         "sectionName": "properties",
@@ -102,15 +105,17 @@
           "Must support keyboard navigation and accessibility standards",
           "Must allow disabling and readonly modes",
           "Must emit events on date selection changes"
-        ]
+        ],
       }
     ]
   };
 
-  const contentDiv = document.getElementById('content2');
 
   function renderClarification(data) {
-  console.log('render')
+    console.info('render');
+    const contentDiv = document.getElementById('content2');
+    console.info(contentDiv)
+
     data.json.forEach(section => {
       const sectionEl = document.createElement('div');
       sectionEl.className = 'section';
@@ -123,33 +128,51 @@
       description.textContent = section.description;
       sectionEl.appendChild(description);
 
+      if(section.widgetName){
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = section.widgetName;
+        input.oninput = () => {
+          section.widgetName = input.value;
+        };
+        sectionEl.appendChild(input);
+      }
+
       if (section.properties) {
         section.properties.forEach(prop => {
           const propEl = document.createElement('div');
           propEl.className = 'property';
-          propEl.textContent = `• ${prop.propertyName}: ${prop.description} (Essencial: ${prop.isEssencial})`;
+          propEl.innerHTML = `• <b>${prop.propertyName}:</b> ${prop.description} (Essencial: ${prop.isEssencial})`;
           sectionEl.appendChild(propEl);
         });
       }
 
       if (section.requirements) {
-        section.requirements.forEach(req => {
-          const reqEl = document.createElement('div');
+          const reqEl = document.createElement('textarea');
           reqEl.className = 'requirement';
-          reqEl.textContent = `- ${req}`;
+          reqEl.rows = section.requirements.length;
+          reqEl.value = ' -' + section.requirements.join('\n -');
+          reqEl.oninput = ()=> {
+              section.requirements = reqEl.value.split('\n');
+          };
           sectionEl.appendChild(reqEl);
-        });
       }
 
       contentDiv.appendChild(sectionEl);
     });
   }
 
-  async function handleAction(action) {
-    await postBackClarification(action, clarificationData.taskId, clarificationData.stepId);
+  function setupButtonListeners() {
+    document.querySelector('.cancel')?.addEventListener('click', () => handleAction('cancel'));
+    document.querySelector('.continue')?.addEventListener('click', () => handleAction('continue'));
   }
-  renderClarification(clarificationData);
-</script>
 
-</body>
-</html>
+  async function handleAction(action) {
+    console.info(clarificationData)
+    await postBackClarification(action, clarificationData);
+  }
+
+  renderClarification(clarificationData);
+  setupButtonListeners();
+
+</script>

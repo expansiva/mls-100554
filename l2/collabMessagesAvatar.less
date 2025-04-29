@@ -4,23 +4,24 @@ collab-messages-avatar-100554 {
 
     display: block;
     position: relative;
+
     .avatar {
         position: absolute;
         display: flex;
         flex-direction: column;
         gap: .4rem;
         align-items: center;
-        
+
         img {
-            width: 20px;
-            height: 20px;
+            width: var(--avatar-width, 30px);
+            height: var(--avatar-height, 30px);
             border-radius: 50%;
             object-fit: cover;
         }
 
         .avatar-placeholder {
-            width: 20px;
-            height: 20px;
+            width: var(--avatar-width, 30px);
+            height: var(--avatar-height, 30px);
             border-radius: 50%;
             background-color: #ccc;
             display: flex;
