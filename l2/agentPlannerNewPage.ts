@@ -115,7 +115,7 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
     nextSteps: null,
     rags: null,
     type: 'agent',
-    title: 'Executing',
+    title: 'Executing', // necessario na api, porem nao existente na interface
   } as any
 
   await addNewStep(context, step.stepId, [newStep]);
