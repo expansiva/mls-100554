@@ -244,8 +244,6 @@ export class ServicePreviewView extends IcaLitElement {
 
     private async addStyles() {
 
-        console.info('addStyles');
-
         if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
         const { project, shortName } = this.models.style.storFile;
         const id = convertFileNameToTag(`_${project}_${shortName}`);
@@ -292,10 +290,6 @@ export class ServicePreviewView extends IcaLitElement {
                 || this.models.ts?.storFile.hasError
                 || this.models.style?.storFile.hasError
                 || this.models.html?.storFile.hasError) {
-
-                console.log('Errors in html:' + this.models?.html?.storFile.hasError);
-                console.log('Errors in style:' + this.models?.style?.storFile.hasError);
-                console.log('Errors in ts:' + this.models?.ts?.storFile.hasError);
 
                 this.error = this.msg.errorCompile;
                 this.showLoader(false);
