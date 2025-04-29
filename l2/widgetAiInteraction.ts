@@ -4,6 +4,7 @@ import { html, css, TemplateResult, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { getNextResultStep, getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById } from './_100554_aiAgentHelper';
+import { getClarification } from './_100554_aiAgentOrchestration';
 
 @customElement('widget-ai-interaction-100554')
 export class WidgetAiInteraction100554 extends IcaLitElement {
@@ -14,14 +15,13 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
     @property({ attribute: false }) seen = new Set<string>();
 
     @property() interactionClarification: mls.msg.AIAgentStep | undefined;
-
     @query('.direct-clarification') directClarification: HTMLElement | undefined;
     @query('.direct-clarification .content') directClarificationContent: HTMLElement | undefined;
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         if (this.interactionClarification) {
-            this.getHTMLFromAgent(this.interactionClarification.agentName);
+            this.setClarification();
         }
     }
 
@@ -34,33 +34,27 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
             const nextStepPending = getNextPendentStep(this.task);
             if (nextStepPending?.type === 'clarification') isClarificationPending = true;
         }
-
-        console.info({
-            payloads: this.payloads,
-            task: this.task
-        })
-
         return html`        
-        <details class="details-task">
-            <summary>Details</summary>
-            <div>
-                ${this.renderTaskInfo()}
-                ${this.renderlLongMemory()}
-                ${this.renderTaskInteractions()}
-            </div>
-        </details>
-        
-        ${this.task?.status === "done"
-                ? this.renderDirectResult()
-                : html``
-            }
+            <details class="details-task">
+                <summary>Details</summary>
+                <div>
+                    ${this.renderTaskInfo()}
+                    ${this.renderlLongMemory()}
+                    ${this.renderTaskInteractions()}
+                </div>
+            </details>
+            
+            ${this.task?.status === "done"
+                    ? this.renderDirectResult()
+                    : html``
+                }
 
-        ${isClarificationPending
-                ? this.renderDirectClarification()
-                : html``
-            }
+            ${isClarificationPending
+                    ? this.renderDirectClarification()
+                    : html``
+                }
 
-        `
+            `
     }
 
     private renderDirectResult() {
@@ -224,7 +218,6 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
             ${payload.interaction ? this.renderInteration(payload.interaction, payload.stepId) : html``}
             ${payload.nextSteps && payload.nextSteps.length > 0 ? this.renderNextSteps(payload.nextSteps, payload.stepId) : html``}
         `;
-
     }
 
     private renderTool(payload: mls.msg.AIToolStep) {
@@ -255,7 +248,6 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
         return html`<div class="content"> Processing...</div>`
 
     }
-
     private renderResult(payload: mls.msg.AIResultStep) {
         return html`
             <div class="result">
@@ -263,19 +255,12 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
             </div>`;
     }
 
-    private async getHTMLFromAgent(agentName: string): Promise<void> {
-        if (!this.directClarificationContent) return;
-        const project = 100554;
-        const keyFile = mls.stor.getKeyToFiles(project, 2, agentName, '', '.html');
-        const storFile = mls.stor.files[keyFile];
-        if (!storFile) this.directClarificationContent.innerHTML = `Agent: ${project}_${agentName} not found`;
-        const content = await storFile.getContent();
-        if (typeof content !== 'string') this.directClarificationContent.innerHTML = `Content must be string`;
-        else {
-            this.directClarificationContent.innerHTML = content;
-            this.executeHTMLClarificationScript();
-        }
-
+    private async setClarification(): Promise<void> {
+        if (!this.directClarificationContent || !this.task) return;
+        const clarification = await getClarification(this.task.PK);
+        if (!clarification) return;
+        this.directClarificationContent.innerHTML = clarification.innerHTML;
+        this.executeHTMLClarificationScript();
     }
 
     private executeHTMLClarificationScript() {
@@ -300,10 +285,4 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
         });
     }
 
-}
-
-
-interface IBreadCrumb {
-    title: string,
-    data: mls.msg.AIPayload[]
 }

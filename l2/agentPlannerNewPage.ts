@@ -7,13 +7,15 @@ import {
   getNextInProgressStepByAgentName,
   calculateStepsStatistics,
   updateStepStatus,
+  getInteractionStepId,
   getStepById
 } from "./_100554_aiAgentHelper";
 
 import {
   startNewAiTask,
   executeNextStep,
-  startNewInteractionInAiTask
+  startNewInteractionInAiTask,
+  addNewStep
 } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentPlannerNewPage";
@@ -90,37 +92,34 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
 
   if (!context || !context.message || !context.task) throw new Error("Invalid context");
   if (!data.json) throw new Error("Invalid json after clarification");
-  console.info({
-    _afterClarification: {
-      context,
-      stepId,
-      data
-    }
-  });
+
   const newPrompt = JSON.stringify(data.json);
-  console.info({ newPrompt })
   const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
   if (!step) {
     throw new Error(`[${agentName}] beforePrompt: No found step: ${stepId} for this agent.`);
   }
-  
-  //context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
-  
-  //notifyTaskChange(context);
 
-  // Todo: chamar que agente ?
-  const newStep: mls.msg.AIAgentStep = {
-    type: "agent",
+  const interactionId: number | null = getInteractionStepId(context.task, step.stepId);
+  if (!interactionId) throw new Error("[beforePrompt] Not found interactionId in pending step")
+  const payload: mls.msg.AIPayload | null = getStepById(context.task, interactionId);
+  if (!payload || payload.type !== "agent") throw new Error("[beforePrompt] Clarification or tool step not bellow a agent");
+
+  const promptUser = payload.interaction?.input.find((input) => input.type === 'human')?.content || '';
+
+  const newStep: mls.msg.AIPayload = {
     agentName,
+    prompt: promptUser + '\n' + newPrompt,
+    status: 'pending',
+    stepId: step.stepId + 1,
     interaction: null,
     nextSteps: null,
-    status: "pending",
-    stepId: step.stepId + 1,
-    prompt: newPrompt,
-    rags:null
-  }
+    rags: null,
+    type: 'agent',
+    title: 'Executing',
+  } as any
 
-  // await executeNextStep(context);
+  await addNewStep(context, step.stepId, [newStep]);
+
 }
 
 function prepareHtmlClarification(

@@ -38,7 +38,8 @@ export async function addMessages(messages: mls.msg.Message[]): Promise<void> {
         for (const message of messages) {
             const newMessage = {
                 ...message,
-                messageId: `${message.createAt}/${message.threadId}`,
+                messageId: `${message.threadId}/${message.createAt}`,
+
             };
             store.put(newMessage);
         }
@@ -57,7 +58,8 @@ export async function addMessage(message: mls.msg.Message): Promise<void> {
         const store = tx.objectStore("messages");
         const newMessage = {
             ...message,
-            messageId: `${message.createAt}/${message.threadId}`,
+            messageId: `${message.threadId}/${message.createAt}`,
+
         }
         store.put(newMessage);
         tx.oncomplete = () => resolve();
@@ -80,42 +82,42 @@ export async function getMessage(messageId: string): Promise<mls.msg.Message | u
 }
 
 export async function getMessagesByThreadId(
-  threadId: string,
-  limit: number = 15,
-  offset: number = 0
+    threadId: string,
+    limit: number = 15,
+    offset: number = 0
 ): Promise<mls.msg.Message[]> {
-  const db = await openDB();
+    const db = await openDB();
 
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction("messages", "readonly");
-    const store = tx.objectStore("messages");
-    const index = store.index("byThreadId");
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("messages", "readonly");
+        const store = tx.objectStore("messages");
+        const index = store.index("byThreadId");
 
-    const range = IDBKeyRange.only(threadId);
-    const request = index.openCursor(range, "prev"); // "prev" = mais recentes primeiro
+        const range = IDBKeyRange.only(threadId);
+        const request = index.openCursor(range, "prev"); // "prev" = mais recentes primeiro
 
-    const messages: mls.msg.Message[] = [];
-    let skipped = 0;
+        const messages: mls.msg.Message[] = [];
+        let skipped = 0;
 
-    request.onsuccess = () => {
-      const cursor = request.result;
-      if (!cursor || messages.length >= limit) {
-        resolve(messages);
-        return;
-      }
+        request.onsuccess = () => {
+            const cursor = request.result;
+            if (!cursor || messages.length >= limit) {
+                resolve(messages);
+                return;
+            }
 
-      if (skipped < offset) {
-        skipped++;
-        cursor.continue();
-        return;
-      }
+            if (skipped < offset) {
+                skipped++;
+                cursor.continue();
+                return;
+            }
 
-      messages.push(cursor.value);
-      cursor.continue();
-    };
+            messages.push(cursor.value);
+            cursor.continue();
+        };
 
-    request.onerror = () => reject("Erro ao buscar mensagens por threadId com paginação");
-  });
+        request.onerror = () => reject("Erro ao buscar mensagens por threadId com paginação");
+    });
 }
 
 
@@ -132,9 +134,8 @@ export async function getAllMessagesByThreadId(threadId: string): Promise<mls.ms
     });
 }
 
-export async function addTask(task: mls.msg.TaskData): Promise<void> {
+export async function addOrUpdateTask(task: mls.msg.TaskData): Promise<void> {
     const db = await openDB();
-
     return new Promise((resolve, reject) => {
         const tx = db.transaction("tasks", "readwrite");
         const store = tx.objectStore("tasks");
@@ -156,21 +157,6 @@ export async function getTask(taskId: string): Promise<mls.msg.TaskData | undefi
         request.onerror = () => reject("Erro ao buscar task");
     });
 }
-
-
-export async function syncTask(taskFromServer: mls.msg.TaskData): Promise<void> {
-    const db = await openDB();
-
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction("tasks", "readwrite");
-        const store = tx.objectStore("tasks");
-        store.put(taskFromServer);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject("Erro na transação de sincronização de task");
-        tx.onabort = () => reject("Transação de sincronização de task abortada");
-    });
-}
-
 
 export async function listThreads(): Promise<mls.msg.ThreadPerformanceCache[]> {
     const db = await openDB();
@@ -238,7 +224,7 @@ export async function updateThread(
     });
 }
 
-export async function syncThreads(threadsFromServer: mls.msg.Thread[]): Promise<void> {
+export async function updateThreads(threadsFromServer: mls.msg.Thread[]): Promise<void> {
 
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -292,7 +278,7 @@ export async function addUser(user: mls.msg.User): Promise<void> {
     });
 }
 
-export async function syncUsers(usersFromServer: mls.msg.User[]): Promise<void> {
+export async function updateUsers(usersFromServer: mls.msg.User[]): Promise<void> {
     const db = await openDB();
 
     return new Promise((resolve, reject) => {
@@ -301,7 +287,7 @@ export async function syncUsers(usersFromServer: mls.msg.User[]): Promise<void> 
 
         try {
             for (const user of usersFromServer) {
-                store.put(user); // Assumindo que user.userId está presente
+                store.put(user);
             }
         } catch (err) {
             reject(`Erro ao inserir usuários: ${err}`);

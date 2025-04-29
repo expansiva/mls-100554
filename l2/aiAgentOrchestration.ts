@@ -1,8 +1,21 @@
 /// <mls shortName="aiAgentOrchestration" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { argsValidator, calculateStepsByFilter, updateStepStatus, calculateStepsStatistics, getInteractionStepId, getNextPendentStep, safeParseArgs, appendPromptToInteraction, getStepById } from "./_100554_aiAgentHelper";
+import {
+    argsValidator,
+    calculateStepsByFilter,
+    updateStepStatus,
+    calculateStepsStatistics,
+    getInteractionStepId,
+    getNextPendentStep,
+    safeParseArgs,
+    appendPromptToInteraction,
+    getStepById,
+    getUserIdLocalStorage,
+    notifyTaskChange,
+    dispatchDetailsTaskClose
+} from "./_100554_aiAgentHelper";
 
-import { getTask, getMessage, syncTask } from "./_100554_msgDBController";
+import { getTask, getMessage } from "./_100554_msgDBController";
 
 export async function startNewAiTask(
     agentName: string,
@@ -26,22 +39,17 @@ export async function startNewAiTask(
         };
 
         const value = await mls.api.msgAddMessageAI(args);
-
-        if (!value) {
-            throw new Error("Error on return addMessageAI, no return");
-        }
-        if (value.statusCode !== 200) {
-            throw new Error("Error on addMessageAI: " + (value.msg || ''));
-        }
+        if (!value) throw new Error("Error on return addMessageAI, no return");
+        if (value.statusCode !== 200) throw new Error("Error on addMessageAI: " + (value.msg || ''));
 
         const ret = value as mls.msg.ResponseAddMessageAI;
-
         context.task = ret.task;
         context.message = ret.message;
+        notifyTaskChange(context);
 
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
-
         await afterPrompt(context);
+
     } catch (error: any) {
         console.error(`[startNewAiTask] ${error.message || error}`);
     }
@@ -72,27 +80,41 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
             throw new Error("Error on addTaskAIInteraction: " + (value.msg || ''));
         }
 
-        //const ret = value as mls.msg.ResponseAddMessageAI; Retorno errado
         const ret = value as mls.msg.ResponseAddTaskAIInteraction
-
-        /*context = {
-            message: context.message,
-            task: ret.task
-        };*/
-
         context.task = ret.task;
+        notifyTaskChange(context);
 
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
-
         await afterPrompt(context);
 
 
     }
     catch (error: any) {
-        if (context && context.task && stepFather)
-            await updateStepStatus(context.task, stepFather, "failed");
+        if (context && context.task && stepFather) {
+            setFailedStatus(context, stepFather);
+        }
         console.error(`[startNewInteractionInAiTask] ${error.message || error}`);
     }
+}
+
+export async function addNewStep(context: mls.msg.ExecutionContext, parentStep: number, steps: mls.msg.AIPayload[]) {
+
+    if (!context || !context.message || !context.task) throw new Error("Invalid context");
+    if (!context.task.messageid_created) throw new Error("addNewInteractionInAiTask: context.task.messageid_created is null");
+
+    const response = await mls.api.msgAddTaskAISteps({
+        userId: getUserIdLocalStorage() || context.message.senderId,
+        parentStepId: parentStep,
+        steps,
+        taskId: context.task.PK,
+        messageId: context.task.messageid_created
+    });
+
+    context.task = response.task;
+    context.task = await updateStepStatus(context.task, parentStep, "completed");
+    notifyTaskChange(context);
+    executeNextStep(context);
+
 }
 
 const maxCostByTask = 1.01; // 1.01 USD
@@ -233,11 +255,13 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
         if (typeof agent.afterPrompt !== "function") throw new Error(`afterPrompt function not found in ${fileJS}`);
         await agent.beforePrompt(context);
     } catch (error: any) {
+
+        setFailedStatus(context, step.stepId);
         console.error(`[executeNextAgent] ${error.message || error}`);
     }
 }
 
-async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep, functionName: string, stepId: number): Promise<any> {
+async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep, functionName: string, stepId: number, args?: object): Promise<any> {
     if (!context || !context.task) throw new Error("[executeAgentFunction] Invalid context");
     if (!step.agentName) throw new Error("[executeAgentFunction] Agent name is missing");
 
@@ -248,7 +272,7 @@ async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls
         if (typeof module.createAgent !== "function") throw new Error(`[executeAgentFunction] createAgent function not found in ${fileJS}`);
         const agent = module.createAgent();
         if (typeof agent[functionName] !== "function") throw new Error(`[executeAgentFunction] ${functionName} function not found in ${fileJS}`);
-        return await agent[functionName](context, stepId);
+        return await agent[functionName](context, stepId, args);
     } catch (error: any) {
         console.error(`[executeAgentFunction] ${error.message || error}`);
     }
@@ -259,6 +283,7 @@ async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.ms
 
     if ((mls as any).istraceAgent) console.log("result:", step.result);
     context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    notifyTaskChange(context);
     return executeNextStep(context);
 
 }
@@ -266,7 +291,7 @@ async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.ms
 async function executeNextClarification(context: mls.msg.ExecutionContext, step: mls.msg.AIClarificationStep) {
     if (!context || !context.task) throw new Error("Invalid context");
     if (!step.clarificationMessage) throw new Error("clarification message is missing");
-
+    notifyTaskChange(context);
     if ((mls as any).istraceAgent) console.log("clarification:", step.clarificationMessage);
     // context.task = await updateStepStatus(context.task, step.stepId, "waiting_for_user");
 
@@ -286,7 +311,11 @@ export async function getAgentContext(taskId: string): Promise<{
     if (!interactionId) throw new Error("[getAgentContext] Not found interactionId in pending step")
     const interaction: mls.msg.AIPayload | null = getStepById(task, interactionId);
     if (!interaction || interaction.type !== "agent") throw new Error("[getAgentContext] Clarification or tool step not bellow a agent");
-    const messageId: string = task.messageid_created.split("/")[1].trim();
+    //const messageId: string = task.messageid_created.split("/")[1].trim();
+    // const parts = task.messageid_created.split("/");
+    // const messageId: string = `${parts[1].trim()}[${parts[0].trim()}]`;
+    const messageId: string = task.messageid_created;
+
     const message: mls.msg.Message | undefined = await getMessage(messageId);
     if (!message) throw new Error("[getAgentContext] Message not found:" + messageId)
     const context: mls.msg.ExecutionContext = {
@@ -320,26 +349,39 @@ export async function postBackClarification(
 
         return null;
     }
+
     const taskId: string | null = findTaskId(clarification);
     if (!taskId) throw new Error("[postBackClarification] Invalid call arguments, no taskId");
     const ret = await getAgentContext(taskId);
+
     if (action === "cancel") {
-        const messageId: string = ret.context.message.createAt;
+
+        const messageId: string | undefined = ret.context.task?.messageid_created;
+        if (!messageId) throw new Error("[postBackClarification] Invalid messageId");
+
         const resp = await mls.api.msgUpdateStepStatus({
             messageId,
             status: "failed",
             stepId: ret.step.stepId,
             taskId,
-            userId: ret.context.message.senderId, // todo: usar userId from localstor
+            userId: getUserIdLocalStorage() || ret.context.message.senderId,
             traceMsg: "user cancel the task"
         });
-        await syncTask(resp.task);
-        // todo: send event to serviceCollabMessages , task changed
+
+        ret.context.task = resp.task;
+        await notifyTaskChange(ret.context);
+
+        dispatchDetailsTaskClose();
         return;
     }
     if (ret.step.type !== "clarification") throw new Error("[getClarification] Clarification step not not found");
-    return await executeAgentFunction(ret.context, ret.interaction, "afterClarification", ret.step.stepId);
+    dispatchDetailsTaskClose();
+    return await executeAgentFunction(ret.context, ret.interaction, "afterClarification", ret.step.stepId, clarification);
+
 }
 
-
-
+async function setFailedStatus(context: mls.msg.ExecutionContext, step: number) {
+    if (!context.task) throw new Error("[setFailedStatus] Invalid context task");
+    context.task = await updateStepStatus(context.task, step, "failed");
+    notifyTaskChange(context);
+}

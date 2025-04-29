@@ -4,9 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { getTask } from './_100554_msgDBController';
-import { getNextPendentStep } from './_100554_aiAgentHelper';
-
-
+import { getNextPendentStep, getTotalCost } from './_100554_aiAgentHelper';
 import {
     collab_money,
     collab_pause,
@@ -16,8 +14,6 @@ import {
     collab_check,
     collab_bug
 } from './_100554_collabIcons';
-
-import { getTotalCost } from './_100554_iaChatBase';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -120,16 +116,6 @@ export class WidgetAiTask100554 extends IcaLitElement {
     private async getTaskLocal(taskId: string) {
         const task = await getTask(taskId);
         if (task) this.task = task;
-    }
-
-    private onStatusClick(ev: MouseEvent, data: { status: mls.msg.AIStepStatus, stepId: number }) {
-
-        const event = new CustomEvent('taskclick', {
-            detail: { stepId: data.stepId },
-            bubbles: true,
-            composed: true
-        });
-        this.dispatchEvent(event);
     }
 
     private onCardClick() {
