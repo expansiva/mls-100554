@@ -7,7 +7,9 @@ export interface IAgent {
   agentDescription: string;
   beforePrompt(context: mls.msg.ExecutionContext): Promise<void>;
   afterPrompt(context: mls.msg.ExecutionContext): Promise<void>;
+  beforeClarification?(context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null>;
   afterClarification?(context: mls.msg.ExecutionContext, stepId: number): Promise<void>;
+  afterTool?(context: mls.msg.ExecutionContext, stepId: number): Promise<void>;
 }
 
 
