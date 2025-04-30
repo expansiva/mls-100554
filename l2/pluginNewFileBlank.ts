@@ -80,7 +80,14 @@ export class PluginNewFileBlank extends IcaLitElement {
         };
         this.loading = true;
         try {
-            await createNewFile(this.project, this.position, this.shortName, this.enhancement, this.getTemplate());
+            await createNewFile({
+                project: this.project,
+                position: this.position,
+                shortName: this.shortName,
+                enhancement: this.enhancement,
+                sourceTS: this.getTemplate(),
+                openPreview:true
+            });
         } catch (e: any) {
             this.loading = false;
         }

@@ -128,7 +128,15 @@ import { globalState } from './_100554_icaState';
         }
         this.loading = true;
         try {
-            await createNewFile(this.project, this.position, this.shortName, this.enhancement, this.getTemplateTS(), this.getTemplateHTML());
+            await createNewFile({
+                project:this.project,
+                position:this.position,
+                shortName: this.shortName,
+                enhancement: this.enhancement,
+                sourceTS: this.getTemplateTS(),
+                sourceHTML: this.getTemplateHTML(),
+                openPreview: true
+            });
         } catch (e: any) {
             this.loading = false;
         }
