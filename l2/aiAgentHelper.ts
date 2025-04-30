@@ -208,6 +208,19 @@ export const updateStepStatus = async (task: mls.msg.TaskData, stepId: number, s
   return (ret as mls.msg.ResponseUpdateStepStatus).task;
 }
 
+export const updateTaskTitle = async (task: mls.msg.TaskData, newTitle: string): Promise<mls.msg.TaskData> => {
+  const args: mls.msg.RequestUpdateTaskTitle = {
+    userId: getUserIdLocalStorage() || task.owner,
+    newTitle,
+    taskId: task.PK,
+    messageId: task.messageid_created || '',
+    action: 'updateTaskTitle',
+  };
+  const ret = await mls.api.msgUpdateTaskTitle(args);
+  if (!ret || ret.statusCode !== 200) throw new Error("error on AI update task title , stoped");
+  return (ret as mls.msg.ResponseUpdateTaskTitle).task;
+}
+
 export async function appendPromptToInteraction(
   userId: string,
   messageId: string | undefined,
@@ -293,35 +306,35 @@ export function getTotalCost(task: mls.msg.TaskData): string {
 }
 
 export function formatTimestamp(timestamp: string) {
-    if (!timestamp || timestamp.length < 14) {
-        return;
-    }
-    const year = timestamp.slice(0, 4);
-    const month = timestamp.slice(4, 6);
-    const day = timestamp.slice(6, 8);
-    const hour = timestamp.slice(8, 10);
-    const minute = timestamp.slice(10, 12);
-    const second = timestamp.slice(12, 14);
-    const utcDate = new Date(Date.UTC(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day),
-        parseInt(hour),
-        parseInt(minute),
-        parseInt(second)
-    ));
+  if (!timestamp || timestamp.length < 14) {
+    return;
+  }
+  const year = timestamp.slice(0, 4);
+  const month = timestamp.slice(4, 6);
+  const day = timestamp.slice(6, 8);
+  const hour = timestamp.slice(8, 10);
+  const minute = timestamp.slice(10, 12);
+  const second = timestamp.slice(12, 14);
+  const utcDate = new Date(Date.UTC(
+    parseInt(year),
+    parseInt(month) - 1,
+    parseInt(day),
+    parseInt(hour),
+    parseInt(minute),
+    parseInt(second)
+  ));
 
-    const localYear = utcDate.getFullYear();
-    const localMonth = (utcDate.getMonth() + 1).toString().padStart(2, '0');
-    const localDay = utcDate.getDate().toString().padStart(2, '0');
-    const localHour = utcDate.getHours().toString().padStart(2, '0');
-    const localMinute = utcDate.getMinutes().toString().padStart(2, '0');
-    const localSecond = utcDate.getSeconds().toString().padStart(2, '0');
+  const localYear = utcDate.getFullYear();
+  const localMonth = (utcDate.getMonth() + 1).toString().padStart(2, '0');
+  const localDay = utcDate.getDate().toString().padStart(2, '0');
+  const localHour = utcDate.getHours().toString().padStart(2, '0');
+  const localMinute = utcDate.getMinutes().toString().padStart(2, '0');
+  const localSecond = utcDate.getSeconds().toString().padStart(2, '0');
 
-    const date = `${localYear}-${localMonth}-${localDay}`;
-    const time = `${localHour}:${localMinute}:${localSecond}`;
-    const dateFull = `${date} ${time}`;
-    return { dateFull, date, time };
+  const date = `${localYear}-${localMonth}-${localDay}`;
+  const time = `${localHour}:${localMinute}:${localSecond}`;
+  const dateFull = `${date} ${time}`;
+  return { dateFull, date, time };
 }
 
 

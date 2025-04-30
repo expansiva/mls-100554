@@ -9,6 +9,8 @@ import {
     getNextInProgressStepByAgentName,
     calculateStepsStatistics,
     updateStepStatus,
+    updateTaskTitle,
+    notifyTaskChange,
     getNextPendentStep
 } from "./_100554_aiAgentHelper";
 
@@ -63,8 +65,11 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
     const { flexible } = calculateStepsStatistics([step], true);
     if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
 
+    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context.task = await updateTaskTitle(context.task, 'Page created successfully');
+    notifyTaskChange(context);
+    
     await addFile(context);
     await executeNextStep(context);    
     
