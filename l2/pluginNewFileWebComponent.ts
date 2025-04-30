@@ -104,7 +104,15 @@ export class PluginNewFileWebComponent extends IcaLitElement {
         };
         this.loading = true;
         try {
-            await createNewFile(this.project, this.position, this.shortName, this.enhancement, this.getTemplate(), undefined, false);
+            await createNewFile({
+                project:this.project,
+                position:this.position,
+                shortName:this.shortName,
+                enhancement:this.enhancement,
+                sourceTS:this.getTemplate(),
+                openPreview: false
+            }
+            );
             if (this.service) {
                 openService('_100554_serviceAim', 'right', 2);
                 const opInstance = this.service.nav3Service?.getActiveInstance('right');

@@ -88,8 +88,9 @@ async function addFile(context: mls.msg.ExecutionContext) {
     const fileTS = (step.result as any).fileTS;
     const project = mls.actual[5].project || 100554;
     const enhancement = '_100554_enhancementLit';
-    await createNewFile(project, 'right', pageName, enhancement, fileTS, fileHTML, false);
-    console.info('Aqui', { fileTS, fileHTML, pageName});
+    await createNewFile(
+        { project, position: 'right', shortName: pageName, enhancement, sourceTS: fileTS, sourceHTML: fileHTML, openPreview: false }
+    );
 }
 
 

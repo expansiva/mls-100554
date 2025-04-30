@@ -99,11 +99,11 @@ export class ServiceSource100554 extends ServiceBase {
         if (op === EToolsSource.icTs) this.showActiveModel();
         if (op === EToolsSource.icHTML) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
-            this.createOrShowModelHtmlOrCss(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.html');
+            this.createOrShowModelHtmlOrCssOrTest(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.html');
         }
         if (op === EToolsSource.icStyle) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
-            this.createOrShowModelHtmlOrCss(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.less');
+            this.createOrShowModelHtmlOrCssOrTest(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.less');
         }
 
         if (op === EToolsSource.icTest) {
@@ -762,7 +762,9 @@ export class ServiceSource100554 extends ServiceBase {
                 fileAction.newProject as number,
                 fileAction.newEnhancement as string,
                 fileAction.newTSSource as string,
-                fileAction.newHtmlSource as string
+                fileAction.newHtmlSource as string,
+                (fileAction as any).newHtmlLess as string,
+                (fileAction as any).newHtmlTest as string
             );
             this.loading = false;
         };
@@ -876,7 +878,7 @@ export class ServiceSource100554 extends ServiceBase {
         this.onMLSEvents(ev);
     }
 
-    private async newFiles(newShortName: string, newProject: number, newEnhancement: string, tsSource: string, htmlSource?: string) {
+    private async newFiles(newShortName: string, newProject: number, newEnhancement: string, tsSource: string, htmlSource?: string, lessSource?: string, testSource?: string) {
 
         this.isNewFile = true;
         this.activeThisService();
@@ -886,8 +888,10 @@ export class ServiceSource100554 extends ServiceBase {
 				\n// typescript new file\n`;
         const modelTS = await this.createModelTS1(newShortName as string, newProject as number,
             newTSSource, true);
-        await this.createOrShowModelHtmlOrCss(newShortName, newProject, false, '.html', htmlSource);
-        await this.createOrShowModelHtmlOrCss(newShortName, newProject, false, '.less');
+        await this.createOrShowModelHtmlOrCssOrTest(newShortName, newProject, false, '.html', htmlSource);
+        await this.createOrShowModelHtmlOrCssOrTest(newShortName, newProject, false, '.less', lessSource);
+        if (testSource) await this.createOrShowModelHtmlOrCssOrTest(newShortName, newProject, false, '.test.ts', testSource);
+        
         this.showActiveModel();
         await mls.stor.localStor.setContent(modelTS.storFile, await this.getValueInfo(modelTS));
         this.isNewFile = false;
@@ -1531,7 +1535,7 @@ export class ServiceSource100554 extends ServiceBase {
         for await (let ext of extFiles) {
             const keyFile1 = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', ext);
             let storFile1 = mls.stor.files[keyFile1];
-            if (!storFile1) storFile1 = await this.createOrShowModelHtmlOrCss(shortName, project, false, ext);
+            if (!storFile1) storFile1 = await this.createOrShowModelHtmlOrCssOrTest(shortName, project, false, ext);
             await this.getOrCreateModelHtmlOrCss(storFile1);
         }
 
@@ -1766,27 +1770,36 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     // HTML LESS
 
-    private async createOrShowModelHtmlOrCss(shortName: string, project: number, open: boolean, mode: '.html' | '.less', source: string = '', fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
+    private async createOrShowModelHtmlOrCssOrTest(shortName: string, project: number, open: boolean, mode: '.html' | '.less' | '.test.ts', source: string = '', fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
 
         const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', mode);
         let storFile = mls.stor.files[key];
         if (!storFile) {
             if (mode === '.less') {
-                const newLess = await this.prepareInitialLess(shortName, project);
+                const newLess = await this.prepareInitialLess(shortName, project, source);
                 await this.createStorFile(project, shortName, newLess, mode);
-            } else {
+            } else  if (mode === '.test.ts') {
+                const newTest = await this.prepareInitialTest(shortName, project, source);
+                await this.createStorFile(project, shortName, newTest, mode);
+            }else{
                 const newHTML = await this.prepareInitiaHTML(source, shortName, project);
                 await this.createStorFile(project, shortName, newHTML, mode);
-            }
+            } 
             storFile = mls.stor.files[key];
         }
 
         const uri = this.getUri(`_${project}_${shortName}`, mode);
         let model = monaco.editor.getModel(uri);
 
-        if (!model) model = await this.getOrCreateModelHtmlOrCss(storFile, fileInfo);
+        if (!model && ['.less', '.html'].includes(mode)) {
+            model = await this.getOrCreateModelHtmlOrCss(storFile, fileInfo);
+        } else if (!model && mode === '.test.ts') {
+            model = await this.getOrCreateModelTsTest(storFile, fileInfo);
+        }
 
-        if (open && this._ed1 && this.activeModels) {
+        if(!model) throw new Error("[createOrShowModelHtmlOrCssOrTest] Erro get or create model")
+
+        if (open && this._ed1 && this.activeModels ) {
             this._ed1.setModel(model);
             this.restaureViewState();
             this.updatedMSizeEditor();
@@ -1821,17 +1834,39 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     }
 
-    private async prepareInitialLess(shortName: string, project: number) {
+    private async prepareInitialTest(shortName: string, project: number, source:string = "") {
+
+        const tag = convertFileNameToTag(`_${project}_${shortName}`);
+        const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />
+				
+                \nimport { ICANTest, ICANIntegration } from './_100554_tsTestAST'; 
+                \n
+                \nexport const integrations: ICANIntegration[] = []; 
+                \nexport const tests: ICANTest[] = [];
+                \n[source]
+                
+                `
+        const newTest = example
+            .replace('[shortName]', shortName)
+            .replace('[project]', project.toString())
+            .replace('[source]', source)
+
+        return newTest;
+    }
+
+    private async prepareInitialLess(shortName: string, project: number, source:string = "") {
 
         const tag = convertFileNameToTag(`_${project}_${shortName}`);
         const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="enhancementStyle" />
 				\n[tag] {
                 \n // Here your less
+                \n[source]
                 \n}`
         const newStyle = example
             .replace('[shortName]', shortName)
             .replace('[project]', project.toString())
             .replace('[tag]', tag)
+            .replace('[source]', source)
 
         return newStyle;
     }
@@ -2532,4 +2567,3 @@ interface ILocalStorageServiceSource {
 type IModes = 'icTs' | 'icStyle' | 'icHTML' | 'icTest';
 type TExtensions = '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts'
 type IModesH = 'btHistory' | 'btHistoryImmediatte';
-

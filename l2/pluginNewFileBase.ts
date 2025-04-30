@@ -23,7 +23,57 @@ export function changeTagName(source: string, tagName: string): string {
     return outputString;
 }
 
-export async function createNewFile(project: number, position: 'left' | 'right', shortName: string, enhancement: string, source: string, sourceHTML?: string, openPreview: boolean = true) {
+export interface IRequestNewFile {
+    project: number,
+    position: 'left' | 'right',
+    shortName: string,
+    enhancement: string,
+    sourceTS: string,
+    sourceHTML?: string,
+    sourceLess?: string,
+    sourceTest?: string,
+    openPreview: boolean
+}
+
+export async function createNewFile(args:IRequestNewFile) {
+
+    const params = {} as mls.events.IFileAction;
+
+    params.action = 'new' as typeof params.action;
+    params.level = 2;
+    params.project = args.project;
+    params.newProject = args.project;
+    params.shortName = args.shortName;
+    params.newshortName = args.shortName;
+    params.folder = '';
+    params.newfolder = '';
+    params.newEnhancement = args.enhancement || '_blank';
+    params.extension = '.ts';
+    params.newTSSource = args.sourceTS;
+    if (args.sourceHTML) params.newHtmlSource = args.sourceHTML;
+    if (args.sourceLess) (params as any).newHtmlLess = args.sourceLess;
+    if (args.sourceTest) (params as any).newHtmlTest = args.sourceTest;
+    params.position = args.position;
+
+    mls.actual[2].setFullName('_' + params.project + '_' + params.shortName);
+    (mls.actual[2] as any)[args.position] = {
+        project: params.project,
+        shortName: params.shortName
+    };
+
+    if (mls.actualLevel == 1) {
+        await mls.events.fire([1], ['FileAction'], JSON.stringify(params), 0);
+        if (args.position === 'left' && args.openPreview) openService('_100554_servicePreviewL1', 'right', 1);
+    } else {
+        await mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);
+        if (args.position === 'left' && args.openPreview) openService('_100554_servicePreview', 'right', 2);
+    }
+
+    saveLocalHistory(params.project, 2, params.shortName, params.extension, params.folder);
+
+}
+
+/*export async function createNewFile(project: number, position: 'left' | 'right', shortName: string, enhancement: string, source: string, sourceHTML?: string, openPreview: boolean = true) {
     const params = {} as mls.events.IFileAction;
 
     params.action = 'new' as typeof params.action;
@@ -56,7 +106,7 @@ export async function createNewFile(project: number, position: 'left' | 'right',
 
     saveLocalHistory(params.project, 2, params.shortName, params.extension, params.folder);
 
-}
+}*/
 
 function saveLocalHistory(project: number, level: number, shortName: string, extension: string, folder: string): void {
 
