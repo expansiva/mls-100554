@@ -99,6 +99,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
           return state1.getState(stateKey);
         }
+        if (this[`_${attributeName}`] !== undefined) return this[`_${attributeName}`];
         // Default to internal property value
         if (typeof this[`_${attributeName}`] === 'object' || Array.isArray(this[`_${attributeName}`])) return this[`_${attributeName}`];
         return attributeValue;
