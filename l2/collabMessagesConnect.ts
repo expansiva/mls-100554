@@ -2,17 +2,21 @@
 
 import { html, css } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
 import { collab_chevron_left, collab_user_plus, collab_gear } from './_100554_collabIcons';
 import { createAgent } from './_100554_agentPlanner1';
 import { getTemporaryContext, formatTimestamp } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, getAllMessagesByThreadId, updateThread, updateUsers, updateThreads } from './_100554_msgDBController';
 
-import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt'
+import { loadChatPreferences } from './_100554_collabMessageHelper';
+
 import './_100554_widgetAiInteraction';
 import './_100554_widgetAiTask';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
+
+import { IChatPreferences } from './_100554_collabMessageHelper';
+import { IcaLitElement } from './_100554_icaLitElement';
+import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -50,6 +54,8 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
     @query('collab-messages-prompt-100554') collabMessagesPrompt: CollabMessagesPrompt100554 | undefined;
     @query('#unread') private unreadEl!: HTMLDivElement | undefined;
     @query('.chat-container') private messageContainer!: HTMLDivElement | undefined;
+
+    @state() userPreferenceChat?: IChatPreferences;
 
     @property() userId: string | undefined;
     @property() activeScenerie: IScenery = 'list';
@@ -104,7 +110,7 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
             const customEvent = e as CustomEvent;
 
             console.log('Tarefa alterada:', customEvent.detail);
-            await this.updateMessageAI(customEvent.detail);
+            await this.updateMessageAI(customEvent.detail, false);
             if (customEvent.detail.task) {
                 await addOrUpdateTask(customEvent.detail.task);
             }
@@ -183,6 +189,9 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
 
     private renderChatMessages() {
+
+        this.userPreferenceChat = loadChatPreferences();
+
         return html`
             <div class="chat-container">    
                 ${Object.keys(this.actualMessagesParsed).map((key) => {
@@ -196,13 +205,14 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                 const userAvatar = this.actualThread?.users.find((user) => user.userId === message.senderId)?.avatar_url || '';
 
                 const cls = message.senderId === this.userId ? 'user' : 'system';
+
                 return html`
                     <div class="message ${cls}">
                         <div class="message-group">
                             <div class="message-row">
                                 <div class="message-card ${cls}">
                                     <div class="message-title">@${userName}</div>
-                                    <div class="message-content">${message.content}</div>
+                                    ${this.renderMessageByLanguage(message)}
                                     <div class="message-footer">${dateFormated?.time}</div>
                                     ${message.taskId
                         ? html`
@@ -229,6 +239,24 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
         ${this.renderPrompt()}
                 `
+    }
+
+    private renderMessageByLanguage(message: mls.msg.Message) {
+
+        console.info(message);
+
+        if (!this.userPreferenceChat || !this.userPreferenceChat.translationEnabled || !message.translations) {
+            return html`<div class="message-content">${message.content}</div>`
+        }
+        const { language } = this.userPreferenceChat;
+        const messageByLanguagePref = message.translations ? message.translations[language] : '';
+        const isSameLanguege = language === message.language_detected;
+
+        return html`
+            <div class="message-content">${messageByLanguagePref || message.content}</div>
+            ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}
+        
+        `
     }
 
     private renderPrompt() {
@@ -442,12 +470,6 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             const lastMessage = this.actualMessages.length > 0 ? this.actualMessages[this.actualMessages.length - 1] : undefined;
 
-            console.info({
-                actual: this.actualThread,
-                actualMessages: this.actualMessages,
-                actualMessagesParsed: this.actualMessagesParsed
-            });
-
             if (!this.userId || !this.actualThread.thread.threadId) return;
             const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId)
             await updateThreads([threadByServer.thread]);
@@ -537,29 +559,18 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
         const response = await mls.api.msgAddMessage(params);
         const { content, createAt, orderAt, senderId, threadId } = response.message;
-        this.updateMessage(content, createAt, orderAt, senderId, threadId);
+        this.updateMessage(false, content, createAt, orderAt, senderId, threadId);
 
     }
 
     private async addMessageIA(prompt: string) {
         if (!this.userId || !this.actualThread) return;
-
-        const text = this.preparePromptIA(prompt);
-
-        // const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, text, async (ctx) => {
-        //     await this.updateMessageAI(ctx);
-        //     if (ctx.task) {
-        //         await addTask(ctx.task);
-        //     }
-        // });
-
-        const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, text)
+        const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, prompt)
         const agent = createAgent();
         await agent.beforePrompt(context);
-
     }
 
-    private async updateMessageAI(context: mls.msg.ExecutionContext) {
+    private async updateMessageAI(context: mls.msg.ExecutionContext, updateThreadDB: boolean) {
 
         if (!context.message && !context.task) return;
         const { content, createAt, orderAt, senderId, threadId, taskId } = context.message;
@@ -579,8 +590,12 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                 senderId,
                 threadId,
             }
-            const thread = await updateThread(threadId, content, createAt, 0);
-            if (this.actualThread) this.actualThread.thread = thread;
+
+            if (updateThreadDB) {
+                const thread = await updateThread(threadId, content, createAt, 0);
+                if (this.actualThread) this.actualThread.thread = thread;
+            }
+
             if (taskId) newMessage.taskId = taskId;
             this.actualMessages.push({ context, lastChanged: new Date().getTime(), ...newMessage });
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
@@ -612,7 +627,7 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
     }
 
-    private async updateMessage(content: string, createAt: string, orderAt: string, senderId: string, threadId: string, taskId?: string) {
+    private async updateMessage(updateThreadDB: boolean, content: string, createAt: string, orderAt: string, senderId: string, threadId: string, taskId?: string) {
 
         const newMessage: mls.msg.Message = {
             content,
@@ -622,18 +637,17 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
             threadId,
         }
 
-        const thread = await updateThread(threadId, content, createAt, 0);
-        if (this.actualThread) this.actualThread.thread = thread;
+        if (updateThreadDB) {
+            const thread = await updateThread(threadId, content, createAt, 0);
+            if (this.actualThread) this.actualThread.thread = thread;
+        }
+
         if (taskId) newMessage.taskId = taskId;
         this.actualMessages.push(newMessage);
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         addMessage(newMessage);
         this.requestUpdate();
 
-    }
-
-    private preparePromptIA(prompt: string) {
-        return prompt.replace('@@', '');
     }
 
     private async onTaskClick(taskId: string, messageId: string, threadId: string,) {
@@ -686,7 +700,6 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
             this.messageContainer.scrollTop = this.savedScrollTop;
         }
     }
-
 }
 
 export interface CollbaMessagesConnectResponse {

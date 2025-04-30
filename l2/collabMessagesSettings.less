@@ -12,22 +12,12 @@ collab-messages-settings-100554 {
     background-color: @bg-primary-color;
     padding: 1rem;
 
-
-    .user {
+    .section {
         background-color: @bg-primary-color-lighter;
         padding: 2rem 0.75rem;
         border-radius: 10px;
         box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-
-        .saving-ok {
-            color: @success-color;
-            font-size: @font-size-12;
-        }
-
-        .saving-error {
-            color: @error-color;
-            font-size: @font-size-12;
-        }
+        margin-bottom: 3rem;
 
         .loader {
             display: inline-block;
@@ -45,6 +35,15 @@ collab-messages-settings-100554 {
             }
         }
 
+        .saving-ok {
+            color: @success-color;
+            font-size: @font-size-12;
+        }
+
+        .saving-error {
+            color: @error-color;
+            font-size: @font-size-12;
+        }
 
         input,
         select {
@@ -84,6 +83,10 @@ collab-messages-settings-100554 {
                 background-color: @info-color-hover;
             }
         }
+
+    }
+
+    .user {
 
         .user-info {
             width: 100%;
@@ -164,6 +167,29 @@ collab-messages-settings-100554 {
             }
         }
 
+
+    }
+
+    .chat-preferences {
+
+        .chat-config-item {
+
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+
+            &.action {
+                display: flex;
+                justify-content: end;
+            }
+
+            label {
+                display: inline-flex;
+                margin-right: 0.6rem;
+                font-weight: var(--font-weight-bold);
+                align-items: center;
+            }
+        }
 
     }
 

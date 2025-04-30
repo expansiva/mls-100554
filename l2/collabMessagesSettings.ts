@@ -4,11 +4,15 @@ import { html, css } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { ServiceBase } from './_100554_serviceBase';
+import { loadChatPreferences, saveChatPreferences } from './_100554_collabMessageHelper';
+import { IChatPreferences } from './_100554_collabMessageHelper';
+
 import {
     collab_user,
     collab_minus,
     collab_ban,
-    collab_dot
+    collab_dot,
+    collab_message
 } from './_100554_collabIcons';
 
 /// **collab_i18n_start** 
@@ -19,8 +23,12 @@ const message_pt = {
     userid: 'Id do usuário',
     username: 'Nome do usuário',
     errorUserName: 'Nome do usuário não pode ser vazio',
-    successSaving: 'Perfil do usuário atualizado com sucesso'
-
+    successSavingUser: 'Perfil do usuário atualizado com sucesso',
+    successSavingChatPref: 'Preferências do chat atualizado com sucesso',
+    chatPref: 'Preferências do chat',
+    translate: 'Tradução habilitada',
+    preferLanguage: 'Idioma preferido',
+    userTitle: 'Usuário',
 }
 
 const message_en = {
@@ -30,7 +38,12 @@ const message_en = {
     userid: 'User Id',
     username: 'UserName',
     errorUserName: 'User name cannot be empty',
-    successSaving: 'User perfil updated successfully'
+    successSavingUser: 'User perfil updated successfully',
+    successSavingChatPref: 'Chat preferences updated successfully',
+    chatPref: 'Chat Preferences',
+    translate: 'Enable translate',
+    preferLanguage: 'Preferred language',
+    userTitle: 'User',
 }
 
 type MessageType = typeof message_en;
@@ -49,22 +62,38 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
     private serviceBase: ServiceBase | undefined;
 
     @state() userPerfil: mls.msg.User | undefined;
+    @state() private chatPreferences: IChatPreferences = {
+        translationEnabled: false,
+        language: ''
+    };
 
     @property() labelOk: string = '';
     @property() labelError: string = '';
-    @property() isSaving: boolean = false;
+    @property() labelOkPref: string = '';
+    @property() labelErrorPref: string = '';
+    @property() isSavingUser: boolean = false;
+    @property() isSavingChat: boolean = false;
+
 
     @query('.avatar img') userAvatarEl: HTMLImageElement | undefined;
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
         this.userPerfil = await this.getUserPerfil();
+        this.chatPreferences = loadChatPreferences();
     }
 
     render() {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
+        return html`
+            ${this.renderUser()}
+            ${this.renderChatPreferences()}
+        `;
+    }
+
+    private renderUser() {
 
         const avatarUrl = this.userPerfil?.avatar_url;
         const iconByStatus = {
@@ -77,9 +106,9 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
         const icon = iconByStatus[this.userPerfil?.status || '']
 
         return html`
-      <div >
-        <h4>User</h4>
-        <div class="user">
+         <div >
+        <h4>${collab_user} ${this.msg.userTitle}</h4>
+        <div class="section user">
           <div class="user-details">
             <div class="avatar">
                 ${avatarUrl
@@ -87,7 +116,7 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
                 : html`<div class="avatar-placeholder">${collab_user}</div>`}
                 <a @click=${(e: MouseEvent) => { e.preventDefault(); this.refreshAvatar(); }} href="#"> Atualizar</a>
             </div>
-            <div  class="user-info">
+            <div class="user-info">
                 <div class="user-info-item">
                     <label>${this.msg.username}</label>
                     <input .value=${this.userPerfil?.name ?? ''} type="text" />
@@ -106,15 +135,53 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
             <div class="user-info-item action">
                 <button
                     @click=${this.handleSave}
-                    ?disabled=${this.isSaving}
+                    ?disabled=${this.isSavingUser}
                 >
-                    ${this.isSaving ? html`<span class="loader"></span>` : this.msg.save}
+                    ${this.isSavingUser ? html`<span class="loader"></span>` : this.msg.save}
                 </button>
             </div>
             ${this.labelOk ? html`<small class="saving-ok">${this.labelOk}<small>` : ''}
             ${this.labelError ? html`<small class="saving-error">${this.labelError}<small>` : ''}      
       </div>
-    `;
+        
+        `
+    }
+
+    private renderChatPreferences() {
+        return html`
+        <div>
+            <h4>${collab_message} ${this.msg.chatPref}</h4>
+            <div class="section chat-preferences">
+                <div class="chat-config-item">
+                    <label>${this.msg.preferLanguage}:</label>
+                    <input
+                        @input=${this.handleLanguageInput}
+                        .value=${this.chatPreferences?.language ?? ''
+                    } type="text" />
+                </div>
+                <div class="chat-config-item">
+                    <label>
+                        <input
+                            type="checkbox"
+                            .checked=${this.chatPreferences.translationEnabled}
+                            @change=${this.handleTranslationToggle}
+                        />
+                        ${this.msg.translate}
+                        
+                    </label>
+                </div>
+                <div class="chat-config-item action">
+                    <button
+                        @click=${this.handleSaveChatPref}
+                        ?disabled=${this.isSavingChat}
+                    >
+                        ${this.isSavingChat ? html`<span class="loader"></span>` : this.msg.save}
+                    </button>
+                </div>
+                ${this.labelOkPref ? html`<small class="saving-ok">${this.labelOkPref}<small>` : ''}
+                ${this.labelErrorPref ? html`<small class="saving-error">${this.labelErrorPref}<small>` : ''}    
+            </div>
+        </div>`;
     }
 
     private refreshAvatar() {
@@ -149,7 +216,7 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
             return;
         }
 
-        this.isSaving = true;
+        this.isSavingUser = true;
 
         try {
             const response = await mls.api.msgUpdateUserDetails({
@@ -161,16 +228,54 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
 
             if (response.statusCode !== 200) {
                 this.labelError = `${response.msg}`;
-                this.isSaving = false;
+                this.isSavingUser = false;
                 return;
             }
-            this.labelOk = `${this.msg.successSaving}`;
-            this.isSaving = false;
+            this.labelOk = `${this.msg.successSavingUser}`;
+            this.isSavingUser = false;
 
         } catch (error: any) {
             console.error('Error on update perfil:', error);
             this.labelError = error.message;
-            this.isSaving = false;
+            this.isSavingUser = false;
         }
     }
+
+    private async handleSaveChatPref() {
+
+        this.labelErrorPref = '';
+        this.labelOkPref = '';
+        this.isSavingChat = true;
+
+        console.info(this.chatPreferences)
+
+        try {
+            saveChatPreferences(this.chatPreferences);
+            this.labelOkPref = `${this.msg.successSavingChatPref}`;
+            this.isSavingChat = false;
+
+        } catch (error: any) {
+            console.error('Error on update chat preferences:', error);
+            this.labelErrorPref = error.message;
+            this.isSavingChat = false;
+        }
+    }
+
+
+    private handleTranslationToggle(e: Event) {
+        const target = e.target as HTMLInputElement;
+        this.chatPreferences = {
+            ...this.chatPreferences,
+            translationEnabled: target.checked
+        };
+    }
+
+    private handleLanguageInput(e: Event) {
+        const target = e.target as HTMLInputElement;
+        this.chatPreferences = {
+            ...this.chatPreferences,
+            language: target.value
+        };
+    }
 }
+
