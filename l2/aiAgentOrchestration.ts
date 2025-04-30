@@ -103,16 +103,21 @@ export async function addNewStep(context: mls.msg.ExecutionContext, parentStep: 
     if (!context.task.messageid_created) throw new Error("addNewInteractionInAiTask: context.task.messageid_created is null");
 
     try {
+        
         const response = await mls.api.msgAddTaskAISteps({
             userId: getUserIdLocalStorage() || context.message.senderId,
             parentStepId: parentStep,
             steps,
             taskId: context.task.PK,
-            messageId: context.task.messageid_created
+            messageId: context.task.messageid_created,
+            newStatus: 'completed',
+            newTaskTitle: 'Pending',
+            stepdIdToChangeStatus: parentStep,
+            traceMsg: 'adding new step'
         });
 
         context.task = response.task;
-        context.task = await updateStepStatus(context.task, parentStep, "completed");
+        // context.task = await updateStepStatus(context.task, parentStep, "completed");
         notifyTaskChange(context);
         executeNextStep(context);
 
