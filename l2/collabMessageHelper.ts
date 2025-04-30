@@ -1,0 +1,30 @@
+/// <mls shortName="collabMessageHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+const LS_KEY = 'collabChatPreferences';
+
+export function loadChatPreferences(): IChatPreferences {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) {
+        try {
+            return JSON.parse(saved);
+        } catch (e) {
+            console.warn('Invalid preferences in localStorage');
+        }
+    }
+    return loadDefaultPreferences();
+}
+
+export function saveChatPreferences(chatPreferences: IChatPreferences) {
+    localStorage.setItem(LS_KEY, JSON.stringify(chatPreferences));
+}
+
+function loadDefaultPreferences(): IChatPreferences {
+    return {
+        language: document.documentElement?.lang?.split('-')?.shift() || 'en',
+        translationEnabled: false,
+    }
+}
+export interface IChatPreferences {
+    translationEnabled: boolean,
+    language: string
+}
