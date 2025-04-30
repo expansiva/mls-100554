@@ -1,10 +1,23 @@
-
-<wc-date-picker-range-custom-100554
-    label="Select Date Range"
-    startValue="2023-01-01"
-    endValue="2023-01-07"
-    minvalue="2023-01-01"
-    maxvalue="2023-12-31"
-    blockedDates='["2023-01-15", "2023-01-16"]'
+<div style="max-width:400px;margin:40px auto;background:@bg-primary-color-lighter;padding:32px;border-radius:12px;box-shadow:0 2px 16px #0001;">
+  <wc-date-picker-range-custom-100554
+    label="Período da reserva"
+    placeHolder="Escolha o intervalo"
+    minvalue="2025-04-01"
+    maxvalue="2025-12-31"
+    .blockedDates='["2025-04-10","2025-04-11","2025-05-04"]'
+    hint="Selecione a data inicial e final. Datas em vermelho estão bloqueadas."
+    errorMessage="Seleção inválida."
+    required
+    style="width:100%;"
+    startValue="{{page1.startValue}}"
+    endValue="{{page1.endValue}}"
   ></wc-date-picker-range-custom-100554>
-  
+  <div style="margin-top:32px;color:@text-primary-color-lighter;font-size:@font-size-16;">
+    <b>Exemplo de uso:</b><br>
+    - Clique no campo para abrir o calendário.<br>
+    - Selecione a data inicial e depois a final.<br>
+    - Datas bloqueadas não podem ser selecionadas.<br>
+    - O período selecionado aparece no campo.<br>
+    - Mensagem de erro aparece acima do campo.<br>
+  </div>
+</div>

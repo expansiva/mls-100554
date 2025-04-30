@@ -66,6 +66,7 @@ export function initState(path: string, value: string | Object | Array<unknown>)
   let current = globalState._ica;
 
   keys.forEach((key, index) => {
+    // changed
     if (!current[key]) {
       // Create an object or set the value if it doesn't exist
       current[key] = index === keys.length - 1 ? value : {};
@@ -83,27 +84,67 @@ export function initState(path: string, value: string | Object | Array<unknown>)
  * ex: 'users[0].name'
  */
 function getPathValue(obj: { [key: string]: any }, path: string) {
-  return path.split('.').reduce((acc, part) => {
-    const arrayMatch = part.match(/(\w+)\[(\d+)\]/);
+  return (path || '').split('.').reduce((acc, part) => {
+    if (acc == null) return undefined;
+
+    const arrayMatch = part.match(/^(\w+)\[(\d+)\]$/);
     if (arrayMatch) {
       const prop = arrayMatch[1];
       const index = parseInt(arrayMatch[2], 10);
-      return acc[prop][index];
+      return acc[prop]?.[index];
     }
     return acc[part];
   }, obj);
 }
+
 // Helper function to set a value in the globalState by path
 function setPathValue(obj: { [key: string]: any }, path: string, value: any): void {
-  const parts = path.split('.');
-  const last: string | undefined = parts.pop();
+  const parts = (path || '').split('.');
+  const last = parts.pop();
   if (!last) return;
-  const lastObj = parts.reduce((acc, part) => {
-    const match = part.match(/(\w+)\[(\d+)\]/);
-    return match ? acc[match[1]][parseInt(match[2], 10)] : acc[part];
-  }, obj);
+
+  let lastObj;
+
+  try {
+    lastObj = parts.reduce((acc, part) => {
+      const match = part.match(/^(\w+)\[(\d+)\]$/);
+      if (match) {
+        const prop = match[1];
+        const index = parseInt(match[2], 10);
+        acc[prop] = acc[prop] || [];
+        acc[prop][index] = acc[prop][index] || {};
+        return acc[prop][index];
+      } else {
+        acc[part] = acc[part] || {};
+        return acc[part];
+      }
+    }, obj);
+  } catch (e) {
+    const isArray = parts.some(p => /^\w+\[\d+\]$/.test(p));
+    initState(parts.join('.'), isArray ? [] : {});
+    obj = globalState._ica; // reload after initState
+    lastObj = parts.reduce((acc, part) => {
+      const match = part.match(/^(\w+)\[(\d+)\]$/);
+      if (match) {
+        const prop = match[1];
+        const index = parseInt(match[2], 10);
+        acc[prop] = acc[prop] || [];
+        acc[prop][index] = acc[prop][index] || {};
+        return acc[prop][index];
+      } else {
+        acc[part] = acc[part] || {};
+        return acc[part];
+      }
+    }, obj);
+  }
+
+  const lastIsArray = /^\w+\[\d+\]$/.test(last);
+  if (lastIsArray && !Array.isArray(lastObj[last])) lastObj[last] = [];
+  if (!lastIsArray && typeof lastObj[last] !== 'object') lastObj[last] = {};
+
   lastObj[last] = value;
 }
+
 
 export function setState(key: string, value: any, systemChange?: boolean): void { 
 
