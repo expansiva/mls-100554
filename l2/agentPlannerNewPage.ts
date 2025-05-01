@@ -1,6 +1,7 @@
 /// <mls shortName="agentPlannerNewPage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
+import './_100554_wcClarification';
 
 import {
   getNextPendingStepByAgentName,
@@ -78,13 +79,8 @@ const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: n
   const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
   if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
   if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
-  const project = 100554;
-  const keyFile = mls.stor.getKeyToFiles(project, 2, agentName, '', '.html');
-  const storFile = mls.stor.files[keyFile];
-  if (!storFile) return null;
-  const content = await storFile.getContent();
-  if (!content || typeof content !== 'string') return null;
-  const element = prepareHtmlClarification(content, step.json, context.task.PK, stepId, step.clarificationMessage);
+
+  const element = prepareHtmlClarification(step.json, context.task.PK, stepId, step.clarificationMessage);
   return element;
 }
 
@@ -93,7 +89,7 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
   if (!context || !context.message || !context.task) throw new Error("Invalid context");
   if (!data.json) throw new Error("Invalid json after clarification");
 
-  const newPrompt = JSON.stringify(data.json);
+  //const newPrompt = JSON.stringify(data.json);
   const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
   if (!step) {
     throw new Error(`[${agentName}] beforePrompt: No found step: ${stepId} for this agent.`);
@@ -106,6 +102,12 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
 
   const promptUser = payload.interaction?.input.find((input) => input.type === 'human')?.content || '';
 
+  let newPrompt = '';
+  data.json.forEach((cl: any) => {
+    const text = Array.isArray(cl.value) ? '-' + cl.value.join('\n -') : cl.value;
+    newPrompt = newPrompt + ` ** ${cl.description}\n ${text} `;
+  });
+
   const newStep: mls.msg.AIPayload = {
     agentName,
     prompt: promptUser + '\n' + newPrompt,
@@ -114,44 +116,35 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
     interaction: null,
     nextSteps: null,
     rags: null,
-    type: 'agent',
+    type: 'agent'
   }
-
-  await addNewStep(context, step.stepId, [newStep]);
+  console.info(newStep);
+  //await addNewStep(context, step.stepId, [newStep]);
 
 }
 
 function prepareHtmlClarification(
-  content: string,
   json: string | object,
   taskId: string,
   stepId: number,
   clarificationMessage: string
 ): HTMLDivElement {
   const div: HTMLDivElement = document.createElement('div');
-  const jsonStr = typeof json === 'object'
-    ? JSON.stringify(json, null, 2)
-    : json;
-  const clarificationTemplate = `//**startClarificationData
-  const clarificationData = {
-    "type": "clarification",
-    "taskId": '[TaskId]',
-    "stepId": '[StepId]',
-    "clarificationMessage": '[clarificationMessage]',
-    "json": [Json]
-  };
-//**endClarificationData`;
-  const updatedBlockContent = content.replace(
-    /\/\/\*\*startClarificationData[\s\S]*?\/\/\*\*endClarificationData/,
-    clarificationTemplate
-  );
-  const finalContent = updatedBlockContent
-    .replace(/\[TaskId\]/g, taskId)
-    .replace(/\[StepId\]/g, stepId.toString())
-    .replace(/\[clarificationMessage\]/g, clarificationMessage)
-    .replace(/\[Json\]/g, jsonStr);
-  div.innerHTML = finalContent;
+  const wc: any = document.createElement('wc-clarification-100554');
+
+  const data = {
+    type: "clarification",
+    taskId: taskId,
+    stepId: stepId.toString(),
+    clarificationMessage: clarificationMessage,
+    json
+  }
+
+  div.appendChild(wc);
+  wc.clarificationData = data
+
   return div;
+
 }
 
 export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
@@ -239,7 +232,7 @@ ou
   }
 ]
 \`\`\`
-
+ 
 definição de TClarification
 \`\`\`json
 [
@@ -247,14 +240,14 @@ definição de TClarification
   {
     "sectionName": "pageName",
     "description": "Nome da pagina",
-    "value": "[nomedapagina]"
+    "value": "nomedapagina"
   },
   {
     "sectionName": "requirements",
     "description": "requisitos para esta pagina, altere se necessário",
     "value": [
-      "[exemplo 1 - Suporte para autenticação de usuário]",
-      "[exemplo 2 - Validação de campos de entrada]"
+      "exemplo 1 - Suporte para autenticação de usuário",
+      "exemplo 2 - Validação de campos de entrada"
     ]
   }
 ]

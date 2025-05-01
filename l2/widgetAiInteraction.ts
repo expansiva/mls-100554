@@ -259,7 +259,8 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
         if (!this.directClarificationContent || !this.task) return;
         const clarification = await getClarification(this.task.PK);
         if (!clarification) return;
-        this.directClarificationContent.innerHTML = clarification.innerHTML;
+        this.directClarificationContent.innerHTML = '';
+        this.directClarificationContent.appendChild(clarification);
         this.executeHTMLClarificationScript();
     }
 
