@@ -118,8 +118,8 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
     rags: null,
     type: 'agent'
   }
-  console.info(newStep);
-  //await addNewStep(context, step.stepId, [newStep]);
+  
+  await addNewStep(context, step.stepId, [newStep]);
 
 }
 
