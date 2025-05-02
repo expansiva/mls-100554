@@ -3,8 +3,10 @@
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getListFilesStart, systemReturnJsonFormat, preferModelType } from './_100554_aiPrompts';
 import { icaDescriptions } from './_100554_icaBaseDescription';
-import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, notifyTaskChange } from "./_100554_aiAgentHelper";
-import { startNewAiTask, executeNextStep, postBackClarification, startNewInteractionInAiTask } from "./_100554_aiAgentOrchestration";
+import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, notifyTaskChange, calculateStepsStatistics, getInteractionStepId,  } from "./_100554_aiAgentHelper";
+import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewStep } from "./_100554_aiAgentOrchestration";
+
+import './_100554_wcClarificationPlannerNewWidget';
 
 const agentName = "agentPlannerNewWidget";
 const widgetPrefix = "wc";
@@ -54,25 +56,13 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
 
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
-    
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    const resultStep: mls.msg.AIPayload | undefined = step.nextSteps?.[0];
-    if (!resultStep) throw new Error(`[${agentName}] afterPromt: No payload found`);
-    if (resultStep.type === "result") {
-        return await executeNextStep(context);
-    }
-    if (resultStep.type !== "clarification") throw new Error(`[${agentName}] afterPromt: No clarification step found`);
+    const { flexible } = calculateStepsStatistics([step], true);
+    if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
+    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    await executeNextStep(context);
 
-    // o tool clarification devera pegar o htlm da aba H 
-    // atualizar o json , incluindo taskId e stepId
-    // mostar ao usuário, apos pressionar botão,
-    // a função postBackClarification irá executar afterClarification
-    // a função afterClarification abaixo irá continuar o afterPromt
-
-    console.log("afterPrompt=>", JSON.stringify(step.nextSteps, null, 2))
-    // context.task = await updateStepStatus(context.task, step.stepId, "completed");
-    // await executeNextStep(context);
 }
 
 const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number, data: ClarificationData): Promise<void> => {
@@ -80,16 +70,35 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     if (!data.json) throw new Error("Invalid json after clarification");
 
-    const newPrompt = generatePromptFromJson(data.json);
-
     const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
     if (!step) {
-        throw new Error(`[${agentName}] beforePrompt: No found step: ${stepId} for this agent.`);
+        throw new Error(`[${agentName}] _afterClarification: No found step: ${stepId} for this agent.`);
     }
-    context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
-    notifyTaskChange(context);
 
-    // se chamar o mesmo, entrar em loop, pois o prompt nunca retorna um type="agent";
+    const interactionId: number | null = getInteractionStepId(context.task, step.stepId);
+    if (!interactionId) throw new Error("[_afterClarification] Not found interactionId in pending step")
+    const payload: mls.msg.AIPayload | null = getStepById(context.task, interactionId);
+    if (!payload || payload.type !== "agent") throw new Error("[_afterClarification] Clarification or tool step not bellow a agent");
+
+    const promptUser = payload.interaction?.input.find((input) => input.type === 'human')?.content || '';
+
+    const rc = {
+        prompt: promptUser,
+        json: data.json
+    }
+
+    const newStep: mls.msg.AIPayload = {
+        agentName: 'agentNewWidget',
+        prompt: JSON.stringify(rc),
+        status: 'pending',
+        stepId: step.stepId + 1,
+        interaction: null,
+        nextSteps: null,
+        rags: null,
+        type: 'agent'
+    }
+
+    await addNewStep(context, step.stepId, [newStep]);
 
 }
 
@@ -99,13 +108,7 @@ const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: n
     const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
     if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
     if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
-    const project = 100554;
-    const keyFile = mls.stor.getKeyToFiles(project, 2, agentName, '', '.html');
-    const storFile = mls.stor.files[keyFile];
-    if (!storFile) return null;
-    const content = await storFile.getContent();
-    if (!content || typeof content !== 'string') return null;
-    const element = prepareHtmlClarification(content, step.json, context.task.PK, stepId, step.clarificationMessage);
+    const element = prepareHtmlClarification(step.json, context.task.PK, stepId, step.clarificationMessage);
     return element;
 
 }
@@ -134,7 +137,7 @@ Você é um planejador responsável por definir os detalhes de criação de um n
 Tarefas
 1. Entenda o propósito do widget passando pelo prompt original do usuário.
 2. Escolha o widgetName, evitando colisões com a lista “Widgets existentes”, o widgetName deve iniciar com o prefixo "${widgetPrefix}".
-3. Escolha o grupo/base mais adequado na lista “Categorias de widgets”.
+3. Escolha o parentClass base mais adequado na lista “Categorias de widgets”.
 4. Cruze os atributos do grupo escolhido com as necessidades do widget:
    • Liste apenas os atributos relevantes que já existirem no grupo.  
    • Para cada necessidade sem atributo correspondente, gere um novo atributo
@@ -168,9 +171,15 @@ definição de TClarification
         "description": "[Breve descrição do widget]"
     },
     {
+        "sectionName": "parentClass",
+        "description": "Component for selecting date ranges, useful for period filters."
+        "widgetName": "IcaFormsInputDateRangeBase"
+    },
+    {
         "sectionName": "widgetName",
         "description": "Nome do Widget",
-        "widgetName": "[Widgetname]"
+        "widgetName": "[WidgetName ex: wcDatePickerRangeCustom]"
+        "tagName": "[WidgetTagName ex: wc-date-picker-range-custom-100554]"
     },
     {
         "sectionName": "properties",
@@ -182,10 +191,14 @@ definição de TClarification
     {
         "sectionName": "requirements",
         "description": "requisitos para este widget, altere se necessário",
-        "requirements": [
+        "functionalRequirements": [
             "[example 1 - Must support keyboard navigation]",
             "[example 2 - Return ISO-8601 date strings]"
-        ]
+        ],
+        "visualRequirements": [
+            "[example 1 - Must render two consecutive months side by side]",
+            "[example 2 - Must clearly differentiate between selected, hovered, and disabled dates]"
+        ],
     }
 ]
 \`\`\`
@@ -225,80 +238,68 @@ ${getICADescription()}
 }
 
 function prepareHtmlClarification(
-    content: string,
-    json: string | object,
+    json: string | ClarificationJson[],
     taskId: string,
     stepId: number,
     clarificationMessage: string
 ): HTMLDivElement {
     const div: HTMLDivElement = document.createElement('div');
 
-    const jsonStr = typeof json === 'object'
-        ? JSON.stringify(json, null, 2)
-        : json;
+    if (typeof json === 'string') {
+        div.innerHTML = json;
+        return div;
+    }
 
+    const clarificationData: ClarificationData = {
+        clarificationMessage,
+        stepId: stepId,
+        taskId: taskId,
+        json: json as ClarificationJson[]
+    }
 
-    const clarificationTemplate = `//**startClarificationData
-  const clarificationData = {
-    "type": "clarification",
-    "taskId": '[TaskId]',
-    "stepId": '[StepId]',
-    "clarificationMessage": '[clarificationMessage]',
-    "json": [Json]
-  };
-//**endClarificationData`;
-
-    const updatedBlockContent = content.replace(
-        /\/\/\*\*startClarificationData[\s\S]*?\/\/\*\*endClarificationData/,
-        clarificationTemplate
-    );
-
-    const finalContent = updatedBlockContent
-        .replace(/\[TaskId\]/g, taskId)
-        .replace(/\[StepId\]/g, stepId.toString())
-        .replace(/\[clarificationMessage\]/g, clarificationMessage)
-        .replace(/\[Json\]/g, jsonStr);
-
-    div.innerHTML = finalContent;
+    const clariEl = document.createElement('wc-clarification-planner-new-widget-100554');
+    (clariEl as any).data = clarificationData;
+    div.appendChild(clariEl);
     return div;
 }
 
-export function generatePromptFromJson(json: any[]): string {
-    const resume = json.find(s => s.sectionName === 'resume');
-    const widgetName = json.find(s => s.sectionName === 'widgetName')?.widgetName;
-    const properties = json.find(s => s.sectionName === 'properties')?.properties || [];
-    const requirements = json.find(s => s.sectionName === 'requirements')?.requirements || [];
 
-    const result: any = {
-        widgetName: widgetName,
-        resume: resume?.description,
-        properties: properties.map((p: any) => ({
-            propertyName: p.propertyName || '',
-            description: p.description || '',
-            isEssencial: p.isEssencial === 'true',
-        })),
-        requirements: requirements
-    };
-
-    return JSON.stringify(result, null, 2);
-}
-
-
-interface ClarificationJson {
-    sectionName: string;
-    description: string;
-    widgetName?: string;
-    properties?: {
-        propertyName: string;
-        description: string;
-        isEssencial: string;
-    }[];
-    requirements?: string[];
-};
 
 interface ClarificationData {
     json: ClarificationJson[],
     taskId: string,
     stepId: number,
     clarificationMessage: string
+}
+
+type ClarificationJson = ClarificationResume | ClarificationWidgetName | ClarificationParentName | ClarificationProperties | ClarificationRequirements;
+
+interface ClarificationBase {
+    sectionName: string;
+    description: string;
+}
+
+interface ClarificationResume extends ClarificationBase {
+}
+
+interface ClarificationWidgetName extends ClarificationBase {
+    widgetName: string;
+    tagName: string;
+}
+
+interface ClarificationParentName extends ClarificationBase {
+    widgetName: string;
+}
+
+interface ClarificationProperties extends ClarificationBase {
+    properties: {
+        propertyName: string;
+        description: string;
+        isEssencial: string;
+    }[];
+}
+
+interface ClarificationRequirements extends ClarificationBase {
+    functionalRequirements: string[];
+    visualRequirements?: string[];
 }

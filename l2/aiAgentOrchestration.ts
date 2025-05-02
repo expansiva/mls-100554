@@ -168,10 +168,8 @@ export async function executeNextStep(context: mls.msg.ExecutionContext): Promis
 
         case "result": return executeNextResult(context, step);
 
-        case "flexible":
-            // flexible step type must be processed by the agent
-            throw new Error(`Flexible step type is not supported: ${JSON.stringify(step)}`);
-
+        case "flexible": return executeNextFlexible(context, step);
+    
         default:
             throw new Error(`Unknown step type: ${(step as { type: string }).type}`);
     }
@@ -293,8 +291,16 @@ async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls
 
 async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.msg.AIResultStep) {
     if (!context || !context.task) throw new Error("Invalid context");
-
     if ((mls as any).istraceAgent) console.log("result:", step.result);
+    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    notifyTaskChange(context);
+    return executeNextStep(context);
+}
+
+async function executeNextFlexible(context: mls.msg.ExecutionContext, step: mls.msg.AIFlexibleResultStep) {
+    if (!context || !context.task) throw new Error("Invalid context");
+
+    if ((mls as any).istraceAgent) console.log("Flexible:", step.result);
     context.task = await updateStepStatus(context.task, step.stepId, "completed");
     notifyTaskChange(context);
     return executeNextStep(context);
