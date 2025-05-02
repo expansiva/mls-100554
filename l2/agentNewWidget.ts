@@ -3,7 +3,8 @@
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getTokens } from './_100554_libCompile';
 import { createNewFile } from "./_100554_pluginNewFileBase";
- 
+import { preferModelType } from './_100554_aiPrompts';
+
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
@@ -53,7 +54,10 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         }
         context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
 
-        const inputs = await getPrompts((step as any).json, JSON.stringify(step.prompt), step.rags);
+        if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
+        const data = JSON.parse(step.prompt);
+        if (!('json' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
+        const inputs = await getPrompts(data.json, data.prompt, step.rags);
 
         await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
     }
@@ -75,17 +79,17 @@ async function addFile(context: mls.msg.ExecutionContext) {
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in create files');
 
     if (!step.content || !step.content.html || !step.content.ts || !step.content.less) throw new Error('Not found "html" or "ts" or "less" in addFile files');
-    
+
     const pageName = step.content.shortName;
     const fileHTML = step.content.html;
     const fileTS = step.content.ts;
     const fileLess = step.content.less;
     await createNewFile(
-        { project, position: 'right', shortName: pageName, enhancement, sourceTS: fileTS, sourceHTML: fileHTML, sourceLess:fileLess, openPreview: false }
+        { project, position: 'right', shortName: pageName, enhancement, sourceTS: fileTS, sourceHTML: fileHTML, sourceLess: fileLess, openPreview: false }
     );
 }
 
-export async function getPrompts(json:any, prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
+export async function getPrompts(json: any, prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
     if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
     const prompts: mls.msg.IAMessageInputType[] = [];
 
@@ -110,7 +114,7 @@ export async function getPrompts(json:any, prompt: string | undefined, rags: str
 function systemMainInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
-        content: `
+        content: `${preferModelType("executor")}
 Você é um programador responsável pela criação de um novo web componente (widget) para o sistema Collab Codes.
 
 Se não for possível cumprir esta tarefa (por falta de dados ou conflito de requisitos), **retorne um objeto JSON** do tipo "result", com uma descrição do problema.
@@ -202,7 +206,7 @@ Você opera em um ciclo de agente iterativo (agent loop) focado na conclusão da
    - A estrutura está coerente com o sistema Collab Codes.
    - A saída está no formato esperado com os três arquivos gerados.
 5. **Finalizar a Tarefa:** Retorne um objeto JSON do tipo:
-   - "flexibl" com os três campos: "ts", "html", "less", se tudo estiver correto.
+   - "flexible" com os três campos: "ts", "html", "less", se tudo estiver correto.
    - "result" com descrição do erro, caso algo esteja inválido ou impossível de gerar.
 
 **Importante:**
@@ -316,17 +320,17 @@ ${JSON.stringify(req, null, 2)}
 async function systemDefinitionsBaseInstruction(json: any[]): Promise<mls.msg.IAMessageInputType> {
 
     const step = json.find((i) => i.sectionName === 'parentClass');
-    if(!step) throw new Error("[systemDefinitionsBaseInstruction]Not found section : parentClass")
+    if (!step) throw new Error("[systemDefinitionsBaseInstruction]Not found section : parentClass")
     if (!step.widgetName) throw new Error("[systemDefinitionsBaseInstruction]Not found widgetName in parentClass");
 
     const shortName = step.widgetName;
 
     const key = mls.stor.getKeyToFiles(project, 2, shortName, "", ".ts");
-    if (!mls.stor.files[key]) throw new Error("[systemDefinitionsBaseInstruction]Not found class base:" + project +"_"+ shortName);
+    if (!mls.stor.files[key]) throw new Error("[systemDefinitionsBaseInstruction]Not found class base:" + project + "_" + shortName);
 
-    let contet = await mls.stor.files[key].getContent() as string; 
+    let contet = await mls.stor.files[key].getContent() as string;
 
-    if(!contet) throw new Error("[systemDefinitionsBaseInstruction]Not found content:" + project +"_"+ shortName);
+    if (!contet) throw new Error("[systemDefinitionsBaseInstruction]Not found content:" + project + "_" + shortName);
     return {
         type: 'system',
         content: `## Definições da Classe Base \n\n ${contet}`
@@ -337,6 +341,6 @@ async function systemDefinitionsBaseInstruction(json: any[]): Promise<mls.msg.IA
 async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageInputType> {
     return {
         type: 'system',
-        content: '## LESS TOKENS - DESIGN SYSTEM \n\n' + (await getTokens({ project, shortName:'' }, actualtheme))|| ""
+        content: '## LESS TOKENS - DESIGN SYSTEM \n\n' + (await getTokens({ project, shortName: '' }, actualtheme)) || ""
     }
 }

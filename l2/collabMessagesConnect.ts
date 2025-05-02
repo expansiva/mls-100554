@@ -108,8 +108,6 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
         window.addEventListener('task-change', async (e) => {
             const customEvent = e as CustomEvent;
-
-            console.log('Tarefa alterada:', customEvent.detail);
             await this.updateMessageAI(customEvent.detail, false);
             if (customEvent.detail.task) {
                 await addOrUpdateTask(customEvent.detail.task);
@@ -242,8 +240,6 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
     }
 
     private renderMessageByLanguage(message: mls.msg.Message) {
-
-        console.info(message);
 
         if (!this.userPreferenceChat || !this.userPreferenceChat.translationEnabled || !message.translations) {
             return html`<div class="message-content">${message.content}</div>`
@@ -695,8 +691,9 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         }
     }
 
-    private restoreScrollPosition() {
+    private async restoreScrollPosition() {
         if (this.messageContainer) {
+            await this.updateComplete;
             this.messageContainer.scrollTop = this.savedScrollTop;
         }
     }
