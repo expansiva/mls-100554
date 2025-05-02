@@ -1,18 +1,19 @@
 /// <mls shortName="litClassMap" project="100554" enhancement="_blank" />
-				
+
 /**
  * @license
  * Copyright 2018 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {AttributePart, noChange} from './_100554_litHtml';
+import { AttributePart, noChange } from './_100554_litHtml';
 import {
   directive,
   Directive,
   DirectiveParameters,
   PartInfo,
   PartType,
+  Part
 } from './_100554_litDirectives';
 
 /**
@@ -39,7 +40,7 @@ class ClassMapDirective extends Directive {
     ) {
       throw new Error(
         '`classMap()` can only be used in the `class` attribute ' +
-          'and must be the only part in the attribute.'
+        'and must be the only part in the attribute.'
       );
     }
   }
@@ -55,13 +56,18 @@ class ClassMapDirective extends Directive {
     );
   }
 
-  override update(part: AttributePart, [classInfo]: DirectiveParameters<this>) {
+  update(part: Part, [classInfo]: DirectiveParameters<this>) {
+    const attributePart = part as unknown as AttributePart;
+    if (!('element' in attributePart && 'name' in attributePart)) {
+      throw new Error('classMap can only be used in attribute parts.');
+    }
+
     // Remember dynamic classes on the first render
     if (this._previousClasses === undefined) {
       this._previousClasses = new Set();
-      if (part.strings !== undefined) {
+      if (attributePart.strings !== undefined) {
         this._staticClasses = new Set(
-          part.strings
+          attributePart.strings
             .join(' ')
             .split(/\s/)
             .filter((s) => s !== '')
@@ -75,7 +81,7 @@ class ClassMapDirective extends Directive {
       return this.render(classInfo);
     }
 
-    const classList = part.element.classList;
+    const classList = attributePart.element.classList;
 
     // Remove old classes that no longer apply
     // We use forEach() instead of for-of so that we don't require down-level
@@ -129,5 +135,5 @@ export const classMap = directive(ClassMapDirective);
  * The type of the class that powers this directive. Necessary for naming the
  * directive's return type.
  */
-export type {ClassMapDirective};
+export type { ClassMapDirective };
 

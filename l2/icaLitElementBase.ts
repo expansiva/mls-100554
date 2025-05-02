@@ -72,7 +72,7 @@ export abstract class IcaLitElementBase extends IcaLitElement implements tps.Ica
 
     }
 
-    protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
+    updated(changedProperties: Map<string | number | symbol, unknown>): void {
         super.updated(changedProperties);
 
         const hasLevel = changedProperties.has('level');
