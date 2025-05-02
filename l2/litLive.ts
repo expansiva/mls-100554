@@ -14,6 +14,7 @@ import {
   DirectiveParameters,
   PartInfo,
   PartType,
+  Part
 }  from './_100554_litDirectives';
 import {isSingleExpression, setCommittedValue} from './_100554_litDirectivesHelper';
 
@@ -40,12 +41,16 @@ class LiveDirective extends Directive {
     return value;
   }
 
-  override update(part: AttributePart, [value]: DirectiveParameters<this>) {
+update(part: Part, [value]: DirectiveParameters<this>) {
+  const attributePart = part as unknown as AttributePart;
+  if (!('element' in attributePart && 'name' in attributePart)) {
+    throw new Error('live() can only be used in attribute/property parts.');
+  }
     if (value === noChange || value === nothing) {
       return value;
     }
-    const element = part.element;
-    const name = part.name;
+    const element = attributePart.element;
+    const name = attributePart.name;
 
     if (part.type === PartType.PROPERTY) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

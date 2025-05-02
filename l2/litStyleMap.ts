@@ -13,6 +13,7 @@ import {
   DirectiveParameters,
   PartInfo,
   PartType,
+  Part
 } from './_100554_litDirectives';
 
 /**
@@ -71,8 +72,12 @@ class StyleMapDirective extends Directive {
     }, '');
   }
 
-  override update(part: AttributePart, [styleInfo]: DirectiveParameters<this>) {
-    const {style} = part.element as HTMLElement;
+update(part: Part, [styleInfo]: DirectiveParameters<this>) {
+  const attributePart = part as unknown as AttributePart;
+  if (!('element' in attributePart && 'name' in attributePart)) {
+    throw new Error('live() can only be used in attribute/property parts.');
+  }
+    const {style} = attributePart.element as HTMLElement;
 
     if (this._previousStyleProperties === undefined) {
       this._previousStyleProperties = new Set();
