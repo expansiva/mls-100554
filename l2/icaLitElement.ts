@@ -44,7 +44,7 @@ export abstract class IcaLitElement extends CollabLitElement {
         this.subscribeToState(newItem);
       }
     });
-  }  
+  }
 
   private subscribeToState(stateKey: string): void {
     if (!this.stateKeys.get(stateKey)) {
@@ -58,6 +58,7 @@ export abstract class IcaLitElement extends CollabLitElement {
   }
 
   connectedCallback(): void {
+    (this as any)._loadStartTime = performance.now();
     super.connectedCallback();
     if (isTrace) {
       console.info(`connectedCallback, subscribe fields: ${Array.from(this.stateKeys.keys())}`);
@@ -68,6 +69,12 @@ export abstract class IcaLitElement extends CollabLitElement {
         this.subscribeToState(stateKey);
       }
     });
+    if (!(window as any).collabPluginMonitor) {
+      this.connectMonitoring();
+    }
+    const tagName = this.tagName.toLowerCase();
+    (window as any).collabPluginMonitor.reportStart(tagName, (this as any)._loadStartTime);
+
   }
 
   disconnectedCallback(): void {
@@ -83,6 +90,25 @@ export abstract class IcaLitElement extends CollabLitElement {
     this.stateKeys.forEach((_isSubscribed, stateKey) => {
       const [, path] = stateKey.split(';');
       state1.notify(path);
+    });
+
+    if (!(window as any).collabPluginMonitor) {
+      this.connectMonitoring();
+    }
+    const duration = performance.now() - ((this as any)._loadStartTime ?? 0);
+    const tagName = this.tagName.toLowerCase();
+    (window as any).collabPluginMonitor.reportDone(tagName, duration);
+
+  }
+
+  updated(_changedProps: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
+    super.updated(_changedProps);
+
+    const start = performance.now();
+    requestAnimationFrame(() => {
+      const tagName = this.tagName.toLowerCase();
+      const renderTime = performance.now() - start;
+      (window as any).collabPluginMonitor?.reportUpdate?.(tagName, renderTime);
     });
   }
 
@@ -107,5 +133,60 @@ export abstract class IcaLitElement extends CollabLitElement {
     });
   }
 
-}
+  connectMonitoring(): void {
+    if ((window as any).collabPluginMonitor) return;
 
+    interface ICollabMonitor {
+      name: string;
+      count: number;
+      totalTime: number;
+      updateCount: number;
+      updateTime: number;
+    }
+
+    const monitor = {
+      records: {} as Record<string, ICollabMonitor>,
+
+      reportStart(name: string, _startTime: number) {
+      },
+
+      reportDone(name: string, duration: number) {
+        const rec = this.getRec(name);
+        rec.count++;
+        rec.totalTime += duration;
+        monitor.records[name] = rec;
+      },
+
+      reportUpdate(name: string, duration: number) {
+        const rec = this.getRec(name);
+        rec.updateCount++;
+        rec.updateTime += duration;
+        this.records[name] = rec;
+      },
+
+      getRec(name: string): ICollabMonitor {
+        return this.records[name] || {
+          name,
+          count: 0,
+          totalTime: 0,
+          updateCount: 0,
+          updateTime: 0
+        };
+      },
+
+      sts() {
+        return Object.values(this.records).map((r) => ({
+          name: r.name,
+          count: r.count,
+          totalTime: parseFloat(r.totalTime.toFixed(2)),
+          avgTime: parseFloat((r.totalTime / r.count).toFixed(2)),
+          updateCount: r.updateCount ?? 0,
+          updateTime: parseFloat((r.updateTime ?? 0).toFixed(2)),
+          avgUpdateTime: r.updateCount ? parseFloat((r.updateTime / r.updateCount).toFixed(2)) : 0
+        }));
+      }
+    };
+
+    (window as any).collabPluginMonitor = monitor;
+  }
+}

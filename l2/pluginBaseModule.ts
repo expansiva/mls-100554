@@ -1,10 +1,9 @@
 /// <mls shortName="pluginBaseModule" project="100554" enhancement="_100554_enhancementLit" />
 
-import { html, css, svg, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { IcaLitElement } from './_100554_icaLitElement';
 
-export abstract class PluginBaseModule extends CollabLitElement {
+export abstract class PluginBaseModule extends IcaLitElement {
 
     @property() scope: 'detail' | 'dashboard' = 'dashboard';
 
