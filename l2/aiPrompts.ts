@@ -80,7 +80,7 @@ function getRagsList(): string {
 - rag2: base de conhecimento da empresa (documentação interna).`
 };
 
-export async function  systemToolsAvailable(): Promise<mls.msg.IAMessageInputType> {
+export async function systemToolsAvailable(): Promise<mls.msg.IAMessageInputType> {
     const tools = await getToolsList();
     return {
         type: 'system',
@@ -92,12 +92,12 @@ export async function  systemToolsAvailable(): Promise<mls.msg.IAMessageInputTyp
 async function getToolsList(): Promise<string> {
     const tolls = await getListFilesStart('tool');
     return tolls.join('\n');
-} 
+}
 
-export async function getListFilesStart(start: 'wc' | 'tool' | 'agent'): Promise<string[]> {
+export async function getListFilesStart(start: 'widget' | 'tool' | 'agent'): Promise<string[]> {
 
     const keys = Object.keys(mls.stor.files);
-    const ret:string[] = [];
+    const ret: string[] = [];
     for await (const k of keys) {
 
         try {
@@ -108,14 +108,21 @@ export async function getListFilesStart(start: 'wc' | 'tool' | 'agent'): Promise
 
             if (file.extension !== '.ts' || !file.shortName.startsWith(start)) continue;
 
-            const mdl = await import(path);
-
-            if (start === 'tool') {
-                const tool = mdl.createTool() as ITool;
-                ret.push(getDefTool(tool));
+            if (start === 'widget') {
+                ret.push(file.shortName);
+                
             } else {
-                const agent = mdl.createAgent() as IAgent;
-                ret.push(`${agent.agentName}: ${agent.agentDescription}`);
+
+                const mdl = await import(path);
+
+                if (start === 'tool') {
+                    const tool = mdl.createTool() as ITool;
+                    ret.push(getDefTool(tool));
+                } else {
+                    const agent = mdl.createAgent() as IAgent;
+                    ret.push(`${agent.agentName}: ${agent.agentDescription}`);
+                }
+
             }
 
         } catch (e) {

@@ -757,6 +757,8 @@ export class ServiceSource100554 extends ServiceBase {
 
         const onNew = async (): Promise<void> => {
             this.loading = true;
+            const openPreview = (fileAction as any).openPreview != undefined ? (fileAction as any).openPreview : true;
+
             await this.newFiles(
                 fileAction.newshortName as string,
                 fileAction.newProject as number,
@@ -764,7 +766,8 @@ export class ServiceSource100554 extends ServiceBase {
                 fileAction.newTSSource as string,
                 fileAction.newHtmlSource as string,
                 (fileAction as any).newHtmlLess as string,
-                (fileAction as any).newHtmlTest as string
+                (fileAction as any).newHtmlTest as string,
+                openPreview
             );
             this.loading = false;
         };
@@ -800,7 +803,14 @@ export class ServiceSource100554 extends ServiceBase {
             const storFileCss = getStorFileCss();
             const storFileTsTest = getStorFileTsTest();
 
-            await this.undoFiles(storFileHTML, storFile, storFileCss, storFileTsTest, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest);
+            if (storFile.status === 'new') {
+
+                await this.deleteFiles(storFileHTML, storFile, storFileCss, storFileTsTest);
+                await mls.stor.localDB.removePrjInfo(storFile.project);
+                
+            } else {
+                await this.undoFiles(storFileHTML, storFile, storFileCss, storFileTsTest, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest);
+            }
         };
 
         const onRename = async (): Promise<void> => {
@@ -878,10 +888,10 @@ export class ServiceSource100554 extends ServiceBase {
         this.onMLSEvents(ev);
     }
 
-    private async newFiles(newShortName: string, newProject: number, newEnhancement: string, tsSource: string, htmlSource?: string, lessSource?: string, testSource?: string) {
+    private async newFiles(newShortName: string, newProject: number, newEnhancement: string, tsSource: string, htmlSource?: string, lessSource?: string, testSource?: string, open: boolean = true) {
 
         this.isNewFile = true;
-        this.activeThisService();
+        if (open) this.activeThisService();
         this.closeMenu();
         const newTSSource = tsSource
             || `/// <mls shortName="${newShortName}" project="${newProject}" enhancement="${newEnhancement}" />
@@ -891,8 +901,8 @@ export class ServiceSource100554 extends ServiceBase {
         await this.createOrShowModelHtmlOrCssOrTest(newShortName, newProject, false, '.html', htmlSource);
         await this.createOrShowModelHtmlOrCssOrTest(newShortName, newProject, false, '.less', lessSource);
         if (testSource) await this.createOrShowModelHtmlOrCssOrTest(newShortName, newProject, false, '.test.ts', testSource);
-        
-        this.showActiveModel();
+
+        if (open) this.showActiveModel();
         await mls.stor.localStor.setContent(modelTS.storFile, await this.getValueInfo(modelTS));
         this.isNewFile = false;
     }
@@ -1778,13 +1788,13 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (mode === '.less') {
                 const newLess = await this.prepareInitialLess(shortName, project, source);
                 await this.createStorFile(project, shortName, newLess, mode);
-            } else  if (mode === '.test.ts') {
+            } else if (mode === '.test.ts') {
                 const newTest = await this.prepareInitialTest(shortName, project, source);
                 await this.createStorFile(project, shortName, newTest, mode);
-            }else{
+            } else {
                 const newHTML = await this.prepareInitiaHTML(source, shortName, project);
                 await this.createStorFile(project, shortName, newHTML, mode);
-            } 
+            }
             storFile = mls.stor.files[key];
         }
 
@@ -1797,9 +1807,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             model = await this.getOrCreateModelTsTest(storFile, fileInfo);
         }
 
-        if(!model) throw new Error("[createOrShowModelHtmlOrCssOrTest] Erro get or create model")
+        if (!model) throw new Error("[createOrShowModelHtmlOrCssOrTest] Erro get or create model")
 
-        if (open && this._ed1 && this.activeModels ) {
+        if (open && this._ed1 && this.activeModels) {
             this._ed1.setModel(model);
             this.restaureViewState();
             this.updatedMSizeEditor();
@@ -1834,7 +1844,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     }
 
-    private async prepareInitialTest(shortName: string, project: number, source:string = "") {
+    private async prepareInitialTest(shortName: string, project: number, source: string = "") {
 
         const tag = convertFileNameToTag(`_${project}_${shortName}`);
         const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />
@@ -1854,14 +1864,24 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         return newTest;
     }
 
-    private async prepareInitialLess(shortName: string, project: number, source:string = "") {
+    private async prepareInitialLess(shortName: string, project: number, source: string = "") {
 
         const tag = convertFileNameToTag(`_${project}_${shortName}`);
-        const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="enhancementStyle" />
+
+        let example = '';
+
+        if (source.indexOf(tag) >= 0) {
+            example = `/// <mls shortName="[shortName]" project="[project]" enhancement="enhancementStyle" />
+
+                \n[source]
+                `
+        } else {
+            example = `/// <mls shortName="[shortName]" project="[project]" enhancement="enhancementStyle" />
 				\n[tag] {
                 \n // Here your less
                 \n[source]
                 \n}`
+        }
         const newStyle = example
             .replace('[shortName]', shortName)
             .replace('[project]', project.toString())

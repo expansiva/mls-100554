@@ -8,13 +8,12 @@ import { preferModelType } from './_100554_aiPrompts';
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
-    calculateStepsStatistics,
     updateStepStatus,
-    getNextPendentStep
+    getNextPendentStep,
+    updateTaskTitle
 } from "./_100554_aiAgentHelper";
 
 import {
-    startNewAiTask,
     executeNextStep,
     startNewInteractionInAiTask
 } from "./_100554_aiAgentOrchestration";
@@ -67,8 +66,9 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    //context.task = await updateStepStatus(context.task, step.stepId, "completed");
+
     await addFile(context);
+    context.task = await updateStepStatus(context.task, step.stepId, "completed");    
     await executeNextStep(context);
 }
 
@@ -87,6 +87,15 @@ async function addFile(context: mls.msg.ExecutionContext) {
     await createNewFile(
         { project, position: 'right', shortName: pageName, enhancement, sourceTS: fileTS, sourceHTML: fileHTML, sourceLess: fileLess, openPreview: false }
     );
+
+    let aux = '';
+    const m = mls.editor.getModels(project, pageName);
+    if (m && m.ts && m.ts.compilerResults && m.ts.compilerResults.errors.length > 0) {
+        aux = ', com '+ m.ts.compilerResults.errors.length + ' erros, favor verificar'
+        
+    }
+
+    context.task = await updateTaskTitle(context.task, "Widget created" + aux);
 }
 
 export async function getPrompts(json: any, prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
@@ -112,6 +121,7 @@ export async function getPrompts(json: any, prompt: string | undefined, rags: st
 }
 
 function systemMainInstruction(): mls.msg.IAMessageInputType {
+    //executor or translate
     return {
         type: 'system',
         content: `${preferModelType("executor")}
@@ -140,12 +150,15 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
   1.7. Deixe a linha 1 , tripleSlash, igual no modelo, isto irá ser importante para saber o nome do arquivo e outros detalhes.
 
 2. Para o retorno do .less
-  2,1 Inclua o código LESS, onde o primeiro nível é a tag HTML do componente.
+  2.1 Inclua o código LESS, onde o primeiro nível é a tag HTML do componente.
 
 3. Para o retorno do .html
-  3.1 use o html para demonstrar o componente criado, procure demonstrar pontos fortes e restrições, inicie o html com a tag div, não inclua javascript, inclua estilos para uma apresentação melhor. 
+  3.1 use o html para demonstrar o componente criado, procure demonstrar pontos fortes e restrições, inicie o html com a tag div, não inclua javascript, inclua estilos para uma apresentação melhor.
 
-4. Analise cuidadosamente as seções fornecidas abaixo:
+4. Para todos os retornos(.ts, .less e .html)
+  4.1 Retorne os conteúdos sem qualquer indentação (sem espaços ou tabulações no início das linhas), mantendo apenas as quebras de linha.
+
+5. Analise cuidadosamente as seções fornecidas abaixo:
    - "Modelo Widget"
    - "Requirements editáveis pelo usuário"
    - "Definições dos Atributos"
@@ -241,15 +254,15 @@ function systemModelInstruction(): mls.msg.IAMessageInputType {
         type: 'system',
         content: `## Modelo Widget
 
-/// <mls shortName="wcInputNumber" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="widgetInputNumber" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
 import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
 
-@customElement('wc-input-number-100554')
-export class WCInputNumber extends IcaFormsInputNumberBase {
+@customElement('widget-input-number-100554')
+export class WidgetInputNumber extends IcaFormsInputNumberBase {
 
     @propertyDataSource({ type: String }) value: number | undefined;
 
