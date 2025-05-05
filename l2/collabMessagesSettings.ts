@@ -53,7 +53,6 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-
 @customElement('collab-messages-settings-100554')
 export class CollabMessagesSettings100554 extends IcaLitElement {
 

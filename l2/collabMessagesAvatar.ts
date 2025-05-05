@@ -21,6 +21,7 @@ export class CollabMessagesAvatar100554 extends IcaLitElement {
     }
 
     render() {
+        
         return html`
         <div class="avatar">
             ${this.avatar

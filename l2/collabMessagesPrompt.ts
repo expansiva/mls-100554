@@ -37,7 +37,6 @@ export class CollabMessagesPrompt100554 extends IcaLitElement {
                     >
                     ${this.isSending ? html`<span class="loader"></span>` : collab_arrow_up_long}
                 </button>
-        
             ${this.mentionActive && this.mentionSuggestions.length > 0 ? html`
             <ul class="mention-suggestions">
                 ${this.mentionSuggestions.map((s, i) => html`
