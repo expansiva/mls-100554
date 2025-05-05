@@ -14,7 +14,6 @@ import './_100554_wcImage';
 import './_100554_collabTasks';
 import './_100554_collabMessagesSettings';
 
-
 /// **collab_i18n_start** 
 const message_pt = {
     loading: 'Carregando...',
