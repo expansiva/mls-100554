@@ -89,16 +89,15 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
   if (!context || !context.message || !context.task) throw new Error("Invalid context");
   if (!data.json) throw new Error("Invalid json after clarification");
 
-  //const newPrompt = JSON.stringify(data.json);
   const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
   if (!step) {
-    throw new Error(`[${agentName}] beforePrompt: No found step: ${stepId} for this agent.`);
+    throw new Error(`[${agentName}] _afterClarification: No found step: ${stepId} for this agent.`);
   }
 
   const interactionId: number | null = getInteractionStepId(context.task, step.stepId);
-  if (!interactionId) throw new Error("[beforePrompt] Not found interactionId in pending step")
+  if (!interactionId) throw new Error("[_afterClarification] Not found interactionId in pending step")
   const payload: mls.msg.AIPayload | null = getStepById(context.task, interactionId);
-  if (!payload || payload.type !== "agent") throw new Error("[beforePrompt] Clarification or tool step not bellow a agent");
+  if (!payload || payload.type !== "agent") throw new Error("[_afterClarification] Clarification or tool step not bellow a agent");
 
   const promptUser = payload.interaction?.input.find((input) => input.type === 'human')?.content || '';
 
