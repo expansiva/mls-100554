@@ -17,6 +17,7 @@ export class WcClarificationPlannerNewWidget100554 extends IcaLitElement {
 
 
     @query('#input_tagName') inputTag?: HTMLInputElement;
+    @query('#widgetNameError') widgetNameError?: HTMLInputElement;
 
     render() {
 
@@ -88,13 +89,15 @@ export class WcClarificationPlannerNewWidget100554 extends IcaLitElement {
                         .value=${item.widgetName}
                         @input= ${(e: MouseEvent) => this.handleWidgetNameInput(e, item)} 
                     ></input>
+                    <small style="color:red" id="widgetNameError"></small>
                 </div>
-                <div>
+                <div style="margin-top:.5rem">
                     <label>Tagname:</label>
                     <input
                         id="input_tagName"
                         type="text"
                         readonly
+                        style="border:none"
                         @change=${(e: MouseEvent) => this.handleTagNameChange(e, item)}
                         .value=${item.tagName}
                     ></input>
@@ -164,6 +167,21 @@ export class WcClarificationPlannerNewWidget100554 extends IcaLitElement {
 
     private handleWidgetNameInput(e: MouseEvent, item: ClarificationWidgetName) {
         const target = e.target as HTMLTextAreaElement;
+
+        const key = mls.stor.getKeyToFiles(this.ICABASEPROJECT, 2, target.value, '', '.ts');
+        if (!this.widgetNameError) return;
+
+        if (mls.stor.files[key]) {
+            this.widgetNameError.innerHTML = "A widget with this name already exists";
+            return;
+        };
+
+        if (!target.value.startsWith('widget')) {
+            this.widgetNameError.innerHTML = "Component name must start with \"widget\"";
+            return;
+        }
+
+        this.widgetNameError.innerHTML = "";
         item.widgetName = target.value;
         if (this.inputTag) {
             this.inputTag.value = this.createTagName(target.value);
@@ -197,6 +215,32 @@ export class WcClarificationPlannerNewWidget100554 extends IcaLitElement {
     }
 
     private handleOk() {
+        let hasError = false;
+        this.data?.json.map((item) => {
+
+            if (item.sectionName === 'widgetName') {
+
+                const key = mls.stor.getKeyToFiles(this.ICABASEPROJECT, 2, (item as ClarificationWidgetName).widgetName, '', '.ts');
+
+                if (!this.widgetNameError) return;
+
+                if (mls.stor.files[key]) {
+                    this.widgetNameError.innerHTML = "A widget with this name already exists";
+                    hasError = true;
+                    return;
+                };
+
+                if (!(item as ClarificationWidgetName).widgetName.startsWith('widget')) {
+                    this.widgetNameError.innerHTML = "Component name must start with \"widget\"";
+                    hasError = true;
+                    return;
+                }
+
+            }
+            
+        })
+
+        if (hasError) return;
         this.handleAction('continue');
     }
 

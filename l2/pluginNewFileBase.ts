@@ -53,6 +53,7 @@ export async function createNewFile(args:IRequestNewFile) {
     if (args.sourceHTML) params.newHtmlSource = args.sourceHTML;
     if (args.sourceLess) (params as any).newHtmlLess = args.sourceLess;
     if (args.sourceTest) (params as any).newHtmlTest = args.sourceTest;
+    (params as any).openPreview = args.openPreview
     params.position = args.position;
 
     mls.actual[2].setFullName('_' + params.project + '_' + params.shortName);

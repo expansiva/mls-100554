@@ -9,7 +9,7 @@ import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewSte
 import './_100554_wcClarificationPlannerNewWidget';
 
 const agentName = "agentPlannerNewWidget";
-const widgetPrefix = "wc";
+const widgetPrefix = "widget";
 
 export function createAgent(): IAgent {
     return {
