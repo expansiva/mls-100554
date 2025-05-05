@@ -9,7 +9,7 @@ import { getClarification } from './_100554_aiAgentOrchestration';
 @customElement('widget-ai-interaction-100554')
 export class WidgetAiInteraction100554 extends IcaLitElement {
 
-    @property() payloads: mls.msg.AIPayload[] | undefined = undefined;
+    // @property() payloads: mls.msg.AIPayload[] | undefined = undefined;
     @property() task: mls.msg.TaskData | undefined = undefined;
     @property() stepid: string = '';
     @property({ attribute: false }) seen = new Set<string>();
@@ -27,7 +27,7 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
 
     render() {
 
-        if (!this.payloads) return html``;
+        if (!this.task) return html`No task.`;
 
         let isClarificationPending: boolean = false;
         if (this.task) {
@@ -38,23 +38,42 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
             <details class="details-task">
                 <summary>Details</summary>
                 <div>
-                    ${this.renderTaskInfo()}
-                    ${this.renderlLongMemory()}
-                    ${this.renderTaskInteractions()}
+                    ${this.renderTaskModeDetails()}
+                </div>
+            </details>
+
+            <details class="details-task">
+                <summary>Details2</summary>
+                <div>
+                    ${this.renderTaskModeJson()}
                 </div>
             </details>
             
             ${this.task?.status === "done"
-                    ? this.renderDirectResult()
-                    : html``
-                }
+                ? this.renderDirectResult()
+                : html``
+            }
 
             ${isClarificationPending
-                    ? this.renderDirectClarification()
-                    : html``
-                }
+                ? this.renderDirectClarification()
+                : html``
+            }
 
             `
+    }
+
+    private renderTaskModeJson() {
+        if (!this.task) return html``;
+        const formattedJson = this.syntaxHighlight(this.task);
+        return html`<div class="formated-details-json"><pre .innerHTML=${formattedJson}></pre></div>`;
+    }
+
+    private renderTaskModeDetails() {
+        return html`
+            ${this.renderTaskInfo()}
+            ${this.renderlLongMemory()}
+            ${this.task?.iaCompressed?.nextSteps ? this.renderTaskInteractions(this.task?.iaCompressed?.nextSteps) : ''}
+        `
     }
 
     private renderDirectResult() {
@@ -84,30 +103,35 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
     }
 
     private renderTaskInfo() {
+
+        if (!this.task) return html``;
+        const cloneTask = Object.assign({}, this.task);
+        delete cloneTask.iaCompressed;
+
         return html`
             <div class="task-info">
                 <ul>
-                    <li>
-                        <span>Id:</span>
-                        <span>${this.task?.PK}</span>
-                    </li>
-                    <li>
-                        <span>Status:</span>
-                        <span>${this.task?.status}</span>
-                    </li>
-                </ul>                
+                    ${Object.keys(cloneTask).map((key) => {
+            return html`
+                            <li>${key}: 
+                            ${cloneTask && typeof (cloneTask as any)[key] === 'string'
+                    ? (cloneTask as any)[key]
+                    : (cloneTask as any)[key].toString()
+                } </li>`
+        })}
+                </ul>             
             </div>
         `
     }
 
-    private renderTaskInteractions() {
+    private renderTaskInteractions(payloads: mls.msg.AIPayload[]) {
         return html`
             <div class="payload-content">
-                ${this.payloads?.map((payload) => {
+                ${payloads.map((payload) => {
             return html`
-                                    <div>
-                                        ${this.renderPayload(payload)}
-                                    </div>`
+                <div>
+                    ${this.renderPayload(payload)}
+                </div>`
         })}
             </div>
         `
@@ -115,25 +139,33 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
 
     private renderPayload(payload: mls.msg.AIPayload, isDirect: boolean = false): TemplateResult<1> {
 
+
         switch (payload.type) {
             case 'agent':
                 return html`
                     <details ?open=${isDirect}>
                         <summary>${payload.type}(${payload.agentName})</summary>
                         ${this.renderAgent(payload)}
+                        ${payload.interaction ? this.renderInteration(payload.interaction, payload.stepId) : html``}
+                        ${payload.nextSteps && payload.nextSteps.length > 0 ? this.renderTaskInteractions(payload.nextSteps) : html``}  
                     </details>`
             case 'tool':
                 return html`
                     <details ?open=${isDirect} >
                         <summary>${payload.type}</summary>
                         ${this.renderTool(payload)}
+                        ${payload.interaction ? this.renderInteration(payload.interaction, payload.stepId) : html``}
+                        ${payload.nextSteps && payload.nextSteps.length > 0 ? this.renderTaskInteractions(payload.nextSteps) : html``}  
                     </details>
                 `
             case 'clarification':
+                console.info(payload.nextSteps)
                 return html`
                     <details ?open=${isDirect} >
                         <summary>${payload.type}</summary>
                         ${this.renderClarificationDetails(payload)}
+                        ${payload.interaction ? this.renderInteration(payload.interaction, payload.stepId) : html``}
+                        ${payload.nextSteps && payload.nextSteps.length > 0 ? this.renderTaskInteractions(payload.nextSteps) : html``}
                     </details>
                 `
             case 'result':
@@ -141,6 +173,17 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
                     <details ?open=${isDirect} >
                         <summary>${payload.type}</summary>
                         ${this.renderResult(payload)}
+                        ${payload.interaction ? this.renderInteration(payload.interaction, payload.stepId) : html``}
+                        ${payload.nextSteps && payload.nextSteps.length > 0 ? this.renderTaskInteractions(payload.nextSteps) : html``}  
+                    </details>
+                `
+            case 'flexible':
+                return html`
+                    <details ?open=${isDirect} >
+                        <summary>${payload.type}</summary>
+                        ${this.renderFlexible(payload)}
+                        ${payload.interaction ? this.renderInteration(payload.interaction, payload.stepId) : html``}
+                        ${payload.nextSteps && payload.nextSteps.length > 0 ? this.renderTaskInteractions(payload.nextSteps) : html``}  
                     </details>
                 `
             default:
@@ -191,37 +234,24 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
             </div>`
     }
 
-    private renderNextSteps(steps: mls.msg.AIStep[], stepId: number) {
-        return html` 
-        <div>
-            <details>
-                <summary>Next Steps</summary>
-                <div>
-                    <ul>
-                        ${steps.map((step) => {
-            return html`<li @click=${this.onNextStepClick(step.interaction, step.stepId)}> ${step.stepId}</li>`
-        })}       
-                    </ul>
-                </div> 
-            </details>
-        </div> 
-            `
-    }
-
-    private onNextStepClick(interaction: mls.msg.AIInteraction | null | undefined, stepId: number) {
-        if (!interaction || !interaction.payload) return;
-        this.requestUpdate();
-    }
-
     private renderAgent(payload: mls.msg.AIAgentStep) {
         return html`
-            ${payload.interaction ? this.renderInteration(payload.interaction, payload.stepId) : html``}
-            ${payload.nextSteps && payload.nextSteps.length > 0 ? this.renderNextSteps(payload.nextSteps, payload.stepId) : html``}
+            <ul>
+                <li>agentName: ${payload.agentName}</li>
+                <li>stepId: ${payload.stepId}</li>
+                <li>prompt: ${payload.prompt}</li>
+                <li>status: ${payload.status}</li>
+            </ul>
         `;
     }
 
     private renderTool(payload: mls.msg.AIToolStep) {
         return html`
+            <ul>
+                <li>toolName: ${payload.toolName}</li>
+                <li>stepId: ${payload.stepId}</li>
+                <li>status: ${payload.status}</li>
+            </ul>
             <div class="clarification-details">
                 <pre>${JSON.stringify(payload)}</pre>
             </div>`;
@@ -230,10 +260,23 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
 
     private renderClarificationDetails(payload: mls.msg.AIClarificationStep) {
         return html`
-            <div class="clarification-details">
-                <pre>${JSON.stringify(payload)}</pre>
-            </div>`;
+            <ul>
+                <li>clarificationMessage: ${payload.clarificationMessage}</li>
+                <li>htmlForm: ${payload.htmlForm}</li>
+                <li>stepId: ${payload.stepId}</li>
+                <li>status: ${payload.status}</li>
+            </ul>
+            ${payload.json ? html`<div class="clarification-details"><pre>${JSON.stringify(payload.json)}</pre></div>` : ''}
+            `;
 
+    }
+
+    private renderFlexible(payload: mls.msg.AIFlexibleResultStep) {
+        return html`
+            <div class="flexible-details">
+                <pre>${JSON.stringify(payload)}</pre>
+            </div>
+            `;
     }
 
     private renderClarification(payload: mls.msg.AIClarificationStep) {
@@ -284,6 +327,35 @@ export class WidgetAiInteraction100554 extends IcaLitElement {
             }
             oldScript.replaceWith(newScript);
         });
+    }
+
+    private syntaxHighlight(json: any): string {
+        if (typeof json !== 'string') {
+            json = JSON.stringify(json, null, 2);
+        }
+        json = json
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        return json.replace(
+            /("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(?:\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+            (match: any) => {
+                let cls = 'json-value';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return `<span class="${cls}">${match}</span>`;
+            }
+        );
     }
 
 }

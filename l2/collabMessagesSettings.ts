@@ -5,7 +5,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { ServiceBase } from './_100554_serviceBase';
 import { loadChatPreferences, saveChatPreferences } from './_100554_collabMessageHelper';
-import { IChatPreferences } from './_100554_collabMessageHelper';
+import { IChatPreferences, TranslateMode } from './_100554_collabMessageHelper';
 
 import {
     collab_user,
@@ -26,7 +26,7 @@ const message_pt = {
     successSavingUser: 'Perfil do usuário atualizado com sucesso',
     successSavingChatPref: 'Preferências do chat atualizado com sucesso',
     chatPref: 'Preferências do chat',
-    translate: 'Tradução habilitada',
+    translate: 'Tradução',
     preferLanguage: 'Idioma preferido',
     userTitle: 'Usuário',
 }
@@ -41,7 +41,7 @@ const message_en = {
     successSavingUser: 'User perfil updated successfully',
     successSavingChatPref: 'Chat preferences updated successfully',
     chatPref: 'Chat Preferences',
-    translate: 'Enable translate',
+    translate: 'Translate',
     preferLanguage: 'Preferred language',
     userTitle: 'User',
 }
@@ -63,7 +63,7 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
 
     @state() userPerfil: mls.msg.User | undefined;
     @state() private chatPreferences: IChatPreferences = {
-        translationEnabled: false,
+        translationMode: 'icon',
         language: ''
     };
 
@@ -119,7 +119,11 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
             <div class="user-info">
                 <div class="user-info-item">
                     <label>${this.msg.username}</label>
-                    <input .value=${this.userPerfil?.name ?? ''} type="text" />
+                    <input
+                        .value=${this.userPerfil?.name ?? ''} 
+                        type="text" 
+                        @input=${this.handleNameInput}
+                    />
                 </div>
                 <div class="user-info-item">
                     <label>${this.msg.userid}</label>
@@ -149,39 +153,43 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
 
     private renderChatPreferences() {
         return html`
-        <div>
-            <h4>${collab_message} ${this.msg.chatPref}</h4>
-            <div class="section chat-preferences">
-                <div class="chat-config-item">
-                    <label>${this.msg.preferLanguage}:</label>
-                    <input
-                        @input=${this.handleLanguageInput}
-                        .value=${this.chatPreferences?.language ?? ''
-                    } type="text" />
-                </div>
-                <div class="chat-config-item">
-                    <label>
-                        <input
-                            type="checkbox"
-                            .checked=${this.chatPreferences.translationEnabled}
-                            @change=${this.handleTranslationToggle}
-                        />
-                        ${this.msg.translate}
-                        
-                    </label>
-                </div>
-                <div class="chat-config-item action">
-                    <button
-                        @click=${this.handleSaveChatPref}
-                        ?disabled=${this.isSavingChat}
-                    >
-                        ${this.isSavingChat ? html`<span class="loader"></span>` : this.msg.save}
-                    </button>
-                </div>
-                ${this.labelOkPref ? html`<small class="saving-ok">${this.labelOkPref}<small>` : ''}
-                ${this.labelErrorPref ? html`<small class="saving-error">${this.labelErrorPref}<small>` : ''}    
+    <div>
+        <h4>${collab_message} ${this.msg.chatPref}</h4>
+        <div class="section chat-preferences">
+
+            <div class="chat-config-item">
+                <label for="translationMode">${this.msg.translate}:</label>
+                <select
+                    id="translationMode"
+                    @change=${this.handleTranslationModeChange}
+                    .value=${this.chatPreferences?.translationMode ?? 'icon'}
+                >
+                    <option value="none">none</option>
+                    <option value="icon">icon</option>
+                    <option value="text">text</option>
+                    <option value="iconText">icon + text</option>
+                </select>
             </div>
-        </div>`;
+            <div class="chat-config-item">
+                <label>${this.msg.preferLanguage}:</label>
+                <input
+                    @input=${this.handleLanguageInput}
+                    .value=${this.chatPreferences?.language ?? ''}
+                    type="text"
+                />
+            </div>
+            <div class="chat-config-item action">
+                <button
+                    @click=${this.handleSaveChatPref}
+                    ?disabled=${this.isSavingChat}
+                >
+                    ${this.isSavingChat ? html`<span class="loader"></span>` : this.msg.save}
+                </button>
+            </div>
+            ${this.labelOkPref ? html`<small class="saving-ok">${this.labelOkPref}<small>` : ''}
+            ${this.labelErrorPref ? html`<small class="saving-error">${this.labelErrorPref}<small>` : ''}    
+        </div>
+    </div>`;
     }
 
     private refreshAvatar() {
@@ -247,8 +255,6 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
         this.labelOkPref = '';
         this.isSavingChat = true;
 
-        console.info(this.chatPreferences)
-
         try {
             saveChatPreferences(this.chatPreferences);
             this.labelOkPref = `${this.msg.successSavingChatPref}`;
@@ -261,14 +267,14 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
         }
     }
 
-
-    private handleTranslationToggle(e: Event) {
-        const target = e.target as HTMLInputElement;
+    private handleTranslationModeChange(e: Event) {
+        const select = e.target as HTMLSelectElement;
         this.chatPreferences = {
             ...this.chatPreferences,
-            translationEnabled: target.checked
+            translationMode: select.value as TranslateMode
         };
     }
+
 
     private handleLanguageInput(e: Event) {
         const target = e.target as HTMLInputElement;
@@ -276,6 +282,12 @@ export class CollabMessagesSettings100554 extends IcaLitElement {
             ...this.chatPreferences,
             language: target.value
         };
+    }
+
+    private handleNameInput(e: Event) {
+        if (!this.userPerfil) return;
+        const target = e.target as HTMLInputElement;
+        this.userPerfil.name = target.value;
     }
 }
 

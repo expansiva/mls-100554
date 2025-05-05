@@ -36,8 +36,6 @@ export class WidgetAiTask100554 extends IcaLitElement {
 
     private msg: MessageType = messages['en'];
 
-    // @property() status: 'todo' | 'in progress' | 'done' | 'paused' | 'waitingforuser' = 'in progress';
-
     @property() taskid: string = '';
     @property() messageid: string = '';
     @property() lastChanged: string = '';

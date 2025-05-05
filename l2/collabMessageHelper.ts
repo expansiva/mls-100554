@@ -21,10 +21,13 @@ export function saveChatPreferences(chatPreferences: IChatPreferences) {
 function loadDefaultPreferences(): IChatPreferences {
     return {
         language: document.documentElement?.lang?.split('-')?.shift() || 'en',
-        translationEnabled: false,
+        translationMode: 'icon',
     }
 }
+
+export type TranslateMode = "none" | "icon" | "text" | "iconText"
+
 export interface IChatPreferences {
-    translationEnabled: boolean,
+    translationMode: TranslateMode
     language: string
 }

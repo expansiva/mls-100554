@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { collab_chevron_left, collab_user_plus, collab_gear } from './_100554_collabIcons';
+import { collab_chevron_left, collab_user_plus, collab_gear, collab_translate } from './_100554_collabIcons';
 import { createAgent } from './_100554_agentPlanner1';
 import { getTemporaryContext, formatTimestamp } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, getAllMessagesByThreadId, updateThread, updateUsers, updateThreads } from './_100554_msgDBController';
@@ -37,7 +37,6 @@ const message_en = {
     errorFieldsAddParticipant: 'Fill in all fields!',
     successAddParticipant: 'User added sucessfully',
     threadDetails: 'Thread details'
-
 }
 
 type MessageType = typeof message_en;
@@ -129,9 +128,9 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         }
 
         return html`
-        ${this.renderHeader()}
-        ${this.renderContent()}
-    `;
+            ${this.renderHeader()}
+            ${this.renderContent()}
+        `;
     }
 
     private renderHeader() {
@@ -201,15 +200,15 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                 const dateFormated = formatTimestamp(message.createAt);
                 const userName = this.actualThread?.users.find((user) => user.userId === message.senderId)?.name || message.senderId;
                 const userAvatar = this.actualThread?.users.find((user) => user.userId === message.senderId)?.avatar_url || '';
-
                 const cls = message.senderId === this.userId ? 'user' : 'system';
+                const isSame = message.isSame;
 
                 return html`
                     <div class="message ${cls}">
                         <div class="message-group">
                             <div class="message-row">
-                                <div class="message-card ${cls}">
-                                    <div class="message-title">@${userName}</div>
+                                <div class="message-card ${cls} ${isSame ? 'same' : ''}">
+                                    ${!isSame ? html`<div class="message-title">@${userName}</div>` : ``}
                                     ${this.renderMessageByLanguage(message)}
                                     <div class="message-footer">${dateFormated?.time}</div>
                                     ${message.taskId
@@ -226,7 +225,7 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
                                             </div>                                            `
                         : html``}
                                 </div> 
-                                ${cls === 'system' ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''} 
+                                ${cls === 'system' && !isSame ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''} 
                             </div>    
                         </div>
                     </div>`
@@ -241,18 +240,35 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
     private renderMessageByLanguage(message: mls.msg.Message) {
 
-        if (!this.userPreferenceChat || !this.userPreferenceChat.translationEnabled || !message.translations) {
+        const mode = this.userPreferenceChat?.translationMode || 'icon';
+
+        if (!this.userPreferenceChat || mode === 'none' || !message.translations) {
             return html`<div class="message-content">${message.content}</div>`
         }
+
         const { language } = this.userPreferenceChat;
         const messageByLanguagePref = message.translations ? message.translations[language] : '';
         const isSameLanguege = language === message.language_detected;
 
-        return html`
-            <div class="message-content">${messageByLanguagePref || message.content}</div>
-            ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}
-        
-        `
+        switch (mode) {
+            case 'icon':
+                return html`
+                <div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>`;
+            case 'text':
+                return html`
+                <div class="message-content">${messageByLanguagePref || message.content}</div>
+                ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
+            case 'iconText':
+                return html`
+                <div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>
+                ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
+            default:
+                return null;
+        }
+
+
+
+
     }
 
     private renderPrompt() {
@@ -432,7 +448,20 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
             groupedByDay[day].sort((a, b) => a.orderAt.localeCompare(b.orderAt));
         }
 
-        return groupedByDay;
+        return this.groupMessages(groupedByDay);
+    }
+
+    private groupMessages(groupedByDay: IMessageGrouped): IMessageGrouped {
+        const result: IMessageGrouped = {};
+
+        Object.keys(groupedByDay).forEach((key) => {
+            result[key] = groupedByDay[key].map((msg, index, arr) => {
+                const isSame = index > 0 && msg.senderId === arr[index - 1].senderId;
+                return { ...msg, isSame };
+            });
+        });
+
+        return result;
     }
 
     private parseLocalDate(dateString: string) {
@@ -455,6 +484,7 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
         const messagesInDb = await getAllMessagesByThreadId(threadInfo.thread.threadId);
         this.actualMessages = messagesInDb;
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+        console.info(this.actualMessagesParsed)
         this.activeScenerie = 'details';
 
         this.isLoadingMessages = true;
@@ -712,6 +742,7 @@ interface IThreadInfo {
 interface IMessage extends mls.msg.Message {
     context?: mls.msg.ExecutionContext,
     lastChanged?: number,
+    isSame?: boolean,
 }
 
 type IMessageGrouped = { [key: string]: IMessage[] }

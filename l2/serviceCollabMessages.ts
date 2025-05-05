@@ -45,10 +45,8 @@ const messages: { [key: string]: MessageType } = {
 export class ServiceCollabMessages100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
-
     @property() activeTab: ITabType = 'CRM';
     @property() activeScenerie: IScenery = 'tabs';
-
     @state() userPerfil: mls.msg.User | undefined;
     @state() userThreads: IThreadData = {}
 
@@ -63,7 +61,13 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     public onClickTabs(index: number) {
-        if (this.activeTab === ETabs[index]) return;
+        if (this.activeTab === ETabs[index]) {
+            this.activeTab = 'Loading';
+            setTimeout(() => {
+                this.activeTab = ETabs[index] as ITabType;
+            }, 0)
+            return;
+        };
         this.activeTab = ETabs[index] as ITabType;
     }
 
@@ -127,7 +131,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        if (this.menu.setTabActive) this.menu.setTabActive(ETabs[this.activeTab]);
+        // if (this.menu.setTabActive) this.menu.setTabActive(ETabs[this.activeTab]);
         return this.renderTabs();
     }
 
@@ -146,6 +150,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                 return this.renderConnect();
             case 'Add':
                 return this.renderAdd();
+            case 'Loading':
+                return html`${this.msg.loading}`
             default:
                 return html``;
         }
@@ -349,8 +355,9 @@ enum ETabs {
     'Connect' = 3,
     'Apps' = 4,
     'Add' = 5,
+    'Loading' = 65,
 }
 
 
-type ITabType = 'CRM' | 'Tasks' | 'Docs' | 'Connect' | 'Apps' | 'Add';
+type ITabType = 'CRM' | 'Tasks' | 'Docs' | 'Connect' | 'Apps' | 'Add' | 'Loading';
 type IScenery = 'tabs' | 'settings'
