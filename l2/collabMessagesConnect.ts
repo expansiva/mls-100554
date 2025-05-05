@@ -17,6 +17,7 @@ import { IChatPreferences } from './_100554_collabMessageHelper';
 import { IcaLitElement } from './_100554_icaLitElement';
 import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt';
 
+
 /// **collab_i18n_start** 
 const message_pt = {
     loading: 'Carregando...',
