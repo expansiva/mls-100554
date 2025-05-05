@@ -6,7 +6,6 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { CollbaMessagesAddResponse } from './_100554_collabMessagesAdd';
 import { saveUserIdLocalStorage } from "./_100554_aiAgentHelper";
-
 import { listThreads, addThread, updateThreads, listUsers, updateUsers } from './_100554_msgDBController';
 import './_100554_collabMessagesAdd';
 import './_100554_collabMessagesConnect';

@@ -9,7 +9,6 @@ import { getClarification } from './_100554_aiAgentOrchestration';
 @customElement('widget-ai-interaction-100554')
 export class WidgetAiInteraction100554 extends IcaLitElement {
 
-    // @property() payloads: mls.msg.AIPayload[] | undefined = undefined;
     @property() task: mls.msg.TaskData | undefined = undefined;
     @property() stepid: string = '';
     @property({ attribute: false }) seen = new Set<string>();

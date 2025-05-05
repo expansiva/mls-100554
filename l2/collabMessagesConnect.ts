@@ -299,7 +299,7 @@ export class CollabMessagesConnect100554 extends IcaLitElement {
 
     private renderTaskDetails() {
         return html`
-            <widget-ai-interaction-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK} .payloads=${this.actualTask?.iaCompressed?.nextSteps}></widget-ai-interaction-100554>`
+            <widget-ai-interaction-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK}></widget-ai-interaction-100554>`
     }
 
     private renderThreadDetails() {

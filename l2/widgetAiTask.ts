@@ -23,7 +23,6 @@ const message_pt = {
 const message_en = {
     loading: 'Loading...',
 }
-
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
