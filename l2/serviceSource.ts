@@ -1117,7 +1117,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (!hasError && this.activeModels && this.activeModels.ts) {
 
             const enhacementName = await getEnhancementName({ project, shortName }).catch((e) => undefined);
-            if (enhacementName) {
+            if (enhacementName && enhacementName !== "_blank") {
                 const path = mls.l2.getPath(enhacementName);
                 const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });
                 if (enhancementInstance) await enhancementInstance.onAfterChange(this.activeModels.ts);
