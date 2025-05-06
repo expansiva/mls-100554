@@ -1,9 +1,9 @@
 /// <mls shortName="libProcessTest" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaState } from './_100554_icaState';
+import { CollabState } from './_100554_collabState';
 import { ICANTest, ICANIntegration } from "./_100554_tsTestAST";
 
-export function getScriptTest(ica: IcaState): { func: string, exe: any } | undefined {
+export function getScriptTest(ica: CollabState): { func: string, exe: any } | undefined {
 
     const stateHistories = ica.getHistory();
     if (stateHistories.length <= 0) return undefined;

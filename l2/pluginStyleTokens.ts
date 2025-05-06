@@ -2,12 +2,11 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
 import { getMessageKey } from './_100554_collabLitElement';
-import { propertyDataSource } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
 import { ICSSState } from './_100554_lessCSS';
-import { LessAst } from "./_100554_lessAST";
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -34,7 +33,7 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-tokens-100554')
-export class PluginCssTokens extends IcaLitElement {
+export class PluginCssTokens extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 

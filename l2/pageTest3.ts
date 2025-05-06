@@ -2,7 +2,7 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement, query } from 'lit/decorators.js';
-import { globalState, initState, setState } from './_100554_icaState';
+import { globalState, initState, setState } from './_100554_collabState';
 import { initTestState } from './_100554_testPagesState';
 
 @customElement('page-test3-100554') 

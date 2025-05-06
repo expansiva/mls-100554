@@ -3,9 +3,9 @@
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getMessageKey } from "./_100554_collabLitElement";
-import { propertyDataSource } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 import { ServiceBase } from './_100554_serviceBase';
 import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget } from "./_100554_pluginNewFileBase";
 import './_100554_wcCode';
@@ -52,7 +52,7 @@ export const details: IDetails = {
 
 
 @customElement('plugin-new-file-service-100554')
-export class PluginNewFileService extends IcaLitElement {
+export class PluginNewFileService extends StateLitElement {
 
     @propertyDataSource() shortName: string | undefined;
 

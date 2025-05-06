@@ -1,6 +1,6 @@
 /// <mls shortName="libManagementCan" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaState, GlobalState } from './_100554_icaState';
+import { CollabState, GlobalState } from './_100554_collabState';
 
 const watchedStates = new Map<string, any>();
 const waitingPromises: Map<string, { value: any, resolve: () => void, reject: (err: Error) => void }> = new Map();
@@ -134,10 +134,10 @@ export function waitingState(path: string, value: any): Promise<void> {
  * Validates whether the current state matches the expected value for any registered waiting state.
  * If the state does not match the expected value, the function stops observing and throws an error.
  *
- * @param {IcaState} stateManager - The state manager that holds the global state.
+ * @param {CollabState} stateManager - The state manager that holds the global state.
  * @throws {Error} - Throws an error if the state at a given path does not match the expected value.
  */
-function validateWaitingStates(stateManager: IcaState): void {
+function validateWaitingStates(stateManager: CollabState): void {
     for (const [path, { value, resolve, reject }] of waitingPromises.entries()) {
         const currentValue = stateManager.getState(path);
 
@@ -198,7 +198,7 @@ function validateWatchedStates(): void {
  * @returns {any} - The global state manager.
  * @throws {Error} - Throws an error if the preview iframe or state manager is not available.
  */
-function getStateManager(): IcaState {
+function getStateManager(): CollabState {
 
     if (!window.preview.iframe) throw new Error('Invalid preview iframe');
     if (!window.preview.iframe.contentWindow) throw new Error('Invalid preview iframe contentWindow');
@@ -248,7 +248,7 @@ function getState(): {} {
 
 
 interface IPreviewWindow extends Window {
-    globalStateManagment: IcaState
+    globalStateManagment: CollabState
     _ica: {},
 }
 

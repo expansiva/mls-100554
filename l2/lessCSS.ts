@@ -1,7 +1,7 @@
 /// <mls shortName="lessCSS" project="100554" enhancement="_blank" />
 
 import { LessAst } from "./_100554_lessAST";
-import { globalState } from './_100554_icaState';
+import { globalState } from './_100554_collabState';
 
 /**
  * A unique symbol used as a key for properties that should be ignored during JSON serialization.

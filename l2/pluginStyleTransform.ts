@@ -3,14 +3,15 @@
 
 import { html, repeat } from 'lit';
 import { customElement, property, queryAll } from 'lit/decorators.js';
-import './_100554_collabDsInputSelectColor';
-import './_100554_collabDsInputRange';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
+import { globalState } from './_100554_collabState';
 import { getMessageKey } from './_100554_collabLitElement';
+import { ICSSState } from './_100554_lessCSS';
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
-import { ICSSState } from './_100554_lessCSS';
-import { globalState } from './_100554_icaState';
+import './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputRange';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -54,7 +55,7 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-transform-100554')
-export class PluginStyleTransform extends IcaLitElement {
+export class PluginStyleTransform extends StateLitElement {
 
     @property() showFull: string = 'true';
     @propertyDataSource() state: ICSSState | undefined;

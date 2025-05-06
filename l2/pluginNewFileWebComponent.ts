@@ -3,9 +3,9 @@
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getMessageKey } from "./_100554_collabLitElement";
-import { propertyDataSource } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 import { ServiceBase } from './_100554_serviceBase';
 import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget } from "./_100554_pluginNewFileBase";
 import { openService } from './_100554_libCommom'
@@ -53,7 +53,7 @@ export const details: IDetails = {
 }
 
 @customElement('plugin-new-file-web-component-100554')
-export class PluginNewFileWebComponent extends IcaLitElement {
+export class PluginNewFileWebComponent extends StateLitElement {
 
     @propertyDataSource() shortName: string | undefined;
 
@@ -70,10 +70,10 @@ export class PluginNewFileWebComponent extends IcaLitElement {
     private template: string = `
  import { html, css } from 'lit'; 
  import { customElement, property } from 'lit/decorators.js';
- import { IcaLitElement } from './_100554_icaLitElement';
+ import { StateLitElement } from './_100554_stateLitElement';
 
  @customElement('[tagName]')
- export class [className] extends IcaLitElement {
+ export class [className] extends StateLitElement {
     
      @property() name: string = 'Somebody';
 
@@ -105,14 +105,33 @@ export class PluginNewFileWebComponent extends IcaLitElement {
         this.loading = true;
         try {
             await createNewFile({
+                project: this.project,
+                position: this.position,
+                shortName: this.shortName,
+                enhancement: this.enhancement,
+                sourceTS: this.getTemplate(),
+                openPreview:true
+            });
+        } catch (e: any) {
+            this.loading = false;
+        }
+    }
+
+    /*private async handleAddFile() {
+        if (!this.project || !this.shortName) {
+            this.service.setError(msg.error)
+            return;
+        };
+        this.loading = true;
+        try {
+            await createNewFile({
                 project:this.project,
                 position:this.position,
                 shortName:this.shortName,
                 enhancement:this.enhancement,
                 sourceTS:this.getTemplate(),
                 openPreview: false
-            }
-            );
+            });
             if (this.service) {
                 openService('_100554_serviceAim', 'right', 2);
                 const opInstance = this.service.nav3Service?.getActiveInstance('right');
@@ -124,7 +143,7 @@ export class PluginNewFileWebComponent extends IcaLitElement {
         } catch (e: any) {
             this.loading = false;
         }
-    }
+    }*/
 
     render() {
         return html`

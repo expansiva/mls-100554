@@ -1,14 +1,14 @@
 /// <mls shortName="pluginStyleMargin" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
+import { html, repeat } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
+import { globalState } from './_100554_collabState';
 import { getMessageKey } from './_100554_collabLitElement';
+import { ICSSState } from './_100554_lessCSS';
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
-import { ICSSState } from './_100554_lessCSS';
-
-import { globalState } from './_100554_icaState';
 
 import {
     collab_lock,
@@ -58,7 +58,7 @@ export function getDescription() {
 
 
 @customElement('plugin-style-margin-100554')
-export class PluginStyleSpacing extends IcaLitElement {
+export class PluginStyleSpacing extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 
