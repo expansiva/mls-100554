@@ -1,13 +1,13 @@
 /// <mls shortName="collabMessagesPrompt" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { collab_arrow_up_long } from './_100554_collabIcons';
 import './_100554_collabMessagesAvatar';
 
 @customElement('collab-messages-prompt-100554')
-export class CollabMessagesPrompt100554 extends IcaLitElement {
+export class CollabMessagesPrompt100554 extends StateLitElement {
 
     @property() isSending: boolean = false;
     @property({ type: Function }) onSend: Function | undefined;

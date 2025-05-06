@@ -1,12 +1,12 @@
 /// <mls shortName="designSystemBaseTest" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getImages, getVideos, getTokens, getTokensLess, getTokensCss, addAssets } from './_100554_designSystemBase';
 
 @customElement('design-system-base-test-100554')
-export class DesignSystemBaseTest100554 extends IcaLitElement {
+export class DesignSystemBaseTest100554 extends StateLitElement {
 
     fileToTest = '_100554__100554_designSystemBase';
     projectToTest = 100554;

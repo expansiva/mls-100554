@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { ServiceBase } from './_100554_serviceBase';
 import { loadChatPreferences, saveChatPreferences } from './_100554_collabMessageHelper';
 import { IChatPreferences, TranslateMode } from './_100554_collabMessageHelper';
@@ -54,7 +54,7 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 @customElement('collab-messages-settings-100554')
-export class CollabMessagesSettings100554 extends IcaLitElement {
+export class CollabMessagesSettings100554 extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 

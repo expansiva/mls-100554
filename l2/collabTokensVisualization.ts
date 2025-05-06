@@ -2,11 +2,11 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getTokens, IDesignSystemTokens } from './_100554_designSystemBase';
 
 @customElement('collab-tokens-visualization-100554')
-export class CollabTokensVisuzalization100554 extends IcaLitElement {
+export class CollabTokensVisuzalization100554 extends StateLitElement {
 
     @property() tokens: IDesignSystemTokens[] = [];
 

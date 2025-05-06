@@ -1,12 +1,12 @@
 /// <mls shortName="collabTasks" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
 import { collab_plus, collab_message } from './_100554_collabIcons';
 
 @customElement('collab-tasks-100554')
-export class CollabTasks100554 extends IcaLitElement {
+export class CollabTasks100554 extends StateLitElement {
 
     render() {
         return html`<div class="task-container">

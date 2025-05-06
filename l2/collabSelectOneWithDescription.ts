@@ -1,9 +1,9 @@
 /// <mls shortName="collabSelectOneWithDescription" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement } from 'lit';
+import { html } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
+import { StateLitElement } from './_100554_stateLitElement';
 import { collab_bolt } from './_100554_collabIcons';
 
 export const initCollabSelectOneWithDescription = ''; 
@@ -25,7 +25,7 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 @customElement('collab-select-one-with-description-100554')
-export class CollabSelectOneWithDescription100554 extends IcaLitElement {
+export class CollabSelectOneWithDescription100554 extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 

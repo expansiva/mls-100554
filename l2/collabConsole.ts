@@ -1,11 +1,11 @@
 /// <mls shortName="collabConsole" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 
 @customElement('collab-console-100554')
-export class CollabConsole100554 extends IcaLitElement {
+export class CollabConsole100554 extends StateLitElement {
 
     @state() logs: Array<{ type: string; message: string }> = [];
     @property({ type: String }) height: string = '200px';

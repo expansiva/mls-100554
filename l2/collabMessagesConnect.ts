@@ -14,7 +14,7 @@ import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
 
 import { IChatPreferences } from './_100554_collabMessageHelper';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt';
 
 /// **collab_i18n_start** 
@@ -45,7 +45,7 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 @customElement('collab-messages-connect-100554')
-export class CollabMessagesConnect100554 extends IcaLitElement {
+export class CollabMessagesConnect100554 extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 

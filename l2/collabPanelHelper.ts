@@ -3,7 +3,7 @@
 import { html, css, LitElement, PropertyValueMap } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { collab_chevron_right, collab_chevron_left } from './_100554_collabIcons';
-import { globalState } from './_100554_icaState';
+import { globalState } from './_100554_collabState';
 
 @customElement('collab-panel-helper-100554')
 export class CollabPanelHelper100554 extends LitElement {
