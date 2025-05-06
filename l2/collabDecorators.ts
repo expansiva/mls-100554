@@ -1,0 +1,180 @@
+/// <mls shortName="collabDecorators" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+import { PropertyDeclaration } from 'lit';
+import { property } from 'lit/decorators.js';
+import { CollabState, globalState } from './_100554_collabState';
+
+export const state1 = new CollabState(); 
+globalState.globalStateManagment = state1;
+
+/**
+ * Custom decorator to bind properties to multiple data sources dynamically.
+ * @param options - Property options, including type and default value.
+ * Accepts variations, e.g., label="Hello {{user.name}}" label-pt="Olá {{user.name}}".
+ * Do not use this for changing data sources dynamically (e.g., input values); 
+ * use `propertyDataSource` instead.
+ * This decorator will read state values but does not persist changes to the state.
+ */
+export function propertyCompositeDataSource(options?: PropertyDeclaration) {
+
+  return (proto: any, propName: PropertyKey): any => {
+    // Define a Lit property with provided options.
+    property(options)(proto, propName);
+    const attributeName = options?.attribute && typeof options.attribute === 'string' ? String(options.attribute) : String(propName);
+
+    Object.defineProperty(proto, propName, {
+      get() {
+        // Check if attribute contains template literals
+        const attributeValue = getAttributeValueWithVariation.call(this, attributeName);
+        if (attributeValue && attributeValue.includes('{{')) {
+          return parseCompositeData.call(this, attributeValue, attributeName, options, '', false);
+        }
+        // Default to internal property value
+        return attributeValue;
+      },
+      set(value: any) {
+        if (typeof value === 'string' && value.includes('{{')) {
+          // Handle template literals for dynamic data binding
+          this[`_${attributeName}`] = parseCompositeData.call(this, value, attributeName, options, '', true);
+        } else {
+          // Handle static values
+          this[`_${attributeName}`] = value;
+        }
+        this.requestUpdate();
+      }
+    });
+
+    // Method to parse composite data from template literals
+    const parseCompositeData = function (this: HTMLElement, templateStr: string, attributeName: string, options: PropertyDeclaration | undefined, value: string, add: boolean): string {
+      const pattern = /\{\{(.*?)\}\}/g;
+      let match;
+      let composedData = templateStr;
+
+      if (add && options && options.reflect) {
+        const attributeValue = getAttributeValueWithVariation.call(this, attributeName);
+        if (attributeValue !== value) this.setAttribute(attributeName, value);
+      }
+
+      let notifications: string[] = [];
+      while ((match = pattern.exec(templateStr))) {
+        const stateKey = match[1].trim();
+        if (add) {
+          notifications.push(stateKey);
+        }
+        const resolvedValue = state1.getState(stateKey) || '';
+        composedData = composedData.replace(match[0], resolvedValue);
+      }
+      if (notifications.length > 0) {
+        prepareForNotification.call(this, attributeName, notifications);
+      }
+
+      return composedData;
+    };
+
+  };
+}
+
+/**
+ * Custom decorator to bind properties either to static data or dynamically from CollabState.
+ * @param options - Property options, including type and default value.
+ * Does not support variations; use `propertyCompositeDataSource` for variations.
+ * For example, label="Hello {{user.name}}" label-pt="Olá {{user.name}}" (label-pt is ignored).
+ * This decorator will read state values and persist changes to the state.
+ */
+export function propertyDataSource(options?: PropertyDeclaration) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (proto: any, propName: PropertyKey): any => {
+    // Define a Lit property with provided options.
+
+
+    property(options)(proto, propName);
+    // const { type } = options;
+    const attributeName = options?.attribute && typeof options.attribute === 'string' ? String(options.attribute) : String(propName);
+
+    Object.defineProperty(proto, propName, {
+      get() {
+
+        const attributeValue = this.hasAttribute(attributeName) ? this.getAttribute(attributeName) : '';
+        if (typeof attributeValue === "string" && attributeValue && attributeValue.includes('{{') && attributeValue.includes('}}')) {
+          const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
+          return state1.getState(stateKey);
+        }
+        if (this[`_${attributeName}`] !== undefined) return this[`_${attributeName}`];
+        // Default to internal property value
+        if (typeof this[`_${attributeName}`] === 'object' || Array.isArray(this[`_${attributeName}`])) return this[`_${attributeName}`];
+        return attributeValue;
+      },
+      set(value: any) {
+
+        if (options?.type === Number && typeof value === 'number' && isNaN(value)) {
+          // ignore , lit sent ex "{{users.name}}" after requestUpdate
+          return;
+        }
+
+        if (typeof value === 'string' && value.startsWith('{{') && value.endsWith('}}')) {
+          // initialization ex selectedvalue="{{globalState.users[0].sex}}"
+          // dynamic data from json
+          if (options?.reflect) {
+            const attributeValue = this.hasAttribute(attributeName) ? this.getAttribute(attributeName) : '';
+            if (attributeValue !== value) this.setAttribute(attributeName, value);
+          }
+          const stateKey = value.replace(/[{{}}]/g, '').trim();
+          prepareForNotification.call(this, attributeName, [stateKey]);
+          this[`_${attributeName}`] = state1.getState(stateKey);
+        } else if (typeof value === 'string' && ((value.startsWith('[') || value.startsWith('{')) && (value.endsWith(']') || value.endsWith('}')))) {
+          // initialization ex options="[{ key: 'm', value: 'male' }, { key: 'f', value: 'female' }, { key: 'o', value: 'other' }]"
+          // Parse JSON string for static data
+          this[`_${attributeName}`] = JSON.parse(value);
+        } else {
+          // updates ex selectedValue = 'm';
+          // Update both internal property value and globalState if necessary and notify state changes 
+          const attributeValue = this.hasAttribute(attributeName) ? this.getAttribute(attributeName) : '';
+          if (typeof attributeValue === "string" && attributeValue.includes('{{') && attributeValue.includes('}}')) {
+            const dynamicKey = attributeValue.replace(/[{{}}]/g, '').trim();
+            this[`_${attributeName}`] = value;
+            state1.setState(dynamicKey, value); // Notify state changes
+          }
+          else this[`_${attributeName}`] = value;
+        }
+        this.requestUpdate();
+      }
+    });
+
+  };
+}
+
+function prepareForNotification(this: any, attributeName: string, path: string[]) {
+  // update state keys on IcaLitElement
+  if (typeof this.updateStateKeys !== 'function') return;
+  this.updateStateKeys(attributeName, path);
+}
+
+/**
+ * Retrieves an attribute value based on the variation.
+ * 
+ * @param key - The key of the attribute.
+ * @param proto - The prototype object containing the attribute.
+ * @returns The value of the attribute, considering the variation, or the default value if no variation is found.
+ */
+function getAttributeValueWithVariation(this: any, key: string): string {
+
+  const htmlLang = document.documentElement.lang;
+  const lang = htmlLang.toLowerCase();
+
+  const actualVariation = this.globalVariation || 0;
+  const languageByVariation = lang;
+  const languageByVariationSimilar = languageByVariation.split('-')[0];
+
+  const defaultValue = this.getAttribute(key);
+  if (actualVariation === 0) return defaultValue;
+  const keyVariation = `${key}-${languageByVariation}`;
+  const keyVariationSimilar = `${key}-${languageByVariationSimilar}`;
+  let variationValue = this.getAttribute(keyVariation);
+  if (!variationValue) variationValue = this.getAttribute(keyVariationSimilar);
+  return variationValue || defaultValue;
+}
+
+export interface OptionItem {
+  key: string;
+  value: string;
+}
