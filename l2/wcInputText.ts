@@ -1,9 +1,9 @@
 /// <mls shortName="wcInputText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, ifDefined, css } from 'lit';
+import { html, ifDefined } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputStringBase } from './_100554_icaFormsInputStringBase';
-import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 
 @customElement('wc-input-text-100554')
 export class WcInputText100554 extends IcaFormsInputStringBase {

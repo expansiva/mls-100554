@@ -3,7 +3,7 @@
 import { html, css, } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IcaApresentationEmbedsSocialMediaBase100554 } from './_100554_icaApresentationEmbedsSocialMediaBase';
-import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
+import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
 
 @customElement('wc-embeds-social-media-100554')
 export class WcEmbedsSocialMedia100554 extends IcaApresentationEmbedsSocialMediaBase100554 {

@@ -1,13 +1,13 @@
 /// <mls shortName="wcClarificationPlannerNewWidget" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { postBackClarification } from "./_100554_aiAgentOrchestration";
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 
 @customElement('wc-clarification-planner-new-widget-100554')
-export class WcClarificationPlannerNewWidget100554 extends IcaLitElement {
+export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
 
     private ICABASEPROJECT = 100554;
 

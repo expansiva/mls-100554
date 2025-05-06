@@ -1,9 +1,9 @@
 /// <mls shortName="wcDatePickerRangeCustom" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, nothing, ifDefined } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { html, nothing } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { IcaFormsInputDateRangeBase } from './_100554_icaFormsInputDateRangeBase';
-import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
+import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
 
 /**  
  * Componente para seleção de intervalo de datas (date range picker), com suporte a limites mínimos/máximos e datas bloqueadas.

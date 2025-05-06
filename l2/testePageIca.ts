@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { globalState } from './_100554_icaState';
+import { globalState } from './_100554_collabState';
 @customElement('teste-page-ica-100554') 
 export class IcaTestPage100554 extends LitElement {
  

@@ -1,8 +1,8 @@
 /// <mls shortName="wcChart" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement } from 'lit';
+import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { propertyDataSource } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 import { IcaApresentationCharts2DBase } from './_100554_icaApresentationCharts2DBase';
 
 declare var echarts: any;

@@ -2,7 +2,6 @@
 
 import { CollabPageElement } from './_100554_collabPageElement'
 import { customElement } from 'lit/decorators.js';
-import { globalState } from './_100554_icaState';
 
 @customElement('wcd-overlay-mode-default-help-100554')
 export class WcdOverlayModeDefault100554 extends CollabPageElement {

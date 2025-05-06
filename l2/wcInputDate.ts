@@ -1,9 +1,9 @@
 /// <mls shortName="wcInputDate" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement, ifDefined, css } from 'lit';
+import { html, ifDefined} from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputDateBase } from './_100554_icaFormsInputDateBase';
-import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
+import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
 
 @customElement('wc-input-date-100554')
 export class WCInputDateRange extends IcaFormsInputDateBase {

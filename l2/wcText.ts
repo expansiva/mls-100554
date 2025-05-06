@@ -1,9 +1,9 @@
 /// <mls shortName="wcText" project="100554" enhancement="_100554_enhancementLit" groupName="_100554_icaApresentationTextText" />
 
-import { html, ifDefined, css , unsafeHTML} from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { html, unsafeHTML} from 'lit';
+import { customElement, property} from 'lit/decorators.js';
 import { IcaApresentationTextTextBase } from './_100554_icaApresentationTextTextBase';
-import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 
 @customElement('wc-text-100554')
 export class WcInputText100554 extends IcaApresentationTextTextBase {

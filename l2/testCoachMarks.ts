@@ -2,7 +2,6 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
-import { globalState } from './_100554_icaState';
 import {addCoachMark, ICoachMarks} from './_100554_coachMarks';
 @customElement('test-coach-marks-100554') 
 export class TestCoachMarks100554 extends CollabPageElement {

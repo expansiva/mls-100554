@@ -2,10 +2,10 @@
 
 import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 
 @customElement('wc-aux-command-100554')
-export class WcAuxCommand100554 extends IcaLitElement {
+export class WcAuxCommand100554 extends StateLitElement {
 
     private elView: HTMLElement | undefined;
     private boundFireKeydown: (event: KeyboardEvent) => void = () => { };

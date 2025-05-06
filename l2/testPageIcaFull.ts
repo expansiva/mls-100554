@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { CollabPageElement } from './_100554_collabPageElement'
 import { customElement } from 'lit/decorators.js';
-import { globalState } from './_100554_icaState';
+import { globalState } from './_100554_collabState';
 
 @customElement('test-page-ica-full-100554')
 export class TestPageICAFull extends CollabPageElement {    
