@@ -2,7 +2,8 @@
 
 import { html, css, TemplateResult, noChange } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 import './_100554_aimChatMessage';
 import * as chatHelper from './_100554_aimChatHelper';
 import * as chatMock from './_100554_aimChatMock';
@@ -25,7 +26,7 @@ const messages: { [key: string]: MessageType } = {
 
 
 @customElement('aim-chat-messages-100554')
-export class AimChatMessages100554 extends IcaLitElement {
+export class AimChatMessages100554 extends StateLitElement {
 
   @propertyDataSource({ type: Number }) activeRoom: number | undefined;
   @propertyDataSource({ type: Number }) activeMessage: number | undefined;

@@ -110,10 +110,10 @@ Para o código de entrada abaixo
 
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement'
+import { StateLitElement } from './_100554_stateLitElement'
 
 @customElement('wc-input-date-range-100554')
-export class WCInputDateRange extends IcaLitElement {
+export class WCInputDateRange extends StateLitElement {
 
     @property({ type: String }) name: string = '';
 

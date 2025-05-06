@@ -1,11 +1,10 @@
 /// <mls shortName="aimPrompt" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
 import { collab_arrow_up_long } from './_100554_collabIcons';
+import { StateLitElement } from './_100554_stateLitElement';
 import './_100554_aimPromptExample';
-import { IcaLitElement, propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
 
 const message_pt = {
     btnSend: 'Enviar',
@@ -31,7 +30,7 @@ const messages: { [key: string]: MessageType } = {
 }
 
 @customElement('aim-prompt-100554')
-export class AimPrompt extends IcaLitElement { 
+export class AimPrompt extends StateLitElement { 
 
     static styles = css`[[mls_getDefaultDesignSystem]]`; 
 

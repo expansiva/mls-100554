@@ -99,8 +99,8 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
  - Respeite a estrutura existente e realize somente as alterações especificadas pelo usuário.
  - Não introduza elementos ou remoções não solicitadas.
  - Não adicionar atributos além dos que estão especificados e solicitados
- - Caso precise setar algo no state troque a linha "import {{ globalState, initState }} from './_100554_icaState';" por      
-    "import {{ globalState, initState, setState}} from './_100554_icaState"
+ - Caso precise setar algo no state troque a linha "import {{ globalState, initState }} from './_100554_collabState';" por      
+    "import {{ globalState, initState, setState}} from './_100554_collabState"
 - A função setState espera 3  parametros (path:string, value:any,  systemChange: boolean default false)
 - Para pegar algo do state, basta começar "globalState._ica." mais o nome do state que foi definido no
 initState e navegar ate a posição do state solicitada.    

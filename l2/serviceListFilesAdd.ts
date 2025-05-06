@@ -6,8 +6,8 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase } from './_100554_serviceBase';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IDetails } from "./_100554_pluginNewFileBase";
-import { propertyDataSource } from './_100554_icaLitElement';
-import { globalState } from './_100554_icaState';
+import { propertyDataSource } from './_100554_collabDecorators';
+import { globalState } from './_100554_collabState';
 
 /// **collab_i18n_start**
 const message_pt = {

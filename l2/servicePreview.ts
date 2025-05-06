@@ -3,10 +3,10 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_serviceBase';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
-import { globalState, setState } from './_100554_icaState';
+import { globalState, setState } from './_100554_collabState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
 import { getScriptTest } from './_100554_libProcessTest';
@@ -982,8 +982,8 @@ export class ServicePreview100554 extends ServiceBase {
         if (!elements) return;
 
         elements.forEach((el) => {
-            if (el.tagName.split('-').length > 1 && (el as IcaLitElement).globalVariation !== undefined) {
-                (el as IcaLitElement).globalVariation = globalState.globalVariation;
+            if (el.tagName.split('-').length > 1 && (el as StateLitElement).globalVariation !== undefined) {
+                (el as StateLitElement).globalVariation = globalState.globalVariation;
             }
         });
     }
