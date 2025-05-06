@@ -112,7 +112,7 @@ Você deve retornar tres códigos, como no exemplo abaixo
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
-import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
+import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
 
 @customElement('wc-input-number-100554')
 export class WCInputNumber extends IcaFormsInputNumberBase {

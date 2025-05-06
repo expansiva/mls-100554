@@ -1,14 +1,14 @@
 /// <mls shortName="aimChatRooms" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, TemplateResult } from 'lit'; 
-import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { html, TemplateResult } from 'lit'; 
+import { customElement } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
+import {  propertyDataSource } from './_100554_collabDecorators';
 import * as chatHelper from './_100554_aimChatHelper';
 import { currentUser, getRooms } from './_100554_aimChatMock';
-import { globalState } from './_100554_icaState';
 
  @customElement('aim-chat-rooms-100554')
- export class AimChatRooms100554 extends IcaLitElement {
+ export class AimChatRooms100554 extends StateLitElement {
     
     @propertyDataSource({ type: Number }) activeRoom: number | undefined;
     @propertyDataSource({ type: Number }) activeMessage: number | undefined;

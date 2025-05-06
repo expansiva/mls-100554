@@ -9,8 +9,8 @@ import { removeTokensFromSource } from './_100554_enhancementStyle';
 import { getTokensLess } from './_100554_designSystemBase';
 import { LessCSS } from "./_100554_lessCSS";
 import { getEnhancementName } from './_100554_libCommom';
-import { globalState } from './_100554_icaState';
-import { propertyDataSource } from './_100554_icaLitElement';
+import { globalState } from './_100554_collabState'; 
+import { propertyDataSource } from './_100554_collabDecorators'; 
 import { collab_html, collab_typescript, collab_less, collab_fileTest } from './_100554_collabIcons';
 import { CollabSpliterVerticalVarFixed100554 } from './_100554_collabSpliterVerticalVarFixed';
 

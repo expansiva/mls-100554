@@ -2,11 +2,11 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import * as chatHelper from './_100554_aimChatHelper';
 
 @customElement('aim-chat-message-100554')
-export class AimChatMessage100554 extends IcaLitElement {
+export class AimChatMessage100554 extends StateLitElement {
 
     @property({ type: Array }) messages: chatHelper.ChatMessage[] = [];
     @property({ type: Boolean }) isUser: boolean | undefined;

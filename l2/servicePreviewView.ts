@@ -6,7 +6,7 @@ import { getDependenciesByHtml, getTokens, IJSONDependence } from './_100554_lib
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { ServiceBase } from './_100554_serviceBase'
 import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -37,7 +37,7 @@ const messages: { [key: string]: MessageType } = {
 
 
 @customElement('service-preview-view-100554')
-export class ServicePreviewView extends IcaLitElement {
+export class ServicePreviewView extends StateLitElement {
 
     public infoIca: any;
 

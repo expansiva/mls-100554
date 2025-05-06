@@ -1,6 +1,6 @@
 /// <mls shortName="aimChatHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { globalState, initState } from './_100554_icaState';
+import { globalState, initState } from './_100554_collabState';
 
 export interface ChatMessage {
   id: number;

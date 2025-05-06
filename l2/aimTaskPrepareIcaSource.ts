@@ -1,7 +1,7 @@
 /// <mls shortName="aimTaskPrepareIcaSource" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { customElement } from 'lit/decorators.js';
-import { getInfoServiceAim, InfoServiceAIM } from "./_100554_aimHelper";
+import { getInfoServiceAim } from "./_100554_aimHelper";
 import { AimTaskBase } from "./_100554_aimTaskBase";
 import { convertFileNameToTag } from "./_100554_utilsLit";
 import { getAttributeDefinitionsLit } from './_100554_icaBaseDescription';
@@ -80,7 +80,7 @@ export class AimTaskPrepareIcaSource extends AimTaskBase {
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { propertyDataSource } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 import { ${extend} } from './${importFile}';
 
 @customElement('${tagName}')

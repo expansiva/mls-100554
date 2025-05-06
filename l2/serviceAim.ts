@@ -1,12 +1,12 @@
 /// <mls shortName="serviceAim" project="100554" enhancement="_100554_enhancementLitService" groupName="service"/>
 
-import { html, css, unsafeHTML, render, styleMap, repeat, TemplateResult } from 'lit';
+import { html, unsafeHTML, render, styleMap, repeat, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IToolbarChangeEvent } from './_100554_serviceBase';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { tasks, readTasks, getUserConfigs, saveUserConfigs, IAimColums } from './_100554_aimHelper';
 import { findActions, ResponseFindActions } from './_100554_aimActionBase';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 import * as chatHelper from './_100554_aimChatHelper';
 import './_100554_aimChatHeader';
 import './_100554_aimChatRooms';
