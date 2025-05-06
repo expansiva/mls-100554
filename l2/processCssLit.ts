@@ -36,6 +36,9 @@ function delay(ms: number): Promise<void> {
 function addLineInConstructor(code: string, lineToAdd: string): string {
 
     const lines = code.split('\n');
+
+    const hasEnhancementLit = lines[0].includes('_100554_enhancementLit');
+    if (!hasEnhancementLit) return code;
     let insideClass = false;
     let constructorIndex = -1;
     let superIndex = -1;
