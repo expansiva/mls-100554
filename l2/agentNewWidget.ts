@@ -1,4 +1,4 @@
-/// <mls shortName="agentNewWidget" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="agentNewWidget" project="100554" enhancement="_blank" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getTokens } from './_100554_libCompile';
