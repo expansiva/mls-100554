@@ -1,8 +1,8 @@
 /// <mls shortName="icaApresentationImagesImagesBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 
-export abstract class IcaApresentationImagesImagesBase extends IcaLitElement {
+export abstract class IcaApresentationImagesImagesBase extends StateLitElement {
 
 	abstract src: string | undefined;
 	abstract alt: string | undefined;

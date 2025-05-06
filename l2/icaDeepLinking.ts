@@ -1,12 +1,12 @@
 /// <mls shortName="icaDeepLinking" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement } from 'lit';
+import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
-import { globalState } from './_100554_icaState';
+import { StateLitElement } from './_100554_stateLitElement';
+import { globalState } from './_100554_collabState';
 
 @customElement('ica-deep-linking-100554')
-export class IcaDeepLinking100554 extends IcaLitElement {
+export class IcaDeepLinking100554 extends StateLitElement {
 
     @property() url: string | undefined;
 

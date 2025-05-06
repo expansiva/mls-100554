@@ -1,7 +1,7 @@
 /// <mls shortName="icaTestPage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { globalState } from './_100554_icaState';
+import { globalState } from './_100554_collabState';
 
 @customElement('ica-test-page-100554')
 export class IcaTestPage100554 extends LitElement {

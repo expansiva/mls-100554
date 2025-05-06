@@ -2,13 +2,13 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
 
 
 @customElement('ica-load-page-100554')
-export class IcaLoadPage100554 extends IcaLitElement {
+export class IcaLoadPage100554 extends StateLitElement {
 
     @property({ type: String }) src: string = '';
 
