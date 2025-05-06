@@ -3,6 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
+
 import { ServiceBase } from './_100554_serviceBase';
 import { loadChatPreferences, saveChatPreferences } from './_100554_collabMessageHelper';
 import { IChatPreferences, TranslateMode } from './_100554_collabMessageHelper';
@@ -167,6 +168,8 @@ export class CollabMessagesSettings100554 extends StateLitElement {
                     <option value="icon">icon</option>
                     <option value="text">text</option>
                     <option value="iconText">icon + text</option>
+                    <option value="trace">trace</option>
+
                 </select>
             </div>
             <div class="chat-config-item">

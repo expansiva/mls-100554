@@ -2,9 +2,27 @@
 
 widget-ai-interaction-100554 {
 
-    height: 100%;
+    display: block;
     overflow: auto;
+    font-family: @font-family-primary;
+    font-weight: @font-weight-normal;
+    line-height: 1.5;
+    color: @text-primary-color;
+    background-color: @bg-primary-color;
+    height: 100%;
     padding: 0 .5rem;
+
+    .task-short-info {
+        font-size: @font-size-16;
+        margin: 1rem 0;
+
+        >div {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+    }
 
     details {
         >div {
@@ -44,37 +62,6 @@ widget-ai-interaction-100554 {
         }
     }
 
-    .breadcrumb {
-        margin-bottom: 1rem;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        font-size: 14px;
-        color: @text-primary-color; // cor base do texto
-
-        span {
-            cursor: pointer;
-            color: @active-color;
-            transition: color 0.2s ease;
-
-            &:hover {
-                color: @text-primary-color-darker;
-            }
-
-            &:last-child {
-                font-weight: bold;
-                color: @text-primary-color-darker;
-                cursor: default;
-            }
-        }
-
-        span+span::before {
-            content: '>';
-            margin: 0 8px;
-            color: @grey-color;
-        }
-    }
-
     .prompts-content {
 
         display: flex;
@@ -106,6 +93,17 @@ widget-ai-interaction-100554 {
     }
 
     .interactions {
+        .cost {
+            display: flex;
+            align-items: center;
+            margin-bottom: .4rem;
+
+            svg {
+                width: 10px;
+                height: 10px;
+            }
+        }
+
         .trace-content {
             pre {
                 font-size: @font-size-12;

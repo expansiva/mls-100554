@@ -12,6 +12,7 @@ import './_100554_widgetAiInteraction';
 import './_100554_widgetAiTask';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
+import './_100554_collabMessagesThreadDetails';
 
 import { IChatPreferences } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
@@ -44,6 +45,7 @@ const messages: { [key: string]: MessageType } = {
     'pt': message_pt
 }
 /// **collab_i18n_end**
+
 @customElement('collab-messages-connect-100554')
 export class CollabMessagesConnect100554 extends StateLitElement {
 
@@ -114,6 +116,15 @@ export class CollabMessagesConnect100554 extends StateLitElement {
 
         window.addEventListener('task-details-close', async (e) => {
             this.onTitleClick();
+        });
+
+        window.addEventListener('thread-change', async (e) => {
+            const customEvent = e as CustomEvent;
+            await this.updateMessageAI(customEvent.detail, false);
+            const thread = customEvent.detail as mls.msg.Thread;
+            const threadUpdated = this.userThreads.CONNECT.find((th) => th.thread.threadId === thread.threadId);
+            if (threadUpdated) threadUpdated.thread = { ...threadUpdated.thread, ...thread };
+            this.requestUpdate();
         });
 
     }
@@ -196,6 +207,7 @@ export class CollabMessagesConnect100554 extends StateLitElement {
             return html`
                     <div class="message-time">${messageTime.date}</div>
                             ${threadMessages.map((message) => {
+
                 const dateFormated = formatTimestamp(message.createAt);
                 const userName = this.actualThread?.users.find((user) => user.userId === message.senderId)?.name || message.senderId;
                 const userAvatar = this.actualThread?.users.find((user) => user.userId === message.senderId)?.avatar_url || '';
@@ -203,7 +215,7 @@ export class CollabMessagesConnect100554 extends StateLitElement {
                 const isSame = message.isSame;
 
                 return html`
-                    <div class="message ${cls}">
+                    <div class="message ${cls} ${isSame ? 'same' : ''}">
                         <div class="message-group">
                             <div class="message-row">
                                 <div class="message-card ${cls} ${isSame ? 'same' : ''}">
@@ -261,12 +273,21 @@ export class CollabMessagesConnect100554 extends StateLitElement {
                 return html`
                 <div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>
                 ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
+            case 'trace':
+                return html`
+                <div class="message-content trace">
+                    <div><b>[LanguageDetected: ${message.language_detected}]</b> ${message.content}</div>
+                    ${Object.keys(message.translations).map((key) => {
+                    if (key === 'language_detected') return ''
+                    if (key === message.language_detected) return ''
+                    return html`<div><b>[${key}]</b> ${message.translations ? message.translations[key] : ''}</div>`
+                })}
+                </div>
+                
+                `
             default:
                 return null;
         }
-
-
-
 
     }
 
@@ -303,7 +324,7 @@ export class CollabMessagesConnect100554 extends StateLitElement {
     }
 
     private renderThreadDetails() {
-        return html`In develpoment`
+        return html`<collab-messages-thread-details-100554 userId=${this.userId} .threadDetails=${{ ...this.actualThread }}></collab-messages-thread-details-100554>`
     }
 
     private renderAddParticipant() {
@@ -500,7 +521,7 @@ export class CollabMessagesConnect100554 extends StateLitElement {
             await updateThreads([threadByServer.thread]);
 
             if (lastMessage && threadByServer) {
-                const thread = await updateThread(threadByServer.thread.threadId, lastMessage.content, lastMessage.createAt, 0);
+                const thread = await updateThread(threadByServer.thread.threadId, threadByServer.thread, lastMessage.content, lastMessage.createAt, 0);
                 threadInfo.thread = thread;
             }
 
@@ -616,8 +637,8 @@ export class CollabMessagesConnect100554 extends StateLitElement {
                 threadId,
             }
 
-            if (updateThreadDB) {
-                const thread = await updateThread(threadId, content, createAt, 0);
+            if (updateThreadDB && this.actualThread) {
+                const thread = await updateThread(threadId, this.actualThread.thread, content, createAt, 0);
                 if (this.actualThread) this.actualThread.thread = thread;
             }
 
@@ -662,8 +683,8 @@ export class CollabMessagesConnect100554 extends StateLitElement {
             threadId,
         }
 
-        if (updateThreadDB) {
-            const thread = await updateThread(threadId, content, createAt, 0);
+        if (updateThreadDB && this.actualThread) {
+            const thread = await updateThread(threadId, this.actualThread.thread, content, createAt, 0);
             if (this.actualThread) this.actualThread.thread = thread;
         }
 
