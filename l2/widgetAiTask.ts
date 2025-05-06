@@ -1,6 +1,6 @@
 /// <mls shortName="widgetAiTask" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { getTask } from './_100554_msgDBController';
@@ -102,7 +102,6 @@ export class WidgetAiTask100554 extends StateLitElement {
             status = this.task.status;
             const nextStepPending = getNextPendentStep(this.task);
             if (nextStepPending?.type === 'clarification') status = 'waitingforuser'
-
         }
 
         if (!this.task) return html`<spanclass="task-icon in progress ">${collab_clock}</span>`;

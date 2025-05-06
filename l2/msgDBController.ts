@@ -192,9 +192,10 @@ export async function addThread(thread: mls.msg.Thread): Promise<void> {
 
 export async function updateThread(
     threadId: string,
-    lastMessage: string,
-    lastMessageTime: string,
-    unreadCount: number
+    thread: mls.msg.Thread,
+    lastMessage?: string,
+    lastMessageTime?: string,
+    unreadCount?: number
 ): Promise<mls.msg.ThreadPerformanceCache> {
     const db = await openDB();
 
@@ -204,19 +205,20 @@ export async function updateThread(
         const request = store.get(threadId);
 
         request.onsuccess = () => {
-            const thread = request.result;
+            let threadDb = request.result;
 
-            if (!thread) {
+            if (!threadDb) {
                 reject(`Thread com ID ${threadId} não encontrada.`);
                 return;
             }
 
-            thread.lastMessage = lastMessage;
-            thread.lastMessageTime = lastMessageTime;
-            thread.unreadCount = unreadCount;
-            thread.lastSync = getCompactUTC(); // atualiza o timestamp de sync também
-            const updateRequest = store.put(thread);
-            updateRequest.onsuccess = () => resolve(thread);
+            threadDb = { ...threadDb, ...thread }
+            if(lastMessage !== undefined) threadDb.lastMessage = lastMessage;
+            if(lastMessageTime !== undefined) threadDb.lastMessageTime = lastMessageTime;
+            if(unreadCount !== undefined) threadDb.unreadCount = unreadCount;
+            threadDb.lastSync = getCompactUTC(); // atualiza o timestamp de sync também
+            const updateRequest = store.put(threadDb);
+            updateRequest.onsuccess = () => resolve(threadDb);
             updateRequest.onerror = () => reject("Erro ao atualizar a thread");
         };
 

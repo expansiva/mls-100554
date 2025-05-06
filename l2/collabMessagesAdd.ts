@@ -4,6 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 
+
 import './_100554_collabInputTag';
 
 /// **collab_i18n_start** 
@@ -11,6 +12,10 @@ const message_pt = {
     loading: 'Carregando...',
     threadName: 'Nome da thread',
     visibility: 'Visibilidade',
+    visibilityPublic: 'Pública',
+    visibilityPrivate: 'Privada',
+    visibilityCompany: 'Empresa',
+    visibilityTeam: 'Time',
     group: 'Grupo',
     languages: 'Idiomas',
     languagesHint: 'Detectado e atualizado com base nos idiomas dos usuários participantes.',
@@ -24,6 +29,10 @@ const message_en = {
     loading: 'Loading...',
     threadName: 'Thread name',
     visibility: 'Visibility',
+    visibilityPublic: 'Plubic',
+    visibilityPrivate: 'Private',
+    visibilityCompany: 'Company',
+    visibilityTeam: 'Team',
     group: 'Group',
     languages: 'Languages',
     languagesHint: 'Detected and updated based on the languages of participating users.',
@@ -73,10 +82,10 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                 <select name="visibility" required
                     .value=${this.visibility}
                     @change=${(e: Event) => this.visibility = (e.target as HTMLSelectElement).value as mls.msg.ThreadVisibility}>
-                    <option value="public">Pública</option>
-                    <option value="private">Privada</option>
-                    <option value="company">Empresa</option>
-                    <option value="team">Equipe</option>
+                      <option value="public">${this.msg.visibilityPublic}</option>
+                    <option value="private">${this.msg.visibilityPrivate}</option>
+                    <option value="company">${this.msg.visibilityCompany}</option>
+                    <option value="team">${this.msg.visibilityTeam}</option>
                 </select>
             </label>
 

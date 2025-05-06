@@ -268,6 +268,16 @@ export function notifyTaskChange(context: mls.msg.ExecutionContext): void {
   window.dispatchEvent(event);
 }
 
+export function notifyThreadChange(thread: mls.msg.Thread): void {
+  const event = new CustomEvent('thread-change', {
+    detail: thread,
+    bubbles: true,
+    composed: true
+  });
+  window.dispatchEvent(event);
+}
+
+
 export function dispatchDetailsTaskClose(): void {
   const event = new CustomEvent('task-details-close', {
     bubbles: true,

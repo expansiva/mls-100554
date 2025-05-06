@@ -1,10 +1,13 @@
 /// <mls shortName="widgetAiInteraction" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, TemplateResult } from 'lit';
+import { html, css, TemplateResult, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-import { getNextResultStep, getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById } from './_100554_aiAgentHelper';
+
+import { getNextResultStep, getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById, getTotalCost } from './_100554_aiAgentHelper';
 import { getClarification } from './_100554_aiAgentOrchestration';
+import { collab_money } from './_100554_collabIcons';
+
 
 @customElement('widget-ai-interaction-100554')
 export class WidgetAiInteraction100554 extends StateLitElement {
@@ -33,18 +36,27 @@ export class WidgetAiInteraction100554 extends StateLitElement {
             const nextStepPending = getNextPendentStep(this.task);
             if (nextStepPending?.type === 'clarification') isClarificationPending = true;
         }
-        return html`        
+        return html`
+
+            <div class="task-short-info">
+                <div>
+                    <b>${this.task.PK}</b> 
+                    <span>${this.task.status}</span> 
+                    <span>${collab_money} ${getTotalCost(this.task)}</span>
+                </div>
+
+            </div>
+            
             <details class="details-task">
                 <summary>Details</summary>
                 <div>
+                    <details>
+                        <summary>Raw</summary>
+                        <div>
+                            ${this.renderTaskModeJson()}
+                        </div>
+                    </details>
                     ${this.renderTaskModeDetails()}
-                </div>
-            </details>
-
-            <details class="details-task">
-                <summary>Details2</summary>
-                <div>
-                    ${this.renderTaskModeJson()}
                 </div>
             </details>
             
@@ -194,6 +206,10 @@ export class WidgetAiInteraction100554 extends StateLitElement {
 
         return html` 
             <div class="interactions">
+                <div class="cost">
+                    ${collab_money} 
+                    Cost: ${interaction.cost}
+                </div>
                 <details>
                     <summary>Inputs</summary>
                     <div>

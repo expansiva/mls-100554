@@ -25,7 +25,7 @@ function loadDefaultPreferences(): IChatPreferences {
     }
 }
 
-export type TranslateMode = "none" | "icon" | "text" | "iconText"
+export type TranslateMode = "none" | "icon" | "text" | "iconText" | "trace"
 
 export interface IChatPreferences {
     translationMode: TranslateMode
