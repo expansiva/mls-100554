@@ -1,8 +1,8 @@
 /// <mls shortName="widgetAiTask" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getTask } from './_100554_msgDBController';
 import { getNextPendentStep, getTotalCost } from './_100554_aiAgentHelper';
 import {
@@ -31,7 +31,7 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 @customElement('widget-ai-task-100554')
-export class WidgetAiTask100554 extends IcaLitElement {
+export class WidgetAiTask100554 extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 

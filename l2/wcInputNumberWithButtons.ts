@@ -2,7 +2,7 @@
 
 import { html, ifDefined } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
+import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
 import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
 
 @customElement('wc-input-number-with-buttons-100554')

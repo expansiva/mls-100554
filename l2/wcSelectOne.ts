@@ -1,9 +1,9 @@
 /// <mls shortName="wcSelectOne" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IcaFormsInputSelectOneBase } from './_100554_icaFormsInputSelectOneBase';
-import { propertyDataSource, propertyCompositeDataSource, OptionItem } from './_100554_icaLitElement';
+import { propertyDataSource, propertyCompositeDataSource, OptionItem } from './_100554_collabDecorators';
 
 @customElement('wc-select-one-100554')
 export class WcSelectOne extends IcaFormsInputSelectOneBase {

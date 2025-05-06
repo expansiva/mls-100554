@@ -1,13 +1,13 @@
 /// <mls shortName="widgetAiInteraction" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, TemplateResult, unsafeHTML } from 'lit';
+import { html, TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getNextResultStep, getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById } from './_100554_aiAgentHelper';
 import { getClarification } from './_100554_aiAgentOrchestration';
 
 @customElement('widget-ai-interaction-100554')
-export class WidgetAiInteraction100554 extends IcaLitElement {
+export class WidgetAiInteraction100554 extends StateLitElement {
 
     @property() task: mls.msg.TaskData | undefined = undefined;
     @property() stepid: string = '';

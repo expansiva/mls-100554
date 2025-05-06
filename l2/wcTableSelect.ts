@@ -1,9 +1,9 @@
 /// <mls shortName="wcTableSelect" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, repeat } from 'lit';
+import { html, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IcaLayoutGroupTableBase } from './_100554_icaLayoutGroupTableBase';
-import { propertyDataSource, propertyCompositeDataSource } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 
 @customElement('wc-table-select-100554')
 export class WcTableSelect100554 extends IcaLayoutGroupTableBase {
