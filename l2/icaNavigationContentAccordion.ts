@@ -3,7 +3,6 @@
 import { customElement, property } from 'lit/decorators.js';
 import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { IcaNavigationContentAccordionBase } from './_100554_icaNavigationContentAccordionBase';
 
 @customElement('ica-navigation-content-accordion-100554')
 export abstract class IcaNavigationContentAccordion extends IcaLitElementBase  {

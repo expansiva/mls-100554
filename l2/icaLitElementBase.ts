@@ -2,12 +2,12 @@
 
 import { html, unsafeHTML } from 'lit';
 import { property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import * as tps from './_100554_icaTypes';
 import * as globalIca from './_100554_icaGlobal';
 
-export abstract class IcaLitElementBase extends IcaLitElement implements tps.IcaLitElementBaseMethods {
+export abstract class IcaLitElementBase extends StateLitElement implements tps.IcaLitElementBaseMethods {
 
     abstract mySymbol: string;
     abstract changeStateHtml(info: string): void;

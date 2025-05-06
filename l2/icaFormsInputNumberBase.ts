@@ -1,8 +1,8 @@
 /// <mls shortName="icaFormsInputNumberBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElement } from './_100554_icaLitElement'
+import { StateLitElement } from './_100554_stateLitElement'
 
-export abstract class IcaFormsInputNumberBase extends IcaLitElement {
+export abstract class IcaFormsInputNumberBase extends StateLitElement {
 
 	abstract hint: string | undefined; // An optional descriptive hint for the field
 	abstract label: string | undefined; // A label to identify this field

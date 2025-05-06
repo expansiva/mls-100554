@@ -1,8 +1,8 @@
 /// <mls shortName="icaLayoutGroupTableBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 
-export abstract class IcaLayoutGroupTableBase extends IcaLitElement {
+export abstract class IcaLayoutGroupTableBase extends StateLitElement {
 
     abstract data: any[] | undefined; 
     abstract columns: string[] | undefined; 

@@ -3,7 +3,6 @@
 import { customElement } from 'lit/decorators.js';
 import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { IWCDCommand } from './_100554_wcdTypes';
 import { countElementsWithTagName } from './_100554_wcdGlobal';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
 
