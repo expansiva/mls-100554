@@ -1,5 +1,5 @@
 /// <mls shortName="pluginExploreList" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-
+ 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
@@ -818,36 +818,41 @@ export class PluginExploreList extends PluginBaseModule {
 
     private async getFileHistory() {
 
-        if (!window['mls']) return [];
-        const arraySfHistory: mls.stor.IFileInfo[] = [];
-        const lh = this.getHistory();
-        if (lh.length <= 0 || !window['mls']) return [];
+        try {
+            if (!window['mls']) return [];
+            const arraySfHistory: mls.stor.IFileInfo[] = [];
+            const lh = this.getHistory();
+            if (lh.length <= 0 || !window['mls']) return [];
 
-        for await (const i of lh) {
+            for await (const i of lh) {
 
-            let key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
+                let key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
 
-            if (!mls.stor.files[key] && +this.project === 0) {
-                await mls.stor.server.loadProjectInfoIfNeeded(i.project);
-                key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
+                if (!mls.stor.files[key] && +this.project === 0) {
+                    await mls.stor.server.loadProjectInfoIfNeeded(i.project);
+                    key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
+                }
+
+                if (!mls.stor.files[key] || (i.project !== +this.project && +this.project !== 0)) continue;
+
+                if (mls.actualLevel == 1 && i.shortName.startsWith('be')) {
+                    arraySfHistory.push(mls.stor.files[key]);
+                }
+                else if (mls.actualLevel == 3 && i.shortName.startsWith('page')) {
+                    arraySfHistory.push(mls.stor.files[key]);
+                }
+                else if ([2, 4, 5, 6, 7].includes(mls.actualLevel) && !i.shortName.startsWith('be')) {
+                    arraySfHistory.push(mls.stor.files[key]);
+                }
+
             }
 
-            if (!mls.stor.files[key] || (i.project !== +this.project && +this.project !== 0)) continue;
-
-            if (mls.actualLevel == 1 && i.shortName.startsWith('be')) {
-                arraySfHistory.push(mls.stor.files[key]);
-            }
-            else if (mls.actualLevel == 3 && i.shortName.startsWith('page')) {
-                arraySfHistory.push(mls.stor.files[key]);
-            }
-            else if ([2, 4, 5, 6, 7].includes(mls.actualLevel) && !i.shortName.startsWith('be')) {
-                arraySfHistory.push(mls.stor.files[key]);
-            }
-
+            return arraySfHistory;
         }
-
-        return arraySfHistory;
-
+        catch (e:any) {
+            console.info('[pluginExploreList getFileHistory]', e);
+            return [];
+        }
     }
 
     private getHistory(): { project: number, shortName: string, extension: string, folder: string }[] {

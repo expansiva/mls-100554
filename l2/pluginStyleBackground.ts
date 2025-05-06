@@ -1,15 +1,17 @@
 /// <mls shortName="pluginStyleBackground" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, repeat, classMap } from 'lit';
-import { customElement, property, queryAll } from 'lit/decorators.js';
-import './_100554_collabDsInputSelectColor';
-import './_100554_collabDsInputRange';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { customElement, property } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
+import { globalState } from './_100554_collabState';
 import { getMessageKey } from './_100554_collabLitElement';
+import { ICSSState } from './_100554_lessCSS';
+
 import './_100554_collabDsInputSelectColor';
 import './_100554_collabDsInputRange';
-import { ICSSState } from './_100554_lessCSS';
-import { globalState } from './_100554_icaState';
+import './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputRange';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -53,7 +55,7 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-background-100554')
-export class PluginCssTokens extends IcaLitElement {
+export class PluginCssTokens extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 

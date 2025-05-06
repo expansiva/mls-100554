@@ -3,9 +3,9 @@
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getMessageKey } from "./_100554_collabLitElement";
-import { propertyDataSource } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget } from "./_100554_pluginNewFileBase";
 import { ServiceBase } from './_100554_serviceBase';
 import './_100554_wcCode';
@@ -56,7 +56,7 @@ export const details: IDetails = {
 }
 
 @customElement('plugin-new-file-page-100554')
-export class PluginNewFilePage extends IcaLitElement {
+export class PluginNewFilePage extends StateLitElement {
 
     @propertyDataSource() shortName: string | undefined;
 
@@ -71,7 +71,7 @@ export class PluginNewFilePage extends IcaLitElement {
     private template: string = `
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
-import { globalState } from './_100554_icaState';
+import { globalState } from './_100554_collabState';
 
  @customElement('[tagName]')
  export class [className] extends CollabPageElement {

@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getMessageKey } from "./_100554_collabLitElement";
-import { propertyDataSource } from './_100554_icaLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 import { IDetails, createNewFile } from "./_100554_pluginNewFileBase";
 import { ServiceBase } from './_100554_serviceBase';
 import './_100554_wcCode';
@@ -51,7 +51,7 @@ export const details: IDetails = {
 }
 
 @customElement('plugin-new-file-blank-100554')
-export class PluginNewFileBlank extends IcaLitElement {
+export class PluginNewFileBlank extends StateLitElement {
 
     @propertyDataSource() shortName: string | undefined;
 

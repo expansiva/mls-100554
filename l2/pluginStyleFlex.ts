@@ -1,12 +1,13 @@
 /// <mls shortName="pluginStyleFlex" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
-import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
-import { CollabLitElement, getMessageKey } from './_100554_collabLitElement';
+import { html,repeat } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
+import { globalState } from './_100554_collabState';
+import {  getMessageKey } from './_100554_collabLitElement';
 import { ICSSState } from './_100554_lessCSS';
 import './_100554_collabDsInputRange';
-import { globalState } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -54,7 +55,7 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-flex-100554')
-export class PluginStyleFlex extends IcaLitElement {
+export class PluginStyleFlex extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 

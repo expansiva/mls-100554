@@ -1,16 +1,17 @@
 /// <mls shortName="pluginStyleTextShadow" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, repeat } from 'lit';
-import { customElement, property, queryAll } from 'lit/decorators.js';
-import './_100554_collabDsInputSelectColor';
-import './_100554_collabDsInputRange';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { customElement, property } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
+import { globalState } from './_100554_collabState';
 import { getMessageKey } from './_100554_collabLitElement';
-import './_100554_collabDsInputSelectColor';
-import './_100554_collabDsInputRange';
 import { ICSSState } from './_100554_lessCSS';
 import { convertColorToHex } from './_100554_libCommom';
-import { globalState } from './_100554_icaState';
+import './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputRange';
+import './_100554_collabDsInputSelectColor';
+import './_100554_collabDsInputRange';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -53,7 +54,7 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-text-shadow-100554')
-export class PluginStyleTextShadow extends IcaLitElement {
+export class PluginStyleTextShadow extends StateLitElement {
 
     @property() showFull: string = 'true';
     @propertyDataSource() state: ICSSState | undefined;

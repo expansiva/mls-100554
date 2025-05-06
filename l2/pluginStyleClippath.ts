@@ -2,10 +2,11 @@
 
 import { html, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
+import { globalState } from './_100554_collabState';
 import { getMessageKey } from './_100554_collabLitElement'
 import { ICSSState } from './_100554_lessCSS';
-import { globalState } from './_100554_icaState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -38,7 +39,7 @@ export function getDescription() {
 }
 
 @customElement('plugin-style-clippath-100554')
-export class PluginStyleClipath extends IcaLitElement {
+export class PluginStyleClipath extends StateLitElement {
 
     @propertyDataSource() state: ICSSState | undefined;
     @property() position: 'left' | 'right' = 'left';
