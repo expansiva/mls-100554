@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 
 import './_100554_collabInputTag';
 
@@ -42,7 +42,7 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 @customElement('collab-messages-add-100554')
-export class CollabMessagesAdd100554 extends IcaLitElement {
+export class CollabMessagesAdd100554 extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 

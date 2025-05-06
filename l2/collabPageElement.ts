@@ -2,7 +2,7 @@
 
 import { html, PropertyValueMap } from 'lit';
 import { property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { WCDOverlayMethods  } from './_100554_wcdTypes';
 import { IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes'
 import { convertTagToFileName } from './_100554_utilsLit'
@@ -13,7 +13,7 @@ export function toPascalCase(str: string) {
     return str.replace(/(^\w|-\w)/g, match => match.replace('-', '').toUpperCase());
 }
 
-export abstract class CollabPageElement extends IcaLitElement {
+export abstract class CollabPageElement extends StateLitElement {
 
     abstract initPage(): void
 

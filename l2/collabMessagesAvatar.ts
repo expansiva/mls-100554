@@ -2,11 +2,11 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { collab_user } from './_100554_collabIcons';
 
 @customElement('collab-messages-avatar-100554')
-export class CollabMessagesAvatar100554 extends IcaLitElement {
+export class CollabMessagesAvatar100554 extends StateLitElement {
 
     @property() avatar: string = '';
     @property({ type: String }) width = '30px';

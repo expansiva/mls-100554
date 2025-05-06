@@ -1,7 +1,7 @@
 /// <mls shortName="collabIcaTree" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement, repeat } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { html, repeat } from 'lit';
+import { customElement } from 'lit/decorators.js';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { ServiceBase } from './_100554_serviceBase';
 import { CollabLitElement } from './_100554_collabLitElement';

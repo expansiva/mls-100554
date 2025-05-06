@@ -1,13 +1,13 @@
 /// <mls shortName="cssHelperIndex" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, when, repeat, TemplateResult } from 'lit';
+import { html, when, repeat } from 'lit';
 import { customElement, property, queryAll } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
-import { propertyDataSource } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource } from './_100554_collabDecorators';
 import { PluginStyleIndexItem } from './_100554_pluginStyleIndexItem';
 import { IHelpers, IMode } from './_100554_cssHelperIndexBase';
 import { ICSSState } from './_100554_lessCSS';
-import { globalState } from './_100554_icaState';
+import { globalState } from './_100554_collabState';
 import './_100554_pluginStyleIndexItem';
 
 /// **collab_i18n_start**
@@ -30,7 +30,7 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 @customElement('css-helper-index-100554')
-export class CssHelperIndex extends IcaLitElement {
+export class CssHelperIndex extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 

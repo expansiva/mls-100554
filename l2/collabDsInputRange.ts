@@ -1,14 +1,13 @@
 /// <mls shortName="collabDsInputRange" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, repeat } from 'lit';
+import { html, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { IcaLitElement, propertyDataSource } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 
 export function initCollabDSInputRange() { };
 
 @customElement('collab-ds-input-range-100554')
-export class CollabDSInputRange extends IcaLitElement {
+export class CollabDSInputRange extends StateLitElement {
 
     public arraySelect: string[] = [];
 

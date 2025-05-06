@@ -1,15 +1,15 @@
 /// <mls shortName="collabInputTag" project="100554" enhancement="_100554_enhancementLit" groupName="internal" />
 
-import { html, css, LitElement } from 'lit';
+import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaLitElement } from './_100554_icaLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 
 export function initCollabInputTag() {
     return true;
 }
 
 @customElement('collab-input-tag-100554')
-export class CollabInputTag extends IcaLitElement {
+export class CollabInputTag extends StateLitElement {
 
     @property()
     tags: string[] = [];
