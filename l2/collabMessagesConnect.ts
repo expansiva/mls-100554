@@ -1,18 +1,19 @@
 /// <mls shortName="collabMessagesConnect" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_user_plus, collab_gear, collab_translate } from './_100554_collabIcons';
 import { createAgent } from './_100554_agentPlanner1';
 import { getTemporaryContext, formatTimestamp } from './_100554_aiAgentHelper';
-import { addOrUpdateTask, addMessages, addMessage, getAllMessagesByThreadId, updateThread, updateUsers, updateThreads } from './_100554_msgDBController';
-
+import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, updateThreads, getMessagesByThreadId } from './_100554_msgDBController';
 import { loadChatPreferences } from './_100554_collabMessageHelper';
+
 import './_100554_widgetAiInteraction';
 import './_100554_widgetAiTask';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
 import './_100554_collabMessagesThreadDetails';
+import './_100554_collabMessagesAddParticipant';
 
 import { IChatPreferences } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
@@ -22,20 +23,12 @@ import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt';
 const message_pt = {
     loading: 'Carregando...',
     btnAddParticipant: 'Adicionar participante',
-    labelUserId: 'Nome do usuario ou Id',
-    labelPermission: 'Autoridade:',
-    errorFieldsAddParticipant: 'Preencha todos os campos!',
-    successAddParticipant: 'Usuário adicionado com sucesso',
     threadDetails: 'Detalhes da sala'
 }
 
 const message_en = {
     loading: 'Loading...',
     btnAddParticipant: 'Add Participant',
-    labelUserId: 'User id or name',
-    labelPermission: 'Auth:',
-    errorFieldsAddParticipant: 'Fill in all fields!',
-    successAddParticipant: 'User added sucessfully',
     threadDetails: 'Thread details'
 }
 
@@ -56,6 +49,7 @@ export class CollabMessagesConnect100554 extends StateLitElement {
     @query('.chat-container') private messageContainer!: HTMLDivElement | undefined;
 
     @state() userPreferenceChat?: IChatPreferences;
+    @state() isLoadingThread: boolean = false;
 
     @property() userId: string | undefined;
     @property() activeScenerie: IScenery = 'list';
@@ -64,18 +58,15 @@ export class CollabMessagesConnect100554 extends StateLitElement {
     @property() actualMessages: IMessage[] = [];
     @property() actualMessagesParsed: IMessageGrouped = {};
     @property() isLoadingMessages: boolean = false;
-    @property() isAddParticipant: boolean = false;
-    @property() labelOkAddParticipant: string = '';
-    @property() labelErrorAddParticipant: string = '';
-    @property() userIdOrName = '';
-    @property() auth: mls.msg.UserAuth = 'write';
 
     @property({ attribute: false }) userThreads: IThread = {
         CONNECT: [{ "thread": { "history": [{ "action": "created", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "update_group", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_language ${language}", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120844.1000", "timestamp": "20250417172252" }, { "action": "add_user", "userId": "20250417004803.1000", "timestamp": "20250417174719" }], "languages": ["pt"], "status": "active", "visibility": "private", "group": "CONNECT", "threadId": "20250417135645.1000", "users": [{ "userId": "20250417120841.1000", "auth": "admin" }, { "userId": "20250417120844.1000", "auth": "write" }, { "userId": "20250417004803.1000", "auth": "write" }], "name": "" }, "users": [{ "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active" }, { "threads": ["20250417133813.1000", "20250417180232.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active" }, { "threads": ["20250417135645.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active" }] }]
     };
 
     private savedScrollTop = 0;
-    private messagesLimit = 5;
+
+    private hasMoreMessages = true;
+    private messagesLimit = 10;
     private messagesOffset = 0;
     private isLoadingMoreMessages = false;
 
@@ -83,7 +74,7 @@ export class CollabMessagesConnect100554 extends StateLitElement {
         super.updated(changedProperties);
 
         if (this.unreadEl) {
-            this.unreadEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            this.unreadEl.scrollIntoView({ behavior: 'auto', block: 'center' });
             return;
         }
 
@@ -199,10 +190,16 @@ export class CollabMessagesConnect100554 extends StateLitElement {
 
         this.userPreferenceChat = loadChatPreferences();
 
+        const sortedEntries = Object.entries(this.actualMessagesParsed)
+            .map(([date, value]) => [date.trim(), value])
+            .sort(([a], [b]) => new Date(a as string).getTime() - new Date(b as string).getTime());
+
+        const sortedObj: IMessageGrouped = Object.fromEntries(sortedEntries);
+
         return html`
-            <div class="chat-container">    
-                ${Object.keys(this.actualMessagesParsed).map((key) => {
-            const threadMessages = this.actualMessagesParsed[key];
+            <div @scroll=${this.onChatScroll} class="chat-container">    
+                ${Object.keys(sortedObj).map((key) => {
+            const threadMessages = sortedObj[key];
             const messageTime = this.parseLocalDate(key);
             return html`
                     <div class="message-time">${messageTime.date}</div>
@@ -315,7 +312,9 @@ export class CollabMessagesConnect100554 extends StateLitElement {
                         </li>
                     `;
         })}
-            </ul>`
+            </ul>
+            ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
+            `
     }
 
     private renderTaskDetails() {
@@ -328,112 +327,43 @@ export class CollabMessagesConnect100554 extends StateLitElement {
     }
 
     private renderAddParticipant() {
-
-        this.labelErrorAddParticipant = '';
-        this.labelOkAddParticipant = '';
-
-        return html`
-        <div class="add-participant">
-            <label>
-                ${this.msg.labelUserId}
-                <input 
-                    type="text"
-                    .value=${this.userIdOrName}
-                    @input=${(e: Event) => this.userIdOrName = (e.target as HTMLInputElement).value}
-                />
-            </label>
-
-            <label>
-                ${this.msg.labelPermission}
-                <select
-                    .value=${this.auth}
-                    @change=${(e: Event) => (this.auth as string) = (e.target as HTMLSelectElement).value}
-                >
-                    <option value="admin">Admin</option>
-                    <option value="moderator">Moderator</option>
-                    <option value="none">None</option>
-                    <option value="read">Read</option>
-                    <option value="write">Write</option>
-                </select>
-            </label>
-
-            <button
-                @click=${this.onSubmitAddParticipant}
-                ?disabled=${this.isAddParticipant}
-            >
-                ${this.isAddParticipant ? html`<span class="loader"></span>` : this.msg.btnAddParticipant}
-            </button>
-            
-            ${this.labelOkAddParticipant ? html`<small class="add-participant-ok">${this.labelOkAddParticipant}<small>` : ''}
-            ${this.labelErrorAddParticipant ? html`<small class="add-participant-error">${this.labelErrorAddParticipant}<small>` : ''}
-        </div>
-    `;
+        return html`<collab-messages-add-participant-100554 userId=${this.userId} .actualThread=${{ ...this.actualThread }}></collab-messages-add-participant-100554>`;
     }
 
 
     private async onChatScroll(e: Event) {
         const container = e.target as HTMLElement;
 
-        if (container.scrollTop === 0 && !this.isLoadingMoreMessages && this.actualThread) {
+        if (
+            container.scrollTop === 0 &&
+            !this.isLoadingMoreMessages &&
+            this.actualThread &&
+            this.hasMoreMessages
+        ) {
             this.isLoadingMoreMessages = true;
 
             const previousHeight = container.scrollHeight;
 
             const newOffset = this.messagesOffset + this.messagesLimit;
-            //const newMessages = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, newOffset);
-            const newMessages = await getAllMessagesByThreadId(this.actualThread.thread.threadId);
+            const newMessages = await getMessagesByThreadId(
+                this.actualThread.thread.threadId,
+                this.messagesLimit,
+                newOffset
+            );
 
+            if (newMessages.length > 0) {
+                this.messagesOffset = newOffset;
+                this.actualMessages = [...newMessages, ...this.actualMessages];
+                this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+                await this.updateComplete;
+                const newHeight = container.scrollHeight;
+                container.scrollTop = newHeight - previousHeight;
+            } else {
 
-            this.messagesOffset = newOffset;
-
-            this.actualMessages = this.mergeMessages(newMessages, this.actualMessages);
-            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
-            await this.updateComplete;
-            const newHeight = container.scrollHeight;
-            container.scrollTop = newHeight - previousHeight;
+                this.hasMoreMessages = false;
+            }
 
             this.isLoadingMoreMessages = false;
-        }
-    }
-
-
-    private async onSubmitAddParticipant() {
-
-        this.labelErrorAddParticipant = '';
-        this.labelOkAddParticipant = '';
-
-        if (!this.actualThread || !this.userId) {
-            return;
-        }
-        if (!this.userIdOrName || !this.auth) {
-            this.labelErrorAddParticipant = this.msg.errorFieldsAddParticipant
-            return;
-        }
-
-        this.isAddParticipant = true;
-
-        try {
-            const response = await mls.api.msgAddUserInThread({
-                auth: this.auth,
-                userIdOrName: this.userIdOrName,
-                threadId: this.actualThread?.thread.threadId,
-                userId: this.userId,
-            });
-
-            if (response.statusCode !== 200) {
-                this.labelErrorAddParticipant = `${response.msg}`;
-                this.isAddParticipant = false;
-                return;
-            }
-            this.labelOkAddParticipant = `${this.msg.successAddParticipant}`;
-            this.userIdOrName = '';
-            this.auth = 'write';
-            this.isAddParticipant = false;
-
-        } catch (error: any) {
-            console.error('Error on add user:', error);
-            this.labelErrorAddParticipant = error.message;
-            this.isAddParticipant = false;
         }
     }
 
@@ -500,8 +430,12 @@ export class CollabMessagesConnect100554 extends StateLitElement {
 
         this.activeScenerie = 'loading';
         this.messagesOffset = 0;
+        this.hasMoreMessages = true;
         this.actualThread = threadInfo;
-        const messagesInDb = await getAllMessagesByThreadId(threadInfo.thread.threadId);
+
+        //const messagesInDb = await getAllMessagesByThreadId(threadInfo.thread.threadId);
+        const messagesInDb = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, 0);
+
         this.actualMessages = messagesInDb;
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         console.info(this.actualMessagesParsed)
@@ -510,8 +444,9 @@ export class CollabMessagesConnect100554 extends StateLitElement {
         this.isLoadingMessages = true;
         try {
             const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
-            this.actualMessages = this.mergeMessages(this.actualMessages, messages);
             addMessages(messages);
+
+            this.actualMessages = this.mergeMessages(this.actualMessages, messages);
 
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             const lastMessage = this.actualMessages.length > 0 ? this.actualMessages[this.actualMessages.length - 1] : undefined;
@@ -541,18 +476,22 @@ export class CollabMessagesConnect100554 extends StateLitElement {
         array1: mls.msg.Message[],
         array2: mls.msg.Message[]
     ): mls.msg.Message[] {
-
         const map = new Map<string, mls.msg.Message>();
+
         for (const item of array1) {
             map.set(`${item.threadId}/${item.createAt}`, item);
         }
 
         for (const item of array2) {
-            map.set(`${item.threadId}/${item.createAt}`, { ...map.get(`${item.threadId}/${item.createAt}`), ...item });
+            const key = `${item.threadId}/${item.createAt}`;
+            if (map.has(key)) {
+                map.set(key, { ...map.get(key), ...item });
+            }
         }
 
         return Array.from(map.values());
     }
+
 
     private onTitleClick() {
         if (this.activeScenerie === 'task') {

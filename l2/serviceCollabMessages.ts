@@ -4,7 +4,6 @@ import { addCoachMark, ICoachMarks } from './_100554_coachMarks';
 import { html, css, LitElement } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { CollbaMessagesAddResponse } from './_100554_collabMessagesAdd';
 import { saveUserIdLocalStorage } from "./_100554_aiAgentHelper";
 import { listThreads, addThread, listUsers, updateUsers } from './_100554_msgDBController';
 import './_100554_collabMessagesAdd';
@@ -45,6 +44,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     private msg: MessageType = messages['en'];
     @property() activeTab: ITabType = 'CRM';
     @property() activeScenerie: IScenery = 'tabs';
+    @state() isLoadingThread: boolean = false;
     @state() userPerfil: mls.msg.User | undefined;
     @state() userThreads: IThreadData = {}
 
@@ -179,6 +179,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         this.execCoachMarks('Connect');
         return html`<collab-messages-connect-100554 
             style="height:${this.style.height}"
+            .isLoadingThread= ${this.isLoadingThread}
             .userThreads=${{
                 CONNECT: Object.keys(this.userThreads)
                     .filter((key) => this.userThreads[key].thread.group === 'CONNECT')
@@ -193,26 +194,13 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         return html`
             <collab-messages-add-100554 
                 userId=${this.userPerfil?.userId} 
-                .afterAdd=${this.onAfterAdd}
             ></collab-messages-add-100554>`
     }
-
-
 
     private openAdd() {
         this.activeTab = 'Add';
         if (this.menu.tabs) this.menu.tabs.selected = ETabs.Add;
         if (this.menu.closeMenu) this.menu.closeMenu();
-    }
-
-    private onAfterAdd(response: CollbaMessagesAddResponse) {
-        if (!response.ok) {
-            this.setError(response.msg || 'Error on add thread');
-            console.error(response.msg);
-            return;
-        }
-
-        if (response.data) addThread(response.data)
     }
 
     private async getUser(): Promise<mls.msg.User> {
@@ -225,13 +213,13 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         }
     }
 
-
     private async updateThreads() {
         if (!this.userPerfil?.userId) {
             this.setError('Invalid userId');
             return;
         }
 
+        this.isLoadingThread = true;
         const userId = this.userPerfil.userId;
         const userThreads: string[] = this.userPerfil.threads;
 
@@ -245,11 +233,13 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             updateUsers(threadInfo.users);
         }
 
+        this.isLoadingThread = false;
         this.requestUpdate();
 
     }
 
     private async getThreadFromLocalDB() {
+
         const threads = await listThreads();
         const users = await listUsers();
 
@@ -267,6 +257,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                 users: threadUsers
             }
         }
+
     }
 
     private async getThreadInfo(threadId: string, userId: string): Promise<IThreadInfo> {
