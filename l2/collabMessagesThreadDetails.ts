@@ -1,9 +1,9 @@
 /// <mls shortName="collabMessagesThreadDetails" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html, css, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { updateThread } from './_100554_msgDBController';
-import { notifyThreadChange } from './_100554_aiAgentHelper'
+import { updateThread, getUser } from './_100554_msgDBController';
+import { notifyThreadChange } from './_100554_aiAgentHelper';
 import { StateLitElement } from './_100554_stateLitElement';
 import './_100554_collabInputTag';
 
@@ -84,8 +84,24 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
     @state() private editedThreadDetails?: IThreadDetails;
 
-    updated(changedProperties: Map<string, any>) {
+    async firstUpdated(changedProperties: Map<string, any>) {
+        super.firstUpdated(changedProperties);
+    }
+
+    async updated(changedProperties: Map<string, any>) {
+        super.updated(changedProperties);
         if (changedProperties.has('threadDetails') && this.threadDetails) {
+
+
+            for (const user of this.threadDetails?.thread.users || []) {
+                const find = this.threadDetails?.users.find((u) => u.userId === user.userId);
+                if (!find) {
+                    const resUser = await getUser(user.userId);
+                    console.log({ resUser })
+                    if (resUser) this.threadDetails.users.push(resUser);
+                }
+            }
+
             this.editedThreadDetails = JSON.parse(JSON.stringify(this.threadDetails));
         }
     }
@@ -130,21 +146,26 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         </div>
 
 
-        
+                
         <div class="users">
-            <h3>${this.msg.users}</h3>
-            <ul>
-            ${this.editedThreadDetails?.thread.users.map(user => {
-            const details = users.find((us) => us.userId === user.userId);
-            return html`
-                <li>
-                    <img src="${details?.avatar_url}" alt="${details?.name}" width="32" height="32" />
-                    ${details?.name} (${user.userId})
-                    <button @click="${() => this.removeUser(user.userId)}">${this.msg.remove}</button>
-                </li>
+        <h3>${this.msg.users}</h3>
+        <ul>
+            ${repeat(
+            this.editedThreadDetails?.thread.users || [],
+            ((user: { userId: string }) => user.userId) as any,
+            ((user: { userId: string; }) => {
+                const details = users.find((us) => us.userId === user.userId);
+                return html`
+                            <li>
+                                <img src="${details?.avatar_url}" alt="${details?.name}" width="32" height="32" />
+                                ${details?.name} (${user.userId})
+                                <button @click="${() => this.removeUser(user.userId)}">${this.msg.remove}</button>
+                            </li>
                 `;
-        })}
-            </ul>
+            }
+            ) as any)}
+            
+        </ul>
         </div>
 
         <div class="languages">
@@ -173,7 +194,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
     `;
     }
 
-    removeUser(userId: string) {
+    private removeUser(userId: string) {
         if (!this.editedThreadDetails) return;
         this.userToRemove.add(userId);
         this.editedThreadDetails.users = this.editedThreadDetails.users.filter(user => user.userId !== userId);
@@ -206,7 +227,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
     }
 
 
-    async saveChanges() {
+    private async saveChanges() {
 
         this.labelError = '';
         this.labelOk = '';

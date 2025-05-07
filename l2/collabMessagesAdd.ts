@@ -3,8 +3,8 @@
 import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-
-
+import { addThread } from './_100554_msgDBController';
+import { notifyThreadChange } from './_100554_aiAgentHelper';
 import './_100554_collabInputTag';
 
 /// **collab_i18n_start** 
@@ -19,10 +19,11 @@ const message_pt = {
     group: 'Grupo',
     languages: 'Idiomas',
     languagesHint: 'Detectado e atualizado com base nos idiomas dos usuários participantes.',
-    addLoading: 'Adicionando thread...',
     validateFormError: 'Preencha todos os campos obrigatórios.',
     userError: 'ID de usuário inválido.',
-    btnAdd: 'Adicionar thread'
+    btnAdd: 'Adicionar thread',
+    successSaving: 'Alterações salvas com sucesso!',
+
 }
 
 const message_en = {
@@ -36,12 +37,11 @@ const message_en = {
     group: 'Group',
     languages: 'Languages',
     languagesHint: 'Detected and updated based on the languages of participating users.',
-    addLoading: 'Adding thread...',
     validateFormError: 'Please fill in all required fields.',
     userError: 'Invalid user ID.',
-    btnAdd: 'Add thread'
+    btnAdd: 'Add thread',
+    successSaving: 'Saving sucessfully',
 }
-
 
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
@@ -59,11 +59,11 @@ export class CollabMessagesAdd100554 extends StateLitElement {
     @state() private visibility: mls.msg.ThreadVisibility = 'private';
     @state() private group: mls.msg.ThreadGroup = 'CRM';
     @state() private languages: string[] = [];
-    @state() private isLoading: boolean = false; // NOVO
+    @state() private isLoading: boolean = false;
 
+    @property() labelOk: string = '';
+    @property() labelError: string = '';
     @property() userId: string | undefined;
-
-    public afterAdd: Function | undefined;
 
     render() {
 
@@ -110,10 +110,15 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                 <small> ${this.msg.languagesHint}</small>
             </label>
 
-            ${this.isLoading
-                ? html`<p>${this.msg.addLoading}</p>`
-                : html`<button @click=${this.addNewThread} style="margin-top: 20px;">${this.msg.btnAdd}</button>`
-            }
+            <button
+                @click=${this.addNewThread}
+                ?disabled=${this.isLoading}
+                >
+                ${this.isLoading ? html`<span class="loader"></span>` : this.msg.btnAdd}
+            </button>
+
+            ${this.labelOk ? html`<small class="saving-ok">${this.labelOk}<small>` : ''}
+            ${this.labelError ? html`<small class="saving-error">${this.labelError}<small>` : ''}   
         </div>`;
     }
 
@@ -125,17 +130,15 @@ export class CollabMessagesAdd100554 extends StateLitElement {
     }
 
     private async addNewThread() {
-        if (!this.validateForm()) {
 
-            const res: CollbaMessagesAddResponse = { ok: false, msg: this.msg.validateFormError };
-            if (this.afterAdd) this.afterAdd(res);
+        if (!this.validateForm()) {
+            this.labelError = this.msg.validateFormError;
             this.isLoading = false;
             return;
         }
 
         if (!this.userId) {
-            const res: CollbaMessagesAddResponse = { ok: false, msg: this.msg.userError };
-            if (this.afterAdd) this.afterAdd(res);
+            this.labelError = this.msg.userError;
             this.isLoading = false;
             return;
         }
@@ -154,21 +157,20 @@ export class CollabMessagesAdd100554 extends StateLitElement {
 
         try {
             const response = await mls.api.msgAddThread(params);
-            const res: CollbaMessagesAddResponse = { ok: true, data: response.thread };
-            if (this.afterAdd) this.afterAdd(res);
+
+            this.labelOk = `${this.msg.successSaving}`;
+            if (response.thread) {
+                const thr = await addThread(response.thread);
+                notifyThreadChange(thr);
+
+            }
+
         } catch (err: any) {
-            const res = { ok: false, msg: err.message };
-            if (this.afterAdd) this.afterAdd(res);
-            throw new Error(err.message);
+            console.error(err);
+            this.labelError = err.message;
         } finally {
             this.isLoading = false;
         }
     }
 }
 
-
-export interface CollbaMessagesAddResponse {
-    ok: boolean,
-    msg?: string,
-    data?: mls.msg.Thread
-}

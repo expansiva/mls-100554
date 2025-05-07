@@ -169,7 +169,7 @@ export async function listThreads(): Promise<mls.msg.ThreadPerformanceCache[]> {
     });
 }
 
-export async function addThread(thread: mls.msg.Thread): Promise<void> {
+export async function addThread(thread: mls.msg.Thread): Promise<mls.msg.ThreadPerformanceCache> {
     const db = await openDB();
 
     const threadCache: mls.msg.ThreadPerformanceCache = {
@@ -184,7 +184,7 @@ export async function addThread(thread: mls.msg.Thread): Promise<void> {
         const tx = db.transaction("threads", "readwrite");
         const store = tx.objectStore("threads");
         store.put(threadCache);
-        tx.oncomplete = () => resolve();
+        tx.oncomplete = () => resolve(threadCache);
         tx.onerror = () => reject("Erro ao adicionar thread");
         tx.onabort = () => reject("Transação abortada");
     });
