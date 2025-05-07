@@ -438,18 +438,22 @@ export class CollabMessagesConnect100554 extends StateLitElement {
 
         this.actualMessages = messagesInDb;
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
-        console.info(this.actualMessagesParsed)
         this.activeScenerie = 'details';
 
         this.isLoadingMessages = true;
         try {
+            
             const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
             addMessages(messages);
-
-            this.actualMessages = this.mergeMessages(this.actualMessages, messages);
-
+            this.actualMessages = [...this.actualMessages, ...messages];
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
-            const lastMessage = this.actualMessages.length > 0 ? this.actualMessages[this.actualMessages.length - 1] : undefined;
+
+            const keys = Object.keys(this.actualMessagesParsed).sort(); // cria uma nova lista ordenada
+            const lastKey = keys.length > 0 ? keys[keys.length - 1] : null;
+            const lastArray = lastKey ? this.actualMessagesParsed[lastKey] : [];
+            const lastMessage = lastArray.length > 0 ? lastArray[lastArray.length - 1] : undefined;
+
+            // const lastMessage = this.actualMessages.length > 0 ? this.actualMessages[this.actualMessages.length - 1] : undefined;
 
             if (!this.userId || !this.actualThread.thread.threadId) return;
             const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId)
