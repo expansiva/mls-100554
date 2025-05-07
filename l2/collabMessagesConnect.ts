@@ -115,6 +115,9 @@ export class CollabMessagesConnect100554 extends StateLitElement {
             const thread = customEvent.detail as mls.msg.Thread;
             const threadUpdated = this.userThreads.CONNECT.find((th) => th.thread.threadId === thread.threadId);
             if (threadUpdated) threadUpdated.thread = { ...threadUpdated.thread, ...thread };
+            else if (thread.group === 'CONNECT') {
+                this.userThreads.CONNECT = [...this.userThreads.CONNECT, { thread, users: [] }];
+            }
             this.requestUpdate();
         });
 
@@ -442,11 +445,18 @@ export class CollabMessagesConnect100554 extends StateLitElement {
 
         this.isLoadingMessages = true;
         try {
-            
+
             const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
             addMessages(messages);
             this.actualMessages = [...this.actualMessages, ...messages];
-            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+
+            const noDuplicates = Array.from(
+                new Map(
+                    this.actualMessages.map(item => [`${item.threadId}/${item.createAt}`, item])
+                ).values()
+            );
+
+            this.actualMessagesParsed = this.parseMessages(noDuplicates);
 
             const keys = Object.keys(this.actualMessagesParsed).sort(); // cria uma nova lista ordenada
             const lastKey = keys.length > 0 ? keys[keys.length - 1] : null;
