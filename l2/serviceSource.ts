@@ -9,15 +9,14 @@ import { removeTokensFromSource } from './_100554_enhancementStyle';
 import { getTokensLess } from './_100554_designSystemBase';
 import { LessCSS } from "./_100554_lessCSS";
 import { getEnhancementName } from './_100554_libCommom';
-import { globalState } from './_100554_collabState'; 
-import { propertyDataSource } from './_100554_collabDecorators'; 
+import { globalState } from './_100554_collabState';
+import { propertyDataSource } from './_100554_collabDecorators';
+import { setErrorOnModel } from './_100554_validateLit'
 import { collab_html, collab_typescript, collab_less, collab_fileTest } from './_100554_collabIcons';
 import { CollabSpliterVerticalVarFixed100554 } from './_100554_collabSpliterVerticalVarFixed';
 
-
 import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
-import './_100554_aimPromptTypescript';
 import './_100554_cssHelperIndex';
 
 
@@ -807,7 +806,7 @@ export class ServiceSource100554 extends ServiceBase {
 
                 await this.deleteFiles(storFileHTML, storFile, storFileCss, storFileTsTest);
                 await mls.stor.localDB.removePrjInfo(storFile.project);
-                
+
             } else {
                 await this.undoFiles(storFileHTML, storFile, storFileCss, storFileTsTest, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest);
             }
@@ -1148,10 +1147,16 @@ export class ServiceSource100554 extends ServiceBase {
     private async changeStatusFile(modelBaseTS: mls.editor.IModelTS, storFile: mls.stor.IFileInfo, variables: mls.common.tripleslash.ITripleSlashVariables | undefined, hasError: boolean, changed: boolean): Promise<void> {
 
         if (!storFile) return; // new file dont have storFile ???
+        const position: 'left' | 'right' = this.getPosition(modelBaseTS.model.id);
         storFile.hasError = hasError;
         this.toogleIconsError();
-        const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
+        if (hasError) {
+            this.setErrorOnEditor(modelBaseTS);
+            mls.events.fireFileAction('statusOrErrorChanged', storFile, position);
+            return;
+        }
 
+        const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
 
         if (sameContent) {
             if (storFile.status !== 'new') {
@@ -1164,12 +1169,27 @@ export class ServiceSource100554 extends ServiceBase {
         }
 
         if (changed) {
-            let position: 'left' | 'right';
-            const idLeft = mls.editor.editors.left?.ts?.model.id;
-            const idActive = modelBaseTS.model.id
-            if (idLeft === idActive) position = 'left';
-            else position = 'right';
             mls.events.fireFileAction('statusOrErrorChanged', storFile, position);
+        }
+    }
+
+    private getPosition(modeIld: string) {
+        let position: 'left' | 'right';
+        const idLeft = mls.editor.editors.left?.ts?.model.id;
+        const idActive = modeIld;
+        if (idLeft === idActive) position = 'left';
+        else position = 'right';
+        return position;
+    }
+
+    private setErrorOnEditor(modelBaseTS: mls.editor.IModelTS) {
+        const errors = modelBaseTS.compilerResults?.errors;
+        if (errors && errors.length > 0) {
+            errors.forEach((err) => {
+                if (err.start === 0 && err.file?.fileName === '') {
+                    setErrorOnModel(modelBaseTS.model, 1, 0, modelBaseTS.model.getLineContent(1).length, err.messageText as string, monaco.MarkerSeverity.Error)
+                }
+            })
         }
     }
 
@@ -2469,6 +2489,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             this.updatedMSizeEditor();
         }
     }
+
     connectedCallback() {
         if (!globalState._ica) globalState._ica = {};
         if (!globalState._ica.less) {
@@ -2500,7 +2521,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         this.setAttribute('historyLanguage', `{{serviceSource.${this.position}.historyLanguage}}`);
         super.connectedCallback();
 
-
     }
 
     firstUpdated(changedProperties: any) {
@@ -2527,33 +2547,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                     
                 </collab-spliter-horizontal-var-fixed-100554>
 
-                <div slot="bottom">
-                    ${this.renderPrompt()}
-                </div>
+                <div slot="bottom"></div>
         </collab-spliter-vertical-var-fixed-100554>`
 
-    }
-
-    renderPrompt() {
-
-        if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return html``;
-        const { shortName, project } = this.activeModels.ts.storFile;
-        if (!shortName || !project) return html``;
-
-        const key = mls.editor.getKeyModel(project, shortName);
-        if (this.mode === 'icTs') return html`
-            <aim-prompt-typescript-100554
-                rendermode="editor" modelkey="${key}">
-            </aim-prompt-typescript-100554>`;
-        if (this.mode === 'icStyle') return html`
-            <aim-prompt-style-100554
-                rendermode="editor" modelkey="${key}">
-            </aim-prompt-style-100554>`;
-        if (this.mode === 'icHTML') return html`
-            <aim-prompt-html-100554
-                rendermode="editor" modelkey="${key}">
-            </aim-prompt-html-100554>`;
-        return html``;
     }
 
 }
