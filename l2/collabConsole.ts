@@ -9,8 +9,12 @@ export class CollabConsole100554 extends StateLitElement {
 
     @state() logs: Array<{ type: string; message: string }> = [];
     @property({ type: String }) height: string = '200px';
+    @property({ type: String }) mode: 'enabled' | 'disabled' = 'disabled';
+
 
     @property() scope: Window & typeof globalThis = window;
+
+    private oldLog?: (...data: any[]) => void;
 
     updated(changedProperties: Map<string | number | symbol, unknown>) {
         super.updated(changedProperties);
@@ -19,13 +23,25 @@ export class CollabConsole100554 extends StateLitElement {
         }
         if (changedProperties.has('scope')) {
             this.logs = [];
-            this.interceptConsole();
+            this.changeMode(this.mode);
+        }
+
+        if (changedProperties.has('mode')) {
+            this.changeMode(this.mode);
         }
 
     }
 
-    interceptConsole() {
-        let oldLog = console.log;
+    private changeMode(mode: 'enabled' | 'disabled') {
+        if (mode === 'enabled') {
+            this.interceptConsole();
+        } else if (this.oldLog) {
+            this.scope.console.log = this.oldLog;
+        }
+    }
+
+    private interceptConsole() {
+        this.oldLog = console.log;
         let _scope = this.scope;
         let _this = this;
 
@@ -47,7 +63,7 @@ export class CollabConsole100554 extends StateLitElement {
             console.trace();
             console.groupEnd();
             _this.addLog.bind(_this)('log', message);
-            
+
         }
 
     }

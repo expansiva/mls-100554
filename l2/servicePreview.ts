@@ -33,7 +33,6 @@ const message_pt = {
     testDelete: 'Excluir',
     testEdit: 'Editar',
     runAllTest: 'Todos os testes'
-
 }
 
 const message_en = {
@@ -53,7 +52,6 @@ const message_en = {
     testDelete: 'Delete',
     testEdit: 'Edit',
     runAllTest: 'All testes'
-
 }
 
 type MessageType = typeof message_en;
@@ -756,7 +754,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onBtDarkLightClick() {
-        
+
         this.light = !this.light;
         if (!(mls.actual[2] as any).left || !this.watch) return this.light;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
@@ -786,7 +784,10 @@ export class ServicePreview100554 extends ServiceBase {
         this.enabledConsole = this.menu.tools.devConsole.selected === 1;
         const collabConsole = this.parentElement?.querySelector('collab-console-100554') as HTMLElement;
         if (!collabConsole) return;
+
         collabConsole.style.display = this.enabledConsole ? 'block' : 'none';
+        collabConsole.setAttribute('mode', this.enabledConsole ? 'enabled' : 'disabled');
+
     }
 
     private openTestResults() {
@@ -930,6 +931,7 @@ export class ServicePreview100554 extends ServiceBase {
         container.appendChild(doc);
 
         const consoleEl = document.createElement('collab-console-100554');
+        consoleEl.setAttribute('mode', 'disabled');
         consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
         container.appendChild(consoleEl);
 
