@@ -17,6 +17,10 @@ export abstract class IcaFormsInputNumberBase extends StateLitElement {
 	abstract errormessage: string | undefined; // Custom error message to display when input validation fails
 	abstract autofocus: boolean; // Whether the field should be automatically focused on page load
 
+	abstract name: string | undefined; 
+	abstract inputmode: string | undefined; 
+	abstract readonly: boolean;
+
 }
 
 
