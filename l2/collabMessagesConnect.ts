@@ -429,6 +429,23 @@ export class CollabMessagesConnect100554 extends StateLitElement {
         };
     }
 
+    private mergeMessages(
+        array1: mls.msg.Message[],
+        array2: mls.msg.Message[]
+    ): mls.msg.Message[] {
+
+        const map = new Map<string, mls.msg.Message>();
+        for (const item of array1) {
+            map.set(`${item.threadId}/${item.createAt}`, item);
+        }
+
+        for (const item of array2) {
+            map.set(`${item.threadId}/${item.createAt}`, { ...map.get(`${item.threadId}/${item.createAt}`), ...item });
+        }
+
+        return Array.from(map.values());
+    }
+
     private async onThreadClick(threadInfo: IThreadInfo) {
 
         this.activeScenerie = 'loading';
@@ -448,15 +465,9 @@ export class CollabMessagesConnect100554 extends StateLitElement {
 
             const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
             addMessages(messages);
-            this.actualMessages = [...this.actualMessages, ...messages];
 
-            const noDuplicates = Array.from(
-                new Map(
-                    this.actualMessages.map(item => [`${item.threadId}/${item.createAt}`, item])
-                ).values()
-            );
-
-            this.actualMessagesParsed = this.parseMessages(noDuplicates);
+            this.actualMessages = this.mergeMessages(this.actualMessages, messages);
+            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
 
             const keys = Object.keys(this.actualMessagesParsed).sort(); // cria uma nova lista ordenada
             const lastKey = keys.length > 0 ? keys[keys.length - 1] : null;
@@ -486,25 +497,7 @@ export class CollabMessagesConnect100554 extends StateLitElement {
 
     }
 
-    private mergeMessages(
-        array1: mls.msg.Message[],
-        array2: mls.msg.Message[]
-    ): mls.msg.Message[] {
-        const map = new Map<string, mls.msg.Message>();
 
-        for (const item of array1) {
-            map.set(`${item.threadId}/${item.createAt}`, item);
-        }
-
-        for (const item of array2) {
-            const key = `${item.threadId}/${item.createAt}`;
-            if (map.has(key)) {
-                map.set(key, { ...map.get(key), ...item });
-            }
-        }
-
-        return Array.from(map.values());
-    }
 
 
     private onTitleClick() {
