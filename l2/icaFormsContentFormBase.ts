@@ -9,7 +9,7 @@ export abstract class IcaFormsContentFormBase extends StateLitElement {
 	abstract novalidate: string | undefined;
 	abstract autocomplete: boolean;
 	abstract disabled: boolean ;
-	abstract validateOnChange: boolean;
+	abstract validateonchange: boolean;
 	abstract enctype: string | undefined;
 	abstract name: string | undefined;
 	abstract target: string| undefined;

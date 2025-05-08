@@ -16,9 +16,12 @@ export abstract class IcaFormsInputStringBase extends StateLitElement {
 	abstract pattern: string| undefined; // A regular expression that the input's value must match
 	abstract errormessage: string| undefined; // Custom error message to display when input validation fails
 	abstract autofocus: boolean ; // Whether the field should be automatically focused on page load
-	abstract autoCapitalize: IAutoCapitalize | undefined; // abstract autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' ; // Controls whether and how text input is automatically capitalized as it is entered by the user.
+	abstract autocapitalize: IAutoCapitalize ; // abstract autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' ; // Controls whether and how text input is automatically capitalized as it is entered by the user.
 	abstract autocorrect: IAutocorrect | undefined; // abstract autocorrect: 'off' | 'on' ; // Indicates whether the browser's autocorrect feature is on or off.
 	abstract autocomplete: string | undefined;
+	abstract validationmessage: string | undefined;
+	abstract debounce: string | undefined;
+	abstract readonly: boolean ;
 
 }
 

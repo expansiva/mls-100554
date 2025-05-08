@@ -3,7 +3,7 @@
 import { StateLitElement } from './_100554_stateLitElement'
 
 export abstract class IcaLayoutFlowRowBase extends StateLitElement {
-    abstract hint: string | undefined; // An optional descriptive hint for the field
+    abstract gap: string | undefined; 
  
 }
 

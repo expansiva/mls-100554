@@ -6,7 +6,7 @@ export const icaDescriptions: IIcaDescriptions = {
 
     //-----ICA-FORMS-----
     "ica-forms-content-form": {
-        attributes: ["action", "method", "novalidate", "autocomplete", "disabled", "enctype", "name", "target", "validateOnChange", "autosave"],
+        attributes: ["action", "method", "novalidate", "autocomplete", "disabled", "enctype", "name", "target", "validateonchange", "autosave"],
         allowedChildren: ["ica-forms-*", "ica-layout-flow-section"],
         allowedParents: [],
         description: "form component provides enhanced control over form submission, validation, and customization"
@@ -18,7 +18,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Allows the user to input numerical values, with support for minimum and maximum limits."
     },
     "ica-forms-input-string": {
-        attributes: ["name", "hint", "label", "required", "disabled", "readonly", "maxlength", "minlength", "placeholder", "pattern", "errormessage", "autofocus", "autoCapitalize", "autocorrect", "autocomplete", "value", "validationMessage", "debounce"],
+        attributes: ["name", "hint", "label", "required", "disabled", "readonly", "maxlength", "minlength", "placeholder", "pattern", "errormessage", "autofocus", "autocapitalize", "autocorrect", "autocomplete", "value", "validationmessage", "debounce"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Field for free text, with configurable validations such as maximum length and regular expressions."
@@ -42,7 +42,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Allows the user to select a time, with support for different time formats."
     },
     "ica-forms-input-date-range": {
-        attributes: ["name", "label", "hint", "required", "disabled", "readonly", "autofocus", "errormessage", "startValue", "endValue"],
+        attributes: ["name", "label", "hint", "required", "disabled", "readonly", "autofocus", "errormessage", "startvalue", "endvalue"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Component for selecting date ranges, useful for period filters."
@@ -84,73 +84,73 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "For attaching a file, with support for drag and drop and upload progress visualization."
     },
     "ica-forms-records-table": {
-        attributes: ["data", "columns", "selectedRow", "filterable", "sortable"],
+        attributes: ["data", "columns", "selectedrow", "filterable", "sortable"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Displays data in table format, with support for sorting and filtering."
     },
     "ica-forms-records-list": {
-        attributes: ["items", "selectedItem"],
+        attributes: ["items", "selecteditem"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "List of items, customizable to display summarized or detailed information."
     },
     "ica-forms-records-timeline": {
-        attributes: ["data", "selectedItem"],
+        attributes: ["data", "selecteditem"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Presents events or records in a timeline, facilitating the visualization of sequences or histories."
     },
     "ica-forms-records-cards": {
-        attributes: ["cardsData", "selectedCard"],
+        attributes: ["cardsdata", "selectedcard"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Data presented in cards, ideal for visual summaries with images or icons."
     },
     "ica-forms-records-map": {
-        attributes: ["latitude", "longitude", "zoom", "markers", "mapType"],
+        attributes: ["latitude", "longitude", "zoom", "markers", "maptype"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Displays geographic information on a map, supporting markers and custom regions."
     },
     "ica-forms-records-table-with-pagination": {
-        attributes: ["data", "columns", "selectedRow", "filterable", "sortable", "pageable"],
+        attributes: ["data", "columns", "selectedrow", "filterable", "sortable", "pageable"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Data table with pagination, to manage large data sets without overloading the interface."
     },
     "ica-forms-records-table-with-infinite-scroll": {
-        attributes: ["data", "columns", "selectedRow", "filterable", "sortable", "infiniteScroll"],
+        attributes: ["data", "columns", "selectedrow", "filterable", "sortable", "infinitescroll"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Table that automatically loads more data as the user scrolls the page, for smooth navigation through large data sets."
     },
     "ica-forms-tree-tree-view": {
-        attributes: ["data", "selectedNode", "expandedNodes"],
+        attributes: ["data", "selectednode", "expandednodes"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Hierarchical data structure that allows for expansion and contraction of nodes, useful for categories or organizational structures."
     },
     "ica-forms-tree-nested-dropdown": {
-        attributes: ["data", "selectedValue", "disabled", "required", "placeholder"],
+        attributes: ["data", "selectedvalue", "disabled", "required", "placeholder"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Nested dropdowns that allow selection at multiple levels of a hierarchy."
     },
     "ica-forms-tree-nested-accordions": {
-        attributes: ["data", "expandedSections", "multiExpand", "disabled"],
+        attributes: ["data", "expandedsections", "multiexpand", "disabled"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Nested accordions to organize content or categories into multiple layers, facilitating navigation in complex structures."
     },
     "ica-forms-tree-tag-cloud": {
-        attributes: ["tagsData", "selectedTags"],
+        attributes: ["tagsdata", "selectedtags"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Set of tags or keywords representing frequency or importance, allowing dynamic editing and organization."
     },
     "ica-forms-tree-mind-map": {
-        attributes: ["data", "selectedNode", "layout"],
+        attributes: ["data", "selectednode", "layout"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Mind map for organizing and visualizing ideas or concepts in a radial structure, facilitating editing and expansion of related concepts."
@@ -162,7 +162,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Button to submit the form. When clicked, it collects and sends the form data to the server or designated handler. Essential for finalizing user data entry."
     },
     "ica-forms-submit-cancel": {
-        attributes: ["name", "title", "icon", "text", "disabled", "form", "clicked-value", "clicked-action"],
+        attributes: ["name", "title", "icon", "text", "disabled", "form", "clickedvalue", "clickedaction"],
         allowedChildren: ["!*"],
         allowedParents: ["**ica-forms-content-form"],
         description: "Button to cancel the form operation, allowing the user to abort their action and typically return to the previous state or screen. Helps ensure safe navigation without data submission."
@@ -188,7 +188,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: ""
     },
     "ica-navigation-links-menus": {
-        attributes: ["items", "selectedItem", "openState", "disabled"],
+        attributes: ["items", "selecteditem", "openstate", "disabled"],
         allowedChildren: ["!*"],
         allowedParents: ["ica-navigation-content-nav"],
         description: "Menus that provide primary navigation through the application or to external sites. Support hierarchical structures to organize navigation options."
@@ -218,19 +218,19 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Anchors that allow internal navigation on a page, directing the user to specific sections without reloading the page."
     },
     "ica-navigation-content-tab": {
-        attributes: ["tabs", "selectedTab", "disabled"],
+        attributes: ["tabs", "selectedtab", "disabled"],
         allowedChildren: ["!*"],
         allowedParents: ["ica-navigation-content-nav"],
         description: "Tabs that organize related content into separate sections, allowing switching between them without reloading the page."
     },
     "ica-navigation-content-scenary": {
-        attributes: ["scenes", "selectedScene", "disabled"],
+        attributes: ["scenes", "selectedscene", "disabled"],
         allowedChildren: ["!*"],
         allowedParents: ["ica-navigation-content-nav"],
         description: "Components that guide the user through scenarios or sequential steps within the same page, ideal for tutorials or step-by-step configurations."
     },
     "ica-navigation-content-stepper": {
-        attributes: ["steps", "currentStep", "disabled"],
+        attributes: ["steps", "currentstep", "disabled"],
         allowedChildren: ["!*"],
         allowedParents: ["ica-navigation-content-nav"],
         description: "Step indicators (steppers) that show progress through a sequence of steps, useful for multi-step processes such as checkouts or long forms."
@@ -254,7 +254,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Popups that provide additional information, messages, or interactive content, appearing over the existing content without redirecting the user."
     },
     "ica-navigation-content-scrollspy": {
-        attributes: ["targets", "activeTarget", "offset"],
+        attributes: ["targets", "activetarget", "offset"],
         allowedChildren: ["!*"],
         allowedParents: ["ica-navigation-content-nav"],
         description: "A component that updates navigation links based on scrolling, indicating which section of the content is currently visible on the screen."
@@ -310,7 +310,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "To show user or character avatars."
     },
     "ica-apresentation-images-gallery": {
-        attributes: ["images", "selectedIndex", "thumbnails", "showNavigation"],
+        attributes: ["images", "selectedindex", "thumbnails", "shownavigation"],
         allowedChildren: ["!*"],
         allowedParents: [],
         description: "To display collections of images in gallery format."
@@ -328,7 +328,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "To display images or banners in a slider."
     },
     "ica-apresentation-images-maps": {
-        attributes: ["latitude", "longitude", "zoom", "markers", "mapType"],
+        attributes: ["latitude", "longitude", "zoom", "markers", "maptype"],
         allowedChildren: ["!*"],
         allowedParents: [],
         description: "To display static or interactive maps."
@@ -346,7 +346,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "To display videos in image format, such as GIFs or animated videos."
     },
     "ica-apresentation-video-video-playlist": {
-        attributes: ["videos", "selectedVideo", "autoplay", "controls", "loop"],
+        attributes: ["videos", "selectedvideo", "autoplay", "controls", "loop"],
         allowedChildren: ["!*"],
         allowedParents: [],
         description: "To list videos in a sequence or collection."
@@ -358,13 +358,13 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "To play audio files or music."
     },
     "ica-apresentation-sound-sound-effects": {
-        attributes: ["sounds", "selectedSound", "autoplay"],
+        attributes: ["sounds", "selectedsound", "autoplay"],
         allowedChildren: ["!*"],
         allowedParents: [],
         description: "To play sound effects on specific actions."
     },
     "ica-apresentation-sound-podcast-player": {
-        attributes: ["podcastEpisodes", "selectedEpisode", "autoplay", "controls", "loop", "preload"],
+        attributes: ["podcastepisodes", "selectedepisode", "autoplay", "controls", "loop", "preload"],
         allowedChildren: ["!*"],
         allowedParents: [],
         description: "To play podcast episodes."
@@ -388,7 +388,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Animations indicating content loading."
     },
     "ica-apresentation-animations-onclick": {
-        attributes: ["animationType", "duration", "trigger", "iterations"],
+        attributes: ["animationtype", "duration", "trigger", "iterations"],
         allowedChildren: ["!*"],
         allowedParents: [],
         description: "Animations triggered by clicks or user interactions."
@@ -412,7 +412,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "To embed social media posts directly on the page."
     },
     "ica-apresentation-embeds-social-media-feeds": {
-        attributes: ["url", "refreshInterval", "limit"],
+        attributes: ["url", "refreshinterval", "limit"],
         allowedChildren: ["!*"],
         allowedParents: [],
         description: "To display live social media feeds in the application."
@@ -430,7 +430,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Alerts are important notifications that require the user's attention, and can be used for critical errors, warnings, or confirmations."
     },
     "ica-apresentation-messages-snackbar": {
-        attributes: ["message", "actionText", "duration"],
+        attributes: ["message", "actiontext", "duration"],
         allowedChildren: ["!*"],
         allowedParents: [],
         description: "Snackbars provide brief messages with the option for user action, such as undoing an action or closing the message."
@@ -505,13 +505,13 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Insere divisores visuais que separam conteúdos sem modificar a estrutura lógica ou hierárquica da página, melhorando a clareza visual."
     },
     "ica-layout-group-table": {
-        attributes: ["data", "columns", "striped", "bordered"],
+        attributes: ["data", "columns", "striped", "bordered", "maxcolumn"],
         allowedChildren: [],
         allowedParents: ["ica-layout-flow-section"],
         description: "Displays data in tabular format, allowing easy analysis and comparison of information."
     },
     "ica-layout-group-cards": {
-        attributes: ["cardsData", "layout", "spacing"],
+        attributes: ["cardsdata", "layout", "spacing"],
         allowedChildren: [],
         allowedParents: ["ica-layout-flow-section"],
         description: "Highlights sets of information or individual items in card format, providing an accessible overview."
@@ -527,7 +527,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Component for viewing PDF documents within the application. Allows users to read and interact with PDF content directly in the interface, without the need for downloads or external applications."
     },
     "ica-blocks-viewer-spreadsheet-viewer": {
-        attributes: ["data", "activeSheet", "readonly"],
+        attributes: ["data", "activesheet", "readonly"],
         allowedChildren: [],
         allowedParents: [],
         description: "Spreadsheet viewer that supports formats such as Excel. Facilitates the visualization and manipulation of spreadsheet data within the application, allowing for direct analysis and reviews."
@@ -545,7 +545,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Calendar plugin that offers views and interactions with events and schedules. Integrates with external systems for event synchronization and management."
     },
     "ica-blocks-plugins-schedule": {
-        attributes: ["eventsData", "view", "selectedDate"],
+        attributes: ["eventsdata", "view", "selecteddate"],
         allowedChildren: [],
         allowedParents: [],
         description: "Component for planning and viewing personal or professional schedules. Allows users to organize and view appointments, tasks, and events in a clear and interactive layout."
@@ -557,7 +557,7 @@ export const icaDescriptions: IIcaDescriptions = {
         description: "Facilitates integration with external APIs to fetch or send data. Ideal for features such as viewing weather conditions, stock quotes, or social media updates directly in the application."
     },
     "ica-blocks-projects-pages": {
-        attributes: ["data", "selectedPage", "editable"],
+        attributes: ["data", "selectedpage", "editable"],
         allowedChildren: [],
         allowedParents: [],
         description: "Allows the embedding of entire pages or specific components within the current application. Useful for integrating additional functionality or information without the need for external navigation."
@@ -580,7 +580,7 @@ const attributeDefinitions = [
     { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean;", desc: "Indicates if the field receives automatic focus." },
     { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined;", desc: "Maximum number of characters allowed." },
     { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined;", desc: "Minimum number of characters required." },
-    { path: "autoCapitalize", lit: "@property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';", desc: "Controls automatic text capitalization." },
+    { path: "autocapitalize", lit: "@property({ type: String }) autocapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';", desc: "Controls automatic text capitalization." },
     { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on';", desc: "Defines whether autocorrect is enabled." },
     { path: "autocomplete", lit: "@property({ type: String }) autocomplete: string | undefined;", desc: "Suggests values based on previous inputs." },
     { path: "validationMessage", lit: "@property({ type: String}) validationMessage: string | undefined", desc: "Custom validation error message." },

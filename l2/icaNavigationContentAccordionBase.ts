@@ -6,6 +6,8 @@ export abstract class IcaNavigationContentAccordionBase extends StateLitElement 
 
     abstract text: string | undefined;
     abstract open: boolean;
+    abstract multiple : boolean | undefined;
+    abstract disabled: boolean | undefined;
 
 }
 
