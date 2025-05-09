@@ -103,8 +103,8 @@ export abstract class IcaLitElementBase extends StateLitElement implements tps.I
     render() {
 
         this.style.display = 'block';
-        if (!this.style.width) this.style.width = 'inherit';
-        if (!this.style.height) this.style.height = 'inherit';
+        //if (!this.style.width) this.style.width = 'inherit';
+        //if (!this.style.height) this.style.height = 'inherit';
 
         const attrs = this.getAttributes();
         let code = `
@@ -282,7 +282,14 @@ export abstract class IcaLitElementBase extends StateLitElement implements tps.I
     }
 
     private async setInitialConfigs() {
-        if (this.widget) {
+        if (
+            this.widget &&
+            window.mls &&
+            (
+                !(mls as any).modePreview ||
+                (mls as any).modePreview !== 'singlePage'
+            )
+        ) {
             const fileName = convertTagToFileName(this.widget);
             await import('./' + fileName);
         }
