@@ -1,12 +1,13 @@
 /// <mls shortName="servicePreviewView" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement } from 'lit';
+import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtml, getTokens, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { ServiceBase } from './_100554_serviceBase'
 import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
 import { StateLitElement } from './_100554_stateLitElement';
+import { PreviewModeSinglePage } from './_100554_previewModeSinglePage';
+import { PreviewModeMinimum } from './_100554_previewModeMinimum';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -98,7 +99,7 @@ export class ServicePreviewView extends StateLitElement {
     }
 
     renderError() {
-        return html`<h3 style="color:red">${this.error}</h3>`
+        return html`<div class="error">${unsafeHTML(this.error)}</div>`
     }
 
     renderPreview() {
@@ -291,7 +292,9 @@ export class ServicePreviewView extends StateLitElement {
                 || this.models.style?.storFile.hasError
                 || this.models.html?.storFile.hasError) {
 
-                this.error = this.msg.errorCompile;
+                const trace = this.models?.ts?.compilerResults?.errors.map((err) => err.messageText).join('\n - ')
+                this.error = this.msg.errorCompile + '\n' + `<div class="error-list"> - ${trace} </div>`;
+
                 this.showLoader(false);
                 this.renderError();
                 return;
@@ -403,10 +406,12 @@ export class ServicePreviewView extends StateLitElement {
             console.log('Errors in compile:', JSON.stringify(ret.errors));
         }
 
-        this.mountJSImporMap(ret, iframe);
-        this.mountJS(ret, iframe);
-        this.mountCSS(iframe);
-        this.mountTokens(ret.tokens || '');
+
+        switch ((mls as any).modePreview) {
+            case 'minimum': this.modeMinimum(ret, iframe); break;
+            case 'singlePage': this.modeSinglePage(ret, iframe); break;
+            default: this.modeMinimum(ret, iframe); break;
+        }
 
     }
 
@@ -419,209 +424,18 @@ export class ServicePreviewView extends StateLitElement {
 
     }
 
-    private mountJSImporMap(info: IJSONDependence, ifr: HTMLIFrameElement): void {
-
-        try {
-            if (info.importsMap.length <= 0 || !ifr.contentDocument) return;
-            const js = '{"imports": { ' + info.importsMap.join(',\n') + '} }';
-            const script = document.createElement('script');
-            script.type = 'importmap';
-            script.textContent = js;
-            ifr.contentDocument.head.appendChild(script);
-        } catch (e: any) {
-            console.info('Error mountJSImporMap: ' + e.message);
-            return;
-        }
-
+    private async modeSinglePage(json: IJSONDependence, iframe: HTMLIFrameElement) {
+        if (!this.file || !this.models) return;
+        const c = new PreviewModeSinglePage(json, iframe, this.level, this.isService, this.file);
+        await c.init();
     }
 
-    private mountJS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
 
-        function loadScripts(scripts: string[]) {
-            const loadScript = (src: string) => {
-                return new Promise((resolve, reject) => {
-                    const script = document.createElement('script');
-                    script.type = 'module';
-                    script.id = src.replace('/', '');
-                    script.src = src;
-                    script.onload = resolve;
-                    script.onerror = reject;
-                    ifr.contentDocument?.body.appendChild(script);
-                });
-            };
+    private async modeMinimum(json: IJSONDependence, iframe: HTMLIFrameElement) {
 
-            let nextScript = Promise.resolve();
-            for (const script of scripts) {
-                nextScript = nextScript.then(() => loadScript(script)) as Promise<void>;
-            }
-            return nextScript;
-        }
-
-        try {
-
-            if (info.importsJs.length <= 0 || !ifr.contentDocument) return;
-            const s = document.createElement('script') as HTMLScriptElement;
-            s.textContent = `
-				window['mls'] = window['mls']  ? window['mls']  : parent.mls ? parent.mls : top['mls'];
-				window['globalVariation'] = window['globalVariation']  ? window['globalVariation']  : parent.globalVariation ? parent.globalVariation : top['globalVariation'];
-				window['latest'] = window['latest']  ? window['latest']  : parent.latest ? parent.latest : top['latest'];
-				window['Quill'] = window['Quill']  ? window['Quill']  : parent.Quill ? parent.Quill : top['Quill'];
-				window['EasyMDE'] = window['EasyMDE']  ? window['EasyMDE']  : parent.EasyMDE ? parent.EasyMDE : top['EasyMDE'];
-				window['l2_html'] = window['l2_html']  ? window['l2_html']  : parent.l2_html ? parent.l2_html : top['l2_html'];
-                window['monaco'] = window['monaco']  ? window['monaco']  : parent.monaco ? parent.monaco : top['monaco'];
-				window['l2_fieldTypes'] = window['l2_fieldTypes']  ? window['l2_fieldTypes']  : parent.l2_fieldTypes ? parent.l2_fieldTypes : top['l2_fieldTypes'];window['litDisableBundleWarning'] = true; window['collabActualLevel'] = ${this.level};
-
-                window['previewL1'] = window['previewL1']  ? window['previewL1']  : parent.previewL1 ? parent.previewL1 : top['previewL1'];
-
-                window['preview'] = window['preview']  ? window['preview']  : parent.preview ? parent.preview : top['preview'];
-				`;
-            ifr.contentDocument?.body.appendChild(s);
-
-            loadScripts(info.importsJs)
-                .then(() => {
-                    this.simulateService(info, ifr)
-                })
-
-        } catch (e: any) {
-            console.info('Error mountJS: ' + e.message);
-        }
-
-    }
-
-    private async simulateService(info: IJSONDependence, ifr: HTMLIFrameElement) {
-
-        if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
-        if (this.isService) {
-            this.addFA(ifr);
-            this.addTooltip(ifr);
-            this.addStyleMls(ifr);
-            this.addNav3(ifr);
-        }
-    }
-
-    private addStyleMls(ifr: HTMLIFrameElement) {
-        const styleMls = document.querySelector('style#mls-style');
-        if (!styleMls || !ifr || !ifr.contentDocument || !ifr.contentWindow) return;
-        const newStyle = styleMls.cloneNode(true);
-        ifr.contentDocument.head.appendChild(newStyle);
-    }
-
-    private addTooltip(ifr: HTMLIFrameElement) {
-        if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
-        if (!ifr.contentWindow.customElements.get('collab-tooltip')) {
-            ifr.contentWindow.customElements.define('collab-tooltip', (window as any)['l4_html'].MlsTooltip);
-        }
-        ifr.contentWindow.customElements.whenDefined('collab-tooltip').then(() => {
-            if (!ifr.contentDocument) return;
-            const collaTbTooltip = document.createElement('collab-tooltip');
-            ifr.contentDocument.body.appendChild(collaTbTooltip);
-        });
-    }
-
-    private waitForComponents(context: Window, componentNames: string[]) {
-        const promises = componentNames.map(name =>
-            context.customElements.whenDefined(name)
-        );
-        return Promise.all(promises);
-    }
-
-    private addNav3(ifr: HTMLIFrameElement) {
-
-        const wcToAdd = [
-            { name: '_100529_collab_nav_3', tag: 'collab-nav-3' },
-            { name: '_100529_collabNav3Menu', tag: 'collab-nav-3-menu' },
-            { name: '_100529_collab_nav_3_tools_link', tag: 'collab-nav-3-menu-tools-link' },
-            { name: '_100529_collab_nav_3_tools_cycle', tag: 'collab-nav-3-menu-tools-cycle' },
-            { name: '_100529_collab_nav_3_tools_dropdown', tag: 'collab-nav-3-menu-tools-dropdown' },
-        ]
-
-        if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
-        wcToAdd.forEach((wc) => {
-            if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
-            if (!ifr.contentWindow.customElements.get(wc.tag)) ifr.contentWindow.customElements.define(wc.tag, (window as any)['l4_html'][wc.name]);
-        });
-
-        const allTags = wcToAdd.map((item) => item.tag);
-        this.waitForComponents(ifr.contentWindow, allTags).then(async () => {
-
-            if (!ifr.contentDocument || !this.file) return;
-
-            const dataService = `_${this.file?.project}_${this.file?.shortName}`
-            const tag = convertFileNameToTag(`_${this.file.project}_${this.file.shortName}`);
-            const old = ifr.contentDocument.querySelector(tag);
-            if (!old) return;
-            await import(`./_${this.file.project}_${this.file.shortName}`);
-
-            const instance = old.cloneNode() as ServiceBase;
-            const lvl = instance.getAttribute('level') || '2';
-            old?.remove();
-            const collabNav = document.createElement('collab-nav-3');
-            collabNav.setAttribute('toolbarposition', instance.position || 'right');
-            collabNav.setAttribute('data-service', dataService);
-
-            collabNav.setAttribute('level', lvl);
-            instance.setAttribute('level', lvl);
-
-            const collabNavService = document.createElement('collab-nav-3-service');
-            collabNavService.setAttribute('data-service', dataService);
-            collabNavService.className = 'active';
-
-            collabNav.style.position = 'relative';
-            collabNav.style.width = '100%';
-            collabNav.style.display = 'block';
-
-            (collabNavService as any).mlsWidget = instance;
-            const mlsnav3 = document.createElement('collab-nav-3-menu');
-            mlsnav3.setAttribute('is-mls2', 'true');
-            mlsnav3.setAttribute('toolbarposition', instance.position || 'right');
-
-            collabNav.appendChild(collabNavService);
-            collabNavService.appendChild(mlsnav3);
-
-            ifr.contentDocument.body.appendChild(collabNav);
-            mlsnav3.after(instance);
-
-        });
-
-    }
-
-    private addFA(ifr: HTMLIFrameElement) {
-        if (!ifr || !ifr.contentDocument || !ifr.contentWindow) return;
-        const styleFA = document.createElement('link');
-        styleFA.rel = 'stylesheet';
-        styleFA.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css';
-        styleFA.type = 'text/css';
-        ifr.contentDocument.head.appendChild(styleFA);
-    }
-
-    private removeOlderTokens(ifr: HTMLIFrameElement) {
-        const id = this.getIdTokens();
-        if (!ifr.contentDocument || !id) return;
-        const st = ifr.contentDocument.head.querySelectorAll(`#${id}`);
-        st.forEach((s) => s.remove());
-    }
-
-    private mountCSS(ifr: HTMLIFrameElement): void {
-        try {
-            if (!ifr.contentDocument) return;
-            const style = document.createElement('style');
-            ifr.contentDocument.body.className = 'scroll-custom';
-            ifr.contentDocument.body.style.width = '100%';
-
-            ifr.contentDocument.body.style.background = 'var(--bg-primary-color)';
-            ifr.contentDocument.body.style.color = 'var(--text-primary-color)';
-
-
-            ifr.contentDocument.body.appendChild(style);
-        } catch (e: any) {
-            console.info('Error mountCSS: ' + e.message);
-        }
-    }
-
-    private getIdTokens() {
-        if (!this.models || !this.models.ts) return 'ds_tokens';
-        const { project } = this.models.ts.storFile
-        return '_' + project + '_ds_tokens';
+        if (!this.file || !this.models) return;
+        const c = new PreviewModeMinimum(json, iframe, this.level, this.isService, this.file, this.models);
+        await c.init();
     }
 
     private mountTokens(tokens: string): void {
@@ -640,6 +454,21 @@ export class ServicePreviewView extends StateLitElement {
             console.info('Error mountTokens: ' + e.message);
         }
     }
+
+    private removeOlderTokens(ifr: HTMLIFrameElement) {
+        const id = this.getIdTokens();
+        if (!ifr.contentDocument || !id) return;
+        const st = ifr.contentDocument.head.querySelectorAll(`#${id}`);
+        st.forEach((s) => s.remove());
+    }
+
+    private getIdTokens() {
+        if (!this.models || !this.models.ts) return 'ds_tokens';
+        const { project } = this.models.ts.storFile
+        return '_' + project + '_ds_tokens';
+    }
+
+
     private changeWidthP(e: InputEvent): void {
         const el = e.target as HTMLInputElement;
         if (!el) return;

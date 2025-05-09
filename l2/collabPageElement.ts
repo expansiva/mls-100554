@@ -21,7 +21,7 @@ export abstract class CollabPageElement extends StateLitElement {
 
     @property() initPageComplete: boolean = false;
 
-    @property({ type: String, reflect: true }) level: string = mls.actualLevel.toString() || '7';
+    @property({ type: String, reflect: true }) level: string = window.mls && mls.actualLevel ? mls.actualLevel.toString() :  '7';
 
     public overlay: WCDOverlayMethods | undefined;
 
@@ -123,7 +123,12 @@ export abstract class CollabPageElement extends StateLitElement {
 
             if (this.hasImport.includes(imports)) return true;
             imports = convertTagToFileName(imports);
-            if (!imports.startsWith('./')) imports = './' + imports;
+            if (!imports.startsWith('./')) {
+
+                if (mls && (mls as any).modePreview && (mls as any).modePreview === 'singlePage') imports = '/' + imports;
+                else imports = './' + imports;
+                
+            }
             await import(imports);
             this.hasImport.push(imports);
             return true;

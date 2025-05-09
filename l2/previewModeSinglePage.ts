@@ -1,0 +1,187 @@
+/// <mls shortName="previewModeSinglePage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+import { IJSONDependence } from './_100554_libCompile';
+import { convertTagToFileName } from './_100554_utilsLit';
+import * as util from './_100554_previewModeUtil';
+
+export class PreviewModeSinglePage{
+
+    private level: string | undefined;
+    private json: IJSONDependence | undefined;
+    private ifr: HTMLIFrameElement | undefined;
+    private isService: boolean = false;
+    private file: mls.stor.IFileInfo | undefined = undefined;
+    private esbuild: any;
+
+    constructor(_j: IJSONDependence, _i: HTMLIFrameElement, _l:string, _s:boolean, _f: mls.stor.IFileInfo) {
+        this.json = _j;
+        this.ifr = _i;
+        this.level = _l;
+        this.isService = _s;
+        this.file = _f;
+    }
+
+    public async init() {
+        if (!this.json || !this.ifr) return;
+        await this.loadEsbuild();
+        await this.configIframe();
+    }
+
+    private async configIframe() {
+
+        if (!this.json || !this.ifr) return;
+
+        const myMap = this.parseImportsMap(this.json.importsMap);
+        const find = this.findWidgets(this.ifr.contentDocument?.body)
+        let valids = [...Object.keys(myMap), ...this.json.importsJs, ...find];
+        valids = [...new Set(valids)];
+
+        const virtualFsPlugin = {
+            name: 'virtual-fs',
+            setup(build: any) {
+
+                build.onResolve({ filter: /.*/ }, (args: any) => {
+
+                    if (valids.includes(args.path)) {
+                        return {
+                            path: args.path,
+                            namespace: 'virtual',
+                        };
+                    }
+
+                    if (args.path.startsWith("./") &&
+                        !args.importer.startsWith("https://")) {
+                        return {
+                            path: args.path.replace('./', '/'),
+                            namespace: 'virtual',
+                        };
+                    }
+
+                    if ((
+                        args.path.startsWith("./") ||
+                        args.path.startsWith("../") ||
+                        args.path.startsWith("/")) &&
+                        myMap[args.importer]) {
+
+                        const url = new URL(args.path, myMap[args.importer]);
+                        return { path: url.href, namespace: 'virtual' };
+
+                    }
+
+                    if ((
+                        args.path.startsWith("./") ||
+                        args.path.startsWith("../") ||
+                        args.path.startsWith("/")) &&
+                        args.importer.startsWith("https://")) {
+
+                        const url = new URL(args.path, args.importer);
+                        return { path: url.href, namespace: 'virtual' };
+
+                    }
+
+                    if (args.path.startsWith("http")) {
+                        return { path: args.path, namespace: 'virtual' };
+                    }
+
+
+                    return null;
+                });
+
+                build.onLoad({ filter: /.*/, namespace: 'virtual' }, async (args: any) => {
+                    try {
+
+                        let path = myMap[args.path] ? myMap[args.path] : args.path;
+
+                        const res = await fetch(path);
+                        if (!res.ok) throw new Error(`Error get ${args.path}`);
+
+                        const text = await res.text();
+                        return { contents: text, loader: 'js' };
+
+                    } catch (e) {
+                        console.info('erro:' + args.path);
+                        return { contents: '', loader: 'js' }
+                    }
+
+                });
+            },
+        };
+
+        let allImports = [...this.json.importsJs, ...find];
+        allImports = [...new Set(allImports)];
+
+        const virtualEntryPath = "virtual-entry.js";
+        const virtualEntryContent = allImports.map(path => `import "${path}";`).join("\n");
+
+        const result = await this.esbuild.build({
+            stdin: {
+                contents: virtualEntryContent,
+                resolveDir: "/",
+                sourcefile: virtualEntryPath,
+                loader: "js"
+            },
+            bundle: true,
+            minify: true,
+            format: "esm",
+            write: false,
+            plugins: [virtualFsPlugin]
+        });
+
+        util.mountJSImporMap(this.json, this.ifr);
+        util.addJsReference(this.ifr, this.level || '2');
+        const s = document.createElement('script') as HTMLScriptElement;
+        s.textContent = result.outputFiles[0].text;
+        this.ifr.contentDocument?.body.appendChild(s);
+        if(this.isService && this.file) util.simulateService(this.json, this.ifr, this.file)
+        
+    }
+
+    private parseImportsMap(importsArray: string[]) {
+        return Object.fromEntries(
+            importsArray.map(str => {
+                const match = str.match(/^"(.+?)":\s*"(.+?)"$/);
+                if (!match) throw new Error("Formato inválido: " + str);
+                const [, key, value] = match;
+                return [key, value];
+            })
+        );
+    }
+
+    private findWidgets(rootElement: HTMLElement | undefined) {
+        if (!rootElement) return [];
+        const els = rootElement.querySelectorAll('[widget]');
+        const array = Array.from(els)
+            .map((el) => {
+
+                if (!el.tagName.toLocaleLowerCase().startsWith('ica-'))
+                    return '';
+
+                return '/' + convertTagToFileName(el.getAttribute('widget') || '');    
+
+            })
+            .filter(Boolean);
+        const ret = [...new Set(array)]
+        return ret;
+
+    }
+
+    private async loadEsbuild() {
+
+        if ((mls as any).esbuild) this.esbuild = (mls as any).esbuild;
+        else await this.initializeEsBuild();
+    }
+
+    private async initializeEsBuild() {
+
+        const url = 'https://unpkg.com/esbuild-wasm@0.14.54/esm/browser.min.js';
+        if (!this.esbuild) {
+            this.esbuild = await import(url);
+            await this.esbuild.initialize({
+                wasmURL: "https://unpkg.com/esbuild-wasm@0.14.54/esbuild.wasm"
+            });
+            (mls as any).esbuild = this.esbuild;
+        }
+
+    }
+
+}
