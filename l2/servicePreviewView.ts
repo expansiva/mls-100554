@@ -406,11 +406,12 @@ export class ServicePreviewView extends StateLitElement {
             console.log('Errors in compile:', JSON.stringify(ret.errors));
         }
 
+        if (!(mls as any).modePreview) (mls as any).modePreview = 'singlePage';
 
         switch ((mls as any).modePreview) {
             case 'minimum': this.modeMinimum(ret, iframe); break;
             case 'singlePage': this.modeSinglePage(ret, iframe); break;
-            default: this.modeSinglePage(ret, iframe); break;
+            default: this.modeMinimum(ret, iframe); break;
         }
 
     }
