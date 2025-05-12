@@ -410,7 +410,7 @@ export class ServicePreviewView extends StateLitElement {
         switch ((mls as any).modePreview) {
             case 'minimum': this.modeMinimum(ret, iframe); break;
             case 'singlePage': this.modeSinglePage(ret, iframe); break;
-            default: this.modeMinimum(ret, iframe); break;
+            default: this.modeSinglePage(ret, iframe); break;
         }
 
     }
