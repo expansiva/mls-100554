@@ -4,7 +4,7 @@ import { IJSONDependence } from './_100554_libCompile';
 import { convertTagToFileName } from './_100554_utilsLit';
 import * as util from './_100554_previewModeUtil';
 
-export class PreviewModeSinglePage{
+export class PreviewModeSinglePage {
 
     private level: string | undefined;
     private json: IJSONDependence | undefined;
@@ -13,7 +13,7 @@ export class PreviewModeSinglePage{
     private file: mls.stor.IFileInfo | undefined = undefined;
     private esbuild: any;
 
-    constructor(_j: IJSONDependence, _i: HTMLIFrameElement, _l:string, _s:boolean, _f: mls.stor.IFileInfo) {
+    constructor(_j: IJSONDependence, _i: HTMLIFrameElement, _l: string, _s: boolean, _f: mls.stor.IFileInfo) {
         this.json = _j;
         this.ifr = _i;
         this.level = _l;
@@ -29,7 +29,7 @@ export class PreviewModeSinglePage{
 
     private async configIframe() {
 
-        if (!this.json || !this.ifr) return;
+        if (!this.json || !this.ifr || !this.esbuild) return;
 
         const myMap = this.parseImportsMap(this.json.importsMap);
         const find = this.findWidgets(this.ifr.contentDocument?.body)
@@ -132,8 +132,8 @@ export class PreviewModeSinglePage{
         const s = document.createElement('script') as HTMLScriptElement;
         s.textContent = result.outputFiles[0].text;
         this.ifr.contentDocument?.body.appendChild(s);
-        if(this.isService && this.file) util.simulateService(this.json, this.ifr, this.file)
-        
+        if (this.isService && this.file) util.simulateService(this.json, this.ifr, this.file)
+
     }
 
     private parseImportsMap(importsArray: string[]) {
@@ -156,7 +156,7 @@ export class PreviewModeSinglePage{
                 if (!el.tagName.toLocaleLowerCase().startsWith('ica-'))
                     return '';
 
-                return '/' + convertTagToFileName(el.getAttribute('widget') || '');    
+                return '/' + convertTagToFileName(el.getAttribute('widget') || '');
 
             })
             .filter(Boolean);
@@ -168,11 +168,12 @@ export class PreviewModeSinglePage{
     private async loadEsbuild() {
 
         if ((mls as any).esbuild) this.esbuild = (mls as any).esbuild;
-        else await this.initializeEsBuild();
+        else if(!(mls as any).esbuildInLoad) await this.initializeEsBuild();
     }
 
     private async initializeEsBuild() {
 
+        (mls as any).esbuildInLoad = true;
         const url = 'https://unpkg.com/esbuild-wasm@0.14.54/esm/browser.min.js';
         if (!this.esbuild) {
             this.esbuild = await import(url);
@@ -180,6 +181,8 @@ export class PreviewModeSinglePage{
                 wasmURL: "https://unpkg.com/esbuild-wasm@0.14.54/esbuild.wasm"
             });
             (mls as any).esbuild = this.esbuild;
+            (mls as any).esbuildInLoad = false
+
         }
 
     }
