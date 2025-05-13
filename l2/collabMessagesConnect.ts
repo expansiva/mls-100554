@@ -99,9 +99,9 @@ export class CollabMessagesConnect100554 extends StateLitElement {
 
         window.addEventListener('task-change', async (e) => {
             const customEvent = e as CustomEvent;
-            await this.updateMessageAI(customEvent.detail, false);
-            if (customEvent.detail.task) {
-                await addOrUpdateTask(customEvent.detail.task);
+            await this.updateMessageAI(customEvent.detail.context, false, customEvent.detail.oldContextCreateAt);
+            if (customEvent.detail.context.task) {
+                await addOrUpdateTask(customEvent.detail.context.task);
             }
         });
 
@@ -221,6 +221,7 @@ export class CollabMessagesConnect100554 extends StateLitElement {
                                 <div class="message-card ${cls} ${isSame ? 'same' : ''}">
                                     ${!isSame ? html`<div class="message-title">@${userName}</div>` : ``}
                                     ${this.renderMessageByLanguage(message)}
+                                    ${message.isLoading ? html`<span class="loader"></span>` : ''}
                                     <div class="message-footer">${dateFormated?.time}</div>
                                     ${message.taskId
                         ? html`
@@ -497,9 +498,6 @@ export class CollabMessagesConnect100554 extends StateLitElement {
 
     }
 
-
-
-
     private onTitleClick() {
         if (this.activeScenerie === 'task') {
             this.activeScenerie = 'details';
@@ -549,9 +547,9 @@ export class CollabMessagesConnect100554 extends StateLitElement {
             userId: this.userId
         };
 
+        const message: mls.msg.Message = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
         const response = await mls.api.msgAddMessage(params);
-        const { content, createAt, orderAt, senderId, threadId } = response.message;
-        this.updateMessage(false, content, createAt, orderAt, senderId, threadId);
+        this.updateMessage2(false, message, response.message);
 
     }
 
@@ -559,18 +557,23 @@ export class CollabMessagesConnect100554 extends StateLitElement {
         if (!this.userId || !this.actualThread) return;
         const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, prompt)
         const agent = createAgent();
+
+        const message: mls.msg.Message = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
+        context.message = message;
         await agent.beforePrompt(context);
+
     }
 
-    private async updateMessageAI(context: mls.msg.ExecutionContext, updateThreadDB: boolean) {
+    private async updateMessageAI(context: mls.msg.ExecutionContext, updateThreadDB: boolean, oldContextCreateAt?: string) {
 
         if (!context.message && !context.task) return;
         const { content, createAt, orderAt, senderId, threadId, taskId } = context.message;
+        const createAt2 = oldContextCreateAt ? oldContextCreateAt : createAt;
 
         let messageAdded = this.actualMessages.find((item) =>
             item.content === content &&
             item.senderId === senderId &&
-            item.createAt === createAt &&
+            item.createAt === createAt2 &&
             item.threadId === threadId
         )
 
@@ -592,11 +595,6 @@ export class CollabMessagesConnect100554 extends StateLitElement {
             this.actualMessages.push({ context, lastChanged: new Date().getTime(), ...newMessage });
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             await addMessage(newMessage);
-            if (this.collabMessagesPrompt) {
-                this.collabMessagesPrompt.text = '';
-                this.collabMessagesPrompt.isSending = false;
-
-            }
             this.requestUpdate();
 
         } else {
@@ -606,10 +604,13 @@ export class CollabMessagesConnect100554 extends StateLitElement {
             messageAdded.threadId = threadId;
             messageAdded.orderAt = orderAt;
             messageAdded.context = context;
+            messageAdded.isLoading = false;
             messageAdded.lastChanged = new Date().getTime();
+            if (taskId) messageAdded.taskId = taskId;
 
             const cloned = structuredClone(messageAdded);
             delete cloned.context;
+            delete cloned.isLoading;
             delete cloned.lastChanged;
 
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
@@ -619,23 +620,52 @@ export class CollabMessagesConnect100554 extends StateLitElement {
 
     }
 
-    private async updateMessage(updateThreadDB: boolean, content: string, createAt: string, orderAt: string, senderId: string, threadId: string, taskId?: string) {
 
-        const newMessage: mls.msg.Message = {
+    private createTempMessage(content: string, senderId: string, threadId: string, taskId?: string) {
+
+        const now = new Date();
+
+        const formattedDate = now.getFullYear().toString()
+            + String(now.getMonth() + 1).padStart(2, '0')
+            + String(now.getDate()).padStart(2, '0')
+            + String(now.getHours() + 3).padStart(2, '0')
+            + String(now.getMinutes()).padStart(2, '0')
+            + String(now.getSeconds()).padStart(2, '0')
+            + "." + Math.floor(1000 + Math.random() * 9000);
+
+        const newMessage: IMessage = {
             content,
-            createAt,
-            orderAt,
+            createAt: formattedDate,
+            orderAt: formattedDate,
             senderId,
             threadId,
-        }
-
-        if (updateThreadDB && this.actualThread) {
-            const thread = await updateThread(threadId, this.actualThread.thread, content, createAt, 0);
-            if (this.actualThread) this.actualThread.thread = thread;
+            isLoading: true
         }
 
         if (taskId) newMessage.taskId = taskId;
         this.actualMessages.push(newMessage);
+        this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+        this.requestUpdate();
+        return newMessage;
+
+    }
+
+    private async updateMessage2(updateThreadDB: boolean, oldMessage: IMessage, newMessage: mls.msg.Message) {
+
+        if (updateThreadDB && this.actualThread) {
+            const thread = await updateThread(newMessage.threadId, this.actualThread.thread, newMessage.content, newMessage.createAt, 0);
+            if (this.actualThread) this.actualThread.thread = thread;
+        }
+
+        this.actualMessages = this.actualMessages.map(item =>
+            item.content === oldMessage.content &&
+                item.senderId === oldMessage.senderId &&
+                item.createAt === oldMessage.createAt &&
+                item.threadId === oldMessage.threadId
+                ? { ...newMessage, isSame: oldMessage.isSame }
+                : item
+        );
+
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         addMessage(newMessage);
         this.requestUpdate();
@@ -709,6 +739,7 @@ interface IMessage extends mls.msg.Message {
     context?: mls.msg.ExecutionContext,
     lastChanged?: number,
     isSame?: boolean,
+    isLoading?: boolean,
 }
 
 type IMessageGrouped = { [key: string]: IMessage[] }

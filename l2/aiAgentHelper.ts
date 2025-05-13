@@ -259,9 +259,9 @@ export function getUserIdLocalStorage(): string | null {
   return localStorage.getItem(USER_ID_KEY);
 }
 
-export function notifyTaskChange(context: mls.msg.ExecutionContext): void {
+export function notifyTaskChange(context: mls.msg.ExecutionContext, oldContextCreateAt?: string): void {
   const event = new CustomEvent('task-change', {
-    detail: context,
+    detail: { context, oldContextCreateAt },
     bubbles: true,
     composed: true
   });

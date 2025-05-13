@@ -9,15 +9,37 @@ import './_100554_collabMessagesAvatar';
 @customElement('collab-messages-prompt-100554')
 export class CollabMessagesPrompt100554 extends StateLitElement {
 
-    @property() isSending: boolean = false;
+    // @property() isSending: boolean = false;
     @property({ type: Function }) onSend: Function | undefined;
     @query('textarea') textArea: HTMLTextAreaElement | undefined;
+
     @state() text: string = '';
     @state() mentionActive = false;
     @state() mentionQuery = '';
     @state() mentionSuggestions: mls.msg.User[] = [];
     @state() mentionIndex = 0;
-    @property() allUsers:mls.msg.User[] = [];
+    @property() allUsers: mls.msg.User[] = [];
+
+    firstUpdated(prop: any) {
+        super.firstUpdated(prop);
+        this.adjustTextAreaHeight();
+    }
+
+    private adjustTextAreaHeight() {
+        const maxHeight = 200;
+        const minHeight = 40;
+
+        if (this.textArea) {
+            const content = this.text
+
+            if (content === '') {
+                this.textArea.style.height = `${minHeight}px`;
+            } else {
+                this.textArea.style.height = 'auto';
+                this.textArea.style.height = Math.min(this.textArea.scrollHeight, maxHeight) + 'px';
+            }
+        }
+    }
 
     render() {
         return html`
@@ -28,14 +50,12 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                     @input=${this.handleInput}
                     @keydown=${this.handleKeyDown}
                     id="prompt_input"
-                    ?readonly=${this.isSending}
                     placeholder="Digite aqui... (@ para menções)">
                 </textarea>
                 <button 
                     @click=${this.handleSend} 
-                    ?disabled=${this.isSending}
                     >
-                    ${this.isSending ? html`<span class="loader"></span>` : collab_arrow_up_long}
+                    ${collab_arrow_up_long}
                 </button>
             ${this.mentionActive && this.mentionSuggestions.length > 0 ? html`
             <ul class="mention-suggestions">
@@ -60,6 +80,8 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         const target = e.target as HTMLTextAreaElement;
         const value = target.value;
         this.text = value;
+
+        this.adjustTextAreaHeight();
 
         const cursorPos = target.selectionStart;
         const beforeCursor = value.slice(0, cursorPos);
@@ -87,7 +109,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     }
 
     private handleKeyDown(e: KeyboardEvent) {
-        if (e.key === "Enter" && !e.shiftKey && !this.isSending) {
+        if (e.key === "Enter" && e.ctrlKey && !e.shiftKey) {
             e.preventDefault();
             this.handleSend();
         }
@@ -135,8 +157,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
 
     async handleSend() {
 
-        if (this.isSending || !this.text) return;
-        this.isSending = true;
+        if (!this.text) return;
         let finalText = this.text.trim();
         let isSpecialMention = false;
 
@@ -145,15 +166,12 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         }
 
         if (this.onSend && typeof this.onSend === 'function') {
-            try {
-                await this.onSend(finalText.trim(), { isSpecialMention });
-            } catch (err) {
-                this.isSending = false;
-            }
+            this.onSend(finalText.trim(), { isSpecialMention });
         }
 
         this.text = '';
-        this.isSending = false;
+        this.adjustTextAreaHeight();
+
 
     }
 
