@@ -126,7 +126,9 @@ export abstract class ServiceBase extends StateLitElement {
         if (name === 'msize') {
             const [width, height, top, left] = this.msize.split(',');
             if (height) this.style.height = height + 'px';
+            this.style.overflow = 'auto';
         }
+
         super.attributeChangedCallback(name, oldVal, newVal);
 
     }
