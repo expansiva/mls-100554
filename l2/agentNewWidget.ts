@@ -2,6 +2,7 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getTokens } from './_100554_libCompile';
+import { forceServiceInstance } from './_100554_libCommom';
 import { createNewFile } from "./_100554_pluginNewFileBase";
 import { preferModelType } from './_100554_aiPrompts';
 
@@ -79,6 +80,8 @@ async function addFile(context: mls.msg.ExecutionContext) {
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in create files');
 
     if (!step.content || !step.content.html || !step.content.ts || !step.content.less) throw new Error('Not found "html" or "ts" or "less" in addFile files');
+
+    await forceServiceInstance(2, '_100554_serviceSource')
 
     const pageName = step.content.shortName;
     const fileHTML = step.content.html;
@@ -336,7 +339,7 @@ async function systemDefinitionsBaseInstruction(json: any[]): Promise<mls.msg.IA
     if (!step) throw new Error("[systemDefinitionsBaseInstruction]Not found section : parentClass")
     if (!step.widgetName) throw new Error("[systemDefinitionsBaseInstruction]Not found widgetName in parentClass");
 
-    const shortName = step.widgetName;
+    const shortName = firstLowercaseLetter(step.widgetName);
 
     const key = mls.stor.getKeyToFiles(project, 2, shortName, "", ".ts");
     if (!mls.stor.files[key]) throw new Error("[systemDefinitionsBaseInstruction]Not found class base:" + project + "_" + shortName);
@@ -348,6 +351,21 @@ async function systemDefinitionsBaseInstruction(json: any[]): Promise<mls.msg.IA
         type: 'system',
         content: `## Definições da Classe Base \n\n ${contet}`
     }
+}
+
+function firstLowercaseLetter(str: string): string {
+
+  if (str.length === 0) return str;
+
+  const first = str[0];
+  const rest = str.slice(1);
+
+  if (first === first.toLowerCase()) {
+    return str;
+  }
+
+    return first.toLowerCase() + rest;
+  
 }
 
 //Tem q ser dinamico
