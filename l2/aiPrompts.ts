@@ -65,6 +65,7 @@ export const preferModelType = (modelType: mls.msg.ModelType) => `<!-- modelType
 
 function getAgentsList(): string {
     const listAgents = [
+        { agent: 'agentAnalyzeNewModule1', description: 'planejamento para a criação de de novos projetos, sites' },
         { agent: 'agentPlannerNewPage', description: 'planejamento para a criação de novas páginas no sistema, será pedido mais informações ao usuário se necessário.' },
         { agent: 'agentPlannerNewWidget', description: 'criação de novos componentes UI, web components, widgets, estes widgets podem futuramente serem incluidos em uma página html.' },
         { agent: 'agentPlannerNewAPI', description: 'criação de endpoints ou APIs, será pedido mais informações ao usuário se necessário.' },
@@ -111,7 +112,7 @@ export async function getListFilesStart(start: 'widget' | 'tool' | 'agent'): Pro
 
             if (start === 'widget') {
                 ret.push(file.shortName);
-                
+
             } else {
 
                 const mdl = await import(path);
