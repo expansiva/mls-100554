@@ -12,7 +12,8 @@ import {
     getStepById,
     getUserIdLocalStorage,
     notifyTaskChange,
-    dispatchDetailsTaskClose
+    dispatchDetailsTaskClose,
+    updateTaskTitle
 } from "./_100554_aiAgentHelper";
 
 import { getTask, getMessage } from "./_100554_msgDBController";
@@ -91,6 +92,8 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
     }
     catch (error: any) {
         if (context && context.task && stepFather) {
+            const msg = 'Error: ' + error.message || 'startNewInteractionInAiTask ';
+            context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
             setFailedStatus(context, stepFather);
         }
         console.error(`[startNewInteractionInAiTask] ${error.message || error}`);
@@ -123,6 +126,8 @@ export async function addNewStep(context: mls.msg.ExecutionContext, parentStep: 
 
     } catch (error: any) {
         if (context && context.task && parentStep) {
+            const msg = 'Error: ' + error.message || 'addNewStep ';
+            context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
             setFailedStatus(context, parentStep);
         }
         console.error(`[startNewInteractionInAiTask] ${error.message || error}`);
@@ -267,6 +272,8 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
         await agent.beforePrompt(context);
     } catch (error: any) {
 
+        const msg = 'Error: ' + error.message || 'beforePrompt '+step.agentName;
+        context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
         setFailedStatus(context, step.stepId);
         console.error(`[executeNextAgent] ${error.message || error}`);
     }
