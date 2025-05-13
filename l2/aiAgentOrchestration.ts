@@ -39,6 +39,7 @@ export async function startNewAiTask(
             inputAI,
         };
 
+        const oldContextCreateAt = context.message.createAt;
         const value = await mls.api.msgAddMessageAI(args);
         if (!value) throw new Error("Error on return addMessageAI, no return");
         if (value.statusCode !== 200) throw new Error("Error on addMessageAI: " + (value.msg || ''));
@@ -46,7 +47,7 @@ export async function startNewAiTask(
         const ret = value as mls.msg.ResponseAddMessageAI;
         context.task = ret.task;
         context.message = ret.message;
-        notifyTaskChange(context);
+        notifyTaskChange(context, oldContextCreateAt);
 
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
         await afterPrompt(context);
