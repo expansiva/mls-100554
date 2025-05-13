@@ -170,7 +170,6 @@ export class WidgetAiInteraction100554 extends StateLitElement {
                     </details>
                 `
             case 'clarification':
-                console.info(payload.nextSteps)
                 return html`
                     <details ?open=${isDirect} >
                         <summary>${payload.type}</summary>
