@@ -16,7 +16,12 @@ const message_pt = {
     errorCompile: 'Erro ao compilar typescript',
     configure: 'Configure seu HTML pela opção do editor!',
     width: 'Largura',
-    height: 'Altura'
+    height: 'Altura',
+    msgSecurity:`<div>
+  <h2>🛡️ Modo de Segurança</h2>
+  <p>Atualmente, você está em <strong>modo de segurança</strong>. Isso significa que o seu código não foi carregado por precaução.</p>
+  <p>Assim que você fizer sua primeira edição, o sistema sairá automaticamente desse modo e o código será carregado normalmente.</p>
+</div>`
 }
 
 const message_en = {
@@ -26,6 +31,11 @@ const message_en = {
     configure: 'Configure your html by editor option!',
     width: 'Width',
     height: 'Height',
+    msgSecurity:`<div>
+<h2>🛡️ Safe Mode</h2>
+<p>You are currently in <strong>safe mode</strong>. This means that your code has not been loaded as a precaution.</p>
+<p>As soon as you make your first edit, the system will automatically exit this mode and the code will load normally.</p>
+</div>`
 }
 
 type MessageType = typeof message_en;
@@ -275,6 +285,7 @@ export class ServicePreviewView extends StateLitElement {
         }
         this.init(iframe);
         window.preview.iframe = iframe;
+
         const collabConsole = this.parentElement?.querySelector('collab-console-100554') as HTMLElement;
         (collabConsole as any).scope = iframe.contentWindow;
 
@@ -297,6 +308,26 @@ export class ServicePreviewView extends StateLitElement {
 
                 this.showLoader(false);
                 this.renderError();
+                return;
+            }
+
+            /*let vTesting = this.getTesting();
+            if (this.file && vTesting.includes(this.file.shortName) && (window as any).lastTesting !== this.file.shortName) {
+                (iframe as any).contentDocument.body.innerHTML = `Error: the code might be blocked. Try again.`;
+                this.showLoader(false);
+                iframe.style.display = '';
+                vTesting = this.removerTesting(vTesting, this.file.shortName);
+                this.setTesting(vTesting);
+                (window as any).lastTesting = this.file.shortName
+                return;
+            }*/
+
+            if ((window as any).securityMode) {
+
+                (iframe as any).contentDocument.body.innerHTML = this.msg.msgSecurity;
+                iframe.style.display = '';
+                (window as any).securityMode = false;
+                this.showLoader(false);
                 return;
             }
 
@@ -326,6 +357,12 @@ export class ServicePreviewView extends StateLitElement {
                 bubbles: true,
                 composed: true,
             }));
+
+            /*if (this.file && (window as any).lastTesting !== this.file.shortName) {
+                (window as any).lastTesting = this.file.shortName;
+                this.fireTesting();
+            }*/
+
 
         } catch (e: any) {
             this.error = e.message;
@@ -553,6 +590,42 @@ export class ServicePreviewView extends StateLitElement {
             }
         }
 
+    }
+
+
+    private fireTesting() {
+        if (!this.file) return;
+
+        let info = this.getTesting()
+        const s = this.file.shortName;
+        info.push(s);
+        info = [... new Set(info)];
+        this.setTesting(info)
+        console.info('salvou' + JSON.stringify(info));
+
+        setTimeout(() => {
+
+            info = this.getTesting();
+            info = this.removerTesting(info, s);
+            this.setTesting(info)
+            console.info('removeu' + JSON.stringify(info));
+
+        }, 20000)
+    }
+
+    private getTesting(): string[] {
+        const sT = localStorage.getItem('iframeTesting') || '[]';
+        let info = JSON.parse(sT);
+        return info
+    }
+
+    private setTesting(info: string[]) {
+        info = [... new Set(info)];
+        localStorage.setItem('iframeTesting', JSON.stringify(info));
+    }
+
+    private removerTesting(array: string[], item: string): string[] {
+        return array.filter(str => str !== item);
     }
 
 }
