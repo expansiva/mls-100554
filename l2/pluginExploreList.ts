@@ -21,7 +21,8 @@ const message_pt = {
     undo: "desfazer",
     clone: "clonar",
     rename: "renomear",
-    delete: "excluir"
+    delete: "excluir",
+    security: 'segurança',
 }
 
 const message_en = {
@@ -38,7 +39,8 @@ const message_en = {
     undo: 'undo',
     clone: 'clone',
     rename: 'rename',
-    delete: 'delete',
+    delete: "delete",
+    security: 'security',
 }
 
 type MessageType = typeof message_en;
@@ -382,6 +384,7 @@ export class PluginExploreList extends PluginBaseModule {
                         <span class="mls-gpbtnslider-item fa fa-clone" title="${this.msg.clone}" @click="${this.clickOptClone}"></span>
                         <span class="mls-gpbtnslider-item fa fa-file-pen" title="${this.msg.rename}" @click="${this.clickOptRename}"></span>
                         <span class="mls-gpbtnslider-item fa fa-trash" title="${this.msg.delete}" @click="${this.clickOptDel}"></span>
+                        <span class="mls-gpbtnslider-item fa-solid fa-shield-halved" title="${this.msg.security}" @click="${this.clickOptOpenSecurity}"></span> 
                     </div>
                     <span class="${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
                     <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>
@@ -426,6 +429,23 @@ export class PluginExploreList extends PluginBaseModule {
         if (!mfile) return;
         this.setHistory(mfile);
         if (mls.actualLevel != 1) selectLevel(2);
+        this.fireEvents('open', mfile, {});
+
+    }
+
+    private async clickOptOpenSecurity(e: MouseEvent) {
+
+        e.stopPropagation();
+        const target = e.target as HTMLElement;
+        const li = target.closest('li');
+        this.lis?.forEach((l) => l.classList.remove('selected'));
+        if (li) li.classList.add('selected');
+
+        const mfile = this.getMyFileInElement(e.target as HTMLElement);
+        if (!mfile) return;
+        this.setHistory(mfile);
+        if (mls.actualLevel != 1) selectLevel(2);
+        (window as any).securityMode = true;
         this.fireEvents('open', mfile, {});
 
     }
