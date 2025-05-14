@@ -171,6 +171,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         <div class="languages">
             <h3>${this.msg.languages}</h3>
             <collab-input-tag-100554 
+                pattern="^[a-z]{2}$|^[a-z]{2}-[A-Z]{2}$"
                 .value=${this.editedThreadDetails?.thread.languages.join(',')}
                 .onValueChanged=${(value: string) => { if (this.editedThreadDetails) this.editedThreadDetails.thread.languages = value.split(',') }}
                 id="languageInput"

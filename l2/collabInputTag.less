@@ -2,9 +2,35 @@
 
 collab-input-tag-100554 {
 
-    
+
     font-family: @font-family-primary;
-    
+
+    .invalid {
+        border: 1px solid @error-color !important;
+        animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+        0% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-4px);
+        }
+
+        50% {
+            transform: translateX(4px);
+        }
+
+        75% {
+            transform: translateX(-4px);
+        }
+
+        100% {
+            transform: translateX(0);
+        }
+    }
 
     .collab-tag-input {
         max-width: 100%;
@@ -16,6 +42,8 @@ collab-input-tag-100554 {
         border-radius: 2px;
         min-height: 33px;
         padding: 0 5px;
+
+
 
         input {
             flex-grow: 1;
