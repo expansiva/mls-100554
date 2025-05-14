@@ -17,6 +17,9 @@ export class CollabInputTag extends StateLitElement {
     @query('#tag-input')
     input: HTMLInputElement | undefined
 
+    @property({ type: String })
+    pattern: string | null = null;
+
     allowDelete = false;
 
     get value() {
@@ -37,24 +40,27 @@ export class CollabInputTag extends StateLitElement {
     public deleteTag(index: number) { return this._deleteTag(index); }
     public empty() { return this._empty(); }
 
-    private _addTag(tag: string) {
 
+    private _addTag(tag: string) {
         if (!tag) return;
-        tag = tag.toLowerCase();
+
+        if (!this.isValidTag(tag)) {
+            this.input?.parentElement?.classList.add('invalid');
+            setTimeout(() => this.input?.parentElement?.classList.remove('invalid'), 500);
+            return;
+        }
 
         if (this.tags.indexOf(tag) === -1) {
             this.tags.push(tag);
             if (this.input) this.input.value = '';
             this.requestUpdate();
         } else {
-            const element = this.querySelector('[data-index="' + this.tags.indexOf(tag) + '"]') as HTMLElement;
+            const element = this.querySelector(`[data-index="${this.tags.indexOf(tag)}"]`) as HTMLElement;
             element.classList.add('duplicate');
-            setTimeout(() => {
-                element.classList.remove('duplicate');
-            }, 500);
+            setTimeout(() => element.classList.remove('duplicate'), 500);
         }
-
     }
+
 
     private _deleteTag(index: number) {
         const newTags: string[] = [];
@@ -73,9 +79,9 @@ export class CollabInputTag extends StateLitElement {
     }
 
     private onInputKeyDown(event: KeyboardEvent) {
-    
+
         event.stopImmediatePropagation();
-        
+
         if (!this.input) return;
         const { value } = this.input;
         if (event.keyCode === 13) {
@@ -97,18 +103,29 @@ export class CollabInputTag extends StateLitElement {
 
     }
 
+    private isValidTag(tag: string): boolean {
+
+
+
+        if (this.pattern) {
+            const regex = new RegExp(this.pattern);
+            if (!regex.test(tag)) return false;
+        }
+        return true;
+    }
+
     render() {
         return html
             `<div class="collab-tag-input">
                 <input id="tag-input" @keydown=${(ev: KeyboardEvent) => { this.onInputKeyDown(ev) }}></input>
                 ${this.tags.map((tag: string, index: number) => {
-                    return html`
+                return html`
                         <div data-index=${index} class="tag">
 
                             ${tag}
                         </div>
                     `
-                })}
+            })}
         </div>`;
     }
 }

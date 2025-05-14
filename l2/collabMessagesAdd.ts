@@ -103,6 +103,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
 
             <label> ${this.msg.languages}
                 <collab-input-tag-100554 
+                    pattern="^[a-z]{2}$|^[a-z]{2}-[A-Z]{2}$"
                     .value=${this.languages.join(',')}
                     .onValueChanged=${(value: string) => this.languages = value.split(',')}
                     id="languageInput"
