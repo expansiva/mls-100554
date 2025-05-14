@@ -328,12 +328,14 @@ export interface IBaseToolsData {
 export interface IToolsData1 extends IBaseToolsData {
     type: 'dropdown' | 'cycle' | 'link';
     selected?: number;
+    onlyMenu?: boolean;
     options: IOptions[];
 }
 
 export interface IToolsData2 extends IBaseToolsData {
     type: 'tree-dropdown';
     selected?: number[];
+    onlyMenu?: boolean;
     options: IOptionsSubMenu[];
 }
 

@@ -20,15 +20,15 @@ const message_pt = {
     theme: 'Tema',
     variations: 'Linguagem',
     editStyle: 'Editar estilo',
-    pause: 'Preview Pausado',
-    run: ' Preview em execução',
+    pause: 'Preview pausado',
+    run: 'Preview executando',
     dark: ' escuro',
     light: 'claro',
     help: 'Ajuda',
-    consoleA: 'Abrir console',
-    consoleD: 'Fechar console',
-    testA: 'Iniciar Teste',
-    testB: 'Finalizar Teste',
+    consoleA: 'Console fechado',
+    consoleD: 'Console aberto',
+    testA: 'Teste não iniciado',
+    testB: 'Teste gravando',
     testRun: 'Executar',
     testDelete: 'Excluir',
     testEdit: 'Editar',
@@ -39,15 +39,15 @@ const message_en = {
     theme: 'Theme',
     variations: 'Language',
     editStyle: 'Edit style',
-    pause: 'Preview Paused',
-    run: 'Running preview',
+    pause: 'Preview paused',
+    run: 'Preview running',
     dark: 'dark',
     light: 'light',
     help: 'Help',
-    consoleA: 'Open console',
-    consoleD: 'Close console',
-    testA: 'Start Test',
-    testB: 'Stop Test',
+    consoleA: 'Console closed',
+    consoleD: 'Console open',
+    testA: 'Test not started',
+    testB: 'Test recording',
     testRun: 'Run',
     testDelete: 'Delete',
     testEdit: 'Edit',
@@ -172,6 +172,7 @@ export class ServicePreview100554 extends ServiceBase {
             test: {
                 type: 'cycle',
                 selected: 0,
+                onlyMenu: true,
                 options: [
                     { text: this.msg.testA, icon: collab_record.strings[0] },
                     { text: this.msg.testB, icon: collab_record.strings[0] },
@@ -180,6 +181,7 @@ export class ServicePreview100554 extends ServiceBase {
             testList: {
                 type: 'tree-dropdown',
                 icon: collab_test.strings[0].trim(),
+                onlyMenu: true,
                 selected: [],
                 options: []
             },
@@ -194,6 +196,7 @@ export class ServicePreview100554 extends ServiceBase {
             theme: {
                 type: 'dropdown',
                 icon: 'f53f',
+                onlyMenu: true,
                 selected: 0,
                 options: []
             },
@@ -213,6 +216,7 @@ export class ServicePreview100554 extends ServiceBase {
             devConsole: {
                 type: 'cycle',
                 selected: 0,
+                onlyMenu: true,
                 options: [
                     { text: this.msg.consoleA, icon: 'f120' },
                     { text: this.msg.consoleD, icon: 'f410' },
@@ -220,6 +224,7 @@ export class ServicePreview100554 extends ServiceBase {
             },
             help: {
                 type: 'link',
+                onlyMenu: true,
                 options: [
                     { text: this.msg.help, icon: 'f059' },
                 ]
