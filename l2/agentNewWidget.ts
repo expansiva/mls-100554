@@ -16,7 +16,8 @@ import {
 
 import {
     executeNextStep,
-    startNewInteractionInAiTask
+    startNewInteractionInAiTask,
+    addNewStep
 } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentNewWidget";
@@ -67,10 +68,11 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-
+    
+    context.task = await updateStepStatus(context.task, step.stepId, "completed"); 
     await addFile(context);
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");    
-    await executeNextStep(context);
+       
+    //await executeNextStep(context);
 }
 
 async function addFile(context: mls.msg.ExecutionContext) {
@@ -91,6 +93,21 @@ async function addFile(context: mls.msg.ExecutionContext) {
         { project, position: 'right', shortName: pageName, enhancement, sourceTS: fileTS, sourceHTML: fileHTML, sourceLess: fileLess, openPreview: false }
     );
 
+    const rc = {shortName: step.content.shortName, project}
+
+    const newStep: mls.msg.AIPayload = {
+        agentName: 'agentGenerateWidgetShowcase',
+        prompt: JSON.stringify(rc),
+        status: 'pending',
+        stepId: step.stepId + 1,
+        interaction: null,
+        nextSteps: null,
+        rags: null,
+        type: 'agent'
+    }
+
+    await addNewStep(context, step.stepId, [newStep]);
+    
     let aux = '';
     const m = mls.editor.getModels(project, pageName);
     if (m && m.ts && m.ts.compilerResults && m.ts.compilerResults.errors.length > 0) {
