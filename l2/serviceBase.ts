@@ -362,7 +362,7 @@ export interface IServiceMenu {
     lastMain?: string,
 
     setMode?: TSetMode,
-    refresh?: Function,
+    refresh?: (mode?: 'full' | 'tabs' | 'tools') => void,
     closeMenu?: Function,
     getLastMode?: TGetLastMode,
     updateTitle?: Function,

@@ -128,7 +128,9 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onClickTabs(index: number) {
         this._ed1?.updateOptions({ readOnly: false });
-        if (index === EPreview.icPreviewD) this.preview('desktop');
+        if (index === EPreview.icPreviewD) {
+            this.preview('desktop');
+        }
         if (index === EPreview.icPreviewM) this.preview('mobile');
         this.lastMode = index;
     }
@@ -181,7 +183,7 @@ export class ServicePreview100554 extends ServiceBase {
             testList: {
                 type: 'tree-dropdown',
                 icon: collab_test.strings[0].trim(),
-                onlyMenu: true,
+                //onlyMenu: true,
                 selected: [],
                 options: []
             },
@@ -234,6 +236,7 @@ export class ServicePreview100554 extends ServiceBase {
         onClickMain: this.onClickMain.bind(this),
         onClickTabs: this.onClickTabs.bind(this),
         onClickTools: this.onClickTools.bind(this),
+
     }
 
     public onServiceClick(visible: boolean, reinit: boolean) {
@@ -244,6 +247,7 @@ export class ServicePreview100554 extends ServiceBase {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
         } else {
+
             this.onReloader();
         }
     }
@@ -285,6 +289,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private lastStatusHasError: boolean = false;
     private onStyleChanged() {
+
         if (this.elPreview) {
             this.lastLevel = this.level;
 
@@ -339,6 +344,8 @@ export class ServicePreview100554 extends ServiceBase {
     private actualFile: mls.stor.IFileInfo | undefined;
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
+
+
         try {
             if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
@@ -384,7 +391,6 @@ export class ServicePreview100554 extends ServiceBase {
                 this.loading = false;
                 this.setTest();
                 this.onReloader();
-                //this.preview(this.lastModePreview)
             }
 
         } catch (e) {
@@ -586,7 +592,7 @@ export class ServicePreview100554 extends ServiceBase {
             this.menu.tools.testList.options = rcOpts;
         }
 
-        this.menu.refresh?.();
+        this.menu.refresh?.('tools');
     }
 
 
