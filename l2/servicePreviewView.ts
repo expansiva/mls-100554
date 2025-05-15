@@ -464,7 +464,7 @@ export class ServicePreviewView extends StateLitElement {
 
     private async modeSinglePage(json: IJSONDependence, iframe: HTMLIFrameElement) {
         if (!this.file || !this.models) return;
-        const c = new PreviewModeSinglePage(json, iframe, this.level, this.isService, this.file);
+        const c = new PreviewModeSinglePage(json, iframe, this.level, this.isService, this.file, this.models);
         await c.init();
     }
 

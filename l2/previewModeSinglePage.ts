@@ -10,26 +10,28 @@ export class PreviewModeSinglePage {
     private json: IJSONDependence | undefined;
     private ifr: HTMLIFrameElement | undefined;
     private isService: boolean = false;
+    private models: mls.editor.IModels | undefined = undefined;
     private file: mls.stor.IFileInfo | undefined = undefined;
     private esbuild: any;
 
-    constructor(_j: IJSONDependence, _i: HTMLIFrameElement, _l: string, _s: boolean, _f: mls.stor.IFileInfo) {
+    constructor(_j: IJSONDependence, _i: HTMLIFrameElement, _l: string, _s: boolean, _f: mls.stor.IFileInfo, _m: mls.editor.IModels) {
         this.json = _j;
         this.ifr = _i;
         this.level = _l;
         this.isService = _s;
         this.file = _f;
+        this.models = _m;
     }
 
     public async init() {
         if (!this.json || !this.ifr) return;
         await this.loadEsbuild();
-        await this.configIframe();
+        setTimeout(async () => await this.configIframe(), 100); 
     }
 
     private async configIframe() {
 
-        if (!this.json || !this.ifr || !this.esbuild) return;
+        if (!this.json || !this.ifr || !this.esbuild || !this.models) return;
 
         const myMap = this.parseImportsMap(this.json.importsMap);
         const find = this.findWidgets(this.ifr.contentDocument?.body)
@@ -128,6 +130,7 @@ export class PreviewModeSinglePage {
         });
 
         util.mountJSImporMap(this.json, this.ifr);
+        util.mountTokens(this.json.tokens || '', this.models);
         util.addJsReference(this.ifr, this.level || '2');
         const s = document.createElement('script') as HTMLScriptElement;
         s.textContent = result.outputFiles[0].text;
