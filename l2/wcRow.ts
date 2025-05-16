@@ -6,10 +6,11 @@ import { IcaLayoutFlowRowBase } from './_100554_icaLayoutFlowRowBase';
 
 @customElement('wc-row-100554')
 export class WcRow extends IcaLayoutFlowRowBase {
+    gap: string | undefined;
 
     @property() hint: string | undefined;
 
     render() {
-        return html`<slot></slot>`; 
+        return html`<slot></slot>`;
     }
 }
