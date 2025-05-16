@@ -81,7 +81,7 @@ async function addFile(context: mls.msg.ExecutionContext) {
 
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in create files');
 
-    if (!step.content || !step.content.html || !step.content.ts || !step.content.less) throw new Error('Not found "html" or "ts" or "less" in addFile files');
+    if (!step.content || !step.content.html || !step.content.ts || !step.content.less || !step.content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
 
     await forceServiceInstance(2, '_100554_serviceSource')
 
@@ -140,10 +140,10 @@ export async function getPrompts(json: any, prompt: string | undefined, rags: st
 }
 
 function systemMainInstruction(): mls.msg.IAMessageInputType {
-    //executor or translate
+    //code
     return {
         type: 'system',
-        content: `${preferModelType("translate")}
+        content: `${preferModelType("code")}
 Você é um programador responsável pela criação de um novo web componente (widget) para o sistema Collab Codes.
 
 Se não for possível cumprir esta tarefa (por falta de dados ou conflito de requisitos), **retorne um objeto JSON** do tipo "result", com uma descrição do problema.
@@ -203,8 +203,8 @@ A classe base utilizada no sistema Collab Codes define três tipos principais de
 - para atributos na classe 'Bind', use '@propertyDataSource'.
 - para atributos na classe 'Cfg', use '@propertyCompositeDataSource'.
 
-- a propriedade autofocus deve ser definida conforme lit "@property({{ type: Boolean }}) autofocus: boolean = false;"
-- a propriedade name deve ser definida conforme lit "@property({{ type: String }}) name: string | undefined;"
+- a propriedade autofocus deve ser definida conforme lit "@propertyDataSource({{ type: Boolean }}) autofocus: boolean = false;"
+- a propriedade name deve ser definida conforme lit "@propertyCompositeDataSource({{ type: String }}) name: string | undefined;"
 
 **Importante**: Use corretamente a anotação conforme o tipo da propriedade analisada.
 Para cada propriedade criada, use um JSDoc com exemplo.

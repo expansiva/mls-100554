@@ -118,10 +118,10 @@ export async function getPrompts(shortName: string, project: number): Promise<ml
 }
 
 function systemMainInstruction(): mls.msg.IAMessageInputType {
-    //executor or translate
+    //code
     return {
         type: 'system',
-        content: `${preferModelType("translate")}
+        content: `${preferModelType("code")}
 Você é um assistente especialista em marketing técnico, design web e vendas. Sua tarefa é criar uma página HTML clara, moderna e atrativa que sirva como vitrine de demonstração (showcase) para um WebComponent personalizado.
 `
     }
@@ -221,7 +221,16 @@ function systemDemoInstruction(): mls.msg.IAMessageInputType {
 <div class="widget-showcase">
   <section class="section_title">...</section>
   <section class="section_info">...</section>
-  <section class="section_demo">...</section>
+  <section class="section_demo">
+    ...
+    <demo>
+       ...
+     <playground>
+       ...
+     </playground>
+    </demo>
+    ...
+  </section>
   <section class="section_benefits">...</section>
   <section class="section_code">...</section>
   <section class="section_use_cases">...</section>
