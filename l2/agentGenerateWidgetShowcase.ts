@@ -129,7 +129,7 @@ Você é um assistente especialista em marketing técnico, design web e vendas. 
 function systemTaskInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
-        content: `##TASK
+        content: `## TASK
 
 Você receberá um arquivo ".ts" contendo a definição de um Web Component.  Sua tarefa é:
 
@@ -145,7 +145,7 @@ Você receberá um arquivo ".ts" contendo a definição de um Web Component.  Su
 function systemDefinitionsInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
-        content: `##CARACTERISTICAS DO HTML
+        content: `## CARACTERISTICAS DO HTML
 
 O bloco HTML gerado deve conter:
   
@@ -207,13 +207,25 @@ Você deve retornar um array de objetos no formato JSON.O objeto representa uma 
 function systemRulesInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
-        content: `**Regras importantes:**
+        content: `## Regras importantes:
 
 - Não repita ou explique o código TypeScript.
 - Apenas gere o bloco HTML dentro da "<div>", pronto para ser colado em qualquer página.
 - Pressuponha que o Web Component está registrado e pode ser usado diretamente pela tag personalizada dele.
 
 O HTML gerado deve estar pronto para ser injetado como parte de um container maior (por exemplo, dentro de uma aba de preview ou guia de documentação).
+
+
+## Sobre o gerenciamento de propriedades e states no Collab Codes:
+
+- Quando uma propriedade é decorada com @propertyDataSource ou @propertyCompositeDataSource, ela é automaticamente associada a um ou mais states dinâmicos do sistema, como por exemplo: "{{ui.dataRange}}".
+- O gerenciador de states do Collab Codes é responsável por:
+  - Registrar automaticamente a dependência entre a propriedade e o(s) state(s) referenciado(s).
+  - Detectar alterações no(s) state(s) de forma automática e eficiente.
+  - Atualizar o valor da propriedade no componente sem necessidade de eventos manuais (dispatchEvent, CustomEvent, etc.).
+- **Importante:**
+  Não é necessário implementar listeners, eventos personalizados, nem funções de observação manual para essas propriedades.
+  **Toda a comunicação e atualização é gerenciada automaticamente pelo sistema de states.**
 `
     }
 }

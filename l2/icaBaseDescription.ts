@@ -765,3 +765,485 @@ interface ComponentDescription {
 interface IIcaDescriptions {
     [key: string]: ComponentDescription;
 }
+
+export const descriptionForPrompt: string = `
+## Atomic Design – Moléculas (Molecules)
+
+General attributes (aplicáveis em quase todas as moléculas):
+- name, id, class, style
+- Attributes A11y (opcionais): role, ariaLabel, ariaDescribedBy, ariaExpanded, ariaSelected …
+
+Attributes Text:
+Exibem textos fixos ou dinâmicos.
+Aceitam texto simples ou **composite binding**.
+Exemplos:
+- label="Digite o CPF"
+- label="Bem-vindo {{ui.user.name}}"
+
+Attributes Cfg:
+Controlam o comportamento ou aparência da molécula.
+Aceitam texto fixo ou **binding puro** (sem texto adicional).
+Exemplos:
+- readonly="true"
+- disabled="{{ui.ReadyForInput}}"
+
+Attributes Bind:
+São usados para ler e/ou gravar dados dinâmicos.
+Aceitam texto fixo ou **binding puro**.
+Exemplos:
+- value="dog"
+- value="{{ui.choice.animal}}"
+
+## ica-forms-content-form
+Form component provides enhanced control over form submission, validation, and customization.
+- Cfg: action, method, novalidate, autocomplete, disabled, enctype, name, target, validateonchange, autosave, formId
+- Example: action="/api/save" method="post" validateonchange
+## ica-forms-input-number
+Allows the user to input numerical values, with support for minimum and maximum limits.
+- Text: label, placeholder, hint
+- Bind: name, value
+- Cfg: required, disabled, readonly, autofocus, pattern, errormessage, maxvalue, minvalue, step, inputmode, suffix, prefix
+- Example: name="quantidade" value="1" minvalue="0" maxvalue="10"
+## ica-forms-input-string
+Field for free text, with configurable validations such as maxlength, minlength, and pattern.
+Use for general text input without visual formatting.
+- Text: label, placeholder, hint, errormessage
+- Bind: name, value
+- Cfg: required, disabled, readonly, maxlength, minlength, pattern, autofocus, autocapitalize, autocorrect, autocomplete, validationmessage, debounce
+- Example: name="nome" value="{{ui.form.nome}}" maxlength="50"
+## ica-forms-input-masked
+Input field with visual masking during typing.
+Ideal for CPF, phone numbers, postal codes, etc.
+- Text: label, placeholder, hint
+- Bind: name, value
+- Cfg: mask, required, disabled, readonly, autocomplete
+- Example: name="cpf" value="{{ui.form.cpf}}" mask="999.999.999-99"
+## ica-forms-input-boolean
+Component for binary choice, like switches or checkboxes.
+Ideal for yes/no settings or enabling/disabling features.
+- Text: label, hint, errormessage
+- Bind: name, checked
+- Cfg: required, disabled, readonly, autofocus
+- Example: name="aceita" checked="{{ui.config.termos}}"
+## ica-forms-input-date
+Date selector, with configuration options to limit periods.
+- Text: label, hint, errormessage
+- Bind: name, value
+- Cfg: required, disabled, readonly, autofocus, pattern, maxvalue, minvalue
+- Example: name="dataNascimento" value="{{ui.user.birthdate}}" minvalue="1900-01-01" maxvalue="2025-12-31"
+## ica-forms-input-time
+Allows the user to select a time, with support for different time formats.
+- Text: label, hint, errormessage, placeholder
+- Bind: name, value
+- Cfg: required, disabled, readonly, autofocus, pattern
+- Example: name="horario" value="{{ui.agenda.hora}}" placeholder="00:00"
+## ica-forms-input-date-range
+Component for selecting date ranges, useful for period filters.
+- Text: label, hint, errormessage
+- Bind: name, startvalue, endvalue
+- Cfg: required, disabled, readonly, autofocus
+- Example: name="filtroPeriodo" startvalue="{{ui.filtro.inicio}}" endvalue="{{ui.filtro.fim}}"
+## ica-forms-input-select-one
+Selector for a single option among many.
+Can be presented as a dropdown, combobox, etc.
+- Text: label, hint
+- Bind: selectedvalue
+- Cfg: required, disabled, options
+- Example: selectedvalue="{{ui.form.estado}}" options="['SP','RJ','MG']"
+## ica-forms-input-multiselect
+Selector for multiple options from a list.
+Ideal for tags, categorias ou filtros múltiplos.
+- Text: label, hint
+- Bind: selectedvalue
+- Cfg: required, disabled, options
+- Example: selectedvalue="{{ui.form.categorias}}" options="['Tecnologia','Design','Marketing']"
+## ica-forms-input-color
+Color picker, with support for different color formats (RGB, HEX, etc.).
+- Text: label, hint, errormessage, placeholder
+- Bind: name, value
+- Cfg: required, disabled, readonly, autofocus, pattern
+- Example: name="corFavorita" value="{{ui.pref.cor}}" placeholder="#RRGGBB"
+## ica-forms-input-editor
+Rich text editor with basic formatting (bold, italic), lists, and tables.
+- Text: label, hint, errormessage
+- Bind: name, value
+- Cfg: required, disabled, readonly, autofocus
+- Example: name="descricao" value="{{ui.produto.descricao}}"
+## ica-forms-input-feedback
+Rating component for expressing opinions (stars, thumbs up/down, etc.).
+- Text: label, hint, errormessage
+- Bind: name, value
+- Cfg: required, disabled, readonly, autofocus
+- Example: name="avaliacao" value="{{ui.feedback.nota}}"
+## ica-forms-input-file
+File upload field, supports drag and drop and upload progress.
+- Text: label, hint, errormessage
+- Bind: name
+- Cfg: required, disabled, readonly, autofocus, accept, multiple
+- Example: name="anexo" accept=".pdf,.jpg" multiple
+## ica-forms-records
+Displays records in various visual formats: table, cards, list, timeline, etc.
+The layout is defined by 'recommendedWidget', and the values shown via direct attributes.
+- Cfg: config
+- Bind: selected
+- Text: title, subtitle, line1, line2, bottom, image, icon, badge
+- Example:  config={
+    "table": "db.produtos", "range": { "start": 0, "end": 10 },
+    "recommendedWidget": "cards", "selectedField": "id" },
+  title="{{nome}}" subtitle="{{descricao}}" bottom="R\${{preco}}"
+## ica-forms-records-grid
+Data-grid capable of multiple behaviours.
+Behaviour is picked via 'recommendedWidget'.
+- Cfg: config
+- Bind: selectedRows, editedRows
+- interface config {
+  table: string,                 // DB ou endpoint
+  range?: { start: number, end: number },
+  recommendedWidget: "readonly" | "editable" | "grouping" | "pivot" | "tree" | "virtual-scroll",
+  columns: {
+    field: string,
+    header?: string,
+    width?: string,
+    resizable?: boolean,
+    sortable?: boolean,
+    filterable?: boolean,
+    editable?: boolean,
+    expandable?: boolean         // tree grid
+  }[],
+  pageable?: boolean,
+  pageSize?: number,
+  rowHeight?: number,
+  selection?: "single" | "multi",
+  aggregation?: "sum" | "avg" | string
+}
+## ica-forms-records-map
+Displays geographic information on a map, supporting markers and custom regions.
+The config attribute defines center point, zoom level, and list of markers.
+- Cfg: config
+- Example: config={ "latitude": -23.5505, "longitude": -46.6333, "zoom": 12, "markers": [ { "lat": -23.55, "lng": -46.63, "label": "SP" } ], "maptype": "roadmap" }
+## ica-forms-tree
+Visual components for hierarchical data (tree, dropdown, accordions, mind map, tag cloud).
+All variations share the same config structure. Rendering style depends on the widget.
+- Cfg: config
+- Bind: selectedvalues, selectedkeys
+- Example:
+  config={ "table": "db.categorias",
+    "columns": { "key": "id", "value": "cidade", "icon": "icon" },
+    "multiexpand": true,  "multiselect": false, "cascadeSelect": true }
+## ica-forms-submit
+Group of form action buttons (submit, cancel, clear).
+Each button is configured via an array inside the config.
+When clicked, the 'value' is sent to the configured state in notify.
+value = "save" | "cancel" | "clear".
+- Cfg: config
+- Bind: notify
+- Example: config={ "buttons": [ { "label": "Salvar", "value": "save" },
+      { "label": "Cancelar", "value": "cancel" } ]}
+## ica-navigation-links
+Flexible navigation widget that can display links, menus, breadcrumbs, buttons, or anchor-based sidebars.
+It supports external links, in-page navigation ('#id') and optional auto-highlighting on scroll.
+- Cfg: config
+- Bind: selected (auto-updated when scrolling or clicking)
+- Interface Config {
+  recommendedWidget: "link" | "menu" | "button" | "breadcrumb" | "anchor", // default = "link"
+  scrollSync?: boolean,      // if true, updates selected as the user scrolls
+  offset?: number,           // pixels from top to consider section active
+  items: {
+    label: string,
+    href: string,            // can be external ("/produtos") or anchor ("#faq")
+    icon?: string,
+    badge?: string | number,
+    disabled?: boolean
+  }[]
+}
+## ica-navigation-content
+Organizes content into multiple sections (tabs, steps, scenarios, accordions, etc.).
+Each section points to external content via 'ref'.
+Supports logical grouping with or without visible headers.
+Supports showing content in popup style with automatic close when using widget "popup"
+- Cfg: config
+- Bind: selected // ex: {{ui.tab1.selected}}
+- interface config {
+  recommendedWidget: "tab" | "stepper" | "scenary" | "accordion" | "toolbar" | "popup" | "none" ,
+  headerVisible?: boolean,
+  sections: {
+    id: number,
+    ref: string,               // local ref (ex: "#form1") or external (ex: "./page2")
+    prefetch?: "hover",
+    label?: string,            // section label
+    icon?: string,             // optional icon
+    badge?: string | number,   // optional badge (count, status, etc.)
+    visible?: boolean,         // false = hidden from header, but content remains accessible
+    disabled?: boolean         // disables interaction
+  }[]
+}
+## ica-navigation-multi-content
+Displays multiple content blocks at once, using a flexible layout like grid or overlay.
+Each content block can reference internal components or external pages.
+Useful for dashboards, side-by-side editing, or tile-based interfaces.
+- Cfg: config
+- Bind: selected (optional, for focus or context)
+- interface config {
+  layout: "horizontal" | "vertical" | "grid" | "overlay" | "tiles",
+  sections: {
+    id: string | number,
+    ref: string, // local ref (ex: "#form1") or external (ex: "./page2")
+    prefetch?: "hover",
+    label?: string,
+    icon?: string,
+    visible?: boolean,
+    resizable?: boolean,
+    width?: string,  // optional width/height hints
+    height?: string
+  }[]
+}
+## ica-apresentation-text-code
+Used to present blocks of code with optional syntax highlighting.
+- Cfg: config
+- Text: text
+- interface config {
+  language?: "ts" | "js" | "html" | "css" | "json" | "bash" | "sql" | "python" | string
+}
+## ica-apresentation-text-rich
+Used to present or edit text with rich formatting (bold, italic, lists, links, etc.).
+Can be used in view or editable mode.
+- Cfg: config
+- Text: content
+- interface config {
+  editable?: boolean
+}
+## ica-apresentation-text
+Presents formatted text content like simple text, quotes, or banners.
+Allows inline HTML (innerHTML) and multiple visual styles based on 'type'.
+Styling and animations should be handled via CSS or themes.
+- Cfg: config
+- Text: text
+- interface config {
+  type: "text" | "quote" | "banner",
+  multiline?: boolean,
+  // quote-specific
+  cite?: string,
+  citeHref?: string,
+  // banner-specific
+  src?: string,
+  alt?: string,
+  href?: string, // optional link on click
+  target?: "_blank" | "_self"
+}
+## ica-apresentation-image
+Displays a single image, icon, or avatar.
+Type defines the visual variation and styling.
+- Cfg: config
+- interface config {
+  type: "image" | "icon" | "avatar",
+  src?: string,         // for image or avatar
+  icon?: string,        // for icon
+  alt?: string,
+  width?: string,
+  height?: string,
+  size?: string,        // icon or avatar
+  color?: string,       // icon only
+  shape?: "circle" | "square" // avatar only
+}
+## ica-apresentation-gallery
+Displays collections of images in formats like gallery, carousel, or slider.
+- Cfg: config
+- Bind: selectedindex (optional, for navigation)
+- interface config {
+  recommendedWidget: "gallery" | "carousel" | "slider",
+  images: string[],               // array of image URLs
+  thumbnails?: boolean,           // for gallery
+  shownavigation?: boolean,       // for carousel/slider
+  autoplay?: boolean,
+  interval?: number,              // ms
+  loop?: boolean
+}
+## ica-apresentation-maps
+Displays static or interactive maps with markers and zoom level.
+- Cfg: config
+- interface config {
+  latitude: number,
+  longitude: number,
+  zoom?: number,
+  markers?: { lat: number, lng: number, label?: string }[],
+  maptype?: "roadmap" | "satellite" | "terrain"
+}
+## ica-apresentation-video
+Displays videos in different formats such as embedded players, inline (image-style), or playlists.
+The layout and interaction style is defined by 'recommendedWidget'.
+- Cfg: config
+- Bind: selectedvideo (for playlist)
+- interface config {
+  recommendedWidget: "embed" | "inline" | "playlist",
+  src?: string,              // for single video (embed/inline)
+  poster?: string,           // for inline (placeholder image)
+  videos?: string[],         // for playlist
+  autoplay?: boolean,
+  controls?: boolean,
+  loop?: boolean,
+  preload?: "auto" | "metadata" | "none"
+}
+## ica-apresentation-sound
+Plays audio content in various contexts such as music tracks, sound effects, or podcast episodes.
+The layout and behavior are defined by 'recommendedWidget'.
+- Cfg: config
+- Bind: selected (for playlist/effects)
+- interface config {
+  recommendedWidget: "player" | "effects" | "podcast",
+  src?: string,                  // for single audio
+  sounds?: string[],            // for sound effects
+  podcastepisodes?: string[],   // for podcast playlists
+  autoplay?: boolean,
+  controls?: boolean,
+  loop?: boolean,
+  preload?: "auto" | "metadata" | "none"
+}
+## ica-apresentation-chart
+Displays visual charts in 2D or 3D using external frameworks like TreeD3.js.
+The config defines rendering behavior; the 'chartdata' must be provided via binding for interactivity.
+- Cfg: config
+- Bind: chartdata  // ex: chartdata="{{ui.relatorio.vendas}}"
+- interface config {
+  recommendedWidget: "treed3" | "echarts" | "chartjs" | string,
+  renderer?: string,               // optional custom render strategy
+  options3d?: object               // used only if recommendedWidget = "3d"
+}
+- interface ChartData {
+  type: "bar" | "line" | "pie" | "scatter" | "tree" | string,
+  title?: string,
+  xAxis?: string[],
+  yAxis?: string[],
+  series: {
+    name: string,
+    data: number[] | { x: string, y: number }[] | object[],
+    type?: string,  // optional override per series
+    style?: object
+  }[],
+  options?: object
+}
+## ica-apresentation-animation
+Applies CSS-based animations to inline or block elements.
+The animation can be triggered by a state value, load, click, or hover.
+- Cfg: config
+- Text: content
+- Bind: state  // optional, ex: state="{{ui.effectTrigger}}"
+- interface config {
+  animation: "fadeIn" | "zoomIn" | "slideLeft" | string,
+  trigger?: "onload" | "onclick" | "hover" | "manual" | "state",
+  triggerValue?: string | number | boolean,  // activate only when state == triggerValue
+  inverted?: boolean,                        // show when state != triggerValue
+  duration?: number,     // in ms
+  delay?: number,
+  repeat?: number        // default = 1
+}
+## ica-apresentation-animation-fullpage
+Fullscreen or large-area visual animations, triggered by actions or state changes.
+The widget defines the visual effect (e.g., confetti, fireworks, radial, curtains, etc.).
+- Cfg: config
+- Bind: state  // optional, ex: state="{{ui.action}}"
+- interface config {
+  recommendedWidget: "confetti" | "fireworks" | "radial-splash" | "balloon-explode" | string,
+  trigger: "manual" | "onload" | "onclick" | "page-enter" | "page-exit" | "state",
+  triggerValue?: string | number | boolean,
+  inverted?: boolean,
+  duration?: number,
+  intensity?: number,
+  once?: boolean
+}
+## ica-navigation-transition
+Animates page transitions using slide, fade, or custom effects.
+- Cfg: config
+- interface config {
+  type: "slide" | "fade" | "push-left" | "push-right" | "zoom",
+  duration?: number,
+  reverseOnBack?: boolean   // reverses direction if going back
+}
+## ica-apresentation-indicator
+Visual indicator for communicating the state or progress of an operation.
+Can react to changes in bound states, useful for feedback like "loading", "in progress", or "success".
+- Cfg: config
+- Text: label
+- Bind: state  // ex: state="{{ui.action}}"
+- interface config {
+  type: "progress" | "loading" | "status" | "badge" | string,
+  value?: number,         // for progress
+  max?: number,           // optional, default 100
+  color?: string,         // optional: for status, badge
+  size?: "sm" | "md" | "lg" | string,
+  triggerValue?: string | boolean | number,  // optional: activate only when state == triggerValue
+  inverted?: boolean      // optional: reverse behavior if state != triggerValue
+}
+## ica-apresentation-embed-social
+Displays embedded social media content, either as a specific post or a live feed/timeline.
+Ideal for showcasing engagement or highlighting external communications.
+- Cfg: config
+- interface config {
+  recommendedWidget: "post" | "feed",
+  url: string,                    // required: post or profile URL
+  width?: string,                 // optional dimensions (ex: "100%", "300px")
+  height?: string,
+  refreshInterval?: number,      // in seconds, only for feeds
+  limit?: number                 // max items, only for feeds
+}
+## ica-navigation-toolbar-social
+Toolbar with icons and links to social media profiles.
+- Cfg: config
+- interface config {
+  items: {
+    platform: "twitter" | "linkedin" | "github" | "facebook" | string,
+    href: string,
+    icon?: string,     // default: inferred by platform
+    label?: string     // optional text for accessibility
+  }[],
+  layout?: "horizontal" | "vertical",
+  size?: "sm" | "md" | "lg"
+}
+## ica-apresentation-message
+Displays transient or interruptive messages to inform the user about application events.
+Message type and behavior are controlled via state and config.
+- Cfg: config
+- Text: state  // ex: state="{{ui.feedback}}", use type MessageState
+- interface config {
+  recommendedWidget: "toast" | "snackbar" | "notification" | "alert" | "modal",
+  duration?: number,              // in ms; optional if not transient
+  closable?: boolean,
+  actionText?: string,           // for snackbar-like interaction
+  queue?: boolean,               // if true, messages stack or enqueue
+  defaultType?: "info" | "warning" | "error" | "success" | string
+}
+- type MessageState = string | { // simplest case: just the message
+  message: string,
+  type?: "info" | "warning" | "error" | "success",
+  action?: string,
+  id?: string | number  // for queue management
+}
+## ica-apresentation-canvas
+Canvas area for rendering dynamic visual scenes, games, simulations, or interactive business tools.
+Ideal for applications where visuals are generated via custom scripts or engines.
+- Cfg: config
+- Bind: state (optional — can be used to send commands or track status)
+- interface config {
+  recommendedWidget: string,       // ex: "carGame", "floorPlanEditor", "inventory3D", "whiteboard"
+  width?: string,                  // ex: "100%", "800px"
+  height?: string,
+  pixelRatio?: number,             // optional for high-DPI displays
+  autoResize?: boolean,
+  runOnLoad?: boolean,             // auto-start on render
+  scriptRef: string                // required JS module that will run the logic
+}
+## ica-blocks-viewer
+Renders document and data files like PDF, spreadsheets, and Office documents inside the application.
+The viewer type and behavior depend on the selected widget.
+- Cfg: config
+- Text: data
+- interface config {
+  recommendedWidget: "pdf" | "spreadsheet" | "document",
+  page?: number,              // pdf only
+  zoom?: number,              // pdf only
+  activesheet?: string,       // spreadsheet only
+  type?: "docx" | "pptx" | "pdf" | string,  // for document viewer fallback
+  readonly?: boolean
+}
+`;
+
+
