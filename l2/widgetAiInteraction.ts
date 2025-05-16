@@ -287,6 +287,10 @@ export class WidgetAiInteraction100554 extends StateLitElement {
 
     private renderFlexible(payload: mls.msg.AIFlexibleResultStep) {
         return html`
+            <ul>
+                <li>stepId: ${payload.stepId}</li>
+                <li>status: ${payload.status}</li>
+            </ul>
             <div class="flexible-details">
                 <pre>${JSON.stringify(payload)}</pre>
             </div>
