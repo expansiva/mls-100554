@@ -6,6 +6,8 @@ import { IcaNavigationContentAccordionBase } from './_100554_icaNavigationConten
 
 @customElement('wc-accordion-details-100554')
 export class WcAccordionDetails100554 extends IcaNavigationContentAccordionBase {
+    multiple: boolean | undefined;
+    disabled: boolean | undefined;
 
     @property({ type: String }) text = '';
     @property({ type: Boolean }) open = false;

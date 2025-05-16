@@ -24,8 +24,12 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_colla
  */
 @customElement('wc-date-picker-range-custom-100554')
 export class IcaDatePickerRangeCustom extends IcaFormsInputDateRangeBase {
+  startvalue: string | undefined;
+  endvalue: string | undefined;
+  placeholder: string | undefined;
+  errormessage: string | undefined;
   /** Data inicial do intervalo selecionado. Exemplo: "2024-06-01" */
-  @propertyDataSource({ type: String }) startValue?: string; 
+  @propertyDataSource({ type: String }) startValue?: string;
   /** Data final do intervalo selecionado. Exemplo: "2024-06-10" */
   @propertyDataSource({ type: String }) endValue?: string;
   /** Data mínima permitida para seleção. Exemplo: "2024-06-01" */

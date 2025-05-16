@@ -6,6 +6,7 @@ import { IcaLayoutFlowColumnBase } from './_100554_icaLayoutFlowColumnBase';
 
 @customElement('wc-column-100554')
 export class WcColumn extends IcaLayoutFlowColumnBase {
+    gap: string | undefined;
 
     render() {
         return html`<slot></slot>`

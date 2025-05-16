@@ -2,11 +2,14 @@
 
 import { html, ifDefined } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaFormsInputStringBase } from './_100554_icaFormsInputStringBase';
+import { IAutoCapitalize, IcaFormsInputStringBase } from './_100554_icaFormsInputStringBase';
 import { propertyDataSource } from './_100554_collabDecorators';
 
 @customElement('wc-input-text-100554')
 export class WcInputText100554 extends IcaFormsInputStringBase {
+    autocapitalize: IAutoCapitalize = "off";
+    validationmessage: string | undefined;
+    debounce: string | undefined;
 
     @propertyDataSource({ type: String }) value: string | undefined;
 
@@ -38,7 +41,7 @@ export class WcInputText100554 extends IcaFormsInputStringBase {
 
     @property({ type: String }) autocorrect: 'off' | 'on' | undefined = undefined;
 
-    @property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined = undefined; 
+    @property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined = undefined;
 
     @query('.input_control') input: HTMLInputElement | undefined;
 

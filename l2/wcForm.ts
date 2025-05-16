@@ -6,6 +6,7 @@ import { IcaFormsContentFormBase } from './_100554_icaFormsContentFormBase';
 
 @customElement('wc-form-100554')
 export class WcForm100554 extends IcaFormsContentFormBase {
+    validateonchange: boolean = true;
 
     @property({ type: String }) action: string | undefined;
 
@@ -27,11 +28,11 @@ export class WcForm100554 extends IcaFormsContentFormBase {
 
     @property({ type: String }) target: string | undefined;
 
-    
+
     render() {
         return html`<form><slot></slot></form>`;
     }
 
-    
+
 
 }
