@@ -178,7 +178,7 @@ definição de TClarification
         "sectionName": "widgetName",
         "description": "Nome do Widget",
         "widgetName": "[WidgetName ex: wcDatePickerRangeCustom]"
-        "tagName": "[WidgetTagName ex: wc-date-picker-range-custom-100554]"
+        "tagName": "[WidgetTagName ex: wc-date-picker-range-custom]"
     },
     {
         "sectionName": "properties",

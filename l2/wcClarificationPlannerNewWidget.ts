@@ -155,14 +155,21 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
     }
 
     private createTagName(value: string) {
+        const valueWithoutProject = this.removeTrailingPattern(value);
         const actual = mls.actual[5];
         const project = actual.project;
-        if (!project) return value;
-        return convertFileNameToTag(`_${project}_${value}`)
+        if (!project) return valueWithoutProject;
+        return convertFileNameToTag(`_${project}_${valueWithoutProject}`)
+    }
+
+    private removeTrailingPattern(str: string): string {
+        return str.replace(/-\d{6}$/, '');
     }
 
     private createParentName(value: string) {
-        return convertTagToFileName(`${value}-${this.ICABASEPROJECT}`).replace(`_${this.ICABASEPROJECT}_`, '') + 'Base'
+        let newParentName = convertTagToFileName(`${value}-${this.ICABASEPROJECT}`).replace(`_${this.ICABASEPROJECT}_`, '')
+        newParentName = newParentName.endsWith('Base') ? newParentName : `${newParentName}Base`;
+        return newParentName.charAt(0).toLowerCase() + newParentName.slice(1);;
     }
 
     private handleWidgetNameInput(e: MouseEvent, item: ClarificationWidgetName) {
@@ -192,7 +199,7 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
 
     private handleTagNameChange(e: MouseEvent, item: ClarificationWidgetName) {
         const target = e.target as HTMLTextAreaElement;
-        item.tagName = target.value;
+        item.tagName = target.value.charAt(0).toLowerCase() + target.value.slice(1);
     }
 
     private handleParentInput(e: MouseEvent, item: ClarificationParentName) {
@@ -237,7 +244,7 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
                 }
 
             }
-            
+
         })
 
         if (hasError) return;
@@ -246,7 +253,10 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
 
     private async handleAction(action: 'cancel' | 'continue') {
         if (!this.data) return;
-        console.info(this.data);
+        if (this.develpoment) {
+            console.info(this.data);
+            return;
+        }
         await postBackClarification(action, this.data);
     }
 
@@ -255,69 +265,8 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
             clarificationMessage: '',
             stepId: 123,
             taskId: '123',
-            json: [
-                {
-                    "sectionName": "resume",
-                    "description": "Widget para seleção de intervalo de datas, com suporte a limites mínimos e máximos e bloqueio de datas específicas, ideal para reservas e agendamentos."
-                },
-                {
-                    "sectionName": "parentClass",
-                    "description": "Component for selecting date ranges, useful for period filters.",
-                    "widgetName": "ica-forms-input-date-range"
-                },
-                {
-                    "sectionName": "widgetName",
-                    "description": "Nome do Widget",
-                    "widgetName": "wcDataPickerRange",
-                    "tagName": "wc-data-picker-range",
-                },
-                {
-                    "sectionName": "properties",
-                    "description": "Propriedades do widget",
-                    "properties": [
-                        { "propertyName": "startValue", "description": "Data inicial do intervalo selecionado", "isEssencial": "true" },
-                        { "propertyName": "endValue", "description": "Data final do intervalo selecionado", "isEssencial": "true" },
-                        { "propertyName": "minvalue", "description": "Data mínima permitida para seleção", "isEssencial": "false" },
-                        { "propertyName": "maxvalue", "description": "Data máxima permitida para seleção", "isEssencial": "false" },
-                        { "propertyName": "blockedDates", "description": "Lista de datas específicas bloqueadas para seleção (essencial)", "isEssencial": "true" },
-                        { "propertyName": "label", "description": "Rótulo para o campo de seleção", "isEssencial": "false" },
-                        { "propertyName": "hint", "description": "Dica para o usuário sobre o uso do widget", "isEssencial": "false" },
-                        { "propertyName": "required", "description": "Define se o campo é obrigatório", "isEssencial": "false" },
-                        { "propertyName": "disabled", "description": "Define se o widget está desabilitado", "isEssencial": "false" },
-                        { "propertyName": "readonly", "description": "Define se o widget é somente leitura", "isEssencial": "false" },
-                        { "propertyName": "autofocus", "description": "Define se o widget recebe foco automaticamente", "isEssencial": "false" },
-                        { "propertyName": "pattern", "description": "Padrão para validação da data", "isEssencial": "false" },
-                        { "propertyName": "errormessage", "description": "Mensagem exibida em caso de erro de validação", "isEssencial": "false" },
-                        { "propertyName": "eventBinding", "description": "Eventos para interação com o widget", "isEssencial": "false" }
-                    ]
-                },
-                {
-                    "sectionName": "requirements",
-                    "description": "Requisitos para este widget, altere se necessário",
-                    "functionalRequirements": [
-                        "Must support selection of a date range with start and end dates",
-                        "Must allow setting minimum and maximum selectable dates",
-                        "Must allow blocking specific dates from selection",
-                        "Must provide clear validation and error messages",
-                        "Must support keyboard navigation and accessibility standards",
-                        "Must allow disabling and readonly modes",
-                        "Must support localization (language, month and weekday labels)",
-                        "Must allow navigation between months",
-                        "Must highlight the current date",
-                        "Must display selected date(s) with visual feedback",
-                        "Must support both single and range date selection modes",
-                        "Must allow customization of first day of the week"
-                    ],
-                    "visualRequirements": [
-                        "Must render two consecutive months side by side",
-                        "Must clearly differentiate between selected, hovered, and disabled dates",
-                        "Must display weekdays headers aligned with their respective columns",
-                        "Must use subtle color variation for past/future dates outside the current month",
-                        "Must include controls for next/previous month navigation",
-                        "Must include a clear call-to-action to close or confirm the selection"
-                    ]
-                }
-            ]
+            json: [{ "sectionName": "resume", "description": "Widget para seleção de intervalo de datas, com suporte a limites mínimo/máximo, bloqueio de datas específicas e validação visual clara. Ideal para reservas e agendamentos." }, { "sectionName": "parentClass", "description": "Component for selecting date ranges, useful for period filters.", "widgetName": "IcaFormsInputDateRangeBase" }, { "sectionName": "widgetName", "description": "Nome do Widget", "widgetName": "widgetDateRangeBooking", "tagName": "widget-date-range-booking-100555" }, { "sectionName": "properties", "description": "Propriedades do widget", "properties": [{ "propertyName": "label", "description": "Texto exibido acima do campo de seleção.", "isEssencial": "false" }, { "propertyName": "hint", "description": "Dica ou instrução para o usuário.", "isEssencial": "false" }, { "propertyName": "errormessage", "description": "Mensagem de erro personalizada.", "isEssencial": "false" }, { "propertyName": "name", "description": "Nome do campo para integração com formulários.", "isEssencial": "false" }, { "propertyName": "startvalue", "description": "Data inicial selecionada.", "isEssencial": "false" }, { "propertyName": "endvalue", "description": "Data final selecionada.", "isEssencial": "false" }, { "propertyName": "required", "description": "Define se o campo é obrigatório.", "isEssencial": "false" }, { "propertyName": "disabled", "description": "Desabilita o componente.", "isEssencial": "false" }, { "propertyName": "readonly", "description": "Torna o campo somente leitura.", "isEssencial": "false" }, { "propertyName": "autofocus", "description": "Foca automaticamente no campo ao carregar.", "isEssencial": "false" }, { "propertyName": "minvalue", "description": "Data mínima permitida para seleção.", "isEssencial": "false" }, { "propertyName": "maxvalue", "description": "Data máxima permitida para seleção.", "isEssencial": "false" }, { "propertyName": "blockedDates", "description": "Lista de datas específicas que não podem ser selecionadas (essencial).", "isEssencial": "true" }, { "propertyName": "dropdown", "description": "Exibe o seletor de datas em formato dropdown (essencial).", "isEssencial": "true" }, { "propertyName": "errorPosition", "description": "Posiciona a mensagem de erro acima do componente (essencial).", "isEssencial": "true" }] }, { "sectionName": "requirements", "description": "requisitos para este widget, altere se necessário", "functionalRequirements": ["O usuário deve clicar primeiro na data inicial e depois na data final para confirmar o intervalo.", "A data inicial deve ser obrigatoriamente menor que a data final.", "Cada dia na tabela de datas deve ser um botão clicável.", "Deve ser possível definir datas bloqueadas que não podem ser selecionadas.", "Após a seleção, o componente deve atualizar e exibir o período escolhido, refletindo na propriedade do web-componente.", "O componente deve emitir eventos ou atualizar propriedades para integração com formulários externos."], "visualRequirements": ["O seletor de datas deve ser exibido em formato dropdown.", "A mensagem de erro deve aparecer acima do componente, nunca abaixo.", "Datas bloqueadas devem ser visualmente diferenciadas e não interativas.", "Datas selecionadas (inicial e final) devem ser destacadas.", "O período selecionado deve ser claramente exibido após a seleção."] }]
+
         }
     }
 
