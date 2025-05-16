@@ -108,6 +108,7 @@ export async function getPrompts(shortName: string, project: number): Promise<ml
     prompts.push(systemMainInstruction());
     prompts.push(systemTaskInstruction());
     prompts.push(systemDefinitionsInstruction());
+    prompts.push(systemPlaygroundInstruction());
     prompts.push(systemDemoInstruction());    
     prompts.push(await systemDefinitionsBaseTSInstruction(shortName, project));
     prompts.push(systemRulesInstruction());
@@ -120,7 +121,7 @@ function systemMainInstruction(): mls.msg.IAMessageInputType {
     //executor or translate
     return {
         type: 'system',
-        content: `${preferModelType("executor")}
+        content: `${preferModelType("translate")}
 Você é um assistente especialista em marketing técnico, design web e vendas. Sua tarefa é criar uma página HTML clara, moderna e atrativa que sirva como vitrine de demonstração (showcase) para um WebComponent personalizado.
 `
     }
@@ -168,6 +169,46 @@ O bloco HTML gerado deve conter:
    - A página seja autoexplicativa, com seções bem definidas.
    - O layout seja atrativo tanto em desktop quanto mobile.
    - Os estilos não ofusquem o componente, mas valorizem sua presença.
+`
+    }
+}
+
+function systemPlaygroundInstruction(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `## Seção de Demonstração (Playground)
+
+1. Crie um bloco playground com componentes <ica-forms-input-string-100554> para cada propriedade configurável.
+2. Para cada propriedade, associe uma key no objeto ui do state, como ui.buttonLabel1, ui.buttonLabel2, etc.
+3. Ao final, crie um único componente <widget-playground-state-100554> com o atributo state representando um objeto JSON com o namespace ui contendo todas essas chaves.
+
+### IMPORTANTE:
+ - O valor do atributo state deve ser uma string JSON válida:
+ - Sem quebras de linha (\n) – tudo deve estar em uma única linha.
+ - Envolvida por aspas simples externas.
+ - Não use aspas simples dentro do JSON, pois isso causará erro de parsing. Use apenas aspas duplas dentro do JSON, como no exemplo:
+
+### Exemplo:
+
+\`\`\` html
+<section class="section_demo">
+    <demo>       
+        <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel1}}"></widget-world-time-greeting-100554>
+        <playground>
+       
+            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop.buttonLabel:" value="{{ui.buttonLabel1}}"></ica-forms-input-string-100554>
+        </playground>
+    </demo>
+    <demo>   
+        <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel2}}"></widget-world-time-greeting-100554>
+        <playground>
+       
+            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{ui.buttonLabel2}}"></ica-forms-input-string-100554>
+        </playground>
+    </demo>
+    <widget-playground-state-100554 state='{"u"i:{"buttonLabel1": "Ver horários pelo mundo", "buttonLabel2": "Ver horários"}}'></Widget-playground-state-100554>
+</section>
+\`\`\`
 `
     }
 }

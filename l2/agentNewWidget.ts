@@ -167,6 +167,7 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
    - "PascalCase" para nomes de componentes/classes.
   1.6. Use os atributos padrões da classe base.
   1.7. Deixe a linha 1 , tripleSlash, igual no modelo, isto irá ser importante para saber o nome do arquivo e outros detalhes.
+  1.7.1 Coloque uma quebra de linha entre o tripleSlash e o codigo, conforme o modelo.
   1.8 Não use o CSS, usaremos o .less em um arquivo separado.
 
 2. Para o retorno do .less
