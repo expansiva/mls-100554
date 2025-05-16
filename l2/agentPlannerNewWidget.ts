@@ -1,7 +1,7 @@
 /// <mls shortName="agentPlannerNewWidget" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getListFilesStart, systemReturnJsonFormat, preferModelType } from './_100554_aiPrompts';
+import { getListFilesStart, systemReturnJsonFormat, preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
 import { icaDescriptions } from './_100554_icaBaseDescription';
 import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, notifyTaskChange, calculateStepsStatistics, getInteractionStepId,  } from "./_100554_aiAgentHelper";
 import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewStep } from "./_100554_aiAgentOrchestration";
@@ -65,6 +65,17 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 }
 
+const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> => {
+
+    if (!context.task) throw new Error("[_beforeClarification] Invalid context.task");
+    const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
+    if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
+    if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
+    const element = prepareHtmlClarification(step.json, context.task.PK, stepId, step.clarificationMessage);
+    return element;
+
+}
+
 const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number, data: ClarificationData): Promise<void> => {
 
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
@@ -102,24 +113,12 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
 
 }
 
-const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> => {
-
-    if (!context.task) throw new Error("[_beforeClarification] Invalid context.task");
-    const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
-    if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
-    if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
-    const element = prepareHtmlClarification(step.json, context.task.PK, stepId, step.clarificationMessage);
-    return element;
-
-}
-
-
 export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
     if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
     const prompts: mls.msg.IAMessageInputType[] = [];
 
     prompts.push(systemMainInstruction());
-    prompts.push(systemICAComponentsList());
+    prompts.push(systemComponentsInstruction());
     prompts.push(await systemWidgetsPrompt());
     prompts.push({
         type: 'human',
@@ -215,25 +214,6 @@ async function systemWidgetsPrompt(): Promise<mls.msg.IAMessageInputType> {
     return {
         type: 'system',
         content: "## Widgets existentes\n" + await getWidgetList()
-    }
-}
-
-function getICADescription(): string {
-    const result: string[] = [];
-    Object.entries(icaDescriptions).forEach(([key, value]) => {
-        result.push(
-            `"${key}": {\n  "attributes": ${JSON.stringify(value.attributes)},\n  "description": "${value.description}"\n}`
-        );
-    });
-    return result.join("/n");
-}
-
-function systemICAComponentsList(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## Componentes Disponíveis
-${getICADescription()}
-`
     }
 }
 

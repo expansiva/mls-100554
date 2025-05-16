@@ -4,7 +4,7 @@ import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getTokens } from './_100554_libCompile';
 import { forceServiceInstance } from './_100554_libCommom';
 import { createNewFile } from "./_100554_pluginNewFileBase";
-import { preferModelType } from './_100554_aiPrompts';
+import { preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
 
 import {
     getNextPendingStepByAgentName,
@@ -129,9 +129,8 @@ export async function getPrompts(json: any, prompt: string | undefined, rags: st
     prompts.push(systemOutInstruction());
     prompts.push(systemModelInstruction());
     prompts.push(systemRequirementsUserInstruction(json));
-    prompts.push(await systemDefinitionsBaseInstruction(json));
+    prompts.push(systemComponentsInstruction());
     prompts.push(await systemTokensLessInstruction());
-
 
     prompts.push({
         type: 'human',
@@ -144,7 +143,7 @@ function systemMainInstruction(): mls.msg.IAMessageInputType {
     //executor or translate
     return {
         type: 'system',
-        content: `${preferModelType("executor")}
+        content: `${preferModelType("translate")}
 Você é um programador responsável pela criação de um novo web componente (widget) para o sistema Collab Codes.
 
 Se não for possível cumprir esta tarefa (por falta de dados ou conflito de requisitos), **retorne um objeto JSON** do tipo "result", com uma descrição do problema.
@@ -168,6 +167,7 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
    - "PascalCase" para nomes de componentes/classes.
   1.6. Use os atributos padrões da classe base.
   1.7. Deixe a linha 1 , tripleSlash, igual no modelo, isto irá ser importante para saber o nome do arquivo e outros detalhes.
+  1.8 Não use o CSS, usaremos o .less em um arquivo separado.
 
 2. Para o retorno do .less
   2.1 Inclua o código LESS, onde o primeiro nível é a tag HTML do componente.
@@ -195,27 +195,19 @@ function systemDefinitionsInstruction(): mls.msg.IAMessageInputType {
         content: `## Definições de Propriedades (Collab Codes):
 A classe base utilizada no sistema Collab Codes define três tipos principais de propriedades:
 
-- @property: Padrão do Lit para propriedades estáticas.
+- @property: Padrão do Lit para propriedades estáticas. Mas vamos evitar usar.
 - @propertyDataSource: Propriedade ligada a um único state dinâmico. Exemplo de binding: "{{page1.name}}".
 - @propertyCompositeDataSource: Propriedade composta por múltiplos states dinâmicos. Exemplo: "Olá {{page1.userId}} - {{page1.userName}}".
+- para atributos na classe 'Text', use '@propertyCompositeDataSource'.
+- para atributos na classe 'Bind', use '@propertyDataSource'.
+- para atributos na classe 'Cfg', use '@propertyCompositeDataSource'.
 
 - a propriedade autofocus deve ser definida conforme lit "@property({{ type: Boolean }}) autofocus: boolean = false;"
 - a propriedade name deve ser definida conforme lit "@property({{ type: String }}) name: string | undefined;"
 
 **Importante**: Use corretamente a anotação conforme o tipo da propriedade analisada.
 Para cada propriedade criada, use um JSDoc com exemplo.
-Para a classe , use um JSDoc incluindo também o esqueleto gerado no render, que será utilizado para fazer o css/less futuramente.
-
-**Sobre o gerenciamento de propriedades e states no Collab Codes:**
-
-- Quando uma propriedade é decorada com @propertyDataSource ou @propertyCompositeDataSource, ela é automaticamente associada a um ou mais states dinâmicos do sistema, como por exemplo: "{{page1.dataRange}}".
-- O gerenciador de states do Collab Codes é responsável por:
-  - Registrar automaticamente a dependência entre a propriedade e o(s) state(s) referenciado(s).
-  - Detectar alterações no(s) state(s) de forma automática e eficiente.
-  - Atualizar o valor da propriedade no componente sem necessidade de eventos manuais (dispatchEvent, CustomEvent, etc.).
-- **Importante:**
-  Não é necessário implementar listeners, eventos personalizados, nem funções de observação manual para essas propriedades.
-  **Toda a comunicação e atualização é gerenciada automaticamente pelo sistema de states.**
+Para a classe , use um JSDoc com o resumo das funcionalidades do componente.
 `
     }
 }
@@ -346,27 +338,6 @@ function systemRequirementsUserInstruction(req: any): mls.msg.IAMessageInputType
 ${JSON.stringify(req, null, 2)}
 \`\`\`
 `
-    }
-}
-
-//Tem q ser dinamico
-async function systemDefinitionsBaseInstruction(json: any[]): Promise<mls.msg.IAMessageInputType> {
-
-    const step = json.find((i) => i.sectionName === 'parentClass');
-    if (!step) throw new Error("[systemDefinitionsBaseInstruction]Not found section : parentClass")
-    if (!step.widgetName) throw new Error("[systemDefinitionsBaseInstruction]Not found widgetName in parentClass");
-
-    const shortName = firstLowercaseLetter(step.widgetName);
-
-    const key = mls.stor.getKeyToFiles(project, 2, shortName, "", ".ts");
-    if (!mls.stor.files[key]) throw new Error("[systemDefinitionsBaseInstruction]Not found class base:" + project + "_" + shortName);
-
-    let contet = await mls.stor.files[key].getContent() as string;
-
-    if (!contet) throw new Error("[systemDefinitionsBaseInstruction]Not found content:" + project + "_" + shortName);
-    return {
-        type: 'system',
-        content: `## Definições da Classe Base \n\n ${contet}`
     }
 }
 

@@ -1,7 +1,7 @@
 /// <mls shortName="aiPrompts" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { ITool, IAgent } from './_100554_aiAgentBase'
-import { icaDescriptions } from './_100554_icaBaseDescription'
+import { descriptionForPrompt } from './_100554_icaBaseDescription'
 
 export function systemAgentsAvailable(): mls.msg.IAMessageInputType {
     return {
@@ -146,40 +146,12 @@ function getDefTool(tool: ITool): string {
 
     return `${tool.toolName}: ${tool.description} (args: ${argsList})`;
 }
-// import { createTool as t2 } from "./toolMortgageCalculator.js";
-// import { createTool as t1 } from './toolPercentagemCalculator.js';
-
-
-// function addTool(tool: mls.msg.ITool, tools: string[]): void {
-//   const argsList = Object.keys(tool.argsSchema || {})
-//     .map(arg => `${arg}:${tool.argsSchema[arg].type} /* ${tool.argsSchema[arg].description} */`)
-//     .join(', ');
-
-//   tools.push(`${tool.toolName}: ${tool.description} (args: ${argsList})`);
-// }
-
-export function systemRulesComponentsInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `##REGRA DOS COMPONENTES
-No atributo  allowedChildren e allowedParents
-
-- Pode encontrar itens que terminam -*, exemplo: "ica-forms-*" isso significa que o componente aceita qualquer filho que a tag comece com "ica-forms-" exemplo nesse caso aceitaria "ica-forms-submit"
-
-- Pode ser encontrado também itens que começam com **, exemplo "**ica-forms-content-form" isso significa que o item não precisar ser filho direto do elemento, porem tem q estar debaixo desse elemento
-
--Pode encontrar também o item "!*", isso significa que esse componente não aceita filho nenhum
-
--Se o atributo allowedParents estiver preenchido, significa que aquele componente só pode ser adicionado dentro daquele componente diretamente ou não, seguindo a regra do "**"
-`
-    }
-}
 
 export function systemComponentsInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
-        content: `##COMPONENTES DISPONÍVEIS
-    ${JSON.stringify(icaDescriptions, null, 2)}
+        content: `## COMPONENTES DISPONÍVEIS
+    ${descriptionForPrompt}
 `
     }
 }
