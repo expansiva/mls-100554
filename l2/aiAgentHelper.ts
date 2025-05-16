@@ -29,6 +29,19 @@ export const getAllSteps = (firstStep: mls.msg.AIPayload[] | undefined): mls.msg
   return allSteps;
 };
 
+export const getAgentStepByAgentName = (task: mls.msg.TaskData, agentName: string): mls.msg.AIPayload | null => {
+  const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
+  const agentSteps = allSteps.find((step): step is mls.msg.AIAgentStep => step.type === 'agent' && step.agentName === agentName);
+  return agentSteps || null;
+};
+
+export const getAgentsStepByAgentName = (task: mls.msg.TaskData, agentName: string): mls.msg.AIPayload[] | [] => {
+  const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
+  const agentSteps = allSteps.filter((step): step is mls.msg.AIAgentStep => step.type === 'agent' && step.agentName === agentName);
+  return agentSteps || [];
+};
+
+
 export const getStepById = (task: mls.msg.TaskData, stepId: number): mls.msg.AIPayload | null => {
   const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
   return allSteps.find(step => step.stepId === stepId) || null;
@@ -80,6 +93,8 @@ export const getInteractionStepId = (task: mls.msg.TaskData, stepId: number): nu
 
   return null;
 }
+
+
 
 
 export type StatisticsAITask = {
@@ -193,6 +208,24 @@ export function argsValidator(
   }
 }
 
+export async function appendLongTermMemory(context: mls.msg.ExecutionContext, longTermMemory: Record<string, string>) {
+  if (!context.task) throw new Error('[appendLongTermMemory] invalid task');
+  const messageId: string | undefined = context.task.messageid_created;
+  if (!messageId) throw new Error("[appendLongTermMemory] Invalid messageId");
+
+  const ret = await mls.api.msgAppendLongTermMemory({
+    longTermMemory,
+    messageId,
+    taskId: context.task.PK,
+    userId: getUserIdLocalStorage() || context.message.senderId,
+
+  });
+
+  if (!ret || ret.statusCode !== 200) throw new Error("error on AI appendLongTermMemory , stoped");
+  return (ret as mls.msg.ResponseAppendLongTermMemory).task;
+
+}
+
 export const updateStepStatus = async (task: mls.msg.TaskData, stepId: number, status: mls.msg.AIStepStatus, traceMsg?: string): Promise<mls.msg.TaskData> => {
   const args: mls.msg.RequestUpdateStepStatus = {
     "action": "updateStepStatus",
@@ -293,23 +326,27 @@ export function getTotalCost(task: mls.msg.TaskData): string {
   const nextSteps = task.iaCompressed?.nextSteps;
   if (!nextSteps || nextSteps.length === 0) return tot.toFixed(4);
 
-  const sumCosts = (interaction: mls.msg.AIInteraction) => {
-    tot += interaction.cost ? interaction.cost : 0;
-    if (interaction.payload && interaction.payload.length > 0) {
-      interaction.payload.forEach((p) => {
-        if (p.interaction) sumCosts(p.interaction);
-        if (p.nextSteps) {
-          p.nextSteps.forEach((p1) => {
-            if (p1.interaction) sumCosts(p1.interaction);
-          });
-        }
-      });
+  const sumCosts = (payload: mls.msg.AIPayload[]) => {
 
-    }
+    payload.forEach((pay) => {
+      const { interaction, nextSteps } = pay;
+
+      if (interaction) {
+        tot += interaction.cost ? interaction.cost : 0;
+        if (interaction.payload) sumCosts(interaction.payload);
+      }
+
+      if (nextSteps) {
+        nextSteps.forEach((next) => {
+          sumCosts([next])
+        });
+      }
+
+    });
   };
 
   nextSteps.forEach((step) => {
-    if (step.interaction) sumCosts(step.interaction);
+    sumCosts([step]);
   })
 
   return tot.toFixed(4);
