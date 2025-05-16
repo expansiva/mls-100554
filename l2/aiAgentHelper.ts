@@ -35,10 +35,11 @@ export const getAgentStepByAgentName = (task: mls.msg.TaskData, agentName: strin
   return agentSteps || null;
 };
 
-export const getAgentsStepByAgentName = (task: mls.msg.TaskData, agentName: string): mls.msg.AIPayload[] | [] => {
+export const getAgentsStepByAgentName = (task: mls.msg.TaskData, agentName: string, status?: mls.msg.AIStepStatus): mls.msg.AIPayload[] => {
   const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
   const agentSteps = allSteps.filter((step): step is mls.msg.AIAgentStep => step.type === 'agent' && step.agentName === agentName);
-  return agentSteps || [];
+  if (!status) return agentSteps || [];
+  return agentSteps.filter(step => step.status === status);
 };
 
 

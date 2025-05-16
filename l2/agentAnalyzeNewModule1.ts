@@ -73,16 +73,7 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
         throw new Error(`[${agentName}] _afterClarification: No found step: ${stepId} for this agent.`);
     }
 
-    const interactionId: number | null = getInteractionStepId(context.task, step.stepId);
-    if (!interactionId) throw new Error("[_afterClarification] Not found interactionId in pending step")
-    const payload: mls.msg.AIPayload | null = getStepById(context.task, interactionId);
-    if (!payload || payload.type !== "agent") throw new Error("[_afterClarification] Clarification or tool step not bellow a agent");
-
-    const promptUser = payload.interaction?.input.find((input) => input.type === 'human')?.content || '';
-
     if (!data.promptUser) {
-        console.info('[_afterClarification] TODO: chamar proximo prompt para continuar');
-
         const newStep: mls.msg.AIPayload = {
             agentName: 'agentAnalyzeNewModule2',
             prompt: JSON.stringify(data.json),
@@ -113,9 +104,9 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
         type: 'agent'
     }
 
+    console.info('[_afterClarification]' + rc)
     await addNewStep(context, step.stepId, [newStep]);
 
-    console.info('[_afterClarification]' + rc)
 
 }
 
@@ -145,7 +136,7 @@ export async function getPrompts(prompt: string | undefined, rags: string[] | nu
 function systemMainInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
-        content: `${preferModelType("translate")}
+        content: `${preferModelType("code")}
 Você é um assistente de projeto. Sua tarefa é analisar este pedido e extrair:
 
 1. Objetivo principal.
