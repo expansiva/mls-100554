@@ -2,6 +2,7 @@
 
 import { ITool, IAgent } from './_100554_aiAgentBase'
 import { descriptionForPrompt } from './_100554_icaBaseDescription'
+import { getTokensLess } from './_100554_designSystemBase';
 
 export function systemAgentsAvailable(): mls.msg.IAMessageInputType {
     return {
@@ -155,3 +156,14 @@ export function systemComponentsInstruction(): mls.msg.IAMessageInputType {
 `
     }
 }
+
+export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageInputType> {
+    const { project } = mls.actual[5];
+    const theme = 'Default';
+    if (!project) throw new Error('Invalid Project');
+    return {
+        type: 'system',
+        content: '## LESS TOKENS - DESIGN SYSTEM \n\n' + (await getTokensLess(project, theme)) || ""
+    }
+}
+

@@ -2,7 +2,6 @@
 
 export type Visibility = 'public' | 'client' | 'admin';
 
-
 export interface IAgentCreateSitePrompt {
     data: ModuleDefinition,
     response : TemplateContent[] | undefined
@@ -51,7 +50,7 @@ export interface UIState {
   description: string;
 }
 
-export interface OrganismOrMolecule {
+export interface Molecule {
   name: string;
   description: string;
   attributes: string;
@@ -60,7 +59,7 @@ export interface OrganismOrMolecule {
 export interface ChildElement {
   class: string;
   description: string;
-  organismOrMolecule: OrganismOrMolecule;
+  organismOrMolecule: Organism | Molecule;
 }
 
 export interface Organism {
@@ -91,6 +90,5 @@ export interface TemplateContent {
   template: Template;
   implementationNotes: string[];
 }
-
 
 
