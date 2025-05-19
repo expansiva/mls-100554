@@ -4,8 +4,8 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaBlocksViewerBase extends StateLitElement {
 
-    abstract config: string | undefined;
-abstract data: string | undefined;
+    abstract config: any | undefined;
+    abstract data: string | undefined;
 
 
 }

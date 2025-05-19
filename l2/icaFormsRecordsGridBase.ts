@@ -4,9 +4,9 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaFormsRecordsGridBase extends StateLitElement {
 
-    abstract config: string | undefined;
-abstract selectedRows: string | undefined;
-abstract editedRows: string | undefined;
+    abstract config: any | undefined;
+    abstract selectedRows: string | undefined;
+    abstract editedRows: string | undefined;
 
 
 }
