@@ -4,8 +4,8 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaApresentationTextBase extends StateLitElement {
 
-    abstract config: string | undefined;
-abstract text: string | undefined;
+    abstract config: any | undefined;
+    abstract text: string | undefined;
 
 
 }

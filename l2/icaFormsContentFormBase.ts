@@ -13,6 +13,7 @@ export abstract class IcaFormsContentFormBase extends StateLitElement {
 	abstract enctype: string | undefined;
 	abstract name: string | undefined;
 	abstract target: string| undefined;
-	abstract autosave: boolean ;
+	abstract autosave: boolean;
+	abstract formId: string| undefined;
 
 }

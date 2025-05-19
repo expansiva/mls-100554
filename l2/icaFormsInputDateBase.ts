@@ -15,4 +15,5 @@ export abstract class IcaFormsInputDateBase extends StateLitElement {
     abstract autofocus: boolean; // Whether the field should be automatically focused on page load
     abstract maxvalue: string | undefined; // Maximum value restriction for the input
     abstract minvalue: string | undefined; // Minimum value restriction for the input
+    abstract readonly: boolean;
 }

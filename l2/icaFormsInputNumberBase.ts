@@ -19,6 +19,8 @@ export abstract class IcaFormsInputNumberBase extends StateLitElement {
 
 	abstract name: string | undefined; 
 	abstract inputmode: string | undefined; 
+	abstract suffix: string | undefined; 
+	abstract prefix: string | null; 
 	abstract readonly: boolean;
 
 }

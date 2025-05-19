@@ -4,7 +4,7 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaApresentationChartBase extends StateLitElement {
 
-    abstract config: string | undefined;
+    abstract config: any | undefined;
     abstract chartdata: string | undefined;
 
 
