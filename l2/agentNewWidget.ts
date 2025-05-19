@@ -166,9 +166,11 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
    - "camelCase" para propriedades.
    - "PascalCase" para nomes de componentes/classes.
   1.6. Use os atributos padrões da classe base.
+  1.6.1 O componente nunca deve renderizar um <ica-...> dentro dele mesmo.
   1.7. Deixe a linha 1 , tripleSlash, igual no modelo, isto irá ser importante para saber o nome do arquivo e outros detalhes.
   1.7.1 Coloque uma quebra de linha entre o tripleSlash e o codigo, conforme o modelo.
   1.8 Não use o CSS, usaremos o .less em um arquivo separado.
+  1.9 Caso tenha textos fixos deve se usar a parte do bloco collab_i18n
 
 2. Para o retorno do .less
   2.1 Inclua o código LESS, onde o primeiro nível é a tag HTML do componente.
@@ -274,8 +276,28 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
 import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
 
+/// **collab_i18n_start**
+const message_pt = {
+    hello: 'Olá',
+
+}
+
+const message_en = {
+    hello: 'Hello',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en': message_en,
+    'pt': message_pt
+}
+/// **collab_i18n_end**
+
 @customElement('widget-input-number-100554')
 export class WidgetInputNumber extends IcaFormsInputNumberBase {
+
+    private myMessage: MessageType = messages['en'];
 
     @propertyDataSource({ type: String }) value: number | undefined;
 
@@ -285,6 +307,7 @@ export class WidgetInputNumber extends IcaFormsInputNumberBase {
 
     render() {
         return html\`
+        <h2>\${this.myMessage.hello}</h2>
         <label class="form-control-label" for="input">
           \${this.label}
         </label>
