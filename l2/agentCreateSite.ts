@@ -4,7 +4,7 @@ import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
 import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getAgentStepByAgentName, updateStepStatus, calculateStepsStatistics, getNextPendentStep, appendLongTermMemory, getAgentsStepByAgentName } from "./_100554_aiAgentHelper";
 import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewStep } from "./_100554_aiAgentOrchestration";
-import { IAgentCreateSitePrompt, ModuleDefinition } from './_100554_agentAnalyzeNewModuleBase';
+import { IAgentCreateSitePrompt, ModuleDefinition, TemplateContent, TemplateChild, ChildElement, Organism } from './_100554_agentAnalyzeNewModuleBase';
 
 const agentName = "agentCreateSite";
 
@@ -66,7 +66,6 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
   if (!remainingTasks || remainingTasks.length === 0) {
     await execPrepareMolecules(context);
-    await executeNextStep(context);
     return;
   }
 
@@ -88,9 +87,9 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 }
 
 async function execPrepareMolecules(context: mls.msg.ExecutionContext) {
-  if (!context || !context.task) throw new Error(`[${agentName}] Not found context on _afterPrompt`);
+  if (!context || !context.task) throw new Error(`[${agentName}] Not found context on execPrepareMolecules`);
   const step = getNextPendentStep(context.task) as any;
-  if (!step || step.type !== 'flexible') throw new Error(`[${agentName}] Invalid next pendent step on _afterPrompt`);
+  if (!step || step.type !== 'flexible') throw new Error(`[${agentName}] Invalid next pendent step on execPrepareMolecules`);
   if (!step.content) throw new Error(`[${agentName}] Not found "content" in flexible result`);
 
   const allSteps = getAgentsStepByAgentName(context.task, 'agentCreateSite');
@@ -99,37 +98,77 @@ async function execPrepareMolecules(context: mls.msg.ExecutionContext) {
     if (payload) return (payload as any).content
   }).filter((s) => s !== undefined).flat();
 
-  console.info({ allStepsResults: allResults })
-
-  const res = extractTemplatesAndOrganisms(allResults);
+  console.info({ allStepsResults: allResults });
+  const templateAndOrganismToCreate = extractTemplatesAndOrganisms(allResults);
   console.info({
-    moleculesToCreate: res
+    templateAndOrganismToCreate: templateAndOrganismToCreate
   });
+
+  const newStep: mls.msg.AIPayload = {
+    agentName: 'agentCreateOrganism',
+    prompt: JSON.stringify([...templateAndOrganismToCreate.templates, ...templateAndOrganismToCreate.organisms]),
+    status: 'pending',
+    stepId: step.stepId + 1,
+    interaction: null,
+    nextSteps: null,
+    rags: null,
+    type: 'agent'
+  }
+
+  await addNewStep(context, step.stepId, [newStep]);
 
 }
 
-export function extractTemplatesAndOrganisms(tasks: any[]) {
-  const templateNames = new Set<string>();
-  const organismNames = new Set<string>();
+export function extractTemplatesAndOrganisms(tasks: TemplateContent[]) {
+  const templateNames = new Set<any>();
+  const organismNames = new Set<any>();
 
-  const collectOrganisms = (childs: any[]) => {
+  const prepareName = (name: string) => {
+    const { project } = mls.actual[5];
+    return `${name}-${project}`;
+  }
+
+  const collectOrganisms = (childs: TemplateChild[] | ChildElement[]) => {
     for (const child of childs) {
-      if (child.organism) {
-        const org = child.organism;
-        if (org.name) organismNames.add(org.name);
+
+      if ("organism" in child) {
+        const _child = child as TemplateChild;
+        const org = _child.organism;
+        if (org.name) organismNames.add({
+          name: prepareName(org.name),
+          description: org.description,
+          class: org.childs.map((child) => child.class)
+        });
         if (org.childs) collectOrganisms(org.childs);
+      } else if ("organismOrMolecule" in child && !("attributes" in child.organismOrMolecule)) {
+
+        const _child = child.organismOrMolecule as Organism;
+        if (_child.name) organismNames.add({
+          name: prepareName(_child.name),
+          description: _child.description,
+          class: _child.childs.map((child) => child.class)
+        });
+        collectOrganisms(child.organismOrMolecule.childs);
       }
     }
+
   };
 
   for (const task of tasks) {
     const template = task.template;
+
     if (template?.name) {
-      templateNames.add(template.name);
+      templateNames.add({
+        name: prepareName(template.name),
+        description: template.description,
+        class: template.childs.map((child) => child.class)
+      });
     }
+
     if (template?.childs) {
       collectOrganisms(template.childs);
     }
+
   }
 
   return {
@@ -142,15 +181,16 @@ export async function getPrompts(taskId: string, prompt: string | undefined, rag
   if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
   const prompts: mls.msg.IAMessageInputType[] = [];
 
-  prompts.push(systemMainInstruction(taskId));
+  let allResults: TemplateContent[] = []
+
   if (tasks) {
-    const allResults = tasks.map((step) => {
+    allResults = tasks.map((step) => {
       const payload = step.interaction?.payload?.[0]
       if (payload) return (payload as any).content
-    }).filter((s) => s !== undefined).flat();
-    prompts.push(tasksAlreadyCreated(allResults));
-
+    }).filter((s) => s !== undefined).flat() as TemplateContent[];
   }
+
+  prompts.push(systemMainInstruction(taskId, allResults));
   prompts.push(outputFormat());
   prompts.push(componentCompositionStandard());
   prompts.push(atomicDesignMolecules());
@@ -177,10 +217,7 @@ Analise a seção "## Definições da task":
  - Não omita nenhuma task. Verifique todas que estiverem listadas no JSON.
  - Use somente as tabelas relacionadas neste módulo.
 
-
-*/
-
-/*
+---------
 
 ## Contexto Global (Retrieve)
 Defina o objetivo e as necessidades da página, dados disponíveis, público-alvo e função principal.
@@ -190,7 +227,8 @@ analise a seção "## Collab States"
 
 */
 
-function systemMainInstruction(taskId: string): mls.msg.IAMessageInputType {
+
+function systemMainInstruction(taskId: string, allResults: TemplateContent[]): mls.msg.IAMessageInputType {
   return {
     type: 'system',
     content: `${preferModelType("code")}
@@ -201,7 +239,7 @@ Retornar um JSON compatível com a interface definida na seção "## Formato de 
 
 ## Contexto Global (Retrieve)
 Defina o objetivo e as necessidades da página, dados disponíveis, público-alvo e função principal.
-Analise a seção "## Definições da task" abaixo, e analise a task "${taskId}". Gere 2 versões com diferenças entre textos e criatividade, nomeie como "${taskId}v1" e "${taskId}v2". Use somente as tabelas relacionadas neste módulo.
+Analise a seção "## Definições da task" abaixo, e analise a task "${taskId}". Use somente as tabelas relacionadas neste módulo.
 Analise a seção "## Padrão de Composição dos Componentes"
 analise a seção "## Collab States"
 
@@ -259,28 +297,18 @@ Algumas moléculas permite o uso de imagens, videos e sons (assets) em seus atri
 - a seção Media permite que uma outra etapa pesquise um asset que mais se encaixe, então use o campo 'searchText' em ingles , de uma forma a pesquisar nos sites especializados.
 
 ## Templates disponíveis no projeto
-${getTemplatesAvaliables()}
+${getTemplatesAvaliables(allResults)}
 
 ## Organismos disponíveis no projeto
-${getOrganismAvaliables()}
+${getOrganismAvaliables(allResults)}
 
 ## Assets disponíveis no projeto
-${getAssetsAvaliables()}
+${getAssetsAvaliables(allResults)}
 
 `
   }
 }
 
-function tasksAlreadyCreated(tasks: any[]): mls.msg.IAMessageInputType {
-  return {
-    type: 'system',
-    content: `## Importante
-    
-    Levar em consideração os states,organism e templates já criados anteriormente e analisar se é possivel reaproveitar. Segue abaixo as definições já criadas:
-      ${JSON.stringify(tasks)}
-    `
-  }
-}
 
 function outputFormat(): mls.msg.IAMessageInputType {
   return {
@@ -450,20 +478,49 @@ A abordagem por states é mais declarativa, permite rastreamento mais fácil por
   }
 }
 
-function getTemplatesAvaliables(): string {
-  return `- nenhum`
+function getTemplatesAvaliables(templatesResult: TemplateContent[]): string {
+  if (templatesResult.length === 0) return `- nenhum`;
+
+  const res = templatesResult.map(item => item.template)
+    .filter(template => template && template.reusable === true)
+    .map(template => ({
+      name: template.name,
+      description: template.description
+    }));
+
+  return res.length === 0 ? `- nenhum` : `- ${res.join('-')}`
+
 }
 
-function getOrganismAvaliables(): string {
-  return `- nenhum`
+function getOrganismAvaliables(templatesResult: TemplateContent[]): string {
+  if (templatesResult.length === 0) return `- nenhum`;
+
+  const organisms: any[] = [];
+  templatesResult.forEach(item => {
+    const template = item.template;
+    if (!template || !template.childs) return;
+
+    template.childs.forEach(child => {
+      const organism = child.organism;
+      if (organism && organism.name && organism.description) {
+        organisms.push({
+          name: organism.name,
+          description: organism.description
+        });
+      }
+    });
+  });
+
+  return organisms.length === 0 ? `- nenhum` : `- ${organisms.join('-')}`
+
 }
 
-function getAssetsAvaliables(): string {
+function getAssetsAvaliables(templatesResult: TemplateContent[]): string {
+  if (templatesResult.length === 0) return `- nenhum`;
   return `- nenhum`
 }
 
 function getRemainingTasksIds(task: mls.msg.TaskData) {
-  // return (window as any).remainingTasks;
   const remainingTasks = task.iaCompressed?.longMemory.remainingTasks || '';
   if (!remainingTasks) return []
   const arrRemainingTasks = remainingTasks.split(',');
