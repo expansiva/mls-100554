@@ -4,7 +4,7 @@ import { PropertyDeclaration } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CollabState, globalState } from './_100554_collabState';
 
-export const state1 = new CollabState(); 
+export const state1 = new CollabState();
 globalState.globalStateManagment = state1;
 
 /**
@@ -29,8 +29,12 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
         if (attributeValue && attributeValue.includes('{{')) {
           return parseCompositeData.call(this, attributeValue, attributeName, options, '', false);
         }
+
+        if (this[`_${attributeName}`] !== undefined) return this[`_${attributeName}`];
         // Default to internal property value
+        if (typeof this[`_${attributeName}`] === 'object' || Array.isArray(this[`_${attributeName}`])) return this[`_${attributeName}`];
         return attributeValue;
+        
       },
       set(value: any) {
         if (typeof value === 'string' && value.includes('{{')) {
@@ -99,10 +103,10 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
           return state1.getState(stateKey);
         }
-        if (this[`_${attributeName}`] !== undefined) return this[`_${attributeName}`];
         // Default to internal property value
-        if (typeof this[`_${attributeName}`] === 'object' || Array.isArray(this[`_${attributeName}`])) return this[`_${attributeName}`];
+        if (this[`_${attributeName}`] !== undefined) return this[`_${attributeName}`];
         return attributeValue;
+
       },
       set(value: any) {
 
