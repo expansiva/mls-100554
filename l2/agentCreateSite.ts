@@ -11,8 +11,8 @@ import { createNewFile } from "./_100554_pluginNewFileBase";
 
 import { TemplateContent, TemplateChild, ChildElement, Organism, Molecule, Media } from './_100554_agentAnalyzeNewModuleBase';
 
-const ICATEMPLATE = 'ica-template-base-100554';
-const ICAORGANISM = 'ica-organism-base-100554';
+const ICATEMPLATE = 'ica-template-100554';
+const ICAORGANISM = 'ica-organism-100554';
 const PROJECTICA = 100554;
 const MODEOVERLAYDEFAULT = 'wcd-overlay-mode-default-100554';
 
@@ -152,6 +152,7 @@ function execPrepareHTML(allResults: TemplateContent[]) {
 
   const result: Record<string, { el: HTMLElement, data: TemplateContent }> = {};
   const result2: Record<string, { el: HTMLElement, data: TemplateContent }> = {};
+  const actualProject = mls.actual[5].project;
 
   for (const task of allResults) {
 
@@ -168,7 +169,8 @@ function execPrepareHTML(allResults: TemplateContent[]) {
         } else if ("organism" in child) {
           const _organism = child.organism as Organism;
           const organinsEl = document.createElement(ICAORGANISM);
-          organinsEl.setAttribute('widget', _organism.name);
+          const tagName = `${_organism.name}-${actualProject}`;
+          organinsEl.setAttribute('widget', tagName);
           organinsEl.className = child.class;
           parent.appendChild(organinsEl);
           prepareElements(_organism.childs, organinsEl);
@@ -177,9 +179,11 @@ function execPrepareHTML(allResults: TemplateContent[]) {
     }
 
     const templateElement = document.createElement(ICATEMPLATE);
-    templateElement.setAttribute('widget', template.name);
+    const tagName = `${template.name}-${actualProject}`;
+    templateElement.setAttribute('widget', tagName);
     result[template.name] = { el: templateElement, data: task };
     if (template?.childs) prepareElements(template.childs, templateElement);
+
   }
 
   const prepareName = (name: string) => {
