@@ -5,6 +5,9 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 @customElement('wc-video-100554')
 export class WcVideo100554 extends LitElement {
+    createRenderRoot() {
+        return this;
+    }
 
     @property({ type: String }) src = '';
     @property({ type: Boolean }) autoplay = false;

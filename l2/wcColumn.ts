@@ -7,6 +7,10 @@ import { customElement, property } from 'lit/decorators.js';
 export class WcColumn extends LitElement {
     gap: string | undefined;
 
+    createRenderRoot() {
+        return this;
+    }
+
     render() {
         return html`<slot></slot>`
     }

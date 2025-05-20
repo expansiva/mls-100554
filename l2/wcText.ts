@@ -7,6 +7,10 @@ import { propertyDataSource } from './_100554_collabDecorators';
 @customElement('wc-text-100554')
 export class WcInputText100554 extends LitElement {
 
+    createRenderRoot() {
+        return this;
+    }
+    
     @propertyDataSource({ type: String }) text: string | undefined;
     @property({ type: String }) type: string | undefined;
     

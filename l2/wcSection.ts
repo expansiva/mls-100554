@@ -5,6 +5,9 @@ import { customElement, property } from 'lit/decorators.js';
 
 @customElement('wc-section-100554')
 export class WcSection100554 extends LitElement {
+    createRenderRoot() {
+        return this;
+    }
 
     render() {
         return html`<slot></slot>`;

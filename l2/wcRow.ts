@@ -7,6 +7,10 @@ import { customElement, property } from 'lit/decorators.js';
 export class WcRow extends LitElement {
     gap: string | undefined;
 
+    createRenderRoot() {
+        return this;
+    }
+
     @property() hint: string | undefined;
 
     render() {

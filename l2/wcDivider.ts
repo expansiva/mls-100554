@@ -6,6 +6,10 @@ import { customElement, property } from 'lit/decorators.js';
 @customElement('wc-divider-100554')
 export class WcDivider100554 extends LitElement {
 
+    createRenderRoot() {
+        return this;
+    }
+
     @property() text: string | undefined;
 
     render() {

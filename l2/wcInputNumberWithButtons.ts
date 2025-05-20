@@ -10,6 +10,10 @@ export class WCInputNumber extends IcaFormsInputNumberBase {
     suffix: string | undefined;
     prefix: string | null = '';
 
+    createRenderRoot() {
+        return this;
+    }
+
     @property({ type: String }) name: string | undefined;
 
     @propertyDataSource({ type: String }) value: number | undefined;
