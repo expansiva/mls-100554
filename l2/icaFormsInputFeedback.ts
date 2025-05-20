@@ -4,6 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
+@customElement('ica-forms-input-feedback-100554')
 export abstract class IcaFormsInputFeedback extends IcaLitElementBase {
 
     public mySymbol = 'fa-table-columns';
