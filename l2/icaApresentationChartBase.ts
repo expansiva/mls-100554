@@ -10,13 +10,13 @@ export abstract class IcaApresentationChartBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     recommendedWidget: "treed3" | "echarts" | "chartjs" | string,
     renderer?: string,               // optional custom render strategy
     options3d?: object               // used only if recommendedWidget = "3d"
 }
 
-interface IChartData {
+export interface IChartData {
     type: "bar" | "line" | "pie" | "scatter" | "tree" | string,
     title?: string,
     xAxis?: string[],

@@ -9,7 +9,7 @@ export abstract class IcaApresentationEmbedSocialBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     recommendedWidget: "post" | "feed",
     url: string,                    // required: post or profile URL
     width?: string,                 // optional dimensions (ex: "100%", "300px")

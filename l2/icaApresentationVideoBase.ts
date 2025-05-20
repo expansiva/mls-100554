@@ -10,7 +10,7 @@ export abstract class IcaApresentationVideoBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     recommendedWidget: "embed" | "inline" | "playlist",
     src?: string,              // for single video (embed/inline)
     poster?: string,           // for inline (placeholder image)

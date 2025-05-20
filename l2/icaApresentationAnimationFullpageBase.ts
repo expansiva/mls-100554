@@ -10,7 +10,7 @@ export abstract class IcaApresentationAnimationFullpageBase extends StateLitElem
 
 }
 
-interface IConfig {
+export interface IConfig {
     recommendedWidget: "confetti" | "fireworks" | "radial-splash" | "balloon-explode" | string,
     trigger: "manual" | "onload" | "onclick" | "page-enter" | "page-exit" | "state",
     triggerValue?: string | number | boolean,

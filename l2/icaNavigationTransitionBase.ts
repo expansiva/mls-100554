@@ -9,7 +9,7 @@ export abstract class IcaNavigationTransitionBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     type: "slide" | "fade" | "push-left" | "push-right" | "zoom",
     duration?: number,
     reverseOnBack?: boolean   // reverses direction if going back

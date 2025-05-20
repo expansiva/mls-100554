@@ -10,7 +10,7 @@ export abstract class IcaBlocksViewerBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     recommendedWidget: "pdf" | "spreadsheet" | "document",
     page?: number,              // pdf only
     zoom?: number,              // pdf only

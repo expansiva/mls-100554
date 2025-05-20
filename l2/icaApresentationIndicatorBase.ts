@@ -11,8 +11,7 @@ export abstract class IcaApresentationIndicatorBase extends StateLitElement {
 
 }
 
-
-interface IConfig {
+export interface IConfig {
     type: "progress" | "loading" | "status" | "badge" | string,
     value?: number,         // for progress
     max?: number,           // optional, default 100

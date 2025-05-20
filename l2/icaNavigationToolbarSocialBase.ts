@@ -9,7 +9,7 @@ export abstract class IcaNavigationToolbarSocialBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     items: {
         platform: "twitter" | "linkedin" | "github" | "facebook" | string,
         href: string,

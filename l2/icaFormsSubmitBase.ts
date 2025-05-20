@@ -10,10 +10,11 @@ export abstract class IcaFormsSubmitBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     buttons: IConfigItens[]
 }
-interface IConfigItens {
+
+export interface IConfigItens {
     label: string,
     value: string
 }
