@@ -3,9 +3,10 @@
 import { html, unsafeHTML, LitElement} from 'lit';
 import { customElement, property} from 'lit/decorators.js';
 import { propertyDataSource } from './_100554_collabDecorators';
+import { StateLitElement } from './_100554_stateLitElement';
 
 @customElement('wc-text-100554')
-export class WcInputText100554 extends LitElement {
+export class WcInputText100554 extends StateLitElement {
 
     createRenderRoot() {
         return this;

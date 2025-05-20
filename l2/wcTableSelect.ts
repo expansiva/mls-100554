@@ -2,13 +2,14 @@
 
 import { html, repeat, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
 import { propertyDataSource } from './_100554_collabDecorators';
 
 @customElement('wc-table-select-100554')
-export class WcTableSelect100554 extends LitElement {
+export class WcTableSelect100554 extends StateLitElement {
 
     createRenderRoot() {
-        return this;
+        return this; 
     }
     
     @propertyDataSource() selected: number | undefined;

@@ -180,7 +180,8 @@ function systemPlaygroundInstruction(): mls.msg.IAMessageInputType {
 
 1. Crie um bloco playground com componentes <ica-forms-input-string-100554> para cada propriedade configurável.
 2. Para cada propriedade, associe uma key no objeto ui do state, como ui.buttonLabel1, ui.buttonLabel2, etc.
-3. Ao final, crie um único componente <widget-playground-state-100554> com o atributo state representando um objeto JSON com o namespace ui contendo todas essas chaves.
+3. Caso a propriedade seja um objeto trate como string no playground.
+4. Ao final, crie um único componente <widget-playground-state-100554> com o atributo state representando um objeto JSON com o namespace ui contendo todas essas chaves.
 
 ### IMPORTANTE:
  - O valor do atributo state deve ser uma string JSON válida:
@@ -196,17 +197,19 @@ function systemPlaygroundInstruction(): mls.msg.IAMessageInputType {
         <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel1}}"></widget-world-time-greeting-100554>
         <playground>
        
-            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop.buttonLabel:" value="{{ui.buttonLabel1}}"></ica-forms-input-string-100554>
+            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop.buttonLabel:" value="{{ui.buttonLabel1}}" config="{{ui.config1}}"></ica-forms-input-string-100554>
+            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. Config:" value="{{ui.config1}}"></ica-forms-input-string-100554>
         </playground>
     </demo>
     <demo>   
-        <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel2}}"></widget-world-time-greeting-100554>
+        <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel2}}" config="{{ui.config2}}"></widget-world-time-greeting-100554>
         <playground>
        
             <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{ui.buttonLabel2}}"></ica-forms-input-string-100554>
+            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. Config:" value="{{ui.config2}}"></ica-forms-input-string-100554>
         </playground>
     </demo>
-    <widget-playground-state-100554 state='{"u"i:{"buttonLabel1": "Ver horários pelo mundo", "buttonLabel2": "Ver horários"}}'></Widget-playground-state-100554>
+    <widget-playground-state-100554 state='{"u"i:{"buttonLabel1": "Ver horários pelo mundo", "buttonLabel2": "Ver horários", "config1":"{"codigo":01}"}", "config2":"{"codigo":02}"}"}'></Widget-playground-state-100554>
 </section>
 \`\`\`
 `
