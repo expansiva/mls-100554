@@ -4,8 +4,28 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaApresentationChartBase extends StateLitElement {
 
-    abstract config: any | undefined;
-    abstract chartdata: string | undefined;
+    abstract config: IConfig | undefined;
+    abstract chartdata: IChartData | undefined;
 
 
+}
+
+interface IConfig {
+    recommendedWidget: "treed3" | "echarts" | "chartjs" | string,
+    renderer?: string,               // optional custom render strategy
+    options3d?: object               // used only if recommendedWidget = "3d"
+}
+
+interface IChartData {
+    type: "bar" | "line" | "pie" | "scatter" | "tree" | string,
+    title?: string,
+    xAxis?: string[],
+    yAxis?: string[],
+    series: {
+        name: string,
+        data: number[] | { x: string, y: number }[] | object[],
+        type?: string,  // optional override per series
+        style?: object
+    }[],
+    options?: object
 }

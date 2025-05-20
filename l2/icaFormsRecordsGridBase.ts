@@ -4,9 +4,32 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaFormsRecordsGridBase extends StateLitElement {
 
-    abstract config: any | undefined;
+    abstract config: IConfig | undefined;
     abstract selectedRows: string | undefined;
     abstract editedRows: string | undefined;
 
+
+}
+
+interface IConfig {
+
+    table: string,                 // DB ou endpoint
+    range?: { start: number, end: number },
+    recommendedWidget: "readonly" | "editable" | "grouping" | "pivot" | "tree" | "virtual-scroll",
+    columns: {
+        field: string,
+        header?: string,
+        width?: string,
+        resizable?: boolean,
+        sortable?: boolean,
+        filterable?: boolean,
+        editable?: boolean,
+        expandable?: boolean         // tree grid
+    }[],
+    pageable?: boolean,
+    pageSize?: number,
+    rowHeight?: number,
+    selection?: "single" | "multi",
+    aggregation?: "sum" | "avg" | string
 
 }

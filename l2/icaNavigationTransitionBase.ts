@@ -4,7 +4,13 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaNavigationTransitionBase extends StateLitElement {
 
-    abstract config: any | undefined;
+    abstract config: IConfig | undefined;
 
 
+}
+
+interface IConfig {
+    type: "slide" | "fade" | "push-left" | "push-right" | "zoom",
+    duration?: number,
+    reverseOnBack?: boolean   // reverses direction if going back
 }

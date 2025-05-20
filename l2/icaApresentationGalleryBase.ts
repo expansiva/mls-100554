@@ -4,9 +4,19 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaApresentationGalleryBase extends StateLitElement {
 
-    abstract config: any | undefined;
+    abstract config: IConfig | undefined;
     abstract selectedindex: string | undefined;
     abstract fornavigation: string | undefined;
 
 
+}
+
+interface IConfig{
+  recommendedWidget: "gallery" | "carousel" | "slider",
+  images: string[],               // array of image URLs
+  thumbnails?: boolean,           // for gallery
+  shownavigation?: boolean,       // for carousel/slider
+  autoplay?: boolean,
+  interval?: number,              // ms
+  loop?: boolean
 }

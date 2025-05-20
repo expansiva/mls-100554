@@ -4,7 +4,15 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaFormsRecordsMapBase extends StateLitElement {
 
-    abstract config: any | undefined;
+    abstract config: IConfig | undefined;
 
 
+}
+
+interface IConfig {
+    latitude: number,
+    longitude: number,
+    zoom: number,
+    markers: [{ lat: number, lng: number, label: string }],
+    maptype: string
 }

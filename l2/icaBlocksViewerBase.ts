@@ -4,8 +4,17 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaBlocksViewerBase extends StateLitElement {
 
-    abstract config: any | undefined;
+    abstract config: IConfig | undefined;
     abstract data: string | undefined;
 
 
+}
+
+interface IConfig {
+    recommendedWidget: "pdf" | "spreadsheet" | "document",
+    page?: number,              // pdf only
+    zoom?: number,              // pdf only
+    activesheet?: string,       // spreadsheet only
+    type?: "docx" | "pptx" | "pdf" | string,  // for document viewer fallback
+    readonly?: boolean
 }
