@@ -4,6 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
+@customElement('ica-blocks-viewer-100554')
 export abstract class IcaBlocksViewer extends IcaLitElementBase {
 
     public mySymbol = 'fa-table-columns';

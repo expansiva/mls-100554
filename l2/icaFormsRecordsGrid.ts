@@ -4,6 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
+@customElement('ica-forms-records-grid-100554')
 export abstract class IcaFormsRecordsGrid extends IcaLitElementBase {
 
     public mySymbol = 'fa-table-columns';

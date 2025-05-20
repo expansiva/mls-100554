@@ -4,6 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
+@customElement('ica-apresentation-indicator-100554')
 export abstract class IcaApresentationIndicator extends IcaLitElementBase {
 
     public mySymbol = 'fa-table-columns';

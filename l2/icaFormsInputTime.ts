@@ -4,6 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 import { IcaLitElementBase } from './_100554_icaLitElementBase';
 
+@customElement('ica-forms-input-time-100554')
 export abstract class IcaFormsInputTime extends IcaLitElementBase {
 
     public mySymbol = 'fa-table-columns';
