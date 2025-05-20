@@ -1,10 +1,9 @@
 /// <mls shortName="agentNewWidget" project="100554" enhancement="_blank" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getTokens } from './_100554_libCompile';
 import { forceServiceInstance } from './_100554_libCommom';
 import { createNewFile } from "./_100554_pluginNewFileBase";
-import { preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
+import { preferModelType, systemComponentsInstruction, systemTokensLessInstruction } from './_100554_aiPrompts';
 
 import {
     getNextPendingStepByAgentName,
@@ -21,7 +20,6 @@ import {
 } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentNewWidget";
-const actualtheme = "Default";
 const project = 100554;
 const enhancement = '_100554_enhancementLit';
 
@@ -68,10 +66,10 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    
-    context.task = await updateStepStatus(context.task, step.stepId, "completed"); 
+
+    context.task = await updateStepStatus(context.task, step.stepId, "completed");
     await addFile(context);
-       
+
     //await executeNextStep(context);
 }
 
@@ -93,7 +91,7 @@ async function addFile(context: mls.msg.ExecutionContext) {
         { project, position: 'right', shortName: pageName, enhancement, sourceTS: fileTS, sourceHTML: fileHTML, sourceLess: fileLess, openPreview: false }
     );
 
-    const rc = {shortName: step.content.shortName, project}
+    const rc = { shortName: step.content.shortName, project }
 
     const newStep: mls.msg.AIPayload = {
         agentName: 'agentGenerateWidgetShowcase',
@@ -107,12 +105,12 @@ async function addFile(context: mls.msg.ExecutionContext) {
     }
 
     await addNewStep(context, step.stepId, [newStep]);
-    
+
     let aux = '';
     const m = mls.editor.getModels(project, pageName);
     if (m && m.ts && m.ts.compilerResults && m.ts.compilerResults.errors.length > 0) {
-        aux = ', com '+ m.ts.compilerResults.errors.length + ' erros, favor verificar'
-        
+        aux = ', com ' + m.ts.compilerResults.errors.length + ' erros, favor verificar'
+
     }
 
     context.task = await updateTaskTitle(context.task, "Widget created" + aux);
@@ -129,7 +127,7 @@ export async function getPrompts(json: any, prompt: string | undefined, rags: st
     prompts.push(systemOutInstruction());
     prompts.push(systemModelInstruction());
     prompts.push(systemRequirementsUserInstruction(json));
-    prompts.push(systemComponentsInstruction());
+    prompts.push(await systemDefinitionBaseInstruction(json));
     prompts.push(await systemTokensLessInstruction());
 
     prompts.push({
@@ -166,7 +164,8 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
    - "camelCase" para propriedades.
    - "PascalCase" para nomes de componentes/classes.
   1.6. Use os atributos padrões da classe base.
-  1.6.1 O componente nunca deve renderizar um <ica-...> dentro dele mesmo.
+  1.6.1 Deve-se obrigatoriamente declarar todos os campos definidos na classe base, com os mesmos nomes e tipos. Isso é necessário para garantir consistência e evitar erros de execução.
+  1.6.2 O componente nunca deve renderizar um <ica-...> dentro dele mesmo.
   1.7. Deixe a linha 1 , tripleSlash, igual no modelo, isto irá ser importante para saber o nome do arquivo e outros detalhes.
   1.7.1 Coloque uma quebra de linha entre o tripleSlash e o codigo, conforme o modelo.
   1.8 Não use o CSS, usaremos o .less em um arquivo separado.
@@ -365,25 +364,47 @@ ${JSON.stringify(req, null, 2)}
     }
 }
 
-function firstLowercaseLetter(str: string): string {
+async function systemDefinitionBaseInstruction(json: any[]): Promise<mls.msg.IAMessageInputType> {
 
-  if (str.length === 0) return str;
+    try {
 
-  const first = str[0];
-  const rest = str.slice(1);
+        const step = json.find((i) => i.sectionName === 'parentClass');
+        if (!step) throw new Error("[systemDefinitionBaseInstruction] Not found section: parentClass");
+        if (!step.widgetName) throw new Error("[systemDefinitionBaseInstruction] Not found widget in parentClass");
 
-  if (first === first.toLowerCase()) {
-    return str;
-  }
+        const shortName = firstLowercaseLetter(step.widgetName);
 
-    return first.toLowerCase() + rest;
-  
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, "", ".ts");
+        if (!mls.stor.files[key]) throw new Error('[systemDefinitionBaseInstruction] not found class base:' + shortName);
+
+        let content = await mls.stor.files[key].getContent() as string;
+
+        if (!content) throw new Error('[systemDefinitionBaseInstruction] not found content:' + key);
+
+        return {
+            type: 'system',
+            content: `## DEFINIÇÕES DA CLASSE BASE \n\n ${content}`
+        }
+
+
+    } catch (e) {
+        console.info(e);
+        return systemComponentsInstruction();
+    }
+
 }
 
-//Tem q ser dinamico
-async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageInputType> {
-    return {
-        type: 'system',
-        content: '## LESS TOKENS - DESIGN SYSTEM \n\n' + (await getTokens({ project, shortName: '' }, actualtheme)) || ""
+function firstLowercaseLetter(str: string): string {
+
+    if (str.length === 0) return str;
+
+    const first = str[0];
+    const rest = str.slice(1);
+
+    if (first === first.toLowerCase()) {
+        return str;
     }
+
+    return first.toLowerCase() + rest;
+
 }
