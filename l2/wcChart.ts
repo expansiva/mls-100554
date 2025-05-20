@@ -9,6 +9,10 @@ declare var echarts: any;
 @customElement('wc-chart-100554')
 export class WcEchartsPie100554 extends LitElement {
 
+    createRenderRoot() {
+        return this;
+    }
+
     @propertyDataSource({ type: String }) data: any | undefined;
 
     @property({ type: String }) chartTitle = '';

@@ -7,6 +7,10 @@ import { propertyDataSource } from './_100554_collabDecorators';
 @customElement('wc-table-select-100554')
 export class WcTableSelect100554 extends LitElement {
 
+    createRenderRoot() {
+        return this;
+    }
+    
     @propertyDataSource() selected: number | undefined;
     @propertyDataSource() data: any[] | undefined;
     @propertyDataSource() columns: string[] | undefined;
