@@ -4,8 +4,16 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaFormsSubmitBase extends StateLitElement {
 
-    abstract config: any | undefined;
-abstract notify: string | undefined;
+    abstract config: IConfig | undefined;
+    abstract notify: string | undefined;
 
 
+}
+
+interface IConfig {
+    buttons: IConfigItens[]
+}
+interface IConfigItens {
+    label: string,
+    value: string
 }

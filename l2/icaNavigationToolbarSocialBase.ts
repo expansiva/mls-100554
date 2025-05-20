@@ -4,7 +4,18 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaNavigationToolbarSocialBase extends StateLitElement {
 
-    abstract config: any | undefined;
+    abstract config: IConfig | undefined;
 
 
+}
+
+interface IConfig {
+    items: {
+        platform: "twitter" | "linkedin" | "github" | "facebook" | string,
+        href: string,
+        icon?: string,     // default: inferred by platform
+        label?: string     // optional text for accessibility
+    }[],
+    layout?: "horizontal" | "vertical",
+    size?: "sm" | "md" | "lg"
 }

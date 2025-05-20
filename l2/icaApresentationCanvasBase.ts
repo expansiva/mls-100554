@@ -4,8 +4,18 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaApresentationCanvasBase extends StateLitElement {
 
-    abstract config: any | undefined;
+    abstract config: IConfig | undefined;
     abstract state: string | undefined;
 
 
+}
+
+interface IConfig {
+    recommendedWidget: string,       // ex: "carGame", "floorPlanEditor", "inventory3D", "whiteboard"
+    width?: string,                  // ex: "100%", "800px"
+    height?: string,
+    pixelRatio?: number,             // optional for high-DPI displays
+    autoResize?: boolean,
+    runOnLoad?: boolean,             // auto-start on render
+    scriptRef: string                // required JS module that will run the logic
 }

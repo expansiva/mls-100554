@@ -4,8 +4,22 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaApresentationTextBase extends StateLitElement {
 
-    abstract config: any | undefined;
+    abstract config: IConfig | undefined;
     abstract text: string | undefined;
 
 
+}
+
+
+interface IConfig {
+    type: "text" | "quote" | "banner",
+    multiline?: boolean,
+    // quote-specific
+    cite?: string,
+    citeHref?: string,
+    // banner-specific
+    src?: string,
+    alt?: string,
+    href?: string, // optional link on click
+    target?: "_blank" | "_self"
 }

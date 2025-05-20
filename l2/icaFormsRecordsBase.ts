@@ -4,9 +4,9 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaFormsRecordsBase extends StateLitElement {
 
-    abstract config: any | undefined;
+    abstract config: IConfig | undefined;
     abstract selected: string | undefined;
-    abstract title: string ;
+    abstract title: string;
     abstract subtitle: string | undefined;
     abstract line1: string | undefined;
     abstract line2: string | undefined;
@@ -16,4 +16,13 @@ export abstract class IcaFormsRecordsBase extends StateLitElement {
     abstract badge: string | undefined;
 
 
+}
+
+interface IConfig {
+
+    table: string, 
+    range: { start: number, end: number },
+    recommendedWidget:string, 
+    selectedField:string,
+    
 }

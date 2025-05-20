@@ -5,7 +5,11 @@ import { StateLitElement } from './_100554_stateLitElement';
 export abstract class IcaApresentationTextRichBase extends StateLitElement {
 
     abstract content: string | undefined;
-    abstract config: any | undefined;
+    abstract config: IConfig | undefined;
 
 
+}
+
+interface IConfig{
+  editable?: boolean
 }
