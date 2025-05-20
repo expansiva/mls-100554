@@ -2,11 +2,22 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
-import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getAgentStepByAgentName, updateStepStatus, calculateStepsStatistics, getNextPendentStep, appendLongTermMemory, getAgentsStepByAgentName } from "./_100554_aiAgentHelper";
-import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewStep } from "./_100554_aiAgentOrchestration";
-import { IAgentCreateSitePrompt, ModuleDefinition, TemplateContent, TemplateChild, ChildElement, Organism } from './_100554_agentAnalyzeNewModuleBase';
+import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getAgentStepByAgentName, updateStepStatus, getNextPendentStep, appendLongTermMemory, getAgentsStepByAgentName, updateTaskTitle } from "./_100554_aiAgentHelper";
+import { startNewInteractionInAiTask, addNewStep, executeNextStep } from "./_100554_aiAgentOrchestration";
+import { getImages } from "./_100554_libUnsplash";
+import { widgetsDefault } from "./_100554_icaBaseDescription";
+import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
+import { createNewFile } from "./_100554_pluginNewFileBase";
+
+import { TemplateContent, TemplateChild, ChildElement, Organism, Molecule, Media } from './_100554_agentAnalyzeNewModuleBase';
+
+const ICATEMPLATE = 'ica-template-base-100554';
+const ICAORGANISM = 'ica-organism-base-100554';
+const PROJECTICA = 100554;
+const MODEOVERLAYDEFAULT = 'wcd-overlay-mode-default-100554';
 
 const agentName = "agentCreateSite";
+const enhancement = '_100554_enhancementLit';
 
 export function createAgent(): IAgent {
   return {
@@ -44,7 +55,6 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
   })
 
   const allStepsTasksComplete = getAgentsStepByAgentName(context.task, 'agentCreateSite', 'completed');
-
   const inputs = await getPrompts(taskId, step.prompt, step.rags, allStepsTasksComplete);
   await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
 
@@ -65,8 +75,14 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
   context.task = task;
 
   if (!remainingTasks || remainingTasks.length === 0) {
-    await execPrepareMolecules(context);
+    const allResults = getAllStepsThisAgent(context);
+    const allResults2 = await execPrepareMidias(allResults);
+    const allResults3 = execPrepareWidgetsDefault(allResults2);
+    const pages = execPrepareHTML(allResults3);
+    await execPrepareOrganismAndTemplates(context, allResults3);
+    await execCreatePages(pages);
     return;
+
   }
 
   const stepAgentAnalyzeNewModule2 = getAgentStepByAgentName(context.task, 'agentAnalyzeNewModule2');
@@ -86,19 +102,181 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 }
 
-async function execPrepareMolecules(context: mls.msg.ExecutionContext) {
-  if (!context || !context.task) throw new Error(`[${agentName}] Not found context on execPrepareMolecules`);
-  const step = getNextPendentStep(context.task) as any;
-  if (!step || step.type !== 'flexible') throw new Error(`[${agentName}] Invalid next pendent step on execPrepareMolecules`);
-  if (!step.content) throw new Error(`[${agentName}] Not found "content" in flexible result`);
 
+function getAllStepsThisAgent(context: mls.msg.ExecutionContext): TemplateContent[] {
+  if (!context || !context.task) throw new Error(`[${agentName}] Not found context on getAllStepsThisAgent`);
   const allSteps = getAgentsStepByAgentName(context.task, 'agentCreateSite');
   const allResults = allSteps.map((step) => {
     const payload = step.interaction?.payload?.[0]
     if (payload) return (payload as any).content
   }).filter((s) => s !== undefined).flat();
 
-  console.info({ allStepsResults: allResults });
+  return allResults;
+}
+
+async function execCreatePages(data: Record<string, { el: HTMLElement; data: TemplateContent; }>) {
+
+  const keys = Object.keys(data);
+  for await (let key of keys) {
+    const page = data[key];
+    await createTemplatePage(key, page)
+  }
+}
+
+async function createTemplatePage(fileName: string, data: { el: HTMLElement; data: TemplateContent; }) {
+
+  const { project, shortName } = mls.l2.getPath(fileName);
+  const tagName = convertFileNameToTag(fileName);
+
+  const ts = `
+/// <mls shortName="${shortName}" project="${project}" enhancement="_100554_enhancementLit" groupName="other" />
+
+import { CollabPageElement } from './_100554_collabPageElement';
+import { customElement } from 'lit/decorators.js';
+import { globalState, initState, setState } from './_100554_collabState';
+
+@customElement('${tagName}')
+export class ${fileName} extends CollabPageElement {
+
+    initPage() {
+
+    }
+}`;
+
+  await createNewFile(
+    { project, position: 'right', shortName, enhancement, sourceTS: ts.trim(), sourceHTML: data.el.outerHTML.trim(), sourceLess: '', openPreview: false }
+  );
+}
+
+function execPrepareHTML(allResults: TemplateContent[]) {
+
+  const result: Record<string, { el: HTMLElement, data: TemplateContent }> = {};
+  const result2: Record<string, { el: HTMLElement, data: TemplateContent }> = {};
+
+  for (const task of allResults) {
+
+    const template = task.template;
+    const prepareElements = async (childs: TemplateChild[] | ChildElement[], parent: HTMLElement) => {
+      for (const child of childs) {
+
+        if ("organismOrMolecule" in child && "attributes" in child.organismOrMolecule) {
+          const _child = child.organismOrMolecule as Molecule;
+          const tagName = `${_child.name}-${PROJECTICA}`;
+          const str = `<${tagName} widget=${_child.widget} ${_child.attributes}> </${tagName}>`;
+          parent.innerHTML = parent.innerHTML + str;
+
+        } else if ("organism" in child) {
+          const _organism = child.organism as Organism;
+          const organinsEl = document.createElement(ICAORGANISM);
+          organinsEl.setAttribute('widget', _organism.name);
+          organinsEl.className = child.class;
+          parent.appendChild(organinsEl);
+          prepareElements(_organism.childs, organinsEl);
+        }
+      }
+    }
+
+    const templateElement = document.createElement(ICATEMPLATE);
+    templateElement.setAttribute('widget', template.name);
+    result[template.name] = { el: templateElement, data: task };
+    if (template?.childs) prepareElements(template.childs, templateElement);
+  }
+
+  const prepareName = (name: string) => {
+    const { project } = mls.actual[5];
+    return `_${project}_${name}`;
+  }
+
+  Object.keys(result).forEach((key, index) => {
+    const item = result[key];
+    const name = prepareName(`pageNew${index}`);
+    const tag = convertFileNameToTag(name);
+    const page = document.createElement(tag);
+    page.setAttribute('modeoverlay', MODEOVERLAYDEFAULT);
+    page.appendChild(item.el);
+    result2[name] = { el: page, data: item.data };
+  });
+
+  return result2;
+
+}
+
+function execPrepareWidgetsDefault(allResults: TemplateContent[]) {
+
+  for (const task of allResults) {
+    const template = task.template;
+
+    const collectMidias = async (childs: TemplateChild[] | ChildElement[]) => {
+      for (const child of childs) {
+        if ("organismOrMolecule" in child && "attributes" in child.organismOrMolecule) {
+          const _child = child.organismOrMolecule as Molecule;
+          _child.widget = widgetsDefault[_child.name];
+        } else if ("organism" in child) {
+          const _organism = child.organism as Organism;
+          collectMidias(_organism.childs);
+        }
+      }
+    }
+    if (template?.childs) collectMidias(template.childs);
+  }
+
+  return allResults;
+
+}
+
+async function execPrepareMidias(allResults: TemplateContent[]) {
+
+  for await (const task of allResults) {
+    const template = task.template;
+    const collectMidias = async (childs: TemplateChild[] | ChildElement[]) => {
+      for (const child of childs) {
+        if ("organismOrMolecule" in child && "attributes" in child.organismOrMolecule) {
+          const _child = child.organismOrMolecule as Molecule;
+          if (!_child.medias) continue;
+          for (const media of _child.medias) {
+            if (media.mediaType === 'image') {
+              console.info({
+                imageToSearch: {
+                  media,
+                  _child
+                }
+              });
+              const res = await getImages(media.searchText, 1, 1);
+              const [image] = res.images;
+              if (!image) continue;
+
+              const escapedFileName = media.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const regex = new RegExp(escapedFileName, 'g');
+
+              if (typeof _child.attributes === 'string') {
+                _child.attributes = _child.attributes.replace(regex, image.urls.regular);
+              }
+
+            };
+            if (media.mediaType === 'sound') continue;
+            if (media.mediaType === 'video') continue;
+          }
+        } else if ("organism" in child) {
+          const _organism = child.organism as Organism;
+          await collectMidias(_organism.childs);
+        }
+      }
+    }
+
+    if (template?.childs) await collectMidias(template.childs);
+
+  }
+
+  return allResults;
+}
+
+async function execPrepareOrganismAndTemplates(context: mls.msg.ExecutionContext, allResults: TemplateContent[]) {
+
+  if (!context || !context.task) throw new Error(`[${agentName}] Not found context on execPrepareMolecules`);
+  const step = getNextPendentStep(context.task) as any;
+  if (!step || step.type !== 'flexible') throw new Error(`[${agentName}] Invalid next pendent step on execPrepareMolecules`);
+  if (!step.content) throw new Error(`[${agentName}] Not found "content" in flexible result`);
+
   const templateAndOrganismToCreate = extractTemplatesAndOrganisms(allResults);
   console.info({
     templateAndOrganismToCreate: templateAndOrganismToCreate
@@ -119,7 +297,7 @@ async function execPrepareMolecules(context: mls.msg.ExecutionContext) {
 
 }
 
-export function extractTemplatesAndOrganisms(tasks: TemplateContent[]) {
+function extractTemplatesAndOrganisms(tasks: TemplateContent[]) {
   const templateNames = new Set<any>();
   const organismNames = new Set<any>();
 
@@ -206,7 +384,7 @@ export async function getPrompts(taskId: string, prompt: string | undefined, rag
 }
 
 /*
-
+ 
 ## Contexto Global (Retrieve)
 Defina o objetivo e as necessidades da página, dados disponíveis, público-alvo e função principal.
 Analise a seção "## Definições da task":
@@ -216,15 +394,15 @@ Analise a seção "## Definições da task":
  - Nomeie seguindo o padrão: [idTask][idVersão]  => Exemplo: (ex: t1v1, t1v2, t2v1, etc)... 
  - Não omita nenhuma task. Verifique todas que estiverem listadas no JSON.
  - Use somente as tabelas relacionadas neste módulo.
-
+ 
 ---------
-
+ 
 ## Contexto Global (Retrieve)
 Defina o objetivo e as necessidades da página, dados disponíveis, público-alvo e função principal.
 Analise a seção "## Definições da task" abaixo, e analise a task "t1". Gere 2 versões com diferenças entre textos e criatividade, nomeie como "t1v1" e "t1v2". Use somente as tabelas relacionadas neste módulo.
 Analise a seção "## Padrão de Composição dos Componentes"
 analise a seção "## Collab States"
-
+ 
 */
 
 
@@ -292,7 +470,7 @@ Cada Organismo poderá ter filhos organismo ou molécula.
 ## Assets em moleculas
 Algumas moléculas permite o uso de imagens, videos e sons (assets) em seus atributos
 - Procure os assets disponíveis em "## Assets disponíveis no projeto"
-- Se for necessário um novo asset para uso na molécula, crie a seção Media , algumas moléculas permite mais configurar mais de um asset.
+- Importante: Se definir um path de midia nos atributos ex: [banner-petshop-hero.jpg], **OBRIGATORIAMENTE** adicione dentro da seção Medias, um item com as informaçoes da media => ex Medias: [{{ name:  '[banner-petshop-hero.jpg]', mediaType: 'image',  searchText: string}]
 - nomeie o asset com um nome de arquivo temporário e use o nome nos atributos da molécula, exemplo "src="[imagem1.png]". Não use pastas ou caminhos aqui.
 - a seção Media permite que uma outra etapa pesquise um asset que mais se encaixe, então use o campo 'searchText' em ingles , de uma forma a pesquisar nos sites especializados.
 
@@ -358,7 +536,7 @@ export interface Organism {
 
 export interface Molecule {
   name: string;
-  medias?: Media[];  // incluir para cada imagem audio video á ser incluido
+  medias: Media[]; // Para cada midia(image, sound ou video) definido, adicionar uma entrada no array.
   description: string;
   attributes: string; // Gere a string de atributos no formato name="xxx" value="yyy" — apenas os pares, sem aspas ao redor da string inteira
 }
@@ -526,3 +704,6 @@ function getRemainingTasksIds(task: mls.msg.TaskData) {
   const arrRemainingTasks = remainingTasks.split(',');
   return arrRemainingTasks;
 }
+
+
+

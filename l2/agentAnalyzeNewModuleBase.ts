@@ -52,8 +52,16 @@ export interface UIState {
 
 export interface Molecule {
   name: string;
+  medias?: Media[];
   description: string;
   attributes: string;
+  widget?: string;
+}
+
+export interface Media {
+  name: string;
+  mediaType: 'image' | 'sound' | 'video';
+  searchText: string;
 }
 
 export interface ChildElement {
@@ -90,5 +98,3 @@ export interface TemplateContent {
   template: Template;
   implementationNotes: string[];
 }
-
-

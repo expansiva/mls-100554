@@ -107,7 +107,7 @@ export class ${fileName} extends ${modeExtends[model]} {
             ts,
             less: widgetData.less
         }
-    })
+    });
 
     await createNewFile(
         { project, position: 'right', shortName, enhancement, sourceTS: ts.trim(), sourceHTML: `<${widgetData.tagName}></${widgetData.tagName}>`, sourceLess: widgetData.less, openPreview: false }
