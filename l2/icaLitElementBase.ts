@@ -170,8 +170,11 @@ export abstract class IcaLitElementBase extends StateLitElement implements tps.I
     }
 
     private updateAttrInWc(prop: string, value: string) {
+
+        console.info({ prop, value })
         const el = this.querySelector(this.widget as string);
         if (el) el.setAttribute(prop, value);
+
     }
 
     private updateStyleDisplay() {
@@ -306,7 +309,8 @@ export abstract class IcaLitElementBase extends StateLitElement implements tps.I
             if (this.excludesProps.includes(attrName)) continue;
 
             let attrValue = this.getAttribute(attrName);
-            if (attrName === 'idel') attrName = 'id'
+            if (attrName === 'idel') attrName = 'id';
+            if (attrName === 'classel') attrName = 'class';
 
             if (attrValue !== null) {
                 attributes.push({
@@ -318,7 +322,16 @@ export abstract class IcaLitElementBase extends StateLitElement implements tps.I
 
         const attrsByVariation = this.filterAttributes(attributes, language);
         let attributesStr = '';
-        attrsByVariation.forEach((item) => attributesStr += `${item.name}="${item.value}"`)
+
+        attrsByVariation.forEach((item) => {
+            const escapedValue = item.value
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            attributesStr += `${item.name}="${escapedValue}" `;
+        });
         return attributesStr;
 
     }
