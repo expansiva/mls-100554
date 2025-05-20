@@ -1,14 +1,13 @@
 /// <mls shortName="wcChart" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { propertyDataSource } from './_100554_collabDecorators';
-import { IcaApresentationCharts2DBase } from './_100554_icaApresentationCharts2DBase';
 
 declare var echarts: any;
 
 @customElement('wc-chart-100554')
-export class WcEchartsPie100554 extends IcaApresentationCharts2DBase {
+export class WcEchartsPie100554 extends LitElement {
 
     @propertyDataSource({ type: String }) data: any | undefined;
 

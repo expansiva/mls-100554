@@ -1,11 +1,11 @@
 /// <mls shortName="pluginExploreList" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
- 
+
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance } from './_100554_libCommom';
-import './_100554_serviceListFilesAdd';  
-  
+import './_100554_serviceListFilesAdd';
+
 /// **collab_i18n_start**
 const message_pt = {
     updateListVerify: "atualizar lista/verificar",
@@ -107,6 +107,8 @@ export class PluginExploreList extends PluginBaseModule {
         this.inFilter = false;
         this.mode = 'add';
     }
+
+    private filesInLocal: mls.stor.IFileInfo[] = [];
 
     //--------EVENTS----------
 
@@ -539,7 +541,7 @@ export class PluginExploreList extends PluginBaseModule {
             (mls.actual[lv as any] as any)[this.position as any] = {
                 project: file.project,
                 shortName: file.shortName,
-                extension: file.extension, 
+                extension: file.extension,
                 folder: file.folder,
             } as any;
 
@@ -566,7 +568,7 @@ export class PluginExploreList extends PluginBaseModule {
         info.project = mls.actual[5].project as number;
         info.level = 2;
         info.needCompile = true;
-        
+
         mls.events.fire([(+(this.levelFiles as any) as any)], ['ProjectLoaded'], JSON.stringify(info), 0);
 
     }
@@ -786,6 +788,7 @@ export class PluginExploreList extends PluginBaseModule {
     private getFilesProject(): mls.stor.IFileInfo[] {
 
         if (!window['mls']) return [];
+        this.filesInLocal = [];
         const arraySf: mls.stor.IFileInfo[] = [];
         const ext = (this.extensionLevel as any)[this.levelFiles as any] as string;
         for (const i of Object.keys(mls.stor.files).sort()) {
@@ -826,7 +829,10 @@ export class PluginExploreList extends PluginBaseModule {
             const testError = testFile && styleFile.hasError;
 
             if (sf.isLocalVersionOutdated) this.info.version++;
-            if (sf.inLocalStorage || htmlLocal || styleLocal || testLocal) this.info.storage++;
+            if (sf.inLocalStorage || htmlLocal || styleLocal || testLocal) {
+                this.filesInLocal.push(sf);
+                this.info.storage++;
+            }
             if (sf.hasError || htmlError || styleError || testError) this.info.error++;
 
             arraySf.push(sf);
@@ -840,7 +846,7 @@ export class PluginExploreList extends PluginBaseModule {
 
         try {
             if (!window['mls']) return [];
-            const arraySfHistory: mls.stor.IFileInfo[] = [];
+            let arraySfHistory: mls.stor.IFileInfo[] = [];
             const lh = this.getHistory();
             if (lh.length <= 0 || !window['mls']) return [];
 
@@ -867,9 +873,15 @@ export class PluginExploreList extends PluginBaseModule {
 
             }
 
+            const diff = this.filesInLocal.filter(a =>
+                !arraySfHistory.some(b => b.shortName === a.shortName)
+            );
+
+            arraySfHistory = [ ...arraySfHistory, ...diff];
             return arraySfHistory;
+
         }
-        catch (e:any) {
+        catch (e: any) {
             console.info('[pluginExploreList getFileHistory]', e);
             return [];
         }

@@ -1,11 +1,10 @@
 /// <mls shortName="wcVideo" project="100554" enhancement="_100554_enhancementLit" groupName="_100554_icaApresentationVideoEmbeddedVideo" />
 
-import { html, css } from 'lit';
+import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaApresentationVideoEmbeddedVideoBase } from './_100554_icaApresentationVideoEmbeddedVideoBase';
 
 @customElement('wc-video-100554')
-export class WcVideo100554 extends IcaApresentationVideoEmbeddedVideoBase {
+export class WcVideo100554 extends LitElement {
 
     @property({ type: String }) src = '';
     @property({ type: Boolean }) autoplay = false;

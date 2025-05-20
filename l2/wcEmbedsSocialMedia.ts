@@ -1,12 +1,11 @@
 /// <mls shortName="wcEmbedsSocialMedia" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, } from 'lit';
+import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaApresentationEmbedsSocialMediaBase100554 } from './_100554_icaApresentationEmbedsSocialMediaBase';
 import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
 
 @customElement('wc-embeds-social-media-100554')
-export class WcEmbedsSocialMedia100554 extends IcaApresentationEmbedsSocialMediaBase100554 {
+export class WcEmbedsSocialMedia100554 extends LitElement {
 
     @propertyDataSource({ type: String }) datasource: string | undefined;
     @property({ type: String }) description: string | undefined;

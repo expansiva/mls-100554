@@ -23,10 +23,10 @@ export class WcdToolboxItemActionCodeLanguage extends WcdToolboxItemBase {
         if (!this.elICA) return;
         const wc = this.elICA.children[0] as IcaApresentationTextCodeBase;
         if (!wc || !(wc instanceof IcaApresentationTextCodeBase)) throw new Error('Invalid wc rendering in ica');
-        if (!wc.languages) throw new Error('Invalid wc languages in component');
-        this.languages = wc.languages || [];
+        if (!(wc as any).languages) throw new Error('Invalid wc languages in component');
+        this.languages = (wc as any).languages || [];
         await this.updateComplete
-        this.actualLanguage = wc.language || '';
+        this.actualLanguage = (wc as any).language || '';
     }
 
     private handleChange(e: MouseEvent) {

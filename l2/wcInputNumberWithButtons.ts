@@ -7,6 +7,8 @@ import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
 
 @customElement('wc-input-number-with-buttons-100554')
 export class WCInputNumber extends IcaFormsInputNumberBase {
+    suffix: string | undefined;
+    prefix: string | null = '';
 
     @property({ type: String }) name: string | undefined;
 

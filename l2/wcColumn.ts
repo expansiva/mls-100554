@@ -2,10 +2,9 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaLayoutFlowColumnBase } from './_100554_icaLayoutFlowColumnBase';
 
 @customElement('wc-column-100554')
-export class WcColumn extends IcaLayoutFlowColumnBase {
+export class WcColumn extends LitElement {
     gap: string | undefined;
 
     render() {

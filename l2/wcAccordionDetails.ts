@@ -1,11 +1,11 @@
 /// <mls shortName="wcAccordionDetails" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaNavigationContentAccordionBase } from './_100554_icaNavigationContentAccordionBase';
+
 
 @customElement('wc-accordion-details-100554')
-export class WcAccordionDetails100554 extends IcaNavigationContentAccordionBase {
+export class WcAccordionDetails100554 extends LitElement {
     multiple: boolean | undefined;
     disabled: boolean | undefined;
 
