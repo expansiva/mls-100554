@@ -7,6 +7,8 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_colla
 
 @customElement('wc-input-number-range-100554')
 export class WCInputNumber extends IcaFormsInputNumberBase {
+    suffix: string | undefined;
+    prefix: string | null = '';
 
     @propertyDataSource({ type: String }) value: number | undefined;
 

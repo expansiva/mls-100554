@@ -1,12 +1,11 @@
 /// <mls shortName="wcButtonSubmit" project="100554" enhancement="_100554_enhancementLit" groupName="FormsSubmitSubmit" />
 
-import { html,  ifDefined } from 'lit';
+import { html,  ifDefined, LitElement } from 'lit';
 import { customElement, property, } from 'lit/decorators.js';
-import { IcaFormsSubmitSubmitBase } from './_100554_icaFormsSubmitSubmitBase';
 import { propertyDataSource } from './_100554_collabDecorators';
 
 @customElement('wc-button-submit-100554')
-export class WcButtonSubmit extends IcaFormsSubmitSubmitBase {
+export class WcButtonSubmit extends LitElement {
 
     @propertyDataSource({ type: String, attribute: 'clicked-value' }) clickedValue: string | undefined;
     @propertyDataSource({ type: String, attribute: 'clicked-action' }) clickedAction: string | undefined;

@@ -1,11 +1,10 @@
 /// <mls shortName="wcImage" project="100554" enhancement="_100554_enhancementLit" groupName="_100554_IcaApresentationImagesImages" />
 
-import { html, css } from 'lit';
+import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaApresentationImagesImagesBase } from './_100554_icaApresentationImagesImagesBase';
 
 @customElement('wc-image-100554')
-export class WcImage100554 extends IcaApresentationImagesImagesBase {
+export class WcImage100554 extends LitElement {
 
     @property() src: string | undefined; 
     @property() alt: string | undefined;

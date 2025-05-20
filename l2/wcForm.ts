@@ -6,6 +6,7 @@ import { IcaFormsContentFormBase } from './_100554_icaFormsContentFormBase';
 
 @customElement('wc-form-100554')
 export class WcForm100554 extends IcaFormsContentFormBase {
+formId: string|undefined;
     validateonchange: boolean = true;
 
     @property({ type: String }) action: string | undefined;
