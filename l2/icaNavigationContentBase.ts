@@ -10,7 +10,7 @@ export abstract class IcaNavigationContentBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     recommendedWidget: "tab" | "stepper" | "scenary" | "accordion" | "toolbar" | "popup" | "none",
     headerVisible?: boolean,
     sections: {

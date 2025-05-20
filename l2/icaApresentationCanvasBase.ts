@@ -10,7 +10,7 @@ export abstract class IcaApresentationCanvasBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     recommendedWidget: string,       // ex: "carGame", "floorPlanEditor", "inventory3D", "whiteboard"
     width?: string,                  // ex: "100%", "800px"
     height?: string,

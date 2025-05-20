@@ -11,7 +11,7 @@ export abstract class IcaApresentationAnimationBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     animation: "fadeIn" | "zoomIn" | "slideLeft" | string,
     trigger?: "onload" | "onclick" | "hover" | "manual" | "state",
     triggerValue?: string | number | boolean,  // activate only when state == triggerValue

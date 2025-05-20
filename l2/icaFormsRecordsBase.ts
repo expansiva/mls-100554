@@ -18,7 +18,7 @@ export abstract class IcaFormsRecordsBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
 
     table: string, 
     range: { start: number, end: number },

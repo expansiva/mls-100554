@@ -10,6 +10,6 @@ export abstract class IcaApresentationTextRichBase extends StateLitElement {
 
 }
 
-interface IConfig{
+export interface IConfig{
   editable?: boolean
 }

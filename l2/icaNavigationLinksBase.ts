@@ -10,7 +10,7 @@ export abstract class IcaNavigationLinksBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     recommendedWidget: "link" | "menu" | "button" | "breadcrumb" | "anchor", // default = "link"
     scrollSync?: boolean,      // if true, updates selected as the user scrolls
     offset?: number,           // pixels from top to consider section active

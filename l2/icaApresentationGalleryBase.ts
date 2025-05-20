@@ -11,7 +11,7 @@ export abstract class IcaApresentationGalleryBase extends StateLitElement {
 
 }
 
-interface IConfig{
+export interface IConfig{
   recommendedWidget: "gallery" | "carousel" | "slider",
   images: string[],               // array of image URLs
   thumbnails?: boolean,           // for gallery

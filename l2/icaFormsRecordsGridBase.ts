@@ -11,7 +11,7 @@ export abstract class IcaFormsRecordsGridBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
 
     table: string,                 // DB ou endpoint
     range?: { start: number, end: number },

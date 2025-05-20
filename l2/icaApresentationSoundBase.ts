@@ -10,7 +10,7 @@ export abstract class IcaApresentationSoundBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     recommendedWidget: "player" | "effects" | "podcast",
     src?: string,                  // for single audio
     sounds?: string[],            // for sound effects

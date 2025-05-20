@@ -10,7 +10,7 @@ export abstract class IcaNavigationMultiContentBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     layout: "horizontal" | "vertical" | "grid" | "overlay" | "tiles",
     sections: {
         id: string | number,

@@ -11,7 +11,7 @@ export abstract class IcaFormsTreeBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     table: string,
     columns: { key: string, value: string, icon: string },
     multiexpand: boolean,

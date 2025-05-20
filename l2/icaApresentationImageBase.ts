@@ -9,7 +9,7 @@ export abstract class IcaApresentationImageBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     type: "image" | "icon" | "avatar",
     src?: string,         // for image or avatar
     icon?: string,        // for icon

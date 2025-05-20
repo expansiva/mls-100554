@@ -10,7 +10,7 @@ export abstract class IcaApresentationMessageBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     recommendedWidget: "toast" | "snackbar" | "notification" | "alert" | "modal",
     duration?: number,              // in ms; optional if not transient
     closable?: boolean,

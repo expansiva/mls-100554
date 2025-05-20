@@ -11,7 +11,7 @@ export abstract class IcaApresentationTextBase extends StateLitElement {
 }
 
 
-interface IConfig {
+export interface IConfig {
     type: "text" | "quote" | "banner",
     multiline?: boolean,
     // quote-specific

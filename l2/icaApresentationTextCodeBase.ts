@@ -9,6 +9,6 @@ export abstract class IcaApresentationTextCodeBase extends StateLitElement {
     
 }
 
-interface IConfig{
+export interface IConfig{
   language?: "ts" | "js" | "html" | "css" | "json" | "bash" | "sql" | "python" | string
 }

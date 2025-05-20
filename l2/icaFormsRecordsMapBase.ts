@@ -9,7 +9,7 @@ export abstract class IcaFormsRecordsMapBase extends StateLitElement {
 
 }
 
-interface IConfig {
+export interface IConfig {
     latitude: number,
     longitude: number,
     zoom: number,
