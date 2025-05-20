@@ -3,9 +3,9 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
-
+import { StateLitElement } from './_100554_stateLitElement';
 @customElement('wc-embeds-social-media-100554')
-export class WcEmbedsSocialMedia100554 extends LitElement {
+export class WcEmbedsSocialMedia100554 extends StateLitElement {
 
     @propertyDataSource({ type: String }) datasource: string | undefined;
     @property({ type: String }) description: string | undefined;

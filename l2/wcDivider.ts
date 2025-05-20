@@ -2,9 +2,10 @@
 
 import { html, css, LitElement } from 'lit'; 
 import { customElement, property } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
 
 @customElement('wc-divider-100554')
-export class WcDivider100554 extends LitElement {
+export class WcDivider100554 extends StateLitElement {
 
     createRenderRoot() {
         return this;

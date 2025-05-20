@@ -2,10 +2,11 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
 
 
 @customElement('wc-accordion-details-100554')
-export class WcAccordionDetails100554 extends LitElement {
+export class WcAccordionDetails100554 extends StateLitElement {
     multiple: boolean | undefined;
     disabled: boolean | undefined;
 

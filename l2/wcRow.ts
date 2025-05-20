@@ -2,9 +2,10 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
 
 @customElement('wc-row-100554')
-export class WcRow extends LitElement {
+export class WcRow extends StateLitElement {
     gap: string | undefined;
 
     createRenderRoot() {

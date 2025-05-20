@@ -2,9 +2,10 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
 
 @customElement('wc-image-100554')
-export class WcImage100554 extends LitElement {
+export class WcImage100554 extends StateLitElement {
 
     @property() src: string | undefined; 
     @property() alt: string | undefined;

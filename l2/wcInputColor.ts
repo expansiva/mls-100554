@@ -2,9 +2,10 @@
 
 import { html, LitElement, ifDefined, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
 
 @customElement('wc-input-color-100554')
-export class WcInputColor extends LitElement {
+export class WcInputColor extends StateLitElement {
     
     @property({ type: String }) name: string | undefined;
 

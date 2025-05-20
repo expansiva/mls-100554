@@ -2,9 +2,10 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { StateLitElement } from './_100554_stateLitElement';
 
 @customElement('wc-video-100554')
-export class WcVideo100554 extends LitElement {
+export class WcVideo100554 extends StateLitElement {
     createRenderRoot() {
         return this;
     }
