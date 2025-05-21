@@ -201,7 +201,7 @@ A classe base utilizada no sistema Collab Codes define três tipos principais de
 - @propertyCompositeDataSource: Propriedade composta por múltiplos states dinâmicos. Exemplo: "Olá {{page1.userId}} - {{page1.userName}}".
 - para atributos na classe 'Text', use '@propertyCompositeDataSource'.
 - para atributos na classe 'Bind', use '@propertyDataSource'.
-- para atributos na classe 'Cfg', use '@propertyCompositeDataSource'.
+- para atributos na classe 'Cfg', use '@propertyDataSource'.
 
 - a propriedade autofocus deve ser definida conforme lit "@propertyDataSource({{ type: Boolean }}) autofocus: boolean = false;"
 - a propriedade name deve ser definida conforme lit "@propertyCompositeDataSource({{ type: String }}) name: string | undefined;"

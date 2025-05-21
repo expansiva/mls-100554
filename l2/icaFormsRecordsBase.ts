@@ -4,7 +4,7 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaFormsRecordsBase extends StateLitElement {
 
-    abstract config: IConfig | undefined;
+    abstract config: string | undefined;
     abstract selected: string | undefined;
     abstract title: string;
     abstract subtitle: string | undefined;

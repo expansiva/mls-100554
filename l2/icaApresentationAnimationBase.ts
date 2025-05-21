@@ -4,7 +4,7 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaApresentationAnimationBase extends StateLitElement {
 
-    abstract config: IConfig | undefined;
+    abstract config: string | undefined;
     abstract content: string | undefined;
     abstract state: string | undefined;
 
