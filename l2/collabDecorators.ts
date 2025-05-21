@@ -125,7 +125,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           const stateKey = value.replace(/[{{}}]/g, '').trim();
           prepareForNotification.call(this, attributeName, [stateKey]);
           this[`_${attributeName}`] = state1.getState(stateKey);
-        } else if (typeof value === 'string' && ((value.startsWith('[') || value.startsWith('{')) && (value.endsWith(']') || value.endsWith('}')))) {
+        } else if (options?.type === Object && (typeof value === 'string' && ((value.startsWith('[') || value.startsWith('{')) && (value.endsWith(']') || value.endsWith('}'))))) {
           // initialization ex options="[{ key: 'm', value: 'male' }, { key: 'f', value: 'female' }, { key: 'o', value: 'other' }]"
           // Parse JSON string for static data
           this[`_${attributeName}`] = JSON.parse(value);
