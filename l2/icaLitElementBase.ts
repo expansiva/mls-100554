@@ -171,7 +171,6 @@ export abstract class IcaLitElementBase extends StateLitElement implements tps.I
 
     private updateAttrInWc(prop: string, value: string) {
 
-        console.info({ prop, value })
         const el = this.querySelector(this.widget as string);
         if (el) el.setAttribute(prop, value);
 
