@@ -74,6 +74,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 }
 
 async function addFile(context: mls.msg.ExecutionContext) {
+    
     if (!context || !context.task) throw new Error('Not found context to create files');
     const step = getNextPendentStep(context.task) as any;
 
@@ -114,6 +115,7 @@ async function addFile(context: mls.msg.ExecutionContext) {
     }
 
     context.task = await updateTaskTitle(context.task, "Widget created" + aux);
+
 }
 
 export async function getPrompts(json: any, prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
@@ -167,8 +169,9 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
 1.6.1 Deve-se obrigatoriamente declarar todos os campos definidos na classe base, com os mesmos nomes e tipos. Isso é necessário para garantir consistência e evitar erros de execução.
 1.6.2 O componente nunca deve renderizar um <ica-...> dentro dele mesmo.
 1.6.3 Caso o componente base tenha um atributo config, o mesmo deve ser usado, seguindo os parametros da interface, a mesma pode ser importada para a tipagem.
-1.6.4 Nunca gere o atributo "class", "style" ou "id".
-1.6.5 Se utilizar o config, e o atributo do mesmo poder ser "undefined" deve ser feito uma verificação antes.
+1.6.4 Nunca altere a interface do config, adicionando novos atributos. Isso é necessário para garantir consistência e evitar erros de execução.
+1.6.5 Nunca gere o atributo "class", "style" ou "id".
+1.6.6 Se utilizar o config, e o atributo do mesmo poder ser "undefined" deve ser feito uma verificação antes.
 1.7. Deixe a linha 1 , tripleSlash, igual no modelo, isto irá ser importante para saber o nome do arquivo e outros detalhes.
 1.7.1 Coloque uma quebra de linha entre o tripleSlash e o codigo, conforme o modelo.
 1.8 Não use o CSS, usaremos o .less em um arquivo separado.

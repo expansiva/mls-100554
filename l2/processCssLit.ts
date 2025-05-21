@@ -16,8 +16,10 @@ export async function injectStyleWithoutShadowRoot(modelTS: mls.editor.IModelTS,
     const css = await compileStyleUsingMFile(modelStyle, theme);
     if (!css) return;
     if (modelTS && modelTS.compilerResults) {
+
         const newJs = addLineInConstructor(modelTS.compilerResults.prodJS, `if(this.loadStyle) this.loadStyle(\`${css}\`);`);
-        if (!newJs || !newJs.trim().startsWith('/// <mls')) return;
+        //if (!newJs || !newJs.trim().startsWith('/// <mls')) return;
+        if (!newJs || newJs.indexOf('/// <mls') < 0) return;
         modelTS.compilerResults.prodJS = newJs;
         mls.stor.cache.clearObsoleteCache();
         modelTS.compilerResults.cacheVersion = generateCompactTimestamp();
@@ -37,7 +39,9 @@ function addLineInConstructor(code: string, lineToAdd: string): string {
 
     const lines = code.split('\n');
 
-    const hasEnhancementLit = lines[0].includes('_100554_enhancementLit');
+    const lineEnhacement = lines.find((l) => l.trim().startsWith('/// <mls'));
+    const hasEnhancementLit = (lineEnhacement || '').includes('_100554_enhancementLit');
+    //const hasEnhancementLit = lines[0].includes('_100554_enhancementLit');
     if (!hasEnhancementLit) return code;
     let insideClass = false;
     let constructorIndex = -1;

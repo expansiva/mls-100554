@@ -66,7 +66,7 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
         if (!context.task.messageid_created) throw new Error("addNewInteractionInAiTask: context.task.messageid_created is null");
         const args: mls.msg.RequestAddTaskAIInteraction = {
             action: "addTaskAIInteraction",
-            userId: context.task.owner,
+            userId: getUserIdLocalStorage() || context.task.owner,
             messageId: context.task.messageid_created,
             taskId: context.task.PK,
             parentStepId: stepFather,
@@ -95,7 +95,9 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
         if (context && context.task && stepFather) {
             const msg = 'Error: ' + error.message || 'startNewInteractionInAiTask ';
             context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
-            setFailedStatus(context, stepFather);
+            await setFailedStatus(context, stepFather);
+            const step = getNextPendentStep(context.task);
+            if (step) setFailedStatus(context, step.stepId);
         }
         console.error(`[startNewInteractionInAiTask] ${error.message || error}`);
     }
@@ -213,7 +215,7 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
         if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${step.stepId}`);
         const stepdIdToChangeStatus = step.stepId;
         const newStatus: mls.msg.AIStepStatus = "completed";
-        const userId = context.task.owner;
+        const userId = getUserIdLocalStorage() || context.task.owner;
         const messageId = context.task.messageid_created || '';
         const taskId = context.task.PK;
 

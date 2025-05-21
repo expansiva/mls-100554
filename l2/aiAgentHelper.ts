@@ -230,16 +230,18 @@ export async function appendLongTermMemory(context: mls.msg.ExecutionContext, lo
 export const updateStepStatus = async (task: mls.msg.TaskData, stepId: number, status: mls.msg.AIStepStatus, traceMsg?: string): Promise<mls.msg.TaskData> => {
   const args: mls.msg.RequestUpdateStepStatus = {
     "action": "updateStepStatus",
-    "userId": task.owner || '',
+    "userId": getUserIdLocalStorage() || task.owner || '',
     "messageId": task.messageid_created || '',
     "taskId": task.PK,
     stepId,
     status,
     traceMsg
   };
+
   const ret = await mls.api.msgUpdateStepStatus(args);
   if (!ret || ret.statusCode !== 200) throw new Error("error on AI update status , stoped");
   return (ret as mls.msg.ResponseUpdateStepStatus).task;
+
 }
 
 export const updateTaskTitle = async (task: mls.msg.TaskData, newTitle: string): Promise<mls.msg.TaskData> => {
