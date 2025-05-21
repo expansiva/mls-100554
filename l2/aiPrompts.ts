@@ -151,9 +151,7 @@ function getDefTool(tool: ITool): string {
 export function systemComponentsInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
-        content: `## COMPONENTES DISPONÍVEIS
-    ${descriptionForPrompt}
-`
+        content: `${descriptionForPrompt}`
     }
 }
 
