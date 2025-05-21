@@ -1,0 +1,100 @@
+<div class="widget-showcase" style="max-width:600px;margin:32px auto 0 auto;padding:0 8px;font-family:'Inter',Arial,sans-serif;background:#fff;border-radius:18px;box-shadow:0 2px 16px 0 rgba(60,60,90,0.08);">
+
+  <!-- Título -->
+  <section class="section_title" style="text-align:center;padding:32px 0 8px 0;">
+    <h1 style="font-size:2.1rem;font-weight:700;letter-spacing:-1px;color:#2a2a3a;margin:0 0 8px 0;">Widget Default Text</h1>
+    <h2 style="font-size:1.15rem;font-weight:400;color:#5a5a7a;margin:0;">Exiba textos dinâmicos, banners ou citações com flexibilidade e acessibilidade</h2>
+  </section>
+
+  <!-- Descrição -->
+  <section class="section_info" style="text-align:center;padding:16px 0 8px 0;">
+    <p style="font-size:1.08rem;color:#444;max-width:440px;margin:0 auto 0 auto;line-height:1.6;">
+      <span style="font-size:1.3em;vertical-align:middle;">📝</span>
+      O <b>Widget Default Text</b> permite exibir textos simples, banners informativos ou citações estilizadas em qualquer aplicação web. Personalize o conteúdo, o estilo e até links de forma declarativa, com suporte a acessibilidade e integração fácil via propriedades.
+    </p>
+  </section>
+
+  <!-- Demonstração -->
+  <section class="section_demo" style="padding:24px 0 16px 0;">
+    <h3 style="text-align:center;font-size:1.15rem;font-weight:600;color:#2a2a3a;margin-bottom:18px;">Demonstração ao vivo</h3>
+    <div style="display:flex;flex-direction:column;gap:28px;align-items:center;">
+      <!-- Exemplo 1: Texto simples -->
+      <demo style="width:100%;max-width:420px;background:linear-gradient(90deg,#f7f8fa 60%,#eaf0ff 100%);border-radius:12px;padding:18px 18px 12px 18px;box-shadow:0 1px 8px 0 rgba(60,60,90,0.06);margin-bottom:0;">
+        <div style="text-align:center;margin-bottom:10px;">
+          <widget-default-text-100554 text="{{ui.text1}}" config="{{ui.config1}}"></widget-default-text-100554>
+        </div>
+        <playground style="display:flex;flex-direction:column;gap:8px;align-items:center;">
+          <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Texto:" value="{{ui.text1}}"></ica-forms-input-string-100554>
+          <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Config (JSON):" value="{{ui.config1}}"></ica-forms-input-string-100554>
+        </playground>
+      </demo>
+      <!-- Exemplo 2: Citação -->
+      <demo style="width:100%;max-width:420px;background:linear-gradient(90deg,#f7f8fa 60%,#ffe9e3 100%);border-radius:12px;padding:18px 18px 12px 18px;box-shadow:0 1px 8px 0 rgba(60,60,90,0.06);margin-bottom:0;">
+        <div style="text-align:center;margin-bottom:10px;">
+          <widget-default-text-100554 text="{{ui.text2}}" config="{{ui.config2}}"></widget-default-text-100554>
+        </div>
+        <playground style="display:flex;flex-direction:column;gap:8px;align-items:center;">
+          <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Texto:" value="{{ui.text2}}"></ica-forms-input-string-100554>
+          <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Config (JSON):" value="{{ui.config2}}"></ica-forms-input-string-100554>
+        </playground>
+      </demo>
+      <!-- Playground State -->
+      <widget-playground-state-100554 state='{"ui":{"text1":"Bem-vindo ao Widget Default Text!","config1":"{\"type\":\"text\"}","text2":"\"A simplicidade é o último grau de sofisticação.\"","config2":"{\"type\":\"quote\",\"cite\":\"Leonardo da Vinci\"}"}}'></widget-playground-state-100554>
+    </div>
+  </section>
+
+  <!-- Benefícios -->
+  <section class="section_benefits" style="padding:18px 0 10px 0;">
+    <h3 style="text-align:center;font-size:1.13rem;font-weight:600;color:#2a2a3a;margin-bottom:12px;">Por que usar o Widget Default Text?</h3>
+    <ul style="list-style:none;padding:0;max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:10px;">
+      <li style="display:flex;align-items:center;gap:8px;font-size:1.03rem;color:#444;">
+        <span style="font-size:1.2em;">⚡</span> <b>Versátil:</b> Exiba textos, banners, citações ou links com uma única tag.
+      </li>
+      <li style="display:flex;align-items:center;gap:8px;font-size:1.03rem;color:#444;">
+        <span style="font-size:1.2em;">🔗</span> <b>Fácil integração:</b> Use propriedades simples para personalizar conteúdo e comportamento.
+      </li>
+      <li style="display:flex;align-items:center;gap:8px;font-size:1.03rem;color:#444;">
+        <span style="font-size:1.2em;">🦾</span> <b>Acessível:</b> Suporte a citações, links e multiline, com markup semântico.
+      </li>
+      <li style="display:flex;align-items:center;gap:8px;font-size:1.03rem;color:#444;">
+        <span style="font-size:1.2em;">🎨</span> <b>Personalizável:</b> Controle o tipo de exibição via JSON (text, quote, banner, link, etc).
+      </li>
+      <li style="display:flex;align-items:center;gap:8px;font-size:1.03rem;color:#444;">
+        <span style="font-size:1.2em;">🔒</span> <b>Seguro:</b> Links abrem em nova aba e com rel="noopener noreferrer".
+      </li>
+    </ul>
+  </section>
+
+  <!-- Código de uso -->
+  <section class="section_code" style="padding:18px 0 10px 0;">
+    <h3 style="text-align:center;font-size:1.13rem;font-weight:600;color:#2a2a3a;margin-bottom:10px;">Como usar</h3>
+    <div style="background:#f7f8fa;border-radius:8px;padding:14px 12px 10px 12px;font-size:0.98rem;color:#2a2a3a;max-width:440px;margin:0 auto 0 auto;font-family:monospace;overflow-x:auto;">
+      <span style="color:#7c4dff;">&lt;widget-default-text-100554</span> <span style="color:#1976d2;">text</span>=<span style="color:#43a047;">"Olá mundo!"</span> <span style="color:#1976d2;">config</span>=<span style="color:#43a047;">'{"type":"text"}'</span><span style="color:#7c4dff;">&gt;&lt;/widget-default-text-100554&gt;</span>
+    </div>
+    <div style="text-align:center;margin-top:8px;font-size:0.97rem;color:#888;">
+      <span style="font-size:1.1em;">💡</span> Basta alterar <b>text</b> e <b>config</b> para personalizar.
+    </div>
+  </section>
+
+  <!-- Casos de uso -->
+  <section class="section_use_cases" style="padding:18px 0 24px 0;">
+    <h3 style="text-align:center;font-size:1.13rem;font-weight:600;color:#2a2a3a;margin-bottom:10px;">Onde aplicar?</h3>
+    <ul style="list-style:none;padding:0;max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:10px;">
+      <li style="display:flex;align-items:center;gap:8px;font-size:1.03rem;color:#444;">
+        <span style="font-size:1.2em;">📢</span> Banners informativos em dashboards ou portais.
+      </li>
+      <li style="display:flex;align-items:center;gap:8px;font-size:1.03rem;color:#444;">
+        <span style="font-size:1.2em;">💬</span> Citações de clientes, depoimentos ou frases de destaque.
+      </li>
+      <li style="display:flex;align-items:center;gap:8px;font-size:1.2em;">🔗</span> Links contextuais ou chamadas para ação.
+      </li>
+      <li style="display:flex;align-items:center;gap:8px;font-size:1.03rem;color:#444;">
+        <span style="font-size:1.2em;">🧩</span> Mensagens dinâmicas em formulários, listas ou cards.
+      </li>
+    </ul>
+    <div style="text-align:center;margin-top:14px;font-size:0.97rem;color:#888;">
+      <span style="font-size:1.1em;">🔧</span> Integre facilmente em qualquer projeto web ou framework que suporte Web Components.
+    </div>
+  </section>
+
+</div>
