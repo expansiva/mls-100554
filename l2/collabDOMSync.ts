@@ -11,7 +11,7 @@ export function sync() {
 
 }
 
-export function updateHTML(html:string) {
+export function updateHTML(html: string) {
 
     if (!window.preview.editor || !window.preview.iframe) return;
     const model = window.preview.editor.getModel();
@@ -42,7 +42,7 @@ function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent:
 
 
 export function formatHtml(html: string) {
-
+    
     const container = document.createElement('div');
     container.innerHTML = html.trim();
 
@@ -52,13 +52,18 @@ export function formatHtml(html: string) {
         let formattedHtml = '';
 
         if (node.nodeType === Node.ELEMENT_NODE) {
-
             formattedHtml += `${indent}<${node.nodeName.toLowerCase()}`;
+
             for (const attr of node.attributes) {
-                formattedHtml += `\n${childIndent}${attr.name}="${attr.value}"`;
+                let attrValue = attr.value.replace(/'/g, '"');
+                formattedHtml += `\n${childIndent}${attr.name}='${attrValue}'`;
             }
 
-            const isSelfClosing = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'].includes(node.nodeName.toLowerCase());
+            const isSelfClosing = [
+                'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
+                'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
+            ].includes(node.nodeName.toLowerCase());
+
             if (node.children.length === 0 && isSelfClosing) {
                 formattedHtml += ' />';
             } else {
@@ -91,6 +96,7 @@ export function formatHtml(html: string) {
 
     return result;
 }
+
 
 function getDiffs(originalLines: string[], modifiedLines: string[]) {
     const diffs: IDiffs[] = [];

@@ -3,7 +3,7 @@
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
 import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getAgentStepByAgentName, updateStepStatus, getNextPendentStep, appendLongTermMemory, getAgentsStepByAgentName, updateTaskTitle } from "./_100554_aiAgentHelper";
-import { startNewInteractionInAiTask, addNewStep, executeNextStep } from "./_100554_aiAgentOrchestration";
+import { startNewInteractionInAiTask, addNewStep, executeNextStep, startNewAiTask } from "./_100554_aiAgentOrchestration";
 import { getImages } from "./_100554_libUnsplash";
 import { widgetsDefault } from "./_100554_icaBaseDescription";
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
@@ -38,28 +38,33 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
   const taskTitle = "Planning";
 
   if (!context || !context.message) throw new Error("Invalid context");
-  if (!context.task) throw new Error("Invalid task");
+
+  if (!context.task) {
+    const inputs = await getPrompts('t1', dataFixed, null, []);
+    await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
+    return;
+  }
 
   const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
   if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
 
   context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
-
   const remainingTasks = getRemainingTasksIds(context.task);
   if (!remainingTasks || remainingTasks.length === 0) throw new Error("remainingTasks === 0");
   const taskId = remainingTasks[0];
+  const allStepsTasksComplete = getAgentsStepByAgentName(context.task, 'agentCreateSite', 'completed');
 
   console.info({
     beforePrompt: step.prompt,
-    taskId
-  })
+    allStepsTasksComplete,
+    taskId,
+    prompt: step.prompt
+  });
 
-  const allStepsTasksComplete = getAgentsStepByAgentName(context.task, 'agentCreateSite', 'completed');
   const inputs = await getPrompts(taskId, step.prompt, step.rags, allStepsTasksComplete);
   await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
 
 }
-
 
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
 
@@ -68,37 +73,50 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
   if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
 
   context.task = await updateStepStatus(context.task, step.stepId, "completed");
-
   const remainingTasks = getRemainingTasksIds(context.task);
   remainingTasks.shift();
   const task = await appendLongTermMemory(context, { remainingTasks: remainingTasks.join(',') });
   context.task = task;
 
-  if (!remainingTasks || remainingTasks.length === 0) {
-    const allResults = getAllStepsThisAgent(context);
-    const allResults2 = await execPrepareMidias(allResults);
-    const allResults3 = execPrepareWidgetsDefault(allResults2);
-    const pages = execPrepareHTML(allResults3);
-    await execPrepareOrganismAndTemplates(context, allResults3);
-    await execCreatePages(pages);
-    return;
+  //Only for test => exec only first task 
+  const allResults = getAllStepsThisAgent(context);
+  console.info(allResults);
+  const allResults2 = await execPrepareMidias(allResults);
+  const allResults3 = execPrepareWidgetsDefault(allResults2);
+  const pages = execPrepareHTML(allResults3);
+  await execPrepareOrganismAndTemplates(context, allResults3);
+  await execCreatePages(pages);
+  // end test
 
-  }
 
-  const stepAgentAnalyzeNewModule2 = getAgentStepByAgentName(context.task, 'agentAnalyzeNewModule2');
-  if (!stepAgentAnalyzeNewModule2) throw new Error(`[${agentName}] afterPrompt: no find parent step AgentAnalyzeNewModule2.`);
-  const data = stepAgentAnalyzeNewModule2.interaction?.payload ? (stepAgentAnalyzeNewModule2.interaction?.payload[0] as any).content : undefined
-  const newStep: mls.msg.AIPayload = {
-    agentName: 'agentCreateSite',
-    prompt: JSON.stringify(data),
-    status: 'pending',
-    stepId: step.stepId + 1,
-    interaction: null,
-    nextSteps: null,
-    rags: null,
-    type: 'agent'
-  }
-  await addNewStep(context, step.stepId, [newStep]);
+  /*
+    if (!remainingTasks || remainingTasks.length === 0) {
+      const allResults = getAllStepsThisAgent(context);
+      console.info(allResults);
+      const allResults2 = await execPrepareMidias(allResults);
+      const allResults3 = execPrepareWidgetsDefault(allResults2);
+      const pages = execPrepareHTML(allResults3);
+      await execPrepareOrganismAndTemplates(context, allResults3);
+      await execCreatePages(pages);
+      return;
+    }
+  
+    const stepAgentAnalyzeNewModule2 = getAgentStepByAgentName(context.task, 'agentAnalyzeNewModule2');
+    if (!stepAgentAnalyzeNewModule2) throw new Error(`[${agentName}] afterPrompt: no find parent step AgentAnalyzeNewModule2.`);
+    const data = stepAgentAnalyzeNewModule2.interaction?.payload ? (stepAgentAnalyzeNewModule2.interaction?.payload[0] as any).content : '';
+    const newStep: mls.msg.AIPayload = {
+      agentName: 'agentCreateSite',
+      prompt: JSON.stringify(data),
+      status: 'pending',
+      stepId: step.stepId + 1,
+      interaction: null,
+      nextSteps: null,
+      rags: null,
+      type: 'agent'
+    }
+    await addNewStep(context, step.stepId, [newStep]);
+  
+    */
 
 }
 
@@ -143,6 +161,11 @@ export class ${fileName} extends CollabPageElement {
     }
 }`;
 
+  console.info({
+    pageName: fileName,
+    html: data.el.outerHTML.trim()
+  })
+
   await createNewFile(
     { project, position: 'right', shortName, enhancement, sourceTS: ts.trim(), sourceHTML: data.el.outerHTML.trim(), sourceLess: '', openPreview: false }
   );
@@ -153,6 +176,26 @@ function execPrepareHTML(allResults: TemplateContent[]) {
   const result: Record<string, { el: HTMLElement, data: TemplateContent }> = {};
   const result2: Record<string, { el: HTMLElement, data: TemplateContent }> = {};
   const actualProject = mls.actual[5].project;
+  const idControllers: Record<string, number> = {};
+
+  function generateAbbreviation(str: string) {
+    const cleaned = str.replace(/[^a-zA-Z\-]/g, '');
+    const parts = cleaned.split('-');
+    const initials = parts.map(p => p[0]);
+    return initials.join('');
+  }
+
+  function generateId(tagName: string) {
+    const keyAbbr = generateAbbreviation(tagName);
+    if (!(keyAbbr in idControllers)) idControllers[keyAbbr] = 0;
+    else idControllers[keyAbbr] = idControllers[keyAbbr] + 1;
+    return `${keyAbbr}-${idControllers[keyAbbr]}`;
+  }
+
+  function prepareName(name: string) {
+    const { project } = mls.actual[5];
+    return `_${project}_${name}`;
+  }
 
   for (const task of allResults) {
 
@@ -163,15 +206,22 @@ function execPrepareHTML(allResults: TemplateContent[]) {
         if ("organismOrMolecule" in child && "attributes" in child.organismOrMolecule) {
           const _child = child.organismOrMolecule as Molecule;
           const tagName = `${_child.name}-${PROJECTICA}`;
-          const str = `<${tagName} widget=${_child.widget} ${_child.attributes}> </${tagName}>`;
-          parent.innerHTML = parent.innerHTML + str;
+          const element = document.createElement(tagName);
+          element.setAttribute('id', generateId(tagName));
+          if (_child.widget) element.setAttribute('widget', _child.widget);
+          _child.attributes.forEach((attr) => {
+            element.setAttribute(attr.key, attr.value.replace(/"/g, "'"));
+          });
+          parent.appendChild(element);
 
         } else if ("organism" in child) {
           const _organism = child.organism as Organism;
           const organinsEl = document.createElement(ICAORGANISM);
           const tagName = `${_organism.name}-${actualProject}`;
           organinsEl.setAttribute('widget', tagName);
-          organinsEl.className = child.class;
+          organinsEl.setAttribute('id', generateId(tagName));
+
+          if (child.class) organinsEl.setAttribute('classel', child.class);
           parent.appendChild(organinsEl);
           prepareElements(_organism.childs, organinsEl);
         }
@@ -181,19 +231,16 @@ function execPrepareHTML(allResults: TemplateContent[]) {
     const templateElement = document.createElement(ICATEMPLATE);
     const tagName = `${template.name}-${actualProject}`;
     templateElement.setAttribute('widget', tagName);
+    templateElement.setAttribute('id', generateId(tagName));
     result[template.name] = { el: templateElement, data: task };
     if (template?.childs) prepareElements(template.childs, templateElement);
 
   }
 
-  const prepareName = (name: string) => {
-    const { project } = mls.actual[5];
-    return `_${project}_${name}`;
-  }
 
   Object.keys(result).forEach((key, index) => {
     const item = result[key];
-    const name = prepareName(`pageNew${index}`);
+    const name = prepareName(item.data.pageName);
     const tag = convertFileNameToTag(name);
     const page = document.createElement(tag);
     page.setAttribute('modeoverlay', MODEOVERLAYDEFAULT);
@@ -205,6 +252,30 @@ function execPrepareHTML(allResults: TemplateContent[]) {
 
 }
 
+function escapeAttrString(attr: string): string {
+  const match = attr.match(/^([^\s=]+)=["']?(.*)["']?$/);
+  if (!match) return attr;
+
+  const key = match[1];
+  let value = match[2];
+
+  if (!(value.trim().startsWith('{{')) && value.trim().startsWith('{') && value.trim().endsWith('}')) {
+    value = escapeHtml(value);
+  } else {
+    value = escapeHtml(value);
+  }
+  return `${key}="${value}"`;
+}
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')   // importante vir primeiro
+    .replace(/"/g, '&quot;')  // aspas
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+
 function execPrepareWidgetsDefault(allResults: TemplateContent[]) {
 
   for (const task of allResults) {
@@ -214,7 +285,7 @@ function execPrepareWidgetsDefault(allResults: TemplateContent[]) {
       for (const child of childs) {
         if ("organismOrMolecule" in child && "attributes" in child.organismOrMolecule) {
           const _child = child.organismOrMolecule as Molecule;
-          _child.widget = widgetsDefault[_child.name];
+          _child.widget = widgetsDefault[_child.name] + `-${PROJECTICA}`;
         } else if ("organism" in child) {
           const _organism = child.organism as Organism;
           collectMidias(_organism.childs);
@@ -251,12 +322,9 @@ async function execPrepareMidias(allResults: TemplateContent[]) {
 
               const escapedFileName = media.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
               const regex = new RegExp(escapedFileName, 'g');
-
-              if (typeof _child.attributes === 'string') {
-                _child.attributes = _child.attributes.replace(regex, image.urls.regular);
-              }
-
+              _child.attributes.forEach((attr) => attr.value = attr.value.replace(regex, image.urls.regular))
             };
+
             if (media.mediaType === 'sound') continue;
             if (media.mediaType === 'video') continue;
           }
@@ -375,13 +443,13 @@ export async function getPrompts(taskId: string, prompt: string | undefined, rag
   prompts.push(systemMainInstruction(taskId, allResults));
   prompts.push(outputFormat());
   prompts.push(componentCompositionStandard());
-  prompts.push(atomicDesignMolecules());
   prompts.push(systemComponentsInstruction())
   prompts.push(collabStates());
 
   prompts.push({
     type: 'human',
-    content: `## Definições da task \n\n ${prompt}`
+    content: `## Definições da task: \n\n
+    \n\n ${prompt}`
   });
 
   return prompts;
@@ -414,16 +482,43 @@ function systemMainInstruction(taskId: string, allResults: TemplateContent[]): m
   return {
     type: 'system',
     content: `${preferModelType("code")}
-Você é responsável por gerar uma nova página web para o sistema Collab.
+Você é responsável por gerar uma página web profissional, moderna e refinada para o sistema Collab.
+Esta página deve ser realista, convincente e adequada ao público-alvo — simulando uma entrega de nível de agência.
 
 ## Objetivo
 Retornar um JSON compatível com a interface definida na seção "## Formato de saída".
 
 ## Contexto Global (Retrieve)
-Defina o objetivo e as necessidades da página, dados disponíveis, público-alvo e função principal.
-Analise a seção "## Definições da task" abaixo, e analise a task "${taskId}". Use somente as tabelas relacionadas neste módulo.
-Analise a seção "## Padrão de Composição dos Componentes"
-analise a seção "## Collab States"
+Defina o objetivo e as necessidades da página, dados disponíveis, público-alvo e função principal, baseada na task ${taskId}
+
+  ### Requisitos para a Página
+  - Analise o promptToCreatePage rigorosamente e siga as definições para a criação dá pagina.
+  - A página deve conter múltiplas seções bem definidas, incluindo:
+      1. Header com logo, menu e botão de ação
+      2. Hero com chamada principal, imagem ou ilustração destacada
+      3. Seções com cards, depoimentos, estatísticas, gráficos ou recursos conforme o tipo da task
+      4. Área principal com conteúdo detalhado e escaneável
+      5. Chamadas para ação (CTA) com botões persuasivos
+      6. Rodapé com links úteis, contatos e redes
+      7. Inclua elementos como carrosséis, gráficos, tabelas ou blocos visuais quando fizer sentido para a tarefa.
+  
+  - Use textos que simulem uma situação real: com títulos persuasivos, descrições claras, botões como "Saiba mais", "Comece agora", etc.
+Evite textos genéricos como "Lorem ipsum", e priorize mensagens alinhadas ao objetivo da task.
+
+  - A composição deve usar **componentes reutilizáveis** segundo o padrão descrito em "## Padrão de Composição dos Componentes" (Templates > Organismos > Moléculas).
+  - A página precisa simular conteúdo realista: textos persuasivos, títulos significativos, botões com ação, imagens ilustrativas, etc.
+  - O design deve considerar **hierarquia visual**, uso estratégico de cores, e adaptação a diferentes tamanhos de tela.
+  - Adapte a página ao público-alvo da task.
+  - Use somente as tabelas e dados disponíveis do módulo da task analisada.
+  
+  ### Exemplo resumido do esperado:
+    Uma página para um sistema de agendamento pode conter:
+    - Hero com "Gerencie seus compromissos com facilidade"
+    - Cards com benefícios ("Agenda inteligente", "Notificações por WhatsApp", etc.)
+    - Seção de depoimentos com fotos e nomes
+    - Tabela com próximos eventos ou KPIs de produtividade
+    - Gráfico de agendamentos por semana
+    - Rodapé com links, termos de uso e redes sociais
 
 
 ## Pense e decida sobre a estrutura geral da página (Decide)
@@ -435,8 +530,10 @@ Use o modelo Atomic Design para organizar os componentes da interface:
 
 ## States
 Decida quais states para o controle da página serão necessários.
-- Toda comunicação com o backend ocorre via states com prefixo "db." (ex: 'db.produto', 'db.categoria'). Nos states "db." ficam os registros dos bancos de dados.
-- Toda lógica e controle visual no frontend é feito com states com prefixo "ui.".
+- **Nunca crie states para textos fixos, estáticos ou institucionais**, como banners, mensagens institucionais, descrições de página ou labels. **Esses textos devem estar diretamente no template e não usar '{{}}'.**
+- Usar states 'db.' somente quando necessário.
+- Toda comunicação com o backend ocorre via states com prefixo '"db."' (ex: 'db.produto', 'db.categoria'). Nos states "db." ficam os registros dos bancos de dados.
+- Toda lógica e controle visual no frontend é feito com states com prefixo '"ui."'.
 - Tabelas intermediárias ou que devem ser preparadas, como por exemplo, para chart , deverão iniciar com "ui.".
 - O TypeScript escuta mudanças nos states "ui." e executa ações baseadas neles, como ler tabelas e atualizar states "db.".
 - Por exemplo se um botão 'save' for pressionado, pode alterar um state "{{ui.action}}", com o valor 'save' , o typescript irá agir conforme necessário.
@@ -506,6 +603,7 @@ export interface Saida {
 
 export interface Task {
     id: string;
+    pageName: string;
     uiStates: UIState[];
     template: {
       name: string;
@@ -542,7 +640,7 @@ export interface Molecule {
   name: string;
   medias: Media[]; // Para cada midia(image, sound ou video) definido, adicionar uma entrada no array.
   description: string;
-  attributes: string; // Gere a string de atributos no formato name="xxx" value="yyy" — apenas os pares, sem aspas ao redor da string inteira
+  attributes: {key:string, value: string}[]; // Gere os atributos key, value
 }
 
 export interface Media {
@@ -581,38 +679,6 @@ O componente 'organism-card' posiciona os filhos com base nas classes: '.card-he
   }
 }
 
-function atomicDesignMolecules(): mls.msg.IAMessageInputType {
-  return {
-    type: 'system',
-    content: `## Atomic Design – Moléculas (Molecules)
-
-General attributes (aplicáveis em quase todas as moléculas):
-- name, id, class, style
-- Attributes A11y (opcionais): role, ariaLabel, ariaDescribedBy, ariaExpanded, ariaSelected …
-
-Attributes Text:
-Exibem textos fixos ou dinâmicos.
-Aceitam texto simples ou **composite binding**.
-Exemplos:
-- label="Digite o CPF"
-- label="Bem-vindo {{ui.user.name}}"
-
-Attributes Cfg:
-Controlam o comportamento ou aparência da molécula.
-Aceitam texto fixo ou **binding puro** (sem texto adicional).
-Exemplos:
-- readonly="true"
-- disabled="{{ui.ReadyForInput}}"
-
-Attributes Bind:
-São usados para ler e/ou gravar dados dinâmicos.
-Aceitam texto fixo ou **binding puro**.
-Exemplos:
-- value="dog"
-- value="{{ui.choice.animal}}"
-`
-  }
-}
 
 function collabStates(): mls.msg.IAMessageInputType {
   return {
@@ -636,7 +702,7 @@ O sistema Collab.codes utiliza componentes web (Lit 3.0) sem shadow DOM. Para fa
 Será criado 2 tipos de states, local , iniciando com “ui” ex: “{{ui.action}}” , e global, iniciando com “db” ex: “{{db.user.name}}”
 
 Decisão:
-	•	A camada HTML usa expressões como {{db.user.name}} para binding de dados.
+	•	A camada HTML usa expressões como {{db.user.name}} para binding de dados
 	•	O TypeScript observa, atualiza e responde às mudanças nesses states.
 	•	Chamadas de API e banco de dados devem ser feitas com base nas alterações de states, e os resultados são colocados de volta no state.
 	•	Nenhum evento customizado entre elementos (como dispatchEvent) será usado para passar dados entre HTML e TS.
@@ -708,6 +774,121 @@ function getRemainingTasksIds(task: mls.msg.TaskData) {
   const arrRemainingTasks = remainingTasks.split(',');
   return arrRemainingTasks;
 }
+
+
+
+const dataFixed = `{
+  "data": {
+    "moduleGoal": "Criar um site pessoal de portfólio em formato one page, apresentando informações e trabalhos do usuário, com destaque para uma imagem de banner.",
+    "stylePreferences": {
+      "brandPersonality": {
+        "sincerity": {
+          "value": 80,
+          "description": "Indicates warmth, honesty, and trust. High values suggest soft colors, friendly language, and empathetic tone."
+        },
+        "excitement": {
+          "value": 60,
+          "description": "Measures energy and boldness. Higher values lead to vibrant palettes, fast animations, and youthful aesthetics."
+        },
+        "competence": {
+          "value": 85,
+          "description": "Reflects professionalism and efficiency. High scores imply clean layout, technical precision, and trustworthy tone."
+        },
+        "sophistication": {
+          "value": 70,
+          "description": "Captures elegance and exclusivity. Higher values suggest premium feel, serif fonts, generous spacing, and refined visuals."
+        },
+        "ruggedness": {
+          "value": 20,
+          "description": "Conveys strength and robustness. High values suggest bold fonts, textured backgrounds, and strong visual contrast."
+        }
+      },
+      "toneOfVoice": {
+        "funny_serious": {
+          "value": 70,
+          "description": "Low values use humor and playfulness; high values use a formal, authoritative tone in texts and CTAs."
+        },
+        "formal_casual": {
+          "value": 60,
+          "description": "Controls the vocabulary and sentence structure. Low = formal and structured; high = relaxed and conversational."
+        },
+        "respectful_irreverent": {
+          "value": 30,
+          "description": "Defines politeness level. Low = traditional and polite; high = informal, bold, possibly sarcastic copy."
+        },
+        "enthusiastic_matterOfFact": {
+          "value": 60,
+          "description": "Low values are objective and neutral; high values use expressive, motivational tone and dynamic CTAs."
+        }
+      }
+    },
+    "models": {
+      "Usuario": {
+        "prisma": "model Usuario { id Int @id @default(autoincrement()) nome String foto String bio String contato String redesSociais String }",
+        "fields": "id, nome, foto, bio, contato, redesSociais"
+      },
+      "Projeto": {
+        "prisma": "model Projeto { id Int @id @default(autoincrement()) titulo String descricao String imagem String link String tecnologias String }",
+        "fields": "id, titulo, descricao, imagem, link, tecnologias"
+      }
+    },
+    "tasks": [
+      {
+        "id": "t1",
+        "name": "Criar página one page do portfólio",
+        "agentName": "agentCreateNewPage",
+        "urlName": "/",
+        "useModels": [
+          "Usuario",
+          "Projeto"
+        ],
+        "description": "Desenvolver a página principal do portfólio em formato one page, contendo todas as seções: banner, apresentação pessoal, listagem de projetos, contato e redes sociais.",
+        "visibleTo": [
+          "public"
+        ],
+        "businessRules": [
+          "O site deve ser responsivo.",
+          "Deve conter uma imagem de banner em destaque.",
+          "Todas as informações devem estar em uma única página.",
+          "Deve apresentar dados do usuário e seus projetos.",
+          "Deve haver seção de contato e links para redes sociais."
+        ],
+        "userStories": [
+          {
+            "as": "visitante",
+            "iWant": "ver rapidamente quem é o usuário e seus principais projetos",
+            "soThat": "eu possa avaliar suas habilidades e experiência"
+          },
+          {
+            "as": "recrutador",
+            "iWant": "acessar facilmente o contato do usuário",
+            "soThat": "eu possa entrar em contato para oportunidades"
+          },
+          {
+            "as": "cliente potencial",
+            "iWant": "visualizar exemplos de trabalhos anteriores",
+            "soThat": "eu possa decidir se quero contratar o usuário"
+          },
+          {
+            "as": "usuário",
+            "iWant": "apresentar minhas informações e portfólio de forma elegante",
+            "soThat": "eu possa causar uma boa impressão"
+          },
+          {
+            "as": "visitante",
+            "iWant": "acessar os links das redes sociais do usuário",
+            "soThat": "eu possa segui-lo ou conhecer mais sobre ele"
+          }
+        ],
+        "navigation": []
+      }
+    ],
+    "moduleConstrains": [
+      "Site deve ser one page",
+      "Deve conter uma imagem de banner em destaque"
+    ]
+  }
+}`
 
 
 

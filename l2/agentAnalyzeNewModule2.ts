@@ -125,17 +125,44 @@ Com base neste JSON de análise, gere um plano de alto nível que quebre o objet
   3. descrição
   4. outros campos
 
-## Regras e orientações:
+## 📘 Regras e Orientações
+
+O resultado será utilizado por uma LLM para gerar uma página web com ótimo conteúdo e excelente design.
 
 - Use o campo 'agentName' com base nos agentes disponíveis.
 - Use 'urlName' apenas para tarefas do tipo 'agentCreateNewPage'.
+- Use 'pageName' apenas para tarefas do tipo 'agentCreateNewPage'.
 - A lista 'useModels' deve conter apenas os modelos utilizados pela página ou tabela.
 - Para 'navigation', **descreva apenas transições reais entre páginas diferentes.**
 - O campo 'navigation/action' deve indicar claramente o que o usuário faz (ex: "Ver produtos", "Fazer login").
 
+## 👥 User Stories
 Para cada página, gere 2 a 5 user stories realistas:
 - cobrindo o objetivo principal da página
 - considerando diferentes perfis de usuário (ex: visitante, cliente, admin)
+
+## 🎯 promptToCreatePage
+Para cada página, gere um campo 'promptToCreatePage' com um **resumo claro e detalhado** para guiar a criação da página.
+
+### O prompt deve levar em consideração:
+
+- **Tipo de site** (ex: institucional, e-commerce, blog, SaaS)
+- **Objetivo principal da página**
+- **stylePreferences** (preferências visuais ou de design)
+
+### 💡 Diretrizes de conteúdo e design
+
+1. Utilize **texto envolvente**, com **títulos fortes** e **descrições explicativas**.
+2. Crie uma estrutura **visual marcante e profissional**, com **layout em seções bem definidas**.
+3. Inclua sugestões de **imagens, ícones, ilustrações ou gráficos**.
+4. Aplique boas práticas de **tipografia, contraste e espaçamento** para reforçar a hierarquia visual.
+5. Estruture o conteúdo em formato **modular**, com blocos como:
+   - Hero Section
+   - Seções em colunas
+   - CTAs (Call to Actions)
+   - Depoimentos
+   - Rodapé
+> **Importante:** O resultado será interpretado por uma LLM para **gerar automaticamente uma página web completa com ótimo conteúdo e design refinado**.
 
 Formato de saída (JSON):
 
@@ -144,7 +171,6 @@ Formato de saída (JSON):
     "type": "flexible",
     "content": {
         "moduleGoal": "...",
-        "stylePreferences" : {}, // manter o mesmo style preferences recebido, sem alterações 
         "models": {
             "modelName": {
             "prisma": "...",
@@ -154,7 +180,9 @@ Formato de saída (JSON):
         "tasks":  [{
             "id": "t1",
             "name": "...",
+            "promptToCreatePage": "..."
             "agentName": "...",
+            "pageName: "pageXxxx",
             "urlName": "...", // ex: "/page1"
             "useModels": ["...","..."]
             "description": "...",
@@ -162,7 +190,7 @@ Formato de saída (JSON):
             "businessRules: ["...", "..."],
             "userStories": [{ as: "...", "iWant": "...", "soThat": "..."}],
             "navigation": [{ to: "...", action: "..." }]
-        }],
+            }],
         "moduleConstrains": ["...","..."]
     }
 }
