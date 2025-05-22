@@ -54,6 +54,7 @@ export class WidgetDefaultNavigationLinks extends IcaNavigationLinksBase {
     }
     private _onScroll = () => {
         const cfg = this._getConfig();
+
         if (!cfg || !cfg.scrollSync) return;
         const offset = typeof cfg.offset === 'number' ? cfg.offset : 0;
         let found: string | undefined = undefined;
@@ -101,6 +102,10 @@ export class WidgetDefaultNavigationLinks extends IcaNavigationLinksBase {
     }
     render() {
         const cfg = this._getConfig();
+
+                console.info({
+            cfgNav: cfg
+        })
         if (!cfg || cfg.recommendedWidget !== 'anchor' || !cfg.items) return nothing;
         return html`
 <nav aria-label="${this._messages.nav}" class="nav-anchor">

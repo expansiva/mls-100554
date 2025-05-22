@@ -4,6 +4,7 @@ import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { preferModelType } from './_100554_aiPrompts';
 import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, calculateStepsStatistics, getInteractionStepId, } from "./_100554_aiAgentHelper";
 import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewStep } from "./_100554_aiAgentOrchestration";
+import { ClarificationData, ClarificationJson } from './_100554_agentAnalyzeNewModuleBase';
 import './_100554_wcClarificationAnalyzeNewModule1';
 
 const agentName = "agentAnalyzeNewModule1";
@@ -140,11 +141,13 @@ function systemMainInstruction(): mls.msg.IAMessageInputType {
 Você é um assistente de projeto. Sua tarefa é analisar este pedido e extrair:
 
 1. Objetivo principal.
-2. Entidades e possíveis atributos.
+2. Entidades e possíveis atributos(se necessario).
 3. Funcionalidades chave.
-4. Perguntas em aberto 
-5. Restrições ou dependências
+4. Perguntas em aberto.
+5. Restrições ou dependências.
 6. Preferências de estilo e comunicação (personalidade da marca e tom de voz), defina valores que mais se adequam para este tipo de site / módulo.
+7. Tipo de Site. [Definir o tipo de site: institucional, e-commerce, dashboard, blog, etc.].
+8. Formato da Página [Definir o formato: SPA, one-page, multi-page, mobile-first, etc.].
 
 ### INSTRUÇÕES IMPORTANTES:
 
@@ -162,6 +165,8 @@ Formato de saída (JSON):
     "clarificationMessage": string,
     "json": {
         "goal": string,
+        "websiteType": string, //[institucional, e-commerce, dashboard, blog, etc]
+        "pageFormat": string, //[SPA, one-page, multi-page, mobile-first, etc.]
         "entities": {name: string; fields: string[]}[],
         "features": string[]
         "openQuestions": {id: string; question: string}[]
@@ -219,7 +224,7 @@ Não planeje etapas nem gere código ainda—só analise.
 
 
 function prepareHtmlClarification(
-    json: string | Object,
+    json: string | ClarificationJson,
     taskId: string,
     stepId: number,
     clarificationMessage: string
@@ -245,10 +250,3 @@ function prepareHtmlClarification(
     return div;
 }
 
-interface ClarificationData {
-    json: Object,
-    taskId: string,
-    stepId: number,
-    clarificationMessage: string,
-    promptUser: string,
-}

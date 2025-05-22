@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { postBackClarification } from "./_100554_aiAgentOrchestration";
-import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
+import { ClarificationData, OpenQuestion, StylePreferences, BrandPersonality, ToneOfVoice } from './_100554_agentAnalyzeNewModuleBase';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -12,6 +12,8 @@ const message_pt = {
     cancel: 'Cancelar Task',
     continue: 'Continuar',
     goalPrincipal: 'Objectivo principal',
+    websiteType: 'Tipo de site',
+    pageFormat: 'Formato da pagina',
     entitities: 'Entidades',
     features: 'Características',
     openQuestions: 'Questões abertas',
@@ -46,6 +48,8 @@ const message_en = {
     cancel: 'Cancel Task',
     continue: 'Continue',
     goalPrincipal: 'Main Goal',
+    websiteType: 'Wensite type',
+    pageFormat: 'Page format',
     entitities: 'Entities',
     features: 'Features',
     openQuestions: 'Open Questions',
@@ -106,6 +110,10 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
             switch (key) {
                 case 'goal':
                     return this.renderGoal(this.data?.json.goal || '');
+                case 'websiteType':
+                    return this.renderWebsiteType(this.data?.json.websiteType || '');
+                case 'pageFormat':
+                    return this.renderPageFormat(this.data?.json.pageFormat || '');
                 case 'entities':
                     return this.renderEntities(this.data?.json.entities || []);
                 case 'features':
@@ -132,6 +140,32 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
             <div class="section">
                 <h2 class="title">${this.msg.goalPrincipal}</h2>
                 <p class="desc">${goal}</p>
+            </div>
+        `
+    }
+
+    private renderWebsiteType(wType: string) {
+        return html`
+            <div class="section">
+                <h2 class="title">${this.msg.websiteType}</h2>
+                <input
+                    type="text"
+                    .value="${wType}" 
+                    @input=${(e: MouseEvent) => this.handleWebsiteTypeInput(e)}
+                /input>
+            </div>
+        `
+    }
+
+    private renderPageFormat(wFormat: string) {
+        return html`
+            <div class="section">
+                <h2 class="title">${this.msg.pageFormat}</h2>
+                <input
+                    type="text"
+                    .value="${wFormat}" 
+                    @input=${(e: MouseEvent) => this.handlePageFormatInput(e)}
+                /input>
             </div>
         `
     }
@@ -305,6 +339,21 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
         this.data.promptUser = target.value.trim();
     }
 
+
+
+    private handlePageFormatInput(e: MouseEvent) {
+        if (!this.data || !this.data.json) throw new Error('Missing keys in json');
+        const target = e.target as HTMLTextAreaElement;
+        this.data.json.pageFormat = target.value.trim()
+    }
+
+    private handleWebsiteTypeInput(e: MouseEvent) {
+        if (!this.data || !this.data.json) throw new Error('Missing keys in json');
+        const target = e.target as HTMLTextAreaElement;
+        this.data.json.websiteType = target.value.trim()
+    }
+
+
     private handleFeaturesInput(e: MouseEvent, item: string[]) {
         if (!this.data || !this.data.json || !this.data.json.features) throw new Error('Missing keys in json');
         const target = e.target as HTMLTextAreaElement;
@@ -369,6 +418,8 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
             promptUser: '',
             json: {
                 goal: "Desenvolver um site para um petshop que apresente os produtos e serviços oferecidos, facilite o contato com clientes e possibilite vendas online.",
+                pageFormat: 'onePage',
+                websiteType: 'institucional',
                 entities: [
                     { name: "Produto", fields: ["nome", "descrição", "preço", "categoria", "imagem", "estoque"] },
                     { name: "Serviço", fields: ["nome", "descrição", "preço", "duração", "imagem"] },
@@ -447,57 +498,4 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
         }
     }
 
-}
-
-interface ClarificationData {
-    json: ClarificationJson,
-    taskId: string,
-    stepId: number,
-    clarificationMessage: string,
-    promptUser: string,
-}
-
-interface ClarificationJson {
-    goal: string;
-    entities: Entity[];
-    features: string[];
-    openQuestions: OpenQuestion[];
-    constraints: string[];
-    stylePreferences: StylePreferences
-}
-
-interface Entity {
-    name: string;
-    fields: string[];
-}
-
-interface OpenQuestion {
-    id: string;
-    question: string;
-    userResponse: string;
-}
-
-interface StyleAttribute {
-    value: number;
-    description: string;
-}
-
-interface BrandPersonality {
-    sincerity: StyleAttribute;
-    excitement: StyleAttribute;
-    competence: StyleAttribute;
-    sophistication: StyleAttribute;
-    ruggedness: StyleAttribute;
-}
-
-interface ToneOfVoice {
-    funny_serious: StyleAttribute;
-    formal_casual: StyleAttribute;
-    respectful_irreverent: StyleAttribute;
-    enthusiastic_matterOfFact: StyleAttribute;
-}
-
-interface StylePreferences {
-    brandPersonality: BrandPersonality;
-    toneOfVoice: ToneOfVoice;
 }

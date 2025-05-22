@@ -1,61 +1,25 @@
-/// <mls shortName="widgetDefaultText" project="100554" enhancement="enhancementStyle" />
+/// <mls shortName="widgetDefaultImage" project="100554" enhancement="enhancementStyle" />
 
-
-widget-default-text-100554 {
-  font-family: @font-family-primary;
-  color: @text-primary-color;
-
-  .text {
-    font-size: @font-size-16;
-    line-height: @line-height-large;
-    color: @text-primary-color;
-    word-break: break-word;
-  }
-
-  .quote {
-    font-size: @font-size-16;
-    color: @text-secondary-color-darker;
-    border-left: 4px solid @text-secondary-color;
-    margin: @space-16 0;
-    padding: @space-8 @space-16;
-    background: @bg-secondary-color-lighter;
-    font-style: italic;
-
-    footer {
-      font-size: @font-size-12;
-      color: @text-primary-color-lighter;
-      margin-top: @space-8;
-
-      a {
-        color: @link-color;
-        text-decoration: underline;
-
-        &:hover {
-          color: @link-color-hover;
-        }
-      }
-    }
-  }
-
-  .banner {
-    font-size: @font-size-20;
-    font-weight: @font-weight-bold;
-    color: @text-secondary-color;
-    background: @bg-secondary-color;
-    padding: @space-16 @space-24;
-    border-radius: @space-8;
-    margin: @space-16 0;
-    text-align: center;
-  }
-
-  a {
-    color: @link-color;
-    text-decoration: underline;
-
-    &:hover {
-      color: @link-color-hover;
-    }
-  }
+                
+widget-default-image-100554 {
+display:block;
+width:100%;
+img {
+display:block;
+width:100%;
+height:auto;
+object-fit:cover;
+background:@bg-secondary-color-lighter;
+border-radius:0;
+}
+&__error {
+color:@error-color;
+font-size:@font-size-16;
+padding:@space-16;
+text-align:center;
+background:@bg-secondary-color-lighter;
+border-radius:0;
+}
 }
 
 //Start Less Tokens

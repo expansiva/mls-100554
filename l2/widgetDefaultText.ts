@@ -1,6 +1,6 @@
 /// <mls shortName="widgetDefaultText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, ifDefined } from 'lit';
+import { html, ifDefined, unsafeHTML } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { propertyCompositeDataSource, propertyDataSource } from './_100554_collabDecorators';
 import { IcaApresentationTextBase } from './_100554_icaApresentationTextBase';
@@ -49,8 +49,8 @@ export class WidgetDefaultText extends IcaApresentationTextBase {
     }
     if (isQuote) {
       return html`
-        <blockquote class="widget-default-text-100554__quote">
-          <p>${inner}</p>
+        <blockquote class="quote">
+          <p>${unsafeHTML(inner)}</p>
           ${cfg.cite ? html`<footer>
             ${cfg.citeHref ? html`<a href=${cfg.citeHref} target="_blank" rel="noopener noreferrer">${cfg.cite}</a>` : cfg.cite}
           </footer>` : ''}
@@ -59,11 +59,11 @@ export class WidgetDefaultText extends IcaApresentationTextBase {
     }
     if (isBanner) {
       return html`
-        <div class="widget-default-text-100554__banner">
-          ${inner}
+        <div class="banner">
+          ${unsafeHTML(inner)}
         </div>
       `;
     }
-    return html`<span class="widget-default-text-100554__text">${inner}</span>`;
+    return html`<span class="text">${unsafeHTML(inner)}</span>`;
   }
 }
