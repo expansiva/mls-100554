@@ -159,7 +159,7 @@ O bloco HTML gerado deve conter:
    - Título chamativo com o nome e propósito do componente.
    - Mantenha os títulos e subtítulos todos centralizados.  
    - Descreva o webcomponente, de maneira demonstrativa, explicando brevemente seu proposito.
-   - Demonstração ao vivo do WebComponent. com no mínimo 2 exemplos, esta parte tem que usar um style mais destacado e convidativo.
+   - Demonstração ao vivo do WebComponent. Esta parte tem que usar um style mais destacado e convidativo.
    - Lista de vantagens e diferenciais do componente.
    - Código de uso (snippet) para copiar/colar.
    - Explicações visuais ou textuais de como o componente pode ser integrado em projetos reais.
