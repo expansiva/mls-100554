@@ -112,7 +112,6 @@ export function propertyDataSource(options?: PropertyDeclaration) {
         if (options?.type === Number && typeof value === 'number' && isNaN(value)) {
           // ignore , lit sent ex "{{users.name}}" after requestUpdate
           const attributeValue = this.hasAttribute(attributeName) ? this.getAttribute(attributeName) : '';
-          console.info(attributeValue);
 
           if (typeof attributeValue === 'string' && attributeValue.startsWith('{{') && attributeValue.endsWith('}}')) {
             // initialization ex selectedvalue="{{globalState.users[0].sex}}"
@@ -132,7 +131,6 @@ export function propertyDataSource(options?: PropertyDeclaration) {
         if (options?.type === Boolean && typeof value === 'boolean') {
           // ignore , lit sent ex "{{users.name}}" after requestUpdate
           const attributeValue = this.hasAttribute(attributeName) ? this.getAttribute(attributeName) : '';
-          console.info(attributeValue);
 
           if (typeof attributeValue === 'string' && attributeValue.startsWith('{{') && attributeValue.endsWith('}}')) {
             // initialization ex selectedvalue="{{globalState.users[0].sex}}"
@@ -158,7 +156,6 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             if (attributeValue !== value) this.setAttribute(attributeName, value);
           }
           const stateKey = value.replace(/[{{}}]/g, '').trim();
-          console.info(attributeName);
           prepareForNotification.call(this, attributeName, [stateKey]);
           this[`_${attributeName}`] = state1.getState(stateKey);
         } else if (options?.type === Object && (typeof value === 'string' && ((value.startsWith('[') || value.startsWith('{')) && (value.endsWith(']') || value.endsWith('}'))))) {
