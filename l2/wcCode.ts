@@ -7,7 +7,7 @@ import { IConfig, IcaApresentationTextCodeBase } from './_100554_icaApresentatio
 @customElement('wc-code-100554')
 export class WcCode100554 extends IcaApresentationTextCodeBase {
   
-  config: IConfig|undefined;
+  @property({ type: String }) config: string|undefined;
 
   @property({ type: String, reflect: true, attribute: true }) language = 'typescript';
 
