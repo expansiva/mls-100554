@@ -140,7 +140,6 @@ export function propertyDataSource(options?: PropertyDeclaration) {
               if (attributeValueR !== value) this.setAttribute(attributeName, value);
             }
             const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
-            debugger;
             prepareForNotification.call(this, attributeName, [stateKey]);
             this[`_${attributeName}`] = state1.getState(stateKey);
           }
