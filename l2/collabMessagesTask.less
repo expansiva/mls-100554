@@ -1,109 +1,165 @@
-/// <mls shortName="collabInputTag" project="100554" enhancement="enhancementStyle" />
+/// <mls shortName="collabMessagesTask" project="100554" enhancement="enhancementStyle" />
 
-collab-input-tag-100554 {
+collab-messages-task-100554 {
 
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: #fff;
+    color: #000000;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
 
-    font-family: @font-family-primary;
-
-    &[haserror="true"] .collab-tag-input {
-        border: 1px solid @error-color-hover  !important;
+    .card.no-details {
+        display: block;
     }
 
-    .invalid {
-        border: 1px solid @error-color  !important;
-        animation: shake 0.3s;
-    }
-
-    @keyframes shake {
-        0% {
-            transform: translateX(0);
-        }
-
-        25% {
-            transform: translateX(-4px);
-        }
-
-        50% {
-            transform: translateX(4px);
-        }
-
-        75% {
-            transform: translateX(-4px);
-        }
-
-        100% {
-            transform: translateX(0);
-        }
-    }
-
-    .collab-tag-input {
-        max-width: 100%;
-        display: flex;
-        align-content: flex-start;
-        flex-wrap: wrap;
-        background-color: #FFF;
-        border: solid 1px #CCC;
-        border-radius: 2px;
-        min-height: 33px;
-        padding: 0 5px;
+    .card {
+        display: block;
+        padding: @space-16;
+        width: 100%;
+        position: relative;
 
 
 
-        input {
-            flex-grow: 1;
-            display: inline-block;
-            order: 200;
-            border: none;
-            height: 33px;
-            line-height: 33px;
-            font-size: 14px;
-            margin: 0;
-            width: auto;
+        .task-icon {
 
-            &:focus {
-                outline: none;
-            }
-        }
-
-        div.tag {
-            display: inline-block;
-            flex-grow: 0;
-            margin: 5px 5px 5px 0;
-            padding: 0 20px 0 10px;
-            height: 25px;
-            line-height: 25px;
-            background-color: #E1E1E1;
-            color: #333;
-            font-size: 14px;
-            order: 100;
-            border-radius: 2px;
-            position: relative;
-            overflow: hidden;
-
-            &.duplicate {
-                background-color: rgba(255, 64, 27, 0.71);
-                transition: all 0.3s linear;
-            }
-
-            &:last-child {
-                margin-right: 5px;
-            }
-
-            .remove {
+            .icon-wrapper {
+                position: relative;
                 display: inline-block;
-                color: #000000;
-                padding-left: 0.45rem;
+                font-size: 20px;
+            }
+
+            .notification-badge {
                 position: absolute;
+                top: -1px;
+                right: -3px;
+                background: red;
+                color: white;
+                border-radius: 50%;
+                padding: 0.1em 0.1em;
+                font-size: 0.49em;
+                font-weight: bold;
+                line-height: 1;
+                min-width: 1em;
                 text-align: center;
-                border-top-right-radius: 2px;
-                border-bottom-right-radius: 2px;
-                transition: all 0.3s ease;
-                cursor: pointer;
-                top: 0;
-                right: 5px;
+            }
+
+            &.failed {
+                fill: @error-color;
+                color: @error-color;
+            }
+
+            &.done {
+                fill: @success-color;
+                color: @success-color;
+            }
+
+            &.waitingforuser {
+                fill: @warning-color;
+                color: @warning-color;
+            }
+
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+
+            .card-user {
+                color: #be069c;
+            }
+
+            .card-time {
+                font-size: .75rem;
+                color: gray;
+                position: absolute;
+                bottom: 0px;
+                right: 10px;
+                text-align: right;
+            }
+
+            .card-title {
+                font-size: @font-size-12;
+                font-weight: bold;
+            }
+
+            .card-price {
+                display: flex;
+                align-items: center;
+                gap: .2rem;
+                font-size: @font-size-12;
+
+                svg {
+                    width: 12px;
+                    height: 12px;
+                }
+            }
+
+            .card-actions {
+                display: flex;
+                gap: .4rem;
+                align-items: center;
+
+                i {
+                    cursor: pointer;
+
+                    &:hover {
+                        transform: scale(1.1);
+                    }
+                }
+
+                svg {
+                    width: 12px;
+                    height: 12px;
+                }
+            }
+
+            .card-status {
+                text-transform: uppercase;
+                font-size: @font-size-12;
+                border: 1px solid;
+                padding: 0 .3rem;
+                border-radius: 4px;
+                white-space: nowrap;
+
+                &.todo {
+                    color: @grey-color-darker;
+                }
+
+                &.done {
+                    color: @success-color;
+                }
+
+                &.in-progress {
+                    color: @active-color;
+                }
+
+                &.waitingforuser {
+                    color: @warning-color;
+                }
+
+                &.paused {
+                    color: @info-color-disabled;
+                }
+
             }
         }
+
+        .card-body {
+            margin-top: @space-16;
+
+            .card-message {
+                font-size: @font-size-16;
+            }
+        }
+
     }
+
 
 }
 

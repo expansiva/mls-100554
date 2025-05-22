@@ -1,10 +1,12 @@
 /// <mls shortName="collabMessagesAdd" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, state, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { addThread } from './_100554_msgDBController';
 import { notifyThreadChange } from './_100554_aiAgentHelper';
+import { CollabInputTag } from './_100554_collabInputTag';
+
 import './_100554_collabInputTag';
 
 /// **collab_i18n_start** 
@@ -43,6 +45,7 @@ const message_en = {
     successSaving: 'Saving sucessfully',
 }
 
+
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
@@ -64,6 +67,10 @@ export class CollabMessagesAdd100554 extends StateLitElement {
     @property() labelOk: string = '';
     @property() labelError: string = '';
     @property() userId: string | undefined;
+
+    @query('#languageInput') languageInput?: CollabInputTag;
+
+    onAddSuccess: Function | undefined;
 
     render() {
 
@@ -132,7 +139,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
 
     private async addNewThread() {
 
-        if (!this.validateForm()) {
+        if (!this.validateForm() || this.languageInput?.hasError) {
             this.labelError = this.msg.validateFormError;
             this.isLoading = false;
             return;
@@ -158,12 +165,11 @@ export class CollabMessagesAdd100554 extends StateLitElement {
 
         try {
             const response = await mls.api.msgAddThread(params);
-
             this.labelOk = `${this.msg.successSaving}`;
             if (response.thread) {
                 const thr = await addThread(response.thread);
                 notifyThreadChange(thr);
-
+                if (this.onAddSuccess) this.onAddSuccess();
             }
 
         } catch (err: any) {
