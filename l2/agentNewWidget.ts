@@ -2,7 +2,9 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { forceServiceInstance } from './_100554_libCommom';
+import { convertFileNameToTag } from './_100554_utilsLit';
 import { createNewFile } from "./_100554_pluginNewFileBase";
+import { descriptionForPrompt } from "./_100554_icaBaseDescription";
 import { preferModelType, systemComponentsInstruction, systemTokensLessInstruction } from './_100554_aiPrompts';
 
 import {
@@ -74,7 +76,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 }
 
 async function addFile(context: mls.msg.ExecutionContext) {
-    
+
     if (!context || !context.task) throw new Error('Not found context to create files');
     const step = getNextPendentStep(context.task) as any;
 
@@ -129,6 +131,7 @@ export async function getPrompts(json: any, prompt: string | undefined, rags: st
     prompts.push(systemOutInstruction());
     prompts.push(systemModelInstruction());
     prompts.push(systemRequirementsUserInstruction(json));
+    prompts.push(systemDefinitionMD(json));
     prompts.push(await systemDefinitionBaseInstruction(json));
     prompts.push(await systemTokensLessInstruction());
 
@@ -366,6 +369,36 @@ ${JSON.stringify(req, null, 2)}
     }
 }
 
+function systemDefinitionMD(json: any[]): mls.msg.IAMessageInputType {
+
+    try {
+
+        const step = json.find((i) => i.sectionName === 'parentClass');
+        if (!step) throw new Error("[systemDefinitionBaseInstruction] Not found section: parentClass");
+        if (!step.widgetName) throw new Error("[systemDefinitionBaseInstruction] Not found widget in parentClass");
+
+        const shortName = firstLowercaseLetter(step.widgetName);
+        let tag = convertFileNameToTag(`_100554_${shortName}`);
+        tag = extractBaseComponentName(tag);
+
+        const content = extractComponentMarkdown(descriptionForPrompt, tag);
+
+        return {
+            type: 'system',
+            content: `## DESCRIÇÃO DA CLASSE BASE \n\n ${content}`
+        }
+
+
+    } catch (e) {
+        console.info(e);
+        return {
+            type: 'system',
+            content: `## DESCRIÇÃO CLASSE BASE \n\n`
+        };
+    }
+
+}
+
 async function systemDefinitionBaseInstruction(json: any[]): Promise<mls.msg.IAMessageInputType> {
 
     try {
@@ -409,4 +442,22 @@ function firstLowercaseLetter(str: string): string {
 
     return first.toLowerCase() + rest;
 
+}
+
+function extractComponentMarkdown(md: string, componentName: string): string | null {
+
+    const pattern = new RegExp(`(## ${componentName}\\n(?:.+\\n)*?)(?=\\n## |$)`, 'gm');
+    const match = md.match(pattern);
+
+    if (match) {
+        const lines = match[0].split('##');
+        return lines && lines[1] ? lines[1].trim() : '';
+    }
+    
+    return '';
+}
+
+function extractBaseComponentName(input: string): string {
+    const match = input.match(/^(.*?)(?:-base-\d+)?$/);
+    return match ? match[1] : input;
 }
