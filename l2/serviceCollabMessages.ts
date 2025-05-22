@@ -6,8 +6,9 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { saveUserIdLocalStorage } from "./_100554_aiAgentHelper";
 import { listThreads, addThread, listUsers, updateUsers } from './_100554_msgDBController';
+
 import './_100554_collabMessagesAdd';
-import './_100554_collabMessagesConnect';
+import './_100554_collabMessagesChat';
 import './_100554_wcImage';
 import './_100554_collabTasks';
 import './_100554_collabMessagesSettings';
@@ -47,6 +48,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     @state() isLoadingThread: boolean = false;
     @state() userPerfil: mls.msg.User | undefined;
     @state() userThreads: IThreadData = {}
+
+    groupSelected: mls.msg.ThreadGroup = 'CRM';
 
     public details: IService = {
         icon: '&#xf086',
@@ -119,17 +122,21 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
-        this.userPerfil = await this.getUser();
-        saveUserIdLocalStorage(this.userPerfil.userId);
-        await this.getThreadFromLocalDB();
-        this.updateThreads();
+    }
+
+    async updated(changedProperties: Map<PropertyKey, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('activeTab') && ['CRM', 'TASK', 'DOCS', 'CONNECT', 'APPS'].includes(this.activeTab)) {
+            this.userPerfil = await this.getUser();
+            saveUserIdLocalStorage(this.userPerfil.userId);
+            await this.getThreadFromLocalDB();
+            this.updateThreads();
+        }
     }
 
     render() {
-
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        // if (this.menu.setTabActive) this.menu.setTabActive(ETabs[this.activeTab]);
         return this.renderTabs();
     }
 
@@ -138,13 +145,13 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         switch (this.activeTab) {
             case 'CRM':
                 return this.renderCRM();
-            case 'Tasks':
+            case 'TASK':
                 return this.renderTasks()
-            case 'Apps':
+            case 'APPS':
                 return this.renderApps();
-            case 'Docs':
+            case 'DOCS':
                 return this.renderDocs();
-            case 'Connect':
+            case 'CONNECT':
                 return this.renderConnect();
             case 'Add':
                 return this.renderAdd();
@@ -156,43 +163,86 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     renderCRM() {
+        this.groupSelected = 'CRM';
         this.execCoachMarks('CRM');
-        return html`CRM`
+        return html`<collab-messages-chat-100554 
+            style="height:${this.style.height}"
+            .isLoadingThread= ${this.isLoadingThread}
+            group="CRM"
+            .userThreads=${{
+                CRM: Object.keys(this.userThreads)
+                    .filter((key) => this.userThreads[key].thread.group === 'CRM')
+                    .map((key) => this.userThreads[key])
+            }} 
+            userId=${this.userPerfil?.userId} 
+        ></collab-messages-chat-100554>`
     }
 
     renderTasks() {
+        this.groupSelected = 'TASK';
         this.execCoachMarks('Tasks');
         return html`<collab-tasks-100554></collab-tasks-100554>`
     }
 
     renderApps() {
+        this.groupSelected = 'APPS';
         this.execCoachMarks('Apps');
-        return html`Apps`
+        return html`<collab-messages-chat-100554 
+            style="height:${this.style.height}"
+            .isLoadingThread= ${this.isLoadingThread}
+            group="APPS"
+            .userThreads=${{
+                APPS: Object.keys(this.userThreads)
+                    .filter((key) => this.userThreads[key].thread.group === 'APPS')
+                    .map((key) => this.userThreads[key])
+            }} 
+            userId=${this.userPerfil?.userId} 
+        ></collab-messages-chat-100554>`
     }
 
     renderDocs() {
+        this.groupSelected = 'DOCS';
         this.execCoachMarks('Docs');
-        return html`Docs`
+        return html`<collab-messages-chat-100554 
+            style="height:${this.style.height}"
+            .isLoadingThread= ${this.isLoadingThread}
+            group="DOCS"
+            .userThreads=${{
+                DOCS: Object.keys(this.userThreads)
+                    .filter((key) => this.userThreads[key].thread.group === 'DOCS')
+                    .map((key) => this.userThreads[key])
+            }} 
+            userId=${this.userPerfil?.userId} 
+        ></collab-messages-chat-100554>`
     }
 
     renderConnect() {
+        this.groupSelected = 'CONNECT';
         this.execCoachMarks('Connect');
-        return html`<collab-messages-connect-100554 
+        return html`<collab-messages-chat-100554 
             style="height:${this.style.height}"
             .isLoadingThread= ${this.isLoadingThread}
+            group="CONNECT"
             .userThreads=${{
                 CONNECT: Object.keys(this.userThreads)
                     .filter((key) => this.userThreads[key].thread.group === 'CONNECT')
                     .map((key) => this.userThreads[key])
             }} 
             userId=${this.userPerfil?.userId} 
-        ></collab-messages-connect-100554>`
+        ></collab-messages-chat-100554>`
     }
 
 
     renderAdd() {
+
+        const onAddSuccess = () => {
+            this.activeTab = this.groupSelected;
+        }
+
         return html`
             <collab-messages-add-100554 
+                .onAddSuccess=${onAddSuccess.bind(this)}
+                .group=${this.groupSelected}
                 userId=${this.userPerfil?.userId} 
             ></collab-messages-add-100554>`
     }
@@ -339,14 +389,14 @@ interface IThreadInfo {
 
 enum ETabs {
     'CRM' = 0,
-    'Tasks' = 1,
-    'Docs' = 2,
-    'Connect' = 3,
-    'Apps' = 4,
+    'TASK' = 1,
+    'DOCS' = 2,
+    'CONNECT' = 3,
+    'APPS' = 4,
     'Add' = 5,
     'Loading' = 65,
 }
 
 
-type ITabType = 'CRM' | 'Tasks' | 'Docs' | 'Connect' | 'Apps' | 'Add' | 'Loading';
+type ITabType = 'CRM' | 'TASK' | 'DOCS' | 'CONNECT' | 'APPS' | 'Add' | 'Loading';
 type IScenery = 'tabs' | 'settings'

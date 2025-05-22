@@ -21,6 +21,7 @@ export class CollabInputTag extends StateLitElement {
     pattern: string | null = null;
 
     allowDelete = false;
+    @property( { attribute: true, reflect: true }) hasError = false;
 
     get value() {
         return this.tags.join(',');
@@ -47,6 +48,7 @@ export class CollabInputTag extends StateLitElement {
         if (!this.isValidTag(tag)) {
             this.input?.parentElement?.classList.add('invalid');
             setTimeout(() => this.input?.parentElement?.classList.remove('invalid'), 500);
+            this.hasError = true;
             return;
         }
 
@@ -58,6 +60,7 @@ export class CollabInputTag extends StateLitElement {
             const element = this.querySelector(`[data-index="${this.tags.indexOf(tag)}"]`) as HTMLElement;
             element.classList.add('duplicate');
             setTimeout(() => element.classList.remove('duplicate'), 500);
+            this.hasError = true;
         }
     }
 
@@ -78,12 +81,21 @@ export class CollabInputTag extends StateLitElement {
         this.requestUpdate();
     }
 
+    private onInputLeave() {
+        if (!this.input) return;
+        const { value } = this.input;
+        this._addTag(value);
+        if (this.onValueChanged) this.onValueChanged(this.value);
+    }
+
     private onInputKeyDown(event: KeyboardEvent) {
 
         event.stopImmediatePropagation();
 
         if (!this.input) return;
         const { value } = this.input;
+        this.hasError = false;
+        
         if (event.keyCode === 13) {
             this._addTag(value);
             if (this.onValueChanged) this.onValueChanged(this.value);
@@ -104,9 +116,6 @@ export class CollabInputTag extends StateLitElement {
     }
 
     private isValidTag(tag: string): boolean {
-
-
-
         if (this.pattern) {
             const regex = new RegExp(this.pattern);
             if (!regex.test(tag)) return false;
@@ -117,7 +126,11 @@ export class CollabInputTag extends StateLitElement {
     render() {
         return html
             `<div class="collab-tag-input">
-                <input id="tag-input" @keydown=${(ev: KeyboardEvent) => { this.onInputKeyDown(ev) }}></input>
+                <input
+                    id="tag-input"
+                    @blur=${this.onInputLeave}
+                    @keydown=${(ev: KeyboardEvent) => { this.onInputKeyDown(ev) }}
+                ></input>
                 ${this.tags.map((tag: string, index: number) => {
                 return html`
                         <div data-index=${index} class="tag">
