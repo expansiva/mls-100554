@@ -811,32 +811,38 @@ export const widgetsDefault: Record<string, string> = {
 }
 
 export const descriptionForPrompt: string = `
-## Atomic Design – Moléculas (Molecules)
+# Atomic Design – Molecules
 
-General attributes (aplicáveis em quase todas as moléculas):
+These are base class specifications describing the intent and allowed attributes of each molecule.
+Each base class can have multiple specialized child widgets (each implementing a single visual style or behavior).
+Choose the appropriate widget for your use case; do not combine multiple behaviors in a single widget.
+
+In the future, the user may mutate or swap a widget for another specialized child, since all widgets in the same base class share the same properties and config structure.
+This allows easy migration between visual styles or navigation patterns with minimal changes.
+All configuration and attribute definitions are described using JSON format for clarity and consistency.
+
+General attributes (common to almost all molecules):
 - name, id, class, style
-- Attributes A11y (opcionais): role, ariaLabel, ariaDescribedBy, ariaExpanded, ariaSelected …
+- Attributes A11y (optional): role, ariaLabel, ariaDescribedBy, ariaExpanded, ariaSelected …
 
 Attributes Text:
-Exibem textos fixos ou dinâmicos.
-Aceitam texto simples ou **composite binding**.
-Exemplos:
-- label="Digite o CPF"
-- label="Bem-vindo {{ui.user.name}}"
+Display fixed or dynamic text.
+Accept simple text or composite binding (ex: label="Welcome {{ui.user.name}}").
 
 Attributes Cfg:
-Controlam o comportamento ou aparência da molécula.
-Aceitam texto fixo ou **binding puro** (sem texto adicional).
-Exemplos:
+Control molecule behavior or appearance.
+Accept fixed text or pure binding (no additional text).
+Ex:
 - readonly="true"
 - disabled="{{ui.ReadyForInput}}"
 
 Attributes Bind:
-São usados para ler e/ou gravar dados dinâmicos.
-Aceitam texto fixo ou **binding puro**.
-Exemplos:
+Used to read or write dynamic data.
+Accept fixed text or pure binding.
+Ex:
 - value="dog"
 - value="{{ui.choice.animal}}"
+
 
 ## ica-forms-content-form
 Form component provides enhanced control over form submission, validation, and customization.
@@ -926,24 +932,26 @@ File upload field, supports drag and drop and upload progress.
 - Cfg: required, disabled, readonly, autofocus, accept, multiple
 - Example: name="anexo" accept=".pdf,.jpg" multiple
 ## ica-forms-records
-Displays records in various visual formats: table, cards, list, timeline, etc.
-The layout is defined by 'recommendedWidget', and the values shown via direct attributes.
+Displays records in various visual formats.
 - Cfg: config
 - Bind: selected
 - Text: title, subtitle, line1, line2, bottom, image, icon, badge
 - Example:  config={
     "table": "db.produtos", "range": { "start": 0, "end": 10 },
-    "recommendedWidget": "cards", "selectedField": "id" },
-  title="{{nome}}" subtitle="{{descricao}}" bottom="R\${{preco}}"
+    "selectedField": "id" },
+  title="{{.nome}}" subtitle="{{.descricao}}" bottom="R\${{.preco}}"
+Specialized widget examples:
+- "cards"
+- "table"
+- "list"
+- "timeline"
 ## ica-forms-records-grid
 Data-grid capable of multiple behaviours.
-Behaviour is picked via 'recommendedWidget'.
 - Cfg: config
 - Bind: selectedRows, editedRows
 - interface config {
   table: string,                 // DB ou endpoint
   range?: { start: number, end: number },
-  recommendedWidget: "readonly" | "editable" | "grouping" | "pivot" | "tree" | "virtual-scroll",
   columns: {
     field: string,
     header?: string,
@@ -960,6 +968,13 @@ Behaviour is picked via 'recommendedWidget'.
   selection?: "single" | "multi",
   aggregation?: "sum" | "avg" | string
 }
+Specialized widget examples:
+- "readonly"
+- "editable"
+- "grouping"
+- "pivot"
+- "tree"
+- "virtual-scroll"
 ## ica-forms-records-map
 Displays geographic information on a map, supporting markers and custom regions.
 The config attribute defines center point, zoom level, and list of markers.
@@ -984,12 +999,10 @@ value = "save" | "cancel" | "clear".
 - Example: config={ "buttons": [ { "label": "Salvar", "value": "save" },
       { "label": "Cancelar", "value": "cancel" } ]}
 ## ica-navigation-links
-Flexible navigation widget that can display links, menus, breadcrumbs, buttons, or anchor-based sidebars.
-It supports external links, in-page navigation ('#id') and optional auto-highlighting on scroll.
+Flexible navigation base molecule for implementing navigation structures.
 - Cfg: config
 - Bind: selected (auto-updated when scrolling or clicking)
 - Interface Config {
-  recommendedWidget: "link" | "menu" | "button" | "breadcrumb" | "anchor", // default = "link"
   scrollSync?: boolean,      // if true, updates selected as the user scrolls
   offset?: number,           // pixels from top to consider section active
   items: {
@@ -1000,6 +1013,12 @@ It supports external links, in-page navigation ('#id') and optional auto-highlig
     disabled?: boolean
   }[]
 }
+Specialized widget examples:
+- 'link': Simple navigation link list (horizontal or vertical)
+- 'dropdown menu': Dropdown navigation
+- 'breadcrumb': Breadcrumb trail
+- 'button bar': Navigation as a set of buttons
+- 'scrollspy': Anchor sidebar with auto-highlight on scroll
 ## ica-navigation-content
 Organizes content into multiple sections (tabs, steps, scenarios, accordions, etc.).
 Each section points to external content via 'ref'.
@@ -1008,7 +1027,6 @@ Supports showing content in popup style with automatic close when using widget "
 - Cfg: config
 - Bind: selected // ex: {{ui.tab1.selected}}
 - interface config {
-  recommendedWidget: "tab" | "stepper" | "scenary" | "accordion" | "toolbar" | "popup" | "none" ,
   headerVisible?: boolean,
   sections: {
     id: number,
@@ -1021,6 +1039,13 @@ Supports showing content in popup style with automatic close when using widget "
     disabled?: boolean         // disables interaction
   }[]
 }
+Specialized widget examples:
+- "tab"
+- "stepper"
+- "scenary"
+- "accordion"
+- "toolbar"
+- "popup"
 ## ica-navigation-multi-content
 Displays multiple content blocks at once, using a flexible layout like grid or overlay.
 Each content block can reference internal components or external pages.
@@ -1094,7 +1119,6 @@ Displays collections of images in formats like gallery, carousel, or slider.
 - Cfg: config
 - Bind: selectedindex (optional, for navigation)
 - interface config {
-  recommendedWidget: "gallery" | "carousel" | "slider",
   images: string[],               // array of image URLs
   thumbnails?: boolean,           // for gallery
   shownavigation?: boolean,       // for carousel/slider
@@ -1102,6 +1126,10 @@ Displays collections of images in formats like gallery, carousel, or slider.
   interval?: number,              // ms
   loop?: boolean
 }
+Specialized widget examples:
+- "gallery"
+- "carousel"
+- "slider"
 ## ica-apresentation-maps
 Displays static or interactive maps with markers and zoom level.
 - Cfg: config
@@ -1114,11 +1142,9 @@ Displays static or interactive maps with markers and zoom level.
 }
 ## ica-apresentation-video
 Displays videos in different formats such as embedded players, inline (image-style), or playlists.
-The layout and interaction style is defined by 'recommendedWidget'.
 - Cfg: config
 - Bind: selectedvideo (for playlist)
 - interface config {
-  recommendedWidget: "embed" | "inline" | "playlist",
   src?: string,              // for single video (embed/inline)
   poster?: string,           // for inline (placeholder image)
   videos?: string[],         // for playlist
@@ -1127,13 +1153,15 @@ The layout and interaction style is defined by 'recommendedWidget'.
   loop?: boolean,
   preload?: "auto" | "metadata" | "none"
 }
+Specialized widget examples:
+- "embed"
+- "inline"
+- "playlist"
 ## ica-apresentation-sound
 Plays audio content in various contexts such as music tracks, sound effects, or podcast episodes.
-The layout and behavior are defined by 'recommendedWidget'.
 - Cfg: config
 - Bind: selected (for playlist/effects)
 - interface config {
-  recommendedWidget: "player" | "effects" | "podcast",
   src?: string,                  // for single audio
   sounds?: string[],            // for sound effects
   podcastepisodes?: string[],   // for podcast playlists
@@ -1142,15 +1170,18 @@ The layout and behavior are defined by 'recommendedWidget'.
   loop?: boolean,
   preload?: "auto" | "metadata" | "none"
 }
+Specialized widget examples:
+- "player"
+- "effects"
+- "podcast"
 ## ica-apresentation-chart
 Displays visual charts in 2D or 3D using external frameworks like TreeD3.js.
 The config defines rendering behavior; the 'chartdata' must be provided via binding for interactivity.
 - Cfg: config
 - Bind: chartdata  // ex: chartdata="{{ui.relatorio.vendas}}"
 - interface config {
-  recommendedWidget: "treed3" | "echarts" | "chartjs" | string,
   renderer?: string,               // optional custom render strategy
-  options3d?: object               // used only if recommendedWidget = "3d"
+  options3d?: object               // used only if type "3d"
 }
 - interface ChartData {
   type: "bar" | "line" | "pie" | "scatter" | "tree" | string,
@@ -1165,6 +1196,10 @@ The config defines rendering behavior; the 'chartdata' must be provided via bind
   }[],
   options?: object
 }
+Specialized widget examples:
+- "treed3"
+- "echarts"
+- "chartjs"
 ## ica-apresentation-animation
 Applies CSS-based animations to inline or block elements.
 The animation can be triggered by a state value, load, click, or hover.
@@ -1186,7 +1221,6 @@ The widget defines the visual effect (e.g., confetti, fireworks, radial, curtain
 - Cfg: config
 - Bind: state  // optional, ex: state="{{ui.action}}"
 - interface config {
-  recommendedWidget: "confetti" | "fireworks" | "radial-splash" | "balloon-explode" | string,
   trigger: "manual" | "onload" | "onclick" | "page-enter" | "page-exit" | "state",
   triggerValue?: string | number | boolean,
   inverted?: boolean,
@@ -1194,6 +1228,11 @@ The widget defines the visual effect (e.g., confetti, fireworks, radial, curtain
   intensity?: number,
   once?: boolean
 }
+Specialized widget examples:
+- "confetti"
+- "fireworks"
+- "radial-splash"
+- "balloon-explode"
 ## ica-navigation-transition
 Animates page transitions using slide, fade, or custom effects.
 - Cfg: config
@@ -1222,13 +1261,15 @@ Displays embedded social media content, either as a specific post or a live feed
 Ideal for showcasing engagement or highlighting external communications.
 - Cfg: config
 - interface config {
-  recommendedWidget: "post" | "feed",
   url: string,                    // required: post or profile URL
   width?: string,                 // optional dimensions (ex: "100%", "300px")
   height?: string,
   refreshInterval?: number,      // in seconds, only for feeds
   limit?: number                 // max items, only for feeds
 }
+Specialized widget examples:
+- "post"
+- "feed"
 ## ica-navigation-toolbar-social
 Toolbar with icons and links to social media profiles.
 - Cfg: config
@@ -1248,7 +1289,6 @@ Message type and behavior are controlled via state and config.
 - Cfg: config
 - Text: state  // ex: state="{{ui.feedback}}", use type MessageState
 - interface config {
-  recommendedWidget: "toast" | "snackbar" | "notification" | "alert" | "modal",
   duration?: number,              // in ms; optional if not transient
   closable?: boolean,
   actionText?: string,           // for snackbar-like interaction
@@ -1261,13 +1301,18 @@ Message type and behavior are controlled via state and config.
   action?: string,
   id?: string | number  // for queue management
 }
+Specialized widget examples:
+- "toast"
+- "snackbar"
+- "notification"
+- "alert"
+- "modal"
 ## ica-apresentation-canvas
 Canvas area for rendering dynamic visual scenes, games, simulations, or interactive business tools.
 Ideal for applications where visuals are generated via custom scripts or engines.
 - Cfg: config
 - Bind: state (optional — can be used to send commands or track status)
 - interface config {
-  recommendedWidget: string,       // ex: "carGame", "floorPlanEditor", "inventory3D", "whiteboard"
   width?: string,                  // ex: "100%", "800px"
   height?: string,
   pixelRatio?: number,             // optional for high-DPI displays
@@ -1275,19 +1320,27 @@ Ideal for applications where visuals are generated via custom scripts or engines
   runOnLoad?: boolean,             // auto-start on render
   scriptRef: string                // required JS module that will run the logic
 }
+Specialized widget examples:
+- "carGame"
+- "floorPlanEditor"
+- "inventory3D"
+- "whiteboard"
 ## ica-blocks-viewer
 Renders document and data files like PDF, spreadsheets, and Office documents inside the application.
 The viewer type and behavior depend on the selected widget.
 - Cfg: config
 - Text: data
 - interface config {
-  recommendedWidget: "pdf" | "spreadsheet" | "document",
   page?: number,              // pdf only
   zoom?: number,              // pdf only
   activesheet?: string,       // spreadsheet only
   type?: "docx" | "pptx" | "pdf" | string,  // for document viewer fallback
   readonly?: boolean
 }
+Specialized widget examples:
+- "pdf"
+- "spreadsheet"
+- "document"
 `;
 
 
