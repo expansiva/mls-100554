@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-import { updateThread } from './_100554_msgDBController';
+import { updateThread, listUsers } from './_100554_msgDBController';
 import { notifyThreadChange } from './_100554_aiAgentHelper';
 
 /// **collab_i18n_start** 
@@ -46,6 +46,16 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
     @property() auth: mls.msg.UserAuth = 'write';
     @property() isAddParticipant: boolean = false;
     @property() actualThread: IThreadActual | undefined;
+    @property() highlightedIndex: number = -1;
+    @property() suggestions: string[] = [];
+    @property() allUsers: string[] = [];
+
+
+    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
+        super.firstUpdated(changedProperties);
+        const users = await listUsers();
+        this.allUsers = users.map((usr) => usr.name);
+    }
 
     render() {
         const lang = this.getMessageKey(messages);
@@ -53,14 +63,37 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
 
         return html`
         <div class="add-participant">
-            <label>
+            <label style="position: relative;">
                 ${this.msg.labelUserId}
                 <input 
+                    name="add participant"
+                    autocomplete="off"
                     type="text"
                     .value=${this.userIdOrName}
-                    @input=${(e: Event) => this.userIdOrName = (e.target as HTMLInputElement).value}
+                     @input=${this.onInput}
+                     @blur=${this.onBlur}
+                     @focus=${this.onFocus}
+                     @keydown=${this.onKeyDown}
                 />
+                ${this.suggestions.length > 0
+                ? html`
+                        <div class="suggestions">
+                        ${this.suggestions.map(
+                    (item, index) => html`
+                            <div
+                                class="suggestion ${index === this.highlightedIndex ? 'highlighted' : ''}"
+                                @click=${() => this.selectSuggestion(item)}
+                            >
+                                ${item}
+                            </div>
+                            `
+                )}
+                        </div>
+                    `
+                : null}
             </label>
+
+            
 
             <label>
                 ${this.msg.labelPermission}
@@ -89,6 +122,63 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
     `;
     }
 
+    private onInput(e: Event) {
+        const value = (e.target as HTMLInputElement).value;
+        this.userIdOrName = value;
+        if (!value.trim()) {
+            this.suggestions = [];
+            return;
+        }
+
+        this.suggestions = this.allUsers.filter((name) =>
+            name.toLowerCase().includes(value.toLowerCase())
+        );
+    }
+
+    private onBlur() {
+        setTimeout(() => {
+            this.suggestions = [];
+        }, 200);
+    }
+
+    private selectSuggestion(suggestion: string) {
+        this.userIdOrName = suggestion;
+        this.suggestions = [];
+    }
+
+    private onKeyDown(e: KeyboardEvent) {
+        if (this.suggestions.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            this.highlightedIndex = (this.highlightedIndex + 1) % this.suggestions.length;
+        }
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            this.highlightedIndex =
+                (this.highlightedIndex - 1 + this.suggestions.length) % this.suggestions.length;
+        }
+
+        if (e.key === 'Tab' || e.key === 'Enter') {
+            if (this.highlightedIndex >= 0 && this.highlightedIndex < this.suggestions.length) {
+                e.preventDefault(); // previne foco mudar com Tab
+                this.selectSuggestion(this.suggestions[this.highlightedIndex]);
+            }
+        }
+    }
+
+
+
+    private onFocus() {
+        if (this.userIdOrName) {
+            this.suggestions = this.allUsers.filter((name) =>
+                name.toLowerCase().includes(this.userIdOrName.toLowerCase())
+            );
+        }
+    }
+
+
     private async onSubmitAddParticipant() {
 
         this.labelErrorAddParticipant = '';
@@ -107,7 +197,7 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
         try {
             const response = await mls.api.msgAddUserInThread({
                 auth: this.auth,
-                userIdOrName: this.userIdOrName,
+                userIdOrName: this.userIdOrName.trim(),
                 threadId: this.actualThread?.thread.threadId,
                 userId: this.userId,
             });
@@ -124,6 +214,9 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
             }
 
             this.labelOkAddParticipant = `${this.msg.successAddParticipant}`;
+            setTimeout(() => {
+                this.labelOkAddParticipant = '';
+            }, 3000);
             this.userIdOrName = '';
             this.auth = 'write';
             this.isAddParticipant = false;

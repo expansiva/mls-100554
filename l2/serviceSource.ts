@@ -1151,14 +1151,13 @@ export class ServiceSource100554 extends ServiceBase {
         storFile.hasError = hasError;
         this.toogleIconsError();
 
-        monaco.editor.setModelMarkers(modelBaseTS.model, 'markerSource', []);
-
+        if (!hasError) monaco.editor.setModelMarkers(modelBaseTS.model, 'markerSource', []);
+        
         if (hasError) {
             this.setErrorOnEditor(modelBaseTS);
             mls.events.fireFileAction('statusOrErrorChanged', storFile, position);
             return;
         }
-
 
         const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
 

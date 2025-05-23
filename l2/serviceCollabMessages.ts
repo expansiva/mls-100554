@@ -264,6 +264,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     private async updateThreads() {
+
         if (!this.userPerfil?.userId) {
             this.setError('Invalid userId');
             return;
@@ -369,7 +370,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     private openSettings() {
         if (this.menu.setTabActive) this.menu.setTabActive(-1);
-
         if (this.menu.setMode) {
             const settings = document.createElement('collab-messages-settings-100554');
             (settings as any)['serviceBase'] = this;
