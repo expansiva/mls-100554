@@ -19,7 +19,6 @@ import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
 import './_100554_cssHelperIndex';
 
-
 /// **collab_i18n_start**
 const message_pt = {
     historyOpen: 'Abrir histórico',
@@ -99,6 +98,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (op === EToolsSource.icHTML) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
             this.createOrShowModelHtmlOrCssOrTest(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.html');
+
         }
         if (op === EToolsSource.icStyle) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
@@ -1152,12 +1152,12 @@ export class ServiceSource100554 extends ServiceBase {
         this.toogleIconsError();
 
         monaco.editor.setModelMarkers(modelBaseTS.model, 'markerSource', []);
-        
+
         if (hasError) {
             this.setErrorOnEditor(modelBaseTS);
             mls.events.fireFileAction('statusOrErrorChanged', storFile, position);
             return;
-        } 
+        }
 
 
         const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
@@ -1840,6 +1840,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (mode === '.less') {
                 this.initModelStyle(uri, model);
             }
+            if (mode === ".html") {
+                this.registerProviderHTML();
+                this.formatMonaco();
+            }
         }
 
         if (mode === '.html' && this._ed1 && this._ed1.getModel()?.id !== model.id) {
@@ -2254,7 +2258,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private registerProviderHTML() {
         monaco.languages.registerDocumentFormattingEditProvider('html', {
-            provideDocumentFormattingEdits: (model) => {
+            provideDocumentFormattingEdits: async (model) => {
                 const value = model.getValue();
                 const formattedValue = formatHtml(value);
                 return [{
