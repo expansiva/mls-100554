@@ -167,6 +167,8 @@ export class PluginPresenterRecorder extends PluginBaseModule {
     if (!this.screenStream || !this.cameraStream) return;
     this.isRecording = true;
 
+    this.showPipPreview();
+  
     const preview = this.querySelector('#plugin-presenter-camera-preview') as HTMLVideoElement | null;
     if (preview) {
       preview.srcObject = this.cameraStream;
@@ -197,15 +199,146 @@ export class PluginPresenterRecorder extends PluginBaseModule {
     }
     this.screenStream?.getTracks().forEach((t) => t.stop());
     this.cameraStream?.getTracks().forEach((t) => t.stop());
+    this.hidePipPreview();
     // this.isRecording = false;
     // this.requestUpdate();
   }
 
-  saveRecording() {
-    const blob = new Blob(this.chunks, { type: 'video/webm' });
-    this.downloadUrl = URL.createObjectURL(blob);
-    this.chunks = [];
-    this.requestUpdate();
-  }
+saveRecording() {
+  const blob = new Blob(this.chunks, { type: 'video/webm' });
+  this.downloadUrl = URL.createObjectURL(blob);
+  this.chunks = [];
+  this.requestUpdate();
+
+  // Download automático
+  const a = document.createElement('a');
+  a.href = this.downloadUrl;
+  a.download = 'apresentacao.webm';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
+
+showPipPreview() {
+  const container = ensureGlobalPipContainer();
+  container.innerHTML = '';
+
+  const pipDiv = document.createElement('div');
+  pipDiv.id = 'plugin-global-pip-preview';
+  pipDiv.className = `pip-avatar-${this.avatarShape === 'round' ? 'round' : 'square'}`;
+  pipDiv.style.width = '160px';
+  pipDiv.style.height = '160px';
+  pipDiv.style.background = '#000';
+  pipDiv.style.border = '3px solid #1890FF';
+  pipDiv.style.borderRadius = this.avatarShape === 'round' ? '50%' : '10px';
+  pipDiv.style.overflow = 'hidden';
+  pipDiv.style.display = 'flex';
+  pipDiv.style.alignItems = 'center';
+  pipDiv.style.justifyContent = 'center';
+  pipDiv.style.position = 'relative';
+  pipDiv.style.pointerEvents = 'auto';
+
+  // Video element (always visible)
+  const video = document.createElement('video');
+  video.id = 'plugin-presenter-camera-preview';
+  video.autoplay = true;
+  video.muted = true;
+  video.style.width = '100%';
+  video.style.height = '100%';
+  video.style.objectFit = 'cover';
+  video.className = `avatar-zoom-${this.avatarZoom === 1 ? '1x' : this.avatarZoom === 1.5 ? '15x' : '2x'}`;
+  pipDiv.appendChild(video);
+
+  // Control buttons (hidden by default)
+  const stopBtn = document.createElement('button');
+  stopBtn.innerHTML = '🛑';
+  stopBtn.title = 'Stop Recording';
+  stopBtn.style.position = 'absolute';
+  stopBtn.style.bottom = '10px';
+  stopBtn.style.right = '10px';
+  stopBtn.style.zIndex = '10001';
+  stopBtn.style.background = 'rgba(255,255,255,0.9)';
+  stopBtn.style.border = 'none';
+  stopBtn.style.borderRadius = '8px';
+  stopBtn.style.padding = '4px 10px';
+  stopBtn.style.cursor = 'pointer';
+  stopBtn.style.fontSize = '1.2rem';
+  stopBtn.style.boxShadow = '0 1px 8px rgba(0,0,0,0.10)';
+  stopBtn.style.display = 'none';
+  stopBtn.onclick = () => this.stopRecording();
+
+  const resumeBtn = document.createElement('button');
+  resumeBtn.innerHTML = '▶️';
+  resumeBtn.title = 'Resume Recording';
+  resumeBtn.style.position = 'absolute';
+  resumeBtn.style.bottom = '10px';
+  resumeBtn.style.left = '10px';
+  resumeBtn.style.zIndex = '10001';
+  resumeBtn.style.background = 'rgba(255,255,255,0.9)';
+  resumeBtn.style.border = 'none';
+  resumeBtn.style.borderRadius = '8px';
+  resumeBtn.style.padding = '4px 10px';
+  resumeBtn.style.cursor = 'pointer';
+  resumeBtn.style.fontSize = '1.2rem';
+  resumeBtn.style.boxShadow = '0 1px 8px rgba(0,0,0,0.10)';
+  resumeBtn.style.display = 'none';
+  resumeBtn.onclick = () => {
+    this.mediaRecorder?.resume();
+    // Hide buttons again on resume
+    stopBtn.style.display = 'none';
+    resumeBtn.style.display = 'none';
+  };
+
+  pipDiv.appendChild(stopBtn);
+  pipDiv.appendChild(resumeBtn);
+
+  // On click: if recording, pause and show buttons
+  pipDiv.onclick = (e) => {
+    // Prevent click from affecting parent
+    e.stopPropagation();
+
+    if (this.mediaRecorder?.state === 'recording') {
+      this.mediaRecorder.pause();
+      // Show control buttons on pause
+      stopBtn.style.display = '';
+      resumeBtn.style.display = '';
+    }
+  };
+
+  // Hide buttons when not paused
+  if (this.mediaRecorder?.state !== 'paused') {
+    stopBtn.style.display = 'none';
+    resumeBtn.style.display = 'none';
+  }
+
+  container.appendChild(pipDiv);
+
+  if (this.cameraStream) video.srcObject = this.cameraStream;
+}
+
+hidePipPreview() {
+  const container = document.getElementById('pip-global-container');
+  if (container) container.innerHTML = '';
+}
+
+}
+
+  function ensureGlobalPipContainer() {
+  let container = document.getElementById('pip-global-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'pip-global-container';
+    // Importante: z-index bem alto, posição fixed, pointer-events none, etc.
+    container.style.position = 'fixed';
+    container.style.bottom = '1rem';
+    container.style.right = '1rem';
+    container.style.zIndex = '9999';
+    container.style.pointerEvents = 'none';
+    document.body.appendChild(container);
+  }
+  return container;
+  }
+
+
 
