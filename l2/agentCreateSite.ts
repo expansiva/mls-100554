@@ -8,6 +8,7 @@ import { getImages } from "./_100554_libUnsplash";
 import { widgetsDefault } from "./_100554_icaBaseDescription";
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { createNewFile } from "./_100554_pluginNewFileBase";
+import { formatHtml } from './_100554_collabDOMSync';
 
 import { TemplateContent, TemplateChild, ChildElement, Organism, Molecule, Media } from './_100554_agentAnalyzeNewModuleBase';
 
@@ -88,7 +89,6 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
   await execCreatePages(pages);
   // end test
 
-
   /*
     if (!remainingTasks || remainingTasks.length === 0) {
       const allResults = getAllStepsThisAgent(context);
@@ -119,7 +119,6 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     */
 
 }
-
 
 function getAllStepsThisAgent(context: mls.msg.ExecutionContext): TemplateContent[] {
   if (!context || !context.task) throw new Error(`[${agentName}] Not found context on getAllStepsThisAgent`);
@@ -164,10 +163,11 @@ export class ${fileName} extends CollabPageElement {
   console.info({
     pageName: fileName,
     html: data.el.outerHTML.trim()
-  })
+  });
 
+  const htmlFormatted = formatHtml(data.el.outerHTML.trim());
   await createNewFile(
-    { project, position: 'right', shortName, enhancement, sourceTS: ts.trim(), sourceHTML: data.el.outerHTML.trim(), sourceLess: '', openPreview: false }
+    { project, position: 'right', shortName, enhancement, sourceTS: ts.trim(), sourceHTML: htmlFormatted, sourceLess: '', openPreview: false }
   );
 }
 
@@ -208,7 +208,10 @@ function execPrepareHTML(allResults: TemplateContent[]) {
           const tagName = `${_child.name}-${PROJECTICA}`;
           const element = document.createElement(tagName);
           element.setAttribute('id', generateId(tagName));
+
+          if (child.class) element.setAttribute('classel', child.class);
           if (_child.widget) element.setAttribute('widget', _child.widget);
+
           _child.attributes.forEach((attr) => {
             element.setAttribute(attr.key, attr.value.replace(/"/g, "'"));
           });
@@ -237,7 +240,6 @@ function execPrepareHTML(allResults: TemplateContent[]) {
 
   }
 
-
   Object.keys(result).forEach((key, index) => {
     const item = result[key];
     const name = prepareName(item.data.pageName);
@@ -251,30 +253,6 @@ function execPrepareHTML(allResults: TemplateContent[]) {
   return result2;
 
 }
-
-function escapeAttrString(attr: string): string {
-  const match = attr.match(/^([^\s=]+)=["']?(.*)["']?$/);
-  if (!match) return attr;
-
-  const key = match[1];
-  let value = match[2];
-
-  if (!(value.trim().startsWith('{{')) && value.trim().startsWith('{') && value.trim().endsWith('}')) {
-    value = escapeHtml(value);
-  } else {
-    value = escapeHtml(value);
-  }
-  return `${key}="${value}"`;
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')   // importante vir primeiro
-    .replace(/"/g, '&quot;')  // aspas
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
 
 function execPrepareWidgetsDefault(allResults: TemplateContent[]) {
 
@@ -418,7 +396,6 @@ function extractTemplatesAndOrganisms(tasks: TemplateContent[]) {
     if (template?.childs) {
       collectOrganisms(template.childs);
     }
-
   }
 
   return {
@@ -430,7 +407,6 @@ function extractTemplatesAndOrganisms(tasks: TemplateContent[]) {
 export async function getPrompts(taskId: string, prompt: string | undefined, rags: string[] | null, tasks: mls.msg.AIPayload[]): Promise<mls.msg.IAMessageInputType[]> {
   if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
   const prompts: mls.msg.IAMessageInputType[] = [];
-
   let allResults: TemplateContent[] = []
 
   if (tasks) {
@@ -777,6 +753,14 @@ function getRemainingTasksIds(task: mls.msg.TaskData) {
 
 
 
+
+
+
+
+
+
+
+// FOR TEST
 const dataFixed = `{
   "data": {
     "moduleGoal": "Criar um site pessoal de portfólio em formato one page, apresentando informações e trabalhos do usuário, com destaque para uma imagem de banner.",
