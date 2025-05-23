@@ -177,14 +177,15 @@ function systemPlaygroundInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
         content: `## Seção de Demonstração (Playground)
+1.Adicione um título h3 com o texto "Demonstração".
+2.Crie um componente <widget-playground-state-100554> com o atributo state, que deve conter um objeto JSON válido como string. Esse objeto deve ter um namespace ui com todas as chaves necessárias para controlar o estado do playground.
+3.Insira o componente principal dentro de um bloco <demo>.
+4.Adicione um bloco <fieldset> com a legenda "Properties", contendo componentes <ica-forms-input-string-100554> para cada propriedade configurável.
+5.Para cada propriedade, associe uma chave no objeto ui dentro de state (por exemplo: ui.buttonLabel1, ui.buttonLabel2, etc.).
+6.Se uma propriedade for um objeto, serialize-a como string para exibição no playground.
 
-1. Crie um bloco playground com componentes <ica-forms-input-string-100554> para cada propriedade configurável.
-2. Para cada propriedade, associe uma key no objeto ui do state, como ui.buttonLabel1, ui.buttonLabel2, etc.
-3. Caso a propriedade seja um objeto trate como string no playground.
-4. Ao final, crie um único componente <widget-playground-state-100554> com o atributo state representando um objeto JSON com o namespace ui contendo todas essas chaves.
-
-### IMPORTANTE:
- - O valor do atributo state deve ser uma string JSON válida:
+### IMPORTANTE SOBRE <widget-playground-state-100554>:
+ - O valor do atributo state do compoennte deve ser uma string JSON válida:
  - Sem quebras de linha (\n) – tudo deve estar em uma única linha.
  - Envolvida por aspas simples externas.
  - Não use aspas simples dentro do JSON, pois isso causará erro de parsing. Use apenas aspas duplas dentro do JSON, como no exemplo:
@@ -193,23 +194,26 @@ function systemPlaygroundInstruction(): mls.msg.IAMessageInputType {
 
 \`\`\` html
 <section class="section_demo">
-    <demo>       
-        <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel1}}"></widget-world-time-greeting-100554>
-        <playground>
-       
-            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop.buttonLabel:" value="{{ui.buttonLabel1}}" config="{{ui.config1}}"></ica-forms-input-string-100554>
-            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. Config:" value="{{ui.config1}}"></ica-forms-input-string-100554>
-        </playground>
-    </demo>
-    <demo>   
-        <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel2}}" config="{{ui.config2}}"></widget-world-time-greeting-100554>
-        <playground>
-       
-            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{ui.buttonLabel2}}"></ica-forms-input-string-100554>
-            <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. Config:" value="{{ui.config2}}"></ica-forms-input-string-100554>
-        </playground>
-    </demo>
-    <widget-playground-state-100554 state='{"u"i:{"buttonLabel1": "Ver horários pelo mundo", "buttonLabel2": "Ver horários", "config1":"{"codigo":01}"}", "config2":"{"codigo":02}"}"}'></Widget-playground-state-100554>
+  <h3>Demonstração</h3>
+  <widget-playground-state-100554 state='{"ui":{"buttonLabel1":"Ver horários pelo mundo","buttonLabel2":"Ver horários","config1":"{\"codigo\":1}","config2":"{\"codigo\":2}"}}'></widget-playground-state-100554>
+
+  <demo>
+    <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel1}}" config="{{ui.config1}}"></widget-world-time-greeting-100554>
+    <fieldset>
+      <legend>Properties:</legend>
+      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{ui.buttonLabel1}}"></ica-forms-input-string-100554>
+      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. config1:" value="{{ui.config1}}"></ica-forms-input-string-100554>
+    </fieldset>
+  </demo>
+
+  <demo>
+    <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel2}}" config="{{ui.config2}}"></widget-world-time-greeting-100554>
+    <fieldset>
+      <legend>Properties:</legend>
+      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{ui.buttonLabel2}}"></ica-forms-input-string-100554>
+      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. config2:" value="{{ui.config2}}"></ica-forms-input-string-100554>
+    </fieldset>
+  </demo>
 </section>
 \`\`\`
 `
@@ -228,9 +232,9 @@ function systemDemoInstruction(): mls.msg.IAMessageInputType {
     ...
     <demo>
        ...
-     <playground>
+     <fieldset>
        ...
-     </playground>
+     </fieldset>
     </demo>
     ...
   </section>
