@@ -2,7 +2,7 @@
 
 
 collab-messages-add-participant-100554 {
-    
+
     display: block;
     overflow: auto;
     font-family: @font-family-primary;
@@ -29,6 +29,35 @@ collab-messages-add-participant-100554 {
             color: @error-color;
             font-size: @font-size-12;
         }
+
+        .suggestions {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            background: white;
+            color: #000000;
+            width: 100%;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+
+        }
+
+        .suggestion {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .suggestion:hover {
+            background-color: #f5f5f5;
+        }
+
+        .suggestion.highlighted {
+            background-color: #f5f5f5;
+        }
+
 
         input,
         select {

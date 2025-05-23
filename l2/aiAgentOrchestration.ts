@@ -53,7 +53,7 @@ export async function startNewAiTask(
         await afterPrompt(context);
 
     } catch (error: any) {
-        console.error(`[startNewAiTask] ${error.message || error}`);
+        throw new Error(`[startNewAiTask] ${error.message || error}`);
     }
 }
 
@@ -109,7 +109,7 @@ export async function addNewStep(context: mls.msg.ExecutionContext, parentStep: 
     if (!context.task.messageid_created) throw new Error("addNewInteractionInAiTask: context.task.messageid_created is null");
 
     try {
-        
+
         const response = await mls.api.msgAddTaskAISteps({
             userId: getUserIdLocalStorage() || context.message.senderId,
             parentStepId: parentStep,
@@ -177,7 +177,7 @@ export async function executeNextStep(context: mls.msg.ExecutionContext): Promis
         case "result": return executeNextResult(context, step);
 
         case "flexible": return executeNextFlexible(context, step);
-    
+
         default:
             throw new Error(`Unknown step type: ${(step as { type: string }).type}`);
     }
@@ -275,7 +275,7 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
         await agent.beforePrompt(context);
     } catch (error: any) {
 
-        const msg = 'Error: ' + error.message || 'beforePrompt '+step.agentName;
+        const msg = 'Error: ' + error.message || 'beforePrompt ' + step.agentName;
         context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
         setFailedStatus(context, step.stepId);
         console.error(`[executeNextAgent] ${error.message || error}`);

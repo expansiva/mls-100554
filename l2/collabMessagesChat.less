@@ -224,6 +224,23 @@ collab-messages-chat-100554 {
                         margin-left: auto;
                     }
 
+                    .failed {
+                        display: flex;
+                        gap: .3rem;
+                        margin-top: .2rem;
+
+                        svg {
+                            fill: @error-color;
+                            width: 14px;
+                            height: 14px;
+                        }
+
+                        small {
+                            font-style: italic;
+                            font-size: @font-size-12;
+                        }
+                    }
+
                     .message-content {
                         white-space: pre-wrap;
                         padding-right: 4em;

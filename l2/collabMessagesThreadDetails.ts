@@ -2,10 +2,12 @@
 
 import { html, css, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { updateThread, getUser } from './_100554_msgDBController';
+import { updateThread, getUser, listUsers } from './_100554_msgDBController';
+import { collab_triangle_exclamation } from './_100554_collabIcons';
 import { notifyThreadChange } from './_100554_aiAgentHelper';
 import { StateLitElement } from './_100554_stateLitElement';
 import './_100554_collabInputTag';
+import './_100554_collabMessagesAddParticipant';
 
 
 /// **collab_i18n_start** 
@@ -31,7 +33,14 @@ const message_pt = {
     userError: 'ID de usuário inválido.',
     btnSave: 'Salvar alterações',
     successSaving: 'Alterações salvas com sucesso!',
-    noChanges: 'Nenhuma alteração detectada.'
+    noChanges: 'Nenhuma alteração detectada.',
+    addParticipant: 'Adicionar participante',
+    labelUserId: 'Nome do usuario ou Id',
+    labelPermission: 'Autoridade:',
+    errorFieldsAddParticipant: 'Preencha todos os campos!',
+    errorRemoveUser: 'Erro ao remover usuário',
+    successAddParticipant: 'Usuário adicionado com sucesso',
+    threadDetails: 'Detalhes da sala'
 }
 
 const message_en = {
@@ -56,9 +65,15 @@ const message_en = {
     userError: 'Invalid user ID.',
     btnSave: 'Save changes',
     successSaving: 'Saving sucessfully',
-    noChanges: 'No changes.'
+    noChanges: 'No changes.',
+    addParticipant: 'Add Participant',
+    labelUserId: 'User id or name',
+    labelPermission: 'Auth:',
+    errorFieldsAddParticipant: 'Fill in all fields!',
+    errorRemoveUser: 'Error on remove user',
+    successAddParticipant: 'User added sucessfully',
+    threadDetails: 'Thread details'
 }
-
 
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
@@ -78,27 +93,28 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
     @property() labelOk: string = '';
     @property() labelError: string = '';
-    @property() userToRemove: Set<string> = new Set([]);
+    @property() labelErrorRemoveUser: string = '';
 
     @state() private isLoading: boolean = false;
-
     @state() private editedThreadDetails?: IThreadDetails;
 
-    async firstUpdated(changedProperties: Map<string, any>) {
+    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
     }
 
     async updated(changedProperties: Map<string, any>) {
         super.updated(changedProperties);
-        if (changedProperties.has('threadDetails') && this.threadDetails) {
 
-
+        if (changedProperties.has('threadDetails') && this.threadDetails && this.userId) {
             for (const user of this.threadDetails?.thread.users || []) {
                 const find = this.threadDetails?.users.find((u) => u.userId === user.userId);
                 if (!find) {
                     const resUser = await getUser(user.userId);
-                    console.log({ resUser })
                     if (resUser) this.threadDetails.users.push(resUser);
+                    else {
+                        const data = await this.getThreadInfo(this.threadDetails.thread.threadId, this.userId);
+                        this.threadDetails = data;
+                    }
                 }
             }
 
@@ -143,33 +159,8 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 </select>
             </label>
 
-        </div>
-
-
-                
-        <div class="users">
-        <h3>${this.msg.users}</h3>
-        <ul>
-            ${repeat(
-            this.editedThreadDetails?.thread.users || [],
-            ((user: { userId: string }) => user.userId) as any,
-            ((user: { userId: string; }) => {
-                const details = users.find((us) => us.userId === user.userId);
-                return html`
-                            <li>
-                                <img src="${details?.avatar_url}" alt="${details?.name}" width="32" height="32" />
-                                ${details?.name} (${user.userId})
-                                <button @click="${() => this.removeUser(user.userId)}">${this.msg.remove}</button>
-                            </li>
-                `;
-            }
-            ) as any)}
             
-        </ul>
-        </div>
-
-        <div class="languages">
-            <h3>${this.msg.languages}</h3>
+            <label> ${this.msg.languages}</label>
             <collab-input-tag-100554 
                 pattern="^[a-z]{2}$|^[a-z]{2}-[A-Z]{2}$"
                 .value=${this.editedThreadDetails?.thread.languages.join(',')}
@@ -177,30 +168,69 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 id="languageInput"
             ></collab-input-tag-100554>
             <small> ${this.msg.languagesHint}</small>
+    
+            <div class="actions">
+                <button
+                @click=${this.saveChanges}
+                ?disabled=${this.isLoading}
+                >
+                    ${this.isLoading ? html`<span class="loader"></span>` : this.msg.btnSave}
+                </button>
+                ${this.labelOk ? html`<small class="saving-ok">${this.labelOk}<small>` : ''}
+                ${this.labelError ? html`<small class="saving-error">${this.labelError}<small>` : ''}   
+            </div>
+
         </div>
 
-        <div class="actions">
-            <button
-            @click=${this.saveChanges}
-            ?disabled=${this.isLoading}
-            >
-                ${this.isLoading ? html`<span class="loader"></span>` : this.msg.btnSave}
-            </button>
-            ${this.labelOk ? html`<small class="saving-ok">${this.labelOk}<small>` : ''}
-            ${this.labelError ? html`<small class="saving-error">${this.labelError}<small>` : ''}   
+        <div class="users">
+            <h3>${this.msg.users}</h3>
+            <ul>
+                ${repeat(
+            this.editedThreadDetails?.thread.users || [],
+            ((user: { userId: string }) => user.userId) as any,
+            ((user: { userId: string; }) => {
+                const details = users.find((us) => us.userId === user.userId);
+                return html`
+                                <li>
+                                    <img src="${details?.avatar_url}" alt="${details?.name}" width="32" height="32" />
+                                    ${details?.name} (${user.userId})
+                                    <button class="remove" @click="${(e: MouseEvent) => this.removeUser(e, user.userId)}">${this.msg.remove}</button>
+                                </li>
+                    `;
+            }
+            ) as any)}
+            </ul>
+            ${this.labelErrorRemoveUser ? html`<small class="saving-error">${collab_triangle_exclamation} ${this.labelErrorRemoveUser}<small>` : ''}   
+
+            <details class="details-add-participant">
+                <summary>${this.msg.addParticipant}</summary>
+                <div>
+                    <collab-messages-add-participant-100554 userId=${this.userId} .actualThread=${{ ...this.threadDetails }}></collab-messages-add-participant-100554>
+                </div>
+            </details>
         </div>
-        
       </div>
 
     `;
     }
 
-    private removeUser(userId: string) {
-        if (!this.editedThreadDetails) return;
-        this.userToRemove.add(userId);
-        this.editedThreadDetails.users = this.editedThreadDetails.users.filter(user => user.userId !== userId);
-        this.editedThreadDetails.thread.users = this.editedThreadDetails.thread.users.filter(user => user.userId !== userId);
-        this.requestUpdate();
+    private async removeUser(e: MouseEvent, userId: string) {
+        this.labelErrorRemoveUser = '';
+        if (!this.threadDetails || !this.userId || !this.editedThreadDetails) return;
+        const button = (e.target as HTMLElement).closest('button');
+        try {
+            button?.classList.add('loading');
+            const newThread = await this.removeUserFromThread(this.threadDetails.thread.threadId, this.userId, userId);
+            if (newThread) {
+                this.threadDetails = JSON.parse(JSON.stringify(this.editedThreadDetails));
+                const threadCache = await updateThread(newThread.threadId, newThread);
+                notifyThreadChange(threadCache);
+            }
+        } catch (err: any) {
+            this.labelErrorRemoveUser = this.msg.errorRemoveUser + ':' + err.message;
+        } finally {
+            button?.classList.remove('loading');
+        }
     }
 
     private getChangedFields(): mls.msg.RequestUpdateThread | undefined {
@@ -237,10 +267,9 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         const changes = this.getChangedFields();
         if (!changes) return;
 
-        const needRemoveUser = this.userToRemove.size > 0;
         const needUpdateThread = Object.keys(changes).length > 3;
 
-        if (!needRemoveUser && !needUpdateThread) {
+        if (!needUpdateThread) {
             this.labelError = this.msg.noChanges;
             return;
         }
@@ -249,11 +278,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
         this.isLoading = true;
         try {
-
-            if (needRemoveUser) {
-                const res = await this.removeUsersFromThread();
-                if (res) newThread = res;
-            }
 
             if (needUpdateThread) {
                 const response = await mls.api.msgUpdateThread(changes);
@@ -271,7 +295,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             }
 
             this.labelOk = `${this.msg.successSaving}`;
-            this.userToRemove.clear();
 
         } catch (err: any) {
             console.error(err);
@@ -279,27 +302,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         } finally {
             this.isLoading = false;
         }
-    }
-
-    private async removeUsersFromThread() {
-
-        let newThread: mls.msg.Thread | undefined;
-
-        if (!this.threadDetails || !this.threadDetails.thread || !this.userId) {
-            throw new Error('Missing thread details or userId');
-        }
-
-
-        const threadId = this.threadDetails.thread.threadId;
-        for (const userId of Array.from(this.userToRemove)) {
-            try {
-                newThread = await this.removeUserFromThread(threadId, this.userId, userId);
-            } catch (err: any) {
-                console.error(`Error remove user: ${userId}:`, err.message);
-            }
-        }
-
-        return newThread;
     }
 
     private async removeUserFromThread(threadId: string, userId: string, userIdOrName: string) {
@@ -315,6 +317,18 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             return res.thread;
         } catch (err: any) {
             throw new Error(err.message);
+        }
+    }
+
+    private async getThreadInfo(threadId: string, userId: string): Promise<IThreadDetails> {
+        try {
+            const response = await mls.api.msgGetThreadUpdate({
+                threadId,
+                userId
+            });
+            return response;
+        } catch (err: any) {
+            throw new Error(err.message)
         }
     }
 

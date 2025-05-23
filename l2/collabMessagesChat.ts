@@ -2,9 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { collab_chevron_left, collab_user_plus, collab_gear, collab_translate, collab_triangle_exclamation } from './_100554_collabIcons';
+import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation } from './_100554_collabIcons';
 import { createAgent } from './_100554_agentPlanner1';
-
 import { getTemporaryContext, formatTimestamp } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, updateThreads, getMessagesByThreadId } from './_100554_msgDBController';
 import { loadChatPreferences } from './_100554_collabMessageHelper';
@@ -14,7 +13,6 @@ import './_100554_collabMessagesTask';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
 import './_100554_collabMessagesThreadDetails';
-import './_100554_collabMessagesAddParticipant';
 
 import { IChatPreferences } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
@@ -24,13 +22,17 @@ import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt';
 const message_pt = {
     loading: 'Carregando...',
     btnAddParticipant: 'Adicionar participante',
-    threadDetails: 'Detalhes da sala'
+    threadDetails: 'Detalhes da sala',
+    msgNotSend: 'Mensagem não enviada*',
+    noThreads: 'Nenhuma sala disponível no momento.'
 }
 
 const message_en = {
     loading: 'Loading...',
     btnAddParticipant: 'Add Participant',
-    threadDetails: 'Thread details'
+    threadDetails: 'Thread details',
+    msgNotSend: 'Message not sent*',
+    noThreads: 'No threads available at the moment.'
 }
 
 type MessageType = typeof message_en;
@@ -152,17 +154,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
                     <span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.actualThread?.thread.name || this.actualThread?.thread.threadId}</span>
                     <div class="header-actions">
                         <span @click=${this.onThreadDetailsClick}>${collab_gear}</span>
-                        <span @click=${this.onAddParticipantClick}>${collab_user_plus}</span>
-                        
                     </div>
                 </div>`;
             case 'list':
                 return html`<div class="header">Threads</div>`;
-            case 'addParticipant':
-                return html`
-                <div class="header">
-                    <span @click=${this.onTitleClick}>${collab_chevron_left} ${this.msg.btnAddParticipant}</span>
-                </div>`;
             case 'threadDetails':
                 return html`
                 <div class="header">
@@ -181,8 +176,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 return this.renderChatMessages();
             case 'task':
                 return this.renderTaskDetails();
-            case 'addParticipant':
-                return this.renderAddParticipant();
             case 'threadDetails':
                 return this.renderThreadDetails();
             default:
@@ -224,7 +217,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                     ${!isSame ? html`<div class="message-title">@${userName}</div>` : ``}
                                     ${this.renderMessageByLanguage(message)}
                                     ${message.isLoading ? html`<span class="loader"></span>` : ''}
-                                    ${message.isFailed ? html`<span class="failed">${collab_triangle_exclamation}</span>` : ''}
+                                    ${message.isFailed ? html`<div class="failed">
+                                        <span>${collab_circle_exclamation}</span>
+                                        <small>${this.msg.msgNotSend}</small>
+                                    </div>`
+
+                        : ''}
                                     <div class="message-footer">${dateFormated?.time}</div>
                                     ${message.taskId
                         ? html`
@@ -302,6 +300,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private renderListThreads() {
 
         const unreadCount = 1;
+
+        if (this.userThreads[this.group].length === 0 && !this.isLoadingThread) {
+            return html`<div style="padding:1rem;">${this.msg.noThreads}</div>`;
+        }
+
         return html` <ul class="thread-list">
                 ${this.userThreads[this.group].map((item) => {
             return html`
@@ -331,10 +334,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private renderThreadDetails() {
         return html`<collab-messages-thread-details-100554 userId=${this.userId} .threadDetails=${{ ...this.actualThread }}></collab-messages-thread-details-100554>`
-    }
-
-    private renderAddParticipant() {
-        return html`<collab-messages-add-participant-100554 userId=${this.userId} .actualThread=${{ ...this.actualThread }}></collab-messages-add-participant-100554>`;
     }
 
 
@@ -456,8 +455,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.messagesOffset = 0;
         this.hasMoreMessages = true;
         this.actualThread = threadInfo;
-
-        //const messagesInDb = await getAllMessagesByThreadId(threadInfo.thread.threadId);
         const messagesInDb = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, 0);
 
         this.actualMessages = messagesInDb;
@@ -466,39 +463,48 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
         this.isLoadingMessages = true;
         try {
-
-            const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
-            addMessages(messages);
-
-            this.actualMessages = this.mergeMessages(this.actualMessages, messages);
-            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
-
-            const keys = Object.keys(this.actualMessagesParsed).sort(); // cria uma nova lista ordenada
-            const lastKey = keys.length > 0 ? keys[keys.length - 1] : null;
-            const lastArray = lastKey ? this.actualMessagesParsed[lastKey] : [];
-            const lastMessage = lastArray.length > 0 ? lastArray[lastArray.length - 1] : undefined;
-
-            // const lastMessage = this.actualMessages.length > 0 ? this.actualMessages[this.actualMessages.length - 1] : undefined;
-
-            if (!this.userId || !this.actualThread.thread.threadId) return;
-            const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId)
+            if (!this.userId) return;
+            const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId);
             await updateThreads([threadByServer.thread]);
-
-            if (lastMessage && threadByServer) {
-                const thread = await updateThread(threadByServer.thread.threadId, threadByServer.thread, lastMessage.content, lastMessage.createAt, 0);
-                threadInfo.thread = thread;
-            }
-
-            threadInfo.users = threadByServer.users;
-            updateUsers(threadInfo.users);
-
-
+            await updateUsers(threadByServer.users);
+            await this.loadAllMessages(threadByServer);
         } catch (err: any) {
             throw new Error('Error on loading messages: ' + err.message);
         } finally {
             this.isLoadingMessages = false;
         }
 
+    }
+
+    private async loadAllMessages(threadInfo: IThreadInfo): Promise<void> {
+
+        const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
+        if (!messages || messages.length === 0 || !this.actualThread || !this.userId) {
+            return;
+        }
+
+        await addMessages(messages);
+        this.actualMessages = this.mergeMessages(this.actualMessages, messages);
+        this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+
+        const keys = Object.keys(this.actualMessagesParsed).sort();
+        const lastKey = keys.length > 0 ? keys[keys.length - 1] : null;
+        const lastArray = lastKey ? this.actualMessagesParsed[lastKey] : [];
+        const lastMessage = lastArray.length > 0 ? lastArray[lastArray.length - 1] : undefined;
+
+        if (lastMessage) {
+            const thread = await updateThread(
+                threadInfo.thread.threadId,
+                threadInfo.thread,
+                lastMessage.content,
+                lastMessage.createAt,
+                0
+            );
+            threadInfo.thread = thread;
+        }
+
+        if (messages.length < 100) return;
+        return this.loadAllMessages(threadInfo);
     }
 
     private onTitleClick() {
@@ -510,15 +516,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.activeScenerie = 'list';
             return;
         }
-        if (this.activeScenerie === 'addParticipant' || this.activeScenerie === 'threadDetails') {
+        if (this.activeScenerie === 'threadDetails') {
             this.activeScenerie = 'details';
             return;
         }
-    }
-
-    private onAddParticipantClick() {
-        this.saveScrollPosition();
-        this.activeScenerie = 'addParticipant';
     }
 
     private onThreadDetailsClick() {
@@ -558,6 +559,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.updateMessage2(false, message, response.message);
         } catch (err: any) {
             message.isFailed = true;
+            message.isLoading = false;
+            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             console.error('Error on send message:' + err.message);
         }
 
@@ -568,9 +571,19 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (!this.userId || !this.actualThread) return;
         const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, prompt);
         const agent = createAgent();
-        const message: mls.msg.Message = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
+        const message: IMessage = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
         context.message = message;
-        await agent.beforePrompt(context);
+
+        try {
+            await agent.beforePrompt(context);
+        } catch (err: any) {
+            console.error('Error on send message:' + err.message);
+            if (message.isLoading) {
+                message.isLoading = false;
+                message.isFailed = true;
+                this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+            }
+        }
 
     }
 
@@ -751,4 +764,4 @@ interface IMessage extends mls.msg.Message {
 
 type IMessageGrouped = { [key: string]: IMessage[] }
 type IThread = { [key: string]: IThreadInfo[] }
-type IScenery = 'list' | 'details' | 'loading' | 'task' | 'addParticipant' | 'threadDetails'
+type IScenery = 'list' | 'details' | 'loading' | 'task' | 'threadDetails'
