@@ -6,7 +6,8 @@ import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
     calculateStepsStatistics,
-    updateStepStatus
+    updateStepStatus,
+    notifyTaskCompleted
 } from "./_100554_aiAgentHelper";
 
 import {
@@ -30,7 +31,7 @@ const agentName = "agentPlanner1";
 export function createAgent(): IAgent {
     return {
         agentName,
-        avatar_url:svg_agent,
+        avatar_url: svg_agent,
         agentDescription: "first agent for general prompts",
         visibility: "private",
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
@@ -58,16 +59,30 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         const inputs = await getPrompts(step.prompt, step.rags);
         await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
     }
-}  
+}
 
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    const { flexible } = calculateStepsStatistics([step], true);
+    const { flexible, result } = calculateStepsStatistics([step], true);
     if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
     context.task = await updateStepStatus(context.task, step.stepId, "completed");
     await executeNextStep(context);
+    if (result > 0) await addMessageResponse(context, step);
+
+}
+
+async function addMessageResponse(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep) {
+
+    const payload = step?.interaction?.payload;
+    if (!payload) return;
+    const [pay1] = payload;
+    if (!pay1 || pay1.type !== 'result') return;
+    const value = typeof pay1.result === 'object' ? JSON.stringify(pay1.result) : pay1.result;
+    if (!value || typeof value !== 'string') return;
+    notifyTaskCompleted(context, value);
 }
 
 export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {

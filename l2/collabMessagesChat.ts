@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation } from './_100554_collabIcons';
 import { createAgent } from './_100554_agentPlanner1';
-import { getTemporaryContext, formatTimestamp } from './_100554_aiAgentHelper';
+import { getTemporaryContext, formatTimestamp, getNextResultStep } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, updateThreads, getMessagesByThreadId } from './_100554_msgDBController';
 import { loadChatPreferences } from './_100554_collabMessageHelper';
 
@@ -68,7 +68,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
     };
 
     private savedScrollTop = 0;
-
     private hasMoreMessages = true;
     private messagesLimit = 10;
     private messagesOffset = 0;
@@ -98,33 +97,21 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
     }
 
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('task-change', this.onTaskChange);
+        window.removeEventListener('task-completed', this.onTaskCompleted);
+        window.removeEventListener('task-details-close', this.onTaskDetailsClose);
+        window.removeEventListener('thread-change', this.onThreadChange);
+    }
+
+
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
-
-        window.addEventListener('task-change', async (e) => {
-            const customEvent = e as CustomEvent;
-            await this.updateMessageAI(customEvent.detail.context, false, customEvent.detail.oldContextCreateAt);
-            if (customEvent.detail.context.task) {
-                await addOrUpdateTask(customEvent.detail.context.task);
-            }
-        });
-
-        window.addEventListener('task-details-close', async (e) => {
-            this.onTitleClick();
-        });
-
-        window.addEventListener('thread-change', async (e) => {
-            const customEvent = e as CustomEvent;
-            await this.updateMessageAI(customEvent.detail, false);
-            const thread = customEvent.detail as mls.msg.Thread;
-            const threadUpdated = this.userThreads[this.group].find((th) => th.thread.threadId === thread.threadId);
-            if (threadUpdated) threadUpdated.thread = { ...threadUpdated.thread, ...thread };
-            else if (thread.group === this.group) {
-                this.userThreads[this.group] = [...this.userThreads[this.group], { thread, users: [] }];
-            }
-            this.requestUpdate();
-        });
-
+        window.addEventListener('task-change', this.onTaskChange);
+        window.addEventListener('task-completed', this.onTaskCompleted);
+        window.addEventListener('task-details-close', this.onTaskDetailsClose);
+        window.addEventListener('thread-change', this.onThreadChange);
     }
 
     render() {
@@ -566,6 +553,14 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     }
 
+    private async addMessageResponse(task: mls.msg.TaskData) {
+        const stepResult = getNextResultStep(task);
+        if (!stepResult) return;
+        const value = typeof stepResult.result === 'object' ? JSON.stringify(stepResult.result) : stepResult.result;
+        if (!addMessage || typeof value !== 'string') return;
+        this.addMessage(`IA:  ${value} `);
+    }
+
     private async addMessageIA(prompt: string) {
 
         if (!this.userId || !this.actualThread) return;
@@ -746,6 +741,38 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.messageContainer.scrollTop = this.savedScrollTop;
         }
     }
+
+    private onTaskChange = async (e: Event) => {
+        const customEvent = e as CustomEvent;
+        const task: mls.msg.TaskData = customEvent.detail.context.task;
+        await this.updateMessageAI(customEvent.detail.context, false, customEvent.detail.oldContextCreateAt);
+        if (task) await addOrUpdateTask(customEvent.detail.context.task);
+    };
+
+    private onTaskCompleted = async (e: Event) => {
+        const customEvent = e as CustomEvent;
+        const task: mls.msg.TaskData = customEvent.detail.context.task;
+        if (task.status === 'done') {
+            this.addMessageResponse(task);
+        }
+    };
+
+    private onTaskDetailsClose = async (_e: Event) => {
+        this.onTitleClick();
+    };
+
+    private onThreadChange = async (e: Event) => {
+        const customEvent = e as CustomEvent;
+        await this.updateMessageAI(customEvent.detail, false);
+        const thread = customEvent.detail as mls.msg.Thread;
+        const threadUpdated = this.userThreads[this.group].find((th) => th.thread.threadId === thread.threadId);
+        if (threadUpdated) threadUpdated.thread = { ...threadUpdated.thread, ...thread };
+        else if (thread.group === this.group) {
+            this.userThreads[this.group] = [...this.userThreads[this.group], { thread, users: [] }];
+        }
+        this.requestUpdate();
+    };
+
 }
 
 
