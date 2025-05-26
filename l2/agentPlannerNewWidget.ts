@@ -2,7 +2,6 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getListFilesStart, systemReturnJsonFormat, preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
-import { icaDescriptions } from './_100554_icaBaseDescription';
 import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, notifyTaskChange, calculateStepsStatistics, getInteractionStepId,  } from "./_100554_aiAgentHelper";
 import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewStep } from "./_100554_aiAgentOrchestration";
 
