@@ -90,7 +90,8 @@ export class ServiceDetail100554 extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
         if (!visible && this.contentPlugin) {
-            this.contentPlugin.innerHTML = '';
+            //Array.from(this.contentPlugin.children).forEach((i) => (i as HTMLElement).style.display = "none");
+
         }
 
         if (!this.contentPlugin) return;
@@ -207,8 +208,9 @@ export class ServiceDetail100554 extends ServiceBase {
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
 
         this.plugin = info;
+        const plugin = info.htmlText ? 'any' : `_${info.project}_${info.shortName}`;
         const content: string = info.htmlText ? info.htmlText : await this.getHtmlFromPlugin(info);
-        this.updateContentPluginWithScripts(content, (info as any).arguments);
+        this.updateContentPluginWithScripts(plugin, content, (info as any).arguments);
     }
 
     private async getHtmlFromPlugin(info: mls.events.IPluginDetail): Promise<string> {
@@ -220,25 +222,54 @@ export class ServiceDetail100554 extends ServiceBase {
         return content;
     }
 
-    private updateContentPluginWithScripts(content: string, args:any): void {
+    private updateContentPluginWithScripts(ori: string, content: string, args: any): void {
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
-        this.contentPlugin.innerHTML = '';
+
+        Array.from(this.contentPlugin.children).forEach((i) => (i as HTMLElement).style.display = "none");
+
+        let el = this.contentPlugin.querySelector('#' + ori) as HTMLElement;
+        if (!el) {
+            el = document.createElement('div');
+            el.id = ori;
+            this.setContentinEl(el, content, args);
+            return;
+        }
+
+        if (ori === 'any') {
+            el.innerHTML = '';
+            this.setContentinEl(el, content, args);
+            el.style.display = '';
+            return;
+        }
+
+        el.style.display = '';
+        (el as any).args = args;
+
+    }
+
+    private setContentinEl(el: HTMLElement, content: string, args: any) {
+
+        if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
+
         const allWcs = getAllWebComponentsInSource(content);
-        this.contentPlugin.innerHTML = content;
-        (this.contentPlugin as any).args = args;
+        el.innerHTML = content;
+        (el as any).args = args;
         allWcs.forEach((wc) => {
             const fileName = convertTagToFileName(wc);
             const script = document.createElement('script');
             script.type = 'module';
             script.id = fileName;
             script.src = (`/${fileName}`);
-            this.contentPlugin?.appendChild(script)
+            el.appendChild(script)
         });
-        Array.from(this.contentPlugin.children).forEach((child) => {
+
+        Array.from(el.children).forEach((child) => {
             if (child.tagName.startsWith('PLUGIN-')) {
                 child.setAttribute('msize', this.msize);
             }
         });
+
+        this.contentPlugin.appendChild(el);
     }
 
     private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
