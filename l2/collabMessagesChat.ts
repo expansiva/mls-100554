@@ -452,7 +452,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         try {
             if (!this.userId) return;
             const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId);
-            await updateThreads([threadByServer.thread]);
+            await updateThread(threadInfo.thread.threadId, threadInfo.thread);
             await updateUsers(threadByServer.users);
             await this.loadAllMessages(threadInfo);
         } catch (err: any) {
