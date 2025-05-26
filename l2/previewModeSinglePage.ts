@@ -125,6 +125,7 @@ export class PreviewModeSinglePage {
             bundle: true,
             minify: true,
             format: "esm",
+            sourcemap: 'inline',
             write: false,
             plugins: [virtualFsPlugin]
         });
