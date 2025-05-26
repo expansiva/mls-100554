@@ -4,7 +4,7 @@ import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance } from './_100554_libCommom';
-import './_100554_serviceListFilesAdd';
+import './_100554_serviceListFilesAdd'; 
 
 /// **collab_i18n_start**
 const message_pt = {
