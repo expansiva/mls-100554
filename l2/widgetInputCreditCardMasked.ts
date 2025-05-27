@@ -116,7 +116,7 @@ export class WidgetInputCreditCardMasked extends IcaFormsInputMaskedBase {
      */
     @propertyCompositeDataSource({ type: String }) name: string | undefined;
 
-    @propertyCompositeDataSource({ type: String }) required: string | undefined;
+    @propertyCompositeDataSource({ type: String }) required: boolean | undefined;
 
     /**
      * Número do cartão de crédito com máscara aplicada
@@ -152,13 +152,13 @@ export class WidgetInputCreditCardMasked extends IcaFormsInputMaskedBase {
      * Define se o campo é somente leitura
      * @example readonly=\"true\"
      */
-    @propertyDataSource({ type: String }) readonly: string | undefined;
+    @propertyDataSource({ type: String }) readonly: boolean | undefined;
 
     /**
      * Define se o campo está desabilitado
      * @example disabled=\"true\"
      */
-    @propertyDataSource({ type: String }) disabled: string | undefined;
+    @propertyDataSource({ type: String }) disabled: boolean | undefined;
 
     /**
      * Mensagem de erro exibida quando o número do cartão é inválido
@@ -263,8 +263,8 @@ export class WidgetInputCreditCardMasked extends IcaFormsInputMaskedBase {
  name=${ifDefined(this.name)}
  .placeholder=${this.__placeholder}
  .value=${this.value || ''}
- ?readonly=${this.readonly === 'true'}
- ?disabled=${this.disabled === 'true'}
+ ?readonly=${this.readonly?.toString() === 'true'}
+ ?disabled=${this.disabled?.toString() === 'true'}
  @input=${this.handleInput.bind(this)}
  maxlength=${this.__mask.replace(/[^9]/g, '').length + this.__mask.replace(/9/g, '').length}
  />

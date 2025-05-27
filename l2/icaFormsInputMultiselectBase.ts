@@ -5,11 +5,11 @@ import { StateLitElement } from './_100554_stateLitElement';
 export abstract class IcaFormsInputMultiselectBase extends StateLitElement {
 
     abstract hint: string | undefined;
-abstract label: string | undefined;
-abstract required: string | undefined;
-abstract disabled: string | undefined;
-abstract options: string | undefined;
-abstract selectedvalue: string | undefined;
+    abstract label: string | undefined;
+    abstract required: boolean | undefined;
+    abstract disabled: boolean | undefined;
+    abstract options: string | undefined;
+    abstract selectedvalue: string | undefined;
 
 
 }

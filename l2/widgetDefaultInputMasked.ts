@@ -50,15 +50,15 @@ export class WidgetDefaultInputMasked extends IcaFormsInputMaskedBase {
     /** Indica se o campo é obrigatório
      * @example required="true"
      */
-    @propertyDataSource({ type: String }) required: string | undefined;
+    @propertyDataSource({ type: String }) required: boolean | undefined;
     /** Indica se o campo está desabilitado
      * @example disabled="true"
      */
-    @propertyDataSource({ type: String }) disabled: string | undefined;
+    @propertyDataSource({ type: String }) disabled: boolean | undefined;
     /** Indica se o campo é somente leitura
      * @example readonly="true"
      */
-    @propertyDataSource({ type: String }) readonly: string | undefined;
+    @propertyDataSource({ type: String }) readonly: boolean | undefined;
     /** Configura autocomplete do campo
      * @example autocomplete="on"
      */
@@ -142,9 +142,9 @@ class="input-masked-input${showError ? ' input-masked-error' : ''}"
 .type="text"
 name=${ifDefined(this.name)}
 .placeholder=${ifDefined(this.placeholder)}
-?disabled=${this.disabled === 'true'}
-?readonly=${this.readonly === 'true'}
-?required=${this.required === 'true'}
+?disabled=${this.disabled?.toString() === 'true'}
+?readonly=${this.readonly?.toString() === 'true'}
+?required=${this.required?.toString() === 'true'}
 autocomplete=${ifDefined(this.autocomplete)}
 .value=${this.value ?? ''}
 @input=${this._onInput.bind(this)}

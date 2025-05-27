@@ -40,11 +40,11 @@ export class WidgetInputPhone extends IcaFormsInputMaskedBase {
     /** Máscara dinâmica. Ex: "(99) 9999-9999" ou "(99) 99999-9999" */
     @propertyDataSource({ type: String }) mask: string | undefined;
     /** Define se o campo é obrigatório. */
-    @propertyDataSource({ type: String }) required: string | undefined;
+    @propertyDataSource({ type: String }) required: boolean | undefined;
     /** Define se o campo está desabilitado. */
-    @propertyDataSource({ type: String }) disabled: string | undefined;
+    @propertyDataSource({ type: String }) disabled: boolean | undefined;
     /** Define se o campo é somente leitura. */
-    @propertyDataSource({ type: String }) readonly: string | undefined;
+    @propertyDataSource({ type: String }) readonly: boolean | undefined;
     /** Configuração para autocomplete do campo. */
     @propertyDataSource({ type: String }) autocomplete: string | undefined;
     /** Mensagem exibida quando o valor está incompleto ou inválido. */
@@ -111,9 +111,9 @@ export class WidgetInputPhone extends IcaFormsInputMaskedBase {
  name=${ifDefined(this.name)}
  .value=${formattedValue}
  placeholder=${placeholder}
- ?required=${!!this.required}
- ?disabled=${!!this.disabled}
- ?readonly=${!!this.readonly}
+ ?required=${this.required?.toString() === 'true'}
+ ?disabled=${this.disabled?.toString() === 'true'}
+ ?readonly=${this.readonly?.toString() === 'true'}
  autocomplete=${ifDefined(this.autocomplete)}
  aria-invalid=${this._error ? 'true' : 'false'}
  aria-describedby=${this.hint ? 'hint' : undefined}
