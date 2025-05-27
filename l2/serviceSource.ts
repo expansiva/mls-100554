@@ -808,7 +808,20 @@ export class ServiceSource100554 extends ServiceBase {
                 await mls.stor.localDB.removePrjInfo(storFile.project);
 
             } else {
-                await this.undoFiles(storFileHTML, storFile, storFileCss, storFileTsTest, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest);
+                const undoType = (fileAction as any).undoType;
+
+                if (!undoType || undoType === 'all') {
+
+                    await this.undoFiles(storFileHTML, storFile, storFileCss, storFileTsTest, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest , 'all');
+                } else if (undoType === '.ts') {
+                    await this.undoFiles(undefined, storFile, undefined, undefined, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, 'ts');
+                } else if (undoType === '.html') {
+                    await this.undoFiles(storFileHTML, undefined, undefined, undefined, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, 'html');
+                } else if (undoType === '.less') {
+                    await this.undoFiles(undefined, undefined, storFileCss, undefined, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, 'less');
+                } else if (undoType === '.test.ts') {
+                    await this.undoFiles(undefined, undefined, undefined, storFileTsTest, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, 'test');
+                }
             }
         };
 
@@ -921,7 +934,7 @@ export class ServiceSource100554 extends ServiceBase {
 
             let fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
 
-            if (!fileModels) {
+            if (!fileModels || !fileModels.ts || !fileModels.html || !fileModels.style) {
                 await this.createModelTS2(storFileTS, true, true);
                 fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
                 if (!fileModels) console.info('No file models');
@@ -1027,13 +1040,14 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async undoFiles(
         storFileHTML: mls.stor.IFileInfo | undefined,
-        storFileTS: mls.stor.IFileInfo,
+        storFileTS: mls.stor.IFileInfo | undefined,
         storFileCss: mls.stor.IFileInfo | undefined,
         storFileTsTest: mls.stor.IFileInfo | undefined,
         keyFileHTML: string,
         keyFileTS: string,
         keyFileCss: string,
         keyFileTsTest: string,
+        tp:string = 'all'
 
     ) {
 
@@ -1054,9 +1068,17 @@ export class ServiceSource100554 extends ServiceBase {
                 throw new Error('not implemented');
             }
 
-            if (data.storFile.extension === '.ts') {
+            if (data.storFile.extension === '.ts' && tp === 'all') {
                 mls.editor.deleteModels(data.storFile.project, data.storFile.shortName, true);
+            } else if (data.storFile.extension === '.ts' && tp === 'ts') {
+                const keyToModel = mls.editor.getKeyModel(data.storFile.project, data.storFile.shortName);
+                if (!mls.editor.models[keyToModel]) return false;
+                if (data.storFile.extension === '.ts') {
+                    mls.editor.models[keyToModel].ts?.model.dispose();
+                    delete mls.editor.models[keyToModel].ts
+                }
             }
+
 
             this.removeEventsStorFile(data.storFile);
             await mls.stor.localStor.setContent(data.storFile, { contentType: 'string', content: null });
@@ -1078,15 +1100,28 @@ export class ServiceSource100554 extends ServiceBase {
             }
 
             if (data.storFile.extension === '.less' || data.storFile.extension === '.html') {
-                const uri = this.getUri(`_${data.storFile.project}_${data.storFile.shortName}`, data.storFile.extension);
+                /*const uri = this.getUri(`_${data.storFile.project}_${data.storFile.shortName}`, data.storFile.extension);
                 const model = monaco.editor.getModel(uri);
-                if (model) model.dispose();
+                if (model) model.dispose();*/
+
+                const keyToModel = mls.editor.getKeyModel(data.storFile.project, data.storFile.shortName);
+                if (!mls.editor.models[keyToModel]) return false;
+
+                if (data.storFile.extension === '.html') {
+                    mls.editor.models[keyToModel].html?.model.dispose();
+                    delete mls.editor.models[keyToModel].html
+                }
+                if (data.storFile.extension === '.less') {
+                    mls.editor.models[keyToModel].style?.model.dispose();
+                    delete mls.editor.models[keyToModel].style
+                }
+                
             }
 
         };
 
-        const models = await this.createModelTS2(storFileTS, false, true);
-        if (models.ts) await this.updateModelStatus(models.ts, false);
+        //const models = await this.createModelTS2(storFileTS, false, true);
+        //if (models.ts) await this.updateModelStatus(models.ts, false);
         // mls.events.fireFileAction('statusOrErrorChanged', storFileTS, this.position);
 
     }
@@ -1152,7 +1187,7 @@ export class ServiceSource100554 extends ServiceBase {
         this.toogleIconsError();
 
         if (!hasError) monaco.editor.setModelMarkers(modelBaseTS.model, 'markerSource', []);
-        
+
         if (hasError) {
             this.setErrorOnEditor(modelBaseTS);
             mls.events.fireFileAction('statusOrErrorChanged', storFile, position);

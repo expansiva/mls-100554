@@ -8,7 +8,7 @@ import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
 import { getMyKeysBranch } from './_100554_libCommom';
 import { getConfigProject, updateConfigProject } from './_100554_libProjectConfig';
 
-initServiceSaveaddBranch(); 
+initServiceSaveaddBranch();
 /// **collab_i18n_start**
 const message_pt = {
     openPullrequest: 'Pull request Abertos',
@@ -460,6 +460,7 @@ export class ServiceSave extends ServiceBase {
                     ${unsafeHTML(item.span)}
                 </label>
                 ${aux}
+                <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${()=> this.undoFile(item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer"></span>
             </div>
         </li>
         `;
@@ -864,7 +865,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private forceSaveL5ProjectFile: boolean = false;
-    private arrayRollback: mls.stor.IFileInfo[] =[]; // implementar
+    private arrayRollback: mls.stor.IFileInfo[] = []; // implementar
 
     //Sempre que salvar vai gerar um novo branch no usuario e solicitar um pullrequest.
     private async onSave(e: MouseEvent) {
@@ -951,24 +952,24 @@ export class ServiceSave extends ServiceBase {
 
     private async afterSave(fileInfos: mls.stor.IFileInfo[]) {
 
-		try {
+        try {
 
-			for await (const f of fileInfos) {
+            for await (const f of fileInfos) {
 
-				if (f.onAction) {
+                if (f.onAction) {
 
-					await f.onAction('aftersave');
+                    await f.onAction('aftersave');
 
-				}
+                }
 
-			}
+            }
 
-		} catch (e: any) {
+        } catch (e: any) {
 
-			console.info('Erro onAftersave:' + e.message);
+            console.info('Erro onAftersave:' + e.message);
 
-		}
-	}
+        }
+    }
 
     private async onSavenewPullrequest(ar: mls.stor.IFileInfo[], msg: string) {
 
@@ -1458,6 +1459,7 @@ export class ServiceSave extends ServiceBase {
     private async deleteFile(storFile: mls.stor.IFileInfo) {
 
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+        await mls.stor.cache.setContent(storFile, null);
         mls.editor.deleteModels(storFile.project, storFile.shortName, true);
         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
         delete mls.stor.files[keyFiles];
@@ -1492,6 +1494,29 @@ export class ServiceSave extends ServiceBase {
             JSON.stringify(options),
             0
         );
+    }
+
+    private async undoFile(storFile: mls.stor.IFileInfo) {
+
+        const params = {} as mls.events.IFileAction;
+
+        (params.action as any) = 'undo';
+        params.level = storFile.level;
+        params.project = storFile.project;
+        params.shortName = storFile.shortName;
+        params.extension = storFile.extension;
+        params.folder = storFile.folder;
+        params.position = this.position as ('right' | 'left');
+        (params as any).undoType = storFile.extension;
+
+        mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);
+
+        setTimeout(async () => {
+            await this.setInfos();
+            this.requestUpdate();
+        }, 500);
+
+
     }
 
 
