@@ -7,9 +7,9 @@ export abstract class IcaFormsInputFeedbackBase extends StateLitElement {
     abstract name: string | undefined;
     abstract label: string | undefined;
     abstract hint: string | undefined;
-    abstract required: string | undefined;
-    abstract disabled: string | undefined;
-    abstract readonly: string | undefined;
+    abstract required: boolean | undefined;
+    abstract disabled: boolean | undefined;
+    abstract readonly: boolean | undefined;
     abstract autofocus: boolean;
     abstract value: string | undefined;
     abstract errormessage: string | undefined;
