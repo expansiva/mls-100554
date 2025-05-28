@@ -9,6 +9,8 @@ import {
     updateStepStatus,
     notifyTaskCompleted,
     getStepById,
+    updateTaskTitle,
+    notifyTaskChange
 } from "./_100554_aiAgentHelper";
 
 import {
@@ -24,10 +26,7 @@ import {
     startNewAiTask,
     executeNextStep,
     startNewInteractionInAiTask,
-    addNewStep
 } from "./_100554_aiAgentOrchestration";
-
-import './_100554_wcClarificationAgentPlanner1';
 
 const agentName = "agentPlanner1";
 
@@ -42,9 +41,6 @@ export function createAgent(): IAgent {
         },
         async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _afterPrompt(context);
-        },
-        async afterClarification(context: mls.msg.ExecutionContext, stepId: number, data: object): Promise<void> {
-            return _afterClarification(context, stepId, data);
         },
         async beforeClarification(context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> {
             return _beforeClarification(context, stepId);
@@ -83,69 +79,25 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 }
 
-
 const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> => {
     if (!context.task) throw new Error("[_beforeClarification] Invalid context.task");
     const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
     if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
-    if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
-    const element = prepareHtmlClarification(step.json, context.task.PK, stepId, step.clarificationMessage);
+    const msg = `Invalid return from agent: ${agentName} not supported return of type clarification`
+    await updateStepStatus(context.task, stepId, 'failed', msg);
+    const task = await updateTaskTitle(context.task, msg);
+    context.task = task;
+    notifyTaskChange(context);
+    const element = prepareHtmlClarification();
     return element;
 }
 
-const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number, data: any): Promise<void> => {
-
-    if (!context || !context.message || !context.task) throw new Error("Invalid context");
-    if (!data.json) throw new Error("Invalid json after clarification");
-
-    const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
-    if (!step) {
-        throw new Error(`[${agentName}] _afterClarification: No found step: ${stepId} for this agent.`);
-    }
-
-    const newStep: mls.msg.AIPayload = {
-        agentName: 'agentPlanner1',
-        prompt: data.promptUser,
-        status: 'pending',
-        stepId: step.stepId + 1,
-        interaction: null,
-        nextSteps: null,
-        rags: null,
-        type: 'agent'
-    }
-
-    await addNewStep(context, step.stepId, [newStep]);
-
-}
-
-
 function prepareHtmlClarification(
-    json: string | object,
-    taskId: string,
-    stepId: number,
-    clarificationMessage: string
 ): HTMLDivElement {
     const div: HTMLDivElement = document.createElement('div');
-
-    if (typeof json === 'string') {
-        div.innerHTML = json;
-        return div;
-    }
-
-    const clarificationData = {
-        clarificationMessage,
-        stepId: stepId,
-        taskId: taskId,
-        promptUser: '',
-        json: json
-    }
-
-    const clariEl = document.createElement('wc-clarification-agent-planner1-100554');
-    (clariEl as any).data = clarificationData;
-    div.appendChild(clariEl);
+    div.innerHTML = `Invalid return from LLM, ${agentName} don't use payload of type Clarification, please try again!`;
     return div;
 }
-
 
 async function addMessageResponse(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep) {
 
