@@ -812,7 +812,7 @@ export class ServiceSource100554 extends ServiceBase {
 
                 if (!undoType || undoType === 'all') {
 
-                    await this.undoFiles(storFileHTML, storFile, storFileCss, storFileTsTest, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest , 'all');
+                    await this.undoFiles(storFileHTML, storFile, storFileCss, storFileTsTest, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, 'all');
                 } else if (undoType === '.ts') {
                     await this.undoFiles(undefined, storFile, undefined, undefined, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, 'ts');
                 } else if (undoType === '.html') {
@@ -1047,7 +1047,7 @@ export class ServiceSource100554 extends ServiceBase {
         keyFileTS: string,
         keyFileCss: string,
         keyFileTsTest: string,
-        tp:string = 'all'
+        tp: string = 'all'
 
     ) {
 
@@ -1115,7 +1115,7 @@ export class ServiceSource100554 extends ServiceBase {
                     mls.editor.models[keyToModel].style?.model.dispose();
                     delete mls.editor.models[keyToModel].style
                 }
-                
+
             }
 
         };
@@ -1299,7 +1299,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         const model = this.activeModels.ts.model;
         mls.editor.editors[this.position] = this.activeModels;
-        
+
         if (model.isDisposed()) return false;
 
         if (!this._ed1 || !this.menu.getLastMode) return false;
@@ -1878,7 +1878,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             }
             if (mode === ".html") {
                 this.registerProviderHTML();
-                this.formatMonaco();
+                // this.formatMonaco();
             }
         }
 

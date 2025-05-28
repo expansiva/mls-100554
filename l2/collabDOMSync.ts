@@ -40,50 +40,51 @@ function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent:
     editor.layout();
 }
 
-
 export function formatHtml(html: string) {
-    
-    const container = document.createElement('div');
-    container.innerHTML = html.trim();
+    const placeholders: string[] = [];
 
-    function formatNode(node: any, indentLevel = 0) {
+    const escapedBlockRegex = /(&lt;[^]+?&gt;)/g;
+    const htmlWithPlaceholders = html.replace(escapedBlockRegex, (match) => {
+        const key = `__ESCAPED_BLOCK_${placeholders.length}__`;
+        placeholders.push(match);
+        return key;
+    });
+
+    const container = document.createElement('div');
+    container.innerHTML = htmlWithPlaceholders.trim();
+
+    function formatNode(node: any, indentLevel = 0): string {
         const indent = '\t'.repeat(indentLevel);
         const childIndent = '\t'.repeat(indentLevel + 1);
         let formattedHtml = '';
 
         if (node.nodeType === Node.ELEMENT_NODE) {
-            formattedHtml += `${indent}<${node.nodeName.toLowerCase()}`;
+            const tagName = node.nodeName.toLowerCase();
+            formattedHtml += `${indent}<${tagName}`;
 
             for (const attr of node.attributes) {
                 let attrValue = attr.value.replace(/'/g, '"');
                 formattedHtml += `\n${childIndent}${attr.name}='${attrValue}'`;
             }
 
-            const isSelfClosing = [
-                'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
-                'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
-            ].includes(node.nodeName.toLowerCase());
+            formattedHtml += '>';
 
-            if (node.children.length === 0 && isSelfClosing) {
-                formattedHtml += ' />';
-            } else {
-                formattedHtml += '>';
-                let childHtml = '';
-                for (const child of node.childNodes) {
-                    const childFormatted = formatNode(child, indentLevel + 1);
-                    if (childFormatted) {
-                        childHtml += `\n${childFormatted}`;
-                    }
+            let childHtml = '';
+            for (const child of node.childNodes) {
+                const childFormatted = formatNode(child, indentLevel + 1);
+                if (childFormatted) {
+                    childHtml += `\n${childFormatted}`;
                 }
-                formattedHtml += childHtml;
-                formattedHtml += `\n${indent}</${node.nodeName.toLowerCase()}>`;
             }
+            formattedHtml += childHtml.trim();
+            formattedHtml += `\n${indent}</${tagName}>`;
         } else if (node.nodeType === Node.TEXT_NODE) {
-            const trimmedText = node.nodeValue.trim();
-            if (trimmedText) {
-                formattedHtml += (indent + trimmedText);
+            let text = node.nodeValue;
+            if (text.trim()) {
+                formattedHtml += indent + text.trim();
             }
         }
+
         return formattedHtml;
     }
 
@@ -94,9 +95,13 @@ export function formatHtml(html: string) {
         .filter(line => line.trim() !== '')
         .join('\n');
 
+    for (let i = 0; i < placeholders.length; i++) {
+        const key = `__ESCAPED_BLOCK_${i}__`;
+        result = result.replace(key, placeholders[i].trim());
+    }
+
     return result;
 }
-
 
 function getDiffs(originalLines: string[], modifiedLines: string[]) {
     const diffs: IDiffs[] = [];
