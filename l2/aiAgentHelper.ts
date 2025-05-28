@@ -364,6 +364,39 @@ export function getTotalCost(task: mls.msg.TaskData): string {
   return tot.toFixed(4);
 }
 
+export function getNextStepIdAvaliable(task: mls.msg.TaskData): number {
+
+  let nextStepId = 0;
+  const nextSteps = task.iaCompressed?.nextSteps;
+  if (!nextSteps || nextSteps.length === 0) return nextStepId + 1;
+
+  const findNextStepId = (payload: mls.msg.AIPayload[]) => {
+    payload.forEach((pay) => {
+      const { interaction, nextSteps, stepId } = pay;
+      if (stepId > nextStepId) nextStepId = stepId + 1;
+      if (interaction) {
+        if (interaction.payload) findNextStepId(interaction.payload);
+      }
+      if (nextSteps) {
+        nextSteps.forEach((next) => {
+          if (next.stepId > nextStepId) nextStepId = next.stepId + 1;
+          findNextStepId([next])
+        });
+      }
+
+    });
+  };
+
+  nextSteps.forEach((step) => {
+    if (step.stepId > nextStepId) nextStepId = step.stepId + 1;
+    findNextStepId([step]);
+  });
+
+  console.info({ nextStepId })
+
+  return nextStepId;
+}
+
 export function formatTimestamp(timestamp: string) {
   if (!timestamp || timestamp.length < 14) {
     return;

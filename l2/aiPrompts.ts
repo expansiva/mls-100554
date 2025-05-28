@@ -66,8 +66,8 @@ export const preferModelType = (modelType: mls.msg.ModelType) => `<!-- modelType
 
 function getAgentsList(): string {
     const listAgents = [
-        { agent: 'agentAnalyzeNewModule1', description: 'planejamento para a criação de de novos projetos, sites' },
-        { agent: 'agentPlannerNewPage', description: 'planejamento para a criação de novas páginas no sistema, será pedido mais informações ao usuário se necessário.' },
+        { agent: 'agentAnalyzeNewModule1', description: 'planejamento para a criação de novos projetos, sites ou criação de uma nova página' },
+        // { agent: 'agentPlannerNewPage', description: 'planejamento para a criação de novas páginas no sistema, será pedido mais informações ao usuário se necessário.' },
         { agent: 'agentPlannerNewWidget', description: 'criação de novos componentes UI, web components, widgets, estes widgets podem futuramente serem incluidos em uma página html.' },
         { agent: 'agentPlannerNewAPI', description: 'criação de endpoints ou APIs, será pedido mais informações ao usuário se necessário.' },
         { agent: 'agentSupportExternal', description: 'suporte para usuários externos. Executar rag1 antes de enviar o prompt.' },

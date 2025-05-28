@@ -2,8 +2,8 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { preferModelType, systemTokensLessInstruction } from './_100554_aiPrompts';
-import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep } from "./_100554_aiAgentHelper";
-import { startNewInteractionInAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
+import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep, getAgentsStepByAgentName, getNextStepIdAvaliable } from "./_100554_aiAgentHelper";
+import { startNewInteractionInAiTask, executeNextStep, addNewStep } from "./_100554_aiAgentOrchestration";
 import { convertTagToFileName } from "./_100554_utilsLit";
 import { forceServiceInstance } from './_100554_libCommom';
 import { createNewFile } from "./_100554_pluginNewFileBase";
@@ -57,13 +57,45 @@ async function createMoleculesAndTemplates(context: mls.msg.ExecutionContext) {
     if (!step || step.type !== 'flexible') throw new Error(`[${agentName}] Invalid next pendent step on execPrepareMolecules`);
     if (!step.content) throw new Error(`[${agentName}] Not found "content" in flexible result`);
     console.info({ widgetsToCreate: step.content });
-    createMoleculesAndTemplates2(step.content);
+    await createMoleculesAndTemplates2(step.content);
+    execPrepareTokensLess(context);
+}
+
+async function execPrepareTokensLess(context: mls.msg.ExecutionContext) {
+
+    if (!context || !context.task) throw new Error(`[${agentName}] Not found context on execPrepareTokensLess`);
+
+    const step = getNextPendentStep(context.task);
+    if (!step) throw new Error(`[${agentName}] Not found nextPendentStep on execPrepareMolecules`);
+
+    const allStepsTasksComplete = getAgentsStepByAgentName(context.task, 'agentAnalyzeNewModule1', 'completed');
+    const lastStep = allStepsTasksComplete.pop();
+    if (!lastStep || !lastStep.interaction || !lastStep.interaction.payload) throw new Error(`[${agentName}] Not found lastStep completed with agent: agentAnalyzeNewModule1`);
+    const json = ((lastStep.interaction.payload[0] as mls.msg.AIClarificationStep).json) as any;
+
+    const newStep: mls.msg.AIPayload = {
+        agentName: 'agentCreateTokens',
+        prompt: JSON.stringify({
+            goal: json.goal || '',
+            pageFormat: json.pageFormat || '',
+            websiteType: json.websiteType || '',
+            stylePreferences: json.stylePreferences || {},
+        }),
+        status: 'pending',
+        stepId: getNextStepIdAvaliable(context.task),
+        interaction: null,
+        nextSteps: null,
+        rags: null,
+        type: 'agent'
+    }
+
+    await addNewStep(context, step.stepId, [newStep]);
+
 }
 
 async function createMoleculesAndTemplates2(widgetsToCreate: ITemplateOrOrganismData[]) {
 
     await forceServiceInstance(2, '_100554_serviceSource');
-
     for (const widget of widgetsToCreate) {
         if (!('less' in widget) || !('tagName' in widget)) continue;
         if (widget.tagName.startsWith('template')) createTemplateOrOrganismWidget(widget, 'template');

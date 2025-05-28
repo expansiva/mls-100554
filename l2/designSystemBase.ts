@@ -1,5 +1,8 @@
 /// <mls shortName="designSystemBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+import { ServiceSource100554 } from './_100554_serviceSource';
+import { forceServiceInstance } from './_100554_libCommom';
+
 export const acceptedImages = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"];
 export const acceptedVideos = [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"]
 
@@ -116,6 +119,49 @@ export async function getTokens(project: number): Promise<IDesignSystemTokens[]>
     const instance: IDesignSystem = await import(`${fileName}?${Date.now()}`);
     if (!instance) throw new Error(`Invalid ds file: ${fileName}`);
     return instance.tokens || [];
+}
+
+export async function addNewTokensTheme(project: number, tokenData: IDesignSystemTokens): Promise<void> {
+    const actualTokens = await getTokens(project);
+    let v = 1;
+
+    const prepareTokens = (tokenData: IDesignSystemTokens) => {
+        const { themeName } = tokenData;
+        const alreadyExists = actualTokens.find((theme) => theme.themeName === themeName);
+        if (alreadyExists) {
+            v += 1;
+            tokenData.themeName = tokenData.themeName + v;
+            prepareTokens(tokenData);
+        }
+    }
+
+    prepareTokens(tokenData);
+    actualTokens.push(tokenData);
+    await serializeTokens(project, actualTokens);
+
+}
+
+async function serializeTokens(project: number, tokens: IDesignSystemTokens[]) {
+    const content = tokens.map(t => JSON.stringify(t, null, 4)).join(",\n\n");
+    const key = mls.stor.getKeyToFiles(project, 2, 'designSystem', '', '.ts');
+    const storFile = mls.stor.files[key];
+    if (!storFile) return;
+
+    await forceServiceInstance(2, '_100554_serviceSource');
+    const serviceSource: ServiceSource100554 = mls.services['100554_serviceSource_left'];
+    if (!serviceSource) throw new Error('Service source is not instancied');
+
+    await serviceSource.createModels(storFile);
+    const keyToModel = mls.editor.getKeyModel(project, 'designSystem');
+    const models = mls.editor.models[keyToModel];
+    if (!models || !models.ts) throw new Error(`Invalid models for file: ${project}_designSystem`);
+    const newCode = replaceTokensBlock(models.ts.model.getValue(), `\n${content}\n`);
+    serviceSource.setValueInModeKeepingUndo(models.ts.model, newCode, true);
+}
+
+export function replaceTokensBlock(code: string, newContent: string): string {
+  const regex = /export\s+const\s+tokens\s*:\s*IDesignSystemTokens\[\]\s*=\s*\[[\s\S]*?\];?/g;
+  return code.replace(regex, `export const tokens: IDesignSystemTokens[] = [\n${newContent}\n]`);
 }
 
 export async function getTokensLess(project: number, theme: string): Promise<string> {

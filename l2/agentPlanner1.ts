@@ -7,14 +7,14 @@ import {
     getNextInProgressStepByAgentName,
     calculateStepsStatistics,
     updateStepStatus,
-    notifyTaskCompleted
+    notifyTaskCompleted,
+    getStepById,
 } from "./_100554_aiAgentHelper";
 
 import {
     systemAgentsAvailable,
     systemRagsAvailable,
     systemToolsAvailable,
-    systemReturnJsonFormat,
     addRAGAdditionalInformation,
     preferModelType
 } from "./_100554_aiPrompts";
@@ -23,8 +23,11 @@ import {
 import {
     startNewAiTask,
     executeNextStep,
-    startNewInteractionInAiTask
+    startNewInteractionInAiTask,
+    addNewStep
 } from "./_100554_aiAgentOrchestration";
+
+import './_100554_wcClarificationAgentPlanner1';
 
 const agentName = "agentPlanner1";
 
@@ -39,9 +42,15 @@ export function createAgent(): IAgent {
         },
         async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _afterPrompt(context);
+        },
+        async afterClarification(context: mls.msg.ExecutionContext, stepId: number, data: object): Promise<void> {
+            return _afterClarification(context, stepId, data);
+        },
+        async beforeClarification(context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> {
+            return _beforeClarification(context, stepId);
         }
-    };
-}
+    }
+};
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     const taskTitle = "Planning";
@@ -74,6 +83,70 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 }
 
+
+const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> => {
+    if (!context.task) throw new Error("[_beforeClarification] Invalid context.task");
+    const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
+    if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
+    if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
+    const element = prepareHtmlClarification(step.json, context.task.PK, stepId, step.clarificationMessage);
+    return element;
+}
+
+const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number, data: any): Promise<void> => {
+
+    if (!context || !context.message || !context.task) throw new Error("Invalid context");
+    if (!data.json) throw new Error("Invalid json after clarification");
+
+    const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
+    if (!step) {
+        throw new Error(`[${agentName}] _afterClarification: No found step: ${stepId} for this agent.`);
+    }
+
+    const newStep: mls.msg.AIPayload = {
+        agentName: 'agentPlanner1',
+        prompt: data.promptUser,
+        status: 'pending',
+        stepId: step.stepId + 1,
+        interaction: null,
+        nextSteps: null,
+        rags: null,
+        type: 'agent'
+    }
+
+    await addNewStep(context, step.stepId, [newStep]);
+
+}
+
+
+function prepareHtmlClarification(
+    json: string | object,
+    taskId: string,
+    stepId: number,
+    clarificationMessage: string
+): HTMLDivElement {
+    const div: HTMLDivElement = document.createElement('div');
+
+    if (typeof json === 'string') {
+        div.innerHTML = json;
+        return div;
+    }
+
+    const clarificationData = {
+        clarificationMessage,
+        stepId: stepId,
+        taskId: taskId,
+        promptUser: '',
+        json: json
+    }
+
+    const clariEl = document.createElement('wc-clarification-agent-planner1-100554');
+    (clariEl as any).data = clarificationData;
+    div.appendChild(clariEl);
+    return div;
+}
+
+
 async function addMessageResponse(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep) {
 
     const payload = step?.interaction?.payload;
@@ -101,7 +174,69 @@ export async function getPrompts(prompt: string | undefined, rags: string[] | nu
     return prompts;
 }
 
-export function systemMainInstruction(): mls.msg.IAMessageInputType {
+function systemReturnJsonFormat(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `
+Você deve retornar um array de objetos no formato JSON. Cada objeto representa uma subtarefa, com **apenas um dos seguintes formatos**:
+\`\`\` json
+[
+  {
+    "type": "agent",
+    "agentName": string,
+    "title": string,
+    "prompt": string,
+    "rags": string[] | null
+  },
+  {
+    "type": "tool",
+    "toolName": string,
+    "title": string,
+    "args": string
+  },
+  {
+    "type": "result",
+    "result": string
+  }
+]
+\`\`\`
+`
+    };
+}
+
+
+function systemMainInstruction(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `${preferModelType("cost")}
+Você é um coordenador de agentes e ferramentas para executar tarefas com base no prompt do usuário.
+Seu único objetivo neste momento é classificar o tipo de ação necessária a partir do prompt.
+
+REGRAS:
+1. Retorne **exatamente uma subtarefa** de um dos seguintes tipos: 'agent' ou 'result'.
+2. Se o prompt for vago ou ambíguo ou não contiver informação suficiente para decidir entre 'agent' ou 'result', retorne um result com mensagem de prompt inválido.
+4. Use 'result' quando o sistema puder **responder diretamente ao usuário** sem envolver agentes.
+5. Use 'agent' quando a tarefa requerer **ação ativa ou execução por parte de um agente ou ferramenta externa**.
+   - Neste caso, inclua o prompt original do usuário no campo 'prompt'.
+6. Não modifique o conteúdo do prompt original.
+7. Não elabore respostas nem explique suas escolhas – apenas classifique.
+
+EXEMPLOS:
+
+Usuário: "Criar uma landing page para um produto fitness"
+Resposta: Agente
+
+Usuário: "Qual é a capital da Alemanha?"
+Resposta: Result
+
+Usuário: "Me ajude"
+Resposta: Result
+
+`
+    };
+}
+
+export function systemMainInstruction2(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
         content: `${preferModelType("cost")}

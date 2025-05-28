@@ -292,7 +292,7 @@ export class ServiceSource100554 extends ServiceBase {
         return this.activeModels.html.model.getValue();
     }
 
-    private setValueInModeKeepingUndo(model: monaco.editor.ITextModel, val: string, checkFirstLine: boolean) {
+    public setValueInModeKeepingUndo(model: monaco.editor.ITextModel, val: string, checkFirstLine: boolean) {
         let fullRange = model.getFullModelRange();
         let newText = val;
         if (checkFirstLine && !(val.trim().startsWith('/// <mls shortName'))) {
