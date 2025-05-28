@@ -458,37 +458,16 @@ Useful for dashboards, side-by-side editing, or tile-based interfaces.
 }
 ## ica-apresentation-text-code
 Used to present blocks of code with optional syntax highlighting.
-- Cfg: config
-- Text: text
-- interface config {
-  language?: "ts" | "js" | "html" | "css" | "json" | "bash" | "sql" | "python" | string
-}
+- Text: text, language?: "ts" | "js" | "html" | "css" | "json" | "bash" | "sql" | "python" | string
 ## ica-apresentation-text-rich
 Used to present or edit text with rich formatting (bold, italic, lists, links, etc.).
 Can be used in view or editable mode.
-- Cfg: config
-- Text: content
-- interface config {
-  editable?: boolean
-}
+- Text: content,editable?: boolean
 ## ica-apresentation-text
 Presents formatted text content like simple text, quotes, or banners.
 Allows inline HTML (innerHTML) and multiple visual styles based on 'type'.
 Styling and animations should be handled via CSS or themes.
-- Cfg: config
-- Text: text
-- interface config {
-  type: "text" | "quote" | "banner",
-  multiline?: boolean,
-  // quote-specific
-  cite?: string,
-  citeHref?: string,
-  // banner-specific
-  src?: string,
-  alt?: string,
-  href?: string, // optional link on click
-  target?: "_blank" | "_self"
-}
+- Text: text, type: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "blockquote" | "span"
 ## ica-apresentation-image
 Displays a single image, icon, or avatar.
 Type defines the visual variation and styling.
@@ -500,6 +479,8 @@ Type defines the visual variation and styling.
   alt?: string,
   width?: string,
   height?: string,
+  srcset?: string,
+  sizes?:string,
   size?: string,        // icon or avatar
   color?: string,       // icon only
   shape?: "circle" | "square" // avatar only

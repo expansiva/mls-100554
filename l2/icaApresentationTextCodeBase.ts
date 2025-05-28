@@ -4,11 +4,8 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 export abstract class IcaApresentationTextCodeBase extends StateLitElement {
 
-    abstract text: string | undefined;
-    abstract config: string | undefined;
-    
+  abstract text: string | undefined;
+  abstract language?: "ts" | "js" | "html" | "css" | "json" | "bash" | "sql" | "python" | string;
+
 }
 
-export interface IConfig{
-  language?: "ts" | "js" | "html" | "css" | "json" | "bash" | "sql" | "python" | string
-}
