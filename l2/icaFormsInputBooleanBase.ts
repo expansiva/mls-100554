@@ -11,7 +11,7 @@ export abstract class IcaFormsInputBooleanBase extends StateLitElement {
     abstract disabled: boolean | undefined;
     abstract readonly: boolean | undefined;
     abstract autofocus: boolean ;
-    abstract checked: string | undefined;
+    abstract checked: boolean | undefined;
     abstract errormessage: string | undefined;
 
 
