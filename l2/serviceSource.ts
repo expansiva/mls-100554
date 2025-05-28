@@ -1148,7 +1148,7 @@ export class ServiceSource100554 extends ServiceBase {
         const ok = await mls.l2.typescript.compileAndPostProcess(modelBaseTS, true, true);
 
         let hasError = ok === false;
-        if (!hasError && this.activeModels && this.activeModels.ts) {
+        if (!hasError && this.activeModels && this.activeModels.ts && !this.activeModels.ts.model.isDisposed()) {
 
             const enhacementName = await getEnhancementName({ project, shortName }).catch((e) => undefined);
             if (enhacementName && enhacementName !== "_blank") {
@@ -1299,6 +1299,8 @@ export class ServiceSource100554 extends ServiceBase {
 
         const model = this.activeModels.ts.model;
         mls.editor.editors[this.position] = this.activeModels;
+        
+        if (model.isDisposed()) return false;
 
         if (!this._ed1 || !this.menu.getLastMode) return false;
         const changedFile: boolean = this.menu.title !== shortName;
