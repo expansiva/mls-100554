@@ -2,7 +2,7 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getListFilesStart, systemReturnJsonFormat, preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
-import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, notifyTaskChange, calculateStepsStatistics, getInteractionStepId,  } from "./_100554_aiAgentHelper";
+import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, notifyTaskChange, calculateStepsStatistics, getInteractionStepId, } from "./_100554_aiAgentHelper";
 import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewStep } from "./_100554_aiAgentOrchestration";
 
 import './_100554_wcClarificationPlannerNewWidget';
@@ -69,7 +69,7 @@ const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: n
     if (!context.task) throw new Error("[_beforeClarification] Invalid context.task");
     const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
     if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
-    if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
+    // if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
     const element = prepareHtmlClarification(step.json, context.task.PK, stepId, step.clarificationMessage);
     return element;
 
@@ -217,17 +217,12 @@ async function systemWidgetsPrompt(): Promise<mls.msg.IAMessageInputType> {
 }
 
 function prepareHtmlClarification(
-    json: string | ClarificationJson[],
+    json: string | ClarificationJson[] | undefined,
     taskId: string,
     stepId: number,
     clarificationMessage: string
 ): HTMLDivElement {
     const div: HTMLDivElement = document.createElement('div');
-
-    if (typeof json === 'string') {
-        div.innerHTML = json;
-        return div;
-    }
 
     const clarificationData: ClarificationData = {
         clarificationMessage,
@@ -237,7 +232,8 @@ function prepareHtmlClarification(
     }
 
     const clariEl = document.createElement('wc-clarification-planner-new-widget-100554');
-    (clariEl as any).data = clarificationData;
+    if (json && typeof json === 'object') (clariEl as any).data = clarificationData;
+    else clariEl.setAttribute('error', 'Invalid clarification return');
     div.appendChild(clariEl);
     return div;
 }
