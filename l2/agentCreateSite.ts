@@ -2,15 +2,15 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
-import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getAgentStepByAgentName, updateStepStatus, getNextPendentStep, appendLongTermMemory, getAgentsStepByAgentName, updateTaskTitle } from "./_100554_aiAgentHelper";
+import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getNextStepIdAvaliable, updateStepStatus, getNextPendentStep, appendLongTermMemory, getAgentsStepByAgentName, updateTaskTitle } from "./_100554_aiAgentHelper";
 import { startNewInteractionInAiTask, addNewStep, executeNextStep, startNewAiTask } from "./_100554_aiAgentOrchestration";
 import { getImages } from "./_100554_libUnsplash";
 import { widgetsDefault } from "./_100554_icaBaseDescription";
-import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
+import { convertFileNameToTag } from './_100554_utilsLit';
 import { createNewFile } from "./_100554_pluginNewFileBase";
 import { formatHtml } from './_100554_collabDOMSync';
 
-import { TemplateContent, TemplateChild, ChildElement, Organism, Molecule, Media } from './_100554_agentAnalyzeNewModuleBase';
+import { TemplateContent, TemplateChild, ChildElement, Organism, Molecule, ClarificationJson } from './_100554_agentAnalyzeNewModuleBase';
 
 const ICATEMPLATE = 'ica-template-100554';
 const ICAORGANISM = 'ica-organism-100554';
@@ -79,6 +79,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
   const task = await appendLongTermMemory(context, { remainingTasks: remainingTasks.join(',') });
   context.task = task;
 
+
   //Only for test => exec only first task 
   const allResults = getAllStepsThisAgent(context);
   console.info(allResults);
@@ -90,33 +91,33 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
   // end test
 
   /*
-    if (!remainingTasks || remainingTasks.length === 0) {
-      const allResults = getAllStepsThisAgent(context);
-      console.info(allResults);
-      const allResults2 = await execPrepareMidias(allResults);
-      const allResults3 = execPrepareWidgetsDefault(allResults2);
-      const pages = execPrepareHTML(allResults3);
-      await execPrepareOrganismAndTemplates(context, allResults3);
-      await execCreatePages(pages);
-      return;
-    }
-  
-    const stepAgentAnalyzeNewModule2 = getAgentStepByAgentName(context.task, 'agentAnalyzeNewModule2');
-    if (!stepAgentAnalyzeNewModule2) throw new Error(`[${agentName}] afterPrompt: no find parent step AgentAnalyzeNewModule2.`);
-    const data = stepAgentAnalyzeNewModule2.interaction?.payload ? (stepAgentAnalyzeNewModule2.interaction?.payload[0] as any).content : '';
-    const newStep: mls.msg.AIPayload = {
-      agentName: 'agentCreateSite',
-      prompt: JSON.stringify(data),
-      status: 'pending',
-      stepId: step.stepId + 1,
-      interaction: null,
-      nextSteps: null,
-      rags: null,
-      type: 'agent'
-    }
-    await addNewStep(context, step.stepId, [newStep]);
-  
-    */
+  if (!remainingTasks || remainingTasks.length === 0) {
+    const allResults = getAllStepsThisAgent(context);
+    console.info(allResults);
+    const allResults2 = await execPrepareMidias(allResults);
+    const allResults3 = execPrepareWidgetsDefault(allResults2);
+    const pages = execPrepareHTML(allResults3);
+    await execPrepareOrganismAndTemplates(context, allResults3);
+    await execCreatePages(pages);
+    return;
+  }
+
+  const stepAgentAnalyzeNewModule2 = getAgentStepByAgentName(context.task, 'agentAnalyzeNewModule2');
+  if (!stepAgentAnalyzeNewModule2) throw new Error(`[${agentName}] afterPrompt: no find parent step AgentAnalyzeNewModule2.`);
+  const data = stepAgentAnalyzeNewModule2.interaction?.payload ? (stepAgentAnalyzeNewModule2.interaction?.payload[0] as any).content : '';
+  const newStep: mls.msg.AIPayload = {
+    agentName: 'agentCreateSite',
+    prompt: JSON.stringify(data),
+    status: 'pending',
+    stepId: step.stepId + 1,
+    interaction: null,
+    nextSteps: null,
+    rags: null,
+    type: 'agent'
+  }
+  await addNewStep(context, step.stepId, [newStep]);
+
+  */
 
 }
 
@@ -323,11 +324,11 @@ async function execPrepareMidias(allResults: TemplateContent[]) {
 async function execPrepareOrganismAndTemplates(context: mls.msg.ExecutionContext, allResults: TemplateContent[]) {
 
   if (!context || !context.task) throw new Error(`[${agentName}] Not found context on execPrepareMolecules`);
-  const step = getNextPendentStep(context.task) as any;
-  if (!step || step.type !== 'flexible') throw new Error(`[${agentName}] Invalid next pendent step on execPrepareMolecules`);
-  if (!step.content) throw new Error(`[${agentName}] Not found "content" in flexible result`);
-
   const templateAndOrganismToCreate = extractTemplatesAndOrganisms(allResults);
+
+  const step = getNextPendentStep(context.task);
+  if(!step) throw new Error(`[${agentName}] Not found nextPendentStep on execPrepareMolecules`);
+
   console.info({
     templateAndOrganismToCreate: templateAndOrganismToCreate
   });
@@ -336,7 +337,7 @@ async function execPrepareOrganismAndTemplates(context: mls.msg.ExecutionContext
     agentName: 'agentCreateOrganism',
     prompt: JSON.stringify([...templateAndOrganismToCreate.templates, ...templateAndOrganismToCreate.organisms]),
     status: 'pending',
-    stepId: step.stepId + 1,
+    stepId: getNextStepIdAvaliable(context.task),
     interaction: null,
     nextSteps: null,
     rags: null,
