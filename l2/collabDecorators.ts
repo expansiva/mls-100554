@@ -2,9 +2,9 @@
 
 import { PropertyDeclaration } from 'lit';
 import { property } from 'lit/decorators.js';
-import { CollabState, globalState } from './_100554_collabState';
+import { globalState, getCollabStateInstance } from './_100554_collabState';
 
-export const state1 = new CollabState();
+export const state1 = getCollabStateInstance();
 globalState.globalStateManagment = state1;
 
 /**
@@ -96,19 +96,53 @@ export function propertyDataSource(options?: PropertyDeclaration) {
 
     Object.defineProperty(proto, propName, {
       get() {
-
+        // Retrieve the raw attribute value from the DOM.
         const attributeValue = this.hasAttribute(attributeName) ? this.getAttribute(attributeName) : '';
-        if (typeof attributeValue === "string" && attributeValue && attributeValue.includes('{{') && attributeValue.includes('}}')) {
-          const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
-          return state1.getState(stateKey);
-        }
-        // Default to internal property value
-        if (this[`_${attributeName}`] !== undefined) return this[`_${attributeName}`];
-        return attributeValue;
 
+        // If the attribute uses template binding (e.g. {{ui.checked}}), resolve from state.
+        if (
+          typeof attributeValue === "string" &&
+          attributeValue &&
+          attributeValue.includes('{{') &&
+          attributeValue.includes('}}')
+        ) {
+          const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
+          const stateValue = state1.getState(stateKey);
+
+          // Special handling for Boolean properties bound from state.
+          if (options?.type === Boolean) {
+            // If state provides a boolean, return it directly.
+            if (typeof stateValue === 'boolean') return stateValue;
+            // If state provides a string, treat "true" or "" as true, otherwise false.
+            if (typeof stateValue === 'string') return stateValue === 'true' || stateValue === '';
+            // Fallback: cast any other value to boolean.
+            return Boolean(stateValue);
+          }
+          return stateValue.toString();
+        }
+
+        // Special handling for Boolean properties from static attribute.
+        if (options?.type === Boolean) {
+          console.log('get bool ', attributeName, attributeValue)
+          // Special handling for Boolean properties from static attribute.
+          // In standard HTML, the presence of a boolean attribute (even as checked="false") means true.
+          // Here, if the attribute value is exactly "false" or the attribute is absent, it is considered false.
+          // This makes <element checked="false"> behave as false, for developer convenience.          
+          if (attributeValue === '' || attributeValue === 'true') return true;
+          if (attributeValue === 'false' || attributeValue === undefined) return false;
+          if (typeof attributeValue === 'boolean') return attributeValue;
+          // Fallback: cast to boolean.
+          return Boolean(attributeValue);
+        }
+
+        // Return internal property value if set (via JS).
+        if (this[`_${attributeName}`] !== undefined) return this[`_${attributeName}`];
+
+        // Fallback: return raw attribute value.
+        return attributeValue;
       },
       set(value: any) {
-        
+
         if (options?.type === Number && typeof value === 'number' && isNaN(value)) {
           // ignore , lit sent ex "{{users.name}}" after requestUpdate
           const attributeValue = this.hasAttribute(attributeName) ? this.getAttribute(attributeName) : '';
@@ -122,9 +156,12 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             }
             const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
             prepareForNotification.call(this, attributeName, [stateKey]);
-            this[`_${attributeName}`] = state1.getState(stateKey);
+            this[`_${attributeName}`] = value;             // Store new value locally
+            state1.setState(stateKey, value);              // Update global state
+          } else {
+            this[`_${attributeName}`] = value;
           }
-
+          this.requestUpdate();
           return;
         }
 
@@ -141,9 +178,12 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             }
             const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
             prepareForNotification.call(this, attributeName, [stateKey]);
-            this[`_${attributeName}`] = state1.getState(stateKey);
+            this[`_${attributeName}`] = value;
+            state1.setState(stateKey, value);
+          } else {
+            this[`_${attributeName}`] = value;
           }
-
+          this.requestUpdate();
           return;
         }
 

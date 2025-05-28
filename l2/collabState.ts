@@ -23,31 +23,39 @@ export const globalState: {
   globalVariation: number;
 } = {} as any;
 
+function getCollabWindow(): any {
+  if (window.parent && window.parent !== window && (window.parent as any).globalStateManagment) {
+    return window.parent;
+  }
+  return window;
+}
+
+(window as any).getCollabWindow = getCollabWindow;
 
 Object.defineProperty(globalState, '_ica', {
   get: function () {
-    return (window as any)._ica;
+    return getCollabWindow()._ica;
   },
   set: function (v: GlobalState) {
-    (window as any)._ica = v;
+    getCollabWindow()._ica = v;
   }
 });
 
 Object.defineProperty(globalState, 'globalStateManagment', {
   get: function () {
-    return (window as any).globalStateManagment;
+    return getCollabWindow().globalStateManagment;
   },
   set: function (v: CollabState) {
-    (window as any).globalStateManagment = v;
+    getCollabWindow().globalStateManagment = v;
   }
 });
 
 Object.defineProperty(globalState, 'globalVariation', {
   get: function () {
-    return (window as any).globalVariation;
+    return getCollabWindow().globalVariation;
   },
   set: function (v: number) {
-    (window as any).globalVariation = v;
+    getCollabWindow().globalVariation = v;
   }
 });
 
@@ -146,17 +154,43 @@ function setPathValue(obj: { [key: string]: any }, path: string, value: any): vo
 }
 
 
-export function setState(key: string, value: any, systemChange?: boolean): void { 
-
+export function setState(key: string, value: any, systemChange?: boolean): void {
   if (!globalState || !globalState.globalStateManagment) return;
   globalState.globalStateManagment.setState(key, value, systemChange);
+}
+
+export interface CollabState {
+  getState(key: string): any;
+  setState(key: string, value: any, systemChange?: boolean): void;
+
+  getHistory(): Array<{ timestamp: number; system: boolean; key: string; value: any }>;
+  clearHistory(): void;
+
+  /**
+   * Subscribe a component to a state key or keys.
+   * @param keyOrKeys - The state key or keys.
+   * @param component - The subscribing component.
+   */
+  subscribe(keyOrKeys: string | string[], component: Object): void;
+  /**
+   * Unsubscribe a component from a state key or keys.
+   * @param keyOrKeys - The state key or keys.
+   * @param component - The unsubscribing component.
+   */
+  unsubscribe(keyOrKeys: string | string[], component: Object | "*"): void;
+  /**
+   * Notify subscribed components about a state change.
+   * @param key - The state key that changed.
+   */
+  notify(key: string): void;
+
 
 }
 
 /**
  * Class responsible for managing shared state.
  */
-export class CollabState {
+class CollabStateSingleton implements CollabState {
   private stateMap: Map<string, any> = new Map(); // values of variables
   private componentMap: Map<string, Set<Object>> = new Map(); // subscribes
   private history: Array<{ timestamp: number; system: boolean; key: string; value: any }> = [];
@@ -167,9 +201,9 @@ export class CollabState {
    * @param value - The new state value.
    * @param systemChange - (optional) Set to true if setState is used in the constructor.
    */
-  setState(key: string, value: any, systemChange?: boolean): void {
+  public setState(key: string, value: any, systemChange?: boolean): void {
     // Default systemChange to this.inNotify if not provided
-    systemChange = systemChange ?? this.inNotify;
+    systemChange = systemChange ?? false;
     const oldValue = this.stateMap.get(key);
 
     if (isTrace) console.info('setState key: ' + key + ' value=', value, ", oldValue=", oldValue)
@@ -206,22 +240,22 @@ export class CollabState {
   /**
    * Retrieves the history of state changes.
    */
-  getHistory(): Array<{ timestamp: number; system: boolean; key: string; value: any }> {
+  public getHistory(): Array<{ timestamp: number; system: boolean; key: string; value: any }> {
     return this.history;
   }
 
   /**
    * clear all entries in the history
    */
-  clearHistory() {
+  public clearHistory(): void {
     this.history = [];
   }
-  
+
   /**
-   * Retrieve state for a given key.
+   * Retrieve state for a given key. 
    * @param key - The state key.
    */
-  getState(key: string): any {
+  public getState(key: string): any {
     const value = this.stateMap.get(key);
     if (isTrace) console.info('getState key: ' + key + ' value=', value);
     return getPathValue(globalState._ica, key);
@@ -232,10 +266,11 @@ export class CollabState {
    * @param keyOrKeys - The state key or keys.
    * @param component - The subscribing component.
    */
-  subscribe(keyOrKeys: string | string[], component: Object): void {
+  public subscribe(keyOrKeys: string | string[], component: Object): void {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
     keys.forEach((key) => {
       if (!key.includes(';')) key = `;${key}`;
+      if (isTrace) console.log('subscribe key(s)', keyOrKeys)
       if (!this.componentMap.has(key)) {
         this.componentMap.set(key, new Set());
       }
@@ -248,39 +283,60 @@ export class CollabState {
    * @param keyOrKeys - The state key or keys.
    * @param component - The unsubscribing component.
    */
-  unsubscribe(keyOrKeys: string | string[], component: Object): void {
+  public unsubscribe(keyOrKeys: string | string[], component: Object | "*"): void {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
 
     keys.forEach((key) => {
-      this.componentMap.get(key)?.delete(component);
+      if (!key.includes(';')) key = `;${key}`;
+      if (component === "*") {
+        if (isTrace) console.log('unsubscribe key', key, " all components");
+        this.componentMap.set(key, new Set());
+      } else {
+        if (isTrace) console.log('unsubscribe key', key, this.componentMap.get(key)?.has(component))
+        this.componentMap.get(key)?.delete(component);
+      }
     });
   }
 
-  inNotify: boolean = false;
+  private notifyQueue: string[] = [];
+  private isNotifying: boolean = false;
 
   /**
    * Notify subscribed components about a state change.
    * @param key - The state key that changed.
    */
-  notify(key: string): void {
+  public notify(key: string): void {
+    if (!this.notifyQueue.includes(key)) {
+      this.notifyQueue.push(key);
+    }
+    if (this.isNotifying) return;
 
+    this.isNotifying = true;
     try {
-      this.inNotify = true;
-      Array.from(this.componentMap).find((map) => {
-        const [stateKey, arr] = map;
-        const path = stateKey.split(';')[1];
-        if (path !== key) return;
-        arr.forEach((component: any) => {
-          if ('handleIcaStateChange' in component) {
-            component['handleIcaStateChange'](key, this.getState(key));
-          }
+      while (this.notifyQueue.length > 0) {
+        const nextKey = this.notifyQueue.shift()!;
+        if (isTrace) console.log(`notify key=${nextKey}`, this.componentMap);
+        Array.from(this.componentMap).find((map) => {
+          const [stateKey, arr] = map;
+          const path = stateKey.split(';')[1];
+          if (path !== nextKey) return;
+          arr.forEach((component: any) => {
+            if ('handleIcaStateChange' in component) {
+              component['handleIcaStateChange'](nextKey, this.getState(nextKey));
+            } else if (typeof component === 'function') {
+              component(nextKey, this.getState(nextKey));
+            } else {
+              console.error('invalid notify on key: ' + nextKey);
+            }
+          });
         });
-      })
+      }
+    } catch (e) {
+      console.error("error on notify, key: " + key, e);
     } finally {
-      this.inNotify = false;
+      this.isNotifying = false;
     }
   }
-
 
   /**
    * Get statistics about current state keys and their subscribers.
@@ -294,3 +350,10 @@ export class CollabState {
   }
 }
 
+export function getCollabStateInstance(): CollabState {
+  const win = getCollabWindow();
+  if (!win.collabState) {
+    win.collabState = new CollabStateSingleton();
+  }
+  return win.collabState;
+}
