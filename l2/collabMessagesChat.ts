@@ -63,10 +63,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @property() actualMessagesParsed: IMessageGrouped = {};
     @property() isLoadingMessages: boolean = false;
 
+
     @property({ attribute: false }) userThreads: IThread = {
         CONNECT: [{ "thread": { "history": [{ "action": "created", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "update_group", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_language ${language}", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120844.1000", "timestamp": "20250417172252" }, { "action": "add_user", "userId": "20250417004803.1000", "timestamp": "20250417174719" }], "languages": ["pt"], "status": "active", "visibility": "private", "group": "CONNECT", "threadId": "20250417135645.1000", "users": [{ "userId": "20250417120841.1000", "auth": "admin" }, { "userId": "20250417120844.1000", "auth": "write" }, { "userId": "20250417004803.1000", "auth": "write" }], "name": "" }, "users": [{ "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active" }, { "threads": ["20250417133813.1000", "20250417180232.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active" }, { "threads": ["20250417135645.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active" }] }]
     };
 
+    private isSystemChangeScroll: boolean = false;
     private savedScrollTop = 0;
     private hasMoreMessages = true;
     private messagesLimit = 10;
@@ -76,8 +78,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
 
-        if (this.unreadEl) {
-            this.unreadEl.scrollIntoView({ behavior: 'auto', block: 'center' });
+        if (this.unreadEl && this.messageContainer) {
+            await this.updateComplete;
+            this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
             return;
         }
 
@@ -90,9 +93,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.restoreScrollPosition();
         }
 
-        if (changedProperties.has('actualMessagesParsed') && changedProperties.get('actualMessagesParsed') !== undefined) {
-            if (this.messageContainer) {
+
+        if (changedProperties.has('actualMessagesParsed') && this.actualMessagesParsed !== undefined) {
+            if (this.messageContainer && this.isSystemChangeScroll) {
                 this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
+                this.isSystemChangeScroll = false;
             }
         }
     }
@@ -325,7 +330,14 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
 
     private async onChatScroll(e: Event) {
+
+        if (this.isSystemChangeScroll) {
+            this.isSystemChangeScroll = false;
+            return;
+        }
+
         const container = e.target as HTMLElement;
+        this.savedScrollTop = container.scrollTop;
 
         if (
             container.scrollTop === 0 &&
@@ -515,6 +527,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async handleSend(value: string, opt: { isSpecialMention: boolean }) {
+
+        this.isSystemChangeScroll = true;
 
         try {
             if (!opt.isSpecialMention) {
