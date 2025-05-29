@@ -178,10 +178,10 @@ function systemPlaygroundInstruction(): mls.msg.IAMessageInputType {
         type: 'system',
         content: `## Seção de Demonstração (Playground)
 1.Adicione um título h3 com o texto "Demonstração".
-2.Crie um componente <widget-playground-state-100554> com o atributo state, que deve conter um objeto JSON válido como string. Esse objeto deve ter um namespace ui com todas as chaves necessárias para controlar o estado do playground.
+2.Crie um componente <widget-playground-state-100554> com o atributo state, que deve conter um objeto JSON válido como string. Esse objeto deve ter um namespace "playground" com todas as chaves necessárias para controlar o estado do playground.
 3.Insira o componente principal dentro de um bloco <demo>.
 4.Adicione um bloco <fieldset> com a legenda "Properties", contendo componentes <ica-forms-input-string-100554> para cada propriedade configurável.
-5.Para cada propriedade, associe uma chave no objeto ui dentro de state (por exemplo: ui.buttonLabel1, ui.buttonLabel2, etc.).
+5.Para cada propriedade, associe uma chave no objeto "playground" dentro de state (por exemplo: playground.buttonLabel1, playground.buttonLabel2, etc.).
 6.Se uma propriedade for um objeto, serialize-a como string para exibição no playground.
 
 ### IMPORTANTE SOBRE <widget-playground-state-100554>:
@@ -195,23 +195,23 @@ function systemPlaygroundInstruction(): mls.msg.IAMessageInputType {
 \`\`\` html
 <section class="section_demo">
   <h3>Demonstração</h3>
-  <widget-playground-state-100554 state='{"ui":{"buttonLabel1":"Ver horários pelo mundo","buttonLabel2":"Ver horários","config1":"{\"codigo\":1}","config2":"{\"codigo\":2}"}}'></widget-playground-state-100554>
+  <widget-playground-state-100554 state='{"playground":{"buttonLabel1":"Ver horários pelo mundo","buttonLabel2":"Ver horários","config1":"{\"codigo\":1}","config2":"{\"codigo\":2}"}}'></widget-playground-state-100554>
 
   <demo>
-    <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel1}}" config="{{ui.config1}}"></widget-world-time-greeting-100554>
+    <widget-world-time-greeting-100554 buttonLabel="{{playground.buttonLabel1}}" config="{{playground.config1}}"></widget-world-time-greeting-100554>
     <fieldset>
       <legend>Properties:</legend>
-      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{ui.buttonLabel1}}"></ica-forms-input-string-100554>
-      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. config1:" value="{{ui.config1}}"></ica-forms-input-string-100554>
+      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{playground.buttonLabel1}}"></ica-forms-input-string-100554>
+      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. config1:" value="{{playground.config1}}"></ica-forms-input-string-100554>
     </fieldset>
   </demo>
 
   <demo>
-    <widget-world-time-greeting-100554 buttonLabel="{{ui.buttonLabel2}}" config="{{ui.config2}}"></widget-world-time-greeting-100554>
+    <widget-world-time-greeting-100554 buttonLabel="{{playground.buttonLabel2}}" config="{{playground.config2}}"></widget-world-time-greeting-100554>
     <fieldset>
       <legend>Properties:</legend>
-      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{ui.buttonLabel2}}"></ica-forms-input-string-100554>
-      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. config2:" value="{{ui.config2}}"></ica-forms-input-string-100554>
+      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{playground.buttonLabel2}}"></ica-forms-input-string-100554>
+      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. config2:" value="{{playground.config2}}"></ica-forms-input-string-100554>
     </fieldset>
   </demo>
 </section>
@@ -275,7 +275,7 @@ O HTML gerado deve estar pronto para ser injetado como parte de um container mai
 
 ## Sobre o gerenciamento de propriedades e states no Collab Codes:
 
-- Quando uma propriedade é decorada com @propertyDataSource ou @propertyCompositeDataSource, ela é automaticamente associada a um ou mais states dinâmicos do sistema, como por exemplo: "{{ui.dataRange}}".
+- Quando uma propriedade é decorada com @propertyDataSource ou @propertyCompositeDataSource, ela é automaticamente associada a um ou mais states dinâmicos do sistema, como por exemplo: "{{playground.dataRange}}".
 - O gerenciador de states do Collab Codes é responsável por:
   - Registrar automaticamente a dependência entre a propriedade e o(s) state(s) referenciado(s).
   - Detectar alterações no(s) state(s) de forma automática e eficiente.

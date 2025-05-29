@@ -171,7 +171,7 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
 1.6. Use sempre os atributos padrões da classe base, nunca crie novos atributos, trabalhe com os atributos da classe base.
 1.6.1 Deve-se obrigatoriamente declarar todos os campos definidos na classe base, com os mesmos nomes e tipos. Isso é necessário para garantir consistência e evitar erros de execução.
 1.6.2 O componente nunca deve renderizar um <ica-...> dentro dele mesmo.
-1.6.3 Caso o componente base tenha um atributo config, o mesmo deve ser usado, seguindo os parametros da interface, a mesma pode ser importada para a tipagem.
+1.6.3 Caso o componente base tenha um atributo config, o mesmo deve ser usado, seguindo os parametros da interface, nunca crie atributos novos, a mesma pode ser importada para a tipagem. Isso é necessário para garantir consistência e evitar erros de execução.
 1.6.4 Nunca altere a interface do config, adicionando novos atributos. Isso é necessário para garantir consistência e evitar erros de execução.
 1.6.5 Nunca gere o atributo "class", "style" ou "id".
 1.6.6 Se utilizar o config, e o atributo do mesmo poder ser "undefined" deve ser feito uma verificação antes.
@@ -181,6 +181,7 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
 1.9 Caso tenha textos fixos deve se usar a parte do bloco collab_i18n
 2. Para o retorno do .less
 2.1 Inclua o código LESS, onde o primeiro nível é a tag HTML do componente.
+2.2 Utilize apenas os tokens passados na sessão "LESS TOKENS - DESIGN SYSTEM", não adicione novos tokens. Isso é necessário para garantir consistência e evitar erros de execução.
 3. Para o retorno do .html
 3.1 use o html para demonstrar o componente criado, procure demonstrar pontos fortes e restrições, inicie o html com a tag div, não inclua javascript, inclua estilos para uma apresentação melhor.
 4. Para todos os retornos(.ts, .less e .html)

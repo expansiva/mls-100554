@@ -2,12 +2,17 @@
 
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { initState} from './_100554_collabState';
+import { initState, setState} from './_100554_collabState';
 
 @customElement('widget-playground-state-100554')
 export class WidgetPlaygroundState extends LitElement { 
 
     @property({ type: String }) state: string = '';
+
+    connectedCallback() {
+        setState('playground', {});
+        super.connectedCallback();
+    }
 
     firstUpdated() {
         this.initStatePlayground();
