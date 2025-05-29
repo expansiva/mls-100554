@@ -7,7 +7,7 @@ export class BEIndexedDBBase extends DatabaseClient {
     public dbName: string = '';
 
     public createTable(tableName: string, fields: IFieldTable[]): Promise<any> {
-        return this._createTable(tableName, fields);
+        return this._ensureTable(tableName, fields);
     }
 
     public get(table: string, key: IKeyFilter[]): Promise<any> {
@@ -38,47 +38,79 @@ export class BEIndexedDBBase extends DatabaseClient {
 
     private request: IDBOpenDBRequest | undefined;
 
-    private async _createTable(tableName: string, fields: IFieldTable[]): Promise<any> {
-
-        await this.createDB();
-
-        if (!this.request) throw new Error('Not found db');
-
-        this.request.onupgradeneeded = (event: any) => {
-
-            let db = event.target.result;
-
-            if (db.objectStoreNames.contains(tableName)) {
-                return;
-            }
-
-            const primary = fields.find((f) => f.primaryKey === true);
-
-            let store: any;
-            if (primary) {
-                store = db.createObjectStore(tableName, { keyPath: primary.field, autoIncrement: primary.autoIncrement });
+    private async _ensureTable(tableName: string, fields: IFieldTable[]): Promise<void> {
+        console.log("on beIndexedDBBase ensureTable")
+        let db: IDBDatabase | undefined = undefined;
+        try {
+            db = await this.openReadonly();
+            const tx = db.transaction(tableName, 'readonly');
+            tx.objectStore(tableName);
+            db.close();
+        } catch (err: any) {
+            if (db) db.close();
+            if (err.name === 'NotFoundError') {
+                console.log(`Table '${tableName}' not found, creating...`);
+                if (this.request?.result) {
+                    try {
+                        this.request.result.close();
+                        console.log('Closed old DB connection before upgrade');
+                    } catch (e) {
+                        console.warn('Failed to close old connection', e);
+                    }
+                }                
+                await this._createTable(tableName, fields);
+                console.log(`Table '${tableName}' created`);
             } else {
-                store = db.createObjectStore(tableName);
+                throw err;
+            }
+        }
+    }
+
+    private openReadonly(): Promise<IDBDatabase> {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(this.dbName!);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    private async _createTable(tableName: string, fields: IFieldTable[]): Promise<void> {
+
+        const currentVersion = await this.getCurrentVersionSafe();
+        return new Promise<void>((resolve, reject) => {
+            const request = indexedDB.open(this.dbName!, currentVersion + 1);
+            request.onblocked = () => {
+                console.log('_createTable blocked')
             }
 
+            request.onupgradeneeded = (event: any) => {
+                const db = event.target.result;
+                if (db.objectStoreNames.contains(tableName)) return;
+                const primary = fields.find((f) => f.primaryKey === true);
+                const store = primary
+                    ? db.createObjectStore(tableName, {
+                        keyPath: primary.field,
+                        autoIncrement: primary.autoIncrement,
+                    })
+                    : db.createObjectStore(tableName);
+                fields.forEach((f) => {
+                    if (!primary || f.field !== primary.field) {
+                        store.createIndex(f.field, f.field, { unique: false });
+                    }
+                });
+            };
 
-            fields.forEach((f) => {
+            request.onsuccess = () => {
+                console.log(`Success update db`);
+                request.result.close();
+                resolve();
+            };
 
-                if (primary && primary.field === f.field) return;
-                store.createIndex(f.field, f.field, { unique: false });
-
-            });
-
-        };
-
-        this.request.onsuccess = () => {
-            console.log(`Success update db`);
-        };
-
-        this.request.onerror = (event: any) => {
-            console.log(`Erro update db:` + event.target.error);
-        };
-
+            request.onerror = () => {
+                console.log(`Erro update db:`, request.error);
+                reject(request.error);
+            };
+        });
     }
 
     private async _get(table: string, key: IKeyFilter[]): Promise<any> {
@@ -234,11 +266,19 @@ export class BEIndexedDBBase extends DatabaseClient {
 
     }
 
-    private async createDB() {
-        if (!this.dbName) throw new Error('Name db invalid');
-        let currentVs = await this.getCurrentVerson();
-        if (!currentVs) currentVs = 0;
-        this.request = indexedDB.open(this.dbName, currentVs + 1);
+    /**
+     * createDB or open 
+     */
+    private async createDB(version: number): Promise<IDBOpenDBRequest> {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName!, version);
+            request.onsuccess = () => {
+                resolve(request);
+            };
+            request.onerror = () => {
+                reject(request.error);
+            };
+        });
     }
 
     private async openDB() {
@@ -247,11 +287,24 @@ export class BEIndexedDBBase extends DatabaseClient {
         this.request = indexedDB.open(this.dbName, currentVs);
     }
 
-    private async getCurrentVerson() {
+    private async getCurrentVerson(): Promise<number> {
         if (!this.dbName) throw new Error('Name db invalid');
         const dbs = await indexedDB.databases();
         const db = dbs.find(i => i.name === this.dbName);
-        return db ? db.version : 0; // Retorna 0 se o banco não existir
+        return db ? db.version || 0 : 0;
+    }
+
+    private async getCurrentVersionSafe(): Promise<number> {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(this.dbName!);
+            req.onsuccess = () => {
+                const db = req.result;
+                const version = db.version;
+                db.close();
+                resolve(version);
+            };
+            req.onerror = () => reject(req.error);
+        });
     }
 
 }

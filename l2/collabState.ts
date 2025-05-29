@@ -87,11 +87,28 @@ export function initState(path: string, value: string | Object | Array<unknown>)
 }
 
 /**
- * Function to retrieve nested property values using a path string.
- * Handles arrays and nested objects. Assumes all objects are indexable with string keys.
- * ex: 'users[0].name'
+ * Retrieves a nested property value from an object using a dot-separated path string.
+ * Supports both nested object and array access with syntax like "a.b[3].c".
+ *
+ * Example usage:
+ *   const obj = {
+ *     products: [
+ *       { name: "Apple" },
+ *       { name: "Banana" },
+ *     ],
+ *     user: { name: "Alice" }
+ *   };
+ *
+ *   getPathValue(obj, "user.name");         // returns "Alice"
+ *   getPathValue(obj, "products[1].name");  // returns "Banana"
+ *   getPathValue(obj, "products[2].name");  // returns undefined
+ *   getPathValue(obj, "foo.bar");           // returns undefined
+ *
+ * @param {Object} obj - The root object to query.
+ * @param {string} path - The dot-separated path string (supports array indices with brackets).
+ * @returns {*} - The value found at the given path, or undefined if not found.
  */
-function getPathValue(obj: { [key: string]: any }, path: string) {
+function getPathValue(obj: { [key: string]: any }, path: string): any {
   return (path || '').split('.').reduce((acc, part) => {
     if (acc == null) return undefined;
 
@@ -105,7 +122,26 @@ function getPathValue(obj: { [key: string]: any }, path: string) {
   }, obj);
 }
 
-// Helper function to set a value in the globalState by path
+/**
+ * Sets a nested property value in an object using a dot-separated path string.
+ * Supports creation of intermediate objects and arrays as needed.
+ * Array indices can be specified using square brackets, e.g., "a.b[3].c".
+ *
+ * Example usage:
+ *   const obj = {};
+ *   setPathValue(obj, "user.addresses[0].city", "São Paulo");
+ *   // obj is now: { user: { addresses: [ { city: "São Paulo" } ] } }
+ *
+ *   setPathValue(obj, "produtos[1].nome", "Banana");
+ *   // obj.produtos[1] is now: { nome: "Banana" }
+ *
+ *   setPathValue(obj, "config.theme", "dark");
+ *   // obj.config.theme === "dark"
+ *
+ * @param {Object} obj - The root object to modify.
+ * @param {string} path - The dot-separated path string (supports array indices with brackets).
+ * @param {*} value - The value to set at the given path.
+ */
 function setPathValue(obj: { [key: string]: any }, path: string, value: any): void {
   const parts = (path || '').split('.');
   const last = parts.pop();
@@ -159,11 +195,31 @@ export function setState(key: string, value: any, systemChange?: boolean): void 
   globalState.globalStateManagment.setState(key, value, systemChange);
 }
 
+
 export interface CollabState {
+  /**
+   * Returns the value for a given state key.
+   * @param key State key in dot notation.
+   * @returns The value stored at the specified key, or undefined if not set.
+   */
   getState(key: string): any;
+
+  /**
+   * Updates the value for a given state key.
+   * @param key State key in dot notation.
+   * @param value Value to be stored.
+   * @param systemChange Optional. If true, marks as a system-initiated change.
+   */
   setState(key: string, value: any, systemChange?: boolean): void;
 
+  /**
+   * Returns the state change history as an array of log entries.
+   */
   getHistory(): Array<{ timestamp: number; system: boolean; key: string; value: any }>;
+
+  /**
+   * Clears all entries from the state change history.
+   */
   clearHistory(): void;
 
   /**
@@ -172,28 +228,40 @@ export interface CollabState {
    * @param component - The subscribing component.
    */
   subscribe(keyOrKeys: string | string[], component: Object): void;
+
   /**
    * Unsubscribe a component from a state key or keys.
    * @param keyOrKeys - The state key or keys.
    * @param component - The unsubscribing component.
    */
   unsubscribe(keyOrKeys: string | string[], component: Object | "*"): void;
+
   /**
    * Notify subscribed components about a state change.
    * @param key - The state key that changed.
    */
   notify(key: string): void;
-
-
 }
 
 /**
+ * -----------
  * Class responsible for managing shared state.
+ * -----------
  */
 class CollabStateSingleton implements CollabState {
-  private stateMap: Map<string, any> = new Map(); // values of variables
+  //private stateMap: Map<string, any> = new Map(); // values of variables
   private componentMap: Map<string, Set<Object>> = new Map(); // subscribes
   private history: Array<{ timestamp: number; system: boolean; key: string; value: any }> = [];
+
+  /**
+   * Retrieve state for a given key. 
+   * @param key - The state key.
+   */
+  public getState(key: string): any {
+    const value = getPathValue(globalState._ica, key);
+    if (isTrace) console.info('getState key: ' + key + ' value=', value);
+    return value;
+  }
 
   /**
    * Updates the state for a given key.
@@ -204,15 +272,51 @@ class CollabStateSingleton implements CollabState {
   public setState(key: string, value: any, systemChange?: boolean): void {
     // Default systemChange to this.inNotify if not provided
     systemChange = systemChange ?? false;
-    const oldValue = this.stateMap.get(key);
+    const oldValue = getPathValue(globalState._ica, key);;
+    // this.stateMap.get(key);
 
     if (isTrace) console.info('setState key: ' + key + ' value=', value, ", oldValue=", oldValue)
-    if (oldValue !== value) {
-      this.stateMap.set(key, value);
-      setPathValue(globalState._ica, key, value);
-      this.logHistory(key, value, systemChange);
-      this.notify(key);
+    if (oldValue === value) return;
+    // this.stateMap.set(key, value);
+    const notifies: string[] = [key]; // array for notifies
+    if (typeof value === "object" && value !== null) {
+      const n: string[] = this.getNotifies(key, value);
+      for (const path of n) {
+        const oldValue: any = getPathValue(globalState._ica, path);
+        const newValue: any = getPathValue(value, path.replace(key + ".", ""));
+        if (oldValue !== newValue) notifies.push(path);
+      }
     }
+    setPathValue(globalState._ica, key, value);
+    this.logHistory(key, value, systemChange);
+    this.notify(notifies);
+  }
+
+  /**
+   * Given a base path and a newObj, finds all nested paths that match
+   * registered subscriptions (componentMap) and returns them in a list.
+   *
+   * @param path - The base path, ex: "db.products"
+   * @param newObj - The new object, ex: { "1": { name: "foo" } }
+   * @returns Array of keys (paths) that have subscribers
+   */
+  getNotifies(path: string, newObj: any): string[] {
+    const ret: string[] = [];
+    const visit = (currentPath: string, value: any) => {
+      if (value && typeof value === "object") {
+        Object.keys(value).forEach(k => {
+          const nextPath = /^\d+$/.test(k)
+            ? `${currentPath}[${k}]`
+            : `${currentPath}.${k}`;
+          if (this.componentMap.has(nextPath)) {
+            ret.push(nextPath);
+          }
+          visit(nextPath, value[k]);
+        });
+      }
+    };
+    visit(path, newObj);
+    return ret;
   }
 
   /**
@@ -249,16 +353,6 @@ class CollabStateSingleton implements CollabState {
    */
   public clearHistory(): void {
     this.history = [];
-  }
-
-  /**
-   * Retrieve state for a given key. 
-   * @param key - The state key.
-   */
-  public getState(key: string): any {
-    const value = this.stateMap.get(key);
-    if (isTrace) console.info('getState key: ' + key + ' value=', value);
-    return getPathValue(globalState._ica, key);
   }
 
   /**
@@ -305,16 +399,20 @@ class CollabStateSingleton implements CollabState {
    * Notify subscribed components about a state change.
    * @param key - The state key that changed.
    */
-  public notify(key: string): void {
-    if (!this.notifyQueue.includes(key)) {
-      this.notifyQueue.push(key);
+  public notify(keys: string | string[]): void {
+    if (typeof keys === "string") keys = [keys];
+    for (const key of keys) {
+      if (!this.notifyQueue.includes(key)) {
+        this.notifyQueue.push(key);
+      }
     }
     if (this.isNotifying) return;
 
     this.isNotifying = true;
+    let nextKey: string = "";
     try {
       while (this.notifyQueue.length > 0) {
-        const nextKey = this.notifyQueue.shift()!;
+        nextKey = this.notifyQueue.shift()!;
         if (isTrace) console.log(`notify key=${nextKey}`, this.componentMap);
         Array.from(this.componentMap).find((map) => {
           const [stateKey, arr] = map;
@@ -332,7 +430,7 @@ class CollabStateSingleton implements CollabState {
         });
       }
     } catch (e) {
-      console.error("error on notify, key: " + key, e);
+      console.error("error on notify, key: " + nextKey, e);
     } finally {
       this.isNotifying = false;
     }

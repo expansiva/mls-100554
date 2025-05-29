@@ -118,12 +118,12 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             // Fallback: cast any other value to boolean.
             return Boolean(stateValue);
           }
-          return stateValue.toString();
+          if (options?.type === String) return stateValue ? stateValue.toString() : stateValue;
+          return stateValue;
         }
 
         // Special handling for Boolean properties from static attribute.
         if (options?.type === Boolean) {
-          console.log('get bool ', attributeName, attributeValue)
           // Special handling for Boolean properties from static attribute.
           // In standard HTML, the presence of a boolean attribute (even as checked="false") means true.
           // Here, if the attribute value is exactly "false" or the attribute is absent, it is considered false.
