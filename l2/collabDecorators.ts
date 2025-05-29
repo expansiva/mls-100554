@@ -118,7 +118,9 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             // Fallback: cast any other value to boolean.
             return Boolean(stateValue);
           }
-          if (options?.type === String) return stateValue ? stateValue.toString() : stateValue;
+          let aux = stateValue.toString();
+          if (typeof stateValue === 'object') aux = JSON.stringify(stateValue);
+          if (options?.type === String) return stateValue ? aux : stateValue;
           return stateValue;
         }
 
