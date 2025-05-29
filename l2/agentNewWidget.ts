@@ -276,7 +276,7 @@ function systemModelInstruction(): mls.msg.IAMessageInputType {
 
 /// <mls shortName="widgetInputNumber" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement, ifDefined, css } from 'lit';
+import { html, LitElement, ifDefined, css, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
 import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';

@@ -1322,6 +1322,11 @@ export class ServiceSource100554 extends ServiceBase {
         this.updatedMSizeEditor();
         this.restaureViewState();
 
+        if ((model as any).needFormat && this._ed1) {
+            (this._ed1 as any).getAction('editor.action.formatDocument').run();
+            (model as any).needFormat = false;
+        }
+
         // if (status === 'new') mls.events.fireFileAction('statusOrErrorChanged', this.activeModels.ts.storFile, this.position);
 
         return true;
@@ -1671,6 +1676,8 @@ export class ServiceSource100554 extends ServiceBase {
                 model.originalProject = originalProject;
                 model.originalShortName = originalShortName;
             }
+
+            (model as any).needFormat = true;
             return model;
         } catch (e: any) {
             this.setError(e.message);
@@ -1860,11 +1867,13 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         const uri = this.getUri(`_${project}_${shortName}`, mode);
         let model = monaco.editor.getModel(uri);
-
+        let createNow = false;
         if (!model && ['.less', '.html'].includes(mode)) {
             model = await this.getOrCreateModelHtmlOrCss(storFile, fileInfo);
+            createNow = true;
         } else if (!model && mode === '.test.ts') {
             model = await this.getOrCreateModelTsTest(storFile, fileInfo);
+            createNow = true;
         }
 
         if (!model) throw new Error("[createOrShowModelHtmlOrCssOrTest] Erro get or create model")
@@ -1884,6 +1893,11 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         if (mode === '.html' && this._ed1 && this._ed1.getModel()?.id !== model.id) {
             this.registerProviderHTML();
+        }
+
+        if ((model as any).needFormat && this._ed1 && !createNow) {
+            (this._ed1 as any).getAction('editor.action.formatDocument').run();
+            (model as any).needFormat = false;
         }
 
         return storFile;
@@ -2356,6 +2370,11 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             this._ed1.setModel(model);
             this.restaureViewState();
             this.updatedMSizeEditor();
+        }
+
+        if ((model as any).needFormat && this._ed1) {
+            (this._ed1 as any).getAction('editor.action.formatDocument').run();
+            (model as any).needFormat = false;
         }
 
         return storFile;
