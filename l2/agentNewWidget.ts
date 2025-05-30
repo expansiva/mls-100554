@@ -213,6 +213,8 @@ A classe base utilizada no sistema Collab Codes define três tipos principais de
 - a propriedade autofocus deve ser definida conforme lit "@propertyDataSource({{ type: Boolean }}) autofocus: boolean = false;"
 - a propriedade name deve ser definida conforme lit "@propertyCompositeDataSource({{ type: String }}) name: string | undefined;"
 
+- Caso criar um attributes A11y (optional): role, ariaLabel, ariaDescribedBy, ariaExpanded, ariaSelected ect. O mesmo deve ser definido da seguinte forma ex: "@propertyDataSource({{ type: String }}) ariaLabel: string = '';" 
+
 **Importante**: Use corretamente a anotação conforme o tipo da propriedade analisada.
 Para cada propriedade criada, use um JSDoc com exemplo.
 Para a classe , use um JSDoc com o resumo das funcionalidades do componente.
