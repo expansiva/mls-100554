@@ -22,6 +22,7 @@ function loadDefaultPreferences(): IChatPreferences {
     return {
         language: document.documentElement?.lang?.split('-')?.shift() || 'en',
         translationMode: 'icon',
+        threadMaintenance: ''
     }
 }
 
@@ -29,5 +30,6 @@ export type TranslateMode = "none" | "icon" | "text" | "iconText" | "trace"
 
 export interface IChatPreferences {
     translationMode: TranslateMode
-    language: string
+    language: string,
+    threadMaintenance:string
 }

@@ -14,6 +14,10 @@ import { TsTestAst } from './_100554_tsTestAST';
 import './_100554_collabConsole';
 import './_100554_collabResultTest';
 import './_100554_servicePreviewView';
+import './_100554_collabPromptPreview';
+
+import './_100554_collabSpliterVerticalVarFixed';
+import './_100554_collabSpliterHorizontalVarFixed';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -73,6 +77,7 @@ export class ServicePreview100554 extends ServiceBase {
     @property() enabledTest: boolean = false;
     @property() light: boolean = true;
     @property() lang: string = 'en';
+    @property() page: string = '';
 
     @query('#preview-container') previewContent: HTMLElement | undefined;
 
@@ -405,7 +410,12 @@ export class ServicePreview100554 extends ServiceBase {
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        return html`<div style="height:100%;" id="preview-container"></div>`;
+        return html`<collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="var(--bg-primary-color)">
+                <div slot="top" style="height:100%;" id="preview-container"></div>
+                <div slot="bottom">
+                    <collab-prompt-preview-100554 page="${this.page}"></collab-prompt-preview-100554>
+                </div>
+            </collab-spliter-vertical-var-fixed-100554>`;
     }
 
     async firstUpdated() {
@@ -838,7 +848,10 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private async createModelIfNeeded(storFile: mls.stor.IFileInfo): Promise<monaco.editor.ITextModel | null> {
-        if (!storFile) throw new Error('Invalid storFile');
+        if (!storFile) {
+            //throw new Error('Invalid storFile');
+            return null;
+        }
         const uri = this.getUri(`_${storFile.project}_${storFile.shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
         if (model) return model;
@@ -950,10 +963,15 @@ export class ServicePreview100554 extends ServiceBase {
         container.appendChild(testResultEl);
 
         if (!this.previewContent) return;
+
+        const iframe = this.querySelector('iframe') as HTMLIFrameElement;
+        if (iframe && iframe.contentDocument) iframe.contentDocument.body.innerHTML = '';
+
         this.previewContent.innerHTML = '';
         this.previewContent.appendChild(container);
 
         // if (this.menu.setMode) this.menu.setMode('page', container);
+        this.page = fullname;
         this.configureButtonsRight(true);
         mls.events.fire(3, 'WCDEventChange' as any);
         return true;
