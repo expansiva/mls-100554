@@ -195,6 +195,10 @@ export function setState(key: string, value: any, systemChange?: boolean): void 
   globalState.globalStateManagment.setState(key, value, systemChange);
 }
 
+export function getState(key: string): any {
+  if (!globalState || !globalState.globalStateManagment) return;
+  return globalState.globalStateManagment.getState(key);
+}
 
 export interface CollabState {
   /**
