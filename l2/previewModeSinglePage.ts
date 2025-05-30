@@ -26,7 +26,7 @@ export class PreviewModeSinglePage {
     public async init() {
         if (!this.json || !this.ifr) return;
         await this.loadEsbuild();
-        setTimeout(async () => await this.configIframe(), 100); 
+        setTimeout(async () => await this.configIframe(), 200); 
     }
 
     private async configIframe() {
