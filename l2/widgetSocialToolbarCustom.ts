@@ -40,8 +40,8 @@ export class WidgetSocialToolbarCustom extends IcaNavigationToolbarSocialBase {
    * { items: [{ platform: 'twitter', href: 'https://twitter.com', icon: '', label: 'Twitter' }], layout: 'horizontal', size: 'md' }
    */
   @propertyDataSource({ type: String }) config: string | undefined;
-
-  private get _config(): IConfig | undefined {
+ 
+  private get __config(): IConfig | undefined {
     if (!this.config) return undefined;
     try {
       return typeof this.config === 'string' ? JSON.parse(this.config) : this.config;
@@ -59,7 +59,7 @@ export class WidgetSocialToolbarCustom extends IcaNavigationToolbarSocialBase {
   }
 
   private get _sizeClass(): string {
-    const size = this._config?.size || 'md';
+    const size = this.__config?.size || 'md';
     if (size === 'sm') return 'icon-sm';
     if (size === 'lg') return 'icon-lg';
     return 'icon-md';
@@ -67,7 +67,7 @@ export class WidgetSocialToolbarCustom extends IcaNavigationToolbarSocialBase {
 
   private get _spacing(): string {
     // Espaçamento uniforme entre ícones
-    return 'spacing-' + (this._config?.size || 'md');
+    return 'spacing-' + (this.__config?.size || 'md');
   }
 
   private get _layoutClass(): string {
@@ -109,7 +109,7 @@ export class WidgetSocialToolbarCustom extends IcaNavigationToolbarSocialBase {
   }
 
   render() {
-    const cfg = this._config;
+    const cfg = this.__config;
     if (!cfg || !Array.isArray(cfg.items) || !cfg.items.length) return nothing;
     return html`
       <nav class="toolbar ${this._layoutClass} ${this._toolbarPosition} ${this._hoverEffect}">

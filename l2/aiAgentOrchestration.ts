@@ -53,6 +53,13 @@ export async function startNewAiTask(
         await afterPrompt(context);
 
     } catch (error: any) {
+        if (context && context.task && 1) {
+            const msg = 'Error: ' + error.message || 'addNewStep ';
+            context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
+            await setFailedStatus(context, 1);
+            const step = getNextPendentStep(context.task);
+            if (step) setFailedStatus(context, step.stepId);
+        }
         throw new Error(`[startNewAiTask] ${error.message || error}`);
     }
 }

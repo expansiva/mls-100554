@@ -175,6 +175,7 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
 1.6.4 Nunca altere a interface do config, adicionando novos atributos. Isso é necessário para garantir consistência e evitar erros de execução.
 1.6.5 Nunca gere o atributo "class", "style" ou "id".
 1.6.6 Se utilizar o config, e o atributo do mesmo poder ser "undefined" deve ser feito uma verificação antes.
+1.6.7 Caso crie um get de algum atributo, sempre crie com "__" dois underlines, exemplo criar um get do atributo config seria: "__config"
 1.7. Deixe a linha 1 , tripleSlash, igual no modelo, isto irá ser importante para saber o nome do arquivo e outros detalhes.
 1.7.1 Coloque uma quebra de linha entre o tripleSlash e o codigo, conforme o modelo.
 1.8 Não use o CSS, usaremos o .less em um arquivo separado.
@@ -213,7 +214,9 @@ A classe base utilizada no sistema Collab Codes define três tipos principais de
 - a propriedade autofocus deve ser definida conforme lit "@propertyDataSource({{ type: Boolean }}) autofocus: boolean = false;"
 - a propriedade name deve ser definida conforme lit "@propertyCompositeDataSource({{ type: String }}) name: string | undefined;"
 
-- Caso criar um attributes A11y (optional): role, ariaLabel, ariaDescribedBy, ariaExpanded, ariaSelected ect. O mesmo deve ser definido da seguinte forma ex: "@propertyDataSource({{ type: String }}) ariaLabel: string = '';" 
+- Caso criar um attributes A11y (optional): role, ariaLabel, ariaDescribedBy, ariaExpanded, ariaSelected ect. O mesmo deve ser definido da seguinte forma ex: "@propertyDataSource({{ type: String }}) ariaLabel: string = '';"
+
+- Todo atributo aria é string e não string | undefined, sempre iniciar com '';
 
 **Importante**: Use corretamente a anotação conforme o tipo da propriedade analisada.
 Para cada propriedade criada, use um JSDoc com exemplo.
@@ -309,6 +312,8 @@ export class WidgetInputNumber extends IcaFormsInputNumberBase {
     @propertyDataSource({ type: String }) value: number | undefined;
 
     @propertyCompositeDataSource({ type: String }) hint: string = '';
+
+    @propertyDataSource({{ type: String }}) ariaLabel: string = '';
 
     error: string = '';
 
