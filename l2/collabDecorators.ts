@@ -129,8 +129,10 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           // Special handling for Boolean properties from static attribute.
           // In standard HTML, the presence of a boolean attribute (even as checked="false") means true.
           // Here, if the attribute value is exactly "false" or the attribute is absent, it is considered false.
-          // This makes <element checked="false"> behave as false, for developer convenience.          
-          if (attributeValue === '' || attributeValue === 'true') return true;
+          // This makes <element checked="false"> behave as false, for developer convenience.
+
+          //if (attributeValue === '' || attributeValue === 'true') return true;
+          if ((this.hasAttribute(attributeName) && attributeValue !== 'false') || attributeValue === 'true') return true;
           if (attributeValue === 'false' || attributeValue === undefined) return false;
           if (typeof attributeValue === 'boolean') return attributeValue;
           // Fallback: cast to boolean.
