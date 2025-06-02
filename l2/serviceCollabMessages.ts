@@ -20,7 +20,6 @@ const message_pt = {
     tasks: 'Tasks',
     docs: 'Docs',
     connect: 'Conectar',
-    apps: 'Apps',
 }
 
 const message_en = {
@@ -29,7 +28,6 @@ const message_en = {
     tasks: 'Tasks',
     docs: 'Docs',
     connect: 'Connect',
-    apps: 'Apps',
 }
 
 type MessageType = typeof message_en;
@@ -39,17 +37,21 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
+const LOCAL_STORAGE_KEY = '_100554_serviceCollabMessages';
+
 @customElement('service-collab-messages-100554')
 export class ServiceCollabMessages100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
+
+    @property() dataLocal: IDataLocal = { lastTab: 'CRM' };
     @property() activeTab: ITabType = 'CRM';
     @property() activeScenerie: IScenery = 'tabs';
     @state() isLoadingThread: boolean = false;
     @state() userPerfil: mls.msg.User | undefined;
     @state() userThreads: IThreadData = {}
 
-    groupSelected: mls.msg.ThreadGroup = 'CRM';
+    groupSelected: ITabType = 'CRM';
 
     public details: IService = {
         icon: '&#xf086',
@@ -70,6 +72,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             return;
         };
         this.activeTab = ETabs[index] as ITabType;
+        this.saveLocalStorage({ lastTab: this.activeTab });
     }
 
     public onClickMain(op: string) {
@@ -101,13 +104,12 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         tabs: {
             group: 'Mode',
             type: 'onlyicon',
-            selected: ETabs.CRM,
+            selected: ETabs.Loading,
             options: [
                 { text: this.msg.crm, icon: 'f095' },
                 { text: this.msg.tasks, icon: 'f0ae' },
-                { text: this.msg.docs, icon: 'f02d' },
                 { text: this.msg.connect, icon: 'f0c1' },
-                { text: this.msg.apps, icon: 'f7d9' },
+                { text: this.msg.docs, icon: 'f02d' },
             ]
         },
         onClickMain: this.onClickMain.bind(this),
@@ -120,8 +122,15 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     }
 
+    connectedCallback() {
+        super.connectedCallback();
+        this.loadLocalStorage();
+
+    }
+
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
+
     }
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
@@ -131,6 +140,11 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             saveUserIdLocalStorage(this.userPerfil.userId);
             await this.getThreadFromLocalDB();
             this.updateThreads();
+        }
+
+        if (changedProperties.has('dataLocal')) {
+
+            if (this.menu.setTabActive && this.activeTab !== 'Loading') this.menu.setTabActive(ETabs[this.dataLocal.lastTab])
         }
     }
 
@@ -147,8 +161,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                 return this.renderCRM();
             case 'TASK':
                 return this.renderTasks()
-            case 'APPS':
-                return this.renderApps();
             case 'DOCS':
                 return this.renderDocs();
             case 'CONNECT':
@@ -182,22 +194,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         this.groupSelected = 'TASK';
         this.execCoachMarks('Tasks');
         return html`<collab-tasks-100554></collab-tasks-100554>`
-    }
-
-    renderApps() {
-        this.groupSelected = 'APPS';
-        this.execCoachMarks('Apps');
-        return html`<collab-messages-chat-100554 
-            style="height:${this.style.height}"
-            .isLoadingThread= ${this.isLoadingThread}
-            group="APPS"
-            .userThreads=${{
-                APPS: Object.keys(this.userThreads)
-                    .filter((key) => this.userThreads[key].thread.group === 'APPS')
-                    .map((key) => this.userThreads[key])
-            }} 
-            userId=${this.userPerfil?.userId} 
-        ></collab-messages-chat-100554>`
     }
 
     renderDocs() {
@@ -378,6 +374,29 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         return true;
     }
 
+    private saveLocalStorage(data: IDataLocal) {
+        try {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+        } catch (e) {
+            console.error('Erro ao salvar no localStorage:', e);
+        }
+    }
+
+    private loadLocalStorage() {
+        try {
+            const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (stored) {
+                this.dataLocal = JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error('Erro ao carregar do localStorage:', e);
+        }
+    }
+
+}
+
+interface IDataLocal {
+    lastTab: ITabType
 }
 
 type IThreadData = { [key: string]: IThreadInfo }
@@ -390,13 +409,12 @@ interface IThreadInfo {
 enum ETabs {
     'CRM' = 0,
     'TASK' = 1,
-    'DOCS' = 2,
-    'CONNECT' = 3,
-    'APPS' = 4,
-    'Add' = 5,
-    'Loading' = 65,
+    'CONNECT' = 2,
+    'DOCS' = 3,
+    'Add' = 4,
+    'Loading' = 5,
 }
 
 
-type ITabType = 'CRM' | 'TASK' | 'DOCS' | 'CONNECT' | 'APPS' | 'Add' | 'Loading';
+type ITabType = 'CRM' | 'TASK' | 'DOCS' | 'CONNECT' | 'Add' | 'Loading';
 type IScenery = 'tabs' | 'settings'
