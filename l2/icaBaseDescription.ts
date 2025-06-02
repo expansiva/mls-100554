@@ -3,201 +3,202 @@
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 
 const attributeDefinitions = [
-    { path: "name", lit: "@property({ type: String }) name: string | undefined;", desc: "Identifier name of the element." },
-    { path: "hint", lit: "@property({ type: String }) hint: string | undefined;", "variations": true, desc: "Hint or suggestion displayed to the user." },
-    { path: "label", lit: "@property({ type: String }) label: string | undefined;", "variations": true, desc: "Label associated with the element." },
-    { path: "required", lit: "@property({ type: Boolean }) required: boolean;", desc: "Indicates if the field is required." },
-    { path: "disabled", lit: "@property({ type: Boolean }) disabled: boolean;", desc: "Defines whether the element is disabled." },
-    { path: "maxvalue", lit: "@property({ type: Number }) maxvalue: number | undefined;", desc: "Maximum allowed value for the field." },
-    { path: "minvalue", lit: "@property({ type: Number }) minvalue: number | undefined;", desc: "Minimum allowed value for the field." },
-    { path: "step", lit: "@property({ type: Number }) step: number | undefined;", desc: "Defines the step interval for allowed values." },
-    { path: "placeholder", lit: "@property({ type: String }) placeholder: string| undefined;", "variations": true, desc: "Text displayed in the field before user input." },
-    { path: "pattern", lit: "@property({ type: String }) pattern: string| undefined;", desc: "Regular expression for field validation." },
-    { path: "errormessage", lit: "@property({ type: String }) errormessage: string| undefined;", "variations": true, desc: "Error message displayed when validation fails." },
-    { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean;", desc: "Indicates if the field receives automatic focus." },
-    { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined;", desc: "Maximum number of characters allowed." },
-    { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined;", desc: "Minimum number of characters required." },
-    { path: "autocapitalize", lit: "@property({ type: String }) autocapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';", desc: "Controls automatic text capitalization." },
-    { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on';", desc: "Defines whether autocorrect is enabled." },
-    { path: "autocomplete", lit: "@property({ type: String }) autocomplete: string | undefined;", desc: "Suggests values based on previous inputs." },
-    { path: "validationMessage", lit: "@property({ type: String}) validationMessage: string | undefined", desc: "Custom validation error message." },
-    { path: "debounce", lit: "@property({ type: Number}) debounce: number | undefined", desc: "Delay time before executing events." },
-    { path: "value", lit: "@property({ type: String }) value: string | undefined;", "variations": true, desc: "Current value of the field." },
-    { path: "options", lit: "@property() options: OptionItem[] | undefined;", desc: "List of available options for selection." },
-    { path: "selectedvalue", lit: "@property() selectedvalue: string | undefined;", desc: "Currently selected value from options." },
-    { path: "inputmode", lit: "@property({ type: String }) inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = 'none';", desc: "Expected input type for the field." },
-    { path: "title", lit: "@property({ type: String }) title: string;", "variations": true, desc: "Title or tooltip of the element." },
-    { path: "icon", lit: "@property({ type: String }) icon: string | undefined;", desc: "Icon associated with the element." },
-    { path: "form", lit: "@property({ type: String }) form: string | undefined;", desc: "Identifier of the form the element belongs to." },
-    { path: "text", lit: "@property({ type: String }) text: string | undefined;", "variations": true, desc: "Text displayed in the element." },
-    { path: "src", lit: "@property({ type: String }) src: string | undefined;", desc: "URL of the media or image source." },
-    { path: "alt", lit: "@property() alt: string | undefined;", "variations": true, desc: "Alternative text for images." },
-    { path: "width", lit: "@property() width: string | undefined;", desc: "Width of the element." },
-    { path: "height", lit: "@property() height: string | undefined;", desc: "Height of the element." },
-    { path: "autoplay", lit: "@property() autoplay: boolean = false;", desc: "Defines whether media starts automatically." },
-    { path: "controls", lit: "@property() controls: boolean = true;", desc: "Defines whether media controls are displayed." },
-    { path: "loop", lit: "@property() loop: boolean = false;", desc: "Indicates if media should repeat." },
-    { path: "preload", lit: "@property() loop: 'auto' | 'metadata' | 'none' = 'auto';", desc: "Defines how media is preloaded." },
-    { path: "open", lit: "@property({ type: Boolean }) open = false;", desc: "Defines whether an element (like a modal) is open." }
+  { path: "name", lit: "@property({ type: String }) name: string | undefined;", desc: "Identifier name of the element." },
+  { path: "hint", lit: "@property({ type: String }) hint: string | undefined;", "variations": true, desc: "Hint or suggestion displayed to the user." },
+  { path: "label", lit: "@property({ type: String }) label: string | undefined;", "variations": true, desc: "Label associated with the element." },
+  { path: "required", lit: "@property({ type: Boolean }) required: boolean;", desc: "Indicates if the field is required." },
+  { path: "disabled", lit: "@property({ type: Boolean }) disabled: boolean;", desc: "Defines whether the element is disabled." },
+  { path: "maxvalue", lit: "@property({ type: Number }) maxvalue: number | undefined;", desc: "Maximum allowed value for the field." },
+  { path: "minvalue", lit: "@property({ type: Number }) minvalue: number | undefined;", desc: "Minimum allowed value for the field." },
+  { path: "step", lit: "@property({ type: Number }) step: number | undefined;", desc: "Defines the step interval for allowed values." },
+  { path: "placeholder", lit: "@property({ type: String }) placeholder: string| undefined;", "variations": true, desc: "Text displayed in the field before user input." },
+  { path: "pattern", lit: "@property({ type: String }) pattern: string| undefined;", desc: "Regular expression for field validation." },
+  { path: "errormessage", lit: "@property({ type: String }) errormessage: string| undefined;", "variations": true, desc: "Error message displayed when validation fails." },
+  { path: "autofocus", lit: "@property({ type: Boolean }) autofocus: boolean;", desc: "Indicates if the field receives automatic focus." },
+  { path: "maxlength", lit: "@property({ type: Number }) maxlength: number | undefined;", desc: "Maximum number of characters allowed." },
+  { path: "minlength", lit: "@property({ type: Number }) minlength: number | undefined;", desc: "Minimum number of characters required." },
+  { path: "autocapitalize", lit: "@property({ type: String }) autocapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';", desc: "Controls automatic text capitalization." },
+  { path: "autocorrect", lit: "@property({ type: String }) autocorrect: 'off' | 'on';", desc: "Defines whether autocorrect is enabled." },
+  { path: "autocomplete", lit: "@property({ type: String }) autocomplete: string | undefined;", desc: "Suggests values based on previous inputs." },
+  { path: "validationMessage", lit: "@property({ type: String}) validationMessage: string | undefined", desc: "Custom validation error message." },
+  { path: "debounce", lit: "@property({ type: Number}) debounce: number | undefined", desc: "Delay time before executing events." },
+  { path: "value", lit: "@property({ type: String }) value: string | undefined;", "variations": true, desc: "Current value of the field." },
+  { path: "options", lit: "@property() options: OptionItem[] | undefined;", desc: "List of available options for selection." },
+  { path: "selectedvalue", lit: "@property() selectedvalue: string | undefined;", desc: "Currently selected value from options." },
+  { path: "inputmode", lit: "@property({ type: String }) inputmode: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = 'none';", desc: "Expected input type for the field." },
+  { path: "title", lit: "@property({ type: String }) title: string;", "variations": true, desc: "Title or tooltip of the element." },
+  { path: "icon", lit: "@property({ type: String }) icon: string | undefined;", desc: "Icon associated with the element." },
+  { path: "form", lit: "@property({ type: String }) form: string | undefined;", desc: "Identifier of the form the element belongs to." },
+  { path: "text", lit: "@property({ type: String }) text: string | undefined;", "variations": true, desc: "Text displayed in the element." },
+  { path: "src", lit: "@property({ type: String }) src: string | undefined;", desc: "URL of the media or image source." },
+  { path: "alt", lit: "@property() alt: string | undefined;", "variations": true, desc: "Alternative text for images." },
+  { path: "width", lit: "@property() width: string | undefined;", desc: "Width of the element." },
+  { path: "height", lit: "@property() height: string | undefined;", desc: "Height of the element." },
+  { path: "autoplay", lit: "@property() autoplay: boolean = false;", desc: "Defines whether media starts automatically." },
+  { path: "controls", lit: "@property() controls: boolean = true;", desc: "Defines whether media controls are displayed." },
+  { path: "loop", lit: "@property() loop: boolean = false;", desc: "Indicates if media should repeat." },
+  { path: "preload", lit: "@property() loop: 'auto' | 'metadata' | 'none' = 'auto';", desc: "Defines how media is preloaded." },
+  { path: "open", lit: "@property({ type: Boolean }) open = false;", desc: "Defines whether an element (like a modal) is open." }
 ];
 
 function removeProjectNumberSegment(input: string): string {
-    return input.replace(/-\d+$/, '');
+  return input.replace(/-\d+$/, '');
 }
 
 export function getAtributtes(root: string, subGroup: string, finalGroup: string): string[] {
-    return getAtributtesByTag(`ica-${root}-${subGroup}-${finalGroup}`);
+  return getAtributtesByTag(`ica-${root}-${subGroup}-${finalGroup}`);
 }
 
 export function getAtributtesByTag(tag: string): string[] {
 
-    tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
-    if (!tag.toLocaleLowerCase().startsWith('ica-')) return [];
-    tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
-    const json = parseMarkdownToJson(descriptionForPrompt);
-    let ret: string[] = [];
-    json.forEach((i) => {
-        if (i.base === tag) {
-            ret = i.attr as string[];
-        }
-    })
+  tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
+  if (!tag.toLocaleLowerCase().startsWith('ica-')) return [];
+  tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
+  const json = parseMarkdownToJson(descriptionForPrompt);
+  let ret: string[] = [];
+  json.forEach((i) => {
+    if (i.base === tag) {
+      ret = i.attr as string[];
+    }
+  })
 
-    return ret;
+  return ret;
 
 }
 
 export function getDefinitionByTag(tag: string): any | undefined {
-    tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
-    if (!tag.toLocaleLowerCase().startsWith('ica-')) return;
+  tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
+  if (!tag.toLocaleLowerCase().startsWith('ica-')) return;
 
-    const json = parseMarkdownToJson(descriptionForPrompt);
-    let ret: any;
-    json.forEach((i) => {
-        if (i.base === tag) {
-            ret = i;
-        }
-    })
+  const json = parseMarkdownToJson(descriptionForPrompt);
+  let ret: any;
+  json.forEach((i) => {
+    if (i.base === tag) {
+      ret = i;
+    }
+  })
 
-    return ret;
+  return ret;
 
 }
 
 export function getDescriptionAttr(attribute: string): string {
-    const attr = attributeDefinitions.find((attr) => attr.path === attribute);
-    if (!attr) return '';
-    return attr.desc;
+  const attr = attributeDefinitions.find((attr) => attr.path === attribute);
+  if (!attr) return '';
+  return attr.desc;
 
 }
 
 export function checkAttributteHasVariation(attribute: string): boolean {
-    const attr = attributeDefinitions.find((attr) => attr.path === attribute);
-    if (!attr) return false;
-    return attr.variations === true;
+  const attr = attributeDefinitions.find((attr) => attr.path === attribute);
+  if (!attr) return false;
+  return attr.variations === true;
 }
 
 export function getAttributeDefinitions(tag: string): string[] {
 
-    tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
-    const json = parseMarkdownToJson(descriptionForPrompt);
-    let ret: string[] = [];
-    json.forEach((i) => {
-        if (i.base === tag) {
-            ret = i.attr as string[];
-        }
-    })
+  tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
+  const json = parseMarkdownToJson(descriptionForPrompt);
+  let ret: string[] = [];
+  json.forEach((i) => {
+    if (i.base === tag) {
+      ret = i.attr as string[];
+    }
+  })
 
-    return ret;
-    
+  return ret;
+
 }
 
 export function getAttributeDefinitionsLit(tag: string): string[] {
-    const rc = new Set<string>();
-    tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
-    const attrs = getAttributeDefinitions(tag);
-    for (const att of attrs) {
-        const def = attributeDefinitions.find((item) => item.path.trim() === att.trim());
-        if (def) rc.add(def.lit);
-    };
-    return Array.from(rc);
+  const rc = new Set<string>();
+  tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
+  const attrs = getAttributeDefinitions(tag);
+  for (const att of attrs) {
+    const def = attributeDefinitions.find((item) => item.path.trim() === att.trim());
+    if (def) rc.add(def.lit);
+  };
+  return Array.from(rc);
 }
 
 export function getGroups(): Record<string, Record<string, string[]>> {
-    return transformIcaDescriptions(widgetsDefault)
+  return transformIcaDescriptions(widgetsDefault)
 }
 
 function transformIcaDescriptions(icaDescriptions: any): Record<string, Record<string, string[]>> {
-    const result: Record<string, Record<string, string[]>> = {};
+  const result: Record<string, Record<string, string[]>> = {};
 
-    Object.keys(icaDescriptions).forEach((key) => {
-        const parts = key.split("-").slice(1);
+  Object.keys(icaDescriptions).forEach((key) => {
+    const parts = key.split("-").slice(1);
 
-        if (parts.length < 2) return;
-        const [category, type] = parts;
-        const rest = parts.slice(2).join("-");
+    if (parts.length < 2) return;
+    const [category, type] = parts;
+    const rest = parts.slice(2).join("-");
 
-        if (!result[category]) {
-            result[category] = {};
-        }
+    if (!result[category]) {
+      result[category] = {};
+    }
 
-        if (!result[category][type]) {
-            result[category][type] = [];
-        }
+    if (!result[category][type]) {
+      result[category][type] = [];
+    }
 
-        result[category][type].push(rest || type);
-    });
+    result[category][type].push(rest || type);
+  });
 
-    return result;
+  return result;
 }
 
 
 export function canMoveElement(element: IcaLitElementBaseMethods, newParent: IcaLitElementBaseMethods): boolean {
 
-    return true;
+  return true;
 
 }
 
 
 export const widgetsDefault: Record<string, string> = {
-    'ica-apresentation-text': 'widget-default-text',
-    'ica-apresentation-text-rich': 'widget-default-text-rich',
-    'ica-forms-records': 'widget-default-records',
-    'ica-apresentation-image': 'widget-default-image',
-    'ica-forms-content-form': 'widget-default-content-form',
-    'ica-forms-input-number': 'widget-default-input-number',
-    'ica-forms-input-string': 'widget-default-input-string',
-    'ica-forms-input-masked': 'widget-default-input-masked',
-    'ica-forms-input-boolean': 'widget-default-input-boolean',
-    'ica-forms-input-date': 'widget-default-input-date',
-    'ica-forms-input-time': 'widget-default-input-time',
-    'ica-forms-input-date-range': 'widget-default-input-date-range',
-    'ica-forms-input-select-one': 'widget-default-input-select-one',
-    'ica-forms-input-multiselect': 'widget-default-input-multiselect',
-    'ica-forms-input-color': 'widget-default-input-color',
-    'ica-forms-input-editor': 'widget-default-input-editor',
-    'ica-forms-input-feedback': 'widget-default-input-feedback',
-    'ica-forms-input-file': 'widget-default-input-file',
-    'ica-forms-records-grid': 'widget-default-records-grid',
-    'ica-forms-records-map': 'widget-default-records-map',
-    'ica-forms-tree': 'widget-default-tree',
-    'ica-forms-submit': 'widget-default-submit',
-    'ica-navigation-links': 'widget-default-navigation-links',
-    'ica-navigation-content': 'widget-default-navigation-content',
-    'ica-navigation-multi-content': 'widget-default-navigation-multi-content',
-    'ica-apresentation-text-code': 'widget-default-text-code',
-    'ica-apresentation-gallery': 'widget-default-gallery',
-    'ica-apresentation-maps': 'widget-default-maps',
-    'ica-apresentation-video': 'widget-default-video',
-    'ica-apresentation-sound': 'widget-default-sound',
-    'ica-apresentation-chart': 'widget-default-chart',
-    'ica-apresentation-animation': 'widget-default-animation',
-    'ica-apresentation-animation-fullpage': 'widget-default-animation-fullpage',
-    'ica-navigation-transition': 'widget-default-transition',
-    'ica-apresentation-indicator': 'widget-default-indicator',
-    'ica-apresentation-embed-social': 'widget-default-embed-social',
-    'ica-navigation-toolbar-social': 'widget-default-toolbar-social',
-    'ica-apresentation-message': 'widget-default-message',
-    'ica-apresentation-canvas': 'widget-default-canvas',
-    'ica-blocks-viewer': 'widget-default-block-viewer',
+  'ica-apresentation-text': 'widget-default-text',
+  'ica-apresentation-text-rich': 'widget-default-text-rich',
+  'ica-forms-records': 'widget-default-records',
+  'ica-apresentation-image': 'widget-default-image',
+  'ica-forms-content-form': 'widget-default-content-form',
+  'ica-forms-input-number': 'widget-default-input-number',
+  'ica-forms-input-string': 'widget-default-input-string',
+  'ica-forms-input-masked': 'widget-default-input-masked',
+  'ica-forms-input-boolean': 'widget-default-input-boolean',
+  'ica-forms-input-date': 'widget-default-input-date',
+  'ica-forms-input-time': 'widget-default-input-time',
+  'ica-forms-input-date-range': 'widget-default-input-date-range',
+  'ica-forms-input-select-one': 'widget-default-input-select-one',
+  'ica-forms-input-multiselect': 'widget-default-input-multiselect',
+  'ica-forms-input-color': 'widget-default-input-color',
+  'ica-forms-input-editor': 'widget-default-input-editor',
+  'ica-forms-input-feedback': 'widget-default-input-feedback',
+  'ica-forms-input-file': 'widget-default-input-file',
+  'ica-forms-records-grid': 'widget-default-records-grid',
+  'ica-forms-records-map': 'widget-default-records-map',
+  'ica-forms-tree': 'widget-default-tree',
+  'ica-forms-submit': 'widget-default-submit',
+  'ica-navigation-links': 'widget-default-navigation-links',
+  'ica-navigation-content': 'widget-default-navigation-content',
+  'ica-navigation-multi-content': 'widget-default-navigation-multi-content',
+  'ica-apresentation-text-code': 'widget-default-text-code',
+  'ica-apresentation-gallery': 'widget-default-gallery',
+  'ica-apresentation-maps': 'widget-default-maps',
+  'ica-apresentation-video': 'widget-default-video',
+  'ica-apresentation-sound': 'widget-default-sound',
+  'ica-apresentation-chart': 'widget-default-chart',
+  'ica-apresentation-animation': 'widget-default-animation',
+  'ica-apresentation-animation-fullpage': 'widget-default-animation-fullpage',
+  'ica-navigation-transition': 'widget-default-transition',
+  'ica-apresentation-indicator': 'widget-default-indicator',
+  'ica-apresentation-embed-social': 'widget-default-embed-social',
+  'ica-navigation-toolbar-social': 'widget-default-toolbar-social',
+  'ica-apresentation-message': 'widget-default-message',
+  'ica-apresentation-canvas': 'widget-default-canvas',
+  'ica-blocks-viewer': 'widget-default-block-viewer',
+  'ica-interaction-button': 'widget-default-interaction-button'
 }
 
 export const descriptionForPrompt: string = `
@@ -712,58 +713,74 @@ Specialized widget examples:
 - "pdf"
 - "spreadsheet"
 - "document"
-`;
+## ica-interaction-button
+Botão reutilizável para ações em interfaces. Pode ser usado em toolbars, cards, modais ou listas de itens.
+Suporta diferentes variantes visuais, ícones e comportamentos de clique.
+
+- Cfg: config
+- Bind: notifyPath (opcional — path state alterado ao clicar ex: {{ ui.action }}), notifyValue (opcional — valor a ser setado no stat ao clicar)
+
+- interface config {
+  label?: string,                          // texto exibido no botão
+  icon?: string,                           // nome do ícone (ex: "save", "edit")
+  type?: "onlyText" | "onlyIcon" | "full"
+  disabled?: boolean,                      // desativa o botão se true
+  tooltip?: string                         // texto exibido ao passar o mouse
+}
+
+`
+  ;
 
 function parseMarkdownToJson(md: string) {
 
-    const lines = md.split('\n');
-    const components = [];
+  const lines = md.split('\n');
+  const components = [];
 
-    let currentComponent = null;
+  let currentComponent = null;
 
-    const attrTypes = ['Text', 'Bind', 'Cfg'];
+  const attrTypes = ['Text', 'Bind', 'Cfg'];
 
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
 
-        // Detecta o início de um componente
-        const matchComponent = line.match(/^##\s+(ica-[\w-]+)/);
-        if (matchComponent) {
-            if (currentComponent) {
-                components.push(currentComponent);
-            }
-            currentComponent = {
-                base: matchComponent[1],
-                attr: new Set()
-            };
-            continue;
-        }
-
-        if (currentComponent) {
-            // Verifica se a linha contém atributos por tipo
-            for (const type of attrTypes) {
-                const attrMatch = line.match(new RegExp(`^-\\s+${type}:\\s*(.+)`, 'i'));
-                if (attrMatch) {
-                    const attrs = attrMatch[1].split(',').map(a => a.trim());
-                    for (const attr of attrs) {
-                        if (attr) {
-                            const v = attr.split('//');
-                            currentComponent.attr.add(v[0].trim());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Adiciona o último componente
-    if (currentComponent) {
+    // Detecta o início de um componente
+    const matchComponent = line.match(/^##\s+(ica-[\w-]+)/);
+    if (matchComponent) {
+      if (currentComponent) {
         components.push(currentComponent);
+      }
+      currentComponent = {
+        base: matchComponent[1],
+        attr: new Set()
+      };
+      continue;
     }
 
-    // Converte o Set em array
-    return components.map(c => ({
-        base: c.base,
-        attr: Array.from(c.attr)
-    }));
+    if (currentComponent) {
+      // Verifica se a linha contém atributos por tipo
+      for (const type of attrTypes) {
+        const attrMatch = line.match(new RegExp(`^-\\s+${type}:\\s*(.+)`, 'i'));
+        if (attrMatch) {
+          const attrs = attrMatch[1].split(',').map(a => a.trim());
+          for (const attr of attrs) {
+            if (attr) {
+              const v = attr.split('//');
+              currentComponent.attr.add(v[0].trim());
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Adiciona o último componente
+  if (currentComponent) {
+    components.push(currentComponent);
+  }
+
+  // Converte o Set em array
+  return components.map(c => ({
+    base: c.base,
+    attr: Array.from(c.attr)
+  }));
 }
