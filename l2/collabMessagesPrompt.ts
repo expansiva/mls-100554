@@ -12,7 +12,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     // @property() isSending: boolean = false;
     @property({ type: Function }) onSend: Function | undefined;
     @query('textarea') textArea: HTMLTextAreaElement | undefined;
-
     @state() text: string = '';
     @state() mentionActive = false;
     @state() mentionQuery = '';
