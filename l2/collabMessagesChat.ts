@@ -6,8 +6,8 @@ import { collab_chevron_left, collab_gear, collab_translate, collab_circle_excla
 import { createAgent } from './_100554_agentPlanner1';
 import { getTemporaryContext, formatTimestamp, getNextResultStep } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, updateThreads, getMessagesByThreadId } from './_100554_msgDBController';
-import { loadChatPreferences } from './_100554_collabMessageHelper';
 
+import { loadChatPreferences } from './_100554_collabMessageHelper';
 import './_100554_collabMessagesTaskDetails';
 import './_100554_collabMessagesTask';
 import './_100554_collabMessagesPrompt';
