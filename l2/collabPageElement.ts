@@ -124,9 +124,9 @@ export abstract class CollabPageElement extends StateLitElement {
             if (this.hasImport.includes(imports)) return true;
             imports = convertTagToFileName(imports);
             if (!imports.startsWith('./')) {
-
-                if (mls && (mls as any).modePreview && (mls as any).modePreview === 'singlePage') imports = '/' + imports;
-                else imports = './' + imports;
+                imports = './' + imports;
+                /*if (mls && (mls as any).modePreview && (mls as any).modePreview === 'singlePage') imports = '/' + imports;
+                else imports = './' + imports;*/
                 
             }
             await import(imports);
