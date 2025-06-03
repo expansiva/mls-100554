@@ -4,7 +4,7 @@ import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance } from './_100554_libCommom';
-import './_100554_serviceListFilesAdd'; 
+import './_100554_serviceListFilesAdd';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -328,16 +328,20 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
 
-    getTitleInLocalStorage(ts: mls.stor.IFileInfo, html: mls.stor.IFileInfo, less: mls.stor.IFileInfo, test: mls.stor.IFileInfo) {
+    getTitleInLocalStorage(ts: mls.stor.IFileInfo, html: mls.stor.IFileInfo, less: mls.stor.IFileInfo, test: mls.stor.IFileInfo, defs: mls.stor.IFileInfo) {
         const tsLocal = ts && ts.inLocalStorage;
         const htmlLocal = html && html.inLocalStorage;
         const styleLocal = less && less.inLocalStorage;
         const testLocal = test && test.inLocalStorage;
+        const defsLocal = defs && defs.inLocalStorage;
+
         let rc = '';
         if (tsLocal) rc = rc + '.ts ';
         if (htmlLocal) rc = rc + '.html ';
         if (styleLocal) rc = rc + '.less ';
         if (testLocal) rc = rc + '.test.ts ';
+        if (defsLocal) rc = rc + '.defs.ts ';
+
         return rc;
     }
 
@@ -354,20 +358,25 @@ export class PluginExploreList extends PluginBaseModule {
         const keyHtml = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.html');
         const keyStyle = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.less');
         const keyTest = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.test.ts');
+        const defsTest = mls.stor.getKeyToFiles(file.project, file.level, file.shortName, file.folder, '.defs.ts');
+
         const styleFile = mls.stor.files[keyStyle];
         const htmlFile = mls.stor.files[keyHtml];
         const testFile = mls.stor.files[keyTest];
+        const defsFile = mls.stor.files[defsTest];
 
         const htmlError = htmlFile && htmlFile.hasError;
         const styleError = styleFile && styleFile.hasError;
         const testError = testFile && testFile.hasError;
+        const defsError = defsFile && defsFile.hasError;
 
-        const titleLocalStorage = this.getTitleInLocalStorage(file, htmlFile, styleFile, testFile);
+
+        const titleLocalStorage = this.getTitleInLocalStorage(file, htmlFile, styleFile, testFile, defsFile);
         if (titleLocalStorage) {
             auxStorage = `<span title=" ${titleLocalStorage} in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
         }
 
-        if (file.hasError || styleError || htmlError || testError) {
+        if (file.hasError || styleError || htmlError || testError || defsError) {
             auxBug = `<span title="bug" class="fa fa-bug" style="color:rgb(169, 3, 3); height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
         }
 
@@ -815,25 +824,30 @@ export class PluginExploreList extends PluginBaseModule {
             const keyHtml = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.html');
             const keyStyle = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.less');
             const keyTestFile = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.test.ts');
+            const keyDefsFile = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.defs.ts');
 
             const styleFile = mls.stor.files[keyStyle];
             const htmlFile = mls.stor.files[keyHtml];
             const testFile = mls.stor.files[keyTestFile];
+            const defsFile = mls.stor.files[keyDefsFile];
 
-            const htmlLocal = htmlFile && mls.stor.files[keyHtml].inLocalStorage;
-            const styleLocal = styleFile && mls.stor.files[keyStyle].inLocalStorage;
-            const testLocal = testFile && mls.stor.files[keyTestFile].inLocalStorage;
+            const htmlLocal = htmlFile && htmlFile.inLocalStorage;
+            const styleLocal = styleFile && styleFile.inLocalStorage;
+            const testLocal = testFile && testFile.inLocalStorage;
+            const defsLocal = defsFile && defsFile.inLocalStorage;
 
             const htmlError = htmlFile && htmlFile.hasError;
             const styleError = styleFile && styleFile.hasError;
-            const testError = testFile && styleFile.hasError;
+            const testError = testFile && testFile.hasError;
+            const defsError = defsFile && defsFile.hasError;
+
 
             if (sf.isLocalVersionOutdated) this.info.version++;
-            if (sf.inLocalStorage || htmlLocal || styleLocal || testLocal) {
+            if (sf.inLocalStorage || htmlLocal || styleLocal || testLocal || defsLocal) {
                 this.filesInLocal.push(sf);
                 this.info.storage++;
             }
-            if (sf.hasError || htmlError || styleError || testError) this.info.error++;
+            if (sf.hasError || htmlError || styleError || testError || defsError) this.info.error++;
 
             arraySf.push(sf);
         }
@@ -877,7 +891,7 @@ export class PluginExploreList extends PluginBaseModule {
                 !arraySfHistory.some(b => b.shortName === a.shortName)
             );
 
-            arraySfHistory = [ ...arraySfHistory, ...diff];
+            arraySfHistory = [...arraySfHistory, ...diff];
             return arraySfHistory;
 
         }

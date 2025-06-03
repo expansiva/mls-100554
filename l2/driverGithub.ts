@@ -201,7 +201,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				let ret: any = '';
 
-				if (['.html', '.ts', '.test.ts', '.css', '.txt', '.json', '.md', '.js', '.less'].includes(ext)) {
+				if (['.html', '.ts', '.test.ts', '.defs.ts', '.css', '.txt', '.json', '.md', '.js', '.less'].includes(ext)) {
 
 					ret = await this.getFilesIO(fileInfo.project, fileName);
 
@@ -1358,7 +1358,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 						Authorization: 'bearer ' + mKey,
 					},
 					referrerPolicy: 'no-referrer',
-					body: JSON.stringify({ delete_branch_on_merge: true})
+					body: JSON.stringify({ delete_branch_on_merge: true })
 				})).json();
 
 				if (ret2 && ret2.message) {
@@ -2128,7 +2128,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 						}
 					}
 				}`;
-				
+
 				const data = await this.fecthQl(q);
 
 				const ret = data.ret.data && data.ret.data.createCommitOnBranch && data.ret.data.createCommitOnBranch.commit && data.ret.data.createCommitOnBranch.commit.abbreviatedOid;
