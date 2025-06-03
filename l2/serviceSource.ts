@@ -19,7 +19,6 @@ import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
 import './_100554_cssHelperIndex';
 
-
 /// **collab_i18n_start**
 const message_pt = {
     historyOpen: 'Abrir histórico',
