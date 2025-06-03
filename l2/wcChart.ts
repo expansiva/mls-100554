@@ -62,6 +62,15 @@ export class WcEchartsPie100554 extends StateLitElement {
     initChart() {
         const that = this;
         if (!this.data) return;
+
+        if (typeof this.data === 'string') {
+            try {
+                this.data = JSON.parse(this.data);
+            } catch (e) {
+                this.data = {};
+            }
+        }
+
         if (this.chartTitle) {
             if (!this.data.title) this.data.title = {};
             this.data.title.text = this.chartTitle;

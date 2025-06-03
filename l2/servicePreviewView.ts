@@ -342,6 +342,12 @@ export class ServicePreviewView extends StateLitElement {
             }
 
             if (iframe.contentDocument) {
+                const base = document.createElement('base') as HTMLBaseElement;
+                base.href = 'https://collab.codes/';
+                iframe.contentDocument.head.insertBefore(base, iframe.contentDocument.head.firstChild);
+            }
+
+            if (iframe.contentDocument) {
                 iframe.contentDocument.body.style.padding = '35px';
                 iframe.contentDocument.body.style.overflowY = 'auto';
                 iframe.contentDocument.body.style.overflowX = 'hidden';
