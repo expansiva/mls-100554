@@ -36,7 +36,10 @@ export function createAgent(): IAgent {
         },
         async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _afterPrompt(context);
-        }
+        },
+        async replayForSupport(payload: mls.msg.AIPayload[]): Promise<void> {
+            return _replayForSupport(payload); 
+        },
     };
 }
 
@@ -75,6 +78,19 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     //await executeNextStep(context);
 }
 
+
+const _replayForSupport = async (payload: mls.msg.AIPayload[]): Promise<void> => {
+
+    const step = payload[0] as any;
+    if (!step || step.type !== 'flexible') throw new Error('Invalid step in create files');
+
+    if (!step.content || !step.content.html || !step.content.ts || !step.content.less || !step.content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
+
+    await createNewFiles(step.content);
+
+
+}
+
 async function addFile(context: mls.msg.ExecutionContext) {
 
     if (!context || !context.task) throw new Error('Not found context to create files');
@@ -84,15 +100,7 @@ async function addFile(context: mls.msg.ExecutionContext) {
 
     if (!step.content || !step.content.html || !step.content.ts || !step.content.less || !step.content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
 
-    await forceServiceInstance(2, '_100554_serviceSource')
-
-    const pageName = step.content.shortName;
-    const fileHTML = step.content.html;
-    const fileTS = step.content.ts;
-    const fileLess = step.content.less;
-    await createNewFile(
-        { project, position: 'right', shortName: pageName, enhancement, sourceTS: fileTS, sourceHTML: fileHTML, sourceLess: fileLess, openPreview: false }
-    );
+    await createNewFiles(step.content);
 
     const rc = { shortName: step.content.shortName, project }
 
@@ -110,7 +118,7 @@ async function addFile(context: mls.msg.ExecutionContext) {
     await addNewStep(context, step.stepId, [newStep]);
 
     let aux = '';
-    const m = mls.editor.getModels(project, pageName);
+    const m = mls.editor.getModels(project, step.content.pageName);
     if (m && m.ts && m.ts.compilerResults && m.ts.compilerResults.errors.length > 0) {
         aux = ', com ' + m.ts.compilerResults.errors.length + ' erros, favor verificar'
 
@@ -118,6 +126,19 @@ async function addFile(context: mls.msg.ExecutionContext) {
 
     context.task = await updateTaskTitle(context.task, "Widget created" + aux);
 
+}
+
+async function createNewFiles(content:{shortName:string, html:string, ts:string, less:string}) {
+    await forceServiceInstance(2, '_100554_serviceSource')
+
+    const pageName = content.shortName;
+    const fileHTML = content.html;
+    const fileTS = content.ts;
+    const fileLess = content.less;
+
+    await createNewFile(
+        { project, position: 'right', shortName: pageName, enhancement, sourceTS: fileTS, sourceHTML: fileHTML, sourceLess: fileLess, openPreview: false }
+    );
 }
 
 export async function getPrompts(json: any, prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
@@ -461,7 +482,7 @@ function extractComponentMarkdown(md: string, componentName: string): string | n
         const lines = match[0].split('##');
         return lines && lines[1] ? lines[1].trim() : '';
     }
-    
+
     return '';
 }
 
