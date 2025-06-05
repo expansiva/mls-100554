@@ -4,7 +4,7 @@ import { html, css, TemplateResult, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 
-import { getNextResultStep, getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById, getTotalCost } from './_100554_aiAgentHelper';
+import { getNextResultStep, getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById, getTotalCost, getTemporaryContext } from './_100554_aiAgentHelper';
 import { getClarification } from './_100554_aiAgentOrchestration';
 import { collab_money } from './_100554_collabIcons';
 import { IAgent } from './_100554_aiAgentBase';
@@ -414,13 +414,17 @@ export class WidgetAiInteraction100554 extends StateLitElement {
         try {
             load(true);
             const moduleAgent = await import(`./_${this.PROJECTNUMBER}_${agentName}`);
-            if (!moduleAgent) throw new Error('Not found agent:' + agentName);
+            if (!moduleAgent || !this.task) throw new Error('Not found agent:' + agentName);
             if (!moduleAgent.createAgent) throw new Error('Not found createAgent:' + agentName);
 
             const agent = moduleAgent.createAgent() as IAgent ;
             if(!agent.replayForSupport) throw new Error('Not found replayForSupport:' + agentName);
 
-            await agent.replayForSupport(interaction.payload);
+            const context = getTemporaryContext(this.task.PK, this.task.owner, 'context temporary');
+
+            context.task = this.task;
+            
+            await agent.replayForSupport(context, interaction.payload);
 
             if (result) result.innerText = 'result: Ok';
             load(false);
