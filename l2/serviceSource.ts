@@ -786,7 +786,7 @@ export class ServiceSource100554 extends ServiceBase {
             } else if (undoType === '.test.ts') {
                 await this.undoFiles(undefined, undefined, undefined, storFileTsTest, undefined, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, keyFileTsDefs, 'test');
             } else if (undoType === '.defs.ts') {
-                await this.undoFiles(undefined, undefined, undefined, undefined, storFileTsTest, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, keyFileTsDefs, 'defs');
+                await this.undoFiles(undefined, undefined, undefined, undefined, storFileTsDefs, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, keyFileTsDefs, 'defs');
             }
 
         };
@@ -1083,6 +1083,22 @@ export class ServiceSource100554 extends ServiceBase {
                 if (data.storFile.extension === '.less') {
                     mls.editor.models[keyToModel].style?.model.dispose();
                     delete mls.editor.models[keyToModel].style
+                }
+
+            }
+
+            if (data.storFile.extension === '.test.ts' || data.storFile.extension === '.defs.ts') {
+
+                const keyToModel = mls.editor.getKeyModel(data.storFile.project, data.storFile.shortName);
+                if (!mls.editor.models[keyToModel]) return false;
+
+                if (data.storFile.extension === '.test.ts') {
+                    mls.editor.models[keyToModel].test?.model.dispose();
+                    delete mls.editor.models[keyToModel].test
+                }
+                if (data.storFile.extension === '.defs.ts') {
+                    mls.editor.models[keyToModel].defs?.model.dispose();
+                    delete mls.editor.models[keyToModel].defs
                 }
 
             }

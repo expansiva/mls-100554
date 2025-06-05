@@ -7,7 +7,7 @@ import { StateLitElement } from './_100554_stateLitElement';
 import { getNextResultStep, getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById, getTotalCost } from './_100554_aiAgentHelper';
 import { getClarification } from './_100554_aiAgentOrchestration';
 import { collab_money } from './_100554_collabIcons';
-
+import { IAgent } from './_100554_aiAgentBase';
 
 @customElement('collab-messages-task-details-100554')
 export class WidgetAiInteraction100554 extends StateLitElement {
@@ -153,13 +153,7 @@ export class WidgetAiInteraction100554 extends StateLitElement {
 
         switch (payload.type) {
             case 'agent':
-                return html`
-                    <details ?open=${isDirect}>
-                        <summary>${payload.type}(${payload.agentName})</summary>
-                        ${this.renderAgent(payload)}
-                        ${payload.interaction ? this.renderInteration(payload.interaction, payload.stepId) : html``}
-                        ${payload.nextSteps && payload.nextSteps.length > 0 ? this.renderTaskInteractions(payload.nextSteps) : html``}  
-                    </details>`
+                return this.renderPayloadAgent(payload, isDirect);
             case 'tool':
                 return html`
                     <details ?open=${isDirect} >
@@ -199,6 +193,24 @@ export class WidgetAiInteraction100554 extends StateLitElement {
             default:
                 return html`<p>Tipo de resultado desconhecido.</p>`;
         }
+    }
+
+    private renderPayloadAgent(payload: mls.msg.AIPayload, isDirect: boolean = false): TemplateResult<1> {
+
+        if (payload.type !== 'agent') return html``;
+
+        return html`
+        <details ?open=${isDirect}>
+            <summary>
+                ${payload.type}(${payload.agentName})
+                <icon class="fa-solid fa-reply-all" style="transform: rotateY(174deg); z-index:9999" @click=${(e: MouseEvent) => { e.stopPropagation(); e.preventDefault(); this.replayForSupport(e.currentTarget as HTMLElement, payload.agentName, payload.interaction, payload.stepId) }}></icon>
+                <span class="result"></span>
+            </summary>
+            ${this.renderAgent(payload)}
+            ${payload.interaction ? this.renderInteration(payload.interaction, payload.stepId) : html``}
+            ${payload.nextSteps && payload.nextSteps.length > 0 ? this.renderTaskInteractions(payload.nextSteps) : html``}  
+        </details>`;
+
     }
 
     private renderInteration(interaction: mls.msg.AIInteraction, stepId: number) {
@@ -374,6 +386,51 @@ export class WidgetAiInteraction100554 extends StateLitElement {
                 return `<span class="${cls}">${match}</span>`;
             }
         );
+    }
+
+    private PROJECTNUMBER = 100554
+    private async replayForSupport(el:HTMLElement, agentName: string, interaction: any, stepId: number) {
+
+        const sum = el?.closest('summary');
+        let result: HTMLElement | undefined;
+        if (sum) result = sum.querySelector('.result') as HTMLElement;
+        if (result) result.innerHTML = '';
+
+        const load = (start: boolean) => {
+
+            if (!el) return;
+
+            if (start) {
+                el.classList.remove('fa-reply-all');
+                el.classList.add('rotate');
+                el.classList.add('fa-rotate-left');
+            } else {
+                el.classList.remove('fa-rotate-left'); 
+                el.classList.remove('rotate');
+                el.classList.add('fa-reply-all');
+            }
+        };
+
+        try {
+            load(true);
+            const moduleAgent = await import(`./_${this.PROJECTNUMBER}_${agentName}`);
+            if (!moduleAgent) throw new Error('Not found agent:' + agentName);
+            if (!moduleAgent.createAgent) throw new Error('Not found createAgent:' + agentName);
+
+            const agent = moduleAgent.createAgent() as IAgent ;
+            if(!agent.replayForSupport) throw new Error('Not found replayForSupport:' + agentName);
+
+            await agent.replayForSupport(interaction.payload);
+
+            if (result) result.innerText = 'result: Ok';
+            load(false);
+
+        } catch (e:any) {
+            console.info(e);
+            if (result) result.innerText = e && e.message ? 'result: '+e.message : 'result: Erro';
+            load(false);
+        }
+
     }
 
 }
