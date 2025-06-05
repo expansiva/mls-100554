@@ -14,6 +14,10 @@ import { propertyDataSource } from './_100554_collabDecorators';
 import { setErrorOnModel } from './_100554_validateLit'
 import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_file_code } from './_100554_collabIcons';
 
+import { createAgent } from './_100554_agentFix';
+import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHelper';
+import { loadChatPreferences } from './_100554_collabMessageHelper';
+
 import { CollabSpliterVerticalVarFixed100554 } from './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
@@ -58,6 +62,7 @@ export class ServiceSource100554 extends ServiceBase {
     @property() isModeHistory: boolean = false;
 
     @property({ type: String }) mode: IModes = 'icTs';
+    @property({ type: String }) textOverlayLoading: string = '';
 
     @property({ type: String }) currentHistorySourceWithoutSave: string | undefined = undefined;
     @property({ type: String }) previousHistorySourceWithoutSave: string | undefined = undefined;
@@ -66,6 +71,7 @@ export class ServiceSource100554 extends ServiceBase {
     @propertyDataSource({ type: String }) previousHistorySource: string | undefined = undefined;;
     @propertyDataSource({ type: String }) historyLanguage: 'typescript' | 'html' | 'less' | 'defs' = 'typescript';
     @propertyDataSource({ type: String }) selectedMode: 'icTs' | 'icStyle' | 'icHTML' | 'icTest' | 'icDefs' | 'History' | undefined;
+    @propertyDataSource() lockMap = new Map<string, boolean>();
 
     private MINWIDTHTPANELRIGHT = 500;
     private lessCSS: LessCSS | undefined;
@@ -323,7 +329,7 @@ export class ServiceSource100554 extends ServiceBase {
         this.formatMonaco();
     }
 
-    private formatMonaco() {
+    public formatMonaco() {
         if (!this._ed1) return;
         this._ed1.trigger('anyString', 'editor.action.formatDocument', null);
     }
@@ -332,6 +338,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     @query('mls-editor-100529') private editorEl: HTMLElement | undefined;
     @query('mls-editor-100529.history') private editorHistoryEl: HTMLElement | undefined;
+    @query('.overlay-loading') private overlayLoading: HTMLElement | undefined;
 
     @query('collab-spliter-vertical-var-fixed-100554') private verticalSpliter: CollabSpliterVerticalVarFixed100554 | undefined;
     @query('collab-spliter-horizontal-var-fixed-100554') private horizontalSpliter: HTMLElement | undefined;
@@ -682,9 +689,7 @@ export class ServiceSource100554 extends ServiceBase {
         let keyFilesHTML: string; // set on getStorFile 
         let keyFilesCss: string; // set on getStorFile 
         let keyFileTsTest: string; // set on getStorFile 
-        let keyFileTsDefs: string; // set on getStorFile 
-
-
+        let keyFileTsDefs: string; // set on getStorFile ;
 
         const getStorFile = (): mls.stor.IFileInfo => {
             keyFiles = mls.stor.getKeyToFiles(fileAction.project, fileAction.level, fileAction.shortName, fileAction.folder, fileAction.extension);
@@ -739,11 +744,18 @@ export class ServiceSource100554 extends ServiceBase {
             const storFileCss = getStorFileCss();
             const storFileTsTest = getStorFileTsTest();
             const storFileTsDefs = getStorFileTsDefs();
-
             await this.openFiles(storFileHTML, storFile, storFileCss, storFileTsTest, storFileTsDefs, fileAction.position);
             mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
             this.updatedMSizeEditor();
             this.toogleIconsError(this.position);
+            const pageActual = this.getActualL2File();
+            if (pageActual) {
+                const isLocked = this.isEditorLocked(pageActual);
+                if (isLocked) this.lockEditorForFile(pageActual);
+                else this.unlockEditorForFile(pageActual);
+                this.toogleOverlayLoading(isLocked, 'Executing agent Fix...');
+            }
+
             if (this.horizontalSpliter && (this.horizontalSpliter as any).resizeItens) (this.horizontalSpliter as any).resizeItens();
             this.loading = false;
         };
@@ -1071,34 +1083,26 @@ export class ServiceSource100554 extends ServiceBase {
                 data.storFile.status = 'changed';
             }
 
-            if (data.storFile.extension === '.less' || data.storFile.extension === '.html') {
+            if (['.less', '.html', '.defs.ts', '.test.ts'].includes(data.storFile.extension)) {
 
                 const keyToModel = mls.editor.getKeyModel(data.storFile.project, data.storFile.shortName);
                 if (!mls.editor.models[keyToModel]) return false;
 
                 if (data.storFile.extension === '.html') {
                     mls.editor.models[keyToModel].html?.model.dispose();
-                    delete mls.editor.models[keyToModel].html
+                    delete mls.editor.models[keyToModel].html;
                 }
                 if (data.storFile.extension === '.less') {
                     mls.editor.models[keyToModel].style?.model.dispose();
-                    delete mls.editor.models[keyToModel].style
+                    delete mls.editor.models[keyToModel].style;
                 }
-
-            }
-
-            if (data.storFile.extension === '.test.ts' || data.storFile.extension === '.defs.ts') {
-
-                const keyToModel = mls.editor.getKeyModel(data.storFile.project, data.storFile.shortName);
-                if (!mls.editor.models[keyToModel]) return false;
-
                 if (data.storFile.extension === '.test.ts') {
                     mls.editor.models[keyToModel].test?.model.dispose();
-                    delete mls.editor.models[keyToModel].test
+                    delete mls.editor.models[keyToModel].test;
                 }
                 if (data.storFile.extension === '.defs.ts') {
                     mls.editor.models[keyToModel].defs?.model.dispose();
-                    delete mls.editor.models[keyToModel].defs
+                    delete mls.editor.models[keyToModel].defs;
                 }
 
             }
@@ -1151,14 +1155,9 @@ export class ServiceSource100554 extends ServiceBase {
         const position: 'left' | 'right' | 'all' = this.getPosition(modelBaseTS.model.id, 'ts');
         storFile.hasError = hasError;
         this.toogleIconsError(position);
+        this.updateActionBasedOnError();
 
         if (!hasError) monaco.editor.setModelMarkers(modelBaseTS.model, 'markerSource', []);
-
-        if (hasError) {
-            this.setErrorOnEditor(modelBaseTS);
-            this.dispatchEventStatusOrErrorChanged(position, storFile);
-            return;
-        }
 
         const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
 
@@ -1170,6 +1169,12 @@ export class ServiceSource100554 extends ServiceBase {
         } else {
             if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
             await mls.stor.localStor.setContent(storFile, await this.getValueInfo(modelBaseTS));
+        }
+
+        if (hasError) {
+            this.setErrorOnEditor(modelBaseTS);
+            this.dispatchEventStatusOrErrorChanged(position, storFile);
+            return;
         }
 
         if (changed) {
@@ -1265,13 +1270,10 @@ export class ServiceSource100554 extends ServiceBase {
             // in page, ex About, prepare model to after close hamburger
             this._ed1.setModel(model);
         }
+
         this.updatedMSizeEditor();
         this.restaureViewState();
-
-        if ((model as any).needFormat && this._ed1) {
-            (this._ed1 as any).getAction('editor.action.formatDocument').run();
-            (model as any).needFormat = false;
-        }
+        this._formatIfNeeded(model as FormattableModel);
 
         return true;
     }
@@ -1308,6 +1310,15 @@ export class ServiceSource100554 extends ServiceBase {
 
 
             this._ed1.onDidChangeCursorPosition((e) => {
+
+                const pageActual = this.getActualL2File();
+                if (pageActual) {
+                    const isLocked = this.isEditorLocked(pageActual);
+                    if (isLocked) {
+                        this._ed1?.updateOptions({ readOnly: true });
+                        return;
+                    }
+                }
 
                 this._ed1?.updateOptions({ readOnly: false });
 
@@ -1362,6 +1373,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (!this.editorEl) return;
 
         this._ed1 = monaco.editor.create(this.editorEl, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
+        this.updateActionBasedOnError();
 
         (this.editorEl as any)['mlsEditor'] = this._ed1;
         mls.editor.instances[this.confE] = this._ed1;
@@ -1372,6 +1384,124 @@ export class ServiceSource100554 extends ServiceBase {
         this.createModelConf('// loading ...'); // model 
         // global routines dont need this._ed1
         await this.createModelTS_testFile();
+    }
+
+    private actionAgentFix: monaco.IDisposable | undefined;
+
+    private addFixAction() {
+
+        if (!this._ed1) return;
+        this.actionAgentFix = (this._ed1).addAction({
+            id: "action-agent-fix",
+            label: "Fix(agentFix)",
+            keybindings: [
+                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyM // Ctrl+M
+            ],
+
+            contextMenuGroupId: "Fix",
+            contextMenuOrder: 1.5,
+            run: (ed: monaco.editor.IStandaloneCodeEditor) => {
+                this.fireAgentFix();
+            }
+        });
+    }
+
+    private lockEditorForFile(page: string) {
+        this.lockMap.set(page, true);
+        if (this._ed1) this._ed1.updateOptions({ readOnly: true });
+    }
+
+    private isEditorLocked(fileId: string): boolean {
+        return this.lockMap.get(fileId) === true;
+    }
+
+    private unlockEditorForFile(fileId: string) {
+        this.lockMap.set(fileId, false);
+        this._ed1?.updateOptions({ readOnly: false });
+    }
+
+    private removeFixAction() {
+        if (!this._ed1) return;
+        const actions: Map<string, any> = (this._ed1 as any)._actions;
+        if (actions && actions.has('action-agent-fix')) actions.delete('action-agent-fix');
+        if (this.actionAgentFix) this.actionAgentFix.dispose();
+    }
+
+    private updateActionBasedOnError() {
+
+        if (!this._ed1) return;
+        if (!this.activeModels) return;
+
+        this.removeFixAction();
+
+        const markersTs = this.activeModels.ts ? monaco.editor.getModelMarkers({ resource: this.activeModels.ts.model.uri }) : [];
+        const markersHtml = this.activeModels.html ? monaco.editor.getModelMarkers({ resource: this.activeModels.html.model.uri }) : [];
+        const markersLess = this.activeModels.style ? monaco.editor.getModelMarkers({ resource: this.activeModels.style.model.uri }) : [];
+        const markersErrorsTS = markersTs.some(marker => marker.severity === monaco.MarkerSeverity.Error);
+        const markersErrorsHTML = markersHtml.some(marker => marker.severity === monaco.MarkerSeverity.Error);
+        const markersErrorsLess = markersLess.some(marker => marker.severity === monaco.MarkerSeverity.Error);
+        const compileErrorsTs = ((this.activeModels.ts?.compilerResults?.errors?.length || 0) > 0)
+
+        let hasErrors = compileErrorsTs || markersErrorsTS || markersErrorsHTML || markersErrorsLess;
+
+        if (hasErrors) {
+            this.addFixAction();
+        }
+
+    }
+
+    private getActualL2File() {
+        if (!mls.actual[2] || !(mls.actual[2] as any)[this.position]) return;
+        const actual = (mls.actual[2] as any)[this.position];
+        const { project, shortName } = actual;
+        if (!project || !shortName) return;
+        const page = `_${project}_${shortName}`
+        return page;
+    }
+
+
+    private async fireAgentFix() {
+
+        const page = this.getActualL2File();
+        if (!page) return;
+        const pref = loadChatPreferences();
+
+        const modeBy = {
+            'icTs': 'typescript',
+            'icHTML': 'html',
+            'icStyle': 'less',
+            'icTest': '',
+            'icDefs': '',
+        }
+
+        const data = { page, prompt: 'Fix errors in files', position: this.position, mode: modeBy[this.mode] }
+        if (!pref.threadMaintenance) {
+            this.setError('Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences');
+            return;
+        }
+
+        const userId = getUserIdLocalStorage();
+        const threadId = pref.threadMaintenance;
+        if (!userId) return;
+        this.lockEditorForFile(page);
+        this.toogleOverlayLoading(true, 'Executing agent Fix...');
+        const context = getTemporaryContext(threadId, userId, '@@ agentFix ' + JSON.stringify(data));
+        const agent = createAgent();
+        await agent.beforePrompt(context);
+
+    }
+
+    private toogleOverlayLoading(show: boolean, msg?: string) {
+        if (!this.overlayLoading) return;
+        if (show) {
+            this.overlayLoading.style.display = 'flex';
+            this.textOverlayLoading = msg || '';
+
+        } else {
+            this.overlayLoading.style.display = 'none';
+            this.textOverlayLoading = '';
+
+        }
     }
 
     private initMonaco_EditorDiff() {
@@ -2006,6 +2136,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 const enhancementInstanceLess = await import('./_100554_enhancementStyle')
                 if (enhancementInstanceLess && this.activeModels) await enhancementInstanceLess.onAfterChange(this.activeModels);
 
+                await mls.l2.less.compileStyle(modelBase);
+
                 modelValue = removeTokensFromSource(modelValue);
                 if (this.activeModels && this.activeModels.ts) {
 
@@ -2048,7 +2180,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (ext === '.html') this.dispatchEventStatusOrErrorChanged(position, storFile);
             else this.dispatchEventStyleChanged(position, storFile);
             this.toogleIconsError(position);
-
+            this.updateActionBasedOnError();
         }, 400);
     };
 
@@ -2144,6 +2276,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             let position = this.getPosition(modelBase.model.id, 'defs');
             this.dispatchEventTsTestChanged(position, storFile);
             this.toogleIconsError(position);
+            this.updateActionBasedOnError();
         })
     };
 
@@ -2248,6 +2381,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             let position = this.getPosition(modelBase.model.id, 'defs');
             this.dispatchEventTsDefsChanged(position, storFile);
             this.toogleIconsError(position);
+            this.updateActionBasedOnError();
 
         })
     };
@@ -2331,14 +2465,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private getPosition(modeIld: string, tp: 'ts' | 'html' | 'defs' | 'style' | 'test'): 'left' | 'right' | 'all' {
         let position: 'left' | 'right' | 'all';
-
         const idLeft = mls.editor.editors.left?.[tp]?.model.id;
         const idRight = mls.editor.editors.right?.[tp]?.model.id;
         const idActive = modeIld;
         if (idLeft === idActive && idRight === idActive) position = 'all';
         else if (idLeft === idActive) position = 'left';
         else position = 'right';
-
         return position;
     }
 
@@ -2616,10 +2748,21 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     // Ica States
 
     handleIcaStateChange(_key: string, _value: any) {
+
         const keyState = `serviceSource.${this.position}`;
         if (!_key.startsWith(keyState)) return;
         if (_key === `${keyState}.selectedMode` && ['icTs', 'icStyle', 'icHTML', 'icTest', 'History'].includes(_value)) {
             this.changeMode(_value);
+        }
+
+        if (_key === `${keyState}.lockMap` && _value) {
+            const pageActual = this.getActualL2File();
+            if (pageActual) {
+                const isLocked = this.isEditorLocked(pageActual);
+                if (isLocked) this.lockEditorForFile(pageActual);
+                else this.unlockEditorForFile(pageActual);
+                this.toogleOverlayLoading(isLocked, 'Executing agent Fix...');
+            }
         }
     }
 
@@ -2648,20 +2791,26 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 left: {
                     selectedMode: 'icTS',
                     historyLanguage: 'typescript',
-                    service: mls.services['100554_serviceSource_left']
+                    service: mls.services['100554_serviceSource_left'],
+                    lockMap: new Map<string, boolean>()
 
                 },
                 right: {
                     selectedMode: 'icTS',
                     historyLanguage: 'typescript',
-                    service: mls.services['100554_serviceSource_right']
+                    service: mls.services['100554_serviceSource_right'],
+                    lockMap: new Map<string, boolean>()
+
                 },
 
             };
         }
 
+
         this.setAttribute('selectedMode', `{{serviceSource.${this.position}.selectedMode}}`);
         this.setAttribute('historyLanguage', `{{serviceSource.${this.position}.historyLanguage}}`);
+        this.setAttribute('lockMap', `{{serviceSource.${this.position}.lockMap}}`);
+
         super.connectedCallback();
 
     }
@@ -2677,6 +2826,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         this.msg = messages[lang];
         this.style.display = 'block';
         return html`
+             <div class="overlay-loading"> <span>${this.textOverlayLoading} <span class="loader"></span> </span> </div>
              <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="#1e1e1e">
                 <collab-spliter-horizontal-var-fixed-100554
                     slot="top"

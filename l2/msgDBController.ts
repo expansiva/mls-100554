@@ -256,6 +256,19 @@ export async function updateThreads(threadsFromServer: mls.msg.Thread[]): Promis
     });
 }
 
+export async function getThread(threadId: string): Promise<mls.msg.ThreadPerformanceCache | undefined> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("threads", "readonly");
+        const store = tx.objectStore("threads");
+        const request = store.get(threadId);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Erro ao buscar thread");
+    });
+}
+
 export async function listUsers(): Promise<mls.msg.User[]> {
     const db = await openDB();
     const tx = db.transaction("users", "readonly");

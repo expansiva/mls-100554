@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation } from './_100554_collabIcons';
-import { createAgent } from './_100554_agentPlanner1';
+import { IAgent } from './_100554_aiAgentBase';
 import { getTemporaryContext, formatTimestamp, getNextResultStep } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, updateThreads, getMessagesByThreadId } from './_100554_msgDBController';
 
@@ -41,6 +41,10 @@ const messages: { [key: string]: MessageType } = {
     'pt': message_pt
 }
 /// **collab_i18n_end**
+
+const AGENTDEFAULT = 'agentPlanner1';
+const PROJECTDEFAULT = 100554;
+
 
 @customElement('collab-messages-chat-100554')
 export class CollabMessagesChat100554 extends StateLitElement {
@@ -283,9 +287,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
 
     }
-
+    // .allUsers=${this.actualThread?.users || []}
     private renderPrompt() {
-        return html`<collab-messages-prompt-100554 .allUsers=${this.actualThread?.users || []} .onSend=${this.handleSend.bind(this)} ></collab-messages-prompt-100554>`
+        return html`<collab-messages-prompt-100554  acceptAutoCompleteAgents="true" acceptAutoCompleteUser="true" threadId=${this.actualThread?.thread.threadId} .onSend=${this.handleSend.bind(this)} ></collab-messages-prompt-100554>`
     }
 
     private renderListThreads() {
@@ -525,7 +529,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.activeScenerie = 'threadDetails';
     }
 
-    private async handleSend(value: string, opt: { isSpecialMention: boolean }) {
+    private async handleSend(value: string, opt: { isSpecialMention: boolean, agentName: string }) {
 
         this.isSystemChangeScroll = true;
 
@@ -533,7 +537,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             if (!opt.isSpecialMention) {
                 await this.addMessage(value);
             } else {
-                await this.addMessageIA(value);
+                await this.addMessageIA(value, opt.agentName);
             }
         } catch (err: any) {
             throw new Error(err.message);
@@ -574,15 +578,20 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.addMessage(`IA:  ${value} `);
     }
 
-    private async addMessageIA(prompt: string) {
+    private async addMessageIA(prompt: string, agentName: string) {
 
         if (!this.userId || !this.actualThread) return;
         const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, prompt);
-        const agent = createAgent();
+        let agentToCall = AGENTDEFAULT;
+        if (agentName) agentToCall = agentName;
+
         const message: IMessage = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
-        context.message = message;
 
         try {
+            const moduleAgent = await import(`/_${PROJECTDEFAULT}_${agentToCall}`);
+            if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent')
+            const agent: IAgent = moduleAgent.createAgent()
+            context.message = message;
             await agent.beforePrompt(context);
         } catch (err: any) {
             console.error('Error on send message:' + err.message);
@@ -756,7 +765,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private onTaskChange = async (e: Event) => {
+
         const customEvent = e as CustomEvent;
+
+        console.info({ onTaskChange: customEvent.detail.context.task })
+
         const task: mls.msg.TaskData = customEvent.detail.context.task;
         await this.updateMessageAI(customEvent.detail.context, false, customEvent.detail.oldContextCreateAt);
         if (task) await addOrUpdateTask(customEvent.detail.context.task);
