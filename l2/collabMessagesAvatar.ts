@@ -1,6 +1,6 @@
 /// <mls shortName="collabMessagesAvatar" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html, css, svg, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { collab_user } from './_100554_collabIcons';
@@ -21,11 +21,13 @@ export class CollabMessagesAvatar100554 extends StateLitElement {
     }
 
     render() {
-        
+
+        const isSvg = this.avatar.trim().startsWith('<svg');
+
         return html`
         <div class="avatar">
             ${this.avatar
-                ? html`<img src="${this.avatar}" alt="Avatar" />`
+                ? isSvg ? html`${unsafeHTML(this.avatar)}` : html`<img src="${this.avatar}" alt="Avatar" />`
                 : html`<div class="avatar-placeholder">${collab_user}</div>`
             }
         </div>`;
