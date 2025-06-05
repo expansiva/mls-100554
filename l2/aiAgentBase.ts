@@ -10,7 +10,7 @@ export interface IAgent {
   beforeClarification?(context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null>;
   afterClarification?(context: mls.msg.ExecutionContext, stepId: number, data: object): Promise<void>;
   afterTool?(context: mls.msg.ExecutionContext, stepId: number): Promise<void>;
-  replayForSupport?(payload: mls.msg.AIPayload[]): Promise<void>;
+  replayForSupport?(task: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void>;
 }
 
 

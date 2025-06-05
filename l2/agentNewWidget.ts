@@ -37,7 +37,8 @@ export function createAgent(): IAgent {
         async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _afterPrompt(context);
         },
-        async replayForSupport(payload: mls.msg.AIPayload[]): Promise<void> {
+        async replayForSupport(context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> {
+            console.info(context);
             return _replayForSupport(payload); 
         },
     };
