@@ -296,39 +296,43 @@ export function getUserIdLocalStorage(): string | null {
 }
 
 export function notifyTaskChange(context: mls.msg.ExecutionContext, oldContextCreateAt?: string): void {
+  const scopeWindow = window?.top ? window.top : window;
   const event = new CustomEvent('task-change', {
     detail: { context, oldContextCreateAt },
     bubbles: true,
     composed: true
   });
-  window.dispatchEvent(event);
+  scopeWindow.dispatchEvent(event);
 }
 
 export function notifyTaskCompleted(context: mls.msg.ExecutionContext, result?: string): void {
+  const scopeWindow = window?.top ? window.top : window;
   const event = new CustomEvent('task-completed', {
     detail: { context, result },
     bubbles: true,
     composed: true
   });
-  window.dispatchEvent(event);
+  scopeWindow.dispatchEvent(event);
 }
 
 export function notifyThreadChange(thread: mls.msg.Thread): void {
+  const scopeWindow = window?.top ? window.top : window;
   const event = new CustomEvent('thread-change', {
     detail: thread,
     bubbles: true,
     composed: true
   });
-  window.dispatchEvent(event);
+  scopeWindow.dispatchEvent(event);
 }
 
 
 export function dispatchDetailsTaskClose(): void {
+  const scopeWindow = window?.top ? window.top : window;
   const event = new CustomEvent('task-details-close', {
     bubbles: true,
     composed: true
   });
-  window.dispatchEvent(event);
+  scopeWindow.dispatchEvent(event);
 }
 
 
