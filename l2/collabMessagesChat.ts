@@ -6,7 +6,6 @@ import { collab_chevron_left, collab_gear, collab_translate, collab_circle_excla
 import { IAgent } from './_100554_aiAgentBase';
 import { getTemporaryContext, formatTimestamp, getNextResultStep } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, updateThreads, getMessagesByThreadId } from './_100554_msgDBController';
-
 import { loadChatPreferences } from './_100554_collabMessageHelper';
 import './_100554_collabMessagesTaskDetails';
 import './_100554_collabMessagesTask';
@@ -14,7 +13,7 @@ import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
 import './_100554_collabMessagesThreadDetails';
 
-import { IChatPreferences } from './_100554_collabMessageHelper';
+import { IChatPreferences, AGENTDEFAULT, PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
 import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt';
 
@@ -41,10 +40,6 @@ const messages: { [key: string]: MessageType } = {
     'pt': message_pt
 }
 /// **collab_i18n_end**
-
-const AGENTDEFAULT = 'agentPlanner1';
-const PROJECTDEFAULT = 100554;
-
 
 @customElement('collab-messages-chat-100554')
 export class CollabMessagesChat100554 extends StateLitElement {
@@ -588,7 +583,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const message: IMessage = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
 
         try {
-            const moduleAgent = await import(`/_${PROJECTDEFAULT}_${agentToCall}`);
+            const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentToCall}`);
             if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent')
             const agent: IAgent = moduleAgent.createAgent()
             context.message = message;
@@ -767,17 +762,23 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private onTaskChange = async (e: Event) => {
 
         const customEvent = e as CustomEvent;
-
-        console.info({ onTaskChange: customEvent.detail.context.task })
-
+        const message: mls.msg.Message = customEvent.detail.context.message;
         const task: mls.msg.TaskData = customEvent.detail.context.task;
+        const thId = message?.threadId;
+        if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
         await this.updateMessageAI(customEvent.detail.context, false, customEvent.detail.oldContextCreateAt);
         if (task) await addOrUpdateTask(customEvent.detail.context.task);
+        
     };
 
     private onTaskCompleted = async (e: Event) => {
+
         const customEvent = e as CustomEvent;
+        const message: mls.msg.Message = customEvent.detail.context.message;
         const task: mls.msg.TaskData = customEvent.detail.context.task;
+        const thId = message?.threadId;
+        if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
+
         if (task.status === 'done') {
             this.addMessageResponse(task);
         }

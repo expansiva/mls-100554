@@ -14,6 +14,8 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
 
     @query('textarea') textArea: HTMLTextAreaElement | undefined;
     @state() text: string = '';
+    @state() actualMention?: IMentions;
+
     @state() mentionActive = false;
     @state() mentionQuery = '';
     @state() mentionSuggestions: IMentions[] = [];
@@ -146,7 +148,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                     <li 
                         class="${i === this.mentionIndex ? 'active' : ''}"
                         title=${s.description}
-                        @click=${() => this.selectMention(s.value, s.type)}
+                        @click=${() => this.selectMention(s)}
                     >
                         ${s.avatar_url ? html`<collab-messages-avatar-100554 width="20px" height="20px" avatar=${s.avatar_url}></collab-messages-avatar-100554>` : ''}
                         ${s.text}
@@ -237,35 +239,34 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                     (this.mentionIndex - 1 + this.mentionSuggestions.length) % this.mentionSuggestions.length;
             } else if (e.key === 'Tab') {
                 e.preventDefault();
-                this.selectMention(mention.value, mention.type);
+                this.selectMention(mention);
             } else if (e.key === 'Enter') {
                 if (this.mentionSuggestions.length > 0) {
                     e.preventDefault();
-                    this.selectMention(mention.value, mention.type);
+                    this.selectMention(mention);
                 }
             }
         }
     }
 
-    private selectMention(suggestion: string, type: 'agent' | 'user') {
+    private selectMention(suggestion: IMentions) {
         if (!this.textArea) return;
         const cursorPos = this.textArea.selectionStart;
         const beforeCursor = this.text.slice(0, cursorPos);
         const afterCursor = this.text.slice(cursorPos);
-
-        const prefix = type === 'agent' ? '@@' : '@';
-
-        const newText = beforeCursor.replace(/@{1,2}[a-zA-Z]*$/, `${prefix}${suggestion} `) + afterCursor;
-
+        const prefix = suggestion.type === 'agent' ? '@@' : '@';
+        const newText = beforeCursor.replace(/@{1,2}[a-zA-Z]*$/, `${prefix}${suggestion.text} `) + afterCursor;
         this.text = newText;
         this.mentionActive = false;
         this.mentionSuggestions = [];
         this.mentionQuery = '';
         this.mentionIndex = 0;
 
+        this.actualMention = suggestion;
+
         setTimeout(() => {
             if (!this.textArea) return;
-            const newCursorPos = beforeCursor.replace(/@{1,2}[a-zA-Z]*$/, `${prefix}${suggestion} `).length;
+            const newCursorPos = beforeCursor.replace(/@{1,2}[a-zA-Z]*$/, `${prefix}${suggestion.text} `).length;
             this.textArea.selectionStart = this.textArea.selectionEnd = newCursorPos;
             this.textArea.focus();
         });
@@ -278,18 +279,13 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         let isSpecialMention = false;
         let agentName: string | undefined;
 
-        if (finalText.startsWith('@@') && this.acceptAutoCompleteAgents) {
+        if (finalText.startsWith('@@') && this.acceptAutoCompleteAgents && this.actualMention) {
             isSpecialMention = true;
-            const regex = /@@([A-Za-z0-9_]+)/;
-            const match = finalText.match(regex);
-            if (match) agentName = match[1];
+            agentName = this.actualMention.value;
+            // const regex = /@@([A-Za-z0-9_]+)/;
+            /// const match = this.actualMention.value.trim().match(regex);
+            ///if (match) agentName = match[1];
         }
-
-        console.info({
-            text: finalText.trim(),
-            isSpecialMention,
-            agentName
-        })
 
         if (this.onSend && typeof this.onSend === 'function') {
             this.onSend(finalText.trim(), { isSpecialMention, agentName });
