@@ -96,26 +96,33 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (this.isModeHistory && this.menu.selectTool) this.menu.selectTool('History');
 
-        if (op === EToolsSource.icTs) this.showActiveModel();
+        if (op === EToolsSource.icTs) {
+            this.showActiveModel();
+            this.updateActionBasedOnError('ts');
+        }
         if (op === EToolsSource.icHTML) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
             this.createOrShowModelHtmlCssTestDefs(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.html');
+            this.updateActionBasedOnError('html');
 
         }
         if (op === EToolsSource.icStyle) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
             this.createOrShowModelHtmlCssTestDefs(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.less');
+            this.updateActionBasedOnError('style');
+
         }
 
         if (op === EToolsSource.icTest) {
             if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
             this.createOrShowModelTsTest(this.activeModels.ts.storFile.shortName, this.activeModels.ts.storFile.project, true);
+            this.updateActionBasedOnError('test');
         }
 
         if (op === EToolsSource.icDefs) {
             if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
             this.createOrShowModelTsDefs(this.activeModels.ts.storFile.shortName, this.activeModels.ts.storFile.project, true);
-
+            this.updateActionBasedOnError('defs');
         }
     }
 
@@ -783,7 +790,7 @@ export class ServiceSource100554 extends ServiceBase {
                 if (!undoType || undoType === 'all') {
                     await this.deleteFiles(storFileHTML, storFile, storFileCss, storFileTsTest, storFileTsDefs);
                     await mls.stor.localDB.removePrjInfo(storFile.project);
-            
+
                 } else if (undoType === '.ts') {
                     await this.deleteFiles(undefined, storFile, undefined, undefined, undefined);
                 } else if (undoType === '.html') {
@@ -799,8 +806,10 @@ export class ServiceSource100554 extends ServiceBase {
                 return;
             }
 
+
             if (!undoType || undoType === 'all') {
                 await this.undoFiles(storFileHTML, storFile, storFileCss, storFileTsTest, storFileTsDefs, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, keyFileTsDefs, 'all');
+                await mls.stor.localDB.removePrjInfo(storFile.project);
             } else if (undoType === '.ts') {
                 await this.undoFiles(undefined, storFile, undefined, undefined, undefined, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, keyFileTsDefs, 'ts');
             } else if (undoType === '.html') {
@@ -1167,7 +1176,7 @@ export class ServiceSource100554 extends ServiceBase {
         const position: 'left' | 'right' | 'all' = this.getPosition(modelBaseTS.model.id, 'ts');
         storFile.hasError = hasError;
         this.toogleIconsError(position);
-        this.updateActionBasedOnError();
+        this.updateActionBasedOnError('ts');
 
         if (!hasError) monaco.editor.setModelMarkers(modelBaseTS.model, 'markerSource', []);
 
@@ -1323,17 +1332,7 @@ export class ServiceSource100554 extends ServiceBase {
 
             this._ed1.onDidChangeCursorPosition((e) => {
 
-                const pageActual = this.getActualL2File();
-                if (pageActual) {
-                    const isLocked = this.isEditorLocked(pageActual);
-                    if (isLocked) {
-                        this._ed1?.updateOptions({ readOnly: true });
-                        return;
-                    }
-                }
-
                 this._ed1?.updateOptions({ readOnly: false });
-
                 clearTimeout(this.timeHtmlChangeCursor);
                 if (!this._ed1 || !this.menu.tabs) return;
                 const model = this._ed1.getModel();
@@ -1385,7 +1384,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (!this.editorEl) return;
 
         this._ed1 = monaco.editor.create(this.editorEl, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
-        this.updateActionBasedOnError();
+        this.updateActionBasedOnError('ts');
 
         (this.editorEl as any)['mlsEditor'] = this._ed1;
         mls.editor.instances[this.confE] = this._ed1;
@@ -1439,23 +1438,26 @@ export class ServiceSource100554 extends ServiceBase {
         if (this.actionAgentFix) this.actionAgentFix.dispose();
     }
 
-    private updateActionBasedOnError() {
+    private updateActionBasedOnError(mode: 'ts' | 'html' | 'style' | 'defs' | 'test') {
 
         if (!this._ed1) return;
         if (!this.activeModels) return;
 
         this.removeFixAction();
 
-        const markersTs = this.activeModels.ts ? monaco.editor.getModelMarkers({ resource: this.activeModels.ts.model.uri }) : [];
-        const markersHtml = this.activeModels.html ? monaco.editor.getModelMarkers({ resource: this.activeModels.html.model.uri }) : [];
-        const markersLess = this.activeModels.style ? monaco.editor.getModelMarkers({ resource: this.activeModels.style.model.uri }) : [];
-        const markersErrorsTS = markersTs.some(marker => marker.severity === monaco.MarkerSeverity.Error);
-        const markersErrorsHTML = markersHtml.some(marker => marker.severity === monaco.MarkerSeverity.Error);
-        const markersErrorsLess = markersLess.some(marker => marker.severity === monaco.MarkerSeverity.Error);
-        const compileErrorsTs = ((this.activeModels.ts?.compilerResults?.errors?.length || 0) > 0)
+        if (mode === 'test' || mode === 'defs') return;
 
-        let hasErrors = compileErrorsTs || markersErrorsTS || markersErrorsHTML || markersErrorsLess;
+        const markers = this.activeModels[mode] ? monaco.editor.getModelMarkers({ resource: this.activeModels[mode]?.model.uri }) : [];
+        const markersErrors = markers.some(marker => marker.severity === monaco.MarkerSeverity.Error);
+        let compileErrors: boolean = false;
 
+        if (mode === 'ts') {
+            compileErrors = ((this.activeModels.ts?.compilerResults?.errors?.length || 0) > 0)
+        } else if (mode === 'style') {
+            compileErrors = ((this.activeModels.style?.styleResults?.errors?.length || 0) > 0)
+        }
+
+        let hasErrors = compileErrors || markersErrors;
         if (hasErrors) {
             this.addFixAction();
         }
@@ -2148,11 +2150,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 const enhancementInstanceLess = await import('./_100554_enhancementStyle')
                 if (enhancementInstanceLess && this.activeModels) await enhancementInstanceLess.onAfterChange(this.activeModels);
 
-                await mls.l2.less.compileStyle(modelBase);
+                mls.l2.less.compileStyle(modelBase);
 
                 modelValue = removeTokensFromSource(modelValue);
                 if (this.activeModels && this.activeModels.ts) {
-
                     if (this.activeModels.ts.compilerResults) {
                         this.activeModels.ts.compilerResults.modelNeedCompile = true;
                     }
@@ -2192,7 +2193,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (ext === '.html') this.dispatchEventStatusOrErrorChanged(position, storFile);
             else this.dispatchEventStyleChanged(position, storFile);
             this.toogleIconsError(position);
-            this.updateActionBasedOnError();
+            this.updateActionBasedOnError(mode);
         }, 400);
     };
 
@@ -2285,10 +2286,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: modelValue });
             }
 
-            let position = this.getPosition(modelBase.model.id, 'defs');
+            let position = this.getPosition(modelBase.model.id, 'test');
             this.dispatchEventTsTestChanged(position, storFile);
             this.toogleIconsError(position);
-            this.updateActionBasedOnError();
+            this.updateActionBasedOnError('test');
         })
     };
 
@@ -2393,7 +2394,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             let position = this.getPosition(modelBase.model.id, 'defs');
             this.dispatchEventTsDefsChanged(position, storFile);
             this.toogleIconsError(position);
-            this.updateActionBasedOnError();
+            this.updateActionBasedOnError('defs');
 
         })
     };
@@ -2763,6 +2764,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
         const keyState = `serviceSource.${this.position}`;
         if (!_key.startsWith(keyState)) return;
+
         if (_key === `${keyState}.selectedMode` && ['icTs', 'icStyle', 'icHTML', 'icTest', 'History'].includes(_value)) {
             this.changeMode(_value);
         }

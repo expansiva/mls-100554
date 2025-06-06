@@ -5,6 +5,8 @@ import { forceServiceInstance } from './_100554_libCommom';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { createNewFile } from "./_100554_pluginNewFileBase";
 import { descriptionForPrompt } from "./_100554_icaBaseDescription";
+import { initCompileMonaco } from "./_100554_collabInit";
+
 import { preferModelType, systemComponentsInstruction, systemTokensLessInstruction } from './_100554_aiPrompts';
 
 import {
@@ -134,8 +136,11 @@ async function addFile(context: mls.msg.ExecutionContext) {
 
 }
 
-async function createNewFiles(content:{shortName:string, html:string, ts:string, less:string}) {
-    await forceServiceInstance(2, '_100554_serviceSource')
+async function createNewFiles(content: { shortName: string, html: string, ts: string, less: string }) {
+    
+    await forceServiceInstance(2, '_100554_serviceSource');
+    const actualProject = mls.actual[5].project;
+    if(actualProject) await initCompileMonaco(actualProject);
 
     const pageName = content.shortName;
     const fileHTML = content.html;
