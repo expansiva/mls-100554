@@ -279,15 +279,13 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         let isSpecialMention = false;
         let agentName: string | undefined;
 
-        if (finalText.startsWith('@@') && this.acceptAutoCompleteAgents && this.actualMention) {
+        if (finalText.startsWith('@@')) {
             isSpecialMention = true;
-            agentName = this.actualMention.value;
-            // const regex = /@@([A-Za-z0-9_]+)/;
-            /// const match = this.actualMention.value.trim().match(regex);
-            ///if (match) agentName = match[1];
+            if (this.actualMention) agentName = this.actualMention.value;
         }
 
         if (this.onSend && typeof this.onSend === 'function') {
+
             this.onSend(finalText.trim(), { isSpecialMention, agentName });
         }
 
