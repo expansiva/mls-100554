@@ -776,16 +776,28 @@ export class ServiceSource100554 extends ServiceBase {
             const storFileCss = getStorFileCss();
             const storFileTsTest = getStorFileTsTest();
             const storFileTsDefs = getStorFileTsDefs();
-
+            const undoType = (fileAction as any).undoType;
 
             if (storFile.status === 'new') {
-                await this.deleteFiles(storFileHTML, storFile, storFileCss, storFileTsTest, storFileTsDefs);
-                await mls.stor.localDB.removePrjInfo(storFile.project);
+
+                if (!undoType || undoType === 'all') {
+                    await this.deleteFiles(storFileHTML, storFile, storFileCss, storFileTsTest, storFileTsDefs);
+                    await mls.stor.localDB.removePrjInfo(storFile.project);
+            
+                } else if (undoType === '.ts') {
+                    await this.deleteFiles(undefined, storFile, undefined, undefined, undefined);
+                } else if (undoType === '.html') {
+                    await this.deleteFiles(storFileHTML, undefined, undefined, undefined, undefined);
+                } else if (undoType === '.less') {
+                    await this.deleteFiles(undefined, undefined, storFileCss, undefined, undefined);
+                } else if (undoType === '.test.ts') {
+                    await this.deleteFiles(undefined, undefined, undefined, storFileTsTest, undefined);
+                } else if (undoType === '.defs.ts') {
+                    await this.deleteFiles(undefined, undefined, undefined, undefined, storFileTsDefs);
+                }
+
                 return;
-
             }
-
-            const undoType = (fileAction as any).undoType;
 
             if (!undoType || undoType === 'all') {
                 await this.undoFiles(storFileHTML, storFile, storFileCss, storFileTsTest, storFileTsDefs, keyFilesHTML, keyFiles, keyFilesCss, keyFileTsTest, keyFileTsDefs, 'all');
@@ -838,7 +850,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async deleteFiles(
         storFileHTML: mls.stor.IFileInfo | undefined,
-        storFileTS: mls.stor.IFileInfo,
+        storFileTS: mls.stor.IFileInfo | undefined,
         storFileCss: mls.stor.IFileInfo | undefined,
         storFileTsTest: mls.stor.IFileInfo | undefined,
         storFileTsDefs: mls.stor.IFileInfo | undefined

@@ -38,7 +38,6 @@ export function createAgent(): IAgent {
             return _afterPrompt(context);
         },
         async replayForSupport(context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> {
-            console.info(context);
             return _replayForSupport(payload); 
         },
     };
@@ -57,11 +56,13 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         if (!step) {
             throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
         }
+
         context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
 
         if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
         const data = JSON.parse(step.prompt);
         if (!('json' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
+        
         const inputs = await getPrompts(data.json, data.prompt, step.rags);
 
         await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
@@ -82,12 +83,14 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 const _replayForSupport = async (payload: mls.msg.AIPayload[]): Promise<void> => {
 
-    const step = payload[0] as any;
+    const step = payload[0] as mls.msg.AIPayload;
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in create files');
 
-    if (!step.content || !step.content.html || !step.content.ts || !step.content.less || !step.content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
+    const content = (step as any).content ? (step as any).content : step.result;
 
-    await createNewFiles(step.content);
+    if (!content || !content.html || !content.ts || !content.less || !content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
+
+    await createNewFiles(content);
 
 
 }
@@ -95,15 +98,17 @@ const _replayForSupport = async (payload: mls.msg.AIPayload[]): Promise<void> =>
 async function addFile(context: mls.msg.ExecutionContext) {
 
     if (!context || !context.task) throw new Error('Not found context to create files');
-    const step = getNextPendentStep(context.task) as any;
+    const step = getNextPendentStep(context.task);
 
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in create files');
 
-    if (!step.content || !step.content.html || !step.content.ts || !step.content.less || !step.content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
+    const content = (step as any).content ? (step as any).content : step.result;
 
-    await createNewFiles(step.content);
+    if (!content || !content.html || !content.ts || !content.less || !content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
 
-    const rc = { shortName: step.content.shortName, project }
+    await createNewFiles(content);
+
+    const rc = { shortName: content.shortName, project }
 
     const newStep: mls.msg.AIPayload = {
         agentName: 'agentGenerateWidgetShowcase',
@@ -119,13 +124,13 @@ async function addFile(context: mls.msg.ExecutionContext) {
     await addNewStep(context, step.stepId, [newStep]);
 
     let aux = '';
-    const m = mls.editor.getModels(project, step.content.pageName);
+    const m = mls.editor.getModels(project, content.pageName);
     if (m && m.ts && m.ts.compilerResults && m.ts.compilerResults.errors.length > 0) {
         aux = ', com ' + m.ts.compilerResults.errors.length + ' erros, favor verificar'
 
     }
 
-    context.task = await updateTaskTitle(context.task, "Widget created" + aux);
+    context.task = await updateTaskTitle(context.task, "Widget created " + content.pageName + aux);
 
 }
 
@@ -142,19 +147,20 @@ async function createNewFiles(content:{shortName:string, html:string, ts:string,
     );
 }
 
-export async function getPrompts(json: any, prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
+export async function getPrompts(obj: any[], prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
     if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
     const prompts: mls.msg.IAMessageInputType[] = [];
 
     prompts.push(systemMainInstruction());
     prompts.push(systemRulesInstruction());
+    prompts.push(systemObsInstruction());
     prompts.push(systemDefinitionsInstruction());
     prompts.push(systemProcessInstruction());
     prompts.push(systemOutInstruction());
     prompts.push(systemModelInstruction());
-    prompts.push(systemRequirementsUserInstruction(json));
-    prompts.push(systemDefinitionMD(json));
-    prompts.push(await systemDefinitionBaseInstruction(json));
+    prompts.push(systemRequirementsUserInstruction(obj));
+    prompts.push(systemDefinitionMD(obj));
+    prompts.push(await systemDefinitionBaseInstruction(obj));
     prompts.push(await systemTokensLessInstruction());
 
     prompts.push({
@@ -216,6 +222,41 @@ function systemRulesInstruction(): mls.msg.IAMessageInputType {
 - "Definições da Classe Base"
 - "Formato de saida"
 - "LESS TOKENS - DESIGN SYSTEM"
+`
+    }
+}
+
+
+function systemObsInstruction(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `## ATENÇÃO
+### ATENÇÃO — Uso da função repeat com tipagem correta no Lit
+1. Importações obrigatórias:
+    O import deve ser feito diretamente de 'lit', assim:
+    import { html, LitElement, repeat, TemplateResult } from 'lit';
+
+2. Uso correto da função repeat:
+    Correto:
+        \${repeat(
+            this.history,
+            ((item: mls.stor.IFileInfo) => item.shortName) as () => string,
+            ((file: mls.stor.IFileInfo, index: any) => this.renderLiItem(file, index, true)) as () => TemplateResult<1>
+        )}
+
+    Errado (sem tipagem):
+        \${repeat(
+            this.history,
+            (item: mls.stor.IFileInfo) => item.shortName,
+            (file: mls.stor.IFileInfo, index: any) => this.renderLiItem(file, index, true)
+        )}
+
+    Importante:
+    A tipagem explícita com as () => string e as () => TemplateResult<1> é necessária para que o TypeScript reconheça corretamente os tipos esperados e evite erros de compilação.
+
+3. É PROIBIDO criar função com o nome "renderOptions()", essa é uma função reservada.
+
+4. Qualquer propriedade ou variavel com a tipagem que pode ser "undefined" ou "null" deve ser verificada antes de usar-la. Isso é necessário para garantir consistência e evitar erros de execução.
 `
     }
 }
@@ -285,7 +326,7 @@ Você deve retornar um array de objetos no formato JSON. Cada objeto representa 
 \`\`\` json
 [{{
     "type": "flexible",
-    "content": { html: string, ts: string, less: string, shortName:string }
+    "result": { html: string, ts: string, less: string, shortName:string }
   },
   {
     "type": "result",
@@ -303,7 +344,7 @@ function systemModelInstruction(): mls.msg.IAMessageInputType {
 
 /// <mls shortName="widgetInputNumber" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement, ifDefined, css, repeat } from 'lit';
+import { html, LitElement, ifDefined, css, repeat, TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
 import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
@@ -365,6 +406,13 @@ export class WidgetInputNumber extends IcaFormsInputNumberBase {
         />
 
         <div class="form_error_message">\${this.error}</div>
+        <ul>
+            \${repeat(
+                ['Banana', 'Cafe'],
+                ((item: string) => item) as () => string,
+                ((item: string) => html\`<li>\${item}</li>\`) as () => TemplateResult<1>
+            )}
+        </ul>
         \`;
     }
 
@@ -388,7 +436,7 @@ export class WidgetInputNumber extends IcaFormsInputNumberBase {
     }
 }
 
-function systemRequirementsUserInstruction(req: any): mls.msg.IAMessageInputType {
+function systemRequirementsUserInstruction(req: any[]): mls.msg.IAMessageInputType {
     return {
         type: 'system',
         content: `## Requirements editável pelo usuário
@@ -399,11 +447,11 @@ ${JSON.stringify(req, null, 2)}
     }
 }
 
-function systemDefinitionMD(json: any[]): mls.msg.IAMessageInputType {
+function systemDefinitionMD(obj: any[]): mls.msg.IAMessageInputType {
 
     try {
 
-        const step = json.find((i) => i.sectionName === 'parentClass');
+        const step = obj.find((i) => i.sectionName === 'parentClass');
         if (!step) throw new Error("[systemDefinitionBaseInstruction] Not found section: parentClass");
         if (!step.widgetName) throw new Error("[systemDefinitionBaseInstruction] Not found widget in parentClass");
 
@@ -429,11 +477,11 @@ function systemDefinitionMD(json: any[]): mls.msg.IAMessageInputType {
 
 }
 
-async function systemDefinitionBaseInstruction(json: any[]): Promise<mls.msg.IAMessageInputType> {
+async function systemDefinitionBaseInstruction(obj: any[]): Promise<mls.msg.IAMessageInputType> {
 
     try {
 
-        const step = json.find((i) => i.sectionName === 'parentClass');
+        const step = obj.find((i) => i.sectionName === 'parentClass');
         if (!step) throw new Error("[systemDefinitionBaseInstruction] Not found section: parentClass");
         if (!step.widgetName) throw new Error("[systemDefinitionBaseInstruction] Not found widget in parentClass");
 
