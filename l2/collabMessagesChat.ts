@@ -106,6 +106,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
         window.removeEventListener('task-completed', this.onTaskCompleted);
         window.removeEventListener('task-details-close', this.onTaskDetailsClose);
         window.removeEventListener('thread-change', this.onThreadChange);
+        window.removeEventListener('message-send', this.onThreadChange);
+
     }
 
 
@@ -115,6 +117,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
         window.addEventListener('task-completed', this.onTaskCompleted);
         window.addEventListener('task-details-close', this.onTaskDetailsClose);
         window.addEventListener('thread-change', this.onThreadChange);
+        window.addEventListener('message-send', this.onMessageSend);
+
     }
 
     render() {
@@ -692,14 +696,22 @@ export class CollabMessagesChat100554 extends StateLitElement {
             if (this.actualThread) this.actualThread.thread = thread;
         }
 
-        this.actualMessages = this.actualMessages.map(item =>
+        const alreadyExist = this.actualMessages.find(item =>
             item.content === oldMessage.content &&
-                item.senderId === oldMessage.senderId &&
-                item.createAt === oldMessage.createAt &&
-                item.threadId === oldMessage.threadId
-                ? { ...newMessage, isSame: oldMessage.isSame }
-                : item
-        );
+            item.senderId === oldMessage.senderId &&
+            item.createAt === oldMessage.createAt &&
+            item.threadId === oldMessage.threadId);
+
+        if (alreadyExist) {
+            this.actualMessages = this.actualMessages.map(item =>
+                item.content === oldMessage.content &&
+                    item.senderId === oldMessage.senderId &&
+                    item.createAt === oldMessage.createAt &&
+                    item.threadId === oldMessage.threadId
+                    ? { ...newMessage, isSame: oldMessage.isSame }
+                    : item
+            );
+        } else this.actualMessages.push(newMessage);
 
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         addMessage(newMessage);
@@ -768,7 +780,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
         await this.updateMessageAI(customEvent.detail.context, false, customEvent.detail.oldContextCreateAt);
         if (task) await addOrUpdateTask(customEvent.detail.context.task);
-        
+
     };
 
     private onTaskCompleted = async (e: Event) => {
@@ -798,6 +810,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.userThreads[this.group] = [...this.userThreads[this.group], { thread, users: [] }];
         }
         this.requestUpdate();
+    };
+
+    private onMessageSend = async (e: Event) => {
+        const customEvent = e as CustomEvent;
+        const message: mls.msg.Message = customEvent.detail.context.message;
+        const thId = message?.threadId;
+        if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
+        this.updateMessage2(false, message, message);
+
     };
 
 }

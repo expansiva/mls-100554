@@ -295,6 +295,17 @@ export function getUserIdLocalStorage(): string | null {
   return localStorage.getItem(USER_ID_KEY);
 }
 
+
+export function notifyMessageSendChange(context: mls.msg.ExecutionContext): void {
+  const scopeWindow = window?.top ? window.top : window;
+  const event = new CustomEvent('message-send', {
+    detail: { context },
+    bubbles: true,
+    composed: true
+  });
+  scopeWindow.dispatchEvent(event);
+}
+
 export function notifyTaskChange(context: mls.msg.ExecutionContext, oldContextCreateAt?: string): void {
   const scopeWindow = window?.top ? window.top : window;
   const event = new CustomEvent('task-change', {
