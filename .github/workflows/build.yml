@@ -53,8 +53,8 @@ jobs:
       run: |
         git fetch origin main
         if ! git push origin main; then
-          echo "⚠️ Push failed. The remote repository contains changes you don't have locally."
-          echo "📝 Files that differ between your HEAD and origin/main:"
+          echo "Push failed. The remote repository contains changes you don't have locally."
+          echo "Files that differ between your HEAD and origin/main:"
           git diff --name-only HEAD origin/main
           exit 1
         fi
