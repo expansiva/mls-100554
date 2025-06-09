@@ -91,12 +91,10 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
 
         const ret = value as mls.msg.ResponseAddTaskAIInteraction
         context.task = ret.task;
-        notifyTaskChange(context);
+        notifyTaskChange(context, ret.task.title);
 
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
         await afterPrompt(context);
-
-
     }
     catch (error: any) {
         if (context && context.task && stepFather) {
