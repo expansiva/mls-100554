@@ -1,6 +1,6 @@
 /// <mls shortName="collabMessageHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { getTemporaryContext, getUserIdLocalStorage } from './_100554_aiAgentHelper';
+import { getTemporaryContext, getUserIdLocalStorage, notifyMessageSendChange } from './_100554_aiAgentHelper';
 import { IAgent } from './_100554_aiAgentBase';
 
 const LS_KEY = 'collabChatPreferences';
@@ -20,7 +20,8 @@ export async function addMessage(threadId: string, messageContent: string) {
             threadId: threadId,
             userId: userId
         };
-        await mls.api.msgAddMessage(params);
+        const res = await mls.api.msgAddMessage(params);
+        notifyMessageSendChange({ message: res.message, task: undefined })
         return;
     }
 
