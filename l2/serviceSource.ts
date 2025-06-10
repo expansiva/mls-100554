@@ -762,7 +762,6 @@ export class ServiceSource100554 extends ServiceBase {
                 else this.unlockEditorForFile(pageActual);
                 this.toogleOverlayLoading(isLocked, 'Executing agent Fix...');
             }
-
             if (this.horizontalSpliter && (this.horizontalSpliter as any).resizeItens) (this.horizontalSpliter as any).resizeItens();
             this.loading = false;
         };
