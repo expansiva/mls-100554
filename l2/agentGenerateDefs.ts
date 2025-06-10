@@ -62,7 +62,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
         const data: any = JSON.parse(extJson(step.prompt).trim());
-        if (!('project' in data) || !('shortName' in data) || !('folder' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
+        if (!('project' in data) || !('shortName' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
 
         const inputs = await getPrompts(data);
 
@@ -78,8 +78,8 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     context.task = await updateStepStatus(context.task, step.stepId, "completed");
     const payload = getNextPendentStep(context.task) as mls.msg.AIPayload | null;
     context = await updateDefs(context, payload);
-    notifyTaskChange(context, "Def updated");
-    // await executeNextStep(context);
+    notifyTaskChange(context);
+    await executeNextStep(context);
 }
 
 const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
@@ -97,22 +97,31 @@ async function updateDefs(context: mls.msg.ExecutionContext, step: mls.msg.AIPay
     await forceServiceInstance(2, '_100554_serviceSource');
 
     const result = step.result as mls.l4.BaseDefs;
-    if (!result.meta.projectId || !result.meta.shortName || result.meta.folder === null) throw new Error("Invalid step in update defs, incorrect meta: '" + result?.meta?.projectId + "', '" + result?.meta?.shortName + "', '" + result?.meta?.folder + "'");
+    if (!result.meta.projectId || !result.meta.shortName) throw new Error("Invalid step in update defs, incorrect meta: '" + result?.meta?.projectId + "', '" + result?.meta?.shortName + "'");
 
     if ('compileEmbedding' in result) delete result.compileEmbedding;
 
-    const models = getModel({ project: result.meta.projectId, shortName: result.meta.shortName });
+    let models = mls.editor.getModels(result.meta.projectId, result.meta.shortName);
+    if (!models) models = await mls.editor.addModels(result.meta.projectId, result.meta.shortName, result.meta.folder || '')
+    if (!models) throw new Error('Erro, model error on AddModels, stoping');
+
     const template = `/// <mls shortName="${result.meta.shortName}" project="${result.meta.projectId}" enhancement="_blank" />
 
 // Do not change – automatically generated code.
 
 export const defs: mls.l4.BaseDefs = ${JSON.stringify(result, null, 2)}
     `;
-    if (models && models.defs) models.defs.model.setValue(template);
-    else await createStorFile(result.meta.projectId, result.meta.shortName, result.meta.folder, template, '.defs.ts');
 
-    if (models && models.defs) mls.editor.forceModelUpdate(models.defs.model);
+    if (models.defs) {
+        models.defs.model.setValue(template);
+    }
+    else {
+        const storFile = await createStorFile(result.meta.projectId, result.meta.shortName, result.meta.folder || '', template, '.defs.ts');
+        models.defs = mls.editor.createModelDefs(storFile, template);
+        if (!models.defs) throw new Error('Erro, model not prepared, stoping')
+    }
 
+    // mls.editor.forceModelUpdate(models.defs.model);
     context.task = await updateTaskTitle(context.task, "Def updated");
     context.task = await updateStepStatus(context.task, step.stepId, "completed");
     return context;
@@ -195,8 +204,8 @@ O objeto '.defs' que será gerado, será usado para:
   - Gere uma seção completa com base na análise profunda do código.
 
 ## Dados complementares, YAML.
-folder: ${folder}
-modelType: ${modelType}
+folder: "${folder}"
+modelType: "${modelType}"
 
 ---
 `
@@ -341,11 +350,6 @@ ${content}
 \`\`\`` }
 }
 
-function getModel(info: { project: number, shortName: string }): mls.editor.IModels | undefined {
-
-    return mls.editor.getModels(info.project, info.shortName);
-
-}
 
 function extJson(str: string): string {
     const start = str.indexOf('{');
@@ -358,7 +362,7 @@ function extJson(str: string): string {
     }
 }
 
-async function createStorFile(project: number, shortName: string, folder: string, content: string, extension: string) {
+async function createStorFile(project: number, shortName: string, folder: string, content: string, extension: string): Promise<mls.stor.IFileInfo> {
     const params = {
         project,
         level: 2,
@@ -375,4 +379,5 @@ async function createStorFile(project: number, shortName: string, folder: string
         contentType: 'string',
     };
     await mls.stor.localStor.setContent(file, fileInfo);
+    return file;
 }
