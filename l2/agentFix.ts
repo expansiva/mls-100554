@@ -122,7 +122,7 @@ function systemMainInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
         content: `${preferModelType("code")}
-Você é um agente especializado em corrigir erros de componentes web desenvolvidos com o framework Lit. Você receberá um arquivo typescript ou html ou less, e um json de definição(estilo metadata com inforamçoes gerais):
+Você é um agente especializado em corrigir erros de componentes web desenvolvidos com o framework Lit. Você receberá um arquivo typescript ou html ou less, e um json de definição(estilo metadata com informaçoes gerais):
 - Arquivo '.ts' com a lógica do componente
 - Arquivo '.html' com a pagina em que o componente esta sendo usado.
 - Arquivo '.less' com os estilos
@@ -217,6 +217,7 @@ async function systemDefinitionTypescript(data: IDataPrompt): Promise<mls.msg.IA
     }
 
 }
+
 async function systemDefinitionHTML(data: IDataPrompt): Promise<mls.msg.IAMessageInputType> {
 
     try {
