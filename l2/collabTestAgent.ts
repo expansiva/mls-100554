@@ -13,10 +13,11 @@ import { updateHTML } from './_100554_collabDOMSync';
 export class AgentTester extends CollabLitElement {
 
     @property({ type: String }) agent = '';
+    @property() isEdit: boolean = false;
     @state() private loading: boolean = false;
     @state() private mode: string = 'item';
     @state() private result: string = '';
-    @state() private activeTabIndex: number = 0;
+    @state() private activeTabIndex: number = -1;
     @state() private prompts: mls.msg.IAMessageInputType[] = [];
     @state() private list: mls.msg.ThreadPerformanceCache[] = [];
     @state() private chatPreferences: IChatPreferences = {
@@ -93,7 +94,7 @@ export class AgentTester extends CollabLitElement {
                 </div>
             </div>
             <button class="action-btn" @click=${() => this.handlePlay()} title="play"><svg style="width: 13px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></button>
-            <button class="action-btn" @click=${() => this.handleSave()} title="save"><svg style="width: 14px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-242.7c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32L64 32zm0 96c0-17.7 14.3-32 32-32l192 0c17.7 0 32 14.3 32 32l0 64c0 17.7-14.3 32-32 32L96 224c-17.7 0-32-14.3-32-32l0-64zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></button>
+            <button class="action-btn ${this.isEdit ? 'edit' : ''}" @click=${() => this.handleSave()} title="save"><svg style="width: 14px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-242.7c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32L64 32zm0 96c0-17.7 14.3-32 32-32l192 0c17.7 0 32 14.3 32 32l0 64c0 17.7-14.3 32-32 32L96 224c-17.7 0-32-14.3-32-32l0-64zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></button>
         </div>
         `
     }
@@ -120,6 +121,8 @@ export class AgentTester extends CollabLitElement {
     }
 
     renderItem() {
+
+        if (this.activeTabIndex < 0) return html``;
         return html`
             <textarea .value="${this.prompts[this.activeTabIndex].content.trim()}"  @input="${(e: Event) => this.updatePromptContent(e)}"></textarea>
         `
@@ -237,7 +240,7 @@ export class AgentTester extends CollabLitElement {
     private updatePromptContent(e: Event) {
         const target = e.target as HTMLTextAreaElement;
         const newValue = target.value;
-
+        this.isEdit = true;
         this.prompts = this.prompts.map((p, idx) =>
             idx === this.activeTabIndex ? { ...p, content: newValue } : p
         );
