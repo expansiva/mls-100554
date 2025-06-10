@@ -410,7 +410,7 @@ async function getDefinitonsByImports(imports: string[], position: 'left' | 'rig
     if (!serviceSource) throw new Error('Not found service source instance');
 
     const definitionsData: { importName: string, definition: string }[] = [];
-    for (let importName of imports) {
+    for await (let importName of imports) {
         if (!importName.startsWith('./')) continue;
         const fullPath = importName.replace('./', '');
         const iPath = mls.l2.getPath(fullPath);
