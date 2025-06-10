@@ -178,85 +178,87 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     };
 
     drawMindMap(positions?: Record<string, { x: number, y: number, alpha: number }>) {
-        const container = this.renderRoot.querySelector('.canvas-container') as HTMLElement;
-        const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
-        if (!canvas || !container) return;
+        requestAnimationFrame(() => {
+            const container = this.renderRoot.querySelector('.canvas-container') as HTMLElement;
+            const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
+            if (!canvas || !container) return;
 
-        const rect = container.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
 
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const { current, nodes } = mapState;
-        let centerNode = nodes.find(n => n.id === current)!;
-        let relatedNodes = this.getRelatedNodes(centerNode, nodes);
+            const { current, nodes } = mapState;
+            let centerNode = nodes.find(n => n.id === current)!;
+            let relatedNodes = this.getRelatedNodes(centerNode, nodes);
 
-        this._nodePositions = [];
+            this._nodePositions = [];
 
-        if (positions) { // animations
-            for (const id in positions) {
-                const node = nodes.find(n => n.id === id);
-                if (!node) continue;
-                const style = this.getNodeStyle(node.type);
-                const isCenter = id === current;
-                const isHovered = this._hoveredNodeId === node.id;
-                const { x, y, alpha } = positions[id];
-                ctx.globalAlpha = alpha
-                // draw as label
-                this.drawLabel(ctx, node, node.label, x, y, style.fill, style.text, style.stroke, isCenter ? 'bold 15px sans-serif' : 'bold 13px sans-serif', isHovered, isCenter);
+            if (positions) { // animations
+                for (const id in positions) {
+                    const node = nodes.find(n => n.id === id);
+                    if (!node) continue;
+                    const style = this.getNodeStyle(node.type);
+                    const isCenter = id === current;
+                    const isHovered = this._hoveredNodeId === node.id;
+                    const { x, y, alpha } = positions[id];
+                    ctx.globalAlpha = alpha
+                    // draw as label
+                    this.drawLabel(ctx, node, node.label, x, y, style.fill, style.text, style.stroke, isCenter ? 'bold 15px sans-serif' : 'bold 13px sans-serif', isHovered, isCenter);
 
-                // center node gets circle too
-                if (isCenter) {
-                    ctx.beginPath();
-                    ctx.arc(x, y, this.nodeRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = style.fill;
-                    ctx.fill();
-                    ctx.strokeStyle = style.stroke;
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
+                    // center node gets circle too
+                    if (isCenter) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, this.nodeRadius, 0, 2 * Math.PI);
+                        ctx.fillStyle = style.fill;
+                        ctx.fill();
+                        ctx.strokeStyle = style.stroke;
+                        ctx.lineWidth = 3;
+                        ctx.stroke();
+                    }
                 }
+                return;
             }
-            return;
-        }
 
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const radius = Math.min(canvas.width, canvas.height) * 0.33;
-        const nodeRadius = this.nodeRadius;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(canvas.width, canvas.height) * 0.33;
+            const nodeRadius = this.nodeRadius;
 
-        relatedNodes.forEach((node, i) => {
-            const angle = (2 * Math.PI / relatedNodes.length) * i - Math.PI / 2;
-            const x = centerX + radius * Math.cos(angle);
-            const y = centerY + radius * Math.sin(angle);
+            relatedNodes.forEach((node, i) => {
+                const angle = (2 * Math.PI / relatedNodes.length) * i - Math.PI / 2;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
 
-            const style = this.getNodeStyle(node.type);
+                const style = this.getNodeStyle(node.type);
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(x, y);
+                ctx.strokeStyle = style.stroke;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                const isHovered = this._hoveredNodeId === node.id;
+                this.drawLabel(ctx, node, node.label, x, y, style.fill, style.text, style.stroke, 'bold 13px sans-serif', isHovered, false);
+            });
+
+            // Center node
+            const centerStyle = this.getNodeStyle(centerNode.type);
+
             ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.lineTo(x, y);
-            ctx.strokeStyle = style.stroke;
+            ctx.arc(centerX, centerY, nodeRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = centerStyle.fill;
+            ctx.fill();
+            ctx.strokeStyle = centerStyle.stroke;
             ctx.lineWidth = 3;
             ctx.stroke();
 
-            const isHovered = this._hoveredNodeId === node.id;
-            this.drawLabel(ctx, node, node.label, x, y, style.fill, style.text, style.stroke, 'bold 13px sans-serif', isHovered, false);
+            const isCenterHovered = this._hoveredNodeId === centerNode.id;
+            this.drawLabel(ctx, centerNode, centerNode.label, centerX, centerY, centerStyle.fill, centerStyle.text, centerStyle.stroke, 'bold 15px sans-serif', isCenterHovered, true);
         });
-
-        // Center node
-        const centerStyle = this.getNodeStyle(centerNode.type);
-
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, nodeRadius, 0, 2 * Math.PI);
-        ctx.fillStyle = centerStyle.fill;
-        ctx.fill();
-        ctx.strokeStyle = centerStyle.stroke;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        const isCenterHovered = this._hoveredNodeId === centerNode.id;
-        this.drawLabel(ctx, centerNode, centerNode.label, centerX, centerY, centerStyle.fill, centerStyle.text, centerStyle.stroke, 'bold 15px sans-serif', isCenterHovered, true);
     }
 
     drawLabel(
@@ -402,46 +404,46 @@ export class WidgetMindMapL4100554 extends StateLitElement {
      * Animates all nodes from their 'from' position to 'to' in 500ms.
      * Calls a callback on each frame with current positions.
      */
-animateTransition(
-    animationMap: { id: string, from?: { x: number, y: number }, to?: { x: number, y: number } }[],
-    duration: number,
-    drawFrame: (positions: Record<string, { x: number, y: number, alpha: number }>) => void,
-    onDone: () => void
-) {
-    const start = performance.now();
+    animateTransition(
+        animationMap: { id: string, from?: { x: number, y: number }, to?: { x: number, y: number } }[],
+        duration: number,
+        drawFrame: (positions: Record<string, { x: number, y: number, alpha: number }>) => void,
+        onDone: () => void
+    ) {
+        const start = performance.now();
 
-    const animate = (now: number) => {
-        let t = (now - start) / duration;
-        if (t > 1) t = 1;
+        const animate = (now: number) => {
+            let t = (now - start) / duration;
+            if (t > 1) t = 1;
 
-        const positions: Record<string, { x: number, y: number, alpha: number }> = {};
+            const positions: Record<string, { x: number, y: number, alpha: number }> = {};
 
-        const easeIn = (t: number, exp = 2) => Math.pow(t, exp);
-        const easeOut = (t: number, exp = 2) => 1 - Math.pow(1 - t, exp);
-        for (const { id, from, to } of animationMap) {
-            if (!from && to) {
-                positions[id] = { ...to, alpha: easeIn(t, 5) }; // fade-in                
-            } else if (from && !to) {
-                positions[id] = { ...from, alpha: 1 - easeOut(t, 5) }; // fade-out
-            } else if (from && to) {
-                positions[id] = {
-                    x: from.x + (to.x - from.x) * t,
-                    y: from.y + (to.y - from.y) * t,
-                    alpha: 1
-                };
+            const easeIn = (t: number, exp = 2) => Math.pow(t, exp);
+            const easeOut = (t: number, exp = 2) => 1 - Math.pow(1 - t, exp);
+            for (const { id, from, to } of animationMap) {
+                if (!from && to) {
+                    positions[id] = { ...to, alpha: easeIn(t, 5) }; // fade-in                
+                } else if (from && !to) {
+                    positions[id] = { ...from, alpha: 1 - easeOut(t, 5) }; // fade-out
+                } else if (from && to) {
+                    positions[id] = {
+                        x: from.x + (to.x - from.x) * t,
+                        y: from.y + (to.y - from.y) * t,
+                        alpha: 1
+                    };
+                }
             }
-        }
 
-        drawFrame(positions);
+            drawFrame(positions);
 
-        if (t < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            onDone();
-        }
-    };
-    requestAnimationFrame(animate);
-}
+            if (t < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                onDone();
+            }
+        };
+        requestAnimationFrame(animate);
+    }
 
     onSelected?(node: MindMapNode): void;
 }

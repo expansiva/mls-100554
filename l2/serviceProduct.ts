@@ -4,8 +4,7 @@ import { html, css, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 
-import './_100554_pluginGithubL4Project';
-import './_100554_pluginGithubL4Issues';
+import './_100554_widgetMindMapL4';
 
 @customElement('service-product-100554')
 export class ServiceWorkspace100554 extends ServiceBase {
@@ -47,7 +46,7 @@ export class ServiceWorkspace100554 extends ServiceBase {
             type: 'onlyicon',
             selected: 0,
             options: [
-                { text: 'Requirements', icon: 'f0a6' },
+                { text: 'MindMap', icon: 'f5dc' },
             ]
         },
         tools: {},
@@ -72,17 +71,16 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
     renderContent() {
         switch (this.activeTab) {
-            case 'IRequirements':
-                return this.renderRequirements();
+            case 'IMindMap':
+                return this.renderMindMap();
             default:
                 return html``;
         }
     }
 
-    renderRequirements() {
+    renderMindMap() {
         return html`
-        <plugin-github-l4-issues-100554 labelfilter="feature request">
-        </plugin-github-l4-issues-100554>`
+        <widget-mind-map-l4-100554></widget-mind-map-l4-100554>`
     }
 
 
@@ -91,5 +89,5 @@ export class ServiceWorkspace100554 extends ServiceBase {
 }
 
 enum ISceneries {
-    'IRequirements' = 0
+    'IMindMap' = 0
 }
