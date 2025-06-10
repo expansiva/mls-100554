@@ -1,0 +1,255 @@
+/// <mls shortName="collabTestAgent" project="100554" enhancement="enhancementStyle" />
+
+collab-test-agent-100554 {
+
+    display: block;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f9f9f9;
+    font-family: @font-family-primary;
+    height: 100%;
+    position: relative;
+
+
+    textarea {
+        width: calc(100% - 1rem);
+        height: calc(100% - 1rem);
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-family: monospace;
+        resize: vertical;
+    }
+
+    .loader {
+        margin-top: 1rem;
+        font-style: italic;
+        color: #555;
+    }
+
+    .tab-header {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #ccc;
+        background-color: #f0f0f0;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .tab-group-left {
+        display: flex;
+        overflow-x: auto;
+        flex: 1;
+        min-width: 0;
+        scrollbar-width: thin;
+
+        &::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: @grey-color-darker;
+            border-radius: 4px;
+        }
+    }
+
+    .tab-group-right {
+        display: flex;
+        flex-shrink: 0;
+    }
+
+    .tab-item {
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+
+    .tab-delete {
+        position: absolute;
+        right: 1rem;
+        top: 5px;
+        background: transparent;
+        border: none;
+        color: @error-color;
+        cursor: pointer;
+        font-size: 14px;
+        margin-left: 2px;
+        padding: 0 4px;
+
+        &:hover {
+            color: @error-color-hover;
+        }
+    }
+
+    .tab-button {
+        padding: 10px 16px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        border-right: 1px solid #ddd;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        
+    }
+
+    .tab-button:hover {
+        background-color: #e0e0e0;
+    }
+
+    .tab-button.active {
+        background-color: #ffffff;
+        font-weight: bold;
+        border-bottom: 2px solid #007bff;
+    }
+
+    .tab-content {
+        position: relative;
+        flex: 1;
+        padding: 0;
+        margin: 0;
+        background-color: #ffffff;
+        display: flex;
+        height: 100%;
+        flex-grow: 1; /* ocupa todo espaço restante */
+        overflow: auto; /* scroll se conteúdo for maior */
+    }
+
+    textarea {
+        resize: none;
+        font-family: monospace;
+        font-size: 14px;
+        box-sizing: border-box;
+        background-color: #ffffff;
+        color: #333;
+        outline: none;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        gap: 10px;
+        background: #fafafa;
+    }
+
+    button.action-btn {
+        padding: 8px 16px;
+        cursor: pointer;
+        background-color: #fff;
+        color: #403f3f;        
+        box-shadow: rgba(0, 0, 0, 0.046) 0px 1px 2px 2px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    button.action-btn:hover {
+        opacity: .8;
+    }
+
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+
+        .dropdown-toggle {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background-color: @bg-primary-color;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 99;
+            min-width: 200px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0px;
+
+            div {
+                padding: 8px 12px;
+                cursor: pointer;
+                color: @text-primary-color;
+                font-size: @font-size-16;
+
+                &:hover {
+                    background-color: @bg-primary-color-hover;
+                }
+            }
+        }
+
+        &:hover .dropdown-menu {
+            display: block;
+        }
+    }
+
+    .settings{
+        padding: 1rem;
+        input,
+        select {
+            display: flex;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #000000;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            outline: none;
+            height: 25px;
+
+        }
+    }
+
+    .result{
+        padding: 1rem;
+        overflow-y: auto;
+    }
+
+    .overlay {
+        position: absolute;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        font-size: 18px;
+        color: white;
+        font-weight: bold;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #ffffff;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin-right: 12px;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+}
+
+

@@ -3,6 +3,7 @@
 import { ITool, IAgent } from './_100554_aiAgentBase'
 import { descriptionForPrompt } from './_100554_icaBaseDescription'
 import { getTokensLess } from './_100554_designSystemBase';
+import { getState } from './_100554_collabState';
 
 export function systemAgentsAvailable(): mls.msg.IAMessageInputType {
     return {
@@ -166,3 +167,69 @@ export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageIn
     }
 }
 
+export async function getPromptByHtml(state:string): Promise<mls.msg.IAMessageInputType[]> { 
+
+    const info = getState(state);
+
+    if (!info.project || !info.shortName ) throw new Error(`[getPromptByHtml]: incomplete parameters.`);
+
+    const keyFile = mls.stor.getKeyToFiles(info.project, 2, info.shortName, info.folder, '.html');
+    if (!mls.stor.files[keyFile]) throw new Error(`[getPromptByHtml]: not found stor.file ${keyFile}.`);
+
+    const content = await mls.stor.files[keyFile].getContent() as string;
+
+    if (!content) return [];
+
+    const el = document.createElement('div');
+    el.innerHTML = content;
+
+    const itens = el.querySelectorAll('promptcustom');
+    const ret: mls.msg.IAMessageInputType[] = [];
+
+    itens.forEach((item) => {
+
+        let cont = item.innerHTML;
+        const tp = item.getAttribute('type') as any;
+
+        if (tp === 'prompt') return;
+
+        const keys = findKeys(cont);
+        keys.forEach((key) => {
+
+            const st = getState(key);
+            if (!st) return;
+            const rp = `{{${key}}}`
+            cont = cont.replace(rp, st);
+
+        });
+
+        ret.push({
+            type: tp,
+            content: cont
+        });
+
+    });
+
+    return ret;
+
+
+}
+
+function findKeys(text: string): string[] {
+  const regex = /{{(.*?)}}/g;
+  const resultados: string[] = [];
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    resultados.push(match[1].trim()); 
+  }
+
+  return resultados;
+}
+
+interface IReqGetPromptByHtml{
+    project: number,
+    shortName: string,
+    folder: string,
+    state: any
+}
