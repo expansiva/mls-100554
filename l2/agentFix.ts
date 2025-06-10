@@ -35,7 +35,11 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context.task) {
         let data;
         try {
-            let pp = context.message.content.replace(`@@ ${agentName}`, '').replace(`@@${agentName}`, '').trim();
+            let pp = context.message.content
+                .replace(`@@ ${agentName}`, '')
+                .replace(`@@${agentName}`, '').trim()
+                .replace(`@@Fix`, '');
+
             data = JSON.parse(pp);
             if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
             const inputs = await getPrompts(data);
