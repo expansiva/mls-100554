@@ -342,6 +342,7 @@ function systemWidgetsDescriptionsInstruction(data: IDataPrompt): mls.msg.IAMess
 Em caso de componentes extends Ica.....Base, se necessário analisar o arquivo description abaixo para melhor definir as correções:
 Para definição de qual decorator usar em cada tipo de atributo, levar em consideração:   
 
+- Se necessário fazer o import:  { propertyCompositeDataSource, propertyDataSource } from './_100554_collabDecorators';
 - @propertyDataSource: Propriedade ligada a um único state dinâmico. Exemplo de binding: "{{page1.name}}".
 - @propertyCompositeDataSource: Propriedade composta por múltiplos states dinâmicos. Exemplo: "Olá {{page1.userId}} - {{page1.userName}}".
 - para atributos na classe 'Text', use '@propertyCompositeDataSource'.
