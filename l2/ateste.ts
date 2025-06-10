@@ -14,6 +14,6 @@ export class SimpleGreeting extends CollabLitElement {
         console.info(e.detail)
     }
     render() {
-        return html`<div class="cls1"><h1>Hello world Lucas 10</h1></div>`;
+        return html`<div class="cls1"><h1>Hello world Lucas 12</h1></div>`;
     }
 }
