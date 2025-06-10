@@ -586,6 +586,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			try {
 
+				if (!opt.branchDest) opt.branchDest = 'main';
+				
 				let body = {} as any;
 
 				this.verifyMKey();
