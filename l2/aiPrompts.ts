@@ -190,7 +190,7 @@ export async function getPromptByHtml(dt:{ project:number, shortName:string, fol
         let cont = item.innerHTML;
         const tp = item.getAttribute('type') as any;
 
-        if (tp === 'prompt') return;
+        if (tp === 'memory' || tp === 'prompt') return;
 
         cont = clearGaps(cont);
         
@@ -198,7 +198,7 @@ export async function getPromptByHtml(dt:{ project:number, shortName:string, fol
         keys.forEach((key) => {
 
             const st = getState(key.trim());
-            if (!st) return;
+            if (st === undefined) return;
             const rp = `{{${key}}}`
             cont = cont.replace(rp, st);
 

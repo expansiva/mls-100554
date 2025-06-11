@@ -2,7 +2,8 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { forceServiceInstance } from './_100554_libCommom';
-import { preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
+import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
+import { initState } from './_100554_collabState';
 
 import {
     getNextPendingStepByAgentName,
@@ -131,20 +132,39 @@ export async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[
 
     if (!info || !info.project || !info.shortName) throw new Error(`Erro [${agentName}] getPrompts: invalid info`);
 
-    const prompts: mls.msg.IAMessageInputType[] = [];
-
     const files = await mls.stor.getFiles({ project: info.project, shortName: info.shortName, folder: info.folder || '', loadContent: true });
     if (!files || !files.ts) throw new Error(`Erro [${agentName}] getPrompts: files not found`);
     const folder: string = files.ts.folder;
 
-    prompts.push(systemMainInstruction(folder));
-    prompts.push(systemFileTS(files.tsContent || ''));
-    prompts.push(systemFileHtml(files.htmlContent || ''));
-    prompts.push(systemFileLess(files.lessContent || ''));
-    prompts.push(systemFileDef(files.defsContent || ''));
-    prompts.push(systemOutInstruction());
-    prompts.push(systemUserInstruction());
+    const modelType: mls.msg.ModelType = "claude";
+
+    initState('agentdefs', {
+        model: preferModelType(modelType),
+        ts: files.tsContent || '',
+        html: files.htmlContent || '',
+        less: files.lessContent || '',
+        def: configFileDef(files.defsContent || ''),
+        folder: folder,
+        modelType:modelType
+        
+    });
+
+    const prompts = await getPromptByHtml({project:100554,shortName:'agentGenerateDefs', folder: '', state:'agentdefs'})
     return prompts;
+}
+
+function configFileDef(content: string): string {
+
+    function removeLine(source: string, startsWith: string) {
+        return source
+            .split('\n')
+            .filter((line: string) => !line.trimStart().startsWith(startsWith))
+            .join('\n');
+    }
+    content = removeLine(content, '"embedding":')
+    content = removeLine(content, '"embeddingVersion":')
+
+    return content;
 }
 
 function systemMainInstruction(folder: string): mls.msg.IAMessageInputType {
