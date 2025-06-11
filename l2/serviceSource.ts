@@ -2092,7 +2092,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         let fileModels = mls.editor.getModels(project, shortName);
         const typeModel = storFile.extension === '.html' ? 'html' : 'style';
         if (fileModels && fileModels[typeModel] && fileModels[typeModel]?.model) {
-            if (this.visible === 'true' && typeModel === 'html') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify(storFile));
+            if (this.visible === 'true' && typeModel === 'html') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify({ ...storFile, position:this.position}));
             return fileModels[typeModel]?.model as monaco.editor.ITextModel;
         }
 
@@ -2106,7 +2106,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const modelBase = await this.createModel(project, shortName, ext);
         if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}${ext}`);
 
-        if (this.visible === 'true' && typeModel === 'html') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify(storFile));
+        if (this.visible === 'true' && typeModel === 'html') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify({ ...storFile, position:this.position}));
         const { model } = modelBase;
 
         const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);

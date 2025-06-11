@@ -286,7 +286,8 @@ export class ServicePreview100554 extends ServiceBase {
             const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
             const storFile = mls.stor.files[keyStorFile];
             if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
-            this.setModel(storFile);
+            
+            if((iPath as any).position && (iPath as any).position === 'left')this.setModel(storFile);
         } catch (err: any) {
             throw new Error(err);
         }
@@ -843,6 +844,7 @@ export class ServicePreview100554 extends ServiceBase {
         monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
             noImplicitAny: true
         });
+
         (this.monacoeditor as any)['mlsEditor'] = this._ed1;
         window.preview.editor = this._ed1;
     }
