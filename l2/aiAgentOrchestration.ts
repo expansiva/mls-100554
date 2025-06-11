@@ -46,6 +46,9 @@ export async function startNewAiTask(
 
         const ret = value as mls.msg.ResponseAddMessageAI;
         context.task = ret.task;
+        if (context.task.iaCompressed) {
+            context.task.iaCompressed.modeSingleStep = context.modeSingleStep;
+        }
         context.message = ret.message;
         notifyTaskChange(context, oldContextCreateAt);
 
@@ -91,6 +94,9 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
 
         const ret = value as mls.msg.ResponseAddTaskAIInteraction
         context.task = ret.task;
+        if (context.task.iaCompressed) {
+            context.task.iaCompressed.modeSingleStep = context.modeSingleStep;
+        }
         notifyTaskChange(context);
 
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
@@ -148,7 +154,7 @@ const maxStepsByTask = 100;
 
 export async function executeNextStep(context: mls.msg.ExecutionContext): Promise<void> {
     if (!context || !context.message || !context.task || !context.task.iaCompressed) throw new Error("Invalid context");
-    if (context.task.status === "paused" || context.task.status === "done") return;
+    if (context.task.status === "paused" || context.task.status === "done" || context.modeSingleStep === true) return;
     const step = getNextPendentStep(context.task);
     if (!step) {
         console.error("finished all steps");
@@ -354,7 +360,8 @@ export async function getAgentContext(taskId: string): Promise<{
     if (!message) throw new Error("[getAgentContext] Message not found:" + messageId)
     const context: mls.msg.ExecutionContext = {
         message,
-        task
+        task,
+        modeSingleStep: task.iaCompressed?.modeSingleStep || undefined
     }
     return { context, interaction, step };
 }
