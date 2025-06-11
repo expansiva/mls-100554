@@ -198,9 +198,9 @@ export async function getPromptByHtml(dt:{ project:number, shortName:string, fol
         keys.forEach((key) => {
 
             const st = getState(key.trim());
-            if (st === undefined) return;
+            if (st === undefined || !key.startsWith(dt.state)) return;
             const rp = `{{${key}}}`
-            cont = cont.replace(rp, st);
+            cont = cont.replace(rp, st).replace(/&gt;/g,'>').replace(/&lt;/g,'<');
 
         });
 
