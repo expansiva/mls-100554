@@ -125,7 +125,7 @@ export class AgentTester extends CollabLitElement {
 
         if (this.prompts.length === 0) return html``;
         return html`
-            <textarea .value="${this.prompts[this.activeTabIndex].content.trim()}"  @input="${(e: Event) => this.updatePromptContent(e)}"></textarea>
+            <textarea .value="${this.prompts[this.activeTabIndex].content.replace(/&gt;/g,'>').replace(/&lt;/g,'<').trim()}"  @input="${(e: Event) => this.updatePromptContent(e)}"></textarea>
         `
     }
 

@@ -11,10 +11,15 @@ import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
 import { CollabState } from './_100554_collabState';
 import { TsTestAst } from './_100554_tsTestAST';
+import { loadChatPreferences } from './_100554_collabMessageHelper';
+import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHelper';
+import { createAgent } from './_100554_agentWebCare';
+
 import './_100554_collabConsole';
 import './_100554_collabResultTest';
 import './_100554_servicePreviewView';
-import './_100554_collabPromptPreview';
+
+import './_100554_collabMessagesPrompt';
 
 import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
@@ -414,9 +419,53 @@ export class ServicePreview100554 extends ServiceBase {
         return html`<collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="var(--bg-primary-color)">
                 <div slot="top" style="height:100%;" id="preview-container"></div>
                 <div slot="bottom">
-                    <collab-prompt-preview-100554 page="${this.page}"></collab-prompt-preview-100554>
+                    <collab-messages-prompt-100554 acceptAutoCompleteAgents="false" .onSend=${this.handleSend.bind(this)}></collab-messages-prompt-100554>
                 </div>
             </collab-spliter-vertical-var-fixed-100554>`;
+    }
+
+    async handleSend(e:any) {
+
+        if (!this.page) {
+            this.setError('Erro page not selected');
+            return;
+        } 
+
+        const v = e || '';
+
+        if (!v) {
+            this.setError('Error: Invalid prompt');
+            return;
+        }
+ 
+        this.loading = true;
+        
+        try {
+            await this.fireCollab(JSON.stringify({ page: this.page, prompt: v }));
+        } catch (err: any) {
+            this.setError('Error on send message:' + err.message);
+        } finally {
+            this.loading = false;
+        }
+
+    }
+
+    private async fireCollab(prompt: string) {
+
+        const pref = loadChatPreferences();
+        if (!pref.threadMaintenance) {
+            this.setError('Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences');
+            return;
+        }
+
+        const userId = getUserIdLocalStorage();
+        const threadId = pref.threadMaintenance;
+        if (!userId) return;
+        
+        const context = getTemporaryContext(threadId, userId, '@@ agentWebCare '+ prompt);
+        const agent = createAgent();
+        await agent.beforePrompt(context);
+
     }
 
     async firstUpdated() {

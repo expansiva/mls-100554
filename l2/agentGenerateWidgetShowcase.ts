@@ -1,7 +1,8 @@
 /// <mls shortName="agentGenerateWidgetShowcase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { preferModelType } from './_100554_aiPrompts';
+import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
+import { initState } from './_100554_collabState';
 
 import {
     getNextPendingStepByAgentName,
@@ -13,7 +14,8 @@ import {
 
 import {
     executeNextStep,
-    startNewInteractionInAiTask
+    startNewInteractionInAiTask,
+    startNewAiTask
 } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentGenerateWidgetShowcase";
@@ -39,7 +41,13 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context || !context.message) throw new Error("Invalid context");
 
     if (!context.task) {
-        throw new Error('[_beforePrompt]This agent cannot be started first: agentGenerateWidgetShowcase')
+
+        const data = JSON.parse(extJson(context.message.content))
+        if (!('shortName' in data) || !('project' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
+
+        const inputs: any = await getPrompts(data.shortName, data.project);
+        await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
+        
     } else {
 
         const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
@@ -103,215 +111,40 @@ export async function getPrompts(shortName: string, project: number): Promise<ml
 
     if (!shortName || !project) throw new Error("Invalid Prompt");
 
-    const prompts: mls.msg.IAMessageInputType[] = [];
+    initState('agentGenerateWidgetShowcase', {
+        mode: preferModelType("code"),
+        ts: await getDefinitionsBaseTSInstruction(shortName, project)
+    });
 
-    prompts.push(systemMainInstruction());
-    prompts.push(systemTaskInstruction());
-    prompts.push(systemDefinitionsInstruction());
-    prompts.push(systemPlaygroundInstruction());
-    prompts.push(systemDemoInstruction());    
-    prompts.push(await systemDefinitionsBaseTSInstruction(shortName, project));
-    prompts.push(systemRulesInstruction());
-    prompts.push(systemOutInstruction());
-    
+    const prompts = await getPromptByHtml({project:100554, shortName:'agentGenerateWidgetShowcase', folder:'', state:'agentGenerateWidgetShowcase'})
+        prompts.push({type:'human',content:'Crie um html conforme as regras'})
     return prompts;
 }
 
-function systemMainInstruction(): mls.msg.IAMessageInputType {
-    //code
-    return {
-        type: 'system',
-        content: `${preferModelType("code")}
-Você é um assistente especialista em marketing técnico, design web e vendas. Sua tarefa é criar uma página HTML clara, moderna e atrativa que sirva como vitrine de demonstração (showcase) para um WebComponent personalizado.
-`
-    }
-}
-
-function systemTaskInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## TASK
-
-Você receberá um arquivo ".ts" contendo a definição de um Web Component.  Sua tarefa é:
-
-1. Analisar o conteúdo do componente fornecido.
-2. Identificar sua funcionalidade principal, pontos fortes, diferenciais e caso de uso ideal.
-3. Criar uma “mini landing page” de marketing e demonstração, totalmente contida em uma única "<div>" raiz.
-4. No HTML , não se deve usar "<html>", "<body>" ou "<script>" externos.
-5. Todo o estilo deve ser aplicado **inline (usando "style" diretamente em cada elemento)** — não utilize blocos "<style>" ou CSS externos.
-`
-    }
-}
-
-function systemDefinitionsInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## CARACTERISTICAS DO HTML
-
-O bloco HTML gerado deve conter:
-  
- - Demonstre o WebComponent em funcionamento real.
- - Destaque seus benefícios com textos de fácil compreensão, voltados para usuários técnicos e semi-técnicos.
- - Use boas práticas de design e copywriting de vendas, com um tom profissional, convidativo e leve (sem parecer exageradamente comercial).
- - Utilize cores modernas e uma tipografia amigável, não tão técnica.
- 
-- Inclua seções como:
-   - Título chamativo com o nome e propósito do componente.
-   - Mantenha os títulos e subtítulos todos centralizados.  
-   - Descreva o webcomponente, de maneira demonstrativa, explicando brevemente seu proposito.
-   - Demonstração ao vivo do WebComponent. Esta parte tem que usar um style mais destacado e convidativo.
-   - Lista de vantagens e diferenciais do componente.
-   - Código de uso (snippet) para copiar/colar.
-   - Explicações visuais ou textuais de como o componente pode ser integrado em projetos reais.
-   - Pode incluir ícones para deixar o texto menos técnico
-
- - Certifique-se de que:
-   - A página seja autoexplicativa, com seções bem definidas.
-   - O layout seja atrativo tanto em desktop quanto mobile.
-   - Os estilos não ofusquem o componente, mas valorizem sua presença.
-`
-    }
-}
-
-function systemPlaygroundInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## Seção de Demonstração (Playground)
-1.Adicione um título h3 com o texto "Demonstração".
-2.Crie um componente <widget-playground-state-100554> com o atributo state, que deve conter um objeto JSON válido como string. Esse objeto deve ter um namespace "playground" com todas as chaves necessárias para controlar o estado do playground.
-3.Insira o componente principal dentro de um bloco <demo>.
-4.Adicione um bloco <fieldset> com a legenda "Properties", contendo componentes <ica-forms-input-string-100554> para cada propriedade configurável.
-5.Para cada propriedade, associe uma chave no objeto "playground" dentro de state (por exemplo: playground.buttonLabel1, playground.buttonLabel2, etc.).
-6.Se uma propriedade for um objeto, serialize-a como string para exibição no playground.
-
-### IMPORTANTE SOBRE <widget-playground-state-100554>:
- - O valor do atributo state do compoennte deve ser uma string JSON válida:
- - Sem quebras de linha (\n) – tudo deve estar em uma única linha.
- - Envolvida por aspas simples externas.
- - Não use aspas simples dentro do JSON, pois isso causará erro de parsing. Use apenas aspas duplas dentro do JSON, como no exemplo:
-
-### Exemplo:
-
-\`\`\` html
-<section class="section_demo">
-  <h3>Demonstração</h3>
-  <widget-playground-state-100554 state='{"playground":{"buttonLabel1":"Ver horários pelo mundo","buttonLabel2":"Ver horários","config1":"{\"codigo\":1}","config2":"{\"codigo\":2}"}}'></widget-playground-state-100554>
-
-  <demo>
-    <widget-world-time-greeting-100554 buttonLabel="{{playground.buttonLabel1}}" config="{{playground.config1}}"></widget-world-time-greeting-100554>
-    <fieldset>
-      <legend>Properties:</legend>
-      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{playground.buttonLabel1}}"></ica-forms-input-string-100554>
-      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. config1:" value="{{playground.config1}}"></ica-forms-input-string-100554>
-    </fieldset>
-  </demo>
-
-  <demo>
-    <widget-world-time-greeting-100554 buttonLabel="{{playground.buttonLabel2}}" config="{{playground.config2}}"></widget-world-time-greeting-100554>
-    <fieldset>
-      <legend>Properties:</legend>
-      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. buttonLabel:" value="{{playground.buttonLabel2}}"></ica-forms-input-string-100554>
-      <ica-forms-input-string-100554 widget="wc-input-text-100554" label="Prop. config2:" value="{{playground.config2}}"></ica-forms-input-string-100554>
-    </fieldset>
-  </demo>
-</section>
-\`\`\`
-`
-    }
-}
-
-function systemDemoInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## HTML DEMONSTRATIVO
-
-<div class="widget-showcase">
-  <section class="section_title">...</section>
-  <section class="section_info">...</section>
-  <section class="section_demo">
-    ...
-    <demo>
-       ...
-     <fieldset>
-       ...
-     </fieldset>
-    </demo>
-    ...
-  </section>
-  <section class="section_benefits">...</section>
-  <section class="section_code">...</section>
-  <section class="section_use_cases">...</section>
-</div>
-`
-    }
-}
-
-function systemOutInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## Formato de saida
-Você deve retornar um array de objetos no formato JSON.O objeto representa uma subtarefa, com **apenas um dos seguintes formatos**:
-\`\`\` json
-[{{
-    "type": "flexible",
-    "content": {{ shortName:string, project:number, html: string}}
-  }}]
-\`\`\`
-`
-    }
-}
-
-function systemRulesInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## Regras importantes:
-
-- Não repita ou explique o código TypeScript.
-- Apenas gere o bloco HTML dentro da "<div>", pronto para ser colado em qualquer página.
-- Pressuponha que o Web Component está registrado e pode ser usado diretamente pela tag personalizada dele.
-
-O HTML gerado deve estar pronto para ser injetado como parte de um container maior (por exemplo, dentro de uma aba de preview ou guia de documentação).
-
-
-## Sobre o gerenciamento de propriedades e states no Collab Codes:
-
-- Quando uma propriedade é decorada com @propertyDataSource ou @propertyCompositeDataSource, ela é automaticamente associada a um ou mais states dinâmicos do sistema, como por exemplo: "{{playground.dataRange}}".
-- O gerenciador de states do Collab Codes é responsável por:
-  - Registrar automaticamente a dependência entre a propriedade e o(s) state(s) referenciado(s).
-  - Detectar alterações no(s) state(s) de forma automática e eficiente.
-  - Atualizar o valor da propriedade no componente sem necessidade de eventos manuais (dispatchEvent, CustomEvent, etc.).
-- **Importante:**
-  Não é necessário implementar listeners, eventos personalizados, nem funções de observação manual para essas propriedades.
-  **Toda a comunicação e atualização é gerenciada automaticamente pelo sistema de states.**
-`
-    }
-}
-
-
-//Tem q ser dinamico
-async function systemDefinitionsBaseTSInstruction(shortName:string, project:number): Promise<mls.msg.IAMessageInputType> {
+async function getDefinitionsBaseTSInstruction(shortName:string, project:number): Promise<string> {
 
     shortName = firstLowercaseLetter(shortName);
 
     const key = mls.stor.getKeyToFiles(project, 2, shortName, "", ".ts");
     if (!mls.stor.files[key]) throw new Error("[systemDefinitionsBaseTSInstruction]Not found class base:" + project + "_" + shortName);
 
-    let contet = await mls.stor.files[key].getContent() as string;
+    let content = await mls.stor.files[key].getContent() as string;
 
-    if (!contet) throw new Error("[systemDefinitionsBaseTSInstruction]Not found content:" + project + "_" + shortName);
-    return {
-        type: 'system',
-        content: `## WEBCOMPONENTE BASE
+    if (!content) throw new Error("[systemDefinitionsBaseTSInstruction]Not found content:" + project + "_" + shortName);
+    return content
+}
 
-Abaixo está o conteúdo do webcomponente de referência que você deve utilizar como base:
+function extJson(str: string): string {
+    const start = str.indexOf('{');
+    const end = str.lastIndexOf('}');
 
-\`\`\` typescript
-${contet}
-\`\`\`
-
-`
+    if (start !== -1 && end !== -1 && end > start) {
+        return (str.substring(start, end + 1)).replace(/\\"/g, '"');
+    } else {
+        return ''; // ou lançar erro, dependendo do caso
     }
 }
+
 
 function firstLowercaseLetter(str: string): string {
 

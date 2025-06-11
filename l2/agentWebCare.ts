@@ -2,7 +2,8 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { forceServiceInstance } from './_100554_libCommom';
-import { preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
+import { preferModelType, systemComponentsInstruction, getPromptByHtml } from './_100554_aiPrompts';
+import { initState } from './_100554_collabState';
 
 import {
     getNextPendingStepByAgentName,
@@ -119,16 +120,35 @@ async function updateFile(context: mls.msg.ExecutionContext) {
 
 export async function getPrompts(json: any): Promise<mls.msg.IAMessageInputType[]> {
     
-    const prompts: mls.msg.IAMessageInputType[] = [];
+    /*const prompts: mls.msg.IAMessageInputType[] = [];
 
     prompts.push(systemMainInstruction());
-    prompts.push(systemTaskInstruction());
+    prompts.push(systemTaskInstruction());'
     prompts.push(systemRulesInstruction());
     prompts.push(systemOutInstruction());
     prompts.push(await systemDefinitionBaseInstruction(json));
     prompts.push(await systemDefinitionBaseHTMLInstruction(json));
     prompts.push(await systemDefinitionBaseLessInstruction(json));
-    prompts.push(await systemUserInstruction(json));
+    prompts.push(await systemUserInstruction(json));*/
+
+    const fullName = json.page;
+    if (!fullName) throw new Error('Not found page name:' + agentName);
+
+    const info = getInfoPage(fullName);
+        
+    const files = await mls.stor.getFiles({ project: info.project, shortName: info.shortName, folder: '', loadContent: true });
+
+    initState('agentWebCare', {
+        mode: preferModelType("mini"),
+        ts: files.tsContent || '',
+        html: files.htmlContent || '',
+        less: files.lessContent || '',
+        humanPrompt: JSON.stringify(json)
+    })
+
+    const prompts = await getPromptByHtml({project:100554, shortName: 'agentWebCare', folder:'', state:'agentWebCare'})
+
+
     return prompts;
 }
 

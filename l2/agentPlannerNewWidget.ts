@@ -1,9 +1,10 @@
 /// <mls shortName="agentPlannerNewWidget" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getListFilesStart, systemReturnJsonFormat, preferModelType, systemComponentsInstruction } from './_100554_aiPrompts';
+import { getListFilesStart, systemReturnJsonFormat, preferModelType, systemComponentsInstruction, getPromptByHtml } from './_100554_aiPrompts';
 import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, notifyTaskChange, calculateStepsStatistics, getInteractionStepId, } from "./_100554_aiAgentHelper";
 import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewStep } from "./_100554_aiAgentOrchestration";
+import { initState } from './_100554_collabState';
 
 import './_100554_wcClarificationPlannerNewWidget';
 
@@ -114,106 +115,29 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
 
 export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
     if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
-    const prompts: mls.msg.IAMessageInputType[] = [];
 
-    prompts.push(systemMainInstruction());
-    prompts.push(systemComponentsInstruction());
-    prompts.push(await systemWidgetsPrompt());
-    prompts.push({
-        type: 'human',
-        content: prompt
+
+    const comp = systemComponentsInstruction();
+    initState('agentPlannerNewWidget', {
+        mode: preferModelType("translate"),
+        widgetPrefix: widgetPrefix,
+        componentDef: comp.content,
+        widgets: await getWidgetsPrompt(),
+        humanPrompt: prompt
     });
+
+    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentPlannerNewWidget', folder: '', state: 'agentPlannerNewWidget' });
+
     return prompts;
 }
 
-function systemMainInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `${preferModelType("translate")}
-Você é um planejador responsável por definir os detalhes de criação de um novo web-componente (widget) que será incluído em uma página HTML.
-
-Tarefas
-1. Entenda o propósito do widget passando pelo prompt original do usuário.
-2. Escolha o widgetName, evitando colisões com a lista “Widgets existentes”, o widgetName deve iniciar com o prefixo "${widgetPrefix}".
-3. Escolha o parentClass base mais adequado na lista “Categorias de widgets”.
-4. Cruze os atributos do grupo escolhido com as necessidades do widget:
-   • Liste apenas os atributos relevantes que já existirem no grupo.  
-   • Para cada necessidade sem atributo correspondente, gere um novo atributo
-     e adicione “(essencial)” na descrição.
-5. Defina restrições e requisitos técnicos/funcionais.
-6. Se o prompt original não tratar da criação de web-componente, retorne um erro pedindo ao usuário refazer o pedido.
-7. Caso contrário, devolva um bloco **clarification** com o json base abaixo, usando textos na linguagem do usuário.
-
-## Formato de saida
-Você deve retornar um array de objetos no formato JSON. Cada objeto representa uma subtarefa, com **apenas um dos seguintes formatos**:
-
-\`\`\` json
-[
-  {
-    "type": "clarification",
-    "clarificationMessage": string,
-    "json": TClarification
-  },
-  {
-    "type": "result",
-    "result": string
-  }
-]
-\`\`\`
-
-definição de TClarification
-\`\`\`json
-[
-    {
-        "sectionName": "resume",
-        "description": "[Breve descrição do widget]"
-    },
-    {
-        "sectionName": "parentClass",
-        "description": "Component for selecting date ranges, useful for period filters."
-        "widgetName": "IcaFormsInputDateRangeBase"
-    },
-    {
-        "sectionName": "widgetName",
-        "description": "Nome do Widget",
-        "widgetName": "[WidgetName ex: wcDatePickerRangeCustom]"
-        "tagName": "[WidgetTagName ex: wc-date-picker-range-custom]"
-    },
-    {
-        "sectionName": "properties",
-        "description": "Propriedades do widget",
-        "properties": [
-            { "propertyName": "[propertyName]", "description": "[description]", "isEssencial": "true|false" }
-        ]
-    },
-    {
-        "sectionName": "requirements",
-        "description": "requisitos para este widget, altere se necessário",
-        "functionalRequirements": [
-            "[example 1 - Must support keyboard navigation]",
-            "[example 2 - Return ISO-8601 date strings]"
-        ],
-        "visualRequirements": [
-            "[example 1 - Must render two consecutive months side by side]",
-            "[example 2 - Must clearly differentiate between selected, hovered, and disabled dates]"
-        ],
-    }
-]
-\`\`\`
-`
-    }
+async function getWidgetsPrompt(): Promise<string> {
+    return "## Widgets existentes\n" + await getWidgetList()
 }
 
 async function getWidgetList(): Promise<string> {
     const widgets = await getListFilesStart(widgetPrefix);
     return widgets.join('\n');
-}
-
-async function systemWidgetsPrompt(): Promise<mls.msg.IAMessageInputType> {
-    return {
-        type: 'system',
-        content: "## Widgets existentes\n" + await getWidgetList()
-    }
 }
 
 function prepareHtmlClarification(

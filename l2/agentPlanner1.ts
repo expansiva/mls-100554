@@ -1,7 +1,7 @@
 /// <mls shortName="agentPlanner1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-
+import { initState } from './_100554_collabState';
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
@@ -18,7 +18,8 @@ import {
     systemRagsAvailable,
     systemToolsAvailable,
     addRAGAdditionalInformation,
-    preferModelType
+    preferModelType,
+    getPromptByHtml
 } from "./_100554_aiPrompts";
 
 
@@ -112,95 +113,21 @@ async function addMessageResponse(context: mls.msg.ExecutionContext, step: mls.m
 
 export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
     if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
-    const prompts: mls.msg.IAMessageInputType[] = [];
-    prompts.push(systemMainInstruction());
-    prompts.push(systemAgentsAvailable());
-    prompts.push(systemRagsAvailable());
-    prompts.push(await systemToolsAvailable());
-    addRAGAdditionalInformation(rags, prompts); // optional
-    prompts.push(systemReturnJsonFormat());
-    prompts.push({
-        type: 'human',
-        content: prompt
-    });
+
+    const agents = systemAgentsAvailable();
+    const ragsA = systemRagsAvailable();
+    const tools = await systemToolsAvailable();
+
+    initState('agentPlanner1', {
+        mode: preferModelType("cost"),
+        agentsAvailable: agents.content,
+        ragsAvailable: ragsA.content,
+        toolsAvailable: tools.content,
+        humanPrompt:prompt
+    })
+    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentPlanner1', folder: '', state: 'agentPlanner1' })
+    
+    addRAGAdditionalInformation(rags, prompts);
+
     return prompts;
-}
-
-function systemReturnJsonFormat(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `
-Você deve retornar um array de objetos no formato JSON. Cada objeto representa uma subtarefa, com **apenas um dos seguintes formatos**:
-\`\`\` json
-[
-  {
-    "type": "agent",
-    "agentName": string,
-    "title": string,
-    "prompt": string,
-    "rags": string[] | null
-  },
-  {
-    "type": "tool",
-    "toolName": string,
-    "title": string,
-    "args": string
-  },
-  {
-    "type": "result",
-    "result": string
-  }
-]
-\`\`\`
-`
-    };
-}
-
-
-function systemMainInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `${preferModelType("cost")}
-Você é um coordenador de agentes e ferramentas para executar tarefas com base no prompt do usuário.
-Seu único objetivo neste momento é classificar o tipo de ação necessária a partir do prompt.
-
-REGRAS:
-1. Retorne **exatamente uma subtarefa** de um dos seguintes tipos: 'agent' ou 'result'.
-2. Se o prompt for vago ou ambíguo ou não contiver informação suficiente para decidir entre 'agent' ou 'result', retorne um result com mensagem de prompt inválido.
-4. Use 'result' quando o sistema puder **responder diretamente ao usuário** sem envolver agentes.
-5. Use 'agent' quando a tarefa requerer **ação ativa ou execução por parte de um agente ou ferramenta externa**.
-   - Neste caso, inclua o prompt original do usuário no campo 'prompt'.
-6. Não modifique o conteúdo do prompt original.
-7. Não elabore respostas nem explique suas escolhas – apenas classifique.
-
-EXEMPLOS:
-
-Usuário: "Criar uma landing page para um produto fitness"
-Resposta: Agente
-
-Usuário: "Qual é a capital da Alemanha?"
-Resposta: Result
-
-Usuário: "Me ajude"
-Resposta: Result
-
-`
-    };
-}
-
-export function systemMainInstruction2(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `${preferModelType("cost")}
-Você é um coordenador de agentes e ferramentas para executar tarefas complexas com base no prompt do usuário.
-Seu único objetivo é analisar o prompt do usuário e decidir qual agente chamar.
-1. Se faltar informações apenas para decidir o agente ou a resposta, retorne apenas uma subtarefa do tipo \`clarification\`.
-2. Se a tarefa puder ser resolvida diretamente com uma resposta, retorne uma subtarefa do tipo \`result\`.
-3. Decida qual agente, ferramenta ou base de conhecimento (RAG) será executado no próximo passo.
-4. Nunca retorne múltiplas subtarefas. Retorne **apenas uma subtarefa por vez** neste passo inicial.
-5. Se retornar um agent, no atributo prompt, deve repetir o prompt original do usuário.
-6. Lembre: seu único objetivo é identificar qual agente chamar, não elaborar mais conteúdos.
-7. Lembre-se não altere o prompt do usuário.
-`
-    };
 }
