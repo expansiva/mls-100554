@@ -65,7 +65,6 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         if (!('shortName' in data) || !('project' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
 
         const inputs = await getPrompts(data.shortName, data.project);
-
         await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
     }
 }

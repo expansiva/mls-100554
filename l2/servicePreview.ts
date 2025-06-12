@@ -6,7 +6,7 @@ import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_service
 import { StateLitElement } from './_100554_stateLitElement';
 import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
-import { globalState, setState } from './_100554_collabState';
+import { globalState, setState, initState, getState } from './_100554_collabState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
 import { CollabState } from './_100554_collabState';
@@ -115,8 +115,9 @@ export class ServicePreview100554 extends ServiceBase {
         super();
         window.preview = {
             editor: undefined,
-            iframe: undefined
+            iframe: undefined,
         };
+        initState('preview', { pausePreview: false });
         this.setEvents();
     }
 
@@ -852,6 +853,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private toogleWatch() {
+        setState('preview.pausePreview', false);
         this.elPreview = undefined;
         this.watch = this.menu.tools.watchPreview.selected === 0;
         if (this.watch) this.onReloader();
@@ -986,7 +988,8 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async preview(mode: string) {
 
-        if (!(mls.actual[2] as any).left || !this.watch) return true;
+        const rp = getState('preview.pausePreview');
+        if (!(mls.actual[2] as any).left || !this.watch || rp) return true;
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
 
         this.menu.title = '';

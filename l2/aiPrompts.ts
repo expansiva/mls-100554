@@ -186,12 +186,12 @@ export async function getPromptByHtml(dt: { project: number, shortName: string, 
     const ret: mls.msg.IAMessageInputType[] = [];
 
     itens.forEach((item) => {
-
         let cont = item.innerHTML;
         const tp = item.getAttribute('type') as any;
-
+        
         if (tp === 'memory' || tp === 'prompt') return;
-
+        cont = escape(cont);
+        
         if (dt.state) {
             cont = clearGaps(cont);
             const keys = findKeys(cont);
@@ -202,7 +202,7 @@ export async function getPromptByHtml(dt: { project: number, shortName: string, 
                 const st = getState(key.trim());
                 if (st === undefined || !key.startsWith(dt.state)) return;
                 const rp = `{{${key}}}`
-                cont = escape(cont.replace(rp, st));
+                cont = cont.replace(rp, st);
 
             });
         }

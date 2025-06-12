@@ -3,22 +3,22 @@
 import { html, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { loadChatPreferences, IChatPreferences } from './_100554_collabMessageHelper';
+import { loadChatPreferences, IChatPreferences, saveChatPreferences } from './_100554_collabMessageHelper';
 import { IAgent } from './_100554_aiAgentBase';
 import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHelper';
 import { listThreads } from './_100554_msgDBController';
 import { updateHTML } from './_100554_collabDOMSync';
 import { collab_trash } from './_100554_collabIcons';
+import { setState } from './_100554_collabState';
 
 @customElement('plugin-agent-playground-100554')
 export class AgentTester extends CollabLitElement {
 
     @property({ type: String }) agent = '';
-    @property() isEdit: boolean = false;
     @state() private loading: boolean = false;
     @state() private mode: string = 'input';
     @state() private result: string = '';
-    @state() private prompts: mls.msg.IAMessageInputType[] = [];
+    @state() private prompts: Iprompts[] = [];
     @state() private list: mls.msg.ThreadPerformanceCache[] = [];
     @state() private chatPreferences: IChatPreferences = {
         translationMode: 'icon',
@@ -31,6 +31,11 @@ export class AgentTester extends CollabLitElement {
         this.prompts = this.getPrompts();
         this.innerHTML = '';
         this.style.display = 'block';
+    }
+
+    disconnectedCallback() {
+        setState('preview.pausePreview', false)
+        super.disconnectedCallback();
     }
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
@@ -87,7 +92,6 @@ export class AgentTester extends CollabLitElement {
         </div>
         <div>
             <button class="action-btn" @click=${() => this.handlePlay()} title="play"><svg style="width: 13px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></button>
-            <button class="action-btn ${this.isEdit ? 'edit' : ''}" @click=${() => this.handleSave()} title="save"><svg style="width: 14px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-242.7c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32L64 32zm0 96c0-17.7 14.3-32 32-32l192 0c17.7 0 32 14.3 32 32l0 64c0 17.7-14.3 32-32 32L96 224c-17.7 0-32-14.3-32-32l0-64zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></button>
         </div>
         `
     }
@@ -117,7 +121,7 @@ export class AgentTester extends CollabLitElement {
         return html`
         
         <div class="containerinputs">
-            ${repeat(this.prompts, ((key: mls.msg.IAMessageInputType) => key.type + Date.now()) as any, ((p: mls.msg.IAMessageInputType, idx: number) => { return this.renderPrompt(p, idx) }) as any)}
+            ${repeat(this.prompts, ((key: Iprompts) => key.type + Date.now()) as any, ((p: Iprompts, idx: number) => { return this.renderPrompt(p, idx) }) as any)}
             ${this.renderButonAdd()}
         </div>
         `
@@ -132,12 +136,12 @@ export class AgentTester extends CollabLitElement {
         `
     }
 
-    renderPrompt(prompt: mls.msg.IAMessageInputType, idx: number) {
+    renderPrompt(prompt: Iprompts, idx: number) {
 
-        let pp = prompt.content.trim();
+        let pp = this.escape(prompt.content.trim());
         return html`
-            <details class="prompt ${prompt.type}" >
-                <summary>
+            <details class="prompt ${prompt.type}" ?open=${prompt.openDetail} >
+                <summary @click=${(e:MouseEvent) => this.handleDetails(e, prompt)}>
                     <div class="pheader">
                         <div class="type">
                             ${this.renderSelect(prompt)}
@@ -149,13 +153,13 @@ export class AgentTester extends CollabLitElement {
                     </div>
                 </summary>
                 <div>
-                    <textarea class="content" @blur="${(e: InputEvent) => this.promptEvent(e, idx)}">${this.escape(pp)}</textarea>
+                    <textarea class="content" @blur="${(e: InputEvent) => this.promptEvent(e, idx)}">${pp}</textarea>
                 </div>
             </details>
         `;
     }
 
-    renderSelect(prompt: mls.msg.IAMessageInputType) {
+    renderSelect(prompt: Iprompts) {
         return html`
             <select .value=${prompt.type.trim()} @change=${(e: Event) => this.updateSelect(e, prompt)}>
                 <option value="system">System</option>
@@ -169,7 +173,7 @@ export class AgentTester extends CollabLitElement {
     renderResult() {
         return html`
         <pre class="result">
-            ${this.result}
+            ${this.escape(this.result)}
         </pre >
         `
     }
@@ -217,9 +221,7 @@ export class AgentTester extends CollabLitElement {
 
     }
 
-
-
-    private updateSelect(e: Event, prompt: mls.msg.IAMessageInputType) {
+    private updateSelect(e: Event, prompt: Iprompts) {
 
         const el = e.target as HTMLSelectElement;
         if (!el) return;
@@ -229,10 +231,24 @@ export class AgentTester extends CollabLitElement {
 
         });
 
+        this.handleSave();
+
+    }
+
+    private handleDetails(e: MouseEvent, prompt: Iprompts) {
+        
+        let el = e.target as HTMLDetailsElement;
+        if (!el) return;
+        if (el.tagName.toLocaleLowerCase() !== 'details') el = el.closest('details') as HTMLDetailsElement;
+
+        this.prompts.forEach((p) => {
+            if (p.content === prompt.content && p.type === prompt.type) p.openDetail = !el.open;
+
+        });
+        
     }
 
     private addPrompt(type: string) {
-        this.isEdit = true;
         this.prompts = [
             ...this.prompts as any,
             {
@@ -244,8 +260,8 @@ export class AgentTester extends CollabLitElement {
 
     private trashClick(idx: number) {
 
-        this.isEdit = true;
         this.prompts = this.prompts.filter((_, i) => i !== idx);
+        this.handleSave();
 
     }
 
@@ -253,10 +269,11 @@ export class AgentTester extends CollabLitElement {
 
         const target = e.target as HTMLTextAreaElement;
         const newValue = target.value;
-        this.isEdit = true;
         this.prompts = this.prompts.map((p, idx) =>
-            idx === activeTabIndex ? { ...p, content: newValue } : p
+            idx === activeTabIndex ? { ...p, content: newValue, openDetail:true } : p
         );
+
+        this.handleSave();
 
     }
 
@@ -278,25 +295,36 @@ export class AgentTester extends CollabLitElement {
 
     }
 
+    private timeSave = 0;
     private async handleSave() {
 
-        let txt = `<plugin-agent-playground-100554 agent="${this.agent}" style="display:none">`;
-        this.prompts.forEach((p) => {
-            txt = txt + `
+        clearTimeout(this.timeSave);
+
+        this.timeSave = setTimeout(() => {
+
+            setState('preview.pausePreview', true);
+
+            let txt = `<plugin-agent-playground-100554 agent="${this.agent}" style="display:none">`;
+            this.prompts.forEach((p) => {
+                txt = txt + `
             <promptcustom type="${p.type}">
                 ${this.escapeAngleBrackets(p.content)}
             </promptcustom>
             `
-        });
-        txt = txt + '</plugin-agent-playground-100554>';
+            });
+            txt = txt + '</plugin-agent-playground-100554>';
 
-        updateHTML(txt);
+            updateHTML(txt);
+
+            setTimeout(()=>setState('preview.pausePreview', false),3000) 
+
+        }, 500);
 
     }
 
-    private getPrompts(): mls.msg.IAMessageInputType[] {
+    private getPrompts(): Iprompts[] {
 
-        const ret: mls.msg.IAMessageInputType[] = [];
+        const ret: Iprompts[] = [];
 
         Array.from(this.children).forEach((i) => {
 
@@ -306,8 +334,9 @@ export class AgentTester extends CollabLitElement {
             const cont = i.innerHTML.trim();
             ret.push({
                 type: tp,
-                content: cont
-            });
+                content: cont,
+                openDetail: false
+            } );
 
         });
 
@@ -320,6 +349,8 @@ export class AgentTester extends CollabLitElement {
             ...this.chatPreferences,
             threadMaintenance: target.value
         };
+
+        saveChatPreferences(this.chatPreferences);
     }
 
     private async _callAgent(agentName: string, message: string): Promise<string> {
@@ -372,8 +403,11 @@ export class AgentTester extends CollabLitElement {
             .replace(/&gt;/g, '>');
     }
 
-    private autoResizeTextarea(textarea:HTMLTextAreaElement) {
-        textarea.style.height = 'auto'; // Reseta para calcular corretamente
-        textarea.style.height = `${textarea.scrollHeight}px`; // Ajusta para o conteúdo
-    }
+}
+
+interface Iprompts{
+    type: string,
+    content: string,
+    openDetail:boolean
+
 }

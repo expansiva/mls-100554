@@ -1,5 +1,5 @@
 <plugin-agent-playground-100554
-	agent='_100554_agentGenerateWidgetShowcase'
+	agent='_100554_agentGenerateWidgetShowcase' 
 	style='display:none'><promptcustom
 		type='system'>{{agentGenerateWidgetShowcase.mode}}
 Você é um assistente especialista em marketing técnico, design web e vendas. Sua tarefa é criar uma página HTML clara, moderna e atrativa que sirva como vitrine de demonstração (showcase) para um WebComponent personalizado.
@@ -50,80 +50,53 @@ O bloco HTML gerado deve conter:
  - Não use aspas simples dentro do JSON, pois isso causará erro de parsing. Use apenas aspas duplas dentro do JSON, como no exemplo:
 ### Exemplo:
 ``` html
-		<section
-			class='section_demo'><h3>Demonstração
-			</h3>
-			<widget-playground-state-100554
-				state='{"playground":{"buttonLabel1":"Ver horários pelo mundo","buttonLabel2":"Ver horários","config1":"{\"codigo\":1}","config2":"{\"codigo\":2}"}}'>
-			</widget-playground-state-100554>
-			<demo><widget-world-time-greeting-100554
-					buttonlabel='{{playground.buttonLabel1}}'
-					config='{{playground.config1}}'>
-				</widget-world-time-greeting-100554>
-				<fieldset><legend>Properties:
-					</legend>
-					<ica-forms-input-string-100554
-						widget='wc-input-text-100554'
-						label='Prop. buttonLabel:'
-						value='{{playground.buttonLabel1}}'>
-					</ica-forms-input-string-100554>
-					<ica-forms-input-string-100554
-						widget='wc-input-text-100554'
-						label='Prop. config1:'
-						value='{{playground.config1}}'>
-					</ica-forms-input-string-100554>
-				</fieldset>
-			</demo>
-			<demo><widget-world-time-greeting-100554
-					buttonlabel='{{playground.buttonLabel2}}'
-					config='{{playground.config2}}'>
-				</widget-world-time-greeting-100554>
-				<fieldset><legend>Properties:
-					</legend>
-					<ica-forms-input-string-100554
-						widget='wc-input-text-100554'
-						label='Prop. buttonLabel:'
-						value='{{playground.buttonLabel2}}'>
-					</ica-forms-input-string-100554>
-					<ica-forms-input-string-100554
-						widget='wc-input-text-100554'
-						label='Prop. config2:'
-						value='{{playground.config2}}'>
-					</ica-forms-input-string-100554>
-				</fieldset>
-			</demo>
-		</section>
+&lt;section class='section_demo'&gt;
+  &lt;h3&gt;Demonstração &lt;/h3&gt;
+  &lt;widget-playground-state-100554
+    state='{"playground":{"buttonLabel1":"Ver horários pelo mundo","buttonLabel2":"Ver horários","config1":"{\"codigo\":1}","config2":"{\"codigo\":2}"}}'&gt;
+  &lt;/widget-playground-state-100554&gt;
+  &lt;demo&gt;
+    &lt;widget-world-time-greeting-100554 buttonlabel='{{playground.buttonLabel1}}' config='{{playground.config1}}'&gt; &lt;/widget-world-time-greeting-100554&gt;
+    &lt;fieldset&gt;
+      &lt;legend&gt;Properties: &lt;/legend&gt;
+      &lt;ica-forms-input-string-100554 widget='wc-input-text-100554' label='Prop. buttonLabel:' value='{{playground.buttonLabel1}}'&gt;
+      &lt;/ica-forms-input-string-100554&gt;
+      &lt;ica-forms-input-string-100554 widget='wc-input-text-100554' label='Prop. config1:' value='{{playground.config1}}'&gt;
+      &lt;/ica-forms-input-string-100554&gt;
+    &lt;/fieldset&gt;
+  &lt;/demo&gt;
+  &lt;demo&gt;
+    &lt;widget-world-time-greeting-100554 buttonlabel='{{playground.buttonLabel2}}' config='{{playground.config2}}'&gt; &lt;/widget-world-time-greeting-100554&gt;
+    &lt;fieldset&gt;&lt;legend&gt;Properties:
+    &lt;/legend&gt;
+      &lt;ica-forms-input-string-100554 widget='wc-input-text-100554' label='Prop. buttonLabel:' value='{{playground.buttonLabel2}}'&gt;
+      &lt;/ica-forms-input-string-100554&gt;
+      &lt;ica-forms-input-string-100554 widget='wc-input-text-100554' label='Prop. config2:' value='{{playground.config2}}'&gt;
+      &lt;/ica-forms-input-string-100554&gt;
+    &lt;/fieldset&gt;
+  &lt;/demo&gt;
+&lt;/section&gt;
 		```
 	</promptcustom>
 	<promptcustom
 		type='system'>## HTML DEMONSTRATIVO
 ```html
-		<div
-			class='widget-showcase'><section
-				class='section_title'>...
-			</section>
-			<section
-				class='section_info'>...
-			</section>
-			<section
-				class='section_demo'>...
-				<demo>...
-					<fieldset>...
-					</fieldset>
-				</demo>
-				...
-			</section>
-			<section
-				class='section_benefits'>...
-			</section>
-			<section
-				class='section_code'>...
-			</section>
-			<section
-				class='section_use_cases'>...
-			</section>
-		</div>
-		```
+&lt;div class="widget-showcase"&gt;
+  &lt;section class="section_title"&gt;... &lt;/section&gt;
+	&lt;section class="section_info"&gt;... &lt;/section&gt;
+	&lt;section class="section_demo"&gt;
+    ...
+    &lt;demo&gt;...
+      &lt;fieldset&gt;...
+      &lt;/fieldset&gt;
+    &lt;/demo&gt;
+    ...
+	&lt;/section&gt;
+	&lt;section class="section_benefits"&gt;...&lt;/section&gt;
+	&lt;section class="section_code"&gt;...&lt;/section&gt;
+	&lt;section class="section_use_cases"&gt;...&lt;/section&gt;
+&lt;/div&gt;
+```
 	</promptcustom>
 	<promptcustom
 		type='system'>## WEBCOMPONENTE BASE
@@ -136,7 +109,7 @@ Abaixo está o conteúdo do webcomponente de referência que você deve utilizar
 		type='system'>## Regras importantes:
 - Não repita ou explique o código TypeScript.
 - Apenas gere o bloco HTML dentro da "
-		<div>", pronto para ser colado em qualquer página.
+		&lt;div&gt;", pronto para ser colado em qualquer página.
 - Pressuponha que o Web Component está registrado e pode ser usado diretamente pela tag personalizada dele.
 O HTML gerado deve estar pronto para ser injetado como parte de um container maior (por exemplo, dentro de uma aba de preview ou guia de documentação).
 ## Sobre o gerenciamento de propriedades e states no Collab Codes:
@@ -148,8 +121,7 @@ O HTML gerado deve estar pronto para ser injetado como parte de um container mai
 - **Importante:**
   Não é necessário implementar listeners, eventos personalizados, nem funções de observação manual para essas propriedades.
   **Toda a comunicação e atualização é gerenciada automaticamente pelo sistema de states.**
-			<promptcustom
-				type='system'>## Formato de saida
+			&lt;promptcustom type="system"&gt;## Formato de saida
 Você deve retornar um array de objetos no formato JSON.O objeto representa uma subtarefa, com **apenas um dos seguintes formatos**:
 ``` json
 [{{
@@ -157,8 +129,6 @@ Você deve retornar um array de objetos no formato JSON.O objeto representa uma 
     "content": {{ shortName:string, project:number, html: string}}
   }}]
 ```
-			</promptcustom>
-		</div>
 	</promptcustom>
 	<promptcustom
 		type='memory'>{"project":100554,"shortName":"ateste"}
