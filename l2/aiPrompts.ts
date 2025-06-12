@@ -167,10 +167,10 @@ export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageIn
     }
 }
 
-export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string, state: string }): Promise<mls.msg.IAMessageInputType[]> {
+export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string, state?: string }): Promise<mls.msg.IAMessageInputType[]> {
 
 
-    if (!dt.project || !dt.shortName || !dt.state) throw new Error(`[getPromptByHtml]: incomplete parameters.`);
+    if (!dt.project || !dt.shortName) throw new Error(`[getPromptByHtml]: incomplete parameters.`);
 
     const keyFile = mls.stor.getKeyToFiles(dt.project, 2, dt.shortName, dt.folder, '.html');
     if (!mls.stor.files[keyFile]) throw new Error(`[getPromptByHtml]: not found stor.file ${keyFile}.`);
@@ -192,17 +192,20 @@ export async function getPromptByHtml(dt: { project: number, shortName: string, 
 
         if (tp === 'memory' || tp === 'prompt') return;
 
-        cont = clearGaps(cont);
+        if (dt.state) {
+            cont = clearGaps(cont);
+            const keys = findKeys(cont);
+            keys.forEach((key) => {
 
-        const keys = findKeys(cont);
-        keys.forEach((key) => {
+                if (!dt.state) return;
 
-            const st = getState(key.trim());
-            if (st === undefined || !key.startsWith(dt.state)) return;
-            const rp = `{{${key}}}`
-            cont = escape(cont.replace(rp, st));
+                const st = getState(key.trim());
+                if (st === undefined || !key.startsWith(dt.state)) return;
+                const rp = `{{${key}}}`
+                cont = escape(cont.replace(rp, st));
 
-        });
+            });
+        }
 
         ret.push({
             type: tp,
