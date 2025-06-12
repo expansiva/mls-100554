@@ -1,8 +1,8 @@
 /// <mls shortName="pluginAgentPlayground" project="100554" enhancement="enhancementStyle" />
-				
+
 plugin-agent-playground-100554 {
-                
- display: block;
+
+    display: block;
     border: 1px solid #ccc;
     padding: 1rem;
     border-radius: 8px;
@@ -111,11 +111,10 @@ plugin-agent-playground-100554 {
         margin: 0;
         background-color: #ffffff;
         display: flex;
-        height: 100%;
+        height: calc(100vh - 175px);
         flex-grow: 1;
-        /* ocupa todo espaÃ§o restante */
         overflow: auto;
-        /* scroll se conteÃºdo for maior */
+        flex-direction: column;
     }
 
     textarea {
@@ -152,11 +151,11 @@ plugin-agent-playground-100554 {
         border-radius: 4px;
         font-size: 14px;
     }
-    
-    .edit::before{ 
+
+    .edit::before {
         content: ' ';
         position: absolute;
-        top:0;
+        top: 0;
         right: 0;
         background-color: red;
         border-radius: 50%;
@@ -260,9 +259,109 @@ plugin-agent-playground-100554 {
             transform: rotate(360deg);
         }
     }
-                
 
-                
+    .containerinputs {
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        align-items: center;
+        padding: 1rem;
+
+        details {
+            width: 100%;
+            max-width: 900px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fafafa;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+
+            &[open] .title{
+                display:none;
+            }
+
+            summary {
+                cursor: pointer;
+                padding: 1rem;
+                border-bottom: 1px solid #e0e0e0;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                .trash{
+                    z-index: 9999;
+                }
+
+                .pheader {
+                    width: 100%;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    .title{
+                        margin-left: 1rem;
+                    }
+                    
+                    .type {
+                        select {
+                            appearance: none;
+                            padding: 0.4rem 1rem;
+                            font-size: 0.95rem;
+                            border: 1px solid #ccc;
+                            border-radius: 6px;
+                            background-color: white;
+                            transition: border 0.3s ease;
+
+                            &:focus {
+                                outline: none;
+                                border-color: #007bff;
+                            }
+                        }
+                    }
+
+                    .trash {
+                        cursor: pointer;
+
+                        svg {
+                            fill: #666;
+                            transition: fill 0.2s ease;
+
+                            &:hover {
+                                fill: #e74c3c;
+                            }
+                        }
+                    }
+                }
+            }
+
+            >div {
+                padding: 1rem;
+
+                textarea.content {
+                    width: 100%;
+                    border: none;
+                    resize: vertical;
+                    padding: 1rem;
+                    font-size: 0.95rem;
+                    font-family: 'Fira Code', monospace;
+                    background-color: #fdfdfd;
+                    border-radius: 6px;
+                    color: #333;
+                    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+                    //overflow: hidden;
+                    min-height: 200px;
+                    line-height: 1.5;
+
+                    &:focus {
+                        outline: none;
+                        background-color: #fff;
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 //Start Less Tokens

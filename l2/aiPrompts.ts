@@ -167,7 +167,7 @@ export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageIn
     }
 }
 
-export async function getPromptByHtml(dt:{ project:number, shortName:string, folder:string, state: string }): Promise<mls.msg.IAMessageInputType[]> { 
+export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string, state: string }): Promise<mls.msg.IAMessageInputType[]> {
 
 
     if (!dt.project || !dt.shortName || !dt.state) throw new Error(`[getPromptByHtml]: incomplete parameters.`);
@@ -193,14 +193,14 @@ export async function getPromptByHtml(dt:{ project:number, shortName:string, fol
         if (tp === 'memory' || tp === 'prompt') return;
 
         cont = clearGaps(cont);
-        
+
         const keys = findKeys(cont);
         keys.forEach((key) => {
 
             const st = getState(key.trim());
             if (st === undefined || !key.startsWith(dt.state)) return;
             const rp = `{{${key}}}`
-            cont = cont.replace(rp, st).replace(/&gt;/g,'>').replace(/&lt;/g,'<');
+            cont = escape(cont.replace(rp, st));
 
         });
 
@@ -217,24 +217,30 @@ export async function getPromptByHtml(dt:{ project:number, shortName:string, fol
 }
 
 function clearGaps(text: string): string {
-  return text.replace(/{{(.*?)}}/g, (_, content) => {
-    return `{{${content.trim().replace(/\s+/g, '')}}}`;
-  });
+    return text.replace(/{{(.*?)}}/g, (_, content) => {
+        return `{{${content.trim().replace(/\s+/g, '')}}}`;
+    });
 }
 
 function findKeys(text: string): string[] {
-  const regex = /{{(.*?)}}/g;
-  const resultados: string[] = [];
-  let match;
+    const regex = /{{(.*?)}}/g;
+    const resultados: string[] = [];
+    let match;
 
-  while ((match = regex.exec(text)) !== null) {
-    resultados.push(match[1].trim()); 
-  }
+    while ((match = regex.exec(text)) !== null) {
+        resultados.push(match[1].trim());
+    }
 
-  return resultados;
+    return resultados;
 }
 
-interface IReqGetPromptByHtml{
+function escape(input: string): string {
+    return input
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
+}
+
+interface IReqGetPromptByHtml {
     project: number,
     shortName: string,
     folder: string,
