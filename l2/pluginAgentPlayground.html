@@ -1,1 +1,122 @@
-<h1>_100554_pluginAgentPlayground</h1>
+<plugin-agent-playground-100554
+	agent='_100554_agentGenerateDefs'
+	style='display:none'><promptcustom
+		type='system'>### IMPORTANTE SOBRE widget-playground-state-100554:
+ - O valor do atributo state do compoennte deve ser uma string JSON válida:
+ - Sem quebras de linha (\n) – tudo deve estar em uma única linha.
+ - Envolvida por aspas simples externas.
+ - Não use aspas simples dentro do JSON, pois isso causará erro de parsing. Use apenas aspas duplas dentro do JSON, como no exemplo:
+### Exemplo:
+``` html
+&lt;section class='section_demo'&gt;&lt;h3&gt;Demonstração &lt;/h3&gt; 
+ &lt;widget-playground-state-100554 state='{"playground":{"buttonLabel1":"Ver horários pelo mundo","buttonLabel2":"Ver horários","config1":"{\"codigo\":1}","config2":"{\"codigo\":2}"}}'&gt;
+ &lt;/widget-playground-state-100554&gt;
+ &lt;demo&gt;
+   &lt;widget-world-time-greeting-100554 buttonlabel='{{playground.buttonLabel1}}' config='{{playground.config1}}'&gt;
+   &lt;/widget-world-time-greeting-100554&gt;
+   &lt;fieldset&gt;&lt;legend&gt;Properties: &lt;/legend&gt;
+     &lt;ica-forms-input-string-100554 widget='wc-input-text-100554' label='Prop. buttonLabel:' value='{{playground.buttonLabel1}}'&gt; &lt;/ica-forms-input-string-100554&gt;
+     &lt;ica-forms-input-string-100554 widget='wc-input-text-100554' label='Prop. config1:' value='{{playground.config1}}'&gt; &lt;/ica-forms-input-string-100554&gt;
+   &lt;/fieldset&gt;
+  &lt;/demo&gt;
+&lt;/section&gt;
+```
+	</promptcustom>
+	<promptcustom
+		type='system'>## arquivo .ts
+```typescript
+{{agentdefs.ts}}
+```
+	</promptcustom>
+	<promptcustom
+		type='system'>## arquivo .html
+```html
+{{agentdefs.html}}
+```
+	</promptcustom>
+	<promptcustom
+		type='system'>## arquivo .less
+```less
+{{agentdefs.less}}
+```
+	</promptcustom>
+	<promptcustom
+		type='system'>## arquivo .defsOld
+```typescript
+{{agentdefs.def}}
+```
+	</promptcustom>
+	<promptcustom
+		type='system'>## formato de saida 
+Você deve retornar o objeto JSON conforme abaixo.
+```json
+{
+  "type": "flexible",
+  "result": BaseDefs
+}
+```
+export interface BaseDefs {
+  meta: {
+    projectId: number;
+    folder: string;
+    shortName: string;
+    type: 'page' | 'widget' | 'plugin' | 'module' | 'lib' | 'table';
+    group?: string; // Ex: module group, 'CRM', 'CA'
+    tags?: string[]; // tags for filtering, ex: ['obsolete', 'newversion2', 'urgent']
+  };
+  references?: {
+    widgets?: string[]; // ['ica-cta-box']
+    plugins?: string[]; // ['plugin-analytics']
+    statesRO?: string[]; // ex: 'ui.enabled1', read only
+    statesRW?: string[]; // ex: 'ui.enabled1', read write
+    statesWO?: string[]; // ex: 'ui.enabled1', write only
+    imports?: string[]; // ['utils/date', 'userHelper']
+  };
+  codeInsights?: {
+    todos?: string[];
+    securityWarnings?: string[];
+    unusedImports?: string[];
+    deadCodeBlocks?: string[];
+    accessibility?: string[];
+    i18nWarnings?: string[]; // strings that should be translated, only if i18n is enabled and if string is essential
+    correctness: number; // 0-10, 10 is best
+    errorHandling: number;
+    readability: number;
+    maintainability: number;
+  };
+  auth?: {
+    view?: UserRole[];
+    edit?: UserRole[];
+    use?: UserRole[];
+    restrictReason?: string;
+  };
+  planning?: {
+    generalDescription?: string;
+    goal?: string;
+    userStories?: UserStories[]; // User stories that describe the functionality from the user's perspective
+    userRequestsFeatures?: Planning[]; // User feature requests
+    userRequestsBugs?: Planning[]; // User bug reports
+    userRequestsEnhancements?: Planning[]; // // User suggestions for improvements
+  };
+  embedding?: string; // Base64 vector embedding (generated post-analysis)
+  embeddingVersion?: string; // Version of the embedding model used, e.g., "text-embedding-3-small"
+}
+export interface UserStories {
+  story: string; // User story description
+  derivedRequirements: Planning[]; // Functional or technical requirements derived from the user story
+}
+export interface Planning {
+  description: string; // Description of the planning
+  done?: boolean; // Whether the planning is done, default = false
+  comment?: string; // Optional comment or notes for done = false
+}
+export type UserRole = string;
+	</promptcustom>
+	<promptcustom
+		type='human'>##Solicitação do usuário
+Por favor, analise os arquivos .ts, .html, .less e gere o objeto .defs conforme o formato especificado.
+	</promptcustom>
+	<promptcustom
+		type='memory'>{"project":100554, "shortName":"ateste", "folder":""}
+	</promptcustom>
+</plugin-agent-playground-100554>
