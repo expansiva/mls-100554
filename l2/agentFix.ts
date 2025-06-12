@@ -18,6 +18,7 @@ export function createAgent(): IAgent {
         avatar_url: svgFixBug,
         agentDescription: "Responsavel por corrigir erros",
         visibility: "public",
+        scope: ["l2_preview"],
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _beforePrompt(context);
         },
@@ -86,7 +87,7 @@ async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType
     if (!('page' in data) || !data.page) throw new Error(`[${agentName}] getPrompts: No 'page' in data prompt.`);
     if (!('position' in data) || !data.position) throw new Error(`[${agentName}] getPrompts: No 'position' in data prompt.`);
     if (!['left', 'right'].includes(data.position)) throw new Error(`[${agentName}] getPrompts: Invalid 'position' in data prompt: ${data.position}`);
-    if (!('mode' in data) || !data.mode) throw new Error(`[${agentName}] getPrompts: No 'mode' in data prompt.`);
+    if (!('mode' in data) || !data.mode) data.mode = 'typescript';
     if (!['typescript', 'html', 'less'].includes(data.mode)) throw new Error(`[${agentName}] getPrompts: Invalid 'mode' in data prompt: ${data.mode}`);
 
     const prompts: mls.msg.IAMessageInputType[] = [];
