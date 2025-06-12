@@ -3,6 +3,7 @@
 export interface IAgent {
   visibility: 'public' | 'private';
   agentName: string;
+  scope?: string[],
   avatar_url: string | undefined;
   agentDescription: string;
   beforePrompt(context: mls.msg.ExecutionContext): Promise<void>;

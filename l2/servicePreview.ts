@@ -13,7 +13,8 @@ import { CollabState } from './_100554_collabState';
 import { TsTestAst } from './_100554_tsTestAST';
 import { loadChatPreferences } from './_100554_collabMessageHelper';
 import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHelper';
-import { createAgent } from './_100554_agentWebCare';
+import { PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
+import { IAgent } from './_100554_aiAgentBase';
 
 import './_100554_collabConsole';
 import './_100554_collabResultTest';
@@ -291,8 +292,8 @@ export class ServicePreview100554 extends ServiceBase {
             const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
             const storFile = mls.stor.files[keyStorFile];
             if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
-            
-            if((iPath as any).position && (iPath as any).position === 'left')this.setModel(storFile);
+
+            if ((iPath as any).position && (iPath as any).position === 'left') this.setModel(storFile);
         } catch (err: any) {
             throw new Error(err);
         }
@@ -419,29 +420,32 @@ export class ServicePreview100554 extends ServiceBase {
         return html`<collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="var(--bg-primary-color)">
                 <div slot="top" style="height:100%;" id="preview-container"></div>
                 <div slot="bottom">
-                    <collab-messages-prompt-100554 acceptAutoCompleteAgents="false" .onSend=${this.handleSend.bind(this)}></collab-messages-prompt-100554>
+                    <collab-messages-prompt-100554 acceptAutoCompleteAgents="true" scope="l${this.level}_preview"  .onSend=${this.handleSend.bind(this)}></collab-messages-prompt-100554>
                 </div>
             </collab-spliter-vertical-var-fixed-100554>`;
     }
 
-    async handleSend(e:any) {
+    async handleSend(value: string, opt: { isSpecialMention: boolean, agentName: string }) {
 
         if (!this.page) {
             this.setError('Erro page not selected');
             return;
-        } 
+        }
 
-        const v = e || '';
+        if (!opt.isSpecialMention || !opt.agentName) {
+            this.setError('Please select a agent first ex: @@Improve');
+            return;
+        }
 
-        if (!v) {
+        if (!value) {
             this.setError('Error: Invalid prompt');
             return;
         }
- 
+
         this.loading = true;
-        
+
         try {
-            await this.fireCollab(JSON.stringify({ page: this.page, prompt: v }));
+            await this.fireCollab(opt.agentName, JSON.stringify({ page: this.page, prompt: value, position: 'left' }));
         } catch (err: any) {
             this.setError('Error on send message:' + err.message);
         } finally {
@@ -450,7 +454,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     }
 
-    private async fireCollab(prompt: string) {
+    private async fireCollab(agentName: string, prompt: string) {
 
         const pref = loadChatPreferences();
         if (!pref.threadMaintenance) {
@@ -461,9 +465,11 @@ export class ServicePreview100554 extends ServiceBase {
         const userId = getUserIdLocalStorage();
         const threadId = pref.threadMaintenance;
         if (!userId) return;
-        
-        const context = getTemporaryContext(threadId, userId, '@@ agentWebCare '+ prompt);
-        const agent = createAgent();
+
+        const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentName}`);
+        if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent');
+        const agent: IAgent = moduleAgent.createAgent()
+        const context = getTemporaryContext(threadId, userId, prompt);
         await agent.beforePrompt(context);
 
     }
@@ -1228,8 +1234,6 @@ export class ServicePreview100554 extends ServiceBase {
         }
         return JSON.stringify(vl);
     }
-
-
 
 
 }

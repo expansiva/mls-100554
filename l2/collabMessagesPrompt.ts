@@ -13,6 +13,9 @@ import './_100554_collabMessagesAvatar';
 export class CollabMessagesPrompt100554 extends StateLitElement {
 
     @query('textarea') textArea: HTMLTextAreaElement | undefined;
+    @query('.mention-suggestions') mentionSuggestionsElement?: HTMLElement;
+    @query('.wrapper') wrapper?: HTMLElement;
+
     @state() text: string = '';
     @state() actualMention?: IMentions;
 
@@ -25,6 +28,8 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
 
     @property({ type: Function }) onSend: Function | undefined;
     @property() threadId?: string;
+    @property() scope?: string;
+
 
     @property({
         type: Boolean,
@@ -40,7 +45,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         this.adjustTextAreaHeight();
-        if (this.acceptAutoCompleteAgents) this.getAgents();
+        if (this.acceptAutoCompleteAgents && !this.scope) this.getAgents();
     }
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
@@ -51,6 +56,10 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             && this.acceptAutoCompleteUser
         ) {
             this.getUsers();
+        }
+
+        if (changedProperties.has('scope') && this.acceptAutoCompleteAgents) {
+            if (this.acceptAutoCompleteAgents) this.getAgents();
         }
     }
 
@@ -69,21 +78,42 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     }
 
     private async getAgents() {
+
         const agentsFiles = await this.getAgentsFiles();
         const agentsPublic = agentsFiles.map((agent: IAgent) => {
-            const { visibility, agentName, avatar_url, agentDescription } = agent;
+            const { visibility, agentName, avatar_url, agentDescription, scope } = agent;
             if (visibility === 'public') {
-                return {
-                    name: agentName,
-                    description: agentDescription,
-                    avatar_url,
-                    alias: agentName.replace('agent', '')
+                let inScope = this.scope ? false : true;
+                if (this.scope && scope) {
+                    inScope = scope.includes(this.scope);
+                }
+                if (inScope) {
+                    return {
+                        name: agentName,
+                        description: agentDescription,
+                        avatar_url,
+                        alias: agentName.replace('agent', '')
+                    }
                 }
             }
         }).filter((item) => !!item)
 
         this.allAgents = agentsPublic as IMentionAgent[];
 
+    }
+
+    private calculatePosition() {
+
+        if (!this.mentionSuggestionsElement || !this.wrapper) return;
+        const bound1 = this.wrapper.getBoundingClientRect();
+        const bound2 = this.mentionSuggestionsElement.getBoundingClientRect();
+        let calc = 0
+        if (bound1.top < bound1.height) {
+            calc = bound1.top;
+        } else {
+            calc = bound1.top - bound1.height - bound2.height;
+        }
+        this.mentionSuggestionsElement.style.top = `${calc}px`;
     }
 
     private adjustTextAreaHeight() {
@@ -160,7 +190,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         </div>`
     }
 
-    handleInput(e: MouseEvent) {
+    async handleInput(e: MouseEvent) {
 
         if (!e.target) return;
         const target = e.target as HTMLTextAreaElement;
@@ -180,7 +210,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             if (atSymbol === '@@' && this.acceptAutoCompleteAgents) {
                 this.mentionActive = true;
                 this.mentionQuery = query;
-
                 this.mentionSuggestions = (this.allAgents.map(agent => {
                     if (agent.name.toLowerCase().startsWith(query.toLowerCase()))
                         return {
@@ -191,6 +220,9 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                             type: 'agent'
                         }
                 }).filter((item) => item !== undefined)) as IMentions[]
+
+                await this.updateComplete;
+                this.calculatePosition();
 
             } else if (atSymbol === '@' && this.acceptAutoCompleteUser) {
                 this.mentionActive = true;
@@ -205,7 +237,10 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                             description: user.name,
                             type: 'user'
                         }
-                }).filter((item) => item !== undefined)) as IMentions[]
+                }).filter((item) => item !== undefined)) as IMentions[];
+
+                await this.updateComplete;
+                this.calculatePosition();
             } else {
                 this.mentionActive = false;
                 this.mentionSuggestions = [];
