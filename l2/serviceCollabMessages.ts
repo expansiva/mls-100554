@@ -12,6 +12,7 @@ import './_100554_collabMessagesChat';
 import './_100554_wcImage';
 import './_100554_collabTasks';
 import './_100554_collabMessagesSettings';
+import './_100554_collabMessagesFindtask';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -78,6 +79,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     public onClickMain(op: string) {
         if (op === 'opReset') this.resetOnBoarding();
         if (op === 'opSettings') this.openSettings();
+        if (op === 'opFindTask') this.openFindTask();
+
     }
 
     public onClickTools(op: string) {
@@ -90,7 +93,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         main: {
             opReset: { text: 'Reset onboarding', icon: 'f2ea' },
             opSettings: { text: 'Settings', icon: 'f085' },
-
+            opFindTask: { text: 'Find Task', icon: 'f002' },
         },
         tools: {
             toolAdd: {
@@ -374,6 +377,16 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         return true;
     }
 
+    private openFindTask() {
+        if (this.menu.setTabActive) this.menu.setTabActive(-1);
+        if (this.menu.setMode) {
+            const settings = document.createElement('collab-messages-findtask-100554');
+            (settings as any)['serviceBase'] = this;
+            this.menu.setMode('page', settings);
+        }
+        return true;
+    }
+
     private saveLocalStorage(data: IDataLocal) {
         try {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
@@ -417,4 +430,4 @@ enum ETabs {
 
 
 type ITabType = 'CRM' | 'TASK' | 'DOCS' | 'CONNECT' | 'Add' | 'Loading';
-type IScenery = 'tabs' | 'settings'
+type IScenery = 'tabs' | 'settings' | 'findTask'

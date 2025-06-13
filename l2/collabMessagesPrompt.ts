@@ -87,7 +87,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                 if (this.scope && scope) {
                     inScope = scope.includes(this.scope);
                 }
-                if (inScope) {
+                if (inScope && !scope) {
                     return {
                         name: agentName,
                         description: agentDescription,
