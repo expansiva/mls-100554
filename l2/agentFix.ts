@@ -153,7 +153,8 @@ Regras que devem ser respeitadas na atualização dos arquivos.
 
 1. Não se deve remover ou renomear atributos sem a solicitação do usuario
 2. Não se deve adicionar novos tokens no less
-3. *Não remover e não alterar*, a primeira linha com tripleslash : /// <mls ... />
+3. *Não remover*, a primeira linha com tripleslash : /// <mls ... />
+4. Não alterar o valor dos itens do tripleslash(shortName,project,enhancement,groupName)
 `
     }
 }
