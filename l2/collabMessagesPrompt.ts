@@ -30,7 +30,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     @property() threadId?: string;
     @property() scope?: string;
 
-
     @property({
         type: Boolean,
         converter: (value: string | null) => value === 'true'
@@ -79,6 +78,8 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
 
     private async getAgents() {
 
+
+
         const agentsFiles = await this.getAgentsFiles();
         const agentsPublic = agentsFiles.map((agent: IAgent) => {
             const { visibility, agentName, avatar_url, agentDescription, scope } = agent;
@@ -87,7 +88,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                 if (this.scope && scope) {
                     inScope = scope.includes(this.scope);
                 }
-                if (inScope && !scope) {
+                if (inScope) {
                     return {
                         name: agentName,
                         description: agentDescription,
@@ -96,7 +97,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                     }
                 }
             }
-        }).filter((item) => !!item)
+        }).filter((item) => !!item);
 
         this.allAgents = agentsPublic as IMentionAgent[];
 

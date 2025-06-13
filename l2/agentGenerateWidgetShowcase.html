@@ -1,6 +1,7 @@
 <plugin-agent-playground-100554
-	agent='_100554_agentGenerateWidgetShowcase' 
-	style='display:none'><promptcustom
+	agent='_100554_agentGenerateWidgetShowcase'
+	style='display:none'>
+  <promptcustom
 		type='system'>{{agentGenerateWidgetShowcase.mode}}
 Você é um assistente especialista em marketing técnico, design web e vendas. Sua tarefa é criar uma página HTML clara, moderna e atrativa que sirva como vitrine de demonstração (showcase) para um WebComponent personalizado.
 	</promptcustom>
@@ -53,7 +54,7 @@ O bloco HTML gerado deve conter:
 &lt;section class='section_demo'&gt;
   &lt;h3&gt;Demonstração &lt;/h3&gt;
   &lt;widget-playground-state-100554
-    state='{"playground":{"buttonLabel1":"Ver horários pelo mundo","buttonLabel2":"Ver horários","config1":"{\"codigo\":1}","config2":"{\"codigo\":2}"}}'&gt;
+    state='{"playground":{"buttonLabel1":"Ver horários pelo mundo","buttonLabel2":"Ver horários","config1":{"codigo":1},"config2":{"codigo":2}}}'&gt;
   &lt;/widget-playground-state-100554&gt;
   &lt;demo&gt;
     &lt;widget-world-time-greeting-100554 buttonlabel='{{playground.buttonLabel1}}' config='{{playground.config1}}'&gt; &lt;/widget-world-time-greeting-100554&gt;

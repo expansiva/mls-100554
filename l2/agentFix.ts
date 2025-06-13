@@ -94,6 +94,7 @@ async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType
     prompts.push(systemMainInstruction());
     prompts.push(systemTaskInstruction());
     prompts.push(systemRulesInstruction());
+    prompts.push(systemRulesTripleSlash());    
     prompts.push(systemKnownErrors());
 
     if (data.mode === 'typescript') {
@@ -153,8 +154,24 @@ Regras que devem ser respeitadas na atualização dos arquivos.
 
 1. Não se deve remover ou renomear atributos sem a solicitação do usuario
 2. Não se deve adicionar novos tokens no less
-3. *Não remover*, a primeira linha com tripleslash : /// <mls ... />
+3. *Não remover*, a primeira linha com tripleslash ex: /// <mls shortName="xxx" project="yyy" enhancement="yyy" groupName="zzzz" />
 4. Não alterar o valor dos itens do tripleslash(shortName,project,enhancement,groupName)
+`
+    }
+}
+
+
+function systemRulesTripleSlash(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `##Rules
+Os arquivos .ts e .less tem como controle a primeira linha sendo um tripleslash. Essa linha é obrigatória, não remover.
+- Os atributos válidos são : shortName,project,enhancement,groupName.
+- Corrigir o nome dos atributos se necessário.
+- Não adicionar novos atributos.
+- Não alterar o value dos atributos
+- O value deverá ser sempre entre aspas duplas "" ex: /// <mls shortName="xxx" project="yyy" enhancement="yyy" groupName="zzzz" />
+
 `
     }
 }

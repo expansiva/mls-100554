@@ -19,7 +19,7 @@ Se for possível cumprir esta tarefa, **retorne um objeto JSON** do tipo "flexib
 1.6. Use sempre os atributos padrões da classe base, nunca crie novos atributos, trabalhe com os atributos da classe base.
 1.6.1 Deve-se obrigatoriamente declarar todos os campos definidos na classe base, com os mesmos nomes e tipos. Isso é necessário para garantir consistência e evitar erros de execução.
 1.6.2 O componente nunca deve renderizar um
-		<ica-...>dentro dele mesmo.
+		&lt;ica-...&gt;dentro dele mesmo.
 1.6.3 Caso o componente base tenha um atributo config, o mesmo deve ser usado, seguindo os parametros da interface, nunca crie atributos novos, a mesma pode ser importada para a tipagem. Isso é necessário para garantir consistência e evitar erros de execução.
 1.6.4 Nunca altere a interface do config, adicionando novos atributos. Isso é necessário para garantir consistência e evitar erros de execução.
 1.6.5 Nunca gere o atributo "class", "style" ou "id".
@@ -43,11 +43,12 @@ Se for possível cumprir esta tarefa, **retorne um objeto JSON** do tipo "flexib
 - "Definições da Classe Base"
 - "Formato de saida"
 - "LESS TOKENS - DESIGN SYSTEM"
-		&gt;/ica-...&lt;
+		>/ica-...&lt;
+	&lt;/ica-...&gt;
 	</promptcustom>
 	<promptcustom
 		type='system'>## ATENÇÃO
-### ATENÇÃO — Uso da função repeat com tipagem correta no Lit
+— Uso da função repeat com tipagem correta no Lit
 1. Importações obrigatórias:
     O import deve ser feito diretamente de 'lit', assim:
     import { html, LitElement, repeat, TemplateResult } from 'lit';
@@ -68,6 +69,17 @@ Se for possível cumprir esta tarefa, **retorne um objeto JSON** do tipo "flexib
     A tipagem explícita com as () => string e as () => TemplateResult&lt;1&gt; é necessária para que o TypeScript reconheça corretamente os tipos esperados e evite erros de compilação.
 3. É PROIBIDO criar função com o nome "renderOptions()", essa é uma função reservada.
 4. Qualquer propriedade ou variavel com a tipagem que pode ser "undefined" ou "null" deve ser verificada antes de usar-la. Isso é necessário para garantir consistência e evitar erros de execução.
+5. Se utilizar as funções do lit firstUpdated, ou updated, elas tem que ser públicas e fazer o super da classe base segue ex:
+```typescript
+async firstUpdated(changedProperties: Map&lt;PropertyKey, unknown&gt;) {
+super.firstUpdated(changedProperties);
+}
+async updated(changedProperties: Map&lt;PropertyKey, unknown&gt;) {
+super.updated(changedProperties);
+}
+```
+6. Imports das directives do Lit 3.0. Se for utilizar alguma das directives do Lit, o import deve ser no import do lit,
+ex: import { html, repeat, classMap, unsafeHTML } from 'lit';
 	</promptcustom>
 	<promptcustom
 		type='system'>## Definições de Propriedades (Collab Codes):
@@ -126,7 +138,7 @@ Você deve retornar um array de objetos no formato JSON. Cada objeto representa 
 	<promptcustom
 		type='system'>## Modelo Widget
 ``` typescript
-///&lt;mls shortname='widgetInputNumber project='100554' enhancement='_100554_enhancementLit' groupname='other'&gt;
+/// &lt;mls shortName="widgetInputNumber" project="100554" enhancement="_100554_enhancementLit" groupName="other"&gt;
 import { html, LitElement, ifDefined, css, repeat, TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IcaFormsInputNumberBase } from './_100554_icaFormsInputNumberBase';
@@ -153,43 +165,22 @@ export class WidgetInputNumber extends IcaFormsInputNumberBase {
     error: string = '';
     render() {
         return html`
-			<h2>${this.myMessage.hello}
-			</h2>
-			<label
-				class='form-control-label'
-				for='input'>${this.label}
-			</label>
-			<input
-				id='input'
-				class='input_control'
-				type='number'
-				name='${ifDefined(this.name)}'
-				?disabled='${this.disabled}'
-				?readonly='${this.readonly}'
-				?required='${this.required}'
-				min='${ifDefined(this.minvalue)}'
-				max='${ifDefined(this.maxvalue)}'
-				step='${ifDefined(this.step'
-				as=''
-				number)}=''
-				.value='${this.value}'
-				?autofocus='${this.autofocus}'
-				pattern='${ifDefined(this.pattern)}'
-				inputmode='${ifDefined(this.inputmode)}'
-				@input='${this.handleChange}'>
-			</input>
-			<div
-				class='form_error_message'>${this.error}
-			</div>
-			<ul>${repeat(
+			&lt;h2&gt;${this.myMessage.hello}
+			&lt;/h2&gt;
+			&lt;label class="form-control-label" for="input"&gt;${this.label}
+			&lt;/label&gt;
+			&lt;input id="input" class="input_control" type="number" name="${ifDefined(this.name)}" ?disabled="${this.disabled}" ?readonly="${this.readonly}" ?required="${this.required}" min="${ifDefined(this.minvalue)}" max="${ifDefined(this.maxvalue)}" step="${ifDefined(this.step" as="" number)}="" .value="${this.value}" ?autofocus="${this.autofocus}" pattern="${ifDefined(this.pattern)}" inputmode="${ifDefined(this.inputmode)}" @input="${this.handleChange}"&gt;
+			&lt;div class="form_error_message"&gt;${this.error}
+			&lt;/div&gt;
+			&lt;ul&gt;${repeat(
                 ['Banana', 'Cafe'],
                 ((item: string) => item) as () => string,
                 ((item: string) => html`
-				<li>${item}
-				</li>
-				`) as () => TemplateResult<1>;
+				&lt;li&gt;${item}
+				&lt;/li&gt;
+				`) as () => TemplateResult&lt;1&gt;;
             )}
-			</ul>
+			&lt;/ul&gt;
 			`;
     }
     private handleChange() {
