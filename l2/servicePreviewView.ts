@@ -352,7 +352,7 @@ export class ServicePreviewView extends StateLitElement {
                 iframe.contentDocument.body.style.overflowY = 'auto';
                 iframe.contentDocument.body.style.overflowX = 'hidden';
                 iframe.contentDocument.body.style.margin = '0';
-                //iframe.contentDocument.body.style.height = 'calc(100% - 70px)';
+                iframe.contentDocument.body.style.height = 'calc(100% - 70px)';
                 iframe.contentDocument.body.style.width = 'calc(100% - 70px)';
 
             }
