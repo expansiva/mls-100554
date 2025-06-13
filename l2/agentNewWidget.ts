@@ -7,6 +7,7 @@ import { createNewFile } from "./_100554_pluginNewFileBase";
 import { descriptionForPrompt } from "./_100554_icaBaseDescription";
 import { initCompileMonaco } from "./_100554_collabInit";
 import { initState } from './_100554_collabState';
+import { formatHtml } from './_100554_collabDOMSync';
 
 import { preferModelType, systemComponentsInstruction, systemTokensLessInstruction, getPromptByHtml } from './_100554_aiPrompts';
 
@@ -42,7 +43,7 @@ export function createAgent(): IAgent {
             return _afterPrompt(context);
         },
         async replayForSupport(context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> {
-            return _replayForSupport(payload); 
+            return _replayForSupport(payload);
         },
     };
 }
@@ -70,7 +71,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
         const data = JSON.parse(step.prompt);
         if (!('json' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
-        
+
         const inputs = await getPrompts(data.json, data.prompt, step.rags);
 
         await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
@@ -143,13 +144,13 @@ async function addFile(context: mls.msg.ExecutionContext) {
 }
 
 async function createNewFiles(content: { shortName: string, html: string, ts: string, less: string }) {
-    
+
     await forceServiceInstance(2, '_100554_serviceSource');
     const actualProject = mls.actual[5].project;
-    if(actualProject) await initCompileMonaco(actualProject);
+    if (actualProject) await initCompileMonaco(actualProject);
 
     const pageName = content.shortName;
-    const fileHTML = content.html;
+    const fileHTML = formatHtml(content.html);
     const fileTS = content.ts;
     const fileLess = content.less;
 
@@ -165,13 +166,13 @@ export async function getPrompts(obj: any[], prompt: string | undefined, rags: s
     initState('agentNewWidget', {
         mode: preferModelType("code"),
         requirements: JSON.stringify(obj, null, 2),
-        mdcontent: getDefinitionMD(obj), 
+        mdcontent: getDefinitionMD(obj),
         basets: await getBase(obj),
         tokens: tokens.content,
         humanPrompt: prompt
     })
 
-    const prompts = await getPromptByHtml({project:100554, shortName:'agentNewWidget', folder:'', state:'agentNewWidget'})
+    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentNewWidget', folder: '', state: 'agentNewWidget' })
 
     return prompts;
 }
