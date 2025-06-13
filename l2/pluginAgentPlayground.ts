@@ -47,7 +47,7 @@ export class AgentTester extends CollabLitElement {
     }
 
     render() {
-
+ 
         const aux = this.loading ? '' : 'none'
         return html`
         <div class="overlay" style="display:${aux}">
