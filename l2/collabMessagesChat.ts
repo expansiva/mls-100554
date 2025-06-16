@@ -394,7 +394,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
         rawData.forEach(msg => {
 
-            const dateKey = msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+            const formatted = formatTimestamp(msg.createAt);
+
+            //const dateKey = msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+            const dateKey = formatted.date || msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
             if (!groupedByDay[dateKey]) {
                 groupedByDay[dateKey] = [];
             }
