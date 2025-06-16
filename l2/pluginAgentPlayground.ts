@@ -29,6 +29,8 @@ export class AgentTester extends CollabLitElement {
         threadMaintenance: ''
     };
 
+    private inEdit = false;
+
     connectedCallback() {
         super.connectedCallback();
         this.prompts = this.getPrompts();
@@ -47,7 +49,7 @@ export class AgentTester extends CollabLitElement {
     }
 
     render() {
- 
+
         const aux = this.loading ? '' : 'none'
         return html`
         <div class="overlay" style="display:${aux}">
@@ -143,16 +145,14 @@ export class AgentTester extends CollabLitElement {
         let pp = this.escape(prompt.content.trim());
         return html`
             <details class="prompt ${prompt.type}" ?open=${prompt.openDetail}
-            draggable="true"
-            @dragstart=${(e: DragEvent) => this.handleDragStart(e, idx)}
             @dragover=${(e: DragEvent) => this.handleDragOver(e, idx, e.currentTarget as HTMLElement)}
             @dragleave=${(e: DragEvent) => this.handleDragLeave(e, e.currentTarget as HTMLElement)}
             @drop=${(e: DragEvent) => this.handleDrop(e, e.currentTarget as HTMLElement)}
-            
-             >
+            >
                 <summary @click=${(e: MouseEvent) => this.handleDetails(e, prompt)}>
+                    ${this.renderMove(idx)}
                     <div class="pheader">
-                        <div class="type">
+                        <div class="type" style="display:flex; align-items: center;gap:.5rem">
                             ${this.renderSelect(prompt)}
                             <span class="title">
                                 ${pp.substring(0, 50)}...
@@ -175,7 +175,18 @@ export class AgentTester extends CollabLitElement {
         `;
     }
 
-    //<textarea class="content" @blur="${(e: InputEvent) => this.promptEvent(e, idx)}">${pp}</textarea>
+    renderMove(idx: number) {
+        return html`
+            <div class="moveelement" 
+                draggable="true"
+                @dragstart=${(e: DragEvent) => this.handleDragStart(e, idx)}
+            > 
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512" style="width:6px"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512" style="width:6px"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
+            </div>
+        `
+    }
+
     renderSelect(prompt: Iprompts) {
         return html`
             <select .value=${prompt.type.trim()} @change=${(e: Event) => this.updateSelect(e, prompt)}>
@@ -255,7 +266,8 @@ export class AgentTester extends CollabLitElement {
     private handleDetails(e: MouseEvent, prompt: Iprompts) {
 
         let el = e.target as HTMLDetailsElement;
-        if (!el) return;
+        if (!el || ['select', 'option'].includes(el.tagName.toLocaleLowerCase())) return;
+
         if (el.tagName.toLocaleLowerCase() !== 'details') el = el.closest('details') as HTMLDetailsElement;
 
         this.prompts.forEach((p) => {
@@ -282,9 +294,13 @@ export class AgentTester extends CollabLitElement {
 
     }
 
+
     private promptEvent(e: InputEvent, activeTabIndex: number) {
+
+        this.inEdit = true;
         const target = e.target as HTMLTextAreaElement;
         const newValue = this.getCleanPreContent(target);
+
         this.prompts = this.prompts.map((p, idx) =>
             idx === activeTabIndex ? { ...p, content: newValue, openDetail: true } : p
         );
@@ -293,149 +309,164 @@ export class AgentTester extends CollabLitElement {
 
     }
 
+
     private getCleanPreContent(preElement: HTMLElement): string {
-    // Remove todos os comentários (nós do tipo 8) dentro do elemento
-    const walker = document.createTreeWalker(preElement, NodeFilter.SHOW_COMMENT);
-    const commentsToRemove: Comment[] = [];
+        // Remove todos os comentários (nós do tipo 8) dentro do elemento
+        const walker = document.createTreeWalker(preElement, NodeFilter.SHOW_COMMENT);
+        const commentsToRemove: Comment[] = [];
 
-    while (walker.nextNode()) {
-        const node = walker.currentNode as Comment;
-        commentsToRemove.push(node);
+        while (walker.nextNode()) {
+            const node = walker.currentNode as Comment;
+            commentsToRemove.push(node);
+        }
+
+        for (const comment of commentsToRemove) {
+            comment.parentNode?.removeChild(comment);
+        }
+
+        // Agora pega o conteúdo limpo
+        return preElement.innerText.trim();
     }
-
-    for (const comment of commentsToRemove) {
-        comment.parentNode?.removeChild(comment);
-    }
-
-    // Agora pega o conteúdo limpo
-    return preElement.innerText.trim();
-}
 
     private async handlePlay() {
-    this.loading = true;
-
-    try {
+        this.loading = true;
         this.selectTabResult();
-        const i = this.prompts.find((p: any) => p.type === 'memory');
-        const message = i ? i.content : '';
 
-        const response = await this._callAgent(this.agent, message);
-        this.result = response;
-    } catch (err) {
-        this.result = `Erro ao testar agente: ${(err as Error).message}`;
-    } finally {
-        this.loading = false;
+        if (this.inEdit) {
+            setTimeout(async () => {
+                this.handlePlay();
+            }, 600);
+            return;
+        }
+
+        try {
+            
+            const i = this.prompts.find((p: any) => p.type === 'memory');
+            const message = i ? i.content : '';
+            const response = await this._callAgent(this.agent, message);
+            this.result = response;
+
+        } catch (err) {
+            this.result = `Erro ao testar agente: ${(err as Error).message}`;
+        } finally {
+            this.loading = false;
+        }
+
+
+
+
+
     }
-
-}
 
     private timeSave = 0;
     private async handleSave() {
 
-    clearTimeout(this.timeSave);
+        clearTimeout(this.timeSave);
 
-    this.timeSave = setTimeout(() => {
+        this.timeSave = setTimeout(() => {
 
-        setState('preview.pausePreview', true);
+            setState('preview.pausePreview', true);
 
-        let txt = `<plugin-agent-playground-100554 agent="${this.agent}" style="display:none">`;
-        this.prompts.forEach((p) => {
-            txt = txt + `
+            let txt = `<plugin-agent-playground-100554 agent="${this.agent}" style="display:none">`;
+            this.prompts.forEach((p) => {
+                txt = txt + `
             <promptcustom type="${p.type}">
                 ${this.escapeAngleBrackets(p.content)}
             </promptcustom>
             `
-        });
-        txt = txt + '</plugin-agent-playground-100554>';
+            });
+            txt = txt + '</plugin-agent-playground-100554>';
 
-        updateHTML(txt);
+            updateHTML(txt);
 
-        setTimeout(() => setState('preview.pausePreview', false), 2000)
+            this.inEdit = false;
 
-    }, 500);
+            setTimeout(() => setState('preview.pausePreview', false), 2000)
 
-}
+        }, 500);
+
+    }
 
     private getPrompts(): Iprompts[] {
 
-    const ret: Iprompts[] = [];
+        const ret: Iprompts[] = [];
 
-    Array.from(this.children).forEach((i) => {
+        Array.from(this.children).forEach((i) => {
 
-        if (i.tagName.toLocaleLowerCase() !== 'promptcustom') return;
+            if (i.tagName.toLocaleLowerCase() !== 'promptcustom') return;
 
-        const tp: any = i.getAttribute('type') || 'system';
-        const cont = i.innerHTML.trim();
-        ret.push({
-            type: tp,
-            content: cont,
-            openDetail: false
+            const tp: any = i.getAttribute('type') || 'system';
+            const cont = i.innerHTML.trim();
+            ret.push({
+                type: tp,
+                content: cont,
+                openDetail: false
+            });
+
         });
 
-    });
-
-    return ret;
-}
+        return ret;
+    }
 
     private handleThreadChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-    this.chatPreferences = {
-        ...this.chatPreferences,
-        threadMaintenance: target.value
-    };
+        const target = e.target as HTMLInputElement;
+        this.chatPreferences = {
+            ...this.chatPreferences,
+            threadMaintenance: target.value
+        };
 
-    saveChatPreferences(this.chatPreferences);
-}
+        saveChatPreferences(this.chatPreferences);
+    }
 
-    private async _callAgent(agentName: string, message: string): Promise < string > {
+    private async _callAgent(agentName: string, message: string): Promise<string> {
 
-    try {
+        try {
 
-        if(!this.chatPreferences.threadMaintenance) {
+            if (!this.chatPreferences.threadMaintenance) {
 
-    return `Agente "${agentName}" error:
+                return `Agente "${agentName}" error:
             Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences`;
-}
+            }
 
-const userId = getUserIdLocalStorage();
-const threadId = this.chatPreferences.threadMaintenance;
-if (!userId) return `Agente "${agentName}" error:
+            const userId = getUserIdLocalStorage();
+            const threadId = this.chatPreferences.threadMaintenance;
+            if (!userId) return `Agente "${agentName}" error:
             Not found userID`;
 
 
-const moduleAgent = await import(`./${agentName}`);
-if (!moduleAgent) throw new Error('Not found agent:' + agentName);
-if (!moduleAgent.createAgent) throw new Error('Not found createAgent:' + agentName);
+            const moduleAgent = await import(`./${agentName}`);
+            if (!moduleAgent) throw new Error('Not found agent:' + agentName);
+            if (!moduleAgent.createAgent) throw new Error('Not found createAgent:' + agentName);
 
-const agt = moduleAgent.createAgent() as IAgent;
+            const agt = moduleAgent.createAgent() as IAgent;
 
-const context = getTemporaryContext(threadId, userId, '@@ ' + agt.agentName + ' ' + message);
+            const context = getTemporaryContext(threadId, userId, '@@ ' + agt.agentName + ' ' + message);
 
-context.modeSingleStep = true;
+            context.modeSingleStep = true;
 
-await agt.beforePrompt(context);
+            await agt.beforePrompt(context);
 
 
-return `Agente "${agentName}" respondeu:\n${JSON.stringify(context, null, 2)}`;
+            return `Agente "${agentName}" respondeu:\n${JSON.stringify(context, null, 2)}`;
 
         } catch (e: any) {
-    return `Agente "${agentName}" error:
+            return `Agente "${agentName}" error:
             ${e.message}`
-}
+        }
 
     }
 
     private escapeAngleBrackets(input: string): string {
-    return input
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
+        return input
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
 
     private escape(input: string): string {
-    return input
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>');
-}
+        return input
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>');
+    }
 
 
     private draggedItem: number = -1;
@@ -443,111 +474,111 @@ return `Agente "${agentName}" respondeu:\n${JSON.stringify(context, null, 2)}`;
     private dropPosition: 'above' | 'below' | null = null;
 
     private handleDragStart(event: DragEvent, idx: number) {
-    event.stopPropagation();
-    this.draggedItem = idx;
+        event.stopPropagation();
+        this.draggedItem = idx;
 
-    const img = document.createElement('img');
-    img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4='; // imagem 1x1 invisível
-    img.style.opacity = '0';
-    event.dataTransfer?.setDragImage(img, 0, 0);
-}
+        const img = document.createElement('img');
+        img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4='; // imagem 1x1 invisível
+        img.style.opacity = '0';
+        event.dataTransfer?.setDragImage(img, 0, 0);
+    }
 
 
     private handleDragOver(event: DragEvent | TouchEvent, idx: number, element: HTMLElement) {
 
-    event.stopPropagation();
-    event.preventDefault();
+        event.stopPropagation();
+        event.preventDefault();
 
-    if (this.draggedItem < 0) return;
+        if (this.draggedItem < 0) return;
 
-    let clientY = 'clientY' in event ? event.clientY : event.touches[0].clientY;
+        let clientY = 'clientY' in event ? event.clientY : event.touches[0].clientY;
 
-    const rect = element.getBoundingClientRect();
-    const offsetY = clientY - rect.top;
-    const height = rect.height;
+        const rect = element.getBoundingClientRect();
+        const offsetY = clientY - rect.top;
+        const height = rect.height;
 
-    const details = element.closest('details');
-    if (!details) return;
-
-
-    if (offsetY < (height * 0.3) && details) {
-
-        this.dropPosition = 'above';
-        details.style.border = "";
-        details.style.border = "";
-        details.style.borderTop = "2px solid blue";
+        const details = element.closest('details');
+        if (!details) return;
 
 
-    } else if (offsetY > (height * 0.6) && details) {
+        if (offsetY < (height * 0.3) && details) {
 
-        this.dropPosition = 'below';
-        details.style.border = "";
-        details.style.border = "";
-        details.style.borderBottom = "2px solid blue";
+            this.dropPosition = 'above';
+            details.style.border = "";
+            details.style.border = "";
+            details.style.borderTop = "2px solid blue";
 
 
+        } else if (offsetY > (height * 0.6) && details) {
+
+            this.dropPosition = 'below';
+            details.style.border = "";
+            details.style.border = "";
+            details.style.borderBottom = "2px solid blue";
+
+
+        }
+
+        this.dropTarget = idx;
     }
-
-    this.dropTarget = idx;
-}
 
     private handleDragLeave(event: DragEvent, element: HTMLElement) {
 
-    const details = element.closest('details');
-    if (details) details.style.border = "";
-    element.style.border = "";
-}
+        const details = element.closest('details');
+        if (details) details.style.border = "";
+        element.style.border = "";
+    }
 
     private handleDrop(event: DragEvent, element: HTMLElement) {
 
-    try {
+        try {
 
-        event.preventDefault();
-        this.prompts = this.moveItemInArray();
+            event.preventDefault();
+            this.prompts = this.moveItemInArray();
 
-    } catch (e: any) {
+        } catch (e: any) {
 
-        console.info(e.message);
+            console.info(e.message);
 
-    } finally {
-        element.style.border = "";
+        } finally {
+            element.style.border = "";
 
-        const details = element.closest('details');
-        if (details) details.style.border = "";
+            const details = element.closest('details');
+            if (details) details.style.border = "";
 
-        this.draggedItem = -1;
-        this.dropTarget = -1;
-        this.dropPosition = null;
+            this.draggedItem = -1;
+            this.dropTarget = -1;
+            this.dropPosition = null;
 
-        setTimeout(() => { this.handleSave(); }, 500);
+            setTimeout(() => { this.handleSave(); }, 500);
+        }
+
+
     }
-
-
-}
 
     private moveItemInArray(): Iprompts[] {
 
-    if (this.draggedItem < 0 || this.dropTarget < 0 || this.dropPosition === null || this.draggedItem === this.dropTarget) {
-        return this.prompts; // Nada a fazer
+        if (this.draggedItem < 0 || this.dropTarget < 0 || this.dropPosition === null || this.draggedItem === this.dropTarget) {
+            return this.prompts; // Nada a fazer
+        }
+
+        const updatedArray = [...this.prompts];
+        const item = updatedArray.splice(this.draggedItem, 1)[0]; // Remove o item
+
+        let insertIndex = this.dropTarget;
+
+        if (this.dropPosition === 'below') {
+            insertIndex += 1;
+        }
+
+        if (this.draggedItem < this.dropTarget) {
+            insertIndex -= 1;
+        }
+
+        updatedArray.splice(insertIndex, 0, item);
+
+        return updatedArray;
     }
-
-    const updatedArray = [...this.prompts];
-    const item = updatedArray.splice(this.draggedItem, 1)[0]; // Remove o item
-
-    let insertIndex = this.dropTarget;
-
-    if (this.dropPosition === 'below') {
-        insertIndex += 1;
-    }
-
-    if (this.draggedItem < this.dropTarget) {
-        insertIndex -= 1;
-    }
-
-    updatedArray.splice(insertIndex, 0, item);
-
-    return updatedArray;
-}
 
 }
 
