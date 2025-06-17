@@ -1,6 +1,6 @@
 /// <mls shortName="pluginAgentPlayground" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, repeat } from 'lit';
+import { html, repeat } from 'lit'; 
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { loadChatPreferences, IChatPreferences, saveChatPreferences } from './_100554_collabMessageHelper';
@@ -169,7 +169,7 @@ export class AgentTester extends CollabLitElement {
                     </div>
                 </summary>
                 <div>
-                    <pre class="content" contenteditable="true" @blur="${(e: InputEvent) => this.promptEvent(e, idx)}">${pp}</pre>
+                    <pre class="content" contenteditable="true" @blur="${(e: InputEvent) => this.promptEvent(e, idx)}" @paste=${this.handlePaste}>${pp}</pre>
                 </div>
             </details>
         `;
@@ -340,7 +340,7 @@ export class AgentTester extends CollabLitElement {
         }
 
         try {
-            
+
             const i = this.prompts.find((p: any) => p.type === 'memory');
             const message = i ? i.content : '';
             const response = await this._callAgent(this.agent, message);
@@ -578,6 +578,23 @@ export class AgentTester extends CollabLitElement {
         updatedArray.splice(insertIndex, 0, item);
 
         return updatedArray;
+    }
+
+
+    private handlePaste(e: ClipboardEvent) {
+        e.preventDefault();
+        const text = (e.clipboardData || (window as any).clipboardData).getData('text');
+
+        const selection = window.getSelection();
+        if (!selection?.rangeCount) return;
+
+        // Remove o conteúdo selecionado e insere o texto puro
+        selection.deleteFromDocument();
+        const range = selection.getRangeAt(0);
+        range.insertNode(document.createTextNode(text));
+
+        // Move o cursor para o final do texto colado
+        selection.collapseToEnd();
     }
 
 }
