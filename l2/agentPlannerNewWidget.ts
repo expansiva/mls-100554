@@ -70,8 +70,8 @@ const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: n
     if (!context.task) throw new Error("[_beforeClarification] Invalid context.task");
     const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
     if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
-    // if (!step.json) throw new Error(`[_beforeClarification] Invalid step json on task: ${context.task.PK} step ${stepId}`);
-    const element = prepareHtmlClarification(step.json, context.task.PK, stepId, step.clarificationMessage);
+    
+    const element = prepareHtmlClarification(step.json, context.task.PK, stepId, '');
     return element;
 
 }
