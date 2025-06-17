@@ -377,7 +377,7 @@ export class AgentTester extends CollabLitElement {
             });
             txt = txt + '</plugin-agent-playground-100554>';
 
-            updateHTML(txt);
+            updateHTML(txt, false);
 
             this.inEdit = false;
 

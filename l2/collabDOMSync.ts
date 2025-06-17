@@ -11,13 +11,13 @@ export function sync() {
 
 }
 
-export function updateHTML(html: string) {
+export function updateHTML(html: string, format:boolean = true) {
 
     if (!window.preview.editor || !window.preview.iframe) return;
     const model = window.preview.editor.getModel();
     if (!model) return;
     const newHTMLOnlyICA = html
-    const formatedNewHTML = formatHtml(newHTMLOnlyICA);
+    const formatedNewHTML = format ? formatHtml(newHTMLOnlyICA) : newHTMLOnlyICA;
     setValueInModeKeepingUndo2(model, formatedNewHTML);
 
 }
