@@ -287,8 +287,8 @@ export class WidgetAiInteraction100554 extends StateLitElement {
     private renderClarificationDetails(payload: mls.msg.AIClarificationStep) {
         return html`
             <ul>
-                <li>clarificationMessage: ${payload.clarificationMessage}</li>
-                <li>htmlForm: ${payload.htmlForm}</li>
+                <li>templateWidget: ${payload.templateWidget}</li>
+                <li>json: ${payload.json}</li>
                 <li>stepId: ${payload.stepId}</li>
                 <li>status: ${payload.status}</li>
             </ul>
