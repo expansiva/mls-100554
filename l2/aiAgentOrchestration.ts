@@ -330,9 +330,9 @@ async function executeNextFlexible(context: mls.msg.ExecutionContext, step: mls.
 
 async function executeNextClarification(context: mls.msg.ExecutionContext, step: mls.msg.AIClarificationStep) {
     if (!context || !context.task) throw new Error("Invalid context");
-    if (!step.clarificationMessage) throw new Error("clarification message is missing");
-    notifyTaskChange(context);
-    if ((mls as any).istraceAgent) console.log("clarification:", step.clarificationMessage);
+    // if (!step.clarificationMessage) throw new Error("clarification message is missing");
+    // notifyTaskChange(context);
+    // if ((mls as any).istraceAgent) console.log("clarification:", step.clarificationMessage);
     // context.task = await updateStepStatus(context.task, step.stepId, "waiting_for_user");
 
 }
