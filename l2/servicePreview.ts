@@ -357,10 +357,9 @@ export class ServicePreview100554 extends ServiceBase {
     private actualFile: mls.stor.IFileInfo | undefined;
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
-
-
         try {
-            if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
+            const rp = getState('preview.pausePreview');
+            if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc || rp) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
             // if ((this.visible === 'false') && !((fileAction.action as any) === 'openBackground')) return;
             const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
@@ -1056,8 +1055,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async preview(mode: string) {
 
-        const rp = getState('preview.pausePreview');
-        if (!(mls.actual[2] as any).left || !this.watch || rp) return true;
+        if (!(mls.actual[2] as any).left || !this.watch ) return true;
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
 
         this.menu.title = '';
