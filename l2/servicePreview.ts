@@ -373,6 +373,8 @@ export class ServicePreview100554 extends ServiceBase {
             const storFileHTML = mls.stor.files[keyToFileInfo];
 
             if (fileAction.action === 'open' || (fileAction.action as any) === 'openBackground') {
+                setState('preview.pausePreview', false);
+                
                 this.setModel(storFileHTML);
 
                 this.actualFile = storFileHTML;
