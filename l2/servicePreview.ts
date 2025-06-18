@@ -358,8 +358,8 @@ export class ServicePreview100554 extends ServiceBase {
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
         try {
-            const rp = getState('preview.pausePreview');
-            if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc || rp) return;
+            
+            if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
             // if ((this.visible === 'false') && !((fileAction.action as any) === 'openBackground')) return;
             const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
@@ -398,7 +398,8 @@ export class ServicePreview100554 extends ServiceBase {
 
             if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
 
-            if (this.watch) {
+            const rp = getState('preview.pausePreview');
+            if (this.watch  && !rp) {
                 this.elPreview = undefined;
                 this.updateLoadingToFalseIfNoTasksRunning();
                 this.setTest();
