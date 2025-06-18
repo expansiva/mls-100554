@@ -44,7 +44,7 @@ export class WidgetAiInteraction100554 extends StateLitElement {
 
     renderTab() {
         return html`
-            <div style="height:    height: calc(100% - 3rem);">
+            <div style="height: calc(100% - 3rem);">
                 <div class="tabs">
                 <div
                     class="tab ${this.activeTab === 'workflow' ? 'active' : ''}"
