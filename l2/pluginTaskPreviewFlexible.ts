@@ -3,10 +3,10 @@
 import { html, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-
+ 
 @customElement('plugin-task-preview-flexible-100554')
 export class pluginTaskPreviewFlexible extends CollabLitElement {
-
+ 
     @property({ type: Object }) step: mls.msg.AIFlexibleResultStep | null = null;
     @state() private mode: string = 'info';
 
