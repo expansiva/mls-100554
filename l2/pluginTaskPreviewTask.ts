@@ -3,14 +3,14 @@
 import { html, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-  
+   
 @customElement('plugin-task-preview-task-100554') 
 export class PluginTaskPreviewTask extends CollabLitElement {
 
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @state() private mode: string = 'info';
  
-    render() {
+    render() { 
 
         if (!this.task) {
             return html`<p>Task not Found.</p>`;

@@ -7,7 +7,7 @@ import { IAgent } from './_100554_aiAgentBase';
 import { getTemporaryContext, formatTimestamp, getNextResultStep } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, updateThreads, getMessagesByThreadId } from './_100554_msgDBController';
 import { loadChatPreferences } from './_100554_collabMessageHelper';
-import './_100554_collabMessagesTaskDetails';
+import './_100554_collabMessagesTaskInfo';
 import './_100554_collabMessagesTask';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
@@ -323,7 +323,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private renderTaskDetails() {
         return html`
-            <collab-messages-task-details-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK}></collab-messages-task-details-100554>`
+            <collab-messages-task-info-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK}></collab-messages-task-info-100554>`
     }
 
     private renderThreadDetails() {

@@ -25,22 +25,21 @@ export class AgentTester extends CollabLitElement {
         if (this.modeTest) {
             setTimeout(() => {
                 this.task = taskExample as any;
-                if (this.task?.iaCompressed?.nextSteps.length) {
-                    this.stepMap.clear();
-                    this.buildStepMap(this.task.iaCompressed.nextSteps);
-                    const firstStepId = this.task.iaCompressed.nextSteps[0].stepId;
-                    this.currentStepId = 0;
-                    this.navigationStack = [0];
-                }
+                this.init();
             }, 500)
         }
 
     }
 
+    firstUpdated() {
+        if (this.modeTest) return
+        this.init();
+    }
+
     render() {
 
         if (!this.task) {
-            return html`<p>Task não fornecida.</p>`;
+            return html`<p>Task not provided.</p>`;
         }
 
         return html`
@@ -51,7 +50,7 @@ export class AgentTester extends CollabLitElement {
     renderStep() {
 
         if (!this.task) {
-            return html`<p>Task não fornecida.</p>`;
+            return html`<p>Task not provided.</p>`;
         }
 
         if (this.currentStepId === 0) {
@@ -66,12 +65,12 @@ export class AgentTester extends CollabLitElement {
         }
 
         if (!this.currentStepId) {
-            return html`<p>Nenhuma etapa selecionada.</p>`;
+            return html`<p>No steps selected.</p>`;
         }
 
         const step = this.stepMap.get(this.currentStepId);
         if (!step) {
-            return html`<p>Step não encontrado: ${this.currentStepId}</p>`;
+            return html`<p>Step not found: ${this.currentStepId}</p>`;
         }
 
         return html`
@@ -144,7 +143,7 @@ export class AgentTester extends CollabLitElement {
 
                 const step = this.stepMap.get(stepId);
                 if (!step) {
-                    return html`<p>Step não encontrado: ${this.currentStepId}</p>`;
+                    return html`<p>Step not found: ${this.currentStepId}</p>`;
                 }
                 return html`
                     <span
@@ -162,7 +161,7 @@ export class AgentTester extends CollabLitElement {
 
     renderAgent(step: mls.msg.AIAgentStep) {
         return html`
-        <plugin-task-preview-agent-100554 .step=${step} key="${step.stepId}"></plugin-task-preview-agent-100554>
+        <plugin-task-preview-agent-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-agent-100554>
         
         `;
     }
@@ -190,6 +189,16 @@ export class AgentTester extends CollabLitElement {
 
     //------IMPLEMENTATION--------
 
+    private init() {
+
+        if (!this.task || !this.task.iaCompressed) return;
+
+        this.stepMap.clear();
+        this.buildStepMap(this.task.iaCompressed.nextSteps);
+        this.currentStepId = 0;
+        this.navigationStack = [0];
+    }
+
     private buildStepMap(steps: any[]) {
         for (const step of steps) {
             this.stepMap.set(step.stepId, step);
@@ -205,7 +214,6 @@ export class AgentTester extends CollabLitElement {
 
     private navigateToStep(stepId: number) {
         if (!this.stepMap.has(stepId)) {
-            console.warn(`StepId ${stepId} não encontrado.`);
             return;
         }
         this.currentStepId = stepId;
