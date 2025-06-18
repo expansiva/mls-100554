@@ -315,7 +315,7 @@ export class ServicePreview100554 extends ServiceBase {
 
                     if (this.watch) {
                         this.elPreview = undefined;
-                        this.loading = false;
+                        this.updateLoadingToFalseIfNoTasksRunning();
                         this.onReloader();
                         this.lastStatusHasError = false;
                         return;
@@ -348,7 +348,7 @@ export class ServicePreview100554 extends ServiceBase {
     private onTsTestChanged() {
         if (this.watch) {
             this.elPreview = undefined;
-            this.loading = false;
+            this.updateLoadingToFalseIfNoTasksRunning();
             this.setTest();
             this.onReloader();
         }
@@ -401,7 +401,7 @@ export class ServicePreview100554 extends ServiceBase {
 
             if (this.watch) {
                 this.elPreview = undefined;
-                this.loading = false;
+                this.updateLoadingToFalseIfNoTasksRunning();
                 this.setTest();
                 this.onReloader();
             }
@@ -445,16 +445,71 @@ export class ServicePreview100554 extends ServiceBase {
 
         this.loading = true;
 
+        if (opt.agentName === 'agentReview') {
+            const modes = ['typescript', 'html', 'less'];
+            await Promise.all(
+                modes.map(mode => {
+                    const payload = { page: this.page, prompt: value, position: 'left', mode };
+                    return this.fireCollab(opt.agentName, JSON.stringify(payload));
+                })
+            ).catch((err) => {
+                this.setError('Error on send message:' + err.message);
+            })
+            return;
+        }
+
         try {
             await this.fireCollab(opt.agentName, JSON.stringify({ page: this.page, prompt: value, position: 'left' }));
         } catch (err: any) {
             this.setError('Error on send message:' + err.message);
-        } finally {
-            this.loading = false;
         }
 
     }
 
+    private onTaskChange = async (e: Event) => {
+
+        if (this.tasksInProgress.size === 0) return;
+        const customEvent = e as CustomEvent;
+        const message: mls.msg.Message = customEvent.detail.context.message;
+        const task: mls.msg.TaskData = customEvent.detail.context.task;
+        const { content, createAt, senderId, threadId } = message;
+        const createAt2 = customEvent.detail.oldContextCreateAt ? customEvent.detail.oldContextCreateAt : createAt;
+
+        let contextChangedByPage = Array.from(this.tasksInProgress).find((item) => {
+            const [key, value] = item;
+            return key === this.page
+        });
+
+        if (!contextChangedByPage) return;
+
+        const tasks = this.tasksInProgress.get(this.page);
+        if (!tasks) return;
+        let contextChanged = Array.from(tasks).find((item) =>
+            item.message.content === content &&
+            item.message.senderId === senderId &&
+            item.message.createAt === createAt2 &&
+            item.message.threadId === threadId
+        );
+
+
+        if (contextChanged && task && (task.status === 'failed' || task.status === 'done')) {
+            tasks.delete(contextChanged);
+            if (tasks.size === 0) this.tasksInProgress.delete(this.page);
+        }
+
+        if (!this.tasksInProgress.get(this.page) || this.tasksInProgress.get(this.page)?.size === 0) this.updateLoadingToFalseIfNoTasksRunning();
+
+    };
+
+
+    private updateLoadingToFalseIfNoTasksRunning() {
+        if (this.tasksInProgress.size === 0) this.loading = false;
+        const actual = this.tasksInProgress.get(this.page);
+        if (!actual) this.loading = false;
+        else if (actual.size === 0) this.loading = false;
+    }
+
+    private tasksInProgress: Map<string, Set<mls.msg.ExecutionContext>> = new Map();
     private async fireCollab(agentName: string, prompt: string) {
 
         const pref = loadChatPreferences();
@@ -469,13 +524,19 @@ export class ServicePreview100554 extends ServiceBase {
 
         const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentName}`);
         if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent');
-        const agent: IAgent = moduleAgent.createAgent()
+        const agent: IAgent = moduleAgent.createAgent();
         const context = getTemporaryContext(threadId, userId, prompt);
+
+        if (!this.tasksInProgress.get(this.page)) this.tasksInProgress.set(this.page, new Set());
+        const actual = this.tasksInProgress.get(this.page);
+        if (actual) actual.add(context);
+
         await agent.beforePrompt(context);
 
     }
 
-    async firstUpdated() {
+    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
+        super.firstUpdated(changedProperties);
         this.createEditor();
         const darkOrLight = this.getDarkLight();
         if (darkOrLight === 'dark' && this.menu.selectTool) this.menu.selectTool('darkLight');
@@ -483,6 +544,13 @@ export class ServicePreview100554 extends ServiceBase {
         this.setTheme();
         this.setTest();
         this.configureButtonsRight(false);
+        window.addEventListener('task-change', this.onTaskChange);
+
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('task-change', this.onTaskChange);
     }
 
     updated(changedProperties: Map<string | number | symbol, unknown>): void {

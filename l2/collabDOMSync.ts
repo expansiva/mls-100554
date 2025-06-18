@@ -11,7 +11,7 @@ export function sync() {
 
 }
 
-export function updateHTML(html: string, format:boolean = true) {
+export function updateHTML(html: string, format: boolean = true) {
 
     if (!window.preview.editor || !window.preview.iframe) return;
     const model = window.preview.editor.getModel();
@@ -54,6 +54,7 @@ export function formatHtml(html: string) {
     container.innerHTML = htmlWithPlaceholders.trim();
 
     function formatNode(node: any, indentLevel = 0): string {
+
         const indent = '\t'.repeat(indentLevel);
         const childIndent = '\t'.repeat(indentLevel + 1);
         let formattedHtml = '';
@@ -76,19 +77,24 @@ export function formatHtml(html: string) {
                     childHtml += `\n${childFormatted}`;
                 }
             }
-            formattedHtml += childHtml.trim();
+            formattedHtml += childHtml;
             formattedHtml += `\n${indent}</${tagName}>`;
         } else if (node.nodeType === Node.TEXT_NODE) {
             let text = node.nodeValue;
             if (text.trim()) {
                 formattedHtml += indent + text.trim();
             }
+        } else if (node.nodeType === Node.COMMENT_NODE) {
+            formattedHtml += `${indent}<!-- ${node.nodeValue?.trim()} -->`;
         }
 
         return formattedHtml;
     }
 
-    let result = formatNode(container.firstChild);
+    let result = Array.from(container.childNodes)
+        .map((child) => formatNode(child))
+        .filter(Boolean)
+        .join('\n');
 
     result = result
         .split('\n')
@@ -101,49 +107,6 @@ export function formatHtml(html: string) {
     }
 
     return result;
-}
-
-function getDiffs(originalLines: string[], modifiedLines: string[]) {
-    const diffs: IDiffs[] = [];
-    originalLines.forEach((line, index) => {
-        if (line !== modifiedLines[index]) {
-            diffs.push({
-                lineNumber: index + 1,
-                originalLine: line,
-                modifiedLine: modifiedLines[index]
-            });
-        }
-    });
-    return diffs;
-}
-
-function applyDiffs(originalModel: monaco.editor.ITextModel, diffs: IDiffs[]) {
-
-    const editor = window.preview.editor;
-    if (!editor) throw new Error('No find editor');
-    editor.setModel(originalModel);
-    const edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
-
-    diffs.forEach(diff => {
-        if (!diff.lineNumber) return;
-        const lines = originalModel.getLineCount();
-        let lineContent = 0;
-
-        if (diff.lineNumber <= lines) lineContent = originalModel.getLineLength(diff.lineNumber);
-        else lineContent = diff.modifiedLine?.length || 0;
-
-        let range: monaco.Range;
-        range = new monaco.Range(diff.lineNumber, 1, diff.lineNumber, lineContent + 1)
-        const edit: monaco.editor.IIdentifiedSingleEditOperation = {
-            range,
-            text: diff.modifiedLine || '',
-            forceMoveMarkers: true,
-        }
-        edits.push(edit);
-    });
-
-    editor.executeEdits('my-source', edits);
-
 }
 
 function clearTree(iframe: HTMLIFrameElement): string {
@@ -221,11 +184,4 @@ function clearTree3(parent: HTMLElement, element: HTMLElement) {
         }
 
     }
-}
-
-
-interface IDiffs {
-    lineNumber: number,
-    originalLine: string,
-    modifiedLine: string
 }

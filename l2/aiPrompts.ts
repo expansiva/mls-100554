@@ -66,6 +66,8 @@ Você deve retornar um array de objetos no formato JSON. Cada objeto representa 
 export const preferModelType = (modelType: mls.msg.ModelType) => `<!-- modelType: ${modelType} -->`;
 
 function getAgentsList(): string {
+
+    let a: mls.msg.ModelType = '';
     const listAgents = [
         { agent: 'agentAnalyzeNewModule1', description: 'planejamento para a criação de novos projetos, sites ou criação de uma nova página' },
         // { agent: 'agentPlannerNewPage', description: 'planejamento para a criação de novas páginas no sistema, será pedido mais informações ao usuário se necessário.' },
@@ -167,16 +169,14 @@ export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageIn
     }
 }
 
-export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string, state?: string }): Promise<mls.msg.IAMessageInputType[]> {
+export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string,  data?: any }): Promise<mls.msg.IAMessageInputType[]> {
 
 
     if (!dt.project || !dt.shortName) throw new Error(`[getPromptByHtml]: incomplete parameters.`);
-
     const keyFile = mls.stor.getKeyToFiles(dt.project, 2, dt.shortName, dt.folder, '.html');
     if (!mls.stor.files[keyFile]) throw new Error(`[getPromptByHtml]: not found stor.file ${keyFile}.`);
 
     const content = await mls.stor.files[keyFile].getContent() as string;
-
     if (!content) return [];
 
     const el = document.createElement('div');
@@ -188,22 +188,19 @@ export async function getPromptByHtml(dt: { project: number, shortName: string, 
     itens.forEach((item) => {
         let cont = item.innerHTML;
         const tp = item.getAttribute('type') as any;
-        
+
         if (tp === 'memory' || tp === 'prompt') return;
         cont = escape(cont);
-        
-        if (dt.state) {
+
+        if (dt.data) {
             cont = clearGaps(cont);
             const keys = findKeys(cont);
             keys.forEach((key) => {
-
-                if (!dt.state) return;
-
-                const st = getState(key.trim());
-                if (st === undefined || !key.startsWith(dt.state)) return;
+                if (!dt.data || !dt.data[key]) return;
+                const st = dt.data[key];
+                if (st === undefined) return;
                 const rp = `{{${key}}}`
                 cont = cont.replace(rp, st);
-
             });
         }
 
@@ -216,8 +213,8 @@ export async function getPromptByHtml(dt: { project: number, shortName: string, 
 
     return ret;
 
-
 }
+
 
 function clearGaps(text: string): string {
     return text.replace(/{{(.*?)}}/g, (_, content) => {
