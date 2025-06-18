@@ -95,12 +95,12 @@ export async function getPrompts(info: string): Promise<mls.msg.IAMessageInputTy
 
     if (!info ) throw new Error(`Erro [${agentName}] getPrompts: invalid info`);
 
-    initState('agentNewModule', {
+    const data = {
         model: preferModelType('code'),
         teste: 'teste de texto',        
-    });
+    }
 
-    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentGenerateDefs', folder: '', state: 'agentNewModule' })
+    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentGenerateDefs', folder: '',data })
     
     return prompts;
 }

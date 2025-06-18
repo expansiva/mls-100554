@@ -118,15 +118,15 @@ export async function getPrompts(prompt: string | undefined, rags: string[] | nu
 
 
     const comp = systemComponentsInstruction();
-    initState('agentPlannerNewWidget', {
+    const data = {
         mode: preferModelType("translate"),
         widgetPrefix: widgetPrefix,
         componentDef: comp.content,
         widgets: await getWidgetsPrompt(),
         humanPrompt: prompt
-    });
+    }
 
-    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentPlannerNewWidget', folder: '', state: 'agentPlannerNewWidget' });
+    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentPlannerNewWidget', folder: '', data });
 
     return prompts;
 }

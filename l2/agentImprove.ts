@@ -82,15 +82,15 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType[]> {
 
-    initState('agentImprove', {
+    const dataPrompt = {
         mode: preferModelType('code'),
         html: await getContentByExtension(data.page, 'html'),
         typescript: await getContentByExtension(data.page, 'ts'),
         style: await getContentByExtension(data.page, 'style'),
         promptUser: JSON.stringify(data)
-    });
+    };
 
-    const rc = await getPromptByHtml({ folder: '', project: 100554, shortName: 'agentImprove', state: 'agentImprove' });
+    const rc = await getPromptByHtml({ folder: '', project: 100554, shortName: 'agentImprove', data: dataPrompt });
     return rc;
 
 }

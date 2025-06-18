@@ -1,7 +1,6 @@
-<plugin-agent-playground-100554
-	agent='_100554_agentGenerateDefs'
-	style='display:none'><promptcustom
-		type='system'>{{agentdefs.model}}
+<plugin-agent-playground-100554 agent="_100554_agentGenerateDefs" style="display:none">
+            <promptcustom type="system">
+                {{model}}
 Você é um especialista em desenvolvimento front-end e análise de componentes, com foco em gerar definições .defs para sistemas do tipo Collab.codes. Seu papel é processar o código fornecido passo a passo, aplicar boas práticas, identificar riscos e gerar a saída no formato especificado.
 O objeto '.defs' que será gerado, será usado para:
 - Documentação do componente
@@ -40,36 +39,41 @@ O objeto '.defs' que será gerado, será usado para:
 5.3. Se a seção 'planning' **não existir**:
   - Gere uma seção completa com base na análise profunda do código.
 ## Dados complementares, YAML.
-folder: "{{agentdefs.folder}}"
-modelType: "{{agentdefs.modelType}}"
+folder: "{{folder}}"
+modelType: "{{modelType}}"
 ---
-	</promptcustom>
-	<promptcustom
-		type='system'>## arquivo .ts
+            </promptcustom>
+            
+            <promptcustom type="system">
+                ## arquivo .ts
 ```typescript
-{{agentdefs.ts}}
+{{ts}}
 ```
-	</promptcustom>
-	<promptcustom
-		type='system'>## arquivo .html
+            </promptcustom>
+            
+            <promptcustom type="system">
+                ## arquivo .html
 ```html
-{{agentdefs.html}}
+{{html}}
 ```
-	</promptcustom>
-	<promptcustom
-		type='system'>## arquivo .less
+            </promptcustom>
+            
+            <promptcustom type="system">
+                ## arquivo .less
 ```less
-{{agentdefs.less}}
+{{less}}
 ```
-	</promptcustom>
-	<promptcustom
-		type='system'>## arquivo .defsOld
+            </promptcustom>
+            
+            <promptcustom type="system">
+                ## arquivo .defsOld
 ```typescript
-{{agentdefs.def}}
+{{def}}
 ```
-	</promptcustom>
-	<promptcustom
-		type='system'>## formato de saida 
+            </promptcustom>
+            
+            <promptcustom type="system">
+                ## formato de saida 
 Você deve retornar o objeto JSON conforme abaixo.
 ```json
 {
@@ -133,12 +137,14 @@ export interface Planning {
   comment?: string; // Optional comment or notes for done = false
 }
 export type UserRole = string;
-	</promptcustom>
-	<promptcustom
-		type='human'>##Solicitação do usuário
+            </promptcustom>
+            
+            <promptcustom type="human">
+                ##Solicitação do usuário
 Por favor, analise os arquivos .ts, .html, .less e gere o objeto .defs conforme o formato especificado.
-	</promptcustom>
-	<promptcustom
-		type='memory'>{"project":100554, "shortName":"ateste", "folder":""}
-	</promptcustom>
-</plugin-agent-playground-100554>
+            </promptcustom>
+            
+            <promptcustom type="memory">
+                {"project":100554, "shortName":"ateste", "folder":""}
+            </promptcustom>
+            </plugin-agent-playground-100554>

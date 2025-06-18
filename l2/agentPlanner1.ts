@@ -118,14 +118,14 @@ export async function getPrompts(prompt: string | undefined, rags: string[] | nu
     const ragsA = systemRagsAvailable();
     const tools = await systemToolsAvailable();
 
-    initState('agentPlanner1', {
+    const data = {
         mode: preferModelType("cost"),
         agentsAvailable: agents.content,
         ragsAvailable: ragsA.content,
         toolsAvailable: tools.content,
-        humanPrompt:prompt
-    })
-    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentPlanner1', folder: '', state: 'agentPlanner1' })
+        humanPrompt: prompt
+    };
+    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentPlanner1', folder: '', data })
     
     addRAGAdditionalInformation(rags, prompts);
 

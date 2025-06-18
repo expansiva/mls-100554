@@ -138,15 +138,15 @@ export async function getPrompts(json: any): Promise<mls.msg.IAMessageInputType[
         
     const files = await mls.stor.getFiles({ project: info.project, shortName: info.shortName, folder: '', loadContent: true });
 
-    initState('agentWebCare', {
+    const data = {
         mode: preferModelType("mini"),
         ts: files.tsContent || '',
         html: files.htmlContent || '',
         less: files.lessContent || '',
         humanPrompt: JSON.stringify(json)
-    })
+    }
 
-    const prompts = await getPromptByHtml({project:100554, shortName: 'agentWebCare', folder:'', state:'agentWebCare'})
+    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentWebCare', folder: '', data });
 
 
     return prompts;
