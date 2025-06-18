@@ -1,6 +1,6 @@
 <plugin-agent-playground-100554 agent="_100554_agentPlannerNewWidget" style="display:none">
             <promptcustom type="system">
-                {{agentPlannerNewWidget.mode}}
+                {{mode}}
 Você é um planejador responsável por definir os detalhes de criação de um novo web-componente (widget) que será incluído em uma página HTML.
 Tarefas
 1. Entenda o propósito do widget passando pelo prompt original do usuário.
@@ -71,16 +71,16 @@ definição de TClarification
             </promptcustom>
             
             <promptcustom type="system">
-                {{agentPlannerNewWidget.componentDef}}
+                {{componentDef}}
             </promptcustom>
             
             <promptcustom type="system">
                 ## Widgets existentes
-{{agentPlannerNewWidget.widgets}}
+{{widgets}}
             </promptcustom>
             
             <promptcustom type="human">
-                {{agentPlannerNewWidget.humanPrompt}}
+                {{humanPrompt}}
             </promptcustom>
             
             <promptcustom type="memory">

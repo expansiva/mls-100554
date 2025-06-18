@@ -111,12 +111,12 @@ export async function getPrompts(shortName: string, project: number): Promise<ml
 
     if (!shortName || !project) throw new Error("Invalid Prompt");
 
-    initState('agentGenerateWidgetShowcase', {
+    const data = {
         mode: preferModelType("code"),
         ts: await getDefinitionsBaseTSInstruction(shortName, project)
-    });
+    }
 
-    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentGenerateWidgetShowcase', folder: '', state: 'agentGenerateWidgetShowcase' })
+    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentGenerateWidgetShowcase', folder: '', data });
     prompts.push({ type: 'human', content: 'Crie um html conforme as regras' })
     return prompts;
 }

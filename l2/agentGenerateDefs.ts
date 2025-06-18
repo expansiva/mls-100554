@@ -3,7 +3,7 @@
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { forceServiceInstance } from './_100554_libCommom';
 import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
-import { initState } from './_100554_collabState'; 
+import { initState } from './_100554_collabState';
 
 import {
     getNextPendingStepByAgentName,
@@ -138,18 +138,17 @@ export async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[
 
     const modelType: mls.msg.ModelType = "claude";
 
-    initState('agentdefs', {
+    const data = {
         model: preferModelType(modelType),
         ts: files.tsContent || '',
         html: files.htmlContent || '',
         less: files.lessContent || '',
         def: configFileDef(files.defsContent || ''),
         folder: folder,
-        modelType:modelType
-        
-    });
+        modelType: modelType
+    };
 
-    const prompts = await getPromptByHtml({project:100554,shortName:'agentGenerateDefs', folder: '', state:'agentdefs'})
+    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentGenerateDefs', folder: '', data })
     return prompts;
 }
 

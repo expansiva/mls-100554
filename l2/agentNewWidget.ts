@@ -163,18 +163,18 @@ export async function getPrompts(obj: any[], prompt: string | undefined, rags: s
     if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
 
     const tokens = await systemTokensLessInstruction();
-    initState('agentNewWidget', {
+    const data = {
         mode: preferModelType("code"),
         requirements: JSON.stringify(obj, null, 2),
         mdcontent: getDefinitionMD(obj),
         basets: await getBase(obj),
         tokens: tokens.content,
         humanPrompt: prompt
-    })
+    }
 
-    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentNewWidget', folder: '', state: 'agentNewWidget' })
-
+    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentNewWidget', folder: '', data })
     return prompts;
+    
 }
 
 function getDefinitionMD(obj: any[]): string {
