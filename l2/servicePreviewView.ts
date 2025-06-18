@@ -533,7 +533,8 @@ export class ServicePreviewView extends StateLitElement {
 
         this.timeShow = setTimeout(() => {
             if (!this.father) return;
-            this.father.loading = show;
+            if (show === false) this.father.updateLoadingToFalseIfNoTasksRunning();
+            else this.father.loading = show;
         }, 200);
     }
 

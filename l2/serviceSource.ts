@@ -99,17 +99,20 @@ export class ServiceSource100554 extends ServiceBase {
         if (op === EToolsSource.icTs) {
             this.showActiveModel();
             this.updateActionBasedOnError('ts');
+            if (this._ed1) this.highlightReviewLines(this._ed1);
+
         }
         if (op === EToolsSource.icHTML) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
             this.createOrShowModelHtmlCssTestDefs(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.html');
             this.updateActionBasedOnError('html');
-
+            if (this._ed1) this.highlightReviewLines(this._ed1);
         }
         if (op === EToolsSource.icStyle) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
             this.createOrShowModelHtmlCssTestDefs(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.less');
             this.updateActionBasedOnError('style');
+            if (this._ed1) this.highlightReviewLines(this._ed1);
 
         }
 
@@ -1179,18 +1182,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (!hasError) monaco.editor.setModelMarkers(modelBaseTS.model, 'markerSource', []);
 
-        const sameContent: boolean = modelBaseTS.originalCRC === mls.common.crc.crc32(modelBaseTS.model.getValue()).toString(16);
-
-        if (sameContent) {
-            if (storFile.status !== 'new') {
-                storFile.status = 'nochange';
-                await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
-            }
-        } else {
-            if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
-            await mls.stor.localStor.setContent(storFile, await this.getValueInfo(modelBaseTS));
-        }
-
+        await this.checkSameContent(modelBaseTS, storFile);
         if (hasError) {
             this.setErrorOnEditor(modelBaseTS);
             this.dispatchEventStatusOrErrorChanged(position, storFile);
@@ -1326,6 +1318,10 @@ export class ServiceSource100554 extends ServiceBase {
                 if (!this.menu.tabs) return '';
                 if (this.menu.tabs.selected === EToolsSource.icHTML) return;
                 mls.editor.setActiveInstance(this.level, this.position);
+            });
+
+            this._ed1.onDidChangeModelContent(() => {
+                if (this._ed1) this.highlightReviewLines(this._ed1);
             });
 
 
@@ -2092,7 +2088,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         let fileModels = mls.editor.getModels(project, shortName);
         const typeModel = storFile.extension === '.html' ? 'html' : 'style';
         if (fileModels && fileModels[typeModel] && fileModels[typeModel]?.model) {
-            if (this.visible === 'true' && typeModel === 'html') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify({ ...storFile, position:this.position}));
+            if (this.visible === 'true' && typeModel === 'html') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify({ ...storFile, position: this.position }));
             return fileModels[typeModel]?.model as monaco.editor.ITextModel;
         }
 
@@ -2106,7 +2102,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const modelBase = await this.createModel(project, shortName, ext);
         if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}${ext}`);
 
-        if (this.visible === 'true' && typeModel === 'html') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify({ ...storFile, position:this.position}));
+        if (this.visible === 'true' && typeModel === 'html') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify({ ...storFile, position: this.position }));
         const { model } = modelBase;
 
         const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
@@ -2173,14 +2169,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 }
             }
 
-            const sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelValue).toString(16);
-            if (sameContent) {
-                if (storFile.status !== 'new' && storFile.status !== 'renamed') storFile.status = 'nochange';
-                if (storFile.status !== 'renamed') await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
-            } else {
-                if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
-                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: modelValue });
-            }
+            await this.checkSameContent(modelBase, storFile);
 
             if (this.isHTMLSystemChange) {
                 this.isHTMLSystemChange = false;
@@ -2271,20 +2260,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         clearTimeout(this._onChangedContentTsTest);
         this._onChangedContentTsTest = window.setTimeout(async () => {
 
-            let modelValue = model.getValue();
             const ok = await mls.l2.typescript.compileAndPostProcess(modelBase, false, true);
             let hasError = ok === false;
             storFile.hasError = hasError;
-
-            const sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelValue).toString(16);
-            if (sameContent) {
-                if (storFile.status !== 'new' && storFile.status !== 'renamed') storFile.status = 'nochange';
-                if (storFile.status !== 'renamed') await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
-            } else {
-                if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
-                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: modelValue });
-            }
-
+            await this.checkSameContent(modelBase, storFile);
             let position = this.getPosition(modelBase.model.id, 'test');
             this.dispatchEventTsTestChanged(position, storFile);
             this.toogleIconsError(position);
@@ -2381,15 +2360,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             let hasError = ok === false;
             storFile.hasError = hasError;
 
-            const sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelValue).toString(16);
-            if (sameContent) {
-                if (storFile.status !== 'new' && storFile.status !== 'renamed') storFile.status = 'nochange';
-                if (storFile.status !== 'renamed') await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
-            } else {
-                if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
-                await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: modelValue });
-            }
-
+            await this.checkSameContent(modelBase, storFile);
             let position = this.getPosition(modelBase.model.id, 'defs');
             this.dispatchEventTsDefsChanged(position, storFile);
             this.toogleIconsError(position);
@@ -2497,6 +2468,19 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
     }
 
+    private async checkSameContent(modelBase: mls.editor.IModelBase, storFile: mls.stor.IFileInfo) {
+        const sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelBase.model.getValue()).toString(16);
+        if (sameContent) {
+            if (storFile.status !== 'new') {
+                storFile.status = 'nochange';
+                await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
+            }
+        } else {
+            if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
+            await mls.stor.localStor.setContent(storFile, await this.getValueInfo(modelBase));
+        }
+    }
+
     private async createStorFile(project: number, shortName: string, content: string, extension: string) {
         const params = {
             project,
@@ -2584,7 +2568,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         this.editorHistoryEl?.setAttribute('msize', this.msize);
     }
 
-
     private toogleIconsError(position: 'left' | 'right' | 'all') {
         const servicesToChange: ServiceSource100554[] = [];
 
@@ -2609,6 +2592,53 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         });
 
     }
+
+    private currentReviewDecorationIds: monaco.editor.IEditorDecorationsCollection | undefined;
+
+    private highlightReviewLines(editor: monaco.editor.IStandaloneCodeEditor) {
+        const model = editor.getModel();
+        if (!model) return;
+
+        const decorations: monaco.editor.IModelDeltaDecoration[] = [];
+
+        for (let i = 1; i <= model.getLineCount(); i++) {
+            const lineContent = model.getLineContent(i);
+            if (lineContent.includes('// REVIEW: Warning') || lineContent.includes('<!-- REVIEW: Warning')) {
+                decorations.push({
+                    range: new monaco.Range(i, 1, i, 1),
+                    options: {
+                        isWholeLine: true,
+                        className: 'review-warning-line-highlight',
+                        overviewRuler: {
+                            color: 'rgba(255, 165, 0, 0.8)',
+                            position: monaco.editor.OverviewRulerLane.Right,
+                        },
+
+                        hoverMessage: { value: lineContent.trim() },
+                    },
+                });
+            }
+
+            if (lineContent.includes('// REVIEW: Error') || lineContent.includes('<!-- REVIEW: Error')) {
+                decorations.push({
+                    range: new monaco.Range(i, 1, i, 1),
+                    options: {
+                        isWholeLine: true,
+                        className: 'review-error-line-highlight',
+                        overviewRuler: {
+                            color: 'rgba(255, 0, 0, 0.6)',
+                            position: monaco.editor.OverviewRulerLane.Right,
+                        },
+                        hoverMessage: { value: lineContent.trim() },
+                    },
+                });
+            }
+        }
+
+        if (this.currentReviewDecorationIds && (this.currentReviewDecorationIds as any)._decorationIds) editor.removeDecorations((this.currentReviewDecorationIds as any)._decorationIds)
+        this.currentReviewDecorationIds = editor.createDecorationsCollection(decorations);
+    }
+
 
     private changeMode(mode: IModes | IModesH) {
         if (!this.menu || !this.menu.setTabActive || !this.menu.selectTool || this.mode === mode) return;
