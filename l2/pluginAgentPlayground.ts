@@ -9,7 +9,7 @@ import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHel
 import { listThreads } from './_100554_msgDBController';
 import { updateHTML } from './_100554_collabDOMSync';
 import { collab_trash } from './_100554_collabIcons';
-import { setState } from './_100554_collabState';
+import { setState } from './_100554_collabState'; 
 
 @customElement('plugin-agent-playground-100554')
 export class AgentTester extends CollabLitElement {
@@ -335,7 +335,7 @@ export class AgentTester extends CollabLitElement {
         if (this.inEdit) {
             setTimeout(async () => {
                 this.handlePlay();
-            }, 600);
+            }, 1100);
             return;
         }
 
@@ -351,10 +351,6 @@ export class AgentTester extends CollabLitElement {
         } finally {
             this.loading = false;
         }
-
-
-
-
 
     }
 
