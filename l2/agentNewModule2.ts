@@ -1,11 +1,10 @@
-/// <mls shortName="agentNewModule" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="agentNewModule2" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { forceServiceInstance } from './_100554_libCommom';
 import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
 import { initState } from './_100554_collabState';
 import './_100554_widgetQuestionsForClarification';
-import { DataForPrompt } from "./_100554_agentNewModule2";
 
 import {
     getNextPendingStepByAgentName,
@@ -26,18 +25,19 @@ import {
     executeNextStep,
     addNewStep,
     ClarificationValue,
+    toLLMClarification,
     startClarification
 } from "./_100554_aiAgentOrchestration";
 
-const agentName = "agentNewModule";
+const agentName = "agentNewModule2";
 const project = 100554;
 
 export function createAgent(): IAgent {
     return {
         agentName,
         avatar_url: svg_agent,
-        agentDescription: "Agent for create a new Module",
-        visibility: "public",
+        agentDescription: "Agent for create a new Module - 2",
+        visibility: "private",
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _beforePrompt(context);
         },
@@ -56,22 +56,31 @@ export function createAgent(): IAgent {
     };
 }
 
+export interface DataForPrompt {
+    userPrompt: string;
+    clarification: ClarificationValue;
+}
+
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-    const taskTitle = "Planning...";
+    const taskTitle = "Planning 2...";
     if (!context || !context.message) throw new Error("Invalid context");
 
     if (!context.task) {
-        const inputs: any = await getPrompts(context.message.content);
-        await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
-    } else {
-        const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
-        if (!step) {
-            throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
-        }
-        context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
-        if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
-        const inputs = await getPrompts(step.prompt);
+        throw new Error(`[${agentName}] [beforePrompt]: no context task.`);
+    }
+    const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
+    if (!step) {
+        throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
+    }
+    context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+    if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
+    try {
+        const prompt: DataForPrompt = JSON.parse(step.prompt);
+        console.log(`[${agentName}] [beforePrompt]:`, prompt)
+        const inputs = await getPrompts(prompt);
         await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
+    } catch (e: any) {
+        throw new Error(`[${agentName}] [beforePrompt]: Invalid prompt: ` + e.message || '?');
     }
 }
 
@@ -113,16 +122,16 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
     const payload: mls.msg.AIPayload | null = getStepById(context.task, interactionId);
     if (!payload || payload.type !== "agent") throw new Error("[${agentName}] [afterClarification] Clarification or tool step not bellow a agent");
 
-    const userPrompt = payload.interaction?.input.find((input) => input.type === 'human')?.content || '';
+    const promptUser = payload.interaction?.input.find((input) => input.type === 'human')?.content || '';
 
-    const dataForNextAgent: DataForPrompt = {
-        userPrompt,
-        clarification: clarification
+    const dataForNextAgent = {
+        prompt: promptUser,
+
     }
 
     const newStep: mls.msg.AIPayload = {
         type: 'agent',
-        agentName: 'agentNewModule2',
+        agentName: 'agentNewModule3',
         prompt: JSON.stringify(dataForNextAgent),
         status: 'pending',
         stepId: getNextStepIdAvaliable(context.task),
@@ -134,11 +143,9 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
     await addNewStep(context, step.stepId, [newStep]);
 }
 
-async function getPrompts(userPrompt: string): Promise<mls.msg.IAMessageInputType[]> {
-    if (!userPrompt) throw new Error(`Erro [${agentName}] getPrompts: invalid userPrompt`);
-    const dataForReplace = {
-        userPrompt
-    }
-    const prompts = await getPromptByHtml({ project, shortName: agentName, folder: '', data: dataForReplace })
+async function getPrompts(prompt: DataForPrompt): Promise<mls.msg.IAMessageInputType[]> {
+    if (!prompt || !prompt.clarification || !prompt.userPrompt) throw new Error(`Erro [${agentName}] getPrompts: invalid userPrompt`);
+    (prompt as any).ResumeClarification = toLLMClarification(prompt.clarification);
+    const prompts = await getPromptByHtml({ project, shortName: agentName, folder: '', data: prompt })
     return prompts;
 }

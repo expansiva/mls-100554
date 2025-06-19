@@ -406,9 +406,6 @@ export function getNextStepIdAvaliable(task: mls.msg.TaskData): number {
     if (step.stepId > nextStepId) nextStepId = step.stepId + 1;
     findNextStepId([step]);
   });
-
-  console.info({ nextStepId })
-
   return nextStepId;
 }
 
