@@ -1,7 +1,8 @@
 /// <mls shortName="beTableProduto" project="100554" enhancement="_blank" groupName="other" />
 
 import { BEIndexedDBBase } from "./_100554_beIndexedDBBase";
-import { EntitiesState, EntityState, ActionRead, ActionAdd, ActionUpdate, ActionDelete, ActionRedo, ActionUndo, Actions } from "./_100554_beTableState"
+import { EntitiesState, EntityState, ActionRead, ActionAdd, 
+ActionUpdate, ActionDelete, ActionRedo, ActionUndo, Actions } from "./_100554_beTableState"
 import { IProviderBase } from "./_100554_beProviderBase";
 import { TableDriverBase } from "./_100554_beTableBase";
 

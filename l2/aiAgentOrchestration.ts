@@ -421,8 +421,114 @@ export async function postBackClarification(
 
 }
 
+export async function startClarification(context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> {
+    // called after agent . beforeClarification
+
+    if (!context.task) throw new Error("[startClarification] Invalid context.task");
+
+    const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
+    if (!step || step.type !== "clarification") throw new Error(`[startClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
+    let clarification: ClarificationValue;
+    try {
+        let ret: any = step.json;
+        if (typeof step.json ==="string") ret = JSON.parse(step.json || '') as any;
+        clarification = {
+            taskId: context.task.PK,
+            stepId,
+            title: ret.title,
+            legends: ret.legends || [],
+            userLanguage: ret.userLanguage || '',
+            questions: ret.questions
+        }
+    }
+    catch (e) {
+        console.error(e);
+        throw new Error(`[startClarification] Invalid step: ${stepId} on task: ${context.task.PK}, json clarification invalid`);
+    }
+
+    const div: HTMLDivElement = document.createElement('div');
+    const clariEl = document.createElement('widget-questions-for-clarification-100554');
+    (clariEl as any).value = clarification;
+    div.appendChild(clariEl);
+    return div;
+}
+
+export async function endClarification(clarification: ClarificationValue, action: "continue" | "cancel"): Promise<void> {
+    // called after press button cancel or continue on clarification
+    // call agent afterClarification
+
+    const taskId: string | null = clarification.taskId || '';
+    if (!taskId) throw new Error("[startClarification] Invalid call arguments, no taskId");
+    const ret = await getAgentContext(taskId);
+    if (ret.step.type !== "clarification") throw new Error("[getClarification] Clarification step not not found");
+
+    if (action === "continue") {
+        dispatchDetailsTaskClose();
+        await executeAgentFunction(ret.context, ret.interaction, "afterClarification", clarification.stepId, clarification);
+    }
+
+    // cancel the task
+    const messageId: string | undefined = ret.context.task?.messageid_created;
+    if (!messageId) throw new Error("[postBackClarification] Invalid messageId");
+    const resp = await mls.api.msgUpdateStepStatus({
+        messageId,
+        status: "failed",
+        stepId: ret.step.stepId,
+        taskId,
+        userId: getUserIdLocalStorage() || ret.context.message.senderId,
+        traceMsg: "user cancel the task"
+    });
+    ret.context.task = resp.task;
+    notifyTaskChange(ret.context);
+    dispatchDetailsTaskClose();
+}
+
+export function toLLMClarification(value: ClarificationValue) {
+  // remove unnecessary values
+  return {
+    title: value.title,
+    userLanguage: value.userLanguage,
+    questions: Object.fromEntries(
+      Object.entries(value.questions).map(([key, q]) => [
+        key,
+        {
+          type: q.type,
+          question: q.question,
+          answer: q.answer
+        }
+      ])
+    )
+  };
+}
+
 async function setFailedStatus(context: mls.msg.ExecutionContext, step: number) {
     if (!context.task) throw new Error("[setFailedStatus] Invalid context task");
     context.task = await updateStepStatus(context.task, step, "failed");
     notifyTaskChange(context);
+}
+
+// Types for the JSON structure
+export interface ClarificationValue {
+    taskId: string;
+    stepId: number;
+    title: string;
+    userLanguage: string;
+    questions: ClarificationQuestions;
+    legends: string[];
+}
+
+export interface ClarificationQuestions {
+    [key: string]: Question;
+}
+
+export interface Question {
+    type: 'open' | 'select' | 'boolean' | 'MoSCoW' | 'range';
+    question: string;
+    answer?: string | boolean;
+    options?: QuestionOption[];
+}
+
+export interface QuestionOption {
+    id: string;
+    label: string;
 }

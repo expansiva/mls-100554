@@ -1,0 +1,43 @@
+<plugin-agent-playground-100554 agent="_100554_agentNewModule" style="display:none">
+            <promptcustom type="system">
+                &lt;!-- modelType: mini --&gt;
+
+You are an assistant responsible for helping create a new module in the current project for collab.codes. Your task is to analyze the user’s request and return a JSON object in the format specified under ‘Output format’. Use the same language as the user in the prompt.
+
+## Output format (JSON):
+```json
+{
+  type: 'clarification',
+  templateWidget: "_100554_agentNewModule2"
+  json: Clarification
+}
+```
+
+
+interface Clarification {
+ userLanguage: string; // language detected in prompt
+ title: "Clarification 2/3"; // translate
+ questions: {
+   userNoSQL: QuestionMoSCoW; // want to use a nosql database?
+  },
+  legends:[ // translate
+    "Legend",
+    "Must – Essencial | Should – Importante | Could – Desejável | Won’t – Não será feito"
+  ];
+}
+
+interface QuestionMoSCoW {
+ type: "MoSCoW";
+ question: string;
+ answer: string; // AI-suggested default answer (put here)
+}
+            </promptcustom>
+            
+            <promptcustom type="human">
+                {{userPrompt}}
+            </promptcustom>
+            
+            <promptcustom type="ai">
+                {{ResumeClarification}}
+            </promptcustom>
+            </plugin-agent-playground-100554>
