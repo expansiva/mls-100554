@@ -421,7 +421,7 @@ export async function postBackClarification(
 
 }
 
-export async function startClarification(context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> {
+export async function startClarification(context: mls.msg.ExecutionContext, stepId: number, modeReadOnly?: boolean): Promise<HTMLDivElement | null> {
     // called after agent . beforeClarification
 
     if (!context.task) throw new Error("[startClarification] Invalid context.task");
@@ -449,6 +449,7 @@ export async function startClarification(context: mls.msg.ExecutionContext, step
     const div: HTMLDivElement = document.createElement('div');
     const clariEl = document.createElement('widget-questions-for-clarification-100554');
     (clariEl as any).value = clarification;
+    if (modeReadOnly === true) clariEl.setAttribute("readonly", "true")
     div.appendChild(clariEl);
     return div;
 }
@@ -462,9 +463,10 @@ export async function endClarification(clarification: ClarificationValue, action
     const ret = await getAgentContext(taskId);
     if (ret.step.type !== "clarification") throw new Error("[getClarification] Clarification step not not found");
 
+    dispatchDetailsTaskClose();
     if (action === "continue") {
-        dispatchDetailsTaskClose();
         await executeAgentFunction(ret.context, ret.interaction, "afterClarification", clarification.stepId, clarification);
+        return;
     }
 
     // cancel the task
@@ -476,11 +478,12 @@ export async function endClarification(clarification: ClarificationValue, action
         stepId: ret.step.stepId,
         taskId,
         userId: getUserIdLocalStorage() || ret.context.message.senderId,
-        traceMsg: "user cancel the task"
+        traceMsg: "user cancel the task",
+        newTaskStatus: 'failed',
+        newTaskTitle: "User canceled task"
     });
     ret.context.task = resp.task;
     notifyTaskChange(ret.context);
-    dispatchDetailsTaskClose();
 }
 
 export function toLLMClarification(value: ClarificationValue) {
