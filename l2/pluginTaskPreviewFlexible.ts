@@ -2,11 +2,12 @@
 
 import { html, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
- 
+import { CollabLitElement } from './_100554_collabLitElement'; 
+  
 @customElement('plugin-task-preview-flexible-100554')
 export class pluginTaskPreviewFlexible extends CollabLitElement {
- 
+
+    @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIFlexibleResultStep | null = null;
     @state() private mode: string = 'info';
 
@@ -17,7 +18,7 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
         }
 
         return html`
-            <div style="height: calc(100% - 85px);">
+            <div style="height: calc(100% - 41px);">
                 <div class="tab-header">
                     <div class="tab-group-left">
                         <button
@@ -53,18 +54,53 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
 
     }
 
-    renderInfo() {
 
-        if (!this.step) return html`Not found!`;
+    renderInfo() { 
 
+        if (!this.task ||!this.step ) return html`Not found!`;
 
         return html`
-            <ul>
-                <li>
-                    #${this.step.stepId} - ${this.step.type} - ${this.step.status}
-                </li>
-            </ul>
+        <div class="containerinputs">
+            <details open>
+                <summary> ${this.renderSummary('Step details')} </summary>
+                <ul>
+                    <li>
+                        #${this.step.stepId} - ${this.step.type} - ${this.step.status}
+                    </li>
+                </ul>
+            </details>
+            <details>
+                <summary> ${this.renderSummary('Task details')}</summary>
+                <ul>
+                    <li>
+                        <header>
+                                <h2>${this.task.PK}</h2>
+                                <small>Status: ${this.task.status} | Última atualização: ${new Date(
+                            this.task.last_updated
+                        ).toLocaleString()}</small>
+                        </header>
+                    </li>
+                </ul>
+            </details>
+        </div>
         `;
+    }
+
+    renderSummary(title: string) {
+        return html`
+            <div class="pheader">
+                <div style="display:flex; align-items: center;gap:.5rem">
+                    <span>
+                        ${title}
+                    </span>
+                </div>
+                <div style="display:flex; gap:.5rem">
+                    <div class="chevron">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width:10px"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>
+                    </div>
+                </div>
+            </div>
+        `
     }
 
     renderFlexible() {

@@ -17,10 +17,15 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
 
     @property({ type: Boolean, reflect: true }) develpoment?: boolean = false;
 
+    @property({ type: String, reflect: true }) mode: 'readonly' | 'write' = 'write';
+
     @query('#input_tagName') inputTag?: HTMLInputElement;
     @query('#widgetNameError') widgetNameError?: HTMLInputElement;
 
     render() {
+        
+        if (this.mode === 'readonly') this.classList.add('readonly');
+        else this.classList.remove('readonly');
 
         if (this.develpoment) this.setDevelpoment();
         if (this.error) {

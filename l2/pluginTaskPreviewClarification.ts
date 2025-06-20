@@ -3,16 +3,19 @@
 import { html, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { convertFileNameToTag } from './_100554_utilsLit'; 
- 
-@customElement('plugin-task-preview-clarification-100554')
+import { convertFileNameToTag } from './_100554_utilsLit';  
+import {getStepById, getTemporaryContext} from "./_100554_aiAgentHelper";
+import { IAgent } from './_100554_aiAgentBase';
+
+@customElement('plugin-task-preview-clarification-100554')  
 export class PluginTaskPreviewClarification extends CollabLitElement {
 
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIClarificationStep | null = null;
     @state() private mode: string = 'info';
     @state() private tag: string = 'pre';
-    @query('#clarificationid') clarificationid: HTMLElement | undefined;
+    @query('#clarificationid') clarificationid: HTMLDivElement | undefined;
+    private elClarification: HTMLDivElement | null = null;
 
     firstUpdated() {
 
@@ -26,7 +29,7 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
         }
 
         return html`
-            <div style="height: calc(100% - 85px);">
+            <div style="height: calc(100% - 41px);">
                 <div class="tab-header">
                     <div class="tab-group-left">
                         <button
@@ -58,27 +61,61 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
             case 'info': return this.renderInfo();
             case 'result': return this.renderResults();
             default: return this.renderInfo();
-        }
-
+        } 
+ 
     }
 
-    renderInfo() {
+    renderInfo() { 
 
-        if (!this.step) return html`Not found!`;
-
+        if (!this.task ||!this.step ) return html`Not found!`;
 
         return html`
-            <ul>
-                <li>
-                    #${this.step.stepId} - ${this.step.type} - ${this.step.status}
-                </li>
-            </ul>
+        <div class="containerinputs">
+            <details open>
+                <summary> ${this.renderSummary('Step details')} </summary>
+                <ul>
+                    <li>
+                        #${this.step.stepId} - ${this.step.type} - ${this.step.status}
+                    </li>
+                </ul>
+            </details>
+            <details>
+                <summary> ${this.renderSummary('Task details')}</summary>
+                <ul>
+                    <li>
+                        <header>
+                                <h2>${this.task.PK}</h2>
+                                <small>Status: ${this.task.status} | Última atualização: ${new Date(
+                            this.task.last_updated
+                        ).toLocaleString()}</small>
+                        </header>
+                    </li>
+                </ul>
+            </details>
+        </div>
         `;
+    }
+
+    renderSummary(title: string) {
+        return html`
+            <div class="pheader">
+                <div style="display:flex; align-items: center;gap:.5rem">
+                    <span>
+                        ${title}
+                    </span>
+                </div>
+                <div style="display:flex; gap:.5rem">
+                    <div class="chevron">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width:10px"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>
+                    </div>
+                </div>
+            </div>
+        `
     }
 
     renderClarification() {
 
-        if (!this.step || !this.task)
+        if (!this.step || !this.elClarification)
             return html`
             <div class="containerinputs">
                 <h3>No input found!</h3>
@@ -87,7 +124,13 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
 
         setTimeout(() => {
 
-            if (!this.clarificationid || !this.step || !this.task) return;
+            if (!this.clarificationid || !this.elClarification) {
+                if(this.clarificationid) this.clarificationid.innerHTML = '';
+                return;
+            }
+            this.clarificationid.appendChild(this.elClarification)
+
+            /*if (!this.clarificationid || !this.step || !this.task) return;
             const dt = {
                 clarificationMessage: '',
                 stepId: this.step.stepId,
@@ -96,13 +139,15 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
             };
 
             (this.clarificationid as any).data = dt;
+            this.clarificationid.setAttribute('mode', 'readonly');*/
+
             
         }, 300)
 
 
         return unsafeHTML(`
-        <${this.tag} id="clarificationid">
-        </${this.tag}>
+            <${this.tag} id="clarificationid">
+            </${this.tag}>
         `)
     }
 
@@ -143,13 +188,37 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
         this.mode = 'result';
     }
 
+    private DEFAULTPROJECT = 100554;
     private async getFile() {
 
-        if (!this.step || !this.step.templateWidget) return;
+        if (!this.step || !this.task ) return;
 
-        const url = './' + this.step.templateWidget;
-        await import(url);
-        this.tag = convertFileNameToTag(this.step.templateWidget)
+        const agentName = this.getAgentBeforeStep(this.step.stepId);
+        if (!agentName) return;
+
+        const url = `./_${this.DEFAULTPROJECT}_${agentName}`;
+        const md = await import(url) as any;
+        const agent = md.createAgent();
+        const ctx = getTemporaryContext('11111', this.task.owner, '');
+        ctx.task = this.task;
+
+        this.elClarification = agent.beforeClarification ? await agent.beforeClarification(ctx, this.step.stepId) : null;
+
+        if (this.elClarification) this.tag = 'div';
+
+    }
+
+    private getAgentBeforeStep(stepId: number): string {
+
+        if (!this.task) return '';
+
+        const agent = getStepById(this.task, stepId);
+        if (agent && agent.type === 'agent') return agent.agentName;
+
+        const next = stepId - 1;
+        if (stepId > 0) return this.getAgentBeforeStep(stepId - 1)
+
+        return '';
 
     }
 }
