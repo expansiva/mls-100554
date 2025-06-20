@@ -11,6 +11,8 @@ import { ClarificationValue, endClarification } from './_100554_aiAgentOrchestra
 export class WidgetQuestionsForClarification100554 extends StateLitElement {
   @property({ type: Object }) value: ClarificationValue | null = null;
 
+  @property({ type: Boolean }) readonly = false;
+
   // Local state for editing answers
   @state()
   private localAnswers: { [key: string]: string | boolean } = {};
@@ -59,14 +61,14 @@ export class WidgetQuestionsForClarification100554 extends StateLitElement {
   }
 
   private onCancel() {
-    if (this.value) {
+    if (this.value && !this.readonly) {
       endClarification(this.value, "cancel");
     }
   }
 
   private onContinue() {
     // Update answers into 'value'
-    if (this.value) {
+    if (this.value && !this.readonly) {
       this.value = {
         ...this.value,
         questions: Object.fromEntries(
@@ -83,6 +85,7 @@ export class WidgetQuestionsForClarification100554 extends StateLitElement {
   render() {
     if (!this.value || !this.value.questions || !this.value.legends) return html`<div>No questions available. value is ${typeof this.value}</div>`;
 
+    const isDisabled = this.readonly === true;
     return html`
     <h2 class='title'>${this.value.title}</h2>
     <form class="clarification-form" @submit=${(e: Event) => e.preventDefault()}>
@@ -153,10 +156,10 @@ export class WidgetQuestionsForClarification100554 extends StateLitElement {
             ` : null}
           `}
         </div>
-      `)}
+      `)} 
       <div class="clarification-actions">
-        <button type="button" class="action-btn cancel" @click=${this.onCancel}>Cancel</button>
-        <button type="button" class="action-btn continue" @click=${this.onContinue}>Continue</button>
+        <button type="button" class="action-btn cancel" @click=${this.onCancel} ?disabled=${isDisabled}>Cancel</button>
+        <button type="button" class="action-btn continue" @click=${this.onContinue} ?disabled=${isDisabled}>Continue</button>
       </div>
       ${this.value.legends?.length ? html`
         <div class="clarification-legends" style="margin-top:2em;">
