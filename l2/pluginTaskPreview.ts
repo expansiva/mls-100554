@@ -2,13 +2,12 @@
 
 import { html, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { getAllSteps } from './_100554_aiAgentHelper';
 import { CollabLitElement } from './_100554_collabLitElement';
 
 import './_100554_pluginTaskPreviewAgent';
 import './_100554_pluginTaskPreviewClarification';
 import './_100554_pluginTaskPreviewFlexible';
-import './_100554_pluginTaskPreviewTask';
-
 
 @customElement('plugin-task-preview-100554')
 export class AgentTester extends CollabLitElement {
@@ -18,6 +17,7 @@ export class AgentTester extends CollabLitElement {
     @state() private stepMap = new Map<number, any>();
     @state() private navigationStack: number[] = [];
     @state() private currentStepId: number | null = null;
+    @state() private allsteps:mls.msg.AIPayload[]  = [];
 
     connectedCallback() {
         super.connectedCallback();
@@ -44,24 +44,13 @@ export class AgentTester extends CollabLitElement {
 
         return html`
             ${this.renderStep()}
-        `;
-    }
+        `; 
+    } 
 
     renderStep() {
 
         if (!this.task) {
             return html`<p>Task not provided.</p>`;
-        }
-
-        if (this.currentStepId === 0) {
-            return html`
-                ${this.renderNavigation(0)}
-                <div class="container">
-                    ${this.renderStepDetails({ stepId: 0 } as any)}
-                </div>
-                ${this.renderBreadcrumb()}
-
-            `;
         }
 
         if (!this.currentStepId) {
@@ -99,8 +88,9 @@ export class AgentTester extends CollabLitElement {
         };
 
         const step = this.stepMap.get(stepId);
-        let name = 'Task';
-        if (step) name = `#${step.stepId} - ${step.agentName ? step.agentName : step.type}`;
+        const all = this.allsteps.length.toString().padStart(2, '0');
+        let name = `00/${all}`;
+        if (step) name = `${stepId.toString().padStart(2, '0')}/${all}`;
 
         return html`
         <div class="tabAction">
@@ -112,8 +102,6 @@ export class AgentTester extends CollabLitElement {
     }
 
     renderStepDetails(step: mls.msg.AIPayload) {
-
-        if (step.stepId === 0) return this.renderTask();
 
         switch (step.type) {
             case 'agent': return this.renderAgent(step);
@@ -129,17 +117,6 @@ export class AgentTester extends CollabLitElement {
       <nav class="breadcrumb">
         ${this.navigationStack.map(
             (stepId, idx) => {
-
-                if (stepId === 0) {
-                    return html`
-                        <span
-                    @click=${() => {
-                            this.navigationStack = this.navigationStack.slice(0, idx + 1);
-                            this.currentStepId = 0;
-                        }}
-                    >Task</span>
-                    `
-                }
 
                 const step = this.stepMap.get(stepId);
                 if (!step) {
@@ -175,14 +152,7 @@ export class AgentTester extends CollabLitElement {
 
     renderFlexible(step: mls.msg.AIFlexibleResultStep) {
         return html`
-        <plugin-task-preview-flexible-100554 .step=${step} key="${step.stepId}"></plugin-task-preview-flexible-100554>
-        
-        `;
-    }
-
-    renderTask() {
-        return html`
-        <plugin-task-preview-task-100554 .task=${this.task}></plugin-task-preview-task-100554>
+        <plugin-task-preview-flexible-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-flexible-100554>
         
         `;
     }
@@ -195,8 +165,9 @@ export class AgentTester extends CollabLitElement {
 
         this.stepMap.clear();
         this.buildStepMap(this.task.iaCompressed.nextSteps);
-        this.currentStepId = 0;
-        this.navigationStack = [0];
+        this.currentStepId = 1;
+        this.navigationStack = [1];
+        this.allsteps = getAllSteps(this.task.iaCompressed.nextSteps);
     }
 
     private buildStepMap(steps: any[]) {

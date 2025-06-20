@@ -4,7 +4,7 @@ import { html, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IAgent } from './_100554_aiAgentBase';
-import { getTemporaryContext } from './_100554_aiAgentHelper';
+import { getTemporaryContext } from './_100554_aiAgentHelper'; 
  
 @customElement('plugin-task-preview-agent-100554')
 export class PluginTaskPreviewAgent extends CollabLitElement { 
@@ -12,7 +12,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIAgentStep | null = null;
     @state() private prompts: mls.msg.IAMessageInputType[] = [];
-    @state() private mode: string = 'info'; 
+    @state() private mode: string = 'info';  
 
     private lastKey: number = -1;
 
@@ -34,7 +34,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
         }
 
         return html`
-            <div style="height: calc(100% - 85px);">
+            <div style="height: calc(100% - 41px);">
                 <div class="tab-header">
                     <div class="tab-group-left">
                         <button
@@ -60,7 +60,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
         `;
     }
 
-    renderMode() {
+    renderMode() { 
 
         switch (this.mode) {
             case 'input': return this.renderInputs();
@@ -73,22 +73,65 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
 
     renderInfo() { 
 
-        if (!this.step || !this.step.interaction) return html`Not found!`;
+        if (!this.task ||!this.step || !this.step.interaction) return html`Not found!`;
 
         return html`
-            <ul>
-                <li>
-                    #${this.step.stepId} - ${this.step.agentName} - ${this.step.status} - ${this.step.interaction.cost}
-                    <div style="float: right;">
-                        <svg xmlns="http://www.w3.org/2000/svg" style="transform: rotateY(174deg); z-index:9999;width:15px; cursor:pointer" @click=${(e: MouseEvent) => { e.stopPropagation(); e.preventDefault(); this.replayForSupport(e.currentTarget as HTMLElement, (this.step as mls.msg.AIAgentStep).agentName, (this.step as mls.msg.AIAgentStep).interaction, (this.step as mls.msg.AIAgentStep).stepId) }} viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M209.4 39.5c-9.1-9.6-24.3-10-33.9-.9L33.8 173.2c-19.9 18.9-19.9 50.7 0 69.6L175.5 377.4c9.6 9.1 24.8 8.7 33.9-.9s8.7-24.8-.9-33.9L66.8 208 208.5 73.4c9.6-9.1 10-24.3 .9-33.9zM352 64c0-12.6-7.4-24.1-19-29.2s-25-3-34.4 5.4l-160 144c-6.7 6.1-10.6 14.7-10.6 23.8s3.9 17.7 10.6 23.8l160 144c9.4 8.5 22.9 10.6 34.4 5.4s19-16.6 19-29.2l0-64 32 0c53 0 96 43 96 96c0 30.4-12.8 47.9-22.2 56.7c-5.5 5.1-9.8 12-9.8 19.5c0 10.9 8.8 19.7 19.7 19.7c2.8 0 5.6-.6 8.1-1.9C494.5 467.9 576 417.3 576 304c0-97.2-78.8-176-176-176l-48 0 0-64z"/></svg>
-                        <span class="result"></span>
-                    </div>
-                </li>
-                <li>
-                    ${this.step.interaction.trace}
-                </li>
-            </ul>
+        <div class="containerinputs">
+            <details open>
+                <summary> ${this.renderSummary('Step details')} </summary>
+                <ul>
+                    <li>
+                        #${this.step.stepId} - ${this.step.agentName} - ${this.step.status} - ${this.step.interaction.cost}
+                    </li>
+                    <li>
+                        ${this.step.interaction.trace}
+                    </li>
+                </ul>
+            </details>
+            <details>
+                <summary> ${this.renderSummary('Task details')}</summary>
+                <ul>
+                    <li>
+                        <header>
+                                <h2>${this.task.PK}</h2>
+                                <small>Status: ${this.task.status} | Última atualização: ${new Date(
+                            this.task.last_updated
+                        ).toLocaleString()}</small>
+                        </header>
+                    </li>
+                </ul>
+            </details>
+            <details>
+                <summary>${this.renderSummary('Advanced details')} </summary>
+                <ul>
+                    <li>
+                        <span>Execute</span>
+                        <div style="float: right;">
+                            <svg xmlns="http://www.w3.org/2000/svg" style="transform: rotateY(174deg); z-index:9999;width:15px; cursor:pointer" @click=${(e: MouseEvent) => { e.stopPropagation(); e.preventDefault(); this.replayForSupport(e.currentTarget as HTMLElement, (this.step as mls.msg.AIAgentStep).agentName, (this.step as mls.msg.AIAgentStep).interaction, (this.step as mls.msg.AIAgentStep).stepId) }} viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M209.4 39.5c-9.1-9.6-24.3-10-33.9-.9L33.8 173.2c-19.9 18.9-19.9 50.7 0 69.6L175.5 377.4c9.6 9.1 24.8 8.7 33.9-.9s8.7-24.8-.9-33.9L66.8 208 208.5 73.4c9.6-9.1 10-24.3 .9-33.9zM352 64c0-12.6-7.4-24.1-19-29.2s-25-3-34.4 5.4l-160 144c-6.7 6.1-10.6 14.7-10.6 23.8s3.9 17.7 10.6 23.8l160 144c9.4 8.5 22.9 10.6 34.4 5.4s19-16.6 19-29.2l0-64 32 0c53 0 96 43 96 96c0 30.4-12.8 47.9-22.2 56.7c-5.5 5.1-9.8 12-9.8 19.5c0 10.9 8.8 19.7 19.7 19.7c2.8 0 5.6-.6 8.1-1.9C494.5 467.9 576 417.3 576 304c0-97.2-78.8-176-176-176l-48 0 0-64z"/></svg>
+                            <span class="result"></span>
+                        </div>
+                    </li>
+                </ul>
+            </details>
+        </div>
         `;
+    }
+
+    renderSummary(title: string) {
+        return html`
+            <div class="pheader">
+                <div style="display:flex; align-items: center;gap:.5rem">
+                    <span>
+                        ${title}
+                    </span>
+                </div>
+                <div style="display:flex; gap:.5rem">
+                    <div class="chevron">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width:10px"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>
+                    </div>
+                </div>
+            </div>
+        `
     }
 
     renderInputs() {
