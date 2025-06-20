@@ -8,7 +8,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 import './_100554_pluginTaskPreviewAgent';
 import './_100554_pluginTaskPreviewClarification';
 import './_100554_pluginTaskPreviewFlexible';
-
+ 
 @customElement('plugin-task-preview-100554')
 export class AgentTester extends CollabLitElement {
 
@@ -384,6 +384,16 @@ const taskExample = {
                                                             "stepId": 5,
                                                             "interaction": null,
                                                             "nextSteps": [
+                                                                {
+    "type": "agent",
+    "stepId": 6,
+    "status": "failed",
+    "agentName": "agentNewModule3",
+    "prompt": "{\"prompt\":\"Criar site para petshop\\n\"}",
+    "rags": null,
+    "interaction": null,
+    "nextSteps": null
+}
                                                             ]
                                                         }
                                                     ]

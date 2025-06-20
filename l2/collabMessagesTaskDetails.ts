@@ -263,7 +263,7 @@ export class WidgetAiInteraction100554 extends StateLitElement {
     private renderAgent(payload: mls.msg.AIAgentStep) {
         return html`
             <ul>
-                <li>agentName: ${payload.agentName}</li>
+                <li>agentName: ${payload.agentName}</li> 
                 <li>stepId: ${payload.stepId}</li>
                 <li>prompt: ${payload.prompt}</li>
                 <li>status: ${payload.status}</li>
@@ -287,7 +287,6 @@ export class WidgetAiInteraction100554 extends StateLitElement {
     private renderClarificationDetails(payload: mls.msg.AIClarificationStep) {
         return html`
             <ul>
-                <li>templateWidget: ${payload.templateWidget}</li>
                 <li>json: ${payload.json}</li>
                 <li>stepId: ${payload.stepId}</li>
                 <li>status: ${payload.status}</li>

@@ -7,8 +7,8 @@ import { convertFileNameToTag } from './_100554_utilsLit';
 import {getStepById, getTemporaryContext} from "./_100554_aiAgentHelper";
 import { IAgent } from './_100554_aiAgentBase';
 
-@customElement('plugin-task-preview-clarification-100554')  
-export class PluginTaskPreviewClarification extends CollabLitElement {
+@customElement('plugin-task-preview-clarification-100554')   
+export class PluginTaskPreviewClarification extends CollabLitElement { 
 
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIClarificationStep | null = null;
@@ -87,7 +87,8 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
                                 <h2>${this.task.PK}</h2>
                                 <small>Status: ${this.task.status} | Última atualização: ${new Date(
                             this.task.last_updated
-                        ).toLocaleString()}</small>
+        ).toLocaleString()}</small>
+                        <br/><small>${this.task.title}</small>
                         </header>
                     </li>
                 </ul>
@@ -198,11 +199,11 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
 
         const url = `./_${this.DEFAULTPROJECT}_${agentName}`;
         const md = await import(url) as any;
-        const agent = md.createAgent();
+        const agent = md.createAgent() as IAgent;
         const ctx = getTemporaryContext('11111', this.task.owner, '');
         ctx.task = this.task;
 
-        this.elClarification = agent.beforeClarification ? await agent.beforeClarification(ctx, this.step.stepId) : null;
+        this.elClarification = agent.beforeClarification ? await agent.beforeClarification(ctx, this.step.stepId, true) : null;
 
         if (this.elClarification) this.tag = 'div';
 
