@@ -214,11 +214,26 @@ export class ServiceSource100554 extends ServiceBase {
         }
     }
 
-    public async createModels(storFile: mls.stor.IFileInfo) {
-        let fileModels = mls.editor.getModels(storFile.project, storFile.shortName);
-        if (!fileModels) {
-            await this.createModelTS2(storFile, false, false);
+    public inCreate: Record<string, Promise<void> | undefined> = {};
+
+    public async createModels(storFile: mls.stor.IFileInfo): Promise<void> {
+        const key = `${storFile.project}_${storFile.shortName}`;
+
+        if (this.inCreate[key]) {
+            return this.inCreate[key];
         }
+        this.inCreate[key] = (async () => {
+            try {
+                const fileModels = mls.editor.getModels(storFile.project, storFile.shortName);
+                if (!fileModels) {
+                    await this.createModelTS2(storFile, false, false);
+                }
+            } finally {
+                delete this.inCreate[key];
+            }
+        })();
+
+        return this.inCreate[key];
     }
 
 

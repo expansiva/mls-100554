@@ -397,7 +397,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             const formatted = formatTimestamp(msg.createAt);
 
             //const dateKey = msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
-            const dateKey = formatted.date || msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+            const dateKey = formatted?.date || msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
             if (!groupedByDay[dateKey]) {
                 groupedByDay[dateKey] = [];
             }
@@ -511,7 +511,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return this.loadAllMessages(threadInfo);
     }
 
-    private onTitleClick() {
+    private async onTitleClick() {
+
+        await this.updateComplete;
         if (this.activeScenerie === 'task') {
             this.activeScenerie = 'details';
             return;
@@ -607,6 +609,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async updateMessageAI(context: mls.msg.ExecutionContext, updateThreadDB: boolean, oldContextCreateAt?: string) {
+
+        if (this.activeScenerie !== 'details') return;
 
         if (!context.message && !context.task) return;
         const { content, createAt, orderAt, senderId, threadId, taskId } = context.message;
