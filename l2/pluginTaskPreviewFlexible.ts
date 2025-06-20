@@ -77,7 +77,8 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
                                 <h2>${this.task.PK}</h2>
                                 <small>Status: ${this.task.status} | Última atualização: ${new Date(
                             this.task.last_updated
-                        ).toLocaleString()}</small>
+        ).toLocaleString()}</small>
+                        <br/><small>${this.task.title}</small>
                         </header>
                     </li>
                 </ul>

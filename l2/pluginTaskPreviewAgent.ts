@@ -73,7 +73,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
 
     renderInfo() { 
 
-        if (!this.task ||!this.step || !this.step.interaction) return html`Not found!`;
+        if (!this.task ||!this.step ) return html`Not found!`;
 
         return html`
         <div class="containerinputs">
@@ -81,10 +81,10 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                 <summary> ${this.renderSummary('Step details')} </summary>
                 <ul>
                     <li>
-                        #${this.step.stepId} - ${this.step.agentName} - ${this.step.status} - ${this.step.interaction.cost}
+                        #${this.step.stepId} - ${this.step.agentName} - ${this.step.status} - ${this.step.interaction?.cost}
                     </li>
                     <li>
-                        ${this.step.interaction.trace}
+                        ${this.step.interaction?.trace}
                     </li>
                 </ul>
             </details>
@@ -96,7 +96,8 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                                 <h2>${this.task.PK}</h2>
                                 <small>Status: ${this.task.status} | Última atualização: ${new Date(
                             this.task.last_updated
-                        ).toLocaleString()}</small>
+        ).toLocaleString()}</small>
+                        <br/><small>${this.task.title}</small>
                         </header>
                     </li>
                 </ul>
