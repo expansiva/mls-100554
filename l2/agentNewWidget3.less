@@ -1,95 +1,12 @@
-/// <mls shortName="pluginTaskPreview" project="100554" enhancement="enhancementStyle" />
-plugin-task-preview-100554 {
-  display: block;
-  border: 1px solid @grey-color;
-  padding: 1rem;
-  border-radius: 8px;
-  background: @bg-secondary-color-lighter;
-  font-family: var(--font-family-primary);
-  height: calc(100% - 50px);
-  position: relative;
-  .tabAction {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: .3rem;
-    gap: 3rem;
-    span {
-      font-weight: 500;
-      font-size: 1.1rem;
-      color: @text-primary-color;
-    }
-    button {
-      padding: 0.2rem 1.2rem;
-      border: none;
-      border-radius: 2px;
-      background-color: @text-primary-color-darker;
-      color: @bg-primary-color;
-      font-size: 0.95rem;
-      cursor: pointer;
-      &:hover:not(:disabled) {
-        opacity: .7;
-      }
-      &:disabled {
-        background-color: @bg-secondary-color;
-        cursor: not-allowed;
-      }
-    }
-  }
-  .breadcrumb {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    overflow: hidden;
-    flex-shrink: 0;
-    height: 20px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    span {
-      display: inline-block;
-      color: @link-color;
-      padding: 0 0.75rem;
-      position: relative;
-      flex-shrink: 0;
-      cursor: pointer;
-      transition: color 0.2s;
-      font-size: 10px;
-      &:hover {
-        color: @link-color-hover;
-      }
-      &::after {
-        content: '>';
-        position: absolute;
-        right: -0.5rem;
-        color: @grey-color-dark;
-        pointer-events: none;
-      }
-      &:last-of-type {
-        font-weight: bold;
-        color: @text-primary-color;
-        &::after {
-          content: none;
-        }
-      }
-    }
-  }
-  .container {
-    background: @bg-primary-color;
-    border-radius: 5px;
-    border: 1px solid @grey-color;
-    height: calc(100% - 70px);
-    overflow-y: auto;
-  }
+/// <mls shortName="agentNewWidget3" project="100554" enhancement="enhancementStyle" />
+				
+agent-new-widget3-100554 {
+                
+ // Here your less
+                
+
+                
 }
-// REVIEW: Warning - O nesting dentro de .tabAction e .breadcrumb está em um nível aceitável, mas evite aumentar para manter a manutenção simples.
-// REVIEW: Warning - As propriedades de espaçamento (padding, gap) estão fixas. Considere usar variáveis para facilitar ajustes futuros.
-// REVIEW: Warning - O seletor .breadcrumb > span > &::after pode ser considerado específico demais. Se possível, simplifique para evitar problemas de sobrescrita.
-// REVIEW: Warning - Há repetição de tokens LESS no final do arquivo. Considere centralizar a definição dos tokens para evitar inconsistências e facilitar manutenção.
-// REVIEW: Warning - O arquivo contém muitos tokens duplicados (as seções //Start Less Tokens e //End Less Tokens aparecem múltiplas vezes). Isso pode causar confusão e dificultar a manutenção.
-// REVIEW: Warning - Considere agrupar as propriedades relacionadas (ex: border, border-radius, background) para melhorar a legibilidade.
 
 //Start Less Tokens
 @text-primary-color-lighter: #535353;
