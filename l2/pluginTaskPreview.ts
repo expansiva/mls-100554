@@ -1,34 +1,31 @@
 /// <mls shortName="pluginTaskPreview" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-
 import { html, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { getAllSteps } from './_100554_aiAgentHelper';
 import { CollabLitElement } from './_100554_collabLitElement';
-
 import './_100554_pluginTaskPreviewAgent';
 import './_100554_pluginTaskPreviewClarification';
 import './_100554_pluginTaskPreviewFlexible';
- 
+
 @customElement('plugin-task-preview-100554')
 export class AgentTester extends CollabLitElement {
 
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property() modeTest: boolean = false;
+
     @state() private stepMap = new Map<number, any>();
     @state() private navigationStack: number[] = [];
     @state() private currentStepId: number | null = null;
-    @state() private allsteps:mls.msg.AIPayload[]  = [];
+    @state() private allSteps: mls.msg.AIPayload[] = [];
 
     connectedCallback() {
         super.connectedCallback();
-
         if (this.modeTest) {
             setTimeout(() => {
-                this.task = taskExample as any;
+                this.task = taskExample as unknown as mls.msg.TaskData;
                 this.init();
             }, 500)
         }
-
     }
 
     firstUpdated() {
@@ -37,140 +34,105 @@ export class AgentTester extends CollabLitElement {
     }
 
     render() {
-
         if (!this.task) {
             return html`<p>Task not provided.</p>`;
         }
-
-        return html`
-            ${this.renderStep()}
-        `; 
-    } 
+        return html`${this.renderStep()}`;
+    }
 
     renderStep() {
-
         if (!this.task) {
             return html`<p>Task not provided.</p>`;
         }
-
         if (!this.currentStepId) {
             return html`<p>No steps selected.</p>`;
         }
-
         const step = this.stepMap.get(this.currentStepId);
         if (!step) {
             return html`<p>Step not found: ${this.currentStepId}</p>`;
         }
-
         return html`
             ${this.renderNavigation(step.stepId)}
             <div class="container">
-                ${this.renderStepDetails(step)}
-
+            ${this.renderStepDetails(step)}
             </div>
             ${this.renderBreadcrumb()}
-        
         `;
-
-
     }
 
     renderNavigation(stepId: number) {
-
         const goToPrevious = () => {
             this.goBack()
         };
-
         const goToNext = () => {
-
             this.navigateToStep(stepId + 1)
-
         };
-
         const step = this.stepMap.get(stepId);
-        const all = this.allsteps.length.toString().padStart(2, '0');
+        const all = this.allSteps.length.toString().padStart(2, '0');
         let name = `00/${all}`;
         if (step) name = `${stepId.toString().padStart(2, '0')}/${all}`;
-
         return html`
-        <div class="tabAction">
-            <button @click=${goToPrevious} ><svg style="width:13px; fill:#fff; transform: rotateY(180deg);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg></button></button>
-            <span>${name}</span>
-            <button @click=${goToNext} ><svg style="width:13px; fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg></button>
-        </div>
-    `;
+            <div class="tabAction">
+                <button @click=${goToPrevious} ><svg style="width:13px; fill:#fff; transform: rotateY(180deg);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg></button>
+                <span>${name}</span>
+                <button @click=${goToNext} ><svg style="width:13px; fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg></button>
+            </div>
+        `;
     }
 
     renderStepDetails(step: mls.msg.AIPayload) {
-
         switch (step.type) {
             case 'agent': return this.renderAgent(step);
             case 'clarification': return this.renderClarification(step);
             case 'flexible': return this.renderFlexible(step);
-            default: return this.renderAgent(step as any);
+            default: return html`Not found type: renderStepDetails`;
         }
-
     }
 
     renderBreadcrumb() {
         return html`
-      <nav class="breadcrumb">
-        ${this.navigationStack.map(
+            <nav class="breadcrumb">
+                ${this.navigationStack.map(
             (stepId, idx) => {
-
                 const step = this.stepMap.get(stepId);
                 if (!step) {
                     return html`<p>Step not found: ${this.currentStepId}</p>`;
                 }
-                return html`
-                    <span
-                    @click=${() => {
+                return html` <span
+                            @click=${() => {
                         this.navigationStack = this.navigationStack.slice(0, idx + 1);
                         this.currentStepId = stepId;
-                    }}
-                    >${step.agentName ? step.agentName : step.type}</span
-                    >
-                `
+                    }} >${step.agentName ? step.agentName : step.type}</span>
+                            `
             })}
-      </nav>
-    `;
+            </nav>
+        `;
     }
 
     renderAgent(step: mls.msg.AIAgentStep) {
-        return html`
-        <plugin-task-preview-agent-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-agent-100554>
-        
-        `;
+        return html` <plugin-task-preview-agent-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-agent-100554> `;
     }
 
     renderClarification(step: mls.msg.AIClarificationStep) {
-        return html`
-        <plugin-task-preview-clarification-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-clarification-100554>
-        
-        `;
+        return html` <plugin-task-preview-clarification-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-clarification-100554> `;
     }
 
     renderFlexible(step: mls.msg.AIFlexibleResultStep) {
-        return html`
-        <plugin-task-preview-flexible-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-flexible-100554>
-        
-        `;
+        return html` <plugin-task-preview-flexible-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-flexible-100554> `;
     }
 
     //------IMPLEMENTATION--------
 
     private init() {
-
         if (!this.task || !this.task.iaCompressed) return;
-
         this.stepMap.clear();
         this.buildStepMap(this.task.iaCompressed.nextSteps);
         this.currentStepId = 1;
         this.navigationStack = [1];
-        this.allsteps = getAllSteps(this.task.iaCompressed.nextSteps);
+        this.allSteps = getAllSteps(this.task.iaCompressed.nextSteps);
     }
 
-    private buildStepMap(steps: any[]) {
+    private buildStepMap(steps: mls.msg.AIPayload[]) {
         for (const step of steps) {
             this.stepMap.set(step.stepId, step);
             if (step.interaction?.payload) {
@@ -182,7 +144,6 @@ export class AgentTester extends CollabLitElement {
         }
     }
 
-
     private navigateToStep(stepId: number) {
         if (!this.stepMap.has(stepId)) {
             return;
@@ -191,7 +152,6 @@ export class AgentTester extends CollabLitElement {
         this.navigationStack = [...this.navigationStack, stepId];
     }
 
-
     private goBack() {
         if (this.navigationStack.length > 1) {
             this.navigationStack.pop();
@@ -199,16 +159,7 @@ export class AgentTester extends CollabLitElement {
         }
     }
 
-
 }
-
-
-
-
-
-
-
-
 
 const taskExample = {
     "last_update_log": "Task started by Santiago at 2025-05-29T13:25:49.461Z",
@@ -264,7 +215,7 @@ const taskExample = {
                                 "input": [
                                     {
                                         "type": "system",
-                                        "content": "Você é um planejador responsável por definir os detalhes de criação de um novo web-componente (widget) que será incluído em uma página HTML.\nTarefas\n1. Entenda o propósito do widget passando pelo prompt original do usuário.\n2. Escolha o widgetName, evitando colisões com a lista “Widgets existentes”, o widgetName deve iniciar com o prefixo \"widget\".\n3. Escolha o parentClass base mais adequado na lista “Categorias de widgets”.\n4. Cruze os atributos do grupo escolhido com as necessidades do widget:\n• Liste apenas os atributos relevantes que já existirem no grupo.\n• Para cada necessidade sem atributo correspondente, gere um novo atributo\ne adicione “(essencial)” na descrição.\n5. Defina restrições e requisitos técnicos/funcionais.\n6. Se o prompt original não tratar da criação de web-componente, retorne um erro pedindo ao usuário refazer o pedido.\n7. Caso contrário, devolva um bloco **clarification** com o json base abaixo, usando textos na linguagem do usuário.\n## Formato de saida\nVocê deve retornar um array de objetos no formato JSON. Cada objeto representa uma subtarefa, com **apenas um dos seguintes formatos**:\n``` json\n[\n{\n\"type\": \"clarification\",\n\"clarificationMessage\": string,\n\"json\": TClarification\n},\n{\n\"type\": \"result\",\n\"result\": string\n}\n]\n```\ndefinição de TClarification\n```json\n[\n{\n\"sectionName\": \"resume\",\n\"description\": \"[Breve descrição do widget]\"\n},\n{\n\"sectionName\": \"parentClass\",\n\"description\": \"Component for selecting date ranges, useful for period filters.\"\n\"widgetName\": \"IcaFormsInputDateRangeBase\"\n},\n{\n\"sectionName\": \"widgetName\",\n\"description\": \"Nome do Widget\",\n\"widgetName\": \"[WidgetName ex: wcDatePickerRangeCustom]\"\n\"tagName\": \"[WidgetTagName ex: wc-date-picker-range-custom]\"\n},\n{\n\"sectionName\": \"properties\",\n\"description\": \"Propriedades do widget\",\n\"properties\": [\n{ \"propertyName\": \"[propertyName]\", \"description\": \"[description]\", \"isEssencial\": \"true|false\" }\n]\n},\n{\n\"sectionName\": \"requirements\",\n\"description\": \"requisitos para este widget, altere se necessário\",\n\"functionalRequirements\": [\n\"[example 1 - Must support keyboard navigation]\",\n\"[example 2 - Return ISO-8601 date strings]\"\n],\n\"visualRequirements\": [\n\"[example 1 - Must render two consecutive months side by side]\",\n\"[example 2 - Must clearly differentiate between selected, hovered, and disabled dates]\"\n],\n}\n]\n```\n"
+                                        "content": "Você é um planejador responsável por definir os detalhes de criação de um novo web-componente (widget) que será incluído em uma página HTML.\nTarefas\n1. Entenda o propósito do widget passando pelo prompt original do usuário.\n2. Escolha o widgetName, evitando colisões com a lista “Widgets existentes”, o widgetName deve iniciar com o prefixo \"widget\".\n3. Escolha o parentClass base mais adequado na lista “Categorias de widgets”.\n4. Cruze os atributos do grupo escolhido com as necessidades do widget:\n• Liste apenas os atributos relevantes que já existirem no grupo.\n• Para cada necessidade sem atributo correspondente, gere um novo atributo\ne adicione “(essencial)” na descrição.\n5. Defina restrições e requisitos técnicos/funcionais.\n6. Se o prompt original não tratar da criação de web-componente, retorne um erro pedindo ao usuário refazer o pedido.\n7. Caso contrário, devolva um bloco **clarification** com o json base abaixo, usando textos na linguagem do usuário.\n## Formato de saida\nVocê deve retornar um array de objetos no formato JSON. Cada objeto representa uma subtarefa, com **apenas um dos seguintes formatos**:\n``` json\n[\n{\n\"type\": \"clarification\",\n\"clarificationMessage\": string,\n\"json\": TClarification\n},\n{\n\"type\": \"result\",\n\"result\": string\n}\n]\n```\ndefinição de TClarification\n```json\n[\n{\n\"sectionName\": \"resume\",\n\"description\": \"[Breve descrição do widget]\"\n},\n{\n\"sectionName\": \"parentClass\",\n\"description\": \"Component for selecting date ranges, useful for period filters.\"\n\"widgetName\": \"IcaFormsInputDateRangeBase\"\n},\n{\n\"sectionName\": \"widgetName\",\n\"description\": \"Nome do Widget\",\n\"widgetName\": \"[WidgetName ex: wcDatePickerRangeCustom]\"\n\"tagName\": \"[WidgetTagName ex: wc-date-picker-range-custom]\"\n},\n{\n\"sectionName\": \"properties\",\n\"description\": \"Propriedades do widget\",\n\"properties\": [\n{ \"propertyName\": \"[propertyName]\", \"description\": \"[description]\", \"isEssencial\": \"true|false\" }\n]\n},\n{\n\"sectionName\": \"requirements\",\n\"description\": \"requisitos para este widget, altere se necessário\",\n\"functionalRequirements\": [\n\"[example 1 - Must support keyboard navigation]\",\n\"[example 2 - Return ISO-8601 date strings]\"\n],\n\"visualRequirements\": [\n\"[example 1 - Must render two consecutive months side by side]\",\n\"[example 2 - Must clearly differentiate between selected, hovered, and disabled dates]\"\n],\n}\n]\n```"
                                     },
                                     {
                                         "type": "system",
@@ -364,7 +315,6 @@ const taskExample = {
                                                             "type": "system",
                                                             "content": "## Content Memory\ndataAtual: 2025-05-29\nuserName: Santiago\n"
                                                         },
-
                                                     ],
                                                     "cost": 0.0288,
                                                     "trace": [
@@ -376,24 +326,24 @@ const taskExample = {
                                                             "type": "flexible",
                                                             "result": {
                                                                 "shortName": "widgetTimeZoneGreeting",
-                                                                "ts": "/// <mls shortName=\"widgetTimeZoneGreeting\" project=\"100554\" enhancement=\"_100554_enhancementLit\" groupName=\"other\" />\n\nimport { html, ifDefined } from 'lit';\nimport { customElement } from 'lit/decorators.js';\nimport { IcaFormsInputStringBase } from './_100554_icaFormsInputStringBase';\nimport { propertyCompositeDataSource, propertyDataSource } from './_100554_collabDecorators';\n/**\n * Widget que exibe a hora atual em múltiplos fusos horários e uma saudação local ao clicar em um botão.\n * Exibe EUA, Portugal, China, Japão e Rússia.\n */\n@customElement('widget-time-zone-greeting-100554')\nexport class WidgetTimeZoneGreeting extends IcaFormsInputStringBase {\n  /**\n   * Nome do campo para binding.\n   * @example name=\"greetingTime\"\n   */\n  @propertyCompositeDataSource({ type: String }) name: string | undefined;\n  /**\n   * Dica de campo.\n   * @example hint=\"Veja as horas pelo mundo\"\n   */\n  @propertyCompositeDataSource({ type: String }) hint: string | undefined;\n  /**\n   * Valor do campo (não utilizado neste widget).\n   */\n  @propertyDataSource({ type: String }) value: string | undefined;\n  /**\n   * Rótulo do campo.\n   * @example label=\"Horas pelo mundo\"\n   */\n  @propertyCompositeDataSource({ type: String }) label: string | undefined;\n  /**\n   * Campo obrigatório?\n   */\n  @propertyDataSource({ type: Boolean }) required: boolean = false;\n  /**\n   * Campo desabilitado?\n   */\n  @propertyDataSource({ type: Boolean }) disabled: boolean = false;\n  /**\n   * Tamanho máximo do texto.\n   */\n  @propertyDataSource({ type: Number }) maxlength: number | undefined;\n  /**\n   * Tamanho mínimo do texto.\n   */\n  @propertyDataSource({ type: Number }) minlength: number | undefined;\n  /**\n   * Placeholder do campo.\n   */\n  @propertyCompositeDataSource({ type: String }) placeholder: string | undefined;\n  /**\n   * Regex de validação.\n   */\n  @propertyCompositeDataSource({ type: String }) pattern: string | undefined;\n  /**\n   * Mensagem de erro customizada.\n   */\n  @propertyCompositeDataSource({ type: String }) errormessage: string | undefined;\n  /**\n   * Autofoco?\n   */\n  @propertyDataSource({ type: Boolean }) autofocus: boolean = false;\n  /**\n   * Autocapitalize.\n   */\n  @propertyDataSource({ type: String }) autocapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = 'off';\n  /**\n   * Autocorrect.\n   */\n  @propertyDataSource({ type: String }) autocorrect: 'off' | 'on' | undefined = 'off';\n  /**\n   * Autocomplete.\n   */\n  @propertyDataSource({ type: String }) autocomplete: string | undefined;\n  /**\n   * Mensagem de validação customizada.\n   */\n  @propertyDataSource({ type: String }) validationmessage: string | undefined;\n  /**\n   * Debounce.\n   */\n  @propertyDataSource({ type: String }) debounce: string | undefined;\n  /**\n   * Somente leitura?\n   */\n  @propertyDataSource({ type: Boolean }) readonly: boolean = false;\n  /**\n   * Texto exibido no botão para ativar a exibição das horas e saudações.\n   * @example buttonLabel=\"Ver horários pelo mundo\"\n   */\n  @propertyCompositeDataSource({ type: String }) buttonLabel: string = 'Ver horários pelo mundo';\n  /**\n   * Lista dos fusos horários a serem exibidos.\n   * @example timeZones=\"America/New_York,Europe/Lisbon,Asia/Shanghai,Asia/Tokyo,Europe/Moscow\"\n   */\n  @propertyCompositeDataSource({ type: String }) timeZones: string = 'America/New_York,Europe/Lisbon,Asia/Shanghai,Asia/Tokyo,Europe/Moscow';\n  /**\n   * Saudações correspondentes a cada país/fuso horário, no idioma local.\n   * @example greetings=\"Hello,Olá,你好,こんにちは,Здравствуйте\"\n   */\n  @propertyCompositeDataSource({ type: String }) greetings: string = 'Hello,Olá,你好,こんにちは,Здравствуйте';\n  /**\n   * Flag para controlar a exibição das horas e saudações após o clique no botão.\n   * @example showTimes=\"false\"\n   */\n  @propertyDataSource({ type: Boolean }) showTimes: boolean = false;\n  /**\n   * Hora local do usuário para cálculo dos horários nos fusos selecionados.\n   * @example userLocalTime=\"2025-05-29T12:00:00\"\n   */\n  @propertyCompositeDataSource({ type: String }) userLocalTime: string | undefined;\n  private handleShowTimes = () => {\n    this.showTimes = true;\n    this.requestUpdate();\n  };\n  private getTimeZoneData() {\n    const zones = (this.timeZones || '').split(',').map(z => z.trim());\n    const greets = (this.greetings || '').split(',');\n    const now = this.userLocalTime ? new Date(this.userLocalTime) : new Date();\n    return zones.map((zone, idx) => {\n      let timeString = '';\n      try {\n        timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: zone });\n      } catch {\n        timeString = '--:--';\n      }\n      return {\n        zone,\n        greeting: greets[idx] || '',\n        time: timeString\n      };\n    });\n  }\n  render() {\n    return html`\n      <div class=\"cc-tzg-container\">\n        <label class=\"cc-tzg-label\">${this.label || 'Horas pelo mundo'}</label>\n        <button\n          class=\"cc-tzg-btn\"\n          @click=${this.handleShowTimes}\n          ?disabled=${this.disabled}\n          aria-label=${this.buttonLabel}\n        >${this.buttonLabel}</button>\n        ${this.showTimes ? html`\n          <ul class=\"cc-tzg-list\">\n            ${this.getTimeZoneData().map(item => html`\n              <li class=\"cc-tzg-item\">\n                <span class=\"cc-tzg-country\">${item.zone}</span>\n                <span class=\"cc-tzg-time\">${item.time}</span>\n                <span class=\"cc-tzg-greet\">${item.greeting}</span>\n              </li>\n            `)}\n          </ul>\n        ` : ''}\n        ${this.hint ? html`<div class=\"cc-tzg-hint\">${this.hint}</div>` : ''}\n        ${this.errormessage ? html`<div class=\"cc-tzg-error\">${this.errormessage}</div>` : ''}\n      </div>\n    `;\n  }\n}\n",
+                                                                "ts": "/// <mls shortName=\"widgetTimeZoneGreeting\" project=\"100554\" enhancement=\"_100554_enhancementLit\" groupName=\"other\" />\n\nimport { html, ifDefined } from 'lit';\nimport { customElement } from 'lit/decorators.js';\nimport { IcaFormsInputStringBase } from './_100554_icaFormsInputStringBase';\nimport { propertyCompositeDataSource, propertyDataSource } from './_100554_collabDecorators';\n/**\n * Widget que exibe a hora atual em múltiplos fusos horários e uma saudação local ao clicar em um botão.\n * Exibe EUA, Portugal, China, Japão e Rússia.\n */\n@customElement('widget-time-zone-greeting-100554')\nexport class WidgetTimeZoneGreeting extends IcaFormsInputStringBase {\n /**\n * Nome do campo para binding.\n * @example name=\"greetingTime\"\n */\n @propertyCompositeDataSource({ type: String }) name: string | undefined;\n /**\n * Dica de campo.\n * @example hint=\"Veja as horas pelo mundo\"\n */\n @propertyCompositeDataSource({ type: String }) hint: string | undefined;\n /**\n * Valor do campo (não utilizado neste widget).\n */\n @propertyDataSource({ type: String }) value: string | undefined;\n /**\n * Rótulo do campo.\n * @example label=\"Horas pelo mundo\"\n */\n @propertyCompositeDataSource({ type: String }) label: string | undefined;\n /**\n * Campo obrigatório?\n */\n @propertyDataSource({ type: Boolean }) required: boolean = false;\n /**\n * Campo desabilitado?\n */\n @propertyDataSource({ type: Boolean }) disabled: boolean = false;\n /**\n * Tamanho máximo do texto.\n */\n @propertyDataSource({ type: Number }) maxlength: number | undefined;\n /**\n * Tamanho mínimo do texto.\n */\n @propertyDataSource({ type: Number }) minlength: number | undefined;\n /**\n * Placeholder do campo.\n */\n @propertyCompositeDataSource({ type: String }) placeholder: string | undefined;\n /**\n * Regex de validação.\n */\n @propertyCompositeDataSource({ type: String }) pattern: string | undefined;\n /**\n * Mensagem de erro customizada.\n */\n @propertyCompositeDataSource({ type: String }) errormessage: string | undefined;\n /**\n * Autofoco?\n */\n @propertyDataSource({ type: Boolean }) autofocus: boolean = false;\n /**\n * Autocapitalize.\n */\n @propertyDataSource({ type: String }) autocapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = 'off';\n /**\n * Autocorrect.\n */\n @propertyDataSource({ type: String }) autocorrect: 'off' | 'on' | undefined = 'off';\n /**\n * Autocomplete.\n */\n @propertyDataSource({ type: String }) autocomplete: string | undefined;\n /**\n * Mensagem de validação customizada.\n */\n @propertyDataSource({ type: String }) validationmessage: string | undefined;\n /**\n * Debounce.\n */\n @propertyDataSource({ type: String }) debounce: string | undefined;\n /**\n * Somente leitura?\n */\n @propertyDataSource({ type: Boolean }) readonly: boolean = false;\n /**\n * Texto exibido no botão para ativar a exibição das horas e saudações.\n * @example buttonLabel=\"Ver horários pelo mundo\"\n */\n @propertyCompositeDataSource({ type: String }) buttonLabel: string = 'Ver horários pelo mundo';\n /**\n * Lista dos fusos horários a serem exibidos.\n * @example timeZones=\"America/New_York,Europe/Lisbon,Asia/Shanghai,Asia/Tokyo,Europe/Moscow\"\n */\n @propertyCompositeDataSource({ type: String }) timeZones: string = 'America/New_York,Europe/Lisbon,Asia/Shanghai,Asia/Tokyo,Europe/Moscow';\n /**\n * Saudações correspondentes a cada país/fuso horário, no idioma local.\n * @example greetings=\"Hello,Olá,你好,こんにちは,Здравствуйте\"\n */\n @propertyCompositeDataSource({ type: String }) greetings: string = 'Hello,Olá,你好,こんにちは,Здравствуйте';\n /**\n * Flag para controlar a exibição das horas e saudações após o clique no botão.\n * @example showTimes=\"false\"\n */\n @propertyDataSource({ type: Boolean }) showTimes: boolean = false;\n /**\n * Hora local do usuário para cálculo dos horários nos fusos selecionados.\n * @example userLocalTime=\"2025-05-29T12:00:00\"\n */\n @propertyCompositeDataSource({ type: String }) userLocalTime: string | undefined;\n private handleShowTimes = () => {\n this.showTimes = true;\n this.requestUpdate();\n };\n private getTimeZoneData() {\n const zones = (this.timeZones || '').split(',').map(z => z.trim());\n const greets = (this.greetings || '').split(',');\n const now = this.userLocalTime ? new Date(this.userLocalTime) : new Date();\n return zones.map((zone, idx) => {\n let timeString = '';\n try {\n timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: zone });\n } catch {\n timeString = '--:--';\n }\n return {\n zone,\n greeting: greets[idx] || '',\n time: timeString\n };\n });\n }\n render() {\n return html`\n <div class=\"cc-tzg-container\">\n <label class=\"cc-tzg-label\">${this.label || 'Horas pelo mundo'}</label>\n <button\n class=\"cc-tzg-btn\"\n @click=${this.handleShowTimes}\n ?disabled=${this.disabled}\n aria-label=${this.buttonLabel}\n >${this.buttonLabel}</button>\n ${this.showTimes ? html`\n <ul class=\"cc-tzg-list\">\n ${this.getTimeZoneData().map(item => html`\n <li class=\"cc-tzg-item\">\n <span class=\"cc-tzg-country\">${item.zone}</span>\n <span class=\"cc-tzg-time\">${item.time}</span>\n <span class=\"cc-tzg-greet\">${item.greeting}</span>\n </li>\n `)}\n </ul>\n ` : ''}\n ${this.hint ? html`<div class=\"cc-tzg-hint\">${this.hint}</div>` : ''}\n ${this.errormessage ? html`<div class=\"cc-tzg-error\">${this.errormessage}</div>` : ''}\n </div>\n `;\n }\n}\n",
                                                                 "less": "widget-time-zone-greeting-100554 {\n.cc-tzg-container {\nbackground: @bg-primary-color;\npadding: @space-24;\nborder-radius: @space-8;\nbox-shadow: 0 2px 8px @grey-color-light;\n}\n.cc-tzg-label {\ndisplay: block;\nfont-family: @font-family-primary;\nfont-size: @font-size-20;\nfont-weight: @font-weight-bold;\ncolor: @text-primary-color;\nmargin-bottom: @space-16;\n}\n.cc-tzg-btn {\nbackground: @text-secondary-color;\ncolor: @bg-primary-color;\nborder: none;\nborder-radius: @space-8;\npadding: @space-8 @space-24;\nfont-size: @font-size-16;\ncursor: pointer;\ntransition: background @transition-normal;\nfont-family: @font-family-primary;\nfont-weight: @font-weight-bold;\nmargin-bottom: @space-24;\n&:hover {\nbackground: @text-secondary-color-hover;\n}\n&:focus {\nbackground: @text-secondary-color-focus;\noutline: 2px solid @text-secondary-color-darker;\n}\n&:disabled {\nbackground: @text-secondary-color-disabled;\ncursor: not-allowed;\n}\n}\n.cc-tzg-list {\nlist-style: none;\npadding: 0;\nmargin: 0;\n}\n.cc-tzg-item {\ndisplay: flex;\nalign-items: center;\nmargin-bottom: @space-16;\nfont-size: @font-size-16;\nfont-family: @font-family-primary;\ncolor: @text-primary-color-lighter;\n}\n.cc-tzg-country {\nmin-width: 140px;\nfont-weight: @font-weight-bold;\ncolor: @text-primary-color-darker;\n}\n.cc-tzg-time {\nmin-width: 70px;\nmargin-left: @space-16;\ncolor: @text-primary-color;\n}\n.cc-tzg-greet {\nmargin-left: @space-16;\ncolor: @text-secondary-color-darker;\nfont-weight: @font-weight-bold;\n}\n.cc-tzg-hint {\nmargin-top: @space-16;\ncolor: @text-primary-color-lighter;\nfont-size: @font-size-12;\n}\n.cc-tzg-error {\nmargin-top: @space-16;\ncolor: @error-color;\nfont-size: @font-size-12;\n}\n}\n",
-                                                                "html": "<div style=\"max-width:420px;margin:40px auto;background:#fff;padding:32px;border-radius:8px;box-shadow:0 2px 8px #F2F2F2;\">\n  <widget-time-zone-greeting-100554\n    label=\"Horas pelo mundo\"\n    buttonLabel=\"Ver horários pelo mundo\"\n    timeZones=\"America/New_York,Europe/Lisbon,Asia/Shanghai,Asia/Tokyo,Europe/Moscow\"\n    greetings=\"Hello,Olá,你好,こんにちは,Здравствуйте\"\n    hint=\"Clique para ver as horas e saudações nos principais países.\"\n    userLocalTime=\"2025-05-29T12:00:00\"\n    style=\"width:100%;\"\n  ></widget-time-zone-greeting-100554>\n</div>\n"
+                                                                "html": "<div style=\"max-width:420px;margin:40px auto;background:#fff;padding:32px;border-radius:8px;box-shadow:0 2px 8px #F2F2F2;\">\n <widget-time-zone-greeting-100554\n label=\"Horas pelo mundo\"\n buttonLabel=\"Ver horários pelo mundo\"\n timeZones=\"America/New_York,Europe/Lisbon,Asia/Shanghai,Asia/Tokyo,Europe/Moscow\"\n greetings=\"Hello,Olá,你好,こんにちは,Здравствуйте\"\n hint=\"Clique para ver as horas e saudações nos principais países.\"\n userLocalTime=\"2025-05-29T12:00:00\"\n style=\"width:100%;\"\n ></widget-time-zone-greeting-100554>\n</div>\n"
                                                             },
                                                             "status": "completed",
                                                             "stepId": 5,
                                                             "interaction": null,
                                                             "nextSteps": [
                                                                 {
-    "type": "agent",
-    "stepId": 6,
-    "status": "failed",
-    "agentName": "agentNewModule3",
-    "prompt": "{\"prompt\":\"Criar site para petshop\\n\"}",
-    "rags": null,
-    "interaction": null,
-    "nextSteps": null
-}
+                                                                    "type": "agent",
+                                                                    "stepId": 6,
+                                                                    "status": "failed",
+                                                                    "agentName": "agentNewModule3",
+                                                                    "prompt": "{\"prompt\":\"Criar site para petshop\n\"}",
+                                                                    "rags": null,
+                                                                    "interaction": null,
+                                                                    "nextSteps": null
+                                                                }
                                                             ]
                                                         }
                                                     ]
@@ -409,7 +359,7 @@ const taskExample = {
                     ]
                 }
             }
-        ]
-    },
-    "title": "Widget created"
-}
+        ],
+        "title": "Widget created"
+    }
+};
