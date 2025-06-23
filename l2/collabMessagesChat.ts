@@ -91,7 +91,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.restoreScrollPosition();
         }
 
-
         if (changedProperties.has('actualMessagesParsed') && this.actualMessagesParsed !== undefined) {
             if (this.messageContainer && this.isSystemChangeScroll) {
                 this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
