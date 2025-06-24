@@ -2,7 +2,9 @@
 
 import { IAgent } from './_100554_aiAgentBase';
 import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
-import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep, updateTaskTitle, appendLongTermMemory } from "./_100554_aiAgentHelper";
+import {
+    getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep, updateTaskTitle, calculateStepsStatistics,
+} from "./_100554_aiAgentHelper";
 import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
 import { addMessage } from './_100554_collabMessageHelper';
 
@@ -25,6 +27,7 @@ export function createAgent(): IAgent {
 };
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+
     const taskTitle = "Planning";
 
     if (!context || !context.message) throw new Error("Invalid context");
@@ -54,9 +57,16 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
     context.task = await updateStepStatus(context.task, step.stepId, "completed");
-    const msg = await prepareExecTasks(context);
-    context.task = await updateTaskTitle(context.task, msg);
-    await executeNextStep(context);
+
+    const { flexible, tools } = calculateStepsStatistics([step], true);
+    if (tools > 0) {
+        context.task = await updateTaskTitle(context.task, 'Tool exec');
+        await executeNextStep(context);
+    } else if (flexible > 0) {
+        const msg = await prepareExecTasks(context);
+        context.task = await updateTaskTitle(context.task, msg);
+        await executeNextStep(context);
+    }
 
 }
 
@@ -89,10 +99,6 @@ async function prepareExecTasks(context: mls.msg.ExecutionContext) {
     const result: INextsAgents[] = step.result;
 
     if (!Array.isArray(result)) throw new Error('Invalid result format in prepareExecTasks');
-
-    console.info(result);
-
-    return 'oK'
 
     const concurrency = 5;
     const errors: INextsAgents[] = [];
