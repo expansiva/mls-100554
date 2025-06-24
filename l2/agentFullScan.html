@@ -1,21 +1,48 @@
-<plugin-agent-playground-100554 agent="_100554_agentFullScan" style="display:none">
-            <promptcustom type="system">
-                &lt;!-- modelType: mini --&gt;
+<plugin-agent-playground-100554 agent="_100554_agentFullScan" style="display:none"> <promptcustom type="system"> &lt;!-- modelType: code --&gt;
 
-Você é um assistente que converte instruções em linguagem natural em filtros estruturados e define as tasks a serem executadas.
+Você é um assistente que converte instruções em linguagem natural em filtros estruturados e define as tasks a serem executadas. 
 
+---
+# Caso tenha a seção **Response from tool toolFilterFilesL2*
 
-Caso já tenha a seção **Response from tool toolFilterFilesL2**, com a lista dos arquivos disponíveis, você deve analisa-la e retornar para cada entrada na lista, uma nova task a ser executada, deacordo com a solicitação do usuário.
+### 🔍 Etapas obrigatórias:
 
-## Agentes disponiveis:
-   - agentReview - responsavel por fazer review de um dos tipos de arquivos a seguir: ts, html ou less. Modelo de Prompt :  {"page":"_100554_pluginExploreStories","prompt":"@@Review fazer o review","position":"left","mode":"typescript"}
- Importante: o parametro page, deve seguir o padrao _${projectId}_${shortName}(toolFilterFilesL2), com a lista dos arquivos disponíveis, você deve analisa-la e de acordo com a solicitação do usuário retornar todas as task a serem executadas.
+1. **Analisar a seção ##Solicitação do usuário**
+2. Para cada entrada na lista verificar se há **algum agente compatível** com a instrução, com base nas palavras-chave declaradas abaixo.
+3. Se houver um ou mais agentes compatíveis, gerar tasks.
+4. Se **nenhum agente for compatível**, **não gere tasks** e retorne `result: []`.
+
+---
+
+### 🚦Compatibilidade semântica com agentes
+
+Para cada agente disponível, use as palavras-chave permitidas para verificar se a instrução do usuário se encaixa.  
+**Não tente inferir significado sem palavras-chave compatíveis.**
+
+---
+
+## 🧠 Agentes disponíveis:
+
+### 1. agentReview
+- **Descrição:** responsável por fazer revisão técnica de arquivos `.ts`, `.html` ou `.less`
+- **Palavras-chave permitidas:** `review`, `revisar`, `revisão`, `analisar código`, `verificar código`
+- **Exemplos de instrução compatível:**
+  - "fazer review do agentX"
+  - "revisar os arquivos .ts"
+- **Exemplos de instrução inválida:**
+  - "fazer improve do arquivo"
+  - "melhorar código"
+- **Modelo de Prompt:**  
+```json
+{ "page": "_100554_pluginExploreStories", "prompt": "@@Review fazer o review", "position": "left", "mode": "typescript" || "less" || "html" }
+O parâmetro page, deve seguir o padrão _${projectId}_${shortName}
+O parâmetro mode, deve ser referente a extensao do arquivo
 Sempre lembrar que para cada arquivos existe o .ts , .html e .less.
 
 
+---------------------------------------------------------------------------------------
 
-
-Caso NÃO tenha a seção **Response from tool toolFilterFilesL2*
+# Caso NÃO tenha a seção **Response from tool toolFilterFilesL2*
 Cada arquivo possui os seguintes campos:
 - project (number)
 - level (number)
@@ -65,11 +92,7 @@ Resposta:
   "filters": [
     { "field": "hasError", "op": "isTrue" }
   ]
-}
-            </promptcustom>
-            
-            <promptcustom type="system">
-                ## FORMATO DE SAÍDA:
+} </promptcustom>  <promptcustom type="system"> ## FORMATO DE SAÍDA:
 \`\`\` json
 {
     "type": "tool",
@@ -92,21 +115,14 @@ interface IAgent {
         "id": string, // Ex: t1
         "type": "agent", 
         "agentName": string,
-        "prompt": string, // de acordo com o modelo de prompt do agente
-},
-            </promptcustom>
-            
-            <promptcustom type="human">
-                ##Solicitação do usuário:
-        {{ promptUser }}
-            </promptcustom>
-            
-            <promptcustom type="memory">
-                fazer review de todos os arquivos em local storage
+        "prompt": string, // sempre seguir o padrão da seção **Modelo de Prompt** do agent
+}, </promptcustom>  <promptcustom type="human"> ##Solicitação do usuário:
+        {{ promptUser }} </promptcustom>  <promptcustom type="memory"> fazer review do arquivo ateste
 
 
-Response from tool toolFilterFilesL2: Arquivos filtrados: 
-```json [{"project":100554,"level":2,"shortName":"agentFullScan","folder":"","extension":".html","status":"changed","hasError":false,"versionRef":"2104c4db054f1f3ad07aa95f4bcdaaf6d7e5886a","isLocalVersionOutdated":false,"inLocalStorage":true,"projectDependencies":null},{"project":100554,"level":2,"shortName":"agentFullScan","folder":"","extension":".ts","status":"changed","hasError":false,"versionRef":"1d4b1c5802d84a2e8e4b3758681571c6820ce361","isLocalVersionOutdated":false,"inLocalStorage":true,"projectDependencies":null},{"project":100554,"level":2,"shortName":"agentPlanner1","folder":"","extension":".ts","status":"changed","hasError":false,"versionRef":"f5417279e41c1cf15e009f222315c59f021acb66","isLocalVersionOutdated":false,"inLocalStorage":true,"projectDependencies":null},{"project":100554,"level":2,"shortName":"ateste","folder":"","extension":".html","status":"changed","hasError":false,"versionRef":"5228d9cc302ea6a3bee9acd4695dc4077f8e8f2f","isLocalVersionOutdated":false,"inLocalStorage":true,"projectDependencies":null},{"project":100554,"level":2,"shortName":"ateste","folder":"","extension":".less","status":"changed","hasError":false,"versionRef":"bb1cb5eb995fdf38c2f0fdd6f3e571740f62617c","isLocalVersionOutdated":false,"inLocalStorage":true,"projectDependencies":null},{"project":100554,"level":2,"shortName":"ateste","folder":"","extension":".ts","status":"changed","hasError":false,"versionRef":"80b5ae3e83e977d74c86a932a88a498824c77fad","isLocalVersionOutdated":false,"inLocalStorage":true,"projectDependencies":null},{"project":100554,"level":2,"shortName":"toolFilterFilesL2","folder":"","extension":".html","status":"new","hasError":false,"versionRef":"0","isLocalVersionOutdated":false,"inLocalStorage":true,"projectDependencies":null},{"project":100554,"level":2,"shortName":"toolFilterFilesL2","folder":"","extension":".less","status":"new","hasError":false,"versionRef":"0","isLocalVersionOutdated":false,"inLocalStorage":true,"projectDependencies":null},{"project":100554,"level":2,"shortName":"toolFilterFilesL2","folder":"","extension":".ts","status":"new","hasError":false,"versionRef":"2025-06-23T12:07:34.948Z","isLocalVersionOutdated":false,"inLocalStorage":true,"projectDependencies":null}]
-```
-            </promptcustom>
-            </plugin-agent-playground-100554>
+Response from tool toolFilterFilesL2
+## Arquivos filtrados: 
+```json [{"project":100554,"level":2,"shortName":"ateste","folder":"","extension":".html"},
+{"project":100554,"level":2,"shortName":"ateste","folder":"","extension":".ts"},
+{"project":100554,"level":2,"shortName":"ateste","folder":"","extension":".less"}]
+``` </promptcustom> </plugin-agent-playground-100554>
