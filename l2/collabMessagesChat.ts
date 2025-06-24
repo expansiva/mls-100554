@@ -12,12 +12,11 @@ import './_100554_collabMessagesTask';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
 import './_100554_collabMessagesThreadDetails';
-
 import { IChatPreferences, AGENTDEFAULT, PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
 import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt';
 
-/// **collab_i18n_start** 
+/// **collab_i18n_start**
 const message_pt = {
     loading: 'Carregando...',
     btnAddParticipant: 'Adicionar participante',
@@ -25,7 +24,6 @@ const message_pt = {
     msgNotSend: 'Mensagem não enviada*',
     noThreads: 'Nenhuma sala disponível no momento.'
 }
-
 const message_en = {
     loading: 'Loading...',
     btnAddParticipant: 'Add Participant',
@@ -33,19 +31,16 @@ const message_en = {
     msgNotSend: 'Message not sent*',
     noThreads: 'No threads available at the moment.'
 }
-
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-/// **collab_i18n_end**
 
+/// **collab_i18n_end**
 @customElement('collab-messages-chat-100554')
 export class CollabMessagesChat100554 extends StateLitElement {
-
     private msg: MessageType = messages['en'];
-
     @query('collab-messages-prompt-100554') collabMessagesPrompt: CollabMessagesPrompt100554 | undefined;
     @query('#unread') private unreadEl!: HTMLDivElement | undefined;
     @query('.chat-container') private messageContainer!: HTMLDivElement | undefined;
@@ -61,7 +56,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @property() actualMessages: IMessage[] = [];
     @property() actualMessagesParsed: IMessageGrouped = {};
     @property() isLoadingMessages: boolean = false;
-
     @property({ attribute: false }) userThreads: IThread = {
         CONNECT: [{ "thread": { "history": [{ "action": "created", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "update_group", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_language ${language}", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120844.1000", "timestamp": "20250417172252" }, { "action": "add_user", "userId": "20250417004803.1000", "timestamp": "20250417174719" }], "languages": ["pt"], "status": "active", "visibility": "private", "group": "CONNECT", "threadId": "20250417135645.1000", "users": [{ "userId": "20250417120841.1000", "auth": "admin" }, { "userId": "20250417120844.1000", "auth": "write" }, { "userId": "20250417004803.1000", "auth": "write" }], "name": "" }, "users": [{ "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active" }, { "threads": ["20250417133813.1000", "20250417180232.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active" }, { "threads": ["20250417135645.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active" }] }]
     };
@@ -75,13 +69,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
-
         if (this.unreadEl && this.messageContainer) {
             await this.updateComplete;
             this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
             return;
         }
-
         if (changedProperties.has('activeScenerie')
             && (changedProperties.get('activeScenerie') === 'task'
                 || changedProperties.get('activeScenerie') === 'addParticipant'
@@ -90,7 +82,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
             && this.activeScenerie === 'details') {
             this.restoreScrollPosition();
         }
-
         if (changedProperties.has('actualMessagesParsed') && this.actualMessagesParsed !== undefined) {
             if (this.messageContainer && this.isSystemChangeScroll) {
                 this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
@@ -98,17 +89,14 @@ export class CollabMessagesChat100554 extends StateLitElement {
             }
         }
     }
-
     disconnectedCallback() {
         super.disconnectedCallback();
         window.removeEventListener('task-change', this.onTaskChange);
         window.removeEventListener('task-completed', this.onTaskCompleted);
         window.removeEventListener('task-details-close', this.onTaskDetailsClose);
         window.removeEventListener('thread-change', this.onThreadChange);
-        window.removeEventListener('message-send', this.onThreadChange);
-
+        window.removeEventListener('message-send', this.onMessageSend);
     }
-
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
@@ -117,50 +105,45 @@ export class CollabMessagesChat100554 extends StateLitElement {
         window.addEventListener('task-details-close', this.onTaskDetailsClose);
         window.addEventListener('thread-change', this.onThreadChange);
         window.addEventListener('message-send', this.onMessageSend);
-
     }
-
+    
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-
         if (this.activeScenerie === 'loading') {
             return html`<div class="loading">${this.msg.loading}</div>`;
         }
-
         return html`
-            ${this.renderHeader()}
-            ${this.renderContent()}
-        `;
+${this.renderHeader()}
+${this.renderContent()}
+`;
     }
-
     private renderHeader() {
         switch (this.activeScenerie) {
             case 'task':
                 return html`
-                <div class="header">
-                    <span @click=${this.onTitleClick}>${collab_chevron_left} Task: ${this.actualTask?.PK || ''}</span>
-                </div>`;
+<div class="header">
+<span @click=${this.onTitleClick}>${collab_chevron_left} Task: ${this.actualTask?.PK || ''}</span>
+</div>`;
             case 'details':
                 return html`
-                <div class="header">
-                    <span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.actualThread?.thread.name || this.actualThread?.thread.threadId}</span>
-                    <div class="header-actions">
-                        <span @click=${this.onThreadDetailsClick}>${collab_gear}</span>
-                    </div>
-                </div>`;
+<div class="header">
+<span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.actualThread?.thread.name || this.actualThread?.thread.threadId}</span>
+<div class="header-actions">
+<span @click=${this.onThreadDetailsClick}>${collab_gear}</span>
+</div>
+</div>`;
             case 'list':
                 return html`<div class="header">Threads</div>`;
             case 'threadDetails':
                 return html`
-                <div class="header">
-                    <span @click=${this.onTitleClick}>${collab_chevron_left} ${this.msg.threadDetails}</span>
-                </div>`;
+<div class="header">
+<span @click=${this.onTitleClick}>${collab_chevron_left} ${this.msg.threadDetails}</span>
+</div>`;
             default:
                 return null;
         }
     }
-
     private renderContent() {
         switch (this.activeScenerie) {
             case 'list':
@@ -175,171 +158,143 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 return null;
         }
     }
-
-
     private renderChatMessages() {
-
         this.userPreferenceChat = loadChatPreferences();
-
         const sortedEntries = Object.entries(this.actualMessagesParsed)
             .map(([date, value]) => [date.trim(), value])
             .sort(([a], [b]) => new Date(a as string).getTime() - new Date(b as string).getTime());
-
         const sortedObj: IMessageGrouped = Object.fromEntries(sortedEntries);
-
         return html`
-            <div @scroll=${this.onChatScroll} class="chat-container">    
-                ${Object.keys(sortedObj).map((key) => {
+<div @scroll=${this.onChatScroll} class="chat-container">
+${Object.keys(sortedObj).map((key) => {
             const threadMessages = sortedObj[key];
             const messageTime = this.parseLocalDate(key);
             return html`
-                    <div class="message-time">${messageTime.date}</div>
-                            ${threadMessages.map((message) => {
-
+<div class="message-time">${messageTime.date}</div>
+${threadMessages.map((message) => {
                 const dateFormated = formatTimestamp(message.createAt);
                 const userName = this.actualThread?.users.find((user) => user.userId === message.senderId)?.name || message.senderId;
                 const userAvatar = this.actualThread?.users.find((user) => user.userId === message.senderId)?.avatar_url || '';
                 const cls = message.senderId === this.userId ? 'user' : 'system';
                 const isSame = message.isSame;
-
                 return html`
-                    <div class="message ${cls} ${isSame ? 'same' : ''}">
-                        <div class="message-group">
-                            <div class="message-row">
-                                <div class="message-card ${cls} ${isSame ? 'same' : ''}">
-                                    ${!isSame ? html`<div class="message-title">@${userName}</div>` : ``}
-                                    ${this.renderMessageByLanguage(message)}
-                                    ${message.isLoading ? html`<span class="loader"></span>` : ''}
-                                    ${message.isFailed ? html`<div class="failed">
-                                        <span>${collab_circle_exclamation}</span>
-                                        <small>${this.msg.msgNotSend}</small>
-                                    </div>`
-
+<div class="message ${cls} ${isSame ? 'same' : ''}">
+<div class="message-group">
+<div class="message-row">
+<div class="message-card ${cls} ${isSame ? 'same' : ''}">
+${!isSame ? html`<div class="message-title">@${userName}</div>` : ``}
+${this.renderMessageByLanguage(message)}
+${message.isLoading ? html`<span class="loader"></span>` : ''}
+${message.isFailed ? html`<div class="failed">
+<span>${collab_circle_exclamation}</span>
+<small>${this.msg.msgNotSend}</small>
+</div>`
                         : ''}
-                                    <div class="message-footer">${dateFormated?.time}</div>
-                                    ${message.taskId
+<div class="message-footer">${dateFormated?.time}</div>
+${message.taskId
                         ? html`
-                                            <div class="message-ai">
-                                                <collab-messages-task-100554 
-                                                    messageId=${message.createAt}
-                                                    .context= ${message.context}
-                                                    lastChanged= ${message.lastChanged}
-                                                    taskId=${message.taskId}
-                                                    @taskclick=${() => this.onTaskClick(message?.taskId || '', message.threadId, message.createAt)}
-                                                    >
-                                                </collab-messages-task-100554>
-                                            </div>                                            `
+<div class="message-ai">
+<collab-messages-task-100554
+messageId=${message.createAt}
+.context= ${message.context}
+lastChanged= ${message.lastChanged}
+taskId=${message.taskId}
+@taskclick=${() => this.onTaskClick(message?.taskId || '', message.threadId, message.createAt)}
+>
+</collab-messages-task-100554>
+</div> `
                         : html``}
-                                </div> 
-                                ${cls === 'system' && !isSame ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''} 
-                            </div>    
-                        </div>
-                    </div>`
+</div>
+${cls === 'system' && !isSame ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''}
+</div>
+</div>
+</div>`
             })}`
         })}
-        ${this.isLoadingMessages ? html`<div class="unread-messages" id="unread">Loading messages...</div>` : html``}
-        </div> 
-
-        ${this.renderPrompt()}
-                `
+${this.isLoadingMessages ? html`<div class="unread-messages" id="unread">Loading messages...</div>` : html``}
+</div>
+${this.renderPrompt()}
+`
     }
-
     private renderMessageByLanguage(message: mls.msg.Message) {
-
         const mode = this.userPreferenceChat?.translationMode || 'icon';
-
         if (!this.userPreferenceChat || mode === 'none' || !message.translations) {
             return html`<div class="message-content">${message.content}</div>`
         }
-
         const { language } = this.userPreferenceChat;
         const messageByLanguagePref = message.translations ? message.translations[language] : '';
         const isSameLanguege = language === message.language_detected;
-
         switch (mode) {
             case 'icon':
                 return html`
-                <div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>`;
+<div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>`;
             case 'text':
                 return html`
-                <div class="message-content">${messageByLanguagePref || message.content}</div>
-                ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
+<div class="message-content">${messageByLanguagePref || message.content}</div>
+${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
             case 'iconText':
                 return html`
-                <div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>
-                ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
+<div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>
+${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
             case 'trace':
                 return html`
-                <div class="message-content trace">
-                    <div><b>[LanguageDetected: ${message.language_detected}]</b> ${message.content}</div>
-                    ${Object.keys(message.translations).map((key) => {
+<div class="message-content trace">
+<div><b>[LanguageDetected: ${message.language_detected}]</b> ${message.content}</div>
+${Object.keys(message.translations).map((key) => {
                     if (key === 'language_detected') return ''
                     if (key === message.language_detected) return ''
                     return html`<div><b>[${key}]</b> ${message.translations ? message.translations[key] : ''}</div>`
                 })}
-                </div>
-                
-                `
+</div>
+`
             default:
                 return null;
         }
-
     }
     // .allUsers=${this.actualThread?.users || []}
     private renderPrompt() {
-        return html`<collab-messages-prompt-100554  acceptAutoCompleteAgents="true" acceptAutoCompleteUser="true" threadId=${this.actualThread?.thread.threadId} .onSend=${this.handleSend.bind(this)} ></collab-messages-prompt-100554>`
+        return html`<collab-messages-prompt-100554 acceptAutoCompleteAgents="true" acceptAutoCompleteUser="true" threadId=${this.actualThread?.thread.threadId} .onSend=${this.handleSend.bind(this)} ></collab-messages-prompt-100554>`
     }
-
     private renderListThreads() {
-
         const unreadCount = 1;
-
         if (this.userThreads[this.group].length === 0 && !this.isLoadingThread) {
             return html`<div style="padding:1rem;">${this.msg.noThreads}</div>`;
         }
-
         return html` <ul class="thread-list">
-                ${this.userThreads[this.group].map((item) => {
+${this.userThreads[this.group].map((item) => {
             return html`
-                        <li @click=${() => this.onThreadClick(item)} class="thread-item">
-                            <div class="thread-content">
-                                <div class="thread-item-header">
-                                    <span class="thread-name">${item.thread.name || item.thread.threadId}</span>
-                                    <span class="last-update">${item.thread.lastMessageTime ? formatTimestamp(item.thread.lastMessageTime)?.date : formatTimestamp(item.thread.history[0].timestamp)?.date}</span>
-                                </div>
-                                <div class="thread-summary">
-                                    <span class="last-message">${item.thread.lastMessage || ''}</span>
-                                    ${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
-                                </div>
-                            </div>
-                        </li>
-                    `;
+<li @click=${() => this.onThreadClick(item)} class="thread-item">
+<div class="thread-content">
+<div class="thread-item-header">
+<span class="thread-name">${item.thread.name || item.thread.threadId}</span>
+<span class="last-update">${item.thread.lastMessageTime ? formatTimestamp(item.thread.lastMessageTime)?.date : formatTimestamp(item.thread.history[0].timestamp)?.date}</span>
+</div>
+<div class="thread-summary">
+<span class="last-message">${item.thread.lastMessage || ''}</span>
+${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
+</div>
+</div>
+</li>
+`;
         })}
-            </ul>
-            ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
-            `
+</ul>
+${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
+`
     }
-
     private renderTaskDetails() {
         return html`
-            <collab-messages-task-info-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK}></collab-messages-task-info-100554>`
+<collab-messages-task-info-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK}></collab-messages-task-info-100554>`
     }
-
     private renderThreadDetails() {
         return html`<collab-messages-thread-details-100554 userId=${this.userId} .threadDetails=${{ ...this.actualThread }}></collab-messages-thread-details-100554>`
     }
-
-
     private async onChatScroll(e: Event) {
-
         if (this.isSystemChangeScroll) {
             this.isSystemChangeScroll = false;
             return;
         }
-
         const container = e.target as HTMLElement;
         this.savedScrollTop = container.scrollTop;
-
         if (
             container.scrollTop === 0 &&
             !this.isLoadingMoreMessages &&
@@ -347,16 +302,13 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.hasMoreMessages
         ) {
             this.isLoadingMoreMessages = true;
-
             const previousHeight = container.scrollHeight;
-
             const newOffset = this.messagesOffset + this.messagesLimit;
             const newMessages = await getMessagesByThreadId(
                 this.actualThread.thread.threadId,
                 this.messagesLimit,
                 newOffset
             );
-
             if (newMessages.length > 0) {
                 this.messagesOffset = newOffset;
                 this.actualMessages = [...newMessages, ...this.actualMessages];
@@ -365,36 +317,26 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 const newHeight = container.scrollHeight;
                 container.scrollTop = newHeight - previousHeight;
             } else {
-
                 this.hasMoreMessages = false;
             }
-
             this.isLoadingMoreMessages = false;
         }
     }
-
     private async getMessages(thread: mls.msg.Thread, lastOrderAt: string = ''): Promise<mls.msg.Message[]> {
-
         if (!this.userId) {
             return [];
         }
-
         const response = await mls.api.msgGetNextMessages({
             lastOrderAt,
             threadId: thread.threadId,
             userId: this.userId
         });
-
         return response.data
     }
-
     private parseMessages(rawData: mls.msg.Message[]): IMessageGrouped {
         const groupedByDay: IMessageGrouped = {};
-
         rawData.forEach(msg => {
-
             const formatted = formatTimestamp(msg.createAt);
-
             //const dateKey = msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
             const dateKey = formatted?.date || msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
             if (!groupedByDay[dateKey]) {
@@ -402,68 +344,53 @@ export class CollabMessagesChat100554 extends StateLitElement {
             }
             groupedByDay[dateKey].push(msg);
         });
-
         for (const day in groupedByDay) {
             groupedByDay[day].sort((a, b) => a.orderAt.localeCompare(b.orderAt));
         }
-
         return this.groupMessages(groupedByDay);
     }
-
     private groupMessages(groupedByDay: IMessageGrouped): IMessageGrouped {
         const result: IMessageGrouped = {};
-
         Object.keys(groupedByDay).forEach((key) => {
             result[key] = groupedByDay[key].map((msg, index, arr) => {
                 const isSame = index > 0 && msg.senderId === arr[index - 1].senderId;
                 return { ...msg, isSame };
             });
         });
-
         return result;
     }
-
     private parseLocalDate(dateString: string) {
         const [year, month, day] = dateString.split('-').map(Number);
         const date = new Date(year, month - 1, day);
-
         return {
             dateObject: date,
-            datafull: date.toLocaleString(),      // Ex: "22/04/2025 00:00:00"
-            date: date.toLocaleDateString(),     // Ex: "22/04/2025"
+            datafull: date.toLocaleString(), // Ex: "22/04/2025 00:00:00"
+            date: date.toLocaleDateString(), // Ex: "22/04/2025"
             time: date.toTimeString().split(' ')[0] // Ex: "00:00:00"
         };
     }
-
     private mergeMessages(
         array1: mls.msg.Message[],
         array2: mls.msg.Message[]
     ): mls.msg.Message[] {
-
         const map = new Map<string, mls.msg.Message>();
         for (const item of array1) {
             map.set(`${item.threadId}/${item.createAt}`, item);
         }
-
         for (const item of array2) {
             map.set(`${item.threadId}/${item.createAt}`, { ...map.get(`${item.threadId}/${item.createAt}`), ...item });
         }
-
         return Array.from(map.values());
     }
-
     private async onThreadClick(threadInfo: IThreadInfo) {
-
         this.activeScenerie = 'loading';
         this.messagesOffset = 0;
         this.hasMoreMessages = true;
         this.actualThread = threadInfo;
         const messagesInDb = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, 0);
-
         this.actualMessages = messagesInDb;
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         this.activeScenerie = 'details';
-
         this.isLoadingMessages = true;
         try {
             if (!this.userId) return;
@@ -476,25 +403,19 @@ export class CollabMessagesChat100554 extends StateLitElement {
         } finally {
             this.isLoadingMessages = false;
         }
-
     }
-
     private async loadAllMessages(threadInfo: IThreadInfo): Promise<void> {
-
         const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
         if (!messages || messages.length === 0 || !this.actualThread || !this.userId) {
             return;
         }
-
         await addMessages(messages);
         this.actualMessages = this.mergeMessages(this.actualMessages, messages);
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
-
         const keys = Object.keys(this.actualMessagesParsed).sort();
         const lastKey = keys.length > 0 ? keys[keys.length - 1] : null;
         const lastArray = lastKey ? this.actualMessagesParsed[lastKey] : [];
         const lastMessage = lastArray.length > 0 ? lastArray[lastArray.length - 1] : undefined;
-
         if (lastMessage) {
             const thread = await updateThread(
                 threadInfo.thread.threadId,
@@ -505,13 +426,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
             );
             threadInfo.thread = thread;
         }
-
         if (messages.length < 100) return;
         return this.loadAllMessages(threadInfo);
     }
-
     private async onTitleClick() {
-
         await this.updateComplete;
         if (this.activeScenerie === 'task') {
             this.activeScenerie = 'details';
@@ -526,16 +444,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
             return;
         }
     }
-
     private onThreadDetailsClick() {
         this.saveScrollPosition();
         this.activeScenerie = 'threadDetails';
     }
-
     private async handleSend(value: string, opt: { isSpecialMention: boolean, agentName: string }) {
-
         this.isSystemChangeScroll = true;
-
         try {
             if (!opt.isSpecialMention) {
                 await this.addMessage(value);
@@ -545,21 +459,16 @@ export class CollabMessagesChat100554 extends StateLitElement {
         } catch (err: any) {
             throw new Error(err.message);
         }
-
     }
-
     private async addMessage(prompt: string) {
         if (!this.userId || !this.actualThread) return;
-
         const params: mls.msg.RequestAddMessage = {
             action: 'addMessage',
             content: prompt,
             threadId: this.actualThread.thread.threadId,
             userId: this.userId
         };
-
         const message: IMessage = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
-
         try {
             const response = await mls.api.msgAddMessage(params);
             message.isFailed = false;
@@ -570,26 +479,20 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             console.error('Error on send message:' + err.message);
         }
-
     }
-
     private async addMessageResponse(task: mls.msg.TaskData) {
         const stepResult = getNextResultStep(task);
         if (!stepResult) return;
         const value = typeof stepResult.result === 'object' ? JSON.stringify(stepResult.result) : stepResult.result;
         if (!addMessage || typeof value !== 'string') return;
-        this.addMessage(`IA:  ${value} `);
+        this.addMessage(`IA: ${value} `);
     }
-
     private async addMessageIA(prompt: string, agentName: string) {
-
         if (!this.userId || !this.actualThread) return;
         const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, prompt);
         let agentToCall = AGENTDEFAULT;
         if (agentName) agentToCall = agentName;
-
         const message: IMessage = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
-
         try {
             const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentToCall}`);
             if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent')
@@ -604,24 +507,18 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             }
         }
-
     }
-
     private async updateMessageAI(context: mls.msg.ExecutionContext, updateThreadDB: boolean, oldContextCreateAt?: string) {
-
         if (this.activeScenerie !== 'details') return;
-
         if (!context.message && !context.task) return;
         const { content, createAt, orderAt, senderId, threadId, taskId } = context.message;
         const createAt2 = oldContextCreateAt ? oldContextCreateAt : createAt;
-
         let messageAdded = this.actualMessages.find((item) =>
             item.content === content &&
             item.senderId === senderId &&
             item.createAt === createAt2 &&
             item.threadId === threadId
         )
-
         if (!messageAdded) {
             const newMessage: mls.msg.Message = {
                 content,
@@ -630,18 +527,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 senderId,
                 threadId,
             }
-
             if (updateThreadDB && this.actualThread) {
                 const thread = await updateThread(threadId, this.actualThread.thread, content, createAt, 0);
                 if (this.actualThread) this.actualThread.thread = thread;
             }
-
             if (taskId) newMessage.taskId = taskId;
             this.actualMessages.push({ context, lastChanged: new Date().getTime(), ...newMessage });
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             await addMessage(newMessage);
             this.requestUpdate();
-
         } else {
             messageAdded.content = content;
             messageAdded.senderId = senderId;
@@ -652,23 +546,17 @@ export class CollabMessagesChat100554 extends StateLitElement {
             messageAdded.isLoading = false;
             messageAdded.lastChanged = new Date().getTime();
             if (taskId) messageAdded.taskId = taskId;
-
             const cloned = structuredClone(messageAdded);
             delete cloned.context;
             delete cloned.isLoading;
             delete cloned.lastChanged;
-
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             await addMessage(cloned);
             this.requestUpdate();
         }
-
     }
-
     private createTempMessage(content: string, senderId: string, threadId: string, taskId?: string) {
-
         const now = new Date();
-
         const formattedDate = now.getFullYear().toString()
             + String(now.getMonth() + 1).padStart(2, '0')
             + String(now.getDate()).padStart(2, '0')
@@ -676,7 +564,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
             + String(now.getMinutes()).padStart(2, '0')
             + String(now.getSeconds()).padStart(2, '0')
             + "." + Math.floor(1000 + Math.random() * 9000);
-
         const newMessage: IMessage = {
             content,
             createAt: formattedDate,
@@ -686,28 +573,22 @@ export class CollabMessagesChat100554 extends StateLitElement {
             isLoading: true,
             isFailed: false,
         }
-
         if (taskId) newMessage.taskId = taskId;
         this.actualMessages.push(newMessage);
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         this.requestUpdate();
         return newMessage;
-
     }
-
     private async updateMessage2(updateThreadDB: boolean, oldMessage: IMessage, newMessage: mls.msg.Message) {
-
         if (updateThreadDB && this.actualThread) {
             const thread = await updateThread(newMessage.threadId, this.actualThread.thread, newMessage.content, newMessage.createAt, 0);
             if (this.actualThread) this.actualThread.thread = thread;
         }
-
         const alreadyExist = this.actualMessages.find(item =>
             item.content === oldMessage.content &&
             item.senderId === oldMessage.senderId &&
             item.createAt === oldMessage.createAt &&
             item.threadId === oldMessage.threadId);
-
         if (alreadyExist) {
             this.actualMessages = this.actualMessages.map(item =>
                 item.content === oldMessage.content &&
@@ -718,13 +599,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
                     : item
             );
         } else this.actualMessages.push(newMessage);
-
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         addMessage(newMessage);
         this.requestUpdate();
-
     }
-
     private async onTaskClick(taskId: string, messageId: string, threadId: string,) {
         this.saveScrollPosition();
         this.activeScenerie = 'loading';
@@ -733,12 +611,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.actualTask = task;
         this.activeScenerie = 'task';
     }
-
     private async getTaskUpdate(taskId: string, threadId: string, createdAt: string) {
-
         if (!taskId || !createdAt || !threadId) throw new Error('Invalid args');
         if (!this.userId) throw new Error('Invalid userId');
-
         const taskData = await mls.api.msgGetTaskUpdate(
             {
                 taskId,
@@ -746,12 +621,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 userId: this.userId
             }
         );
-
         if (taskData.statusCode !== 200) throw new Error("error on AI get taskUpdate , stoped");
-
         return taskData.task;
     }
-
     private async getThreadInfo(threadId: string, userId: string): Promise<IThreadInfo> {
         try {
             const response = await mls.api.msgGetThreadUpdate({
@@ -763,22 +635,18 @@ export class CollabMessagesChat100554 extends StateLitElement {
             throw new Error(err.message)
         }
     }
-
     private saveScrollPosition() {
         if (this.messageContainer) {
             this.savedScrollTop = this.messageContainer.scrollTop;
         }
     }
-
     private async restoreScrollPosition() {
         if (this.messageContainer) {
             await this.updateComplete;
             this.messageContainer.scrollTop = this.savedScrollTop;
         }
     }
-
     private onTaskChange = async (e: Event) => {
-
         const customEvent = e as CustomEvent;
         const message: mls.msg.Message = customEvent.detail.context.message;
         const task: mls.msg.TaskData = customEvent.detail.context.task;
@@ -786,26 +654,20 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
         await this.updateMessageAI(customEvent.detail.context, false, customEvent.detail.oldContextCreateAt);
         if (task) await addOrUpdateTask(customEvent.detail.context.task);
-
     };
-
     private onTaskCompleted = async (e: Event) => {
-
         const customEvent = e as CustomEvent;
         const message: mls.msg.Message = customEvent.detail.context.message;
         const task: mls.msg.TaskData = customEvent.detail.context.task;
         const thId = message?.threadId;
         if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
-
         if (task.status === 'done') {
             this.addMessageResponse(task);
         }
     };
-
     private onTaskDetailsClose = async (_e: Event) => {
         this.onTitleClick();
     };
-
     private onThreadChange = async (e: Event) => {
         const customEvent = e as CustomEvent;
         await this.updateMessageAI(customEvent.detail, false);
@@ -817,19 +679,14 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
         this.requestUpdate();
     };
-
     private onMessageSend = async (e: Event) => {
         const customEvent = e as CustomEvent;
         const message: mls.msg.Message = customEvent.detail.context.message;
         const thId = message?.threadId;
         if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
         this.updateMessage2(false, message, message);
-
     };
-
 }
-
-
 interface IThreadInfo {
     thread: mls.msg.ThreadPerformanceCache,
     users: mls.msg.User[]
@@ -840,9 +697,7 @@ interface IMessage extends mls.msg.Message {
     isSame?: boolean,
     isLoading?: boolean,
     isFailed?: boolean,
-
 }
-
 type IMessageGrouped = { [key: string]: IMessage[] }
 type IThread = { [key: string]: IThreadInfo[] }
 type IScenery = 'list' | 'details' | 'loading' | 'task' | 'threadDetails'
