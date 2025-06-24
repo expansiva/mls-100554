@@ -100,6 +100,10 @@ async function prepareExecTasks(context: mls.msg.ExecutionContext) {
 
     if (!Array.isArray(result)) throw new Error('Invalid result format in prepareExecTasks');
 
+    if (result.length === 0) {
+        return 'Analysis completed. No suitable agent was found for this request.'
+    }
+
     const concurrency = 5;
     const errors: INextsAgents[] = [];
     const total = result.length;

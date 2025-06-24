@@ -37,6 +37,8 @@ export function createTool(): ITool {
         },
         async execute(args: Args): Promise<string> {
             const { filters } = args;
+            if (!filters || filters.length === 0) return `## Arquivos filtrados: \n\n []`;
+            
             const actualProject = mls.actual[5].project;
             if (!actualProject) throw new Error('Project ID is missing or invalid. Cannot filter files without a valid project context.');
             // Get files with explicit typing
@@ -88,8 +90,7 @@ export function createTool(): ITool {
                 extension: item.extension
             }));
 
-            console.info(result);
-            return ` Arquivos filtrados: ${JSON.stringify(result)}`;
+            return `## Arquivos filtrados: \n\n ${JSON.stringify(result)}`;
         }
     };
 }
