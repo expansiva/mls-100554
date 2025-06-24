@@ -862,7 +862,15 @@ export class PluginExploreList extends PluginBaseModule {
             if (!window['mls']) return [];
             let arraySfHistory: mls.stor.IFileInfo[] = [];
             const lh = this.getHistory();
-            if (lh.length <= 0 || !window['mls']) return [];
+            if (lh.length <= 0 || !window['mls']) {
+
+                const diff = this.filesInLocal.filter(a =>
+                    !arraySfHistory.some(b => b.shortName === a.shortName)
+                );
+
+                arraySfHistory = [...arraySfHistory, ...diff];
+                return arraySfHistory;
+            }
 
             for await (const i of lh) {
 
@@ -927,12 +935,13 @@ export class PluginExploreList extends PluginBaseModule {
         if (res.length > 10) {
             for (let i = res.length - 1; i >= 0; i--) {
                 if (res.length <= 10) break;
-                const key = mls.stor.getKeyToFiles(res[i].project, this.levelFiles, res[i].shortName, res[i].folder, res[i].extension);
+                res.splice(i, 1);
+                /*const key = mls.stor.getKeyToFiles(res[i].project, this.levelFiles, res[i].shortName, res[i].folder, res[i].extension);
                 if (!mls.stor.files[key]) {
                     res.splice(i, 1);
                 } else if (mls.stor.files[key] && mls.stor.files[key].status === 'nochange' && mls.stor.files[key].shortName !== file.shortName) {
                     res.splice(i, 1);
-                }
+                }*/
             }
         }
 
