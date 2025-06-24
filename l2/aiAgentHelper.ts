@@ -201,7 +201,8 @@ export function argsValidator(
     }
 
     const expectedType = schema[key].type;
-    const actualType = typeof args[key];
+    let actualType: string = typeof args[key];
+    actualType = actualType === 'object' ? (Array.isArray(args[key]) ? 'array' : 'object') : actualType
 
     if (expectedType !== actualType) {
       throw new Error(`Invalid type for argument '${key}': expected '${expectedType}', got '${actualType}'`);

@@ -13,7 +13,8 @@ import {
     getUserIdLocalStorage,
     notifyTaskChange,
     dispatchDetailsTaskClose,
-    updateTaskTitle
+    updateTaskTitle,
+    getNextStepIdAvaliable,
 } from "./_100554_aiAgentHelper";
 
 import { getTask, getMessage } from "./_100554_msgDBController";
@@ -218,21 +219,29 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
     const existResults = rc.result.length > 0;
     if (existResults) {
 
-        const inputAI: mls.msg.IAMessageInputType[] = [{
-            type: "system",
-            content: `Response from tool ${step.toolName}: ${rc.result}`
-        }];
         const interactionStepId = getInteractionStepId(context.task, step.stepId);
         if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${step.stepId}`);
-        const stepdIdToChangeStatus = step.stepId;
-        const newStatus: mls.msg.AIStepStatus = "completed";
-        const userId = getUserIdLocalStorage() || context.task.owner;
-        const messageId = context.task.messageid_created || '';
-        const taskId = context.task.PK;
 
-        context.task = await appendPromptToInteraction(userId, messageId, taskId, interactionStepId, inputAI, stepdIdToChangeStatus, newStatus);
+        const stepdIdToChangeStatus = step.stepId;
+        if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${step.stepId}`);
+        const stepInteraction = getStepById(context.task, interactionStepId);
+        if (!stepInteraction || stepInteraction.type !== 'agent') throw new Error('Interaction must be type: agent');
+        const oldPrompt = stepInteraction.interaction?.input.find((item) => item.type === 'human');
+
+        const newStep: mls.msg.AIPayload = {
+            type: 'agent',
+            agentName: stepInteraction.agentName,
+            prompt: `${oldPrompt?.content} \n\n Response from tool ${step.toolName}: ${rc.result}`,
+            status: 'pending',
+            stepId: getNextStepIdAvaliable(context.task),
+            interaction: null,
+            nextSteps: null,
+            rags: null
+        }
 
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context.task, null, 2));
+        return await addNewStep(context, stepdIdToChangeStatus, [newStep]);
+
     }
 
     return executeNextStep(context);
@@ -431,7 +440,7 @@ export async function startClarification(context: mls.msg.ExecutionContext, step
     let clarification: ClarificationValue;
     try {
         let ret: any = step.json;
-        if (typeof step.json ==="string") ret = JSON.parse(step.json || '') as any;
+        if (typeof step.json === "string") ret = JSON.parse(step.json || '') as any;
         clarification = {
             taskId: context.task.PK,
             stepId,
@@ -487,21 +496,21 @@ export async function endClarification(clarification: ClarificationValue, action
 }
 
 export function toLLMClarification(value: ClarificationValue) {
-  // remove unnecessary values
-  return {
-    title: value.title,
-    userLanguage: value.userLanguage,
-    questions: Object.fromEntries(
-      Object.entries(value.questions).map(([key, q]) => [
-        key,
-        {
-          type: q.type,
-          question: q.question,
-          answer: q.answer
-        }
-      ])
-    )
-  };
+    // remove unnecessary values
+    return {
+        title: value.title,
+        userLanguage: value.userLanguage,
+        questions: Object.fromEntries(
+            Object.entries(value.questions).map(([key, q]) => [
+                key,
+                {
+                    type: q.type,
+                    question: q.question,
+                    answer: q.answer
+                }
+            ])
+        )
+    };
 }
 
 async function setFailedStatus(context: mls.msg.ExecutionContext, step: number) {
