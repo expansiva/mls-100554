@@ -7,6 +7,7 @@ import { selectLevel, forceServiceInstance } from './_100554_libCommom';
 import './_100554_serviceListFilesAdd';
 
 /// **collab_i18n_start**
+
 const message_pt = {
     updateListVerify: "atualizar lista/verificar",
     update: "atualizar",
