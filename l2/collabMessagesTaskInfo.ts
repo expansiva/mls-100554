@@ -1,15 +1,18 @@
 /// <mls shortName="collabMessagesTaskInfo" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-
+ 
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { getClarification } from './_100554_aiAgentOrchestration';
-import { getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById } from './_100554_aiAgentHelper'; 
+import { getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById } from './_100554_aiAgentHelper';
 
 import './_100554_collabMessagesTaskDetails';
 import './_100554_pluginTaskPreview';
 @customElement('collab-messages-task-info-100554')
 export class WidgetAiInteraction100554 extends StateLitElement {
+
+    private forceViewRaw = false;
+    private isClarificationPending = false;
 
     @property() task: mls.msg.TaskData | undefined = undefined;
     @property() stepid: string = '';
@@ -32,18 +35,20 @@ export class WidgetAiInteraction100554 extends StateLitElement {
 
         if (!this.task) return html`No task.`;
 
-        let isClarificationPending: boolean = false;
+        this.isClarificationPending = false;
         if (this.task) {
             const nextStepPending = getNextPendentStep(this.task);
-            if (nextStepPending?.type === 'clarification') isClarificationPending = true;
+            if (nextStepPending?.type === 'clarification') this.isClarificationPending = true;
         }
 
-        if (isClarificationPending) return this.renderDirectClarification();
+        if (this.isClarificationPending && !this.forceViewRaw) return this.renderDirectClarification();
+
         return this.renderTab();
     }
 
     renderTab() {
         return html`
+            ${this.isClarificationPending ? html`<button class="viewraw" @click=${()=>this.clickForceViewRaw(false)}>Clarification</button>` : ''}
             <div style="height: calc(100% - 3rem);">
                 <div class="tabs">
                 <div
@@ -90,7 +95,10 @@ export class WidgetAiInteraction100554 extends StateLitElement {
         if (!this.task) throw new Error('Invalid task');
         const payload = getNextClarificationStep(this.task);
         if (!payload) return html``;
-        return html`<div class="direct-clarification">${this.renderClarification(payload)}</div>`
+        return html`
+        <button class="viewraw" @click=${()=>this.clickForceViewRaw(true)}>View raw</button>
+        <div class="direct-clarification">${this.renderClarification(payload)}
+        </div>`
     }
 
     renderClarification(payload: mls.msg.AIClarificationStep) {
@@ -108,6 +116,12 @@ export class WidgetAiInteraction100554 extends StateLitElement {
 
 
     //---------IMPLEMENTATION -----------
+
+    private clickForceViewRaw(force: boolean) {
+        this.forceViewRaw = force;
+        this.requestUpdate();
+        if (!force) setTimeout(() => this.setClarification(), 300);
+    }
 
     private async setClarification(): Promise<void> {
         if (!this.directClarificationContent || !this.task) return;
