@@ -77,6 +77,13 @@ export class ServiceSource100554 extends ServiceBase {
     private lessCSS: LessCSS | undefined;
     private viewState: IViewState = {};
     private msg: MessageType = messages['en'];
+    private modeToExt: { [key: string]: 'ts' | 'html' | 'style' | 'test' | 'defs' } = {
+        icTs: 'ts',
+        icHTML: 'html',
+        icStyle: 'style',
+        icTest: 'test',
+        icDefs: 'defs',
+    }
 
     public onClickMain(op: string) {
         if (op === 'opTS2') return;
@@ -98,20 +105,20 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (op === EToolsSource.icTs) {
             this.showActiveModel();
-            this.updateActionBasedOnError('ts');
+            this.updateActionBasedOnError('ts', this.activeModels?.ts?.model.id);
             if (this._ed1) this.highlightReviewLines(this._ed1);
 
         }
         if (op === EToolsSource.icHTML) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
             this.createOrShowModelHtmlCssTestDefs(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.html');
-            this.updateActionBasedOnError('html');
+            this.updateActionBasedOnError('html', this.activeModels?.html?.model.id);
             if (this._ed1) this.highlightReviewLines(this._ed1);
         }
         if (op === EToolsSource.icStyle) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
             this.createOrShowModelHtmlCssTestDefs(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.less');
-            this.updateActionBasedOnError('style');
+            this.updateActionBasedOnError('style', this.activeModels?.style?.model.id);
             if (this._ed1) this.highlightReviewLines(this._ed1);
 
         }
@@ -119,13 +126,13 @@ export class ServiceSource100554 extends ServiceBase {
         if (op === EToolsSource.icTest) {
             if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
             this.createOrShowModelTsTest(this.activeModels.ts.storFile.shortName, this.activeModels.ts.storFile.project, true);
-            this.updateActionBasedOnError('test');
+            this.updateActionBasedOnError('test', this.activeModels?.test?.model.id);
         }
 
         if (op === EToolsSource.icDefs) {
             if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
             this.createOrShowModelTsDefs(this.activeModels.ts.storFile.shortName, this.activeModels.ts.storFile.project, true);
-            this.updateActionBasedOnError('defs');
+            this.updateActionBasedOnError('defs', this.activeModels?.defs?.model.id);
         }
     }
 
@@ -323,6 +330,18 @@ export class ServiceSource100554 extends ServiceBase {
 
         model.pushEditOperations([], operations as any, () => []);
         this._ed1?.setPosition({ lineNumber: 1, column: 1 });
+
+        if (this._ed1?.getModel()?.id === model.id) {
+            this.highlightReviewLines(this._ed1);
+            if ((model.getLanguageId() === 'typescript') && this.activeModels?.ts && this.activeModels.ts.compilerResults) {
+                setTimeout(() => {
+                    if (this.activeModels?.ts?.compilerResults) this.activeModels.ts.compilerResults.modelNeedCompile = true;
+                    mls.editor.forceModelUpdate(model);
+                }, 500)
+
+            }
+        }
+
     }
 
     private setValueInModelInSpecificLine(content: string, line: number) {
@@ -383,14 +402,8 @@ export class ServiceSource100554 extends ServiceBase {
         const activeModel = this.activeModels;
         if (!activeModel) return;
         if (!this._ed1 || !this.mode || !activeModel || !activeModel.ts) return;
-        const obj: { [key: string]: 'ts' | 'html' | 'style' | 'test' | 'defs' } = {
-            icTs: 'ts',
-            icHTML: 'html',
-            icStyle: 'style',
-            icTest: 'test',
-            icDefs: 'defs',
-        };
-        const mode: 'ts' | 'html' | 'style' | 'test' | 'defs' = obj[this.mode];
+
+        const mode: 'ts' | 'html' | 'style' | 'test' | 'defs' = this.modeToExt[this.mode];
         const keyViewState = `${activeModel.ts.storFile.project}_${activeModel.ts.storFile.shortName}`;
         if (!this.viewState[keyViewState]) {
             this.viewState[keyViewState] = {
@@ -408,14 +421,8 @@ export class ServiceSource100554 extends ServiceBase {
         const activeModel = this.activeModels;
         if (!activeModel) return;
         if (!this._ed1 || !this.mode || !activeModel || !activeModel.ts) return;
-        const obj: { [key: string]: 'ts' | 'html' | 'style' | 'test' | 'defs' } = {
-            icTs: 'ts',
-            icHTML: 'html',
-            icStyle: 'style',
-            icTest: 'test',
-            icDefs: 'defs',
-        };
-        const mode: 'ts' | 'html' | 'style' | 'test' | 'defs' = obj[this.mode];
+
+        const mode: 'ts' | 'html' | 'style' | 'test' | 'defs' = this.modeToExt[this.mode];
         const keyViewState = `${activeModel.ts.storFile.project}_${activeModel.ts.storFile.shortName}`;
         if (this.viewState[keyViewState] && this.viewState[keyViewState][mode]) this._ed1.restoreViewState(this.viewState[keyViewState][mode]);
     }
@@ -435,15 +442,8 @@ export class ServiceSource100554 extends ServiceBase {
     private async getHistories() {
 
         this.setHistories('Loading...', '', 'text');
-        const obj: { [key: string]: 'ts' | 'html' | 'style' | 'test' | 'defs' } = {
-            icTs: 'ts',
-            icHTML: 'html',
-            icStyle: 'style',
-            icTest: 'test',
-            icDefs: 'defs',
 
-        };
-        const mode: 'ts' | 'html' | 'style' | 'test' | 'defs' = obj[this.mode];
+        const mode: 'ts' | 'html' | 'style' | 'test' | 'defs' = this.modeToExt[this.mode];
         if (!this.activeModels || !this.activeModels[mode]) {
             console.error('No active model');
             return;
@@ -1193,7 +1193,8 @@ export class ServiceSource100554 extends ServiceBase {
         const position: 'left' | 'right' | 'all' = this.getPosition(modelBaseTS.model.id, 'ts');
         storFile.hasError = hasError;
         this.toogleIconsError(position);
-        this.updateActionBasedOnError('ts');
+
+        this.updateActionBasedOnError('ts', modelBaseTS.model.id);
 
         if (!hasError) monaco.editor.setModelMarkers(modelBaseTS.model, 'markerSource', []);
 
@@ -1394,7 +1395,6 @@ export class ServiceSource100554 extends ServiceBase {
         if (!this.editorEl) return;
 
         this._ed1 = monaco.editor.create(this.editorEl, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
-        this.updateActionBasedOnError('ts');
 
         (this.editorEl as any)['mlsEditor'] = this._ed1;
         mls.editor.instances[this.confE] = this._ed1;
@@ -1448,7 +1448,11 @@ export class ServiceSource100554 extends ServiceBase {
         if (this.actionAgentFix) this.actionAgentFix.dispose();
     }
 
-    private updateActionBasedOnError(mode: 'ts' | 'html' | 'style' | 'defs' | 'test') {
+    private updateActionBasedOnError(mode: 'ts' | 'html' | 'style' | 'defs' | 'test', modelId: string | undefined) {
+
+        if (this._ed1?.getModel()?.id !== modelId) return;
+
+        console.info({ updateActionBasedOnError: mode })
 
         if (!this._ed1) return;
         if (!this.activeModels) return;
@@ -2196,7 +2200,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             if (ext === '.html') this.dispatchEventStatusOrErrorChanged(position, storFile);
             else this.dispatchEventStyleChanged(position, storFile);
             this.toogleIconsError(position);
-            this.updateActionBasedOnError(mode);
+            this.updateActionBasedOnError(mode, modelBase.model.id);
         }, 400);
     };
 
@@ -2282,7 +2286,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             let position = this.getPosition(modelBase.model.id, 'test');
             this.dispatchEventTsTestChanged(position, storFile);
             this.toogleIconsError(position);
-            this.updateActionBasedOnError('test');
+            this.updateActionBasedOnError('test', modelBase.model.id);
         })
     };
 
@@ -2379,7 +2383,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             let position = this.getPosition(modelBase.model.id, 'defs');
             this.dispatchEventTsDefsChanged(position, storFile);
             this.toogleIconsError(position);
-            this.updateActionBasedOnError('defs');
+            this.updateActionBasedOnError('defs', modelBase.model.id);
 
         })
     };
