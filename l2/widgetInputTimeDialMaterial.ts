@@ -268,7 +268,7 @@ ${hours.map(h => {
             const y = 50 + 40 * Math.sin(rad);
             return html`<button class="cc-dial-num ${h === hour ? 'selected' : ''}" style="left:${x}%;top:${y}%" @click=${() => this._onDialHourSelect(h)}>${mode12h && h === 0 ? 12 : h}</button>`;
         })}
-<div class="cc-dial-pointer" style="transform: rotate(${((360 / hours.length) * hour) - 90}deg); transition: ${this.smoothRotation ? 'transform 0.3s cubic-bezier(.4,2,.6,1)' : 'none'};"></div>
+
 </div>
 ` : html`
 <div class="cc-dial-clock">
@@ -279,7 +279,7 @@ ${minutes.map(m => {
             const y = 50 + 40 * Math.sin(rad);
             return html`<button class="cc-dial-num ${m === minute ? 'selected' : ''}" style="left:${x}%;top:${y}%" @click=${() => this._onDialMinuteSelect(m)}>${m < 10 ? '0' + m : m}</button>`;
         })}
-<div class="cc-dial-pointer" style="transform: rotate(${((360 / minutes.length) * (minute / 5)) - 90}deg); transition: ${this.smoothRotation ? 'transform 0.3s cubic-bezier(.4,2,.6,1)' : 'none'};"></div>
+
 </div>
 `}
 </div>
