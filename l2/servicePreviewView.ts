@@ -294,6 +294,7 @@ export class ServicePreviewView extends StateLitElement {
     private async init(iframe: HTMLIFrameElement) {
 
         try {
+            this.father.setError('');
             this.setDevice(iframe);
             this.setTheme(iframe);
             this.setMyFile();
@@ -427,6 +428,7 @@ export class ServicePreviewView extends StateLitElement {
         return true;
 
     }
+
     private async setHTml(iframe: HTMLIFrameElement) {
 
         if (!iframe.contentDocument || !this.models) return;
