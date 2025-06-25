@@ -1451,12 +1451,8 @@ export class ServiceSource100554 extends ServiceBase {
     private updateActionBasedOnError(mode: 'ts' | 'html' | 'style' | 'defs' | 'test', modelId: string | undefined) {
 
         if (this._ed1?.getModel()?.id !== modelId) return;
-
-        console.info({ updateActionBasedOnError: mode })
-
         if (!this._ed1) return;
         if (!this.activeModels) return;
-
         this.removeFixAction();
 
         if (mode === 'test' || mode === 'defs') return;
