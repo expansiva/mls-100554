@@ -1,211 +1,251 @@
 /// <mls shortName="widgetInputTimeDialMaterial" project="100554" enhancement="enhancementStyle" />
 
-                
+
 widget-input-time-dial-material-100554 {
-.cc-time-field {
-font-family: @font-family-primary;
-}
-.cc-label {
-display: block;
-color: @text-primary-color;
-font-size: @font-size-16;
-margin-bottom: @space-8;
-font-weight: @font-weight-bold;
-}
-.cc-input-wrap {
-display: flex;
-align-items: center;
-gap: @space-8;
-}
-.cc-input {
-padding: @space-8 @space-16;
-border: 1px solid @grey-color-dark;
-border-radius: 8px;
-font-size: @font-size-16;
-color: @text-primary-color;
-background: @bg-primary-color;
-transition: border-color @transition-normal;
-&:focus {
-border-color: @active-color;
-}
-&:disabled {
-color: @text-primary-color-disabled;
-background: @bg-primary-color-disabled;
-}
-}
-.cc-dial-btn {
-background: none;
-border: none;
-padding: @space-8;
-cursor: pointer;
-color: @text-secondary-color;
-transition: color @transition-normal;
-&:hover:not(:disabled) {
-color: @active-color;
-}
-&:disabled {
-color: @text-secondary-color-disabled;
-cursor: not-allowed;
-}
-}
-.cc-mode-btn {
-background: @bg-secondary-color;
-border: none;
-padding: @space-8 @space-16;
-border-radius: 6px;
-color: @text-secondary-color;
-font-size: @font-size-12;
-cursor: pointer;
-margin-left: @space-8;
-transition: background @transition-normal;
-&:hover:not(:disabled) {
-background: @bg-secondary-color-hover;
-}
-&:disabled {
-color: @text-secondary-color-disabled;
-background: @bg-secondary-color-disabled;
-cursor: not-allowed;
-}
-}
-.cc-hint {
-margin-top: @space-8;
-color: @text-secondary-color;
-font-size: @font-size-12;
-}
-.cc-error {
-margin-top: @space-8;
-color: @error-color;
-font-size: @font-size-12;
-}
-.cc-dial-modal {
-position: fixed;
-top: 0; left: 0; right: 0; bottom: 0;
-z-index: 1000;
-display: flex;
-justify-content: center;
-align-items: center;
-}
-.cc-dial-backdrop {
-position: absolute;
-top: 0; left: 0; right: 0; bottom: 0;
-background: fade(@grey-color-darker, 60%);
-}
-.cc-dial-content {
-position: relative;
-background: @bg-primary-color;
-padding: @space-24;
-border-radius: 16px;
-box-shadow: 0 4px 32px #0002;
-min-width: 320px;
-min-height: 340px;
-display: flex;
-flex-direction: column;
-align-items: center;
-}
-.cc-dial-header {
-display: flex;
-justify-content: center;
-align-items: center;
-gap: @space-8;
-font-size: @font-size-24;
-margin-bottom: @space-16;
-}
-.cc-dial-hour, .cc-dial-minute {
-cursor: pointer;
-padding: @space-8;
-border-radius: 6px;
-transition: background @transition-normal;
-&.active {
-background: @bg-secondary-color;
-color: @text-secondary-color;
-}
-}
-.cc-dial-ampm {
-display: flex;
-gap: @space-8;
-margin-left: @space-16;
-}
-.cc-ampm-btn {
-background: @bg-secondary-color;
-border: none;
-padding: @space-8 @space-16;
-border-radius: 6px;
-color: @text-secondary-color;
-cursor: pointer;
-font-size: @font-size-12;
-transition: background @transition-normal;
-&.active {
-background: @active-color;
-color: @bg-primary-color;
-}
-}
-.cc-dial-body {
-display: flex;
-justify-content: center;
-align-items: center;
-margin-bottom: @space-16;
-}
-.cc-dial-clock {
-position: relative;
-width: 220px;
-height: 220px;
-background: @bg-secondary-color-lighter;
-border-radius: 50%;
-display: flex;
-justify-content: center;
-align-items: center;
-}
-.cc-dial-num {
-position: absolute;
-width: 40px;
-height: 40px;
-margin-left: -20px;
-margin-top: -20px;
-border-radius: 50%;
-background: @bg-primary-color;
-border: 1px solid @grey-color-dark;
-color: @text-primary-color;
-font-size: @font-size-16;
-font-weight: @font-weight-bold;
-cursor: pointer;
-transition: background @transition-normal, color @transition-normal;
-&.selected {
-background: @active-color;
-color: @bg-primary-color;
-border-color: @active-color;
-}
-}
-.cc-dial-pointer {
-position: absolute;
-top: 50%; left: 50%;
-width: 2px;
-height: 80px;
-background: @active-color;
-transform-origin: bottom center;
-border-radius: 2px;
-transition: transform @transition-normal;
-}
-.cc-dial-actions {
-display: flex;
-gap: @space-16;
-margin-top: @space-8;
-}
-.cc-dial-cancel, .cc-dial-ok {
-padding: @space-8 @space-24;
-border: none;
-border-radius: 6px;
-font-size: @font-size-16;
-cursor: pointer;
-font-weight: @font-weight-bold;
-}
-.cc-dial-cancel {
-background: @bg-secondary-color;
-color: @text-secondary-color;
-}
-.cc-dial-ok {
-background: @active-color;
-color: @bg-primary-color;
-}
+    .cc-time-field {
+        font-family: @font-family-primary;
+    }
+
+    .cc-label {
+        display: block;
+        color: @text-primary-color;
+        font-size: @font-size-16;
+        margin-bottom: @space-8;
+        font-weight: @font-weight-bold;
+    }
+
+    .cc-input-wrap {
+        display: flex;
+        align-items: center;
+        gap: @space-8;
+    }
+
+    .cc-input {
+        padding: @space-8 @space-16;
+        border: 1px solid @grey-color-dark;
+        border-radius: 8px;
+        font-size: @font-size-16;
+        color: @text-primary-color;
+        background: @bg-primary-color;
+        transition: border-color @transition-normal;
+
+        &:focus {
+            border-color: @active-color;
+        }
+
+        &:disabled {
+            color: @text-primary-color-disabled;
+            background: @bg-primary-color-disabled;
+        }
+    }
+
+    .cc-dial-btn {
+        background: none;
+        border: none;
+        padding: @space-8;
+        cursor: pointer;
+        color: @text-secondary-color;
+        transition: color @transition-normal;
+
+        &:hover:not(:disabled) {
+            color: @active-color;
+        }
+
+        &:disabled {
+            color: @text-secondary-color-disabled;
+            cursor: not-allowed;
+        }
+    }
+
+    .cc-mode-btn {
+        background: @bg-secondary-color;
+        border: none;
+        padding: @space-8 @space-16;
+        border-radius: 6px;
+        color: @text-secondary-color;
+        font-size: @font-size-12;
+        cursor: pointer;
+        margin-left: @space-8;
+        transition: background @transition-normal;
+
+        &:hover:not(:disabled) {
+            background: @bg-secondary-color-hover;
+        }
+
+        &:disabled {
+            color: @text-secondary-color-disabled;
+            background: @bg-secondary-color-disabled;
+            cursor: not-allowed;
+        }
+    }
+
+    .cc-hint {
+        margin-top: @space-8;
+        color: @text-secondary-color;
+        font-size: @font-size-12;
+    }
+
+    .cc-error {
+        margin-top: @space-8;
+        color: @error-color;
+        font-size: @font-size-12;
+    }
+
+    .cc-dial-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .cc-dial-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: fade(@grey-color-darker, 60%);
+    }
+
+    .cc-dial-content {
+        position: relative;
+        background: @bg-primary-color;
+        padding: @space-24;
+        border-radius: 16px;
+        box-shadow: 0 4px 32px #0002;
+        min-width: 320px;
+        min-height: 340px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cc-dial-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: @space-8;
+        font-size: @font-size-24;
+        margin-bottom: @space-16;
+    }
+
+    .cc-dial-hour,
+    .cc-dial-minute {
+        cursor: pointer;
+        padding: @space-8;
+        border-radius: 6px;
+        transition: background @transition-normal;
+
+        &.active {
+            background: @bg-secondary-color;
+            color: @text-secondary-color;
+        }
+    }
+
+    .cc-dial-ampm {
+        display: flex;
+        gap: @space-8;
+        margin-left: @space-16;
+    }
+
+    .cc-ampm-btn {
+        background: @bg-secondary-color;
+        border: none;
+        padding: @space-8 @space-16;
+        border-radius: 6px;
+        color: @text-secondary-color;
+        cursor: pointer;
+        font-size: @font-size-12;
+        transition: background @transition-normal;
+
+        &.active {
+            background: @active-color;
+            color: @bg-primary-color;
+        }
+    }
+
+    .cc-dial-body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: @space-16;
+    }
+
+    .cc-dial-clock {
+        position: relative;
+        width: 220px;
+        height: 220px;
+        background: @bg-secondary-color-lighter;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .cc-dial-num {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        margin-left: -20px;
+        margin-top: -20px;
+        border-radius: 50%;
+        background: @bg-primary-color;
+        border: 1px solid @grey-color-dark;
+        color: @text-primary-color;
+        font-size: @font-size-16;
+        font-weight: @font-weight-bold;
+        cursor: pointer;
+        transition: background @transition-normal, color @transition-normal;
+
+        &.selected {
+            background: @active-color;
+            color: @bg-primary-color;
+            border-color: @active-color;
+        }
+    }
+
+    .cc-dial-pointer {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 2px;
+        height: 80px;
+        background: @active-color;
+        transform-origin: bottom center;
+        border-radius: 2px;
+        transition: transform @transition-normal;
+    }
+
+    .cc-dial-actions {
+        display: flex;
+        gap: @space-16;
+        margin-top: @space-8;
+    }
+
+    .cc-dial-cancel,
+    .cc-dial-ok {
+        padding: @space-8 @space-24;
+        border: none;
+        border-radius: 6px;
+        font-size: @font-size-16;
+        cursor: pointer;
+        font-weight: @font-weight-bold;
+    }
+
+    .cc-dial-cancel {
+        background: @bg-secondary-color;
+        color: @text-secondary-color;
+    }
+
+    .cc-dial-ok {
+        background: @active-color;
+        color: @bg-primary-color;
+    }
 }
 
 //Start Less Tokens
