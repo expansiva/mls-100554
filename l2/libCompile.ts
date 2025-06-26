@@ -126,21 +126,71 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
 }
 
 function extrairTagsCustomizadas(html: string): string[] {
+    
+    const container = document.createElement('div');
+    container.innerHTML = html;
 
+    const customTags: Set<string> = new Set();
+    const tagsException = new Set([
+        'mls-showexamplecode-100529',
+        'mls-usecaseadd-100529',
+        'mls-head'
+    ]);
+
+    const allElements = container.querySelectorAll('*');
+
+    allElements.forEach(element => {
+        const tagName = element.tagName.toLowerCase();
+
+        const isCustomTag = tagName.includes('-');
+        const isInCodeBlock = element.closest('code') !== null;
+
+        if (
+            isCustomTag &&
+            !tagsException.has(tagName) &&
+            !isInCodeBlock
+        ) {
+            customTags.add(tagName);
+        }
+    });
+
+    return Array.from(customTags);
+}
+
+/*function extrairTagsCustomizadas(html: string): string[] {
+
+    const el = document.createElement('div');
     const regex = /<\/?([a-z][a-z0-9-]*)\b[^>]*>/gi;
     const customTags: string[] = [];
+    const tagsException = ['mls-showexamplecode-100529', 'mls-usecaseadd-100529', 'mls-head'];
+
     let match;
+    el.innerHTML = html;
+
     while ((match = regex.exec(html)) !== null) {
+
         const tag: string = match[1];
+        const tagName = tag.replace('<', '').replace('>', '');
+        const all = el.querySelectorAll(tagName);
+        let isIntoCode = false;
+
+        Array.from(all).forEach((i) => {
+
+            const father = i.closest('code');
+            if (father) isIntoCode = true;
+
+        });
+
         if (tag.indexOf('-') >= 0
             && !customTags.includes(tag)
-            && !['mls-showexamplecode-100529', 'mls-usecaseadd-100529', 'mls-head'].includes(tag.replace('<', '').replace('>', ''))) {
-            customTags.push(tag.replace('<', '').replace('>', ''));
+            && !isIntoCode
+            && !tagsException.includes(tagName)) {
+            customTags.push(tagName);
         }
     }
     return customTags;
 
-}
+}*/
 
 async function loadMyNeedsToCompile(
     tags: string[],

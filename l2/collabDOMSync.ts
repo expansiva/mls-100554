@@ -27,6 +27,8 @@ function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent:
     if (!editor)
         throw new Error('No find editor');
 
+    if (!newContent) throw new Error('New content is empty');
+    
     editor.setModel(model);
     const lastLineNumber = model.getLineCount();
     const lastLineLength = model.getLineLength(lastLineNumber);
