@@ -1,9 +1,10 @@
 /// <mls shortName="widgetQuestionsForClarification" project="100554" enhancement="enhancementStyle" />
 
 widget-questions-for-clarification-100554 {
-  font-family: @font-family-primary;
+
   background: @bg-primary-color;
   color: @text-primary-color;
+  font-size: @font-size-16;
   border-radius: @space-16;
   box-shadow: 0 2px 12px 0 fade(@grey-color-darker, 18%);
   padding: @space-32;
@@ -49,6 +50,7 @@ widget-questions-for-clarification-100554 {
         color: @text-primary-color;
         margin-right: @space-16;
         font-weight: 500;
+
         &:focus {
           border: 1.2px solid @active-color;
           background: @bg-primary-color-lighter;
@@ -64,12 +66,20 @@ widget-questions-for-clarification-100554 {
       }
     }
 
-    label, .moscow-label {
+    label,
+    .moscow-label {
       font-size: @font-size-16;
       color: @text-primary-color-lighter;
       font-weight: 400;
       margin: 0 0 0.2em 0;
       line-height: 1.5;
+    }
+
+    textarea,
+    select {
+      color: @text-primary-color;
+      background: @bg-primary-color;
+      font-family: @font-family-primary;
     }
 
     textarea,
@@ -81,15 +91,18 @@ widget-questions-for-clarification-100554 {
       background: @bg-secondary-color-lighter;
       transition: border @transition-slow;
       margin-top: 0.25em;
+
       &:focus {
         border: 1.2px solid @active-color;
         background: @bg-primary-color-lighter;
       }
     }
+
     textarea {
       min-height: 48px;
       resize: vertical;
     }
+
     input[type="checkbox"] {
       accent-color: @active-color;
       transform: scale(1.1);
@@ -103,6 +116,7 @@ widget-questions-for-clarification-100554 {
     justify-content: flex-end;
     gap: @space-16;
     margin-top: @space-32;
+
     .action-btn {
       min-width: 120px;
       font-size: @font-size-16;
@@ -113,27 +127,32 @@ widget-questions-for-clarification-100554 {
       cursor: pointer;
       transition: background @transition-slow, color @transition-slow;
       outline: none;
+
       &.cancel {
         background: @bg-secondary-color;
         color: @text-primary-color;
+
         &:hover {
           background: @bg-secondary-color-hover;
         }
       }
+
       &.continue {
         background: @active-color;
         color: #fff;
+
         &:hover {
           background: @active-color-hover;
         }
       }
     }
-  .action-btn:disabled {
-    background: @bg-secondary-color-disabled;
-    color: @text-primary-color-disabled;
-    cursor: not-allowed;
-    opacity: 0.7;
-  }    
+
+    .action-btn:disabled {
+      background: @bg-secondary-color-disabled;
+      color: @text-primary-color-disabled;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
   }
 
   .clarification-legends {
@@ -145,13 +164,16 @@ widget-questions-for-clarification-100554 {
 
   @media (max-width: @breakpoint-small) {
     padding: @space-16;
+
     .clarification-actions {
       flex-direction: column;
       gap: @space-8;
+
       .action-btn {
         width: 100%;
       }
     }
+
     .title {
       font-size: @font-size-20;
     }
