@@ -12,7 +12,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     @query('textarea') textArea: HTMLTextAreaElement | undefined;
     @query('.mention-suggestions') mentionSuggestionsElement?: HTMLElement;
     @query('.wrapper') wrapper?: HTMLElement;
-    @state() text: string = '';
+    @property() text: string = '';
     @state() actualMention?: IMentions;
     @state() mentionActive: boolean = false;
     @state() mentionQuery: string = '';

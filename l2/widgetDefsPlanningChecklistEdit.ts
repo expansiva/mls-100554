@@ -18,7 +18,7 @@ export class WidgetDefsPlanningChecklistEdit100554 extends StateLitElement {
         comment: "Implementado na coluna direita do cenário 'select'."
     }
 
-    @state() private isEditing = false;
+    @property() private isEditing = false;
     @state() private tempDescription = '';
     @state() private tempComment = '';
     @state() private tempDone = false;
