@@ -1,21 +1,14 @@
 /// <mls shortName="agentNewModule2" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { forceServiceInstance } from './_100554_libCommom';
-import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
-import { initState } from './_100554_collabState';
-import './_100554_widgetQuestionsForClarification';
+import { getPromptByHtml } from './_100554_aiPrompts';
+import { getPayload1, PayLoad1 } from './_100554_agentNewModule';
 
 import {
     getNextPendingStepByAgentName,
-    getNextInProgressStepByAgentName,
-    updateStepStatus,
-    getNextPendentStep,
     getStepById,
-    updateTaskTitle,
-    notifyTaskCompleted,
-    getInteractionStepId,
     getNextStepIdAvaliable,
+    getAgentStepByAgentName,
     notifyTaskChange
 } from "./_100554_aiAgentHelper";
 
@@ -25,7 +18,7 @@ import {
     executeNextStep,
     addNewStep,
     ClarificationValue,
-    toLLMClarification,
+    ClarificationQuestions,
     startClarification
 } from "./_100554_aiAgentOrchestration";
 
@@ -56,9 +49,9 @@ export function createAgent(): IAgent {
     };
 }
 
-export interface DataForPrompt {
-    userPrompt: string;
-    clarification: ClarificationValue;
+interface DataForPrompt {
+    clarification: any,
+    userPrompt: string
 }
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
@@ -66,86 +59,157 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context || !context.message) throw new Error("Invalid context");
 
     if (!context.task) {
-        throw new Error(`[${agentName}] [beforePrompt]: no context task.`);
+        // use mock
+        const inputs: any = await getPrompts(getPayload1Mock());
+        await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
+        return;
     }
+
     const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
     if (!step) {
-        throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
+        throw new Error(`[${agentName}] [beforePrompt]: No pending step found for this agent.`);
     }
-    context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
-    if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
-    try {
-        const prompt: DataForPrompt = JSON.parse(step.prompt);
-        console.log(`[${agentName}] [beforePrompt]:`, prompt)
-        const inputs = await getPrompts(prompt);
-        await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
-    } catch (e: any) {
-        throw new Error(`[${agentName}] [beforePrompt]: Invalid prompt: ` + e.message || '?');
-    }
+    // context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+    // don't need updateStepStatus, addInteractionAiTask put this task in 'in_process'
+    const inputs = await getPrompts(getPayload1(context));
+    await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
 }
 
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
-    const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No in progress interaction found.`);
     notifyTaskChange(context);
     await executeNextStep(context);
 }
 
 const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
-    const step = payload[0] as mls.msg.AIPayload;
-    if (!step || step.type !== 'flexible') throw new Error('Invalid step for replay');
-    if (!step.result || !step.result.meta) throw new Error('Invalid step result for replay');
-
-    // TODO: implemntar o que vai ser preciso fazer
-
+    throw new Error("[replayForSupport] not implemented");
 }
 
 const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> => {
     return startClarification(context, stepId);
 }
 
-
 const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number, clarification: ClarificationValue): Promise<void> => {
-    if (!context || !context.message || !context.task) throw new Error("[${agentName}] [afterClarification] Invalid context");
-    if (!clarification) throw new Error("[${agentName}] [afterClarification] Invalid json after clarification");
+    if (!context || !context.message || !context.task) throw new Error(`[${agentName}] [afterClarification] Invalid context`);
+    if (!clarification) throw new Error(`[${agentName}] [afterClarification] Invalid json after clarification`);
 
     const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
     if (!step || step.type !== "clarification") {
         throw new Error(`[${agentName}] [afterClarification] No found step: ${stepId} for this agent.`);
     }
 
-    // add step for agentNewModule2
-
-    const interactionId: number | null = getInteractionStepId(context.task, step.stepId);
-    if (!interactionId) throw new Error("[${agentName}] [afterClarification] Not found interactionId in pending step")
-    const payload: mls.msg.AIPayload | null = getStepById(context.task, interactionId);
-    if (!payload || payload.type !== "agent") throw new Error("[${agentName}] [afterClarification] Clarification or tool step not bellow a agent");
-
-    const promptUser = payload.interaction?.input.find((input) => input.type === 'human')?.content || '';
-
-    const dataForNextAgent = {
-        prompt: promptUser,
-
-    }
-
+    // add step for agentNewModule3
     const newStep: mls.msg.AIPayload = {
         type: 'agent',
         agentName: 'agentNewModule3',
-        prompt: JSON.stringify(dataForNextAgent),
         status: 'pending',
+        prompt: "...",
         stepId: getNextStepIdAvaliable(context.task),
         interaction: null,
         nextSteps: null,
         rags: null
     }
     // complete this step (payload) and push another step
-    await addNewStep(context, step.stepId, [newStep]);
+    await addNewStep(context, step.stepId, [newStep], "Waiting ...");
 }
 
-async function getPrompts(prompt: DataForPrompt): Promise<mls.msg.IAMessageInputType[]> {
-    if (!prompt || !prompt.clarification || !prompt.userPrompt) throw new Error(`Erro [${agentName}] getPrompts: invalid userPrompt`);
-    (prompt as any).ResumeClarification = toLLMClarification(prompt.clarification);
-    const prompts = await getPromptByHtml({ project, shortName: agentName, folder: '', data: prompt })
-    return prompts;
+async function getPrompts(payload1: PayLoad1): Promise<mls.msg.IAMessageInputType[]> {
+    if (!payload1 || !payload1.title || !payload1.userPrompt) throw new Error(`Erro [${agentName}] getPrompts: invalid payload1`);
+    const data: Record<string, string> = {
+        userPrompt: payload1.userPrompt,
+        resumeClarification: JSON.stringify({
+            title: payload1.title,
+            userLanguage: payload1.userLanguage,
+            questions: payload1.questions
+        }, null, 2)
+    }
+    return await getPromptByHtml({ project, shortName: agentName, folder: '', data })
+}
+
+function getPayload1Mock(): PayLoad1 {
+    return {
+        userPrompt: "criar um web site para petshop",
+        userLanguage: "pt-BR",
+        title: "Esclarecimento 1/2",
+        questions: {
+            roles: {
+                type: "open",
+                question: "Quais papéis de usuário o site deve ter? (ex: administrador, cliente, funcionário)",
+                answer: "Administrador e cliente"
+            },
+            publicTarget: {
+                type: "open",
+                question: "Qual é o público-alvo principal do site? (ex: donos de pets, veterinários, fornecedores)",
+                answer: "Donos de pets"
+            },
+            tone: {
+                type: "open",
+                question: "Qual tom o site deve transmitir? (ex: amigável, profissional, descontraído)",
+                answer: "Amigável e profissional"
+            },
+            languages: {
+                type: "open",
+                question: "O site deve ser multilíngue? Se sim, quais idiomas?",
+                answer: "Apenas português"
+            },
+            openQuestion1: {
+                type: "open",
+                question: "Quais funcionalidades principais o site deve ter? (ex: agendamento, loja online, blog)",
+                answer: "Agendamento de serviços e loja online"
+            },
+            openQuestion2: {
+                type: "open",
+                question: "Você já possui conteúdo e imagens para o site ou precisa que sejam criados?",
+                answer: "Preciso que sejam criados"
+            },
+            openQuestion3: {
+                type: "open",
+                question: "Há alguma referência de design ou sites que você gostaria que fossem usados como inspiração?",
+                answer: "Sim, sites modernos e limpos"
+            }
+        },
+        legends: [
+            "Este é o primeiro esclarecimento",
+            "antes de criar algo"
+        ]
+    }
+}
+
+export function getPayload2(context: mls.msg.ExecutionContext): PayLoad2 {
+    if (!context || !context.task) throw new Error(`[${agentName}] [getPayload] Invalid context`);
+    const agentStep = getAgentStepByAgentName(context.task, agentName); // Only one agent execution must exist in this task
+    if (!agentStep) throw new Error(`[${agentName}] [getPayload] no agent found`);
+
+    // get result
+    const resultStep = agentStep.interaction?.payload?.[0];
+    if (!resultStep || resultStep.type !== "clarification" || !resultStep.json) throw new Error(`[${agentName}] [getPayload] No step clarification found for this agent.`);
+    let payload2: PayLoad2 | string = resultStep.json;
+    if (typeof payload2 === "string") payload2 = JSON.parse(payload2) as PayLoad2;
+    return payload2;
+}
+
+export interface PayLoad2 {
+    userLanguage: string;
+    executionRegions: string[];
+    title: string;
+    moduleDetails: {
+        userPrompt: string;
+        goal: string;
+        requirements: string[];
+    },
+    analysisResult: {
+        essentialProblems: string[];
+    },
+    questions: Record<string, OpenQuestion | QuestionMoSCoW>;
+    legends: string[];
+}
+export interface OpenQuestion {
+    type: "open";
+    question: string;
+    answer: string;
+}
+export interface QuestionMoSCoW {
+    type: "MoSCoW";
+    question: string;
+    answer: "must" | "should" | "could" | "won't";
 }
