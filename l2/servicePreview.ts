@@ -118,7 +118,7 @@ export class ServicePreview100554 extends ServiceBase {
             editor: undefined,
             iframe: undefined,
         };
-        initState('preview', { pausePreview: false });
+        initState('preview', { pausePreview: false, service: this });
         this.setEvents();
     }
 
