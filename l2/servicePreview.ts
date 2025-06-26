@@ -19,6 +19,7 @@ import { IAgent } from './_100554_aiAgentBase';
 import './_100554_collabConsole';
 import './_100554_collabResultTest';
 import './_100554_servicePreviewView';
+import './_100554_pluginPreviewInsights';
 
 import './_100554_collabMessagesPrompt';
 
@@ -140,10 +141,9 @@ export class ServicePreview100554 extends ServiceBase {
 
     public onClickTabs(index: number) {
         this._ed1?.updateOptions({ readOnly: false });
-        if (index === EPreview.icPreviewD) {
-            this.preview('desktop');
-        }
-        if (index === EPreview.icPreviewM) this.preview('mobile');
+        if (index === EPreview.icPreviewD) this.preview('desktop');
+        else if (index === EPreview.icPreviewM) this.preview('mobile');
+        else if (index === EPreview.icPreviewI) this.preview('insights');
         this.lastMode = index;
     }
 
@@ -180,6 +180,7 @@ export class ServicePreview100554 extends ServiceBase {
             options: [
                 { text: 'Desktop', icon: 'f390' },
                 { text: 'Mobile', icon: 'f3cf' },
+                { text: 'Insights', icon: 'f0eb' },
             ]
         },
         tools: {
@@ -358,7 +359,7 @@ export class ServicePreview100554 extends ServiceBase {
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
         try {
-            
+
             if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
             // if ((this.visible === 'false') && !((fileAction.action as any) === 'openBackground')) return;
@@ -374,7 +375,7 @@ export class ServicePreview100554 extends ServiceBase {
 
             if (fileAction.action === 'open' || (fileAction.action as any) === 'openBackground') {
                 setState('preview.pausePreview', false);
-                
+
                 this.setModel(storFileHTML);
 
                 this.actualFile = storFileHTML;
@@ -401,7 +402,7 @@ export class ServicePreview100554 extends ServiceBase {
             if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
 
             const rp = getState('preview.pausePreview');
-            if (this.watch  && !rp) {
+            if (this.watch && !rp) {
                 this.elPreview = undefined;
                 this.updateLoadingToFalseIfNoTasksRunning();
                 this.setTest();
@@ -1058,51 +1059,58 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async preview(mode: string) {
 
-        if (!(mls.actual[2] as any).left || !this.watch ) return true;
+        if (!(mls.actual[2] as any).left || !this.watch) return true;
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
 
-        this.menu.title = '';
         if (this.menu.updateTitle) this.menu.updateTitle();
         await this.fireWcdChanges();
+        this.menu.title = '';
         this.lastModePreview = mode;
         this.lastLevel = this.level;
+        this.page = fullname;
 
         const container = document.createElement('div');
         container.style.display = 'flex';
         container.style.flexDirection = 'column';
-        container.style.height = '100%'; // this.style.height;
+        container.style.height = '100%';
 
-        const doc = document.createElement('service-preview-view-100554');
-        doc.setAttribute('page', fullname);
-        doc.setAttribute('level', this.level as any);
-        doc.setAttribute('mode', mode);
-        doc.setAttribute('actualtheme', this.actualTheme);
-        doc.setAttribute('lang', this.lang);
-        doc.style.flex = '1';
-        (doc as any).father = this;
-        this.elPreview = doc;
-        container.appendChild(doc);
 
-        const consoleEl = document.createElement('collab-console-100554');
-        consoleEl.setAttribute('mode', 'disabled');
-        consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
-        container.appendChild(consoleEl);
+        if (mode === 'insights') {
+            const insights = document.createElement('plugin-preview-insights-100554');
+            container.appendChild(insights);
+            insights.setAttribute('page', fullname);
+            insights.setAttribute('level', this.level.toString());
+            this.configureButtonsRight(false);
 
-        const testResultEl = this.createTestElement();
-        container.appendChild(testResultEl);
+        } else {
+            const doc = document.createElement('service-preview-view-100554');
+            doc.setAttribute('page', fullname);
+            doc.setAttribute('level', this.level.toString());
+            doc.setAttribute('mode', mode);
+            doc.setAttribute('actualtheme', this.actualTheme);
+            doc.setAttribute('lang', this.lang);
+            doc.style.flex = '1';
+            (doc as any).father = this;
+            this.elPreview = doc;
+            container.appendChild(doc);
+
+            const consoleEl = document.createElement('collab-console-100554');
+            consoleEl.setAttribute('mode', 'disabled');
+            consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
+            container.appendChild(consoleEl);
+
+            const testResultEl = this.createTestElement();
+            container.appendChild(testResultEl);
+
+            const iframe = this.querySelector('iframe') as HTMLIFrameElement;
+            if (iframe && iframe.contentDocument) iframe.contentDocument.body.innerHTML = '';
+            this.configureButtonsRight(true);
+            mls.events.fire(3, 'WCDEventChange' as any);
+        }
 
         if (!this.previewContent) return;
-
-        const iframe = this.querySelector('iframe') as HTMLIFrameElement;
-        if (iframe && iframe.contentDocument) iframe.contentDocument.body.innerHTML = '';
-
         this.previewContent.innerHTML = '';
         this.previewContent.appendChild(container);
-
-        // if (this.menu.setMode) this.menu.setMode('page', container);
-        this.page = fullname;
-        this.configureButtonsRight(true);
-        mls.events.fire(3, 'WCDEventChange' as any);
         return true;
     }
 
@@ -1339,5 +1347,6 @@ interface ILanguage {
 
 enum EPreview {
     'icPreviewD' = 0,
-    'icPreviewM' = 1
+    'icPreviewM' = 1,
+    'icPreviewI' = 2,
 }     
