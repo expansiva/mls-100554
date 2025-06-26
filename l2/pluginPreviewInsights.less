@@ -1,0 +1,449 @@
+/// <mls shortName="pluginPreviewInsights" project="100554" enhancement="enhancementStyle" />
+plugin-preview-insights-100554 {
+    display: block;
+    font-family: var(--font-family-primary);
+    padding: 1rem;
+    position: relative;
+    background-color: @bg-primary-color;
+    color: @text-primary-color;
+    font-size: @font-size-16;
+    border-radius: 10px;
+    overflow: auto;
+
+    .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: @space-16;
+    }
+
+    .tab-header {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #ccc;
+        background-color: #f0f0f0;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .tab-group-left {
+        display: flex;
+        overflow-x: auto;
+        flex: 1;
+        min-width: 0;
+        scrollbar-width: thin;
+    }
+
+    .tab-group-left::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .tab-group-left::-webkit-scrollbar-thumb {
+        background-color: var(--grey-color-darker);
+        border-radius: 4px;
+    }
+
+    .tab-group-right {
+        display: flex;
+        flex-shrink: 0;
+    }
+
+    .tab-item {
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+
+    .tab-button {
+        padding: 10px 16px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        border-right: 1px solid @grey-color;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tab-button:not(.active):hover {
+        background-color: @grey-color-light;
+        color: @text-primary-color;
+    }
+
+    .tab-button.active {
+        background-color: #ffffff;
+        font-weight: bold;
+        border-bottom: 2px solid @active-color;
+    }
+
+    .tab-content {
+        position: relative;
+        flex: 1;
+        padding: @space-8;
+        margin: 0;
+        background-color: #ffffff;
+        color: #000000;
+        display: flex;
+        flex-grow: 1;
+        overflow: auto;
+        flex-direction: column;
+    }
+
+    section {
+        padding: 0.5rem 0.8rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #cecece;
+        border-radius: 10px;
+    }
+
+    .business {
+        .planning-info {
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .planning-checklist-item {
+            display: flex;
+            gap: .3rem;
+            align-items: center;
+            padding-left: .5rem;
+
+            widget-defs-planning-checklist-edit-100554 {
+                flex: 1;
+            }
+
+            i {
+                cursor: pointer;
+                width: 20px;
+                visibility: hidden;
+                pointer-events: none;
+            }
+
+            &:hover {
+                i {
+                    visibility: visible;
+                    pointer-events: all;
+                }
+            }
+        }
+
+        .planning-add-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            padding: .3rem;
+            border: 1px solid transparent;
+            color: @active-color;
+
+            svg {
+                fill: @active-color;
+            }
+
+            &:hover {
+                border: 1px solid @grey-color-light;
+            }
+        }
+
+        .add-new-userStorie-container{
+            display: flex;
+            width: 100%;
+            button {
+                cursor: pointer;
+                padding: 0.3rem 0.6rem;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                background: #f8f8f8;
+                font-size: 0.85rem;
+                display: flex;
+                gap: .3rem;
+            }
+        }
+
+        .section {
+            display: block;
+            padding: .2rem 1.5em;
+
+            details {
+                margin-bottom: 1rem;
+
+                .summary-done{
+                    color: @success-color;
+                    svg {
+                        fill: @success-color;
+                    }
+                }
+
+                .summary-pending{
+                    color: @warning-color;
+                    svg {
+                        fill: @warning-color;
+                    }
+                }
+
+                >div {
+                    margin-left: 1rem;
+                    padding: 1rem;
+                }
+
+                >summary {
+                    cursor: pointer;
+
+                    svg {
+                        height: 14px;
+                        width: 14px;
+                    }
+                }
+            }
+        }
+    }
+
+    .technical {
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: .3rem;
+            overflow: hidden;
+            width: 100%;
+
+            input[type="text"] {
+                padding: 4px 4px;
+                border: 1px solid #d1d1d1;
+                background-color: #fff;
+                color: #000;
+                font-size: 14px;
+                transition: border-color .3s ease;
+                outline: none;
+                line-height: 1.2;
+            }
+        }
+    }
+}
+
+//Start Less Tokens
+@text-primary-color-lighter: #535353;
+@text-primary-color-lighter-hover: #5f5f5f;
+@text-primary-color-lighter-focus: #4a4a4a;
+@text-primary-color-lighter-disabled: #696969;
+@text-primary-color: #403f3f;
+@text-primary-color-hover: #4b4a4a;
+@text-primary-color-focus: #353434;
+@text-primary-color-disabled: #525151;
+@text-primary-color-darker: #000000;
+@text-primary-color-darker-hover: #1a1a1a;
+@text-primary-color-darker-focus: #0d0d0d;
+@text-primary-color-darker-disabled: #262626;
+@text-secondary-color-lighter: #408EC8;
+@text-secondary-color-lighter-hover: #4a9adb;
+@text-secondary-color-lighter-focus: #377bb0;
+@text-secondary-color-lighter-disabled: #629fd2;
+@text-secondary-color: #1C91CD;
+@text-secondary-color-hover: #2a9edb;
+@text-secondary-color-focus: #1786b7;
+@text-secondary-color-disabled: #55b4e1;
+@text-secondary-color-darker: #0F6FA9;
+@text-secondary-color-darker-hover: #1b7bb5;
+@text-secondary-color-darker-focus: #0c6495;
+@text-secondary-color-darker-disabled: #3a9ec1;
+@bg-primary-color-lighter: #ffffff;
+@bg-primary-color-lighter-hover: #f2f2f2;
+@bg-primary-color-lighter-focus: #e6e6e6;
+@bg-primary-color-lighter-disabled: #d9d9d9;
+@bg-primary-color: #ffffff;
+@bg-primary-color-hover: #f2f2f2;
+@bg-primary-color-focus: #e6e6e6;
+@bg-primary-color-disabled: #d9d9d9;
+@bg-primary-color-darker: #fafafa;
+@bg-primary-color-darker-hover: #f5f5f5;
+@bg-primary-color-darker-focus: #eeeeee;
+@bg-primary-color-darker-disabled: #e0e0e0;
+@bg-secondary-color-lighter: #F9F9F9;
+@bg-secondary-color-lighter-hover: #f4f4f4;
+@bg-secondary-color-lighter-focus: #efefef;
+@bg-secondary-color-lighter-disabled: #eaeaea;
+@bg-secondary-color: #E6E6E6;
+@bg-secondary-color-hover: #d9d9d9;
+@bg-secondary-color-focus: #cccccc;
+@bg-secondary-color-disabled: #bfbfbf;
+@bg-secondary-color-darker: #C0C0C0;
+@bg-secondary-color-darker-hover: #b3b3b3;
+@bg-secondary-color-darker-focus: #a6a6a6;
+@bg-secondary-color-darker-disabled: #999999;
+@grey-color-lighter: #F9FAFB;
+@grey-color-light: #F2F2F2;
+@grey-color: #E6E6E6;
+@grey-color-dark: #D3D3D3;
+@grey-color-darker: #C0C0C0;
+@error-color: #FF4D4F;
+@error-color-hover: #ff6666;
+@error-color-focus: #e63e3e;
+@error-color-disabled: #ff9999;
+@success-color: #52C41A;
+@success-color-hover: #66d93f;
+@success-color-focus: #4ca610;
+@success-color-disabled: #8cd78e;
+@warning-color: #FAAD14;
+@warning-color-hover: #fbbd34;
+@warning-color-focus: #e09a0e;
+@warning-color-disabled: #fdd55e;
+@info-color: #0a6dc9;
+@info-color-hover: #1b7edb;
+@info-color-focus: #006ab3;
+@info-color-disabled: #66a8e1;
+@active-color: #1890FF;
+@active-color-hover: #1a99ff;
+@active-color-focus: #0e80cc;
+@active-color-disabled: #66b3ff;
+@link-color: #1890FF;
+@link-color-hover: #1a99ff;
+@link-color-focus: #0e80cc;
+@link-color-disabled: #66b3ff;
+@font-base-unit: .25rem;
+@font-family-primary: 'Charlie Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+@font-family-secondary: serif;
+@font-size-12: calc(@font-base-unit * 3);
+@font-size-16: calc(@font-base-unit * 4);
+@font-size-20: calc(@font-base-unit * 5);
+@font-size-24: calc(@font-base-unit * 6);
+@font-size-40: calc(@font-base-unit * 10);
+@font-size-48: calc(@font-base-unit * 12);
+@font-size-64: calc(@font-base-unit * 16);
+@line-height-base-unit: 1;
+@line-height-small: calc(@line-height-base-unit * 1.1);
+@line-height-medium: calc(@line-height-base-unit * 1.3);
+@line-height-large: calc(@line-height-base-unit * 1.5);
+@font-weight-lighter: 100;
+@font-weight-light: 200;
+@font-weight-normal: 400;
+@font-weight-bold: 700;
+@font-weight-bolder: 900;
+@breakpoint-small: 544px;
+@breakpoint-medium: 768px;
+@breakpoint-large: 1012px;
+@transition-slow: 0.2s;
+@transition-normal: 0.3s;
+@transition-fast: 0.5s;
+@space-base-unit: 0.25rem;
+@space-8: calc(@space-base-unit * 2);
+@space-16: calc(@space-base-unit * 4);
+@space-24: calc(@space-base-unit * 6);
+@space-32: calc(@space-base-unit * 8);
+@space-40: calc(@space-base-unit * 10);
+@space-48: calc(@space-base-unit * 12);
+@space-64: calc(@space-base-unit * 16);
+//End Less Tokens
+
+//Start Less Tokens
+@text-primary-color-lighter: #535353;
+@text-primary-color-lighter-hover: #5f5f5f;
+@text-primary-color-lighter-focus: #4a4a4a;
+@text-primary-color-lighter-disabled: #696969;
+@text-primary-color: #403f3f;
+@text-primary-color-hover: #4b4a4a;
+@text-primary-color-focus: #353434;
+@text-primary-color-disabled: #525151;
+@text-primary-color-darker: #000000;
+@text-primary-color-darker-hover: #1a1a1a;
+@text-primary-color-darker-focus: #0d0d0d;
+@text-primary-color-darker-disabled: #262626;
+@text-secondary-color-lighter: #408EC8;
+@text-secondary-color-lighter-hover: #4a9adb;
+@text-secondary-color-lighter-focus: #377bb0;
+@text-secondary-color-lighter-disabled: #629fd2;
+@text-secondary-color: #1C91CD;
+@text-secondary-color-hover: #2a9edb;
+@text-secondary-color-focus: #1786b7;
+@text-secondary-color-disabled: #55b4e1;
+@text-secondary-color-darker: #0F6FA9;
+@text-secondary-color-darker-hover: #1b7bb5;
+@text-secondary-color-darker-focus: #0c6495;
+@text-secondary-color-darker-disabled: #3a9ec1;
+@bg-primary-color-lighter: #ffffff;
+@bg-primary-color-lighter-hover: #f2f2f2;
+@bg-primary-color-lighter-focus: #e6e6e6;
+@bg-primary-color-lighter-disabled: #d9d9d9;
+@bg-primary-color: #ffffff;
+@bg-primary-color-hover: #f2f2f2;
+@bg-primary-color-focus: #e6e6e6;
+@bg-primary-color-disabled: #d9d9d9;
+@bg-primary-color-darker: #fafafa;
+@bg-primary-color-darker-hover: #f5f5f5;
+@bg-primary-color-darker-focus: #eeeeee;
+@bg-primary-color-darker-disabled: #e0e0e0;
+@bg-secondary-color-lighter: #F9F9F9;
+@bg-secondary-color-lighter-hover: #f4f4f4;
+@bg-secondary-color-lighter-focus: #efefef;
+@bg-secondary-color-lighter-disabled: #eaeaea;
+@bg-secondary-color: #E6E6E6;
+@bg-secondary-color-hover: #d9d9d9;
+@bg-secondary-color-focus: #cccccc;
+@bg-secondary-color-disabled: #bfbfbf;
+@bg-secondary-color-darker: #C0C0C0;
+@bg-secondary-color-darker-hover: #b3b3b3;
+@bg-secondary-color-darker-focus: #a6a6a6;
+@bg-secondary-color-darker-disabled: #999999;
+@grey-color-lighter: #F9FAFB;
+@grey-color-light: #F2F2F2;
+@grey-color: #E6E6E6;
+@grey-color-dark: #D3D3D3;
+@grey-color-darker: #C0C0C0;
+@error-color: #FF4D4F;
+@error-color-hover: #ff6666;
+@error-color-focus: #e63e3e;
+@error-color-disabled: #ff9999;
+@success-color: #52C41A;
+@success-color-hover: #66d93f;
+@success-color-focus: #4ca610;
+@success-color-disabled: #8cd78e;
+@warning-color: #FAAD14;
+@warning-color-hover: #fbbd34;
+@warning-color-focus: #e09a0e;
+@warning-color-disabled: #fdd55e;
+@info-color: #0a6dc9;
+@info-color-hover: #1b7edb;
+@info-color-focus: #006ab3;
+@info-color-disabled: #66a8e1;
+@active-color: #1890FF;
+@active-color-hover: #1a99ff;
+@active-color-focus: #0e80cc;
+@active-color-disabled: #66b3ff;
+@link-color: #1890FF;
+@link-color-hover: #1a99ff;
+@link-color-focus: #0e80cc;
+@link-color-disabled: #66b3ff;
+@font-base-unit: .25rem;
+@font-family-primary: 'Charlie Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+@font-family-secondary: serif;
+@font-size-12: calc(@font-base-unit * 3);
+@font-size-16: calc(@font-base-unit * 4);
+@font-size-20: calc(@font-base-unit * 5);
+@font-size-24: calc(@font-base-unit * 6);
+@font-size-40: calc(@font-base-unit * 10);
+@font-size-48: calc(@font-base-unit * 12);
+@font-size-64: calc(@font-base-unit * 16);
+@line-height-base-unit: 1;
+@line-height-small: calc(@line-height-base-unit * 1.1);
+@line-height-medium: calc(@line-height-base-unit * 1.3);
+@line-height-large: calc(@line-height-base-unit * 1.5);
+@font-weight-lighter: 100;
+@font-weight-light: 200;
+@font-weight-normal: 400;
+@font-weight-bold: 700;
+@font-weight-bolder: 900;
+@breakpoint-small: 544px;
+@breakpoint-medium: 768px;
+@breakpoint-large: 1012px;
+@transition-slow: 0.2s;
+@transition-normal: 0.3s;
+@transition-fast: 0.5s;
+@space-base-unit: 0.25rem;
+@space-8: calc(@space-base-unit * 2);
+@space-16: calc(@space-base-unit * 4);
+@space-24: calc(@space-base-unit * 6);
+@space-32: calc(@space-base-unit * 8);
+@space-40: calc(@space-base-unit * 10);
+@space-48: calc(@space-base-unit * 12);
+@space-64: calc(@space-base-unit * 16);
+//End Less Tokens
