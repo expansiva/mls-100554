@@ -316,85 +316,59 @@ export class ServiceSave extends ServiceBase {
     }
 
     renderLevels(level: string, project: string, indexP: number, index: number) {
-        if (level === '3') {
-            return this.renderLevel3(level, project, indexP, index);
-        } else {
-            return this.renderLevelsDefault(level, project, indexP, index);
-        }
-    }
-
-    renderLevel3(level: string, project: string, indexP: number, index: number) {
-
         if (!this.itens) return html``;
 
         const objP = this.itens[+project]; 
-        const keys = Object.keys(objP[+level]);
+        let item = objP[+level] as Ifile; 
 
-        return html`
-            <li class="open">
-                <div>
-                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
-                    <input type="checkbox" id="l0-${project}-${index}" @click="${this.clickSetValueAllChilds}">
-                    <label for="l0-${project}-${index}">l${level}</label>
-                </div>
-                <ul>
-                    ${repeat(keys, ((key: any) => key) as any, ((k: number, index3: any) => {
-                        const objL = objP[+level];
-                        const objDS = objL[k] as unknown as [] ;
-                        const itens = objDS ? objDS: []; 
-                        return this.renderLevel3P2(itens, project, indexP, index, index3, k);
-                    }) as any)}
-                </ul>
-            </li>
-        `;
-    }
-
-    renderLevel3P2(itens: any[], project: string, indexP: number, index: number, index3: number, k: number) { 
-        return html`
-            <li>
-                <div>
-                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
-                    <input type="checkbox" id="l0-${project}-${index}-${index3}" @click="${this.clickSetValueAllChilds}">
-                    <label for="l0-${project}-${index}-${index3}">${k}</label>
-                </div>
-                <ul>
-                    ${repeat(itens, ((item: any) => item) as any, ((i: any, indexI: any) => { return this.renderItem(i, indexP, index, indexI); }) as any)}
-                </ul>
-            </li>
-        `;
-    }
-
-    renderLevelsDefault(level: string, project: string, indexP: number, index: number) {
-
-        if (!this.itens) return html``;
-
-        const objP = this.itens[+project]; 
-        let itens = objP[+level] as Iitem[]; 
-        itens = itens.sort((a, b) => a.text.localeCompare(b.text));
+        const keys = Object.keys(item); 
         return html`
             <li class="open">
                 <div>
                     <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > </span>
-                    <input type = "checkbox" id = "l0-${project}-${index}" @click="${this.clickSetValueAllChilds}"/>
-                    <label for= "l0-${project}-${index}" > l${level} </label>
+                    <input type = "checkbox" id = "l1-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/>
+                    <label for= "l1-${indexP}-${index}" > l${level} </label>
                 </div>
                 <ul>
-                    ${repeat(itens, ((item: any) => item) as any, ((i: any, indexI: any) => { return this.renderItem(i, indexP, index, indexI); }) as any)}
+                    ${repeat(keys, ((item: string) => item) as any, ((i: string, indexF: number) => { return this.renderFilesDefault(i, level, project, indexP, index, indexF); }) as any)}
                 </ul>
             </li>
         `;
     }
 
-    renderItem(item: Iitem, indexP: number, indexL: number, index: number) {
+    renderFilesDefault(file:string, level: string, project: string, indexPP: number, indexP: number, index: number) {
+
+        if (!this.itens) return html``;
+
+        const objP = this.itens[+project]; 
+        const fileInfo = objP[+level] as Ifile; 
+        let itens = fileInfo[file];
+        itens = itens.sort((a, b) => a.text.localeCompare(b.text));
+        return html`
+            <li class="">
+                <div>
+                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > </span>
+                    <input type = "checkbox" id = "l2-${indexPP}-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/> 
+                    <label for= "l2-${indexPP}-${indexP}-${index}" > ${file} </label>
+                </div>
+                <ul>
+                    ${repeat(itens, ((item: any) => item) as any, ((i: any, indexI: any) => { return this.renderItem(i, indexPP, indexP, index, indexI); }) as any)}
+                </ul>
+            </li>
+        `;
+    }
+
+
+    renderItem(item: Iitem, indexP: number, indexL: number,indexM: number, index: number) {
         const aux = ['new', 'rename'].includes(item.file.status) ? '' : html`<span @click="${this.clickHistory}" .item=${item} style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer" class="fa-regular fa-clock" title="History"></span>`;
         return html`
             <li style="padding-left: 1.1rem;">
                 <div style="align-items: center;">
                     ${item.disabled || item.onlyFather
-                        ? html`<input type="checkbox" id="l0-${indexP}-${indexL}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
-                        : html`<input type="checkbox" id="l0-${indexP}-${indexL}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
+                        ? html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
+                        : html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
                     }
-                    <label for= "l0-${indexP}-${indexL}-${index}" >
+                    <label for= "l3-${indexP}-${indexL}-${indexM}-${index}" >
                         ${item.text}
                         ${unsafeHTML(item.span)}
                     </label>
@@ -501,39 +475,26 @@ export class ServiceSave extends ServiceBase {
 
     private async setInfos() {
         try {
+
             this.freeToSave = false;
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
             this.otherProjects = await mls.stor.localDB.getAllProjects();
+
             for (const fKey of filesKeys) {
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
                 if (
-                    /*(!file.inLocalStorage && file.status === 'nochange') ||
-                    file.status === 'nochange' ||*/
                     (!file.inLocalStorage && file.status !== 'deleted') ||
-                    file.project === 0 || file.project !== mls.actual[5].project
+                    file.project === 0 ||
+                    file.project !== mls.actual[5].project
                 ) continue;
-                const pj = file.project;
-                const level = file.level;
-                if (!objProjects[pj]) objProjects[pj] = {};
-                const obj = objProjects[pj];
-                if (!obj[level] && level === 3) {
-                    const nNivel = file.folder.split('/');
-                    if (nNivel.length >= 1) {
-                        obj[level] = { [nNivel[0]]: [await this.configItem(file)] }
-                    }
-                } else if (!obj[level]) {
-                    obj[level] = [await this.configItem(file)];
-                } else if (obj[level] && level === 3) {
-                    const nNivel = file.folder.split('/');
-                    const obj3 = obj[level];
-                    if (nNivel.length >= 1 && obj3[nNivel[0]]) {
-                        obj3[nNivel[0]].push(await this.configItem(file))
-                    }
-                } else {
-                    obj[level].push(await this.configItem(file));
-                }
+
+                const obj = this.setProjectLevelShortName(objProjects, file.project, file.level, file.shortName);
+
+                obj.push(await this.configItem(file));
+                
             }
+
             if (Object.keys(objProjects).length > 0) {
                 this.itens = objProjects;
             }
@@ -541,11 +502,25 @@ export class ServiceSave extends ServiceBase {
                 this.itens = undefined;
                 this.toogleBadge(false, '_100554_serviceSave');
             }
+
         } catch (e: any) {
             this.itens = undefined;
             this.error = e.message;
             this.setError(e.message);
         }
+    }
+
+    private setProjectLevelShortName(obj:any, prj:number, level:number, shortname: string):any[] {
+
+        if (!obj[prj]) obj[prj] = { [level]: {} };
+        const pj = obj[prj];
+
+        if (!pj[level]) pj[level] = {};
+        const l = pj[level];
+
+        if (!l[shortname]) l[shortname] = [];
+
+        return l[shortname];
     }
 
     private oIcon = {
@@ -1131,41 +1106,6 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
-    /*private async uppVersionAfterSave(array: mls.stor.IFileInfo[]) {
-    const driver = mls.stor.others.getDefaultDriver(mls.actual[5].project as number);
-    const retArray = await driver.loadFilesInfo(mls.actual[5].project as number);
-    const arrayVersion = this.createArrayInfoVersion(array);
-    retArray.forEach(async (i) => {
-    const file = arrayVersion.filter((f) => f.name === i.ShortPath);
-    if (!file || file.length <= 0 || (file && file.length >= 1 && file[0].version === i.versionRef)) return;
-    if (file[0].version !== i.versionRef) {
-    file[0].file.versionRef = i.versionRef;
-    file[0].file.isLocalVersionOutdated = false;
-    file[0].file.newVersionRefIfOutdated = undefined;
-    await mls.stor.localStor.setContent(file[0].file, { contentType: 'string', content: null });
-    }
-    });
-    }
-    private async verifyVersionBlock(array: mls.stor.IFileInfo[]) {
-    try {
-    if (array.length <= 0) return;
-    const ret = await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
-    } catch (e: any) {
-    console.info('Error save verifyVersionBlock:' + e.message);
-    }
-    }
-    private createArrayInfoVersion(array: mls.stor.IFileInfo[]): { name: string, version: string, file: mls.stor.IFileInfo }[] {
-    const ret: any = [];
-    array.forEach((i) => {
-    ret.push({
-    name: `l${i.level}/${i.folder ? i.folder + '/' : ''}${i.shortName}${i.extension}`,
-    version: i.versionRef,
-    file: i
-    })
-    })
-    return ret;
-    }*/
-
     private async deleteFile(storFile: mls.stor.IFileInfo) {
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
         await mls.stor.cache.setContent(storFile, null);
@@ -1228,7 +1168,11 @@ interface IDefItem{
 }
 
 interface IDefItemLevel{
-    [key: number]: Iitem[]
+    [key: number]: Ifile
+}
+
+interface Ifile{
+    [key:string]: Iitem[]
 }
 
 interface Iitem {

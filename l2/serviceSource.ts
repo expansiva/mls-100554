@@ -1735,6 +1735,7 @@ export class ServiceSource100554 extends ServiceBase {
     private async createModel(project: number, shortName: string, ext: '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts', content?: string): Promise<mls.editor.IModelBase | undefined> {
 
         try {
+
             let src: string | Blob | null | undefined = undefined;
             let haveInfo: boolean = false;
             let info: mls.stor.IFileInfoValue | null = null;
@@ -2120,8 +2121,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (this.visible === 'true' && typeModel === 'html') mls.events.fire([2, 3, 4, 5, 6, 7], 'ModelHTMLCreated' as any, JSON.stringify({ ...storFile, position: this.position }));
         const { model } = modelBase;
 
-        const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
-        modelBase.originalCRC = originalCRC;
+        /*const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
+        modelBase.originalCRC = originalCRC;*/
 
         if (storFile.status === 'renamed' && fileInfo) {
             this.setEventsModelHTMLOrCss(modelBase, fileInfo.originalShortName as string, fileInfo.originalProject as number, ext);
@@ -2242,8 +2243,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}${ext}`);
         const { model } = modelBase;
 
-        const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
-        modelBase.originalCRC = originalCRC;
+        /*const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
+        modelBase.originalCRC = originalCRC;*/
 
         if (storFile.status === 'renamed' && fileInfo) {
             this.setEventsModelTsTest(modelBase, fileInfo.originalShortName as string, fileInfo.originalProject as number);
@@ -2337,8 +2338,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}${ext}`);
         const { model } = modelBase;
 
-        const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
-        modelBase.originalCRC = originalCRC;
+        /*const originalCRC = fileInfo ? fileInfo?.originalCRC : mls.common.crc.crc32(content as string).toString(16);
+        modelBase.originalCRC = originalCRC;*/
 
         if (storFile.status === 'renamed' && fileInfo) {
             this.setEventsModelTsDefs(modelBase, fileInfo.originalShortName as string, fileInfo.originalProject as number);

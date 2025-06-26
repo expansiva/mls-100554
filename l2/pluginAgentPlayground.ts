@@ -42,6 +42,7 @@ export class AgentTester extends CollabLitElement {
     }
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
+        this.init();
         this.chatPreferences = loadChatPreferences();
         this.list = await listThreads();
     }
@@ -205,6 +206,19 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
     }
 
     //---------IMPLEMENTATION--------
+
+    private init() {
+        this.verifyProp()
+    }
+
+    private verifyProp() {
+
+        if (this.agent) return;
+        const left = (mls.actual[2] as any).left;
+        if (!left) return;
+        this.agent = `_${left.project}_${left.shortName}`;
+
+    }
 
     private selectTabResult() {
         this.mode = 'result';
