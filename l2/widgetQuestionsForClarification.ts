@@ -1,13 +1,11 @@
 /// <mls shortName="widgetQuestionsForClarification" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 
 import { ClarificationValue, endClarification } from './_100554_aiAgentOrchestration';
 
-
-@customElement('widget-questions-for-clarification-100554')
 export class WidgetQuestionsForClarification100554 extends StateLitElement {
   @property({ type: Object }) value: ClarificationValue | null = null;
 
@@ -170,3 +168,8 @@ export class WidgetQuestionsForClarification100554 extends StateLitElement {
   `;
   }
 }
+
+if (!customElements.get('widget-questions-for-clarification-100554')) {
+  customElements.define('widget-questions-for-clarification-100554', WidgetQuestionsForClarification100554);
+}
+
