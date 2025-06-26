@@ -1,21 +1,13 @@
 /// <mls shortName="agentNewModule" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { forceServiceInstance } from './_100554_libCommom';
-import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
-import { initState } from './_100554_collabState';
+import { getPromptByHtml } from './_100554_aiPrompts';
 import './_100554_widgetQuestionsForClarification';
-import { DataForPrompt } from "./_100554_agentNewModule2";
 
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
-    updateStepStatus,
-    getNextPendentStep,
-    getStepById,
-    updateTaskTitle,
-    notifyTaskCompleted,
-    getInteractionStepId,
+    getAgentStepByAgentName,
     getNextStepIdAvaliable,
     notifyTaskChange
 } from "./_100554_aiAgentHelper";
@@ -44,11 +36,8 @@ export function createAgent(): IAgent {
         async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _afterPrompt(context);
         },
-        async replayForSupport(context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> {
-            return _replayForSupport(context, payload);
-        },
-        async beforeClarification(context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> {
-            return _beforeClarification(context, stepId);
+        async beforeClarification(context: mls.msg.ExecutionContext, stepId: number, readOnly: boolean): Promise<HTMLDivElement | null> {
+            return _beforeClarification(context, stepId, readOnly);
         },
         async afterClarification(context: mls.msg.ExecutionContext, stepId: number, clarification: ClarificationValue): Promise<void> {
             return _afterClarification(context, stepId, clarification);
@@ -61,18 +50,17 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context || !context.message) throw new Error("Invalid context");
 
     if (!context.task) {
-        const inputs: any = await getPrompts(context.message.content);
+        // const inputs: any = await getPrompts(context.message.content || getPromptMock());
+        const inputs: any = await getPrompts(getPromptMock());
         await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
-    } else {
-        const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
-        if (!step) {
-            throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
-        }
-        context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
-        if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
-        const inputs = await getPrompts(step.prompt);
-        await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
+        return;
     }
+    const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
+    if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
+
+    if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
+    const inputs = await getPrompts(step.prompt);
+    await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
 }
 
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
@@ -83,47 +71,21 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     await executeNextStep(context);
 }
 
-const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
-    const step = payload[0] as mls.msg.AIPayload;
-    if (!step || step.type !== 'flexible') throw new Error('Invalid step for replay');
-    if (!step.result || !step.result.meta) throw new Error('Invalid step result for replay');
 
-    // TODO: implemntar o que vai ser preciso fazer
-
+const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number, readOnly: boolean): Promise<HTMLDivElement | null> => {
+    return startClarification(context, stepId, readOnly);
 }
-
-const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> => {
-    return startClarification(context, stepId);
-}
-
 
 const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number, clarification: ClarificationValue): Promise<void> => {
-    if (!context || !context.message || !context.task) throw new Error("[${agentName}] [afterClarification] Invalid context");
-    if (!clarification) throw new Error("[${agentName}] [afterClarification] Invalid json after clarification");
-
-    const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
-    if (!step || step.type !== "clarification") {
-        throw new Error(`[${agentName}] [afterClarification] No found step: ${stepId} for this agent.`);
-    }
+    // only execute after button 'continue'
+    if (!context || !context.message || !context.task) throw new Error(`[${agentName}] [afterClarification] Invalid context`);
+    if (!clarification) throw new Error(`[${agentName}] [afterClarification] Invalid json after clarification`);
 
     // add step for agentNewModule2
-
-    const interactionId: number | null = getInteractionStepId(context.task, step.stepId);
-    if (!interactionId) throw new Error("[${agentName}] [afterClarification] Not found interactionId in pending step")
-    const payload: mls.msg.AIPayload | null = getStepById(context.task, interactionId);
-    if (!payload || payload.type !== "agent") throw new Error("[${agentName}] [afterClarification] Clarification or tool step not bellow a agent");
-
-    const userPrompt = payload.interaction?.input.find((input) => input.type === 'human')?.content || '';
-
-    const dataForNextAgent: DataForPrompt = {
-        userPrompt,
-        clarification: clarification
-    }
-
     const newStep: mls.msg.AIPayload = {
         type: 'agent',
         agentName: 'agentNewModule2',
-        prompt: JSON.stringify(dataForNextAgent),
+        prompt: '...',
         status: 'pending',
         stepId: getNextStepIdAvaliable(context.task),
         interaction: null,
@@ -131,7 +93,7 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
         rags: null
     }
     // complete this step (payload) and push another step
-    await addNewStep(context, step.stepId, [newStep]);
+    await addNewStep(context, stepId, [newStep], "Waiting ...");
 }
 
 async function getPrompts(userPrompt: string): Promise<mls.msg.IAMessageInputType[]> {
@@ -141,4 +103,38 @@ async function getPrompts(userPrompt: string): Promise<mls.msg.IAMessageInputTyp
     }
     const prompts = await getPromptByHtml({ project, shortName: agentName, folder: '', data: dataForReplace })
     return prompts;
+}
+
+function getPromptMock(): string {
+    return "criar site petshop";
+}
+
+export function getPayload1(context: mls.msg.ExecutionContext): PayLoad1 {
+    if (!context || !context.task) throw new Error(`[${agentName}] [getPayload] Invalid context`);
+    const agentStep = getAgentStepByAgentName(context.task, agentName); // Only one agent execution must exist in this task
+    if (!agentStep) throw new Error(`[${agentName}] [getPayload] no agent found`);
+
+    // get result
+    const resultStep = agentStep.interaction?.payload?.[0];
+    if (!resultStep || resultStep.type !== "clarification" || !resultStep.json) throw new Error(`[${agentName}] [getPayload] No step clarification found for this agent.`);
+    let payload1: PayLoad1 | string = resultStep.json;
+    if (typeof payload1 === "string") payload1 = JSON.parse(payload1) as PayLoad1;
+
+    // get userPrompt
+    payload1.userPrompt = agentStep?.interaction?.input.find((input) => input.type === 'human')?.content || '';
+
+    return payload1;
+}
+
+export interface PayLoad1 {
+    userPrompt: string;
+    userLanguage: string;
+    title: string;
+    questions: Record<string, Question>;
+    legends: string[];
+}
+export interface Question {
+    type: "open";
+    question: string;
+    answer: string;
 }
