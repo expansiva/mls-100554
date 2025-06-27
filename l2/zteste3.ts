@@ -4,7 +4,7 @@ import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
 import { globalState } from './_100554_collabState';
 
- @customElement('zteste3-100554')
+ @customElement('zteste3-100554') 
  export class Zteste3100554 extends CollabPageElement {
 
      initPage() {
