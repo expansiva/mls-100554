@@ -73,8 +73,6 @@ export class WidgetDefsPlanningChecklistEdit100554 extends StateLitElement {
         return html`
 
         <div class="mode-edit">
-            
-
                 <div class="check-container">
                     <input
                         class="checkbox"
@@ -105,8 +103,8 @@ export class WidgetDefsPlanningChecklistEdit100554 extends StateLitElement {
                 </div>
                 <div class="actions">
                     <button @click=${() => this.saveEdit()}>${collab_floppy_disk} Save</button>
-                    <button @click=${() => this.cancelEdit()}>${collab_xmark} Cancel</button>
                     <button @click=${() => this.deleteItem()}>${collab_trash} Delete</button>
+                    <button @click=${() => this.cancelEdit()}>${collab_xmark} Cancel</button>
                 </div>
             </div>
         </div>
