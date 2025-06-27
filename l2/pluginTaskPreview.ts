@@ -7,6 +7,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 import './_100554_pluginTaskPreviewAgent';
 import './_100554_pluginTaskPreviewClarification';
 import './_100554_pluginTaskPreviewFlexible';
+import './_100554_pluginTaskPreviewTools';
 
 @customElement('plugin-task-preview-100554')
 export class AgentTester extends CollabLitElement {
@@ -86,6 +87,7 @@ export class AgentTester extends CollabLitElement {
             case 'agent': return this.renderAgent(step);
             case 'clarification': return this.renderClarification(step);
             case 'flexible': return this.renderFlexible(step);
+            case 'tool': return this.renderTools(step);
             default: return html`Not found type: renderStepDetails`;
         }
     }
@@ -120,6 +122,10 @@ export class AgentTester extends CollabLitElement {
 
     renderFlexible(step: mls.msg.AIFlexibleResultStep) {
         return html` <plugin-task-preview-flexible-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-flexible-100554> `;
+    }
+
+    renderTools(step: mls.msg.AIToolStep) {
+        return html` <plugin-task-preview-tools-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-tools-100554> `;
     }
 
     //------IMPLEMENTATION--------
