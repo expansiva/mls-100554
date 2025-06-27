@@ -2,11 +2,12 @@
 
 import { ITool, svg_tool } from './_100554_aiAgentBase';
 const toolName = "toolFileFilter";
-type FilterOp = "equals" | "startsWith" | "endsWith" | "contains" | "regex" | "isTrue" | "isFalse";
+type FilterOp = "equals" | "startsWith" | "endsWith" | "contains" | "regex" | "isTrue" | "isFalse" | "between";
+
 interface FileFilter {
     field: string;
     op: FilterOp;
-    value?: string | number;
+    value?: string | number | [string, string];
 }
 interface Args {
     filters: FileFilter[];
@@ -30,7 +31,7 @@ export function createTool(): ITool {
                     properties: {
                         field: { type: "string", description: "Campo do arquivo a ser filtrado." },
                         op: { type: "string", description: "Operador de comparação (equals, startsWith, endsWith, contains, regex, isTrue, isFalse)." },
-                        value: { type: ["string", "number"], description: "Valor a ser comparado (se aplicável).", optional: true }
+                        value: { type: ["string", "number", "array"], description: "Valor a ser comparado (se aplicável).", optional: true }
                     }
                 }
             }
@@ -38,7 +39,6 @@ export function createTool(): ITool {
         async execute(args: Args): Promise<string> {
             const { filters } = args;
             if (!filters || filters.length === 0) return `## Arquivos filtrados: \n\n []`;
-            
             const actualProject = mls.actual[5].project;
             if (!actualProject) throw new Error('Project ID is missing or invalid. Cannot filter files without a valid project context.');
             // Get files with explicit typing
@@ -76,10 +76,31 @@ export function createTool(): ITool {
                         return fieldValue === true;
                     case "isFalse":
                         return fieldValue === false;
+                    case "between":
+                        if (
+                            filter.field === "updatedAt" &&
+                            typeof fieldValue === "string" &&
+                            Array.isArray(filter.value) &&
+                            filter.value.length === 2 &&
+                            typeof filter.value[0] === "string" &&
+                            typeof filter.value[1] === "string"
+                        ) {
+                            const fileDateUTC = new Date(fieldValue);
+                            const fileDateLocal = new Date(
+                                fileDateUTC.getTime() + fileDateUTC.getTimezoneOffset() * 60000 * -1
+                            );
+
+                            const start = new Date(filter.value[0]);
+                            const end = new Date(filter.value[1]);
+
+                            return fileDateLocal >= start && fileDateLocal <= end;
+                        }
+                        return false;
                     default:
                         return false;
                 }
             }
+            
             const result = files.filter(file =>
                 filters.every(filter => matches(file, filter))
             ).map(item => ({
@@ -94,3 +115,4 @@ export function createTool(): ITool {
         }
     };
 }
+
