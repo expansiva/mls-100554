@@ -81,7 +81,8 @@ async function getPrompts(prompt: string): Promise<mls.msg.IAMessageInputType[]>
 
     const dataPrompt = {
         promptUser: prompt,
-        files: JSON.stringify(files)
+        files: JSON.stringify(files),
+        date: new Date().toISOString()
     };
 
     const rc = await getPromptByHtml({ folder: '', project: 100554, shortName: agentName, data: dataPrompt });
@@ -124,7 +125,6 @@ async function prepareExecTasks(context: mls.msg.ExecutionContext) {
     }
 
     return `Analyze completed, ${total} tasks executed: ${total - errors.length} succeeded, ${errors.length} failed.`;
-
 
 }
 
