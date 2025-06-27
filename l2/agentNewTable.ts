@@ -104,7 +104,7 @@ export async function getPrompts(): Promise<mls.msg.IAMessageInputType[]> {
         mode: preferModelType("code"),
     });
     
-    return await getPromptByHtml({ project: 100554, shortName: agentName, folder: '', state: agentName })
+    return await getPromptByHtml({ project: 100554, shortName: agentName, folder: '' })
 }
 
 
