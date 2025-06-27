@@ -71,7 +71,7 @@ export class ServiceSave extends ServiceBase {
     private scenery: string = 'save';
 
     @property() freeToSave: boolean = false;
-    @property() itens: IDefItem | undefined = undefined; 
+    @property() itens: IDefItem | undefined = undefined;
     @property() otherProjects: number[] = [];
     @property() error: string = '';
 
@@ -263,11 +263,13 @@ export class ServiceSave extends ServiceBase {
         </sectionsave>`
     }
 
-    renderOthersProjectsItens(project:number) {
+    renderOthersProjectsItens(project: number) {
         return html`
         <li style="cursor: not-allowed;opacity: .5;">
             <div style="cursor: not-allowed;">
-                <span class="fatv fa-caret-righttv" style="cursor: not-allowed;"></span>
+                <span class="fatv fa-caret-righttv" style="cursor: not-allowed;">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
+                </span>
                 <input type="checkbox" disabled style="cursor: not-allowed;">
                 <label style="cursor: not-allowed;">${project}</label>
             </div>
@@ -275,7 +277,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     renderItens() {
-        const keys = Object.keys(this.itens || {}); 
+        const keys = Object.keys(this.itens || {});
         return html`
             <sectionsave>
                 <div id="Save_menu_action" style="display:flex;">
@@ -299,12 +301,14 @@ export class ServiceSave extends ServiceBase {
     renderProject(project: string, index: number) {
 
         if (!this.itens) return html``;
- 
-        const keys = Object.keys(this.itens[+project]); 
+
+        const keys = Object.keys(this.itens[+project]);
         return html`
             <li class="open">
                 <div>
-                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}"></span>
+                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}">
+                        <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
+                    </span>
                     <input type="checkbox" id="l0-${index}" @click="${this.clickSetValueAllChilds}">
                     <label for="l0-${index}">${project}</label>
                 </div>
@@ -318,14 +322,16 @@ export class ServiceSave extends ServiceBase {
     renderLevels(level: string, project: string, indexP: number, index: number) {
         if (!this.itens) return html``;
 
-        const objP = this.itens[+project]; 
-        let item = objP[+level] as Ifile; 
+        const objP = this.itens[+project];
+        let item = objP[+level] as Ifile;
 
-        const keys = Object.keys(item); 
+        const keys = Object.keys(item);
         return html`
             <li class="open">
                 <div>
-                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > </span>
+                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > 
+                        <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
+                    </span>
                     <input type = "checkbox" id = "l1-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/>
                     <label for= "l1-${indexP}-${index}" > l${level} </label>
                 </div>
@@ -336,18 +342,20 @@ export class ServiceSave extends ServiceBase {
         `;
     }
 
-    renderFilesDefault(file:string, level: string, project: string, indexPP: number, indexP: number, index: number) {
+    renderFilesDefault(file: string, level: string, project: string, indexPP: number, indexP: number, index: number) {
 
         if (!this.itens) return html``;
 
-        const objP = this.itens[+project]; 
-        const fileInfo = objP[+level] as Ifile; 
+        const objP = this.itens[+project];
+        const fileInfo = objP[+level] as Ifile;
         let itens = fileInfo[file];
         itens = itens.sort((a, b) => a.text.localeCompare(b.text));
         return html`
             <li class="">
                 <div>
-                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > </span>
+                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > 
+                        <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
+                    </span>
                     <input type = "checkbox" id = "l2-${indexPP}-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/> 
                     <label for= "l2-${indexPP}-${indexP}-${index}" > ${file} </label>
                 </div>
@@ -359,15 +367,15 @@ export class ServiceSave extends ServiceBase {
     }
 
 
-    renderItem(item: Iitem, indexP: number, indexL: number,indexM: number, index: number) {
+    renderItem(item: Iitem, indexP: number, indexL: number, indexM: number, index: number) {
         const aux = ['new', 'rename'].includes(item.file.status) ? '' : html`<span @click="${this.clickHistory}" .item=${item} style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer" class="fa-regular fa-clock" title="History"></span>`;
         return html`
             <li style="padding-left: 1.1rem;">
                 <div style="align-items: center;">
                     ${item.disabled || item.onlyFather
-                        ? html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
-                        : html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
-                    }
+                ? html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
+                : html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
+            }
                     <label for= "l3-${indexP}-${indexL}-${indexM}-${index}" >
                         ${item.text}
                         ${unsafeHTML(item.span)}
@@ -389,12 +397,12 @@ export class ServiceSave extends ServiceBase {
                 el = el.closest('.fa-clock') as HTMLElement;
             }
 
-            if (!(el as any).item) return; 
+            if (!(el as any).item) return;
 
-            const f = ((el as any).item.file as mls.stor.IFileInfo); 
+            const f = ((el as any).item.file as mls.stor.IFileInfo);
             const h = await f.getHistory();
             if (!h || h.length <= 0) return;
-            
+
             const obj = {
                 project: f.project,
                 shortName: f.shortName,
@@ -456,7 +464,7 @@ export class ServiceSave extends ServiceBase {
         if (this.menu.updateTitle) this.menu.updateTitle();
         const div = document.createElement('div');
         const el = document.createElement('save-add-branch-100554');
-        (el as any).callBack = (obj: any) => { 
+        (el as any).callBack = (obj: any) => {
             if (obj.nameWithOwner) {
                 const ret = obj.nameWithOwner.split('/');
                 this.owner = ret[0];
@@ -492,7 +500,7 @@ export class ServiceSave extends ServiceBase {
                 const obj = this.setProjectLevelShortName(objProjects, file.project, file.level, file.shortName);
 
                 obj.push(await this.configItem(file));
-                
+
             }
 
             if (Object.keys(objProjects).length > 0) {
@@ -510,7 +518,7 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
-    private setProjectLevelShortName(obj:any, prj:number, level:number, shortname: string):any[] {
+    private setProjectLevelShortName(obj: any, prj: number, level: number, shortname: string): any[] {
 
         if (!obj[prj]) obj[prj] = { [level]: {} };
         const pj = obj[prj];
@@ -609,7 +617,7 @@ export class ServiceSave extends ServiceBase {
         all.forEach((i) => {
             if (i.checked) needDisable = false;
         });
-        
+
         if (needDisable) inpMain.checked = false;
     }
 
@@ -732,6 +740,8 @@ export class ServiceSave extends ServiceBase {
             await this.firePullrequest(msg);
             console.info('gerou o pullrequest');
 
+            this.backChecked();
+
             await this.afterSave(array);
 
             txt.value = '';
@@ -741,8 +751,7 @@ export class ServiceSave extends ServiceBase {
             this.repo = oldRepo;
             this.branch = oldBranch;
 
-            await this.setInfos();
-
+            await this.setInfos();    
             this.fireEvents();
             window.collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 5000, autoClose: true });
             this.showLoader(false);
@@ -753,6 +762,7 @@ export class ServiceSave extends ServiceBase {
             });
             this.error = err.message;
             this.setError(err.message);
+            this.backChecked();
             this.showLoader(false);
             console.info('Error onSave:', err);
         }
@@ -800,7 +810,7 @@ export class ServiceSave extends ServiceBase {
             const user = await driver.getUserInfo();
 
             info.login = user.login;
-            const isForkExist = await (driver as any).checkForkIO(this.owner, this.repo, info.login); 
+            const isForkExist = await (driver as any).checkForkIO(this.owner, this.repo, info.login);
 
             if (!isForkExist) {
                 console.info('criou um novo fork');
@@ -935,7 +945,7 @@ export class ServiceSave extends ServiceBase {
                         return;
                     }
                     //await this.verifyVersionBlock(array);
-                    await this.onSavenew(array, msg);
+                    await this.onSave_old(array, msg);
                     await this.setInfos();
                     this.fireEvents();
                     this.showLoader(false);
@@ -951,6 +961,13 @@ export class ServiceSave extends ServiceBase {
             this.showLoader(false);
             console.info('Error onSave');
         }
+    }
+
+    private backChecked() {
+
+        const els = this.querySelectorAll('input[type="checkbox"]:checked')
+        console.info(els)
+        Array.from(els).forEach((i) => (i as HTMLInputElement).checked = false);
     }
 
     private async veriFyPermission(): Promise<IPermission> {
@@ -976,7 +993,7 @@ export class ServiceSave extends ServiceBase {
         if (!prj) throw new Error('Not found project actual');
         let str = localStorage.getItem('InfoCurrentDriver');
         if (!str) str = '{}';
-        const info: any = JSON.parse(str); 
+        const info: any = JSON.parse(str);
         if (info[prj]) delete info[prj];
         localStorage.setItem('InfoCurrentDriver', JSON.stringify(info));
     }
@@ -1001,16 +1018,16 @@ export class ServiceSave extends ServiceBase {
         if (!prj) throw new Error('Not found project actual');
         let str = localStorage.getItem('InfoCurrentDriver');
         if (!str) str = '{}';
-        const info: any = JSON.parse(str); 
+        const info: any = JSON.parse(str);
         if (info[prj]) return info[prj]
-        return {} as any; 
+        return {} as any;
     }
 
     private getAllFileToSave(father: HTMLElement): mls.stor.IFileInfo[] {
         const ar: mls.stor.IFileInfo[] = [];
         if (this.forceSaveL5ProjectFile) {
             const allChecks = father.querySelectorAll('input[type="checkbox"][onlyStatusFather]');
-            allChecks.forEach((item: any) => { 
+            allChecks.forEach((item: any) => {
                 if (item.instance
                     && item.instance.level === 5
                     && item.instance.shortName === 'project'
@@ -1021,7 +1038,7 @@ export class ServiceSave extends ServiceBase {
             this.forceSaveL5ProjectFile = false;
         }
         const els = father.querySelectorAll('input[type="checkbox"][onlyStatusFather]:checked');
-        els.forEach((el: any) => { 
+        els.forEach((el: any) => {
             if (el.instance) {
                 ar.push(el.instance);
                 const info = el.instance as mls.stor.IFileInfo
@@ -1037,7 +1054,7 @@ export class ServiceSave extends ServiceBase {
         return ar;
     }
 
-    private async onSavenew(ar: mls.stor.IFileInfo[], msg: string) {
+    private async onSave_old(ar: mls.stor.IFileInfo[], msg: string) {
         if (ar.length <= 0) return;
         try {
             let versionBLock = 0;
@@ -1058,7 +1075,7 @@ export class ServiceSave extends ServiceBase {
                 this.fireEvents(800);
             }
             if (versionBLock > 0) {
-                (window as any).collabMessages.add(`File ${versionBLock} was changed in server, file was not save`, 'information'); 
+                (window as any).collabMessages.add(`File ${versionBLock} was changed in server, file was not save`, 'information');
             }
             return;
         } catch (e: any) {
@@ -1086,9 +1103,9 @@ export class ServiceSave extends ServiceBase {
     private async uppVersionAfterSave(array: mls.stor.IFileInfo[]) {
         try {
             const driver = mls.stor.others.getDefaultDriver(mls.actual[5].project as number);
-            if (!driver || !(driver as any).getVersionFromFiles) return; 
+            if (!driver || !(driver as any).getVersionFromFiles) return;
 
-            const info = await (driver as any).getVersionFromFiles(this.owner, this.repo, this.branch, array); 
+            const info = await (driver as any).getVersionFromFiles(this.owner, this.repo, this.branch, array);
             if (!info) return;
 
             for await (const a of array) {
@@ -1107,9 +1124,11 @@ export class ServiceSave extends ServiceBase {
     }
 
     private async deleteFile(storFile: mls.stor.IFileInfo) {
-        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-        await mls.stor.cache.setContent(storFile, null);
-        mls.editor.deleteModels(storFile.project, storFile.shortName, true);
+        if (storFile.inLocalStorage) {
+            await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+            await mls.stor.cache.setContent(storFile, null);
+            mls.editor.deleteModels(storFile.project, storFile.shortName, true);
+        }
         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
         delete mls.stor.files[keyFiles];
     }
@@ -1140,7 +1159,7 @@ export class ServiceSave extends ServiceBase {
 
     private async undoFile(storFile: mls.stor.IFileInfo) {
         const params = {} as mls.events.IFileAction;
-        params.action = 'undo'; 
+        params.action = 'undo';
         params.level = storFile.level;
         params.project = storFile.project;
         params.shortName = storFile.shortName;
@@ -1163,16 +1182,16 @@ interface IPermission {
     delete: boolean,
 }
 
-interface IDefItem{
+interface IDefItem {
     [key: number]: IDefItemLevel
 }
 
-interface IDefItemLevel{
+interface IDefItemLevel {
     [key: number]: Ifile
 }
 
-interface Ifile{
-    [key:string]: Iitem[]
+interface Ifile {
+    [key: string]: Iitem[]
 }
 
 interface Iitem {
