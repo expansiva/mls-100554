@@ -5,7 +5,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { getMessageKey } from './_100554_collabLitElement';
 import { StateLitElement } from './_100554_stateLitElement';
 import { propertyDataSource } from './_100554_collabDecorators';
-import { getDSInstance, DesignSystemIO } from './_100554_libDesignSystem';
+import { getTokens } from './_100554_designSystemBase';
+
 import { ICSSState } from './_100554_lessCSS';
 
 /// **collab_i18n_start**
@@ -53,26 +54,14 @@ export class PluginCssTokens extends StateLitElement {
 
     private needOrder: boolean = true;
 
-    private dsInstance: DesignSystemIO | undefined;
-
-    private async initDsInstance() {
-        const { project } = mls.actual[5];
-        if (project === undefined) throw new Error('No project selected!');
-        this.dsInstance = await getDSInstance(project, 0);
-        if (!this.dsInstance) return;
-        await this.dsInstance.init();
-    }
-
     private async getTokensColor() {
-
-        await this.initDsInstance();
-        if (!this.dsInstance || !this.dsInstance.tokens) return '';
-        if (!this.dsInstance) return '';
-        const resumeTokensByTheme = this.dsInstance.tokens.list[this.theme];
+        const { project } = mls.actual[5];
+        if(!project) throw new Error('Invalid project selected')
+        const tokens = await getTokens(project)
+        const resumeTokensByTheme = tokens.find((tk) => tk.themeName === this.theme);
         if (!resumeTokensByTheme) return undefined;
         const tokensColorKeys = Object.keys(resumeTokensByTheme.color);
         const filter = this.value.startsWith('@') ? this.value.substring(1, this.value.length) : this.value;
-        // const res = tokensColorKeys.filter((key) => !key.startsWith('_dark') && key.indexOf(filter) > -1).map((key2) => {
         const res = tokensColorKeys.filter((key) => !key.startsWith('_dark')).map((key2) => {
             return {
                 key: key2,
