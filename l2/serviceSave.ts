@@ -306,7 +306,7 @@ export class ServiceSave extends ServiceBase {
         return html`
             <li class="open">
                 <div>
-                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}">
+                    <span class="fatv fa-caret-righttv rotate" @click="${this.openMeList}">
                         <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
                     </span>
                     <input type="checkbox" id="l0-${index}" @click="${this.clickSetValueAllChilds}">
@@ -329,7 +329,7 @@ export class ServiceSave extends ServiceBase {
         return html`
             <li class="open">
                 <div>
-                    <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > 
+                    <span class="fatv fa-caret-righttv rotate" @click="${this.openMeList}" > 
                         <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
                     </span>
                     <input type = "checkbox" id = "l1-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/>
@@ -571,6 +571,10 @@ export class ServiceSave extends ServiceBase {
         const li = el.closest('li') as HTMLElement;
         if (!li) return;
         li.classList.toggle('open');
+
+        const fa = li.querySelector('.fa-caret-righttv');
+        if (fa) fa.classList.toggle('rotate');
+        
     }
 
     private clickSetValueAllChilds(e: MouseEvent): void {
@@ -964,9 +968,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private backChecked() {
-
         const els = this.querySelectorAll('input[type="checkbox"]:checked')
-        console.info(els)
         Array.from(els).forEach((i) => (i as HTMLInputElement).checked = false);
     }
 
