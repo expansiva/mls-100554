@@ -273,29 +273,39 @@ export class PluginPreviewInsights100554 extends StateLitElement {
       if (value <= 8) return '🙂';
       return '😄';
     };
-
+    
     return html`
 
     <h3>Code Quality Metrics</h3>
 
-    ${metrics.map(({ key, label }) => {
-      const value = insights[key as keyof typeof insights] ?? 0;
-      return html`
-        <div class="metric">
-          <label for="${key}">${label}:</label>
-          <input
-            type="number"
-            id="${key}"
-            name="${key}"
-            min="0"
-            max="10"
-            .value=${value}
-            @input=${(e: Event) => this.updateCodeMetric(e)}
-          />
-          <span class="emoji">${getEmoji(value as number)}</span>
-        </div>
-      `;
-    })}
+    ${[insights.errorHandling, insights.correctness, insights.maintainability, insights.readability].every((item) => item === undefined)
+      ? html`No metrics`
+      :
+      metrics.map(({ key, label }) => {
+        const value = insights[key as keyof typeof insights] ?? 0;
+        if(!value) return html``
+        return html`
+          <div class="metric">
+            <label for="${key}">${label}:</label>
+            <input
+              type="number"
+              id="${key}"
+              name="${key}"
+              min="0"
+              max="10"
+              .value=${value}
+              readonly
+
+            />
+            <span class="emoji">${getEmoji(value as number)}</span>
+          </div>
+        `;
+      })
+    
+    }
+
+
+
   `;
   }
 
@@ -636,14 +646,6 @@ export class PluginPreviewInsights100554 extends StateLitElement {
 
   }
 
-  private updateCodeMetric(e: Event) {
-    if (!this.defs?.codeInsights) return;
-    const input = e.target as HTMLInputElement;
-    const key = input.name as keyof typeof this.defs.codeInsights;
-    const value = Math.max(0, Math.min(10, parseInt(input.value) || 0));
-    this.defs.codeInsights[key] = value as number & string[];
-    this.requestUpdate(); 
-  }
 
   private onImproveClick(item: mls.l4.Planning) {
     const service = getState('preview.service');
