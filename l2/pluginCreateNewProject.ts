@@ -5,6 +5,8 @@ import { customElement, property, queryAll } from 'lit/decorators.js';
 import { collab_check, collab_xmark, collab_lock } from './_100554_collabIcons';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 
+import './_100554_pluginNewProject';
+
 /// **collab_i18n_start**
 const message_pt = {
     createProjectTitle: 'Criar projeto',
@@ -82,6 +84,10 @@ export class PluginCreateProject100554 extends PluginBaseModule {
             case 'customize':
                 return html`
                     ${this.renderCustomize()}
+                `
+            case 'create':
+                return html`
+                    ${this.renderCreate()}
                 `
         }
     }
@@ -173,7 +179,7 @@ export class PluginCreateProject100554 extends PluginBaseModule {
     renderCustomize() {
         return html`
             <div class="details-new-project">
-                <details open>
+                <details open style="display:none">
                     <summary>Resume</summary>
                     <div>
                         <ul>
@@ -274,6 +280,11 @@ export class PluginCreateProject100554 extends PluginBaseModule {
         `;
     }
 
+    renderCreate() {
+        return html`<plugin-new-project-100554></plugin-new-project-100554>
+        `
+    }
+
     //-----------IMPLEMENTATION-------------
 
     private changeScenario(scenario: IScenaries) {
@@ -295,7 +306,7 @@ export class PluginCreateProject100554 extends PluginBaseModule {
     }
 
     private onBtnCreateClick() {
-        alert(this.msg.alert);
+        this.changeScenario('create');
     }
 
 
@@ -575,7 +586,7 @@ export class PluginCreateProject100554 extends PluginBaseModule {
 
 }
 
-type IScenaries = 'select' | 'customize';
+type IScenaries = 'select' | 'customize' | 'create';
 interface IPlugins {
     type: 'free' | 'pro',
     enabled: boolean,

@@ -118,6 +118,14 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		return this.verifyPermissionIO(owner, repo, login);
 	}
 
+	public setPermissionAction(owner: string, repo: string, login: string): Promise<boolean> {
+		return this.setPermissionActionIO(owner, repo, login);
+	}
+
+	public addVariable2(owner: string, repo: string, name: string, value: string): Promise<boolean> {
+		return this.addVariableIO2(owner, repo, name, value);
+	}
+
 	public addVariable(name: string, value: string): Promise<boolean> {
 		return this.addVariableIO(name, value);
 	}
@@ -587,7 +595,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			try {
 
 				if (!opt.branchDest) opt.branchDest = 'main';
-				
+
 				let body = {} as any;
 
 				this.verifyMKey();
@@ -890,6 +898,70 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
+	private addVariableIO2(owner:string, repo:string, newVariable: string, secret: string): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!newVariable || !secret) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				this.verifyMKey();
+
+				const body = {
+					name: newVariable,
+					value: secret
+				};
+
+				const retFetch = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/variables`, {
+					method: 'POST',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + mKey,
+					},
+					referrerPolicy: 'no-referrer',
+					body: JSON.stringify(body)
+				});
+
+				if (retFetch.status === 401) {
+					throw new Error(`Conecte no "gitHub", faça SignIn no "gitHub" para permitir salvar nos repositórios<br/>É importante salvar nos repositórios para permitir históricos e evitar perca de dados.`);
+				}
+
+				if (retFetch.status === 404) {
+					resolve(false);
+					return;
+				}
+
+				if (retFetch.status === 403) {
+					resolve(false);
+					return;
+				}
+
+				const ret = await retFetch.json();
+
+				if (ret && ret.message) {
+					reject(new Error(ret.message));
+					return;
+				}
+
+				resolve(true);
+
+			} catch (err: any) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
 	private addVariableIO(newVariable: string, secret: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
@@ -953,6 +1025,56 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 				resolve(true);
 
 			} catch (err: any) {
+
+				reject(err);
+
+			}
+
+		});
+
+	}
+
+	private setPermissionActionIO(owner: string, repo: string, login: string): Promise<boolean> {
+
+		return new Promise<boolean>(async (resolve, reject) => {
+
+			if (!repo || !owner ) {
+				reject(new Error('Information invalid!'));
+				return;
+			}
+
+			try {
+
+				this.verifyMKey();
+
+				const url = `https://api.github.com/repos/${owner}/${repo}/actions/permissions/workflow`;
+
+				const retFetch = await fetch(url, {
+					method: 'PUT',
+					mode: 'cors',
+					cache: 'no-cache',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						Authorization: 'bearer ' + mKey,
+					},
+					body: JSON.stringify({
+						enabled: true,
+						default_workflow_permissions: 'write',
+						allowed_actions: 'all',
+						can_approve_pull_request_reviews:true
+					}),
+					referrerPolicy: 'no-referrer',
+				});
+
+				if (![200,204].includes(retFetch.status)) {
+					throw new Error(`Error: set permission action`);
+				}
+
+				
+				resolve(true);
+
+			} catch (err) {
 
 				reject(err);
 
