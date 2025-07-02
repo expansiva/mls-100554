@@ -350,6 +350,13 @@ export class CollabNewProject extends CollabLitElement {
         const value = (e.target as HTMLSelectElement).value;
         this.orgSelected = !!value;
         this.orgName = value;
+        if (this.login !== this.orgName) {
+            const ref = this.actualOrgs.find((o) => o.id === value);
+            if (!ref) throw new Error('Not found orgName');
+            this.orgName = ref.name;
+
+        }
+
         if (value) {
             this.loadTeamByOrg(value);
             setTimeout(() => this.step3?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
@@ -502,7 +509,20 @@ export class CollabNewProject extends CollabLitElement {
             }
 
             if (rc === 'free') {
-                await this.tryItem(async () => await this.instanceDriver?.createRepository(this.login, this.NEWREPONAME, this.orgName, 'new project in collab.codes', 'PUBLIC'), `${this.msg.log_1} ${this.NEWREPONAME} `);
+
+                let orgName = this.orgName;
+                if (this.login !== orgName) {
+                    const ref = this.actualOrgs.find((o) => o.name === orgName);
+                    if (!ref) {
+                        this.changeStatusLastLog('error', 'Error not found org name');
+                        this.setProgressError(true);
+                        throw new Error('Error not found org name');
+                    }
+                    orgName = ref.id;
+
+                }
+
+                await this.tryItem(async () => await this.instanceDriver?.createRepository(this.login, this.NEWREPONAME, orgName, 'new project in collab.codes', 'PUBLIC'), `${this.msg.log_1} ${this.NEWREPONAME} `);
                 newPercent += percent;
                 this.setProgress(newPercent);
 

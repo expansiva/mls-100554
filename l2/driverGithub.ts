@@ -1631,7 +1631,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 								name
 								login
 								avatarUrl
-								
+								id
 							}
 						}
 					}
@@ -1650,8 +1650,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 						const info = {} as mls.stor.others.IOrg;
 
-						info.name = i.node.name;
-						info.id = i.node.login;
+						info.name = i.node.login;
+						info.id = i.node.id;
 						info.avatarUrl = i.node.avatarUrl;
 						info.visibility = 'public';
 
