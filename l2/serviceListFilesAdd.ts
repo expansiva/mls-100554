@@ -7,7 +7,7 @@ import { ServiceBase } from './_100554_serviceBase';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IDetails } from "./_100554_pluginNewFileBase";
 import { propertyDataSource } from './_100554_collabDecorators';
-import { globalState } from './_100554_collabState';
+import { globalState, initState } from './_100554_collabState';
 import { loadPluginProject } from './_100554_libCommom';
 
 /// **collab_i18n_start**
@@ -61,9 +61,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     async connectedCallback() {
         super.connectedCallback();
-        if (!globalState._ica) globalState._ica = {};
-        if (!globalState._ica.l2) globalState._ica.l2 = {};
-        if (!globalState._ica.l2.addFile) globalState._ica.l2.addFile = { shortName: '', project: 0 };
+        if (!globalState._ica?.l2?.addFile) initState('l2.addFile', { shortName: '', project: 0 });
         globalState.globalStateManagment.setState('l2.addFile.shortName', '');
         await this.init();
     }

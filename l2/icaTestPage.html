@@ -6,46 +6,46 @@
 
 <h3>Exemplos Dinamicos no HTML</h3>
     <div style="display:flex; justify-content: start; ">
-        <collab-select-one-with-description-100554 options="{{ tables.events }}" selectedvalue="{{ wcdAddEventSelected }}"></collab-select-one-with-description-100554>
+        <collab-select-one-with-description-100554 options="{{ icaTestPage.tables.events }}" selectedvalue="{{ icaTestPage.wcdAddEventSelected }}"></collab-select-one-with-description-100554>
     </div>
     <br>
     <br>
     <br>
 
-    <wc-input-text-100554 label="Item selecionado:" value="{{ wcdAddEventSelected }}"></wc-input-text-100554>
+    <wc-input-text-100554 label="Item selecionado:" value="{{ icaTestPage.wcdAddEventSelected }}"></wc-input-text-100554>
 
 <div style="padding: 1rem; display:flex; gap:4rem;">
 
 
-    <wc-select-one-100554 label-pt="O usuario {{users[0].name}} tem {{users[0].age}} anos e mora em {{users[0].city}}"
-        label="The user {{users[0].name}} is {{users[0].age}} years old and lives in {{users[0].city}}."
-        hint-pt="Selecione o sexo do usuario" hint="Select the user's gender" options="{{ tables.sex }}"
-        selectedvalue="{{users[0].sex}}">
+    <wc-select-one-100554 label-pt="O usuario {{icaTestPage.users[0].name}} tem {{icaTestPage.users[0].age}} anos e mora em {{icaTestPage.users[0].city}}"
+        label="The user {{icaTestPage.users[0].name}} is {{icaTestPage.users[0].age}} years old and lives in {{icaTestPage.users[0].city}}."
+        hint-pt="Selecione o sexo do usuario" hint="Select the user's gender" options="{{ icaTestPage.tables.sex }}"
+        selectedvalue="{{icaTestPage.users[0].sex}}">
     </wc-select-one-100554>
 
-    <wc-input-text-100554 label="User" value="{{users[0].name}}"></wc-input-text-100554>
-    <wc-input-text-100554 label="City" value="{{users[0].city}}"></wc-input-text-100554>
-    <wc-input-number-100554 label="Age:" value="{{users[0].age}}" errormessage="Invalid age" minvalue="0"
+    <wc-input-text-100554 label="User" value="{{icaTestPage.users[0].name}}"></wc-input-text-100554>
+    <wc-input-text-100554 label="City" value="{{icaTestPage.users[0].city}}"></wc-input-text-100554>
+    <wc-input-number-100554 label="Age:" value="{{icaTestPage.users[0].age}}" errormessage="Invalid age" minvalue="0"
         maxvalue="100"></wc-input-number-100554>
 </div>
 <hr>
 
 
 <div style="padding: 1rem; display:flex; gap:4rem;">
-    <wc-select-one-100554 options="{{ tables.sex }}" selectedvalue="{{users[0].sex}}" label="Sex">
+    <wc-select-one-100554 options="{{ icaTestPage.tables.sex }}" selectedvalue="{{icaTestPage.users[0].sex}}" label="Sex">
     </wc-select-one-100554>
-    <wc-input-number-with-buttons-100554 label="Age:" value="{{users[0].age}}" errormessage="Invalid age"
+    <wc-input-number-with-buttons-100554 label="Age:" value="{{icaTestPage.users[0].age}}" errormessage="Invalid age"
         minvalue="0" maxvalue="100"></wc-input-number-with-buttons-100554>
 </div>
 
 <hr>
 
 <div style="padding: 1rem; display:flex; gap:4rem;">
-    <wc-select-one-100554 options="{{ tables.sex }}" selectedvalue="{{users[0].sex}}" label="Sex">
+    <wc-select-one-100554 options="{{ icaTestPage.tables.sex }}" selectedvalue="{{icaTestPage.users[0].sex}}" label="Sex">
     </wc-select-one-100554>
-    <wc-input-number-range-100554 label="Age:" value="{{users[0].age}}" errormessage="Invalid age"
+    <wc-input-number-range-100554 label="Age:" value="{{icaTestPage.users[0].age}}" errormessage="Invalid age"
         minvalue="0" maxvalue="100"></wc-input-number-range-100554>
 </div>
     <div style="display:flex; justify-content: start; ">
-        <collab-select-one-with-description-100554 options="{{ tables.events }}" selectedvalue="{{ wcdAddEventSelected }}"></collab-select-one-with-description-100554>
+        <collab-select-one-with-description-100554 options="{{ icaTestPage.tables.events }}" selectedvalue="{{ icaTestPage.wcdAddEventSelected }}"></collab-select-one-with-description-100554>
     </div>

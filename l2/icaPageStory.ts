@@ -8,9 +8,7 @@ import { globalState } from './_100554_collabState';
 export class IcaPageMedium100554 extends CollabPageElement {
 
     initPage() {
-        globalState._ica = {
-            
-        }; 
+
     }
 
     /// **collab_events_start**
