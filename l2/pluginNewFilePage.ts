@@ -6,10 +6,9 @@ import { convertFileNameToTag } from './_100554_utilsLit';
 import { StateLitElement } from './_100554_stateLitElement';
 import { getMessageKey } from "./_100554_collabLitElement";
 import { propertyDataSource } from './_100554_collabDecorators';
-import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget } from "./_100554_pluginNewFileBase";
+import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget, changeStateName } from "./_100554_pluginNewFileBase";
 import { ServiceBase } from './_100554_serviceBase';
 import './_100554_wcCode';
-
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -71,14 +70,15 @@ export class PluginNewFilePage extends StateLitElement {
     private template: string = `
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
-import { globalState } from './_100554_collabState';
+import { globalState, setState, initState } from './_100554_collabState';
 
  @customElement('[tagName]')
  export class [className] extends CollabPageElement {
 
      initPage() {
-          globalState._ica = {
-             tables: {
+
+        initState('[stateName]', {
+            tables: {
                  sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
              },
              newUser: {
@@ -88,7 +88,8 @@ import { globalState } from './_100554_collabState';
                  sex: ''
              },
              sum: 0,
-         };
+        });
+
      }
 
  }`;
@@ -104,6 +105,8 @@ import { globalState } from './_100554_collabState';
             newExample = changeTagName(newExample, convertFileNameToTag(`_${this.project}_${this.shortName}`));
             newExample = changeClassName(newExample, this.project, this.shortName);
             newExample = changeWidget(newExample, this.project, this.shortName);
+            newExample = changeStateName(newExample, this.shortName);
+
         }
         return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" />\n${newExample}\n`;;
     }

@@ -23,6 +23,12 @@ export function changeTagName(source: string, tagName: string): string {
     return outputString;
 }
 
+export function changeStateName(source: string, stateName: string): string {
+    const outputString = source.replace(/\[stateName\]/g, stateName);
+    return outputString;
+}
+
+
 export interface IRequestNewFile {
     project: number,
     position: 'left' | 'right',
@@ -32,6 +38,7 @@ export interface IRequestNewFile {
     sourceHTML?: string,
     sourceLess?: string,
     sourceTest?: string,
+    sourceDefs?: string,
     openPreview: boolean
 }
 
@@ -51,8 +58,11 @@ export async function createNewFile(args:IRequestNewFile) {
     params.extension = '.ts';
     params.newTSSource = args.sourceTS;
     if (args.sourceHTML) params.newHtmlSource = args.sourceHTML;
-    if (args.sourceLess) (params as any).newHtmlLess = args.sourceLess;
-    if (args.sourceTest) (params as any).newHtmlTest = args.sourceTest;
+    if (args.sourceLess) (params as any).newLessSource = args.sourceLess;
+    if (args.sourceTest) (params as any).newTsTestSource = args.sourceTest;
+    if (args.sourceDefs) (params as any).newTsDefsSource = args.sourceDefs;
+
+
     (params as any).openPreview = args.openPreview
     params.position = args.position;
 
