@@ -438,8 +438,9 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         this.state.orgs = [];
     }
 
+    private KeyHistory = 'serviceExploreProjects'
     private loadHistory(): IHistory[] {
-        const lcHistory = localStorage.getItem('l5-projects-history');
+        const lcHistory = localStorage.getItem(this.KeyHistory);
         let rc: IHistory[] = [];
         if (!lcHistory) return rc;
         try {
@@ -543,7 +544,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         };
         this.state.history.unshift(historyItem);
         if (this.state.history.length > 9) this.state.history.pop();
-        localStorage.setItem('l5-projects-history', JSON.stringify(this.state.history));
+        localStorage.setItem(this.KeyHistory, JSON.stringify(this.state.history));
     }
 
     private projectCreatedNumber: number = 100554;
