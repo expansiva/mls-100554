@@ -285,21 +285,37 @@ export async function getEnhancementName(file: { project: number, shortName: str
     return enhacementName;
 }
 
-const keyProject = 'projectDetails'
+const BaseProject = 100554;
+export async function loadPluginProject(project: number, scope: string, onlyEnabled: boolean = true): Promise<mls.plugin.MenuAction[]> {
 
-export function setProjectDetails(project: number) {
-    const detail = mls.l5.getProjectDetails(project);
-    localStorage.setItem(keyProject, JSON.stringify({project, dependencies: detail ? detail.prj_dependencies : []}));
+    await mls.plugin.loadAll(BaseProject, onlyEnabled);
+    const base = mls.plugin.getAllMenuActions(BaseProject, { scope: scope } as any);
+
+    await mls.plugin.loadAll(project, onlyEnabled);
+    const user = mls.plugin.getAllMenuActions(project, { scope: scope } as any);
+
+    const i = [...base, ...user];
+
+    return Array.from(
+        new Map(i.map(obj => [JSON.stringify(obj), obj])).values()
+    );
+
 }
 
-export function getProjectDetails():IRetProjectDetails | undefined {
-    const info = localStorage.getItem(keyProject);
+const KeyProject = 'projectDetails'
+export function setProjectDetails(project: number) {
+    const detail = mls.l5.getProjectDetails(project);
+    localStorage.setItem(KeyProject, JSON.stringify({ project, dependencies: detail ? detail.prj_dependencies : [] }));
+}
+
+export function getProjectDetails(): IRetProjectDetails | undefined {
+    const info = localStorage.getItem(KeyProject);
     if (!info) return undefined;
     return JSON.parse(info);
 
 }
 
-interface IRetProjectDetails{
+interface IRetProjectDetails {
     project: number,
-    dependencies:number[]
+    dependencies: number[]
 }

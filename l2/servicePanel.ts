@@ -3,6 +3,7 @@
 import { html, css, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { loadPluginProject } from './_100554_libCommom';
 import './_100554_collabPanel';
 @customElement('service-panel-100554')
 export class ServicePanel100554 extends ServiceBase {
@@ -172,13 +173,13 @@ export class ServicePanel100554 extends ServiceBase {
         }, 500);
     }
 
+    private baseProject = 100554;
+
     private async setMyData() {
 
         const prj = mls.actual[5].project;
         if (!prj) return;
-        let array: any[] = [];
-        await mls.plugin.loadAll(prj, false);
-        array = mls.plugin.getAllMenuActions(prj, { scope: 'l5Panel' } as any)
+        let array= await loadPluginProject(prj, 'l5Panel', false);
 
         array.forEach((item: mls.plugin.MenuAction) => {
 

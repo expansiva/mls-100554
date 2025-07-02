@@ -4,6 +4,8 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { getConfigProject } from './_100554_libProjectConfig';
+import { loadPluginProject } from './_100554_libCommom';
+
 import './_100554_collabTiles';
 
 @customElement('service-dashboard-100554')
@@ -141,14 +143,15 @@ export class ServiceDashboard100554 extends ServiceBase {
 
     private pluginsDash2: ITiles[] = [];
 
+    private baseProject = 100554;
     private async loadAndSetPlugins() {
 
         const prj = mls.actual[5].project;
         if (!prj) return;
 
-        await mls.plugin.loadAll(prj, true);
         const dash = "l6Dashboard" as mls.plugin.Scope;
-        const arry = mls.plugin.getAllMenuActions(100554, { scope: dash } as any);
+
+        const arry = await loadPluginProject(prj, dash);
 
         const config = await getConfigProject(prj);
 

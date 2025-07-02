@@ -7,9 +7,8 @@ import { CollabLitElement } from './_100554_collabLitElement'
 import { globalWcd } from './_100554_wcdState';
 import { executeFromTag, getOverlay } from './_100554_wcdCommandAdd';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import {
-    getGroups
-} from './_100554_icaBaseDescription';
+import { getGroups } from './_100554_icaBaseDescription';
+import { loadPluginProject } from './_100554_libCommom';
 
 
 /// **collab_i18n_start**
@@ -306,10 +305,10 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
         const elOverlay = getOverlay();
         if (!elOverlay) return;
 
-        if (!mls.actual[5].project) return;
-        await mls.plugin.loadAll(mls.actual[5].project, false);
+        const { project } = mls.actual[5];
+        if (!project) return;
 
-        const listIndex = mls.plugin.getAllMenuActions(mls.actual[5].project, { scope: 'l3AddWidget' } as any);
+        const listIndex = await loadPluginProject(project, 'l3AddWidget', false);
 
         const list = elOverlay.listWidgetsBase;
 

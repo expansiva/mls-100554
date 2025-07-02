@@ -3,6 +3,7 @@
 import { html, repeat, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { loadPluginProject } from './_100554_libCommom';
 import './_100554_collabPanel';
 import './_100554_collabPanelItem';
 
@@ -138,13 +139,14 @@ export class ServiceUser100554 extends ServiceBase {
         `
     }
 
+    private baseProject = 100554;
+
     private async setMyData() {
 
         const prj = mls.actual[5].project;
         if (!prj) return;
-        let array: any[] = [];
-        await mls.plugin.loadAll(prj, false);
-        array = mls.plugin.getAllMenuActions(prj, { scope: 'l5UserSettings' } as any);
+        let array = await loadPluginProject(prj, 'l5UserSettings', false);
+
         array.forEach((item: any) => {
             const cat = item.category as string;
             item.mode = 'tag';
