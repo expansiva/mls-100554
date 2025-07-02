@@ -3,49 +3,94 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-import { PayLoad3, getPayload3 } from './_100554_agentNewModule3';
+import { PayLoad3, getPayload3, PageDefinition } from './_100554_agentNewModule3';
 import { getTask } from './_100554_msgDBController';
-
+import { formatHtml } from './_100554_collabDOMSync';
+import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
+import { createNewFile } from "./_100554_pluginNewFileBase";
 @customElement('agent-new-module-create-100554')
 export class AgentNewModuleCreate100554 extends StateLitElement {
+
     static properties = {
         type: { type: String },
         index: { type: Number },
-        result: { type: String }
+        result: { type: String },
+        groupToDelete: { type: String },
+        loading: { type: Boolean }
+
     };
 
 
     type = "table";
     index = 0;
-    taskId = "task#1750787911355";
+    groupToDelete = '';
+    taskId = "task#1751381101588";  //"task#1750787911355"
     result = "";
     project = 100554;
     folder = "";
+    loading = false;
+
 
     render() {
+
+        if (this.loading) {
+            return html`executing...`
+        }
         return html`
       <div>
-        <label>TaskId:</label>
-        <input type="string" .value=${this.taskId} @input=${(e: Event) => this.taskId =(e.target as HTMLInputElement).value} />
-        <label>Type:</label>
-        <select @change=${(e: Event) => this.type = (e.target as HTMLSelectElement).value}>
-          <option value="table">table</option>
-          <option value="plugin">plugin</option>
-          <option value="organism">organism</option>
-          <option value="page">page</option>
-        </select>
 
-        <label>Index:</label>
-        <input type="number" .value=${this.index} @input=${(e: Event) => this.index = Number((e.target as HTMLInputElement).value)} />
+        <fieldset>
+            <label>TaskId:</label>
+            <input type="string" .value=${this.taskId} @input=${(e: Event) => this.taskId = (e.target as HTMLInputElement).value} />
+            <label>Type:</label>
+            <select @change=${(e: Event) => this.type = (e.target as HTMLSelectElement).value}>
+            <option value="table">table</option>
+            <option value="plugin">plugin</option>
+            <option value="organism">organism</option>
+            <option value="page">page</option>
+            </select>
 
-        <button @click=${this.generate}>Generate .defs</button>
+            <label>Index:</label>
+            <input type="number" .value=${this.index} @input=${(e: Event) => this.index = Number((e.target as HTMLInputElement).value)} />
+
+            <div>
+                <button @click=${this.generate}>Gerar .defs</button>
+                <button @click=${this.generateHTML}>Gerar .html</button>
+                <button @click=${this.generateTS}>Gerar .ts</button>
+
+                <button @click=${this.generatePage}>Criar Página</button>
+                <button @click=${this.generateOrganism}>Criar Organismo</button>
+                <button @click=${this.generateTable}>Criar Tabela</button>
+
+    
+            </div>
+        </fieldset>
+
+        
+        
+        <fieldset>
+                <button @click=${this.generateAllPage}>Criar todas as páginas</button>
+                <button @click=${this.generateAllOrganism}>Criar todos os organismos</button>
+                <button @click=${this.generateAllTables}>Criar todas as tabelas</button>
+
+        </fieldset>
+
+        <fieldset>
+            <div>
+                <label>GroupName:</label>
+                <input @input=${(e: Event) => this.groupToDelete = String((e.target as HTMLInputElement).value)} />
+                <button @click=${this.deletePages}>Deletar</button>
+            </div>
+        </fieldset>
+
+
       </div>
 
       <pre><code>${this.result}</code></pre>
     `;
     }
 
-    async generate() {
+    async getPayload() {
         const task = await getTask(this.taskId);
         if (!task) return `// invalid taskid selected`;
         const context: mls.msg.ExecutionContext = {
@@ -60,12 +105,100 @@ export class AgentNewModuleCreate100554 extends StateLitElement {
             modeSingleStep: true,
         }
         const payload3 = getPayload3(context);
-        this.result = generate(this.type, payload3, this.project, this.folder, this.index)
+        return payload3;
+    }
 
+    async deletePages() {
+        if (!this.groupToDelete) return this.result = 'Digite um grupo para deletar';
+        this.result = await deleteAllPagesByGroup(this.groupToDelete, this.project, this.folder);
+    }
+
+    async generate() {
+        const payload3 = await this.getPayload();
+        if (typeof payload3 === 'string') return this.result = payload3;
+        this.result = generateDefs(this.type, payload3, this.project, this.folder, this.index);
+    }
+
+    async generateHTML() {
+        const payload3 = await this.getPayload();
+        if (typeof payload3 === 'string') return this.result = payload3;
+        this.result = generateHTML(this.type, payload3, this.project, this.folder, this.index);
+    }
+
+    async generateTS() {
+        const payload3 = await this.getPayload();
+        if (typeof payload3 === 'string') return this.result = payload3;
+        this.result = generateTs(this.type, payload3, this.project, this.folder, this.index);
+    }
+
+    async generatePage() {
+        this.loading = true;
+        try {
+            const payload3 = await this.getPayload();
+            if (typeof payload3 === 'string') return this.result = payload3;
+            this.result = await generatePage(payload3, this.project, this.folder, this.index);
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    async generateOrganism() {
+        this.loading = true;
+        try {
+            const payload3 = await this.getPayload();
+            if (typeof payload3 === 'string') return this.result = payload3;
+            this.result = await generateOrganism(payload3, this.project, this.folder, this.index)
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    async generateTable() {
+        this.loading = true;
+        try {
+            const payload3 = await this.getPayload();
+            if (typeof payload3 === 'string') return this.result = payload3;
+            this.result = await generateTable(payload3, this.project, this.folder, this.index)
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    async generateAllPage() {
+        this.loading = true;
+        try {
+            const payload3 = await this.getPayload();
+            if (typeof payload3 === 'string') return this.result = payload3;
+            this.result = await generateAllPages(payload3, this.project, this.folder);
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    async generateAllOrganism() {
+        this.loading = true;
+        try {
+            const payload3 = await this.getPayload();
+            if (typeof payload3 === 'string') return this.result = payload3;
+            this.result = await generateAllOrganism(payload3, this.project, this.folder);
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    async generateAllTables() {
+        this.loading = true;
+        try {
+            const payload3 = await this.getPayload();
+            if (typeof payload3 === 'string') return this.result = payload3;
+            this.result = await generateAllTables(payload3, this.project, this.folder);
+        } finally {
+            this.loading = false;
+        }
     }
 }
 
-function generate(fileType: string, payload3: PayLoad3, project: number, folder: string, index: number): string {
+function generateDefs(fileType: string, payload3: PayLoad3, project: number, folder: string, index: number): string {
     try {
         switch (fileType) {
             case "table":
@@ -82,6 +215,357 @@ function generate(fileType: string, payload3: PayLoad3, project: number, folder:
     } catch (err: any) {
         return `// Error: ${err.message}`;
     }
+}
+
+
+function generateTs(fileType: string, payload3: PayLoad3, project: number, folder: string, index: number): string {
+    try {
+        switch (fileType) {
+            case "table":
+                return generateTsTable(payload3, project, folder, index);
+            case "plugin":
+                return ''
+            case "organism":
+                return generateTsOrganism(payload3, project, folder, index);
+            case "page":
+                return generateTsPage(payload3, project, folder, index);
+            default:
+                return "// Invalid type selected.";
+        }
+
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
+}
+
+function generateHTML(fileType: string, payload3: PayLoad3, project: number, folder: string, index: number) {
+    try {
+
+        switch (fileType) {
+            case "table":
+                return ''
+            case "plugin":
+                return ''
+            case "organism":
+                return generateHtmlOrganism(payload3, project, folder, index);
+            case "page":
+                return generateHtmlPage(payload3, project, folder, index);
+            default:
+                return "// Invalid type selected.";
+        }
+
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
+}
+
+
+async function generateAllPages(payload3: PayLoad3, project: number, folder: string): Promise<string> {
+
+    const logs: string[] = [];
+    for (let i = 0; i < payload3.pagesWireframe.length; i++) {
+        try {
+            const response = await generatePage(payload3, project, folder, i);
+            logs.push(response);
+        } catch (err: any) {
+            logs.push(`// Error: ${err.message}`)
+        }
+    }
+
+    return logs.join('\n');
+
+}
+
+async function generateAllOrganism(payload3: PayLoad3, project: number, folder: string): Promise<string> {
+
+    const logs: string[] = [];
+    for (let i = 0; i < payload3.organism.length; i++) {
+        try {
+            const response = await generateOrganism(payload3, project, folder, i);
+            logs.push(response);
+        } catch (err: any) {
+            logs.push(`// Error: ${err.message}`)
+        }
+    }
+
+    return logs.join('\n');
+
+}
+
+async function generateAllTables(payload3: PayLoad3, project: number, folder: string): Promise<string> {
+
+    const logs: string[] = [];
+    for (let i = 0; i < payload3.hierarchicalPersistentData.length; i++) {
+        try {
+            const response = await generateTable(payload3, project, folder, i);
+            logs.push(response);
+        } catch (err: any) {
+            logs.push(`// Error: ${err.message}`)
+        }
+    }
+
+    return logs.join('\n');
+
+}
+
+async function generatePage(payload3: PayLoad3, project: number, folder: string, index: number): Promise<string> {
+    try {
+        const ts = generateTs('page', payload3, project, folder, index);
+        const html = generateHTML('page', payload3, project, folder, index);
+        const defs = generateDefs('page', payload3, project, folder, index);
+
+        const pageWirefame = payload3.pagesWireframe[index];
+        const shortName = pageWirefame.pageName;
+        const enhancement = '_100554_enhancementLit';
+
+        await createNewFile(
+            { project, position: 'right', shortName, enhancement, sourceTS: ts.trim(), sourceHTML: html, sourceLess: '', sourceDefs: defs, openPreview: false }
+        );
+
+        return `page created: ${shortName}`
+
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
+}
+
+async function generateOrganism(payload3: PayLoad3, project: number, folder: string, index: number): Promise<string> {
+    try {
+        const ts = generateTs('organism', payload3, project, folder, index);
+        const html = generateHTML('organism', payload3, project, folder, index);
+        const defs = generateDefs('organism', payload3, project, folder, index);
+
+        const organism = payload3.organism[index];
+        const shortTagName = organism.organismTag;
+        const fullName = convertTagToFileName(`${shortTagName}-${project}`);
+        const { shortName } = mls.l2.getPath(fullName)
+        const enhancement = '_100554_enhancementLit';
+
+        await createNewFile(
+            { project, position: 'right', shortName, enhancement, sourceTS: ts.trim(), sourceHTML: html, sourceDefs: defs, openPreview: false }
+        );
+
+        return `organism created: ${fullName}`
+
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
+}
+
+async function generateTable(payload3: PayLoad3, project: number, folder: string, index: number): Promise<string> {
+    try {
+        const ts = generateTs('table', payload3, project, folder, index);
+        const defs = generateDefs('table', payload3, project, folder, index);
+
+        const entity = payload3.hierarchicalPersistentData[index];
+        const shortNameAux = sanitizeMeta(entity.entityName.toLowerCase(), project, folder);
+        const aux = prepareNameTable(shortNameAux);
+        const fullName = convertTagToFileName(`${aux}-${project}`);
+        const { shortName } = mls.l2.getPath(fullName)
+        const enhancement = '_100554_enhancementLit';
+
+
+        await createNewFile(
+            { project, position: 'right', shortName, enhancement, sourceTS: ts.trim(), sourceHTML: '', sourceLess: '', sourceDefs: defs, openPreview: false }
+        );
+
+        return `table created: ${fullName}`
+
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
+}
+
+
+function generateTsTable(payload: PayLoad3, project: number, folder: string, index: number): string {
+    try {
+        const entity = payload.hierarchicalPersistentData[index];
+        const shortNameAux = sanitizeMeta(entity.entityName.toLowerCase(), project, folder);
+        const aux = prepareNameTable(shortNameAux);
+        const fullName = convertTagToFileName(`${aux}-${project}`);
+        const { shortName } = mls.l2.getPath(fullName)
+        const enhancement = '_100554_enhancementLit';
+        const tagName = `${shortNameAux}-${project}`;
+        const groupName = payload.finalModuleDetails.moduleName;
+
+        console.info(entity.entityDefinitions)
+
+        const interfaceBlock = entity.entityDefinitions.length
+            ? `${entity.entityDefinitions.join("\n")}`
+            : "";
+
+        const formatted = interfaceBlock
+            .split('\n')
+            .map(line => line.trim().startsWith('export interface') ? formatInterface(line.trim()) : line)
+            .join('\n');
+
+
+        const ts = `
+/// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
+
+${formatted}
+
+`;
+        return ts;
+
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
+}
+
+function generateTsOrganism(payload: PayLoad3, project: number, folder: string, index: number): string {
+    try {
+        const organism = payload.organism[index];
+        const tagName = organism.organismTag;
+        const fullName = convertTagToFileName(`${tagName}-${project}`);
+        const { shortName } = mls.l2.getPath(fullName)
+        const enhancement = '_100554_enhancementLit';
+        const groupName = payload.finalModuleDetails.moduleName;
+        const fileName = `_${project}_${shortName}`
+
+        const ts = `
+/// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
+
+import { customElement } from 'lit/decorators.js';
+import { IcaOrganismWireframeBase } from './_100554_icaOrganismWireframeBase';
+
+@customElement('${tagName}-${project}')
+export class ${fileName} extends IcaOrganismWireframeBase {
+    
+    generalDescription: string | undefined = '${organism.planning.context}';
+    goal: string | undefined = '${organism.planning.goal}';
+
+}`;
+        return ts;
+
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
+}
+
+function generateHtmlOrganism(payload: PayLoad3, project: number, folder: string, index: number): string {
+    try {
+        const organism = payload.organism[index];
+        const shortTagName = organism.organismTag;
+        const tagName = `${shortTagName}-${project}`;
+        const htmlResult = `<${tagName}></${tagName}>`;
+        return htmlResult;
+
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
+}
+
+function generateTsPage(payload: PayLoad3, project: number, folder: string, index: number): string {
+    const pageWirefame = payload.pagesWireframe[index];
+    const shortName = pageWirefame.pageName;
+    const enhancement = '_100554_enhancementLit';
+    const groupName = payload.finalModuleDetails.moduleName;
+    const fileName = `_${project}_${shortName}`
+    const tagName = convertFileNameToTag(fileName);
+
+    const ts = `
+/// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
+
+import { CollabPageElement } from './_100554_collabPageElement';
+import { customElement } from 'lit/decorators.js';
+import { globalState, initState, setState } from './_100554_collabState';
+
+@customElement('${tagName}')
+export class ${fileName} extends CollabPageElement {
+    initPage() {
+
+    }
+}`;
+
+    return ts;
+}
+
+function generateHtmlPage(payload: PayLoad3, project: number, folder: string, index: number): string {
+    const pageWirefame = payload.pagesWireframe[index];
+    const shortName = pageWirefame.pageName;
+    const fileName = `_${project}_${shortName}`
+    const pagetagName = convertFileNameToTag(fileName);
+
+    const suffix = `-${project}`;
+
+    const updatedTags = pageWirefame.pageHtml.map(tag => {
+        return tag.replace(/<\/?([a-z0-9\-]+)(\s[^>]*)?>/gi, (match, tagName, attrs = '') => {
+            // Só adiciona sufixo se for web component (tem hífen no nome da tag)
+            if (tagName.includes('-')) {
+                const newTagName = tagName + suffix;
+                return match.startsWith('</')
+                    ? `</${newTagName}>`
+                    : `<${newTagName}${attrs}>`;
+            }
+            return match;
+        });
+    });
+    const htmlFinal = `<${pagetagName}>\n${formatHtml(updatedTags.join('\n'))}\n</${pagetagName}>`
+    return formatHtml(htmlFinal);
+}
+
+
+
+async function deleteAllPagesByGroup(group: string, project: number, folder: string) {
+
+    const filesToDelete: mls.stor.IFileInfo[] = [];
+    let modelsToDelete: { project: number, shortName: string }[] = [];
+    const filesToDeleteCache: Set<string> = new Set();
+    const logs: string[] = [];
+
+    const filesLocal = Object.values(mls.stor.files).filter(file =>
+        file.inLocalStorage &&
+        file.folder === folder &&
+        file.project === project &&
+        file.status === 'new'
+    );
+    for await (let storFile of filesLocal) {
+        const keyModel = mls.l2.getKey(storFile);
+        const models = mls.editor.models[keyModel];
+        if (models.ts) {
+            mls.l2.typescript.parseTripleSlash(models.ts);
+            const tpsGroup = models.ts.compilerResults?.tripleSlashMLS?.variables['groupName']
+            if (group === tpsGroup) filesToDelete.push(storFile);
+        }
+    }
+
+    modelsToDelete = Array.from(
+        new Map(filesToDelete.map(({ project, shortName }) => [shortName, { project, shortName }])).values()
+    );
+
+
+    for await (let fileToDelete of filesToDelete) {
+        await mls.stor.localStor.setContent(fileToDelete, { contentType: 'string', content: null });
+        fileToDelete.onAction = undefined;
+        fileToDelete.getValueInfo = undefined;
+        const keyFiles = mls.stor.getKeyToFiles(fileToDelete.project, fileToDelete.level, fileToDelete.shortName, fileToDelete.folder, fileToDelete.extension);
+        delete mls.stor.files[keyFiles];
+        logs.push(`Removendo stor file: ${keyFiles}`);
+        const ext = fileToDelete.extension.replace('.ts', '.js');
+        const targetKey = `https://collab.codes/local/_${fileToDelete.project}_${fileToDelete.shortName}${ext}?v=`
+        filesToDeleteCache.add(targetKey);
+    }
+
+    for await (let data of modelsToDelete) {
+        const keyModel = mls.l2.getKey(data);
+        logs.push(`Removendo models: ${keyModel}`);
+        mls.editor.deleteModels(data.project, data.shortName, true);
+
+    }
+    
+    const cacheName = 'mls-v2';
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    for (const request of keys) {
+        for (const targetKey of Array.from(filesToDeleteCache)) {
+            if (request.url.includes(targetKey)) {
+                await cache.delete(request);
+                logs.push(`Deletar do cache: ${request.url}`);
+            }
+        }
+    }
+    return logs.join('\n');
 }
 
 //
@@ -127,7 +611,11 @@ function capitalizeFirstLetter(text: string): string {
 
 function generateOrganismDefsFromLLM(payload: PayLoad3, index: number, project: number, folder: string): string {
     const organism = payload.organism[index];
-    const shortName = sanitizeMeta(organism.organismTag, project, folder);
+
+    console.info(organism)
+    let shortName1 = sanitizeMeta(organism.organismTag, project, folder);
+    const fileName = convertTagToFileName(`${shortName1}-${project}`);
+    const { shortName } = mls.l2.getPath(fileName);
 
     const tableImports = extractTablesFromDataNeeds(organism.organismDataNeeds);
 
@@ -260,10 +748,19 @@ function generatePageDefsFromLLM(payload: PayLoad3, index: number, project: numb
         `export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}\n`;
 }
 
+function prepareNameTable(shortNameAux: string) {
+    const prefix = "table";
+    const shortName = shortNameAux.replace(new RegExp(`^(${prefix})(.)`), (_, p1, p2) => {
+        return p1 + p2.toUpperCase();
+    });
+    return shortName;
+
+}
+
 function generateTableDefsFromLLM(payload: PayLoad3, index: number, project: number, folder: string): string {
     const entity = payload.hierarchicalPersistentData[index];
-    const shortName = sanitizeMeta(entity.entityName.toLowerCase(), project, folder);
-
+    const shortNameAux = sanitizeMeta(entity.entityName.toLowerCase(), project, folder);
+    const shortName = prepareNameTable(shortNameAux);
     const defs: mls.l4.BaseDefs = {
         meta: {
             projectId: project,
@@ -304,3 +801,15 @@ function generateTableDefsFromLLM(payload: PayLoad3, index: number, project: num
         `export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}\n\n\n` + interfaceBlock
         ;
 }
+
+function formatInterface(line: string) {
+    const match = line.match(/^export interface (\w+)\s*\{(.*)\}$/);
+    if (!match) return line;
+
+    const [, name, body] = match;
+    const properties = body.split(';').map(p => p.trim()).filter(Boolean);
+    const formattedProps = properties.map(p => `  ${p};`).join('\n');
+
+    return `export interface ${name} {\n${formattedProps}\n}`;
+}
+
