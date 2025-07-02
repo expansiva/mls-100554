@@ -5,6 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { loadPluginProject } from './_100554_libCommom';
 import { getAtributtesByTag, checkAttributteHasVariation, getDescriptionAttr } from './_100554_icaBaseDescription';
 import "./_100554_wcdToolboxItemActionEditVariation";
 
@@ -412,8 +413,7 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
 
         const { project } = mls.actual[5];
         if (!project) return [];
-        await mls.plugin.loadAll(project, true);
-        const plgs = mls.plugin.getAllMenuActions(project, { scope: 'l3PreviewAttr' } as any);
+        const plgs = await loadPluginProject(project, 'l3PreviewAttr');
 
         const ret: string[] = [];
         plgs.forEach((p) => {

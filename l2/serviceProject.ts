@@ -6,6 +6,7 @@ import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '
 import { collab_user } from './_100554_collabIcons';
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
+import { loadPluginProject } from './_100554_libCommom';
 import('./_100554_collabPanel');
 
 /// **collab_i18n_start**
@@ -235,21 +236,7 @@ export class ServiceProject100554 extends ServiceBase {
 
     private async getExploreData() {
         let { project } = mls.actual[5];
-
-        await mls.plugin.loadAll(this.baseProject, true);
-        const base = mls.plugin.getAllMenuActions(this.baseProject, { scope: 'l5Explore' } as any);
-
-        let user: mls.plugin.MenuAction[] = [] 
-        if (project) {
-            await mls.plugin.loadAll(project, true);
-            user = mls.plugin.getAllMenuActions(this.baseProject, { scope: 'l5Explore' } as any);
-        }
-
-        const i = [...base, ...user]
-
-        this.explories = Array.from(
-  new Map(i.map(obj => [JSON.stringify(obj), obj])).values()
-);;
+        this.explories = await loadPluginProject(project || 0, 'l5Explore');
 
     }
 

@@ -8,6 +8,7 @@ import { PluginStyleIndexItem } from './_100554_pluginStyleIndexItem';
 import { IHelpers, IMode } from './_100554_cssHelperIndexBase';
 import { ICSSState } from './_100554_lessCSS';
 import { globalState } from './_100554_collabState';
+import { loadPluginProject } from './_100554_libCommom';
 import './_100554_pluginStyleIndexItem';
 
 /// **collab_i18n_start**
@@ -138,12 +139,13 @@ export class CssHelperIndex extends StateLitElement {
         await this.updateComplete;
     }
 
+    private baseProject = 100554;
     private async getAvaliablesPlugins(): Promise<IHelpers[]> {
 
         const { project } = mls.actual[5];
-        if (!project) return [];
-        await mls.plugin.loadAll(project, true);
-        const allPlugins = mls.plugin.getAllMenuActions(project, { scope: 'l2StyleHelper' } as any);
+        
+        const allPlugins = await loadPluginProject(project || 0 , 'l2StyleHelper');
+
         const helpers: IHelpers[] = []
 
         for await (let plugin of allPlugins) {

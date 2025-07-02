@@ -8,6 +8,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 import { IDetails } from "./_100554_pluginNewFileBase";
 import { propertyDataSource } from './_100554_collabDecorators';
 import { globalState } from './_100554_collabState';
+import { loadPluginProject } from './_100554_libCommom';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -45,7 +46,7 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-list-files-add-100554')
 export class ServiceListFilesAdd100554 extends CollabLitElement {
 
-    private defaultProject = 100554;
+    private baseProject = 100554;
 
     private msg: MessageType = messages['en'];
 
@@ -229,10 +230,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
     }
     private async getPlugins(): Promise<mls.plugin.MenuAction[]> {
         let { project } = mls.actual[5];
-        if (!project) project = this.defaultProject;
-        await mls.plugin.loadAll(project, true);
-        const plugins = mls.plugin.getAllMenuActions(project, { scope: 'l2NewFile' } as any);
-        return plugins;
+        return await loadPluginProject(project || 0, 'l2NewFile');
     }
 
     private async getPluginsInfo(plugins: mls.plugin.MenuAction[]): Promise<IPlugins[]> {
