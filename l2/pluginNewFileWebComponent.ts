@@ -8,7 +8,6 @@ import { getMessageKey } from "./_100554_collabLitElement";
 import { propertyDataSource } from './_100554_collabDecorators';
 import { ServiceBase } from './_100554_serviceBase';
 import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget } from "./_100554_pluginNewFileBase";
-import { openService } from './_100554_libCommom'
 import './_100554_wcCode';
 
 /// **collab_i18n_start**
@@ -68,7 +67,7 @@ export class PluginNewFileWebComponent extends StateLitElement {
     private service = this.closest('service-detail-100554') as ServiceBase;
 
     private template: string = `
- import { html, css } from 'lit'; 
+ import { html } from 'lit'; 
  import { customElement, property } from 'lit/decorators.js';
  import { StateLitElement } from './_100554_stateLitElement';
 
@@ -116,34 +115,6 @@ export class PluginNewFileWebComponent extends StateLitElement {
             this.loading = false;
         }
     }
-
-    /*private async handleAddFile() {
-        if (!this.project || !this.shortName) {
-            this.service.setError(msg.error)
-            return;
-        };
-        this.loading = true;
-        try {
-            await createNewFile({
-                project:this.project,
-                position:this.position,
-                shortName:this.shortName,
-                enhancement:this.enhancement,
-                sourceTS:this.getTemplate(),
-                openPreview: false
-            });
-            if (this.service) {
-                openService('_100554_serviceAim', 'right', 2);
-                const opInstance = this.service.nav3Service?.getActiveInstance('right');
-                if (opInstance) {
-                    opInstance.setAttribute('actiontoopen', this.aimActionSuggest)
-                }
-            }
-
-        } catch (e: any) {
-            this.loading = false;
-        }
-    }*/
 
     render() {
         return html`
