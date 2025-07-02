@@ -8,7 +8,8 @@ import {
     template_build,
     template_tsconfig,
     template_ds,
-    template_l5Project
+    template_l5Project,
+    template_coreIndex
 } from './_100554_pluginNewProjectTemplate';
 
 import {
@@ -60,6 +61,7 @@ const message_pt = {
     log_13: "Criando arquivo inicial designSystem.ts file",
     log_14: "Setando permissão ao action",
     log_15: "Setando variavel no action",
+    log_16: "Criando arquivo inicial pluginCollabCoreIndex.ts file",
     log_error_03: "Por favor espere, outro usuário esta utilizando o repositório.",
     log_error_04: "Existe um repositório, mas não foi possível validar o usuário",
 }
@@ -104,6 +106,7 @@ const message_en = {
     log_13: "Creating initial designSystem.ts file",
     log_14: "Setting permission to action",
     log_15: "Setting variable in action",
+    log_16: "Creating initial pluginCollabCoreIndex.ts file",
     log_error_03: "Please wait, another user is creating; ",
     log_error_04: " There is a repository, but I was unable to validate the user",
 }
@@ -475,7 +478,7 @@ export class CollabNewProject extends CollabLitElement {
         }
 
         try {
-            let percent = 7.14;
+            let percent = 7.15;
             let newPercent = 0;
             this.setProgressError(false);
             this.setProgressFinished(false);
@@ -508,48 +511,74 @@ export class CollabNewProject extends CollabLitElement {
                 this.setProgress(newPercent);
             }
 
-            this.secret = 'teste010725';//this.getUniquePassword();
+            this.secret = this.getUniquePassword();
 
             const newProjectId = await this.tryItem(this.createProjecInCollab.bind(this), `${this.msg.log_3}`);
             newPercent += percent;
             this.setProgress(newPercent);
 
+            await this.sleep(200);
+
             if (this.newProjectVisibility === 'private') await this.tryItem(async () => await this.instanceDriver?.changeVisibility(this.orgName, this.NEWREPONAME, 'PRIVATE'), `${this.msg.log_4}`);
             newPercent += percent;
             this.setProgress(newPercent);
+
+            await this.sleep(200);
 
             const newProjectName = `mls-${newProjectId}`;
             await this.tryItem(async () => await this.instanceDriver?.renameRepository(this.orgName, this.NEWREPONAME, newProjectName), `${this.msg.log_5}`);
             newPercent += percent;
             this.setProgress(newPercent);
 
+            await this.sleep(200);
+
             await this.tryItem(async () => await this.setPermissionAction(this.orgName, newProjectName), `${this.msg.log_14}`);
             newPercent += percent;
             this.setProgress(newPercent);
+
+            await this.sleep(200);
 
             await this.tryItem(async () => await this.setVariableAction(this.orgName, newProjectName, this.secret), `${this.msg.log_15}`);
             newPercent += percent;
             this.setProgress(newPercent);
 
+            await this.sleep(200);
+
             await this.tryItem(async () => await this.createInitialReadMe(newProjectId), this.msg.log_8);
             newPercent += percent;
             this.setProgress(newPercent);
+
+            await this.sleep(200);
 
             await this.tryItem(async () => await this.createInitialBuildFile(newProjectId), this.msg.log_10);
             newPercent += percent;
             this.setProgress(newPercent);
 
+            await this.sleep(200);
+
+            /*await this.tryItem(async () => await this.createInitialCoreIndex(newProjectId), this.msg.log_16);
+            newPercent += percent;
+            this.setProgress(newPercent);
+
+            await this.sleep(200);*/
+
             await this.tryItem(async () => await this.createInitialPackageFile(newProjectId), this.msg.log_9);
             newPercent += percent;
             this.setProgress(newPercent);
+
+            await this.sleep(200);
 
             await this.tryItem(async () => await this.createInitialTSConfigFile(newProjectId), this.msg.log_11);
             newPercent += percent;
             this.setProgress(newPercent);
 
+            await this.sleep(200);
+
             await this.tryItem(async () => await this.createInitialConfigL5File(newProjectId), this.msg.log_12);
             newPercent += percent;
             this.setProgress(newPercent);
+
+            await this.sleep(200);
 
             await this.tryItem(async () => await this.createInitialDSFile(newProjectId), this.msg.log_13);
             newPercent += percent;
@@ -572,7 +601,7 @@ export class CollabNewProject extends CollabLitElement {
     private async createProjecInCollab() {
 
         const userNameCollab: string = this.getLoginUser() as string;
-        
+
         const param: {
             orgName: string;
             info: mls.cbe.IProjectInfo;
@@ -598,7 +627,7 @@ export class CollabNewProject extends CollabLitElement {
             }
         }
 
-        return 102008;//await mls.api.cbeSaveNewPrj(param);
+        return await mls.api.cbeSaveNewPrj(param);
     }
 
     private async setPermissionAction(org: string, repo: string) {
@@ -609,7 +638,11 @@ export class CollabNewProject extends CollabLitElement {
 
     }
 
-    private async setVariableAction(org: string, repo: string, psw:string) {
+    private sleep(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    private async setVariableAction(org: string, repo: string, psw: string) {
 
         if (!this.instanceDriver) return;
 
@@ -626,6 +659,12 @@ export class CollabNewProject extends CollabLitElement {
     private async createInitialBuildFile(project: number) {
         const fileName = '.github/workflows/build.yml';
         const content = template_build.template.trim().replace(/\[project\]/g, project.toString());
+        await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
+    }
+
+    private async createInitialCoreIndex(project: number) {
+        const fileName = 'l2/pluginCollabCoreIndex.ts';
+        const content = template_coreIndex.template.trim().replace(/\[project\]/g, project.toString());
         await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
     }
 
@@ -680,7 +719,7 @@ export class CollabNewProject extends CollabLitElement {
         const encoder = new TextEncoder();
         const data = encoder.encode(Date.now().toString() + Math.random());
         const hashBuffer = (crypto.subtle as any).digestSync
-            ? (crypto.subtle as any).digestSync('SHA-256', data) 
+            ? (crypto.subtle as any).digestSync('SHA-256', data)
             : null;
 
         const bytes = hashBuffer ? new Uint8Array(hashBuffer) : crypto.getRandomValues(new Uint8Array(32));
