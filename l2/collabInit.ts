@@ -395,10 +395,11 @@ export class CollabInit extends CollabLitElement {
             return this.anonymousServices;
         }
 
-        let project: number = this.actualProject || 0;
+        let project: number = 100554;//this.actualProject || 0;
         if (!project) project = this.baseProject;
 
         if (window.traceLifeCycle) console.info(`getServices using index project: ${project}`);
+
 
         await mls.plugin.loadAll(project, false);
 

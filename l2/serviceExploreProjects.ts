@@ -3,6 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property, queryAll, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { setProjectDetails, getProjectDetails } from './_100554_libCommom';
 import './_100554_pluginCreateNewProject'
 
 /// **collab_i18n_start**
@@ -342,7 +343,9 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     private getLastProject() {
-        this.lastPrjId = localStorage.getItem('l5-last-project');
+        const info = getProjectDetails();
+        if (info) this.lastPrjId = info.project.toString();
+        else this.lastPrjId = localStorage.getItem('l5-last-project');
         return this.lastPrjId;
     }
 
@@ -504,10 +507,12 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         mls.events.fire([5], ['ProjectSelected'], '');
     }
 
+    
     private setProjectActual(project: number) {
         mls.actual[5].project = project;
         this.state.projectSelected = project;
-        localStorage.setItem('l5-last-project', project.toString());
+        setProjectDetails(project);
+        //localStorage.setItem('l5-last-project', project.toString());    
     }
 
     private setOrgActual(project: number) {
