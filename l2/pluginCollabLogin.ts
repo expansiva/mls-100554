@@ -8,7 +8,7 @@ import { PluginBaseModule } from './_100554_pluginBaseModule';
 
 const message_pt = {
   title1: 'Bem vindo!',
-  title2: 'no', 
+  title2: 'no',
   title3: 'Collab Codes!',
   google_canSignIn: 'Continuar com o Google',
   google_canDisconnect: 'Desconectar do Google',
@@ -136,10 +136,10 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
     </div>
   `;
   }
-  
+
   logoff() {
-      document.cookie = `loginUser=anonymous; path=/; secure; samesite=strict;`;
-      window.location.reload();
+    document.cookie = `loginUser=anonymous; path=/; secure; samesite=strict;`;
+    window.location.reload();
   }
 
   getState(provider: mls.cbe.Provider): StateProvider {
@@ -174,7 +174,14 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
     if (this.verifyDisconnect('github')) return;
     const clientId = 'Ov23liz6csr4BVqknUlF';
     const redirectUri = encodeURIComponent('https://collab.codes?source=github');
-    const scope = 'repo read:user user:email';
+    //const scope = 'repo read:user user:email';
+    const scope = [
+      'repo',         // Access to repositories (includes issues)
+      'project',      // Access to GitHub Projects
+      'workflow',      // Access to GitHub Projects
+      'admin:org',    // Admin access to organization (very sensitive)
+      'user:email'    // Access to user's email address
+    ].join(' ');
     const state = this.generateRandomState();
     localStorage.setItem('pluginCollabLogin', state)
     const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
