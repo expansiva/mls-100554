@@ -284,3 +284,22 @@ export async function getEnhancementName(file: { project: number, shortName: str
     if (!enhacementName) throw new Error('enhacementName not valid');
     return enhacementName;
 }
+
+const keyProject = 'projectDetails'
+
+export function setProjectDetails(project: number) {
+    const detail = mls.l5.getProjectDetails(project);
+    localStorage.setItem(keyProject, JSON.stringify({project, dependencies: detail ? detail.prj_dependencies : []}));
+}
+
+export function getProjectDetails():IRetProjectDetails | undefined {
+    const info = localStorage.getItem(keyProject);
+    if (!info) return undefined;
+    return JSON.parse(info);
+
+}
+
+interface IRetProjectDetails{
+    project: number,
+    dependencies:number[]
+}

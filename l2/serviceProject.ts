@@ -28,7 +28,7 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-project-100554')
 export class ServiceProject100554 extends ServiceBase {
 
-    private defaultProject = 100554;
+    private baseProject = 100554;
 
     private msg: MessageType = messages['en'];
 
@@ -234,10 +234,22 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     private async getExploreData() {
-        let { project } = mls.actual[5]
-        if (!project) project = this.defaultProject;
-        await mls.plugin.loadAll(project, true);
-        this.explories = mls.plugin.getAllMenuActions(project, { scope: 'l5Explore' } as any);
+        let { project } = mls.actual[5];
+
+        await mls.plugin.loadAll(this.baseProject, true);
+        const base = mls.plugin.getAllMenuActions(this.baseProject, { scope: 'l5Explore' } as any);
+
+        let user: mls.plugin.MenuAction[] = [] 
+        if (project) {
+            await mls.plugin.loadAll(project, true);
+            user = mls.plugin.getAllMenuActions(this.baseProject, { scope: 'l5Explore' } as any);
+        }
+
+        const i = [...base, ...user]
+
+        this.explories = Array.from(
+  new Map(i.map(obj => [JSON.stringify(obj), obj])).values()
+);;
 
     }
 
