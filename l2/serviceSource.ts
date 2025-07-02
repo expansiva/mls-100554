@@ -753,9 +753,9 @@ export class ServiceSource100554 extends ServiceBase {
                 fileAction.newEnhancement as string,
                 fileAction.newTSSource as string,
                 fileAction.newHtmlSource as string,
-                (fileAction as any).newHtmlLess as string,
-                (fileAction as any).newHtmlTest as string,
-                (fileAction as any).newHtmlDefs as string,
+                (fileAction as any).newLessSource as string,
+                (fileAction as any).newTsTestSource as string,
+                (fileAction as any).newTsDefsSource as string,
                 openPreview
             );
             this.loading = false;
@@ -919,6 +919,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private async newFiles(newShortName: string, newProject: number, newEnhancement: string, tsSource: string, htmlSource?: string, lessSource?: string, testSource?: string, defsSource?: string, open: boolean = true) {
+        
         if (open) this.activeThisService();
         this.closeMenu();
         const newTSSource = tsSource
@@ -930,6 +931,7 @@ export class ServiceSource100554 extends ServiceBase {
         await this.createOrShowModelHtmlCssTestDefs(newShortName, newProject, false, '.less', lessSource);
 
         if (testSource) await this.createOrShowModelHtmlCssTestDefs(newShortName, newProject, false, '.test.ts', testSource);
+    
         if (defsSource) await this.createOrShowModelHtmlCssTestDefs(newShortName, newProject, false, '.defs.ts', defsSource);
 
         if (open) this.showActiveModel();
@@ -1964,8 +1966,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 const newTest = await this.prepareInitialTest(shortName, project, source);
                 await this.createStorFile(project, shortName, newTest, mode);
             } else if (mode === '.defs.ts') {
-                const newTest = await this.prepareInitialDefs(shortName, project, source);
-                await this.createStorFile(project, shortName, newTest, mode);
+                const newDefs = source || await this.prepareInitialDefs(shortName, project);
+                await this.createStorFile(project, shortName, newDefs, mode);
             } else {
                 const newHTML = await this.prepareInitiaHTML(source, shortName, project);
                 await this.createStorFile(project, shortName, newHTML, mode);
@@ -1987,7 +1989,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             createNow = true;
         }
 
-        if (!model) throw new Error("[createOrShowModelHtmlCssTestDefs] Erro get or create model")
+        if (!model) throw new Error("[createOrShowModelHtmlCssTestDefs] Erro get or create model");
+        mls.editor.forceModelUpdate(model); // Force to add on cache
 
         if (open && this._ed1 && this.activeModels) {
             this._ed1.setModel(model);
@@ -2048,24 +2051,19 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         return newTest;
     }
 
-    private async prepareInitialDefs(shortName: string, project: number, source: string = "") {
+    private async prepareInitialDefs(shortName: string, project: number) {
 
         const tag = convertFileNameToTag(`_${project}_${shortName}`);
-        const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />
-				
-                // TODO: InDevelpoment
-                
+        const newDefs = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />\n
+// TODO: InDevelpoment
                 `
-        const newTest = example
-            .replace('[shortName]', shortName)
-            .replace('[project]', project.toString())
-            .replace('[source]', source)
-
-        return newTest;
+        return newDefs;
     }
 
 
     private async prepareInitialLess(shortName: string, project: number, source: string = "") {
+
+        console.info({prepareInitialLess: source})
 
         const tag = convertFileNameToTag(`_${project}_${shortName}`);
 
