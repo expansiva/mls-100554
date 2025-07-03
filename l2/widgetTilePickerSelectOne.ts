@@ -7,7 +7,7 @@ import { propertyDataSource, propertyCompositeDataSource } from './_100554_colla
 const message_pt = {
     select: 'Selecionar',
     selected: 'Selecionado',
-};
+}; 
 const message_en = {
     select: 'Select',
     selected: 'Selected',
@@ -44,7 +44,7 @@ export class WidgetTilePickerSelectOne extends IcaFormsInputSelectOneBase {
     * Lista de opções disponíveis para seleção, cada uma com imagem e label
     * @example options="[{ value: 'tema1', label: 'Tema Claro', image: 'img1.png' }]"
     */
-    @propertyDataSource({ type: Array }) options: Array<{ value: string; label: string; image: string }> = [];
+    @propertyDataSource({ type: Array }) options: Array<{ value: string; label: string; image: string }> | undefined;
     /**
     * Desabilita o widget
     * @example disabled=true
