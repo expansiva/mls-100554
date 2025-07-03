@@ -391,10 +391,8 @@ export class ServiceProject100554 extends ServiceBase {
     private async setMyData() {
 
         const prj = mls.actual[5].project;
-        if (!prj) return;
-        let array: any[] = [];
-        await mls.plugin.loadAll(prj, false);
-        array = mls.plugin.getAllMenuActions(prj, { scope: 'l5Project' } as any);
+        
+        let array = await loadPluginProject(prj || 0, 'l5Project', false); 
         array.forEach((item: mls.plugin.MenuAction) => {
             const cat = item.category as string;
             if (!this.myData[cat]) this.myData[cat] = [item]
