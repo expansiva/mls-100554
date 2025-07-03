@@ -628,6 +628,7 @@ export class ServiceSave extends ServiceBase {
     private async updateList() {
         try {
             this.showLoader(true);
+            this.backChecked();
             this.fireEventsDetails();
             await this.setInfos();
             this.showLoader(false);
