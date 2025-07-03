@@ -118,7 +118,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             // Fallback: cast any other value to boolean.
             return Boolean(stateValue);
           }
-          let aux = stateValue.toString();
+          let aux = stateValue ? stateValue.toString() : '';
           if (typeof stateValue === 'object') aux = JSON.stringify(stateValue);
           if (options?.type === String) return stateValue ? aux : stateValue;
           return stateValue;
@@ -146,6 +146,8 @@ export function propertyDataSource(options?: PropertyDeclaration) {
         return attributeValue;
       },
       set(value: any) {
+
+        if (value === null) return;
 
         if (options?.type === Number && typeof value === 'number' && isNaN(value)) {
           // ignore , lit sent ex "{{users.name}}" after requestUpdate
@@ -210,9 +212,28 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           // Update both internal property value and globalState if necessary and notify state changes 
           const attributeValue = this.hasAttribute(attributeName) ? this.getAttribute(attributeName) : '';
           if (typeof attributeValue === "string" && attributeValue.includes('{{') && attributeValue.includes('}}')) {
+
             const dynamicKey = attributeValue.replace(/[{{}}]/g, '').trim();
-            this[`_${attributeName}`] = value;
-            state1.setState(dynamicKey, value); // Notify state changes
+            const ori = state1.getState(dynamicKey);
+
+            if (typeof ori === 'number' && typeof value === 'string') {
+
+              this[`_${attributeName}`] = +value;
+              state1.setState(dynamicKey, +value); // Notify state changes
+              
+            } else if (typeof ori === 'object' && typeof value === 'string') {
+
+              this[`_${attributeName}`] = JSON.parse(value);
+              state1.setState(dynamicKey, JSON.parse(value)); // Notify state changes
+              
+            } else {
+              
+              this[`_${attributeName}`] = value;
+              state1.setState(dynamicKey, value); // Notify state changes
+            }
+
+            
+
           }
           else this[`_${attributeName}`] = value;
         }
