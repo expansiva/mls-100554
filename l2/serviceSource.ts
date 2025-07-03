@@ -8,7 +8,7 @@ import { formatHtml, sync } from './_100554_collabDOMSync';
 import { removeTokensFromSource } from './_100554_enhancementStyle';
 import { getTokensLess } from './_100554_designSystemBase';
 import { LessCSS } from "./_100554_lessCSS";
-import { getEnhancementName } from './_100554_libCommom';
+import { getEnhancementName, getProjectDetails } from './_100554_libCommom';
 import { globalState } from './_100554_collabState';
 import { propertyDataSource } from './_100554_collabDecorators';
 import { setErrorOnModel } from './_100554_validateLit'
@@ -55,6 +55,8 @@ export class ServiceSource100554 extends ServiceBase {
         mls.events.addListener(2, 'CreateModelHTML' as any, (ev) => this.checkToCreateModelHTML(ev));
         this.initMonaco_GlobalEditor();
     }
+
+    private baseProject = 100554;
 
     @property({ type: String }) msize = '';
     @property({ type: Boolean }) panelRightOpened = false;
@@ -530,7 +532,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         const div = document.createElement('div');
         const scr = document.createElement('script');
-        const i2 = `/_${'100554'}_${'mlsHistoryList'}`;
+        const i2 = `/_${this.baseProject}_${'mlsHistoryList'}`;
         scr.type = 'module';
         scr.id = i2.replace('/', '');
         scr.src = i2;
@@ -597,9 +599,17 @@ export class ServiceSource100554 extends ServiceBase {
             }
         }
 
-        const info = await mls.stor.localDB.readPrjInfo(100554);
+        const info = await mls.stor.localDB.readPrjInfo(this.baseProject);
         if (info && info.indexModules && info.indexModules !== '') {
             promises.push(this.createProjectModel(project, info.indexModules));
+        }
+
+        const prj = mls.actual[5].project;
+        if (prj && prj !== this.baseProject) {
+            const actual = await mls.stor.localDB.readPrjInfo(prj);
+            if (actual && actual.indexModules && actual.indexModules !== '') {
+                promises.push(this.createProjectModel(project, actual.indexModules));
+            }
         }
 
         if (mls.istrace) console.time('creating models');
@@ -885,7 +895,23 @@ export class ServiceSource100554 extends ServiceBase {
         for await (let storFile of [storFileHTML, storFileTS, storFileCss, storFileTsTest, storFileTsDefs]) {
             if (!storFile) continue;
             if (storFile.status === 'new') this.deleteFile(storFile);
-            else storFile.status = 'deleted';
+            else {
+                storFile.status = 'deleted';
+                if (storFile.getValueInfo) {
+                    let valueInfo = await storFile.getValueInfo();
+                    if (!valueInfo.content) {
+                        const src = await storFile.getContent() as string;
+                        valueInfo = {
+                            content: src,
+                            contentType: 'string',
+                            originalShortName: storFile.shortName,
+                            originalProject: storFile.project,
+                            originalCRC: mls.common.crc.crc32(src).toString(16)
+                        }
+                    }
+                    await mls.stor.localStor.setContent(storFile, valueInfo);
+                }
+            }
             mls.events.fireFileAction('statusOrErrorChanged', storFile, this.position);
         }
     }
@@ -919,7 +945,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private async newFiles(newShortName: string, newProject: number, newEnhancement: string, tsSource: string, htmlSource?: string, lessSource?: string, testSource?: string, defsSource?: string, open: boolean = true) {
-        
+
         if (open) this.activeThisService();
         this.closeMenu();
         const newTSSource = tsSource
@@ -931,7 +957,7 @@ export class ServiceSource100554 extends ServiceBase {
         await this.createOrShowModelHtmlCssTestDefs(newShortName, newProject, false, '.less', lessSource);
 
         if (testSource) await this.createOrShowModelHtmlCssTestDefs(newShortName, newProject, false, '.test.ts', testSource);
-    
+
         if (defsSource) await this.createOrShowModelHtmlCssTestDefs(newShortName, newProject, false, '.defs.ts', defsSource);
 
         if (open) this.showActiveModel();
@@ -1074,7 +1100,7 @@ export class ServiceSource100554 extends ServiceBase {
         tp: string = 'all'
 
     ) {
-
+        debugger;
         for await (let data of [
             { storFile: storFileHTML, keyFiles: keyFileHTML },
             { storFile: storFileCss, keyFiles: keyFileCss },
@@ -1126,7 +1152,7 @@ export class ServiceSource100554 extends ServiceBase {
             if (['.less', '.html', '.defs.ts', '.test.ts'].includes(data.storFile.extension)) {
 
                 const keyToModel = mls.editor.getKeyModel(data.storFile.project, data.storFile.shortName);
-                if (!mls.editor.models[keyToModel]) return false;
+                if (!mls.editor.models[keyToModel]) continue;
 
                 if (data.storFile.extension === '.html') {
                     mls.editor.models[keyToModel].html?.model.dispose();
@@ -2063,7 +2089,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private async prepareInitialLess(shortName: string, project: number, source: string = "") {
 
-        console.info({prepareInitialLess: source})
+        console.info({ prepareInitialLess: source })
 
         const tag = convertFileNameToTag(`_${project}_${shortName}`);
 
