@@ -9,7 +9,8 @@ import {
     getNextInProgressStepByAgentName,
     getAgentStepByAgentName,
     getNextStepIdAvaliable,
-    notifyTaskChange
+    notifyTaskChange,
+    updateStepStatus
 } from "./_100554_aiAgentHelper";
 
 import {
@@ -67,6 +68,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No in progress interaction found.`);
+    context.task = await updateStepStatus(context.task, step.stepId, "completed");
     notifyTaskChange(context);
     await executeNextStep(context);
 }

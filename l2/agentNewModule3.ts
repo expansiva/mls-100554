@@ -18,6 +18,8 @@ import {
     ClarificationQuestions,
 } from "./_100554_aiAgentOrchestration";
 
+import { generateAllOrganism, generateAllPages, generateAllTables } from './_100554_agentNewModuleCreate';
+
 const agentName = "agentNewModule3";
 const project = 100554;
 
@@ -62,10 +64,20 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No in progress interaction found.`);
-    context.task = await updateTaskTitle(context.task, "Ok, see mind map");
     context.task = await updateStepStatus(context.task, step.stepId, "completed", "no more agents");
     notifyTaskChange(context);
+    await createFiles(context);
+    context.task = await updateTaskTitle(context.task, "Ok, see mind map");
     await executeNextStep(context);
+}
+
+async function createFiles(context: mls.msg.ExecutionContext) {
+    const payload = getPayload3(context);
+    const { project } = mls.actual[5];
+    if (!project) throw new Error(`[${agentName}] createFiles: No project selected.`)
+    await generateAllOrganism(payload, project, '');
+    await generateAllPages(payload, project, '');
+    await generateAllTables(payload, project, '');
 }
 
 const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
@@ -247,7 +259,7 @@ export interface Organism {
 }
 export interface UserStories {
     story: string;
-    derivedRequirements: Planning[]; 
+    derivedRequirements: Planning[];
 }
 export interface Planning {
     description: string; // Description of the planning

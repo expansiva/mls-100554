@@ -109,8 +109,12 @@ export class AgentNewModuleCreate100554 extends StateLitElement {
     }
 
     async deletePages() {
+        this.result = '';
         if (!this.groupToDelete) return this.result = 'Digite um grupo para deletar';
-        this.result = await deleteAllPagesByGroup(this.groupToDelete, this.project, this.folder);
+        const files = await getListFilesToDelete(this.groupToDelete, this.project, this.folder);
+        for await (const log of deleteAllFiles(files)) {
+            this.result = this.result + '\n' + log;
+        }
     }
 
     async generate() {
@@ -260,7 +264,7 @@ function generateHTML(fileType: string, payload3: PayLoad3, project: number, fol
 }
 
 
-async function generateAllPages(payload3: PayLoad3, project: number, folder: string): Promise<string> {
+export async function generateAllPages(payload3: PayLoad3, project: number, folder: string): Promise<string> {
 
     const logs: string[] = [];
     for (let i = 0; i < payload3.pagesWireframe.length; i++) {
@@ -276,7 +280,7 @@ async function generateAllPages(payload3: PayLoad3, project: number, folder: str
 
 }
 
-async function generateAllOrganism(payload3: PayLoad3, project: number, folder: string): Promise<string> {
+export async function generateAllOrganism(payload3: PayLoad3, project: number, folder: string): Promise<string> {
 
     const logs: string[] = [];
     for (let i = 0; i < payload3.organism.length; i++) {
@@ -292,7 +296,7 @@ async function generateAllOrganism(payload3: PayLoad3, project: number, folder: 
 
 }
 
-async function generateAllTables(payload3: PayLoad3, project: number, folder: string): Promise<string> {
+export async function generateAllTables(payload3: PayLoad3, project: number, folder: string): Promise<string> {
 
     const logs: string[] = [];
     for (let i = 0; i < payload3.hierarchicalPersistentData.length; i++) {
@@ -388,8 +392,6 @@ function generateTsTable(payload: PayLoad3, project: number, folder: string, ind
         const tagName = `${shortNameAux}-${project}`;
         const groupName = payload.finalModuleDetails.moduleName;
 
-        console.info(entity.entityDefinitions)
-
         const interfaceBlock = entity.entityDefinitions.length
             ? `${entity.entityDefinitions.join("\n")}`
             : "";
@@ -457,6 +459,7 @@ function generateHtmlOrganism(payload: PayLoad3, project: number, folder: string
 }
 
 function generateTsPage(payload: PayLoad3, project: number, folder: string, index: number): string {
+
     const pageWirefame = payload.pagesWireframe[index];
     const shortName = pageWirefame.pageName;
     const enhancement = '_100554_enhancementLit';
@@ -506,13 +509,9 @@ function generateHtmlPage(payload: PayLoad3, project: number, folder: string, in
 }
 
 
-
-async function deleteAllPagesByGroup(group: string, project: number, folder: string) {
+export async function getListFilesToDelete(group: string, project: number, folder: string) {
 
     const filesToDelete: mls.stor.IFileInfo[] = [];
-    let modelsToDelete: { project: number, shortName: string }[] = [];
-    const filesToDeleteCache: Set<string> = new Set();
-    const logs: string[] = [];
 
     const filesLocal = Object.values(mls.stor.files).filter(file =>
         file.inLocalStorage &&
@@ -520,6 +519,7 @@ async function deleteAllPagesByGroup(group: string, project: number, folder: str
         file.project === project &&
         file.status === 'new'
     );
+
     for await (let storFile of filesLocal) {
         const keyModel = mls.l2.getKey(storFile);
         const models = mls.editor.models[keyModel];
@@ -530,42 +530,54 @@ async function deleteAllPagesByGroup(group: string, project: number, folder: str
         }
     }
 
-    modelsToDelete = Array.from(
+    return filesToDelete;
+}
+
+export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
+    const modelsToDelete: { project: number, shortName: string }[] = Array.from(
         new Map(filesToDelete.map(({ project, shortName }) => [shortName, { project, shortName }])).values()
     );
 
+    const filesToDeleteCache: Set<string> = new Set();
 
-    for await (let fileToDelete of filesToDelete) {
+    for (const fileToDelete of filesToDelete) {
         await mls.stor.localStor.setContent(fileToDelete, { contentType: 'string', content: null });
         fileToDelete.onAction = undefined;
         fileToDelete.getValueInfo = undefined;
-        const keyFiles = mls.stor.getKeyToFiles(fileToDelete.project, fileToDelete.level, fileToDelete.shortName, fileToDelete.folder, fileToDelete.extension);
+
+        const keyFiles = mls.stor.getKeyToFiles(
+            fileToDelete.project,
+            fileToDelete.level,
+            fileToDelete.shortName,
+            fileToDelete.folder,
+            fileToDelete.extension
+        );
         delete mls.stor.files[keyFiles];
-        logs.push(`Removendo stor file: ${keyFiles}`);
+
+        yield `Storfile deleted: ${keyFiles}`;
+
         const ext = fileToDelete.extension.replace('.ts', '.js');
-        const targetKey = `https://collab.codes/local/_${fileToDelete.project}_${fileToDelete.shortName}${ext}?v=`
+        const targetKey = `https://collab.codes/local/_${fileToDelete.project}_${fileToDelete.shortName}${ext}?v=`;
         filesToDeleteCache.add(targetKey);
     }
 
-    for await (let data of modelsToDelete) {
+    for (const data of modelsToDelete) {
         const keyModel = mls.l2.getKey(data);
-        logs.push(`Removendo models: ${keyModel}`);
         mls.editor.deleteModels(data.project, data.shortName, true);
-
+        yield `Model deleted : ${keyModel}`;
     }
-    
+
     const cacheName = 'mls-v2';
     const cache = await caches.open(cacheName);
     const keys = await cache.keys();
     for (const request of keys) {
-        for (const targetKey of Array.from(filesToDeleteCache)) {
+        for (const targetKey of filesToDeleteCache) {
             if (request.url.includes(targetKey)) {
                 await cache.delete(request);
-                logs.push(`Deletar do cache: ${request.url}`);
+                yield `Cache file deleted: ${request.url}`;
             }
         }
     }
-    return logs.join('\n');
 }
 
 //
@@ -612,7 +624,6 @@ function capitalizeFirstLetter(text: string): string {
 function generateOrganismDefsFromLLM(payload: PayLoad3, index: number, project: number, folder: string): string {
     const organism = payload.organism[index];
 
-    console.info(organism)
     let shortName1 = sanitizeMeta(organism.organismTag, project, folder);
     const fileName = convertTagToFileName(`${shortName1}-${project}`);
     const { shortName } = mls.l2.getPath(fileName);
