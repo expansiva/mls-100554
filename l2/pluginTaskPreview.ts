@@ -7,7 +7,8 @@ import { CollabLitElement } from './_100554_collabLitElement';
 import './_100554_pluginTaskPreviewAgent';
 import './_100554_pluginTaskPreviewClarification';
 import './_100554_pluginTaskPreviewFlexible';
-import './_100554_pluginTaskPreviewTools';
+import './_100554_pluginTaskPreviewTools'; 
+import './_100554_pluginTaskPreviewResult';
 
 @customElement('plugin-task-preview-100554')
 export class AgentTester extends CollabLitElement {
@@ -88,6 +89,7 @@ export class AgentTester extends CollabLitElement {
             case 'clarification': return this.renderClarification(step);
             case 'flexible': return this.renderFlexible(step);
             case 'tool': return this.renderTools(step);
+            case 'result': return this.renderResult(step);
             default: return html`Not found type: renderStepDetails`;
         }
     }
@@ -126,6 +128,10 @@ export class AgentTester extends CollabLitElement {
 
     renderTools(step: mls.msg.AIToolStep) {
         return html` <plugin-task-preview-tools-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-tools-100554> `;
+    }
+
+    renderResult(step: mls.msg.AIResultStep) {
+        return html` <plugin-task-preview-result-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-result-100554> `;
     }
 
     //------IMPLEMENTATION--------
