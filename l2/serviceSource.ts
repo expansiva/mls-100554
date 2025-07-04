@@ -1100,7 +1100,7 @@ export class ServiceSource100554 extends ServiceBase {
         tp: string = 'all'
 
     ) {
-        debugger;
+
         for await (let data of [
             { storFile: storFileHTML, keyFiles: keyFileHTML },
             { storFile: storFileCss, keyFiles: keyFileCss },
