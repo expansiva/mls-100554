@@ -17,7 +17,6 @@ export class AgentNewModuleCreate100554 extends StateLitElement {
         result: { type: String },
         groupToDelete: { type: String },
         loading: { type: Boolean }
-
     };
 
 
@@ -52,29 +51,20 @@ export class AgentNewModuleCreate100554 extends StateLitElement {
 
             <label>Index:</label>
             <input type="number" .value=${this.index} @input=${(e: Event) => this.index = Number((e.target as HTMLInputElement).value)} />
-
             <div>
                 <button @click=${this.generate}>Gerar .defs</button>
                 <button @click=${this.generateHTML}>Gerar .html</button>
                 <button @click=${this.generateTS}>Gerar .ts</button>
-
                 <button @click=${this.generatePage}>Criar Página</button>
                 <button @click=${this.generateOrganism}>Criar Organismo</button>
-                <button @click=${this.generateTable}>Criar Tabela</button>
-
-    
+                <button @click=${this.generateTable}>Criar Tabela</button>    
             </div>
         </fieldset>
-
-        
-        
         <fieldset>
                 <button @click=${this.generateAllPage}>Criar todas as páginas</button>
                 <button @click=${this.generateAllOrganism}>Criar todos os organismos</button>
                 <button @click=${this.generateAllTables}>Criar todas as tabelas</button>
-
         </fieldset>
-
         <fieldset>
             <div>
                 <label>GroupName:</label>
@@ -82,8 +72,6 @@ export class AgentNewModuleCreate100554 extends StateLitElement {
                 <button @click=${this.deletePages}>Deletar</button>
             </div>
         </fieldset>
-
-
       </div>
 
       <pre><code>${this.result}</code></pre>
@@ -522,8 +510,9 @@ export async function getListFilesToDelete(group: string, project: number, folde
 
     for await (let storFile of filesLocal) {
         const keyModel = mls.l2.getKey(storFile);
-        const models = mls.editor.models[keyModel];
-        if (models.ts) {
+        let models:mls.editor.IModels | undefined = mls.editor.models[keyModel];
+        if(!models) models = await mls.editor.addModels(storFile.project, storFile.shortName, '')
+        if (models && models.ts) {
             mls.l2.typescript.parseTripleSlash(models.ts);
             const tpsGroup = models.ts.compilerResults?.tripleSlashMLS?.variables['groupName']
             if (group === tpsGroup) filesToDelete.push(storFile);
