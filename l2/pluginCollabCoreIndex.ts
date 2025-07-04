@@ -311,6 +311,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginProjectFindFiles'
             },
+                {
+                category: 'Helpers',
+                scope: ['l5Project'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginProjectDeleteFiles'
+            },
             {
                 category: 'Helpers',
                 scope: ['l5Project'],
