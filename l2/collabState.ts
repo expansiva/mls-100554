@@ -80,7 +80,12 @@ export function initState(path: string, value: string | Object | Array<unknown>)
       current[key] = index === keys.length - 1 ? value : {};
     } else if (index === keys.length - 1 && typeof current[key] === 'object' && typeof value === 'object') {
       // Merge objects if both existing and new values are objects
-      current[key] = { ...current[key], ...value };
+      if (Array.isArray(current[key]) && Array.isArray(value)) {
+        current[key] = [...value ];
+      } else {
+        current[key] = { ...value };
+      }
+      
     }
     current = current[key];
   });

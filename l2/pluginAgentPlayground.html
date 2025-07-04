@@ -1,6 +1,4 @@
-<plugin-agent-playground-100554 agent="_100554_agentGenerateDefs" style="display:none">
-<promptcustom type="system">
-### IMPORTANTE SOBRE widget-playground-state-100554:
+<plugin-agent-playground-100554 agent="_100554_agentGenerateDefs" style="display:none"> <promptcustom type="system"> ### IMPORTANTE SOBRE widget-playground-state-100554:
 teste2
 - O valor do atributo state do compoennte deve ser uma string JSON válida:
 - Sem quebras de linha (\n) – tudo deve estar em uma única linha.
@@ -20,39 +18,20 @@ teste2
 &lt;/fieldset&gt;
 &lt;/demo&gt;
 &lt;/section&gt;
-```
-</promptcustom>
-
-<promptcustom type="system">
-## arquivo .ts
+``` </promptcustom>  <promptcustom type="system"> ## arquivo .ts
 ```typescript
 {{agentdefs.ts}}
-```
-</promptcustom>
-
-<promptcustom type="system">
-## arquivo .html
+``` </promptcustom>  <promptcustom type="system"> ## arquivo .html
 ```html
 {{agentdefs.html}}
-```
-</promptcustom>
-
-<promptcustom type="system">
-## arquivo .less
+``` </promptcustom>  <promptcustom type="system"> ## arquivo .less
 ```less
 {{agentdefs.less}}
-```
-</promptcustom>
-
-<promptcustom type="system">
-## arquivo .defsOld
+``` </promptcustom>  <promptcustom type="system"> ## arquivo .defsOld
 ```typescript
 {{agentdefs.def}}
-```
-</promptcustom>
-
-<promptcustom type="system">
-## formato de saida
+``` </promptcustom>  <promptcustom type="human"> ##Solicitação do usuário
+Por favor, analise os arquivos .ts, .html, .less e gere o objeto .defs conforme o formato especificado. </promptcustom>  <promptcustom type="system"> ## formato de saida
 Você deve retornar o objeto JSON conforme abaixo.
 ```json
 {
@@ -115,15 +94,4 @@ description: string; // Description of the planning
 done?: boolean; // Whether the planning is done, default = false
 comment?: string; // Optional comment or notes for done = false
 }
-export type UserRole = string;
-</promptcustom>
-
-<promptcustom type="human">
-##Solicitação do usuário
-Por favor, analise os arquivos .ts, .html, .less e gere o objeto .defs conforme o formato especificado.
-</promptcustom>
-
-<promptcustom type="memory">
-{"project":100554, "shortName":"ateste", "folder":""}
-</promptcustom>
-</plugin-agent-playground-100554>
+export type UserRole = string; </promptcustom>  <promptcustom type="memory"> {"project":100554, "shortName":"ateste", "folder":""} </promptcustom> </plugin-agent-playground-100554>

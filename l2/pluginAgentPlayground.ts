@@ -13,6 +13,7 @@ import { setState } from './_100554_collabState';
 @customElement('plugin-agent-playground-100554')
 export class AgentTester extends CollabLitElement {
 
+    private _agent = '';
     @property({ type: String }) agent = '';
     @query('.containerdraganddrop') containerdraganddrop: HTMLElement | undefined;
 
@@ -84,7 +85,7 @@ ${this.renderMode()}
     renderHead() {
         return html`
 <div class="header">
-<strong>Agent:</strong> ${this.agent}
+<strong>Agent:</strong> ${this._agent}
 </div>
 <div>
 <button class="action-btn" @click=${() => this.handlePlay()} title="play"><svg style="width: 13px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></button>
@@ -213,10 +214,13 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
 
     private verifyProp() {
 
-        if (this.agent) return;
+        if (this.agent) {
+            this._agent = this.agent;
+            return;
+        }
         const left = (mls.actual[2] as any).left;
         if (!left) return;
-        this.agent = `_${left.project}_${left.shortName}`;
+        this._agent = `_${left.project}_${left.shortName}`;
 
     }
 
@@ -309,7 +313,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         try {
             const i = this.prompts.find((p: Iprompts) => p.type === 'memory');
             const message = i ? i.content : '';
-            const response = await this._callAgent(this.agent, message);
+            const response = await this._callAgent(this._agent, message);
             this.result = response;
         } catch (err) {
             this.result = `Error when testing agent: ${(err as Error).message}`;
@@ -323,7 +327,8 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         clearTimeout(this.timeSave);
         this.timeSave = setTimeout(() => {
             setState('preview.pausePreview', true);
-            let txt = `<plugin-agent-playground-100554 agent="${this.agent}" style="display:none">`;
+            const aux = this.agent ? `agent="${this.agent}"` : '';
+            let txt = `<plugin-agent-playground-100554 ${aux} style="display:none">`;
             this.prompts.forEach((p) => {
                 txt = txt + ` <promptcustom type="${p.type}"> ${this.escapeAngleBrackets(p.content)} </promptcustom> `
             });
