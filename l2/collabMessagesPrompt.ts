@@ -20,6 +20,10 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     @state() mentionIndex: number = 0;
     @state() allUsers: mls.msg.User[] = [];
     @state() allAgents: IMentionAgent[] = [];
+
+    @state() alreadyLoadingAgents: boolean = false;
+    @state() lastScopeLoaded: string | undefined;
+
     @property({ type: Function }) onSend: Function | undefined;
     @property() threadId?: string;
     @property() scope?: string;
@@ -35,7 +39,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         this.adjustTextAreaHeight();
-        if (this.acceptAutoCompleteAgents && !this.scope) this.getAgents();
+        // if (this.acceptAutoCompleteAgents && !this.scope) this.getAgents();
     }
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
@@ -46,9 +50,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             && this.acceptAutoCompleteUser
         ) {
             this.getUsers();
-        }
-        if (changedProperties.has('scope') && this.acceptAutoCompleteAgents) {
-            if (this.acceptAutoCompleteAgents) this.getAgents();
         }
     }
 
@@ -142,6 +143,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         <textarea
             .value=${this.text}
             @input=${this.handleInput}
+            @focus=${this.handleFocus}
             @keydown=${this.handleKeyDown}
             id="prompt_input"
             placeholder="Digite aqui... (@ para menções) (@@ para agentes)">
@@ -166,6 +168,16 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             </ul>
         ` : ''}
     </div>`
+    }
+
+    async handleFocus() {
+        if (this.acceptAutoCompleteAgents &&
+            (!this.alreadyLoadingAgents || this.scope !== this.lastScopeLoaded)
+        ) {
+            this.lastScopeLoaded = this.scope;
+            this.alreadyLoadingAgents = true;
+            this.getAgents();
+        } 
     }
 
     async handleInput(e: MouseEvent) {
