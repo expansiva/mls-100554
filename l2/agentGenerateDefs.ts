@@ -2,7 +2,7 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { forceServiceInstance } from './_100554_libCommom';
-import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
+import { getPromptByHtml } from './_100554_aiPrompts';
 import { initState } from './_100554_collabState';
 
 import {
@@ -11,7 +11,6 @@ import {
     updateStepStatus,
     getNextPendentStep,
     updateTaskTitle,
-    notifyTaskCompleted,
     notifyTaskChange
 } from "./_100554_aiAgentHelper";
 
@@ -22,8 +21,6 @@ import {
 } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentGenerateDefs";
-const project = 100554;
-const enhancement = '_100554_enhancementLit';
 
 export function createAgent(): IAgent {
     return {
@@ -42,8 +39,6 @@ export function createAgent(): IAgent {
         }
     };
 }
-
-// todo: fazer html com explicações
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     const taskTitle = "Creating.";
@@ -74,7 +69,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
+    if (!step) throw new Error(`[${agentName}] afterPrompt: No step for this agent`);
 
     context.task = await updateStepStatus(context.task, step.stepId, "completed");
     const payload = getNextPendentStep(context.task) as mls.msg.AIPayload | null;
@@ -136,19 +131,15 @@ export async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[
     if (!files || !files.ts) throw new Error(`Erro [${agentName}] getPrompts: files not found`);
     const folder: string = files.ts.folder;
 
-    const modelType: mls.msg.ModelType = "claude";
-
     const data = {
-        model: preferModelType(modelType),
         ts: files.tsContent || '',
         html: files.htmlContent || '',
         less: files.lessContent || '',
         def: configFileDef(files.defsContent || ''),
         folder: folder,
-        modelType: modelType
     };
 
-    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentGenerateDefs', folder: '', data })
+    const prompts = await getPromptByHtml({ project: 100554, shortName: agentName, folder: '', data })
     return prompts;
 }
 
@@ -165,210 +156,6 @@ function configFileDef(content: string): string {
 
     return content;
 }
-
-function systemMainInstruction(folder: string): mls.msg.IAMessageInputType {
-    // models types: code, claude37
-    const modelType: mls.msg.ModelType = "claude";
-    const model: string = preferModelType(modelType);
-
-    // const thinking = `Para cada step processado abaixo, grave no field 'thinking' no "formato de saida" as informações sobre o raciocíneo usado, exemplo: "step 1.1 xxx"`;
-
-    return {
-        type: 'system',
-        content: `${model}
-Você é um especialista em desenvolvimento front-end e análise de componentes, com foco em gerar definições .defs para sistemas do tipo Collab.codes. Seu papel é processar o código fornecido passo a passo, aplicar boas práticas, identificar riscos e gerar a saída no formato especificado.
-
-O objeto '.defs' que será gerado, será usado para:
-- Documentação do componente
-- Suporte à IA copiloto e RAG
-- Construção de mapas mentais e relacionamentos
-- Análise técnica e organizacional do sistema Collab.codes
-- Análise da qualidade do software
-
-## Regras específicas para cada seção no "formato de saida".
-
-1. na seção 'meta':
-1.1. copie a seção 'meta' do '.defsOld' se existir.
-1.2. verifique a seção 'meta':
-  - se existir, copie os dados desta seção, atualize algumas informações se o usuário solicitar.
-  - se não existir, preencha os campos após uma análise profunda.
-
-2. na seção 'references', preencha os dados após uma análise no .ts,
-2.1 Extraia 'states' somente dos seguintes padrões:
-  - Comandos 'getState(...)', 'setState(...)'
-  - Bindings no HTML como '{{db.produto.nome}}'
-  - Atributos com 'value="{{...}}"', 'checked="{{...}}"' etc.
-
-3. na seção 'codeInsights', analise os arquivos .ts, .html e .less e preencha os fields:
-3.1. field 'todos': inicie esta field limpo, e inclua novos registros se tiver comentários 'todo:' no '.ts'.
-3.2. field 'securityWarnings': inicie esta field limpo, detecte padrões inseguros, como innerHTML, acesso direto ao window, tokens hardcoded, etc.
-3.3. field 'unusedImports': inicie esta field limpo, identifique imports no .ts que não são usados.
-3.4. field 'deadCodeBlocks': inicie esta field limpo, identifique blocos de código que nunca serão executados.
-3.5. field 'accessibility': revise atributos como aria-*, contraste, foco via teclado, uso de tabindex, e comente boas práticas ou problemas.
-3.6. field 'i18nWarnings': se o .ts tiver seção i18n, verifique se há strings que deveriam estar internacionalizadas, exceto termos genéricos como 'stop', 'cancel', etc.
-3.7. field 'correctness': nota de 0 a 10 para o typecript.
-3.8. field 'errorHandling': nota de 0 a 10 para o typescript,
-3.9. field 'readability': nota de 0 a 10 para o typescript,
-3.10. field 'maintainability': nota de 0 a 10 para o typescript,
-
-
-4. na seção 'auth', preencha **somente** se houver **evidência direta** no código (ex: 'if user.role === 'admin'').
-
-5. na seção 'planning':
-5.1. copia a seção 'planning' do '.defsOld', se existir, somente copie esta seção.
-5.2. Se a seção 'planning' **já existir**:
-  - Atualize os campos 'done' e 'comment' de cada item (interface Planning), mesmo sem solicitação do usuário. Para isto analise o campo 'description' e verifique se já foi feito ou não, inclua um comentário caso necessário.
-  - Não altere ou adicione novos itens (description) a menos que o usuário solicite.
-5.3. Se a seção 'planning' **não existir**:
-  - Gere uma seção completa com base na análise profunda do código.
-
-## Dados complementares, YAML.
-folder: "${folder}"
-modelType: "${modelType}"
-
----
-`
-    }
-}
-
-function systemOutInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## formato de saida 
-Você deve retornar o objeto JSON conforme abaixo.
-
-\`\`\`json
-{
-  "type": "flexible",
-  "result": BaseDefs
-}
-\`\`\`
-
-export interface BaseDefs {
-
-  meta: {
-    projectId: number;
-    folder: string;
-    shortName: string;
-    type: 'page' | 'widget' | 'plugin' | 'module' | 'lib' | 'table';
-    group?: string; // Ex: module group, 'CRM', 'CA'
-    tags?: string[]; // tags for filtering, ex: ['obsolete', 'newversion2', 'urgent']
-  };
-
-  references?: {
-    widgets?: string[]; // ['ica-cta-box']
-    plugins?: string[]; // ['plugin-analytics']
-    statesRO?: string[]; // ex: 'ui.enabled1', read only
-    statesRW?: string[]; // ex: 'ui.enabled1', read write
-    statesWO?: string[]; // ex: 'ui.enabled1', write only
-    imports?: string[]; // ['utils/date', 'userHelper']
-  };
-
-  codeInsights?: {
-    todos?: string[];
-    securityWarnings?: string[];
-    unusedImports?: string[];
-    deadCodeBlocks?: string[];
-    accessibility?: string[];
-    i18nWarnings?: string[]; // strings that should be translated, only if i18n is enabled and if string is essential
-    correctness: number; // 0-10, 10 is best
-    errorHandling: number;
-    readability: number;
-    maintainability: number;
-  };
-
-  auth?: {
-    view?: UserRole[];
-    edit?: UserRole[];
-    use?: UserRole[];
-    restrictReason?: string;
-  };
-
-  planning?: {
-    generalDescription?: string;
-    goal?: string;
-    userStories?: UserStories[]; // User stories that describe the functionality from the user's perspective
-    userRequestsFeatures?: Planning[]; // User feature requests
-    userRequestsBugs?: Planning[]; // User bug reports
-    userRequestsEnhancements?: Planning[]; // // User suggestions for improvements
-  };
-
-  embedding?: string; // Base64 vector embedding (generated post-analysis)
-  embeddingVersion?: string; // Version of the embedding model used, e.g., "text-embedding-3-small"
-}
-
-export interface UserStories {
-  story: string; // User story description
-  derivedRequirements: Planning[]; // Functional or technical requirements derived from the user story
-}
-
-export interface Planning {
-  description: string; // Description of the planning
-  done?: boolean; // Whether the planning is done, default = false
-  comment?: string; // Optional comment or notes for done = false
-}
-
-export type UserRole = string;
-`
-    }
-}
-
-function systemUserInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'human',
-        content: `##Solicitação do usuário
-
-Por favor, analise os arquivos .ts, .html, .less e gere o objeto .defs conforme o formato especificado.
-`
-    }
-}
-
-function systemFileTS(content: string): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## arquivo .ts
-\`\`\`typescript
-${content}
-\`\`\`` }
-}
-
-function systemFileHtml(content: string): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## arquivo .html
-\`\`\`html
-${content}
-\`\`\``}
-}
-
-function systemFileLess(content: string): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## arquivo .less
-\`\`\`less
-${content}
-\`\`\`` }
-}
-
-function systemFileDef(content: string): mls.msg.IAMessageInputType {
-
-    function removeLine(source: string, startsWith: string) {
-        return source
-            .split('\n')
-            .filter((line: string) => !line.trimStart().startsWith(startsWith))
-            .join('\n');
-    }
-    content = removeLine(content, '"embedding":')
-    content = removeLine(content, '"embeddingVersion":')
-
-    return {
-        type: 'system',
-        content: `## arquivo .defsOld
-\`\`\`typescript
-${content}
-\`\`\`` }
-}
-
 
 function extJson(str: string): string {
     const start = str.indexOf('{');
