@@ -110,6 +110,13 @@ export const defs: mls.l4.BaseDefs = ${JSON.stringify(result, null, 2)}
 
     if (models.defs) {
         models.defs.model.setValue(template);
+        const keyFile = mls.stor.getKeyToFiles(result.meta.projectId, 2, result.meta.shortName, result.meta.folder || '', '.defs.ts');
+        const storFile = mls.stor.files[keyFile];
+        if (storFile) {
+            storFile.status = 'changed';
+            storFile.inLocalStorage = true;
+            storFile.updatedAt = new Date().toISOString();
+        }        
     }
     else {
         const storFile = await createStorFile(result.meta.projectId, result.meta.shortName, result.meta.folder || '', template, '.defs.ts');
