@@ -2,11 +2,39 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
 import { StateLitElement } from './_100554_stateLitElement';
+
+type MindMapSelected = MindMapSelectedFile | MindMapSelectedPlugin;
+
+interface MindMapSelectedBase {
+    plugin: Function; // function to get informations
+    args: string;
+}
+
+interface MindMapSelectedFile extends MindMapSelectedBase {
+    type: "file",
+    file: mls.stor.IFileInfo; // file selected , level, project, shortName, folder, extension
+    organism?: string;
+    widget?: string;
+    modelType?: mls.editor.ModelType; // .ts , .html, .less, .test.ts, .defs.ts
+}
+
+interface MindMapSelectedPlugin extends MindMapSelectedBase  {
+    type: "plugin",
+    file: mls.stor.IFileInfo; // file selected , level, project, shortName, folder, extension    
+}
+
+interface MindMapSelectedGroup extends MindMapSelectedBase {
+    type: "group",
+}
+
 
 @customElement('widget-mind-map-l4-100554')
 export class WidgetMindMapL4100554 extends StateLitElement {
 
+    @propertyDataSource({ type: Object }) mindMapSelected: MindMapSelected | undefined;
+  
     // Allow node size configuration
     @property({ type: Number }) nodeRadius = 30;
 
