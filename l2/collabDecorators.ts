@@ -118,9 +118,11 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             // Fallback: cast any other value to boolean.
             return Boolean(stateValue);
           }
+  
           let aux = stateValue ? stateValue.toString() : '';
           if (typeof stateValue === 'object') aux = JSON.stringify(stateValue);
           if (options?.type === String) return stateValue ? aux : stateValue;
+          if (options?.type === Array && typeof stateValue === 'string') return JSON.parse(stateValue);
           return stateValue;
         }
 
@@ -147,7 +149,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
       },
       set(value: any) {
 
-        if (value === null) return;
+        
 
         if (options?.type === Number && typeof value === 'number' && isNaN(value)) {
           // ignore , lit sent ex "{{users.name}}" after requestUpdate
@@ -214,25 +216,9 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           if (typeof attributeValue === "string" && attributeValue.includes('{{') && attributeValue.includes('}}')) {
 
             const dynamicKey = attributeValue.replace(/[{{}}]/g, '').trim();
-            const ori = state1.getState(dynamicKey);
 
-            if (typeof ori === 'number' && typeof value === 'string') {
-
-              this[`_${attributeName}`] = +value;
-              state1.setState(dynamicKey, +value); // Notify state changes
-              
-            } else if (typeof ori === 'object' && typeof value === 'string') {
-
-              this[`_${attributeName}`] = JSON.parse(value);
-              state1.setState(dynamicKey, JSON.parse(value)); // Notify state changes
-              
-            } else {
-              
-              this[`_${attributeName}`] = value;
-              state1.setState(dynamicKey, value); // Notify state changes
-            }
-
-            
+            this[`_${attributeName}`] = value;
+              state1.setState(dynamicKey, value);
 
           }
           else this[`_${attributeName}`] = value;
