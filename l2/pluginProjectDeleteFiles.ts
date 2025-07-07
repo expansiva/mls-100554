@@ -167,6 +167,9 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
             this.requestUpdate();
         }
         this.logs.push('All files removed');
+        const key = mls.stor.getKeyToFiles(100554, 2, 'pluginProjectDeleteFiles', '', '.ts');
+        const storFile = mls.stor.files[key];
+        mls.events.fireFileAction('statusOrErrorChanged', storFile, 'left');
         this.requestUpdate();
 
     }
