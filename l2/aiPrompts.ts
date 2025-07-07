@@ -195,7 +195,7 @@ export async function getPromptByHtml(dt: { project: number, shortName: string, 
             cont = clearGaps(cont);
             const keys = findKeys(cont);
             keys.forEach((key) => {
-                if (!dt.data || !dt.data[key]) return;
+                if (!dt.data) return;
                 const st = dt.data[key];
                 if (st === undefined) return;
                 const rp = `{{${key}}}`
