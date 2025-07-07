@@ -395,7 +395,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 				};
 
 				const ret = await this.getFilesRepo(project);
-				return ret;
+				resolve(ret);
 
 			} catch (e: any) {
 				reject(new Error(e.message));
