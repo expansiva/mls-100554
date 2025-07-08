@@ -574,7 +574,7 @@ export class ServiceSave extends ServiceBase {
 
         const fa = li.querySelector('.fa-caret-righttv');
         if (fa) fa.classList.toggle('rotate');
-        
+
     }
 
     private clickSetValueAllChilds(e: MouseEvent): void {
@@ -747,8 +747,8 @@ export class ServiceSave extends ServiceBase {
 
             this.backChecked();
 
+            console.info('vai rodar afterSave');
             await this.afterSave(array);
-
             txt.value = '';
 
             this.clearLocalHIstoryCurrentInfoDriver();
@@ -756,12 +756,13 @@ export class ServiceSave extends ServiceBase {
             this.repo = oldRepo;
             this.branch = oldBranch;
 
-            await this.setInfos();    
+            await this.setInfos();
             this.fireEvents();
             window.collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 5000, autoClose: true });
             this.showLoader(false);
 
         } catch (err: any) {
+            console.info('aqui', err);
             this.arrayRollback.forEach((i) => {
                 if (!i.inLocalStorage) i.inLocalStorage = true;
             });
@@ -791,7 +792,9 @@ export class ServiceSave extends ServiceBase {
             const arrSet: mls.stor.IFileInfo[] = [];
             ar.forEach((i) => {
                 i.inLocalStorage = false;
-                if (!i.onAction) i.onAction = (action: mls.stor.IFileInfoAction) => this.afterUpdate(i);
+                if (!i.onAction) i.onAction = (action: mls.stor.IFileInfoAction) => {
+                    return this.afterUpdate(i);
+                }
                 arrSet.push(i);
             });
             if (arrSet.length > 0) {
@@ -1054,7 +1057,14 @@ export class ServiceSave extends ServiceBase {
                 }
             }
         })
-        return ar;
+
+        const unics = Array.from(
+            new Map(
+                ar.map(item => [`${item.project}_${item.shortName}_${item.folder}_${item.extension}`, item])
+            ).values()
+        );
+
+        return unics;
     }
 
     private async onSave_old(ar: mls.stor.IFileInfo[], msg: string) {
@@ -1127,11 +1137,14 @@ export class ServiceSave extends ServiceBase {
     }
 
     private async deleteFile(storFile: mls.stor.IFileInfo) {
+
+        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+
         if (storFile.inLocalStorage) {
-            await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
             await mls.stor.cache.setContent(storFile, null);
             mls.editor.deleteModels(storFile.project, storFile.shortName, true);
         }
+
         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
         delete mls.stor.files[keyFiles];
     }
