@@ -350,7 +350,7 @@ export class PluginPageNavigation extends PluginBaseModule {
         const li = element.closest('li');
         if (!li) return;
 
-        const parentICA = item.el.getIcaParent(item.el);
+        /*const parentICA = item.el.getIcaParent(item.el);
 
         if (offsetY < (height * 0.3) && parentICA) {
             const canMove = canMoveElement(this.draggedItem.el, parentICA)
@@ -375,7 +375,7 @@ export class PluginPageNavigation extends PluginBaseModule {
             element.style.border = "2px solid " + (canMove ? 'blue' : 'red');
         }
 
-        this.dropTarget = item;
+        this.dropTarget = item;*/
         this.requestUpdate();
     }
 
