@@ -8,14 +8,14 @@ import { globalWcd } from './_100554_wcdState';
 export abstract class WcdToolboxItemBase extends CollabLitElement implements WCDToolboxItemMethodos {
 
     public myParent: WCDToolboxMethodos | undefined;
-    public elMain: HTMLElement | undefined;
+    //public elMain: HTMLElement | undefined;
     public elICA: IcaLitElementBaseMethods | undefined;
     abstract args: string | undefined;
 
     constructor() {
         super();
         this.myParent = globalWcd.myParent;
-        this.elMain = globalWcd.elMain;
+        //this.elMain = globalWcd.elMain;
         this.elICA = globalWcd.elICA;
         
     }

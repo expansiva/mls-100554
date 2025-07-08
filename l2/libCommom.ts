@@ -288,10 +288,10 @@ export async function getEnhancementName(file: { project: number, shortName: str
 const BaseProject = 100554;
 export async function loadPluginProject(project: number, scope: string, onlyEnabled: boolean = true): Promise<mls.plugin.MenuAction[]> {
 
-    await mls.plugin.loadAll(BaseProject, onlyEnabled);
+    await mls.plugin.loadAll(BaseProject, false);
     const base = mls.plugin.getAllMenuActions(BaseProject, { scope: scope } as any);
 
-    await mls.plugin.loadAll(project, onlyEnabled);
+    await mls.plugin.loadAll(project, false);
     const user = mls.plugin.getAllMenuActions(project, { scope: scope } as any);
 
     const i = [...base, ...user];

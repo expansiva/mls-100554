@@ -446,6 +446,9 @@ export class ServicePreviewView extends StateLitElement {
         iframe.contentDocument.body.innerHTML = txt;
         ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
 
+        const els = iframe.contentDocument.body.querySelectorAll('*');
+        els.forEach((el) => el.setAttribute('mls_origin', 'true'));
+
         if (ret.errors.length > 0) {
             this.father.setError(`Error(${ret.errors.length}) when compiling:${ret.errors[0].error}`);
             console.log('Errors in compile:', JSON.stringify(ret.errors));

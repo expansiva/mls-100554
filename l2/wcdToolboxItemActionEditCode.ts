@@ -18,7 +18,7 @@ export class WCDToolboxItemActionEditCode extends WcdToolboxItemBase {
     }
 
     disconnectedCallback() {
-        if (this.elMain) this.elMain.style.visibility = '';
+        if (this.elICA) this.elICA.style.visibility = '';
         this.fireChange();
         super.disconnectedCallback();
     }
@@ -56,14 +56,14 @@ export class WCDToolboxItemActionEditCode extends WcdToolboxItemBase {
 
     renderEdit() {
 
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
         this.style.left = '0';
         this.style.top = '0';
         this.style.background = '#fff';
         this.style.width = '100%;';
         const css = 'outline:none; position:relative; min-width:20px';
-        this.text = this.elMain.getAttribute('text') || '';
-        this.elMain.style.visibility = 'hidden';
+        this.text = this.elICA.getAttribute('text') || '';
+        this.elICA.style.visibility = 'hidden';
         const ret = html`<pre style="white-space:pre-line;"><code id="edittextwcd" contenteditable="true" spellcheck="false" @keydown=${this.onKeyDown} style="${css}">${this.text}</code></pre>
             <style>
                 #edittextwcd *{
@@ -85,7 +85,7 @@ export class WCDToolboxItemActionEditCode extends WcdToolboxItemBase {
     private text = '';
 
     private onKeyDown(e: KeyboardEvent) {
-        if (!this.myParent || !this.elMain) return;
+        if (!this.myParent || !this.elICA) return;
         console.info(e)
         if ([ 'Backspace', 'c', 'v', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
             e.stopPropagation();
@@ -96,7 +96,7 @@ export class WCDToolboxItemActionEditCode extends WcdToolboxItemBase {
         }
 
         if (!this.contentEditables) return;
-        const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;
+        const el = (this.elICA.shadowRoot ? this.elICA.shadowRoot.children[0] : this.elICA.children[0]) as HTMLElement;
         el.innerHTML = this.contentEditables.innerHTML + '<br><br><br>' as string;
 
 

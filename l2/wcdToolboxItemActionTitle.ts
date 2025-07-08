@@ -15,7 +15,7 @@ export class WcdToolboxItemActionTitle extends WcdToolboxItemBase {
 
     render() {
         return html`
-            <div>${this.myParent?.widget || ''}</div>
+            <div>${this.elICA?.tagName.toLocaleLowerCase() || ''}</div>
             <style>${this.styles}</style>
         `;
     }

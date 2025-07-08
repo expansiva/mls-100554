@@ -3,17 +3,17 @@
 import { html, unsafeHTML, LitElement} from 'lit';
 import { customElement, property} from 'lit/decorators.js';
 import { propertyDataSource } from './_100554_collabDecorators';
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaApresentationTextBase } from './_100554_icaApresentationTextBase';
 
 @customElement('wc-text-100554')
-export class WcInputText100554 extends StateLitElement {
+export class WcInputText100554 extends IcaApresentationTextBase {
 
     createRenderRoot() {
         return this;
     }
     
     @propertyDataSource({ type: String }) text: string | undefined;
-    @property({ type: String }) type: string | undefined;
+    @property({ type: String }) type: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "blockquote" | "span" | undefined;
     
     error: string = '';
 

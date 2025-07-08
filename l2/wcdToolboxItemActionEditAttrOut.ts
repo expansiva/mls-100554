@@ -6,7 +6,7 @@ import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
 import { loadPluginProject } from './_100554_libCommom';
-import { getAtributtesByTag, checkAttributteHasVariation, getDescriptionAttr } from './_100554_icaBaseDescription';
+import { getAtributtesByEl, checkAttributteHasVariation, getDescriptionAttr } from './_100554_icaBaseDescription';
 import "./_100554_wcdToolboxItemActionEditVariation";
 
 @customElement('wcd-toolbox-item-action-edit-attr-out-100554')
@@ -54,7 +54,7 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
     updated(changedProperties: any) {
 
         super.updated(changedProperties);
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
 
     }
 
@@ -234,12 +234,9 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
 
     }
 
-
-
     private getMyAtributtes() {
 
         try {
-
             const state = this.getState();
             if (!state) {
                 this.mode = 'notFound';
@@ -254,7 +251,7 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
 
             const order: { vl: IAttr[], nvl: IAttr[] } = { vl: [], nvl: [] };
             const objAllAttr: { [key: string]: string } = {};
-            const mainAttrs = getAtributtesByTag(this.elIca.tagName);
+            const mainAttrs = getAtributtesByEl(this.elIca);
 
             mainAttrs.forEach((a) => {
 

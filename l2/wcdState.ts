@@ -15,7 +15,7 @@ import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 
 export const globalWcd: {
     myParent: WCDToolboxMethodos | undefined;
-    elMain: HTMLElement | undefined;
+    //elMain: HTMLElement | undefined;
     elICA: IcaLitElementBaseMethods | undefined;
     wcdItens: WCDToolboxItemMethodos[] | undefined;
 } = {} as any;
@@ -29,14 +29,14 @@ Object.defineProperty(globalWcd, 'myParent', {
     }
 });
 
-Object.defineProperty(globalWcd, 'elMain', {
+/*Object.defineProperty(globalWcd, 'elMain', {
     get: function () {
         return (window as any).wcdState.elMain;
     },
     set: function (v: HTMLElement | undefined) {
         (window as any).wcdState.elMain = v;
     }
-});
+});*/
 
 Object.defineProperty(globalWcd, 'elICA', {
     get: function () {

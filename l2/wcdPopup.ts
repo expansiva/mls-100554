@@ -133,7 +133,7 @@ export class WCDPopup extends LitElement implements WCDPopupMethodos {
   checkIsValidDropCap(): boolean {
     const contentEditable = this.parentElement?.querySelector('[contenteditable="true"]') as HTMLElement;
     if (!contentEditable) return false;
-    if (!globalWcd.elMain || globalWcd.elMain?.getAttribute('type') !== "p") return false;
+    if (!globalWcd.elICA || globalWcd.elICA?.getAttribute('type') !== "p") return false;
     const isFirstWordSelected = this.isFirstWordSelected(contentEditable);
     return isFirstWordSelected;
   }

@@ -24,7 +24,7 @@ const message_en = {
     left: 'Left',
     bottom: 'Bottom',
     right: 'Right',
-}
+} 
 
 type MessageType = typeof message_en;
 
@@ -65,12 +65,12 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
     updated(changedProperties: any) {
 
         super.updated(changedProperties);
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
         
         
 
         if (this.args && ['top', 'bottom', 'left', 'right'].includes(this.args)) {
-            this.myParent.updateSize(this.elMain, this.myParent, true);
+            this.myParent.updateSize(this.elICA, this.myParent, true);
             this.onmousedown = (e) => this.initDragging(e);
         }
 
@@ -196,7 +196,7 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
     }
 
     private renderMargin() {
-        if (!this.elMain) return html``;
+        if (!this.elICA) return html``;
 
         return html`
             <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
@@ -204,19 +204,19 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
                 <h4 style="display:flex; gap:1.5rem;margin:0px" >${this.myMsg.margin}<input type="checkbox" prop="margin"></h4>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.myMsg.top}</div>
-                    <input prop="marginTop" type="text" .value="${this.elMain.style.marginTop}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
+                    <input prop="marginTop" type="text" .value="${this.elICA.style.marginTop}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.myMsg.right}</div>
-                    <input prop="marginRight" type="text" .value="${this.elMain.style.marginRight}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
+                    <input prop="marginRight" type="text" .value="${this.elICA.style.marginRight}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div> 
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.myMsg.bottom}</div>
-                    <input prop="marginBottom" type="text" .value="${this.elMain.style.marginBottom}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
+                    <input prop="marginBottom" type="text" .value="${this.elICA.style.marginBottom}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.myMsg.left}</div>
-                    <input prop="marginLeft" type="text" .value="${this.elMain.style.marginLeft}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
+                    <input prop="marginLeft" type="text" .value="${this.elICA.style.marginLeft}"  group="margin" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div>
                 
             </div>
@@ -240,11 +240,11 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
         let isGroup = false;
         if (elGroup) isGroup = elGroup.checked;
 
-        if (!prop || !this.elMain || !this.myParent) return;
+        if (!prop || !this.elICA || !this.myParent) return;
 
         if (isGroup) {
 
-            this.elMain.style.margin = el.value;
+            this.elICA.style.margin = el.value;
             ['marginTop', 'marginBottom', 'marginLeft', 'marginRight'].forEach((pr: string) => {
 
                 const field = el.closest('.myAuxGroup')?.querySelector(`input[prop="${pr}"]`) as HTMLInputElement;
@@ -252,14 +252,14 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
 
             });
 
-            this.myParent.updateSize(this.elMain, this.myParent, true);
-            this.fireEvent(`margin: ${this.elMain.style.padding};`);
+            this.myParent.updateSize(this.elICA, this.myParent, true);
+            this.fireEvent(`margin: ${this.elICA.style.padding};`);
             return;
 
         }
 
-        this.elMain.style[prop as any] = el.value;
-        this.myParent.updateSize(this.elMain, this.myParent, true);
+        this.elICA.style[prop as any] = el.value;
+        this.myParent.updateSize(this.elICA, this.myParent, true);
         this.fireEvent();
     }
 
@@ -267,10 +267,10 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
 
     private initDragging(e: MouseEvent): void {
 
-        if (!this.elMain || !document.defaultView) return;
+        if (!this.elICA || !document.defaultView) return;
         this.startX = e.clientX;
         this.startY = e.clientY;
-        const st = document.defaultView.getComputedStyle(this.elMain);
+        const st = document.defaultView.getComputedStyle(this.elICA);
         this.startTop = parseInt(st.marginTop, 10);
         this.startBottom = parseInt(st.marginBottom, 10);
         this.startLeft = parseInt(st.marginLeft, 10);
@@ -278,7 +278,7 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
 
         const doDragging = (e: MouseEvent) => {
 
-            if (!this.elMain || !this.myParent) return;
+            if (!this.elICA || !this.myParent) return;
 
             this.myParent.style.background = '#f9cc9d80';
 
@@ -286,29 +286,29 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
             const deltaY: number = (e.clientY - this.startY);
 
             if (!this.args || ['top'].includes(this.args)) {
-                this.elMain.style.marginTop = (this.startTop + deltaY * -1) + 'px';
+                this.elICA.style.marginTop = (this.startTop + deltaY * -1) + 'px';
             }
 
             if (!this.args || ['bottom'].includes(this.args)) {
-                this.elMain.style.marginBottom = (this.startBottom + deltaY) + 'px';
+                this.elICA.style.marginBottom = (this.startBottom + deltaY) + 'px';
             }
 
             if (!this.args || ['left'].includes(this.args)) {
-                this.elMain.style.marginLeft = (this.startLeft + deltaX) + 'px';
+                this.elICA.style.marginLeft = (this.startLeft + deltaX) + 'px';
             }
 
             if (!this.args || ['right'].includes(this.args)) {
-                this.elMain.style.marginRight = (this.startRight + deltaX) + 'px';
+                this.elICA.style.marginRight = (this.startRight + deltaX) + 'px';
             }
 
             this.renderOutdoorScenary();
-            this.myParent.updateSize(this.elMain, this.myParent, true);
+            this.myParent.updateSize(this.elICA, this.myParent, true);
 
         }
 
         const stopDragging = (e: MouseEvent) => {
 
-            if (!this.elMain || !this.myParent) return;
+            if (!this.elICA || !this.myParent) return;
 
             this.myParent.style.background = '';
 
@@ -329,14 +329,14 @@ export class WCDToolboxItemActionMargin extends WcdToolboxItemBase {
 
     private fireEvent(ret: string = ''): void {
 
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
 
         if (ret === '') {
 
-            if (this.args === 'top') ret = `margin-top: ${this.elMain.style.marginTop};`;
-            if (this.args === 'bottom') ret = `margin-bottom: ${this.elMain.style.marginBottom};`;
-            if (this.args === 'left') ret = `margin-left: ${this.elMain.style.marginLeft};`;
-            if (this.args === 'right') ret = `margin-right: ${this.elMain.style.marginRight};`;
+            if (this.args === 'top') ret = `margin-top: ${this.elICA.style.marginTop};`;
+            if (this.args === 'bottom') ret = `margin-bottom: ${this.elICA.style.marginBottom};`;
+            if (this.args === 'left') ret = `margin-left: ${this.elICA.style.marginLeft};`;
+            if (this.args === 'right') ret = `margin-right: ${this.elICA.style.marginRight};`;
 
         }
 

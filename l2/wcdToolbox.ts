@@ -17,17 +17,17 @@ export function initWCDToolbox() {
 }
 
 @customElement('wcd-toolbox-100554')
-export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
+export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos { 
 
     // ------------ PROPERTIES ------------------
 
     @property({ type: String, reflect: true })
     public level: string = '';
 
-    @property({ type: String, reflect: true })
-    public widget: string | undefined;
+    //@property({ type: String, reflect: true })
+    //public widget: string | undefined;
 
-    public elMain: HTMLElement | undefined; // component from ica render
+    //public elMain: HTMLElement | undefined; // component from ica render
 
     public elICA: tps.IcaLitElementBaseMethods | undefined; // ica base to wcd
 
@@ -55,12 +55,12 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
     connectedCallback() {
         super.connectedCallback();
         if (!this.elICA) return;
-        const widgetName = this.elICA.getAttribute('widget');
+        /*const widgetName = this.elICA.getAttribute('widget');
         if (!widgetName) return;
         const widget = this.elICA.querySelector(widgetName);
-        if (!widget) return;
-        this.elMain = widget as HTMLElement;
-        this.setAttribute('widget', widget.tagName.toLowerCase())
+        if (!widget) return;*/
+        //this.elMain = this.elICA as HTMLElement;
+        //this.setAttribute('widget', this.elICA.tagName.toLowerCase())
     }
 
 
@@ -79,8 +79,8 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
     }
 
     firstUpdated() {
-        if (!this.elMain) return;
-        this.updateSize(this.elMain, this, true);
+        if (!this.elICA) return;
+        this.updateSize(this.elICA, this, true);
         this.initObserverResize();
         this._renderAction();
 
@@ -132,14 +132,14 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
     private _settimetouSetStyle: number = 0;
     public setStyle(style: string): void {
         if (!this.elICA) return;
-        const styleEl = this.elICA.getAttribute('styleel');
-        if (!styleEl) this.elICA.setAttribute('styleel', style);
+        const styleEl = this.elICA.getAttribute('style');
+        if (!styleEl) this.elICA.setAttribute('style', style);
         else {
             const newStyle = styleEl.trim().endsWith(';') ? styleEl.trim() + style : `${styleEl};${style}`;
 
             const elTemp = document.createElement('span');
             elTemp.style.cssText = newStyle;
-            this.elICA.setAttribute('styleel', elTemp.style.cssText);
+            this.elICA.setAttribute('style', elTemp.style.cssText);
             elTemp.remove();
         }
 
@@ -170,8 +170,8 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         this.setDefaultToolBoxOptions();
 
         globalWcd.elICA = this.elICA;
-        globalWcd.myParent = this;
-        globalWcd.elMain = this.elMain;
+        globalWcd.myParent = this as any;
+        //globalWcd.elMain = this.elMain;
 
         for await (let i of actions) {
 
@@ -203,8 +203,8 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
             el.style.zIndex = '9998';
             el.args = i.args;
 
-            if (!globalWcd.wcdItens) globalWcd.wcdItens = [el];
-            else globalWcd.wcdItens.push(el);
+            if (!globalWcd.wcdItens) globalWcd.wcdItens = [el as any];
+            else globalWcd.wcdItens.push(el as any);
 
             this.appendChild(el);
 
@@ -252,9 +252,9 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
         this._updateBackgroundAuxSize();
 
-        if (this.elMain && updataSize === 'size') this.updateSize(this.elMain, this, true);
+        if (this.elICA && updataSize === 'size') this.updateSize(this.elICA, this, true);
 
-        if (this.elMain && updataSize === 'padding') this._updateBaseNoPadding(this.elMain, this);
+        if (this.elICA && updataSize === 'padding') this._updateBaseNoPadding(this.elICA, this);
 
     }
 
@@ -345,7 +345,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
                     resolve((this.wcServicePage as any).querySelector('div'));
                 } else {
                     const nav3 = this.getNav3();
-                    if (!nav3 || !this.elMain) resolve(undefined);
+                    if (!nav3 || !this.elICA) resolve(undefined);
 
                     const wc = (nav3 as any).getActiveInstance('left');
                     if (!wc) resolve(undefined);
@@ -379,13 +379,13 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         if (this.resizeObserver) this.resizeObserver.disconnect();
         this.resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
-                if (!this.elMain) return;
+                if (!this.elICA) return;
                 clearTimeout(this.timeResize);
                 this.timeResize = setTimeout(() => {
 
                     const attr = this.getAttribute('needresize');
-                    if (!this.elMain || attr === 'false') return;
-                    this.updateSize(this.elMain, this, true);
+                    if (!this.elICA || attr === 'false') return;
+                    this.updateSize(this.elICA, this, true);
 
                 }, 100)
             }
@@ -531,7 +531,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
     private _updateBackgroundAuxSize(tp: 'show' | 'hide' = 'hide'): void {
 
         const elChange = this.querySelector('wcd-toolbox-aux-background') as HTMLElement;
-        const elBase = this.elMain;
+        const elBase = this.elICA;
         if (!elBase || !elChange || !this.parentElement) return;
 
         if (tp === 'hide') {

@@ -53,7 +53,7 @@ export abstract class CollabPageElement extends StateLitElement {
             this.checkToAddOverlay();
         }, 500);
 
-        this.setupIds();
+        //this.setupIds();
         // this.setupEvents();
         await this.initPage();
         this.initPageComplete = true;
@@ -148,7 +148,7 @@ export abstract class CollabPageElement extends StateLitElement {
 
         function traverseShadowRoot(element: HTMLElement, depth: number) {
 
-            if (element.tagName.toLowerCase().startsWith('ica') && !arrayEls.includes(element)) {
+            if (element.getAttribute('mls_origin') && !arrayEls.includes(element)) {
                 const { x, y, height, width } = element.getBoundingClientRect();
                 elements.push({ element: element as IcaLitElementBaseMethods, depth, x, y, height, width, opacity: element.style.opacity });
                 arrayEls.push(element);
