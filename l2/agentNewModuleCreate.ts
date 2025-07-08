@@ -372,6 +372,10 @@ async function generateTable(payload3: PayLoad3, project: number, folder: string
 function generateTsTable(payload: PayLoad3, project: number, folder: string, index: number): string {
     try {
         const entity = payload.hierarchicalPersistentData[index];
+        const flatData = payload.flatPersistentData[0].prima[index];
+        console.info({ entity, flatData });
+        console.info(payload);
+
         const shortNameAux = sanitizeMeta(entity.entityName.toLowerCase(), project, folder);
         const aux = prepareNameTable(shortNameAux);
         const fullName = convertTagToFileName(`${aux}-${project}`);
@@ -384,16 +388,23 @@ function generateTsTable(payload: PayLoad3, project: number, folder: string, ind
             ? `${entity.entityDefinitions.join("\n")}`
             : "";
 
-        const formatted = interfaceBlock
+
+        const formattedInterfaces = interfaceBlock
             .split('\n')
             .map(line => line.trim().startsWith('export interface') ? formatInterface(line.trim()) : line)
             .join('\n');
 
 
+
+
         const ts = `
 /// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
 
-${formatted}
+${formattedInterfaces}
+
+export const modelPrisma = \`
+${formatPrismaModel(flatData)}
+\`;
 
 `;
         return ts;
@@ -401,6 +412,25 @@ ${formatted}
     } catch (err: any) {
         return `// Error: ${err.message}`;
     }
+}
+
+function formatPrismaModel(modelStr: string) {
+
+    const match = modelStr.match(/model\s+(\w+)\s*{(.*)}/s);
+    if (!match) return modelStr;
+
+    const modelName = match[1];
+    const fieldsBlock = match[2].trim();
+    if (!fieldsBlock) return modelStr;
+
+
+    const formattedFields = fieldsBlock
+        .match(/[^@{}\n]+(?:@[^\s{}]+(?:\([^\)]*\))?\s*)*/g) 
+        ?.map(field => field.trim())
+        .filter(Boolean)
+        .join('\n  ');
+    // Retorna o model formatado
+    return `model ${modelName} {\n  ${formattedFields}\n}`;
 }
 
 function generateTsOrganism(payload: PayLoad3, project: number, folder: string, index: number): string {
@@ -510,8 +540,8 @@ export async function getListFilesToDelete(group: string, project: number, folde
 
     for await (let storFile of filesLocal) {
         const keyModel = mls.l2.getKey(storFile);
-        let models:mls.editor.IModels | undefined = mls.editor.models[keyModel];
-        if(!models) models = await mls.editor.addModels(storFile.project, storFile.shortName, '')
+        let models: mls.editor.IModels | undefined = mls.editor.models[keyModel];
+        if (!models) models = await mls.editor.addModels(storFile.project, storFile.shortName, '')
         if (models && models.ts) {
             mls.l2.typescript.parseTripleSlash(models.ts);
             const tpsGroup = models.ts.compilerResults?.tripleSlashMLS?.variables['groupName']
