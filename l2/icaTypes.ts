@@ -71,6 +71,22 @@ export interface IToolboxOptions {
 export interface IcaLitElementBaseMethods extends LitElement {
     level: '1' | '2' | '3' | '4' | '5' | '6' | '7' | undefined;
     globalVariation: number | undefined;
+    //widget: string | undefined;
+    className: string;
+    overlayRef: HTMLElement | undefined;
+    mySymbol: string;
+    getActionsTags(): ActionTag[];
+    //changeStateStyle(info: {}): void;
+    //changeStateHtml(info: string): void;
+    //allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): IAllowCommand;
+    //getICAComponents(scope: HTMLElement): IcaLitElementBaseMethods[];
+    //getMyScope(): IcaLitElementBaseMethods | HTMLElement | undefined;
+    //getIcaParent(target: HTMLElement): IcaLitElementBaseMethods | undefined;
+}
+
+/*export interface IcaLitElementBaseMethods extends LitElement {
+    level: '1' | '2' | '3' | '4' | '5' | '6' | '7' | undefined;
+    globalVariation: number | undefined;
     widget: string | undefined;
     overlayRef: HTMLElement | undefined;
     mySymbol: string;
@@ -81,7 +97,7 @@ export interface IcaLitElementBaseMethods extends LitElement {
     getICAComponents(scope: HTMLElement): IcaLitElementBaseMethods[];
     getMyScope(): IcaLitElementBaseMethods | HTMLElement | undefined;
     getIcaParent(target: HTMLElement): IcaLitElementBaseMethods | undefined;
-}
+}*/
 
 export interface IICADepths {
     element: IcaLitElementBaseMethods,
