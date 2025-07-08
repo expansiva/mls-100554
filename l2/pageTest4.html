@@ -1,87 +1,69 @@
 <page-test4-100554
-	modeoverlay="wcd-overlay-mode-default-100554">
-	<ica-layout-flow-section-100554
-		id="section1"
-		class="full"
-		widget="wc-section-100554">
-		<ica-apresentation-text-text-100554
-			id="apText1"
-			widget="wc-text-100554"
-			text="Relatório de Pedidos e Status"
-			type="h2">
-		</ica-apresentation-text-text-100554>
-		<ica-layout-flow-divider-100554
-			widget="wc-divider-line-100554"
-			id="apDivider1">
-		</ica-layout-flow-divider-100554>
-        <ica-layout-flow-row-100554
-			widget="wc-row-100554"
-			id="">
-			<ica-layout-flow-column-100554
-				widget="wc-column-100554"
-				id="">
-                	<ica-forms-input-string-100554
-                        widget="wc-input-text-100554"
-                        label="Nome do solicitante"
-                        value="{{ projectTest.page4.filter.solicitante }}"
-                        id="">
-                    </ica-forms-input-string-100554>
-			</ica-layout-flow-column-100554>
-            <ica-layout-flow-column-100554
-				widget="wc-column-100554"
-				id="">
-                <ica-forms-input-select-one-100554
-                    widget="wc-select-one-100554"
-                    label="Status"
-                    options="{{ projectTest.page4.status }}"
-                    selectedvalue="{{ projectTest.page4.filter.status }}"
-                    id="">
-                </ica-forms-input-select-one-100554>
-			</ica-layout-flow-column-100554>
-            <ica-layout-flow-column-100554
-				widget="wc-column-100554"
-				id="">
-                <ica-forms-input-number-100554
-                    widget="wc-input-date-100554"
-                    label="Data inicial"
-                    value="{{ projectTest.page4.filter.dataInicial }}"
-                    id="">
-                </ica-forms-input-number-100554>
-			</ica-layout-flow-column-100554>
-            <ica-layout-flow-column-100554
-				widget="wc-column-100554"
-				id="">
-                <ica-forms-input-number-100554
-                        widget="wc-input-date-100554"
-                        label="Data final"
-                        value="{{ projectTest.page4.filter.dataFinal }}"
-                        id="">
-                    </ica-forms-input-number-100554>
-			</ica-layout-flow-column-100554>
-            <ica-layout-flow-column-100554
-                widget="wc-column-100554"
-                id="">
-                <ica-forms-submit-submit-100554
-                    id="btnFilter"
-					clicked-action="{{ projectTest.page4.action }}"
-					clicked-value="filter"
-                    text="Filtrar"
-                    widget="wc-button-submit-100554">
-                </ica-forms-submit-submit-100554>
-            </ica-layout-flow-column-100554>
-
-		</ica-layout-flow-row-100554>
-
-        <ica-layout-flow-divider-100554
-			widget="wc-divider-line-100554"
-			id="apDivider1">
-		</ica-layout-flow-divider-100554>
-        <ica-layout-group-table-100554
-			widget="wc-table-select-100554"
-			data="{{ projectTest.page4.actualData }}"
-			columns="{{ projectTest.page4.fields }}"
-			id="tableSelect"
-			data-event="item-selected">
-		</ica-layout-group-table-100554>
-	</ica-layout-flow-section-100554>
+	modeoverlay='wcd-overlay-mode-default-100554'>
+	<wc-section-100554
+		id='section1'
+		class='full'>
+		<wc-text-100554
+			id='apText1'
+			text='Relatório de Pedidos e Status'
+			type='h2'>
+		</wc-text-100554>
+		<wc-divider-line-100554
+			id='apDivider1'>
+		</wc-divider-line-100554>
+		<wc-row-100554
+			id='test'>
+			<wc-column-100554
+				id='c1'>
+				<wc-input-text-100554
+					label='Nome do solicitante'
+					value='{{ projectTest.page4.filter.solicitante }}'
+					id='t1'>
+				</wc-input-text-100554>
+			</wc-column-100554>
+			<wc-column-100554
+				id='c2'>
+				<wc-select-one-100554
+					label='Status'
+					options='{{ projectTest.page4.status }}'
+					selectedvalue='{{ projectTest.page4.filter.status }}'
+					id='s1'>
+				</wc-select-one-100554>
+			</wc-column-100554>
+			<wc-column-100554
+				id='c3'>
+				<wc-input-date-100554
+					label='Data inicial'
+					value='{{ projectTest.page4.filter.dataInicial }}'
+					id='i1'>
+				</wc-input-date-100554>
+			</wc-column-100554>
+			<wc-column-100554
+				id='c4'>
+				<wc-input-date-100554
+					label='Data final'
+					value='{{ projectTest.page4.filter.dataFinal }}'
+					id='i2'>
+				</wc-input-date-100554>
+			</wc-column-100554>
+			<wc-column-100554
+				id='c5'>
+				<wc-button-submit-100554
+					id='btnFilter'
+					clicked-action='{{ projectTest.page4.action }}'
+					clicked-value='filter'
+					text='Filtrar'>
+				</wc-button-submit-100554>
+			</wc-column-100554>
+		</wc-row-100554>
+		<wc-divider-line-100554
+			id='apDivider1'>
+		</wc-divider-line-100554>
+		<wc-table-select-100554
+			data='{{ projectTest.page4.actualData }}'
+			columns='{{ projectTest.page4.fields }}'
+			id='tableSelect'
+			data-event='item-selected'>
+		</wc-table-select-100554>
+	</wc-section-100554>
 </page-test4-100554>
