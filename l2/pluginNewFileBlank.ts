@@ -7,7 +7,7 @@ import { getMessageKey } from "./_100554_collabLitElement";
 import { propertyDataSource } from './_100554_collabDecorators';
 import { IDetails, createNewFile } from "./_100554_pluginNewFileBase";
 import { ServiceBase } from './_100554_serviceBase';
-import './_100554_wcCode';
+import './_100554_widgetTextCode';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -109,7 +109,7 @@ export class PluginNewFileBlank extends StateLitElement {
                     <div style="margin-top:1rem;">
                         <button @click=${this.handleAddFile}>${msg.btnCreate}</button>
                     </div>
-                    <wc-code-100554 language="typescript" text="${this.getTemplate()}"></wc-code-100554>
+                    <widget-text-code-100554 language="typescript" text="${this.getTemplate()}"></widget-text-code-100554>
                 </div>`
             }
         `

@@ -8,7 +8,7 @@ import { getMessageKey } from "./_100554_collabLitElement";
 import { propertyDataSource } from './_100554_collabDecorators';
 import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget, changeStateName } from "./_100554_pluginNewFileBase";
 import { ServiceBase } from './_100554_serviceBase';
-import './_100554_wcCode';
+import './_100554_widgetTextCode';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -162,8 +162,8 @@ import { globalState, setState, initState } from './_100554_collabState';
                         <button @click=${this.handleAddFile}>${msg.btnCreate}</button>
                     </div>
 
-                    <wc-code-100554 language="typescript" text="${this.getTemplateTS()}"></wc-code-100554>
-                    <wc-code-100554 language="html" text="${this.getTemplateHTML()}"></wc-code-100554>
+                    <widget-text-code-100554 language="typescript" text="${this.getTemplateTS()}"></widget-text-code-100554>
+                    <widget-text-code-100554 language="html" text="${this.getTemplateHTML()}"></widget-text-code-100554>
 
                 
                 </div>`

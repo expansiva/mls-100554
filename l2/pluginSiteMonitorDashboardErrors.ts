@@ -25,7 +25,7 @@ export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
 
     async prepare() {
 
-        await import('./_100554_wcChart');
+        await import('./_100554_widgetCollabChart');
 
         const dataByFilter: any = {
             today: [
@@ -85,7 +85,7 @@ export class PluginSiteMonitorDashboardErrors extends PluginBaseModule {
             }],
         }
         await this.updateComplete;
-        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" data=${JSON.stringify(this.chartData)}></wc-chart-100554>`;
+        if (this.body) this.body.innerHTML = `<widget-collab-chart-100554 renderer="svg" data=${JSON.stringify(this.chartData)}></widget-collab-chart-100554>`;
 
     }
 

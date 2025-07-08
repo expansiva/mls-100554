@@ -1,4 +1,4 @@
-/// <mls shortName="wcChart" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="widgetCollabChart" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -7,12 +7,8 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 declare var echarts: any;
 
-@customElement('wc-chart-100554')
+@customElement('widget-collab-chart-100554')
 export class WcEchartsPie100554 extends StateLitElement {
-
-    createRenderRoot() {
-        return this;
-    }
 
     @propertyDataSource({ type: String }) data: any | undefined;
 

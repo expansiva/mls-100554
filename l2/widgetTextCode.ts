@@ -1,11 +1,11 @@
-/// <mls shortName="wcCode" project="100554" enhancement="_100554_enhancementLit" groupName="_100554_icaApresentationTextCode" />
+/// <mls shortName="widgetTextCode" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import {  IcaApresentationTextCodeBase } from './_100554_icaApresentationTextCodeBase';
 
-@customElement('wc-code-100554')
-export class WcCode100554 extends IcaApresentationTextCodeBase {
+@customElement('widget-text-code-100554')
+export class WidgetTextCode extends IcaApresentationTextCodeBase {
   
   @property({ type: String }) config: string|undefined;
 

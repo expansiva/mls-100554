@@ -25,10 +25,9 @@ export class PluginSiteMonitorDashboardExpenses extends PluginBaseModule {
 
     @query('.plugin-body') body: HTMLDivElement | undefined;
 
-
     async prepare() {
 
-        await import('./_100554_wcChart');
+        await import('./_100554_widgetCollabChart');
 
         this.chartData = {
             tooltip: {
@@ -83,7 +82,7 @@ export class PluginSiteMonitorDashboardExpenses extends PluginBaseModule {
                 .replace(/>/g, "&gt;");
         }
 
-        if (this.body) this.body.innerHTML = `<wc-chart-100554 renderer="svg" data="${escapeHTML(data)}"></wc-chart-100554>`;
+        if (this.body) this.body.innerHTML = `<widget-collab-chart-100554 renderer="svg" data="${escapeHTML(data)}"></widget-collab-chart-100554>`;
 
     }
 
