@@ -11,7 +11,7 @@ export class TestGenerateDefs100554 extends StateLitElement {
     project = 100554;
     threadId = "20250521144240.1000";
     filePrefix: string = "plugin";
-    max = 20;
+    max = 2;
     log: string[] = [];
 
     render() {
@@ -54,8 +54,11 @@ export class TestGenerateDefs100554 extends StateLitElement {
         
         for (const shortName of shortNames) {
             const info = await mls.stor.getFiles({ project: this.project, shortName: shortName as string, folder: "", loadContent: false });
-            if (info.defs && info.defs.updatedAt && (new Date(info.defs.updatedAt)) > updateDefsAfter) continue;
+            if (info.defs && info.defs.updatedAt && (new Date(info.defs.updatedAt)) > updateDefsAfter) {
+                continue;
+            }
             if (files.length >= this.max) break;
+            this.log.push("added " + shortName + "," + (!!info.defs) + "," + info?.defs?.updatedAt )
             files.push(info);
         }
         this.log.push(`preparando ${files.length} files limitado por max`);
@@ -68,13 +71,12 @@ export class TestGenerateDefs100554 extends StateLitElement {
             const command = `@@GenerateDefs gerar o arquivo de definição: {"project":${file.ts.project}, "shortName":"${file.ts.shortName}" }`;
 
             if (!simular) {
-                if (!(await mls.editor.addModels(file.ts.project, file.ts.shortName, file.ts.folder))) console.log('Error addModels ' + file.ts.shortName);
-                else batch.push(
+                batch.push(
                     (async () => {
                         if (!file || !file.ts) return;
                         try {
                             await addMessage(this.threadId, command);
-                            await sleep(5000);
+                            await sleep(1000);
                             this.log.push("added message: " + command);
                         } catch (e: any) {
                             this.log.push("erro ao adicionar mensagem: " + (e?.message || e));
