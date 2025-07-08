@@ -601,7 +601,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         const info = await mls.stor.localDB.readPrjInfo(this.baseProject);
         if (info && info.indexModules && info.indexModules !== '') {
-            promises.push(this.createProjectModel(project, info.indexModules));
+            promises.push(this.createProjectModel(this.baseProject, info.indexModules));
         }
 
         const prj = mls.actual[5].project;
