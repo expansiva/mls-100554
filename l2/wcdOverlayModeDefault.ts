@@ -20,13 +20,13 @@ export class WcdOverlayModeDefault extends WcdOverlayLitBase {
 
     public listWidgetsBase = [
         
-        {name: '_100554_wcImage'},
-        {name: '_100554_wcText' },
-        {name: '_100554_wcCode' },
-        {name: '_100554_wcVideo'},
+        {name: '_100554_widgetImage'},
+        {name: '_100554_widgetText' },
+        {name: '_100554_widgetTextCode' },
+        {name: '_100554_widgetVideo'},
         
-        {name: '_100554_wcSection'},
-        {name: '_100554_wcDividerLine'}
+        {name: '_100554_widgetSection'},
+        {name: '_100554_widgetDividerLine'}
     ]
 
     private keys: { [key: string]: string } = {

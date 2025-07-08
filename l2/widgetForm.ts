@@ -1,10 +1,10 @@
-/// <mls shortName="wcForm" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="widgetForm" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IcaFormsContentFormBase } from './_100554_icaFormsContentFormBase';
 
-@customElement('wc-form-100554')
+@customElement('widget-form-100554')
 export class WcForm100554 extends IcaFormsContentFormBase {
 formId: string|undefined;
     validateonchange: boolean = true;
