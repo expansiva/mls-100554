@@ -1,13 +1,23 @@
 /// <mls shortName="icaBlocksViewerBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaBlocksViewerBase extends StateLitElement {
+export abstract class IcaBlocksViewerBase extends IcaLitElementBase {
 
     abstract config: string | undefined;
     abstract data: string | undefined;
 
-
+    public baseName: string = 'IcaBlocksViewerBase';
+    public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 }
 
 export interface IConfig {
