@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import './_100554_wcCode';
+import './_100554_widgetTextCode';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -50,10 +50,10 @@ class MyCustomElement extends LitElement {
             <p> ${this.msg.p1}</p>
             <hr>
             <h2>${this.msg.usage}:</h2>
-            <wc-code-100554
+            <widget-text-code-100554
                 text=${this.textCode2}
                 language="typescript">
-            </wc-code-100554>
+            </widget-text-code-100554>
             <div>
                 <p>${this.msg.p2}</p>
             </div>

@@ -27,9 +27,7 @@ export class PluginSiteMonitorDashboardActiveUsers extends PluginBaseModule {
 
     async prepare() {
 
-        console.info('prepare')
-
-        await import('./_100554_wcChart');
+        await import('./_100554_widgetCollabChart');
 
         this.chartData = {
             "tooltip": {
@@ -98,7 +96,7 @@ export class PluginSiteMonitorDashboardActiveUsers extends PluginBaseModule {
         }
 
         if (this.body) {
-            this.body.innerHTML = `<wc-chart-100554 renderer="svg" data="${escapeHTML(data)}"></wc-chart-100554>`;
+            this.body.innerHTML = `<widget-collab-chart-100554 renderer="svg" data="${escapeHTML(data)}"></widget-collab-chart-100554>`;
         }
 
     }
