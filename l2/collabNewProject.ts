@@ -462,8 +462,6 @@ export class CollabNewProject extends CollabLitElement {
                             name: this.newProjectName,
                             owner: userNameCollab,
                             userAuth: this.newProjectVisibility as any,
-                            archived_at: '',
-                            created_at: '',
                             prj_dependencies: [],
                             value: ''
                         }

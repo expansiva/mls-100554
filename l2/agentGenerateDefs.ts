@@ -3,7 +3,9 @@
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { forceServiceInstance } from './_100554_libCommom';
 import { getPromptByHtml } from './_100554_aiPrompts';
-import { initState } from './_100554_collabState';
+import { globalState } from './_100554_collabState';
+import { ServiceSource100554 } from './_100554_serviceSource';
+
 
 import {
     getNextPendingStepByAgentName,
@@ -97,10 +99,6 @@ async function updateDefs(context: mls.msg.ExecutionContext, step: mls.msg.AIPay
 
     if ('compileEmbedding' in result) delete result.compileEmbedding;
 
-    let models = mls.editor.getModels(result.meta.projectId, result.meta.shortName);
-    if (!models) models = await mls.editor.addModels(result.meta.projectId, result.meta.shortName, result.meta.folder || '')
-    if (!models) throw new Error('Erro, model error on AddModels, stoping');
-
     const template = `/// <mls shortName="${result.meta.shortName}" project="${result.meta.projectId}" enhancement="_blank" />
 
 // Do not change – automatically generated code.
@@ -108,23 +106,29 @@ async function updateDefs(context: mls.msg.ExecutionContext, step: mls.msg.AIPay
 export const defs: mls.l4.BaseDefs = ${JSON.stringify(result, null, 2)}
     `;
 
-    if (models.defs) {
-        models.defs.model.setValue(template);
-        const keyFile = mls.stor.getKeyToFiles(result.meta.projectId, 2, result.meta.shortName, result.meta.folder || '', '.defs.ts');
-        const storFile = mls.stor.files[keyFile];
-        if (storFile) {
-            storFile.status = 'changed';
-            storFile.inLocalStorage = true;
-            storFile.updatedAt = new Date().toISOString();
-        }        
-    }
-    else {
-        const storFile = await createStorFile(result.meta.projectId, result.meta.shortName, result.meta.folder || '', template, '.defs.ts');
-        models.defs = mls.editor.createModelDefs(storFile, template);
-        if (!models.defs) throw new Error('Erro, model not prepared, stoping')
-    }
+    const keyDefsFile = mls.stor.getKeyToFiles(result.meta.projectId, 2, result.meta.shortName, result.meta.folder, '.defs.ts');
+    const keyTsFile = mls.stor.getKeyToFiles(result.meta.projectId, 2, result.meta.shortName, result.meta.folder, '.ts');
+    const storFileTs = mls.stor.files[keyTsFile];
+    let storFileDefs = mls.stor.files[keyDefsFile];
+    if (!storFileTs) throw new Error(`Invalid file .ts ${keyTsFile}`);
+    if (!storFileDefs) {
+        storFileDefs = await createStorFile(result.meta.projectId, result.meta.shortName, result.meta.folder || '', template, '.defs.ts');
+        storFileDefs.updatedAt = new Date().toISOString();
+    } else {
+        let models = mls.editor.getModels(result.meta.projectId, result.meta.shortName);
+        if (!models || !models.defs) {
+            const position: string = 'left';
+            const serviceSource: ServiceSource100554 = globalState._ica?.serviceSource[position].service;
+            if (!serviceSource) throw new Error('Not found service source instance');
+            await serviceSource.createModels(storFileTs);
+            models = mls.editor.getModels(result.meta.projectId, result.meta.shortName);
+            if (!models || !models.defs) throw new Error('Erro, model error on AddModels, stoping');
+            models.defs.model.setValue(template);
+            storFileDefs.updatedAt = new Date().toISOString();
+        }
 
-    // mls.editor.forceModelUpdate(models.defs.model);
+    }
+    
     context.task = await updateTaskTitle(context.task, "Def updated");
     context.task = await updateStepStatus(context.task, step.stepId, "completed");
     return context;
