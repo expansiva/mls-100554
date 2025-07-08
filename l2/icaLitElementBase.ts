@@ -7,9 +7,9 @@ import * as tps from './_100554_icaTypes';
 export abstract class IcaLitElementBase extends StateLitElement implements tps.IcaLitElementBaseMethods {
 
     abstract baseName: string;
-    abstract mySymbol: string;
     abstract getActionsTags(): tps.ActionTag[];
 
+    public mySymbol: string = 'fa-column';
     public overlayRef: HTMLElement | undefined;
     public originalAttrs: any[] = [];
 
@@ -23,6 +23,7 @@ export abstract class IcaLitElementBase extends StateLitElement implements tps.I
         super.connectedCallback();
         const attrs = this.getAttributes();
         attrs.forEach((atr) => {
+            if (atr.name.startsWith('.')) return;
             this.setAttribute(atr.name, atr.value);
         })
     }

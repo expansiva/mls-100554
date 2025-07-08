@@ -251,7 +251,7 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
 
             const order: { vl: IAttr[], nvl: IAttr[] } = { vl: [], nvl: [] };
             const objAllAttr: { [key: string]: string } = {};
-            const mainAttrs = getAtributtesByEl(this.elIca);
+            const mainAttrs = getAtributtesByEl(this.elIca as any);
 
             mainAttrs.forEach((a) => {
 
