@@ -7,6 +7,7 @@ import { IAgent } from './_100554_aiAgentBase';
 import { getTemporaryContext, formatTimestamp, getNextResultStep } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, updateThreads, getMessagesByThreadId } from './_100554_msgDBController';
 import { loadChatPreferences } from './_100554_collabMessageHelper';
+import { collabImport } from './_100554_collabImport';
 import './_100554_collabMessagesTaskInfo';
 import './_100554_collabMessagesTask';
 import './_100554_collabMessagesPrompt';
@@ -36,8 +37,9 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-
 /// **collab_i18n_end**
+
+
 @customElement('collab-messages-chat-100554')
 export class CollabMessagesChat100554 extends StateLitElement {
     private msg: MessageType = messages['en'];
@@ -89,6 +91,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             }
         }
     }
+
     disconnectedCallback() {
         super.disconnectedCallback();
         window.removeEventListener('task-change', this.onTaskChange);
@@ -106,7 +109,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         window.addEventListener('thread-change', this.onThreadChange);
         window.addEventListener('message-send', this.onMessageSend);
     }
-    
+
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
@@ -114,36 +117,37 @@ export class CollabMessagesChat100554 extends StateLitElement {
             return html`<div class="loading">${this.msg.loading}</div>`;
         }
         return html`
-${this.renderHeader()}
-${this.renderContent()}
-`;
+            ${this.renderHeader()}
+            ${this.renderContent()}`;
     }
+
     private renderHeader() {
         switch (this.activeScenerie) {
             case 'task':
                 return html`
-<div class="header">
-<span @click=${this.onTitleClick}>${collab_chevron_left} Task: ${this.actualTask?.PK || ''}</span>
-</div>`;
+                    <div class="header">
+                        <span @click=${this.onTitleClick}>${collab_chevron_left} Task: ${this.actualTask?.PK || ''}</span>
+                    </div>`;
             case 'details':
                 return html`
-<div class="header">
-<span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.actualThread?.thread.name || this.actualThread?.thread.threadId}</span>
-<div class="header-actions">
-<span @click=${this.onThreadDetailsClick}>${collab_gear}</span>
-</div>
-</div>`;
+                    <div class="header">
+                        <span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.actualThread?.thread.name || this.actualThread?.thread.threadId}</span>
+                        <div class="header-actions">
+                            <span @click=${this.onThreadDetailsClick}>${collab_gear}</span>
+                        </div>
+                    </div>`;
             case 'list':
                 return html`<div class="header">Threads</div>`;
             case 'threadDetails':
                 return html`
-<div class="header">
-<span @click=${this.onTitleClick}>${collab_chevron_left} ${this.msg.threadDetails}</span>
-</div>`;
+                    <div class="header">
+                        <span @click=${this.onTitleClick}>${collab_chevron_left} ${this.msg.threadDetails}</span>
+                    </div>`;
             default:
                 return null;
         }
     }
+
     private renderContent() {
         switch (this.activeScenerie) {
             case 'list':
@@ -158,6 +162,7 @@ ${this.renderContent()}
                 return null;
         }
     }
+
     private renderChatMessages() {
         this.userPreferenceChat = loadChatPreferences();
         const sortedEntries = Object.entries(this.actualMessagesParsed)
@@ -165,57 +170,56 @@ ${this.renderContent()}
             .sort(([a], [b]) => new Date(a as string).getTime() - new Date(b as string).getTime());
         const sortedObj: IMessageGrouped = Object.fromEntries(sortedEntries);
         return html`
-<div @scroll=${this.onChatScroll} class="chat-container">
-${Object.keys(sortedObj).map((key) => {
+        <div @scroll=${this.onChatScroll} class="chat-container">
+            ${Object.keys(sortedObj).map((key) => {
             const threadMessages = sortedObj[key];
             const messageTime = this.parseLocalDate(key);
             return html`
-<div class="message-time">${messageTime.date}</div>
-${threadMessages.map((message) => {
+                    <div class="message-time">${messageTime.date}</div>
+                    ${threadMessages.map((message) => {
                 const dateFormated = formatTimestamp(message.createAt);
                 const userName = this.actualThread?.users.find((user) => user.userId === message.senderId)?.name || message.senderId;
                 const userAvatar = this.actualThread?.users.find((user) => user.userId === message.senderId)?.avatar_url || '';
                 const cls = message.senderId === this.userId ? 'user' : 'system';
                 const isSame = message.isSame;
+                const taskResponse = 'teste'
                 return html`
-<div class="message ${cls} ${isSame ? 'same' : ''}">
-<div class="message-group">
-<div class="message-row">
-<div class="message-card ${cls} ${isSame ? 'same' : ''}">
-${!isSame ? html`<div class="message-title">@${userName}</div>` : ``}
-${this.renderMessageByLanguage(message)}
-${message.isLoading ? html`<span class="loader"></span>` : ''}
-${message.isFailed ? html`<div class="failed">
-<span>${collab_circle_exclamation}</span>
-<small>${this.msg.msgNotSend}</small>
-</div>`
-                        : ''}
-<div class="message-footer">${dateFormated?.time}</div>
-${message.taskId
-                        ? html`
-<div class="message-ai">
-<collab-messages-task-100554
-messageId=${message.createAt}
-.context= ${message.context}
-lastChanged= ${message.lastChanged}
-taskId=${message.taskId}
-@taskclick=${() => this.onTaskClick(message?.taskId || '', message.threadId, message.createAt)}
->
-</collab-messages-task-100554>
-</div> `
-                        : html``}
-</div>
-${cls === 'system' && !isSame ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''}
-</div>
-</div>
-</div>`
+                            <div class="message ${cls} ${isSame ? 'same' : ''}">
+                                <div class="message-group">
+                                    <div class="message-row">
+                                        <div class="message-card ${cls} ${isSame ? 'same' : ''}">
+                                            ${!isSame ? html`<div class="message-title">@${userName}</div>` : ``}
+                                            ${this.renderMessageByLanguage(message)}
+                                            ${message.isLoading ? html`<span class="loader"></span>` : ''}
+                                            ${message.isFailed ? html`<div class="failed">
+                                                <span>${collab_circle_exclamation}</span>
+                                                <small>${this.msg.msgNotSend}</small>
+                                            </div>`: ''}
+                                            <div class="message-footer">${dateFormated?.time}</div>
+                                            ${message.taskId ? html`
+                                                <div class="message-ai">
+                                                    <collab-messages-task-100554
+                                                        messageId=${message.createAt}
+                                                        .context= ${message.context}
+                                                        lastChanged= ${message.lastChanged}
+                                                        taskId=${message.taskId}
+                                                        @taskclick=${() => this.onTaskClick(message?.taskId || '', message.threadId, message.createAt)}
+                                                    >
+                                                    </collab-messages-task-100554>
+                                                </div> `: html``}                                            
+                                        </div>
+                                        ${cls === 'system' && !isSame ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''}
+                                    </div>
+                                </div>
+                            </div>`
             })}`
         })}
-${this.isLoadingMessages ? html`<div class="unread-messages" id="unread">Loading messages...</div>` : html``}
+        ${this.isLoadingMessages ? html`<div class="unread-messages" id="unread">Loading messages...</div>` : html``}
 </div>
-${this.renderPrompt()}
+        ${this.renderPrompt()}
 `
     }
+
     private renderMessageByLanguage(message: mls.msg.Message) {
         const mode = this.userPreferenceChat?.translationMode || 'icon';
         if (!this.userPreferenceChat || mode === 'none' || !message.translations) {
@@ -226,68 +230,67 @@ ${this.renderPrompt()}
         const isSameLanguege = language === message.language_detected;
         switch (mode) {
             case 'icon':
-                return html`
-<div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>`;
+                return html`<div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>`;
             case 'text':
                 return html`
-<div class="message-content">${messageByLanguagePref || message.content}</div>
-${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
+                <div class="message-content">${messageByLanguagePref || message.content}</div>
+                ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
             case 'iconText':
-                return html`
-<div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>
-${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
+                return html`<div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>
+                ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
             case 'trace':
-                return html`
-<div class="message-content trace">
-<div><b>[LanguageDetected: ${message.language_detected}]</b> ${message.content}</div>
-${Object.keys(message.translations).map((key) => {
+                return html`<div class="message-content trace">
+                <div><b>[LanguageDetected: ${message.language_detected}]</b> ${message.content}</div>
+                ${Object.keys(message.translations).map((key) => {
                     if (key === 'language_detected') return ''
                     if (key === message.language_detected) return ''
                     return html`<div><b>[${key}]</b> ${message.translations ? message.translations[key] : ''}</div>`
                 })}
-</div>
-`
+                </div>`
             default:
                 return null;
         }
     }
-    // .allUsers=${this.actualThread?.users || []}
+
     private renderPrompt() {
         return html`<collab-messages-prompt-100554 acceptAutoCompleteAgents="true" acceptAutoCompleteUser="true" threadId=${this.actualThread?.thread.threadId} .onSend=${this.handleSend.bind(this)} ></collab-messages-prompt-100554>`
     }
+
     private renderListThreads() {
         const unreadCount = 1;
         if (this.userThreads[this.group].length === 0 && !this.isLoadingThread) {
             return html`<div style="padding:1rem;">${this.msg.noThreads}</div>`;
         }
-        return html` <ul class="thread-list">
-${this.userThreads[this.group].map((item) => {
+        return html` 
+        <ul class="thread-list">
+            ${this.userThreads[this.group].map((item) => {
             return html`
-<li @click=${() => this.onThreadClick(item)} class="thread-item">
-<div class="thread-content">
-<div class="thread-item-header">
-<span class="thread-name">${item.thread.name || item.thread.threadId}</span>
-<span class="last-update">${item.thread.lastMessageTime ? formatTimestamp(item.thread.lastMessageTime)?.date : formatTimestamp(item.thread.history[0].timestamp)?.date}</span>
-</div>
-<div class="thread-summary">
-<span class="last-message">${item.thread.lastMessage || ''}</span>
-${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
-</div>
-</div>
-</li>
-`;
+                <li @click=${() => this.onThreadClick(item)} class="thread-item">
+                    <div class="thread-content">
+                        <div class="thread-item-header">
+                            <span class="thread-name">${item.thread.name || item.thread.threadId}</span>
+                            <span class="last-update">${item.thread.lastMessageTime ? formatTimestamp(item.thread.lastMessageTime)?.date : formatTimestamp(item.thread.history[0].timestamp)?.date}</span>
+                        </div>
+                        <div class="thread-summary">
+                            <span class="last-message">${item.thread.lastMessage || ''}</span>
+                            ${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
+                        </div>
+                    </div>
+                </li>`;
         })}
-</ul>
-${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
+        </ul>
+        ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
 `
     }
+
     private renderTaskDetails() {
-        return html`
-<collab-messages-task-info-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK}></collab-messages-task-info-100554>`
+        return html`<collab-messages-task-info-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK}></collab-messages-task-info-100554>`
     }
+
     private renderThreadDetails() {
         return html`<collab-messages-thread-details-100554 userId=${this.userId} .threadDetails=${{ ...this.actualThread }}></collab-messages-thread-details-100554>`
     }
+
     private async onChatScroll(e: Event) {
         if (this.isSystemChangeScroll) {
             this.isSystemChangeScroll = false;
@@ -322,6 +325,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
             this.isLoadingMoreMessages = false;
         }
     }
+
     private async getMessages(thread: mls.msg.Thread, lastOrderAt: string = ''): Promise<mls.msg.Message[]> {
         if (!this.userId) {
             return [];
@@ -333,11 +337,11 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         });
         return response.data
     }
+
     private parseMessages(rawData: mls.msg.Message[]): IMessageGrouped {
         const groupedByDay: IMessageGrouped = {};
         rawData.forEach(msg => {
             const formatted = formatTimestamp(msg.createAt);
-            //const dateKey = msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
             const dateKey = formatted?.date || msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
             if (!groupedByDay[dateKey]) {
                 groupedByDay[dateKey] = [];
@@ -349,6 +353,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         }
         return this.groupMessages(groupedByDay);
     }
+
     private groupMessages(groupedByDay: IMessageGrouped): IMessageGrouped {
         const result: IMessageGrouped = {};
         Object.keys(groupedByDay).forEach((key) => {
@@ -359,6 +364,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         });
         return result;
     }
+
     private parseLocalDate(dateString: string) {
         const [year, month, day] = dateString.split('-').map(Number);
         const date = new Date(year, month - 1, day);
@@ -369,6 +375,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
             time: date.toTimeString().split(' ')[0] // Ex: "00:00:00"
         };
     }
+
     private mergeMessages(
         array1: mls.msg.Message[],
         array2: mls.msg.Message[]
@@ -382,6 +389,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         }
         return Array.from(map.values());
     }
+
     private async onThreadClick(threadInfo: IThreadInfo) {
         this.activeScenerie = 'loading';
         this.messagesOffset = 0;
@@ -404,6 +412,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
             this.isLoadingMessages = false;
         }
     }
+
     private async loadAllMessages(threadInfo: IThreadInfo): Promise<void> {
         const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
         if (!messages || messages.length === 0 || !this.actualThread || !this.userId) {
@@ -429,6 +438,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         if (messages.length < 100) return;
         return this.loadAllMessages(threadInfo);
     }
+
     private async onTitleClick() {
         await this.updateComplete;
         if (this.activeScenerie === 'task') {
@@ -444,10 +454,12 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
             return;
         }
     }
+
     private onThreadDetailsClick() {
         this.saveScrollPosition();
         this.activeScenerie = 'threadDetails';
     }
+
     private async handleSend(value: string, opt: { isSpecialMention: boolean, agentName: string }) {
         this.isSystemChangeScroll = true;
         try {
@@ -460,6 +472,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
             throw new Error(err.message);
         }
     }
+
     private async addMessage(prompt: string) {
         if (!this.userId || !this.actualThread) return;
         const params: mls.msg.RequestAddMessage = {
@@ -480,6 +493,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
             console.error('Error on send message:' + err.message);
         }
     }
+
     private async addMessageResponse(task: mls.msg.TaskData) {
         const stepResult = getNextResultStep(task);
         if (!stepResult) return;
@@ -487,6 +501,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         if (!addMessage || typeof value !== 'string') return;
         this.addMessage(`IA: ${value} `);
     }
+
     private async addMessageIA(prompt: string, agentName: string) {
         if (!this.userId || !this.actualThread) return;
         const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, prompt);
@@ -494,7 +509,8 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         if (agentName) agentToCall = agentName;
         const message: IMessage = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
         try {
-            const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentToCall}`);
+            // const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentToCall}`);
+            const moduleAgent = await collabImport({ project: PROJECTAGENTDEFAULT, shortName: agentToCall, folder: '' });
             if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent')
             const agent: IAgent = moduleAgent.createAgent()
             context.message = message;
@@ -508,6 +524,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
             }
         }
     }
+
     private async updateMessageAI(context: mls.msg.ExecutionContext, updateThreadDB: boolean, oldContextCreateAt?: string) {
         if (this.activeScenerie !== 'details') return;
         if (!context.message && !context.task) return;
@@ -555,6 +572,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
             this.requestUpdate();
         }
     }
+
     private createTempMessage(content: string, senderId: string, threadId: string, taskId?: string) {
         const now = new Date();
         const formattedDate = now.getFullYear().toString()
@@ -579,6 +597,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         this.requestUpdate();
         return newMessage;
     }
+
     private async updateMessage2(updateThreadDB: boolean, oldMessage: IMessage, newMessage: mls.msg.Message) {
         if (updateThreadDB && this.actualThread) {
             const thread = await updateThread(newMessage.threadId, this.actualThread.thread, newMessage.content, newMessage.createAt, 0);
@@ -603,6 +622,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         addMessage(newMessage);
         this.requestUpdate();
     }
+
     private async onTaskClick(taskId: string, messageId: string, threadId: string,) {
         this.saveScrollPosition();
         this.activeScenerie = 'loading';
@@ -611,6 +631,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         this.actualTask = task;
         this.activeScenerie = 'task';
     }
+
     private async getTaskUpdate(taskId: string, threadId: string, createdAt: string) {
         if (!taskId || !createdAt || !threadId) throw new Error('Invalid args');
         if (!this.userId) throw new Error('Invalid userId');
@@ -624,6 +645,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         if (taskData.statusCode !== 200) throw new Error("error on AI get taskUpdate , stoped");
         return taskData.task;
     }
+
     private async getThreadInfo(threadId: string, userId: string): Promise<IThreadInfo> {
         try {
             const response = await mls.api.msgGetThreadUpdate({
@@ -635,11 +657,13 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
             throw new Error(err.message)
         }
     }
+
     private saveScrollPosition() {
         if (this.messageContainer) {
             this.savedScrollTop = this.messageContainer.scrollTop;
         }
     }
+
     private async restoreScrollPosition() {
         if (this.messageContainer) {
             await this.updateComplete;
@@ -655,6 +679,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         await this.updateMessageAI(customEvent.detail.context, false, customEvent.detail.oldContextCreateAt);
         if (task) await addOrUpdateTask(customEvent.detail.context.task);
     };
+
     private onTaskCompleted = async (e: Event) => {
         const customEvent = e as CustomEvent;
         const message: mls.msg.Message = customEvent.detail.context.message;
@@ -665,9 +690,11 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
             this.addMessageResponse(task);
         }
     };
+
     private onTaskDetailsClose = async (_e: Event) => {
         this.onTitleClick();
     };
+
     private onThreadChange = async (e: Event) => {
         const customEvent = e as CustomEvent;
         await this.updateMessageAI(customEvent.detail, false);
@@ -679,6 +706,7 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         }
         this.requestUpdate();
     };
+
     private onMessageSend = async (e: Event) => {
         const customEvent = e as CustomEvent;
         const message: mls.msg.Message = customEvent.detail.context.message;
@@ -687,10 +715,12 @@ ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         this.updateMessage2(false, message, message);
     };
 }
+
 interface IThreadInfo {
     thread: mls.msg.ThreadPerformanceCache,
     users: mls.msg.User[]
 }
+
 interface IMessage extends mls.msg.Message {
     context?: mls.msg.ExecutionContext,
     lastChanged?: number,
@@ -698,6 +728,7 @@ interface IMessage extends mls.msg.Message {
     isLoading?: boolean,
     isFailed?: boolean,
 }
+
 type IMessageGrouped = { [key: string]: IMessage[] }
 type IThread = { [key: string]: IThreadInfo[] }
 type IScenery = 'list' | 'details' | 'loading' | 'task' | 'threadDetails'

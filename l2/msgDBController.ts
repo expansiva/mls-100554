@@ -1,8 +1,11 @@
 /// <mls shortName="msgDBController" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+const MAXMESSAGESBYTHREAD = 100;
+const VERSION = 2;
+
 export function openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open("msgDB", 1);
+        const request = indexedDB.open("msgDB", VERSION);
 
         request.onupgradeneeded = (event) => {
             const db = (event.target as IDBOpenDBRequest).result;
@@ -17,9 +20,16 @@ export function openDB(): Promise<IDBDatabase> {
                 db.createObjectStore("tasks", { keyPath: "PK" });
             }
 
+            let messageStore: IDBObjectStore;
             if (!db.objectStoreNames.contains("messages")) {
-                const messageStore = db.createObjectStore("messages", { keyPath: "messageId" });
+                messageStore = db.createObjectStore("messages", { keyPath: "messageId" });
                 messageStore.createIndex("byThreadId", "threadId", { unique: false });
+                messageStore.createIndex("byThreadId_orderAt", ["threadId", "orderAt"], { unique: false });
+            } else {
+                messageStore = request.transaction!.objectStore("messages");
+                if (!messageStore.indexNames.contains("byThreadId_orderAt")) {
+                    messageStore.createIndex("byThreadId_orderAt", ["threadId", "orderAt"], { unique: false });
+                }
             }
         };
 
@@ -50,7 +60,7 @@ export async function addMessages(messages: mls.msg.Message[]): Promise<void> {
     });
 }
 
-export async function addMessage(message: mls.msg.Message): Promise<void> {
+export async function addMessage2(message: mls.msg.Message): Promise<void> {
     const db = await openDB();
 
     return new Promise((resolve, reject) => {
@@ -65,6 +75,59 @@ export async function addMessage(message: mls.msg.Message): Promise<void> {
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject("Erro ao adicionar task");
         tx.onabort = () => reject("Transação abortada");
+    });
+}
+
+export async function addMessage(message: mls.msg.Message): Promise<void> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("messages", "readonly");
+        const store = tx.objectStore("messages");
+        const index = store.index("byThreadId_orderAt");
+
+        const messagesInThread: mls.msg.Message[] = [];
+        const range = IDBKeyRange.bound([message.threadId, ''], [message.threadId, '\uffff']);
+        const request = index.openCursor(range);
+
+        request.onsuccess = async (event) => {
+            const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+            if (cursor) {
+                messagesInThread.push(cursor.value);
+                cursor.continue();
+            } else {
+
+                const excess = messagesInThread.length - MAXMESSAGESBYTHREAD + 1;
+                const messagesToDelete = excess > 0
+                    ? messagesInThread.sort((a, b) => a.orderAt.localeCompare(b.orderAt)).slice(0, excess)
+                    : [];
+
+                try {
+        
+                    if (messagesToDelete.length > 0) {
+                        deleteMessagesAndTasks(messagesToDelete);
+                    }
+
+                    const txWrite = db.transaction("messages", "readwrite");
+                    const storeWrite = txWrite.objectStore("messages");
+
+                    const newMessage = {
+                        ...message,
+                        messageId: `${message.threadId}/${message.createAt}`,
+                    };
+
+                    storeWrite.put(newMessage);
+                    txWrite.oncomplete = () => resolve();
+                    txWrite.onerror = () => reject("Erro ao adicionar mensagem");
+                    txWrite.onabort = () => reject("Transação abortada");
+
+                } catch (err) {
+                    reject(err);
+                }
+            }
+        };
+
+        request.onerror = () => reject("Erro ao ler mensagens da thread");
     });
 }
 
@@ -134,6 +197,36 @@ export async function getAllMessagesByThreadId(threadId: string): Promise<mls.ms
     });
 }
 
+
+async function deleteMessagesAndTasks(messages: mls.msg.Message[]): Promise<void> {
+
+    const db = await openDB();
+    const tx = db.transaction(["messages", "tasks"], "readwrite"); // transação para ambas stores
+
+    const messageStore = tx.objectStore("messages");
+
+    for (const msg of messages) {
+        messageStore.delete(`${msg.threadId}/${msg.createAt}`,);
+    }
+
+    await new Promise<void>((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error);
+    });
+
+    for await (const msg of messages) {
+        if (msg.taskId) {
+            try {
+                await deleteTask(msg.taskId);
+            } catch (err) {
+                console.warn(`Falha ao deletar task ${msg.taskId}:`, err);
+            }
+        }
+    }
+}
+
+
 export async function addOrUpdateTask(task: mls.msg.TaskData): Promise<void> {
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -155,6 +248,20 @@ export async function getTask(taskId: string): Promise<mls.msg.TaskData | undefi
         const request = store.get(taskId);
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject("Erro ao buscar task");
+    });
+}
+
+export async function deleteTask(taskId: string): Promise<void> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("tasks", "readwrite");
+        const store = tx.objectStore("tasks");
+
+        const request = store.delete(taskId);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject("Erro ao deletar task");
+        tx.onabort = () => reject("Transação abortada");
     });
 }
 
@@ -213,9 +320,9 @@ export async function updateThread(
             }
 
             threadDb = { ...threadDb, ...thread }
-            if(lastMessage !== undefined) threadDb.lastMessage = lastMessage;
-            if(lastMessageTime !== undefined) threadDb.lastMessageTime = lastMessageTime;
-            if(unreadCount !== undefined) threadDb.unreadCount = unreadCount;
+            if (lastMessage !== undefined) threadDb.lastMessage = lastMessage;
+            if (lastMessageTime !== undefined) threadDb.lastMessageTime = lastMessageTime;
+            if (unreadCount !== undefined) threadDb.unreadCount = unreadCount;
             threadDb.lastSync = getCompactUTC(); // atualiza o timestamp de sync também
             const updateRequest = store.put(threadDb);
             updateRequest.onsuccess = () => resolve(threadDb);
