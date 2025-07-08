@@ -1,32 +1,57 @@
-<page-test3-100554 modeoverlay="wcd-overlay-mode-default-100554">
-	<ica-layout-flow-section-100554 id="section1" class="inset" widget="wc-section-100554">
-		<ica-apresentation-text-text-100554 id="apText1" widget="wc-text-100554" text="Aprovar Solicitações" type="h2"
-			class="story-title">
-		</ica-apresentation-text-text-100554>
-		<ica-layout-group-table-100554 widget="wc-table-select-100554" data="{{projectTest.tables.solicitacoes}}"
-			columns="{{projectTest.page3.columns}}" id="tableSelect" selected="{{projectTest.page3.indexSel}}">
-		</ica-layout-group-table-100554>
-		<ica-forms-input-string-100554 widget="wc-input-text-100554" label="Id" id="iptId"
-			value="{{projectTest.page3.id}}">
-		</ica-forms-input-string-100554>
-		<ica-forms-input-string-100554 widget="wc-input-text-100554" label="Solicitante" id="iptSol"
-			value="{{projectTest.page3.solicitante}}">
-		</ica-forms-input-string-100554>
-		<ica-layout-flow-divider-100554 widget="wc-divider-100554" id="apDivider1">
-		</ica-layout-flow-divider-100554>
-		<ica-forms-input-string-100554 widget="wc-input-text-100554" label="Justificativa" id="iptJusti"
-			value="{{projectTest.page3.justificativa}}">
-		</ica-forms-input-string-100554>
-		<ica-layout-flow-row-100554 widget="wc-row-100554" id="widget4">
-			<ica-forms-submit-submit-100554 widget="wc-button-submit-100554" id="buttonApprove" text="Approve"
-				clicked-value="approve" clicked-action="{{projectTest.page3.action}}">
-			</ica-forms-submit-submit-100554>
-			<ica-forms-submit-submit-100554 widget="wc-button-submit-100554" id="buttonReject" text="Reject"
-				clicked-value="reject" clicked-action="{{projectTest.page3.action}}">
-			</ica-forms-submit-submit-100554>
-		</ica-layout-flow-row-100554>
-		<ica-apresentation-text-text-100554 widget="wc-text-100554" type="p" text="{{projectTest.page3.error}}"
-			id="apText2">
-		</ica-apresentation-text-text-100554>
-	</ica-layout-flow-section-100554>
+<page-test3-100554
+	modeoverlay='wcd-overlay-mode-default-100554'>
+	<wc-section-100554
+		id='section1'
+		class='inset'>
+		<wc-text-100554
+			id='apText1'
+			text='Aprovar Solicitações'
+			type='h2'
+			class='story-title'>
+		</wc-text-100554>
+		<wc-table-select-100554
+			data='{{projectTest.tables.solicitacoes}}'
+			columns='{{projectTest.page3.columns}}'
+			id='tableSelect'
+			selected='{{projectTest.page3.indexSel}}'>
+		</wc-table-select-100554>
+		<wc-input-text-100554
+			label='Id'
+			id='iptId'
+			value='{{projectTest.page3.id}}'>
+		</wc-input-text-100554>
+		<wc-input-text-100554
+			label='Solicitante'
+			id='iptSol'
+			value='{{projectTest.page3.solicitante}}'>
+		</wc-input-text-100554>
+		<wc-divider-100554
+			id='apDivider1'>
+		</wc-divider-100554>
+		<wc-input-text-100554
+			label='Justificativa'
+			id='iptJusti'
+			value='{{projectTest.page3.justificativa}}'>
+		</wc-input-text-100554>
+		<wc-row-100554
+			id='widget4'>
+			<wc-button-submit-100554
+				id='buttonApprove'
+				text='Approve' 
+				clicked-value='approve'
+				clicked-action='{{projectTest.page3.action}}'>
+			</wc-button-submit-100554>
+			<wc-button-submit-100554
+				id='buttonReject'
+				text='Reject'
+				clicked-value='reject'
+				clicked-action='{{projectTest.page3.action}}'>
+			</wc-button-submit-100554>
+		</wc-row-100554>
+		<wc-text-100554
+			type='p'
+			text='{{projectTest.page3.error}}'
+			id='apText2'>
+		</wc-text-100554>
+	</wc-section-100554>
 </page-test3-100554>
