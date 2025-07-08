@@ -1,303 +1,60 @@
 /// <mls shortName="icaLitElementBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, unsafeHTML } from 'lit';
 import { property } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import * as tps from './_100554_icaTypes';
-import * as globalIca from './_100554_icaGlobal';
 
 export abstract class IcaLitElementBase extends StateLitElement implements tps.IcaLitElementBaseMethods {
 
+    //---
+    widget: string | undefined;
+    changeStateStyle(info: {}): void {
+        throw new Error('Method not implemented.');
+    }
+    changeStateHtml(info: string): void {
+        throw new Error('Method not implemented.');
+    }
+    allowCommand(cmd: '' | 'move', scope: HTMLElement, target: HTMLElement): tps.IAllowCommand {
+        throw new Error('Method not implemented.');
+    }
+    getICAComponents(scope: HTMLElement): tps.IcaLitElementBaseMethods[] {
+        throw new Error('Method not implemented.');
+    }
+    getMyScope(): HTMLElement | tps.IcaLitElementBaseMethods | undefined {
+        throw new Error('Method not implemented.');
+    }
+    getIcaParent(target: HTMLElement): tps.IcaLitElementBaseMethods | undefined {
+        throw new Error('Method not implemented.');
+    }
+    //--
+    
     abstract mySymbol: string;
-    abstract changeStateHtml(info: string): void;
-    abstract allowCommand(cmd: 'move' | '', scope: HTMLElement, target: HTMLElement): tps.IAllowCommand;
     abstract getActionsTags(): tps.ActionTag[];
 
     public overlayRef: HTMLElement | undefined;
-
-    @property({ type: String, reflect: true })
-    public widget: string | undefined;
-
-    @property({ type: String, reflect: true })
-    public id: string = '';
-
-    @property({ type: Boolean, reflect: true })
-    public isICAGroup: boolean | undefined;
-
-    @property({ type: String })
-    public renderType: 'preview' | 'edit' | 'editactive' | undefined;
+    public originalAttrs: any[] = [];
 
     @property({ type: String })
     public level: '1' | '2' | '3' | '4' | '5' | '6' | '7' | undefined;
 
-    @property({ type: String })
-    public styleel: string | undefined = '';
-
-    public internalInnerHTML = '';
-
-    private lastWidget: string = '';
-
-    private styleElMain: CSSStyleDeclaration | undefined = undefined;
-
-    private excludesProps = ['rendertype', 'level', 'widget', 'style', 'styleel', 'id', globalIca.ATTRGROUP];
 
     //--------COMPONENT-----------------
+
+    connectedCallback(): void {
+        super.connectedCallback();
+        const attrs = this.getAttributes();
+        attrs.forEach((atr) => {
+            this.setAttribute(atr.name, atr.value);
+        })
+    }
+
     createRenderRoot() {
         return this;
     }
 
-    connectedCallback(): void {
-        super.connectedCallback();
-        this.setInitialConfigs();
-    }
+    //--------IMPLEMENTS-------------
 
-    attributeChangedCallback(
-        name: string,
-        oldValue: string | null,
-        newValue: string | null
-    ): void {
-        super.attributeChangedCallback(name, oldValue, newValue);
-        if (!this.excludesProps.includes(name) && oldValue !== newValue && newValue) {
-            this.updateAttrInWc(name, newValue)
-        }
-    }
-
-    async firstUpdated(changedProperties: Map<string | number | symbol, unknown>) {
-        super.firstUpdated(changedProperties);
-        const tempeEl = document.createElement('span');
-        tempeEl.style.cssText = this.styleel ? this.styleel : '';
-        this.styleElMain = tempeEl.style;
-        await this.performPreSlotAllocationOperations();
-
-    }
-
-    updated(changedProperties: Map<string | number | symbol, unknown>): void {
-        super.updated(changedProperties);
-
-        const hasLevel = changedProperties.has('level');
-        const hasStyleEl = changedProperties.has('styleel');
-
-        if (this.widget && this.lastWidget !== this.widget) {
-            this.lastWidget = this.widget as string;
-            customElements.whenDefined(this.lastWidget).then(() => {
-                this.updateStyleDisplay();
-            });
-        }
-
-        if (hasLevel) {
-            const valLevel = changedProperties.get('level');
-            if (this.level === valLevel) return;
-            this.updateLevelIcas();
-        }
-
-        if (hasStyleEl) {
-            const valStyleEl = changedProperties.get('styleel');
-            if (this.styleel === valStyleEl) return;
-            this.updateStyleEl();
-        }
-
-
-    }
-
-    render() {
-
-        this.style.display = 'block';
-        //if (!this.style.width) this.style.width = 'inherit';
-        //if (!this.style.height) this.style.height = 'inherit';
-
-        const attrs = this.getAttributes();
-        let code = `
-            <${this.widget} ${attrs}>
-            </${this.widget}>
-        `;
-        return html`${unsafeHTML(code)}`;
-    }
-
-    //---------IMPLEMENTATION-------------
-
-    public changeStateStyle(style: {}): void {
-
-        if (!this.styleElMain || !style) return;
-        const el = this.querySelector(`${this.widget}:first-child`) as HTMLElement
-        if (el) {
-            this.styleElMain.cssText = el.style.cssText;
-            Object.assign(this.styleElMain, style as CSSStyleDeclaration);
-            el.style.cssText = this.styleElMain.cssText;
-            this.styleel = el.style.cssText
-        }
-    }
-
-    private updateStyleEl() {
-        if (!this.widget) return;
-        const widgetEl = this.querySelector(this.widget) as HTMLElement;
-        if (!widgetEl) return;
-        widgetEl.style.cssText = this.styleel || '';
-    }
-
-    private updateLevelIcas() {
-
-        if (!this.level) return;
-
-        const traverseShadowRoot = (element: HTMLElement) => {
-            if (element.tagName.toLowerCase().startsWith('ica')) {
-                element.setAttribute('level', this.level as any);
-                return;
-            }
-            if (element.shadowRoot) {
-                element.shadowRoot.querySelectorAll('*').forEach((item) => {
-                    if (item.tagName.toLowerCase().startsWith('ica')) {
-                        item.setAttribute('level', this.level as any);
-                    }
-                });
-            } else {
-                const children = Array.from(element.children);
-                if (children.length > 0) {
-                    children.forEach(child => {
-                        if (child.tagName.toLowerCase().startsWith('ica')) {
-                            child.setAttribute('level', this.level as any);
-                        }
-                    });
-                }
-            }
-        }
-
-        if (!this.widget) return;
-        const widgetEl = this.querySelector(this.widget);
-        if (!widgetEl) return;
-        traverseShadowRoot(widgetEl as HTMLElement);
-
-    }
-
-    private updateAttrInWc(prop: string, value: string) {
-
-        const el = this.querySelector(this.widget as string);
-        if (el) el.setAttribute(prop, value);
-
-    }
-
-    private updateStyleDisplay() {
-        const el = this.querySelector(this.widget as string);
-        if (el) {
-            const d = window.getComputedStyle(el);
-            this.style.display = d.display;
-        }
-    }
-
-
-    private doChangeState(js: string): void {
-
-        const info = JSON.parse(js);
-
-        switch (info.tp) {
-            case "menu":
-                // console.info(info.menu);
-                break;
-            case "style":
-                this.changeStateStyle(info.style);
-                break;
-            case "html":
-                this.changeStateHtml(info.html);
-                break;
-            default:
-                '';
-                break;
-        }
-
-        //mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
-    }
-
-    public getICAComponents(scope: HTMLElement): tps.IcaLitElementBaseMethods[] {
-
-        let ret: tps.IcaLitElementBaseMethods[] = [];
-        const reentrance = (el: IcaLitElementBase | HTMLElement) => {
-            const tag = el.tagName.toLowerCase();
-            if (tag.startsWith(`${globalIca.PREFIX}-`)) {
-                ret.push(el as tps.IcaLitElementBaseMethods);
-            }
-
-            const isGroup = el.getAttribute(`${globalIca.ATTRGROUP}`);
-            if (!isGroup || isGroup === 'false') {
-                Array.from(el.children).forEach(i => {
-                    reentrance(i as HTMLElement);
-                })
-            }
-        };
-
-        Array.from(scope.children).forEach(i => {
-            reentrance(i as HTMLElement);
-        });
-        return ret;
-
-    }
-
-    public getMyScope(): IcaLitElementBase | HTMLElement | undefined {
-        let ret = this.closest(`${globalIca.ICAPAGE}`) as IcaLitElementBase;
-        if (!ret) ret = this.closest('body') as any;
-        return ret
-    }
-
-    public getIcaParent(target: HTMLElement): tps.IcaLitElementBaseMethods | undefined {
-        const parent = target.parentElement;
-        if (!parent) return;
-        const tag = parent.tagName.toLowerCase();
-        if (!tag.startsWith(`${globalIca.PREFIX}-`)) return this.getIcaParent(parent);
-        else if (tag.startsWith(`${globalIca.PREFIX}-`)) return parent as tps.IcaLitElementBaseMethods;
-    }
-
-    async performPreSlotAllocationOperations() {
-
-        if (!this.widget) return;
-        const tag = convertFileNameToTag(this.widget);
-        if (tag.startsWith(globalIca.PREFIX) || tag.startsWith(globalIca.PREFIXWCD)) return;
-
-        Promise.all([tag].map((wc) => customElements.whenDefined(wc))).then(async () => {
-
-            let childrens = Array.from(this.children).filter((child) => child.tagName !== tag.toUpperCase());
-            const widgetElement = this.querySelector(tag) as IcaLitElementBase;
-            if (!widgetElement || !childrens || childrens.length === 0) return;
-
-            childrens.forEach((child) => {
-                if (child.tagName.toLowerCase().startsWith(globalIca.PREFIXWCD)) return;
-                child.remove();
-                widgetElement.appendChild(child);
-            });
-
-            const slots = widgetElement.shadowRoot ?
-                Array.from(widgetElement.shadowRoot.querySelectorAll(`slot`)) :
-                Array.from(widgetElement.querySelectorAll(`slot`))
-
-            if (!slots || slots.length === 0) return;
-            const slotWithoutName = slots.find((slot) => !slot.getAttribute('name'));
-
-            childrens.forEach(element => {
-                const elementSlotName = element.getAttribute('slot');
-                if (elementSlotName) {
-                    const slotByName = slots.find((slot) => slot.getAttribute('name') === elementSlotName);
-                    if (slotByName) slotByName.parentNode?.insertBefore(element, slotByName);
-                } else if (slotWithoutName) {
-                    slotWithoutName.parentNode?.insertBefore(element, slotWithoutName);
-                }
-            });
-            slots.forEach((sl) => sl.remove());
-        })
-    }
-
-    private async setInitialConfigs() {
-        if (
-            this.widget &&
-            window.mls &&
-            (
-                !(mls as any).modePreview ||
-                (mls as any).modePreview !== 'singlePage'
-            )
-        ) {
-            const fileName = convertTagToFileName(this.widget);
-            await import('./' + fileName);
-        }
-    }
-
-
+    private excludesProps = ['rendertype', 'level', 'style', 'id'];
     private getAttributes() {
 
         const language = (this.closest('html') as HTMLHtmlElement)?.lang || 'en';
@@ -316,22 +73,16 @@ export abstract class IcaLitElementBase extends StateLitElement implements tps.I
                     name: attrName,
                     value: attrValue
                 });
+
+                this.originalAttrs.push({
+                    name: attrName,
+                    value: attrValue
+                });
             }
         }
 
         const attrsByVariation = this.filterAttributes(attributes, language);
-        let attributesStr = '';
-
-        attrsByVariation.forEach((item) => {
-            const escapedValue = item.value
-                .replace(/&/g, '&amp;')
-                .replace(/"/g, '&quot;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-
-            attributesStr += `${item.name}="${escapedValue}" `;
-        });
-        return attributesStr;
+        return attrsByVariation;
 
     }
 
@@ -358,6 +109,7 @@ export abstract class IcaLitElementBase extends StateLitElement implements tps.I
         });
         return aux;
     }
+
 
 }
 

@@ -66,6 +66,40 @@ export function getAtributtesByTag(tag: string): string[] {
 
 }
 
+export function getAtributtesByEl(el: HTMLElement): string[] {
+
+  const firstClass = Object.getPrototypeOf(el);
+  const superClass = Object.getPrototypeOf(firstClass);
+
+  if (!superClass || !superClass.constructor || !superClass.constructor.nameclass) return [];
+
+  const tag = classNameToKebabCase(superClass.constructor.nameclass);
+
+  const json = parseMarkdownToJson(descriptionForPrompt);
+  let ret: string[] = [];
+  json.forEach((i) => {
+    if (i.base === tag) {
+      ret = i.attr as string[];
+    }
+  })
+
+  return ret;
+
+}
+
+function classNameToKebabCase(className: string): string {
+  // Remove sufixos comuns como "Base" ou "Component" (personalize conforme necessário)
+  const cleanedName = className.replace(/(Base|Component)$/, '');
+
+  // Converte PascalCase para kebab-case
+  const kebab = cleanedName
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')  // insere '-' entre camelCase
+    .replace(/([A-Z])([A-Z][a-z])/g, '$1-$2') // lida com acrônimos (e.g., ICA -> ICA-Presentation)
+    .toLowerCase();
+
+  return kebab;
+}
+
 export function getDefinitionByTag(tag: string): any | undefined {
   tag = removeProjectNumberSegment(tag.toLocaleLowerCase());
   if (!tag.toLocaleLowerCase().startsWith('ica-')) return;

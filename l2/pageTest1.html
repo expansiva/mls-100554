@@ -1,94 +1,37 @@
 <page-test1-100554
-	modeoverlay="wcd-overlay-mode-default-100554">
-	<ica-layout-flow-section-100554
-		id="section1"
-		class="inset"
-		widget="wc-section-100554">
-		<ica-apresentation-text-text-100554
-			id="apText1"
-			widget="wc-text-100554"
-			text="Solicitação de Compra de Materiais"
-			type="h2">
-		</ica-apresentation-text-text-100554>
-		<ica-layout-flow-divider-100554
-			widget="wc-divider-line-100554"
-			id="apDivider1">
-		</ica-layout-flow-divider-100554>
-		<ica-forms-input-string-100554
-			widget="wc-input-text-100554"
-			label="Nome do solicitante"
-			value="{{ projectTest.page1.newRequest.solicitante }}"
-			id="">
-		</ica-forms-input-string-100554>
-		<ica-forms-input-select-one-100554
-			widget="wc-select-one-100554"
-			label="Departamentos"
-			hint="Selecione um departamento"
-			options="{{ projectTest.tables.depto }}"
-			selectedvalue="{{ projectTest.page1.newRequest.depto }}"
-			id="">
-		</ica-forms-input-select-one-100554>
-		<ica-layout-flow-row-100554
-			widget="wc-row-100554"
-			id="">
-			<ica-layout-flow-column-100554
-				widget="wc-column-100554"
-				id="">
-				<ica-forms-input-select-one-100554
-					widget="wc-select-one-100554"
-					label="Itens"
-					hint="Selecione um item para solicitação"
-					options="{{ projectTest.tables.products }}"
-					selectedvalue="{{ projectTest.page1.newRequest.item }}"
-					id="">
-				</ica-forms-input-select-one-100554>
-			</ica-layout-flow-column-100554>
-			<ica-layout-flow-column-100554
-				widget="wc-column-100554"
-				id="">
-				<ica-forms-input-number-100554
-					minvalue="1"
-					widget="wc-input-number-with-buttons-100554"
-					label="Quantidade"
-					value="{{ projectTest.page1.newRequest.quantidade }}"
-					id="">
-				</ica-forms-input-number-100554>
-			</ica-layout-flow-column-100554>
-			<ica-layout-flow-column-100554
-				widget="wc-column-100554"
-				id="">
-				<ica-forms-input-number-100554
-					widget="wc-input-date-100554"
-					label="Data"
-					readonly=""
-					value="{{ projectTest.page1.newRequest.data }}"
-					id="">
-				</ica-forms-input-number-100554>
-			</ica-layout-flow-column-100554>
-		</ica-layout-flow-row-100554>
-		<ica-forms-input-string-100554
-			widget="wc-input-text-100554"
-			label="Justificativa"
-			value="{{ projectTest.page1.newRequest.justificativa }}"
-			id="">
-		</ica-forms-input-string-100554>
-		<ica-layout-flow-row-100554
-			widget="wc-row-100554"
-			id="">
-			<ica-forms-submit-submit-100554
-				id="btnSave"
-				text="Abrir Solicitação"
-				clicked-action="{{ projectTest.page1.action }}"
-				clicked-value="save"
-				widget="wc-button-submit-100554">
-			</ica-forms-submit-submit-100554>
-			<ica-forms-submit-submit-100554
-				id="btnCancel"
-				text="Cancelar"
-				clicked-action="{{ projectTest.page1.action }}"
-				clicked-value="cancel"
-				widget="wc-button-submit-100554">
-			</ica-forms-submit-submit-100554>
-		</ica-layout-flow-row-100554>
-	</ica-layout-flow-section-100554>
+	modeoverlay='wcd-overlay-mode-default-100554'
+	style='position: relative;'>
+	<wc-section-100554
+		id='section1'
+		class='inset'>
+		<wc-text-100554
+			id='apText1'
+			text='Teste ingles 2'
+			type='h2'
+			text-es='Teste 323'>
+		</wc-text-100554>
+		<wc-divider-line-100554
+			widget='wc-divider-line-100554'
+			id='apDivider1'>
+		</wc-divider-line-100554>
+		<wc-input-text-100554
+			label='Nome do solicitante'
+			value='{{ projectTest.page1.newRequest.solicitante }}'
+			id='apText2'
+			autocapitalize='off'>
+		</wc-input-text-100554>
+		<wc-select-one-100554
+			label='Departamentos'
+			hint='Selecione um departamento'
+			options='{{ projectTest.tables.depto }}'
+			selectedvalue='{{ projectTest.page1.newRequest.depto }}'
+			id='apText3'>
+		</wc-select-one-100554>
+		<wc-input-text-100554
+			label='Justificativa'
+			value='{{ projectTest.page1.newRequest.justificativa }}'
+			id='apText4'
+			autocapitalize='off'>
+		</wc-input-text-100554>
+	</wc-section-100554>
 </page-test1-100554>

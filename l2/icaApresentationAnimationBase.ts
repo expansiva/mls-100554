@@ -1,12 +1,25 @@
 /// <mls shortName="icaApresentationAnimationBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { StateLitElement } from './_100554_stateLitElement';
+import { ActionTag, IAllowCommand } from './_100554_icaTypes';
 
 export abstract class IcaApresentationAnimationBase extends StateLitElement {
 
     abstract config: string | undefined;
     abstract content: string | undefined;
     abstract state: string | undefined;
+
+    public mySymbol = 'fa-table-columns';
+
+    public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 
 
 }

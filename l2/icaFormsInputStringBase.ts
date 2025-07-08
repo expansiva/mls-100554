@@ -1,6 +1,7 @@
 /// <mls shortName="icaFormsInputStringBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { StateLitElement } from './_100554_stateLitElement';
+import { ActionTag } from './_100554_icaTypes';
 
 export abstract class IcaFormsInputStringBase extends StateLitElement {
     
@@ -21,7 +22,17 @@ export abstract class IcaFormsInputStringBase extends StateLitElement {
 	abstract autocomplete: string | undefined;
 	abstract validationmessage: string | undefined;
 	abstract debounce: string | undefined;
-	abstract readonly: boolean ;
+	abstract readonly: boolean;
+
+	public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 
 }
 

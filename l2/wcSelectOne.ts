@@ -34,6 +34,7 @@ export class WcSelectOne extends IcaFormsInputSelectOneBase {
     }
 
     renderOpt() {
+
         if (this.options) {
             return html`
                 ${this.options.map((opt: OptionItem) => {

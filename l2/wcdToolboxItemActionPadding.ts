@@ -65,11 +65,11 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
     updated(changedProperties: any) {
 
         super.updated(changedProperties);
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
 
         if (this.args && ['top', 'bottom', 'left', 'right'].includes(this.args)) {
             this.onmousedown = (e) => this.initDragging(e);
-            this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+            this.myParent.updateBaseNoPadding(this.elICA, this.myParent);
             this.myParent.updateBackgroundAuxSize('show');
         }
 
@@ -192,26 +192,26 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
     }
 
     private renderPadding() {
-        if (!this.elMain) return html``;
+        if (!this.elICA) return html``;
         return html`
             <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
                 <p style=" margin-bottom: 5px;">A propriedade <b>padding</b> define uma a distância entre o conteúdo de um elemento e suas bordas</p>
                 <h4 style="display:flex; gap:1.5rem;margin:0px" >${this.msg.padding}<input type="checkbox" prop="padding"></h4>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.msg.top}</div>
-                    <input prop="paddingTop" type="text" .value="${this.elMain.style.paddingTop}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                    <input prop="paddingTop" type="text" .value="${this.elICA.style.paddingTop}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.msg.right}</div>
-                    <input prop="paddingRight" type="text" .value="${this.elMain.style.paddingRight}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                    <input prop="paddingRight" type="text" .value="${this.elICA.style.paddingRight}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div> 
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.msg.bottom}</div>
-                    <input prop="paddingBottom" type="text" .value="${this.elMain.style.paddingBottom}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                    <input prop="paddingBottom" type="text" .value="${this.elICA.style.paddingBottom}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">${this.msg.left}</div>
-                    <input prop="paddingLeft" type="text" .value="${this.elMain.style.paddingLeft}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
+                    <input prop="paddingLeft" type="text" .value="${this.elICA.style.paddingLeft}"  group="padding" @input="${(e: any) => this.onChangeProp(e)}" />
                 </div>
                 
             </div>
@@ -235,25 +235,25 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
         let isGroup = false;
         if (elGroup) isGroup = elGroup.checked;
 
-        if (!prop || !this.elMain || !this.myParent) return;
+        if (!prop || !this.elICA || !this.myParent) return;
 
         if (isGroup) {
 
-            this.elMain.style.padding = el.value;
+            this.elICA.style.padding = el.value;
             ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'].forEach((pr: string) => {
                 const field = el.closest('.myAuxGroup')?.querySelector(`input[prop="${pr}"]`) as HTMLInputElement;
                 if (field) field.value = el.value;
             });
 
-            this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+            this.myParent.updateBaseNoPadding(this.elICA, this.myParent);
             this.myParent.updateBackgroundAuxSize('show');
-            this.fireEvent(`{"padding":"${this.elMain.style.padding}"}`);
+            this.fireEvent(`{"padding":"${this.elICA.style.padding}"}`);
             return;
 
         }
 
-        this.elMain.style[prop as any] = el.value;
-        this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+        this.elICA.style[prop as any] = el.value;
+        this.myParent.updateBaseNoPadding(this.elICA, this.myParent);
         this.myParent.updateBackgroundAuxSize('show');
         this.fireEvent();
     }
@@ -263,10 +263,10 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
     private timeRemoveResize = 0;
     private initDragging(e: MouseEvent): void {
 
-        if (!this.elMain || !document.defaultView) return;
+        if (!this.elICA || !document.defaultView) return;
         this.startX = e.clientX;
         this.startY = e.clientY;
-        const st = document.defaultView.getComputedStyle(this.elMain);
+        const st = document.defaultView.getComputedStyle(this.elICA);
         this.startTop = parseInt(st.paddingTop, 10);
         this.startBottom = parseInt(st.paddingBottom, 10);
         this.startLeft = parseInt(st.paddingLeft, 10);
@@ -274,7 +274,7 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
 
         const doDragging = (e: MouseEvent) => {
 
-            if (!this.elMain || !this.myParent) return;
+            if (!this.elICA || !this.myParent) return;
 
             this.myParent.style.background = '#f9cc9d80';
 
@@ -282,23 +282,23 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
             const deltaY: number = (e.clientY - this.startY);
 
             if (!this.args || ['top'].includes(this.args)) {
-                this.elMain.style.paddingTop = (this.startTop + deltaY) + 'px';
+                this.elICA.style.paddingTop = (this.startTop + deltaY) + 'px';
             }
 
             if (!this.args || ['bottom'].includes(this.args)) {
-                this.elMain.style.paddingBottom = (this.startBottom + deltaY) + 'px';
+                this.elICA.style.paddingBottom = (this.startBottom + deltaY) + 'px';
             }
 
             if (!this.args || ['left'].includes(this.args)) {
-                this.elMain.style.paddingLeft = (this.startLeft + deltaX) + 'px';
+                this.elICA.style.paddingLeft = (this.startLeft + deltaX) + 'px';
             }
 
             if (!this.args || ['right'].includes(this.args)) {
-                this.elMain.style.paddingRight = (this.startRight + deltaX * -1) + 'px';
+                this.elICA.style.paddingRight = (this.startRight + deltaX * -1) + 'px';
             }
 
             this.renderOutdoorScenary();
-            this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+            this.myParent.updateBaseNoPadding(this.elICA, this.myParent);
             this.myParent.updateBackgroundAuxSize('show');
 
         }
@@ -306,7 +306,7 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
 
         const stopDragging = (e: MouseEvent) => {
 
-            if (!this.elMain || !this.myParent) return;
+            if (!this.elICA || !this.myParent) return;
 
             this.myParent.style.background = '';
 
@@ -315,14 +315,14 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
 
             clearTimeout(this.timeRemoveResize);
             this.timeRemoveResize = setTimeout(() => {
-                if (!this.elMain || !this.myParent) return;
+                if (!this.elICA || !this.myParent) return;
                 this.myParent.setAttribute('needResize', '');
             }, 800);
 
             this.fireEvent();
         }
 
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
         this.myParent.setAttribute('needResize', 'false');
         document.body.addEventListener('mousemove', doDragging, false);
         document.body.addEventListener('mouseup', stopDragging, false);
@@ -332,14 +332,14 @@ export class WCDToolboxItemActionPadding extends WcdToolboxItemBase {
 
     private fireEvent(ret: string = ''): void {
 
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
 
         if (ret === '') {
 
-            if (this.args === 'top') ret = `padding-top: ${this.elMain.style.paddingTop}; `;
-            if (this.args === 'bottom') ret = `padding-bottom:${this.elMain.style.paddingBottom}; `;
-            if (this.args === 'left') ret = `padding-left: ${this.elMain.style.paddingLeft}; `;
-            if (this.args === 'right') ret = `padding-right: ${this.elMain.style.paddingRight}; `;
+            if (this.args === 'top') ret = `padding-top: ${this.elICA.style.paddingTop}; `;
+            if (this.args === 'bottom') ret = `padding-bottom:${this.elICA.style.paddingBottom}; `;
+            if (this.args === 'left') ret = `padding-left: ${this.elICA.style.paddingLeft}; `;
+            if (this.args === 'right') ret = `padding-right: ${this.elICA.style.paddingRight}; `;
 
         }
         

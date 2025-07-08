@@ -1,5 +1,7 @@
 /// <mls shortName="collabDOMSync" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+import {CollabLitElement} from './_100554_collabLitElement'
+
 export function sync() {
 
     if (!window.preview.editor || !window.preview.iframe) return;
@@ -113,22 +115,24 @@ export function formatHtml(html: string) {
 
 function clearTree(iframe: HTMLIFrameElement): string {
     let ret = '';
-    const div = document.createElement('div');
+
+    //const div = document.createElement('div');
     const divRet = document.createElement('div');
     const body = iframe.contentDocument?.body
     if (!body) return ret;
-    clearTree2(div, body as HTMLElement);
-    clearTree3(divRet, div);
+    clearTree2(divRet, body as HTMLElement);
+    //clearTree3(divRet, div);
     return divRet.innerHTML;
 }
 
 function clearTree2(parent: HTMLElement, element: HTMLElement): HTMLElement {
 
-    const tagname = element.tagName.toLowerCase();
+    /*const tagname = element.tagName.toLowerCase();
 
     if (element && element.getAttribute('modeoverlay')) {
         const clone = element.cloneNode(false);
-        (clone as HTMLElement).removeAttribute('style');
+        //(clone as HTMLElement).removeAttribute('style');
+        (clone as HTMLElement).removeAttribute('ori');
         (clone as HTMLElement).removeAttribute('level');
         parent.appendChild(clone);
         let children = [];
@@ -137,19 +141,31 @@ function clearTree2(parent: HTMLElement, element: HTMLElement): HTMLElement {
         for (const child of children) {
             clearTree2(clone as HTMLElement, child as HTMLElement);
         }
-    }
+    }*/
 
-    if (tagname.startsWith('ica-')) {
-
-        const clone = element.cloneNode(false);
+    //if (tagname.startsWith('ica-')) {
+    if (element.hasAttribute('mls_origin')) {
+        const clone = element.cloneNode(false) as HTMLElement;
         const idEl = (clone as HTMLElement).id;
         (clone as HTMLElement).removeAttribute('idel');
-        (clone as HTMLElement).removeAttribute('style');
+        (clone as HTMLElement).removeAttribute('mls_origin');
+        //(clone as HTMLElement).removeAttribute('style');
         (clone as HTMLElement).removeAttribute('level');
         (clone as HTMLElement).removeAttribute('rendertype');
         if (idEl && idEl.startsWith('ica_')) (clone as HTMLElement).setAttribute('id', idEl.substring(4, idEl.length));
 
         parent.appendChild(clone);
+
+        const v = (element as CollabLitElement).globalVariation;
+        if (v > 0 && (element as any).originalAttrs) {
+
+            (element as any).originalAttrs.forEach((atr:any) => {
+
+                if(atr.name.indexOf('-') < 0 && !!atr.value) clone.setAttribute(atr.name, atr.value);
+                
+            })
+        
+        }
 
         let children = [];
         if (element.shadowRoot) children = [...element.shadowRoot.children]

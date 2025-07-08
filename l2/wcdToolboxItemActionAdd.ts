@@ -31,7 +31,7 @@ export class WCDToolboxItemActionEditAttr extends WcdToolboxItemBase {
     updated(changedProperties: any) {
 
         super.updated(changedProperties);
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
 
     }
 

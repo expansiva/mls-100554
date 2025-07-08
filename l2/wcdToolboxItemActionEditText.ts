@@ -15,6 +15,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     private myInfos = { tp: "", attr: "text", x: undefined, y: undefined }
 
+    private oldStyle:string  = '';
 
     constructor() {
         super();
@@ -29,7 +30,10 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     disconnectedCallback() {
 
-        if (this.elMain) this.elMain.style.visibility = '';
+        if (this.elICA) {
+            this.elICA.style.cssText = this.oldStyle;
+            if (!this.oldStyle) this.elICA.removeAttribute('style');
+        }
         this.fireChange();
 
         super.disconnectedCallback();
@@ -38,7 +42,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     updated(changedProperties: any) {
 
         super.updated(changedProperties);
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
 
     }
 
@@ -94,17 +98,13 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     renderEdit() {
 
 
-        if (!this.elICA || !this.myParent  || !this.elICA.widget) return;
+        if (!this.elICA || !this.myParent  ) return;
 
         this.style.left = '0';
         //this.style.background = '#fff';
 
-        const ref = this.elICA.querySelector(this.elICA.widget);
-        if (ref) this.elMain = ref as HTMLElement;
 
-        if (!this.elMain) return;
-
-        const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;
+        const el = (this.elICA.shadowRoot ? this.elICA.shadowRoot.children[0] : this.elICA.children[0]) as HTMLElement;
 
         if (!el) return html`Not found element`;
 
@@ -125,9 +125,10 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         if (this.myText !== '') this.style.top = '1px';
 
-        this.elMain.style.visibility = 'hidden';
+        this.oldStyle = this.elICA.style.cssText;
+        this.elICA.style.visibility = 'hidden';
 
-        this.hasDropCap = this.elMain.classList.contains('dropcap');
+        this.hasDropCap = this.elICA.classList.contains('dropcap');
 
         const ret = html`<div id="edittextwcd" class="${this.hasDropCap ? 'dropcap' : ''}" @keydown="${this.onkeyDown}" @mouseup="${this.mouseUP}" @input="${this.onInput}" style="${css}">${unsafeHTML(el.outerHTML)}
             </div>
@@ -197,13 +198,13 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         const edit = this.querySelector('#edittextwcd');
         const actualDropCap = edit?.classList.contains('dropcap');
 
-
         if ((this.myText !== this.firstText) || (this.myTag !== this.firstTag) || this.hasDropCap !== actualDropCap) {
             if (!this.elICA) return;
             let aux = '';
             const lang = (document.documentElement.lang || '').toLowerCase();
             if (this.elICA.globalVariation && this.elICA.globalVariation > 0 && lang !== '') aux = '-' + lang;
             this.elICA.setAttribute(this.myInfos.attr + aux, this.myText);
+            this.elICA.setAttribute(this.myInfos.attr, this.myText);
 
             if (actualDropCap) this.elICA.classList.add('dropcap');
             else this.elICA.classList.remove('dropcap');
@@ -231,7 +232,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     private changeInEditor(tp: string) {
 
-        if (!this.elMain) return;
+        if (!this.elICA) return;
 
         const edit = this.querySelector('#edittextwcd');
         if (!edit) return;
@@ -241,7 +242,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         this.myTag = tp;
         const newElement = document.createElement(tp);
-        newElement.innerHTML = this.elMain.getAttribute(this.myInfos.attr) as string;
+        newElement.innerHTML = this.elICA.getAttribute(this.myInfos.attr) as string;
         newElement.setAttribute('contenteditable', 'true');
         newElement.setAttribute('spellcheck', 'false');
         newElement.style.outline = 'none';
@@ -312,16 +313,7 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
         me = me.querySelector('*[contenteditable]') as HTMLElement
 
-        if (!me || !this.elMain || !this.myParent || !this.elICA) return;
-
-        const actualElMain = this.elICA.querySelector(this.elICA.getAttribute('widget') as string) as HTMLElement;
-
-        if (actualElMain !== this.elMain) {
-            this.elMain = actualElMain;
-            globalWcd.elMain = actualElMain;
-        }
-
-        const el = (this.elMain.shadowRoot ? this.elMain.shadowRoot.children[0] : this.elMain.children[0]) as HTMLElement;
+        if (!me  || !this.myParent || !this.elICA) return;
 
         const parent = this.parentElement;
         const elAdd:HTMLElement | undefined = parent ? parent.querySelector('wcd-add-100554') as HTMLElement : undefined;
@@ -329,13 +321,12 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
         if (elAdd && me.innerHTML !== '') elAdd.style.display = 'none';
         else if (elAdd) elAdd.style.display = '';
         
-        el.innerHTML = me.innerHTML as string;
-        this.myText = el.innerHTML as string;
+        this.myText = me.innerHTML as string;
     }
 
     private onkeyDown(e: any) {
         
-        if (!this.myParent || !this.elMain) return;
+        if (!this.myParent || !this.elICA) return;
 
         /*if (e.key === 'Enter') {
             e.preventDefault();

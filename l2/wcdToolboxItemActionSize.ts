@@ -63,10 +63,10 @@ export class WCDToolboxItemActionSize extends WcdToolboxItemBase {
     updated(changedProperties: any) {
 
         super.updated(changedProperties);
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
 
         if (this.args && ['all', 'height', 'width'].includes(this.args)) {
-            this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+            this.myParent.updateBaseNoPadding(this.elICA, this.myParent);
             this.myParent.updateBackgroundAuxSize('show');
             this.onmousedown = (e) => this.initDragging(e);
         }
@@ -184,18 +184,18 @@ export class WCDToolboxItemActionSize extends WcdToolboxItemBase {
     }
 
     private renderSize() {
-        if (!this.elMain) return html``;
+        if (!this.elICA) return html``;
         return html`
             <div style="display:flex; flex-direction:column; gap:.5rem ;padding:1rem" class="myAuxGroup">
                 <p style=" margin-bottom: 5px;">A <b>width</b> propriedade CSS define a largura de um elemento.<br/>A <b>height</b> propriedade CSS especifica a altura de um elemento.</p>
                 <h4 style="display:flex; gap:1.5rem;margin:0px" >Size</h4>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">Width</div>
-                    <collab-ds-input-range-100554 prop="width" value="${this.elMain.style.width}" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="width" value="${this.elICA.style.width}" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div>
                 <div style="display:flex; gap:.5rem">
                     <div style="width:70px">Height</div>
-                    <collab-ds-input-range-100554 prop="height" value="${this.elMain.style.height}" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
+                    <collab-ds-input-range-100554 prop="height" value="${this.elICA.style.height}" .arraySelect=${this.tpMeasures} @onchange="${(e: any) => this.onChangeProp(e)}"></collab-ds-input-range-100554>
                 </div> 
             </div>
         `;
@@ -215,10 +215,10 @@ export class WCDToolboxItemActionSize extends WcdToolboxItemBase {
         const prop = el.getAttribute('prop');
 
 
-        if (!prop || !this.elMain || !this.myParent) return;
+        if (!prop || !this.elICA || !this.myParent) return;
 
-        this.elMain.style[prop as any] = el.value;
-        this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+        this.elICA.style[prop as any] = el.value;
+        this.myParent.updateBaseNoPadding(this.elICA, this.myParent);
         this.myParent.updateBackgroundAuxSize('show');
         this.fireEvent();
     }
@@ -229,34 +229,34 @@ export class WCDToolboxItemActionSize extends WcdToolboxItemBase {
 
     private initDragging(e: MouseEvent): void {
 
-        if (!this.elMain || !document.defaultView) return;
+        if (!this.elICA || !document.defaultView) return;
         this.startX = e.clientX;
         this.startY = e.clientY;
-        this.startWidth = parseInt(document.defaultView.getComputedStyle(this.elMain).width, 10);
-        this.startHeight = parseInt(document.defaultView.getComputedStyle(this.elMain).height, 10);
+        this.startWidth = parseInt(document.defaultView.getComputedStyle(this.elICA).width, 10);
+        this.startHeight = parseInt(document.defaultView.getComputedStyle(this.elICA).height, 10);
 
         const doDragging = (e: MouseEvent) => {
 
-            if (!this.elMain || !this.myParent) return;
+            if (!this.elICA || !this.myParent) return;
 
             console.info(this.args)
             if (!this.args || ['all', 'width'].includes(this.args)) {
-                this.elMain.style.width = (this.startWidth + e.clientX - this.startX) + 'px';
+                this.elICA.style.width = (this.startWidth + e.clientX - this.startX) + 'px';
             }
 
             if (!this.args || ['all', 'height'].includes(this.args)) {
-                this.elMain.style.height = (this.startHeight + e.clientY - this.startY) + 'px';
+                this.elICA.style.height = (this.startHeight + e.clientY - this.startY) + 'px';
             }
 
             this.renderOutdoorScenary();
-            this.myParent.updateBaseNoPadding(this.elMain, this.myParent);
+            this.myParent.updateBaseNoPadding(this.elICA, this.myParent);
             this.myParent.updateBackgroundAuxSize('show');
 
         }
 
         const stopDragging = (e: MouseEvent) => {
 
-            if (!this.elMain) return;
+            if (!this.elICA) return;
 
             document.body.removeEventListener('mousemove', doDragging, false);
             document.body.removeEventListener('mouseup', stopDragging, false);
@@ -273,13 +273,13 @@ export class WCDToolboxItemActionSize extends WcdToolboxItemBase {
 
     private fireEvent(ret: string = ''): void {
 
-        if (!this.elMain || !this.myParent) return;
+        if (!this.elICA || !this.myParent) return;
 
         if (ret === '') {
 
-            ret = `width: ${this.elMain.style.width}; height: ${this.elMain.style.height};`
-            if (this.args === 'width') ret = `width: ${this.elMain.style.width};`
-            if (this.args === 'height') ret = `height: ${this.elMain.style.height};`
+            ret = `width: ${this.elICA.style.width}; height: ${this.elICA.style.height};`
+            if (this.args === 'width') ret = `width: ${this.elICA.style.width};`
+            if (this.args === 'height') ret = `height: ${this.elICA.style.height};`
 
         }
 
