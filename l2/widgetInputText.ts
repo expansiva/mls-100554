@@ -1,11 +1,11 @@
-/// <mls shortName="wcInputText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="widgetInputText" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, ifDefined } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { IAutoCapitalize, IcaFormsInputStringBase } from './_100554_icaFormsInputStringBase';
 import { propertyDataSource } from './_100554_collabDecorators';
 
-@customElement('wc-input-text-100554')
+@customElement('widget-input-text-100554')
 export class WcInputText100554 extends IcaFormsInputStringBase {
     autocapitalize: IAutoCapitalize = "off";
     validationmessage: string | undefined;
