@@ -11,7 +11,7 @@ export class TestGenerateDefs100554 extends StateLitElement {
     project = 100554;
     threadId = "20250521144240.1000";
     filePrefix: string = "plugin";
-    max = 2;
+    max = 20;
     log: string[] = [];
 
     render() {
@@ -64,7 +64,7 @@ export class TestGenerateDefs100554 extends StateLitElement {
         this.log.push(`preparando ${files.length} files limitado por max`);
         this.requestUpdate();
 
-        const batchSize = 3;
+        const batchSize = 5;
         let batch: Promise<any>[] = [];
         for await (const file of files) {
             if (!file || !file.ts) continue;
@@ -76,7 +76,6 @@ export class TestGenerateDefs100554 extends StateLitElement {
                         if (!file || !file.ts) return;
                         try {
                             await addMessage(this.threadId, command);
-                            await sleep(1000);
                             this.log.push("added message: " + command);
                         } catch (e: any) {
                             this.log.push("erro ao adicionar mensagem: " + (e?.message || e));
@@ -86,7 +85,10 @@ export class TestGenerateDefs100554 extends StateLitElement {
                 );
 
                 if (batch.length === batchSize) {
+                    this.log.push("starting " + batch.length + " batch.")
+                    this.requestUpdate();
                     await Promise.all(batch);
+                    await sleep(batchSize * 1000);
                     this.requestUpdate();
                     batch = [];
                 }
