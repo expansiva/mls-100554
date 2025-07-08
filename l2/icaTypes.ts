@@ -72,7 +72,7 @@ export interface IcaLitElementBaseMethods extends LitElement {
     level: '1' | '2' | '3' | '4' | '5' | '6' | '7' | undefined;
     globalVariation: number | undefined;
     //widget: string | undefined;
-    className: string;
+    baseName: string;
     overlayRef: HTMLElement | undefined;
     mySymbol: string;
     getActionsTags(): ActionTag[];
