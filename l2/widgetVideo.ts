@@ -1,10 +1,10 @@
-/// <mls shortName="wcVideo" project="100554" enhancement="_100554_enhancementLit" groupName="_100554_icaApresentationVideoEmbeddedVideo" />
+/// <mls shortName="widgetVideo" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 
-@customElement('wc-video-100554')
+@customElement('widget-video-100554')
 export class WcVideo100554 extends StateLitElement {
     createRenderRoot() {
         return this;
