@@ -29,7 +29,6 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
     }
 
     disconnectedCallback() {
-
         if (this.elICA) {
             this.elICA.style.cssText = this.oldStyle;
             if (!this.oldStyle) this.elICA.removeAttribute('style');
@@ -97,17 +96,13 @@ export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {
 
     renderEdit() {
 
-
         if (!this.elICA || !this.myParent  ) return;
 
         this.style.left = '0';
-        //this.style.background = '#fff';
-
 
         const el = (this.elICA.shadowRoot ? this.elICA.shadowRoot.children[0] : this.elICA.children[0]) as HTMLElement;
 
         if (!el) return html`Not found element`;
-
 
         const css = 'outline:none; position:relative; min-width:20px;';
 

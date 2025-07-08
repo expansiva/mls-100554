@@ -60,6 +60,4 @@ export class WcInputText100554 extends IcaApresentationTextBase {
         return unsafeHTML(line)
     }
 
-   
-
 }

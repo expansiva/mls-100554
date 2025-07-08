@@ -84,7 +84,7 @@ function checkParentSection(sectionParent: HTMLElement, sibling: IcaLitElementBa
 
 function findIcaParentSibling(icaBase: HTMLElement): IcaLitElementBaseMethods | undefined | null | Element {
 
-    let parentElement = icaBase.parentElement as IcaLitElementBaseMethods;
+    /*let parentElement = icaBase.parentElement as IcaLitElementBaseMethods;
     if (parentElement && !parentElement.tagName.toLocaleLowerCase().startsWith('ica-')) {
         return findIcaParentSibling(parentElement);
     }
@@ -94,7 +94,7 @@ function findIcaParentSibling(icaBase: HTMLElement): IcaLitElementBaseMethods | 
     const tag = parentElement.widget as string;
     const elPR = parentElement.querySelector(tag);
     if (elPR && elPR.children.length > 1) return elPR.children[elPR.children.length - 1];
-    else if (parentElement) return parentElement;
+    else if (parentElement) return parentElement;*/
     return undefined;
 }
 

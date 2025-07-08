@@ -11,7 +11,7 @@ export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMeth
 
     const father = target.parentElement as HTMLElement;
     const child = el.querySelector('#' + target.id);
-    const parentICA = target.getIcaParent(target);
+    const parentICA = target.closest('*[mls-origin]') as IcaLitElementBaseMethods;//target.getIcaParent(target);
 
     if (el === target || child) {
         throw new Error('Not possible move');
@@ -73,7 +73,7 @@ function insertInside(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMet
 
     const canMove = canMoveElement(el as IcaLitElementBaseMethods, target);
     if (!canMove) return false;
-    const elIn = target.querySelector(target.widget || '');
+    const elIn = target;//target.querySelector(target.widget || '');
     if (elIn) elIn.appendChild(el);
     return true;
 
