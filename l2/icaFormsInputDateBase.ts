@@ -1,8 +1,9 @@
 /// <mls shortName="icaFormsInputDateBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaFormsInputDateBase extends StateLitElement {
+export abstract class IcaFormsInputDateBase extends IcaLitElementBase {
 
     abstract name: string | undefined;
     abstract hint: string | undefined; // An optional descriptive hint for the field
@@ -16,4 +17,16 @@ export abstract class IcaFormsInputDateBase extends StateLitElement {
     abstract maxvalue: string | undefined; // Maximum value restriction for the input
     abstract minvalue: string | undefined; // Minimum value restriction for the input
     abstract readonly: boolean;
+
+
+    public baseName:string=  'IcaFormsInputDateBase';
+    public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "events" },
+        ]
+    }
 }

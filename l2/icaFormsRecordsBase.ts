@@ -1,8 +1,9 @@
 /// <mls shortName="icaFormsRecordsBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaFormsRecordsBase extends StateLitElement {
+export abstract class IcaFormsRecordsBase extends IcaLitElementBase {
 
     abstract config: string | undefined;
     abstract selected: string | undefined;
@@ -15,14 +16,24 @@ export abstract class IcaFormsRecordsBase extends StateLitElement {
     abstract icon: string | undefined;
     abstract badge: string | undefined;
 
+    public baseName: string = 'IcaFormsRecordsBase';
+    public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 
 }
 
 export interface IConfig {
 
-    table: string, 
+    table: string,
     range: { start: number, end: number },
-    recommendedWidget:string, 
-    selectedField:string,
-    
+    recommendedWidget: string,
+    selectedField: string,
+
 }

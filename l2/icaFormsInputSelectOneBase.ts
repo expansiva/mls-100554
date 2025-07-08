@@ -1,8 +1,9 @@
 /// <mls shortName="icaFormsInputSelectOneBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaFormsInputSelectOneBase extends StateLitElement {
+export abstract class IcaFormsInputSelectOneBase extends IcaLitElementBase {
     
     abstract hint: string | undefined; // An optional descriptive hint for the field
 	abstract label: string | undefined; // A label to identify this field
@@ -10,6 +11,17 @@ export abstract class IcaFormsInputSelectOneBase extends StateLitElement {
 	abstract selectedvalue: string | undefined;
 	abstract required: boolean ; // Whether the field is required or optional
 	abstract disabled: boolean; // Whether the field is ready for input or disabled
+
+	public baseName:string=  'IcaFormsInputSelectOneBase';
+	public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 	
 }
 

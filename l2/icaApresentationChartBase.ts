@@ -1,12 +1,23 @@
 /// <mls shortName="icaApresentationChartBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaApresentationChartBase extends StateLitElement {
+export abstract class IcaApresentationChartBase extends IcaLitElementBase {
 
     abstract config: string | undefined;
     abstract chartdata: string | undefined;
 
+    public baseName:string=  'IcaApresentationChartBase';
+    public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 
 }
 

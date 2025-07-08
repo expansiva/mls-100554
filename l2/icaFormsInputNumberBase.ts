@@ -1,8 +1,9 @@
 /// <mls shortName="icaFormsInputNumberBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement'
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaFormsInputNumberBase extends StateLitElement {
+export abstract class IcaFormsInputNumberBase extends IcaLitElementBase {
 
 	abstract hint: string | undefined; // An optional descriptive hint for the field
 	abstract label: string | undefined; // A label to identify this field
@@ -17,11 +18,23 @@ export abstract class IcaFormsInputNumberBase extends StateLitElement {
 	abstract errormessage: string | undefined; // Custom error message to display when input validation fails
 	abstract autofocus: boolean; // Whether the field should be automatically focused on page load
 
-	abstract name: string | undefined; 
-	abstract inputmode: string | undefined; 
-	abstract suffix: string | undefined; 
-	abstract prefix: string | null; 
+	abstract name: string | undefined;
+	abstract inputmode: string | undefined;
+	abstract suffix: string | undefined;
+	abstract prefix: string | null;
 	abstract readonly: boolean;
+
+
+	public baseName: string = 'IcaFormsInputNumberBase';
+	public getActionsTags(): ActionTag[] {
+		return [
+			{ name: "margin" },
+			{ name: "padding" },
+			{ name: "menu" },
+			{ name: "size" },
+			{ name: "title" },
+		]
+	}
 
 }
 

@@ -1,14 +1,24 @@
 /// <mls shortName="icaFormsRecordsGridBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaFormsRecordsGridBase extends StateLitElement {
+export abstract class IcaFormsRecordsGridBase extends IcaLitElementBase {
 
     abstract config: string | undefined;
     abstract selectedRows: string | undefined;
     abstract editedRows: string | undefined;
 
-
+    public baseName: string = 'IcaFormsRecordsGridBase';
+    public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 }
 
 export interface IConfig {
