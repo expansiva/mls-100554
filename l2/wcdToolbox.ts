@@ -65,10 +65,10 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
 
     disconnectedCallback() {
-        //globalWcd.elICA = undefined;
+        globalWcd.elICA = undefined;
         globalWcd.myParent = undefined;
         globalWcd.wcdItens = undefined;
-        //globalWcd.elMain = undefined;
+        
         if (this.parentElement && (this.parentElement as any).fcRemoveWcd)
             (this.parentElement as any).fcRemoveWcd();
 

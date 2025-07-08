@@ -88,7 +88,7 @@ export class WCDToolboxItemActionEditAttr extends WcdToolboxItemBase {
 
         if (!this.myParent || !this.elICA || !this.elICA.overlayRef) return;
 
-        this.elICA.allowCommand('addChild' as any, this, this);
+        //this.elICA.allowCommand('addChild' as any, this, this);
 
     }
 
