@@ -9,7 +9,6 @@ import { listThreads, addThread, listUsers, updateUsers } from './_100554_msgDBC
 
 import './_100554_collabMessagesAdd';
 import './_100554_collabMessagesChat';
-import './_100554_wcImage';
 import './_100554_collabTasks';
 import './_100554_collabMessagesSettings';
 import './_100554_collabMessagesFindtask';
@@ -337,7 +336,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             steps: [
                 {
                     elementRef: `collab-nav-3-menu li[data-tooltip="${name}"]`,
-                    text: `<div style="padding:1rem;"><wc-image-100554 src="/100554/l3/assets/coachMarkCollabMessages${name}.png"  style="display: block; max-width: 100%; height: auto;"></wc-image-100554></div>`,
+                    text: `<div style="padding:1rem;"><img src="/100554/l3/assets/coachMarkCollabMessages${name}.png"  style="display: block; max-width: 100%; height: auto;"></img></div>`,
                     position: "bottom",
                     marginV: 25,
                     marginH: 25,

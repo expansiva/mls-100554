@@ -1,4 +1,5 @@
 /// <mls shortName="wcdToolboxItemActionMove" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
