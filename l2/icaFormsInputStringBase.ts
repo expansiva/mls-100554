@@ -1,9 +1,9 @@
 /// <mls shortName="icaFormsInputStringBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
 import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaFormsInputStringBase extends StateLitElement {
+export abstract class IcaFormsInputStringBase extends IcaLitElementBase {
     
     abstract name: string | undefined;
 	abstract hint: string | undefined; // An optional descriptive hint for the field
@@ -24,6 +24,7 @@ export abstract class IcaFormsInputStringBase extends StateLitElement {
 	abstract debounce: string | undefined;
 	abstract readonly: boolean;
 
+	public baseName:string=  'IcaFormsInputStringBase';
 	public getActionsTags(): ActionTag[] {
         return [
             { name: "margin" },

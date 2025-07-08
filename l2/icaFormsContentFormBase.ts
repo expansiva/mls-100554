@@ -1,8 +1,9 @@
 /// <mls shortName="icaFormsContentFormBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import {StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaFormsContentFormBase extends StateLitElement {
+export abstract class IcaFormsContentFormBase extends IcaLitElementBase {
      
     abstract action: string | undefined;
 	abstract method: string | undefined;
@@ -14,6 +15,17 @@ export abstract class IcaFormsContentFormBase extends StateLitElement {
 	abstract name: string | undefined;
 	abstract target: string| undefined;
 	abstract autosave: boolean;
-	abstract formId: string| undefined;
+	abstract formId: string | undefined;
+
+	public baseName:string=  'IcaFormsContentFormBase';
+	public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 
 }

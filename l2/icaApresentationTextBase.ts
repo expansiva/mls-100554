@@ -5,11 +5,10 @@ import { ActionTag } from './_100554_icaTypes';
 
 export abstract class IcaApresentationTextBase extends IcaLitElementBase {
 
-    static nameclass:string=  'IcaApresentationTextBase';
-
     abstract type: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "blockquote" | "span" | undefined;
     abstract text: string | undefined;
 
+    public baseName:string=  'IcaApresentationTextBase';
     public getActionsTags(): ActionTag[] {
 
         let isBlankLine = !this.getAttribute('text');

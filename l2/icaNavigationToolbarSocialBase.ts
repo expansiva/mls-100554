@@ -1,12 +1,22 @@
 /// <mls shortName="icaNavigationToolbarSocialBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaNavigationToolbarSocialBase extends StateLitElement {
+export abstract class IcaNavigationToolbarSocialBase extends IcaLitElementBase {
 
     abstract config: string | undefined;
 
-
+    public baseName: string = 'IcaNavigationToolbarSocialBase';
+    public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 }
 
 export interface IConfig {

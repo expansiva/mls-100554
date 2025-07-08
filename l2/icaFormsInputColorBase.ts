@@ -1,8 +1,9 @@
 /// <mls shortName="icaFormsInputColorBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaFormsInputColorBase extends StateLitElement {
+export abstract class IcaFormsInputColorBase extends IcaLitElementBase {
 
     abstract name: string | undefined;
     abstract label: string | undefined;
@@ -16,5 +17,15 @@ export abstract class IcaFormsInputColorBase extends StateLitElement {
     abstract errormessage: string | undefined;
     abstract placeholder: string | undefined;
 
+    public baseName: string = 'IcaFormsInputColorBase';
+    public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 
 }

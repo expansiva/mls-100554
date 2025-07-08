@@ -1,8 +1,9 @@
 /// <mls shortName="icaFormsInputMultiselectBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag } from './_100554_icaTypes';
 
-export abstract class IcaFormsInputMultiselectBase extends StateLitElement {
+export abstract class IcaFormsInputMultiselectBase extends IcaLitElementBase {
 
     abstract hint: string | undefined;
     abstract label: string | undefined;
@@ -12,4 +13,14 @@ export abstract class IcaFormsInputMultiselectBase extends StateLitElement {
     abstract selectedvalue: string | undefined;
 
 
+    public baseName:string=  'IcaFormsInputMultiselectBase';
+    public getActionsTags(): ActionTag[] {
+        return [
+            { name: "margin" },
+            { name: "padding" },
+            { name: "menu" },
+            { name: "size" },
+            { name: "title" },
+        ]
+    }
 }

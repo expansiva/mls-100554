@@ -66,14 +66,14 @@ export function getAtributtesByTag(tag: string): string[] {
 
 }
 
-export function getAtributtesByEl(el: HTMLElement): string[] {
+export function getAtributtesByEl(el: IcaLitElementBaseMethods): string[] {
 
-  const firstClass = Object.getPrototypeOf(el);
-  const superClass = Object.getPrototypeOf(firstClass);
+  /*const firstClass = Object.getPrototypeOf(el);
+  const superClass = Object.getPrototypeOf(firstClass); 
 
-  if (!superClass || !superClass.constructor || !superClass.constructor.nameclass) return [];
+  if (!superClass || !superClass.constructor || !superClass.constructor.nameclass) return [];*/
 
-  const tag = classNameToKebabCase(superClass.constructor.nameclass);
+  const tag = classNameToKebabCase(el.baseName);
 
   const json = parseMarkdownToJson(descriptionForPrompt);
   let ret: string[] = [];

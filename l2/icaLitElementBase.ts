@@ -6,28 +6,7 @@ import * as tps from './_100554_icaTypes';
 
 export abstract class IcaLitElementBase extends StateLitElement implements tps.IcaLitElementBaseMethods {
 
-    //---
-    widget: string | undefined;
-    changeStateStyle(info: {}): void {
-        throw new Error('Method not implemented.');
-    }
-    changeStateHtml(info: string): void {
-        throw new Error('Method not implemented.');
-    }
-    allowCommand(cmd: '' | 'move', scope: HTMLElement, target: HTMLElement): tps.IAllowCommand {
-        throw new Error('Method not implemented.');
-    }
-    getICAComponents(scope: HTMLElement): tps.IcaLitElementBaseMethods[] {
-        throw new Error('Method not implemented.');
-    }
-    getMyScope(): HTMLElement | tps.IcaLitElementBaseMethods | undefined {
-        throw new Error('Method not implemented.');
-    }
-    getIcaParent(target: HTMLElement): tps.IcaLitElementBaseMethods | undefined {
-        throw new Error('Method not implemented.');
-    }
-    //--
-    
+    abstract baseName: string;
     abstract mySymbol: string;
     abstract getActionsTags(): tps.ActionTag[];
 
