@@ -17,7 +17,7 @@ export interface GlobalState {
 }*/
 
 
-export const globalState: {
+const globalState: {
   _ica: GlobalState;
   globalStateManagment: IcaState;
   globalVariation: number;
@@ -58,7 +58,7 @@ Object.defineProperty(globalState, 'globalVariation', {
  * @param {string} path - The dot-separated path specifying the property to initialize (e.g., "globalState.users").
  * @param {*} value - The value to set if the property at the given path does not exist.
  */
-export function initState(path: string, value: string | Object | Array<unknown>) {
+function initState(path: string, value: string | Object | Array<unknown>) {
   const keys = path.split('.');
   if (!globalState._ica) {
     globalState._ica = {}
@@ -146,7 +146,7 @@ function setPathValue(obj: { [key: string]: any }, path: string, value: any): vo
 }
 
 
-export function setState(key: string, value: any, systemChange?: boolean): void { 
+function setState(key: string, value: any, systemChange?: boolean): void { 
 
   if (!globalState || !globalState.globalStateManagment) return;
   globalState.globalStateManagment.setState(key, value, systemChange);
@@ -156,7 +156,7 @@ export function setState(key: string, value: any, systemChange?: boolean): void 
 /**
  * Class responsible for managing shared state.
  */
-export class IcaState {
+class IcaState {
   private stateMap: Map<string, any> = new Map(); // values of variables
   private componentMap: Map<string, Set<Object>> = new Map(); // subscribes
   private history: Array<{ timestamp: number; system: boolean; key: string; value: any }> = [];

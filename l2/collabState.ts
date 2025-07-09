@@ -1,5 +1,83 @@
 /// <mls shortName="collabState" project="100554" enhancement="_blank" />
 
+/**
+ * Returns the value for a given state key.
+ * @param key State key in dot notation.
+ * @returns The value stored at the specified key, or undefined if not set.
+ */
+export function getState(key: string): any {
+  return globalState.globalStateManagment.getState(key);
+}
+
+/**
+ * Updates the value for a given state key.
+ * @param key State key in dot notation.
+ * @param value Value to be stored.
+ * @param systemChange Optional. If true, marks as a system-initiated change.
+ */
+export function setState(key: string, value: any, systemChange?: boolean): void {
+  globalState.globalStateManagment.setState(key, value, systemChange);
+}
+
+/**
+ * Subscribe a component to a state key or keys.
+ * @param keyOrKeys - The state key or keys.
+ * @param component - The subscribing component.
+ */
+export function subscribe(keyOrKeys: string | string[], component: Object): void {
+  return globalState.globalStateManagment.subscribe(keyOrKeys, component);
+}
+
+/**
+ * Unsubscribe a component from a state key or keys.
+ * @param keyOrKeys - The state key or keys.
+ * @param component - The unsubscribing component.
+ */
+ export function unsubscribe(keyOrKeys: string | string[], component: Object | "*"): void {
+  return globalState.globalStateManagment.unsubscribe(keyOrKeys, component);
+ }
+
+/**
+ * Notify subscribed components about a state change.
+ * @param key - The state key that changed.
+ */
+export function notify(key: string): void {
+  return globalState.globalStateManagment.notify(key);
+}
+
+/**
+ * Initializes a nested property in the global state object if it doesn't already exist.
+ * If the property exists, it retains its current value without being overwritten.
+ *
+ * @param {string} path - The dot-separated path specifying the property to initialize (e.g., "globalState.users").
+ * @param {*} value - The value to set if the property at the given path does not exist.
+ */
+export function initState(path: string, value: string | Object | Array<unknown>) {
+  const keys = path.split('.');
+  if (!globalState._ica) {
+    globalState._ica = {}
+  }
+  let current = globalState._ica;
+
+  keys.forEach((key, index) => {
+    // changed
+    if (!current[key]) {
+      // Create an object or set the value if it doesn't exist
+      current[key] = index === keys.length - 1 ? value : {};
+    } else if (index === keys.length - 1 && typeof current[key] === 'object' && typeof value === 'object') {
+      // Merge objects if both existing and new values are objects
+      if (Array.isArray(current[key]) && Array.isArray(value)) {
+        current[key] = [...value ];
+      } else {
+        current[key] = { ...value };
+      }
+      
+    }
+    current = current[key];
+  });
+}
+
+
 const isTrace = false;
 
 // Declare a global state structure
@@ -58,38 +136,6 @@ Object.defineProperty(globalState, 'globalVariation', {
     getCollabWindow().globalVariation = v;
   }
 });
-
-/**
- * Initializes a nested property in the global state object if it doesn't already exist.
- * If the property exists, it retains its current value without being overwritten.
- *
- * @param {string} path - The dot-separated path specifying the property to initialize (e.g., "globalState.users").
- * @param {*} value - The value to set if the property at the given path does not exist.
- */
-export function initState(path: string, value: string | Object | Array<unknown>) {
-  const keys = path.split('.');
-  if (!globalState._ica) {
-    globalState._ica = {}
-  }
-  let current = globalState._ica;
-
-  keys.forEach((key, index) => {
-    // changed
-    if (!current[key]) {
-      // Create an object or set the value if it doesn't exist
-      current[key] = index === keys.length - 1 ? value : {};
-    } else if (index === keys.length - 1 && typeof current[key] === 'object' && typeof value === 'object') {
-      // Merge objects if both existing and new values are objects
-      if (Array.isArray(current[key]) && Array.isArray(value)) {
-        current[key] = [...value ];
-      } else {
-        current[key] = { ...value };
-      }
-      
-    }
-    current = current[key];
-  });
-}
 
 /**
  * Retrieves a nested property value from an object using a dot-separated path string.
@@ -194,61 +240,13 @@ function setPathValue(obj: { [key: string]: any }, path: string, value: any): vo
   lastObj[last] = value;
 }
 
-
-export function setState(key: string, value: any, systemChange?: boolean): void {
-  if (!globalState || !globalState.globalStateManagment) return;
-  globalState.globalStateManagment.setState(key, value, systemChange);
-}
-
-export function getState(key: string): any {
-  if (!globalState || !globalState.globalStateManagment) return;
-  return globalState.globalStateManagment.getState(key);
-}
-
 export interface CollabState {
-  /**
-   * Returns the value for a given state key.
-   * @param key State key in dot notation.
-   * @returns The value stored at the specified key, or undefined if not set.
-   */
   getState(key: string): any;
-
-  /**
-   * Updates the value for a given state key.
-   * @param key State key in dot notation.
-   * @param value Value to be stored.
-   * @param systemChange Optional. If true, marks as a system-initiated change.
-   */
   setState(key: string, value: any, systemChange?: boolean): void;
-
-  /**
-   * Returns the state change history as an array of log entries.
-   */
   getHistory(): Array<{ timestamp: number; system: boolean; key: string; value: any }>;
-
-  /**
-   * Clears all entries from the state change history.
-   */
   clearHistory(): void;
-
-  /**
-   * Subscribe a component to a state key or keys.
-   * @param keyOrKeys - The state key or keys.
-   * @param component - The subscribing component.
-   */
   subscribe(keyOrKeys: string | string[], component: Object): void;
-
-  /**
-   * Unsubscribe a component from a state key or keys.
-   * @param keyOrKeys - The state key or keys.
-   * @param component - The unsubscribing component.
-   */
   unsubscribe(keyOrKeys: string | string[], component: Object | "*"): void;
-
-  /**
-   * Notify subscribed components about a state change.
-   * @param key - The state key that changed.
-   */
   notify(key: string): void;
 }
 
@@ -262,22 +260,12 @@ class CollabStateSingleton implements CollabState {
   private componentMap: Map<string, Set<Object>> = new Map(); // subscribes
   private history: Array<{ timestamp: number; system: boolean; key: string; value: any }> = [];
 
-  /**
-   * Retrieve state for a given key. 
-   * @param key - The state key.
-   */
   public getState(key: string): any {
     const value = getPathValue(globalState._ica, key);
     if (isTrace) console.info('getState key: ' + key + ' value=', value);
     return value;
   }
 
-  /**
-   * Updates the state for a given key.
-   * @param key - The state key.
-   * @param value - The new state value.
-   * @param systemChange - (optional) Set to true if setState is used in the constructor.
-   */
   public setState(key: string, value: any, systemChange?: boolean): void {
     // Default systemChange to this.inNotify if not provided
     systemChange = systemChange ?? false;
@@ -364,11 +352,6 @@ class CollabStateSingleton implements CollabState {
     this.history = [];
   }
 
-  /**
-   * Subscribe a component to a state key or keys.
-   * @param keyOrKeys - The state key or keys.
-   * @param component - The subscribing component.
-   */
   public subscribe(keyOrKeys: string | string[], component: Object): void {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
     keys.forEach((key) => {
@@ -381,11 +364,6 @@ class CollabStateSingleton implements CollabState {
     });
   }
 
-  /**
-   * Unsubscribe a component from a state key or keys.
-   * @param keyOrKeys - The state key or keys.
-   * @param component - The unsubscribing component.
-   */
   public unsubscribe(keyOrKeys: string | string[], component: Object | "*"): void {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
 
@@ -404,10 +382,6 @@ class CollabStateSingleton implements CollabState {
   private notifyQueue: string[] = [];
   private isNotifying: boolean = false;
 
-  /**
-   * Notify subscribed components about a state change.
-   * @param key - The state key that changed.
-   */
   public notify(keys: string | string[]): void {
     if (typeof keys === "string") keys = [keys];
     for (const key of keys) {
@@ -464,3 +438,7 @@ export function getCollabStateInstance(): CollabState {
   }
   return win.collabState;
 }
+
+if (!globalState.globalStateManagment) globalState.globalStateManagment = getCollabStateInstance();
+
+if (!globalState._ica) globalState._ica = {};

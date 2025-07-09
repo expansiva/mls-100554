@@ -2,10 +2,7 @@
 
 import { PropertyDeclaration } from 'lit';
 import { property } from 'lit/decorators.js';
-import { IcaState, globalState } from './_100554_icaState';
-
-export const state1 = new IcaState();
-globalState.globalStateManagment = state1;
+import { getState, setState } from './_100554_collabState';
 
 /**
  * Custom decorator to bind properties to multiple data sources dynamically.
@@ -61,7 +58,7 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
         if (add) {
           notifications.push(stateKey);
         }
-        const resolvedValue = state1.getState(stateKey) || '';
+        const resolvedValue = getState(stateKey) || '';
         composedData = composedData.replace(match[0], resolvedValue);
       }
       if (notifications.length > 0) {
@@ -97,7 +94,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
         const attributeValue = this.hasAttribute(attributeName) ? this.getAttribute(attributeName) : '';
         if (typeof attributeValue === "string" && attributeValue && attributeValue.includes('{{') && attributeValue.includes('}}')) {
           const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
-          return state1.getState(stateKey);
+          return getState(stateKey);
         }
         if (this[`_${attributeName}`] !== undefined) return this[`_${attributeName}`];
         // Default to internal property value
@@ -120,7 +117,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           }
           const stateKey = value.replace(/[{{}}]/g, '').trim();
           prepareForNotification.call(this, attributeName, [stateKey]);
-          this[`_${attributeName}`] = state1.getState(stateKey);
+          this[`_${attributeName}`] = getState(stateKey);
         } else if (typeof value === 'string' && ((value.startsWith('[') || value.startsWith('{')) && (value.endsWith(']') || value.endsWith('}')))) {
           // initialization ex options="[{ key: 'm', value: 'male' }, { key: 'f', value: 'female' }, { key: 'o', value: 'other' }]"
           // Parse JSON string for static data
@@ -132,7 +129,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           if (typeof attributeValue === "string" && attributeValue.includes('{{') && attributeValue.includes('}}')) {
             const dynamicKey = attributeValue.replace(/[{{}}]/g, '').trim();
             this[`_${attributeName}`] = value;
-            state1.setState(dynamicKey, value); // Notify state changes
+            setState(dynamicKey, value); // Notify state changes
           }
           else this[`_${attributeName}`] = value;
         }

@@ -2,8 +2,7 @@
 
 import { CollabLitElement } from './_100554_collabLitElement';
 import { PropertyValueMap } from 'lit';
-import { state1 } from './_100554_icaDecorators';
-export * from './_100554_icaDecorators';
+import { getState, setState, subscribe, unsubscribe, notify } from './_100554_collabState';
 
 const isTrace = false;
 
@@ -33,7 +32,7 @@ export abstract class IcaLitElement extends CollabLitElement {
     for (const key of this.stateKeys.keys()) {
       if (key.startsWith(`${attributeName}/`)) {
         this.stateKeys.delete(key);
-        state1.unsubscribe([key], this);
+        unsubscribe([key], this);
       }
     }
 
@@ -48,7 +47,7 @@ export abstract class IcaLitElement extends CollabLitElement {
 
   private subscribeToState(stateKey: string): void {
     if (!this.stateKeys.get(stateKey)) {
-      state1.subscribe([stateKey], this);
+      subscribe([stateKey], this);
       this.stateKeys.set(stateKey, true);
     }
   }
@@ -80,7 +79,7 @@ export abstract class IcaLitElement extends CollabLitElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.stateKeys.forEach((isSubscribed, stateKey) => {
-      if (isSubscribed) state1.unsubscribe([stateKey], this);
+      if (isSubscribed) unsubscribe([stateKey], this);
       this.stateKeys.set(stateKey, false);
     });
   }
@@ -89,7 +88,7 @@ export abstract class IcaLitElement extends CollabLitElement {
     super.firstUpdated(_changedProperties);
     this.stateKeys.forEach((_isSubscribed, stateKey) => {
       const [, path] = stateKey.split(';');
-      state1.notify(path);
+      notify(path);
     });
 
     if (!(window as any).collabPluginMonitor) {

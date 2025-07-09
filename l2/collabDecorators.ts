@@ -2,10 +2,7 @@
 
 import { PropertyDeclaration } from 'lit';
 import { property } from 'lit/decorators.js';
-import { globalState, getCollabStateInstance } from './_100554_collabState';
-
-export const state1 = getCollabStateInstance();
-globalState.globalStateManagment = state1;
+import { getState, setState } from './_100554_collabState';
 
 /**
  * Custom decorator to bind properties to multiple data sources dynamically.
@@ -65,7 +62,7 @@ export function propertyCompositeDataSource(options?: PropertyDeclaration) {
         if (add) {
           notifications.push(stateKey);
         }
-        const resolvedValue = state1.getState(stateKey) || '';
+        const resolvedValue = getState(stateKey) || '';
         composedData = composedData.replace(match[0], resolvedValue);
       }
       if (notifications.length > 0) {
@@ -107,7 +104,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           attributeValue.includes('}}')
         ) {
           const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
-          const stateValue = state1.getState(stateKey);
+          const stateValue = getState(stateKey);
 
           // Special handling for Boolean properties bound from state.
           if (options?.type === Boolean) {
@@ -165,7 +162,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
             prepareForNotification.call(this, attributeName, [stateKey]);
             this[`_${attributeName}`] = value;             // Store new value locally
-            state1.setState(stateKey, value);              // Update global state
+            setState(stateKey, value);              // Update global state
           } else {
             this[`_${attributeName}`] = value;
           }
@@ -187,7 +184,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             const stateKey = attributeValue.replace(/[{{}}]/g, '').trim();
             prepareForNotification.call(this, attributeName, [stateKey]);
             this[`_${attributeName}`] = value;
-            state1.setState(stateKey, value);
+            setState(stateKey, value);
           } else {
             this[`_${attributeName}`] = value;
           }
@@ -204,7 +201,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
           }
           const stateKey = value.replace(/[{{}}]/g, '').trim();
           prepareForNotification.call(this, attributeName, [stateKey]);
-          this[`_${attributeName}`] = state1.getState(stateKey);
+          this[`_${attributeName}`] = getState(stateKey);
         } else if (options?.type === Object && (typeof value === 'string' && ((value.startsWith('[') || value.startsWith('{')) && (value.endsWith(']') || value.endsWith('}'))))) {
           // initialization ex options="[{ key: 'm', value: 'male' }, { key: 'f', value: 'female' }, { key: 'o', value: 'other' }]"
           // Parse JSON string for static data
@@ -218,7 +215,7 @@ export function propertyDataSource(options?: PropertyDeclaration) {
             const dynamicKey = attributeValue.replace(/[{{}}]/g, '').trim();
 
             this[`_${attributeName}`] = value;
-              state1.setState(dynamicKey, value);
+              setState(dynamicKey, value);
 
           }
           else this[`_${attributeName}`] = value;
