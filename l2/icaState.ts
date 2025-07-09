@@ -272,6 +272,7 @@ class IcaState {
         if (path !== key) return;
         arr.forEach((component: any) => {
           if ('handleIcaStateChange' in component) {
+            console.log('notify in icaState:' + path)
             component['handleIcaStateChange'](key, this.getState(key));
           }
         });

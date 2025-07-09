@@ -20,9 +20,10 @@ export function setState(key: string, value: any, systemChange?: boolean): void 
 }
 
 /**
- * Subscribe a component to a state key or keys.
- * @param keyOrKeys - The state key or keys.
- * @param component - The subscribing component.
+ * Subscribes a component to one or more state keys.
+ * @param keyOrKeys - The state key or keys. Example: 'name/0;ui.name'.  
+ * Use a key starting with '*' (e.g. '*myKey;ui.xxx') to ensure only one active subscription with that key.
+ * @param component - The subscribing component or callback function.
  */
 export function subscribe(keyOrKeys: string | string[], component: Object): void {
   return globalState.globalStateManagment.subscribe(keyOrKeys, component);
@@ -352,11 +353,17 @@ class CollabStateSingleton implements CollabState {
     this.history = [];
   }
 
-  public subscribe(keyOrKeys: string | string[], component: Object): void {
+  public subscribe(keyOrKeys: string | string[], component: Object, id?: string): void {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
     keys.forEach((key) => {
       if (!key.includes(';')) key = `;${key}`;
       if (isTrace) console.log('subscribe key(s)', keyOrKeys)
+
+    const isExclusive = key.startsWith('*');
+    if (isExclusive) {
+      this.componentMap.delete(key); // clear olds subscribes
+    }
+
       if (!this.componentMap.has(key)) {
         this.componentMap.set(key, new Set());
       }

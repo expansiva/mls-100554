@@ -748,18 +748,20 @@ Specialized widget examples:
 - "spreadsheet"
 - "document"
 ## ica-interaction-button
-Botão reutilizável para ações em interfaces. Pode ser usado em toolbars, cards, modais ou listas de itens.
-Suporta diferentes variantes visuais, ícones e comportamentos de clique.
+Reusable button for interface actions.  
+Can be placed in toolbars, cards, modals or item lists.  
+Supports different visual variants, icons and click behaviors.
 
-- Cfg: config
-- Bind: notifyPath (opcional — path state alterado ao clicar ex: {{ ui.action }}), notifyValue (opcional — valor a ser setado no stat ao clicar)
+- Cfg: config  
+- Bind: notifyPath (optional — state path to update on click, e.g. '{{ ui.action }}'),  
+        notifyValue (optional — value to assign to that state on click)
 
 - interface config {
-  label?: string,                          // texto exibido no botão
-  icon?: string,                           // nome do ícone (ex: "save", "edit")
-  type?: "onlyText" | "onlyIcon" | "full"
-  disabled?: boolean,                      // desativa o botão se true
-  tooltip?: string                         // texto exibido ao passar o mouse
+  label?: string,              // text displayed on the button
+  icon?: string,               // icon name (e.g. "save", "edit")
+  type?: "onlyText" | "onlyIcon" | "full",
+  disabled?: boolean,          // disables the button when true
+  tooltip?: string             // text shown on hover
 }
 
 `
