@@ -55,7 +55,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         if (!step) {
             throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
         }
-        context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+        context = await updateStepStatus(context, step.stepId, "in_progress");
 
         if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
@@ -73,7 +73,8 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No step for this agent`);
 
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context = await updateStepStatus(context, step.stepId, "completed");
+    if (!context.task) throw new Error("Invalid context task");
     const payload = getNextPendentStep(context.task) as mls.msg.AIPayload | null;
     context = await updateDefs(context, payload);
     notifyTaskChange(context);
@@ -130,7 +131,7 @@ export const defs: mls.l4.BaseDefs = ${JSON.stringify(result, null, 2)}
     }
     
     context.task = await updateTaskTitle(context.task, "Def updated");
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context = await updateStepStatus(context, step.stepId, "completed");
     return context;
 }
 

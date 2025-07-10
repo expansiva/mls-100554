@@ -58,7 +58,10 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
-    context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+    const { task, message } = await updateStepStatus(context.task, step.stepId, "in_progress");
+    if (message) context.message = message;
+    context.task = task;
+    
     if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
     const data: IDataPrompt = JSON.parse(step.prompt);
@@ -75,7 +78,11 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+
+    const { task, message } = await updateStepStatus(context.task, step.stepId, "completed");
+    if (message) context.message = message;
+    context.task = task;
+
     await updateFile(context);
     context.task = await updateTaskTitle(context.task, "Widget fixed");
     await executeNextStep(context);
@@ -94,7 +101,7 @@ async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType
     prompts.push(systemMainInstruction());
     prompts.push(systemTaskInstruction());
     prompts.push(systemRulesInstruction());
-    prompts.push(systemRulesTripleSlash());    
+    prompts.push(systemRulesTripleSlash());
     prompts.push(systemKnownErrors());
 
     if (data.mode === 'typescript') {

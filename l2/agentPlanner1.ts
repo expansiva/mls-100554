@@ -61,7 +61,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         if (!step) {
             throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
         }
-        context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+        context = await updateStepStatus(context, step.stepId, "in_progress");
         const inputs = await getPrompts(step.prompt, step.rags);
         await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
     }
@@ -74,9 +74,8 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
     const { flexible, result } = calculateStepsStatistics([step], true);
     if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context =  await updateStepStatus(context, step.stepId, "completed");
     await executeNextStep(context);
-    if (result > 0) await addMessageResponse(context, step);
 
 }
 
@@ -85,7 +84,7 @@ const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: n
     const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
     if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
     const msg = `Invalid return from agent: ${agentName} not supported return of type clarification`
-    await updateStepStatus(context.task, stepId, 'failed', msg);
+    await updateStepStatus(context, stepId, 'failed', msg);
     const task = await updateTaskTitle(context.task, msg);
     context.task = task;
     notifyTaskChange(context);
@@ -98,17 +97,6 @@ function prepareHtmlClarification(
     const div: HTMLDivElement = document.createElement('div');
     div.innerHTML = `Invalid return from LLM, ${agentName} don't use payload of type Clarification, please try again!`;
     return div;
-}
-
-async function addMessageResponse(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep) {
-
-    const payload = step?.interaction?.payload;
-    if (!payload) return;
-    const [pay1] = payload;
-    if (!pay1 || pay1.type !== 'result') return;
-    const value = typeof pay1.result === 'object' ? JSON.stringify(pay1.result) : pay1.result;
-    if (!value || typeof value !== 'string') return;
-    notifyTaskCompleted(context, value);
 }
 
 export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
@@ -126,7 +114,7 @@ export async function getPrompts(prompt: string | undefined, rags: string[] | nu
         humanPrompt: prompt
     };
     const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentPlanner1', folder: '', data })
-    
+
     addRAGAdditionalInformation(rags, prompts);
 
     return prompts;

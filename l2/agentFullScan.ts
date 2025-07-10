@@ -43,7 +43,8 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
-    context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+
+    context = await updateStepStatus(context, step.stepId, "in_progress");
     if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
     const inputs = await getPrompts(step.prompt);
     await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId)
@@ -56,7 +57,8 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context = await updateStepStatus(context, step.stepId, "completed");
+    if (!context || !context.message || !context.task) throw new Error("Invalid context");
 
     const { flexible, tools } = calculateStepsStatistics([step], true);
     if (tools > 0) {

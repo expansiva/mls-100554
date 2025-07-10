@@ -49,8 +49,8 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
   const agentStep = getAgentStepByAgentName(context.task, agentName); // Only one agent execution must exist in this task
   if (!agentStep) throw new Error(`[${agentName}] [_afterPrompt] no agent found`);
 
-  context.task = await updateStepStatus(context.task, agentStep.stepId, "completed");
-
+  context = await updateStepStatus(context, agentStep.stepId, "completed");
+  if(!context.task) throw new Error(`[${agentName}] [_afterPrompt] Invalid context task`);
   const newStep: mls.msg.AIAgentStep = {
     type: 'agent',
     agentName: 'agentProjectSearch2',

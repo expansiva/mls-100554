@@ -115,7 +115,7 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
     }
 }
 
-export async function addNewStep(context: mls.msg.ExecutionContext, parentStepId: number, steps: mls.msg.AIPayload[], newTaskTitle="Pending") {
+export async function addNewStep(context: mls.msg.ExecutionContext, parentStepId: number, steps: mls.msg.AIPayload[], newTaskTitle = "Pending") {
 
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     if (!context.task.messageid_created) throw new Error("addNewInteractionInAiTask: context.task.messageid_created is null");
@@ -210,7 +210,8 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
     if (rc.status !== true) {
         const traceMsg = `Error executing tool ${step.toolName}: ${rc.error}`;
         console.error(traceMsg);
-        context.task = await updateStepStatus(context.task, step.stepId, "failed", traceMsg);
+        context = await updateStepStatus(context, step.stepId, "failed", traceMsg);
+
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context.task, null, 2));
         return;
     }
@@ -322,7 +323,7 @@ async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls
 async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.msg.AIResultStep) {
     if (!context || !context.task) throw new Error("Invalid context");
     if ((mls as any).istraceAgent) console.log("result:", step.result);
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context = await updateStepStatus(context, step.stepId, "completed");
     notifyTaskChange(context);
     return executeNextStep(context);
 }
@@ -331,7 +332,8 @@ async function executeNextFlexible(context: mls.msg.ExecutionContext, step: mls.
     if (!context || !context.task) throw new Error("Invalid context");
 
     if ((mls as any).istraceAgent) console.log("Flexible:", step.result);
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context = await updateStepStatus(context, step.stepId, "completed");
+
     notifyTaskChange(context);
     return executeNextStep(context);
 
@@ -515,7 +517,7 @@ export function toLLMClarification(value: ClarificationValue) {
 
 async function setFailedStatus(context: mls.msg.ExecutionContext, step: number) {
     if (!context.task) throw new Error("[setFailedStatus] Invalid context task");
-    context.task = await updateStepStatus(context.task, step, "failed");
+    context = await updateStepStatus(context, step, "failed");
     notifyTaskChange(context);
 }
 

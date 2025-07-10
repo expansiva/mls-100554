@@ -38,6 +38,8 @@ export class WidgetAiTask100554 extends StateLitElement {
     @property() taskid: string = '';
     @property() messageid: string = '';
     @property() lastChanged: string = '';
+    @property() title: string = '';
+    @property() status: string = '';
 
     @state() task: mls.msg.TaskData | undefined;
     @state() context: mls.msg.ExecutionContext | undefined;
@@ -60,8 +62,7 @@ export class WidgetAiTask100554 extends StateLitElement {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-
-        if (!this.task) {
+        if (!this.task && !this.title && !this.status) {
             return html`<div @click=${this.onCardClick} class="card no-details"> 
             <div class="card-header">
                 <span class="card-title">Task</span>
@@ -70,14 +71,14 @@ export class WidgetAiTask100554 extends StateLitElement {
          </div>`
         }
 
-        const price = getTotalCost(this.task) || '0.00';
-        const title = this.task.title || '...';
+        const price = this.task ? getTotalCost(this.task) || '0.00' : '';
+        const title = this.title || this.task?.title || '...';
 
         return html`<div @click=${this.onCardClick} class="card"> 
             <div class="card-header">
                 ${this.renderIconTask()}
                     <span class="card-title"> ${title}</span>
-                    <span class="card-price"> ${collab_money}${price}</span>
+                    <span class="card-price"> ${price ? collab_money : ''}${price}</span>
             </div>
          </div>`;
     }
@@ -97,14 +98,14 @@ export class WidgetAiTask100554 extends StateLitElement {
                         <span class="notification-badge">1</span>
                     </span>`,
         }
-        let status = '';
+        let status = this.status;
         if (this.task) {
             status = this.task.status;
             const nextStepPending = getNextPendentStep(this.task);
             if (nextStepPending?.type === 'clarification') status = 'waitingforuser'
         }
 
-        if (!this.task) return html`<spanclass="task-icon in progress ">${collab_clock}</span>`;
+        if (!status) return html`<spanclass="task-icon in progress ">${collab_clock}</span>`;
         return html`<span class="task-icon ${status.split(' ').join('-')} ">${taskObj[status]}</span>`;
 
     }
