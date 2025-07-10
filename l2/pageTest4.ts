@@ -2,7 +2,7 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
-import { globalState, initState, setState } from './_100554_collabState';
+import { getState, subscribe, initState, setState } from './_100554_collabState';
 import { initTestState, ISolicitacao } from './_100554_testPagesState';
 @customElement('page-test4-100554')
 export class PageTest4 extends CollabPageElement {
@@ -19,11 +19,11 @@ export class PageTest4 extends CollabPageElement {
                 status: '',
             },
             fields: ['id', 'solicitante', 'item', 'quantidade', 'data', 'status'],
-            status: [{ key: '', value: '' }].concat(...globalState._ica.projectTest.tables.status),
-            actualData: [...globalState._ica.projectTest.tables.solicitacoes]
+            status: [{ key: '', value: '' }].concat(...getState('projectTest.tables.status')),
+            actualData: [...getState('projectTest.tables.solicitacoes')]
         });
 
-        globalState.globalStateManagment.subscribe(
+        subscribe(
             [
                 'projectTest.page4.action',
             ]
@@ -52,8 +52,8 @@ export class PageTest4 extends CollabPageElement {
 
 
     async handleClickBtnFilter() {
-        const filterAtual = globalState._ica.projectTest.page4.filter;
-        const data = [...globalState._ica.projectTest.tables.solicitacoes];
+        const filterAtual = getState('projectTest.page4.filter');
+        const data = [...getState('projectTest.tables.solicitacoes')];
         const filtered = this.filterData(data, filterAtual);
         setState('projectTest.page4.actualData', filtered, true);
         setState('projectTest.page4.filter', '', true);

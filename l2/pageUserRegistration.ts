@@ -3,7 +3,7 @@
 import { BECollabClient } from './_100554_beCollabClient';
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement, query } from 'lit/decorators.js';
-import { globalState, initState, setState } from './_100554_collabState';
+import { getState, subscribe, initState, setState } from './_100554_collabState';
 import { initTestState } from './_100554_testPagesState';
 
 @customElement('page-user-registration-100554')
@@ -33,8 +33,7 @@ export class PageUserRegistration100554 extends CollabPageElement {
         });
 
         
-
-        globalState.globalStateManagment.subscribe([
+        subscribe([
             'data/0;projectTest.pageUserRegistration.indexSel',
             'data/0;projectTest.pageUserRegistration.action',
             'data/0;projectTest.pageUserRegistration.mode'
@@ -71,12 +70,9 @@ export class PageUserRegistration100554 extends CollabPageElement {
 
     onSelectItem(idx: number) {
 
-        setState('projectTest.pageUserRegistration.selected.id', globalState._ica.projectTest.pageUserRegistration.users[idx].id, true);
-
-        setState('projectTest.pageUserRegistration.selected.user', globalState._ica.projectTest.pageUserRegistration.users[idx].user, true);
-
-        setState('projectTest.pageUserRegistration.selected.status', globalState._ica.projectTest.pageUserRegistration.users[idx].status, true);
-
+        setState('projectTest.pageUserRegistration.selected.id', getState(`projectTest.pageUserRegistration.users[${idx}].id`), true);
+        setState('projectTest.pageUserRegistration.selected.user', getState(`projectTest.pageUserRegistration.users[${idx}].user`), true);
+        setState('projectTest.pageUserRegistration.selected.status', getState(`projectTest.pageUserRegistration.users[${idx}].status`), true);
         setState('projectTest.pageUserRegistration.mode', 'edit', true);
 
     }
@@ -84,19 +80,16 @@ export class PageUserRegistration100554 extends CollabPageElement {
     onNew() {
 
         setState('projectTest.pageUserRegistration.selected.id', '', true);
-
         setState('projectTest.pageUserRegistration.selected.user', '', true);
-
         setState('projectTest.pageUserRegistration.selected.status', '', true);
-
         setState('projectTest.pageUserRegistration.mode', 'edit', true);
 
     }
 
     private async onSubmitForm() { 
     
-        let action = globalState._ica.projectTest.pageUserRegistration.action;
-        const st = { ...globalState._ica.projectTest.pageUserRegistration };
+        let action = getState('projectTest.pageUserRegistration.action');
+        const st = { ...getState('projectTest.pageUserRegistration') };
 
         if (action === 'cancel') {
             setState('projectTest.pageUserRegistration.indexSel', -1, true);
@@ -131,7 +124,7 @@ export class PageUserRegistration100554 extends CollabPageElement {
     private configureMode() {
 
         if (!this.contentForm || !this.list) return;
-        const st = { ...globalState._ica.projectTest.pageUserRegistration };
+        const st = { ...getState('projectTest.pageUserRegistration') };
         if (st.mode === 'list') {
             this.list.style.display = '';
             this.contentForm.style.display = 'none';

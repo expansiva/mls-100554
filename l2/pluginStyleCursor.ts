@@ -4,7 +4,7 @@ import { html, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { propertyDataSource } from './_100554_collabDecorators';
-import { globalState } from './_100554_collabState';
+import { getState, setState } from './_100554_collabState';
 import { getMessageKey } from './_100554_collabLitElement'
 import { ICSSState } from './_100554_lessCSS';
 
@@ -84,8 +84,8 @@ export class PluginStyleClipath extends StateLitElement {
     }
 
     private setState(css: string) {
-        globalState._ica.less[this.position].emitter = 'helper';
-        const styles = globalState._ica.less[this.position].lessCSS.styles;
+        setState(`less.${this.position}.emitter`, 'helper');
+        const styles: CSSStyleDeclaration = getState(`less.${this.position}.lessCSS.styles`);
         styles.cursor = css;
     }
 

@@ -5,7 +5,7 @@ import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
 import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep, updateTaskTitle } from "./_100554_aiAgentHelper";
 import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
 import { forceServiceInstance } from './_100554_libCommom';
-import { globalState, getState, initState } from './_100554_collabState';
+import {  getState } from './_100554_collabState';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
 const agentName = "agentReview";
@@ -114,7 +114,7 @@ async function getModels(fullName: string, position: string) {
     const storFile = mls.stor.files[key];
     if (!storFile) throw new Error(`Invalid stor file for key: ${key}`);
 
-    const serviceSource: ServiceSource100554 = globalState._ica?.serviceSource[position].service;
+    const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
     if (!serviceSource) throw new Error('Not found service source instance');
     await serviceSource.createModels(storFile);
     return mls.editor.models[fullName];
@@ -136,7 +136,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     const contentTS = result.ts ? result.ts : undefined;
     const contentLess = result.less ? result.less : undefined;
     const position = result.position || 'left';
-    const serviceSource: ServiceSource100554 = globalState._ica?.serviceSource[position]?.service;
+    const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
 
     if (!serviceSource) throw new Error('Not found service source instance');
 

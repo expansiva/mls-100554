@@ -7,7 +7,7 @@ import { propertyDataSource } from './_100554_collabDecorators';
 import { PluginStyleIndexItem } from './_100554_pluginStyleIndexItem';
 import { IHelpers, IMode } from './_100554_cssHelperIndexBase';
 import { ICSSState } from './_100554_lessCSS';
-import { globalState } from './_100554_collabState';
+import { setState, getState } from './_100554_collabState';
 import { loadPluginProject } from './_100554_libCommom';
 import './_100554_pluginStyleIndexItem';
 
@@ -143,8 +143,8 @@ export class CssHelperIndex extends StateLitElement {
     private async getAvaliablesPlugins(): Promise<IHelpers[]> {
 
         const { project } = mls.actual[5];
-        
-        const allPlugins = await loadPluginProject(project || 0 , 'l2StyleHelper');
+
+        const allPlugins = await loadPluginProject(project || 0, 'l2StyleHelper');
 
         const helpers: IHelpers[] = []
 
@@ -180,10 +180,8 @@ export class CssHelperIndex extends StateLitElement {
 
     private filterByProp(helpers: IHelpers[], actualProp: string | undefined, actualValue: string | undefined): IHelpers[] {
 
-        if (!globalState._ica?.less
-            || !globalState._ica.less[this.position]
-            || !globalState._ica.less[this.position].selector
-            || !globalState._ica.less[this.position].lineNumber) return [];
+        const state = getState(`less.${this.position}`);
+        if (!state || !state.selector || !state.lineNumber) return [];
 
         const rc = helpers.filter(helper => {
             return helper.tags.some(helperTag => {

@@ -4,7 +4,7 @@ import { html, repeat } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { propertyDataSource } from './_100554_collabDecorators';
-import { globalState } from './_100554_collabState';
+import { getState, setState } from './_100554_collabState';
 import { getMessageKey } from './_100554_collabLitElement';
 import { ICSSState } from './_100554_lessCSS';
 import './_100554_collabDsInputSelectColor';
@@ -262,9 +262,8 @@ export class PluginStylePadding extends StateLitElement {
 
     updatePadding(padding: string | { [key: string]: string }) {
 
-        globalState._ica.less[this.position].emitter = 'helper';
-
-        const styles = globalState._ica.less[this.position].lessCSS.styles;
+        setState(`less.${this.position}.emitter`, 'helper');
+        const styles: CSSStyleDeclaration = getState(`less.${this.position}.lessCSS.styles`);
         if (typeof padding === 'string') {
             styles.paddingTop = styles.paddingRight = styles.paddingBottom = styles.paddingLeft = '';
             styles.padding = padding;

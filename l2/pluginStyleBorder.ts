@@ -4,7 +4,7 @@ import { html, repeat } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { propertyDataSource } from './_100554_collabDecorators';
-import { globalState } from './_100554_collabState';
+import { setState, getState } from './_100554_collabState';
 import { getMessageKey } from './_100554_collabLitElement';
 import { CollabDsInputSelectColor } from './_100554_collabDsInputSelectColor';
 import { convertColorToHex } from './_100554_libCommom';
@@ -460,9 +460,9 @@ export class PluginStyleBorder extends StateLitElement {
     private updateBorderRadius(borderRadius: string | { [key: string]: string }) {
         if (borderRadius === undefined) return;
 
-        globalState._ica.less[this.position].emitter = 'helper';
+        setState(`less.${this.position}.emitter`, 'helper');
+        const styles: CSSStyleDeclaration = getState(`less.${this.position}.lessCSS.styles`);
 
-        const styles: CSSStyleDeclaration = globalState._ica.less[this.position].lessCSS.styles;
         if (typeof borderRadius === 'string') {
             styles.borderTopLeftRadius = styles.borderTopRightRadius = styles.borderBottomLeftRadius = styles.borderBottomRightRadius = '';
             styles.borderRadius = borderRadius;
@@ -479,9 +479,8 @@ export class PluginStyleBorder extends StateLitElement {
     private updateBorder(border: string | { [key: string]: string }) {
         if (border === undefined) return;
 
-        globalState._ica.less[this.position].emitter = 'helper';
-
-        const styles: CSSStyleDeclaration = globalState._ica.less[this.position].lessCSS.styles;
+        setState(`less.${this.position}.emitter`, 'helper');
+        const styles: CSSStyleDeclaration = getState(`less.${this.position}.lessCSS.styles`);
 
         styles.breakInside
 
@@ -579,7 +578,7 @@ export class PluginStyleBorder extends StateLitElement {
 
         let ruleText = properties.map(([key, item]) => `${key}: ${(item as { value: string }).value};`).join(' ');
         ruleText = this.replaceTokens(ruleText)
-    
+
         const selector = ruleSelector;
         const cssStyleSheet = new CSSStyleSheet();
         const ruleIndex = cssStyleSheet.insertRule(`${selector} { ${ruleText} }`, 0);

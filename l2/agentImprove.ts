@@ -5,7 +5,7 @@ import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
 import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep, updateTaskTitle } from "./_100554_aiAgentHelper";
 import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
 import { forceServiceInstance } from './_100554_libCommom';
-import { globalState, getState, initState } from './_100554_collabState';
+import { setState, getState } from './_100554_collabState';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
 const agentName = "agentImprove";
@@ -123,7 +123,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     const contentTS = result.ts ? result.ts : undefined;
     const contentLess = result.less ? result.less : undefined;
     const position = result.position || 'left';
-    const serviceSource: ServiceSource100554 = globalState._ica?.serviceSource[position]?.service;
+    const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
 
     if (!serviceSource) throw new Error('Not found service source instance');
 
@@ -168,7 +168,7 @@ function refreshStateLock(page: string, position: string, value: boolean) {
     const lockMap: Map<string, boolean> = getState(`serviceSource.${position}.lockMap`);
     const newMap = new Map(lockMap);
     newMap.set(page, value);
-    globalState.globalStateManagment.setState(`serviceSource.${position}.lockMap`, newMap);
+    setState(`serviceSource.${position}.lockMap`, newMap);
 }
 
 
