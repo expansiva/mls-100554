@@ -1,12 +1,12 @@
-/// <mls shortName="wcTableSelect" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="widgetTableSelect" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, repeat, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { propertyDataSource } from './_100554_collabDecorators';
 
-@customElement('wc-table-select-100554')
-export class WcTableSelect100554 extends StateLitElement {
+@customElement('widget-table-select-100554')
+export class WidgetTableSelect100554 extends StateLitElement {
 
     createRenderRoot() {
         return this; 

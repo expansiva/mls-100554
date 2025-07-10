@@ -12,12 +12,12 @@ export async function execute(param: IWCDCommand) {
     if (!param.overlay || typeof param.overlay.selectItem !== 'function') throw new Error('invalid param.overlay');
 
     const icaTagName = 'ica-apresentation-text-code-100554';
-    const wcTagName = 'wc-code-100554';
+    const wcTagName = 'widget-text-code-100554';
     importFilesIfNeeded([icaTagName, wcTagName]);
 
     const widgetIca = icaTagName;
     const elDivider = document.createElement(widgetIca) as IcaLitElementBaseMethods;
-    elDivider.setAttribute('widget', 'wc-code-100554');
+    elDivider.setAttribute('widget', 'widget-text-code-100554');
     const allCode = countElementsWithTagName(param.overlay, icaTagName);
 
     const id = 'apCode' + (allCode + 1);;

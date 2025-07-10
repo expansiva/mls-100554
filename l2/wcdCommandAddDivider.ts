@@ -12,9 +12,9 @@ export async function execute(param: IWCDCommand) {
     if (!param.overlay || typeof param.overlay.selectItem !== 'function') throw new Error('invalid param.overlay');
 
     const icaSectionTagName = 'ica-layout-flow-section-100554';
-    const wcSectionTagName = 'wc-section-100554';
+    const wcSectionTagName = 'widget-section-100554';
     const icaTagName = 'ica-layout-flow-divider-100554';
-    const wcTagName = 'wc-divider-100554';
+    const wcTagName = 'widget-divider-100554';
 
     const imports = [icaTagName, wcTagName, icaSectionTagName, wcSectionTagName];
     importFilesIfNeeded(imports);

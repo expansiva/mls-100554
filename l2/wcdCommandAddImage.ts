@@ -15,11 +15,11 @@ export async function execute(param: IWCDCommand) {
     if (!args.src || typeof args.src !== 'string') throw new Error('Invalid args: src is missing or invalid');
 
     const icaTagName = 'ica-apresentation-images-images-100554';
-    const wcTagName = 'wc-image-100554';
+    const wcTagName = 'widget-image-100554';
     importFilesIfNeeded([icaTagName, wcTagName]);
 
     const elImage = document.createElement(icaTagName) as IcaLitElementBaseMethods;
-    elImage.setAttribute('widget', 'wc-image-100554');
+    elImage.setAttribute('widget', 'widget-image-100554');
     elImage.setAttribute('src', args.src || '');
 
     const allImagesAp = countElementsWithTagName(param.overlay, icaTagName);
