@@ -5,7 +5,7 @@ import { preferModelType } from './_100554_aiPrompts';
 import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep, updateTaskTitle } from "./_100554_aiAgentHelper";
 import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
 import { forceServiceInstance } from './_100554_libCommom';
-import { globalState, getState } from './_100554_collabState';
+import { getState, setState } from './_100554_collabState';
 import { ServiceSource100554 } from './_100554_serviceSource';
 import { descriptionForPrompt } from "./_100554_icaBaseDescription";
 import { convertFileNameToTag } from './_100554_utilsLit';
@@ -58,10 +58,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
-    const { task, message } = await updateStepStatus(context.task, step.stepId, "in_progress");
-    if (message) context.message = message;
-    context.task = task;
-    
+    context = await updateStepStatus(context, step.stepId, "in_progress");    
     if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
     const data: IDataPrompt = JSON.parse(step.prompt);
@@ -79,11 +76,10 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
 
-    const { task, message } = await updateStepStatus(context.task, step.stepId, "completed");
-    if (message) context.message = message;
-    context.task = task;
+    context = await updateStepStatus(context, step.stepId, "completed");
 
     await updateFile(context);
+    if (!context.task) throw new Error("Invalid context task");
     context.task = await updateTaskTitle(context.task, "Widget fixed");
     await executeNextStep(context);
 
@@ -437,7 +433,7 @@ async function getContentByExtension(fullName: string, ext: 'html' | 'ts' | 'sty
 
 async function getDefinitonsByImports(imports: string[], position: 'left' | 'right') {
 
-    const serviceSource: ServiceSource100554 = globalState._ica?.serviceSource[position]?.service;
+    const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
     if (!serviceSource) throw new Error('Not found service source instance');
 
     const definitionsData: { importName: string, definition: string }[] = [];
@@ -499,7 +495,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     const contentTS = result.ts ? result.ts : undefined;
     const contentLess = result.less ? result.less : undefined;
     const position = result.position || 'left';
-    const serviceSource: ServiceSource100554 = globalState._ica?.serviceSource[position]?.service;
+    const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
     if (!serviceSource) throw new Error('Not found service source instance');
 
     const models = getModel(info);
@@ -547,7 +543,7 @@ function refreshStateLock(page: string, position: string, value: boolean) {
     const lockMap: Map<string, boolean> = getState(`serviceSource.${position}.lockMap`);
     const newMap = new Map(lockMap);
     newMap.set(page, value);
-    globalState.globalStateManagment.setState(`serviceSource.${position}.lockMap`, newMap);
+    setState(`serviceSource.${position}.lockMap`, newMap);
 }
 
 const svgFixBug = `<svg fill="#000000" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 

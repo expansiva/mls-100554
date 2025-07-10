@@ -9,7 +9,7 @@ import { removeTokensFromSource } from './_100554_enhancementStyle';
 import { getTokensLess } from './_100554_designSystemBase';
 import { LessCSS } from "./_100554_lessCSS";
 import { getEnhancementName, getProjectDetails } from './_100554_libCommom';
-import { globalState } from './_100554_collabState';
+import { getState, initState } from './_100554_collabState';
 import { propertyDataSource } from './_100554_collabDecorators';
 import { setErrorOnModel } from './_100554_validateLit'
 import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_file_code } from './_100554_collabIcons';
@@ -2189,7 +2189,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                     await mls.l2.typescript.compileAndPostProcess(this.activeModels.ts, true, true);
                 }
 
-                const lastemitter = globalState._ica.less[this.position]?.emitter || 'editor';
+                const lastemitter = getState(`less.${this.position}.emitter`) || 'editor';
                 if (this.lessCSS && this._ed1) {
                     const uri = this.getUri(`_${modelBase.storFile.project}_${modelBase.storFile.shortName}`, '.less');
                     const lastSelector = this.lessCSS.selector;
@@ -2827,38 +2827,30 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     connectedCallback() {
-        if (!globalState._ica) globalState._ica = {};
-        if (!globalState._ica.less) {
-            globalState._ica.less = {
-                left: {},
-                right: {},
-            }
-        }
-        if (!globalState._ica.serviceSource) {
-            globalState._ica.serviceSource = {
-                left: {
-                    selectedMode: 'icTS',
-                    historyLanguage: 'typescript',
-                    service: mls.services['100554_serviceSource_left'],
-                    lockMap: new Map<string, boolean>()
 
-                },
-                right: {
-                    selectedMode: 'icTS',
-                    historyLanguage: 'typescript',
-                    service: mls.services['100554_serviceSource_right'],
-                    lockMap: new Map<string, boolean>()
+        initState('less', {
+            left: {},
+            right: {}
+        });
 
-                },
-
-            };
-        }
-
+        initState('serviceSource', {
+            left: {
+                selectedMode: 'icTS',
+                historyLanguage: 'typescript',
+                service: mls.services['100554_serviceSource_left'],
+                lockMap: new Map<string, boolean>()
+            },
+            right: {
+                selectedMode: 'icTS',
+                historyLanguage: 'typescript',
+                service: mls.services['100554_serviceSource_right'],
+                lockMap: new Map<string, boolean>()
+            },
+        });
 
         this.setAttribute('selectedMode', `{{serviceSource.${this.position}.selectedMode}}`);
         this.setAttribute('historyLanguage', `{{serviceSource.${this.position}.historyLanguage}}`);
         this.setAttribute('lockMap', `{{serviceSource.${this.position}.lockMap}}`);
-
         super.connectedCallback();
 
     }

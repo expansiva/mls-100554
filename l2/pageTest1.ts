@@ -2,7 +2,7 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
-import { globalState, initState, setState } from './_100554_collabState';
+import { initState, setState, getState, subscribe } from './_100554_collabState';
 import { initTestState, adicionarSolicitacao, ISolicitacao } from './_100554_testPagesState';
 
 @customElement('page-test1-100554') 
@@ -26,7 +26,7 @@ export class PageTest1100554 extends CollabPageElement {
             }
         });
 
-        globalState.globalStateManagment.subscribe(
+        subscribe(
             [
                 'projectTest.page1.action',
             ]
@@ -55,7 +55,7 @@ export class PageTest1100554 extends CollabPageElement {
 
 
     async handleClickBtnSave() {
-        const novaSolicitacao: ISolicitacao = globalState._ica.projectTest.page1.newRequest;
+        const novaSolicitacao: ISolicitacao = getState('projectTest.page1.newRequest');
         if (!novaSolicitacao.solicitante) {
             setState(`projectTest.page1.labelError`, 'O solicitante não deve pode ser em branco', true);
             return;

@@ -4,7 +4,7 @@ import { html,repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { propertyDataSource } from './_100554_collabDecorators';
-import { globalState } from './_100554_collabState';
+import { setState, getState } from './_100554_collabState';
 import {  getMessageKey } from './_100554_collabLitElement';
 import { ICSSState } from './_100554_lessCSS';
 import './_100554_collabDsInputRange';
@@ -307,8 +307,8 @@ export class PluginStyleFlex extends StateLitElement {
 
     private setState(prop: string, css: string) {
         prop = this.state?.lessCSS?.lessAST.toCamelCaseProperty(prop) || '';
-        globalState._ica.less[this.position].emitter = 'helper';
-        const styles = globalState._ica.less[this.position].lessCSS.styles;
+        setState(`less.${this.position}.emitter`, 'helper');
+        const styles = getState(`less.${this.position}.lessCSS.styles`);
         styles[prop] = css;
     }
 

@@ -2,7 +2,7 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement, query } from 'lit/decorators.js';
-import { globalState, initState, setState } from './_100554_collabState';
+import { getState, initState, setState, subscribe } from './_100554_collabState';
 import { initTestState } from './_100554_testPagesState';
 
 @customElement('page-test2-100554')
@@ -28,7 +28,7 @@ export class PageTest2100554 extends CollabPageElement {
             }
         });
         
-        globalState.globalStateManagment.subscribe([
+        subscribe([
             'projectTest.page2.indexSel',
             'projectTest.page2.action'
         ], this)
@@ -71,11 +71,11 @@ export class PageTest2100554 extends CollabPageElement {
     
     onSelectItemtableSelect(idx: number) {
 
-        setState('projectTest.page2.selecionado.empresa', globalState._ica.projectTest.tables.fornecedores[idx].empresa, true);
-        setState('projectTest.page2.selecionado.cnpj', globalState._ica.projectTest.tables.fornecedores[idx].cnpj, true);
-        setState('projectTest.page2.selecionado.endereco', globalState._ica.projectTest.tables.fornecedores[idx].endereco, true);
-        setState('projectTest.page2.selecionado.contato', globalState._ica.projectTest.tables.fornecedores[idx].contato, true);
-        setState('projectTest.page2.selecionado.produtos', globalState._ica.projectTest.tables.fornecedores[idx].produtos, true);
+        setState('projectTest.page2.selecionado.empresa', getState('projectTest.tables.fornecedores[idx].empresa'), true);
+        setState('projectTest.page2.selecionado.cnpj', getState('projectTest.tables.fornecedores[idx].cnpj'), true);
+        setState('projectTest.page2.selecionado.endereco', getState('projectTest.tables.fornecedores[idx].endereco'), true);
+        setState('projectTest.page2.selecionado.contato', getState('projectTest.tables.fornecedores[idx].contato'), true);
+        setState('projectTest.page2.selecionado.produtos', getState('projectTest.tables.fornecedores[idx].produtos'), true);
     }
 
     onNew() {
@@ -101,21 +101,21 @@ export class PageTest2100554 extends CollabPageElement {
 
         setState('projectTest.page2.action', '', true);
 
-        let idx = globalState._ica.projectTest.page2.indexSel;
+        let idx = getState('projectTest.page2.indexSel');
 
-        const isValidNameEmpresa = this.validarNomeEmpresa(globalState._ica.projectTest.page2.selecionado.empresa);
+        const isValidNameEmpresa = this.validarNomeEmpresa(getState('projectTest.page2.selecionado.empresa'));
         if (!isValidNameEmpresa) return;
 
         let isValidCNPJ = this.validarReg();
         if (!isValidCNPJ) return;
 
-        const i = Object.assign({}, globalState._ica.projectTest.page2.selecionado);
+        const i = Object.assign({}, getState('projectTest.page2.selecionado'));
 
         i.produtos = typeof i.produtos === 'string' ? i.produtos.split(', ') : i.produtos;
 
         if (idx < 0) {
 
-            const dt = [...globalState._ica.projectTest.tables.fornecedores];
+            const dt = [...getState('projectTest.tables.fornecedores')];
             dt.push(i);
             setState(`projectTest.tables.fornecedores`, dt, true);
 
@@ -140,13 +140,13 @@ export class PageTest2100554 extends CollabPageElement {
 
         setState('projectTest.page2.action', '', true);
 
-        const idx = globalState._ica.projectTest.page2.indexSel;
+        const idx = getState('projectTest.page2.indexSel');
 
-        const emp = idx < 0 ? '' : globalState._ica.projectTest.tables.fornecedores[idx].empresa;
-        const cnpj = idx < 0 ? '' : globalState._ica.projectTest.tables.fornecedores[idx].cnpj;
-        const end = idx < 0 ? '' : globalState._ica.projectTest.tables.fornecedores[idx].endereco;
-        const ct = idx < 0 ? '' : globalState._ica.projectTest.tables.fornecedores[idx].contato;
-        const prod = idx < 0 ? '' : globalState._ica.projectTest.tables.fornecedores[idx].produtos;
+        const emp = idx < 0 ? '' : getState('projectTest.tables.fornecedores[idx].empresa');
+        const cnpj = idx < 0 ? '' : getState('projectTest.tables.fornecedores[idx].cnpj');
+        const end = idx < 0 ? '' : getState('projectTest.tables.fornecedores[idx].endereco');
+        const ct = idx < 0 ? '' : getState('projectTest.tables.fornecedores[idx].contato');
+        const prod = idx < 0 ? '' : getState('projectTest.tables.fornecedores[idx].produtos');
 
         setState('projectTest.page2.selecionado.empresa', emp, true);
         setState('projectTest.page2.selecionado.cnpj', cnpj, true);
@@ -160,11 +160,11 @@ export class PageTest2100554 extends CollabPageElement {
 
         setState('projectTest.page2.action', '', true);
 
-        let idx = globalState._ica.projectTest.page2.indexSel;
+        let idx = getState('projectTest.page2.indexSel');
 
         if (idx < 0) return;
 
-        const dt = [...globalState._ica.projectTest.tables.fornecedores];
+        const dt = [...getState('projectTest.tables.fornecedores')];
         dt.splice(idx, 1);
 
         setState(`projectTest.tables.fornecedores`, dt, true);
@@ -185,9 +185,9 @@ export class PageTest2100554 extends CollabPageElement {
         const selProds = this.querySelector('#selProds') as any;
         if (!selProds) return;
         const vl = selProds.querySelector('select').value;
-        if (globalState._ica.projectTest.page2.selecionado.produtos.includes(vl)) return;
+        if (getState('projectTest.page2.selecionado.produtos').includes(vl)) return;
 
-        let vls = globalState._ica.projectTest.page2.selecionado.produtos;
+        let vls = getState('projectTest.page2.selecionado.produtos');
         if (typeof vl === 'string') {
             vls += vls.length === 0 ? vl : ', ' + vl;
         } else {
@@ -201,19 +201,19 @@ export class PageTest2100554 extends CollabPageElement {
 
     private validarReg(): boolean {
 
-        let vcnpj = this.validarCNPJ(globalState._ica.projectTest.page2.selecionado.cnpj);
+        let vcnpj = this.validarCNPJ(getState('projectTest.page2.selecionado.cnpj'));
 
         if (!vcnpj) {
             setState(`projectTest.page2.labelError`, 'CNPJ invalido', true);
             return false;
         }
 
-        const cnpj = globalState._ica.projectTest.page2.selecionado.cnpj.replace(/[^\d]/g, '');
+        const cnpj = getState('projectTest.page2.selecionado.cnpj').replace(/[^\d]/g, '');
 
         let cnpjv = true;
-        globalState._ica.projectTest.tables.fornecedores.forEach((f: any) => {
+        getState('projectTest.tables.fornecedores').forEach((f: any) => {
             const cnpjf = f.cnpj.replace(/[^\d]/g, '');
-            if (cnpj === cnpjf && globalState._ica.projectTest.page2.selecionado.empresa !== f.empresa) cnpjv = false;
+            if (cnpj === cnpjf && getState('projectTest.page2.selecionado.empresa') !== f.empresa) cnpjv = false;
         })
 
         if (!cnpjv) {

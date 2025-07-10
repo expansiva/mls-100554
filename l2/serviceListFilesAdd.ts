@@ -7,7 +7,7 @@ import { ServiceBase } from './_100554_serviceBase';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IDetails } from "./_100554_pluginNewFileBase";
 import { propertyDataSource } from './_100554_collabDecorators';
-import { globalState, initState } from './_100554_collabState';
+import { getState, setState, initState } from './_100554_collabState';
 import { loadPluginProject } from './_100554_libCommom';
 
 /// **collab_i18n_start**
@@ -61,8 +61,8 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     async connectedCallback() {
         super.connectedCallback();
-        if (!globalState._ica?.l2?.addFile) initState('l2.addFile', { shortName: '', project: 0 });
-        globalState.globalStateManagment.setState('l2.addFile.shortName', '');
+        initState('l2.addFile', { shortName: '', project: 0 });
+        setState('l2.addFile.shortName', '');
         await this.init();
     }
 
@@ -92,7 +92,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
         this.msg = lang ? messages[lang] : message_en;
 
         const { project } = mls.actual[5] || 0;
-        globalState.globalStateManagment.setState('l2.addFile.project', project);
+        setState('l2.addFile.project', project);
 
         return html`
             ${project !== undefined ? this.renderAdd(project)
@@ -170,7 +170,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
             this.error = this.msg.invalidName;
             return;
         }
-        globalState.globalStateManagment.setState('l2.addFile.shortName', target.value);
+        setState('l2.addFile.shortName', target.value);
     }
 
     private handleClickTemplate(plugin: IPlugins) {

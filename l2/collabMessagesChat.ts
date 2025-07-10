@@ -181,7 +181,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 const userName = this.actualThread?.users.find((user) => user.userId === message.senderId)?.name || message.senderId;
                 const userAvatar = this.actualThread?.users.find((user) => user.userId === message.senderId)?.avatar_url || '';
                 const cls = message.senderId === this.userId ? 'user' : 'system';
-                        const isSame = message.isSame;
+                const isSame = message.isSame;
                 const titleTranslated = this.getTitleMessageTranslated(message)
 
                 return html`
@@ -234,7 +234,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const { language } = this.userPreferenceChat;
         const messageByLanguagePref = message.taskResultsTranslated ? message.taskResultsTranslated[language] : '';
         const isSameLanguege = language === message.taskResultsTranslated.language_detected;
-        
+
         switch (mode) {
             case 'icon':
                 return html`<div class="message-content">${messageByLanguagePref || response} ${!isSameLanguege ? collab_translate : ''}</div>`;
@@ -307,29 +307,43 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private renderListThreads() {
         const unreadCount = 1;
+        const imageUrls = [
+            "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "https://plus.unsplash.com/premium_photo-1677252438426-595a3a9d5e11?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA",
+            "https://plus.unsplash.com/premium_photo-1677252438450-b779a923b0f6?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA",
+
+        ];
         if (this.userThreads[this.group].length === 0 && !this.isLoadingThread) {
             return html`<div style="padding:1rem;">${this.msg.noThreads}</div>`;
         }
-        return html` 
+        return html`
         <ul class="thread-list">
             ${this.userThreads[this.group].map((item) => {
-            return html`
-                <li @click=${() => this.onThreadClick(item)} class="thread-item">
-                    <div class="thread-content">
-                        <div class="thread-item-header">
-                            <span class="thread-name">${item.thread.name || item.thread.threadId}</span>
-                            <span class="last-update">${item.thread.lastMessageTime ? formatTimestamp(item.thread.lastMessageTime)?.date : formatTimestamp(item.thread.history[0].timestamp)?.date}</span>
+                const randomImage = imageUrls[Math.floor(Math.random() * imageUrls.length)];
+                return html`
+                    <li @click=${() => this.onThreadClick(item)} class="thread-item">
+                        <div class="thread-item-avatar">
+                            <img src="${randomImage}"></img>
                         </div>
-                        <div class="thread-summary">
-                            <span class="last-message">${item.thread.lastMessage || ''}</span>
-                            ${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
+                        <div class="thread-content">
+                            <div class="thread-item-header">
+                                <span class="thread-name">${item.thread.name || item.thread.threadId}</span>
+                                <span class="last-update">
+                                    ${item.thread.lastMessageTime
+                                        ? formatTimestamp(item.thread.lastMessageTime)?.date
+                                        : formatTimestamp(item.thread.history[0].timestamp)?.date}
+                                </span>
+                            </div>
+                            <div class="thread-summary">
+                                <span class="last-message">${item.thread.lastMessage || ''}</span>
+                                ${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
+                            </div>
                         </div>
-                    </div>
-                </li>`;
-        })}
+                    </li>`;
+            })}
         </ul>
         ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
-`
+    `;
     }
 
     private renderTaskDetails() {

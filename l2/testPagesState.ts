@@ -1,9 +1,9 @@
 /// <mls shortName="testPagesState" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { globalState, initState } from './_100554_collabState';
+import { initState, getState, setState } from './_100554_collabState';
 
 export function initTestState() {
-    
+
     initState('projectTest.tables.status', [
         { key: 'Pendente', value: 'Pendente' },
         { key: 'Aprovado', value: 'Aprovado' },
@@ -144,20 +144,20 @@ export function initTestState() {
 
 export function adicionarSolicitacao(novaSolicitacao: ISolicitacao) {
     const newObJ = { ...novaSolicitacao }
-    const data = [...globalState._ica.projectTest.tables.solicitacoes] || [];
+    const data = [...getState('projectTest.tables.solicitacoes')] || [];
     newObJ.id = getNextIdSolicitacao();
     data.push(newObJ);
-    globalState.globalStateManagment.setState(`projectTest.tables.solicitacoes`, data, true);
+    setState(`projectTest.tables.solicitacoes`, data, true);
 }
 
 export function alterarStatusSolicitacao(newStatus: TStatus, index: number) {
-    const data = globalState._ica.projectTest.tables.solicitacoes || [];
+    const data = getState('projectTest.tables.solicitacoes') || [];
     if (!data[index]) throw new Error('Invalid row');
-    globalState.globalStateManagment.setState(`projectTest.tables.solicitacoes[${index}].status`, newStatus);
+    setState(`projectTest.tables.solicitacoes[${index}].status`, newStatus);
 }
 
 function getNextIdSolicitacao() {
-    return globalState._ica.projectTest.tables.solicitacoes?.length + 1 || 1;
+    return getState('projectTest.tables.solicitacoes')?.length + 1 || 1;
 }
 
 export interface ISolicitacao {

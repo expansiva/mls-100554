@@ -3,7 +3,7 @@
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { forceServiceInstance } from './_100554_libCommom';
 import { getPromptByHtml } from './_100554_aiPrompts';
-import { globalState } from './_100554_collabState';
+import { getState } from './_100554_collabState';
 import { ServiceSource100554 } from './_100554_serviceSource';
 
 
@@ -119,7 +119,7 @@ export const defs: mls.l4.BaseDefs = ${JSON.stringify(result, null, 2)}
         let models = mls.editor.getModels(result.meta.projectId, result.meta.shortName);
         if (!models || !models.defs) {
             const position: string = 'left';
-            const serviceSource: ServiceSource100554 = globalState._ica?.serviceSource[position].service;
+            const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
             if (!serviceSource) throw new Error('Not found service source instance');
             await serviceSource.createModels(storFileTs);
             models = mls.editor.getModels(result.meta.projectId, result.meta.shortName);

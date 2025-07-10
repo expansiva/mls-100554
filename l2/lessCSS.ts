@@ -1,7 +1,7 @@
 /// <mls shortName="lessCSS" project="100554" enhancement="_blank" />
 
 import { LessAst } from "./_100554_lessAST";
-import { globalState } from './_100554_collabState';
+import { setState, getState, initState } from './_100554_collabState';
 
 /**
  * A unique symbol used as a key for properties that should be ignored during JSON serialization.
@@ -96,67 +96,56 @@ export class LessCSS {
 
         this.refresh();
 
-        if (!globalState._ica
-            || !globalState.globalStateManagment
-            || !globalState._ica.less
-            || !globalState._ica.less[this.position]) return;
+        const state = getState(`less.${this.position}`);
+        if (!state) return;
 
         const selector = this.lessAST.findSelectorByLine(lineNumber);
         if (!selector) {
             this.clearState();
-            globalState._ica.less[this.position].lineContent = lineContent;
-            globalState.globalStateManagment.setState(`less.${this.position}`, { ...globalState._ica.less[this.position] });
+            setState(`less.${this.position}.lineContent`, lineContent);
             return;
         }
 
         this.setSelector(selector);
         const info = this.lessAST.findInfoByLine(selector, lineNumber);
-        globalState._ica.less[this.position].selector = selector;
-        globalState._ica.less[this.position].lineContent = lineContent;
-        globalState._ica.less[this.position].key = info?.key;
-        globalState._ica.less[this.position].value = info?.value;
-        globalState._ica.less[this.position].emitter = emitter;
-        globalState._ica.less[this.position].lineNumber = lineNumber;
-        globalState._ica.less[this.position].lessCSS = this;
-        globalState.globalStateManagment.setState(`less.${this.position}`, { ...globalState._ica.less[this.position] });
+        setState(`less.${this.position}`, {
+            selector: selector,
+            lineContent: lineContent,
+            key: info?.key,
+            value: info?.value,
+            emitter: emitter,
+            lineNumber: lineNumber,
+            lessCSS: this,
+        });
 
     }
 
     private clearState() {
-        if (!globalState._ica
-            || !globalState._ica.less
-            || !globalState._ica.less[this.position]) return;
 
-        globalState._ica.less[this.position].lessCSS = undefined;
-        globalState._ica.less[this.position].key = undefined;
-        globalState._ica.less[this.position].value = undefined;
-        globalState._ica.less[this.position].selector = undefined;
+        const state = getState(`less.${this.position}`);
+        if (!state) return;
+        setState(`less.${this.position}.lessCSS`, undefined);
+        setState(`less.${this.position}.key`, undefined);
+        setState(`less.${this.position}.value`, undefined);
+        setState(`less.${this.position}.selector`, undefined);
+
     }
 
     private updateState() {
-        if (!globalState._ica
-            || !globalState.globalStateManagment
-            || !globalState._ica.less
-            || !globalState._ica.less[this.position]) return;
-
-        globalState._ica.less[this.position].lessCSS = this;
-        globalState._ica.less[this.position].lessCSS.styles = this.styles;
-        globalState.globalStateManagment.setState(`less.${this.position}`, { ...globalState._ica.less[this.position] });
+        const state = getState(`less.${this.position}`);
+        if (!state) return;
+        setState(`less.${this.position}.lessCSS`, this);
+        setState(`less.${this.position}.lessCSS.styles`, this.styles);
     }
 
     private initStateIfNeeded() {
 
-
-        if (!globalState._ica) globalState._ica = {};
-        if (!globalState._ica.less) globalState._ica.less = {};
-        if (!globalState._ica.globalStateManagment) return;
-
-        globalState._ica.less = {
+        initState('less', {
             left: {},
             right: {}
-        };
+        });
 
-        globalState._ica.less[this.position] = {
+        setState(`less.${this.position}`, {
             lessCSS: this,
             emitter: 'editor',
             key: undefined,
@@ -164,9 +153,9 @@ export class LessCSS {
             lineNumber: undefined,
             selector: undefined,
             uri: this._url,
-        };
+        });
 
-        globalState.globalStateManagment.setState(`less.${this.position}`, { ...globalState._ica.less[this.position] });
+        //setState(`less.${this.position}`, { ...getState(`less[${this.position}]`) });
 
     }
 

@@ -4,7 +4,7 @@ import { html, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { propertyDataSource } from './_100554_collabDecorators';
-import { globalState } from './_100554_collabState';
+import { setState, getState } from './_100554_collabState';
 import { getMessageKey } from './_100554_collabLitElement';
 import { ICSSState } from './_100554_lessCSS';
 import { convertColorToHex } from './_100554_libCommom';
@@ -206,8 +206,8 @@ export class PluginStyleTextShadow extends StateLitElement {
 
 
     private setState() {
-        globalState._ica.less[this.position].emitter = 'helper';
-        const styles: CSSStyleDeclaration = globalState._ica.less[this.position].lessCSS.styles;
+        setState(`less.${this.position}.emitter`, 'helper');
+        const styles: CSSStyleDeclaration = getState(`less.${this.position}.lessCSS.styles`);
         styles.textShadow = this.textShadow || '';
     }
 
