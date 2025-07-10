@@ -19,14 +19,14 @@ export function execute(param: IWCDCommand) {
     if (!ica) return;
 
     //const icaSectionTagName = 'ica-layout-flow-section-100554';
-    const wcSectionTagName = 'wc-section-100554';
+    const wcSectionTagName = 'widget-section-100554';
     //const icaTagName = 'ica-apresentation-text-text-100554';
-    const wcTagName = 'wc-text-100554';
+    const wcTagName = 'widget-default-text-100554';
 
     const imports = [wcTagName, wcSectionTagName];
     importFilesIfNeeded(imports);
 
-    const elAdd = document.createElement('wc-text-100554') as IcaLitElementBaseMethods;
+    const elAdd = document.createElement('widget-default-text-100554') as IcaLitElementBaseMethods;
     elAdd.setAttribute('type', 'p');
     elAdd.setAttribute('text', '');
     elAdd.setAttribute('mls_origin', 'true');

@@ -136,7 +136,7 @@ export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDO
         content.appendChild(icaOverlayItem);
     }
 
-    private updateSizeOverlayItems() {
+    public updateSizeOverlayItems() {
 
         requestAnimationFrame(() => {
             const items = Array.from(this.children) as WCDOverlayItensMethods[];

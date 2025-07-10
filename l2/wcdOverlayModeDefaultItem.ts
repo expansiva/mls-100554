@@ -54,7 +54,7 @@ export class WcdOverlayModeDefaultItem extends WcdOverlayItemLitBase {
     private onCBClick(e: MouseEvent) {
 
         const wcd = this.querySelector('wcd-toolbox-100554') as WCDToolboxMethodos;
-        if (!wcd) return;
+        if (!wcd || !wcd.elICA || !wcd.elICA.getActionsTags) return;
 
         const tag = wcd.elICA ? wcd.elICA.getActionsTags() : [];
         const test = tag.filter((i) => i.name === 'add').length <= 0;

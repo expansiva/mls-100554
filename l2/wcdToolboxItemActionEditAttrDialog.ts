@@ -17,6 +17,7 @@ export class WcdToolboxItemActionEditAttrDialog extends CollabLitElement {
     //-------COMPONENT----------
 
     disconnectedCallback() {
+        debugger;
         if (!globalWcd) throw new Error('Invalid window.wcdState');
         if (globalWcd.myParent) {
             globalWcd.myParent.removeAttribute('needresize');
@@ -54,7 +55,6 @@ export class WcdToolboxItemActionEditAttrDialog extends CollabLitElement {
     private lastHeightResize = 0;
     private firstHeight = 0;
     private initObserverResize() {
-
         if (!this) return;
 
         if (this.resizeObserver) this.resizeObserver.disconnect();
@@ -77,7 +77,7 @@ export class WcdToolboxItemActionEditAttrDialog extends CollabLitElement {
     }
 
     private recalculeIcaHeight() {
-        
+
         if (!globalWcd) throw new Error('Invalid window.wcdState');
         if (!globalWcd.elICA) throw new Error('Invalid window.wcdState.elICA');
         if (!this.itemEdit) return;
