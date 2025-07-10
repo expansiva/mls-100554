@@ -53,7 +53,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         if (!step) {
             throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
         }
-        context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+        context = await updateStepStatus(context, step.stepId, "in_progress");
 
         if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
         
@@ -71,7 +71,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
 
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context = await updateStepStatus(context, step.stepId, "completed");
     await updateFile(context);
 
 }
@@ -114,7 +114,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     if(mls.editor.instances['l2_left'])(mls.editor.instances['l2_left'] as any).getAction('editor.action.formatDocument').run()
 
     context.task = await updateTaskTitle(context.task, "Widget updated");
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context = await updateStepStatus(context, step.stepId, "completed");
 
 }
 

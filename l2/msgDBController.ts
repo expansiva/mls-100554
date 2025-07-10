@@ -1,7 +1,7 @@
 /// <mls shortName="msgDBController" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 const MAXMESSAGESBYTHREAD = 100;
-const VERSION = 2;
+const VERSION = 3;
 
 export function openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
@@ -20,17 +20,22 @@ export function openDB(): Promise<IDBDatabase> {
                 db.createObjectStore("tasks", { keyPath: "PK" });
             }
 
+
             let messageStore: IDBObjectStore;
             if (!db.objectStoreNames.contains("messages")) {
                 messageStore = db.createObjectStore("messages", { keyPath: "messageId" });
-                messageStore.createIndex("byThreadId", "threadId", { unique: false });
-                messageStore.createIndex("byThreadId_orderAt", ["threadId", "orderAt"], { unique: false });
             } else {
-                messageStore = request.transaction!.objectStore("messages");
-                if (!messageStore.indexNames.contains("byThreadId_orderAt")) {
-                    messageStore.createIndex("byThreadId_orderAt", ["threadId", "orderAt"], { unique: false });
-                }
+                messageStore = (event.target as IDBOpenDBRequest).transaction!.objectStore("messages");
             }
+
+            if (!messageStore.indexNames.contains("byThreadId")) {
+                messageStore.createIndex("byThreadId", "threadId", { unique: false });
+            }
+
+            if (!messageStore.indexNames.contains("byThreadId_orderAt")) {
+                messageStore.createIndex("byThreadId_orderAt", ["threadId", "orderAt"], { unique: false });
+            }
+
         };
 
         request.onsuccess = () => resolve(request.result);
@@ -103,7 +108,7 @@ export async function addMessage(message: mls.msg.Message): Promise<void> {
                     : [];
 
                 try {
-        
+
                     if (messagesToDelete.length > 0) {
                         deleteMessagesAndTasks(messagesToDelete);
                     }
@@ -128,6 +133,39 @@ export async function addMessage(message: mls.msg.Message): Promise<void> {
         };
 
         request.onerror = () => reject("Erro ao ler mensagens da thread");
+    });
+}
+
+export async function updateMessage(message: mls.msg.Message): Promise<void> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("messages", "readwrite");
+        const store = tx.objectStore("messages");
+
+        const messageId = `${message.threadId}/${message.createAt}`;
+
+        const getRequest = store.get(messageId);
+
+        getRequest.onsuccess = () => {
+            if (!getRequest.result) {
+                reject(`Mensagem com ID ${messageId} não encontrada.`);
+                return;
+            }
+
+            const updatedMessage = {
+                ...getRequest.result,
+                ...message,
+                messageId,
+            };
+
+            const updateRequest = store.put(updatedMessage);
+            updateRequest.onsuccess = () => resolve();
+            updateRequest.onerror = () => reject("Erro ao atualizar mensagem.");
+        };
+
+        getRequest.onerror = () => reject("Erro ao buscar mensagem para atualização.");
+        tx.onabort = () => reject("Transação abortada.");
     });
 }
 

@@ -66,7 +66,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
             throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
         }
 
-        context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+        context = await updateStepStatus(context, step.stepId, "in_progress");
 
         if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
         const data = JSON.parse(step.prompt);
@@ -83,7 +83,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
 
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context = await updateStepStatus(context, step.stepId, "completed");
     await addFile(context);
 
     //await executeNextStep(context);

@@ -1,5 +1,8 @@
 /// <mls shortName="aiAgentHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+import { updateMessage, addMessages } from "./_100554_msgDBController";
+
+
 /**
  * Helper function to collect all steps from a task in a flat array
  */
@@ -228,12 +231,13 @@ export async function appendLongTermMemory(context: mls.msg.ExecutionContext, lo
 
 }
 
-export const updateStepStatus = async (task: mls.msg.TaskData, stepId: number, status: mls.msg.AIStepStatus, traceMsg?: string): Promise<mls.msg.TaskData> => {
+export const updateStepStatus = async (context: mls.msg.ExecutionContext, stepId: number, status: mls.msg.AIStepStatus, traceMsg?: string): Promise<mls.msg.ExecutionContext> => {
+  if(!context.task) throw new Error("error on AI updateStepStatus , invalid task");
   const args: mls.msg.RequestUpdateStepStatus = {
     "action": "updateStepStatus",
-    "userId": getUserIdLocalStorage() || task.owner || '',
-    "messageId": task.messageid_created || '',
-    "taskId": task.PK,
+    "userId": getUserIdLocalStorage() || context.task.owner || '',
+    "messageId": context.task.messageid_created || '',
+    "taskId": context.task.PK,
     stepId,
     status,
     traceMsg
@@ -241,7 +245,13 @@ export const updateStepStatus = async (task: mls.msg.TaskData, stepId: number, s
 
   const ret = await mls.api.msgUpdateStepStatus(args);
   if (!ret || ret.statusCode !== 200) throw new Error("error on AI update status , stoped");
-  return (ret as mls.msg.ResponseUpdateStepStatus).task;
+  if (ret.message) {
+    context.message = ret.message;
+    await updateMessage(ret.message);
+  }
+
+  context.task = ret.task;
+  return context;
 
 }
 

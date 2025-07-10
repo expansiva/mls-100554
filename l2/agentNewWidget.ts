@@ -48,7 +48,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         if (!step) {
             throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
         }
-        context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
+        context = await updateStepStatus(context, step.stepId, "in_progress");
         const inputs = await getPrompts(step.prompt, step.rags);
         await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
     }
@@ -61,7 +61,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
     const { flexible } = calculateStepsStatistics([step], true);
     if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
-    context.task = await updateStepStatus(context.task, step.stepId, "completed");
+    context = await updateStepStatus(context, step.stepId, "completed");
     await executeNextStep(context);
 
 }

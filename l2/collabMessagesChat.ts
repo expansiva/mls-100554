@@ -181,8 +181,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 const userName = this.actualThread?.users.find((user) => user.userId === message.senderId)?.name || message.senderId;
                 const userAvatar = this.actualThread?.users.find((user) => user.userId === message.senderId)?.avatar_url || '';
                 const cls = message.senderId === this.userId ? 'user' : 'system';
-                const isSame = message.isSame;
-                const taskResponse = 'teste'
+                        const isSame = message.isSame;
+                const titleTranslated = this.getTitleMessageTranslated(message)
+
                 return html`
                             <div class="message ${cls} ${isSame ? 'same' : ''}">
                                 <div class="message-group">
@@ -203,10 +204,13 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                                         .context= ${message.context}
                                                         lastChanged= ${message.lastChanged}
                                                         taskId=${message.taskId}
+                                                        title=${titleTranslated}
+                                                        status=${message.taskStatus}
                                                         @taskclick=${() => this.onTaskClick(message?.taskId || '', message.threadId, message.createAt)}
                                                     >
                                                     </collab-messages-task-100554>
-                                                </div> `: html``}                                            
+                                                </div> `: html``}
+                                            ${this.renderMessageResultByLanguage(message)}                                            
                                         </div>
                                         ${cls === 'system' && !isSame ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''}
                                     </div>
@@ -218,6 +222,51 @@ export class CollabMessagesChat100554 extends StateLitElement {
 </div>
         ${this.renderPrompt()}
 `
+    }
+
+    private renderMessageResultByLanguage(message: mls.msg.Message) {
+        if (!message.taskResults || message.taskResults.length === 0 || message.taskStatus !== 'done' || !message.taskResultsTranslated) return html``;
+        const mode = this.userPreferenceChat?.translationMode || 'icon';
+        if (!this.userPreferenceChat || mode === 'none') {
+            return html`<div class="message-content">${message.taskResults[0]}</div>`
+        }
+        const response = message.taskResults[0];
+        const { language } = this.userPreferenceChat;
+        const messageByLanguagePref = message.taskResultsTranslated ? message.taskResultsTranslated[language] : '';
+        const isSameLanguege = language === message.taskResultsTranslated.language_detected;
+        
+        switch (mode) {
+            case 'icon':
+                return html`<div class="message-content">${messageByLanguagePref || response} ${!isSameLanguege ? collab_translate : ''}</div>`;
+            case 'text':
+                return html`
+                <div class="message-content">${messageByLanguagePref || response}</div>
+                ${!isSameLanguege ? html`<small class="message-content translate">${response}</small>` : ''}`;
+            case 'iconText':
+                return html`<div class="message-content">${messageByLanguagePref || response} ${!isSameLanguege ? collab_translate : ''}</div>
+                ${!isSameLanguege ? html`<small class="message-content translate">${response}</small>` : ''}`;
+            case 'trace':
+                return html`<div class="message-content trace">
+                <div><b>[LanguageDetected: ${message.language_detected}]</b> ${response}</div>
+                ${Object.keys(message.taskResultsTranslated || {}).map((key) => {
+                    if (key === 'language_detected') return ''
+                    if (key === message.taskResultsTranslated?.language_detected) return ''
+                    return html`<div><b>[${key}]</b> ${message.taskResultsTranslated ? message.taskResultsTranslated[key] : ''}</div>`
+                })}
+                </div>`
+            default:
+                return null;
+        }
+    }
+
+    private getTitleMessageTranslated(message: mls.msg.Message) {
+        const mode = this.userPreferenceChat?.translationMode || 'icon';
+        if (!this.userPreferenceChat || mode === 'none' || !message.taskTitleTranslated) {
+            return message.taskTitle;
+        }
+        const { language } = this.userPreferenceChat;
+        const titleByLanguagePref = message.taskTitleTranslated ? message.taskTitleTranslated[language] : message.taskTitle;
+        return titleByLanguagePref;
     }
 
     private renderMessageByLanguage(message: mls.msg.Message) {
@@ -528,7 +577,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private async updateMessageAI(context: mls.msg.ExecutionContext, updateThreadDB: boolean, oldContextCreateAt?: string) {
         if (this.activeScenerie !== 'details') return;
         if (!context.message && !context.task) return;
-        const { content, createAt, orderAt, senderId, threadId, taskId } = context.message;
+        const { content, createAt, orderAt, senderId, threadId, taskId, status, taskTitle, taskTitleTranslated, taskStatus,
+            taskResults, taskResultsTranslated } = context.message;
         const createAt2 = oldContextCreateAt ? oldContextCreateAt : createAt;
         let messageAdded = this.actualMessages.find((item) =>
             item.content === content &&
@@ -554,11 +604,18 @@ export class CollabMessagesChat100554 extends StateLitElement {
             await addMessage(newMessage);
             this.requestUpdate();
         } else {
+
             messageAdded.content = content;
             messageAdded.senderId = senderId;
             messageAdded.createAt = createAt;
             messageAdded.threadId = threadId;
             messageAdded.orderAt = orderAt;
+            if (status) messageAdded.status = status;
+            if (taskTitle) messageAdded.taskTitle = taskTitle;
+            if (taskTitleTranslated) messageAdded.taskTitleTranslated = taskTitleTranslated;
+            if (taskStatus) messageAdded.taskStatus = taskStatus;
+            if (taskResults) messageAdded.taskResults = taskResults;
+            if (taskResultsTranslated) messageAdded.taskResultsTranslated = taskResultsTranslated;
             messageAdded.context = context;
             messageAdded.isLoading = false;
             messageAdded.lastChanged = new Date().getTime();
