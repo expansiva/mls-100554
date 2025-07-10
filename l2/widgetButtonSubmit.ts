@@ -1,12 +1,12 @@
-/// <mls shortName="wcButtonSubmit" project="100554" enhancement="_100554_enhancementLit" groupName="FormsSubmitSubmit" />
+/// <mls shortName="widgetButtonSubmit" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html,  ifDefined, LitElement } from 'lit';
 import { customElement, property, } from 'lit/decorators.js';
 import { propertyDataSource } from './_100554_collabDecorators';
 import { StateLitElement } from './_100554_stateLitElement';
 
-@customElement('wc-button-submit-100554')
-export class WcButtonSubmit extends StateLitElement {
+@customElement('widget-button-submit-100554')
+export class WidgetButtonSubmit extends StateLitElement {
 
     createRenderRoot() {
         return this;

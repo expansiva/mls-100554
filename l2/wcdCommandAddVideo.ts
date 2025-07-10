@@ -14,7 +14,7 @@ export async function execute(param: IWCDCommand) {
     if (!args.src || typeof args.src !== 'string') throw new Error('Invalid args: src is missing or invalid');
 
     const icaTagName = 'ica-apresentation-video-embedded-video-100554';
-    const wcTagName = 'wc-video-100554';
+    const wcTagName = 'widget-video-100554';
     importFilesIfNeeded([icaTagName, wcTagName]);
 
     const elVideo = document.createElement(icaTagName) as IcaLitElementBaseMethods;

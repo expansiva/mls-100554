@@ -1,10 +1,10 @@
-/// <mls shortName="wcEmbedsSocialMedia" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="widgetEmbedsSocialMedia" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
 import { StateLitElement } from './_100554_stateLitElement';
-@customElement('wc-embeds-social-media-100554')
+@customElement('widget-embeds-social-media-100554')
 export class WcEmbedsSocialMedia100554 extends StateLitElement {
 
     @propertyDataSource({ type: String }) datasource: string | undefined;

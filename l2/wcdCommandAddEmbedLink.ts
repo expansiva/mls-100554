@@ -15,7 +15,7 @@ export async function execute(param: IWCDCommand) {
     if (!args.url || typeof args.url !== 'string') throw new Error('Invalid args: url is missing or invalid');
 
     const icaTagName = 'ica-apresentation-embeds-social-media-100554';
-    const wcTagName = 'wc-embeds-social-media-100554';
+    const wcTagName = 'widget-embeds-social-media-100554';
     importFilesIfNeeded([icaTagName, wcTagName]);
 
     const elEmbedSocialMedia = document.createElement(icaTagName) as IcaLitElementBaseMethods;

@@ -14,9 +14,9 @@ export async function execute(param: IWCDCommand) {
     if (!args.newSize || typeof args.newSize !== 'string' || !isValidSize(args.newSize)) throw new Error('Invalid args: newSize is missing or invalid');
 
     const icaSectionTagName = 'ica-layout-flow-section-100554';
-    const wcSectionTagName = 'wc-section-100554';
+    const wcSectionTagName = 'widget-section-100554';
     const icaTagName = 'ica-apresentation-images-images-100554';
-    const wcTagName = 'wc-image-100554';
+    const wcTagName = 'widget-image-100554';
 
     const imports = [icaTagName, wcTagName, icaSectionTagName, wcSectionTagName];
     importFilesIfNeeded(imports);
