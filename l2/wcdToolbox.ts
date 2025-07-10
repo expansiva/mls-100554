@@ -65,7 +65,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
 
     disconnectedCallback() {
-        globalWcd.elICA = undefined;
+        //globalWcd.elICA = undefined;
         globalWcd.myParent = undefined;
         globalWcd.wcdItens = undefined;
         
@@ -619,7 +619,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     private verifyNeedDel() {
 
-        if (!this.elICA || !this.elICA.overlayRef) return;
+        if (!this.elICA || !this.elICA.overlayRef || !this.elICA.getActionsTags) return;
         const acts = this.elICA.getActionsTags()
 
         if (acts.some((a) => a.name === 'add')) {
