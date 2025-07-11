@@ -14,6 +14,8 @@ import { setState } from './_100554_collabState';
 export class AgentTester extends CollabLitElement {
 
     private _agent = '';
+    private inError = false;
+
     @property({ type: String }) agent = '';
     @query('.containerdraganddrop') containerdraganddrop: HTMLElement | undefined;
 
@@ -181,8 +183,9 @@ draggable="true"
 `
     }
     renderResult() {
+        const aux = this.inError ? 'color:red' : '';
         return html`
-<pre class="result">
+<pre class="result" style="${aux}">
 ${this.escape(this.result)}
 </pre >
 `
@@ -303,7 +306,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
 
     private async handlePlay() {
         this.loading = true;
-        this.selectTabResult();
+        
         if (this.inEdit) {
             setTimeout(async () => {
                 this.handlePlay();
@@ -315,6 +318,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             const message = i ? i.content : '';
             const response = await this._callAgent(this._agent, message);
             this.result = response;
+            this.selectTabResult();
         } catch (err) {
             this.result = `Error when testing agent: ${(err as Error).message}`;
         } finally {
@@ -371,17 +375,19 @@ Please configure your maintenance thread at: CollabMessage > Settings > Chat Pre
         const userId = getUserIdLocalStorage();
         const threadId = this.chatPreferences.threadMaintenance;
         if (!userId) return `Agent "${agentName}" error: Not found userID`;
+        let context; 
         try {
             const moduleAgent = await import(`./${agentName}`);
             if (!moduleAgent) return 'Not found agent:' + agentName;
             if (!moduleAgent.createAgent) return 'Not found createAgent:' + agentName;
             const agt = moduleAgent.createAgent() as IAgent;
-            const context = getTemporaryContext(threadId, userId, '@@' + agt.agentName + ' ' + message);
+            context = getTemporaryContext(threadId, userId, '@@' + agt.agentName + ' ' + message);
             context.modeSingleStep = true;
             await agt.beforePrompt(context);
             return `Agent "${agentName}" responded:\n${JSON.stringify(context, null, 2)}`;
         } catch (e: any) {
-            return `Agent "${agentName}" error: ${e.message}`
+            this.inError = true;
+            return `Agent "${agentName}" error: ${e.message}\n\n${JSON.stringify(context, null, 2)}`
         }
     }
 

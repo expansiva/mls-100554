@@ -52,14 +52,16 @@ export class WcdOverlayModeDefaultItem extends WcdOverlayItemLitBase {
 
 
     private onCBClick(e: MouseEvent) {
-
+        
         const wcd = this.querySelector('wcd-toolbox-100554') as WCDToolboxMethodos;
-        if (!wcd || !wcd.elICA || !wcd.elICA.getActionsTags) return;
+        if (!wcd || !wcd.elICA) return;
+        wcd.style.boxShadow = '0px 0px 2px 2px var(--bg-primary-color-darker-disabled)' 
 
+        if(!wcd.elICA.getActionsTags) return;
         const tag = wcd.elICA ? wcd.elICA.getActionsTags() : [];
         const test = tag.filter((i) => i.name === 'add').length <= 0;
 
-        if (test) wcd.style.boxShadow = '0px 0px 2px 2px var(--bg-primary-color-darker-disabled)';
+        if (!test) wcd.style.boxShadow = '';
     }
     
 

@@ -35,6 +35,7 @@ export interface WCDOverlayMethods extends HTMLElement {
     getActionsTagsDefault(): { [key: string]: tps.ActionTag };
     refreshOverlay(): void;
     myItens: tps.IICADepths[]
+    updateSizeOverlayItems(): void;
 }
 
 export interface IListWidgetBase{

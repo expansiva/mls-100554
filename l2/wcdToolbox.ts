@@ -5,7 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { CollabLitElement } from './_100554_collabLitElement';
 import { ServiceBase } from './_100554_serviceBase';
-import { WCDToolboxMethodos, WCDToolboxItemMethodos } from './_100554_wcdTypes';
+import { WCDToolboxMethodos, WCDToolboxItemMethodos, WCDOverlayMethods } from './_100554_wcdTypes';
 import { globalWcd } from './_100554_wcdState';
 import { execute as excCommandDel } from './_100554_wcdCommandDel';
 import { dispatchEventConciliate } from './_100554_wcdCommandBase';
@@ -55,12 +55,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
     connectedCallback() {
         super.connectedCallback();
         if (!this.elICA) return;
-        /*const widgetName = this.elICA.getAttribute('widget');
-        if (!widgetName) return;
-        const widget = this.elICA.querySelector(widgetName);
-        if (!widget) return;*/
-        //this.elMain = this.elICA as HTMLElement;
-        //this.setAttribute('widget', this.elICA.tagName.toLowerCase())
+
     }
 
 
@@ -68,6 +63,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         //globalWcd.elICA = undefined;
         globalWcd.myParent = undefined;
         globalWcd.wcdItens = undefined;
+        globalWcd.overlay = undefined;
         
         if (this.parentElement && (this.parentElement as any).fcRemoveWcd)
             (this.parentElement as any).fcRemoveWcd();
@@ -171,7 +167,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
         globalWcd.elICA = this.elICA;
         globalWcd.myParent = this as any;
-        //globalWcd.elMain = this.elMain;
+        globalWcd.overlay = this.getOverlay();
 
         for await (let i of actions) {
 
@@ -210,9 +206,28 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
         };
 
+        this.adjustPositionIfNecessary();
 
-        this.adjustPositionIfNecessary()
+        setTimeout(() => {
+            if (globalWcd.overlay) globalWcd.overlay.updateSizeOverlayItems();
+        }, 200);
 
+    }
+
+    private getOverlay(): WCDOverlayMethods | undefined {
+
+        let ret = undefined;
+
+        const page = this.closest('*[modeoverlay]');
+        if (!page) return ret;
+        const tag = page.getAttribute('modeoverlay');
+
+        if (!tag) return ret;
+
+        ret = page.querySelector(tag) as WCDOverlayMethods;
+
+        return ret;
+        
     }
 
     private setDefaultToolBoxOptions() {
@@ -363,8 +378,8 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
     }
 
     private _backNavigationScenaryOutdoor(): void {
-        if (this.level !== '4') return;
-        mls.events.fire(4, 'WCDEvent' as any, `{"op":"Navigation"}`);
+        if (this.level !== '3') return;
+        mls.events.fire(3, 'WCDEvent' as any, `{"op":"Navigation"}`);
     }
 
     //------SIZE AND POSITION--------------------

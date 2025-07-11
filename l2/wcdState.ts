@@ -1,6 +1,6 @@
 /// <mls shortName="wcdState" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { WCDToolboxMethodos, WCDToolboxItemMethodos } from './_100554_wcdTypes';
+import { WCDToolboxMethodos, WCDToolboxItemMethodos, WCDOverlayMethods } from './_100554_wcdTypes';
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 
 /*declare global {
@@ -18,6 +18,7 @@ export const globalWcd: {
     //elMain: HTMLElement | undefined;
     elICA: IcaLitElementBaseMethods | undefined;
     wcdItens: WCDToolboxItemMethodos[] | undefined;
+    overlay: WCDOverlayMethods | undefined;
 } = {} as any;
 
 Object.defineProperty(globalWcd, 'myParent', {
@@ -26,6 +27,15 @@ Object.defineProperty(globalWcd, 'myParent', {
     },
     set: function (v: WCDToolboxMethodos | undefined) {
         (window as any).wcdState.myParent = v;
+    }
+});
+
+Object.defineProperty(globalWcd, 'overlay', {
+    get: function () {
+        return (window as any).wcdState.overlay;
+    },
+    set: function (v: WCDOverlayMethods | undefined) {
+        (window as any).wcdState.overlay = v;
     }
 });
 

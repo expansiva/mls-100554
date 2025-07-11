@@ -21,7 +21,7 @@ export class WidgetDefaultText extends IcaApresentationTextBase {
 
   render() {
     const tag = this.type || 'p';
-    return html`${unsafeHTML(`<${tag} class="widget-default-text-content">${this.text}</${tag}>`)}`
+    return html`${unsafeHTML(`<${tag}>${this.text}</${tag}>`)}`
   }
     
   

@@ -17,7 +17,7 @@ export class WcdToolboxItemActionEditAttrDialog extends CollabLitElement {
     //-------COMPONENT----------
 
     disconnectedCallback() {
-        debugger;
+
         if (!globalWcd) throw new Error('Invalid window.wcdState');
         if (globalWcd.myParent) {
             globalWcd.myParent.removeAttribute('needresize');
