@@ -818,6 +818,8 @@ export class ServiceSave extends ServiceBase {
             this.repo = oldRepo;
             this.branch = oldBranch;
 
+            this.totFileSize = `${this.myMessage.msgTotFile} 0B`
+
             await this.setInfos();
             this.fireEvents();
             window.collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 5000, autoClose: true });
