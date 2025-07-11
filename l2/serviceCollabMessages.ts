@@ -180,7 +180,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         this.groupSelected = 'CRM';
         this.execCoachMarks('CRM');
         return html`<collab-messages-chat-100554 
-            style="height:${this.style.height}"
+            
             .isLoadingThread= ${this.isLoadingThread}
             group="CRM"
             .userThreads=${{
@@ -197,12 +197,13 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         this.execCoachMarks('Tasks');
         return html`<collab-tasks-100554></collab-tasks-100554>`
     }
+//style="height:${this.style.height}"
 
     renderDocs() {
         this.groupSelected = 'DOCS';
         this.execCoachMarks('Docs');
         return html`<collab-messages-chat-100554 
-            style="height:${this.style.height}"
+            
             .isLoadingThread= ${this.isLoadingThread}
             group="DOCS"
             .userThreads=${{
@@ -218,7 +219,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         this.groupSelected = 'CONNECT';
         this.execCoachMarks('Connect');
         return html`<collab-messages-chat-100554 
-            style="height:${this.style.height}"
+            
             .isLoadingThread= ${this.isLoadingThread}
             group="CONNECT"
             .userThreads=${{

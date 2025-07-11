@@ -2,8 +2,8 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement, query } from 'lit/decorators.js';
-import { getState, subscribe, initState, setState } from './_100554_collabState';
-import { initTestState } from './_100554_testPagesState';
+import { getState, subscribe, initState, setState, unsubscribe } from './_100554_collabState';
+import { initTestState } from './_100554_pageTestBase';
 
 @customElement('page-test3-100554') 
 export class PageTest3100554 extends CollabPageElement {
@@ -23,10 +23,19 @@ export class PageTest3100554 extends CollabPageElement {
         });
 
         subscribe([
-            'data/0;projectTest.page3.indexSel',
-            'data/0;projectTest.page3.action'
+            'projectTest.page3.indexSel',
+            'projectTest.page3.action'
         ], this)
 
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        unsubscribe([
+            'projectTest.page3.indexSel',
+            'projectTest.page3.action',
+
+        ], this)
     }
 
     handleIcaStateChange(_key: string, _value: any) {

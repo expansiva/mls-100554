@@ -196,7 +196,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                                 <span>${collab_circle_exclamation}</span>
                                                 <small>${this.msg.msgNotSend}</small>
                                             </div>`: ''}
-                                            <div class="message-footer">${dateFormated?.time}</div>
                                             ${message.taskId ? html`
                                                 <div class="message-ai">
                                                     <collab-messages-task-100554
@@ -210,7 +209,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                                     >
                                                     </collab-messages-task-100554>
                                                 </div> `: html``}
-                                            ${this.renderMessageResultByLanguage(message)}                                            
+                                            ${this.renderMessageResultByLanguage(message)}
+                                            <div class="message-footer">${dateFormated?.timeShort}</div>
                                         </div>
                                         ${cls === 'system' && !isSame ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''}
                                     </div>
@@ -265,7 +265,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             return message.taskTitle;
         }
         const { language } = this.userPreferenceChat;
-        const titleByLanguagePref = message.taskTitleTranslated ? message.taskTitleTranslated[language] : message.taskTitle;
+        const titleByLanguagePref = message.taskTitleTranslated ? (message.taskTitleTranslated[language] ? message.taskTitleTranslated[language] : message.taskTitle) : message.taskTitle;
         return titleByLanguagePref;
     }
 
@@ -319,8 +319,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return html`
         <ul class="thread-list">
             ${this.userThreads[this.group].map((item) => {
-                const randomImage = imageUrls[Math.floor(Math.random() * imageUrls.length)];
-                return html`
+            const randomImage = imageUrls[Math.floor(Math.random() * imageUrls.length)];
+            return html`
                     <li @click=${() => this.onThreadClick(item)} class="thread-item">
                         <div class="thread-item-avatar">
                             <img src="${randomImage}"></img>
@@ -330,8 +330,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                 <span class="thread-name">${item.thread.name || item.thread.threadId}</span>
                                 <span class="last-update">
                                     ${item.thread.lastMessageTime
-                                        ? formatTimestamp(item.thread.lastMessageTime)?.date
-                                        : formatTimestamp(item.thread.history[0].timestamp)?.date}
+                    ? formatTimestamp(item.thread.lastMessageTime)?.date
+                    : formatTimestamp(item.thread.history[0].timestamp)?.date}
                                 </span>
                             </div>
                             <div class="thread-summary">
@@ -340,7 +340,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                             </div>
                         </div>
                     </li>`;
-            })}
+        })}
         </ul>
         ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
     `;
@@ -417,7 +417,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return this.groupMessages(groupedByDay);
     }
 
-    private groupMessages(groupedByDay: IMessageGrouped): IMessageGrouped {
+    private groupMessages2(groupedByDay: IMessageGrouped): IMessageGrouped {
         const result: IMessageGrouped = {};
         Object.keys(groupedByDay).forEach((key) => {
             result[key] = groupedByDay[key].map((msg, index, arr) => {
@@ -425,6 +425,37 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 return { ...msg, isSame };
             });
         });
+        return result;
+    }
+
+    private groupMessages(groupedByDay: IMessageGrouped): IMessageGrouped {
+        const result: IMessageGrouped = {};
+
+        Object.keys(groupedByDay).forEach((key) => {
+            let consecutiveCount = 0;
+            let lastSenderId: string | null = null;
+
+            result[key] = groupedByDay[key].map((msg, index, arr) => {
+                let isSame = false;
+
+                if (msg.senderId === lastSenderId) {
+                    consecutiveCount++;
+                    isSame = true;
+                    if (consecutiveCount >= 3) {
+                        consecutiveCount = 0;
+                        isSame = false;
+                    }
+
+                } else {
+                    consecutiveCount = 0;
+                    isSame = false;
+                    lastSenderId = msg.senderId;
+                }
+
+                return { ...msg, isSame };
+            });
+        });
+
         return result;
     }
 

@@ -72,7 +72,7 @@ export class WidgetAiTask100554 extends StateLitElement {
         }
 
         const price = this.task ? getTotalCost(this.task) || '0.00' : '';
-        const title = this.title || this.task?.title || '...';
+        const title =  this.task?.title || this.title || '';
 
         return html`<div @click=${this.onCardClick} class="card"> 
             <div class="card-header">

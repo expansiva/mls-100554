@@ -448,8 +448,10 @@ export function formatTimestamp(timestamp: string) {
 
   const date = `${localYear}-${localMonth}-${localDay}`;
   const time = `${localHour}:${localMinute}:${localSecond}`;
+  const timeShort = `${localHour}:${localMinute}`;
+
   const dateFull = `${date} ${time}`;
-  return { dateFull, date, time };
+  return { dateFull, date, time, timeShort };
 }
 
 

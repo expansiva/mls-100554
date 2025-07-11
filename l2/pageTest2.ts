@@ -2,15 +2,17 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement, query } from 'lit/decorators.js';
-import { getState, initState, setState, subscribe } from './_100554_collabState';
-import { initTestState } from './_100554_testPagesState';
+import { getState, initState, setState, subscribe, unsubscribe } from './_100554_collabState';
+import { initTestState } from './_100554_pageTestBase';
 
 @customElement('page-test2-100554')
 export class PageTest2100554 extends CollabPageElement {
 
 
+
+
     initPage() {
-        
+
         initTestState();
         initState('projectTest.page2', {
             labelError: '',
@@ -27,7 +29,7 @@ export class PageTest2100554 extends CollabPageElement {
                 produtos: []
             }
         });
-        
+
         subscribe([
             'projectTest.page2.indexSel',
             'projectTest.page2.action'
@@ -35,9 +37,18 @@ export class PageTest2100554 extends CollabPageElement {
 
     }
 
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        unsubscribe([
+            'projectTest.page2.indexSel',
+            'projectTest.page2.action'
+        ], this)
+    }
+
     handleIcaStateChange(_key: string, _value: any) {
 
         if (_key === 'projectTest.page2.indexSel' && _value >= 0) {
+
             this.onSelectItemtableSelect(_value);
             return;
         }
@@ -68,14 +79,14 @@ export class PageTest2100554 extends CollabPageElement {
         }
 
     }
-    
+
     onSelectItemtableSelect(idx: number) {
 
-        setState('projectTest.page2.selecionado.empresa', getState('projectTest.tables.fornecedores[idx].empresa'), true);
-        setState('projectTest.page2.selecionado.cnpj', getState('projectTest.tables.fornecedores[idx].cnpj'), true);
-        setState('projectTest.page2.selecionado.endereco', getState('projectTest.tables.fornecedores[idx].endereco'), true);
-        setState('projectTest.page2.selecionado.contato', getState('projectTest.tables.fornecedores[idx].contato'), true);
-        setState('projectTest.page2.selecionado.produtos', getState('projectTest.tables.fornecedores[idx].produtos'), true);
+        setState('projectTest.page2.selecionado.empresa', getState(`projectTest.tables.fornecedores[${idx}].empresa`), true);
+        setState('projectTest.page2.selecionado.cnpj', getState(`projectTest.tables.fornecedores[${idx}].cnpj`), true);
+        setState('projectTest.page2.selecionado.endereco', getState(`projectTest.tables.fornecedores[${idx}].endereco`), true);
+        setState('projectTest.page2.selecionado.contato', getState(`projectTest.tables.fornecedores[${idx}].contato`), true);
+        setState('projectTest.page2.selecionado.produtos', getState(`projectTest.tables.fornecedores[${idx}].produtos`), true);
     }
 
     onNew() {
@@ -130,7 +141,7 @@ export class PageTest2100554 extends CollabPageElement {
         setState(`projectTest.tables.fornecedores[${idx}].endereco`, i.endereco, true);
         setState(`projectTest.tables.fornecedores[${idx}].contato`, i.contato, true);
         setState(`projectTest.tables.fornecedores[${idx}].produtos`, i.produtos, true);
-        
+
         await this.delay(5000);
         setState(`projectTest.page2.labelOk`, 'Dados salvos', true);
 
@@ -142,11 +153,11 @@ export class PageTest2100554 extends CollabPageElement {
 
         const idx = getState('projectTest.page2.indexSel');
 
-        const emp = idx < 0 ? '' : getState('projectTest.tables.fornecedores[idx].empresa');
-        const cnpj = idx < 0 ? '' : getState('projectTest.tables.fornecedores[idx].cnpj');
-        const end = idx < 0 ? '' : getState('projectTest.tables.fornecedores[idx].endereco');
-        const ct = idx < 0 ? '' : getState('projectTest.tables.fornecedores[idx].contato');
-        const prod = idx < 0 ? '' : getState('projectTest.tables.fornecedores[idx].produtos');
+        const emp = idx < 0 ? '' : getState(`projectTest.tables.fornecedoress[${idx}].empresa`);
+        const cnpj = idx < 0 ? '' : getState(`projectTest.tables.fornecedoress[${idx}].cnpj`);
+        const end = idx < 0 ? '' : getState(`projectTest.tables.fornecedoress[${idx}].endereco`);
+        const ct = idx < 0 ? '' : getState(`projectTest.tables.fornecedoress[${idx}].contato`);
+        const prod = idx < 0 ? '' : getState(`projectTest.tables.fornecedoress[${idx}].produtos`);
 
         setState('projectTest.page2.selecionado.empresa', emp, true);
         setState('projectTest.page2.selecionado.cnpj', cnpj, true);

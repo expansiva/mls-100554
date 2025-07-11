@@ -1,26 +1,25 @@
-/// <mls shortName="pageUserRegistration" project="100554" enhancement="_100554_enhancementLit" groupName="other" /> 
+/// <mls shortName="pageTestUserRegistration" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { BECollabClient } from './_100554_beCollabClient';
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement, query } from 'lit/decorators.js';
-import { getState, subscribe, initState, setState } from './_100554_collabState';
+import { getState, subscribe, initState, setState, unsubscribe } from './_100554_collabState';
 import { initTestState } from './_100554_testPagesState';
 
-@customElement('page-user-registration-100554')
+@customElement('page-test-user-registration-100554')
 export class PageUserRegistration100554 extends CollabPageElement {
 
     private client = new BECollabClient();
-    @query('#widget44') list: HTMLElement | undefined; 
+    @query('#widget44') list: HTMLElement | undefined;
     @query('#contentForm') contentForm: HTMLElement | undefined;
 
     initPage() {
 
         initTestState();
-
         initState('projectTest.pageUserRegistration', {
             indexSel: -1,
             columns: ['id', 'user', 'status'],
-            mode:'list',
+            mode: 'list',
             msg: '',
             action: '',
             users: [],
@@ -32,16 +31,26 @@ export class PageUserRegistration100554 extends CollabPageElement {
             },
         });
 
-        
+
         subscribe([
-            'data/0;projectTest.pageUserRegistration.indexSel',
-            'data/0;projectTest.pageUserRegistration.action',
-            'data/0;projectTest.pageUserRegistration.mode'
+            'projectTest.pageUserRegistration.indexSel',
+            'projectTest.pageUserRegistration.action',
+            'projectTest.pageUserRegistration.mode'
         ], this);
 
         this.onGetForm();
 
-        
+
+    }
+
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        unsubscribe([
+            'projectTest.pageUserRegistration.indexSel',
+            'projectTest.pageUserRegistration.action',
+            'projectTest.pageUserRegistration.mode'
+        ], this)
     }
 
     handleIcaStateChange(_key: string, _value: any) {
@@ -55,7 +64,7 @@ export class PageUserRegistration100554 extends CollabPageElement {
             this.onNew();
             return;
         }
- 
+
         if (_key === 'projectTest.pageUserRegistration.action' && _value != '') {
             this.onSubmitForm();
             return;
@@ -86,8 +95,8 @@ export class PageUserRegistration100554 extends CollabPageElement {
 
     }
 
-    private async onSubmitForm() { 
-    
+    private async onSubmitForm() {
+
         let action = getState('projectTest.pageUserRegistration.action');
         const st = { ...getState('projectTest.pageUserRegistration') };
 
@@ -99,26 +108,26 @@ export class PageUserRegistration100554 extends CollabPageElement {
         }
 
         if (action === 'save' && !st.selected.id) st.action = 'new';
-        if (st.selected.id !== '') st.selected.id = +st.selected.id; 
-        
-        const ret = await this.client.request("beUserRegistration", "POST", st);  
+        if (st.selected.id !== '') st.selected.id = +st.selected.id;
+
+        const ret = await this.client.request("beUserRegistration", "POST", st);
         setState('projectTest.pageUserRegistration.msg', ret, true);
         this.onGetForm();
     }
 
-    private async onGetForm() { 
+    private async onGetForm() {
 
         const ret = await this.client.request("beUserRegistration", "GET", {});
         setState('projectTest.pageUserRegistration.users', ret, true);
         setState('projectTest.pageUserRegistration.mode', 'list', true);
         setTimeout(() => setState('projectTest.pageUserRegistration.msg', '', true), 3000);
-        
+
     }
 
     private time = -1;
-    private onMode() { 
+    private onMode() {
         clearTimeout(this.time);
-        this.time = setTimeout(()=>this.configureMode(),500) 
+        this.time = setTimeout(() => this.configureMode(), 500)
     }
 
     private configureMode() {
