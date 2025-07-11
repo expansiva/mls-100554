@@ -101,8 +101,9 @@ collab-messages-chat-100554 {
             padding: 0.9rem;
         }
 
-        .thread-item-avatar{
+        .thread-item-avatar {
             width: 50px;
+
             img {
                 border-radius: 10px;
                 width: 100%;
@@ -188,8 +189,8 @@ collab-messages-chat-100554 {
         display: flex;
         flex: 1;
         flex-direction: column;
-        padding: 10px;
-        width: calc(100% - 20px);
+        padding: 6px;
+        width: calc(100% - 12px);
         overflow-y: auto;
         max-height: 100%;
 
@@ -218,30 +219,32 @@ collab-messages-chat-100554 {
             .message-row {
                 max-width: 80%;
                 margin-bottom: 3px;
-                margin-right: 50px;
+                // margin-right: 50px;
                 margin-left: 50px;
                 position: relative;
 
                 .message-card {
                     display: flex;
                     flex-direction: column;
-                    background-color: #f9f9f9;
+                    background-color: #f5f5f5;
                     border-radius: 8px;
                     padding: .5rem;
                     position: relative;
                     font-size: 14px;
-
+                    &.system:not(.same){
+                        border-top-left-radius: 0px;
+                    }
                     &.system:not(.same):before {
                         content: '';
                         position: absolute;
-                        top: 10px;
-                        left: -7px;
-                        width: 0;
+                        top: 0px;
+                        left: -15px;
+                        width: 6px;
                         height: 0;
-                        border-top: 8px solid transparent;
-                        border-right: 8px solid #f9f9f9;
-                        ;
-                        border-bottom: 8px solid transparent;
+                        border-top: 0px solid transparent;
+                        border-right: 10px solid #f5f5f5;
+                        border-bottom: 12px solid transparent;
+
                     }
 
                     &.user {
@@ -257,6 +260,7 @@ collab-messages-chat-100554 {
                         margin-top: .3rem;
                         display: flex;
                         margin-left: auto;
+                        width: 100%;
                     }
 
                     .failed {
@@ -279,7 +283,7 @@ collab-messages-chat-100554 {
 
                     .message-content {
                         white-space: pre-wrap;
-                        padding-right: 4em;
+                        // padding-right: 4em;
                         margin-top: 0.4rem;
                         color: #000;
                         display: flex;
@@ -318,7 +322,7 @@ collab-messages-chat-100554 {
 
                 collab-messages-avatar-100554 {
                     position: absolute;
-                    top: 3px;
+                    top: -3px;
                     left: -40px;
                 }
             }

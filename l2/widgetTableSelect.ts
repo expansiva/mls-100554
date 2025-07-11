@@ -9,9 +9,9 @@ import { propertyDataSource } from './_100554_collabDecorators';
 export class WidgetTableSelect100554 extends StateLitElement {
 
     createRenderRoot() {
-        return this; 
+        return this;
     }
-    
+
     @propertyDataSource() selected: number | undefined;
     @propertyDataSource() data: any[] | undefined;
     @propertyDataSource() columns: string[] | undefined;
@@ -39,7 +39,7 @@ export class WidgetTableSelect100554 extends StateLitElement {
 
 
     renderHeader() {
-        if (!this.data || this.data.length === 0) return html``; 
+        if (!this.data || this.data.length === 0) return html``;
         if (!this.columns) this.columns = Object.keys(this.data[0]);
         return html`
             ${repeat(this.columns || [], ((key: string) => key) as any, ((k: any, index: any) => { return html`<th>${k}</th>` }) as any)}
@@ -75,7 +75,7 @@ export class WidgetTableSelect100554 extends StateLitElement {
         if (!el) return;
 
         const info = (el as any).info;
-        this.selected = info.index
+        this.selected = info.index;
         const event = new CustomEvent('item-selected', {
             detail: info,
             bubbles: true,

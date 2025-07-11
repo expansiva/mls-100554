@@ -15,36 +15,21 @@
 			id='test'>
 			<widget-column-100554
 				id='c1'>
-				<wc-input-text-100554
+				<widget-input-text-100554
 					label='Nome do solicitante'
 					value='{{ projectTest.page4.filter.solicitante }}'
 					id='t1'>
-				</wc-input-text-100554>
+				</widget-input-text-100554>
 			</widget-column-100554>
 			<widget-column-100554
 				id='c2'>
-				<wc-select-one-100554
+				<widget-select-one-autocomplete-material-100554
 					label='Status'
-					options='{{ projectTest.page4.status }}'
-					selectedvalue='{{ projectTest.page4.filter.status }}'
-					id='s1'>
-				</wc-select-one-100554>
-			</widget-column-100554>
-			<widget-column-100554
-				id='c3'>
-				<wc-input-date-100554
-					label='Data inicial'
-					value='{{ projectTest.page4.filter.dataInicial }}'
-					id='i1'>
-				</wc-input-date-100554>
-			</widget-column-100554>
-			<widget-column-100554
-				id='c4'>
-				<wc-input-date-100554
-					label='Data final'
-					value='{{ projectTest.page4.filter.dataFinal }}'
-					id='i2'>
-				</wc-input-date-100554>
+					selectedvalue='{{projectTest.page4.filter.status}}'
+					options='{{projectTest.page4.status}}'
+					
+				>
+				</widget-select-one-autocomplete-material-100554>
 			</widget-column-100554>
 			<widget-column-100554
 				id='c5'>

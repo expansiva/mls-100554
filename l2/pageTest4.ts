@@ -2,24 +2,21 @@
 
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
-import { getState, subscribe, initState, setState } from './_100554_collabState';
-import { initTestState, ISolicitacao } from './_100554_testPagesState';
+import { getState, subscribe, initState, setState, unsubscribe } from './_100554_collabState';
+import { initTestState, ISolicitacao } from './_100554_pageTestBase';
 @customElement('page-test4-100554')
 export class PageTest4 extends CollabPageElement {
 
     initPage() {
         initTestState();
-
         initState('projectTest.page4', {
             action: '',
             filter: {
                 solicitante: '',
-                dataInicial: '',
-                dataFinal: new Date().toISOString().split('T')[0],
                 status: '',
             },
             fields: ['id', 'solicitante', 'item', 'quantidade', 'data', 'status'],
-            status: [{ key: '', value: '' }].concat(...getState('projectTest.tables.status')),
+            status: [''].concat(...getState('projectTest.tables.status').map((item: any) => item.value)),
             actualData: [...getState('projectTest.tables.solicitacoes')]
         });
 
@@ -29,6 +26,14 @@ export class PageTest4 extends CollabPageElement {
             ]
             , this);
 
+    }
+
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        unsubscribe([
+            'projectTest.page4.action'
+        ], this)
     }
 
     handleIcaStateChange(_key: string, _value: any) {
@@ -41,22 +46,20 @@ export class PageTest4 extends CollabPageElement {
 
     private filterData(dados: ISolicitacao[], filtro: any) {
         return dados.filter(({ solicitante, data, status }) => {
-            const dentroDoPeriodo = new Date(data) >= new Date(filtro.dataInicial) && new Date(data) <= new Date(filtro.dataFinal);
             const statusCorreto = filtro.status ? status === filtro.status : true;
             const solicitanteCorreto = filtro.solicitante ?
                 solicitante.toLowerCase().includes(filtro.solicitante.toLowerCase()) : true;
-
-            return dentroDoPeriodo && statusCorreto && solicitanteCorreto;
+            return statusCorreto && solicitanteCorreto;
         });
     }
 
-
     async handleClickBtnFilter() {
+
         const filterAtual = getState('projectTest.page4.filter');
         const data = [...getState('projectTest.tables.solicitacoes')];
         const filtered = this.filterData(data, filterAtual);
         setState('projectTest.page4.actualData', filtered, true);
-        setState('projectTest.page4.filter', '', true);
+        setState('projectTest.page4.action', '', true);
         this.requestUpdate();
     }
 

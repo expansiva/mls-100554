@@ -1,4 +1,4 @@
-/// <mls shortName="testPagesState" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="pageTestBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { initState, getState, setState } from './_100554_collabState';
 
