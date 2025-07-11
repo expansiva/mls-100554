@@ -131,7 +131,7 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
 
             const wc = overlayItem.querySelector('wcd-toolbox-100554') as HTMLElement;
             if (wc) {
-                lestCssWcd = wc.style.cssText;
+                //lestCssWcd = wc.style.cssText;
                 wc.remove();
             }
 
@@ -144,9 +144,10 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
         wcd.setAttribute('initialclick', `${x},${y}`);
         wcd.lastHelper = '';
 
-        if(lestCssWcd) wcd.style.cssText = lestCssWcd;
+        //if(lestCssWcd) wcd.style.cssText = lestCssWcd;
         this.setAttribute('rendertype', 'editactive');
         this.appendChild(wcd);
+        this.overlay.updateSizeOverlayItems();
     }
 
 
