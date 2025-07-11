@@ -355,6 +355,8 @@ export class ServicePreviewView extends StateLitElement {
                 iframe.contentDocument.body.style.margin = '0';
                 iframe.contentDocument.body.style.height = 'calc(100% - 70px)';
                 iframe.contentDocument.body.style.width = 'calc(100% - 70px)';
+                iframe.contentDocument.body.style.background = 'var(--bg-primary-color)';
+                iframe.contentDocument.body.style.color = 'var(--text-primary-color)';
 
             }
 
