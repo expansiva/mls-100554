@@ -315,6 +315,36 @@ export function getProjectDetails(): IRetProjectDetails | undefined {
 
 }
 
+export function calculateTotalStringSize(source: string, limitBase:number):ICalculateTotalStringSize {
+    
+    let totalBytes = 0;
+
+    for (const text of source) {
+        const encoded = new TextEncoder().encode(text);
+        totalBytes += encoded.length;
+    }
+
+    const exceededLimit = totalBytes > limitBase;
+
+    return {
+        totalsize: totalBytes, // em bytes
+        exceededLimit,
+        sizeFormatted: formatSize(totalBytes)
+    };
+}
+
+function formatSize(bytes: number) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+interface ICalculateTotalStringSize {
+    totalsize: number, // em bytes
+    exceededLimit: boolean,
+    sizeFormatted: string
+}
+
 interface IRetProjectDetails {
     project: number,
     dependencies: number[]
