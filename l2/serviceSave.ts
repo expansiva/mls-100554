@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu } from './_100554_serviceBase';
 import { collab_branch } from './_100554_collabIcons';
 import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
-import { getMyKeysBranch } from './_100554_libCommom';
+import { getMyKeysBranch, calculateTotalStringSize } from './_100554_libCommom';
 import { getConfigProject, updateConfigProject } from './_100554_libProjectConfig';
 
 initServiceSaveaddBranch();
@@ -29,7 +29,9 @@ const message_pt = {
     msgBlock: 'Você não tem acesso de escrita neste repositorio, caso deseje criar um fork clique no botão abaixo',
     pullrequestOk: 'Pull request realizado com sucesso',
     errorVerify: 'Foi encontrado arquivos com erros',
-    obsVerify: 'O salvamento só será permitido se não houver arquivos com erros ou se a verificação for cancelada!'
+    obsVerify: 'O salvamento só será permitido se não houver arquivos com erros ou se a verificação for cancelada!',
+    msgTotFile: 'Tamanho total dos arquivos selecionados:',
+    msgErroTotFile: 'Excedeu o tamanho total permitido'
 }
 const message_en = {
     openPullrequest: 'Open pull requests',
@@ -49,7 +51,9 @@ const message_en = {
     msgBlock: 'You do not have write access to this repository, if you wish to create a fork click the button below',
     pullrequestOk: 'Pull request completed successfully',
     errorVerify: 'Files with errors were found',
-    obsVerify: 'Saving will only be allowed if there are no files with errors, or the check is cancelled!'
+    obsVerify: 'Saving will only be allowed if there are no files with errors, or the check is cancelled!',
+    msgTotFile: 'Total size of selected files:',
+    msgErroTotFile: 'Exceeded the total size allowed'
 }
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
@@ -69,11 +73,13 @@ export class ServiceSave extends ServiceBase {
     private repo: string = '';
     private branch: string = '';
     private scenery: string = 'save';
+    private exceededLimit: boolean = false;
 
     @property() freeToSave: boolean = false;
     @property() itens: IDefItem | undefined = undefined;
     @property() otherProjects: number[] = [];
     @property() error: string = '';
+    @property() totFileSize: string = '';
 
     createRenderRoot() {
         return this;
@@ -291,6 +297,7 @@ export class ServiceSave extends ServiceBase {
                     </div>
                 </div>
                 <h4 class="mt-3" data-mlsline="23">${this.myMessage.fileChanges}</h4>
+                <small style="font-size:12px">${this.totFileSize ? this.totFileSize : this.myMessage.msgTotFile}</small> 
                 <ul>
                     ${repeat(keys, ((key: any) => key) as any, ((k: any, index: any) => { return this.renderProject(k, index); }) as any)}
                 </ul>
@@ -368,11 +375,11 @@ export class ServiceSave extends ServiceBase {
 
 
     renderItem(item: Iitem, indexP: number, indexL: number, indexM: number, index: number) {
-        const aux = ['new', 'rename'].includes(item.file.status) ? '' : html`<span @click="${this.clickHistory}" .item=${item} style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer" class="fa-regular fa-clock" title="History"></span>`;
+
         return html`
-            <li style="padding-left: 1.1rem;">
+            <li style="padding-left: 1.1rem;" class="${item.errorLocal ? 'errorLocal' : ''}">
                 <div style="align-items: center;">
-                    ${item.disabled || item.onlyFather
+                    ${item.disabled || item.onlyFather || item.errorLocal
                 ? html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
                 : html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
             }
@@ -380,11 +387,32 @@ export class ServiceSave extends ServiceBase {
                         ${item.text}
                         ${unsafeHTML(item.span)}
                     </label>
-                    ${aux}
-                    <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${() => this.undoFile(item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer"></span>
+                    ${this.renderAuxActionsItem(item)}
+                    
                 </div>
             </li>
         `;
+    }
+
+    renderAuxActionsItem(item: Iitem) {
+
+        if (item.errorLocal) return html``;
+
+        if (['new', 'rename'].includes(item.file.status)) {
+
+            return html`
+                <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${() => this.undoFile(item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer"></span>
+            `;
+
+        } else {
+
+            return html`
+            <span @click="${this.clickHistory}" .item=${item} style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer" class="fa-regular fa-clock" title="History"></span>
+            <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${() => this.undoFile(item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 13px; cursor:pointer"></span>
+            `;
+
+        }
+
     }
 
     //-------- IMPLEMENTATION --------
@@ -491,7 +519,7 @@ export class ServiceSave extends ServiceBase {
 
             for (const fKey of filesKeys) {
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
-                if (
+                if (!file ||
                     (!file.inLocalStorage && file.status !== 'deleted') ||
                     file.project === 0 ||
                     file.project !== mls.actual[5].project
@@ -542,6 +570,7 @@ export class ServiceSave extends ServiceBase {
     private async configItem(item: mls.stor.IFileInfo) {
         let mountText = item.shortName + item.extension;
         let disabled = false;
+        let errorLocal = false;
         let span = `<span style = "font-size: 12px; color: #7678a6; margin-left: 5px;" class="fa ${this.oIcon[item.status].icon}" title = "${this.oIcon[item.status].title}" > </span>`;
         if (item.hasError && item.status !== 'deleted') {
             span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px; height: 16px;" class="fa fa-bug" title="Error"></span>';
@@ -555,12 +584,18 @@ export class ServiceSave extends ServiceBase {
             const itemNew = await item.getValueInfo();
             mountText = `${itemNew.originalShortName + item.extension} to ${mountText} `;
         }
+
+        errorLocal = !(await mls.stor.localDB.existFile({ project: item.project, extension: item.extension, shortName: item.shortName, folder: item.folder, level: item.level }));
+
+        if (errorLocal) span = '<span> Error: the file does not exist in the database<span>';
+
         return {
             file: item,
             text: mountText,
             span: span,
             onlyFather: false,
             disabled: disabled,
+            errorLocal
         }
     }
 
@@ -582,6 +617,8 @@ export class ServiceSave extends ServiceBase {
         const el = e.target as HTMLInputElement;
         if (!el) return;
         this.setValueAllChilds(el);
+        clearTimeout(this.timeSumTotal);
+        this.timeSumTotal = setTimeout(() => this.sumTotalSize(), 300);
     }
 
     private setValueAllChilds(el: HTMLInputElement): void {
@@ -598,11 +635,30 @@ export class ServiceSave extends ServiceBase {
         if (all.length === 1 && all[0].disabled) el.checked = false;
     }
 
+    private timeSumTotal = 0;
     private clickVerifyStatusFather(e: MouseEvent): void {
         e.stopPropagation();
         const el = e.target as HTMLInputElement;
         if (!el) return;
         this.verifyStatusFather(el);
+        clearTimeout(this.timeSumTotal);
+        this.timeSumTotal = setTimeout(() => this.sumTotalSize(), 300);
+    }
+
+    private async sumTotalSize() {
+
+        const array: mls.stor.IFileInfo[] = this.getAllFileToSave(this);
+        let txt = '';
+        for await (const file of array) {
+            if (file.status !== 'deleted') {
+                txt = txt + '\n' + await file.getContent() as string;
+            }
+        }
+
+        const ret = calculateTotalStringSize(txt, 1000000);
+        this.exceededLimit = ret.exceededLimit;
+        this.totFileSize = `${this.myMessage.msgTotFile} ${ret.sizeFormatted}`;
+
     }
 
     private verifyStatusFather(el: HTMLInputElement): void {
@@ -700,6 +756,12 @@ export class ServiceSave extends ServiceBase {
             const el = e.target as HTMLButtonElement;
             if (!el) return;
 
+            if (this.exceededLimit) {
+                this.setError(this.myMessage.msgErroTotFile);
+                return;
+            }
+
+            
             const father = el.closest('sectionsave') as HTMLDivElement;
             if (!father) return;
 
@@ -747,7 +809,6 @@ export class ServiceSave extends ServiceBase {
 
             this.backChecked();
 
-            console.info('vai rodar afterSave');
             await this.afterSave(array);
             txt.value = '';
 
@@ -762,7 +823,6 @@ export class ServiceSave extends ServiceBase {
             this.showLoader(false);
 
         } catch (err: any) {
-            console.info('aqui', err);
             this.arrayRollback.forEach((i) => {
                 if (!i.inLocalStorage) i.inLocalStorage = true;
             });
@@ -1101,7 +1161,7 @@ export class ServiceSave extends ServiceBase {
         const mmodel: mls.editor.IModels | undefined = mls.editor.getModels(storFile.project, storFile.shortName);
         storFile.inLocalStorage = false;
         if (storFile.status === 'deleted') {
-            this.deleteFile(storFile);
+            await this.deleteFile(storFile);
             return;
         }
         if (storFile.status === 'renamed' && mmodel && mmodel.ts) {
@@ -1141,6 +1201,7 @@ export class ServiceSave extends ServiceBase {
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
 
         if (storFile.inLocalStorage) {
+
             await mls.stor.cache.setContent(storFile, null);
             mls.editor.deleteModels(storFile.project, storFile.shortName, true);
         }
@@ -1216,4 +1277,5 @@ interface Iitem {
     span: string;
     onlyFather: boolean,
     disabled: boolean,
+    errorLocal: boolean
 }
