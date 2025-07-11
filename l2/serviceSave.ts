@@ -464,6 +464,7 @@ export class ServiceSave extends ServiceBase {
 
     private async init(isSetInfoProject: boolean = true) {
         this.showLoader(true);
+        this.totFileSize = `${this.myMessage.msgTotFile} 0B`
         this.scenery = 'save';
         if (isSetInfoProject) await this.initInfoProject();
         await this.setInfos();
