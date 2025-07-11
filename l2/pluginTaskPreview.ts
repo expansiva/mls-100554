@@ -7,7 +7,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 import './_100554_pluginTaskPreviewAgent';
 import './_100554_pluginTaskPreviewClarification';
 import './_100554_pluginTaskPreviewFlexible';
-import './_100554_pluginTaskPreviewTools'; 
+import './_100554_pluginTaskPreviewTools';
 import './_100554_pluginTaskPreviewResult';
 
 @customElement('plugin-task-preview-100554')
@@ -143,6 +143,9 @@ export class AgentTester extends CollabLitElement {
         this.currentStepId = 1;
         this.navigationStack = [1];
         this.allSteps = getAllSteps(this.task.iaCompressed.nextSteps);
+        if (this.task && ['done', 'failed'].includes(this.task.status)) {
+            this.allSteps.forEach((a, idx) => { if (idx > 0) this.navigateToStep(a.stepId) })
+        };
     }
 
     private buildStepMap(steps: mls.msg.AIPayload[]) {
@@ -219,7 +222,7 @@ const taskExample = {
                     "payload": [
                         {
                             "type": "agent",
-                            "agentName": "agentPlannerNewWidget",
+                            "agentName": "agentNewWidget",
                             "title": "Criar widget de hora mundial com saudações",
                             "rags": null,
                             "status": "completed",
@@ -316,7 +319,7 @@ const taskExample = {
                                                 "type": "agent",
                                                 "stepId": 4,
                                                 "status": "completed",
-                                                "agentName": "agentNewWidget",
+                                                "agentName": "agentNewWidget2",
                                                 "rags": null,
                                                 "interaction": {
                                                     "input": [
@@ -351,7 +354,7 @@ const taskExample = {
                                                                     "type": "agent",
                                                                     "stepId": 6,
                                                                     "status": "failed",
-                                                                    "agentName": "agentNewModule3",
+                                                                    "agentName": "agentNewWidget3",
                                                                     "prompt": "{\"prompt\":\"Criar site para petshop\n\"}",
                                                                     "rags": null,
                                                                     "interaction": null,
