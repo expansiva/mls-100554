@@ -57,7 +57,7 @@ export class pluginTaskPreviewResult extends CollabLitElement {
         return html`
         <div class="containerinputs">
             <details open>
-                <summary> ${this.renderSummary('Step details')} </summary>
+                <summary> ${this.renderSummary('Result')} </summary>
                 <ul>
                     <li>
                         #${this.step.stepId} - ${this.step.type} - ${this.step.status}
@@ -116,10 +116,6 @@ export class pluginTaskPreviewResult extends CollabLitElement {
         <div style="padding:1rem">
             ${this.step.result}
         </div>
-        <ul>
-            ${nextOptions.length === 0 ? html`<li><em>Not next step</em></li>`
-                : nextOptions.map( (ns) => html` <li> [${ns.stepId}] ${ns.type} - ${ns.agentName} </li> ` )}
-        </ul>
         `
     }
 

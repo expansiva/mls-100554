@@ -11,8 +11,10 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
 
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIAgentStep | null = null;
+    @property({ type: String }) agentDescription: string = '';
     @state() private prompts: mls.msg.IAMessageInputType[] = [];
     @state() private mode: string = 'info';  
+
 
     private lastKey: number = -1;
 
@@ -47,7 +49,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                         </button>
                         <button
                             class="tab-button ${this.mode === 'result' ? 'active' : ''}" @click=${() => this.selectTabResult()} >
-                            Results                            
+                            Payload                             
                         </button>
 
                     </div>
@@ -78,13 +80,16 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
         return html`
         <div class="containerinputs">
             <details open>
-                <summary> ${this.renderSummary('Step details')} </summary>
+                <summary> ${this.renderSummary('Agent')} </summary>
                 <ul>
                     <li>
-                        #${this.step.stepId} - ${this.step.agentName} - ${this.step.status} - ${this.step.interaction?.cost}
+                        #${this.step.stepId} - ${this.step.agentName} - ${this.step.status} - $${this.step.interaction?.cost}
                     </li>
                     <li>
                         ${this.step.interaction?.trace}
+                    </li>
+                    <li>
+                        <b>${this.step.agentName}: </b>${this.agentDescription}
                     </li>
                 </ul>
             </details>
@@ -202,13 +207,35 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
 
     //------IMPLEMENTATION----------
 
-    private init() {
+    private async init() {
 
         if (this.step && this.step.stepId === this.lastKey) return;
 
         this.lastKey = this.step?.stepId || -1;
 
-        this.getPrompts()
+        this.getPrompts();
+
+        await this.getDescription();
+    }
+
+    private async getDescription() {
+
+        if (!this.step || !this.step.agentName) return;
+
+        try {
+
+            const md = await import(`/_100554_${this.step.agentName}`);
+            if (!md || !md.createAgent) return;
+
+            const info = md.createAgent();
+            if (!info || !info.agentDescription) return;
+
+            this.agentDescription = info.agentDescription;
+            
+        } catch (e) {
+            
+        }
+        
     }
 
     private getPrompts() {

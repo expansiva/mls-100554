@@ -42,7 +42,7 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
                         </button>
                         <button
                             class="tab-button ${this.mode === 'result' ? 'active' : ''}" @click=${() => this.selectTabResult()} >
-                            Results                            
+                            Payload                            
                         </button>
                     </div>
                 </div>
@@ -72,10 +72,10 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
         return html`
         <div class="containerinputs">
             <details open>
-                <summary> ${this.renderSummary('Step details')} </summary>
+                <summary> ${this.renderSummary('Clarification')} </summary>
                 <ul>
                     <li>
-                        #${this.step.stepId} - ${this.step.type} - ${this.step.status}
+                        #${this.step.stepId} - ${this.step.type} - ${this.step.status} - $${this.step.interaction? this.step.interaction.cost : '0'}
                     </li>
                 </ul>
             </details>
