@@ -349,7 +349,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private renderTaskDetails() {
         const messageId = `${this.actualThread?.thread.threadId}/${this.actualMessage?.createAt}`
-        return html`<collab-messages-task-info-100554 message-id=${messageId} .task=${this.actualTask} taskId=${this.actualTask?.PK}></collab-messages-task-info-100554>`
+        return html`<collab-messages-task-info-100554 messageId=${messageId} .task=${this.actualTask} .message=${this.actualMessage} taskId=${this.actualTask?.PK}></collab-messages-task-info-100554>`
     }
 
     private renderThreadDetails() {

@@ -9,6 +9,7 @@ import { getTemporaryContext } from './_100554_aiAgentHelper';
 @customElement('plugin-task-preview-agent-100554')
 export class PluginTaskPreviewAgent extends CollabLitElement { 
 
+    @property({ type: Object }) message: mls.msg.Message | null = null;
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIAgentStep | null = null;
     @property({ type: String }) agentDescription: string = '';
@@ -47,11 +48,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                             class="tab-button ${this.mode === 'input' ? 'active' : ''}" @click=${() => this.selectTabInput()} >
                             Inputs                            
                         </button>
-                        <button
-                            class="tab-button ${this.mode === 'result' ? 'active' : ''}" @click=${() => this.selectTabResult()} >
-                            Payload                             
-                        </button>
-
+                        
                     </div>
                 </div>
                 <div class="tab-content">
@@ -60,6 +57,13 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                 </div>
             </div>
         `;
+
+        /*
+        <button
+            class="tab-button ${this.mode === 'result' ? 'active' : ''}" @click=${() => this.selectTabResult()} >
+            Payload                             
+        </button>
+         */
     }
 
     renderMode() { 
@@ -103,6 +107,21 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                             this.task.last_updated
         ).toLocaleString()}</small>
                         <br/><small>${this.task.title}</small>
+                        </header>
+                    </li>
+                </ul>
+            </details>
+            <details>
+                <summary> ${this.renderSummary('Message details')}</summary>
+                <ul>
+                    <li>
+                        <header>
+                            <h2>${this.message?.taskTitle}</h2>
+                            <p>${this.message?.content}</p>
+                            <small>Status: ${this.message?.status} </small>
+                            <br/>
+                            <br/>
+                            <p>Task result:${this.message?.taskResults}</p>
                         </header>
                     </li>
                 </ul>

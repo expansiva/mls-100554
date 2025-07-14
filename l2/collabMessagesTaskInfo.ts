@@ -11,10 +11,12 @@ import './_100554_pluginTaskPreview';
 @customElement('collab-messages-task-info-100554')
 export class WidgetAiInteraction100554 extends StateLitElement {
 
+    private elParent: HTMLElement | undefined;
     private forceViewRaw = false;
     private isClarificationPending = false;
 
     @property() task: mls.msg.TaskData | undefined = undefined;
+    @property() message: mls.msg.Message | undefined = undefined;
     @property() stepid: string = '';
     @property({ attribute: false }) seen = new Set<string>();
 
@@ -22,7 +24,19 @@ export class WidgetAiInteraction100554 extends StateLitElement {
     @query('.direct-clarification') directClarification: HTMLElement | undefined;
     @query('.direct-clarification .content') directClarificationContent: HTMLElement | undefined;
 
-    @state() private activeTab: 'workflow' | 'step' | 'raw' = 'workflow';
+    @state() private activeTab: 'workflow' | 'step' | 'raw' = 'step';
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.elParent = this.closest('collab-messages-chat-100554') as HTMLElement;
+        if (this.elParent) this.elParent.style.width = '100%';
+        
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this.elParent) this.elParent.style.width = '';
+    }
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
@@ -51,20 +65,19 @@ export class WidgetAiInteraction100554 extends StateLitElement {
             ${this.isClarificationPending ? html`<button class="viewraw" @click=${()=>this.clickForceViewRaw(false)}>Clarification</button>` : ''}
             <div style="height: calc(100% - 3rem);">
                 <div class="tabs">
-                <div
-                    class="tab ${this.activeTab === 'workflow' ? 'active' : ''}"
-                    @click=${() => this.setTab('workflow')}
-                >Workflow</div>
-                <div
-                    class="tab ${this.activeTab === 'step' ? 'active' : ''}"
-                    @click=${() => this.setTab('step')}
-                >Step</div>
-                <div
-                    class="tab ${this.activeTab === 'raw' ? 'active' : ''}"
-                    @click=${() => this.setTab('raw')}
-                >Raw</div>
+                    <div
+                        class="tab ${this.activeTab === 'step' ? 'active' : ''}"
+                        @click=${() => this.setTab('step')}
+                    >Step</div>
+                    <div
+                        class="tab ${this.activeTab === 'raw' ? 'active' : ''}"
+                        @click=${() => this.setTab('raw')}
+                    >Raw</div>
+                    <div
+                        class="tab ${this.activeTab === 'workflow' ? 'active' : ''}"
+                        @click=${() => this.setTab('workflow')}
+                    >Workflow</div>
                 </div>
-
                 <div class="content">
                     ${this.renderTabContent()}
                 </div>
@@ -88,7 +101,7 @@ export class WidgetAiInteraction100554 extends StateLitElement {
     }
 
     renderStep() {
-        return html`<plugin-task-preview-100554 .task=${this.task}></plugin-task-preview-100554>`
+        return html`<plugin-task-preview-100554 .message=${this.message} .task=${this.task}></plugin-task-preview-100554>`
     }
 
     renderDirectClarification() {

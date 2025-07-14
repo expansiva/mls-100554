@@ -7,6 +7,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 @customElement('plugin-task-preview-result-100554')
 export class pluginTaskPreviewResult extends CollabLitElement {
 
+    @property({ type: Object }) message: mls.msg.Message | null = null;
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIResultStep | null = null;
     @state() private mode: string = 'result';
@@ -74,6 +75,21 @@ export class pluginTaskPreviewResult extends CollabLitElement {
                             this.task.last_updated
         ).toLocaleString()}</small>
                         <br/><small>${this.task.title}</small>
+                        </header>
+                    </li>
+                </ul>
+            </details>
+            <details>
+                <summary> ${this.renderSummary('Message details')}</summary>
+                <ul>
+                    <li>
+                        <header>
+                            <h2>${this.message?.taskTitle}</h2>
+                            <p>${this.message?.content}</p>
+                            <small>Status: ${this.message?.status} </small>
+                            <br/>
+                            <br/>
+                            <p>Task result:${this.message?.taskResults}</p>
                         </header>
                     </li>
                 </ul>
