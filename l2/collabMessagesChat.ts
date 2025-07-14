@@ -55,6 +55,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @property() activeScenerie: IScenery = 'list';
     @property() actualThread: IThreadInfo | undefined;
     @property() actualTask: mls.msg.TaskData | undefined;
+    @property() actualMessage: IMessage | undefined;    
     @property() actualMessages: IMessage[] = [];
     @property() actualMessagesParsed: IMessageGrouped = {};
     @property() isLoadingMessages: boolean = false;
@@ -205,7 +206,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                                         taskId=${message.taskId}
                                                         title=${titleTranslated}
                                                         status=${message.taskStatus}
-                                                        @taskclick=${() => this.onTaskClick(message?.taskId || '', message.threadId, message.createAt)}
+                                                        @taskclick=${() => this.onTaskClick(message?.taskId || '', message.createAt, message.threadId , message)}
                                                     >
                                                     </collab-messages-task-100554>
                                                 </div> `: html``}
@@ -347,7 +348,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private renderTaskDetails() {
-        return html`<collab-messages-task-info-100554 .task=${this.actualTask} taskId=${this.actualTask?.PK}></collab-messages-task-info-100554>`
+        const messageId = `${this.actualThread?.thread.threadId}/${this.actualMessage?.createAt}`
+        return html`<collab-messages-task-info-100554 message-id=${messageId} .task=${this.actualTask} taskId=${this.actualTask?.PK}></collab-messages-task-info-100554>`
     }
 
     private renderThreadDetails() {
@@ -725,22 +727,23 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.requestUpdate();
     }
 
-    private async onTaskClick(taskId: string, messageId: string, threadId: string,) {
+    private async onTaskClick(taskId: string, messageId: string, threadId: string, message: IMessage ) {
         this.saveScrollPosition();
         this.activeScenerie = 'loading';
-        const task = await this.getTaskUpdate(taskId, threadId, messageId);
+        const task = await this.getTaskUpdate(taskId, messageId, threadId);
         addOrUpdateTask(task);
         this.actualTask = task;
+        this.actualMessage = message; 
         this.activeScenerie = 'task';
     }
 
-    private async getTaskUpdate(taskId: string, threadId: string, createdAt: string) {
+    private async getTaskUpdate(taskId: string, createdAt: string, threadId: string) {
         if (!taskId || !createdAt || !threadId) throw new Error('Invalid args');
         if (!this.userId) throw new Error('Invalid userId');
         const taskData = await mls.api.msgGetTaskUpdate(
             {
                 taskId,
-                messageId: `${createdAt}/${threadId}`,
+                messageId: `${threadId}/${createdAt}`,
                 userId: this.userId
             }
         );
