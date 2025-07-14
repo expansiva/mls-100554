@@ -13,6 +13,7 @@ import './_100554_pluginTaskPreviewResult';
 @customElement('plugin-task-preview-100554')
 export class AgentTester extends CollabLitElement {
 
+    @property({ type: Object }) message: mls.msg.Message | null = null;
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property() modeTest: boolean = false;
 
@@ -115,23 +116,23 @@ export class AgentTester extends CollabLitElement {
     }
 
     renderAgent(step: mls.msg.AIAgentStep) {
-        return html` <plugin-task-preview-agent-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-agent-100554> `;
+        return html` <plugin-task-preview-agent-100554 .step=${step} .message=${this.message} .task=${this.task} key="${step.stepId}"></plugin-task-preview-agent-100554> `;
     }
 
     renderClarification(step: mls.msg.AIClarificationStep) {
-        return html` <plugin-task-preview-clarification-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-clarification-100554> `;
+        return html` <plugin-task-preview-clarification-100554 .step=${step} .message=${this.message}  .task=${this.task} key="${step.stepId}"></plugin-task-preview-clarification-100554> `;
     }
 
     renderFlexible(step: mls.msg.AIFlexibleResultStep) {
-        return html` <plugin-task-preview-flexible-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-flexible-100554> `;
+        return html` <plugin-task-preview-flexible-100554 .step=${step} .message=${this.message}  .task=${this.task} key="${step.stepId}"></plugin-task-preview-flexible-100554> `;
     }
 
     renderTools(step: mls.msg.AIToolStep) {
-        return html` <plugin-task-preview-tools-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-tools-100554> `;
+        return html` <plugin-task-preview-tools-100554 .step=${step} .message=${this.message}  .task=${this.task} key="${step.stepId}"></plugin-task-preview-tools-100554> `;
     }
 
     renderResult(step: mls.msg.AIResultStep) {
-        return html` <plugin-task-preview-result-100554 .step=${step} .task=${this.task} key="${step.stepId}"></plugin-task-preview-result-100554> `;
+        return html` <plugin-task-preview-result-100554 .step=${step} .message=${this.message}  .task=${this.task} key="${step.stepId}"></plugin-task-preview-result-100554> `;
     }
 
     //------IMPLEMENTATION--------

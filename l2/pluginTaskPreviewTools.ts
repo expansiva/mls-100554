@@ -7,6 +7,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 @customElement('plugin-task-preview-tools-100554')
 export class pluginTaskPreviewTools extends CollabLitElement {
 
+    @property({ type: Object }) message: mls.msg.Message | null = null;
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIToolStep | null = null;
     @state() private mode: string = 'info';
@@ -28,10 +29,6 @@ export class pluginTaskPreviewTools extends CollabLitElement {
                         <button
                             class="tab-button ${this.mode === 'tools' ? 'active' : ''}" @click=${() => this.selectTabTools()} >
                             Tools                            
-                        </button>
-                        <button
-                            class="tab-button ${this.mode === 'result' ? 'active' : ''}" @click=${() => this.selectTabResult()} >
-                            Payload                            
                         </button>
                     </div>
                 </div>
@@ -79,6 +76,21 @@ export class pluginTaskPreviewTools extends CollabLitElement {
                             this.task.last_updated
         ).toLocaleString()}</small>
                         <br/><small>${this.task.title}</small>
+                        </header>
+                    </li>
+                </ul>
+            </details>
+            <details>
+                <summary> ${this.renderSummary('Message details')}</summary>
+                <ul>
+                    <li>
+                        <header>
+                            <h2>${this.message?.taskTitle}</h2>
+                            <p>${this.message?.content}</p>
+                            <small>Status: ${this.message?.status} </small>
+                            <br/>
+                            <br/>
+                            <p>Task result:${this.message?.taskResults}</p>
                         </header>
                     </li>
                 </ul>
