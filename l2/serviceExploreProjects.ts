@@ -483,23 +483,28 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         if (!item.doSelect) return;
         this.setProjectActual(item.project);
         this.setOrgActual(item.project);
-        this._fireEventProjectSelected(item.project);
-        this.changeScenario('select');
-        await this.loadProjectActual(item.project);
-        await mls.stor.server.unzipSourcesIfNeeded(item.project)
-        this.openExplore()
+        window.location.reload();
+
+        // this._fireEventProjectSelected(item.project);
+        // this.changeScenario('select');
+        // await this.loadProjectActual(item.project);
+        // await mls.stor.server.unzipSourcesIfNeeded(item.project);
+        // this.openExplore()
     }
 
     private async onProjectClick(item: IInfoPrj) {
+
         if (!item.doSelect) return;
         this.setProjectActual(item.project);
         this.setOrgActual(item.project);
         this.addOnHistory(item);
-        this._fireEventProjectSelected(item.project);
-        this.changeScenario('details');
-        await this.loadProjectActual(item.project);
-        await mls.stor.server.unzipSourcesIfNeeded(item.project);
-        this.openExplore()
+        window.location.reload();
+
+        //this._fireEventProjectSelected(item.project);
+        // this.changeScenario('details');
+        // await this.loadProjectActual(item.project);
+        // await mls.stor.server.unzipSourcesIfNeeded(item.project);
+        // this.openExplore()
     }
 
 
@@ -508,12 +513,11 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         mls.events.fire([5], ['ProjectSelected'], '');
     }
 
-    
+
     private setProjectActual(project: number) {
         mls.actual[5].project = project;
         this.state.projectSelected = project;
         setProjectDetails(project);
-        //localStorage.setItem('l5-last-project', project.toString());    
     }
 
     private setOrgActual(project: number) {
