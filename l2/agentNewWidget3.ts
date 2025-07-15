@@ -83,16 +83,16 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 async function updateFile(context: mls.msg.ExecutionContext) {
     if (!context || !context.task) throw new Error('Not found context to create files');
 
-    const step = getNextPendentStep(context.task) as any;
+    const step = getNextPendentStep(context.task) as mls.msg.AIFlexibleResultStep;
 
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in create files');
 
-    if (!step.content || !step.content.html) throw new Error('Not found "html"  in addFile files');
+    if (!step.result || !step.result.html) throw new Error('Not found "html"  in addFile files');
 
 
-    const pageName = step.content.shortName;
-    const project = step.content.project;
-    const fileHTML = formatHtml(step.content.html);
+    const pageName = step.result.shortName;
+    const project = step.result.project;
+    const fileHTML = formatHtml(step.result.html);
 
     const m = mls.editor.getModels(project, pageName);
     if (m && m.html) m.html.model.setValue(fileHTML)

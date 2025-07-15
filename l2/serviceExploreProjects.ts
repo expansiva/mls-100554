@@ -382,36 +382,11 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
                     if (!info || !info.projectDriver || !info.projectURL) doSelect = false;
 
-                    prj.push({
+                    if(doSelect) prj.push({
                         project: p.id,
                         name: p.name,
                         doSelect
                     });
-
-                    /*let projectDriver = '';
-                    let projectURL = '';
-
-
-                    if (!json.projectURL && json.l5_actionPrjSettings) {
-
-                        projectDriver = json.l5_actionPrjSettings.projectDriver || '';
-                        projectURL = json.l5_actionPrjSettings.projectURL || '';
-
-                    } else if (json.projectURL) {
-
-                        projectDriver = json.projectDriver || '';
-                        projectURL = json.projectURL || '';
-
-                    }
-
-                    if (!projectDriver || !projectURL || projectDriver === 'mls') return;*/
-
-                    /*if (
-                        !json.l5_actionPrjSettings ||
-                        !json.l5_actionPrjSettings.projectDriver ||
-                        json.l5_actionPrjSettings.projectDriver === 'mls') return;
-
-                    prj.push(p);*/
 
                 } catch (e) {
                     //console.info('Erro to parse' + p.name);
