@@ -387,9 +387,14 @@ export class PluginExploreList extends PluginBaseModule {
 
         const style = this.inFilter && inHistory ? 'display:none' : '';
         const actualL2 = (mls.actual[2] as any)[this.position]?.shortName;
+    
+        const validProject = this.project === 0 && mls.actual[5].project !== file.project && file.project !== 0 ? false : true;
 
+        let auxValidProject = '';
+        if (!validProject) auxValidProject = ';user-select: none; pointer-events: none; opacity: .5;';
+        
         return html`
-            <li @click="${this.clickOptOpen}" class="${file.shortName === actualL2 ? 'selected' : ''}" style="${style}" .myFile=${file} .nameFilter="${nameFilter}">
+            <li @click="${this.clickOptOpen}" class="${file.shortName === actualL2 ? 'selected' : ''}" style="${style}${auxValidProject}" .myFile=${file} .nameFilter="${nameFilter}" ?disabled=${!validProject}>
                 <div class="elContent">
                     <div class="groupHiddenList" @click="${this.clickGroupHidden}">
                         <span class="mls-gpbtnslider-item fa fa-undo" title="${this.msg.undo}" @click="${this.clickOptUndo}"></span>
