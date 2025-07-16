@@ -84,14 +84,9 @@ export class pluginTaskPreviewTools extends CollabLitElement {
                 <summary> ${this.renderSummary('Message details')}</summary>
                 <ul>
                     <li>
-                        <header>
-                            <h2>${this.message?.taskTitle}</h2>
-                            <p>${this.message?.content}</p>
-                            <small>Status: ${this.message?.status} </small>
-                            <br/>
-                            <br/>
-                            <p>Task result:${this.message?.taskResults}</p>
-                        </header>
+                        <pre>
+                            ${JSON.stringify(this.message, null, 2)}
+                        </pre>
                     </li>
                 </ul>
             </details>
