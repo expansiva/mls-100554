@@ -17,7 +17,7 @@ export const pluginData: mls.plugin.IPluginData = {
 };
 
 @customElement('plugin-project-detail-100554')
-export class PluginProjectDetail extends LitElement {
+export class PluginProjectDetail extends PluginBaseModule {
 
     @query('contentproject') contentproject: HTMLElement | undefined;
     @query('contentprojectinfo') contentprojectinfo: HTMLElement | undefined;

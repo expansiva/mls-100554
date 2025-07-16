@@ -3,7 +3,7 @@
 import { html, svg, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { getListFilesToDelete, deleteAllFiles } from './_100554_agentNewModuleCreate';
+import { getListNewFilesToDeleteByGroup, deleteAllFiles } from './_100554_libCommom';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -152,7 +152,7 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
             this.logs.push('No project selected');
             return;
         }
-        this.filesToDelete = await getListFilesToDelete(this.groupName, project, '');
+        this.filesToDelete = await getListNewFilesToDeleteByGroup(this.groupName, project, '');
         this.selectedFiles = new Map(
             this.filesToDelete.map(file => [this.getFileKey(file), file])
         );
@@ -166,6 +166,7 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
             this.logs.push(log);
             this.requestUpdate();
         }
+        
         this.logs.push('All files removed');
         const key = mls.stor.getKeyToFiles(100554, 2, 'pluginProjectDeleteFiles', '', '.ts');
         const storFile = mls.stor.files[key];

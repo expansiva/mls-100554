@@ -6,7 +6,6 @@ import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { collab_trash, collab_lock, collab_lock_open } from './_100554_collabIcons';
 
-
 /// **collab_i18n_start**
 const message_pt = {
     detailsResume: 'Resumo',
@@ -84,15 +83,13 @@ export class PluginProjectInfo extends PluginBaseModule {
     private projectDetails: mls.cbe.IPrj_settings | undefined;
 
     async prepare() {
-
         await this.init();
-
     }
-
 
     //------COMPONENT------
 
     firstUpdated() {
+        console.log('11111')
         if (!this.body || !this.autoPrepare) return;
         this.prepare();
 

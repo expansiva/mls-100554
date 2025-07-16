@@ -647,7 +647,13 @@ export class CollabNewProject extends CollabLitElement {
             }
         }
 
-        return await mls.api.cbeSaveNewPrj(param);
+        try {
+            const res = await mls.api.cbeSaveNewPrj(param);
+            console.info({ res });
+            return res;
+        } catch (err:any) {
+            throw new Error('Error on create project in collab' + err.message)
+        }
     }
 
     private async setPermissionAction(org: string, repo: string) {
@@ -726,7 +732,7 @@ export class CollabNewProject extends CollabLitElement {
     }
 
     private getLoginUser() {
-        const userNameCollab = 'Santiago';
+        const userNameCollab = mls.getActualUser();
         return userNameCollab;
     }
 
