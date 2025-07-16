@@ -10,7 +10,7 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
     @property({ type: Object }) message: mls.msg.Message | null = null;
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIFlexibleResultStep | null = null;
-    @state() private mode: string = 'info';
+    @state() private mode: string = 'flexible';
 
     render() {
 
@@ -84,14 +84,9 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
                 <summary> ${this.renderSummary('Message details')}</summary>
                 <ul>
                     <li>
-                        <header>
-                            <h2>${this.message?.taskTitle}</h2>
-                            <p>${this.message?.content}</p>
-                            <small>Status: ${this.message?.status} </small>
-                            <br/>
-                            <br/>
-                            <p>Task result:${this.message?.taskResults}</p>
-                        </header>
+                        <pre>
+                            ${JSON.stringify(this.message, null, 2)}
+                        </pre>
                     </li>
                 </ul>
             </details>

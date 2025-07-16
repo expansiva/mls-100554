@@ -24,6 +24,7 @@ export abstract class IcaFormsInputStringBase extends IcaLitElementBase {
 	abstract debounce: string | undefined;
 	abstract readonly: boolean;
 
+	public mySymbol = 'fa-font';
 	public baseName:string=  'IcaFormsInputStringBase';
 	public getActionsTags(): ActionTag[] {
         return [

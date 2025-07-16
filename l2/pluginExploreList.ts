@@ -63,6 +63,8 @@ export const pluginData: mls.plugin.IPluginData = {
 
 export class PluginExploreList extends PluginBaseModule {
 
+    private resizeObserver: ResizeObserver | undefined;
+
     private msg: MessageType = messages['en'];
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
@@ -164,6 +166,16 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     //---------COMPONENT-------------
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.initObserverResize();
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this.resizeObserver) this.resizeObserver.disconnect();
+    }
 
     createRenderRoot() {
         return this;
@@ -387,12 +399,12 @@ export class PluginExploreList extends PluginBaseModule {
 
         const style = this.inFilter && inHistory ? 'display:none' : '';
         const actualL2 = (mls.actual[2] as any)[this.position]?.shortName;
-    
+
         const validProject = this.project === 0 && mls.actual[5].project !== file.project && file.project !== 0 ? false : true;
 
         let auxValidProject = '';
         if (!validProject) auxValidProject = ';user-select: none; pointer-events: none; opacity: .5;';
-        
+
         return html`
             <li @click="${this.clickOptOpen}" class="${file.shortName === actualL2 ? 'selected' : ''}" style="${style}${auxValidProject}" .myFile=${file} .nameFilter="${nameFilter}" ?disabled=${!validProject}>
                 <div class="elContent">
@@ -403,7 +415,7 @@ export class PluginExploreList extends PluginBaseModule {
                         <span class="mls-gpbtnslider-item fa fa-trash" title="${this.msg.delete}" @click="${this.clickOptDel}"></span>
                         <span class="mls-gpbtnslider-item fa-solid fa-shield-halved" title="${this.msg.security}" @click="${this.clickOptOpenSecurity}"></span> 
                     </div>
-                    <span class="${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
+                    <span class="spanFileName ${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
                     <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>
                 </div>
             </li>
@@ -971,6 +983,21 @@ export class PluginExploreList extends PluginBaseModule {
         const key = mls.stor.getKeyToFiles(+action.project, this.levelFiles as any, action.name, file.folder, file.extension);
         return !mls.stor.files[key];
 
+    }
+
+    private initObserverResize() {
+
+        if (this.resizeObserver) this.resizeObserver.disconnect();
+        this.resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (entry.contentRect.width < 515) {
+                    this.classList.add('breakContent');
+                } else {
+                    this.classList.remove('breakContent');
+                }
+            }
+        });
+        this.resizeObserver.observe(this);
     }
 
 

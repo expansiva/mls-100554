@@ -42,5 +42,7 @@ export abstract class IcaApresentationTextBase extends IcaLitElementBase {
         return rc;
 
     }
+
+    public mySymbol = 'fa-font';
     
 }

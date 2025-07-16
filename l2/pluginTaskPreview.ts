@@ -144,9 +144,9 @@ export class AgentTester extends CollabLitElement {
         this.currentStepId = 1;
         this.navigationStack = [1];
         this.allSteps = getAllSteps(this.task.iaCompressed.nextSteps);
-        if (this.task && ['done', 'failed'].includes(this.task.status)) {
+        /*if (this.task && ['done', 'failed'].includes(this.task.status)) {
             this.allSteps.forEach((a, idx) => { if (idx > 0) this.navigateToStep(a.stepId) })
-        };
+        };*/
     }
 
     private buildStepMap(steps: mls.msg.AIPayload[]) {

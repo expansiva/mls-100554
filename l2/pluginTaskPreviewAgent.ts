@@ -90,7 +90,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                         #${this.step.stepId} - ${this.step.agentName} - ${this.step.status} - $${this.step.interaction?.cost}
                     </li>
                     <li>
-                        ${this.step.interaction?.trace}
+                        <b>Trace: </b>${this.step.interaction?.trace}
                     </li>
                     <li>
                         <b>${this.step.agentName}: </b>${this.agentDescription}
@@ -115,14 +115,9 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                 <summary> ${this.renderSummary('Message details')}</summary>
                 <ul>
                     <li>
-                        <header>
-                            <h2>${this.message?.taskTitle}</h2>
-                            <p>${this.message?.content}</p>
-                            <small>Status: ${this.message?.status} </small>
-                            <br/>
-                            <br/>
-                            <p>Task result:${this.message?.taskResults}</p>
-                        </header>
+                        <pre>
+                            ${JSON.stringify(this.message, null, 2)}
+                        </pre>
                     </li>
                 </ul>
             </details>
