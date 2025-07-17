@@ -6,7 +6,7 @@ import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { IcaLitElementBaseMethods } from './_100554_icaTypes';
 import { IWCDCommand } from './_100554_wcdTypes';
 import { execute as executeDel } from './_100554_wcdCommandDel';
-import { move } from './_100554_wcdCommandMove';
+import { move } from './_100554_wcdCommandMove'; 
 import { canMoveElement } from './_100554_icaBaseDescription';
 
 /// **collab_i18n_start**
@@ -51,7 +51,7 @@ export class PluginPageNavigation extends PluginBaseModule {
     }
 
     private onWCDEventChange(ev: mls.events.IEvent) {
-
+        console.info(ev);
         if (this && this.forceUpdate) {
             setTimeout(()=> this.forceUpdate(),150);
         }
@@ -90,7 +90,8 @@ export class PluginPageNavigation extends PluginBaseModule {
     renderItemTree(item: IInfoElChildren, idx: string) {
 
         const name = convertTagToFileName(item.el.tagName.toLocaleLowerCase());
-        const cls = (item.el as any).renderType === 'editactive' ? 'activeBranch' : '';       
+        const cls = item.el.overlayRef?.getAttribute('rendertype')
+ === 'editactive' ? 'activeBranch' : '';       
 
         let mySymbol = 'fa-cubes'
         if ((item.el as any).mySymbol) mySymbol = (item.el as any).mySymbol;
@@ -151,8 +152,7 @@ export class PluginPageNavigation extends PluginBaseModule {
         const reentrance = (array: IInfoElChildren[], element: HTMLElement) => {
 
             let info: IInfoElChildren | undefined;
-            const tag = element.tagName.toLowerCase();
-            if (tag.startsWith('ica') && !tag.startsWith('ica-page-overlay')) {
+            if (element.getAttribute('mls_origin') && !element.hasAttribute('modeoverlay')) {
                 info = { el: element as IcaLitElementBaseMethods, id: element.id, children: [] as any };
                 array.push(info);
             }
@@ -206,22 +206,10 @@ export class PluginPageNavigation extends PluginBaseModule {
 
         if (active) active.classList.remove('activeBranch');
 
-        //target.classList.add('activeBranch');
-
         item.el.style.border = '';
         item.el.overlayRef?.click();
         item.el.overlayRef?.scrollIntoView({ block: 'center' });
-        /*const father = item.el.closest('*[rendertype="editactive"]');
-        if (father) {
-
-            this.idLastClick = item.id;
-            item.el.overlayRef?.click();
-            item.el.overlayRef?.scrollIntoView({ block: 'center' });
-
-        } else {
-            item.el.overlayRef?.click();
-            item.el.overlayRef?.scrollIntoView({ block: 'center' });
-        }*/
+        
 
     }
 
@@ -273,8 +261,10 @@ export class PluginPageNavigation extends PluginBaseModule {
         if (!inOver) inOver = 'false';
 
         if (!el || !el.info || inOver === 'true' || el.className.indexOf('activeBranch') >= 0) return;
-        //el.info.el.style.border = '1px solid blue';
-        el.info.el.style.boxShadow = '0px 0px 2px #0909dd';
+
+        const info = (el.info) as IInfoElChildren;
+        if (!info || !info.el.overlayRef) return;
+        info.el.overlayRef.style.boxShadow = '0px 0px 2px #0909dd';
 
 
     }
@@ -290,9 +280,10 @@ export class PluginPageNavigation extends PluginBaseModule {
         }
 
         el.removeAttribute('inOver');
-        //el.info.el.style.border = '';
-        el.info.el.style.boxShadow = '';
 
+        const info = (el.info) as IInfoElChildren;
+        if (!info || !info.el.overlayRef) return;
+        info.el.overlayRef.style.boxShadow = '';
 
     }
 
@@ -329,15 +320,13 @@ export class PluginPageNavigation extends PluginBaseModule {
     private handleDragStart(event: DragEvent, item: IInfoElChildren) {
         event.stopPropagation();
         this.draggedItem = item;
-        //event.dataTransfer!.effectAllowed = 'move';
-        setTimeout(() => this.requestUpdate(), 0);
+        this.requestUpdate();    
     }
 
     private handleDragOver(event: DragEvent | TouchEvent, item: IInfoElChildren, element: HTMLElement) {
 
         event.stopPropagation();
         event.preventDefault();
-        //event.dataTransfer!.dropEffect = 'move';
 
         if (!this.draggedItem) return;
 
@@ -350,33 +339,26 @@ export class PluginPageNavigation extends PluginBaseModule {
         const li = element.closest('li');
         if (!li) return;
 
-        /*const parentICA = item.el.getIcaParent(item.el);
-
-        if (offsetY < (height * 0.3) && parentICA) {
-            const canMove = canMoveElement(this.draggedItem.el, parentICA)
+        if (offsetY < (height * 0.3)) {
+            const canMove = true;
             this.dropPosition = 'above';
             element.style.border = "";
             li.style.border = "";
             li.style.borderTop = "2px solid " + (canMove ? 'blue' : 'red');
 
 
-        } else if (offsetY > (height * 0.6) && parentICA) {
-            const canMove = canMoveElement(this.draggedItem.el, parentICA)
+        } else if (offsetY > (height * 0.6)) {
+            const canMove = true;
             this.dropPosition = 'below';
             element.style.border = "";
             li.style.border = "";
             li.style.borderBottom = "2px solid " + (canMove ? 'blue' : 'red');
 
 
-        } else {
-            const canMove = canMoveElement(this.draggedItem.el, item.el)
-            this.dropPosition = 'inside';
-            li.style.border = "";
-            element.style.border = "2px solid " + (canMove ? 'blue' : 'red');
-        }
+        } 
 
-        this.dropTarget = item;*/
-        this.requestUpdate();
+        this.dropTarget = item;
+        this.requestUpdate();    
     }
 
     private handleDragLeave(event: DragEvent, element: HTMLElement) {
