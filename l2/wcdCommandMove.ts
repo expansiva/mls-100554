@@ -11,9 +11,9 @@ export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMeth
 
     const father = target.parentElement as HTMLElement;
     const child = el.querySelector('#' + target.id);
-    const parentICA = target.closest('*[mls-origin]') as IcaLitElementBaseMethods;//target.getIcaParent(target);
+    const parentICA = target.parentElement?.closest('*[mls_origin]') as IcaLitElementBaseMethods;//target.getIcaParent(target);
 
-    if (el === target || child) {
+    if (el === target || child || !parentICA) {
         throw new Error('Not possible move');
     }
 

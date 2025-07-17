@@ -55,8 +55,6 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
 
     private onIcaOverlayItemOver(e: MouseEvent) {
 
-
-
         const wcdOther = this.parentElement?.querySelector('wcd-toolbox-100554') as HTMLElement;
 
         if (wcdOther) {
@@ -199,10 +197,18 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
 
         const rect1 = el1.getBoundingClientRect();
         const rect2 = el2.getBoundingClientRect();
-        const horizontalOverlap = rect1.left < rect2.right && rect1.right > rect2.left;
+        /*const horizontalOverlap = rect1.left < rect2.right && rect1.right > rect2.left;
         const verticalOverlap = rect1.top < rect2.bottom && rect1.bottom > rect2.top;
-        return horizontalOverlap && verticalOverlap;
-        
+
+        return horizontalOverlap && verticalOverlap;*/
+        const completelyOverlaps =
+            rect1.top <= rect2.top &&
+            rect1.left <= rect2.left &&
+            rect1.bottom >= rect2.bottom &&
+            rect1.right >= rect2.right;
+
+        return completelyOverlaps;
+
     }
 
     private async checkToChangeWCD() {
