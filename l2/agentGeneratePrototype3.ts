@@ -4,7 +4,7 @@ import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getPromptByHtml } from './_100554_aiPrompts';
 import { getPayload2, PayLoad2 } from './_100554_agentGeneratePrototype2';
 
-import { getTokensLess} from "./_100554_designSystemBase";
+import { getTokensLess, getTokens, IDesignSystemTokens} from "./_100554_designSystemBase";
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
@@ -88,6 +88,7 @@ const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls
 async function getPrompts(payload2: PayLoad2): Promise<mls.msg.IAMessageInputType[]> {
     if (!payload2 || !payload2.moduleDetails.userPrompt) throw new Error(`Erro [${agentName}] getPrompts: invalid userPrompt`);
 
+    const tokens = await getTokens(project);
     const data: Record<string, string> = {
         userPrompt: payload2.moduleDetails.userPrompt,
         resumeClarification: JSON.stringify({
@@ -100,7 +101,7 @@ async function getPrompts(payload2: PayLoad2): Promise<mls.msg.IAMessageInputTyp
                 requirements: payload2.moduleDetails.requirements
             }
         }, null, 2),
-        tokens: await getTokensLess(project, "Default")
+        tokens: JSON.stringify(tokens[0]),
     }
 
     const prompts = await getPromptByHtml({ project, shortName: agentName, folder: '', data })
@@ -220,8 +221,9 @@ export interface PayLoad3 {
     plugins: PluginDefinition[],
     pagesWireframe: PagesWireframe[],
     organism: Organism[],
-    tokens: string[]
+    tokens: IDesignSystemTokens
 }
+
 export interface UserRequestsEnhancements {
     description: string;
     priority: "could" | "should";

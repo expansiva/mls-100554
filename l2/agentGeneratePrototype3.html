@@ -57,11 +57,14 @@ Guidelines:
 	•	Shadows: at least 3 levels (sm, md, lg).
 	•	Transitions: base, fast, slow (with easing).
 	•	Z-index: modal, tooltip, dropdown.
-- Token names must follow the naming pattern: @token-category-name, e.g., @color-primary, @spacing-md.
+- Token names must follow the naming pattern: token-category-name, e.g., color-primary, spacing-md.
 - Use scalable units (like rem or em) instead of fixed px values where possible.
 - Colors should reflect the platform’s visual identity and accessibility best practices (e.g., minimum contrast ratios).
 - Avoid adding tokens that are not used by the organisms or layouts of this module.
-- Organize tokens in a flat list, one per line, using the .less variable format (e.g., @color-bg: #ffffff;).
+- Dark mode support:
+For each color token, generate a corresponding dark mode variation by prefixing it with _dark-.
+Example: color-background → _dark-color-background.
+These dark tokens should reflect an appropriate color scheme for dark interfaces.
 
 ## Output format (JSON):
 ```json
@@ -70,6 +73,14 @@ Guidelines:
   result: NewModuleAnalysis
 }
 ```
+interface IDesignSystemTokens {
+    description: string,
+    themeName: string,
+    color: Record&lt;string, string&gt;,
+    global: Record&lt;string, string&gt;,
+    typography: Record&lt;string, string&gt;,
+}
+
 interface NewModuleAnalysis {
  finalModuleDetails: {
    userLanguage: string;
@@ -84,7 +95,7 @@ interface NewModuleAnalysis {
  plugins: PluginDefinition[],
  pagesWireframe: PagesWireframe[],
  organism: Organism[],
- tokens: string[]
+ tokens: IDesignSystemTokens
 }
 interface UserRequestsEnhancements { 
    description: string; 
@@ -131,6 +142,6 @@ interface Planning {
 ```json
 {{resumeClarification}}
 ``` </promptcustom>  <promptcustom type="system"> ## Tokens Default
-```less
+```json
 {{tokens}}
 ``` </promptcustom> </plugin-agent-playground-100554>
