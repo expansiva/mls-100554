@@ -66,6 +66,46 @@ For each color token, generate a corresponding dark mode variation by prefixing 
 Example: color-background → _dark-color-background.
 These dark tokens should reflect an appropriate color scheme for dark interfaces.
 
+7. Com as informações das páginas e dos organismos, vamos criar um html único, estilo SPA , com javascript embutido, store the result in "siteHtml", e siga as regras:
+- O site deve ter um header &lt;organism-nav&gt; e um footer &lt;organism-footer&gt;, que permanecem fixos em todas as páginas.
+- O conteúdo principal deve ser trocado entre &lt;page-home&gt;, &lt;page-servicos&gt;, &lt;page-contato&gt;, etc, mostrando apenas um por vez.
+- A navegação deve funcionar via links internos e JavaScript, sem recarregar a página.
+- o CSS será gerado posteriormente com o less anterior.
+
+
+7. Using the information from “pages” and “organisms”, generate the full HTML for each page in a single file (SPA style), including all required organisms and structure.
+Guidelines:
+- For each organism, if its code has already been defined earlier in the HTML, simply indicate with a placeholder/task (e.g., &lt;!-- insert organism-nav here --&gt;), rather than repeating its code.
+- Header and footer (organism-nav and organism-footer) should be included as part of each page if required.
+- The goal is that each page is fully defined, but organism code is only present once in the file and reused via placeholders/tasks.
+- Navigation between pages should work with JavaScript, swapping only the main content without page reloads.
+- Create a &lt;div id="content"&gt;&lt;/div&gt; that will contain the full content of selected page.
+- The CSS will be generated from tokens later.
+example:
+&lt;body&gt;
+  &lt;div id="content"&gt;
+    &lt;!-- Selected page here --&gt;
+  &lt;/div&gt;
+  &lt;script&gt;
+    // JS SPA navigation: inject page HTML into #content
+  &lt;/script&gt;
+  &lt;page-home&gt;
+    &lt;header&gt;
+      &lt;organism-nav&gt;
+        &lt;!-- nav code here --&gt;
+      &lt;/organism-nav&gt;
+    &lt;/header&gt;
+    &lt;main&gt; ... &lt;/main&gt;
+    &lt;footer&gt; ... &lt;/footer&gt;
+  &lt;/page-home&gt;
+  &lt;page-contact&gt;
+    &lt;header&gt; ... &lt;/header&gt;
+    &lt;main&gt; ... &lt;/main&gt;
+    &lt;footer&gt; ... &lt;/footer&gt;
+  &lt;/page-contact&gt;
+  ...
+&lt;/body&gt;
+
 ## Output format (JSON):
 ```json
 {
@@ -73,14 +113,6 @@ These dark tokens should reflect an appropriate color scheme for dark interfaces
   result: NewModuleAnalysis
 }
 ```
-interface IDesignSystemTokens {
-    description: string,
-    themeName: string,
-    color: Record&lt;string, string&gt;,
-    global: Record&lt;string, string&gt;,
-    typography: Record&lt;string, string&gt;,
-}
-
 interface NewModuleAnalysis {
  finalModuleDetails: {
    userLanguage: string;
@@ -95,7 +127,8 @@ interface NewModuleAnalysis {
  plugins: PluginDefinition[],
  pagesWireframe: PagesWireframe[],
  organism: Organism[],
- tokens: IDesignSystemTokens
+ tokens: IDesignSystemTokens,
+ siteHtml: string
 }
 interface UserRequestsEnhancements { 
    description: string; 
@@ -137,6 +170,13 @@ interface UserStories {
 interface Planning {
   description: string; // Description of the planning
   comment?: string; // Optional comment or notes
+}
+interface IDesignSystemTokens {
+    description: string,
+    themeName: string,
+    color: Record&lt;string, string&gt;,
+    global: Record&lt;string, string&gt;,
+    typography: Record&lt;string, string&gt;,
 } </promptcustom>  <promptcustom type="human"> ## User Prompt 
 {{userPrompt}} </promptcustom>  <promptcustom type="ai"> ## Clarification 2
 ```json

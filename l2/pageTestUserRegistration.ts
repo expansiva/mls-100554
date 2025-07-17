@@ -4,7 +4,7 @@ import { BECollabClient } from './_100554_beCollabClient';
 import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement, query } from 'lit/decorators.js';
 import { getState, subscribe, initState, setState, unsubscribe } from './_100554_collabState';
-import { initTestState } from './_100554_testPagesState';
+// import { initTestState } from './_100554_testPagesState';
 
 @customElement('page-test-user-registration-100554')
 export class PageUserRegistration100554 extends CollabPageElement {
@@ -15,7 +15,7 @@ export class PageUserRegistration100554 extends CollabPageElement {
 
     initPage() {
 
-        initTestState();
+        // initTestState();
         initState('projectTest.pageUserRegistration', {
             indexSel: -1,
             columns: ['id', 'user', 'status'],
