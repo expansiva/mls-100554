@@ -4,10 +4,16 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { PayLoad3, getPayload3, PageDefinition } from './_100554_agentGeneratePrototype3';
+import { PayLoadPrototypeOrganism, getPayload as getPayloadOrganism } from './_100554_agentGeneratePrototypeOrganism';
+import { updateTokensTheme } from './_100554_designSystemBase';
+import { addMessage } from './_100554_collabMessageHelper';
 import { getTask } from './_100554_msgDBController';
 import { formatHtml } from './_100554_collabDOMSync';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { createNewFile } from "./_100554_pluginNewFileBase";
+import { deleteAllFiles, getListNewFilesToDeleteByGroup } from './_100554_libCommom';
+import { getImages } from './_100554_libUnsplash';
+
 @customElement('agent-generate-prototype-create-100554')
 export class agentGeneratePrototypeCreate extends StateLitElement {
 
@@ -23,9 +29,10 @@ export class agentGeneratePrototypeCreate extends StateLitElement {
     type = "page";
     index = 0;
     groupToDelete = '';
-    taskId = "task#1752623963952";
+    taskId = "task#1752689318274";
+    taskIdOrganism = "task#1752669827417"
     result = "";
-    project = 100554;
+    project = 102010;
     folder = "";
     loading = false;
 
@@ -61,6 +68,9 @@ export class agentGeneratePrototypeCreate extends StateLitElement {
                 <br>
                 <button @click=${this.generateAllPage}>Build all Pages</button>
                 <button @click=${this.generateAllOrganism}>Build all Organisms</button>
+                <br>
+                <button @click=${this.generateAllOrganism}>Build Page Complete(Page/Organism)</button>
+
                 <hr>
                 <label>GroupName:</label>
                 <input @input=${(e: Event) => this.groupToDelete = String((e.target as HTMLInputElement).value)} />
@@ -91,10 +101,29 @@ export class agentGeneratePrototypeCreate extends StateLitElement {
         return payload3;
     }
 
+    async getPayloadOrganism() {
+
+        const task = await getTask(this.taskIdOrganism);
+        if (!task) return `// invalid taskid selected`;
+        const context: mls.msg.ExecutionContext = {
+            message: {
+                threadId: "",
+                orderAt: "",
+                createAt: "",
+                senderId: "",
+                content: "",
+            },
+            task,
+            modeSingleStep: true,
+        }
+        const payload3 = getPayloadOrganism(context);
+        return payload3;
+    }
+
     async deletePages() {
         this.result = '';
         if (!this.groupToDelete) return this.result = 'Digite um grupo para deletar';
-        const files = await getListFilesToDelete(this.groupToDelete, this.project, this.folder);
+        const files = await getListNewFilesToDeleteByGroup(this.groupToDelete, this.project, this.folder);
         for await (const log of deleteAllFiles(files)) {
             this.result = this.result + '\n' + log;
         }
@@ -304,7 +333,7 @@ function generateTsOrganism(payload: PayLoad3, project: number, folder: string, 
 /// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
 
 import { customElement } from 'lit/decorators.js';
-import { IcaOrganismWireframeBase } from './_100554_icaOrganismWireframeBase';
+import { IcaOrganism } from './_100554_icaOrganism';
 
 @customElement('${tagName}-${project}')
 export class ${fileName} extends IcaOrganismWireframeBase {
@@ -383,82 +412,6 @@ function generateHtmlPage(payload: PayLoad3, project: number, folder: string, in
     return formatHtml(htmlFinal);
 }
 
-
-export async function getListFilesToDelete(group: string, project: number, folder: string) {
-
-    const filesToDelete: mls.stor.IFileInfo[] = [];
-
-    const filesLocal = Object.values(mls.stor.files).filter(file =>
-        file.inLocalStorage &&
-        file.folder === folder &&
-        file.project === project &&
-        file.status === 'new'
-    );
-
-    for await (let storFile of filesLocal) {
-        const keyModel = mls.l2.getKey(storFile);
-        let models: mls.editor.IModels | undefined = mls.editor.models[keyModel];
-        if (!models) models = await mls.editor.addModels(storFile.project, storFile.shortName, '')
-        if (models && models.ts) {
-            mls.l2.typescript.parseTripleSlash(models.ts);
-            const tpsGroup = models.ts.compilerResults?.tripleSlashMLS?.variables['groupName']
-            if (group === tpsGroup) filesToDelete.push(storFile);
-        }
-    }
-
-    return filesToDelete;
-}
-
-export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
-    const modelsToDelete: { project: number, shortName: string }[] = Array.from(
-        new Map(filesToDelete.map(({ project, shortName }) => [shortName, { project, shortName }])).values()
-    );
-
-    const filesToDeleteCache: Set<string> = new Set();
-
-    for (const fileToDelete of filesToDelete) {
-        await mls.stor.localStor.setContent(fileToDelete, { contentType: 'string', content: null });
-        fileToDelete.onAction = undefined;
-        fileToDelete.getValueInfo = undefined;
-
-        const keyFiles = mls.stor.getKeyToFiles(
-            fileToDelete.project,
-            fileToDelete.level,
-            fileToDelete.shortName,
-            fileToDelete.folder,
-            fileToDelete.extension
-        );
-        delete mls.stor.files[keyFiles];
-
-        yield `Storfile deleted: ${keyFiles}`;
-
-        const ext = fileToDelete.extension.replace('.ts', '.js');
-        const targetKey = `https://collab.codes/local/_${fileToDelete.project}_${fileToDelete.shortName}${ext}?v=`;
-        filesToDeleteCache.add(targetKey);
-    }
-
-    for (const data of modelsToDelete) {
-        const keyModel = mls.l2.getKey(data);
-        mls.editor.deleteModels(data.project, data.shortName, true);
-        yield `Model deleted : ${keyModel}`;
-    }
-
-    const cacheName = 'mls-v2';
-    const cache = await caches.open(cacheName);
-    const keys = await cache.keys();
-    for (const request of keys) {
-        for (const targetKey of filesToDeleteCache) {
-            if (request.url.includes(targetKey)) {
-                await cache.delete(request);
-                yield `Cache file deleted: ${request.url}`;
-            }
-        }
-    }
-}
-
-//
-// ------
-//
 
 
 function verifyIfExists(args: { project: number, shortName: string, folder: string }): boolean {
@@ -571,3 +524,103 @@ function generatePageDefsFromLLM(payload: PayLoad3, index: number, project: numb
         `// Do not change – automatically generated code.\n\n` +
         `export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}\n`;
 }
+
+
+
+
+
+export async function generateOrganismPrototype(payload3: PayLoad3, payLoadPrototypeOrganism: PayLoadPrototypeOrganism, project: number, indexOrganism: number): Promise<string> {
+
+    try {
+
+        console.info({ payload3, payLoadPrototypeOrganism })
+
+        const ts = await generateTsOrganismPrototype(payload3, payLoadPrototypeOrganism.images, payLoadPrototypeOrganism.ts, project, indexOrganism);
+        const html = payLoadPrototypeOrganism.html;
+        const less = generateLessOrganismPrototype(payload3, payLoadPrototypeOrganism.less, project, indexOrganism);
+
+        const organism = payload3.organism[indexOrganism];
+        const shortTagName = organism.organismTag;
+        const fullName = convertTagToFileName(`${shortTagName}-${project}`);
+        const { shortName } = mls.l2.getPath(fullName)
+        const enhancement = '_100554_enhancementLit';
+
+        await createNewFile(
+            { project, position: 'right', shortName, enhancement, sourceTS: ts.trim(), sourceHTML: html, sourceDefs: '', sourceLess: less, openPreview: false }
+        );
+
+        return `organism created: ${fullName}`
+
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
+}
+
+
+async function generateTsOrganismPrototype(
+  payload: PayLoad3,
+  images: Record<string, string>,
+  source: string,
+  project: number,
+  indexOrganism: number
+) {
+  try {
+    const organism = payload.organism[indexOrganism];
+    const tagName = organism.organismTag;
+    const fullName = convertTagToFileName(`${tagName}-${project}`);
+    const { shortName } = mls.l2.getPath(fullName);
+    const enhancement = '_100554_enhancementLit';
+    const groupName = payload.finalModuleDetails.moduleName;
+
+    await updateTokensTheme(project, 'Default', payload.tokens);
+    const resolvedImages = await getAllImages(images);
+
+    let finalSource = source;
+    for (const [key, url] of Object.entries(resolvedImages)) {
+      const pattern = new RegExp(`\\[${key}\\]`, 'g');
+      finalSource = finalSource.replace(pattern, url);
+    }
+
+    const ts = `
+/// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
+
+${finalSource}
+`;
+
+    return ts;
+  } catch (err: any) {
+    return `// Error: ${err.message}`;
+  }
+}
+
+function generateLessOrganismPrototype(payload: PayLoad3, source: string, project: number, indexOrganism: number): string {
+
+    return `${source}
+
+`
+}
+
+ async function getAllImages(
+  imageMap: Record<string, string>
+): Promise<Record<string, string>> {
+  const resolved: Record<string, string> = {};
+
+  for (const [key, query] of Object.entries(imageMap)) {
+    try {
+      const result = await getImages(query, 1, 1);
+      if (result.images && result.images.length > 0) {
+        const image = result.images[0];
+        resolved[key] = image.urls.regular;
+      } else {
+        resolved[key] = `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
+      }
+    } catch (err) {
+      console.warn(`Failed to get image for "${query}":`, err);
+      resolved[key] = `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
+    }
+  }
+
+  return resolved;
+}
+
+

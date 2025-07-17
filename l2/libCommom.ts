@@ -312,13 +312,11 @@ export function getProjectDetails(): IRetProjectDetails | undefined {
     const info = localStorage.getItem(KeyProject);
     if (!info) return undefined;
     return JSON.parse(info);
-
 }
 
 export function calculateTotalStringSize(source: string, limitBase:number):ICalculateTotalStringSize {
     
     let totalBytes = 0;
-
     for (const text of source) {
         const encoded = new TextEncoder().encode(text);
         totalBytes += encoded.length;
@@ -337,6 +335,79 @@ function formatSize(bytes: number) {
     if (bytes < 1024) return `${bytes}B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)}KB`;
     return `${(bytes / (1024 * 1024)).toFixed(2)}MB`;
+}
+
+
+export async function getListNewFilesToDeleteByGroup(group: string, project: number, folder: string) {
+
+    const filesToDelete: mls.stor.IFileInfo[] = [];
+
+    const filesLocal = Object.values(mls.stor.files).filter(file =>
+        file.inLocalStorage &&
+        file.folder === folder &&
+        file.project === project &&
+        file.status === 'new'
+    );
+
+    for await (let storFile of filesLocal) {
+        const keyModel = mls.l2.getKey(storFile);
+        let models: mls.editor.IModels | undefined = mls.editor.models[keyModel];
+        if (!models) models = await mls.editor.addModels(storFile.project, storFile.shortName, '')
+        if (models && models.ts) {
+            mls.l2.typescript.parseTripleSlash(models.ts);
+            const tpsGroup = models.ts.compilerResults?.tripleSlashMLS?.variables['groupName']
+            if (group === tpsGroup) filesToDelete.push(storFile);
+        }
+    }
+
+    return filesToDelete;
+}
+
+export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
+    const modelsToDelete: { project: number, shortName: string }[] = Array.from(
+        new Map(filesToDelete.map(({ project, shortName }) => [shortName, { project, shortName }])).values()
+    );
+
+    const filesToDeleteCache: Set<string> = new Set();
+
+    for (const fileToDelete of filesToDelete) {
+        await mls.stor.localStor.setContent(fileToDelete, { contentType: 'string', content: null });
+        fileToDelete.onAction = undefined;
+        fileToDelete.getValueInfo = undefined;
+
+        const keyFiles = mls.stor.getKeyToFiles(
+            fileToDelete.project,
+            fileToDelete.level,
+            fileToDelete.shortName,
+            fileToDelete.folder,
+            fileToDelete.extension
+        );
+        delete mls.stor.files[keyFiles];
+
+        yield `Storfile deleted: ${keyFiles}`;
+
+        const ext = fileToDelete.extension.replace('.ts', '.js');
+        const targetKey = `https://collab.codes/local/_${fileToDelete.project}_${fileToDelete.shortName}${ext}?v=`;
+        filesToDeleteCache.add(targetKey);
+    }
+
+    for (const data of modelsToDelete) {
+        const keyModel = mls.l2.getKey(data);
+        mls.editor.deleteModels(data.project, data.shortName, true);
+        yield `Model deleted : ${keyModel}`;
+    }
+
+    const cacheName = 'mls-v2';
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    for (const request of keys) {
+        for (const targetKey of filesToDeleteCache) {
+            if (request.url.includes(targetKey)) {
+                await cache.delete(request);
+                yield `Cache file deleted: ${request.url}`;
+            }
+        }
+    }
 }
 
 interface ICalculateTotalStringSize {

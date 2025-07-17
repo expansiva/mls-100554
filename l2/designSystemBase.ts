@@ -121,6 +121,19 @@ export async function getTokens(project: number): Promise<IDesignSystemTokens[]>
     return instance.tokens || [];
 }
 
+export async function updateTokensTheme(project: number, themeName: string, tokenData: IDesignSystemTokens): Promise<void> {
+    const actualTokens = await getTokens(project);
+    const tokensByTheme = actualTokens.find((theme) => theme.themeName === themeName);
+    if (!tokensByTheme) throw new Error(`Invalid theme`);
+
+    tokensByTheme.color = tokenData.color;
+    tokensByTheme.typography = tokenData.typography;
+    tokensByTheme.global = tokenData.global;
+    tokensByTheme.description = tokenData.themeName;
+    await serializeTokens(project, actualTokens);
+
+}
+
 export async function addNewTokensTheme(project: number, tokenData: IDesignSystemTokens): Promise<void> {
     const actualTokens = await getTokens(project);
     let v = 1;

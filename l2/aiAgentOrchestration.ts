@@ -9,6 +9,7 @@ import {
     getNextPendentStep,
     safeParseArgs,
     appendPromptToInteraction,
+    appendLongTermMemory,
     getStepById,
     getUserIdLocalStorage,
     notifyTaskChange,
@@ -27,7 +28,9 @@ export async function startNewAiTask(
     userId: string,
     inputAI: mls.msg.IAMessageInputType[],
     context: mls.msg.ExecutionContext,
-    afterPrompt: (context: mls.msg.ExecutionContext) => Promise<void>
+    afterPrompt: (context: mls.msg.ExecutionContext) => Promise<void>,
+    longTermMemory?: Record<string, string>
+
 ): Promise<void> {
     try {
         const args: mls.msg.RequestAddMessageAI = {
@@ -54,6 +57,7 @@ export async function startNewAiTask(
         notifyTaskChange(context, oldContextCreateAt);
 
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
+        if (longTermMemory) await appendLongTermMemory(context, longTermMemory);
         await afterPrompt(context);
 
     } catch (error: any) {
