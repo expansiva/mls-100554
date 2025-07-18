@@ -47,7 +47,9 @@ Examples: Stripe (payment), Sentry (error tracking), Google Analytics (usage tra
 
 5. Using the information from "pages" and "pagesWireframe", define each organism resume and store them in "organism".
 
-6. Analyze the user’s preferences and the type of website being built. Then create a .less token system based on default design tokens and tailored to this module. Store the results in the “tokens” field.
+6. Define the visual identify and store then in 'visualIdentity'.
+
+7. Analyze the user’s preferences and the type of website being built. Then create a .less token system based on default design tokens and tailored to this module. Store the results in the “tokens” field.
 Guidelines:
 - Include tokens for:
 	•	Colors: primary, secondary, accent, background, surface, text (normal, secondary, disabled), border, link (normal, hover, visited), overlay.
@@ -60,51 +62,8 @@ Guidelines:
 - Token names must follow the naming pattern: token-category-name, e.g., color-primary, spacing-md.
 - Use scalable units (like rem or em) instead of fixed px values where possible.
 - Colors should reflect the platform’s visual identity and accessibility best practices (e.g., minimum contrast ratios).
-- Avoid adding tokens that are not used by the organisms or layouts of this module.
-- Dark mode support:
-For each color token, generate a corresponding dark mode variation by prefixing it with _dark-.
-Example: color-background → _dark-color-background.
-These dark tokens should reflect an appropriate color scheme for dark interfaces.
+- For dark mode support, generate a variant of each color token by prefixing with _dark- (e.g., color-background → _dark-color-background), using appropriate values for dark interfaces.
 
-7. Com as informações das páginas e dos organismos, vamos criar um html único, estilo SPA , com javascript embutido, store the result in "siteHtml", e siga as regras:
-- O site deve ter um header &lt;organism-nav&gt; e um footer &lt;organism-footer&gt;, que permanecem fixos em todas as páginas.
-- O conteúdo principal deve ser trocado entre &lt;page-home&gt;, &lt;page-servicos&gt;, &lt;page-contato&gt;, etc, mostrando apenas um por vez.
-- A navegação deve funcionar via links internos e JavaScript, sem recarregar a página.
-- o CSS será gerado posteriormente com o less anterior.
-
-
-7. Using the information from “pages” and “organisms”, generate the full HTML for each page in a single file (SPA style), including all required organisms and structure.
-Guidelines:
-- For each organism, if its code has already been defined earlier in the HTML, simply indicate with a placeholder/task (e.g., &lt;!-- insert organism-nav here --&gt;), rather than repeating its code.
-- Header and footer (organism-nav and organism-footer) should be included as part of each page if required.
-- The goal is that each page is fully defined, but organism code is only present once in the file and reused via placeholders/tasks.
-- Navigation between pages should work with JavaScript, swapping only the main content without page reloads.
-- Create a &lt;div id="content"&gt;&lt;/div&gt; that will contain the full content of selected page.
-- The CSS will be generated from tokens later.
-example:
-&lt;body&gt;
-  &lt;div id="content"&gt;
-    &lt;!-- Selected page here --&gt;
-  &lt;/div&gt;
-  &lt;script&gt;
-    // JS SPA navigation: inject page HTML into #content
-  &lt;/script&gt;
-  &lt;page-home&gt;
-    &lt;header&gt;
-      &lt;organism-nav&gt;
-        &lt;!-- nav code here --&gt;
-      &lt;/organism-nav&gt;
-    &lt;/header&gt;
-    &lt;main&gt; ... &lt;/main&gt;
-    &lt;footer&gt; ... &lt;/footer&gt;
-  &lt;/page-home&gt;
-  &lt;page-contact&gt;
-    &lt;header&gt; ... &lt;/header&gt;
-    &lt;main&gt; ... &lt;/main&gt;
-    &lt;footer&gt; ... &lt;/footer&gt;
-  &lt;/page-contact&gt;
-  ...
-&lt;/body&gt;
 
 ## Output format (JSON):
 ```json
@@ -127,8 +86,8 @@ interface NewModuleAnalysis {
  plugins: PluginDefinition[],
  pagesWireframe: PagesWireframe[],
  organism: Organism[],
+ visualIdentity: VisualIdentity,
  tokens: IDesignSystemTokens,
- siteHtml: string
 }
 interface UserRequestsEnhancements { 
    description: string; 
@@ -175,8 +134,25 @@ interface IDesignSystemTokens {
     description: string,
     themeName: string,
     color: Record&lt;string, string&gt;,
-    global: Record&lt;string, string&gt;,
+
+    global: Record&lt;string, string&gt;, // general-purpose tokens (e.g., spacing, radius, shadow, transition)
     typography: Record&lt;string, string&gt;,
+}
+interface VisualIdentity {
+  logoDescription: string; // English description of style and concept used to generate an SVG logo
+  fontFamily: string;      // Preferred font family for headings and body
+  iconStyle?: "outline" | "solid" | "duotone" | "custom"; // General icon preference
+  illustrationStyle?: string; // in ingles, describe the visual style of illustrations (e.g., flat, 3D, line art)
+  colorPalette: {
+    primary: string; // HEX color
+    secondary: string;
+    text: string;
+    background: string;
+    border: string;
+    error: string;
+    warning: string;
+    success: string;
+  }
 } </promptcustom>  <promptcustom type="human"> ## User Prompt 
 {{userPrompt}} </promptcustom>  <promptcustom type="ai"> ## Clarification 2
 ```json
