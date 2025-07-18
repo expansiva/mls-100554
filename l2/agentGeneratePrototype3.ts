@@ -221,6 +221,7 @@ export interface PayLoad3 {
     plugins: PluginDefinition[],
     pagesWireframe: PagesWireframe[],
     organism: Organism[],
+    visualIdentity: VisualIdentity,
     tokens: IDesignSystemTokens
 }
 
@@ -265,4 +266,19 @@ export interface Planning {
     description: string; // Description of the planning
     comment?: string; // Optional comment or notes
 }
-
+export interface VisualIdentity {
+  logoDescription: string; // English description of style and concept used to generate an SVG logo
+  fontFamily: string;      // Preferred font family for headings and body
+  iconStyle?: "outline" | "solid" | "duotone" | "custom"; // General icon preference
+  illustrationStyle?: string; // Describe the visual style of illustrations (e.g., flat, 3D, line art)
+  colorPalette: {
+    primary: string; // HEX color
+    secondary: string;
+    text: string;
+    background: string;
+    border: string;
+    error: string;
+    warning: string;
+    success: string;
+  }
+}
