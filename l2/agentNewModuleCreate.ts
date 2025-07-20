@@ -660,7 +660,7 @@ function generateOrganismDefsFromLLM(payload: PayLoad3, index: number, project: 
         },
         references: {
             widgets: [],
-            plugins: organism.organismPlugins,
+            plugins: undefined, // organism.organismPlugins,
             statesRO: [],
             statesRW: [],
             statesWO: [],
@@ -752,7 +752,7 @@ function generatePageDefsFromLLM(payload: PayLoad3, index: number, project: numb
             tags: ["lit", "page"]
         },
         references: {
-            widgets,
+            widgets: undefined, // widgets is not organism
             plugins: [],
             statesRO: [],
             statesRW: [],

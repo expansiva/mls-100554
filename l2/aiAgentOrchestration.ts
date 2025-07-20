@@ -19,6 +19,7 @@ import {
 } from "./_100554_aiAgentHelper";
 
 import { getTask, getMessage } from "./_100554_msgDBController";
+import { IAgent, svg_agent } from './_100554_aiAgentBase';
 
 export async function startNewAiTask(
     agentName: string,
@@ -290,21 +291,32 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
     if (!step.agentName) throw new Error("Agent name is missing");
 
     try {
-        //const fileJS = `./${step.agentName}.js`;
-        const fileJS = `./_100554_${step.agentName}`;
-        const module = await import(fileJS);
-        if (typeof module.createAgent !== "function") throw new Error(`createAgent function not found in ${fileJS}`);
-        const agent = module.createAgent();
-        if (typeof agent.beforePrompt !== "function") throw new Error(`beforePrompt function not found in ${fileJS}`);
-        if (typeof agent.afterPrompt !== "function") throw new Error(`afterPrompt function not found in ${fileJS}`);
+        const agent = await loadAgent(mls.actual[5].project || 0, step.agentName);
+        if (!agent) throw new Error(`createAgent function not found in ${mls.actual[5].project} ${step.agentName}`);
         await agent.beforePrompt(context);
     } catch (error: any) {
-
         const msg = 'Error: ' + error.message || 'beforePrompt ' + step.agentName;
         context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
         setFailedStatus(context, step.stepId);
         console.error(`[executeNextAgent] ${error.message || error}`);
     }
+}
+
+export async function loadAgent(projectId: number, shortName: string): Promise<IAgent | undefined> {
+
+    try {
+        const fileJS = `./_${projectId}_${shortName}`;
+        const module = await import(fileJS);
+        if (typeof module.createAgent !== "function") throw new Error(`createAgent function not found in ${fileJS}`);
+        const agent = module.createAgent();
+        if (typeof agent.beforePrompt !== "function") throw new Error(`beforePrompt function not found in ${fileJS}`);
+        if (typeof agent.afterPrompt !== "function") throw new Error(`afterPrompt function not found in ${fileJS}`);
+        return agent;
+    } catch (error: any) {
+        console.error(`[loadAgent] ${error.message || error}`);
+        return undefined;
+    }
+
 }
 
 async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep, functionName: string, stepId: number, args?: object): Promise<any> {
