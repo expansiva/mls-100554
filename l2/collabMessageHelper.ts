@@ -7,7 +7,7 @@ const LS_KEY = 'collabChatPreferences';
 export const AGENTDEFAULT = 'agentPlanner1';
 export const PROJECTAGENTDEFAULT = 100554;
 
-export async function addMessage(threadId: string, messageContent: string) {
+export async function addMessage(threadId: string, messageContent: string, contextToBot?: mls.bots.ToolsBeforeSendMessage) {
 
     const userId = getUserIdLocalStorage() || '';
     if (!userId) throw new Error('Invalid user id');
@@ -18,7 +18,8 @@ export async function addMessage(threadId: string, messageContent: string) {
             action: 'addMessage',
             content: messageContent,
             threadId: threadId,
-            userId: userId
+            userId: userId,
+            contextToBot: contextToBot
         };
         const res = await mls.api.msgAddMessage(params);
         notifyMessageSendChange({ message: res.message, task: undefined })

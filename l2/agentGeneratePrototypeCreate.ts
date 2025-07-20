@@ -487,7 +487,7 @@ function generatePageDefsFromLLM(payload: PayLoad3, index: number, project: numb
     const shortName = sanitizeMeta(page.pageName, project, folder);
 
     const wireframe = payload.pagesWireframe.find(p => p.pageSequential === page.pageSequential);
-    const widgets = wireframe ? extractOrganismTagsFromHtml(wireframe.pageHtml) : [];
+    // const widgets = wireframe ? extractOrganismTagsFromHtml(wireframe.pageHtml) : [];
 
     const defs: mls.l4.BaseDefs = {
         meta: {
@@ -499,7 +499,7 @@ function generatePageDefsFromLLM(payload: PayLoad3, index: number, project: numb
             tags: ["lit", "page"]
         },
         references: {
-            widgets,
+            widgets: undefined,
             plugins: [],
             statesRO: [],
             statesRW: [],

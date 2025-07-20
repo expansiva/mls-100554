@@ -664,7 +664,7 @@ export class PluginPreviewInsights100554 extends StateLitElement {
 
   private onSaveReferences(mode: 'widgets' | 'plugins' | 'statesRO' | 'statesRW' | 'statesWO' | 'imports', value: string[]) {
     if (!this.defs || !this.defs.references || !this.defs.references[mode]) return;
-    this.defs.references[mode] = value;
+    // todo: refactory this.defs.references[mode] = value;
     this.requestUpdate();
   }
 
