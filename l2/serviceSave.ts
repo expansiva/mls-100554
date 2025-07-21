@@ -1250,6 +1250,7 @@ export class ServiceSave extends ServiceBase {
         mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);
         setTimeout(async () => {
             await this.setInfos();
+            this.backChecked();
             this.requestUpdate();
         }, 500);
     }
