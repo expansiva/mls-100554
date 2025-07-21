@@ -150,6 +150,7 @@ export class ServicePreview100554 extends ServiceBase {
     public onClickTools(op: string) {
 
         if (op === 'watchPreview') this.toogleWatch();
+        else if (op === 'editTextL3') this.toogleEditTextL3();
         else if (op === 'devConsole') this.toogleConsole();
         else if (op === 'help') this.onHelpClick();
         else if (op === 'test') this.onBtTestClick();
@@ -259,6 +260,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.elPreview) {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
+            this.changeTools();
         } else {
 
             this.onReloader();
@@ -266,6 +268,64 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     // -------------- EVENTS -------------------
+
+    private changeTools() {
+
+        this.changeToolsLevel3();
+        if (this.menu.refresh) this.menu.refresh();
+
+    }
+
+    private changeToolsLevel3() {
+
+        if (this.level !== 3 && this.menu.tools.editTextL3) {
+            delete this.menu.tools.editTextL3;
+            return;
+        }
+
+        this.menu.tools.editTextL3 = {
+            type: 'cycle',
+            selected: 0,
+            options: [
+                { text: "Edit", icon: 'f31c' },
+                { text: "Save", icon: 'f0c7' },
+            ]
+        }
+
+
+    }
+
+    private elEditL3: HTMLElement | undefined;
+    private async toogleEditTextL3() {
+
+        if (!this.elPreview) return;
+        const iframe = this.elPreview.querySelector('iframe') as HTMLIFrameElement;
+
+        if (!iframe || !iframe.contentDocument || !iframe.contentDocument.body) return;
+
+        const body = iframe.contentDocument.body;
+
+        if (this.menu.tools.editTextL3.selected === 0) {
+            if (this.elEditL3 && (this.elEditL3 as any).save) {
+                const ret = await (this.elEditL3 as any).save();
+                if (!ret) this.preview(this.lastModePreview);
+                
+            }else this.preview(this.lastModePreview);
+            return;
+        }
+
+        this.elEditL3 = document.createElement('collab-l3-edit-text-100554');
+        body.appendChild(this.elEditL3);
+
+        if (!body.querySelector('#_100554_collabL3EditText')) {
+            const script = document.createElement('script') as HTMLScriptElement;
+            script.type = 'module';
+            script.id = '_100554_collabL3EditText';
+            script.src = '/_100554_collabL3EditText';
+            body.appendChild(script);
+        }
+
+    }
 
     private setEvents() {
 
