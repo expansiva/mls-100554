@@ -12,6 +12,7 @@ import './_100554_collabL3PreviewTextI18n';
 @customElement('collab-l3-edit-text-100554')
 export class CollabL3EditText extends CollabLitElement {
 
+    @property({ type: Boolean }) dev: boolean = false ;
     @property({ type: Object }) target: HTMLElement | null = null;
     private json: IInfoEditLe | undefined;
     private baseTexti18n: string = '';
@@ -30,7 +31,8 @@ export class CollabL3EditText extends CollabLitElement {
     }
 
     render() {
-        return html`<button @click="${this.save}">Save</button>`;
+        if (this.dev) return html`<button @click="${this.save}">Save</button>`;
+        return html``;
     }
 
     //--------IMPLEMENTS---------
@@ -236,7 +238,7 @@ export class CollabL3EditText extends CollabLitElement {
 
     }
 
-    async save() {
+    public async save() {
 
         if (!this.json) return;
 
@@ -284,6 +286,9 @@ export class CollabL3EditText extends CollabLitElement {
 
         if (edits.length > 0) {
             models.ts.model.pushEditOperations([], edits, () => null);
+            return true;
+        } else {
+            return false;
         }
     }
 
