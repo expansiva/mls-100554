@@ -22,7 +22,8 @@ import { ServiceSource100554 } from './_100554_serviceSource';
 import './_100554_collabInputTag';
 import './_100554_widgetDefsPlanningChecklistEdit';
 import './_100554_widgetDefsListEdit';
-
+import './_100554_widgetDefsObjectListEdit';
+import './_100554_widgetDefsPluginListEdit'
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -197,22 +198,23 @@ export class PluginPreviewInsights100554 extends StateLitElement {
   }
 
   renderWidgets() {
+
     return html`
     <h3>Widgets</h3>
-    <widget-defs-list-edit-100554
-      .listItem=${this.defs?.references?.widgets}
-      @onSaveEditClick=${(e: CustomEvent) => this.onSaveReferences('widgets', e.detail.item)}
-    ></widget-defs-list-edit-100554>
+    <widget-defs-object-list-edit-100554
+      .listItem=${this.defs?.references?.widgets || []}
+      @onSaveEditClick=${(e: CustomEvent) => this.onSaveReferencesWidgets(e.detail.widgets)} 
+    ></widget-defs-object-list-edit-100554>
     `
   }
 
   renderPlugins() {
     return html`
     <h3>Plugins</h3>
-    <widget-defs-list-edit-100554
-      .listItem=${this.defs?.references?.plugins}
-      @onSaveEditClick=${(e: CustomEvent) => this.onSaveReferences('plugins', e.detail.item)}
-    ></widget-defs-list-edit-100554>
+    <widget-defs-plugin-list-edit-100554
+      .listItem=${this.defs?.references?.plugins || []}
+      @onSaveEditClick=${(e: CustomEvent) => this.onSaveReferencesPlugins(e.detail.plugins)}
+    ></widget-defs-plugin-list-edit-100554>
     `
   }
 
@@ -273,18 +275,18 @@ export class PluginPreviewInsights100554 extends StateLitElement {
       if (value <= 8) return '🙂';
       return '😄';
     };
-    
+
     return html`
 
     <h3>Code Quality Metrics</h3>
 
     ${[insights.errorHandling, insights.correctness, insights.maintainability, insights.readability].every((item) => item === undefined)
-      ? html`No metrics`
-      :
-      metrics.map(({ key, label }) => {
-        const value = insights[key as keyof typeof insights] ?? 0;
-        if(!value) return html``
-        return html`
+        ? html`No metrics`
+        :
+        metrics.map(({ key, label }) => {
+          const value = insights[key as keyof typeof insights] ?? 0;
+          if (!value) return html``
+          return html`
           <div class="metric">
             <label for="${key}">${label}:</label>
             <input
@@ -300,9 +302,9 @@ export class PluginPreviewInsights100554 extends StateLitElement {
             <span class="emoji">${getEmoji(value as number)}</span>
           </div>
         `;
-      })
-    
-    }
+        })
+
+      }
 
 
 
@@ -617,11 +619,9 @@ export class PluginPreviewInsights100554 extends StateLitElement {
   }
 
   private deletePlannigItem(key: 'userRequestsEnhancements' | 'userRequestsBugs' | 'userRequestsFeatures', index: number) {
-
     if (!this.defs?.planning || !this.defs.planning[key]) return;
     this.defs.planning[key]?.splice(index, 1)
     this.requestUpdate();
-
   }
 
   private addPlannigItem(key: 'userRequestsEnhancements' | 'userRequestsBugs' | 'userRequestsFeatures') {
@@ -643,9 +643,7 @@ export class PluginPreviewInsights100554 extends StateLitElement {
     if (!this.defs?.planning?.userStories || !this.defs.planning.userStories[index]) return;
     this.defs.planning.userStories.splice(index, 1);
     this.requestUpdate();
-
   }
-
 
   private onImproveClick(item: mls.l4.Planning) {
     const service = getState('preview.service');
@@ -662,12 +660,24 @@ export class PluginPreviewInsights100554 extends StateLitElement {
     this.requestUpdate();
   }
 
-  private onSaveReferences(mode: 'widgets' | 'plugins' | 'statesRO' | 'statesRW' | 'statesWO' | 'imports', value: string[]) {
+  private onSaveReferences(mode: 'statesRO' | 'statesRW' | 'statesWO' | 'imports', value: string[]) {
     if (!this.defs || !this.defs.references || !this.defs.references[mode]) return;
-    // todo: refactory this.defs.references[mode] = value;
+    this.defs.references[mode] = value;
     this.requestUpdate();
   }
 
+  private onSaveReferencesWidgets(value: mls.l4.DefsWidget[]) {
+
+    if (!this.defs || !this.defs.references) return;
+    this.defs.references.widgets = value;
+    this.requestUpdate();
+  }
+
+  private onSaveReferencesPlugins(value: mls.l4.DefsPlugin[]) {
+    if (!this.defs || !this.defs.references) return;
+    this.defs.references.plugins = value;
+    this.requestUpdate();
+  }
 
   private async setInfos() {
 
@@ -725,9 +735,8 @@ export const defs: mls.l4.BaseDefs = ${JSON.stringify(result, null, 2)}
     this.mode = tab;
   }
 
-
-
 }
+
 
 
 const defsMock: mls.l4.BaseDefs = {
@@ -745,7 +754,20 @@ const defsMock: mls.l4.BaseDefs = {
     ]
   },
   "references": {
-    "widgets": [],
+    "widgets": [
+      {
+        tag: 'widget-1',
+        analysis: {
+          hasLogic: true,
+          independent: true,
+          reusable: true,
+          suggestion: 'widget'
+        },
+        bindings: [], // string[]
+        purpose: '',
+        used: true
+      }
+    ],
     "plugins": [],
     "statesRO": [
       "actualSiteSelected",

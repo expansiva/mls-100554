@@ -65,7 +65,6 @@ export class WidgetDefsListEdit100554 extends StateLitElement {
         if (!this.listItem) return;
         this.listItem = this.tempListItem;
         this.isEditing = false;
-        console.info(this.listItem)
         this.dispatchEvent(new CustomEvent('onSaveEditClick', {
             detail: { item: this.listItem },
             bubbles: true,
