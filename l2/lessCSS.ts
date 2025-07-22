@@ -100,6 +100,7 @@ export class LessCSS {
         if (!state) return;
 
         const selector = this.lessAST.findSelectorByLine(lineNumber);
+
         if (!selector) {
             this.clearState();
             setState(`less.${this.position}.lineContent`, lineContent);
@@ -108,21 +109,23 @@ export class LessCSS {
 
         this.setSelector(selector);
         const info = this.lessAST.findInfoByLine(selector, lineNumber);
-        setState(`less.${this.position}`, {
+        const obj: any = {
             selector: selector,
             lineContent: lineContent,
-            key: info?.key,
-            value: info?.value,
             emitter: emitter,
             lineNumber: lineNumber,
             lessCSS: this,
-        });
+        }
+
+        if (info && info.key) obj.key = info.key;
+        if (info && info.value !== undefined) obj.value = info.value;
+        setState(`less.${this.position}`, obj);
 
     }
 
     private clearState() {
 
-        const state = getState(`less.${this.position}`);
+        const state = getState(`less.${this.position} `);
         if (!state) return;
         setState(`less.${this.position}.lessCSS`, undefined);
         setState(`less.${this.position}.key`, undefined);
@@ -132,7 +135,7 @@ export class LessCSS {
     }
 
     private updateState() {
-        const state = getState(`less.${this.position}`);
+        const state = getState(`less.${this.position} `);
         if (!state) return;
         setState(`less.${this.position}.lessCSS`, this);
         setState(`less.${this.position}.lessCSS.styles`, this.styles);
@@ -145,7 +148,7 @@ export class LessCSS {
             right: {}
         });
 
-        setState(`less.${this.position}`, {
+        setState(`less.${this.position} `, {
             lessCSS: this,
             emitter: 'editor',
             key: undefined,
@@ -154,8 +157,6 @@ export class LessCSS {
             selector: undefined,
             uri: this._url,
         });
-
-        //setState(`less.${this.position}`, { ...getState(`less[${this.position}]`) });
 
     }
 

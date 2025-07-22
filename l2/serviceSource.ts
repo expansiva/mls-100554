@@ -1110,13 +1110,13 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private async renameAllFiles(storFileTS: mls.stor.IFileInfo, newProject: number, newShortName: string) {
-        
+
         const files = await mls.stor.getFiles({ project: storFileTS.project, shortName: storFileTS.shortName, folder: storFileTS.folder || '', loadContent: true });
         const oldTag = convertFileNameToTag(`_${storFileTS.project}_${storFileTS.shortName}`);
         const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
         const regex = new RegExp(oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
 
-        const replaceTripleslashAndTag = (src:string) => {
+        const replaceTripleslashAndTag = (src: string) => {
             src = src.replace(/shortName="[^"]*"/, `shortName="${newShortName}"`).replace(/project="[^"]*"/, `project="${newProject}"`);
             return src.replace(regex, newTag);
         };
@@ -1165,14 +1165,14 @@ export class ServiceSource100554 extends ServiceBase {
             };
             await mls.stor.addOrUpdateFile(params);
         }
-        
+
         if (mls.stor.files[key]) {
             await mls.stor.localStor.setContent(mls.stor.files[key], { contentType: 'string', content: null });
             delete mls.stor.files[key];
         }
     }
 
-    private async createStorFileStatusRename(project:number, shortName:string, content:string, extension:string, originalProject:number, originalShortName:string, originalFolder:string, oldStatus:string) {
+    private async createStorFileStatusRename(project: number, shortName: string, content: string, extension: string, originalProject: number, originalShortName: string, originalFolder: string, oldStatus: string) {
         const params = {
             project,
             level: 2,
@@ -1500,6 +1500,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     private timeHtmlChangeCursor: number = 0;
     private lastIdSelected: string | null = null;
+    private lastLineNumber: number | null = null;
     private async initMonaco_Editor(): Promise<void> {
 
         const addEventsEditor = () => {
@@ -1517,6 +1518,10 @@ export class ServiceSource100554 extends ServiceBase {
 
             this._ed1.onDidChangeCursorPosition((e) => {
 
+                const currentLineNumber = e.position.lineNumber;
+                if (currentLineNumber === this.lastLineNumber) return;
+                this.lastLineNumber = currentLineNumber;
+
                 this._ed1?.updateOptions({ readOnly: false });
                 clearTimeout(this.timeHtmlChangeCursor);
                 if (!this._ed1 || !this.menu.tabs) return;
@@ -1530,11 +1535,14 @@ export class ServiceSource100554 extends ServiceBase {
                     if (!isReadOnlyArea) {
                         if (this.lessCSS && this.lessCSS.setStateByLine && typeof this.lessCSS.setStateByLine === 'function') {
                             const content = model?.getLineContent(lineNumber) || '';
-                            this.lessCSS.setStateByLine(lineNumber, content, 'editor');
+                            setTimeout(() => {
+                                this.lessCSS?.setStateByLine(lineNumber, content, 'editor');
+                            }, 100);
                         }
                     }
                     return;
                 }
+
 
                 if (!this._ed1 || this.menu.tabs.selected !== EToolsSource.icHTML) return;
                 const position = e.position;
