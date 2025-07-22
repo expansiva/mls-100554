@@ -8,6 +8,7 @@ import { notifyThreadChange } from './_100554_aiAgentHelper';
 import { StateLitElement } from './_100554_stateLitElement';
 import './_100554_collabInputTag';
 import './_100554_collabMessagesAddParticipant';
+import { addMessage } from "./_100554_collabMessageHelper";
 
 
 /// **collab_i18n_start** 
@@ -24,7 +25,9 @@ const message_pt = {
     statusArchived: 'Arquivado',
     statusDeleted: 'Deletado',
     remove: 'Remover',
+    disable: 'Desalibitar',
     users: 'Usuários',
+    bots: 'Bots',
     group: 'Grupo',
     details: 'Detalhes',
     languages: 'Idiomas',
@@ -56,8 +59,10 @@ const message_en = {
     statusArchived: 'Archived',
     statusDeleted: 'Deleted',
     remove: 'Remove',
+    disable: 'Disable',
     group: 'Group',
     users: 'Users',
+    bots: 'Bots',
     languages: 'Languages',
     details: 'Details',
     languagesHint: 'Detected and updated based on the languages of participating users.',
@@ -87,13 +92,15 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 
-    @property() userId: string | undefined;
+    @property() userId: string | undefined = '20250417120841.1000';
 
-    @property() threadDetails?: IThreadDetails = { "thread": { "history": [{ "action": "created", "userId": "20250417120841.1000", "timestamp": "20250417180232" }, { "action": "update_name", "userId": "20250417120841.1000", "timestamp": "20250417180232" }, { "action": "update_group", "userId": "20250417120841.1000", "timestamp": "20250417180232" }, { "action": "add_user", "userId": "20250417120841.1000", "timestamp": "20250417180232" }, { "action": "add_user", "userId": "20250417120844.1000", "timestamp": "20250417183722" }, { "action": "add_user", "userId": "20250417004803.1000", "timestamp": "20250424195218" }], "languages": ["pt", "en", "es"], "status": "active", "visibility": "private", "group": "CONNECT", "threadId": "20250417180232.1000", "users": [{ "userId": "20250417120841.1000", "auth": "admin" }, { "userId": "20250417120844.1000", "auth": "write" }, { "userId": "20250417004803.1000", "auth": "write" }], "name": "Enquetes", "lastMessage": "@@ Criar um widget que permita aos usuários selecionar um intervalo de datas, com opções para definir limites mínimos e máximos e bloquear datas específicas, ideal para aplicações de reservas e agendamentos. Fazer um dropdown, com a data inicial e data final sendo marcadas uma após a outra. A data inicial deve ser menor que a data final. O usuário deve clicar na data inicial e depois na data final para confirmar a seleção. Cada dia na tabela deve ser um botão clicável. No final da seleção, atualizar o componente para mostrar o período selecionado e atualizar a propriedade do web-componente. A mensagem de erro deve ficar em cima do componente, para evitar que fique embaixo do dropdown e não seja visível.", "lastMessageTime": "20250502195959.1000", "unreadCount": 0, "lastSync": "20250506140645" }, "users": [{ "avatar_url": "https://lh3.googleusercontent.com/a-/AOh14GjhEPN7UazL97l6qFIRIYUoLY-PNNPC93Zw4EVT=s96-c", "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000", "20250422203048.1000", "20250425212707.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active" }, { "avatar_url": "https://lh5.googleusercontent.com/-RcrSZBlS8sM/AAAAAAAAAAI/AAAAAAAAAAc/DQDUXj8XpEo/s96-c/photo.jpg", "threads": ["20250417133813.1000", "20250417180232.1000", "20250423205309.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active" }, { "avatar_url": "https://lh6.googleusercontent.com/-Gup9IkqANhQ/AAAAAAAAAAI/AAAAAAAAIFc/38cLYfRcRbg/s96-c/photo.jpg", "threads": ["20250417135645.1000", "20250417180232.1000", "20250425212707.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active" }] };
+    @property() threadDetails?: IThreadDetails = { "thread": { "history": [{ "action": "created", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "update_name", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "update_visibility", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "update_group", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "update_languages", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "add_user", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "add_user", "userId": "20250417120841.1000", "timestamp": "20250623120953" }, { "action": "add_user", "userId": "20250521175345.1000", "timestamp": "20250623120959" }, { "action": "add_user", "userId": "20250417120844.1000", "timestamp": "20250623121006" }, { "action": "updateBot", "userId": "Wagner", "timestamp": "20250721114724" }], "languages": ["pt"], "status": "active", "visibility": "company", "group": "CONNECT", "threadId": "20250622191652.1000", "users": [{ "userId": "20250417004803.1000", "auth": "admin" }, { "userId": "20250417120841.1000", "auth": "write" }, { "userId": "20250521175345.1000", "auth": "write" }, { "userId": "20250417120844.1000", "auth": "write" }], "name": "Wagner", "lastMessage": "aonde compro a tv 32 ?", "lastMessageTime": "20250721144157.1001", "unreadCount": 0, "lastSync": "20250721191357" }, "users": [{ "avatar_url": "https://lh6.googleusercontent.com/-Gup9IkqANhQ/AAAAAAAAAAI/AAAAAAAAIFc/38cLYfRcRbg/s96-c/photo.jpg", "threads": ["20250417135645.1000", "20250417180232.1000", "20250425212707.1000", "20250521143841.1000", "20250521144214.1000", "20250521144240.1000", "20250507201344.1000", "20250622191652.1000", "20250622191728.1000", "20250622191744.1000", "20250622191802.1000", "20250630112715.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active" }, { "avatar_url": "https://lh3.googleusercontent.com/a-/AOh14GjhEPN7UazL97l6qFIRIYUoLY-PNNPC93Zw4EVT=s96-c", "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000", "20250422203048.1000", "20250425212707.1000", "20250507201344.1000", "20250423205309.1000", "20250521144240.1000", "20250521223250.1000", "20250521225039.1000", "20250521225730.1000", "20250521225840.1000", "20250523200654.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active" }, { "avatar_url": "https://lh3.googleusercontent.com/a-/AOh14Gh-DIRLsowx8ItOQ7slQNzEN7geu3YrsG09SFD1=s96-c", "threads": ["20250422203048.1000", "20250521144240.1000", "20250521225840.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Lucas", "userId": "20250521175345.1000", "status": "active" }, { "avatar_url": "https://lh5.googleusercontent.com/-RcrSZBlS8sM/AAAAAAAAAAI/AAAAAAAAAAc/DQDUXj8XpEo/s96-c/photo.jpg", "threads": ["20250417133813.1000", "20250417180232.1000", "20250423205309.1000", "20250425212707.1000", "20250521144240.1000", "20250521225840.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active" }] };
 
     @property() labelOk: string = '';
     @property() labelError: string = '';
     @property() labelErrorRemoveUser: string = '';
+    @property() labelErrorRemoveBoot: string = '';
+
 
     @state() private isLoading: boolean = false;
     @state() private editedThreadDetails?: IThreadDetails;
@@ -126,7 +133,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        const users = this.editedThreadDetails?.users || [];
 
         return html`
       <div class="content">
@@ -181,19 +187,33 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             </div>
 
         </div>
+        ${this.renderUsers()}
+        ${this.renderBots()}
 
+        
+      </div>
+
+    `;
+    }
+
+
+    private renderUsers() {
+        const users = this.editedThreadDetails?.users || [];
+
+        return html`
         <div class="users">
             <h3>${this.msg.users}</h3>
             <ul>
                 ${repeat(
             this.editedThreadDetails?.thread.users || [],
             ((user: { userId: string }) => user.userId) as any,
-            ((user: { userId: string; }) => {
+            ((user: { userId: string, auth: string }) => {
                 const details = users.find((us) => us.userId === user.userId);
                 return html`
                                 <li>
                                     <img src="${details?.avatar_url}" alt="${details?.name}" width="32" height="32" />
-                                    ${details?.name} (${user.userId})
+                                    <small>${details?.name}<b>(${user.auth})</b> - ${user.userId}</small>
+                    
                                     <button class="remove" @click="${(e: MouseEvent) => this.removeUser(e, user.userId)}">${this.msg.remove}</button>
                                 </li>
                     `;
@@ -209,9 +229,36 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 </div>
             </details>
         </div>
-      </div>
+        `
+    }
 
-    `;
+    private renderBots() {
+
+        return html`
+        <div class="bots">
+            <h3>${this.msg.bots}</h3>
+            <ul>
+                ${repeat(
+            this.editedThreadDetails?.thread.bots || [],
+            ((bot: mls.msg.ThreadBot) => bot.botId) as any,
+            ((bot: mls.msg.ThreadBot) => {
+                return html`
+                        <li>
+                            <small>${bot?.botId}<b>(${bot.status})</b></small>
+            
+                            ${bot.status !== "disabled"
+                        ? html`<button class="remove" @click="${(e: MouseEvent) => this.removeBot(e, bot.botId)}">${this.msg.disable}</button>`
+                        : ""
+                    }                            
+                        </li>
+                    `;
+            }
+            ) as any)}
+            </ul>
+            ${this.labelErrorRemoveBoot ? html`<small class="saving-error">${collab_triangle_exclamation} ${this.labelErrorRemoveBoot}<small>` : ''}   
+
+        </div>
+        `
     }
 
     private async removeUser(e: MouseEvent, userId: string) {
@@ -231,6 +278,48 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         } finally {
             button?.classList.remove('loading');
         }
+    }
+
+    private async removeBot(e: MouseEvent, botName: string) {
+        this.labelErrorRemoveBoot = '';
+        if (!this.threadDetails || !this.userId || !this.editedThreadDetails) return;
+        const button = (e.target as HTMLElement).closest('button');
+        try {
+            button?.classList.add('loading');
+            await this.disableBot(botName, this.threadDetails.thread.threadId, this.userId)
+        } catch (err: any) {
+            this.labelErrorRemoveBoot = err.message;
+        } finally {
+            button?.classList.remove('loading');
+        }
+    }
+
+    private async disableBot(botId: string, threadId: string, userId: string): Promise<boolean> {
+
+        try {
+            const rc = await mls.api.msgAddOrUpdateThreadBot({
+                botId,
+                llmPrompt: "",
+                status: "disabled",
+                threadId,
+                userId,
+                config: undefined
+            });
+            if (rc.statusCode === 200) {
+                await updateThread(threadId, rc.thread);
+                this.threadDetails = JSON.parse(JSON.stringify(this.editedThreadDetails));
+                const threadCache = await updateThread(threadId, rc.thread);
+                notifyThreadChange(threadCache);
+                await addMessage(threadId, `Bot ${botId} disabled OK!`);
+                return true;
+            };
+
+            throw new Error(`"error on disable bot", ${rc.statusCode} : ${rc.msg}`)
+
+        } catch (err: any) {
+            throw new Error(`"error on disable bot", ${err.message}`)
+        }
+
     }
 
     private getChangedFields(): mls.msg.RequestUpdateThread | undefined {

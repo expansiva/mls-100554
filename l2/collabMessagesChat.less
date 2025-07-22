@@ -1,11 +1,11 @@
 /// <mls shortName="collabMessagesChat" project="100554" enhancement="enhancementStyle" />
+
 collab-messages-chat-100554 {
     position: relative;
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 375px;
-
     .loader {
         display: inline-block;
         width: 10px;
@@ -231,9 +231,11 @@ collab-messages-chat-100554 {
                     padding: .5rem;
                     position: relative;
                     font-size: 14px;
-                    &.system:not(.same){
+
+                    &.system:not(.same) {
                         border-top-left-radius: 0px;
                     }
+
                     &.system:not(.same):before {
                         content: '';
                         position: absolute;
@@ -264,8 +266,12 @@ collab-messages-chat-100554 {
                     }
 
                     .failed {
-                        display: flex;
-                        gap: .3rem;
+
+                        >div {
+                            display: flex;
+                            gap: .3rem;
+                        }
+
                         margin-top: .2rem;
 
                         svg {

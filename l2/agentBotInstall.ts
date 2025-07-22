@@ -1,7 +1,7 @@
 /// <mls shortName="agentBotInstall" project="100554" enhancement="_blank" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getNextInProgressStepByAgentName, updateStepStatus } from "./_100554_aiAgentHelper";
+import { getNextInProgressStepByAgentName, updateStepStatus, notifyMessageSendChange } from "./_100554_aiAgentHelper";
 import { executeNextStep, loadAgent } from "./_100554_aiAgentOrchestration";
 import { addMessage } from "./_100554_collabMessageHelper";
 
@@ -35,9 +35,10 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         disableBot(context, projectId, shortName);
         return;
     }
-    const agent = await loadAgent(projectId, shortName);
+    const agent = await loadAgent(shortName);
     if (!agent) throw new Error(`[${agentName}] beforePrompt: Invalid Agent, check projectID and shortName: _${projectId}_${shortName}`);
     if (!agent.installBot) throw new Error(`[${agentName}] beforePrompt: Invalid Agent, is not a Bot: _${projectId}_${shortName}, ${JSON.stringify(agent)}`);
+    notifyMessageSendChange({ message: context.message, task: undefined });
     const rc = await agent.installBot(context);
     if (!rc) throw new Error(`[${agentName}] beforePrompt: Agent not instaled, error`);
     return;

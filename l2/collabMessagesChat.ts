@@ -55,7 +55,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @property() activeScenerie: IScenery = 'list';
     @property() actualThread: IThreadInfo | undefined;
     @property() actualTask: mls.msg.TaskData | undefined;
-    @property() actualMessage: IMessage | undefined;    
+    @property() actualMessage: IMessage | undefined;
     @property() actualMessages: IMessage[] = [];
     @property() actualMessagesParsed: IMessageGrouped = {};
     @property() isLoadingMessages: boolean = false;
@@ -194,8 +194,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                             ${this.renderMessageByLanguage(message)}
                                             ${message.isLoading ? html`<span class="loader"></span>` : ''}
                                             ${message.isFailed ? html`<div class="failed">
-                                                <span>${collab_circle_exclamation}</span>
-                                                <small>${this.msg.msgNotSend}</small>
+                                                <div>
+                                                    <span>${collab_circle_exclamation}</span>
+                                                    <small>${this.msg.msgNotSend}</small>
+                                                </div>
+                                                <small>${message.isFailedError}</small>
                                             </div>`: ''}
                                             ${message.taskId ? html`
                                                 <div class="message-ai">
@@ -206,7 +209,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                                         taskId=${message.taskId}
                                                         title=${titleTranslated}
                                                         status=${message.taskStatus}
-                                                        @taskclick=${() => this.onTaskClick(message?.taskId || '', message.createAt, message.threadId , message)}
+                                                        @taskclick=${() => this.onTaskClick(message?.taskId || '', message.createAt, message.threadId, message)}
                                                     >
                                                     </collab-messages-task-100554>
                                                 </div> `: html``}
@@ -499,7 +502,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
         try {
             if (!this.userId) return;
             const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId);
-            await updateThread(threadInfo.thread.threadId, threadInfo.thread);
+
+            // await updateThread(threadInfo.thread.threadId, threadInfo.thread);
+
+            await updateThread(threadByServer.thread.threadId, threadByServer.thread);
             await updateUsers(threadByServer.users);
             await this.loadAllMessages(threadInfo);
         } catch (err: any) {
@@ -581,9 +587,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
         try {
             const response = await mls.api.msgAddMessage(params);
             message.isFailed = false;
+            message.isFailedError = '';
             this.updateMessage2(false, message, response.message);
         } catch (err: any) {
             message.isFailed = true;
+            message.isFailedError = err.message;
             message.isLoading = false;
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             console.error('Error on send message:' + err.message);
@@ -616,6 +624,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             if (message.isLoading) {
                 message.isLoading = false;
                 message.isFailed = true;
+                message.isFailedError = err.message;
                 this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             }
         }
@@ -623,7 +632,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private async updateMessageAI(context: mls.msg.ExecutionContext, updateThreadDB: boolean, oldContextCreateAt?: string) {
         if (this.activeScenerie !== 'details') return;
-        if (!context.message && !context.task) return;
+        if (!context.message) return;
+
         const { content, createAt, orderAt, senderId, threadId, taskId, status, taskTitle, taskTitleTranslated, taskStatus,
             taskResults, taskResultsTranslated } = context.message;
         const createAt2 = oldContextCreateAt ? oldContextCreateAt : createAt;
@@ -694,6 +704,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             threadId,
             isLoading: true,
             isFailed: false,
+            isFailedError: ''
         }
         if (taskId) newMessage.taskId = taskId;
         this.actualMessages.push(newMessage);
@@ -713,27 +724,36 @@ export class CollabMessagesChat100554 extends StateLitElement {
             item.createAt === oldMessage.createAt &&
             item.threadId === oldMessage.threadId);
         if (alreadyExist) {
-            this.actualMessages = this.actualMessages.map(item =>
-                item.content === oldMessage.content &&
+            this.actualMessages = this.actualMessages.map(item => {
+                if (
+                    item.content === oldMessage.content &&
                     item.senderId === oldMessage.senderId &&
                     item.createAt === oldMessage.createAt &&
                     item.threadId === oldMessage.threadId
-                    ? { ...newMessage, isSame: oldMessage.isSame }
-                    : item
-            );
+                ) {
+                    const { isLoading, isFailed, isFailedError, ...rest }: IMessage = { ...newMessage, isSame: oldMessage.isSame };
+                    return rest;
+                }
+                return item;
+            });
         } else this.actualMessages.push(newMessage);
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
-        addMessage(newMessage);
+        const m = newMessage as IMessage;
+        delete m.isLoading;
+        delete m.isFailed;
+        delete m.isFailedError;
+        delete m.isSame;
+        addMessage(m);
         this.requestUpdate();
     }
 
-    private async onTaskClick(taskId: string, messageId: string, threadId: string, message: IMessage ) {
+    private async onTaskClick(taskId: string, messageId: string, threadId: string, message: IMessage) {
         this.saveScrollPosition();
         this.activeScenerie = 'loading';
         const task = await this.getTaskUpdate(taskId, messageId, threadId);
         addOrUpdateTask(task);
         this.actualTask = task;
-        this.actualMessage = message; 
+        this.actualMessage = message;
         this.activeScenerie = 'task';
     }
 
@@ -832,6 +852,8 @@ interface IMessage extends mls.msg.Message {
     isSame?: boolean,
     isLoading?: boolean,
     isFailed?: boolean,
+    isFailedError?: string,
+
 }
 
 type IMessageGrouped = { [key: string]: IMessage[] }

@@ -348,6 +348,8 @@ export function notifyThreadChange(thread: mls.msg.Thread): void {
 }
 
 
+
+
 export function dispatchDetailsTaskClose(): void {
   const scopeWindow = window?.top ? window.top : window;
   const event = new CustomEvent('task-details-close', {

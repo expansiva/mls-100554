@@ -8,7 +8,8 @@ import './_100554_widgetQuestionsForClarification';
 import {
     getNextInProgressStepByAgentName,
     notifyTaskChange,
-    updateStepStatus
+    notifyThreadChange,
+    updateStepStatus,
 } from "./_100554_aiAgentHelper";
 import { addMessage } from "./_100554_collabMessageHelper";
 
@@ -76,6 +77,7 @@ const _installBot = async (context: mls.msg.ExecutionContext): Promise<boolean> 
     });
     if (rc.statusCode === 200) {
         await addMessage(context.message.threadId, `Bot ${agentName} instaled OK!`);
+        notifyThreadChange(rc.thread);
         return true;
     };
     console.error("error on install bot", rc);
