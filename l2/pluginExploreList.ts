@@ -208,7 +208,6 @@ export class PluginExploreList extends PluginBaseModule {
                     ${this.renderHistory()}
                     ${this.renderList()}
                 </ul>
-                ${this.renderAuxEdit()}
             </div>
         `;
         } else {
@@ -319,27 +318,6 @@ export class PluginExploreList extends PluginBaseModule {
             }
         `;
     }
-
-    renderAuxEdit() {
-        return html`
-            <div class="elContentAux" style="display:none" @click="${this.clickOptStop}">
-                <div class="elContentAux2">
-                    <form>
-                        <span class="spanPrj">
-                            <input name="projectEdit1" style="width: 80px;" .value="${this.project}" @click="${this.clickOptStop}">
-                        </span>
-                        <span class="spanName">
-                            <input name="projectEdit2" @click="${this.clickOptStop}">
-                        </span>
-                    </form>
-                    <button class="btnActCloneRename fa fa-file-pen" style="margin: 4px 0px;"></button>
-                    <button class="fa fa-ban" title="cancel" @click="${this.clickHiddenAux}" style="margin: 4px 0px;"></button>
-                </div>
-                <div class="showError"style="color: red; font-size: 10px;">${this.errorAux}</div>
-            </div>
-        `;
-    }
-
 
     getTitleInLocalStorage(ts: mls.stor.IFileInfo, html: mls.stor.IFileInfo, less: mls.stor.IFileInfo, test: mls.stor.IFileInfo, defs: mls.stor.IFileInfo) {
         const tsLocal = ts && ts.inLocalStorage;
@@ -508,17 +486,30 @@ export class PluginExploreList extends PluginBaseModule {
         const li = el.closest('li') as HTMLElement;
         if (!father || !li) return;
 
-        const elContentAux = father.querySelector('.elContentAux') as HTMLElement;
-        const btnActCloneRename = father.querySelector('.btnActCloneRename') as HTMLElement;
-        const iptProj = elContentAux.querySelector('.spanPrj input') as HTMLInputElement;
-        const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
+        let elContentAux = father.querySelector('.elContentAux') as HTMLElement;
+
+        if (!elContentAux)
+            elContentAux = this.createElContentAux();
 
         if (!father || !li) return;
 
         li.appendChild(elContentAux);
+
+        const btnActCloneRename = father.querySelector('.btnActCloneRename') as HTMLElement;
+        const iptProj = elContentAux.querySelector('.spanPrj input') as HTMLInputElement;
+        const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
+        const errorDivAux = elContentAux.querySelector('#errorDivAux ') as HTMLInputElement;
+
         elContentAux.style.display = '';
         iptProj.value = mls.actual[5].project as any;
         iptName.value = '';
+
+        btnActCloneRename.classList.remove('fa-file-pen');
+        btnActCloneRename.classList.remove('fa-clone');
+        btnActCloneRename.title = mode;
+        if (mode === 'clone') btnActCloneRename.classList.add('fa-clone');
+        else btnActCloneRename.classList.add('fa-file-pen');
+
         btnActCloneRename.onclick = async (e2: MouseEvent) => {
 
             try {
@@ -532,8 +523,8 @@ export class PluginExploreList extends PluginBaseModule {
 
             } catch (er: any) {
 
-                this.errorAux = er.message;
-                setTimeout(() => { this.errorAux = '' }, 2000);
+                errorDivAux.innerText = er.message;
+                setTimeout(() => { errorDivAux.innerText = ''; }, 2000);
 
             }
 
@@ -541,6 +532,65 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
+
+    private createElContentAux() {
+        const container = document.createElement("div");
+        container.className = "elContentAux";
+        container.style.display = "none";
+        container.onclick = (e) => this.clickOptStop(e);
+        const inner = document.createElement("div");
+        inner.className = "elContentAux2";
+
+        // form
+        const form = document.createElement("form");
+        form.style.display = "flex";
+        form.style.gap = ".5rem";
+        const spanPrj = document.createElement("span");
+        spanPrj.className = "spanPrj";
+        const inputPrj = document.createElement("input");
+        inputPrj.name = "projectEdit1";
+        inputPrj.style.width = "80px";
+        inputPrj.value = this.project.toString();
+        inputPrj.onclick = (e) => this.clickOptStop(e);
+    
+        spanPrj.appendChild(inputPrj);
+        const spanName = document.createElement("span");
+        spanName.className = "spanName";
+        const inputName = document.createElement("input");
+        inputName.name = "projectEdit2";
+        inputName.onclick = (e) => this.clickOptStop(e);
+    
+        spanName.appendChild(inputName);
+        form.appendChild(spanPrj);
+        form.appendChild(spanName);
+
+        // buttons
+        const btnClone = document.createElement("button");
+        btnClone.className = "btnActCloneRename fa fa-file-pen";
+        btnClone.style.margin = "4px 0px";
+        const btnCancel = document.createElement("button");
+        btnCancel.className = "fa fa-ban";
+        btnCancel.title = "cancel";
+        btnCancel.style.margin = "4px 0px";
+        btnCancel.onclick = (e) => this.clickHiddenAux(e);
+
+        // montar
+        inner.appendChild(form);
+        inner.appendChild(btnClone);
+        inner.appendChild(btnCancel);
+
+        // erro
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "showError";
+        errorDiv.style.color = "red";
+        errorDiv.style.fontSize = "10px";
+        errorDiv.id = 'errorDivAux';
+        errorDiv.textContent = this.errorAux;
+        container.appendChild(inner);
+        container.appendChild(errorDiv);
+        
+        return container;
+    }
 
     private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
 
@@ -970,6 +1020,29 @@ export class PluginExploreList extends PluginBaseModule {
     private validInputsAux(file: mls.stor.IFileInfo, action: { mode: string, project: string, name: string }): void {
 
         if (file.hasError && ['clone', 'rename'].includes(action.mode)) throw new Error('It is not possible to perform this action on files with an error.');
+
+        if (action.mode === 'clone' && !action.name) {
+
+            let idx = 2;
+            let isvalidName = false;
+            while (!isvalidName) {
+
+                action.name = file.shortName + idx;
+                const ret = this.isValidNewName(file, action);
+                if (!ret) {
+                    idx++;
+                } else {
+                    isvalidName = true;
+                }
+                
+            }
+
+            let elContentAux = this.querySelector('.elContentAux') as HTMLElement;
+            const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
+            if (iptName) iptName.value = action.name;
+                
+        }
+
         if (!this.isValidNewName(file, action)) throw new Error('Invalid name');
 
     }

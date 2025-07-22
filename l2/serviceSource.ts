@@ -921,31 +921,68 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private async cloneFiles(storFileTS: mls.stor.IFileInfo, newProject: number, newShortName: string, oldFileAction: mls.events.IFileAction) {
-        await this.createModelTS_loading();
+
+        //await this.createModelTS_loading();
         this.activeThisService();
-        await this.createModelTS_clone(storFileTS, newProject, newShortName);
+        //await this.createModelTS_clone(storFileTS, newProject, newShortName);
+        await this.cloneAllFiles(storFileTS, newProject, newShortName);
 
         (mls.actual[this.level] as any)[this.position] = {
             project: newProject,
             shortName: newShortName
-        }
+        };
 
-        const fileAction: mls.events.IFileAction = {
+        const fileAction = {
             ...oldFileAction,
             project: newProject,
             shortName: newShortName,
             action: 'open',
             newProject: undefined,
             newshortName: undefined,
-        }
+        };
 
         const ev: mls.events.IEvent = {
-            level: this.level as mls.Level,
+            level: this.level,
             type: 'FileAction',
             desc: JSON.stringify(fileAction)
-        }
+        };
 
         this.onMLSEvents(ev);
+    }
+
+    private async cloneAllFiles(storFileTS: mls.stor.IFileInfo, newProject: number, newShortName: string) {
+
+        const files = await mls.stor.getFiles({ project: storFileTS.project, shortName: storFileTS.shortName, folder: storFileTS.folder || '', loadContent: true });
+
+        const oldTag = convertFileNameToTag(`_${storFileTS.project}_${storFileTS.shortName}`);
+        const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
+        const regex = new RegExp(oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+
+        const replaceTripleslashAndTag = (src: string) => {
+            src = src.replace(/shortName="[^"]*"/, `shortName="${newShortName}"`).replace(/project="[^"]*"/, `project="${newProject}"`);
+            return src.replace(regex, newTag);
+        };
+
+        if (!files.tsContent) throw new Error('Impossible clone this file:' + storFileTS.shortName);
+
+        await this.createStorFile(newProject, newShortName, replaceTripleslashAndTag(files.tsContent), '.ts');
+
+        if (files.htmlContent) {
+            await this.createStorFile(newProject, newShortName, replaceTripleslashAndTag(files.htmlContent), '.html');
+        }
+
+        if (files.lessContent) {
+            await this.createStorFile(newProject, newShortName, replaceTripleslashAndTag(files.lessContent), '.less');
+        }
+
+        if (files.testContent) {
+            await this.createStorFile(newProject, newShortName, replaceTripleslashAndTag(files.testContent), '.test.ts');
+        }
+
+        if (files.defsContent) {
+            await this.createStorFile(newProject, newShortName, replaceTripleslashAndTag(files.defsContent), '.defs.ts');
+        }
+
     }
 
     private async newFiles(newShortName: string, newProject: number, newEnhancement: string, tsSource: string, htmlSource?: string, lessSource?: string, testSource?: string, defsSource?: string, open: boolean = true) {
@@ -1030,11 +1067,25 @@ export class ServiceSource100554 extends ServiceBase {
         await this.createModelTS_loading();
         this.activeThisService();
 
-        let fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
-        if (!fileModels) fileModels = await this.createModelTS2(storFileTS, false, true);
+        //let fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
+        /*if (!fileModels) fileModels = await this.createModelTS2(storFileTS, false, true);
 
         this.renameAllFiles(fileModels, newProject, newShortName);
-        this.activeModels = fileModels;
+        this.activeModels = fileModels;*/
+
+        await this.renameAllFiles(storFileTS, newProject, newShortName);
+        const oldPrj = storFileTS.project;
+        const oldName = storFileTS.shortName;
+        const oldLevel = storFileTS.level;
+        const oldFolder = storFileTS.folder;
+
+        for await (const ext of ['.ts', '.html', '.less', '.test.ts', '.defs.ts']) {
+            const key = mls.stor.getKeyToFiles(oldPrj, oldLevel, oldName, oldFolder, ext);
+            if (!mls.stor.files[key])
+                continue;
+            await mls.stor.localStor.setContent(mls.stor.files[key], { contentType: 'string', content: null });
+            delete mls.stor.files[key];
+        }
 
         (mls.actual[this.level] as any)[this.position] = {
             project: newProject,
@@ -1056,6 +1107,96 @@ export class ServiceSource100554 extends ServiceBase {
             desc: JSON.stringify(fileAction)
         }
         this.onMLSEvents(ev);
+    }
+
+    private async renameAllFiles(storFileTS: mls.stor.IFileInfo, newProject: number, newShortName: string) {
+        
+        const files = await mls.stor.getFiles({ project: storFileTS.project, shortName: storFileTS.shortName, folder: storFileTS.folder || '', loadContent: true });
+        const oldTag = convertFileNameToTag(`_${storFileTS.project}_${storFileTS.shortName}`);
+        const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
+        const regex = new RegExp(oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+
+        const replaceTripleslashAndTag = (src:string) => {
+            src = src.replace(/shortName="[^"]*"/, `shortName="${newShortName}"`).replace(/project="[^"]*"/, `project="${newProject}"`);
+            return src.replace(regex, newTag);
+        };
+
+        if (!files.tsContent) throw new Error('Impossible clone this file:' + storFileTS.shortName);
+
+        await this.createStorFileStatusRename(newProject, newShortName, replaceTripleslashAndTag(files.tsContent), '.ts', storFileTS.project, storFileTS.shortName, storFileTS.folder, storFileTS.status);
+
+        if (files.htmlContent) {
+            await this.createStorFileStatusRename(newProject, newShortName, replaceTripleslashAndTag(files.htmlContent), '.html', storFileTS.project, storFileTS.shortName, storFileTS.folder, storFileTS.status);
+        }
+
+        if (files.lessContent) {
+            await this.createStorFileStatusRename(newProject, newShortName, replaceTripleslashAndTag(files.lessContent), '.less', storFileTS.project, storFileTS.shortName, storFileTS.folder, storFileTS.status);
+        }
+
+        if (files.testContent) {
+            await this.createStorFileStatusRename(newProject, newShortName, replaceTripleslashAndTag(files.testContent), '.test.ts', storFileTS.project, storFileTS.shortName, storFileTS.folder, storFileTS.status);
+        }
+
+        if (files.defsContent) {
+            await this.createStorFileStatusRename(newProject, newShortName, replaceTripleslashAndTag(files.defsContent), '.defs.ts', storFileTS.project, storFileTS.shortName, storFileTS.folder, storFileTS.status);
+        }
+
+    }
+
+    private async undoFileRenamed(storFile: mls.stor.IFileInfo) {
+
+        const info = storFile.getValueInfo ? await storFile.getValueInfo() : {} as mls.stor.IFileInfoValue;
+
+        if (!info.originalProject || !info.originalShortName)
+            throw new Error('[undoFileRenamed] Not found info base for rename');
+
+        const originalKey = mls.stor.getKeyToFiles(info.originalProject, storFile.level, info.originalShortName, storFile.folder, storFile.extension);
+
+        const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
+
+        if (!mls.stor.files[originalKey]) {
+            const params = {
+                project: info.originalProject,
+                level: storFile.level,
+                shortName: info.originalShortName,
+                extension: storFile.extension,
+                versionRef: '0',
+                folder: storFile.folder
+            };
+            await mls.stor.addOrUpdateFile(params);
+        }
+        
+        if (mls.stor.files[key]) {
+            await mls.stor.localStor.setContent(mls.stor.files[key], { contentType: 'string', content: null });
+            delete mls.stor.files[key];
+        }
+    }
+
+    private async createStorFileStatusRename(project:number, shortName:string, content:string, extension:string, originalProject:number, originalShortName:string, originalFolder:string, oldStatus:string) {
+        const params = {
+            project,
+            level: 2,
+            shortName,
+            extension,
+            versionRef: '0',
+            folder: originalFolder
+        };
+        const file = await mls.stor.addOrUpdateFile(params);
+        if (!file) throw new Error('Invalid storFile');
+        file.status = oldStatus === 'new' ? 'new' : 'renamed';
+
+        const fileInfo: mls.stor.IFileInfoValue = {
+            content,
+            contentType: 'string'
+        };
+
+        if (file.status === 'renamed' && oldStatus !== 'renamed') {
+            fileInfo.originalFolder = originalFolder;
+            fileInfo.originalProject = originalProject;
+            fileInfo.originalShortName = originalShortName;
+        }
+
+        await mls.stor.localStor.setContent(file, fileInfo);
     }
 
     private async updatedOnServer() {
@@ -1120,7 +1261,8 @@ export class ServiceSource100554 extends ServiceBase {
             }
 
             if (data.storFile.status === 'renamed') {
-                throw new Error('not implemented');
+                await this.undoFileRenamed(data.storFile);
+                continue;
             }
 
             if (data.storFile.extension === '.ts' && tp === 'all') {
@@ -1277,7 +1419,7 @@ export class ServiceSource100554 extends ServiceBase {
         }, 500);
     }
 
-    private renameAllFiles(models: mls.editor.IModels, newProject: number, newShortName: string): void {
+    private renameAllFilesOld(models: mls.editor.IModels, newProject: number, newShortName: string): void {
 
         const { html, style, ts, test } = models;
         if (!ts) throw new Error('Invalid ts file to rename');
