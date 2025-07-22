@@ -17,12 +17,7 @@ export const defs: mls.l4.BaseDefs = {
     ]
   },
   "references": {
-    "widgets": [
-      "collab-spliter-vertical-var-fixed-100554",
-      "collab-spliter-horizontal-var-fixed-100554",
-      "mls-editor-100529",
-      "css-helper-index-100554"
-    ],
+    "widgets": [],
     "plugins": [],
     "statesRO": [],
     "statesRW": [

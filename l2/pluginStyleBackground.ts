@@ -496,7 +496,6 @@ export class PluginCssTokens extends StateLitElement {
         }
 
         this.css = text;
-        console.info(this.css);
         this.info = Object.assign({}, this.info);
         this.setState();
 
