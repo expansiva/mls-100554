@@ -10,14 +10,14 @@ import * as icons from './_100554_collabIcons';
 /// **collab_i18n_start**
 const message_pt = {
     btnSearch: 'Pesquisar',
-    lblSearch: 'Texto a pesquisar:',
+    lblSearch: 'Texto a pesquisar (texto ou regex):',
     lblChoice: 'Selecionar tipo de arquivo:',
     lblTotal: 'Total arquivos encontrados:',
 }
 
 const message_en = {
     btnSearch: 'Search',
-    lblSearch: 'Text to search:',
+    lblSearch: 'Text to search (text or regex):',
     lblChoice: 'Select file type:',
     lblTotal: 'Total files found:',
 };
@@ -34,6 +34,7 @@ export class PluginProjectFindFiles extends PluginBaseModule {
 
     private msg: MessageType = messages['en'];
     private matchedFiles: string[] = [];
+    private usingRegex: boolean = false;
     private progressValue: number = 0;
 
     render(): TemplateResult {
@@ -77,12 +78,12 @@ export class PluginProjectFindFiles extends PluginBaseModule {
                 </div>
 
                 <progress value="${this.progressValue}" max="100"></progress>
-                <p>${this.msg.lblTotal} ${this.matchedFiles.length}</p>
+                <p>${this.msg.lblTotal} ${this.matchedFiles.length}, regex:${this.usingRegex}</p>
                 <ul>
                     ${this.matchedFiles
-                        .slice()
-                        .sort((a, b) => a.localeCompare(b))
-                        .map(file => html`<li>${file}</li>`)}
+                .slice()
+                .sort((a, b) => a.localeCompare(b))
+                .map(file => html`<li>${file}</li>`)}
                 </ul>
             </div>
         `;
@@ -94,7 +95,7 @@ export class PluginProjectFindFiles extends PluginBaseModule {
         const project = mls.actual[5].project;
         const files = Object.entries(mls.stor.files)
             .filter(([, file]) => file.project === project && file.extension === fileType)
-            .map(([key]) => key);            
+            .map(([key]) => key);
         await this.searchFiles(files, searchText);
     }
 
@@ -102,17 +103,44 @@ export class PluginProjectFindFiles extends PluginBaseModule {
         this.matchedFiles = [];
         this.progressValue = 0;
         let filesProcessed = 0;
+
+        let regex: RegExp | null = null;
+        this.usingRegex = false;
+        try {
+            if (searchText.startsWith('/') && searchText.endsWith('/')) {
+                const pattern = searchText.slice(1, -1);
+                regex = new RegExp(pattern);
+                this.usingRegex = true;
+            } else {
+                regex = null;
+            }
+        } catch {
+            regex = null;
+        }
+
         const promises = files.map(async (file) => {
             const fileContent: string | Blob | null = await mls.stor.files[file].getContent("");
-            if (typeof fileContent === 'string' && fileContent.includes(searchText)) {
-                this.matchedFiles.push(file);
+            if (typeof fileContent === 'string') {
+                const lines = fileContent.split('\n');
+                const found = lines.some(line => {
+                    if (regex) {
+                        return regex.test(line);
+                    } else {
+                        return line.includes(searchText);
+                    }
+                });
+                if (found) {
+                    this.matchedFiles.push(file);
+                }
             }
             filesProcessed++;
             this.progressValue = (filesProcessed / files.length) * 100;
             this.requestUpdate();
         });
+
         await Promise.all(promises);
     }
+
 }
 
 if (!customElements.get('plugin-project-find-files-100554')) {
