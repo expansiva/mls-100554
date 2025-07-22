@@ -21,6 +21,8 @@ import {
 import { getTask, getMessage } from "./_100554_msgDBController";
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 
+import { loadModuleFromProjectOrDependency} from './_100554_libCommom';
+
 export async function startNewAiTask(
     agentName: string,
     taskTitle: string,
@@ -264,11 +266,12 @@ export async function executeTool(toolName: string, args: string): Promise<IExec
         return rc;
     };
     try {
-        //const fileJS = `./${toolName}.js`;
+        /*//const fileJS = `./${toolName}.js`;
         const fileJS = `./_100554_${toolName}`;
         const module = await import(fileJS);
         if (typeof module.createTool !== "function") throw new Error(`createTool function not found in ${fileJS}`);
-        const tool = module.createTool();
+        const tool = module.createTool();*/
+        const tool = await loadTool(toolName);
         if (!args) {
             // no args provided
             argsValidator({}, tool.argsSchema);
@@ -291,7 +294,7 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
     if (!step.agentName) throw new Error("Agent name is missing");
 
     try {
-        const agent = await loadAgent(mls.actual[5].project || 0, step.agentName);
+        const agent = await loadAgent(step.agentName);
         if (!agent) throw new Error(`createAgent function not found in ${mls.actual[5].project} ${step.agentName}`);
         await agent.beforePrompt(context);
     } catch (error: any) {
@@ -302,18 +305,31 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
     }
 }
 
-export async function loadAgent(projectId: number, shortName: string): Promise<IAgent | undefined> {
+export async function loadAgent( shortName: string): Promise<IAgent | undefined> {
 
     try {
-        const fileJS = `./_${projectId}_${shortName}`;
-        const module = await import(fileJS);
-        if (typeof module.createAgent !== "function") throw new Error(`createAgent function not found in ${fileJS}`);
+        const module = await loadModuleFromProjectOrDependency(shortName, '', '.ts');
+        if (typeof module.createAgent !== "function") throw new Error(`createAgent function not found in ${shortName}`);
         const agent = module.createAgent();
-        if (typeof agent.beforePrompt !== "function") throw new Error(`beforePrompt function not found in ${fileJS}`);
-        if (typeof agent.afterPrompt !== "function") throw new Error(`afterPrompt function not found in ${fileJS}`);
+        if (typeof agent.beforePrompt !== "function") throw new Error(`beforePrompt function not found in ${shortName}`);
+        if (typeof agent.afterPrompt !== "function") throw new Error(`afterPrompt function not found in ${shortName}`);
         return agent;
     } catch (error: any) {
         console.error(`[loadAgent] ${error.message || error}`);
+        return undefined;
+    }
+
+}
+
+export async function loadTool( shortName: string): Promise<any | undefined> {
+
+    try {
+        const module = await loadModuleFromProjectOrDependency(shortName, '', '.ts');
+        if (typeof module.createTool !== "function") throw new Error(`createTool function not found in ${shortName}`);
+        const tool = module.createTool();
+        return tool;
+    } catch (error: any) {
+        console.error(`[loadTool] ${error.message || error}`);
         return undefined;
     }
 
@@ -324,12 +340,13 @@ async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls
     if (!step.agentName) throw new Error("[executeAgentFunction] Agent name is missing");
 
     try {
-        //const fileJS = `./${step.agentName}.js`;
+        /*//const fileJS = `./${step.agentName}.js`;
         const fileJS = `./_100554_${step.agentName}`;
         const module = await import(fileJS);
         if (typeof module.createAgent !== "function") throw new Error(`[executeAgentFunction] createAgent function not found in ${fileJS}`);
-        const agent = module.createAgent();
-        if (typeof agent[functionName] !== "function") throw new Error(`[executeAgentFunction] ${functionName} function not found in ${fileJS}`);
+        const agent = module.createAgent();*/
+        const agent = await loadAgent(step.agentName) as any;
+        if (typeof agent[functionName] !== "function") throw new Error(`[executeAgentFunction] ${functionName} function not found in ${step.agentName}`);
         return await agent[functionName](context, stepId, args);
     } catch (error: any) {
         console.error(`[executeAgentFunction] ${error.message || error}`);

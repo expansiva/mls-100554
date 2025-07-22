@@ -17,7 +17,7 @@ import {
 } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentProjectSearch";
-const project: number = Number(localStorage.getItem("l5-last-project") || "1");
+const project: number = 100554;//Number(localStorage.getItem("l5-last-project") || "1");
 
 export function createAgent(): IAgent {
   return {
