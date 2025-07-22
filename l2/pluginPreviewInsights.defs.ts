@@ -12,11 +12,7 @@ export const defs: mls.l4.BaseDefs = {
     "tags": []
   },
   "references": {
-    "widgets": [
-      "widget-defs-list-edit-100554",
-      "widget-defs-planning-checklist-edit-100554",
-      "collab-input-tag-100554"
-    ],
+    "widgets": [],
     "plugins": [],
     "statesRO": [
       "preview.service"
