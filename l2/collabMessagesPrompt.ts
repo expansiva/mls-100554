@@ -196,7 +196,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                 this.mentionActive = true;
                 this.mentionQuery = query;
                 this.mentionSuggestions = (this.allAgents.map(agent => {
-                    if (agent.name.toLowerCase().startsWith(query.toLowerCase()))
+                    if (agent.name.toLowerCase().startsWith(query.toLowerCase()) || agent.alias.toLowerCase().startsWith(query.toLowerCase()))
                         return {
                             text: agent.alias,
                             value: agent.name,
