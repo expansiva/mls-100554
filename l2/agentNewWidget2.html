@@ -22,6 +22,9 @@ Se for possível cumprir esta tarefa, **retorne um objeto JSON** do tipo "flexib
 1.6.8 Caso crie um get de algum atributo, sempre crie com "__" dois underlines, exemplo criar um get do atributo config seria: "__config"
 1.7. Deixe a linha 1 , tripleSlash, igual no modelo, isto irá ser importante para saber o nome do arquivo e outros detalhes.
 1.7.1 Coloque uma quebra de linha entre o tripleSlash e o codigo, conforme o modelo.
+1.7.2 Mantenha o parâmetro enhancement do tripleSlash  conforme o original enhancement="_100554_enhancementLit"
+1.7.3 O parâmetro project do tripleSlash deve ser atualizado com o projeto que foi passado.
+1.7.4 Os imports devem se manter no projeto 100554 pois o mesmo é o base, ex: import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators'; 
 1.8 Não use o CSS, usaremos o .less em um arquivo separado.
 1.9 Caso tenha textos fixos deve se usar a parte do bloco collab_i18n
 2. Para o retorno do .less

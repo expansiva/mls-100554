@@ -34,14 +34,14 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     if (!context || !context.message) throw new Error("Invalid context");
     if (!context.task) {
-        let data;
+        let data:any;
         try {
             let pp = context.message.content
                 .replace(`@@ ${agentName}`, '')
                 .replace(`@@${agentName}`, '').trim()
                 .replace(`@@Fix`, '');
 
-            data = JSON.parse(pp);
+            data = mls.common.safeParseArgs(pp) as IDataPrompt;
             if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
             const inputs = await getPrompts(data);
             await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt).catch((err) => {
@@ -61,7 +61,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     context = await updateStepStatus(context, step.stepId, "in_progress");    
     if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
-    const data: IDataPrompt = JSON.parse(step.prompt);
+    const data: IDataPrompt = mls.common.safeParseArgs(step.prompt) as IDataPrompt;
     if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
     const inputs = await getPrompts(data);
     await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId).catch((err) => {

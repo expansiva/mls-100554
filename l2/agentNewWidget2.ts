@@ -54,8 +54,12 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context || !context.message) throw new Error("Invalid context");
 
     if (!context.task) {
-        let pp = extJson(context.message.content).trim();
-        const data = JSON.parse(pp);
+        let pp = context.message.content
+                .replace(`@@ ${agentName}`, '')
+                .replace(`@@${agentName}`, '').trim()
+
+        pp = extJson(context.message.content).trim();
+        const data = mls.common.safeParseArgs(pp);
         if (!('json' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
         const inputs: any = await getPrompts(data.json, data.prompt, []);
         await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
@@ -69,7 +73,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         context = await updateStepStatus(context, step.stepId, "in_progress");
 
         if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
-        const data = JSON.parse(step.prompt);
+        const data = mls.common.safeParseArgs(step.prompt);
         if (!('json' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
 
         const inputs = await getPrompts(data.json, data.prompt, step.rags);
@@ -99,6 +103,9 @@ const _replayForSupport = async (payload: mls.msg.AIPayload[]): Promise<void> =>
 
     if (!content || !content.html || !content.ts || !content.less || !content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
 
+    const prj = mls.actual[5].project || 0;
+    content.project = prj;
+
     await createNewFiles(content);
 
 
@@ -115,9 +122,13 @@ async function addFile(context: mls.msg.ExecutionContext) {
 
     if (!content || !content.html || !content.ts || !content.less || !content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
 
+    const prj = mls.actual[5].project || 0;
+
+    content.project = prj;
+
     await createNewFiles(content);
 
-    const rc = { shortName: content.shortName, project }
+    const rc = { shortName: content.shortName, project:prj }
 
     const newStep: mls.msg.AIPayload = {
         agentName: 'agentNewWidget3',
@@ -133,7 +144,7 @@ async function addFile(context: mls.msg.ExecutionContext) {
     await addNewStep(context, step.stepId, [newStep]);
 
     let aux = '';
-    const m = mls.editor.getModels(project, content.pageName);
+    const m = mls.editor.getModels(prj, content.pageName);
     if (m && m.ts && m.ts.compilerResults && m.ts.compilerResults.errors.length > 0) {
         aux = ', com ' + m.ts.compilerResults.errors.length + ' erros, favor verificar'
 
@@ -143,11 +154,11 @@ async function addFile(context: mls.msg.ExecutionContext) {
 
 }
 
-async function createNewFiles(content: { shortName: string, html: string, ts: string, less: string }) {
+async function createNewFiles(content: { shortName: string, html: string, ts: string, less: string, project:number }) {
 
     await forceServiceInstance(2, '_100554_serviceSource');
-    const actualProject = mls.actual[5].project;
-    if (actualProject) await initCompileMonaco(actualProject);
+
+    if (content.project) await initCompileMonaco(content.project);
 
     const pageName = content.shortName;
     const fileHTML = formatHtml(content.html);
@@ -155,7 +166,7 @@ async function createNewFiles(content: { shortName: string, html: string, ts: st
     const fileLess = content.less;
 
     await createNewFile(
-        { project, position: 'right', shortName: pageName, enhancement, sourceTS: fileTS, sourceHTML: fileHTML, sourceLess: fileLess, openPreview: false }
+        { project: content.project, position: 'right', shortName: pageName, enhancement, sourceTS: fileTS, sourceHTML: fileHTML, sourceLess: fileLess, openPreview: false }
     );
 }
 

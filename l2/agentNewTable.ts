@@ -65,7 +65,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         context = await updateStepStatus(context, step.stepId, "in_progress");
 
         if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
-        const data = JSON.parse(step.prompt);
+        const data =  mls.common.safeParseArgs(step.prompt);
         if (!('json' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
 
         const inputs = await getPrompts();

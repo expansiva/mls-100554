@@ -43,7 +43,13 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     if (!context.task) {
 
-        const data = JSON.parse(extJson(context.message.content))
+        let pp = context.message.content
+                .replace(`@@ ${agentName}`, '')
+                .replace(`@@${agentName}`, '').trim()
+
+        pp = extJson(context.message.content).trim();
+
+        const data = mls.common.safeParseArgs(pp)
         if (!('shortName' in data) || !('project' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
 
         const inputs: any = await getPrompts(data.shortName, data.project);
@@ -61,7 +67,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
         if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
-        const data = JSON.parse(step.prompt);
+        const data = mls.common.safeParseArgs(step.prompt);
 
         if (!('shortName' in data) || !('project' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
 

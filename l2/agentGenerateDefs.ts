@@ -45,10 +45,15 @@ export function createAgent(): IAgent {
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     const taskTitle = "Creating.";
     if (!context || !context.message) throw new Error("Invalid context");
-    let pp = extJson(context.message.content).trim();
+
+    let pp = context.message.content
+        .replace(`@@ ${agentName}`, '')
+        .replace(`@@${agentName}`, '').trim();
+        
+    pp = extJson(context.message.content).trim();
 
     if (!context.task) {
-        const inputs: any = await getPrompts(JSON.parse(pp));
+        const inputs: any = await getPrompts(mls.common.safeParseArgs(pp));
         await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
     } else {
         const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
@@ -59,7 +64,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
         if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
-        const data: any = JSON.parse(extJson(step.prompt).trim());
+        const data: any = mls.common.safeParseArgs(extJson(step.prompt).trim());
         if (!('project' in data) || !('shortName' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing json and prompt`);
 
         const inputs = await getPrompts(data);

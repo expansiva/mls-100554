@@ -283,6 +283,8 @@ export class ServicePreview100554 extends ServiceBase {
             return;
         }
 
+        if(this.level !== 3) return
+
         this.menu.tools.editTextL3 = {
             type: 'cycle',
             selected: 0,

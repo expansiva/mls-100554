@@ -2,6 +2,7 @@
 import { getMessageKey } from "./_100554_collabLitElement";
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
+import { collabImport } from './_100554_collabImport';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -408,6 +409,32 @@ export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
             }
         }
     }
+}
+
+export async function loadModuleFromProjectOrDependency(name: string, folder:string, ext:string): Promise<any>{
+
+    const prj = mls.actual[5].project;
+    if (!prj) throw new Error('Not found project actual!');
+
+    let key = mls.stor.getKeyToFiles(prj, 2, name, folder, ext);
+    if (mls.stor.files[key]) return await await collabImport({ project: prj, shortName: name, folder: '' });
+
+    const info = mls.l5.getProjectDetails(prj);
+    if(!info) throw new Error('Not found project details from actual project!');
+
+    let prjDep = 0;
+    info.prj_dependencies.forEach((dep) => {
+
+        if (mls.stor.files[key]) return;
+        prjDep = dep;
+        key = mls.stor.getKeyToFiles(dep, 2, name, folder, ext);
+    
+    });
+
+    if (!mls.stor.files[key]) throw new Error('File not found in any dependency!');
+
+    return await await collabImport({ project: prjDep, shortName: name, folder: '' });
+    
 }
 
 interface ICalculateTotalStringSize {
