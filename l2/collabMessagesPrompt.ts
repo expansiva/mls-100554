@@ -101,17 +101,30 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         }
         this.mentionSuggestionsElement.style.top = `${calc}px`;
     }
-
     private adjustTextAreaHeight() {
         const maxHeight = 200;
         const minHeight = 40;
+
         if (this.textArea) {
-            const content = this.text
-            if (content === '') {
+            const prevHeight = this.textArea.offsetHeight;
+
+            if (this.text === '') {
                 this.textArea.style.height = `${minHeight}px`;
             } else {
                 this.textArea.style.height = 'auto';
                 this.textArea.style.height = Math.min(this.textArea.scrollHeight, maxHeight) + 'px';
+            }
+
+            const newHeight = this.textArea.offsetHeight;
+
+            if (newHeight !== prevHeight) {
+                this.dispatchEvent(new CustomEvent('textarea-resize', {
+                    detail: {
+                        height: newHeight
+                    },
+                    bubbles: true,
+                    composed: true
+                }));
             }
         }
     }
@@ -177,7 +190,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             this.lastScopeLoaded = this.scope;
             this.alreadyLoadingAgents = true;
             this.getAgents();
-        } 
+        }
     }
 
     async handleInput(e: MouseEvent) {

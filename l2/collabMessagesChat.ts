@@ -5,8 +5,8 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation } from './_100554_collabIcons';
 import { IAgent } from './_100554_aiAgentBase';
 import { getTemporaryContext, formatTimestamp, getNextResultStep } from './_100554_aiAgentHelper';
-import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, updateThreads, getMessagesByThreadId } from './_100554_msgDBController';
-import { loadChatPreferences } from './_100554_collabMessageHelper';
+import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, getMessage, getMessagesByThreadId } from './_100554_msgDBController';
+import { loadChatPreferences, getBotsContext } from './_100554_collabMessageHelper';
 import { collabImport } from './_100554_collabImport';
 import './_100554_collabMessagesTaskInfo';
 import './_100554_collabMessagesTask';
@@ -69,6 +69,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private messagesLimit = 10;
     private messagesOffset = 0;
     private isLoadingMoreMessages = false;
+    private wasMessagesAtBottom: boolean = true;
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
@@ -214,6 +215,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                                     </collab-messages-task-100554>
                                                 </div> `: html``}
                                             ${this.renderMessageResultByLanguage(message)}
+                                            ${this.renderMessageFooterResult(message)}
                                             <div class="message-footer">${dateFormated?.timeShort}</div>
                                         </div>
                                         ${cls === 'system' && !isSame ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''}
@@ -228,7 +230,25 @@ export class CollabMessagesChat100554 extends StateLitElement {
 `
     }
 
+    private renderMessageFooterResult(message: mls.msg.MessagePerformanceCache) {
+        if (!message.footers || message.footers.length === 0) return html``;
+        return html`<div class="message-result">
+            ${message.footers?.map((footer) => {
+            const content = footer.lines.join('\n').trim();
+            if (!content) return html``;
+            return html`
+                <div class="message-result-text">
+                    <b>${footer.title?.trim()}</b>
+                    <div>
+                        ${footer.lines.join('\n').trim()}
+                    </div>
+                </div>`
+        })}
+        </div>`
+    }
+
     private renderMessageResultByLanguage(message: mls.msg.Message) {
+
         if (!message.taskResults || message.taskResults.length === 0 || message.taskStatus !== 'done' || !message.taskResultsTranslated) return html``;
         const mode = this.userPreferenceChat?.translationMode || 'icon';
         if (!this.userPreferenceChat || mode === 'none') {
@@ -306,7 +326,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private renderPrompt() {
-        return html`<collab-messages-prompt-100554 acceptAutoCompleteAgents="true" acceptAutoCompleteUser="true" threadId=${this.actualThread?.thread.threadId} .onSend=${this.handleSend.bind(this)} ></collab-messages-prompt-100554>`
+        return html`
+            <collab-messages-prompt-100554
+                acceptAutoCompleteAgents="true"
+                acceptAutoCompleteUser="true"
+                threadId=${this.actualThread?.thread.threadId}
+                .onSend=${this.handleSend.bind(this)}
+                @textarea-resize=${this.handlePromptResize}
+            ></collab-messages-prompt-100554>
+        `;
     }
 
     private renderListThreads() {
@@ -366,6 +394,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
         const container = e.target as HTMLElement;
         this.savedScrollTop = container.scrollTop;
+
+        const threshold = 5;
+        this.wasMessagesAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - threshold;
+
         if (
             container.scrollTop === 0 &&
             !this.isLoadingMoreMessages &&
@@ -406,7 +438,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return response.data
     }
 
-    private parseMessages(rawData: mls.msg.Message[]): IMessageGrouped {
+    private parseMessages(rawData: mls.msg.MessagePerformanceCache[]): IMessageGrouped {
         const groupedByDay: IMessageGrouped = {};
         rawData.forEach(msg => {
             const formatted = formatTimestamp(msg.createAt);
@@ -476,10 +508,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private mergeMessages(
-        array1: mls.msg.Message[],
-        array2: mls.msg.Message[]
-    ): mls.msg.Message[] {
-        const map = new Map<string, mls.msg.Message>();
+        array1: mls.msg.MessagePerformanceCache[],
+        array2: mls.msg.MessagePerformanceCache[]
+    ): mls.msg.MessagePerformanceCache[] {
+        const map = new Map<string, mls.msg.MessagePerformanceCache>();
         for (const item of array1) {
             map.set(`${item.threadId}/${item.createAt}`, item);
         }
@@ -502,9 +534,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         try {
             if (!this.userId) return;
             const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId);
-
-            // await updateThread(threadInfo.thread.threadId, threadInfo.thread);
-
             await updateThread(threadByServer.thread.threadId, threadByServer.thread);
             await updateUsers(threadByServer.users);
             await this.loadAllMessages(threadInfo);
@@ -520,8 +549,16 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (!messages || messages.length === 0 || !this.actualThread || !this.userId) {
             return;
         }
-        await addMessages(messages);
-        this.actualMessages = this.mergeMessages(this.actualMessages, messages);
+        const newMessages: mls.msg.MessagePerformanceCache[] = [];
+        for await (let mm of messages) {
+            const messageId = `${mm.threadId}/${mm.createAt}`
+            const messageOld = await getMessage(messageId);
+            const tempMessage: mls.msg.MessagePerformanceCache = { ...mm, footers: messageOld?.footers || [] };
+            newMessages.push(tempMessage);
+        }
+
+        await addMessages(newMessages);
+        this.actualMessages = this.mergeMessages(this.actualMessages, newMessages);
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         const keys = Object.keys(this.actualMessagesParsed).sort();
         const lastKey = keys.length > 0 ? keys[keys.length - 1] : null;
@@ -575,20 +612,34 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
     }
 
+    private handlePromptResize(e: CustomEvent) {
+        if (this.wasMessagesAtBottom) {
+            const chatEl = this.querySelector('.chat-container') as HTMLElement | null;
+            if (chatEl) chatEl.scrollTop = chatEl.scrollHeight;
+        }
+    }
+
     private async addMessage(prompt: string) {
         if (!this.userId || !this.actualThread) return;
-        const params: mls.msg.RequestAddMessage = {
-            action: 'addMessage',
-            content: prompt,
-            threadId: this.actualThread.thread.threadId,
-            userId: this.userId
-        };
+
         const message: IMessage = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
         try {
+            const context: mls.msg.ExecutionContext = {
+                message,
+                task: undefined
+            }
+            const contextToBot = await getBotsContext(this.actualThread.thread, prompt, context);
+            const params: mls.msg.RequestAddMessage = {
+                action: 'addMessage',
+                content: prompt,
+                threadId: this.actualThread.thread.threadId,
+                userId: this.userId,
+            };
+            if (contextToBot) params.contextToBot = contextToBot;
             const response = await mls.api.msgAddMessage(params);
             message.isFailed = false;
             message.isFailedError = '';
-            this.updateMessage2(false, message, response.message);
+            this.updateMessage2(false, message, response.message, response.botOutputs);
         } catch (err: any) {
             message.isFailed = true;
             message.isFailedError = err.message;
@@ -644,12 +695,13 @@ export class CollabMessagesChat100554 extends StateLitElement {
             item.threadId === threadId
         )
         if (!messageAdded) {
-            const newMessage: mls.msg.Message = {
+            const newMessage: mls.msg.MessagePerformanceCache = {
                 content,
                 createAt,
                 orderAt,
                 senderId,
                 threadId,
+                footers: []
             }
             if (updateThreadDB && this.actualThread) {
                 const thread = await updateThread(threadId, this.actualThread.thread, content, createAt, 0);
@@ -704,7 +756,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
             threadId,
             isLoading: true,
             isFailed: false,
-            isFailedError: ''
+            isFailedError: '',
+            footers: []
         }
         if (taskId) newMessage.taskId = taskId;
         this.actualMessages.push(newMessage);
@@ -713,11 +766,22 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return newMessage;
     }
 
-    private async updateMessage2(updateThreadDB: boolean, oldMessage: IMessage, newMessage: mls.msg.Message) {
+    private async updateMessage2(updateThreadDB: boolean, oldMessage: IMessage, newMessage: mls.msg.Message, outputs: mls.msg.BotOutput[] | undefined) {
         if (updateThreadDB && this.actualThread) {
             const thread = await updateThread(newMessage.threadId, this.actualThread.thread, newMessage.content, newMessage.createAt, 0);
             if (this.actualThread) this.actualThread.thread = thread;
         }
+
+        const footerData: IMessageFooter[] = [];
+
+        outputs?.forEach((item) => {
+            const footerItem: IMessageFooter = {
+                title: item.botId,
+                lines: [item.output]
+            }
+            footerData.push(footerItem)
+        });
+
         const alreadyExist = this.actualMessages.find(item =>
             item.content === oldMessage.content &&
             item.senderId === oldMessage.senderId &&
@@ -731,18 +795,20 @@ export class CollabMessagesChat100554 extends StateLitElement {
                     item.createAt === oldMessage.createAt &&
                     item.threadId === oldMessage.threadId
                 ) {
-                    const { isLoading, isFailed, isFailedError, ...rest }: IMessage = { ...newMessage, isSame: oldMessage.isSame };
+                    const { isLoading, isFailed, isFailedError, ...rest }: IMessage = { ...newMessage, isSame: oldMessage.isSame, footers: footerData };
                     return rest;
                 }
                 return item;
             });
-        } else this.actualMessages.push(newMessage);
+        } else this.actualMessages.push({ ...newMessage, footers: footerData });
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+
         const m = newMessage as IMessage;
         delete m.isLoading;
         delete m.isFailed;
         delete m.isFailedError;
         delete m.isSame;
+        if (outputs) m.footers = footerData;
         addMessage(m);
         this.requestUpdate();
     }
@@ -835,9 +901,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private onMessageSend = async (e: Event) => {
         const customEvent = e as CustomEvent;
         const message: mls.msg.Message = customEvent.detail.context.message;
+        const outputs: mls.msg.BotOutput[] = customEvent.detail.context.botOutput;
+
         const thId = message?.threadId;
         if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
-        this.updateMessage2(false, message, message);
+        this.updateMessage2(false, { ...message, footers: [] }, message, outputs);
     };
 }
 
@@ -846,14 +914,22 @@ interface IThreadInfo {
     users: mls.msg.User[]
 }
 
-interface IMessage extends mls.msg.Message {
+interface IMessage extends mls.msg.MessagePerformanceCache {
     context?: mls.msg.ExecutionContext,
     lastChanged?: number,
     isSame?: boolean,
     isLoading?: boolean,
     isFailed?: boolean,
     isFailedError?: string,
+}
 
+interface IMessageFooter {
+    title?: string;
+    lines: string[];
+    icon?: string; // icon to show in footer, ex: "fa fa-check"
+    color?: string; // color of the footer, ex: "#00ff00"
+    backgroundColor?: string; // background color of the footer, ex: "#000000"
+    timestamp?: string;
 }
 
 type IMessageGrouped = { [key: string]: IMessage[] }

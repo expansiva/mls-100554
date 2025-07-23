@@ -12,7 +12,7 @@ export interface IAgent {
   afterClarification?(context: mls.msg.ExecutionContext, stepId: number, data: object): Promise<void>;
   afterTool?(context: mls.msg.ExecutionContext, stepId: number): Promise<void>;
   installBot?(context: mls.msg.ExecutionContext): Promise<boolean>;
-  beforeBot?(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage): Promise<Record<string, any>>;
+  beforeBot?(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage[]): Promise<Record<string, any>>;
   replayForSupport?(task: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void>;
 }
 
