@@ -36,7 +36,7 @@ export function createAgent(): IAgent {
         async installBot(context: mls.msg.ExecutionContext): Promise<boolean> {
             return _installBot(context);
         },
-        async beforeBot(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage): Promise<Record<string, any>> {
+        async beforeBot(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage[]): Promise<Record<string, any>> {
             return _beforeBot(context, msg, toolsBeforeSendMessage);
         }
     };
@@ -84,7 +84,7 @@ const _installBot = async (context: mls.msg.ExecutionContext): Promise<boolean> 
     return false;
 }
 
-async function _beforeBot(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage): Promise<Record<string, any>> {
+async function _beforeBot(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage[]): Promise<Record<string, any>> {
     // prepare config to send in 
     const contextToBot: Record<string, any> = {};
     return contextToBot;

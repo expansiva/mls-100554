@@ -43,17 +43,17 @@ export function openDB(): Promise<IDBDatabase> {
     });
 }
 
-export async function addMessages(messages: mls.msg.Message[]): Promise<void> {
+export async function addMessages(messages: mls.msg.MessagePerformanceCache[]): Promise<void> {
     const db = await openDB();
 
     return new Promise((resolve, reject) => {
         const tx = db.transaction("messages", "readwrite");
         const store = tx.objectStore("messages");
-
         for (const message of messages) {
             const newMessage = {
-                ...message,
+                ...{ ...message, lastSync: getCompactUTC() },
                 messageId: `${message.threadId}/${message.createAt}`,
+
 
             };
             store.put(newMessage);
@@ -65,25 +65,8 @@ export async function addMessages(messages: mls.msg.Message[]): Promise<void> {
     });
 }
 
-export async function addMessage2(message: mls.msg.Message): Promise<void> {
-    const db = await openDB();
+export async function addMessage(message: mls.msg.MessagePerformanceCache): Promise<void> {
 
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction("messages", "readwrite");
-        const store = tx.objectStore("messages");
-        const newMessage = {
-            ...message,
-            messageId: `${message.threadId}/${message.createAt}`,
-
-        }
-        store.put(newMessage);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject("Erro ao adicionar task");
-        tx.onabort = () => reject("Transação abortada");
-    });
-}
-
-export async function addMessage(message: mls.msg.Message): Promise<void> {
     const db = await openDB();
 
     return new Promise((resolve, reject) => {
@@ -91,7 +74,7 @@ export async function addMessage(message: mls.msg.Message): Promise<void> {
         const store = tx.objectStore("messages");
         const index = store.index("byThreadId_orderAt");
 
-        const messagesInThread: mls.msg.Message[] = [];
+        const messagesInThread: mls.msg.MessagePerformanceCache[] = [];
         const range = IDBKeyRange.bound([message.threadId, ''], [message.threadId, '\uffff']);
         const request = index.openCursor(range);
 
@@ -117,7 +100,7 @@ export async function addMessage(message: mls.msg.Message): Promise<void> {
                     const storeWrite = txWrite.objectStore("messages");
 
                     const newMessage = {
-                        ...message,
+                        ...{ ...message, lastSync: getCompactUTC() },
                         messageId: `${message.threadId}/${message.createAt}`,
                     };
 
@@ -169,7 +152,7 @@ export async function updateMessage(message: mls.msg.Message): Promise<void> {
     });
 }
 
-export async function getMessage(messageId: string): Promise<mls.msg.Message | undefined> {
+export async function getMessage(messageId: string): Promise<mls.msg.MessagePerformanceCache | undefined> {
     const db = await openDB();
 
     return new Promise((resolve, reject) => {
@@ -186,7 +169,7 @@ export async function getMessagesByThreadId(
     threadId: string,
     limit: number = 15,
     offset: number = 0
-): Promise<mls.msg.Message[]> {
+): Promise<mls.msg.MessagePerformanceCache[]> {
     const db = await openDB();
 
     return new Promise((resolve, reject) => {
@@ -197,7 +180,7 @@ export async function getMessagesByThreadId(
         const range = IDBKeyRange.only(threadId);
         const request = index.openCursor(range, "prev"); // "prev" = mais recentes primeiro
 
-        const messages: mls.msg.Message[] = [];
+        const messages: mls.msg.MessagePerformanceCache[] = [];
         let skipped = 0;
 
         request.onsuccess = () => {
@@ -222,7 +205,7 @@ export async function getMessagesByThreadId(
 }
 
 
-export async function getAllMessagesByThreadId(threadId: string): Promise<mls.msg.Message[]> {
+export async function getAllMessagesByThreadId(threadId: string): Promise<mls.msg.MessagePerformanceCache[]> {
     const db = await openDB();
     return new Promise((resolve, reject) => {
         const tx = db.transaction("messages", "readonly");
@@ -236,7 +219,7 @@ export async function getAllMessagesByThreadId(threadId: string): Promise<mls.ms
 }
 
 
-async function deleteMessagesAndTasks(messages: mls.msg.Message[]): Promise<void> {
+async function deleteMessagesAndTasks(messages: mls.msg.MessagePerformanceCache[]): Promise<void> {
 
     const db = await openDB();
     const tx = db.transaction(["messages", "tasks"], "readwrite"); // transação para ambas stores
@@ -483,5 +466,6 @@ function getCompactUTC() {
 
     return `${year}${month}${day}${hours}${minutes}${seconds}`;
 }
+
 
 

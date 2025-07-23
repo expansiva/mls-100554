@@ -6,6 +6,7 @@ collab-messages-chat-100554 {
     flex-direction: column;
     height: 100%;
     width: 375px;
+
     .loader {
         display: inline-block;
         width: 10px;
@@ -289,7 +290,6 @@ collab-messages-chat-100554 {
 
                     .message-content {
                         white-space: pre-wrap;
-                        // padding-right: 4em;
                         margin-top: 0.4rem;
                         color: #000;
                         display: flex;
@@ -300,6 +300,17 @@ collab-messages-chat-100554 {
                         svg {
                             width: 12px;
                             fill: @active-color;
+                        }
+                    }
+
+                    .message-result {
+
+                        .message-result-text {
+                            border-top: 1px solid @grey-color-dark;
+                            margin-top: .5rem;
+                            white-space: pre-line;
+                            color: #000;
+                            word-break: break-word;
                         }
                     }
 

@@ -2,6 +2,7 @@
 
 import { getTemporaryContext, getUserIdLocalStorage, notifyMessageSendChange } from './_100554_aiAgentHelper';
 import { IAgent } from './_100554_aiAgentBase';
+import { collabImport } from './_100554_collabImport';
 
 const LS_KEY = 'collabChatPreferences';
 export const AGENTDEFAULT = 'agentPlanner1';
@@ -31,6 +32,42 @@ export async function addMessage(threadId: string, messageContent: string, conte
     const agent: IAgent = moduleAgent.createAgent();
     await agent.beforePrompt(context);
 
+}
+
+export async function getArgsToBots(): Promise<Record<string, any>> {
+    const data = {
+        project: mls.actual[5].project
+    }
+    return data
+}
+
+export async function getBotsContext(thread: mls.msg.Thread, prompt: string, context: mls.msg.ExecutionContext): Promise<Record<string, any>> {
+
+    const argsToBot = await getArgsToBots();
+    const botsVarsBefore = mls.bots.getBotContextVarsBeforeMessageSend(thread, prompt);
+    const botsVarsBefore2 = mls.bots.getBotContextVarsBeforeMessageSend2(botsVarsBefore, argsToBot);
+    const auxContextToBot: Record<string, any>[] = []
+    for await (let bot of botsVarsBefore2) {
+        try {
+            const moduleBot = await collabImport({ project: PROJECTAGENTDEFAULT, shortName: bot.toolName, folder: '' });
+            if (!moduleBot || !moduleBot.createAgent || typeof moduleBot.createAgent !== 'function') continue;
+            const agent: IAgent = moduleBot.createAgent();
+            if (agent && agent.beforeBot && typeof agent.beforeBot === 'function') {
+                const argsBot: Record<string, any> = await agent.beforeBot(context, prompt, botsVarsBefore2)
+                auxContextToBot.push(argsBot);
+            }
+        } catch (err:any) {
+            console.error(err.message);
+            continue;
+        }
+        
+    }
+
+    const merged = auxContextToBot.reduce((acc, curr) => {
+        return { ...acc, ...curr }
+    }, {})
+
+    return merged;
 }
 
 export function loadChatPreferences(): IChatPreferences {
