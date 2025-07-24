@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation } from './_100554_collabIcons';
 import { IAgent } from './_100554_aiAgentBase';
-import { getTemporaryContext, formatTimestamp, getNextResultStep } from './_100554_aiAgentHelper';
+import { getTemporaryContext, formatTimestamp, getNextResultStep, notifyThreadChange } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, getMessage, getMessagesByThreadId } from './_100554_msgDBController';
 import { loadChatPreferences, getBotsContext } from './_100554_collabMessageHelper';
 import { collabImport } from './_100554_collabImport';
@@ -338,7 +338,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private renderListThreads() {
-        const unreadCount = 1;
+        const unreadCount = 0;
         const imageUrls = [
             "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             "https://plus.unsplash.com/premium_photo-1677252438426-595a3a9d5e11?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA",
@@ -348,10 +348,39 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (this.userThreads[this.group].length === 0 && !this.isLoadingThread) {
             return html`<div style="padding:1rem;">${this.msg.noThreads}</div>`;
         }
+
+        const ordenedThreads = this.userThreads[this.group]
+            .map((item) => {
+
+                const lastTimestamp = item.thread.lastMessageTime
+                    ? item.thread.lastMessageTime
+                    : item.thread.history[0].timestamp;
+
+                const formatedTimestamp = formatTimestamp(lastTimestamp).dateFull;
+                const lastMessageDate = this.parseLocalDate(formatedTimestamp);
+
+                return {
+                    ...item,
+                    _lastMessageDate: lastMessageDate,
+                };
+            })
+            .sort((a, b) => b._lastMessageDate.dateObject.getTime() - a._lastMessageDate.dateObject.getTime())
+
         return html`
         <ul class="thread-list">
-            ${this.userThreads[this.group].map((item) => {
+            ${ordenedThreads.map((item) => {
             const randomImage = imageUrls[Math.floor(Math.random() * imageUrls.length)];
+
+            const now = new Date();
+            const isToday =
+                item._lastMessageDate.dateObject.getFullYear() === now.getFullYear() &&
+                item._lastMessageDate.dateObject.getMonth() === now.getMonth() &&
+                item._lastMessageDate.dateObject.getDate() === now.getDate();
+
+            const displayDate = isToday
+                ? item._lastMessageDate.time
+                : item._lastMessageDate.date;
+
             return html`
                     <li @click=${() => this.onThreadClick(item)} class="thread-item">
                         <div class="thread-item-avatar">
@@ -360,11 +389,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                         <div class="thread-content">
                             <div class="thread-item-header">
                                 <span class="thread-name">${item.thread.name || item.thread.threadId}</span>
-                                <span class="last-update">
-                                    ${item.thread.lastMessageTime
-                    ? formatTimestamp(item.thread.lastMessageTime)?.date
-                    : formatTimestamp(item.thread.history[0].timestamp)?.date}
-                                </span>
+                                <span class="last-update">${displayDate}</span>
                             </div>
                             <div class="thread-summary">
                                 <span class="last-message">${item.thread.lastMessage || ''}</span>
@@ -497,15 +522,21 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private parseLocalDate(dateString: string) {
-        const [year, month, day] = dateString.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
+        const normalized = dateString.includes(' ')
+            ? dateString.replace(' ', 'T')
+            : `${dateString}T00:00:00`;
+
+        const date = new Date(normalized);
+
         return {
             dateObject: date,
-            datafull: date.toLocaleString(), // Ex: "22/04/2025 00:00:00"
-            date: date.toLocaleDateString(), // Ex: "22/04/2025"
-            time: date.toTimeString().split(' ')[0] // Ex: "00:00:00"
+            datafull: date.toLocaleString(),
+            date: date.toLocaleDateString(),
+            time: date.toTimeString().split(' ')[0]
         };
     }
+
+
 
     private mergeMessages(
         array1: mls.msg.MessagePerformanceCache[],
@@ -573,6 +604,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 0
             );
             threadInfo.thread = thread;
+            notifyThreadChange(thread);
         }
         if (messages.length < 100) return;
         return this.loadAllMessages(threadInfo);
@@ -639,7 +671,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             const response = await mls.api.msgAddMessage(params);
             message.isFailed = false;
             message.isFailedError = '';
-            this.updateMessage2(false, message, response.message, response.botOutputs);
+            this.updateMessage2(true, message, response.message, response.botOutputs);
         } catch (err: any) {
             message.isFailed = true;
             message.isFailedError = err.message;
@@ -767,9 +799,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async updateMessage2(updateThreadDB: boolean, oldMessage: IMessage, newMessage: mls.msg.Message, outputs: mls.msg.BotOutput[] | undefined) {
+
         if (updateThreadDB && this.actualThread) {
             const thread = await updateThread(newMessage.threadId, this.actualThread.thread, newMessage.content, newMessage.createAt, 0);
             if (this.actualThread) this.actualThread.thread = thread;
+            notifyThreadChange(this.actualThread.thread);
         }
 
         const footerData: IMessageFooter[] = [];
@@ -810,6 +844,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         delete m.isSame;
         if (outputs) m.footers = footerData;
         addMessage(m);
+        this.isSystemChangeScroll = true;
         this.requestUpdate();
     }
 
