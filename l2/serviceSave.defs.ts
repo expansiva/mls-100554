@@ -19,11 +19,8 @@ export const defs: mls.l4.BaseDefs = {
   },
   "references": {
     "widgets": [
-      "service-save-100554"
     ],
     "plugins": [
-      "plugin-pullrequest-100554",
-      "plugin-verify-error-100554"
     ],
     "statesRO": [
       "mls.stor.files",
