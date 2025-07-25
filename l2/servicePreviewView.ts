@@ -17,7 +17,7 @@ const message_pt = {
     configure: 'Configure seu HTML pela opção do editor!',
     width: 'Largura',
     height: 'Altura',
-    msgSecurity:`<div>
+    msgSecurity: `<div>
   <h2>🛡️ Modo de Segurança</h2>
   <p>Atualmente, você está em <strong>modo de segurança</strong>. Isso significa que o seu código não foi carregado por precaução.</p>
   <p>Assim que você fizer sua primeira edição, o sistema sairá automaticamente desse modo e o código será carregado normalmente.</p>
@@ -31,7 +31,7 @@ const message_en = {
     configure: 'Configure your html by editor option!',
     width: 'Width',
     height: 'Height',
-    msgSecurity:`<div>
+    msgSecurity: `<div>
 <h2>🛡️ Safe Mode</h2>
 <p>You are currently in <strong>safe mode</strong>. This means that your code has not been loaded as a precaution.</p>
 <p>As soon as you make your first edit, the system will automatically exit this mode and the code will load normally.</p>
@@ -349,12 +349,14 @@ export class ServicePreviewView extends StateLitElement {
             }
 
             if (iframe.contentDocument) {
-                iframe.contentDocument.body.style.padding = '35px';
+                // iframe.contentDocument.body.style.padding = '35px';
+                // iframe.contentDocument.body.style.height = 'calc(100% - 70px)';
+                // iframe.contentDocument.body.style.width = 'calc(100% - 70px)';
                 iframe.contentDocument.body.style.overflowY = 'auto';
                 iframe.contentDocument.body.style.overflowX = 'hidden';
                 iframe.contentDocument.body.style.margin = '0';
-                iframe.contentDocument.body.style.height = 'calc(100% - 70px)';
-                iframe.contentDocument.body.style.width = 'calc(100% - 70px)';
+                iframe.contentDocument.body.style.height = '100%';
+                iframe.contentDocument.body.style.width = '100%';
                 iframe.contentDocument.body.style.background = 'var(--bg-primary-color)';
                 iframe.contentDocument.body.style.color = 'var(--text-primary-color)';
 
@@ -398,7 +400,7 @@ export class ServicePreviewView extends StateLitElement {
         if (!this.page || this.page === '') throw new Error(this.msg.pageNotDefined);
         mls.actual[0].setFullName(this.page);
         const info = mls.actual[0];
-        
+
 
         const key = mls.stor.getKeyToFiles(
             info.project as number,
@@ -413,7 +415,7 @@ export class ServicePreviewView extends StateLitElement {
         const mkey = mls.l2.getKey({
             project: info.project as number,
             shortName: info.path as string,
-            folder: file ? file.folder: '',
+            folder: file ? file.folder : '',
         });
 
         if (!mls.stor.files[key]) throw new Error(this.msg.notFoundStorfile + ': ' + key);
