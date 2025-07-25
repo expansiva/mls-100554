@@ -8,11 +8,13 @@ import { getTemporaryContext, formatTimestamp, getNextResultStep, notifyThreadCh
 import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, getMessage, getMessagesByThreadId } from './_100554_msgDBController';
 import { loadChatPreferences, getBotsContext } from './_100554_collabMessageHelper';
 import { collabImport } from './_100554_collabImport';
+
 import './_100554_collabMessagesTaskInfo';
 import './_100554_collabMessagesTask';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
 import './_100554_collabMessagesThreadDetails';
+
 import { IChatPreferences, AGENTDEFAULT, PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
 import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt';
@@ -23,14 +25,17 @@ const message_pt = {
     btnAddParticipant: 'Adicionar participante',
     threadDetails: 'Detalhes da sala',
     msgNotSend: 'Mensagem não enviada*',
-    noThreads: 'Nenhuma sala disponível no momento.'
+    noThreads: 'Nenhuma sala disponível no momento.',
+    placeholderSearch: 'Digite para filtrar',
 }
 const message_en = {
     loading: 'Loading...',
     btnAddParticipant: 'Add Participant',
     threadDetails: 'Thread details',
     msgNotSend: 'Message not sent*',
-    noThreads: 'No threads available at the moment.'
+    noThreads: 'No threads available at the moment.',
+    placeholderSearch: 'Type to filter',
+
 }
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
@@ -49,6 +54,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     @state() userPreferenceChat?: IChatPreferences;
     @state() isLoadingThread: boolean = false;
+    @state() filteredThreads: IFilteredThreads[] = []
 
     @property() group: 'CONNECT' | 'APPS' | 'DOCS' | 'CRM' = 'CONNECT';
     @property() userId: string | undefined;
@@ -59,9 +65,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @property() actualMessages: IMessage[] = [];
     @property() actualMessagesParsed: IMessageGrouped = {};
     @property() isLoadingMessages: boolean = false;
+    @property() searchTerm: string = '';
+
     @property({ attribute: false }) userThreads: IThread = {
         CONNECT: [{ "thread": { "history": [{ "action": "created", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "update_group", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_language ${language}", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120844.1000", "timestamp": "20250417172252" }, { "action": "add_user", "userId": "20250417004803.1000", "timestamp": "20250417174719" }], "languages": ["pt"], "status": "active", "visibility": "private", "group": "CONNECT", "threadId": "20250417135645.1000", "users": [{ "userId": "20250417120841.1000", "auth": "admin" }, { "userId": "20250417120844.1000", "auth": "write" }, { "userId": "20250417004803.1000", "auth": "write" }], "name": "" }, "users": [{ "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active" }, { "threads": ["20250417133813.1000", "20250417180232.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active" }, { "threads": ["20250417135645.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active" }] }]
     };
+
 
     private isSystemChangeScroll: boolean = false;
     private savedScrollTop = 0;
@@ -341,34 +350,18 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const unreadCount = 0;
         const imageUrls = [
             "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            "https://plus.unsplash.com/premium_photo-1677252438426-595a3a9d5e11?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA",
-            "https://plus.unsplash.com/premium_photo-1677252438450-b779a923b0f6?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA",
-
         ];
         if (this.userThreads[this.group].length === 0 && !this.isLoadingThread) {
             return html`<div style="padding:1rem;">${this.msg.noThreads}</div>`;
         }
 
-        const ordenedThreads = this.userThreads[this.group]
-            .map((item) => {
-
-                const lastTimestamp = item.thread.lastMessageTime
-                    ? item.thread.lastMessageTime
-                    : item.thread.history[0].timestamp;
-
-                const formatedTimestamp = formatTimestamp(lastTimestamp).dateFull;
-                const lastMessageDate = this.parseLocalDate(formatedTimestamp);
-
-                return {
-                    ...item,
-                    _lastMessageDate: lastMessageDate,
-                };
-            })
-            .sort((a, b) => b._lastMessageDate.dateObject.getTime() - a._lastMessageDate.dateObject.getTime())
+        const ordenedThreads: IFilteredThreads[] = this.getOrdenedThreads();
+        this.filteredThreads = this.getFilteredThreads(ordenedThreads);
 
         return html`
+        ${this.renderThreadSearch()}
         <ul class="thread-list">
-            ${ordenedThreads.map((item) => {
+            ${this.filteredThreads.map((item) => {
             const randomImage = imageUrls[Math.floor(Math.random() * imageUrls.length)];
 
             const now = new Date();
@@ -403,6 +396,17 @@ export class CollabMessagesChat100554 extends StateLitElement {
     `;
     }
 
+    private renderThreadSearch() {
+        return html`<div class="thread-search">
+                <input type="search"
+                    .value=${this.searchTerm}
+                    placeholder=${this.msg.placeholderSearch} 
+                    @input=${this.onSearchInput} 
+                    type="text">
+                </input>
+        </div>`
+    }
+
     private renderTaskDetails() {
         const messageId = `${this.actualThread?.thread.threadId}/${this.actualMessage?.createAt}`
         return html`<collab-messages-task-info-100554 messageId=${messageId} .task=${this.actualTask} .message=${this.actualMessage} taskId=${this.actualTask?.PK}></collab-messages-task-info-100554>`
@@ -410,6 +414,13 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private renderThreadDetails() {
         return html`<collab-messages-thread-details-100554 userId=${this.userId} .threadDetails=${{ ...this.actualThread }}></collab-messages-thread-details-100554>`
+    }
+
+    private onSearchInput(e: Event) {
+        const target = e.target as HTMLInputElement;
+        this.searchTerm = target.value.toLowerCase();
+        const ordenedThreads: IFilteredThreads[] = this.getOrdenedThreads();
+        this.filteredThreads = this.getFilteredThreads(ordenedThreads);
     }
 
     private async onChatScroll(e: Event) {
@@ -449,6 +460,37 @@ export class CollabMessagesChat100554 extends StateLitElement {
             }
             this.isLoadingMoreMessages = false;
         }
+    }
+
+    private getOrdenedThreads() {
+        const ordenedThreads: IFilteredThreads[] = this.userThreads[this.group]
+            .map((item) => {
+
+                const lastTimestamp = item.thread.lastMessageTime
+                    ? item.thread.lastMessageTime
+                    : item.thread.history[0].timestamp;
+
+                const formatedTimestamp = formatTimestamp(lastTimestamp).dateFull;
+                const lastMessageDate = this.parseLocalDate(formatedTimestamp);
+
+                return {
+                    ...item,
+                    _lastMessageDate: lastMessageDate,
+
+                };
+            })
+            .sort((a, b) => b._lastMessageDate.dateObject.getTime() - a._lastMessageDate.dateObject.getTime())
+
+        return [...ordenedThreads]
+    }
+
+    private getFilteredThreads(ordened: IFilteredThreads[]): IFilteredThreads[] {
+
+        if (!this.searchTerm) return ordened;
+        return ordened.filter(item => {
+            const threadMatch = item.thread.name?.toLowerCase().includes(this.searchTerm);
+            return threadMatch;
+        });
     }
 
     private async getMessages(thread: mls.msg.Thread, lastOrderAt: string = ''): Promise<mls.msg.Message[]> {
@@ -966,7 +1008,16 @@ interface IMessageFooter {
     backgroundColor?: string; // background color of the footer, ex: "#000000"
     timestamp?: string;
 }
-
+interface IFilteredThreads {
+    _lastMessageDate: {
+        dateObject: Date;
+        datafull: string;
+        date: string;
+        time: string;
+    };
+    thread: mls.msg.ThreadPerformanceCache;
+    users: mls.msg.User[];
+}
 type IMessageGrouped = { [key: string]: IMessage[] }
 type IThread = { [key: string]: IThreadInfo[] }
 type IScenery = 'list' | 'details' | 'loading' | 'task' | 'threadDetails'
