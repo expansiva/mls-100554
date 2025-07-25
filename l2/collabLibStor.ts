@@ -242,6 +242,8 @@ export async function undoFile(storFile: mls.stor.IFileInfo): Promise<void> {
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
     }
 
+    storFile.getValueInfo = undefined;
+
     const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName);
     if (!mls.editor.models[keyToModel]) return;
 
