@@ -20,9 +20,7 @@ import './_100554_collabConsole';
 import './_100554_collabResultTest';
 import './_100554_servicePreviewView';
 import './_100554_pluginPreviewInsights';
-
 import './_100554_collabMessagesPrompt';
-
 import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
 
@@ -283,7 +281,7 @@ export class ServicePreview100554 extends ServiceBase {
             return;
         }
 
-        if(this.level !== 3) return
+        if (this.level !== 3) return
 
         this.menu.tools.editTextL3 = {
             type: 'cycle',
@@ -311,8 +309,8 @@ export class ServicePreview100554 extends ServiceBase {
             if (this.elEditL3 && (this.elEditL3 as any).save) {
                 const ret = await (this.elEditL3 as any).save();
                 if (!ret) this.preview(this.lastModePreview);
-                
-            }else this.preview(this.lastModePreview);
+
+            } else this.preview(this.lastModePreview);
             return;
         }
 
@@ -480,11 +478,33 @@ export class ServicePreview100554 extends ServiceBase {
 
     // -------------- COMPONENT ---------------
 
+    render2() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        return html`
+        <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="var(--bg-primary-color)">
+                <div slot="top" style="height:100%;" id="preview-container"></div>
+                <div slot="bottom">
+                    <collab-messages-prompt-100554 acceptAutoCompleteAgents="true" scope="l${this.level}_preview"  .onSend=${this.handleSend.bind(this)}></collab-messages-prompt-100554>
+                </div>
+            </collab-spliter-vertical-var-fixed-100554>`;
+    }
+
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        return html`<collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="var(--bg-primary-color)">
-                <div slot="top" style="height:100%;" id="preview-container"></div>
+        return html`
+        <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="var(--bg-primary-color)">
+
+                <collab-spliter-horizontal-var-fixed-100554
+                    slot="top"
+                    complementcolor="var(--bg-primary-color);"
+                    fixedwidth="30%"
+                    fixedvisible= "closed" 
+                >
+                    <div slot="left" style="height:100%;" id="preview-container"></div>
+                    <div slot="right" style="height:100%;" id="preview-details"></div>
+                </collab-spliter-horizontal-var-fixed-100554>
                 <div slot="bottom">
                     <collab-messages-prompt-100554 acceptAutoCompleteAgents="true" scope="l${this.level}_preview"  .onSend=${this.handleSend.bind(this)}></collab-messages-prompt-100554>
                 </div>
