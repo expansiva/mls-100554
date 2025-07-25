@@ -88,7 +88,6 @@ export async function readDefs(): Promise<mls.l4.BaseDefs> {
         "references": {
             "widgets": [],
             "plugins": [
-                "pluginthemeswitcher"
             ],
             "statesRO": [],
             "statesRW": [],

@@ -276,8 +276,8 @@ export function convertColorToHex(color: string) {
     );
 }
 
-export async function getEnhancementName(file: { project: number, shortName: string }): Promise<string> {
-    const key = mls.l2.getKey({ project: file.project, shortName: file.shortName });
+export async function getEnhancementName(file: { project: number, shortName: string, folder:string }): Promise<string> {
+    const key = mls.l2.getKey({ project: file.project, shortName: file.shortName, folder:file.folder });
     const mmodel = mls.editor.models[key];
     if (!mmodel || !mmodel.ts) throw new Error('model invalid');
     if (!mmodel.ts.compilerResults) throw new Error('model ts not compiled yet');
@@ -365,8 +365,9 @@ export async function getListNewFilesToDeleteByGroup(group: string, project: num
 }
 
 export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
-    const modelsToDelete: { project: number, shortName: string }[] = Array.from(
-        new Map(filesToDelete.map(({ project, shortName }) => [shortName, { project, shortName }])).values()
+
+    const modelsToDelete: { project: number, shortName: string, folder:string }[] = Array.from(
+        new Map(filesToDelete.map(({ project, shortName, folder }) => [shortName, { project, shortName, folder }])).values()
     );
 
     const filesToDeleteCache: Set<string> = new Set();

@@ -1,5 +1,7 @@
 /// <mls shortName="pluginNewFileBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { openService } from './_100554_libCommom'
+import { createAllFiles, IReqCreateAllFiles } from './_100554_collabLibStor';
+
 export interface IDetails {
     title: string,
     description: string,
@@ -42,7 +44,77 @@ export interface IRequestNewFile {
     openPreview: boolean
 }
 
-export async function createNewFile(args:IRequestNewFile) {
+export async function createNewFile(args: IRequestNewFile) {
+
+    const param = {
+        shortName: args.shortName,
+        project: args.project,
+        folder: '',
+        enhancement: args.enhancement || '_blank',
+        level: 2,
+        tsSource: args.sourceTS
+
+    } as IReqCreateAllFiles;
+
+    if (args.sourceHTML) param.htmlSource = args.sourceHTML;
+    if (args.sourceLess) param.lessSource = args.sourceLess;
+    if (args.sourceTest) param.testSource = args.sourceTest;
+    if (args.sourceDefs) param.defsSource = args.sourceDefs;
+
+    const files = await createAllFiles(param);
+
+    if (args.openPreview && files.ts && !(files.ts instanceof Error)) {
+
+        fireEvents(files.ts, { position: args.position, openPreview: args.openPreview }, 0);
+        saveLocalHistory(param.project, 2, param.shortName, '.ts', param.folder);
+
+    }
+
+    
+}
+
+function fireEvents(file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
+
+    const params = {} as mls.events.IFileAction;
+
+    params.action = 'open';
+    params.level = file.level;
+    params.project = file.project;
+    params.shortName = file.shortName;
+    params.extension = file.extension;
+    params.folder = file.folder;
+    params.position = info.position as ('right' | 'left');
+
+    if (info && info.shortName) {
+        params.newshortName = info.shortName;
+        params.newProject = info.project;
+        params.newfolder = file.folder;
+    }
+
+    const lv = mls.actualLevel == 1 ? 1 : file.level;
+
+    mls.actual[lv as any].setFullName(`_${file.project}_${file.shortName}`);
+    (mls.actual[lv as any] as any)[info.position as any] = {
+        project: file.project,
+        shortName: file.shortName,
+        extension: file.extension,
+        folder: file.folder,
+    } as any;
+
+
+
+    if (mls.actualLevel == 1) {
+        mls.events.fire([1], ['FileAction'], JSON.stringify(params), timeout);
+        if (info.position === 'left' && info.openPreview) openService('_100554_servicePreviewL1', 'right', 1);
+    } else {
+        mls.events.fire([(+(file.level as any) as any)], ['FileAction'], JSON.stringify(params), timeout);
+        if (info.position === 'left' && info.openPreview) openService('_100554_servicePreview', 'right', 2);
+    }
+
+
+}
+
+/*export async function createNewFile(args:IRequestNewFile) {
 
     const params = {} as mls.events.IFileAction;
 
@@ -78,41 +150,6 @@ export async function createNewFile(args:IRequestNewFile) {
     } else {
         await mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);
         if (args.position === 'left' && args.openPreview) openService('_100554_servicePreview', 'right', 2);
-    }
-
-    saveLocalHistory(params.project, 2, params.shortName, params.extension, params.folder);
-
-}
-
-/*export async function createNewFile(project: number, position: 'left' | 'right', shortName: string, enhancement: string, source: string, sourceHTML?: string, openPreview: boolean = true) {
-    const params = {} as mls.events.IFileAction;
-
-    params.action = 'new' as typeof params.action;
-    params.level = 2;
-    params.project = project;
-    params.newProject = project;
-    params.shortName = shortName;
-    params.newshortName = shortName;
-    params.folder = '';
-    params.newfolder = '';
-    params.newEnhancement = enhancement || '_blank';
-    params.extension = '.ts';
-    params.newTSSource = source;
-    if (sourceHTML) params.newHtmlSource = sourceHTML;
-    params.position = position;
-
-    mls.actual[2].setFullName('_' + params.project + '_' + params.shortName);
-    (mls.actual[2] as any)[position] = {
-        project: params.project,
-        shortName: params.shortName
-    };
-
-    if (mls.actualLevel == 1) {
-        await mls.events.fire([1], ['FileAction'], JSON.stringify(params), 0);
-        if (position === 'left' && openPreview) openService('_100554_servicePreviewL1', 'right', 1);
-    } else {
-        await mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);
-        if (position === 'left' && openPreview) openService('_100554_servicePreview', 'right', 2);
     }
 
     saveLocalHistory(params.project, 2, params.shortName, params.extension, params.folder);

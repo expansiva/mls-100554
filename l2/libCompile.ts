@@ -60,7 +60,7 @@ async function getTagsInTypescript(modelTS: mls.editor.IModelTS, tags: string[])
 async function getDependencies(models: mls.editor.IModels, filename: string, html: string, theme: string, withCss: boolean = false) {
 
     if (!models.ts) throw new Error('getDependencies: Invalid model ts');
-    const { project, shortName } = models.ts.storFile;
+    const { project, shortName, folder } = models.ts.storFile;
 
     const myImportsMap: string[] = [];
     const myImports: string[] = [];
@@ -80,7 +80,7 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
         myModules,
     );
 
-    let tokens: string | undefined = await getTokens({ project, shortName }, theme);
+    let tokens: string | undefined = await getTokens({ project, shortName,folder }, theme);
     return {
         file: filename,
         wcComponents: tags,
@@ -94,7 +94,7 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
 
 async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, html: string, theme: string, withCss: boolean = false) {
 
-    const { project, shortName } = file;
+    const { project, shortName, folder } = file;
 
     const myImportsMap: string[] = [];
     const myImports: string[] = [];
@@ -113,7 +113,7 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
         myModules,
     );
 
-    let tokens: string | undefined = await getTokens({ project, shortName }, theme);
+    let tokens: string | undefined = await getTokens({ project, shortName, folder }, theme);
     return {
         file: filename,
         wcComponents: tags,
@@ -204,10 +204,11 @@ async function loadMyNeedsToCompile(
         if (tags.length <= 0) return;
         const name = convertTagToFileName(tags[0]);
         mls.actual[0].setFullName(name);
+        const f = mls.stor.files[name];
         const { project, path } = mls.actual[0];
         if (!project || !path) return;
 
-        const ipath = { project, shortName: path };
+        const ipath = { project, shortName: path, folder: f ? f.folder : '' };
         const enhacementName = await getEnhancementFromFetch(ipath);
         if (!enhacementName) throw new Error('enhacementName not valid');
         if (enhacementName === '_blank') return;
@@ -215,7 +216,7 @@ async function loadMyNeedsToCompile(
         if (!myModules[enhacementName]) {
 
             mls.actual[0].setFullName(enhacementName);
-            const ipathenhacement = { project: mls.actual[0].project || 0, shortName: mls.actual[0].path || '' };
+            const ipathenhacement = { project: mls.actual[0].project || 0, shortName: mls.actual[0].path || '', folder: f ? f.folder : '' };
 
             const mModule = await mls.l2.enhancement.getEnhancementModule(ipathenhacement);
 
