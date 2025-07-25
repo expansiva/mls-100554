@@ -18,7 +18,6 @@ export const defs: mls.l4.BaseDefs = {
   },
   "references": {
     "widgets": [
-      "mls-editor-100529"
     ],
     "plugins": [],
     "statesRO": [],

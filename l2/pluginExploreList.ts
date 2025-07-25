@@ -1,9 +1,11 @@
 /// <mls shortName="pluginExploreList" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
-import { property, queryAll } from 'lit/decorators.js';
+import { html, css, svg, repeat, TemplateResult } from 'lit'; 
+import { property, queryAll } from 'lit/decorators.js';  
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance } from './_100554_libCommom';
+import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles } from './_100554_collabLibStor';  
+import { ServiceBase } from './_100554_serviceBase';
 import './_100554_serviceListFilesAdd';
 
 /// **collab_i18n_start**
@@ -13,7 +15,7 @@ const message_pt = {
     update: "atualizar",
     addNewFile: "adicionar novo arquivo",
     filter: "Filtrar",
-    localProject: "Projeto local",
+    localProject: "Todos projetos",
     totalFiles: "arquivos totais",
     filesWithErrors: "arquivos com erros",
     filesInLocalStorage: "arquivos no armazenamento local",
@@ -31,7 +33,7 @@ const message_en = {
     update: 'update',
     addNewFile: 'add new file',
     filter: 'Filter',
-    localProject: 'Local project',
+    localProject: 'Upstream project',
     totalFiles: 'total files',
     filesWithErrors: 'files with errors',
     filesInLocalStorage: 'file in local storage',
@@ -65,7 +67,11 @@ export class PluginExploreList extends PluginBaseModule {
 
     private resizeObserver: ResizeObserver | undefined;
 
+    private myDep: number[] = [];
+
     private msg: MessageType = messages['en'];
+
+    public service: ServiceBase | undefined;
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
 
@@ -145,6 +151,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     private onlevelChange(ev: mls.events.IEvent) {
         this.changeList();
+        this.showLoading(false);
     }
 
     private onMLSEvents: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
@@ -281,7 +288,7 @@ export class PluginExploreList extends PluginBaseModule {
                     </li>
                     ${repeat(
                     this.history,
-                    ((item: mls.stor.IFileInfo) => item.shortName) as any,
+                    ((item: mls.stor.IFileInfo) => item.project+'_'+item.shortName) as any,
                     ((file: mls.stor.IFileInfo, index: any) => this.renderLiItem(file, index, true)) as any
                 )}
                 `
@@ -297,7 +304,7 @@ export class PluginExploreList extends PluginBaseModule {
                 html`
                     ${repeat(
                     this.files,
-                    ((item: mls.stor.IFileInfo) => item.shortName) as any,
+                    ((item: mls.stor.IFileInfo) => item.project+'_'+item.shortName) as any,
                     ((file: mls.stor.IFileInfo, index: any) => {
 
                         if (letterInit !== file.shortName.charAt(0).toUpperCase()) {
@@ -338,7 +345,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     renderLiItem(file: mls.stor.IFileInfo, index: number, inHistory: boolean) {
 
-        const name = this.project === 0 && inHistory ? '_' + file.project + '_' + file.shortName : file.shortName;
+        const name = this.project === 0  ? '_' + file.project + '_' + file.shortName : file.shortName;
         const nameFilter = inHistory ? '*******' : name.toLocaleLowerCase();
 
         let auxVersion = '';
@@ -381,7 +388,8 @@ export class PluginExploreList extends PluginBaseModule {
         const validProject = this.project === 0 && mls.actual[5].project !== file.project && file.project !== 0 ? false : true;
 
         let auxValidProject = '';
-        if (!validProject) auxValidProject = ';user-select: none; pointer-events: none; opacity: .5;';
+        //if (!validProject) auxValidProject = ';user-select: none; pointer-events: none; opacity: .5;';
+        //if (this.project !== 0 && file.project !== this.project) auxValidProject = 'display:none';
 
         return html`
             <li @click="${this.clickOptOpen}" class="${file.shortName === actualL2 ? 'selected' : ''}" style="${style}${auxValidProject}" .myFile=${file} .nameFilter="${nameFilter}" ?disabled=${!validProject}>
@@ -406,21 +414,48 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     //------------ ACTIONS -----------------
-    private clickOptUndo(e: MouseEvent) {
 
-        e.stopPropagation();
-        const mfile = this.getMyFileInElement(e.target as HTMLElement);
-        if (!mfile) return;
-        this.fireEvents('undo', mfile, {});
+    private showLoading(show: boolean) {
+        if (this.service) this.service.loading = show;
+    }
+
+    private showError(error: string) {
+        if (this.service) this.service.setError(error);
+    }
+
+    private closeAllMenus() {
+        const all = this.querySelectorAll('.activegpbtnslider');
+        Array.from(all).forEach((i) => i.classList.remove('activegpbtnslider'));
+    }
+
+    private async clickOptUndo(e: MouseEvent) {
+
+        try {
+            e.stopPropagation();
+            const mfile = this.getMyFileInElement(e.target as HTMLElement);
+            if (!mfile) return;
+            await undoAllFiles(mfile);
+            this.closeAllMenus();
+            this.changeList();
+        } catch (err: any) {
+            this.showError(err.message);
+        }
 
     }
 
-    private clickOptDel(e: MouseEvent) {
+    private async clickOptDel(e: MouseEvent) {
 
-        e.stopPropagation();
-        const mfile = this.getMyFileInElement(e.target as HTMLElement);
-        if (!mfile) return;
-        this.fireEvents('delete', mfile, {});
+        try {
+            e.stopPropagation();
+            const mfile = this.getMyFileInElement(e.target as HTMLElement);
+            if (!mfile) throw new Error('[clickOptDel] Not found file');
+            await deleteAllFiles(mfile)
+            this.closeAllMenus();
+            this.changeList();
+        } catch (err: any) {
+            this.showError(err.message);
+        }
+
 
     }
 
@@ -429,6 +464,9 @@ export class PluginExploreList extends PluginBaseModule {
         e.stopPropagation();
         const target = e.target as HTMLElement;
         const li = target.closest('li');
+
+        if (li && li.querySelector('*[contenteditable]')) return;
+
         this.lis?.forEach((l) => l.classList.remove('selected'));
         if (li) li.classList.add('selected');
 
@@ -454,6 +492,7 @@ export class PluginExploreList extends PluginBaseModule {
         if (mls.actualLevel != 1) selectLevel(2);
         (window as any).securityMode = true;
         this.fireEvents('open', mfile, {});
+        this.closeAllMenus();
 
     }
 
@@ -462,7 +501,47 @@ export class PluginExploreList extends PluginBaseModule {
         e.stopPropagation();
         const el = e.target as HTMLElement;
         if (!el) return;
-        this.clickOptRenameClone(el, 'rename')
+
+        const li = el.closest('li');
+        if (!li) {
+            this.showError('[clickOptRename] Not found element');
+            return;
+        }
+        const spanFileName = li.querySelector('.spanFileName') as HTMLElement;
+        spanFileName.setAttribute('contentEditable', 'true');
+
+        const oldValue = spanFileName.innerText;
+        li.onclick = () => { };
+
+        const mfile = this.getMyFileInElement(e.target as HTMLElement);
+        if (!mfile || !spanFileName) {
+            this.showError('[clickOptRename] Not found element rename');
+            return;
+        }
+
+        spanFileName.onkeydown = (event: KeyboardEvent) => {
+
+            if (event.key === "Enter") {
+                event.preventDefault(); // evita quebra de linha
+                const param = { project: mfile.project.toString(), name: spanFileName.innerText.trim(), mode: 'rename' };
+                if (!this.isValidNewName(mfile, param)) {
+                    this.showError('[rename] invalid name');
+                    return;
+                };
+                this.renameFile(mfile, param);
+            }
+        }
+
+        spanFileName.onblur = () => {
+
+            spanFileName.innerText = oldValue;
+            spanFileName.removeAttribute('contentEditable');
+            this.changeList();
+        }
+
+        spanFileName.focus();
+
+        this.closeAllMenus();
 
     }
 
@@ -471,125 +550,71 @@ export class PluginExploreList extends PluginBaseModule {
         e.stopPropagation();
         const el = e.target as HTMLElement;
         if (!el) return;
-        this.clickOptRenameClone(el, 'clone');
+        const myfile = this.getMyFileInElement(el);
+        if (!myfile) {
+            this.showError('[clickOptClone] Not found file!');
+            return;
+        }
 
+        this.cloneFile(myfile);
+        this.closeAllMenus();
     }
 
-    private clickOptRenameClone(el: HTMLElement, mode: string) {
+    private async cloneFile(storFile: mls.stor.IFileInfo) {
 
-        if (!el) return;
+        try {
+            this.showLoading(true);
 
-        const myfile = this.getMyFileInElement(el);
-        if (!myfile) return;
+            let idx = 2;
+            let isvalidName = false;
+            let name = ''
+            while (!isvalidName) {
 
-        const father = el.closest('.contentServiceList') as HTMLElement;
-        const li = el.closest('li') as HTMLElement;
-        if (!father || !li) return;
-
-        let elContentAux = father.querySelector('.elContentAux') as HTMLElement;
-
-        if (!elContentAux)
-            elContentAux = this.createElContentAux();
-
-        if (!father || !li) return;
-
-        li.appendChild(elContentAux);
-
-        const btnActCloneRename = father.querySelector('.btnActCloneRename') as HTMLElement;
-        const iptProj = elContentAux.querySelector('.spanPrj input') as HTMLInputElement;
-        const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
-        const errorDivAux = elContentAux.querySelector('#errorDivAux ') as HTMLInputElement;
-
-        elContentAux.style.display = '';
-        iptProj.value = mls.actual[5].project as any;
-        iptName.value = '';
-
-        btnActCloneRename.classList.remove('fa-file-pen');
-        btnActCloneRename.classList.remove('fa-clone');
-        btnActCloneRename.title = mode;
-        if (mode === 'clone') btnActCloneRename.classList.add('fa-clone');
-        else btnActCloneRename.classList.add('fa-file-pen');
-
-        btnActCloneRename.onclick = async (e2: MouseEvent) => {
-
-            try {
-
-                e2.stopPropagation();
-                this.validInputsAux(myfile, { mode: mode, project: iptProj.value, name: iptName.value });
-                this.fireEvents(mode, myfile, { project: +iptProj.value, shortName: iptName.value });
-                elContentAux.style.display = 'none';
-                const all = this.shadowRoot?.querySelectorAll('.activegpbtnslider');
-                Array.from(all as any).forEach((i: any) => i.classList.remove('activegpbtnslider'))
-
-            } catch (er: any) {
-
-                errorDivAux.innerText = er.message;
-                setTimeout(() => { errorDivAux.innerText = ''; }, 2000);
-
+                name = storFile.shortName + idx;
+                const ret = this.isValidNewName(storFile, { project: storFile.project.toString(), name: name, mode: 'clone' });
+                if (!ret) {
+                    idx++;
+                } else {
+                    isvalidName = true;
+                }
             }
+
+            const file = await cloneAllFiles(storFile, storFile.project, name)
+            if (!file.ts || file.ts instanceof Error) return;
+
+            this.setHistory(file.ts);
+            if (mls.actualLevel != 1) selectLevel(2);
+            this.fireEvents('open', file.ts, {});
+
+        } catch (e: any) {
+
+            this.showError(e.message);
+            setTimeout(() => this.showLoading(false), 500);
 
         }
 
+
     }
 
+    private async renameFile(storFile: mls.stor.IFileInfo, info: { project: string, name: string }) {
 
-    private createElContentAux() {
-        const container = document.createElement("div");
-        container.className = "elContentAux";
-        container.style.display = "none";
-        container.onclick = (e) => this.clickOptStop(e);
-        const inner = document.createElement("div");
-        inner.className = "elContentAux2";
+        try {
+            this.showLoading(true);
+            const file = await renameAllFiles(storFile, +info.project, info.name)
+            if (!file.ts || file.ts instanceof Error) return;
 
-        // form
-        const form = document.createElement("form");
-        form.style.display = "flex";
-        form.style.gap = ".5rem";
-        const spanPrj = document.createElement("span");
-        spanPrj.className = "spanPrj";
-        const inputPrj = document.createElement("input");
-        inputPrj.name = "projectEdit1";
-        inputPrj.style.width = "80px";
-        inputPrj.value = this.project.toString();
-        inputPrj.onclick = (e) => this.clickOptStop(e);
-    
-        spanPrj.appendChild(inputPrj);
-        const spanName = document.createElement("span");
-        spanName.className = "spanName";
-        const inputName = document.createElement("input");
-        inputName.name = "projectEdit2";
-        inputName.onclick = (e) => this.clickOptStop(e);
-    
-        spanName.appendChild(inputName);
-        form.appendChild(spanPrj);
-        form.appendChild(spanName);
+            this.setHistory(file.ts);
+            if (mls.actualLevel != 1) selectLevel(2);
+            this.fireEvents('open', file.ts, {});
 
-        // buttons
-        const btnClone = document.createElement("button");
-        btnClone.className = "btnActCloneRename fa fa-file-pen";
-        btnClone.style.margin = "4px 0px";
-        const btnCancel = document.createElement("button");
-        btnCancel.className = "fa fa-ban";
-        btnCancel.title = "cancel";
-        btnCancel.style.margin = "4px 0px";
-        btnCancel.onclick = (e) => this.clickHiddenAux(e);
+        } catch (e: any) {
 
-        // montar
-        inner.appendChild(form);
-        inner.appendChild(btnClone);
-        inner.appendChild(btnCancel);
+            this.showError(e.message);
+            setTimeout(() => this.showLoading(false), 500);
 
-        // erro
-        const errorDiv = document.createElement("div");
-        errorDiv.className = "showError";
-        errorDiv.style.color = "red";
-        errorDiv.style.fontSize = "10px";
-        errorDiv.id = 'errorDivAux';
-        errorDiv.textContent = this.errorAux;
-        container.appendChild(inner);
-        container.appendChild(errorDiv);
-        
-        return container;
+        }
+
+
     }
 
     private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
@@ -615,12 +640,7 @@ export class PluginExploreList extends PluginBaseModule {
             const lv = mls.actualLevel == 1 ? 1 : this.levelFiles;
 
             mls.actual[lv as any].setFullName(`_${file.project}_${file.shortName}`);
-            (mls.actual[lv as any] as any)[this.position as any] = {
-                project: file.project,
-                shortName: file.shortName,
-                extension: file.extension,
-                folder: file.folder,
-            } as any;
+            mls.actual[lv as any][this.position as ('right' | 'left')] = file
 
         }
 
@@ -677,6 +697,9 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.storage = 0;
         this.info.error = 0;
         this.project = mls.actual[5].project || 0;
+        const prjs = mls.l5.getProjectDetails(this.project)?.prj_dependencies || []
+        this.myDep = [... prjs];
+        this.myDep.push(this.project);
         this.projectLabel = this.project.toString();
         this.fireEventLoadProject();
         await this.getFiles();
@@ -802,14 +825,6 @@ export class PluginExploreList extends PluginBaseModule {
             if (isClick) return;
             el.innerText = 'updated';
 
-            /*await mls.stor.server.loadProjectInfoIfNeeded(mls.actual[5].project as number, true);
-            const key = Object.keys(mls.stor.files)?.filter((item) => item.indexOf((mls.actual[5].project as number).toString()) >= 0);
-
-            if (key.length > 0) {
-                this.fireEvents('projectListChanged', mls.stor.files[key[0]], {}, 500);
-                mls.events.fireFileAction('updatedOnServer', mls.stor.files[key[0]], 'left', undefined, undefined, undefined, undefined, 600);
-            }*/
-
             const ret = await mls.l2.typescript.compileAll(mls.actual[5].project as number);
             this.setFilesErros(ret);
 
@@ -868,14 +883,19 @@ export class PluginExploreList extends PluginBaseModule {
         this.filesInLocal = [];
         const arraySf: mls.stor.IFileInfo[] = [];
         const ext = (this.extensionLevel as any)[this.levelFiles as any] as string;
-        for (const i of Object.keys(mls.stor.files).sort()) {
+        
+        
+        for (const i of Object.keys(mls.stor.files)) {
 
             const sf = mls.stor.files[i];
             if (
-                sf.project !== this.project ||
+                //sf.project !== this.project  ||
+                !this.myDep.includes(sf.project) ||
                 sf.level !== +(this.levelFiles as any) ||
                 sf.extension !== ext
             ) continue;
+
+            if (this.project !== 0 && sf.project !== this.project) continue;
 
             if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
                 continue;
@@ -919,6 +939,8 @@ export class PluginExploreList extends PluginBaseModule {
 
             arraySf.push(sf);
         }
+
+        arraySf.sort((a, b) => a.shortName.localeCompare(b.shortName));
 
         return arraySf;
 
@@ -1004,12 +1026,6 @@ export class PluginExploreList extends PluginBaseModule {
             for (let i = res.length - 1; i >= 0; i--) {
                 if (res.length <= 10) break;
                 res.splice(i, 1);
-                /*const key = mls.stor.getKeyToFiles(res[i].project, this.levelFiles, res[i].shortName, res[i].folder, res[i].extension);
-                if (!mls.stor.files[key]) {
-                    res.splice(i, 1);
-                } else if (mls.stor.files[key] && mls.stor.files[key].status === 'nochange' && mls.stor.files[key].shortName !== file.shortName) {
-                    res.splice(i, 1);
-                }*/
             }
         }
 
@@ -1034,13 +1050,13 @@ export class PluginExploreList extends PluginBaseModule {
                 } else {
                     isvalidName = true;
                 }
-                
+
             }
 
             let elContentAux = this.querySelector('.elContentAux') as HTMLElement;
             const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
             if (iptName) iptName.value = action.name;
-                
+
         }
 
         if (!this.isValidNewName(file, action)) throw new Error('Invalid name');

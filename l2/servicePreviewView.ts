@@ -256,7 +256,7 @@ export class ServicePreviewView extends StateLitElement {
     private async addStyles() {
 
         if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
-        const { project, shortName } = this.models.style.storFile;
+        const { project, shortName, folder } = this.models.style.storFile;
         const id = convertFileNameToTag(`_${project}_${shortName}`);
         const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
         const newStyle = document.createElement('style');
@@ -267,7 +267,7 @@ export class ServicePreviewView extends StateLitElement {
             window.preview.iframe.contentDocument.head.appendChild(newStyle);
             if (oldStyle) oldStyle.remove();
         }
-        const tokens = await getTokens({ project, shortName }, this.actualtheme)
+        const tokens = await getTokens({ project, shortName, folder }, this.actualtheme)
         this.mountTokens(tokens || '');
         this.stylechanged = 'false';
 
@@ -398,6 +398,7 @@ export class ServicePreviewView extends StateLitElement {
         if (!this.page || this.page === '') throw new Error(this.msg.pageNotDefined);
         mls.actual[0].setFullName(this.page);
         const info = mls.actual[0];
+        
 
         const key = mls.stor.getKeyToFiles(
             info.project as number,
@@ -407,9 +408,12 @@ export class ServicePreviewView extends StateLitElement {
             '.html'
         );
 
+        const file = mls.stor.files[key];
+
         const mkey = mls.l2.getKey({
             project: info.project as number,
             shortName: info.path as string,
+            folder: file ? file.folder: '',
         });
 
         if (!mls.stor.files[key]) throw new Error(this.msg.notFoundStorfile + ': ' + key);

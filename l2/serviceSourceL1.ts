@@ -371,7 +371,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
     private async renameFile(models: mls.editor.IModelBase | undefined, newProject: number, newShortName: string) {
 
         if (!models || !models.storFile) return;
-        const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject };
+        const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject, folder:models.storFile.folder };
 
         if (!models.storFile.getValueInfo) return;
         const valueInfo = await models.storFile.getValueInfo();
@@ -576,7 +576,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
     private async updateModelStatus(modelBaseBE: mls.editor.IModelTS, changed: boolean): Promise<void> {
 
         if (!modelBaseBE.storFile) throw new Error('Invalid stor file');
-        const { project, shortName } = modelBaseBE.storFile;
+        const { project, shortName, folder } = modelBaseBE.storFile;
 
         if (project === 0 && (shortName === 'loading' || shortName === 'testFile')) return;
         modelBaseBE.storFile.hasError = false;
@@ -585,7 +585,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
 
-            const enhacementName = await getEnhancementName({ project, shortName }).catch((e) => undefined);
+            const enhacementName = await getEnhancementName({ project, shortName, folder }).catch((e) => undefined);
             if (enhacementName) {
                 const path = mls.l2.getPath(enhacementName);
                 const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });

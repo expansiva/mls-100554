@@ -553,8 +553,8 @@ export async function getListFilesToDelete(group: string, project: number, folde
 }
 
 export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
-    const modelsToDelete: { project: number, shortName: string }[] = Array.from(
-        new Map(filesToDelete.map(({ project, shortName }) => [shortName, { project, shortName }])).values()
+    const modelsToDelete: { project: number, shortName: string, folder:string }[] = Array.from(
+        new Map(filesToDelete.map(({ project, shortName, folder }) => [shortName, { project, shortName, folder }])).values()
     );
 
     const filesToDeleteCache: Set<string> = new Set();

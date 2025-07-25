@@ -1,6 +1,6 @@
 /// <mls shortName="serviceProject" project="100554" enhancement="_100554_enhancementLitService" groupName="other" />
 
-import { html, css, repeat } from 'lit';
+import { html, css, repeat } from 'lit'; 
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from './_100554_serviceBase';
 import { collab_user } from './_100554_collabIcons';
@@ -161,7 +161,9 @@ export class ServiceProject100554 extends ServiceBase {
     private refreshPlugins() {
         this.allContainers?.forEach((item) => {
             const plg = item.children[0];
-            if (plg) plg.setAttribute('mode', 'list');
+            if (plg) {
+                plg.setAttribute('mode', 'list');
+            }
         });
     }
 
@@ -231,6 +233,7 @@ export class ServiceProject100554 extends ServiceBase {
         pluginEl.setAttribute('autoprepare', '');
         pluginEl.setAttribute('level', this.level.toString());
         pluginEl.setAttribute('position', this.position.toString());
+        (pluginEl as any).service = this;
         div.appendChild(pluginEl);
     }
 

@@ -687,8 +687,10 @@ export class PluginPreviewInsights100554 extends StateLitElement {
     const { project, path } = mls.actual[0];
     if (!project || !path) throw new Error(`Project or path invalids: ${this.page}`);
 
+    const f = mls.actual[0].getStorFile();
 
-    const mkey = mls.l2.getKey({ project, shortName: path });
+    const mkey = mls.l2.getKey({ project, shortName: path, folder: f ? f.folder : '' });
+    
     this.models = mls.editor.models[mkey];
 
     const moduleDefs = await import(`./${this.page}.defs.js?cache_bust=${Date.now()}`);

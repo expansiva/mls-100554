@@ -1,0 +1,400 @@
+/// <mls shortName="collabLibStor" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+
+import { convertFileNameToTag } from './_100554_utilsLit'
+
+export async function createStorFile(req: IReqCreateStorFile): Promise<mls.stor.IFileInfo> {
+
+    const params = {
+        project: req.project,
+        level: req.level,
+        shortName: req.shortName,
+        extension: req.extension,
+        versionRef: '0',
+        folder: req.folder
+    };
+
+    const file = await mls.stor.addOrUpdateFile(params);
+    if (!file) throw new Error('[createStorFile] Invalid storFile');
+
+    file.status = req.status ?? 'new';
+
+    const fileInfo: mls.stor.IFileInfoValue = {
+        content: req.source,
+        contentType: 'string'
+    };
+
+    if (req.fileInfo) {
+        fileInfo.originalFolder = req.fileInfo.originalFolder;
+        fileInfo.originalProject = req.fileInfo.originalProject;
+        fileInfo.originalShortName = req.fileInfo.originalShortName;
+    }
+
+    await mls.stor.localStor.setContent(file, fileInfo);
+
+    return file;
+
+}
+
+export async function createAllFiles(req: IReqCreateAllFiles): Promise<IRetAllFiles> {
+
+    const template = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="${req.enhancement}" />\n\n// typescript new file\n`;
+
+    const templateHTML = `<h1>${req.shortName}</h1>`;
+
+    const templateLess = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="enhancementStyle" />\n\n${convertFileNameToTag(`_${req.project}_${req.shortName}`)} {\n\n// Here your less\n\n }`;
+
+    const templateTest = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="_blank" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
+
+    const templateDefs = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="_blank" />\n\n`;
+
+    const newTSSource = req.tsSource || template;
+    const newHTMLSource = req.htmlSource || templateHTML;
+    const newLessSource = req.lessSource || templateLess;
+    const newTestSource = req.testSource || templateTest;
+    const newDefsSource = req.defsSource || templateDefs;
+
+    const param: IReqCreateStorFile = {
+        project: req.project,
+        shortName: req.shortName,
+        folder: req.folder,
+        level: req.level,
+        extension: '.ts',
+        source: newTSSource,
+        status: 'new'
+    };
+
+    const ret: IRetAllFiles = {
+        ts: await safeCreate(param)
+    }
+
+    ret.html = await safeCreate({ ...param, extension: '.html', source: newHTMLSource });
+    ret.less = await safeCreate({ ...param, extension: '.less', source: newLessSource });
+    ret.test = await safeCreate({ ...param, extension: '.test.ts', source: newTestSource });
+    ret.def = await safeCreate({ ...param, extension: '.defs.ts', source: newDefsSource });
+
+    return ret;
+
+}
+
+export async function deleteFile(storFile: mls.stor.IFileInfo): Promise<void> {
+
+    if (storFile.status === 'new') {
+        await deleteFileSystem(storFile);
+        return;
+    }
+
+    storFile.status = 'deleted';
+    const keyToModel = mls.editor.getKeyModel(100554, 'atest');
+    
+    if (storFile.getValueInfo ) {
+        let valueInfo = mls.editor.models[keyToModel] ? await storFile.getValueInfo() : {} as mls.stor.IFileInfoValue;
+        if (!valueInfo.content) {
+            const src = await storFile.getContent() as string;
+            valueInfo = {
+                content: src,
+                contentType: 'string',
+                originalShortName: storFile.shortName,
+                originalProject: storFile.project,
+                originalCRC: mls.common.crc.crc32(src).toString(16)
+            }
+        }
+        await mls.stor.localStor.setContent(storFile, valueInfo);
+    } 
+
+}
+
+export async function deleteAllFiles(storFile: mls.stor.IFileInfo): Promise<void> {
+
+    for await (let ext of ['.ts', '.html', '.less', '.test.ts', '.defs.ts']) {
+
+        const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, ext);
+
+        if (!mls.stor.files[key]) continue;
+
+        await deleteFile(mls.stor.files[key]);
+
+    }
+
+}
+
+export async function renameFile(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): Promise<mls.stor.IFileInfo> {
+
+    let source = await storFile.getContent() as string;
+    if (!source) throw new Error('[renameFile] Impossible rename this file:' + storFile.shortName);
+
+    source = replaceTripleslashAndTag(storFile, newProject, newShortName, source);
+
+    const param: IReqCreateStorFile = {
+        shortName: newShortName,
+        project: newProject,
+        folder: storFile.folder,
+        level: storFile.level,
+        source: source,
+        extension: storFile.extension,
+        status: storFile.status === 'new' ? 'new' : 'renamed',
+        fileInfo: {
+            originalFolder: storFile.folder,
+            originalProject: storFile.project,
+            originalShortName: storFile.shortName
+        }
+    }
+
+    const file = await createStorFile(param);
+
+    await deleteFileSystem(storFile);
+
+    return file;
+}
+
+export async function renameAllFiles(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): Promise<IRetAllFiles> {
+
+    const ret: IRetAllFiles = {};
+
+    for await (let ext of ['.ts', '.html', '.less', '.test.ts', '.defs.ts']) {
+
+        const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, ext);
+
+        if (!mls.stor.files[key]) continue;
+
+        const prop = mapExt[ext];
+        ret[prop] = await safeRename(mls.stor.files[key], newProject, newShortName);
+
+    }
+
+    return ret;
+
+}
+
+export async function cloneFile(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): Promise<mls.stor.IFileInfo> {
+
+    let source = await storFile.getContent() as string;
+    if (!source) throw new Error('[cloneFile] Impossible rename this file:' + storFile.shortName);
+
+    source = replaceTripleslashAndTag(storFile, newProject, newShortName, source);
+
+    const param: IReqCreateStorFile = {
+        shortName: newShortName,
+        project: newProject,
+        folder: storFile.folder,
+        level: storFile.level,
+        source: source,
+        extension: storFile.extension,
+        status: 'new'
+    }
+
+    const file = await createStorFile(param);
+    return file;
+
+}
+
+export async function cloneAllFiles(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): Promise<IRetAllFiles> {
+
+    const ret: IRetAllFiles = {};
+
+    for await (let ext of ['.ts', '.html', '.less', '.test.ts', '.defs.ts']) {
+
+        const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, ext);
+
+        if (!mls.stor.files[key]) continue;
+
+        const prop = mapExt[ext];
+        ret[prop] = await safeClone(mls.stor.files[key], newProject, newShortName);
+
+    }
+
+    return ret;
+
+}
+
+export async function undoFile(storFile: mls.stor.IFileInfo): Promise<void> {
+
+    if (storFile.status === 'nochange' && !storFile.inLocalStorage) {
+        return;
+    }
+
+    if (storFile.status === 'new') {
+        await deleteFileSystem(storFile);
+        return;
+    }
+
+    if (storFile.status === 'deleted') {
+        storFile.status = 'nochange';
+    }
+
+    if (storFile.status === 'renamed') {
+        await undoFileRenamed(storFile);
+        return;
+    }
+
+    if (storFile.status === 'changed') {
+        storFile.status = 'nochange';
+        storFile.inLocalStorage = false;
+        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+        if (storFile.isLocalVersionOutdated && storFile.newVersionRefIfOutdated) {
+            storFile.versionRef = storFile.newVersionRefIfOutdated;
+            storFile.isLocalVersionOutdated = false;
+            storFile.newVersionRefIfOutdated = undefined;
+        }
+    }
+
+    if (storFile.inLocalStorage) {
+        storFile.inLocalStorage = false;
+        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+    }
+
+    const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName);
+    if (!mls.editor.models[keyToModel]) return;
+
+    const prop = mapExtUndo[storFile.extension];
+    if (prop && mls.editor.models[keyToModel]?.[prop]) {
+        mls.editor.models[keyToModel][prop]?.model.dispose();
+        delete mls.editor.models[keyToModel][prop];
+    }
+
+}
+
+export async function undoAllFiles(storFile: mls.stor.IFileInfo): Promise<void> {
+
+    for await (let ext of ['.ts', '.html', '.less', '.test.ts', '.defs.ts']) {
+
+        const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, ext);
+
+        if (!mls.stor.files[key]) continue;
+        await undoFile(mls.stor.files[key]);
+
+    }
+
+}
+
+function isNewNameValid(newShortName: string): boolean {
+        if (newShortName.length === 0 || newShortName.length > 255) return false;
+        const invalidCharacters = /[_\/{}\t\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+        return (!invalidCharacters.test(newShortName));
+    }
+
+//---------AUXILIARY FUNCTIONS AND DEFINITIONS-------------
+
+const mapExt: Record<string, keyof IRetAllFiles> = {
+    '.ts': 'ts',
+    '.html': 'html',
+    '.less': 'less',
+    '.test.ts': 'test',
+    '.defs.ts': 'def'
+};
+
+const mapExtUndo: Record<string, keyof typeof mls.editor.models[string]> = {
+    '.ts': 'ts',
+    '.html': 'html',
+    '.less': 'style',
+    '.test.ts': 'test',
+    '.defs.ts': 'defs'
+};
+
+function replaceTripleslashAndTag(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, src: string) {
+
+    const oldTag = convertFileNameToTag(`_${storFile.project}_${storFile.shortName}`);
+    const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
+    const regex = new RegExp(oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+
+    src = src.replace(/shortName="[^"]*"/, `shortName="${newShortName}"`).replace(/project="[^"]*"/, `project="${newProject}"`);
+    return src.replace(regex, newTag);
+
+}
+
+async function deleteFileSystem(storFile: mls.stor.IFileInfo) {
+
+    await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+    mls.editor.deleteModels(storFile.project, storFile.shortName, true);
+    const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
+    delete mls.stor.files[keyFiles];
+}
+
+async function safeCreate(param: IReqCreateStorFile): Promise<mls.stor.IFileInfo | Error> {
+    try {
+        return await createStorFile(param);
+    } catch (err) {
+        return err instanceof Error ? err : new Error(String(err));
+    }
+}
+
+async function safeRename(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): Promise<mls.stor.IFileInfo | Error> {
+    try {
+        return await renameFile(storFile, newProject, newShortName);
+    } catch (err) {
+        return err instanceof Error ? err : new Error(String(err));
+    }
+}
+
+async function safeClone(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): Promise<mls.stor.IFileInfo | Error> {
+    try {
+        return await cloneFile(storFile, newProject, newShortName);
+    } catch (err) {
+        return err instanceof Error ? err : new Error(String(err));
+    }
+}
+
+async function undoFileRenamed(storFile: mls.stor.IFileInfo) {
+
+    const info = storFile.getValueInfo ? await storFile.getValueInfo() : {} as mls.stor.IFileInfoValue;
+    
+    if (!info.originalProject || !info.originalShortName)
+        throw new Error('[undoFileRenamed] Not found info base for rename');
+
+    const originalKey = mls.stor.getKeyToFiles(info.originalProject, storFile.level, info.originalShortName, storFile.folder, storFile.extension);
+
+    const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
+
+    if (!mls.stor.files[originalKey]) {
+        const params = {
+            project: info.originalProject,
+            level: storFile.level,
+            shortName: info.originalShortName,
+            extension: storFile.extension,
+            versionRef: '0',
+            folder: storFile.folder
+        };
+        await mls.stor.addOrUpdateFile(params);
+    }
+
+    if (mls.stor.files[key]) {
+        await mls.stor.localStor.setContent(mls.stor.files[key], { contentType: 'string', content: null });
+        delete mls.stor.files[key];
+    }
+}
+
+//---------INTERFACE---------
+export interface IReqCreateAllFiles {
+    shortName: string,
+    project: number,
+    folder: string,
+    enhancement: string,
+    level: number,
+    tsSource?: string,
+    htmlSource?: string,
+    lessSource?: string,
+    testSource?: string,
+    defsSource?: string,
+}
+
+export interface IReqCreateStorFile {
+    shortName: string,
+    project: number,
+    folder: string,
+    level: number,
+    source: string,
+    extension: string,
+    status?: mls.stor.IFileInfoStatus,
+    fileInfo?: {
+        originalFolder: string;
+        originalProject: number;
+        originalShortName: string;
+    }
+}
+
+export interface IRetAllFiles {
+    ts?: mls.stor.IFileInfo | undefined | Error,
+    html?: mls.stor.IFileInfo | undefined | Error,
+    less?: mls.stor.IFileInfo | undefined | Error,
+    def?: mls.stor.IFileInfo | undefined | Error,
+    test?: mls.stor.IFileInfo | undefined | Error,
+}
