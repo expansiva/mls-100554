@@ -44,8 +44,8 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context.task) {
 
         let pp = context.message.content
-                .replace(`@@ ${agentName}`, '')
-                .replace(`@@${agentName}`, '').trim()
+            .replace(`@@ ${agentName}`, '')
+            .replace(`@@${agentName}`, '').trim()
 
         pp = extJson(context.message.content).trim();
 
@@ -99,9 +99,23 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     const pageName = step.result.shortName;
     const project = step.result.project;
     const fileHTML = formatHtml(step.result.html);
+    const key = mls.stor.getKeyToFiles(step.result.project, 2, step.result.shortName, '', '.html');
+    const file = mls.stor.files[key];
 
     const m = mls.editor.getModels(project, pageName);
     if (m && m.html) m.html.model.setValue(fileHTML)
+    else if(file) {
+
+        const oldFileInfo = file.getValueInfo ? await file.getValueInfo() : {} as mls.stor.IFileInfoValue;
+        
+        const fileInfo: mls.stor.IFileInfoValue = {
+            ...oldFileInfo,
+            content: fileHTML,
+            contentType: 'string'
+        };
+
+        await mls.stor.localStor.setContent(file, fileInfo);
+    }
 
     let aux = '';
     if (m && m.ts && m.ts.compilerResults && m.ts.compilerResults.errors.length > 0) {

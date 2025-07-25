@@ -206,7 +206,7 @@ export async function cloneAllFiles(storFile: mls.stor.IFileInfo, newProject: nu
 
 }
 
-export async function undoFile(storFile: mls.stor.IFileInfo): Promise<void> {
+export async function undoFile(storFile: mls.stor.IFileInfo, removeProject:boolean = true): Promise<void> {
 
     if (storFile.status === 'nochange' && !storFile.inLocalStorage) {
         return;
@@ -253,6 +253,8 @@ export async function undoFile(storFile: mls.stor.IFileInfo): Promise<void> {
         delete mls.editor.models[keyToModel][prop];
     }
 
+    if(removeProject && storFile) await mls.stor.localDB.removePrjInfo(storFile.project);
+
 }
 
 export async function undoAllFiles(storFile: mls.stor.IFileInfo): Promise<void> {
@@ -262,9 +264,11 @@ export async function undoAllFiles(storFile: mls.stor.IFileInfo): Promise<void> 
         const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, ext);
 
         if (!mls.stor.files[key]) continue;
-        await undoFile(mls.stor.files[key]);
+        await undoFile(mls.stor.files[key], false);    
 
     }
+
+    await mls.stor.localDB.removePrjInfo(storFile.project);
 
 }
 

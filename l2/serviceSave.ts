@@ -4,6 +4,7 @@ import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu } from './_100554_serviceBase';
 import { collab_branch } from './_100554_collabIcons';
+import { undoFile } from './_100554_collabLibStor';
 import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
 import { getMyKeysBranch, calculateTotalStringSize } from './_100554_libCommom';
 import { getConfigProject, updateConfigProject } from './_100554_libProjectConfig';
@@ -513,7 +514,7 @@ export class ServiceSave extends ServiceBase {
     private async setInfos() {
         try {
 
-            this.freeToSave = false;
+            this.freeToSave = this.freeToSave;
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
             this.otherProjects = await mls.stor.localDB.getAllProjects();
@@ -1238,7 +1239,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private async undoFile(storFile: mls.stor.IFileInfo) {
-        const params = {} as mls.events.IFileAction;
+        /*const params = {} as mls.events.IFileAction;
         params.action = 'undo';
         params.level = storFile.level;
         params.project = storFile.project;
@@ -1247,7 +1248,8 @@ export class ServiceSave extends ServiceBase {
         params.folder = storFile.folder;
         params.position = this.position as ('right' | 'left');
         (params as any).undoType = storFile.extension;
-        mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);
+        mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);*/
+        await undoFile(storFile);
         setTimeout(async () => {
             await this.setInfos();
             this.backChecked();
