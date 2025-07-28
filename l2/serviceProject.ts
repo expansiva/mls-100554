@@ -373,14 +373,16 @@ export class ServiceProject100554 extends ServiceBase {
                 const allWcs = getAllWebComponentsInSource(content);
                 console.info(allWcs);
 
-                 allWcs.forEach((wc) => {
-                     const info = convertTagToFileName(wc);
-                     const script = document.createElement('script');
-                     script.type = 'module';
-                     script.id = `_${info.project}_${info.shortName}`;
-                     script.src = (`/_${info.project}_${info.shortName}`);
-                     this.projectDiv?.appendChild(script)
-                 });
+                allWcs.forEach((wc) => {
+                    const info = convertTagToFileName(wc);
+                    if (info) {
+                        const script = document.createElement('script');
+                        script.type = 'module';
+                        script.id = `_${info.project}_${info.shortName}`;
+                        script.src = (`/_${info.project}_${info.shortName}`);
+                        this.projectDiv?.appendChild(script)
+                    }
+                });
 
                 const div = document.createElement('div');
                 div.innerHTML = content;

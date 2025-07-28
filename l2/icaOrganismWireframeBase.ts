@@ -31,12 +31,10 @@ export abstract class IcaOrganismWireframeBase extends StateLitElement {
 
     private onEditClick(ev: MouseEvent) {
         ev.preventDefault();
-        console.info({
-            generalDescription: this.generalDescription,
-            goal: this.goal
-        });
 
-        const {shortName, project} = convertTagToFileName(this.tagName.toLowerCase());
+        const info = convertTagToFileName(this.tagName.toLowerCase());
+        if (!info) return;
+        const { shortName, project } = info;
         const keyStor = mls.stor.getKeyToFiles(project, 2, shortName, '', '.ts');
         const storFile = mls.stor.files[keyStor];
         this.fireEvents('open', storFile);

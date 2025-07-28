@@ -242,11 +242,13 @@ export async function loadFileHTMLInContainer(el: HTMLElement, shortName: string
 
     allWcs.forEach((wc) => {
         const info = convertTagToFileName(wc);
-        const script = document.createElement('script');
-        script.type = 'module';
-        script.id = info.shortName;
-        script.src = (`/_${info.project}_${info.shortName}`);
-        el.appendChild(script)
+        if (info) {
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.id = info.shortName;
+            script.src = (`/_${info.project}_${info.shortName}`);
+            el.appendChild(script)
+        }
     });
 
 }

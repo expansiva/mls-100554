@@ -256,12 +256,14 @@ export class ServiceDetail100554 extends ServiceBase {
         el.innerHTML = content;
         (el as any).args = args;
         allWcs.forEach((wc) => {
-            const fileName = convertTagToFileName(wc);
-            const script = document.createElement('script');
-            script.type = 'module';
-            script.id = `_${fileName.project}_${fileName.shortName}`;
-            script.src = (`/_${fileName.project}_${fileName.shortName}`);
-            el.appendChild(script)
+            const info = convertTagToFileName(wc);
+            if (info) {
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.id = `_${info.project}_${info.shortName}`;
+                script.src = (`/_${info.project}_${info.shortName}`);
+                el.appendChild(script)
+            }
         });
 
         Array.from(el.children).forEach((child) => {

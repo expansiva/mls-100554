@@ -100,7 +100,7 @@ export class PluginPageNavigation extends PluginBaseModule {
                 <div 
                     .info=${item}
                     draggable="true"
-                    id="${info.shortName + idx}"                      
+                    id="${info?.shortName + idx}"                      
                     class="header ${cls} ${this.dropTarget === item ? 'drop-target' : ''}" 
                     @mouseover="${this.mouseOver}" 
                     @mouseleave="${this.mouseLeave}" 
@@ -118,7 +118,7 @@ export class PluginPageNavigation extends PluginBaseModule {
                 >
                     <info-item .info=${item}>
                         <span class="fa ${mySymbol}" style="margin-right:.5rem"></span>
-                        ${info.shortName}
+                        ${info?.shortName}
                     </info-item>
                     <div class="groupHiddenList" .info=${item}  @click="${this.clickGroupHidden}" >
                         <span class="mls-gpbtnslider-item fa fa-trash" @click="${this.delEl}" title="remove"></span>

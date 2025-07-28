@@ -8,6 +8,7 @@ export function dispatchEventConciliate() {
 export async function importFilesIfNeeded(files: string[]) {
     for await (const file of files) {
         const importInfo = convertTagToFileName(file);
+        if (!importInfo) continue;
         await import(`./_${importInfo.project}_${importInfo.shortName}`);
     }
 }

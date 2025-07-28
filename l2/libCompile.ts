@@ -47,6 +47,7 @@ async function getTagsInTypescript(modelTS: mls.editor.IModelTS, tags: string[])
     for (const tagTs of tagsInTypescript) {
         if (!tags.includes(tagTs)) {
             const info = convertTagToFileName(tagTs);
+            if (!info) continue;
             const keyModels = mls.editor.getKeyModel(info.project, info.shortName, info.folder);
             const mmodels = mls.editor.models[keyModels];
             if (mmodels && mmodels.ts) {
@@ -204,6 +205,7 @@ async function loadMyNeedsToCompile(
     try {
         if (tags.length <= 0) return;
         const info = convertTagToFileName(tags[0]);
+        if (!info) return;
         const name = `_${info.project}_${info.shortName}`
         mls.actual[0].setFullName(name);
         const f = mls.stor.files[name];
