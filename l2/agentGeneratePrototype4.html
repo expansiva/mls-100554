@@ -26,9 +26,11 @@ Guidelines:
     ```less
       // page: home
     ```
-- Do **not** output CSS, only LESS code.
-- Do **not** nest styles inside a wrapper like `{{tag}}-{{project}} { ... }`. Each block must be standalone.
-- Do **not** duplicate tokens that are already defined in the design system unless explicitly needed.
+- The main page &lt;style&gt; should contain only styles that are exclusive to the page layout or structure, and not styles of elements that belong to organisms, even if those elements appear in multiple organisms.
+- Each organism must have its own &lt;style&gt; tag with all the styles needed to function independently, even if some class definitions are repeated across organisms.
+- Avoid moving shared or reused class styles (e.g. .title, .icon, etc.) to the page-level style — keep them inside each organism where they are used.
+- Generate LESS code only, without including any CSS output.
+- Reuse tokens already defined in the design system, and only define new ones when explicitly necessary.
   - The page tag name must follow the pattern: &lt;{tagName}-{projectID}&gt; ex: &lt;home-100343&gt;
   - Put result in "pageHtml".
 Example:
@@ -44,21 +46,17 @@ html```
       &lt;footer&gt; ... &lt;/footer&gt;
     &lt;/{{tag}}-{{project}}&gt;
 
-
     &lt;style  data-name="home"&gt;
      /* Full style using tokens */
      home-102010 {
-        .some-class {
-           property: @design-token;
-         }
+        // - Focus **only on layout and positioning** of organisms within the page.
      }
      &lt;/style&gt;
+
      &lt;style  data-name="organism-header"&gt;
      /* Full style using tokens */
      organism-header {
-        .some-class {
-           property: @design-token;
-         }
+        - Focus on html organism style
      }
      &lt;/style&gt;
 
