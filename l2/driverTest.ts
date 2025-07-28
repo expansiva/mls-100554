@@ -3,7 +3,6 @@
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { convertFileNameToTag } from './_100554_utilsLit';
 
 @customElement('driver-test-100554')
 export class DriverTest extends CollabLitElement {

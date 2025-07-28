@@ -393,7 +393,8 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
                 if (!mP.pluginData) continue;
 
                 p.file = nP;
-                p.tag = convertFileNameToTag(nP);
+                const infoNp = mls.l2.getPath(nP)
+                p.tag = convertFileNameToTag(infoNp);
                 p.pluginData = mP.pluginData;
                 this.plugins.push(p);
 
@@ -424,10 +425,10 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
 }
 
 interface IAttr {
-    attr: string, 
+    attr: string,
     vl: string,
     hasVariation: boolean;
-    description:string,
+    description: string,
     variations: IVariation[]
 }
 

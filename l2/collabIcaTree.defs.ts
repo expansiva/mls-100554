@@ -17,10 +17,7 @@ export const defs: mls.l4.BaseDefs = {
     ]
   },
   "references": {
-    "widgets": [
-      "collab-ica-tree-100554",
-      "info-item"
-    ],
+    "widgets": [],
     "imports": [
       "lit",
       "lit/decorators.js",

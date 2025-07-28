@@ -70,7 +70,7 @@ export class CollabPanelItem extends CollabLitElement {
 
             this.classList.add('active');
         }
-        
+
         mls.actual[0].setFullName(this.widget);
         const options = {
             shortName: mls.actual[0].path,
@@ -79,7 +79,9 @@ export class CollabPanelItem extends CollabLitElement {
         }
 
         if (this.mode === 'tag') {
-            const tag = convertFileNameToTag(this.widget);
+
+            const infoPathWidget = mls.l2.getPath(this.widget);
+            const tag = convertFileNameToTag(infoPathWidget);
             options.htmlText = `<${tag}></${tag}>`
         }
 
@@ -94,8 +96,8 @@ export class CollabPanelItem extends CollabLitElement {
 
     private async setMyInfo() {
         if (!this.widget) return;
-        const file = convertTagToFileName(this.widget);
-        const modulePlugin = await import('./' + file);
+        const file = mls.l2.getPath(this.widget);
+        const modulePlugin = await import('./' + `_${file.project}_${file.shortName}`);
         this.myInfo = modulePlugin.pluginData;
         this.setAttribute('loading', '');
 

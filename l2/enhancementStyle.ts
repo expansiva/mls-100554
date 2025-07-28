@@ -55,7 +55,7 @@ export async function verifyMarkersError(modelStyle: mls.editor.IModelStyle) {
 export async function validateStyle(modelStyle: mls.editor.IModelStyle) {
 
     const model: monaco.editor.ITextModel = modelStyle.model;
-    const { project, shortName } = modelStyle.storFile;
+    const { project, shortName, folder } = modelStyle.storFile;
     const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, '', '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!model || !storFileLess) return;
@@ -67,7 +67,7 @@ export async function validateStyle(modelStyle: mls.editor.IModelStyle) {
 
     const markers: monaco.Position[] = [];
     const fileName = `_${project}_${shortName}`;
-    const tagName = convertFileNameToTag(fileName);
+    const tagName = convertFileNameToTag({project, shortName, folder});
     const nav3MenuSelector = `collab-nav-3-service[data-service="${fileName}"]`
     const rootSelectorRegex = /^[^\s].*?{/gm;
     const errors: string[] = [];

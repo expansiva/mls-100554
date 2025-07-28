@@ -32,7 +32,8 @@ export const requires: mls.l2.enhancement.IRequire[] = [
 ];
 
 export const getDefaultHtmlExamplePreview = (modelTS: mls.editor.IModelTS): string => {
-    const tag = convertFileNameToTag(`_${modelTS.storFile.project}_${modelTS.storFile.shortName}`);
+    const { project, shortName, folder } = modelTS.storFile;
+    const tag = convertFileNameToTag({ project, shortName, folder });
     return `<${tag}></${tag}>`;
 }
 

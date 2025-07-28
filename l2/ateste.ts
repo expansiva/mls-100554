@@ -1,35 +1,68 @@
 /// <mls shortName="ateste" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+
+import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement'
-import './_100554_ateste2';
-/// **collab_i18n_start**
-const message_pt = {
-    hello2: 'Ola mundo!, teste',
-    hello: 'Ola mundo novo!',
-}
-type MessageType = typeof message_pt;
-const messages: { [key: string]: MessageType } = {
-    'pt': message_pt
-}
-/// **collab_i18n_end**
+import { updateHTML } from './_100554_collabDOMSync';
+
 @customElement('ateste-100554')
 export class SimpleGreeting extends CollabLitElement {
-    @property() name: string = new Date(Date.now()).toString();
-    handleConfirm(e: CustomEvent) {
-        console.info(e.detail)
-    }
-    showGreetingAlert() {
-        alert(`Hello world Lucas 10`);
-    }
+
+    @property() selectedId: number | null = 2;
+    @state() items = [
+        { id: 1, name: 'Banana', color: 'green' },
+        { id: 2, name: 'Maçã', color: 'red' },
+        { id: 3, name: 'Uva', color: 'purple' },
+    ];
+
     render() {
         return html`
-      <div class="cls1" clb_id="1">
-        <h1 clb_id="2">Hello world Lucas ${message_pt.hello} teste 23</h1>
-        <button @click="${this.showGreetingAlert}" clb_id="3">Show Greeting</button>
-        <ateste2-100554 clb_id="4" name="Guilherme"></ateste2-100554>
-        <h1 clb_id="5">${message_pt.hello}</h1>
-      </div>
-    `;
+    <div>
+      <h3>Frutas:</h3>
+      <ul>
+        ${repeat(
+            this.items,
+            ((item: any) => item.id) as any,
+            ((item: any) => {
+
+                const classes = {
+                    'highlight': item.color === 'green',
+                    'selected': item.id === this.selectedId,
+                };
+
+                const styles = {
+                    color: item.color,
+                    cursor: 'pointer',
+                };
+
+                return html`
+              <li
+                class=${classMap(classes)}
+                style=${styleMap(styles)}
+                title=${ifDefined(item.name)}
+                @click=${() => (this.selectedId = item.id)}
+              >
+                ${item.name}
+              </li>
+            `;
+            }) as any
+        )}
+      </ul>
+
+      ${when(
+            this.selectedId !== null,
+            () => html`<p>Selecionado: ${this.getSelectedName()}</p>`,
+            () => html`<p>Nenhuma fruta selecionada.</p>`
+        )}
+    </div>
+  `;
+    }
+
+
+    private getSelectedName(): string {
+        const found = this.items.find(i => i.id === this.selectedId);
+        return found ? found.name : '';
     }
 }
+
+

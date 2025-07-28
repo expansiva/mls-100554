@@ -1,6 +1,6 @@
 /// <mls shortName="serviceProject" project="100554" enhancement="_100554_enhancementLitService" groupName="other" />
 
-import { html, css, repeat } from 'lit'; 
+import { html, css, repeat } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from './_100554_serviceBase';
 import { collab_user } from './_100554_collabIcons';
@@ -226,9 +226,9 @@ export class ServiceProject100554 extends ServiceBase {
         if (!details) return;
         const div = details.querySelector('div');
         if (!div || div.childElementCount > 0) return;
-
-        await import(`./${details.data.widget}`);
-        const pluginTag = convertFileNameToTag(details.data.widget);
+        const { folder, project, shortName } = mls.l2.getPath(details.data.widget);
+        await import(`./_${project}_${shortName}`);
+        const pluginTag = convertFileNameToTag({ project, shortName, folder });
         const pluginEl = document.createElement(pluginTag);
         pluginEl.setAttribute('autoprepare', '');
         pluginEl.setAttribute('level', this.level.toString());
@@ -371,15 +371,16 @@ export class ServiceProject100554 extends ServiceBase {
             const content = await storFile.getContent();
             if (this.projectDiv && typeof content === 'string') {
                 const allWcs = getAllWebComponentsInSource(content);
+                console.info(allWcs);
 
-                allWcs.forEach((wc) => {
-                    const fileName = convertTagToFileName(wc);
-                    const script = document.createElement('script');
-                    script.type = 'module';
-                    script.id = fileName;
-                    script.src = (`/${fileName}`);
-                    this.projectDiv?.appendChild(script)
-                });
+                 allWcs.forEach((wc) => {
+                     const info = convertTagToFileName(wc);
+                     const script = document.createElement('script');
+                     script.type = 'module';
+                     script.id = `_${info.project}_${info.shortName}`;
+                     script.src = (`/_${info.project}_${info.shortName}`);
+                     this.projectDiv?.appendChild(script)
+                 });
 
                 const div = document.createElement('div');
                 div.innerHTML = content;
@@ -394,8 +395,8 @@ export class ServiceProject100554 extends ServiceBase {
     private async setMyData() {
 
         const prj = mls.actual[5].project;
-        
-        let array = await loadPluginProject(prj || 0, 'l5Project', false); 
+
+        let array = await loadPluginProject(prj || 0, 'l5Project', false);
         array.forEach((item: mls.plugin.MenuAction) => {
             const cat = item.category as string;
             if (!this.myData[cat]) this.myData[cat] = [item]

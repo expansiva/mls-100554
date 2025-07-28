@@ -17,7 +17,7 @@ export function initWCDToolbox() {
 }
 
 @customElement('wcd-toolbox-100554')
-export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos { 
+export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
 
     // ------------ PROPERTIES ------------------
 
@@ -64,7 +64,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         globalWcd.myParent = undefined;
         globalWcd.wcdItens = undefined;
         globalWcd.overlay = undefined;
-        
+
         if (this.parentElement && (this.parentElement as any).fcRemoveWcd)
             (this.parentElement as any).fcRemoveWcd();
 
@@ -194,7 +194,8 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
             const ok = await this.importWCDActions(i.name);
             if (!ok) continue;
 
-            const el = document.createElement(convertFileNameToTag(i.name)) as WCDToolboxItemMethodos;
+            const infoPath = mls.l2.getPath(i.name);
+            const el = document.createElement(convertFileNameToTag({ project: infoPath.project, shortName: infoPath.shortName, folder: infoPath.folder })) as WCDToolboxItemMethodos;
             el.className = `p ${i.position}`;
             el.style.zIndex = '9998';
             el.args = i.args;
@@ -227,7 +228,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         ret = page.querySelector(tag) as WCDOverlayMethods;
 
         return ret;
-        
+
     }
 
     private setDefaultToolBoxOptions() {

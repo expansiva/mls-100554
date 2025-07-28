@@ -8,7 +8,7 @@ export function validateTagName(modelTS: mls.editor.IModelTS): boolean {
     if (!modelTS || !modelTS.storFile) return false;
 
     const { storFile, model } = modelTS;
-    const { project, shortName } = storFile;
+    const { project, shortName, folder } = storFile;
 
     storFile.hasError = false;
     clearErrorsOnModel(model)
@@ -27,7 +27,7 @@ export function validateTagName(modelTS: mls.editor.IModelTS): boolean {
             const decoratorInfo = getDecoratorClassInfo(_decorator.text);
             if (!decoratorInfo || decoratorInfo.decoratorName !== decoratorToCheck) return;
 
-            let correctTagName = convertFileNameToTag(`_${project}_${shortName}`);
+            let correctTagName = convertFileNameToTag({ project, shortName, folder });
             if (correctTagName !== decoratorInfo.tagName) {
                 rc = true;
                 setErrorOnModel(model, _decorator.line + 1, decoratorToCheck.length + 3, _decorator.text.length + 1, `Invalid web component tag name, the correct definition is: ${correctTagName}`, monaco.MarkerSeverity.Error);
@@ -43,14 +43,13 @@ export function validateRender(modelTS: mls.editor.IModelTS): boolean {
 
     if (!modelTS || !modelTS.storFile) return false;
     const { storFile, model, compilerResults } = modelTS;
-    const { project, shortName } = storFile;
+    const { project, shortName, folder } = storFile;
 
     storFile.hasError = false;
     clearErrorsOnModel(model);
     if (!compilerResults) return false;
     if (shortName === 'enhancementLit' && project === 100554) return false;
-    const shortName2 = `_${project}_${shortName}`
-    return verify(model, shortName2)
+    return verify(model, project, shortName, folder)
 }
 
 function getDecoratorClassInfo(decoratorString: string): IDecoratorClassInfo | undefined {
@@ -95,9 +94,9 @@ function clearErrorsOnModel(model: monaco.editor.ITextModel) {
     monaco.editor.setModelMarkers(model, 'markerSource', []);
 }
 
-function verify(model: monaco.editor.ITextModel, shortName: string): boolean {
+function verify(model: monaco.editor.ITextModel, project: number, shortName: string, folder: string): boolean {
     const lines = model.getLinesContent();
-    const tag = convertFileNameToTag(shortName);
+    const tag = convertFileNameToTag({ project, shortName, folder });
     const msgError = `Do not use the same component tag (${tag}) inside the rendering, possible looping`;
     let htmlCount: number = 0;
 

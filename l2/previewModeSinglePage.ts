@@ -160,7 +160,8 @@ export class PreviewModeSinglePage {
                 if (!el.tagName.toLocaleLowerCase().startsWith('ica-'))
                     return '';
 
-                return '/' + convertTagToFileName(el.getAttribute('widget') || '');
+                const info = convertTagToFileName(el.getAttribute('widget') || '');
+                return '/' + `_${info.project}_${info.shortName}`;
 
             })
             .filter(Boolean);

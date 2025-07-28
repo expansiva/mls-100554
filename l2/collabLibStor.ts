@@ -37,11 +37,13 @@ export async function createStorFile(req: IReqCreateStorFile): Promise<mls.stor.
 
 export async function createAllFiles(req: IReqCreateAllFiles): Promise<IRetAllFiles> {
 
+    const { folder, shortName, project } = req;
+
     const template = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="${req.enhancement}" />\n\n// typescript new file\n`;
 
     const templateHTML = `<h1>${req.shortName}</h1>`;
 
-    const templateLess = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="enhancementStyle" />\n\n${convertFileNameToTag(`_${req.project}_${req.shortName}`)} {\n\n// Here your less\n\n }`;
+    const templateLess = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="enhancementStyle" />\n\n${convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
 
     const templateTest = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="_blank" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
 
@@ -85,8 +87,8 @@ export async function deleteFile(storFile: mls.stor.IFileInfo): Promise<void> {
 
     storFile.status = 'deleted';
     const keyToModel = mls.editor.getKeyModel(100554, 'atest');
-    
-    if (storFile.getValueInfo ) {
+
+    if (storFile.getValueInfo) {
         let valueInfo = mls.editor.models[keyToModel] ? await storFile.getValueInfo() : {} as mls.stor.IFileInfoValue;
         if (!valueInfo.content) {
             const src = await storFile.getContent() as string;
@@ -99,7 +101,7 @@ export async function deleteFile(storFile: mls.stor.IFileInfo): Promise<void> {
             }
         }
         await mls.stor.localStor.setContent(storFile, valueInfo);
-    } 
+    }
 
 }
 
@@ -122,7 +124,7 @@ export async function renameFile(storFile: mls.stor.IFileInfo, newProject: numbe
     let source = await storFile.getContent() as string;
     if (!source) throw new Error('[renameFile] Impossible rename this file:' + storFile.shortName);
 
-    source = replaceTripleslashAndTag(storFile, newProject, newShortName, source);
+    source = replaceTripleslashAndTag(storFile, newProject, newShortName, storFile.folder, source);
 
     const param: IReqCreateStorFile = {
         shortName: newShortName,
@@ -170,7 +172,7 @@ export async function cloneFile(storFile: mls.stor.IFileInfo, newProject: number
     let source = await storFile.getContent() as string;
     if (!source) throw new Error('[cloneFile] Impossible rename this file:' + storFile.shortName);
 
-    source = replaceTripleslashAndTag(storFile, newProject, newShortName, source);
+    source = replaceTripleslashAndTag(storFile, newProject, newShortName, storFile.folder, source);
 
     const param: IReqCreateStorFile = {
         shortName: newShortName,
@@ -206,7 +208,7 @@ export async function cloneAllFiles(storFile: mls.stor.IFileInfo, newProject: nu
 
 }
 
-export async function undoFile(storFile: mls.stor.IFileInfo, removeProject:boolean = true): Promise<void> {
+export async function undoFile(storFile: mls.stor.IFileInfo, removeProject: boolean = true): Promise<void> {
 
     if (storFile.status === 'nochange' && !storFile.inLocalStorage) {
         return;
@@ -253,7 +255,7 @@ export async function undoFile(storFile: mls.stor.IFileInfo, removeProject:boole
         delete mls.editor.models[keyToModel][prop];
     }
 
-    if(removeProject && storFile) await mls.stor.localDB.removePrjInfo(storFile.project);
+    if (removeProject && storFile) await mls.stor.localDB.removePrjInfo(storFile.project);
 
 }
 
@@ -264,7 +266,7 @@ export async function undoAllFiles(storFile: mls.stor.IFileInfo): Promise<void> 
         const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, ext);
 
         if (!mls.stor.files[key]) continue;
-        await undoFile(mls.stor.files[key], false);    
+        await undoFile(mls.stor.files[key], false);
 
     }
 
@@ -273,10 +275,10 @@ export async function undoAllFiles(storFile: mls.stor.IFileInfo): Promise<void> 
 }
 
 function isNewNameValid(newShortName: string): boolean {
-        if (newShortName.length === 0 || newShortName.length > 255) return false;
-        const invalidCharacters = /[_\/{}\t\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
-        return (!invalidCharacters.test(newShortName));
-    }
+    if (newShortName.length === 0 || newShortName.length > 255) return false;
+    const invalidCharacters = /[_\/{}\t\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+    return (!invalidCharacters.test(newShortName));
+}
 
 //---------AUXILIARY FUNCTIONS AND DEFINITIONS-------------
 
@@ -296,10 +298,12 @@ const mapExtUndo: Record<string, keyof typeof mls.editor.models[string]> = {
     '.defs.ts': 'defs'
 };
 
-function replaceTripleslashAndTag(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, src: string) {
+function replaceTripleslashAndTag(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder: string, src: string) {
 
-    const oldTag = convertFileNameToTag(`_${storFile.project}_${storFile.shortName}`);
-    const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
+    const { folder, project, shortName } = storFile;
+
+    const oldTag = convertFileNameToTag({ folder, project, shortName });
+    const newTag = convertFileNameToTag({ folder: newFolder, project: newProject, shortName: newShortName });
     const regex = new RegExp(oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
 
     src = src.replace(/shortName="[^"]*"/, `shortName="${newShortName}"`).replace(/project="[^"]*"/, `project="${newProject}"`);
@@ -342,7 +346,7 @@ async function safeClone(storFile: mls.stor.IFileInfo, newProject: number, newSh
 async function undoFileRenamed(storFile: mls.stor.IFileInfo) {
 
     const info = storFile.getValueInfo ? await storFile.getValueInfo() : {} as mls.stor.IFileInfoValue;
-    
+
     if (!info.originalProject || !info.originalShortName)
         throw new Error('[undoFileRenamed] Not found info base for rename');
 

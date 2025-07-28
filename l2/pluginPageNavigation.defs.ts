@@ -17,7 +17,7 @@ export const defs: mls.l4.BaseDefs = {
   },
   "references": {
     "widgets": [
-      "info-item"
+
     ],
     "plugins": [],
     "statesRO": [],

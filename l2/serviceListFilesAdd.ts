@@ -174,11 +174,12 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
     }
 
     private handleClickTemplate(plugin: IPlugins) {
-        const tag = convertFileNameToTag(plugin.widget);
-        const { project, shortName } = mls.l2.getPath(plugin.widget);
+        const { project, shortName, folder } = mls.l2.getPath(plugin.widget);
+        const tag = convertFileNameToTag({project, shortName, folder});
         const options = {
             shortName,
             project,
+            folder,
             htmlText: `<${tag} position=${this.position} project="{{ l2.addFile.project }}" shortName="{{ l2.addFile.shortName }}"></${tag}>`
         }
         mls.events.fire(2, 'PluginDetails', JSON.stringify(options), 0);

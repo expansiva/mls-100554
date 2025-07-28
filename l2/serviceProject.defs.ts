@@ -16,10 +16,7 @@ export const defs: mls.l4.BaseDefs = {
     ]
   },
   "references": {
-    "widgets": [
-      "service-project-100554",
-      "collab-panel-100554"
-    ],
+    "widgets": [],
     "plugins": [],
     "statesRO": [],
     "statesRW": [

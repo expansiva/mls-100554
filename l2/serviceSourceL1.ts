@@ -5,7 +5,7 @@ import { customElement, query, property } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { getEnhancementName } from './_100554_libCommom';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions, ITools } from './_100554_serviceBase';
-   
+
 @customElement('service-source-l1-100554')
 export class ServiceSourceL1100554 extends ServiceBase {
 
@@ -119,7 +119,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
             case 'delete': await this.onDelete(fileAction); break;
             case 'undo': await this.onUndo(fileAction); break;
             case 'rename': await this.onRename(fileAction); break;
-            case 'clone': await this.onClone(fileAction);break;
+            case 'clone': await this.onClone(fileAction); break;
             case 'updatedOnServer': break;
             default: ''
         }
@@ -211,7 +211,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
         if (storFile.status === 'new') this.deleteFile(storFile);
         else storFile.status = 'deleted';
 
-        const st = { ...storFile, level:1 };
+        const st = { ...storFile, level: 1 };
         mls.events.fireFileAction('statusOrErrorChanged', st, this.position);
 
         await mls.stor.localDB.removePrjInfo(storFile.project);
@@ -342,8 +342,8 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
         let defaultTS = modelTS.model.getValue();
 
-        const baseTag = convertFileNameToTag(`_${storFile.project}_${storFile.shortName}`)
-        const newTag = convertFileNameToTag(`_${newProject}_${newShortName}`);
+        const baseTag = convertFileNameToTag({ project: storFile.project, shortName: storFile.shortName })
+        const newTag = convertFileNameToTag({ project: newProject, shortName: newShortName });
         const regex = new RegExp(baseTag, 'g');
 
         defaultTS = defaultTS.replace(regex, newTag);
@@ -371,7 +371,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
     private async renameFile(models: mls.editor.IModelBase | undefined, newProject: number, newShortName: string) {
 
         if (!models || !models.storFile) return;
-        const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject, folder:models.storFile.folder };
+        const newSts: mls.cbe.IPath = { shortName: newShortName, project: newProject, folder: models.storFile.folder };
 
         if (!models.storFile.getValueInfo) return;
         const valueInfo = await models.storFile.getValueInfo();
@@ -422,7 +422,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
         return true;
     }
 
-    
+
 
     private async openFiles(storFileTS: mls.stor.IFileInfo, position: 'left' | 'right') {
 
@@ -566,9 +566,9 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
         clearTimeout(this._onChangedContent);
         this._onChangedContent = window.setTimeout(async () => {
-            
+
             const ignoreChanges = (e.changes.length === 1 && e.changes[0].range.startLineNumber === 1 && e.changes[0].range.endLineNumber === 1 && e.changes[0].range.endColumn <= 2);
-            
+
             await this.updateModelStatus(activeModel, !ignoreChanges);
         }, 400);
     };
@@ -633,7 +633,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
             if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
             await mls.stor.localStor.setContent(storFile, await this.getValueInfo(modelBaseBE));
         }
-        
+
         if (changed) {
             const position = 'left';
             const st = { ...storFile, level: 1 };

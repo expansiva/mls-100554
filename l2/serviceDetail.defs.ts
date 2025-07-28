@@ -18,9 +18,7 @@ export const defs: mls.l4.BaseDefs = {
   },
   "references": {
     "widgets": [],
-    "plugins": [
-      "plugin-codelens-file-references-100554"
-    ],
+    "plugins": [],
     "statesRO": [],
     "statesRW": [
       "msize",

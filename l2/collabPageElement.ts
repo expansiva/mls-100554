@@ -122,7 +122,8 @@ export abstract class CollabPageElement extends StateLitElement {
         try {
 
             if (this.hasImport.includes(imports)) return true;
-            imports = convertTagToFileName(imports);
+            const info = convertTagToFileName(imports);
+            imports = `_${info.project}_${info.shortName}`;
             if (!imports.startsWith('./')) {
                 imports = './' + imports;
                 /*if (mls && (mls as any).modePreview && (mls as any).modePreview === 'singlePage') imports = '/' + imports;

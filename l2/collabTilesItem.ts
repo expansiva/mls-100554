@@ -15,7 +15,7 @@ export class CollabTilesItem extends CollabLitElement {
     private startHeight: number = 0;
 
     public myinfo: ITilesItem | undefined;
-    
+
 
     @property({ type: String, reflect: true }) position = '';
     @property({ type: String, reflect: true }) plugin = '';
@@ -50,7 +50,7 @@ export class CollabTilesItem extends CollabLitElement {
         if (!this.myinfo) return;
 
         this.style.display = '';
-        if(this.edit !== 'true' && this.myinfo.enabled === 'false') this.style.display = 'none';
+        if (this.edit !== 'true' && this.myinfo.enabled === 'false') this.style.display = 'none';
 
 
         const [r, c] = this.myinfo.position ? this.myinfo.position.split(' ') : ['2', '2'];
@@ -109,15 +109,16 @@ export class CollabTilesItem extends CollabLitElement {
 
         if (!this.myinfo) return;
 
-        this.myinfo.enabled = this.myinfo.enabled === 'true' ? 'false' : 'true' ;
+        this.myinfo.enabled = this.myinfo.enabled === 'true' ? 'false' : 'true';
         this.requestUpdate();
-        
+
     }
 
     private async loadingPlugin() {
 
-        await import('./' + this.plugin)
-        const tag = convertFileNameToTag(this.plugin);
+        const infoPathPlugin = mls.l2.getPath(this.plugin);
+        await import('./' + `_${infoPathPlugin.project}_${infoPathPlugin.shortName}`);
+        const tag = convertFileNameToTag(infoPathPlugin);
         this.elPlugin = document.createElement(tag);
         this.elPlugin.setAttribute('dashboardindex', this.index);
         this.setPlugin();
@@ -200,7 +201,7 @@ export class CollabTilesItem extends CollabLitElement {
         this.style.width = '';
         this.style.height = '';
 
-        if(this.myinfo) this.myinfo.position = row + ' '+col;
+        if (this.myinfo) this.myinfo.position = row + ' ' + col;
 
     }
 
@@ -214,5 +215,5 @@ interface ITilesItem {
     position: string,
     index: string,
     enabled: string,
-    widgetConfig:string
+    widgetConfig: string
 }

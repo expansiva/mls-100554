@@ -184,13 +184,14 @@ export class ServiceDetail100554 extends ServiceBase {
         this.openMe();
         if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
         const data: mls.events.IPluginDetail = JSON.parse(ev.desc);
+
         this.showPluginContent(data);
     }
 
     private onWidgetChanged() {
         if (this.widget) {
-            const { project, shortName } = mls.l2.getPath(this.widget);
-            const tag = convertFileNameToTag(this.widget);
+            const { project, shortName, folder } = mls.l2.getPath(this.widget);
+            const tag = convertFileNameToTag({ project, shortName, folder });
             const info: mls.events.IPluginDetail = {
                 project,
                 shortName,
@@ -258,8 +259,8 @@ export class ServiceDetail100554 extends ServiceBase {
             const fileName = convertTagToFileName(wc);
             const script = document.createElement('script');
             script.type = 'module';
-            script.id = fileName;
-            script.src = (`/${fileName}`);
+            script.id = `_${fileName.project}_${fileName.shortName}`;
+            script.src = (`/_${fileName.project}_${fileName.shortName}`);
             el.appendChild(script)
         });
 

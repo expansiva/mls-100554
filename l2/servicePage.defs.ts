@@ -18,10 +18,7 @@ export const defs: mls.l4.BaseDefs = {
     ]
   },
   "references": {
-    "widgets": [
-      "wcd-toolbox-item-action-edit-attr-out-100554",
-      "collab-panel-100554"
-    ],
+    "widgets": [],
     "plugins": [],
     "statesRO": [
       "msg",

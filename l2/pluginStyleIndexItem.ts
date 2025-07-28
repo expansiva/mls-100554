@@ -95,7 +95,8 @@ export class PluginStyleIndexItem extends CollabLitElement {
         }
 
         if (container.childElementCount === 0) {
-            const tag = convertFileNameToTag(help.widget);
+            const { folder, project, shortName } = mls.l2.getPath(help.widget)
+            const tag = convertFileNameToTag({ project, shortName, folder });
             this.pluginEl = document.createElement(tag);
             this.pluginEl.setAttribute('state', `{{ less.${this.position} }}`);
             this.pluginEl.setAttribute('showFull', this.mode === 'full' ? 'true' : 'false');

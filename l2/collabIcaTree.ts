@@ -72,7 +72,7 @@ export class CollabFCATree extends CollabLitElement {
 
     renderItemTree(item: IInfoElCholdren, idx: string) {
 
-        const name = convertTagToFileName(item.el.tagName.toLocaleLowerCase());
+        const info = convertTagToFileName(item.el.tagName.toLocaleLowerCase());
         const cls = (item.el as any).renderType === 'editactive' ? 'activeBranch' : '';
 
         if (this.idLastClick === name + idx) { // Verifico se preciso forçar um click
@@ -94,8 +94,8 @@ export class CollabFCATree extends CollabLitElement {
 
         return html`
             <li>
-                <div id="${name + idx}" .info=${item} @mouseover="${this.mouseOver}" @mouseleave="${this.mouseLeave}" class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
-                    <info-item .info=${item}><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${name}</info-item>
+                <div id="${info.shortName + idx}" .info=${item} @mouseover="${this.mouseOver}" @mouseleave="${this.mouseLeave}" class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
+                    <info-item .info=${item}><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${info.shortName}</info-item>
                     <div class="dragDropcontainer">
                         <span class="dbefore fa fa-arrow-up"></span>
                         <span class="din fa fa-arrow-turn-down"></span>
