@@ -19,7 +19,8 @@ import {
     updateStepStatus,
     appendLongTermMemory,
     getNextPendentStep,
-    getNextStepIdAvaliable
+    getInteractionStepId,
+    getStepById
 } from "./_100554_aiAgentHelper";
 import {
     startNewInteractionInAiTask,
@@ -31,6 +32,8 @@ import {
 const agentName = "agentGeneratePrototype4";
 const agentProject = 100554;
 const projectToSave = mls.actual[5].project || 0;
+const enhancementTs = '_100554_enhancementLit';
+const enhancementStyle = '_100554_enhancementStyle';
 
 export function createAgent(): IAgent {
     return {
@@ -55,7 +58,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context || !context.message) throw new Error("Invalid context");
 
     if (!context.task) {
-        const pageIndex: number = 0;
+        const pageIndex: number = 1;
         const organism: string[] = [];
         const payload3: PayLoad3 = getPayload3Mock();
         const totalPages = payload3.pages.length;
@@ -70,8 +73,9 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
     }
     const organismAlreadyDeclared = getOrganismsAlreadyCreated(context);
-    //const payload3: PayLoad3 = getPayload3Mock();
-    const payload3: PayLoad3 = getPayload3(context);
+    let payload3: PayLoad3 | undefined;
+    if (context.modeSingleStep) payload3 = getPayload3Mock(); // only for dev test on preview
+    else payload3 = getPayload3(context);
     const totalPages = payload3.pages.length;
     appendLongTermMemory(context, { "total_pages": totalPages.toString() })
     const inputs = await getPrompts(payload3, organismAlreadyDeclared, Number(step.prompt));
@@ -122,16 +126,19 @@ async function createPage(context: mls.msg.ExecutionContext) {
     if (!context || !context.task) throw new Error('Not found context to createPage');
     const step = getNextPendentStep(context.task);
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in createPage');
-    const payload: PayLoad4 = step.result;
-    if (!payload || !payload.pageHtml) throw new Error('Not found "pageHtml" in payload');
+    const payload4: PayLoad4 = step.result;
+    if (!payload4 || !payload4.pageHtml) throw new Error('Not found "pageHtml" in payload');
 
-    const payload3 = getPayload3Mock();
-    const resolvedImages = await getAllImages(payload.images);
+    let payload3: PayLoad3 | undefined;
+    if (context.modeSingleStep) payload3 = getPayload3Mock(); // only for dev test on preview
+    else payload3 = getPayload3(context);
 
-    let finalSource = payload.pageHtml;
-     for (const [key, url] of Object.entries(resolvedImages)) {
+    const resolvedImages = await getAllImages(payload4.images);
+
+    let finalSource = payload4.pageHtml;
+    for (const [key, url] of Object.entries(resolvedImages)) {
         const pattern = new RegExp(`\\{{${key}\\}}`, 'g');
-         finalSource = finalSource.replace(pattern, url);
+        finalSource = finalSource.replace(pattern, url);
     }
     const actualTaskIndex = context.task?.iaCompressed?.longMemory['next_page'] ? +(context.task?.iaCompressed?.longMemory['next_page']) : -1;
 
@@ -141,7 +148,7 @@ async function createPage(context: mls.msg.ExecutionContext) {
 
     const organismUsed = extractOrganismTags(finalSource);
     await updateLongMemory(context, organismUsed, actualTaskIndex);
-    await generateFiles(payload3, finalSource, organismUsed, projectToSave, '', actualTaskIndex);
+    await generateFiles(step, context.task, payload4, payload3, finalSource, organismUsed, projectToSave, '', actualTaskIndex);
     return context;
 }
 
@@ -248,21 +255,19 @@ export function getPayload4(context: mls.msg.ExecutionContext): PayLoad4 {
     return payload4;
 }
 
-async function generateFiles(payload3: PayLoad3, htmlFull: string, organism: string[], project: number, folder: string, index: number): Promise<string> {
+async function generateFiles(step: mls.msg.AIPayload, task: mls.msg.TaskData, payload4: PayLoad4, payload3: PayLoad3, htmlFull: string, organism: string[], project: number, folder: string, index: number): Promise<string> {
     try {
 
         const { html, style } = extractStyleFromHtml(htmlFull);
 
         const pageWirefame = payload3.pages[index];
         const shortName = pageWirefame.pageName;
-        const enhancement = '_100554_enhancementLit';
-
+        const enhancement = enhancementTs;
         await generateOrganisms(payload3, organism, htmlFull, project);
-
         const sourceTS = generateTsPage(payload3, project, folder, index);
-        const sourceHTML = generateHtmlPage(html, project);
-        const sourceLess = generateLess(htmlFull, shortName);
-        const sourceDefs = generatePageDefsFromLLM(payload3, index, project, folder);
+        const sourceHTML = generateHtmlPage(html, project, payload3, index);
+        const sourceLess = generateLessPage(htmlFull, payload3, project, folder, index);
+        const sourceDefs = generateDefsPage(payload3, index, project, folder, payload4.images, organism, task, step);
 
         await createNewFile({ project, position: 'right', shortName, enhancement, sourceTS: sourceTS.trim(), sourceHTML, sourceLess, sourceDefs, openPreview: false });
 
@@ -275,7 +280,7 @@ async function generateFiles(payload3: PayLoad3, htmlFull: string, organism: str
 
 async function generateOrganisms(payload3: PayLoad3, organisms: string[], htmlString: string, project: number) {
 
-    const enhancement = '_100554_enhancementLit';
+    const enhancement = enhancementTs;
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlString, 'text/html');
     const styles = doc.querySelectorAll('style[type="text/less"]');
@@ -293,8 +298,8 @@ async function generateOrganisms(payload3: PayLoad3, organisms: string[], htmlSt
         if (!organismData) return;
 
         let shortName1 = sanitizeMeta(organismData.organismTag, project, '');
-        const fileName = convertTagToFileName(`${shortName1}-${project}`);
-        const { shortName } = mls.l2.getPath(fileName);
+        const info = convertTagToFileName(`${shortName1}-${project}`);
+        if (!info) continue;
 
         const organismHtml = organismEl.innerHTML;
         if (!organismHtml) continue;
@@ -302,79 +307,24 @@ async function generateOrganisms(payload3: PayLoad3, organisms: string[], htmlSt
 
         const sourceTS = generateTsOrganism(shortName1, project, payload3.finalModuleDetails.moduleName, '', organismHtml);
         const sourceHTML = generateHtmlOrganism(organismData, project);
-        const sourceLess = organismLess || '';
-        const sourceDefs = generateOrganismDefsFromLLM(payload3, organism, project, '');
+        const sourceLess = generateLessOrganism(organismData, project, organismLess || '');
+        const sourceDefs = generateDefsOrganism(payload3, organism, project, '');
 
-        await createNewFile({ project, position: 'right', shortName, enhancement, sourceTS: sourceTS.trim(), sourceHTML, sourceLess, sourceDefs, openPreview: false });
+        await createNewFile({ project, position: 'right', shortName: info.shortName, enhancement, sourceTS: sourceTS.trim(), sourceHTML, sourceLess, sourceDefs, openPreview: false });
+
 
     }
 
-}
-
-export function generateHtmlPage(htmlFull: string, project: number): string {
-    const newHtml = replaceOrganismTags(htmlFull, project)
-    const htmlFinal = `${formatHtml(newHtml)}`
-    return htmlFinal;
-}
-
-function replaceOrganismTags(htmlString: string, project: number): string {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString, 'text/html');
-    const organismElements = doc.querySelectorAll('*');
-    organismElements.forEach((el) => {
-        if (el.tagName.toLowerCase().startsWith('organism-')) {
-            const tagName = el.tagName.toLowerCase();
-            const newTagName = `${tagName}-${project}`;
-            const newEl = document.createElement(newTagName);
-            for (const attr of el.attributes) {
-                newEl.setAttribute(attr.name, attr.value);
-            }
-            el.replaceWith(newEl);
-        }
-    });
-    doc.querySelectorAll('script').forEach((sc) => sc.remove());
-    return doc.body.innerHTML;
-}
-
-export function generateLess(htmlString: string, pageName: string): string {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString, 'text/html');
-    const styles = doc.querySelectorAll('style[type="text/less"]');
-    const resultStyles = Array.from(styles).map(style => ({
-        name: style.getAttribute('data-name'),
-        content: style.textContent
-    }));
-
-    const styleData = resultStyles.find((result) => result.name === `page-${pageName}`);
-    return styleData?.content || '';
-
-}
-
-export function extractStyleFromHtml(htmlString: string): { html: string; style: string } {
-    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-
-    let styleContent = '';
-    let match: RegExpExecArray | null;
-
-    while ((match = styleRegex.exec(htmlString)) !== null) {
-        styleContent += match[1].trim() + '\n';
-    }
-
-    const cleanedHtml = htmlString.replace(styleRegex, '').trim();
-    return {
-        html: cleanedHtml,
-        style: styleContent.trim(),
-    };
 }
 
 function generateTsPage(payload: PayLoad3, project: number, folder: string, index: number): string {
 
     const pageWirefame = payload.pagesWireframe[index];
     const shortName = pageWirefame.pageName;
-    const enhancement = '_100554_enhancementLit';
+    const enhancement = enhancementTs;
     const groupName = payload.finalModuleDetails.moduleName;
     const fileName = `_${project}_${shortName}`
-    const tagName = convertFileNameToTag(fileName);
+    const tagName = convertFileNameToTag({ project, shortName, folder });
 
     const ts = `
 /// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
@@ -393,23 +343,66 @@ export class ${fileName} extends CollabPageElement {
     return ts;
 }
 
-function verifyIfExists(args: { project: number, shortName: string, folder: string }): boolean {
-    const key = mls.stor.getKeyToFiles(args.project, 2, args.shortName, args.folder, ".defs")
-    return !!mls.stor.files[key];
+
+function generateLessPage(htmlString: string, payload: PayLoad3, project: number, folder: string, index: number): string {
+
+    const page = payload.pages[index];
+    const shortName = page.pageName;
+    const enhancement = enhancementStyle;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, 'text/html');
+    const styles = doc.querySelectorAll('style[type="text/less"]');
+    const resultStyles = Array.from(styles).map(style => ({
+        name: style.getAttribute('data-name'),
+        content: style.textContent
+    }));
+
+    const styleData = resultStyles.find((result) => result.name === `page-${shortName}`);
+    if (!styleData) return "";
+    if (styleData && !styleData.content) return "";
+    const lessResult = `/// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" />\n\n ${styleData?.content || ''}`;
+
+    return lessResult;
+
 }
 
-function sanitizeMeta(baseShortName: string, project: number, folder: string): string {
-    let candidateName = baseShortName;
-    let suffix = 1;
+function generateHtmlPage(htmlFull: string, project: number, payload: PayLoad3, indexPage: number): string {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlFull, 'text/html');
+    const allElements = doc.querySelectorAll('*');
+    const countByTags: Record<string, number> = {};
 
-    while (verifyIfExists({ project, shortName: candidateName, folder })) {
-        candidateName = `${baseShortName}${suffix}`;
-        suffix++;
-    }
-    return candidateName;
+    const page = payload.pages[indexPage];
+    const pageName = page.pageName;
+
+    allElements.forEach((element) => {
+        const tag = element.tagName.toLowerCase();
+
+        if (tag.startsWith('organism')) {
+            if (!countByTags[tag]) {
+                countByTags[tag] = 1;
+            } else {
+                countByTags[tag]++;
+            }
+            element.id = pageName + '-' + tag + countByTags[tag].toString();
+        }
+    });
+
+    const newHtml = replaceOrganismTags(doc.body.outerHTML, project);
+    const htmlFinal = `${formatHtml(newHtml)}`;
+    return htmlFinal;
 }
 
-function generatePageDefsFromLLM(payload: PayLoad3, index: number, project: number, folder: string): string {
+function generateDefsPage(
+    payload: PayLoad3,
+    index: number,
+    project: number,
+    folder: string,
+    images: Images[],
+    organism: string[],
+    task: mls.msg.TaskData,
+    step: mls.msg.AIPayload
+): string {
     const page = payload.pages[index];
     const shortName = sanitizeMeta(page.pageName, project, folder);
     const wireframe = payload.pagesWireframe.find(p => p.pageSequential === page.pageSequential);
@@ -446,17 +439,33 @@ function generatePageDefsFromLLM(payload: PayLoad3, index: number, project: numb
         }
     };
 
+    let trace: string = '';
+    const stepInteractionId = getInteractionStepId(task, step.stepId);
+    if (stepInteractionId) {
+        const stepInteraction = getStepById(task, stepInteractionId);
+        if (stepInteraction) trace = stepInteraction.interaction?.trace.join('\n') || ''
+    }
+
     return `/// <mls shortName="${shortName}" project="${project}" enhancement="_blank" />\n\n` +
         `// Do not change – automatically generated code.\n\n` +
-        `export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}\n`;
+        `export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}\n\n
+/*\n
+Task Id: ${task.PK}\n
+Step Trace: ${trace}
+Organism used in page: ${JSON.stringify(organism, null, 2)} \n
+Images:\n ${JSON.stringify(images, null, 2)}\n 
+\n*/
+`;
 }
+
 
 function generateTsOrganism(shortTagName: string, project: number, groupName: string, folder: string, organismHtml: string) {
 
-    const enhancement = '_100554_enhancementLit';
+    const enhancement = enhancementTs;
     const tagName = `${shortTagName}-${project}`;
-    const fileName = convertTagToFileName(tagName);
-    const { shortName } = mls.l2.getPath(fileName);
+    const info = convertTagToFileName(tagName);
+    if (!info) return ``;
+    const shortName = info.shortName;
 
     const ts = `
 /// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
@@ -466,7 +475,7 @@ import { customElement } from 'lit/decorators.js';
 import { IcaOrganismBase } from './_100554_icaOrganismBase';
 
 @customElement('${tagName}')
-export class ${fileName} extends IcaOrganismBase {
+export class ${shortName} extends IcaOrganismBase {
     render(){
         return html\`${organismHtml}\`
     }
@@ -488,13 +497,32 @@ function generateHtmlOrganism(organism: Organism, project: number): string {
     }
 }
 
+function generateLessOrganism(organism: Organism, project: number, less: string): string {
+    try {
 
-function generateOrganismDefsFromLLM(payload: PayLoad3, organismTag: string, project: number, folder: string): string {
+        const shortTagName = organism.organismTag;
+        const tagName = `${shortTagName}-${project}`;
+        const info = convertTagToFileName(tagName);
+        if (!info) return ``;
+        const shortName = info.shortName;
+        const enhancement = enhancementStyle;
+        if (!less) return '';
+        const lessResult = `/// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" />\n\n ${less}`
+        return lessResult;
+
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
+}
+
+function generateDefsOrganism(payload: PayLoad3, organismTag: string, project: number, folder: string): string {
     const organism = payload.organism.find((org) => org.organismTag = organismTag);
     if (!organism) return '';
     let shortName1 = sanitizeMeta(organism.organismTag, project, folder);
-    const fileName = convertTagToFileName(`${shortName1}-${project}`);
-    const { shortName } = mls.l2.getPath(fileName);
+
+    const info = convertTagToFileName(`${shortName1}-${project}`);
+    if (!info) return ``;
+    const shortName = info.shortName;
 
     const defs: mls.l4.BaseDefs = {
         meta: {
@@ -527,6 +555,60 @@ function generateOrganismDefsFromLLM(payload: PayLoad3, organismTag: string, pro
         `export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}\n`;
 }
 
+function replaceOrganismTags(htmlString: string, project: number): string {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, 'text/html');
+    const organismElements = doc.querySelectorAll('*');
+    organismElements.forEach((el) => {
+        if (el.tagName.toLowerCase().startsWith('organism-')) {
+            const tagName = el.tagName.toLowerCase();
+            const newTagName = `${tagName}-${project}`;
+            const newEl = document.createElement(newTagName);
+            for (const attr of el.attributes) {
+                newEl.setAttribute(attr.name, attr.value);
+            }
+            el.replaceWith(newEl);
+        }
+    });
+    doc.querySelectorAll('script').forEach((sc) => sc.remove());
+    return doc.body.innerHTML;
+}
+
+function extractStyleFromHtml(htmlString: string): { html: string; style: string } {
+    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+
+    let styleContent = '';
+    let match: RegExpExecArray | null;
+
+    while ((match = styleRegex.exec(htmlString)) !== null) {
+        styleContent += match[1].trim() + '\n';
+    }
+
+    const cleanedHtml = htmlString.replace(styleRegex, '').trim();
+    return {
+        html: cleanedHtml,
+        style: styleContent.trim(),
+    };
+}
+
+
+function verifyIfExists(args: { project: number, shortName: string, folder: string }): boolean {
+    const key = mls.stor.getKeyToFiles(args.project, 2, args.shortName, args.folder, ".defs")
+    return !!mls.stor.files[key];
+}
+
+function sanitizeMeta(baseShortName: string, project: number, folder: string): string {
+    let candidateName = baseShortName;
+    let suffix = 1;
+
+    while (verifyIfExists({ project, shortName: candidateName, folder })) {
+        candidateName = `${baseShortName}${suffix}`;
+        suffix++;
+    }
+    return candidateName;
+}
+
+
 function extractOrganismTagsFromHtml(pageHtml: string[]): mls.l4.DefsWidget[] {
     const tags = new Set<string>();
     for (const line of pageHtml) {
@@ -554,7 +636,7 @@ function extractOrganismTagsFromHtml(pageHtml: string[]): mls.l4.DefsWidget[] {
     return arr;
 }
 
-export function getPayload3Mock(): PayLoad3 {
+function getPayload3Mock(): PayLoad3 {
 
     const data: PayLoad3 = {
         "finalModuleDetails": {
