@@ -19,15 +19,7 @@ export const defs: mls.l4.BaseDefs = {
   },
   "references": {
     "widgets": [
-      "collab-spliter-vertical-var-fixed-100554",
-      "collab-messages-prompt-100554",
-      "plugin-preview-result-js-100554",
-      "plugin-preview-result-test-js-100554",
-      "plugin-preview-insights-100554",
-      "service-preview-view-100554",
-      "collab-console-100554",
-      "collab-result-test-100554",
-      "collab-result-container-100554"
+
     ],
     "plugins": [],
     "statesRO": [

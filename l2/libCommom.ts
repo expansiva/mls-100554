@@ -182,7 +182,8 @@ export function openService(service: string, position: 'left' | 'right', level: 
     const itemNav3Content = page.querySelector(`collab-nav-3-service[data-service="${service}"]`) as HTMLElement;
 
     if (itemNav3Content && args) {
-        const tagService = convertFileNameToTag(service);
+        const { shortName, folder, project } = mls.l2.getPath(service);
+        const tagService = convertFileNameToTag({ shortName, folder, project });
         const serviceItem = itemNav3Content.querySelector(tagService);
         if (serviceItem) {
             Object.entries(args).forEach((arg) => {
@@ -240,11 +241,11 @@ export async function loadFileHTMLInContainer(el: HTMLElement, shortName: string
     el.innerHTML = content;
 
     allWcs.forEach((wc) => {
-        const fileName = convertTagToFileName(wc);
+        const info = convertTagToFileName(wc);
         const script = document.createElement('script');
         script.type = 'module';
-        script.id = fileName;
-        script.src = (`/${fileName}`);
+        script.id = info.shortName;
+        script.src = (`/_${info.project}_${info.shortName}`);
         el.appendChild(script)
     });
 
@@ -276,8 +277,8 @@ export function convertColorToHex(color: string) {
     );
 }
 
-export async function getEnhancementName(file: { project: number, shortName: string, folder:string }): Promise<string> {
-    const key = mls.l2.getKey({ project: file.project, shortName: file.shortName, folder:file.folder });
+export async function getEnhancementName(file: { project: number, shortName: string, folder: string }): Promise<string> {
+    const key = mls.l2.getKey({ project: file.project, shortName: file.shortName, folder: file.folder });
     const mmodel = mls.editor.models[key];
     if (!mmodel || !mmodel.ts) throw new Error('model invalid');
     if (!mmodel.ts.compilerResults) throw new Error('model ts not compiled yet');
@@ -315,8 +316,8 @@ export function getProjectDetails(): IRetProjectDetails | undefined {
     return JSON.parse(info);
 }
 
-export function calculateTotalStringSize(source: string, limitBase:number):ICalculateTotalStringSize {
-    
+export function calculateTotalStringSize(source: string, limitBase: number): ICalculateTotalStringSize {
+
     let totalBytes = 0;
     for (const text of source) {
         const encoded = new TextEncoder().encode(text);
@@ -366,7 +367,7 @@ export async function getListNewFilesToDeleteByGroup(group: string, project: num
 
 export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
 
-    const modelsToDelete: { project: number, shortName: string, folder:string }[] = Array.from(
+    const modelsToDelete: { project: number, shortName: string, folder: string }[] = Array.from(
         new Map(filesToDelete.map(({ project, shortName, folder }) => [shortName, { project, shortName, folder }])).values()
     );
 
@@ -412,7 +413,7 @@ export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
     }
 }
 
-export async function loadModuleFromProjectOrDependency(name: string, folder:string, ext:string): Promise<any>{
+export async function loadModuleFromProjectOrDependency(name: string, folder: string, ext: string): Promise<any> {
 
     const prj = mls.actual[5].project;
     if (!prj) throw new Error('Not found project actual!');
@@ -421,7 +422,7 @@ export async function loadModuleFromProjectOrDependency(name: string, folder:str
     if (mls.stor.files[key]) return await await collabImport({ project: prj, shortName: name, folder: '' });
 
     const info = mls.l5.getProjectDetails(prj);
-    if(!info) throw new Error('Not found project details from actual project!');
+    if (!info) throw new Error('Not found project details from actual project!');
 
     let prjDep = 0;
     info.prj_dependencies.forEach((dep) => {
@@ -429,13 +430,13 @@ export async function loadModuleFromProjectOrDependency(name: string, folder:str
         if (mls.stor.files[key]) return;
         prjDep = dep;
         key = mls.stor.getKeyToFiles(dep, 2, name, folder, ext);
-    
+
     });
 
     if (!mls.stor.files[key]) throw new Error('File not found in any dependency!');
 
     return await await collabImport({ project: prjDep, shortName: name, folder: '' });
-    
+
 }
 
 interface ICalculateTotalStringSize {

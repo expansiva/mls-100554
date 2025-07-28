@@ -16,9 +16,7 @@ export const defs: mls.l4.BaseDefs = {
     ]
   },
   "references": {
-    "widgets": [
-      "wc-code-100554"
-    ],
+    "widgets": [],
     "plugins": [],
     "statesRO": [],
     "statesRW": [

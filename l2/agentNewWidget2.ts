@@ -55,8 +55,8 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     if (!context.task) {
         let pp = context.message.content
-                .replace(`@@ ${agentName}`, '')
-                .replace(`@@${agentName}`, '').trim()
+            .replace(`@@ ${agentName}`, '')
+            .replace(`@@${agentName}`, '').trim()
 
         pp = extJson(context.message.content).trim();
         const data = mls.common.safeParseArgs(pp);
@@ -128,7 +128,7 @@ async function addFile(context: mls.msg.ExecutionContext) {
 
     await createNewFiles(content);
 
-    const rc = { shortName: content.shortName, project:prj }
+    const rc = { shortName: content.shortName, project: prj }
 
     const newStep: mls.msg.AIPayload = {
         agentName: 'agentNewWidget3',
@@ -154,7 +154,7 @@ async function addFile(context: mls.msg.ExecutionContext) {
 
 }
 
-async function createNewFiles(content: { shortName: string, html: string, ts: string, less: string, project:number }) {
+async function createNewFiles(content: { shortName: string, html: string, ts: string, less: string, project: number }) {
 
     await forceServiceInstance(2, '_100554_serviceSource');
 
@@ -185,7 +185,7 @@ export async function getPrompts(obj: any[], prompt: string | undefined, rags: s
 
     const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentNewWidget2', folder: '', data })
     return prompts;
-    
+
 }
 
 function getDefinitionMD(obj: any[]): string {
@@ -197,7 +197,7 @@ function getDefinitionMD(obj: any[]): string {
         if (!step.widgetName) throw new Error("[getDefinitionMD] Not found widget in parentClass");
 
         const shortName = firstLowercaseLetter(step.widgetName);
-        let tag = convertFileNameToTag(`_100554_${shortName}`);
+        let tag = convertFileNameToTag({ project: 100554, shortName, folder: '' });
         tag = extractBaseComponentName(tag);
 
         const content = extractComponentMarkdown(descriptionForPrompt, tag);

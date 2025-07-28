@@ -29,11 +29,11 @@ export const getDependenciesByHtml = (models: mls.editor.IModels, html: string, 
 
 export const getDependenciesByMFile = (models: mls.editor.IModels, withCss: boolean = false): Promise<IJSONDependence> => {
     if (!models.ts) throw new Error('getDependenciesByMFile: Invalid model ts');
-    const { project, shortName, extension } = models.ts.storFile;
+    const { project, shortName, extension, folder } = models.ts.storFile;
     return new Promise<IJSONDependence>(async (resolve, reject) => {
         try {
             if (extension !== '.ts') throw new Error('Only myfile .ts');
-            const tag = convertFileNameToTag(`_${project}_${shortName}`);
+            const tag = convertFileNameToTag({ project, shortName, folder });
             resolve(await getDependencies(models, tag, `<${tag}></${tag}>`, 'Default', withCss))
         } catch (e) {
             reject(e);
@@ -46,8 +46,9 @@ async function getTagsInTypescript(modelTS: mls.editor.IModelTS, tags: string[])
     const tagsInTypescript = getAllWebComponentsInSource(modelTS.model.getValue());
     for (const tagTs of tagsInTypescript) {
         if (!tags.includes(tagTs)) {
-            const fileName = convertTagToFileName(tagTs);
-            const mmodels = mls.editor.models[fileName];
+            const info = convertTagToFileName(tagTs);
+            const keyModels = mls.editor.getKeyModel(info.project, info.shortName, info.folder);
+            const mmodels = mls.editor.models[keyModels];
             if (mmodels && mmodels.ts) {
                 await getTagsInTypescript(mmodels.ts, tags);
                 tags.push(tagTs);
@@ -68,7 +69,7 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
     const myModules = {};
     let tags = extrairTagsCustomizadas(html);
 
-    const tag = convertFileNameToTag(`_${project}_${shortName}`);
+    const tag = convertFileNameToTag({ project, shortName, folder });
     if (!tags.includes(tag)) tags.push(tag);
     tags = await getTagsInTypescript(models.ts, tags);
 
@@ -80,7 +81,7 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
         myModules,
     );
 
-    let tokens: string | undefined = await getTokens({ project, shortName,folder }, theme);
+    let tokens: string | undefined = await getTokens({ project, shortName, folder }, theme);
     return {
         file: filename,
         wcComponents: tags,
@@ -102,7 +103,7 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
     const myModules = {};
     let tags = extrairTagsCustomizadas(html);
 
-    const tag = convertFileNameToTag(`_${project}_${shortName}`);
+    const tag = convertFileNameToTag({ project, shortName, folder });
     if (!tags.includes(tag)) tags.push(tag);
 
     await loadMyNeedsToCompile(
@@ -126,7 +127,7 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
 }
 
 function extrairTagsCustomizadas(html: string): string[] {
-    
+
     const container = document.createElement('div');
     container.innerHTML = html;
 
@@ -202,7 +203,8 @@ async function loadMyNeedsToCompile(
 
     try {
         if (tags.length <= 0) return;
-        const name = convertTagToFileName(tags[0]);
+        const info = convertTagToFileName(tags[0]);
+        const name = `_${info.project}_${info.shortName}`
         mls.actual[0].setFullName(name);
         const f = mls.stor.files[name];
         const { project, path } = mls.actual[0];

@@ -128,7 +128,7 @@ export function addNav3(ifr: HTMLIFrameElement, file: mls.stor.IFileInfo) {
         if (!ifr.contentDocument || !file) return;
 
         const dataService = `_${file?.project}_${file?.shortName}`
-        const tag = convertFileNameToTag(`_${file.project}_${file.shortName}`);
+        const tag = convertFileNameToTag({ project: file.project, shortName: file.shortName, folder: file.folder });
         const old = ifr.contentDocument.querySelector(tag);
         if (!old) return;
         await import(`./_${file.project}_${file.shortName}`);

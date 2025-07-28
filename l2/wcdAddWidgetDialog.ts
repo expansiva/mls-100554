@@ -175,7 +175,7 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
     private renderFinalGruops() {
         const [, rootSelected, subGroupSelected] = this.actualBreadCrumb;
         const groups = getGroups();
-        
+
         return html`
         <div class="group-container">
             ${groups[rootSelected][subGroupSelected].map((finalGroup) => {
@@ -360,8 +360,9 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
 
             if (!extendName) return;
 
-            const tag = convertFileNameToTag('_100554_' + extendName);
-            const tagW = convertFileNameToTag(item.widget);
+            const tag = convertFileNameToTag({ project: 100554, shortName: extendName });
+            const pathInfoWidget = mls.l2.getPath(item.widget)
+            const tagW = convertFileNameToTag({ project: pathInfoWidget.project, shortName: pathInfoWidget.shortName, folder: pathInfoWidget.folder });
 
             const i = {
                 nome: mls.actual[0].path,

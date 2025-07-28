@@ -36,8 +36,7 @@ export abstract class IcaOrganismWireframeBase extends StateLitElement {
             goal: this.goal
         });
 
-        const fileName = convertTagToFileName(this.tagName.toLowerCase());
-        const { project, shortName } = mls.l2.getPath(fileName);
+        const {shortName, project} = convertTagToFileName(this.tagName.toLowerCase());
         const keyStor = mls.stor.getKeyToFiles(project, 2, shortName, '', '.ts');
         const storFile = mls.stor.files[keyStor];
         this.fireEvents('open', storFile);

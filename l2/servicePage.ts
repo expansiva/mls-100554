@@ -100,7 +100,7 @@ export class ServicePage100554 extends ServiceBase {
         return this;
     }
 
-    
+
     async firstUpdated() {
         if (this.menu.setTabActive) this.menu.setTabActive(ESceneries[this.activeTab]);
         await this.loadPlugins();
@@ -179,12 +179,14 @@ export class ServicePage100554 extends ServiceBase {
         const plgNavName = plgNav[0] ? plgNav[0].widget : '';
         const plgPropName = plgProp[0] ? plgProp[0].widget : '';
         if (plgNavName) {
-            await import(`./${plgNavName}`);
-            this.pluginNav = convertFileNameToTag(plgNavName);
+            const { folder, project, shortName } = mls.l2.getPath(plgNavName);
+            await import(`./_${project}_${shortName}`);
+            this.pluginNav = convertFileNameToTag({ project, shortName, folder });
         }
         if (plgPropName) {
-            await import(`./${plgPropName}`);
-            this.pluginProp = convertFileNameToTag(plgPropName);
+            const { folder, project, shortName } = mls.l2.getPath(plgPropName);
+            await import(`./_${project}_${shortName}`);
+            this.pluginProp = convertFileNameToTag({ project, shortName, folder });
         }
     }
 

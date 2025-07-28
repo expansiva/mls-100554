@@ -257,7 +257,7 @@ export class ServicePreviewView extends StateLitElement {
 
         if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
         const { project, shortName, folder } = this.models.style.storFile;
-        const id = convertFileNameToTag(`_${project}_${shortName}`);
+        const id = convertFileNameToTag({ project, shortName, folder });
         const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
         const newStyle = document.createElement('style');
         const newLess = await compileStyleUsingStorFile(shortName, project, this.actualtheme);
@@ -447,9 +447,6 @@ export class ServicePreviewView extends StateLitElement {
         (iframe.contentDocument.body as any)['service'] = this.father;
 
         let ret;
-        if (this.isService && this.file) {
-            const tag = convertFileNameToTag(`_${this.file.project}_${this.file.shortName}`);
-        }
 
         iframe.contentDocument.body.innerHTML = txt;
         ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);

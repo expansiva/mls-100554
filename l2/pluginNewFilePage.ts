@@ -57,9 +57,11 @@ export const details: IDetails = {
 @customElement('plugin-new-file-page-100554')
 export class PluginNewFilePage extends StateLitElement {
 
-    @propertyDataSource() shortName: string | undefined;
+    @propertyDataSource({ attribute: true }) shortName: string | undefined;
 
     @propertyDataSource({ attribute: true }) project: number | undefined;
+
+    @propertyDataSource({ attribute: true }) folder: string | undefined;
 
     @property() position: 'left' | 'right' = 'left';
 
@@ -102,7 +104,7 @@ import { globalState, setState, initState } from './_100554_collabState';
     private getTemplateTS(): string {
         let newExample = this.template;
         if (this.shortName && this.project) {
-            newExample = changeTagName(newExample, convertFileNameToTag(`_${this.project}_${this.shortName}`));
+            newExample = changeTagName(newExample, convertFileNameToTag({ project: this.project, shortName: this.shortName, folder: this.folder }));
             newExample = changeClassName(newExample, this.project, this.shortName);
             newExample = changeWidget(newExample, this.project, this.shortName);
             newExample = changeStateName(newExample, this.shortName);
@@ -112,7 +114,9 @@ import { globalState, setState, initState } from './_100554_collabState';
     }
 
     private getTemplateHTML(): string {
-        const tagName = convertFileNameToTag(`_${this.project}_${this.shortName}`);
+        if (!this.shortName || !this.project) return '';
+
+        const tagName = convertFileNameToTag({ project: this.project, shortName: this.shortName, folder: this.folder });
         return `<${tagName} modeoverlay="wcd-overlay-mode-default-100554">\n\t<ica-layout-flow-section-100554 id="section1" class="inset" widget="wc-section-100554">
 		\n\t\t<ica-apresentation-text-text-100554 id="apText1" widget="wc-text-100554" text="In development" type="h2">
 		</ica-apresentation-text-text-100554>
@@ -132,8 +136,8 @@ import { globalState, setState, initState } from './_100554_collabState';
         this.loading = true;
         try {
             await createNewFile({
-                project:this.project,
-                position:this.position,
+                project: this.project,
+                position: this.position,
                 shortName: this.shortName,
                 enhancement: this.enhancement,
                 sourceTS: this.getTemplateTS(),

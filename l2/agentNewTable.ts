@@ -1,11 +1,6 @@
 /// <mls shortName="agentNewTable" project="100554" enhancement="_blank" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { forceServiceInstance } from './_100554_libCommom';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { createNewFile } from "./_100554_pluginNewFileBase";
-import { descriptionForPrompt } from "./_100554_icaBaseDescription";
-import { initCompileMonaco } from "./_100554_collabInit";
 import { initState } from './_100554_collabState';
 
 import { preferModelType, systemComponentsInstruction, systemTokensLessInstruction, getPromptByHtml } from './_100554_aiPrompts';

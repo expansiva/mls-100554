@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
-import { convertFileNameToTag } from './_100554_utilsLit'
+import { convertFileNameToTag } from './_100554_utilsLit';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions, ITools } from './_100554_serviceBase';
 import { formatHtml, sync } from './_100554_collabDOMSync';
 import { removeTokensFromSource } from './_100554_enhancementStyle';
@@ -113,13 +113,13 @@ export class ServiceSource100554 extends ServiceBase {
         }
         if (op === EToolsSource.icHTML) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
-            this.createOrShowModelHtmlCssTestDefs(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.html');
+            this.createOrShowModelHtmlCssTestDefs(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, this.activeModels.html.storFile.folder, true, '.html');
             this.updateActionBasedOnError('html', this.activeModels?.html?.model.id);
             if (this._ed1) this.highlightReviewLines(this._ed1);
         }
         if (op === EToolsSource.icStyle) {
             if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
-            this.createOrShowModelHtmlCssTestDefs(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, true, '.less');
+            this.createOrShowModelHtmlCssTestDefs(this.activeModels.html.storFile.shortName, this.activeModels.html.storFile.project, this.activeModels.html.storFile.folder, true, '.less');
             this.updateActionBasedOnError('style', this.activeModels?.style?.model.id);
             if (this._ed1) this.highlightReviewLines(this._ed1);
 
@@ -127,13 +127,13 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (op === EToolsSource.icTest) {
             if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
-            this.createOrShowModelTsTest(this.activeModels.ts.storFile.shortName, this.activeModels.ts.storFile.project, true);
+            this.createOrShowModelTsTest(this.activeModels.ts.storFile.shortName, this.activeModels.ts.storFile.project, this.activeModels.ts.storFile.folder, true);
             this.updateActionBasedOnError('test', this.activeModels?.test?.model.id);
         }
 
         if (op === EToolsSource.icDefs) {
             if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
-            this.createOrShowModelTsDefs(this.activeModels.ts.storFile.shortName, this.activeModels.ts.storFile.project, true);
+            this.createOrShowModelTsDefs(this.activeModels.ts.storFile.shortName, this.activeModels.ts.storFile.project, this.activeModels.ts.storFile.folder, true);
             this.updateActionBasedOnError('defs', this.activeModels?.defs?.model.id);
         }
     }
@@ -491,7 +491,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (this.menu.tabs.selected === undefined) return false;
         if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return false;
 
-        const { shortName, project } = this.activeModels.ts.storFile;
+        const { shortName, project, folder } = this.activeModels.ts.storFile;
         const obj: { [key: string]: string } = {
             0: '.ts',
             1: '.html',
@@ -501,7 +501,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         };
         const ext = obj[this.menu.tabs.selected];
-        const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
+        const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
         const file = mls.stor.files[keyToFile];
         if (!file) {
             (window as any).collabMessages.add('Invalid File', 'information');
@@ -638,6 +638,7 @@ export class ServiceSource100554 extends ServiceBase {
         storFile.onAction = (action: mls.stor.IFileInfoAction) => this._afterUpdate(storFile, model1.model, 'ts');
         storFile.getValueInfo = () => this.getValueInfo(model1);
         model1.model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this.onModelChange(e, model1, storFile));
+
     }
 
     private removeEventsStorFile(storFile: mls.stor.IFileInfo): void {
@@ -767,23 +768,23 @@ export class ServiceSource100554 extends ServiceBase {
             let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName);
 
             if (storFiles.ts && (!fileModels || !fileModels.ts)) {
-                await this.createModelTS1(storFiles.ts.shortName, storFiles.ts.project, storFiles.tsContent || '', false);
+                await this.createModelTS1(storFiles.ts.shortName, storFiles.ts.project, storFiles.ts.folder, storFiles.tsContent || '', false);
             }
 
             if (storFiles.html && (!fileModels || !fileModels.html)) {
-                await this.createOrShowModelHtmlCssTestDefs(storFiles.html.shortName, storFiles.html.project, false, '.html', storFiles.htmlContent);
+                await this.createOrShowModelHtmlCssTestDefs(storFiles.html.shortName, storFiles.html.project, storFiles.html.folder, false, '.html', storFiles.htmlContent);
             }
 
             if (storFiles.less && (!fileModels || !fileModels.style)) {
-                await this.createOrShowModelHtmlCssTestDefs(storFiles.less.shortName, storFiles.less.project, false, '.less', storFiles.htmlContent);
+                await this.createOrShowModelHtmlCssTestDefs(storFiles.less.shortName, storFiles.less.project, storFiles.less.folder, false, '.less', storFiles.htmlContent);
             }
 
             if (storFiles.defs && (!fileModels || !fileModels.defs)) {
-                await this.createOrShowModelHtmlCssTestDefs(storFiles.defs.shortName, storFiles.defs.project, false, '.defs.ts', storFiles.defsContent);
+                await this.createOrShowModelHtmlCssTestDefs(storFiles.defs.shortName, storFiles.defs.project, storFiles.defs.folder, false, '.defs.ts', storFiles.defsContent);
             }
 
             if (storFiles.test && (!fileModels || !fileModels.test)) {
-                await this.createOrShowModelHtmlCssTestDefs(storFiles.test.shortName, storFiles.test.project, false, '.test.ts', storFiles.testContent);
+                await this.createOrShowModelHtmlCssTestDefs(storFiles.test.shortName, storFiles.test.project, storFiles.test.folder, false, '.test.ts', storFiles.testContent);
             }
 
 
@@ -1254,8 +1255,9 @@ export class ServiceSource100554 extends ServiceBase {
     private async createModelTS_testFile() {
         const shortName = 'testFile';
         const project = 0; // localstorage project
+        const folder = '';
         const defaultTS = `/// <mls shortName="${shortName}" project="${project}" enhancement="_blank" />\n// typescript example`;
-        await this.createModelTS1(shortName, project, defaultTS, true);
+        await this.createModelTS1(shortName, project, folder, defaultTS, true);
     }
 
     onFirtModel = true;
@@ -1263,19 +1265,20 @@ export class ServiceSource100554 extends ServiceBase {
         const shortName = 'loading';
         const project = 0; // localstorage project
         const defaultTS = 'wait...';
-        const mfile = await this.createModelTS1(shortName, project, defaultTS, true);
+        const folder = '';
+        const mfile = await this.createModelTS1(shortName, project, folder, defaultTS, true);
         if (this.onFirtModel && this._ed1) {
             this.onFirtModel = false;
             this._ed1.setModel(mfile.model);
         }
     }
 
-    private async createModelTS1(shortName: string, project: number, defaultTS: string, activateModel: boolean): Promise<mls.editor.IModelTS> {
+    private async createModelTS1(shortName: string, project: number, folder: string, defaultTS: string, activateModel: boolean): Promise<mls.editor.IModelTS> {
 
         const level = 2;
         const extension = '.ts';
         if (project > 1) await mls.stor.server.loadProjectInfoIfNeeded(project);
-        const key = mls.stor.getKeyToFiles(project, level, shortName, '', extension);
+        const key = mls.stor.getKeyToFiles(project, level, shortName, folder, extension);
         let storFile: mls.stor.IFileInfo | undefined = mls.stor.files[key];
 
         if (!storFile) {
@@ -1302,7 +1305,7 @@ export class ServiceSource100554 extends ServiceBase {
     private async createModelTS2(storFile: mls.stor.IFileInfo, activedModel: boolean, compile: boolean): Promise<mls.editor.IModels> {
         // load source from repository
 
-        const { project, shortName, extension } = storFile;
+        const { project, shortName, folder } = storFile;
 
         let fileModels = mls.editor.getModels(project, shortName);
         if (fileModels && fileModels.ts && fileModels.html && fileModels.style && fileModels.defs && fileModels.test) return fileModels;
@@ -1315,19 +1318,19 @@ export class ServiceSource100554 extends ServiceBase {
 
         const extFiles: Array<'.html' | '.less'> = ['.html', '.less'];
         for await (let ext of extFiles) {
-            const keyFile1 = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', ext);
+            const keyFile1 = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, storFile.folder, ext);
             let storFile1 = mls.stor.files[keyFile1];
-            if (!storFile1) storFile1 = await this.createOrShowModelHtmlCssTestDefs(shortName, project, false, ext);
+            if (!storFile1) storFile1 = await this.createOrShowModelHtmlCssTestDefs(shortName, project, folder, false, ext);
             await this.getOrCreateModelHtmlOrCss(storFile1);
         }
 
-        const keyFileTsTest = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.test.ts');
+        const keyFileTsTest = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, storFile.folder, '.test.ts');
         let storFileTsTest = mls.stor.files[keyFileTsTest];
         if (storFileTsTest) {
             await this.getOrCreateModelTsTest(storFileTsTest);
         }
 
-        const keyFileTsDefs = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, '', '.defs.ts');
+        const keyFileTsDefs = mls.stor.getKeyToFiles(storFile.project, 2, storFile.shortName, storFile.folder, '.defs.ts');
         let storFileTsDefs = mls.stor.files[keyFileTsDefs];
         if (storFileTsDefs) {
             await this.getOrCreateModelTsDefs(storFileTsDefs);
@@ -1569,13 +1572,13 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     // HTML LESS
 
-    private async createOrShowModelHtmlCssTestDefs(shortName: string, project: number, open: boolean, mode: '.html' | '.less' | '.test.ts' | '.defs.ts', source: string = '', fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
+    private async createOrShowModelHtmlCssTestDefs(shortName: string, project: number, folder: string, open: boolean, mode: '.html' | '.less' | '.test.ts' | '.defs.ts', source: string = '', fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
 
-        const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', mode);
+        const key = mls.stor.getKeyToFiles(project, this.level, shortName, folder, mode);
         let storFile = mls.stor.files[key];
         if (!storFile) {
             if (mode === '.less') {
-                const newLess = await this.prepareInitialLess(shortName, project, source);
+                const newLess = await this.prepareInitialLess(shortName, project, folder, source);
                 await this.createStorFile(project, shortName, newLess, mode);
             } else if (mode === '.test.ts') {
                 const newTest = await this.prepareInitialTest(shortName, project, source);
@@ -1648,7 +1651,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private async prepareInitialTest(shortName: string, project: number, source: string = "") {
 
-        const tag = convertFileNameToTag(`_${project}_${shortName}`);
         const example = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />
 				
                 \nimport { ICANTest, ICANIntegration } from './_100554_tsTestAST'; 
@@ -1668,7 +1670,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     private async prepareInitialDefs(shortName: string, project: number) {
 
-        const tag = convertFileNameToTag(`_${project}_${shortName}`);
         const newDefs = `/// <mls shortName="[shortName]" project="[project]" enhancement="_blank" />\n
 // TODO: InDevelpoment
                 `
@@ -1676,9 +1677,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
 
-    private async prepareInitialLess(shortName: string, project: number, source: string = "") {
+    private async prepareInitialLess(shortName: string, project: number, folder: string, source: string = "") {
 
-        const tag = convertFileNameToTag(`_${project}_${shortName}`);
+        const tag = convertFileNameToTag({ project, shortName, folder });
         let example = '';
 
         if (source.indexOf(tag) >= 0) {
@@ -1805,10 +1806,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     // Model Test
 
-    private async createOrShowModelTsTest(shortName: string, project: number, open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
+    private async createOrShowModelTsTest(shortName: string, project: number, folder: string, open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
 
         const ext = '.test.ts'
-        const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', ext);
+        const key = mls.stor.getKeyToFiles(project, this.level, shortName, folder, ext);
         let storFile = mls.stor.files[key];
         if (!storFile) {
             const newTest = await this.prepareInitialTsTest(shortName, project);
@@ -1894,10 +1895,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
     //  Defs
 
-    private async createOrShowModelTsDefs(shortName: string, project: number, open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
+    private async createOrShowModelTsDefs(shortName: string, project: number, folder: string, open: boolean, fileInfo?: mls.stor.IFileInfoValue): Promise<mls.stor.IFileInfo> {
 
         const ext = '.defs.ts'
-        const key = mls.stor.getKeyToFiles(project, this.level, shortName, '', ext);
+        const key = mls.stor.getKeyToFiles(project, this.level, shortName, folder, ext);
         let storFile = mls.stor.files[key];
         if (!storFile) {
             const newTest = await this.prepareInitialDefs(shortName, project);
@@ -2353,7 +2354,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         try {
             const iPath: mls.cbe.IPath = JSON.parse(ev.desc);
             if (!iPath || !iPath.project || !iPath.shortName) return;
-            const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
+            const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, iPath.folder, '.html');
             const storFile = mls.stor.files[keyStorFile];
             if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile)
             await this.getOrCreateModelHtmlOrCss(storFile);

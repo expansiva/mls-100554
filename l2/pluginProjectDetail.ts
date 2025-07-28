@@ -95,8 +95,8 @@ export class PluginProjectDetail extends PluginBaseModule {
             const fileName = convertTagToFileName(wc);
             const script = document.createElement('script');
             script.type = 'module';
-            script.id = fileName;
-            script.src = (`/${fileName}`);
+            script.id = `_${fileName.project}_${fileName.shortName}`;
+            script.src = (`/_${fileName.project}_${fileName.shortName}`);
             this.contentproject?.appendChild(script)
         });
 

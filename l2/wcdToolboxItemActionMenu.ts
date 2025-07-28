@@ -1,6 +1,6 @@
 /// <mls shortName="wcdToolboxItemActionMenu" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html,  } from 'lit';
+import { html, } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
 import { convertFileNameToTag } from './_100554_utilsLit';
@@ -20,13 +20,13 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
         return this;
     }
 
-    
+
 
     render() {
-        
+
         this.setMyArgs();
         if (!this.myInfos || this.myInfos.itens === undefined) return html``;
-        setTimeout(()=>{ this.loadItens()},200)
+        setTimeout(() => { this.loadItens() }, 200)
         this.style.zIndex = '9999';
         return html`
         <style>${this.css}</style>
@@ -63,10 +63,10 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
 
             await this.loadItem(item);
         }
-        
+
     }
 
-    private isLoad:string[] = [];
+    private isLoad: string[] = [];
     private async loadItem(item: IWCDMenuItem100554) {
 
         try {
@@ -83,7 +83,8 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
                 await import(file);
             }
 
-            const tag = convertFileNameToTag(item.item)
+            const infoPathItem = mls.l2.getPath(item.item);
+            const tag = convertFileNameToTag(infoPathItem)
             const el = document.createElement(tag);
             (el as any).args = item.args;
             el.style.cssText = `
@@ -96,14 +97,14 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
             f.appendChild(el);
 
             if (this.elItens) this.elItens.appendChild(f);
-            
+
         } catch (e) {
             return '';
         }
-        
+
     }
 
-    
+
     //--------CSS------------------------
 
     private css = `

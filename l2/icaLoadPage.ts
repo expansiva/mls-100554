@@ -20,7 +20,9 @@ export class IcaLoadPage100554 extends StateLitElement {
         for await (let importJs of deps.importsJs) {
             await import(`.${importJs}`);
         }
-        const tag = convertFileNameToTag(this.src);
+
+        const infoPath = mls.l2.getPath(this.src)
+        const tag = convertFileNameToTag(infoPath);
         if (!tag) return;
         this.innerHTML = html;
     }
@@ -29,7 +31,7 @@ export class IcaLoadPage100554 extends StateLitElement {
 
         const { project, shortName } = mls.l2.getPath(this.src)
         if (!project || !shortName) return '';
-        
+
         const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
         const file = mls.stor.files[keyToFile];
         if (!file) return '';

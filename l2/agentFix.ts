@@ -34,7 +34,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     if (!context || !context.message) throw new Error("Invalid context");
     if (!context.task) {
-        let data:any;
+        let data: any;
         try {
             let pp = context.message.content
                 .replace(`@@ ${agentName}`, '')
@@ -58,7 +58,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
-    context = await updateStepStatus(context, step.stepId, "in_progress");    
+    context = await updateStepStatus(context, step.stepId, "in_progress");
     if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
     const data: IDataPrompt = mls.common.safeParseArgs(step.prompt) as IDataPrompt;
@@ -358,7 +358,8 @@ function systemWidgetsDescriptionsInstruction(data: IDataPrompt): mls.msg.IAMess
     }
 
     const tagWidgetBase = hasBaseIca.replace('./', '').replace('Base', '');
-    let tag = convertFileNameToTag(tagWidgetBase);
+    const { folder, project, shortName } = mls.l2.getPath(tagWidgetBase);
+    let tag = convertFileNameToTag({ project, shortName, folder });
     tag = extractBaseComponentName(tag);
     const content = extractComponentMarkdown(descriptionForPrompt, tag.replace('-100554', ''));
 

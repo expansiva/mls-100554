@@ -58,6 +58,8 @@ export class PluginNewFileService extends StateLitElement {
 
     @propertyDataSource({ attribute: true }) project: number | undefined;
 
+    @propertyDataSource({ attribute: true }) folder: string | undefined;
+
     @property() position: 'left' | 'right' = 'left';
 
     @property() loading: boolean = false;
@@ -114,7 +116,7 @@ export class [className] extends ServiceBase {
     private getTemplate(): string {
         let newExample = this.template;
         if (this.shortName && this.project) {
-            newExample = changeTagName(newExample, convertFileNameToTag(`_${this.project}_${this.shortName}`));
+            newExample = changeTagName(newExample, convertFileNameToTag({project: this.project, shortName: this.shortName, folder: this.folder}));
             newExample = changeClassName(newExample, this.project, this.shortName);
             newExample = changeWidget(newExample, this.project, this.shortName);
         }

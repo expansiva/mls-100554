@@ -2,8 +2,7 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { convertFileNameToTag } from './_100554_utilsLit';  
+import { CollabLitElement } from './_100554_collabLitElement'; 
 import {getStepById, getTemporaryContext} from "./_100554_aiAgentHelper";
 import { IAgent } from './_100554_aiAgentBase';
 
