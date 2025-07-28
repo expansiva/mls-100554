@@ -1,7 +1,7 @@
 /// <mls shortName="pluginExploreList" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, svg, repeat, TemplateResult } from 'lit'; 
-import { property, queryAll } from 'lit/decorators.js';  
+import { property, queryAll } from 'lit/decorators.js';   
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance } from './_100554_libCommom';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles } from './_100554_collabLibStor';  
@@ -584,7 +584,8 @@ export class PluginExploreList extends PluginBaseModule {
 
             this.setHistory(file.ts);
             if (mls.actualLevel != 1) selectLevel(2);
-            this.fireEvents('open', file.ts, {});
+            //this.fireEvents('open', file.ts, {});
+            this.changeList(100);
 
         } catch (e: any) {
 
@@ -605,7 +606,8 @@ export class PluginExploreList extends PluginBaseModule {
 
             this.setHistory(file.ts);
             if (mls.actualLevel != 1) selectLevel(2);
-            this.fireEvents('open', file.ts, {});
+            //this.fireEvents('open', file.ts, {});
+            this.changeList(100);
 
         } catch (e: any) {
 
@@ -672,7 +674,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     private changeListTimeout: number = 0;
     public changeList(time: number = 500): void {
-
+        this.showLoading(false);
         clearTimeout(this.changeListTimeout);
         this.changeListTimeout = setTimeout(async () => {
 

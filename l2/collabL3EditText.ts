@@ -17,6 +17,8 @@ export class CollabL3EditText extends CollabLitElement {
     private json: IInfoEditLe | undefined;
     private baseTexti18n: string = '';
 
+    private baseSearch = 'id';
+
     firstUpdated() {
 
         setTimeout(() => {
@@ -70,8 +72,8 @@ export class CollabL3EditText extends CollabLitElement {
         const traverse = (node: HTMLElement) => {
             if (isWrapper(node)) return;
 
-            const elOri = node.closest('*[clb_id]') as HTMLElement;
-            const ori = elOri ? elOri.getAttribute('clb_id') as string : '';
+            const elOri = node.closest('*['+this.baseSearch+']') as HTMLElement;
+            const ori = elOri ? elOri.getAttribute(this.baseSearch) as string : '';
 
             if (!elOri) {
                 Array.from(node.children).forEach((child) => {
@@ -142,7 +144,7 @@ export class CollabL3EditText extends CollabLitElement {
                     const tag = node.tagName.toLowerCase();
                     const key = tag + '_' + ori + '_' + index;
                     if (!inner[key]) {
-                        inner[key] = { old_v: textContent, ori: `clb_id="${ori}"`, new_v: textContent, textNode: childNode as Text, tag };
+                        inner[key] = { old_v: textContent, ori: `${this.baseSearch}="${ori}"`, new_v: textContent, textNode: childNode as Text, tag };
                     }
                 }
 
@@ -151,7 +153,7 @@ export class CollabL3EditText extends CollabLitElement {
 
             // Atributos visíveis no DOM renderizado
             for (const attrName of node.getAttributeNames()) {
-                if (['innertext', 'innerhtml', 'style', 'id', 'class', 'clb_id'].includes(attrName.toLocaleLowerCase())) continue;
+                if (['innertext', 'innerhtml', 'style', 'id', 'class', 'clb_id', this.baseSearch].includes(attrName.toLocaleLowerCase())) continue;
 
                 const value = node.getAttribute(attrName);
                 if (!value) continue;
@@ -172,7 +174,7 @@ export class CollabL3EditText extends CollabLitElement {
                 if (matches.length > 0) {
                     matches.forEach((textNode) => {
 
-                        attr[key] = { old_v: value, new_v: value, attr: attrName, ori: `clb_id="${ori}"`, textNode: textNode };
+                        attr[key] = { old_v: value, new_v: value, attr: attrName, ori: `${this.baseSearch}="${ori}"`, textNode: textNode };
                     });
                 }
             }
