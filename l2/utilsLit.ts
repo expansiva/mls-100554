@@ -29,7 +29,7 @@ export function convertTagToFileName(tag: string): {
     shortName: string;
     project: number;
     folder: string;
-} {
+} | undefined {
     const parts = tag.split('--');
     const namePart = parts.pop() || '';
     const folder = parts.join('/');
@@ -37,9 +37,7 @@ export function convertTagToFileName(tag: string): {
     const regex = /(.+)-(\d+)$/;
     const match = namePart.match(regex);
 
-    if (!match) {
-        throw new Error("Invalid tag format");
-    }
+    if (!match) return;
 
     const [, rest, number] = match;
     const shortName = rest.replace(/-(.)/g, (_, letter) => letter.toUpperCase());

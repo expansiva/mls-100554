@@ -184,7 +184,9 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
     }
 
     private createParentName(value: string) {
-        let newParentName = convertTagToFileName(`${value}-${this.ICABASEPROJECT}`).shortName
+        const info = convertTagToFileName(`${value}-${this.ICABASEPROJECT}`);
+        if (!info) return '';
+        let newParentName = info.shortName;
         newParentName = newParentName.endsWith('Base') ? newParentName : `${newParentName}Base`;
         return newParentName.charAt(0).toLowerCase() + newParentName.slice(1);;
     }

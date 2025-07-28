@@ -94,8 +94,8 @@ export class CollabFCATree extends CollabLitElement {
 
         return html`
             <li>
-                <div id="${info.shortName + idx}" .info=${item} @mouseover="${this.mouseOver}" @mouseleave="${this.mouseLeave}" class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
-                    <info-item .info=${item}><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${info.shortName}</info-item>
+                <div id="${info?.shortName + idx}" .info=${item} @mouseover="${this.mouseOver}" @mouseleave="${this.mouseLeave}" class="header ${cls}" @click="${(e: MouseEvent) => this.selectItem(e, item)}">
+                    <info-item .info=${item}><span class="fa ${mySymbol}" style="margin-right:.5rem"></span>${info?.shortName}</info-item>
                     <div class="dragDropcontainer">
                         <span class="dbefore fa fa-arrow-up"></span>
                         <span class="din fa fa-arrow-turn-down"></span>

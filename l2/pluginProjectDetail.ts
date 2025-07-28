@@ -52,7 +52,7 @@ export class PluginProjectDetail extends PluginBaseModule {
     //----------IMPLEMENTATION--------------------
 
     private async loadProject() {
-    
+
         if (!this.contentproject || !this.contentprojectinfo) return;
 
         const txt = localStorage.getItem('serviceDetail');
@@ -62,7 +62,7 @@ export class PluginProjectDetail extends PluginBaseModule {
 
         localStorage.removeItem('serviceDetail');
 
-        const  prj = info.prj;
+        const prj = info.prj;
         const actual = mls.actual[5].project;
 
         if (!prj || !actual) return;
@@ -92,15 +92,18 @@ export class PluginProjectDetail extends PluginBaseModule {
         this.contentproject.innerHTML = content;
 
         allWcs.forEach((wc) => {
-            const fileName = convertTagToFileName(wc);
-            const script = document.createElement('script');
-            script.type = 'module';
-            script.id = `_${fileName.project}_${fileName.shortName}`;
-            script.src = (`/_${fileName.project}_${fileName.shortName}`);
-            this.contentproject?.appendChild(script)
+            const info = convertTagToFileName(wc);
+            if (info) {
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.id = `_${info.project}_${info.shortName}`;
+                script.src = (`/_${info.project}_${info.shortName}`);
+                this.contentproject?.appendChild(script)
+            }
+
         });
 
-        
+
 
 
     }
