@@ -26,7 +26,7 @@ export class PreviewModeSinglePage {
     public async init() {
         if (!this.json || !this.ifr) return;
         await this.loadEsbuild();
-        setTimeout(async () => await this.configIframe(), 200); 
+        setTimeout(async () => await this.configIframe(), 200);
     }
 
     private async configIframe() {
@@ -160,9 +160,8 @@ export class PreviewModeSinglePage {
                 if (!el.tagName.toLocaleLowerCase().startsWith('ica-'))
                     return '';
 
-                debugger;
-
                 const info = convertTagToFileName(el.getAttribute('widget') || '');
+                if (!info) return '';
                 return '/' + `_${info.project}_${info.shortName}`;
 
             })
@@ -175,7 +174,7 @@ export class PreviewModeSinglePage {
     private async loadEsbuild() {
 
         if ((mls as any).esbuild) this.esbuild = (mls as any).esbuild;
-        else if(!(mls as any).esbuildInLoad) await this.initializeEsBuild();
+        else if (!(mls as any).esbuildInLoad) await this.initializeEsBuild();
     }
 
     private async initializeEsBuild() {
