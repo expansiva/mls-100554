@@ -148,7 +148,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
                         </div>
                     </div>`;
             case 'list':
-                return html`<div class="header">Threads</div>`;
+                return html`<div class="header">
+                    ${this.renderThreadSearch()}
+                </div>`;
             case 'threadDetails':
                 return html`
                     <div class="header">
@@ -359,7 +361,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.filteredThreads = this.getFilteredThreads(ordenedThreads);
 
         return html`
-        ${this.renderThreadSearch()}
         <ul class="thread-list">
             ${this.filteredThreads.map((item) => {
             const randomImage = imageUrls[Math.floor(Math.random() * imageUrls.length)];
