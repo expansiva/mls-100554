@@ -70,51 +70,17 @@ export async function createModel(storFile: mls.stor.IFileInfo): Promise<mls.edi
 
     _addEventsModel(storFile, modelBase);
 
+    if (modelBase.storFile.extension.endsWith('.ts')) {
+        await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
+    }
+
     mls.editor.forceModelUpdate(modelBase.model); // Force to add on cache
 
     return modelBase;
 
 }
 
-export async function createAllModels(storFile: mls.stor.IFileInfo): Promise<mls.editor.IModels | undefined> {
-    const key = `${storFile.project}_${storFile.shortName}`;
-
-    if (inCreate[key]) {
-        return inCreate[key];
-    }
-
-    inCreate[key] = (async () => {
-        try {
-            const fileModels = mls.editor.getModels(storFile.project, storFile.shortName);
-            if (!fileModels) {
-                return await _createAllModels(storFile);
-            }
-        } finally {
-            delete inCreate[key];
-        }
-    })();
-
-    return inCreate[key];
-}
-
-
-//---------AUXILIARY FUNCTIONS AND DEFINITIONS-------------
-
-const inCreate: Record<string, Promise<mls.editor.IModels | undefined> | undefined> = {};
-const baseProject = 100554;
-const projectsLoaded: number[] = [];
-
-const mapExt: Record<string, keyof typeof mls.editor.models[string]> = {
-    '.ts': 'ts',
-    '.html': 'html',
-    '.less': 'style',
-    '.test.ts': 'test',
-    '.defs.ts': 'defs'
-};
-
-type Extesion = '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts';
-
-async function _createAllModels(storFileBase: mls.stor.IFileInfo): Promise<mls.editor.IModels | undefined> {
+export async function createAllModels(storFileBase: mls.stor.IFileInfo): Promise<mls.editor.IModels | undefined> {
 
     const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
 
@@ -145,6 +111,21 @@ async function _createAllModels(storFileBase: mls.stor.IFileInfo): Promise<mls.e
     return fileModels;
 
 }
+
+//---------AUXILIARY FUNCTIONS AND DEFINITIONS-------------
+
+const baseProject = 100554;
+const projectsLoaded: number[] = [];
+
+const mapExt: Record<string, keyof typeof mls.editor.models[string]> = {
+    '.ts': 'ts',
+    '.html': 'html',
+    '.less': 'style',
+    '.test.ts': 'test',
+    '.defs.ts': 'defs'
+};
+
+type Extesion = '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts';
 
 async function _createProjectModel(project: number, contentTS: string): Promise<mls.editor.IModels> {
 
