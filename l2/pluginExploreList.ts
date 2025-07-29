@@ -626,6 +626,9 @@ export class PluginExploreList extends PluginBaseModule {
 
     private async fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): Promise<void> {
 
+        try {
+
+            this.showLoading(true);
         const params = {} as mls.events.IFileAction;
 
         const files = await createAllModels(file);
@@ -660,7 +663,15 @@ export class PluginExploreList extends PluginBaseModule {
         }
 
         if (['open'].includes(action)) return;
+        this.showLoading(false);
         this.changeList(100);
+            
+        } catch (err: any) {
+
+            this.showError('false');
+            this.showError(err.message || '[fireEvents]: erro open');
+        }
+        
 
     }
 

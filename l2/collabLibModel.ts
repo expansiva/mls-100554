@@ -74,8 +74,6 @@ export async function createModel(storFile: mls.stor.IFileInfo): Promise<mls.edi
         await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
     }
 
-    mls.editor.forceModelUpdate(modelBase.model); // Force to add on cache
-
     return modelBase;
 
 }
