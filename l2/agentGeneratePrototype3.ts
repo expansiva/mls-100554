@@ -11,12 +11,13 @@ import {
     getAgentStepByAgentName,
     notifyTaskChange,
     updateTaskTitle,
-    updateStepStatus
+    updateStepStatus,
+    getNextPendentStep
 } from "./_100554_aiAgentHelper";
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
-    executeNextStep,
+    addNewStep,
     ClarificationQuestions,
 } from "./_100554_aiAgentOrchestration";
 
@@ -69,17 +70,24 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     // await createFiles(context);
     if (!context.task) throw new Error("Invalid context task");
     context.task = await updateTaskTitle(context.task, "Ok, see mind map");
-    await executeNextStep(context);
+
+    const stepPendent = getNextPendentStep(context.task);
+    if (!stepPendent) throw new Error(`[${agentName}] afterPrompt: Invalid next stepPendent`);
+
+    const newStep: mls.msg.AIPayload = {
+        agentName: 'agentGeneratePrototype4',
+        prompt: '0',
+        status: 'pending',
+        stepId: stepPendent.stepId + 1,
+        interaction: null,
+        nextSteps: null,
+        rags: null,
+        type: 'agent'
+    }
+    await addNewStep(context, stepPendent.stepId, [newStep]);
+
 }
 
-// async function createFiles(context: mls.msg.ExecutionContext) {
-//     const payload = getPayload3(context);
-//     const { project } = mls.actual[5];
-//     if (!project) throw new Error(`[${agentName}] createFiles: No project selected.`)
-//     await generateAllOrganism(payload, project, '');
-//     await generateAllPages(payload, project, '');
-//     await generateAllTables(payload, project, '');
-// }
 
 const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
     throw new Error("[replayForSupport] not implemented");
