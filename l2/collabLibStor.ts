@@ -1,8 +1,9 @@
 /// <mls shortName="collabLibStor" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { convertFileNameToTag } from './_100554_utilsLit'
+import { createModel } from './_100554_collabLibModel'
 
-export async function createStorFile(req: IReqCreateStorFile): Promise<mls.stor.IFileInfo> {
+export async function createStorFile(req: IReqCreateStorFile, needCreateModel:boolean): Promise<mls.stor.IFileInfo> {
 
     const params = {
         project: req.project,
@@ -31,11 +32,13 @@ export async function createStorFile(req: IReqCreateStorFile): Promise<mls.stor.
 
     await mls.stor.localStor.setContent(file, fileInfo);
 
+    if (needCreateModel) await createModel(file);
+
     return file;
 
 }
 
-export async function createAllFiles(req: IReqCreateAllFiles): Promise<IRetAllFiles> {
+export async function createAllFiles(req: IReqCreateAllFiles, needCreateModel:boolean = true): Promise<IRetAllFiles> {
 
     const { folder, shortName, project } = req;
 
@@ -66,13 +69,13 @@ export async function createAllFiles(req: IReqCreateAllFiles): Promise<IRetAllFi
     };
 
     const ret: IRetAllFiles = {
-        ts: await safeCreate(param)
+        ts: await safeCreate(param, needCreateModel)
     }
 
-    ret.html = await safeCreate({ ...param, extension: '.html', source: newHTMLSource });
-    ret.less = await safeCreate({ ...param, extension: '.less', source: newLessSource });
-    ret.test = await safeCreate({ ...param, extension: '.test.ts', source: newTestSource });
-    ret.def = await safeCreate({ ...param, extension: '.defs.ts', source: newDefsSource });
+    ret.html = await safeCreate({ ...param, extension: '.html', source: newHTMLSource }, needCreateModel);
+    ret.less = await safeCreate({ ...param, extension: '.less', source: newLessSource }, needCreateModel);
+    ret.test = await safeCreate({ ...param, extension: '.test.ts', source: newTestSource }, needCreateModel);
+    ret.def = await safeCreate({ ...param, extension: '.defs.ts', source: newDefsSource }, needCreateModel);
 
     return ret;
 
@@ -141,7 +144,7 @@ export async function renameFile(storFile: mls.stor.IFileInfo, newProject: numbe
         }
     }
 
-    const file = await createStorFile(param);
+    const file = await createStorFile(param, true);
 
     await deleteFileSystem(storFile);
 
@@ -184,7 +187,7 @@ export async function cloneFile(storFile: mls.stor.IFileInfo, newProject: number
         status: 'new'
     }
 
-    const file = await createStorFile(param);
+    const file = await createStorFile(param, true);
     return file;
 
 }
@@ -319,9 +322,9 @@ async function deleteFileSystem(storFile: mls.stor.IFileInfo) {
     delete mls.stor.files[keyFiles];
 }
 
-async function safeCreate(param: IReqCreateStorFile): Promise<mls.stor.IFileInfo | Error> {
+async function safeCreate(param: IReqCreateStorFile, createMdl:boolean): Promise<mls.stor.IFileInfo | Error> {
     try {
-        return await createStorFile(param);
+        return await createStorFile(param, createMdl);
     } catch (err) {
         return err instanceof Error ? err : new Error(String(err));
     }

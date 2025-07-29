@@ -143,12 +143,15 @@ export class LessCSS {
 
     private initStateIfNeeded() {
 
-        initState('less', {
-            left: {},
-            right: {}
-        });
-
-        setState(`less.${this.position} `, {
+        const stateLess = getState(`less`);
+        if (!stateLess) {
+            initState('less', {
+                left: {},
+                right: {}
+            });
+        }
+        
+        setState(`less.${this.position}`, {
             lessCSS: this,
             emitter: 'editor',
             key: undefined,

@@ -1,10 +1,11 @@
 /// <mls shortName="pluginExploreList" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, svg, repeat, TemplateResult } from 'lit'; 
+import { html, css, svg, repeat, TemplateResult } from 'lit';  
 import { property, queryAll } from 'lit/decorators.js';   
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance } from './_100554_libCommom';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles } from './_100554_collabLibStor';  
+import { createAllModels, readProjectTypescriptAndCompile } from './_100554_collabLibModel'; 
 import { ServiceBase } from './_100554_serviceBase';
 import './_100554_serviceListFilesAdd';
 
@@ -64,6 +65,10 @@ export const pluginData: mls.plugin.IPluginData = {
 };
 
 export class PluginExploreList extends PluginBaseModule {
+
+    public async createModels(stor:mls.stor.IFileInfo) {
+        await createAllModels(stor);
+    }
 
     private resizeObserver: ResizeObserver | undefined;
 
@@ -619,9 +624,11 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
-    private fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): void {
+    private async fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): Promise<void> {
 
         const params = {} as mls.events.IFileAction;
+
+        const files = await createAllModels(file);
 
         (params.action as any) = action;
         params.level = file.level;
@@ -660,7 +667,7 @@ export class PluginExploreList extends PluginBaseModule {
     private fireEventThisProject = 0;
     private fireEventLoadProject(): void {
 
-        if (this.fireEventThisProject === mls.actual[5].project) return;
+        /*if (this.fireEventThisProject === mls.actual[5].project) return;
         this.fireEventThisProject = mls.actual[5].project as number;
 
         const info = {} as mls.events.IProjectLoaded;
@@ -668,8 +675,10 @@ export class PluginExploreList extends PluginBaseModule {
         info.level = 2;
         info.needCompile = true;
 
-        mls.events.fire([(+(this.levelFiles as any) as any)], ['ProjectLoaded'], JSON.stringify(info), 0);
-
+        mls.events.fire([(+(this.levelFiles as any) as any)], ['ProjectLoaded'], JSON.stringify(info), 0);*/
+        if (this.fireEventThisProject === mls.actual[5].project) return;
+        this.fireEventThisProject = mls.actual[5].project as number;
+        readProjectTypescriptAndCompile(mls.actual[5].project as number, '', true);
     }
 
     private changeListTimeout: number = 0;
