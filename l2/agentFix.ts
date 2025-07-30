@@ -2,13 +2,21 @@
 
 import { IAgent } from './_100554_aiAgentBase';
 import { preferModelType } from './_100554_aiPrompts';
-import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep, updateTaskTitle } from "./_100554_aiAgentHelper";
+import {
+    getNextPendingStepByAgentName,
+    getNextInProgressStepByAgentName,
+    updateStepStatus,
+    getNextPendentStep,
+    updateTaskTitle,
+    appendLongTermMemory,
+} from "./_100554_aiAgentHelper";
 import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
 import { forceServiceInstance } from './_100554_libCommom';
 import { getState, setState } from './_100554_collabState';
 import { ServiceSource100554 } from './_100554_serviceSource';
 import { descriptionForPrompt } from "./_100554_icaBaseDescription";
 import { convertFileNameToTag } from './_100554_utilsLit';
+import { createAllModels } from './_100554_collabLibModel';
 
 const agentName = "agentFix";
 
@@ -34,7 +42,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     if (!context || !context.message) throw new Error("Invalid context");
     if (!context.task) {
-        let data: any;
+        let data: IDataPrompt | undefined;
         try {
             let pp = context.message.content
                 .replace(`@@ ${agentName}`, '')
@@ -43,13 +51,23 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
             data = mls.common.safeParseArgs(pp) as IDataPrompt;
             if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
+            data = consistDataParams(data);
+
             const inputs = await getPrompts(data);
-            await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt).catch((err) => {
-                throw new Error(err.message)
-            });
+            await startNewAiTask(
+                agentName,
+                taskTitle,
+                context.message.content,
+                context.message.threadId,
+                context.message.senderId,
+                inputs,
+                context,
+                _afterPrompt,
+                { 'page': `${data.page}`, 'position': data.position, "mode": data.mode }
+            ).catch((err) => { throw new Error(err.message) });
 
         } catch (err) {
-            refreshStateLock(data.page, data.position, false);
+            if (data) refreshStateLock(data.page, data.position, false);
         }
         return;
     }
@@ -61,8 +79,11 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     context = await updateStepStatus(context, step.stepId, "in_progress");
     if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
-    const data: IDataPrompt = mls.common.safeParseArgs(step.prompt) as IDataPrompt;
+    let data: IDataPrompt = mls.common.safeParseArgs(step.prompt) as IDataPrompt;
     if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
+    data = consistDataParams(data);
+    await appendLongTermMemory(context, { 'page': `${data.page}`, 'position': data.position, "mode": data.mode });
+
     const inputs = await getPrompts(data);
     await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId).catch((err) => {
         refreshStateLock(data.page, data.position, false);
@@ -77,7 +98,6 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
 
     context = await updateStepStatus(context, step.stepId, "completed");
-
     await updateFile(context);
     if (!context.task) throw new Error("Invalid context task");
     context.task = await updateTaskTitle(context.task, "Widget fixed");
@@ -85,13 +105,17 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 }
 
-async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType[]> {
+function consistDataParams(data: IDataPrompt): IDataPrompt {
 
     if (!('page' in data) || !data.page) throw new Error(`[${agentName}] getPrompts: No 'page' in data prompt.`);
     if (!('position' in data) || !data.position) throw new Error(`[${agentName}] getPrompts: No 'position' in data prompt.`);
     if (!['left', 'right'].includes(data.position)) throw new Error(`[${agentName}] getPrompts: Invalid 'position' in data prompt: ${data.position}`);
     if (!('mode' in data) || !data.mode) data.mode = 'typescript';
     if (!['typescript', 'html', 'less'].includes(data.mode)) throw new Error(`[${agentName}] getPrompts: Invalid 'mode' in data prompt: ${data.mode}`);
+    return data;
+}
+
+async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType[]> {
 
     const prompts: mls.msg.IAMessageInputType[] = [];
     prompts.push(systemMainInstruction());
@@ -401,9 +425,6 @@ function systemOutInstruction(): mls.msg.IAMessageInputType {
         html: string, 
         ts: string, 
         less: string, 
-        page:string, // retornar o mesmo nome de page recebido *obrigatório*,
-        position: 'left' | 'right'  // retornar o mesmo position recebido *obrigatório*,
-        mode: 'typescript' | 'html' | 'less' // retornar o mesmo mode recebido *obrigatório*,
     }
   }
 \`\`\`
@@ -445,7 +466,7 @@ async function getDefinitonsByImports(imports: string[], position: 'left' | 'rig
         const keyToStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.ts');
         const storFile = mls.stor.files[keyToStorFile];
         if (!storFile) continue;
-        await serviceSource.createModels(storFile);
+        await createAllModels(storFile);
         const models = mls.editor.models[fullPath];
         if (!models || !models.ts) continue;
         await mls.l2.typescript.compileAndPostProcess(models.ts, false, false);
@@ -464,20 +485,14 @@ async function getDefinitonsByImports(imports: string[], position: 'left' | 'rig
 
 }
 
-function getInfoPage(fullName: string): { project: number, shortName: string } {
-    let pr = fullName.substring(1).split("_")[0];
-    let prID: number = Number(pr);
-    if (isNaN(prID)) prID = 0; // error
-    const shortName = fullName.substring(pr.length + 2);
-    return { project: prID, shortName }
-}
 
-function getModel(info: { project: number, shortName: string }): mls.editor.IModels | undefined {
-    const key = mls.editor.getKeyModel(info.project, info.shortName);
+function getModel(info: { project: number, shortName: string, folder: string }): mls.editor.IModels | undefined {
+    const key = mls.editor.getKeyModel(info.project, info.shortName, info.folder);
     return mls.editor.models[key];
 }
 
 async function updateFile(context: mls.msg.ExecutionContext) {
+
 
     if (!context || !context.task) throw new Error('Not found context to updateFile');
     const step = getNextPendentStep(context.task);
@@ -485,17 +500,21 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in updateFile');
     const result: IDataResult = step.result;
 
-    if (!result || !result.page) throw new Error('Not found "page" in updateFile files');
-    if (!result || !result.mode) throw new Error('Not found "mode" in updateFile files');
+    if (!result) throw new Error('Not found "result"');
 
     await forceServiceInstance(2, '_100554_serviceSource');
 
-    const info = getInfoPage(result.page);
-    const mode = result.mode;
+    const modeMemory = context.task?.iaCompressed?.longMemory['mode'];
+    const pageMemory = context.task?.iaCompressed?.longMemory['page'];
+    const positionMemory = context.task?.iaCompressed?.longMemory['position'];
+    if(!pageMemory) throw new Error(`[${agentName}][updateFile]: invalid pageMemory`);
+
+    const info = mls.l2.getPath(pageMemory);
+    const mode = modeMemory;
     const contentHTML = result.html ? result.html : undefined;
     const contentTS = result.ts ? result.ts : undefined;
     const contentLess = result.less ? result.less : undefined;
-    const position = result.position || 'left';
+    const position = positionMemory || 'left';
     const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
     if (!serviceSource) throw new Error('Not found service source instance');
 
@@ -517,7 +536,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
         (models.style.model as any).needFormat = true;
     }
 
-    refreshStateLock(result.page, position, false);
+    refreshStateLock(pageMemory, position, false);
     serviceSource.formatMonaco();
 
 }
@@ -581,9 +600,6 @@ interface IDataResult {
     html: string,
     ts: string,
     less: string,
-    page: string,
-    position: 'left' | 'right',
-    mode: 'typescript' | 'html' | 'less'
 }
 
 interface IDataPrompt {

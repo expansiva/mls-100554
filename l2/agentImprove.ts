@@ -2,7 +2,14 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
-import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep, updateTaskTitle } from "./_100554_aiAgentHelper";
+import {
+    getNextPendingStepByAgentName,
+    getNextInProgressStepByAgentName,
+    updateStepStatus,
+    getNextPendentStep,
+    updateTaskTitle,
+    appendLongTermMemory
+} from "./_100554_aiAgentHelper";
 import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
 import { forceServiceInstance } from './_100554_libCommom';
 import { setState, getState } from './_100554_collabState';
@@ -31,7 +38,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     if (!context || !context.message) throw new Error("Invalid context");
     if (!context.task) {
-        let data:any;
+        let data: IDataPrompt | undefined;
         try {
             let pp = context.message.content
                 .replace(`@@ ${agentName}`, '')
@@ -40,13 +47,24 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
             data = mls.common.safeParseArgs(pp) as IDataPrompt;
             if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
+
             const inputs = await getPrompts(data);
-            await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt).catch((err) => {
+            await startNewAiTask(
+                agentName,
+                taskTitle,
+                context.message.content,
+                context.message.threadId,
+                context.message.senderId,
+                inputs,
+                context,
+                _afterPrompt,
+                { 'page': `${data.page}`, 'position': data.position }
+            ).catch((err) => {
                 throw new Error(err.message)
             });
 
         } catch (err) {
-            refreshStateLock(data.page, data.position, false);
+            if (data) refreshStateLock(data.page, data.position, false);
         }
         return;
     }
@@ -60,6 +78,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     const data: IDataPrompt = mls.common.safeParseArgs(step.prompt) as IDataPrompt;
     if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
+    await appendLongTermMemory(context, { 'page': `${data.page}`, 'position': data.position });
     const inputs = await getPrompts(data);
     await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId).catch((err) => {
         refreshStateLock(data.page, data.position, false);
@@ -115,14 +134,18 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in updateFile');
     const result: IDataResult = step.result;
 
-    if (!result || !result.page) throw new Error('Not found "page" in updateFile files');
+    if (!result) throw new Error('Not found "result" in updateFile files');
     await forceServiceInstance(2, '_100554_serviceSource');
 
-    const info = getInfoPage(result.page);
+    const pageMemory = context.task?.iaCompressed?.longMemory['page'];
+    const positionMemory = context.task?.iaCompressed?.longMemory['position'];
+    if (!pageMemory) throw new Error(`[${agentName}][updateFile]: invalid pageMemory`);
+
+    const info = mls.l2.getPath(pageMemory);
     const contentHTML = result.html ? result.html : undefined;
     const contentTS = result.ts ? result.ts : undefined;
     const contentLess = result.less ? result.less : undefined;
-    const position = result.position || 'left';
+    const position = positionMemory || 'left';
     const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
 
     if (!serviceSource) throw new Error('Not found service source instance');
@@ -145,24 +168,15 @@ async function updateFile(context: mls.msg.ExecutionContext) {
         (models.style.model as any).needFormat = true;
     }
 
-    refreshStateLock(result.page, position, false);
+    refreshStateLock(pageMemory, position, false);
     serviceSource.formatMonaco();
 
 }
 
-function getInfoPage(fullName: string): { project: number, shortName: string } {
-    let pr = fullName.substring(1).split("_")[0];
-    let prID: number = Number(pr);
-    if (isNaN(prID)) prID = 0; // error
-    const shortName = fullName.substring(pr.length + 2);
-    return { project: prID, shortName }
-}
-
-function getModel(info: { project: number, shortName: string }): mls.editor.IModels | undefined {
+function getModel(info: { project: number, shortName: string, folder: string }): mls.editor.IModels | undefined {
     const key = mls.editor.getKeyModel(info.project, info.shortName);
     return mls.editor.models[key];
 }
-
 
 function refreshStateLock(page: string, position: string, value: boolean) {
     const lockMap: Map<string, boolean> = getState(`serviceSource.${position}.lockMap`);
@@ -170,8 +184,6 @@ function refreshStateLock(page: string, position: string, value: boolean) {
     newMap.set(page, value);
     setState(`serviceSource.${position}.lockMap`, newMap);
 }
-
-
 
 interface IDataPrompt {
     page: string,
@@ -183,7 +195,5 @@ interface IDataResult {
     html: string,
     ts: string,
     less: string,
-    page: string,
-    position: 'left' | 'right',
 }
 
