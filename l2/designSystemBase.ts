@@ -2,6 +2,8 @@
 
 import { ServiceSource100554 } from './_100554_serviceSource';
 import { forceServiceInstance } from './_100554_libCommom';
+import { createAllModels } from './_100554_collabLibModel'
+import { collabImport } from './_100554_collabImport';
 
 export const acceptedImages = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"];
 export const acceptedVideos = [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"]
@@ -116,7 +118,7 @@ async function _onAction(action: mls.stor.IFileInfoAction, storFile: mls.stor.IF
 
 export async function getTokens(project: number): Promise<IDesignSystemTokens[]> {
     const fileName = `./_${project}_designSystem`;
-    const instance: IDesignSystem = await import(`${fileName}?${Date.now()}`);
+    const instance: IDesignSystem = await collabImport({ folder: '', project, shortName: 'designSystem' });
     if (!instance) throw new Error(`Invalid ds file: ${fileName}`);
     return instance.tokens || [];
 }
@@ -164,9 +166,7 @@ async function serializeTokens(project: number, tokens: IDesignSystemTokens[]) {
     const serviceSource: ServiceSource100554 = mls.services['100554_serviceSource_left'];
     if (!serviceSource) throw new Error('Service source is not instancied');
 
-    await serviceSource.createModels(storFile);
-    const keyToModel = mls.editor.getKeyModel(project, 'designSystem');
-    const models = mls.editor.models[keyToModel];
+    const models = await createAllModels(storFile);
     if (!models || !models.ts) throw new Error(`Invalid models for file: ${project}_designSystem`);
     const newCode = replaceTokensBlock(models.ts.model.getValue(), `\n${content}\n`);
     serviceSource.setValueInModeKeepingUndo(models.ts.model, newCode, true);
