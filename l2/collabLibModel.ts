@@ -52,31 +52,47 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
 
 export async function createModel(storFile: mls.stor.IFileInfo): Promise<mls.editor.IModelBase | undefined> {
 
-    if (storFile.project > 1) await mls.stor.server.loadProjectInfoIfNeeded(storFile.project);
+    const key = `${storFile.project}_${storFile.shortName}_${storFile.extension}`;
 
-    let fileModels = mls.editor.getModels(storFile.project, storFile.shortName);
-    const prop = mapExt[storFile.extension];
-    if (fileModels && fileModels[prop]) return fileModels[prop];
-
-    const src: string = storFile ? await storFile.getContent() as string : '';
-
-    const ftype: Extesion = src.split("\n")[0].indexOf(' type="definition"') > 0 ? ".d.ts" : storFile.extension as Extesion;
-
-    const modelBase = await _createModel(storFile, ftype, src);
-
-    if (!modelBase) throw new Error(`[createModel] invalid mls.editor.models for file: _${storFile.project}_${storFile.shortName}${ftype}`);
-
-    mls.editor.forceModelUpdate(modelBase.model);
-
-    _addEventsModel(storFile, modelBase);
-
-    if (modelBase.storFile.extension.endsWith('.ts')) {
-        const modelTs = (modelBase as mls.editor.IModelTS);
-        if (modelTs && modelTs.compilerResults) modelTs.compilerResults.modelNeedCompile = true;
-        await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
+    if (modelPromises.has(key)) {
+        return modelPromises.get(key)!;
     }
 
-    return modelBase;
+    const promise = (async () => {
+        if (storFile.project > 1) {
+            await mls.stor.server.loadProjectInfoIfNeeded(storFile.project);
+        }
+
+        let fileModels = mls.editor.getModels(storFile.project, storFile.shortName);
+        const prop = mapExt[storFile.extension];
+        if (fileModels && fileModels[prop]) return fileModels[prop];
+
+        const src: string = storFile ? await storFile.getContent() as string : '';
+        const ftype: Extesion = src.split("\n")[0].indexOf(' type="definition"') > 0 ? ".d.ts" : storFile.extension as Extesion;
+
+        const modelBase = await _createModel(storFile, ftype, src);
+        if (!modelBase) throw new Error(`[createModel] invalid mls.editor.models for file: _${storFile.project}_${storFile.shortName}${ftype}`);
+
+        mls.editor.forceModelUpdate(modelBase.model);
+        _addEventsModel(storFile, modelBase);
+
+        if (modelBase.storFile.extension.endsWith('.ts')) {
+            const modelTs = modelBase as mls.editor.IModelTS;
+            if (modelTs && modelTs.compilerResults) modelTs.compilerResults.modelNeedCompile = true;
+            await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
+        }
+
+        return modelBase;
+    })();
+
+    modelPromises.set(key, promise);
+
+    try {
+        const result = await promise;
+        return result;
+    } finally {
+        modelPromises.delete(key); 
+    }
 
 }
 
@@ -113,6 +129,7 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo): Promise
 }
 
 //---------AUXILIARY FUNCTIONS AND DEFINITIONS-------------
+const modelPromises = new Map<string, Promise<mls.editor.IModelBase | undefined>>();
 
 const baseProject = 100554;
 const projectsLoaded: number[] = [];
