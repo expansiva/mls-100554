@@ -11,7 +11,7 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
     if (mls.istrace) console.log('loading files from project ' + project);
     projectsLoaded.push(project);
 
-    const promises: Promise<mls.editor.IModels | undefined>[] = [];
+    const promises: Promise<mls.editor.IModels | mls.editor.IModelBase | undefined>[] = [];
     const keys: string[] = Object.keys(mls.stor.files);
 
     if ((window as any).traceLivecicle) console.info('creating: files model ', project);
@@ -23,7 +23,7 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
             && storFile.extension === '.ts'
             && (mls.istrace || storFile.inLocalStorage)
             && storFile.shortName !== shortName) {
-            promises.push(createAllModels(storFile));
+            promises.push(createAllModels(storFile, false));
         }
     }
 
@@ -44,13 +44,45 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
     await Promise.all(promises);
     if (mls.istrace) console.timeEnd('creating models');
 
-    if (needCompile) {
-        // await mls.l2.editor.compileAllProjectIfNeed(project, true);
-        //await mls.l2.typescript.compileAll(project);
-    }
 }
 
-export async function createModel(storFile: mls.stor.IFileInfo): Promise<mls.editor.IModelBase | undefined> {
+export async function createAllModels(storFileBase: mls.stor.IFileInfo, needCompile: boolean = true): Promise<mls.editor.IModels | undefined> {
+
+    const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
+
+    let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName);
+
+    if (storFiles.less && (!fileModels || !fileModels.style)) {
+        await createModel(storFiles.less, needCompile);
+    }
+
+    if (storFiles.ts && (!fileModels || !fileModels.ts)) {
+        await createModel(storFiles.ts, needCompile);
+    }
+
+    if (storFiles.html && (!fileModels || !fileModels.html)) {
+        await createModel(storFiles.html, needCompile);
+    }
+
+    if (storFiles.test && (!fileModels || !fileModels.test)) {
+        await createModel(storFiles.test, needCompile);
+    }
+
+    if (storFiles.defs && (!fileModels || !fileModels.defs)) {
+        await createModel(storFiles.defs, needCompile);
+    }
+
+    fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName);
+
+    return fileModels;
+
+}
+
+export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boolean = true): Promise<mls.editor.IModelBase | undefined> {
+
+    let fileModels = mls.editor.getModels(storFile.project, storFile.shortName);
+    const prop = mapExt[storFile.extension];
+    if (fileModels && fileModels[prop]) return fileModels[prop];
 
     const key = `${storFile.project}_${storFile.shortName}_${storFile.extension}`;
 
@@ -63,20 +95,15 @@ export async function createModel(storFile: mls.stor.IFileInfo): Promise<mls.edi
             await mls.stor.server.loadProjectInfoIfNeeded(storFile.project);
         }
 
-        let fileModels = mls.editor.getModels(storFile.project, storFile.shortName);
-        const prop = mapExt[storFile.extension];
-        if (fileModels && fileModels[prop]) return fileModels[prop];
-
         const src: string = storFile ? await storFile.getContent() as string : '';
         const ftype: Extesion = src.split("\n")[0].indexOf(' type="definition"') > 0 ? ".d.ts" : storFile.extension as Extesion;
 
         const modelBase = await _createModel(storFile, ftype, src);
         if (!modelBase) throw new Error(`[createModel] invalid mls.editor.models for file: _${storFile.project}_${storFile.shortName}${ftype}`);
 
-        mls.editor.forceModelUpdate(modelBase.model);
         _addEventsModel(storFile, modelBase);
 
-        if (modelBase.storFile.extension.endsWith('.ts')) {
+        if (needCompile && modelBase.storFile.extension.endsWith('.ts')) {
             const modelTs = modelBase as mls.editor.IModelTS;
             if (modelTs && modelTs.compilerResults) modelTs.compilerResults.modelNeedCompile = true;
             await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
@@ -91,40 +118,8 @@ export async function createModel(storFile: mls.stor.IFileInfo): Promise<mls.edi
         const result = await promise;
         return result;
     } finally {
-        modelPromises.delete(key); 
+        modelPromises.delete(key);
     }
-
-}
-
-export async function createAllModels(storFileBase: mls.stor.IFileInfo): Promise<mls.editor.IModels | undefined> {
-
-    const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
-
-    let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName);
-
-    if (storFiles.less && (!fileModels || !fileModels.style)) {
-        await createModel(storFiles.less);
-    }
-
-    if (storFiles.ts && (!fileModels || !fileModels.ts)) {
-        await createModel(storFiles.ts);
-    }
-
-    if (storFiles.html && (!fileModels || !fileModels.html)) {
-        await createModel(storFiles.html);
-    }
-
-    if (storFiles.test && (!fileModels || !fileModels.test)) {
-        await createModel(storFiles.test);
-    }
-
-    if (storFiles.defs && (!fileModels || !fileModels.defs)) {
-        await createModel(storFiles.defs);
-    }
-
-    fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName);
-
-    return fileModels;
 
 }
 
@@ -176,6 +171,7 @@ async function _createProjectModel(project: number, contentTS: string): Promise<
     }
     const modelsBase = await _createModel(info, ftype, contentTS)
     if (!modelsBase) throw new Error(`invalid mls.editor.models for file: _${info.project}_.d.ts`);
+
     return projectModel as mls.editor.IModels;
 
 }
