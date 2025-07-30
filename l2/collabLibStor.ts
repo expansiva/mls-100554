@@ -1,7 +1,7 @@
 /// <mls shortName="collabLibStor" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { convertFileNameToTag } from './_100554_utilsLit'
-import { createModel } from './_100554_collabLibModel'
+import { createModel, createAllModels } from './_100554_collabLibModel'
 
 export async function createStorFile(req: IReqCreateStorFile, needCreateModel:boolean): Promise<mls.stor.IFileInfo> {
 
@@ -69,13 +69,15 @@ export async function createAllFiles(req: IReqCreateAllFiles, needCreateModel:bo
     };
 
     const ret: IRetAllFiles = {
-        ts: await safeCreate(param, needCreateModel)
+        ts: await safeCreate(param, false)
     }
 
-    ret.html = await safeCreate({ ...param, extension: '.html', source: newHTMLSource }, needCreateModel);
-    ret.less = await safeCreate({ ...param, extension: '.less', source: newLessSource }, needCreateModel);
-    ret.test = await safeCreate({ ...param, extension: '.test.ts', source: newTestSource }, needCreateModel);
-    ret.def = await safeCreate({ ...param, extension: '.defs.ts', source: newDefsSource }, needCreateModel);
+    ret.html = await safeCreate({ ...param, extension: '.html', source: newHTMLSource }, false);
+    ret.less = await safeCreate({ ...param, extension: '.less', source: newLessSource }, false);
+    ret.test = await safeCreate({ ...param, extension: '.test.ts', source: newTestSource }, false);
+    ret.def = await safeCreate({ ...param, extension: '.defs.ts', source: newDefsSource }, false);
+
+    if (needCreateModel && ret.ts && !(ret.ts instanceof Error)) await createAllModels(ret.ts);
 
     return ret;
 
