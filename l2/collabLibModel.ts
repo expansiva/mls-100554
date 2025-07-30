@@ -71,6 +71,8 @@ export async function createModel(storFile: mls.stor.IFileInfo): Promise<mls.edi
     _addEventsModel(storFile, modelBase);
 
     if (modelBase.storFile.extension.endsWith('.ts')) {
+        const modelTs = (modelBase as mls.editor.IModelTS);
+        if (modelTs && modelTs.compilerResults) modelTs.compilerResults.modelNeedCompile = true;
         await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
     }
 
