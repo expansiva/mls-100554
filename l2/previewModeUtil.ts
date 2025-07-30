@@ -189,6 +189,37 @@ export function addJsReference(ifr: HTMLIFrameElement, level: string) {
                 window['previewL1'] = window['previewL1']  ? window['previewL1']  : parent.previewL1 ? parent.previewL1 : top['previewL1'];
 
                 window['preview'] = window['preview']  ? window['preview']  : parent.preview ? parent.preview : top['preview'];
+
+                window['getMatchingRulesForElement'] = function (element) {
+                const matchingRules = [];
+
+                for (const sheet of document.styleSheets) {
+                    let rules;
+                    try {
+                    rules = sheet.cssRules;
+                    } catch (e) {
+                    continue;
+                    }
+
+                    for (const rule of rules) {
+                    if (rule instanceof CSSStyleRule) {
+                        try {
+                        if (element.matches(rule.selectorText)) {
+                            matchingRules.push({
+                            selector: rule.selectorText,
+                            style: rule.style,
+                            origin: sheet.href || 'inline <style>',
+                            });
+                        }
+                        } catch (e) {
+                        continue;
+                        }
+                    }
+                    }
+                }
+
+                return matchingRules;
+                };
 				`;
 
     ifr.contentDocument?.body.appendChild(s);

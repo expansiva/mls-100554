@@ -102,16 +102,16 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo): Promise
 
     let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName);
 
+    if (storFiles.less && (!fileModels || !fileModels.style)) {
+        await createModel(storFiles.less);
+    }
+
     if (storFiles.ts && (!fileModels || !fileModels.ts)) {
         await createModel(storFiles.ts);
     }
 
     if (storFiles.html && (!fileModels || !fileModels.html)) {
         await createModel(storFiles.html);
-    }
-
-    if (storFiles.less && (!fileModels || !fileModels.style)) {
-        await createModel(storFiles.less);
     }
 
     if (storFiles.test && (!fileModels || !fileModels.test)) {
