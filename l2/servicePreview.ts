@@ -334,6 +334,59 @@ export class ServicePreview100554 extends ServiceBase {
         mls.events.addListener(2, 'styleChanged' as any, this.onStyleChanged.bind(this));
         mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
         mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['LevelChanged'] as any, this.onLevelChange.bind(this));
+        mls.events.addListener(3, 'L3EditEvents' as any, this.onL3EditEvents.bind(this));
+
+    }
+
+    private onL3EditEvents(ev: mls.events.IEvent) {
+
+        if (!ev.desc || ev.level !== this.level || ev.level !== 3) return;
+
+        const info = JSON.parse(ev.desc);
+
+        if (!info || !info.action || !info.position || info.position === 'right') return;
+
+        switch (info.action) {
+            case ('modeEdit'):
+                this.onActiveModeEdit(true);
+                break;
+            case ('modePreview'):
+                this.onActiveModeEdit(false);
+                break;
+
+        }
+
+    }
+
+    private onActiveModeEdit(active: boolean) {
+
+        if (!this.menu.tools.editTextL3 || !this.menu.selectTool) return;
+
+        if (active && this.menu.tools.editTextL3.selected === 0) {
+            this.menu.selectTool('editTextL3');
+        } else if (!active && this.menu.tools.editTextL3.selected === 1) {
+            this.menu.selectTool('editTextL3');
+        }
+
+        if (active && this.elPreview) {
+
+            const iframe = this.elPreview.querySelector('iframe') as HTMLIFrameElement;
+
+            if (!iframe || !iframe.contentDocument || !iframe.contentDocument.body) return;
+            const body = iframe.contentDocument.body;
+            const el = document.querySelector('collab-l3-edit-text-100554');
+            if (el) return;
+            this.elEditL3 = document.createElement('collab-l3-edit-text-100554');
+            body.appendChild(this.elEditL3);
+
+            if (!body.querySelector('#_100554_collabL3EditText')) {
+                const script = document.createElement('script') as HTMLScriptElement;
+                script.type = 'module';
+                script.id = '_100554_collabL3EditText';
+                script.src = '/_100554_collabL3EditText';
+                body.appendChild(script);
+            }
+        }
 
     }
 
@@ -341,7 +394,7 @@ export class ServicePreview100554 extends ServiceBase {
         clearTimeout(this.timeEvent);
         this.timeEvent = setTimeout(async () => {
             this.preview(this.lastModePreview);
-            mls.events.fire((+(this.level as any)) as any, 'WCDEventChange' as any, `{"op":"Navigation"}`);
+            mls.events.fire((+(this.level as any)) as any, 'L3EditEvents' as any, `{"action":"navigation", "position":"right"}`, 500);
         }, 500);
     }
 
@@ -1037,7 +1090,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onHelpClick() {
-        this.openService('_100554_servicePage', 'left', 3);
+        this.openService('_100554_serviceOrganism', 'left', 3);
     }
 
     private createEditor() {

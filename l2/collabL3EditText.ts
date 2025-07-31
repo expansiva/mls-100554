@@ -12,12 +12,57 @@ import './_100554_collabL3PreviewTextI18n';
 @customElement('collab-l3-edit-text-100554')
 export class CollabL3EditText extends CollabLitElement {
 
-    @property({ type: Boolean }) dev: boolean = false ;
+    @property({ type: Boolean }) dev: boolean = false;
     @property({ type: Object }) target: HTMLElement | null = null;
     private json: IInfoEditLe | undefined;
     private baseTexti18n: string = '';
-
     private baseSearch = 'id';
+
+    constructor() {
+        super();
+        this.setEvents();
+    }
+
+    //----------EVENTS-----------
+    private setEvents(): void {
+        mls.events.addListener(3, 'L3EditEvents' as any, this.onL3EditEvents.bind(this));
+    }
+
+    private onL3EditEvents(ev: mls.events.IEvent) {
+
+        if (!ev.desc || ev.level !== 3) return;
+
+        const info = JSON.parse(ev.desc);
+
+        if (!info || !info.action || !info.position || info.position === 'right') return;
+
+        switch (info.action) {
+            case ('select'):
+                this.onSelect(info);
+                break;
+
+
+        }
+
+
+    }
+
+    private onSelect(info: any) {
+        if (!info.id) return;
+        info.id;
+
+        const body = this.closest('body');
+        if (!body) return;
+        const el = body.querySelector('#' + info.id) as HTMLElement;
+        if (!el) return;
+
+        const els = body.querySelectorAll('*[clb_mode="edit"]');
+        els.forEach((e) => e.removeAttribute('clb_mode'));
+        el.setAttribute('clb_mode', 'edit');
+
+    }
+
+    //-------COMPONENT-----------
 
     firstUpdated() {
 
@@ -72,7 +117,7 @@ export class CollabL3EditText extends CollabLitElement {
         const traverse = (node: HTMLElement) => {
             if (isWrapper(node)) return;
 
-            const elOri = node.closest('*['+this.baseSearch+']') as HTMLElement;
+            const elOri = node.closest('*[' + this.baseSearch + ']') as HTMLElement;
             const ori = elOri ? elOri.getAttribute(this.baseSearch) as string : '';
 
             if (!elOri) {
@@ -202,10 +247,14 @@ export class CollabL3EditText extends CollabLitElement {
         const inners = Object.keys(json.inner);
         inners.forEach((key) => {
 
+
             const inner = json.inner[key];
             const wrapper = document.createElement('collab-l3-preview-text-100554');
+            let el = inner.textNode.parentElement?.closest('[id]');
+            let findby = el ? el.id : '';
             wrapper.setAttribute('value', `{{ collabl3edit.inner.${key}.new_v }}`);
             wrapper.setAttribute('contenteditable', 'true');
+            wrapper.setAttribute('findby', findby);
             (wrapper as any).info = inner;
 
             // Substitui apenas o TextNode original
@@ -218,9 +267,11 @@ export class CollabL3EditText extends CollabLitElement {
 
             const attr = json.attr[key];
             const wrapper = document.createElement('collab-l3-preview-text-attr-100554');
+            let el = attr.textNode.parentElement?.closest('[id]');
+            let findby = el ? el.id : '';
             wrapper.setAttribute('value', `{{ collabl3edit.attr.${key}.new_v }}`);
             wrapper.setAttribute('attr', attr.attr);
-
+            wrapper.setAttribute('findby', findby);
             (wrapper as any).info = attr;
             attr.textNode.parentNode?.replaceChild(wrapper, attr.textNode);
 
@@ -231,8 +282,11 @@ export class CollabL3EditText extends CollabLitElement {
 
             const i18n = json.i18n[key];
             i18n.textNode.forEach((t) => {
+                let el = t.parentElement?.closest('[id]');
+                let findby = el ? el.id : '';
                 const wrapper = document.createElement('collab-l3-preview-text-i18n-100554');
                 wrapper.setAttribute('value', `{{ collabl3edit.i18n.${key}.new_v }}`);
+                wrapper.setAttribute('findby', findby);
                 (wrapper as any).info = i18n;
                 t.parentNode?.replaceChild(wrapper, t);
             })
