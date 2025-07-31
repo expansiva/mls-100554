@@ -89,7 +89,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l3ServicesLeft'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_servicePage'
+                widget: '_100554_serviceOrganism'
             },
             {
                 category: 'Services',
@@ -141,7 +141,14 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l3PageNavigation'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginPageNavigation'
+                widget: '_100554_pluginNavigationRenderOrganism'
+            },
+            {
+                category: 'Stories',
+                scope: ['l3PageStyle'],
+                priority: 2,
+                auth: ['*'],
+                widget: '_100554_pluginEditStyleL3'
             },
             {
                 category: 'Stories',
@@ -411,6 +418,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             },
 
         ];
+
     }
 
 
