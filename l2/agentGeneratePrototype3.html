@@ -95,7 +95,7 @@ interface UserRequestsEnhancements {
 }
 interface PageDefinition {
   pageSequential: number; // start on 0
-  pageName: string; // suggested name for use as a file or route, all lowercase, no spaces or special characters
+  pageName: string; // camelCase only (e.g., panelAdmin), must not contain dashes, spaces, or special characters
   pageGoal: string;
   pageRequirements: string[];
 }
@@ -108,11 +108,23 @@ interface PluginDefinition {
 }
 interface PagesWireframe {
     pageSequential: number;
-    pageName: string;
+    pageName: string; // camelCase only (e.g., panelAdmin), must not contain dashes, spaces, or special characters
     pageHtml: string[];
 }
 interface Organism {
   organismSequential: number; // start at 0
+  /**
+   * The tag name of the organism component.
+   * 
+   * Must follow the format:
+   * - Start with `organism-`
+   * - Use only lowercase letters
+   * - Separate words with hyphens (`-`)
+   * - Do not use camelCase, PascalCase, underscores or spaces
+   * 
+   * ✅ Valid:   'organism-featured-product'
+   * ❌ Invalid: 'organism-produtoDestaque', 'organism_featuredProduct', 'organism Featured Product'
+   */
   organismTag: string; // e.g., 'organism-nav'
   planning: {
     context: string; // broader explanation, system role, justification
