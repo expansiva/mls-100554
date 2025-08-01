@@ -102,6 +102,7 @@ import { globalState, setState, initState } from './_100554_collabState';
     private groupName: string = `other`;
 
     private getTemplateTS(): string {
+
         let newExample = this.template;
         if (this.shortName && this.project) {
             newExample = changeTagName(newExample, convertFileNameToTag({ project: this.project, shortName: this.shortName, folder: this.folder }));
@@ -110,10 +111,11 @@ import { globalState, setState, initState } from './_100554_collabState';
             newExample = changeStateName(newExample, this.shortName);
 
         }
-        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" />\n${newExample}\n`;;
+        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" folder="${this.folder}" />\n${newExample}\n`;;
     }
 
     private getTemplateHTML(): string {
+
         if (!this.shortName || !this.project) return '';
 
         const tagName = convertFileNameToTag({ project: this.project, shortName: this.shortName, folder: this.folder });

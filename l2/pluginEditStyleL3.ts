@@ -3,6 +3,8 @@
 import { html, repeat } from 'lit';
 import { customElement, query, property, state } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
+import { LessCSS } from "./_100554_lessCSS";
+import { getState } from './_100554_collabState';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -33,6 +35,10 @@ export class PluginEditStyleL3 extends PluginBaseModule {
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
     private msg: MessageType = messages['en'];
     private model: monaco.editor.ITextModel | undefined;
+
+    public modelLessCSS: LessCSS | undefined;
+    public lessCSS: LessCSS | undefined;
+    private keysResolve: any = {};
 
     //-----------INIT------------
 
@@ -81,6 +87,10 @@ export class PluginEditStyleL3 extends PluginBaseModule {
         return this;
     }
 
+    firstUpdated() {
+        this.initMonaco();
+    }
+
     updated(changedProperties: any) {
         super.updated(changedProperties);
         if (changedProperties.has('msize')) {
@@ -89,11 +99,10 @@ export class PluginEditStyleL3 extends PluginBaseModule {
     }
 
     render() {
-        setTimeout(() => { this.initMonaco() }, 500);
         this.style.display = 'block';
         if (this.error) return html`<h3 style="color:red">${this.error}</h3>`
         return html`
-            <mls-editor-100529 slot="left" msize="${this.msize}"></mls-editor-100529>
+            <mls-editor-100529 slot="left"></mls-editor-100529>
         `
     }
 
@@ -163,8 +172,41 @@ export class PluginEditStyleL3 extends PluginBaseModule {
             return;
         }
 
+        this.modelLessCSS = getState(`less.left.lessCSS`);
+        if (!this.modelLessCSS) return;
+
+        let cssText = '';
         const sel = this.getMatchingRulesForElement(active, iframeDoc);
         console.info(sel);
+
+        Object.keys(this.modelLessCSS.lessAST.ast).forEach((key) => {
+
+            const selector = this.resolveSelector(key);
+            if (this.keysResolve[selector]) return;
+            this.keysResolve[selector] = key;
+
+        });
+
+        sel.forEach((selector) => {
+
+            if (!this.modelLessCSS) return;
+            const keyCss = this.keysResolve[selector.selector];
+            if (!keyCss) return;
+            const baseRule = this.modelLessCSS.lessAST.ast[keyCss];
+            if (!baseRule) return;
+            cssText += `\n${selector.selector}{`
+            for (const key of Object.keys(baseRule)) {
+                const info = baseRule[key];
+                if (!info || typeof info === 'number') continue;
+                cssText += `\n${key}: ${info.value};`
+            }
+
+            cssText += `\n}`
+
+        });
+
+        this.model?.setValue(cssText);
+        this._ed1?.getAction('editor.action.formatDocument')?.run();
 
     }
 
@@ -175,19 +217,96 @@ export class PluginEditStyleL3 extends PluginBaseModule {
             let model = monaco.editor.getModel(uri);
             if (!model) model = monaco.editor.createModel('', 'less', uri)
 
+            model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this._onModelChange(e, model, storFile));
+
             return model;
         } catch (e: any) {
             this.error = e.message;
         }
     }
 
-    private getMatchingRulesForElement(element: HTMLElement, iframeDoc: Window) {
-        if (!(iframeDoc as any).getMatchingRulesForElement) return;
+    private _onModelChange(e: monaco.editor.IModelContentChangedEvent, activeModel: monaco.editor.ITextModel | null, storFile: mls.stor.IFileInfo): void {
+
+        if (this._ed1) {
+            const uri = `file://server/_${storFile.project}_l3_editor.less`;
+            this.lessCSS = new LessCSS(uri.toString(), this._ed1, 'right');
+            this.lessCSS.setEditor(this._ed1);
+
+            this.changeLessOrigin();
+        }
+
+    }
+
+    private timeOnChangeLessOrigin = 0;
+    private changeLessOrigin() {
+        clearTimeout(this.timeOnChangeLessOrigin);
+        this.timeOnChangeLessOrigin = setTimeout(() => {
+            this.changeLessOrigin2();
+        }, 500);
+    }
+
+    private changeLessOrigin2() {
+
+        if (!this.lessCSS || !this.modelLessCSS) return;
+
+        const keys = Object.keys(this.lessCSS.lessAST.ast);
+        keys.forEach((myKey) => {
+
+            if (!this.lessCSS || !this.modelLessCSS) return;
+            const keyCss = this.keysResolve[myKey];
+            if (!keyCss) return;
+
+            if (this.modelLessCSS.lessAST.ast[keyCss]) {
+                this.modelLessCSS.setSelector(keyCss);
+                this.lessCSS.setSelector(myKey);
+
+                const baseRules = this.lessCSS.lessAST.ast[myKey];
+                for (const attr of Object.keys(baseRules)) {
+                    const info = baseRules[attr];
+                    if (!info || typeof info === 'number' || typeof attr === 'number' || (this.modelLessCSS.styles as any)[attr] === info.value) continue;
+                    (this.modelLessCSS.styles as any)[attr] = info.value;
+                }
+
+            }
+
+        });
+
+    }
+
+    private getMatchingRulesForElement(element: HTMLElement, iframeDoc: Window): ISelector[] {
+        if (!(iframeDoc as any).getMatchingRulesForElement) return [];
         return (iframeDoc as any).getMatchingRulesForElement(element);
     }
 
     private updatedMSizeEditor() {
         this.editorEl?.setAttribute('msize', this.msize);
     }
+
+    private resolveSelector(selector: string): string {
+        const parts = selector.trim().split(/\s+/);
+        const result: string[] = [];
+
+        for (const part of parts) {
+            if (part.startsWith('&.')) {
+                const className = part.slice(1); // remove o '&'
+                if (result.length > 0) {
+                    result[result.length - 1] += className; // junta com o anterior
+                } else {
+                    result.push(className); // fallback se for o primeiro
+                }
+            } else {
+                result.push(part);
+            }
+        }
+
+        return result.join(' ');
+    }
+
+}
+
+interface ISelector {
+    origin: string,
+    selector: string,
+    style: StyleSheet
 
 }

@@ -89,13 +89,15 @@ export class PluginNewFileWebComponent extends StateLitElement {
     private groupName: string = `other`;
 
     private getTemplate(): string {
+
+
         let newExample = this.template;
         if (this.shortName && this.project) {
             newExample = changeTagName(newExample, convertFileNameToTag({ project: this.project, shortName: this.shortName, folder: this.folder }));
             newExample = changeClassName(newExample, this.project, this.shortName);
             newExample = changeWidget(newExample, this.project, this.shortName);
         }
-        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" />\n${newExample}\n`;;
+        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" folder="${this.folder}" />\n${newExample}\n`;;
     }
 
     private async handleAddFile() {
@@ -109,6 +111,7 @@ export class PluginNewFileWebComponent extends StateLitElement {
                 project: this.project,
                 position: this.position,
                 shortName: this.shortName,
+                folder:this.folder,
                 enhancement: this.enhancement,
                 sourceTS: this.getTemplate(),
                 openPreview: true

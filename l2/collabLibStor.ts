@@ -42,15 +42,15 @@ export async function createAllFiles(req: IReqCreateAllFiles, needCreateModel:bo
 
     const { folder, shortName, project } = req;
 
-    const template = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="${req.enhancement}" />\n\n// typescript new file\n`;
+    const template = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="${req.enhancement}" folder="${req.folder}" />\n\n// typescript new file\n`;
 
     const templateHTML = `<h1>${req.shortName}</h1>`;
 
-    const templateLess = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="enhancementStyle" />\n\n${convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
+    const templateLess = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="enhancementStyle" folder="${req.folder}" />\n\n${convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
 
-    const templateTest = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="_blank" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
+    const templateTest = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="_blank" folder="${req.folder}" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
 
-    const templateDefs = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="_blank" />\n\n`;
+    const templateDefs = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="_blank" folder="${req.folder}" />\n\n`;
 
     const newTSSource = req.tsSource || template;
     const newHTMLSource = req.htmlSource || templateHTML;
@@ -91,7 +91,7 @@ export async function deleteFile(storFile: mls.stor.IFileInfo): Promise<void> {
     }
 
     storFile.status = 'deleted';
-    const keyToModel = mls.editor.getKeyModel(100554, 'atest');
+    const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
 
     if (storFile.getValueInfo) {
         let valueInfo = mls.editor.models[keyToModel] ? await storFile.getValueInfo() : {} as mls.stor.IFileInfoValue;

@@ -7,9 +7,9 @@ import { PluginBaseModule } from './_100554_pluginBaseModule';
 /// **collab_i18n_start**
 const message_pt = {
     noItens: 'Nenhum item foi encontrado!'
-} 
+}
 
-const message_en = { 
+const message_en = {
     noItens: 'No items were found!',
 }
 
@@ -41,12 +41,12 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     private onL3EditEvents(ev: mls.events.IEvent) {
 
-        if (!ev.desc ||  ev.level !== 3) return;
+        if (!ev.desc || ev.level !== 3) return;
 
         const info = JSON.parse(ev.desc);
 
         if (!info || !info.action || !info.position || info.position === 'left') return;
-    
+
         switch (info.action) {
             case ('select'):
                 this.onSelect(info);
@@ -54,7 +54,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
             case ('navigation'):
                 this.onNavigation(info);
                 break;
-                
+
         }
 
     }
@@ -84,7 +84,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     @state() activeId = '';
 
-    createRenderRoot() { 
+    createRenderRoot() {
         return this;
     }
 
@@ -124,7 +124,9 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                     .info=${item}
                     id="${item.el.tagName.toLocaleLowerCase() + idx}"                      
                     class="header ${cls}" 
-                    @click="${(e: MouseEvent) => this.selectItem(e, item)}"    
+                    @click="${(e: MouseEvent) => this.selectItem(e, item)}" 
+                    @mouseover="${(e: MouseEvent) => this.onMouseover(item)}"
+                    @mouseout="${(e: MouseEvent) => this.onMouseout(item)}"   
                 >
                     <info-item .info=${item}>
                         <span class="fa ${mySymbol}" style="margin-right:.5rem"></span>
@@ -145,9 +147,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     //-------- IMPLEMENTATION --------------
 
     public forceUpdate(): void {
-
         this.requestUpdate();
-
     }
 
     private getComponents(): IInfoElChildren[] {
@@ -243,6 +243,42 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     }
 
+    private onMouseover(item: IInfoElChildren) {
+        this.highlightElement(item.el);
+    }
+
+    private onMouseout(item: IInfoElChildren) {
+        this.unhighlightElement(item.el);
+    };
+
+    private elOverlay: HTMLElement | undefined;
+    private createOverlay() {
+        const div = document.createElement("collab-aux-overlay");
+        div.style.outlineOffset = '-2px';
+        div.style.position = 'absolute';
+        div.style.backgroundColor = 'rgb(0 183 255 / 22%)';
+        div.style.zIndex = '99999';
+        const scope = window.preview?.iframe?.contentDocument?.body;
+        if (!scope) return div;
+        scope.appendChild(div);
+        return div;
+    }
+
+    private highlightElement(el: HTMLElement) {
+
+        if (!this.elOverlay)this.elOverlay = this.createOverlay();
+        const rect = el.getBoundingClientRect();
+        this.elOverlay.style.display = 'block';
+        this.elOverlay.style.top = `${rect.top + window.scrollY}px`;
+        this.elOverlay.style.left = `${rect.left + window.scrollX}px`;
+        this.elOverlay.style.width = `${rect.width}px`;
+        this.elOverlay.style.height = `${rect.height}px`;
+    }
+
+    private unhighlightElement(el: HTMLElement) {
+        if (this.elOverlay) this.elOverlay.style.display = 'none';
+    }
+
     private timeFireEventMode = 0;
     private fireEventMode(mode: 'edit' | 'noEdit') {
         clearTimeout(this.timeFireEventMode);
@@ -257,13 +293,13 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     }
 
     private timeFireSelectEdit = 0;
-    private fireSelectEdit(id:string) {
+    private fireSelectEdit(id: string) {
         clearTimeout(this.timeFireSelectEdit);
         this.timeFireSelectEdit = setTimeout(() => {
             const param = {
                 'position': 'left',
                 'action': 'select',
-                'id':id,
+                'id': id,
             }
             mls.events.fire(3, 'L3EditEvents' as any, JSON.stringify(param));
         }, 500);
