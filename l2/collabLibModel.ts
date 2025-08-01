@@ -4,6 +4,7 @@ import { removeTokensFromSource } from './_100554_enhancementStyle';
 import { getTokensLess } from './_100554_designSystemBase';
 import { getEnhancementName } from './_100554_libCommom';
 import { setErrorOnModel } from './_100554_validateLit'
+import { convertFileNameToTag } from './_100554_utilsLit'
 
 export async function readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true) {
 
@@ -54,6 +55,9 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
     if (storFiles.less && (!fileModels || !fileModels.style)) {
         await createModel(storFiles.less, needCompile);
+    }else if (!storFiles.less && (!fileModels || !fileModels.style)) {
+        storFiles.less = await createStorFiles(storFiles.ts, '.less');
+        await createModel(storFiles.less, needCompile);
     }
 
     if (storFiles.ts && (!fileModels || !fileModels.ts)) {
@@ -62,13 +66,22 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
     if (storFiles.html && (!fileModels || !fileModels.html)) {
         await createModel(storFiles.html, needCompile);
+    }else if (!storFiles.html && (!fileModels || !fileModels.html)) {
+        storFiles.html = await createStorFiles(storFiles.ts, '.html');
+        await createModel(storFiles.html, needCompile);
     }
 
     if (storFiles.test && (!fileModels || !fileModels.test)) {
         await createModel(storFiles.test, needCompile);
+    }else if (!storFiles.test && (!fileModels || !fileModels.test)) {
+        storFiles.test = await createStorFiles(storFiles.ts, '.test.ts');
+        await createModel(storFiles.test, needCompile);
     }
 
     if (storFiles.defs && (!fileModels || !fileModels.defs)) {
+        await createModel(storFiles.defs, needCompile);
+    } else if (!storFiles.defs && (!fileModels || !fileModels.defs)) {
+        storFiles.defs = await createStorFiles(storFiles.ts, '.defs.ts');
         await createModel(storFiles.defs, needCompile);
     }
 
@@ -528,4 +541,63 @@ function _dispatchEventLessChanged(position: 'left' | 'right' | 'all', storFile:
         return;
     }
     mls.events.fire([2], ['LessChangedEditor'] as any, JSON.stringify({ position, storFile }));
+}
+
+async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext:string): Promise<mls.stor.IFileInfo> {
+
+    if (!fileBase) throw new Error('[createStorFiles] Invalid file base!');
+
+    const { folder, shortName, project } = fileBase;
+
+    const template = `/// <mls shortName="${shortName}" project="${project}" enhancement="_blank" folder="${folder}" />\n\n// typescript new file\n`;
+
+    const templateHTML = `<h1>${shortName}</h1>`;
+
+    const templateLess = `/// <mls shortName="${shortName}" project="${project}" enhancement="enhancementStyle" folder="${folder}" />\n\n${convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
+
+    const templateTest = `/// <mls shortName="${shortName}" project="${project}" enhancement="_blank" folder="${folder}" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
+
+    const templateDefs = `/// <mls shortName="${shortName}" project="${project}" enhancement="_blank" folder="${folder}" />\n\n`;
+
+    let source = '';
+    switch (ext) {
+        case ('.ts'):
+            source = template;
+            break;
+        case ('.html'):
+            source = templateHTML;
+            break;
+        case ('.less'):
+            source = templateLess;
+            break;
+        case ('.test.ts'):
+            source = templateTest;
+            break;
+        case ('.defs.ts'):
+            source = templateDefs;
+            break;
+    }
+
+    const params = {
+        project: fileBase.project,
+        level: fileBase.level,
+        shortName: fileBase.shortName,
+        extension: ext,
+        versionRef: '0',
+        folder: fileBase.folder
+    };
+
+    const file = await mls.stor.addOrUpdateFile(params);
+    if (!file) throw new Error('[createStorFile] Invalid storFile');
+
+    file.status = 'new';
+    const fileInfo: mls.stor.IFileInfoValue = {
+        content: source,
+        contentType: 'string'
+    };
+
+    await mls.stor.localStor.setContent(file, fileInfo);
+
+    return file;
+
 }

@@ -35,6 +35,7 @@ export interface IRequestNewFile {
     project: number,
     position: 'left' | 'right',
     shortName: string,
+    folder?:string,
     enhancement: string,
     sourceTS: string,
     sourceHTML?: string,
@@ -49,7 +50,7 @@ export async function createNewFile(args: IRequestNewFile) {
     const param = {
         shortName: args.shortName,
         project: args.project,
-        folder: '',
+        folder: args.folder || '',
         enhancement: args.enhancement || '_blank',
         level: 2,
         tsSource: args.sourceTS

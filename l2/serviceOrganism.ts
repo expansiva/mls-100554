@@ -133,7 +133,7 @@ export class ServiceOrganism100554 extends ServiceBase {
 
     renderNavigation() {
         // this.openService('_100554_servicePreview', 'right', 3);
-        return html` ${this.pluginNav ? unsafeHTML(`<${this.pluginNav} .service=${this} msize="${this.msize}"></${this.pluginNav}>`) : `<div>${this.msg.loading}</div>`}`;
+        return html` ${this.pluginNav ? unsafeHTML(`<${this.pluginNav} .service=${this}></${this.pluginNav}>`) : `<div>${this.msg.loading}</div>`}`;
     }
 
     renderProperties() {
@@ -147,14 +147,14 @@ export class ServiceOrganism100554 extends ServiceBase {
 
     renderStyle() {
 
-        return html` ${this.pluginStyle ? unsafeHTML(`<${this.pluginStyle} .service=${this} msize="${this.msize}"></${this.pluginStyle}>`) : `<div>${this.msg.loading}</div>`}`;
+        return html`<plugin-edit-style-l3-100554 .service=${this} msize="${this.msize}"></plugin-edit-style-l3-100554>`;
     }
 
     //---------IMPLEMENTATION------------
 
     private async loadPlugins() {
 
-        const project = mls.actualProject;
+        const  project  = mls.actualProject;
         if (!project) return;
         await mls.plugin.loadAll(project, true);
         const plgNav = mls.plugin.getAllMenuActions(project, { scope: 'l3PageNavigation' } as any);

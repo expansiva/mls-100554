@@ -56,7 +56,7 @@ export class PluginNewFileService extends StateLitElement {
 
     @propertyDataSource() shortName: string | undefined;
 
-    @propertyDataSource({ attribute: true }) project: number | undefined;
+    @propertyDataSource({ attribute: true }) project: number | undefined ;
 
     @propertyDataSource({ attribute: true }) folder: string | undefined;
 
@@ -114,13 +114,16 @@ export class [className] extends ServiceBase {
     private groupName: string = `other`;
 
     private getTemplate(): string {
+
         let newExample = this.template;
-        if (this.shortName && this.project) {
+        if (this.shortName && this.project && this.shortName) {
+
+            const name = this.folder ? this.folder+'/'+this.shortName : this.shortName
             newExample = changeTagName(newExample, convertFileNameToTag({project: this.project, shortName: this.shortName, folder: this.folder}));
             newExample = changeClassName(newExample, this.project, this.shortName);
-            newExample = changeWidget(newExample, this.project, this.shortName);
+            newExample = changeWidget(newExample, this.project, name);
         }
-        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" />\n${newExample}\n`;;
+        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" folder="${this.folder}" />\n${newExample}\n`;;
     }
 
     private async handleAddFile() {
@@ -133,7 +136,8 @@ export class [className] extends ServiceBase {
             await createNewFile({
                 project:this.project,
                 position:this.position,
-                shortName:this.shortName,
+                shortName: this.shortName,
+                folder:this.folder,
                 enhancement:this.enhancement,
                 sourceTS: this.getTemplate(),
                 openPreview:true

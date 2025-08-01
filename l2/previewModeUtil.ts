@@ -191,36 +191,51 @@ export function addJsReference(ifr: HTMLIFrameElement, level: string) {
                 window['preview'] = window['preview']  ? window['preview']  : parent.preview ? parent.preview : top['preview'];
 
                 window['getMatchingRulesForElement'] = function (element) {
-                const matchingRules = [];
+                    const matchingRules = [];
 
-                for (const sheet of document.styleSheets) {
-                    let rules;
-                    try {
-                    rules = sheet.cssRules;
-                    } catch (e) {
-                    continue;
-                    }
-
-                    for (const rule of rules) {
-                    if (rule instanceof CSSStyleRule) {
+                    for (const sheet of document.styleSheets) {
+                        let rules;
                         try {
-                        if (element.matches(rule.selectorText)) {
-                            matchingRules.push({
-                            selector: rule.selectorText,
-                            style: rule.style,
-                            origin: sheet.href || 'inline <style>',
-                            });
-                        }
+                        rules = sheet.cssRules;
                         } catch (e) {
                         continue;
                         }
-                    }
-                    }
-                }
 
-                return matchingRules;
-                };
-				`;
+                        for (const rule of rules) {
+                        if (rule.type === CSSRule.STYLE_RULE && rule instanceof CSSStyleRule) {
+                            const selector = rule.selectorText;
+
+                            try {
+
+                            const baseSelector = selector.replace(/:(hover|active|focus|visited|checked|disabled|focus-visible|focus-within)\b/g, '');
+
+                            if (element.matches(baseSelector)) {
+                                matchingRules.push({
+                                selector,
+                                style: rule.style,
+                                origin: sheet.href || 'inline <style>',
+                                });
+                                continue;
+                            }
+
+                            const found = Array.from(doc.querySelectorAll(selector)).includes(element);
+                            if (found) {
+                                matchingRules.push({
+                                selector,
+                                style: rule.style,
+                                origin: sheet.href || 'inline <style>',
+                                });
+                            }
+
+                            } catch (e) {
+                            continue;
+                            }
+                        }
+                        }
+                    }
+
+                    return matchingRules;
+                }`;
 
     ifr.contentDocument?.body.appendChild(s);
 }

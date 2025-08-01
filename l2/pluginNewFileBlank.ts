@@ -55,6 +55,8 @@ export class PluginNewFileBlank extends StateLitElement {
 
     @propertyDataSource() shortName: string | undefined;
 
+    @propertyDataSource() folder: string | undefined;
+
     @propertyDataSource({ attribute: true }) project: number | undefined;
 
     @property() position: 'left' | 'right' = 'left';
@@ -70,7 +72,8 @@ export class PluginNewFileBlank extends StateLitElement {
     private groupName: string = `other`;
 
     private getTemplate(): string {
-        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" />\n${this.template}\n`;;
+        
+        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" folder="${this.folder}" />\n${this.template}\n`;;
     }
 
     private async handleAddFile() {
@@ -84,6 +87,7 @@ export class PluginNewFileBlank extends StateLitElement {
                 project: this.project,
                 position: this.position,
                 shortName: this.shortName,
+                folder:this.folder,
                 enhancement: this.enhancement,
                 sourceTS: this.getTemplate(),
                 openPreview:true

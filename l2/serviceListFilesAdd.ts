@@ -61,8 +61,9 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     async connectedCallback() {
         super.connectedCallback();
-        initState('l2.addFile', { shortName: '', project: 0 });
+        initState('l2.addFile', { shortName: '', project: 0, folder:'' });
         setState('l2.addFile.shortName', '');
+        setState('l2.addFile.folder', '');
         await this.init();
     }
 
@@ -170,7 +171,10 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
             this.error = this.msg.invalidName;
             return;
         }
-        setState('l2.addFile.shortName', target.value);
+
+        const info = mls.l2.getPath(`_${project}_${target.value}`);
+        setState('l2.addFile.folder', info.folder);
+        setState('l2.addFile.shortName', info.shortName);
     }
 
     private handleClickTemplate(plugin: IPlugins) {
@@ -180,7 +184,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
             shortName,
             project,
             folder,
-            htmlText: `<${tag} position=${this.position} project="{{ l2.addFile.project }}" shortName="{{ l2.addFile.shortName }}"></${tag}>`
+            htmlText: `<${tag} position=${this.position} project="{{ l2.addFile.project }}" shortName="{{ l2.addFile.shortName }}" folder="{{ l2.addFile.folder }}"></${tag}>`
         }
         mls.events.fire(2, 'PluginDetails', JSON.stringify(options), 0);
     }
@@ -200,11 +204,12 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     private getNewNameAndValid(prj: number, name: string): boolean {
         if (name === '' || !name || name === null) return false;
+        const split = name.split('/');
         const isValidName = this.isValidNewName({
-            shortName: name,
+            shortName: split.pop() || name,
             project: prj,
             level: +this.level,
-            folder: '',
+            folder: split.length > 0 ? split.join('/') : '',
             extension: '.ts'
         });
         if (!isValidName) return false;
