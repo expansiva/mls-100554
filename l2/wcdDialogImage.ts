@@ -21,7 +21,7 @@ export class WcdDialogImage100554 extends LitElement {
     private lastHeight: string | undefined;
 
     async firstUpdated() {
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if (!project) return;
         this.project = project;
         this.images = await this.getImages(project);

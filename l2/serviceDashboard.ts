@@ -146,7 +146,7 @@ export class ServiceDashboard100554 extends ServiceBase {
     private baseProject = 100554;
     private async loadAndSetPlugins() {
 
-        const prj = mls.actual[5].project;
+        const prj = mls.actualProject;
         if (!prj) return;
 
         const dash = "l6Dashboard" as mls.plugin.Scope;

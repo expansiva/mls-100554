@@ -27,7 +27,7 @@ export async function addIssueInProject(req: IReq, idProject: string, idIssue: s
 
         return ret.addProjectV2ItemById.item.id;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -59,7 +59,7 @@ export async function removeIssueInProject(req: IReq, idProject: string, idIssue
 
         return true;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -100,7 +100,7 @@ export async function updateFieldSelectProjects(req: IReq, idProject: string, id
 
         return true;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -303,7 +303,7 @@ export async function getIssuesInProjects(req: IReq, idProject: string): Promise
 
         return itens;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -384,7 +384,7 @@ export async function getProjectFields(req: IReq, idProject: string): Promise<IF
 
         return fields;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -444,7 +444,7 @@ export async function getProjects(req: IReq): Promise<IProject[]> {
 
         return prjs.sort((a, b) => { return b.number - a.number; });
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e);
         throw new Error(e);
     }
@@ -515,7 +515,7 @@ export async function addNewIssueIO(req: IReq, user: IInfo, repositoryId: string
 
         return issue;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -544,7 +544,7 @@ export async function removeReact(req: IReq, issueid: string, reactid: string): 
         return true;
 
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -575,7 +575,7 @@ export async function addReact(req: IReq, issueid: string): Promise<string> {
 
         return ret.addReaction.reaction.id;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -695,7 +695,7 @@ export async function getIssues(req: IReq, state: string = 'OPEN'): Promise<IIss
 
         return issues.sort((a, b) => { return b.numberIssues - a.numberIssues; });
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -800,7 +800,7 @@ export async function getIssue(req: IReq, id: string): Promise<IIssues | undefin
 
         return issue;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -851,7 +851,7 @@ export async function addComment(req: IReq, issue: IIssues, comment: string): Pr
         return com;
 
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -909,7 +909,7 @@ export async function getIssueComments(req: IReq, issue: IIssues): Promise<IComm
 
         return comments;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -937,7 +937,7 @@ export async function getRepositoryId(req: IReq): Promise<string> {
 
         return ret.repository.id;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -977,7 +977,7 @@ export async function addMemberInIssue(req: IReq, issueId: string, memberId: str
 
         return true;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -1030,7 +1030,7 @@ export async function addLabelInIssue(req: IReq, issueId: string, labelId: strin
 
         return retLabel;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -1068,7 +1068,7 @@ export async function removeMemberInIssue(req: IReq, issueId: string, memberId: 
 
         return true;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -1108,7 +1108,7 @@ export async function removeLabelInIssue(req: IReq, issueId: string, labelId: st
 
         return true;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -1144,7 +1144,7 @@ export async function getLabels(req: IReq): Promise<ILabel[]> {
         }
         return []
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -1191,7 +1191,7 @@ export async function getUsers(req: IReq): Promise<IAssignees[]> {
 
         return users;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -1273,7 +1273,7 @@ export async function getLabelIdOrAdd(req: IReq, repositoryId: string): Promise<
         return retLabels;
 
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -1318,7 +1318,7 @@ export async function createLabelIO(req: IReq, repositoryId: string, label: stri
 
         return undefined;
 
-    } catch (e:any) {
+    } catch (e: any) {
         console.info(e)
         throw new Error(e);
     }
@@ -1360,7 +1360,7 @@ export function getUserInfoIO(req: IReq): Promise<IInfo> {
     });
 }
 
-const driver = await mls.stor.others.getDefaultDriver(mls.actual[5]?.project || 0);
+const driver = await mls.stor.others.getDefaultDriver(mls.actualProject || 0);
 function qlFetch(query: string, variables?: {}): Promise<any> {
 
     return new Promise<any>(async (resolve, reject) => {
@@ -1393,7 +1393,7 @@ function qlFetch(query: string, variables?: {}): Promise<any> {
 
             resolve(info.ret.data);*/
 
-        } catch (er:any) {
+        } catch (er: any) {
 
             reject(er.message);
 
@@ -1429,7 +1429,7 @@ function myFetch(query: string, mKey: string, variables?: {}): Promise<{ status:
                 resolve({ status, ret: data });
             }).catch((e) => reject(e));
 
-        } catch (er:any) {
+        } catch (er: any) {
 
             reject(er.message);
 

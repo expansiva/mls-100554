@@ -103,7 +103,7 @@ const _replayForSupport = async (payload: mls.msg.AIPayload[]): Promise<void> =>
 
     if (!content || !content.html || !content.ts || !content.less || !content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
 
-    const prj = mls.actual[5].project || 0;
+    const prj = mls.actualProject || 0;
     content.project = prj;
 
     await createNewFiles(content);
@@ -122,7 +122,7 @@ async function addFile(context: mls.msg.ExecutionContext) {
 
     if (!content || !content.html || !content.ts || !content.less || !content.shortName) throw new Error('Not found "html" or "ts" or "less" or "shortName" in addFile files');
 
-    const prj = mls.actual[5].project || 0;
+    const prj = mls.actualProject || 0;
 
     content.project = prj;
 

@@ -143,7 +143,7 @@ export class ServiceUser100554 extends ServiceBase {
 
     private async setMyData() {
 
-        const prj = mls.actual[5].project;
+        const prj = mls.actualProject;
         if (!prj) return;
         let array = await loadPluginProject(prj, 'l5UserSettings', false);
 

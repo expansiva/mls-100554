@@ -92,7 +92,7 @@ export class PluginProjectFindFiles extends PluginBaseModule {
     async onSearch() {
         const fileType = (this.querySelector('[name="fileType"]') as HTMLSelectElement).value;
         const searchText = (this.querySelector('[name="searchText"]') as HTMLInputElement).value;
-        const project = mls.actual[5].project;
+        const project = mls.actualProject;
         const files = Object.entries(mls.stor.files)
             .filter(([, file]) => file.project === project && file.extension === fileType)
             .map(([key]) => key);

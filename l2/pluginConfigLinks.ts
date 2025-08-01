@@ -100,7 +100,7 @@ export class PluginConfigLinks extends PluginBaseModule {
 
     private async init() {
 
-        const prj = mls.actual[5].project;
+        const prj = mls.actualProject;
         if (!prj) return;
 
         this.myConfig = await getConfigProject(prj);
@@ -147,7 +147,7 @@ export class PluginConfigLinks extends PluginBaseModule {
 
         try {
 
-            const prj = mls.actual[5].project;
+            const prj = mls.actualProject;
             if (!prj || !this.myConfig) return;
         
             (this.myConfig as any)['links'] = this.myLinks;

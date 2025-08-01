@@ -147,11 +147,11 @@ export class PluginProjectConfig extends PluginBaseModule {
 
     private async loadProjectConfigs(ignoreLocal: boolean = false) {
 
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if (!project) return;
         this.lastProject = project;
         let config = await libProjectConfig.getConfigProject(project, ignoreLocal);
-        
+
         if (!config) config = await libProjectConfig.createConfigFile(project);
         this.setInitialConfig(JSON.stringify(config, null, 2), project);
     }

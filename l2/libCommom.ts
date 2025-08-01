@@ -1,4 +1,5 @@
 /// <mls shortName="libCommom" project="100554" enhancement="_blank" groupName="other" />
+
 import { getMessageKey } from "./_100554_collabLitElement";
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
@@ -417,7 +418,7 @@ export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
 
 export async function loadModuleFromProjectOrDependency(name: string, folder: string, ext: string): Promise<any> {
 
-    const prj = mls.actual[5].project;
+    const prj = mls.actualProject;
     if (!prj) throw new Error('Not found project actual!');
 
     let key = mls.stor.getKeyToFiles(prj, 2, name, folder, ext);
@@ -440,6 +441,55 @@ export async function loadModuleFromProjectOrDependency(name: string, folder: st
     return await await collabImport({ project: prjDep, shortName: name, folder: '' });
 
 }
+
+
+const STORAGE_KEY = '_100554_serviceInit';
+
+export function saveOpenedFile(project: number, level: number, file: OpenedFile): void {
+
+    if (level < 0 || level > 7) {
+        console.warn('Invalid level');
+        return;
+    }
+
+    const data = getAllUserOpenedFiles();
+    if (!data[project]) {
+        data[project] = {};
+    }
+
+    const currentLevelData = data[project][level];
+
+    if (
+        typeof file === 'object' &&
+        file !== null &&
+        typeof currentLevelData === 'object' &&
+        currentLevelData !== null
+    ) {
+        data[project][level] = {
+            left: file.left ?? currentLevelData.left,
+            right: file.right ?? currentLevelData.right,
+        };
+    } else {
+        data[project][level] = file;
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+export function getLastOpenedFiles(project: number): UserOpenedFiles {
+    const data = getAllUserOpenedFiles();
+    return data[project] ?? {};
+}
+
+function getAllUserOpenedFiles(): Record<string, UserOpenedFiles> {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+}
+
+export type OpenedFile = string | OpenedFileL2;
+export type UserOpenedFiles = Record<number, OpenedFile>;
+export type OpenedFileL2 = { left?: string; right?: string };
+
 
 interface ICalculateTotalStringSize {
     totalsize: number, // em bytes

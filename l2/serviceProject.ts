@@ -238,7 +238,7 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     private async getExploreData() {
-        let { project } = mls.actual[5];
+        let project = mls.actualProject;
         this.explories = await loadPluginProject(project || 0, 'l5Explore');
 
     }
@@ -246,7 +246,7 @@ export class ServiceProject100554 extends ServiceBase {
     private renderShowCase() {
         this.fireEventClose('In development: Details showcase');
 
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if (!project) return '<div>No project selected</div<';
         const keyToFile = mls.stor.getKeyToFiles(project, 2, 'project', '', '.html');
         const file = mls.stor.files[keyToFile]
@@ -396,7 +396,7 @@ export class ServiceProject100554 extends ServiceBase {
 
     private async setMyData() {
 
-        const prj = mls.actual[5].project;
+        const prj = mls.actualProject;
 
         let array = await loadPluginProject(prj || 0, 'l5Project', false);
         array.forEach((item: mls.plugin.MenuAction) => {

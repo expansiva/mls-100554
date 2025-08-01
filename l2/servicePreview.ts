@@ -6,6 +6,8 @@ import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_service
 import { StateLitElement } from './_100554_stateLitElement';
 import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
+import { selectLevel } from './_100554_libCommom';
+
 import { globalState, setState, initState, getState } from './_100554_collabState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
@@ -164,8 +166,12 @@ export class ServicePreview100554 extends ServiceBase {
         if (op === 'theme') return this.onBtThemeClick();
     }
 
+    public onClickTitle = () => {
+        this._onClickTitle();
+    }
+
     public menu: IServiceMenu = {
-        title: 'Preview',
+        title: '',
         main: {
             opAboutWCD: 'About this WCD',
             opResultHTML: 'Result HTML',
@@ -248,6 +254,7 @@ export class ServicePreview100554 extends ServiceBase {
         onClickMain: this.onClickMain.bind(this),
         onClickTabs: this.onClickTabs.bind(this),
         onClickTools: this.onClickTools.bind(this),
+        onClickTitle: this.onClickTitle.bind(this),
 
     }
 
@@ -343,7 +350,6 @@ export class ServicePreview100554 extends ServiceBase {
         if (!ev.desc || ev.level !== this.level || ev.level !== 3) return;
 
         const info = JSON.parse(ev.desc);
-
         if (!info || !info.action || !info.position || info.position === 'right') return;
 
         switch (info.action) {
@@ -353,7 +359,6 @@ export class ServicePreview100554 extends ServiceBase {
             case ('modePreview'):
                 this.onActiveModeEdit(false);
                 break;
-
         }
 
     }
@@ -450,6 +455,8 @@ export class ServicePreview100554 extends ServiceBase {
 
         if (!ev.desc) return;
         const data: { to: number, from: number } = JSON.parse(ev.desc);
+
+        this.setTitleByLevel();
 
         if (data.to === 7 || data.from === 7) {
             if (this.watch) {
@@ -1140,7 +1147,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private async setLanguages() {
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if (!project) {
             this.languages = {
                 'English': { acronym: 'en', name: 'English' }
@@ -1177,7 +1184,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async setTheme() {
 
-        const project = mls.actual[5].project;
+        const project = mls.actualProject;
         if (!project) return;
         const tokens = await getTokens(project)
         this.themes = tokens.map((item) => item.themeName);
@@ -1192,14 +1199,14 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.menu.refresh) this.menu.refresh();
     }
 
-    private async preview(mode: string) {
+    private async preview2(mode: string) {
 
         if (!(mls.actual[2] as any).left || !this.watch) return true;
         const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
 
         if (this.menu.updateTitle) this.menu.updateTitle();
         await this.fireWcdChanges();
-        this.menu.title = '';
+
         this.lastModePreview = mode;
         this.lastLevel = this.level;
         this.page = fullname;
@@ -1448,6 +1455,187 @@ export class ServicePreview100554 extends ServiceBase {
             return vl;
         }
         return JSON.stringify(vl);
+    }
+
+
+    // Title changes
+
+    private async preview(mode: string) {
+        const actual = mls.actual[mls.actualLevel];
+        switch (actual.level) {
+            case 2:
+                this.previewL2(mode)
+                break;
+            case 3:
+                this.previewByLevel(mode, actual.level)
+                break;
+            case 4:
+                this.previewByLevel(mode, actual.level)
+                break;
+            case 5:
+                this.previewByLevel(mode, actual.level)
+                break;
+            case 6:
+                this.previewByLevel(mode, actual.level)
+                break;
+            case 7:
+                this.previewByLevel(mode, actual.level)
+                break;
+
+        }
+
+    }
+
+    private createPath(project: number, shortName: string, folder: string) {
+        if (!folder) return `_${project}_${shortName}`
+        else return `${folder}/_${project}_${shortName}`
+    }
+
+    private previewL2(mode: string) {
+        if (!mls.actual[2].left) {
+            this.clearPreview();
+            return;
+        }
+        const { project, shortName, folder } = mls.actual[2].left;
+        const fullname = this.createPath(project, shortName, folder);
+        this.createPreview(mode, fullname);
+    }
+
+    private previewByLevel(mode: string, level: number) {
+        if (!mls.actual[level]) {
+            this.clearPreview();
+            return;
+        };
+        const { project, path } = mls.actual[level];
+        if (!project || !path) {
+            this.clearPreview();
+            return;
+        };
+        const fullname = this.createPath(project, path, '');
+        this.createPreview(mode, fullname);
+    }
+
+    private clearPreview() {
+        if (this.previewContent) {
+            this.previewContent.innerHTML = ''
+            return;
+        }
+
+    }
+
+    private async createPreview(mode: string, fullName: string) {
+
+        if (!fullName || !this.watch) return;
+        this.setTitleByLevel();
+
+        if (this.menu.updateTitle) this.menu.updateTitle();
+        await this.fireWcdChanges();
+
+        this.lastModePreview = mode;
+        this.lastLevel = this.level;
+        this.page = fullName;
+
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.height = '100%';
+
+
+        if (mode === 'insights') {
+            const insights = document.createElement('plugin-preview-insights-100554');
+            container.appendChild(insights);
+            insights.setAttribute('page', fullName);
+            insights.setAttribute('level', this.level.toString());
+            this.configureButtonsRight(false);
+
+        } else {
+            const doc = document.createElement('service-preview-view-100554');
+            doc.setAttribute('page', fullName);
+            doc.setAttribute('level', this.level.toString());
+            doc.setAttribute('mode', mode);
+            doc.setAttribute('actualtheme', this.actualTheme);
+            doc.setAttribute('lang', this.lang);
+            doc.style.flex = '1';
+            (doc as any).father = this;
+            this.elPreview = doc;
+            container.appendChild(doc);
+
+            const consoleEl = document.createElement('collab-console-100554');
+            consoleEl.setAttribute('mode', 'disabled');
+            consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
+            container.appendChild(consoleEl);
+
+            const testResultEl = this.createTestElement();
+            container.appendChild(testResultEl);
+
+            const iframe = this.querySelector('iframe') as HTMLIFrameElement;
+            if (iframe && iframe.contentDocument) iframe.contentDocument.body.innerHTML = '';
+            this.configureButtonsRight(true);
+            mls.events.fire(3, 'WCDEventChange' as any);
+        }
+
+        if (!this.previewContent) return;
+        this.previewContent.innerHTML = '';
+        this.previewContent.appendChild(container);
+        return true;
+    }
+
+    private _onClickTitle() {
+
+        const actual = mls.actual[mls.actualLevel];
+        switch (actual.level) {
+            case 2:
+                this.selectLevel(3);
+                break;
+            case 3:
+                this.selectLevel(4);
+                break;
+            case 4:
+                this.selectLevel(5);
+                break;
+            case 5:
+                this.selectLevel(6);
+                break;
+            case 6:
+                this.selectLevel(7);
+                break;
+            case 7:
+                this.selectLevel(4);
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    private setTitleByLevel() {
+
+        const actual = mls.actual[mls.actualLevel];
+        switch (actual.level) {
+            case 2:
+                this.menu.title = `< ${mls.actual[3].path || 'No organism selected'}`;
+                break;
+            case 3:
+                this.menu.title = `< ${mls.actual[4].path || 'No page selected'}`;
+                break;
+            case 4:
+                this.menu.title = `< Module`;
+                break;
+            case 5:
+                this.menu.title = `< Project ${mls.actualProject}`;
+                break;
+            case 6:
+                this.menu.title = '< Projects';
+                break;
+            case 7:
+                this.menu.title = mls.actual[7].path || 'No page selected >>';
+                break;
+            default:
+                this.menu.title = '';
+                break;
+        }
+
+        if (this.menu.updateTitle) this.menu.updateTitle();
     }
 
 

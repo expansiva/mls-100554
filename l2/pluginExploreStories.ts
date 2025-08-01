@@ -145,7 +145,7 @@ export class PluginExploreStories extends PluginBaseModule {
     }
 
     private async init() {
-        this.project = mls.actual[5].project as number;
+        this.project = mls.actualProject as number;
         await this.getFiles();
     }
 

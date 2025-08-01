@@ -95,7 +95,7 @@ export class PluginProjectRunTest extends PluginBaseModule {
 
     private async init() {
         try {
-            const { project } = mls.actual[5];
+            const project = mls.actualProject;
             if (!project) return;
             this.clear();
             this.filesWithTest = await this.getStorFilesWithTest(project);

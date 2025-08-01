@@ -6,6 +6,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { saveUserIdLocalStorage } from "./_100554_aiAgentHelper";
 import { listThreads, addThread, listUsers, updateUsers } from './_100554_msgDBController';
+import { saveLastTab, loadLastTab } from "./_100554_collabMessageHelper";
 
 import './_100554_collabMessagesAdd';
 import './_100554_collabMessagesChat';
@@ -37,7 +38,6 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-const LOCAL_STORAGE_KEY = '_100554_serviceCollabMessages';
 
 @customElement('service-collab-messages-100554')
 export class ServiceCollabMessages100554 extends ServiceBase {
@@ -72,7 +72,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             return;
         };
         this.activeTab = ETabs[index] as ITabType;
-        this.saveLocalStorage({ lastTab: this.activeTab });
+        saveLastTab(this.activeTab);
     }
 
     public onClickMain(op: string) {
@@ -126,8 +126,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     connectedCallback() {
         super.connectedCallback();
-        this.loadLocalStorage();
-
+        this.dataLocal.lastTab = loadLastTab() as ITabType;
     }
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
@@ -197,7 +196,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         this.execCoachMarks('Tasks');
         return html`<collab-tasks-100554></collab-tasks-100554>`
     }
-//style="height:${this.style.height}"
+    //style="height:${this.style.height}"
 
     renderDocs() {
         this.groupSelected = 'DOCS';
@@ -387,24 +386,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         return true;
     }
 
-    private saveLocalStorage(data: IDataLocal) {
-        try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-        } catch (e) {
-            console.error('Erro ao salvar no localStorage:', e);
-        }
-    }
 
-    private loadLocalStorage() {
-        try {
-            const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (stored) {
-                this.dataLocal = JSON.parse(stored);
-            }
-        } catch (e) {
-            console.error('Erro ao carregar do localStorage:', e);
-        }
-    }
 
 }
 

@@ -173,8 +173,7 @@ export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
 
     private createTagName(value: string) {
         const valueWithoutProject = this.removeTrailingPattern(value);
-        const actual = mls.actual[5];
-        const project = actual.project;
+        const project = mls.actualProject;
         if (!project) return valueWithoutProject;
         return convertFileNameToTag({ project, shortName: valueWithoutProject })
     }

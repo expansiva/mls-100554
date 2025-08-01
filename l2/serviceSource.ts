@@ -13,6 +13,9 @@ import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_fi
 import { createAgent } from './_100554_agentFix';
 import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHelper';
 import { loadChatPreferences } from './_100554_collabMessageHelper';
+import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2 } from './_100554_libCommom';
+import { createAllModels, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
+
 import { CollabSpliterVerticalVarFixed100554 } from './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterHorizontalVarFixed';
@@ -205,6 +208,8 @@ export class ServiceSource100554 extends ServiceBase {
         await this.initMonaco();
         if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icTs);
         this.updatedMSizeEditor();
+
+        if (!this.activeModels) this.openLastFile(this.level, this.position);
 
         if (this.editorEl) {
             const bgEl = this.editorEl.querySelector('.monaco-editor-background');
@@ -644,7 +649,7 @@ export class ServiceSource100554 extends ServiceBase {
 
     private async lessChangedEditor(ev: mls.events.IEvent): Promise<void> {
 
-        if (!ev.desc || ev.level !== 2 ) return;
+        if (!ev.desc || ev.level !== 2) return;
 
         const info = JSON.parse(ev.desc);
         if (info.position !== this.position) return;
@@ -704,7 +709,6 @@ export class ServiceSource100554 extends ServiceBase {
             this.activeModels = fileModels;
             mls.editor.editors[this.position] = fileModels;
             this.showActiveModel();
-
             if (!this._ed1) return;
             this.restaureViewState();
 
@@ -751,7 +755,7 @@ export class ServiceSource100554 extends ServiceBase {
                 break;
             default: '';
         }
-        
+
     }
 
     private async initModelStyle(uri: monaco.Uri, model: monaco.editor.ITextModel) {
@@ -777,10 +781,6 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return false;
         const { shortName, project, status } = this.activeModels.ts.storFile;
-
-        if (!(mls.actual[2] as any)[this.position]) {
-            this.openLastFile(this.level, this.position);
-        }
 
         const model = this.activeModels.ts.model;
         mls.editor.editors[this.position] = this.activeModels;
@@ -916,7 +916,7 @@ export class ServiceSource100554 extends ServiceBase {
         addEventsEditor();
 
         //this.createModelTS_loading();
-        this.createModelConf('// loading ...'); // model 
+        await this.createModelConf('// loading ...'); // model 
         // global routines dont need this._ed1
         //await this.createModelTS_testFile();
     }
@@ -1495,52 +1495,38 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
     }
 
-    private saveLocalStorageLastOpen(storFile: mls.stor.IFileInfo, position: string) {
-
-        const infoByUser = this.getLocalStorageInfo();
-        let lastOpened = infoByUser.lastOpened;
-        const keyLocal = this.confE;
-        if (!lastOpened[keyLocal]) lastOpened[keyLocal] = {
-            extension: '',
-            folder: '',
-            level: 0,
-            project: 0,
-            shortName: ''
-        };
-        lastOpened[keyLocal].project = storFile.project;
-        lastOpened[keyLocal].shortName = storFile.shortName;
-        lastOpened[keyLocal].extension = storFile.extension;
-        lastOpened[keyLocal].level = storFile.level;
-        lastOpened[keyLocal].folder = storFile.folder;
-        this.saveLocalStorageInfo(infoByUser);
-
+    private saveLocalStorageLastOpen(storFile: mls.stor.IFileInfo, position: 'left' | 'right') {
+        const data: OpenedFileL2 = {};
+        if (storFile.folder) data[position] = `_${storFile.project}_${storFile.folder}/${storFile.shortName}`;
+        else data[position] = `_${storFile.project}_${storFile.shortName}`;
+        saveOpenedFile(storFile.project, 2, data);
     }
 
-    private openLastFile(level: number, position: string): boolean {
+    private async openLastFile(level: number, position: 'left' | 'right') {
+        this.loading = true;
+        const actualProject = mls.actualProject;
+        if (!actualProject) return;
+        const lastOpenedFile = getLastOpenedFiles(actualProject);
+        const lastL2 = lastOpenedFile[2] as OpenedFileL2;
+        if (!lastL2) return;
+        const lastL2ByPosition = lastL2[position];
 
-        try {
-            const infoByUser = this.getLocalStorageInfo();
-            let lastOpened = infoByUser.lastOpened;
-            const keyLocal = this.confE;
-            if (!lastOpened[keyLocal]) return false;
-
-            const { project, shortName } = lastOpened[keyLocal];
-            const models = mls.editor.getModels(project, shortName);
-            if (!models) return false;
-            this.activeModels = models;
-            mls.actual[this.level].setFullName(`_${project}_${shortName}`);
-
-            (mls.actual[this.level] as any)[position] = {
-                project,
-                shortName,
-                extension: '.ts',
-                folder: ''
-            }
-            return true;
-
-        } catch (e) {
-            return false;
+        if (!lastL2ByPosition) return;
+        const { project, shortName, folder } = mls.l2.getPath(lastL2ByPosition);
+        const keyStorFile = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+        const storFile = mls.stor.files[keyStorFile];
+        if (!storFile) return;
+        let models = mls.editor.getModels(project, shortName);
+        if (!models) {
+            models = await createAllModels(storFile)
         }
+        if (!models) return;
+        
+        this.activeModels = models;
+        await readProjectTypescriptAndCompile(actualProject, '', true)
+        if (models && models.ts) mls.editor.forceModelUpdate(models.ts.model);
+        this.loading = false;
+        this.showActiveModel();
 
     }
 

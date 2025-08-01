@@ -159,7 +159,7 @@ export function systemComponentsInstruction(): mls.msg.IAMessageInputType {
 }
 
 export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageInputType> {
-    const { project } = mls.actual[5];
+    const project = mls.actualProject;
     const theme = 'Default';
     if (!project) throw new Error('Invalid Project');
     return {
@@ -168,7 +168,7 @@ export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageIn
     }
 }
 
-export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string,  data?: any }): Promise<mls.msg.IAMessageInputType[]> {
+export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string, data?: any }): Promise<mls.msg.IAMessageInputType[]> {
 
 
     if (!dt.project || !dt.shortName) throw new Error(`[getPromptByHtml]: incomplete parameters.`);

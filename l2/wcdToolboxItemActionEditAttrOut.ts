@@ -409,7 +409,7 @@ export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {
 
     private async loadPlugins(): Promise<string[]> {
 
-        const { project } = mls.actual[5];
+        const project  = mls.actualProject;
         if (!project) return [];
         const plgs = await loadPluginProject(project, 'l3PreviewAttr');
 

@@ -6,7 +6,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 import { getConfigProject, createConfigFile } from './_100554_libProjectConfig';
 import { initManagerCoachMark } from "./_100554_collabManagerCoachMarks";
 import { getTokensCss } from './_100554_designSystemBase';
-import { getProjectDetails, setProjectDetails } from './_100554_libCommom';
+import { getProjectDetails, setProjectDetails, getLastOpenedFiles } from './_100554_libCommom';
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
@@ -84,11 +84,12 @@ export class CollabInit extends CollabLitElement {
         this.setOrgActual(this.actualProject);
         await this.loadProjectBase();
         await this.loadLastProject();
+        await this.setLastOpenedFiles();
         this.showMessagesIfNeeded();
         const services = await this.getServices();
         this.checkURLParams();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
-
+        
     }
 
     /**
@@ -213,7 +214,7 @@ export class CollabInit extends CollabLitElement {
      * Sets CSS tokens for light and dark themes by retrieving data from a cache.
      */
     private async setTokensCss(): Promise<void> {
-        
+
         if (window.traceLifeCycle) console.info('setting: tokens');
         const tokensCss = await getTokensCss(this.baseProject, 'Default');
 
@@ -268,6 +269,7 @@ export class CollabInit extends CollabLitElement {
     private setProjectActual(): number | undefined {
         if (window.traceLifeCycle) console.info('setProjectActual');
         const project = this.getLastProjectSelected();
+        mls.setActualProject(project || 0);
         mls.actual[5].project = project || 0;
         return project;
     }
@@ -306,6 +308,41 @@ export class CollabInit extends CollabLitElement {
         if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
         if (this.actualProject) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
     }
+    private setLastOpenedFiles() {
+
+        if (!this.actualProject) return;
+        const lastFiles = getLastOpenedFiles(this.actualProject);
+        Object.entries(lastFiles).forEach(([levelStr, value]) => {
+            const level = +levelStr;
+            const actual = mls.actual[level];
+            if (!actual) return;
+
+            if (typeof value === 'string') {
+                actual.setFullName(value);
+                return;
+            }
+
+            if (typeof value === 'object' && value !== null) {
+                this.restoreSideFile(value.left, level, 'left', actual);
+                this.restoreSideFile(value.right, level, 'right', actual);
+            }
+        });
+    }
+
+    private restoreSideFile(
+        filename: string | undefined,
+        level: number,
+        side: 'left' | 'right',
+        actual: any
+    ) {
+        if (!filename) return;
+        const path = mls.l2.getPath(filename);
+        const key = mls.stor.getKeyToFiles(path.project, level, path.shortName, path.folder, '.ts');
+        const file = mls.stor.files[key];
+        if (!file) return;
+        actual[side] = file;
+    }
+
 
     /**
      * Checks for the presence of a `<collab-sticky-notification>` element on the page.
@@ -449,7 +486,7 @@ export class CollabInit extends CollabLitElement {
     }
 
     private async initProjectLocalIfNeeded() {
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if (project !== 0) return;
         const configProjectAnonymous = await getConfigProject(0);
         if (!configProjectAnonymous) await createConfigFile(0);

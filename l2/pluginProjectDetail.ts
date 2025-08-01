@@ -63,7 +63,7 @@ export class PluginProjectDetail extends PluginBaseModule {
         localStorage.removeItem('serviceDetail');
 
         const prj = info.prj;
-        const actual = mls.actual[5].project;
+        const actual = mls.actualProject;
 
         if (!prj || !actual) return;
 
