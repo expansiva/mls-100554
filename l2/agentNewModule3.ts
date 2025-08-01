@@ -74,7 +74,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 async function createFiles(context: mls.msg.ExecutionContext) {
     const payload = getPayload3(context);
-    const { project } = mls.actual[5];
+    const project = mls.actualProject;
     if (!project) throw new Error(`[${agentName}] createFiles: No project selected.`)
     await generateAllOrganism(payload, project, '');
     await generateAllPages(payload, project, '');

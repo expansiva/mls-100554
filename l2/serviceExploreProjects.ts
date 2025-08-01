@@ -490,7 +490,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
 
     private setProjectActual(project: number) {
-        mls.actual[5].project = project;
+        mls.setActualProject(project);
         this.state.projectSelected = project;
         setProjectDetails(project);
     }

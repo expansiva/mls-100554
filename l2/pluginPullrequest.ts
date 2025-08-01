@@ -102,7 +102,7 @@ export class PluginPullrequest extends PluginBaseModule {
 
     async loadListPullRequest() {
         try {
-            const prj = mls.actual[5].project;
+            const prj = mls.actualProject;
             if (!prj)
                 throw new Error('Not found project actual');
             const driver = mls.stor.others.getDefaultDriver(prj);
@@ -120,7 +120,7 @@ export class PluginPullrequest extends PluginBaseModule {
     }
 
     async initInfoProject() {
-        const prj = mls.actual[5].project;
+        const prj = mls.actualProject;
         if (!prj)
             return;
         const info = getMyKeysBranch(prj);

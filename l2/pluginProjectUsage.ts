@@ -56,7 +56,7 @@ export class PluginProjectUsage extends PluginBaseModule {
 
     async prepare() {
 
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if (!project) return;
         let settings = mls.l5.getProjectSettings(project);
         let details = mls.l5.getProjectDetails(project);

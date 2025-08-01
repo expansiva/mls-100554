@@ -154,7 +154,7 @@ export class ServiceOrganism100554 extends ServiceBase {
 
     private async loadPlugins() {
 
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if (!project) return;
         await mls.plugin.loadAll(project, true);
         const plgNav = mls.plugin.getAllMenuActions(project, { scope: 'l3PageNavigation' } as any);

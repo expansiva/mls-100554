@@ -295,7 +295,7 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
 
     try {
         const agent = await loadAgent(step.agentName);
-        if (!agent) throw new Error(`createAgent function not found in ${mls.actual[5].project} ${step.agentName}`);
+        if (!agent) throw new Error(`createAgent function not found in ${mls.actualProject} ${step.agentName}`);
         await agent.beforePrompt(context);
     } catch (error: any) {
         const msg = 'Error: ' + error.message || 'beforePrompt ' + step.agentName;

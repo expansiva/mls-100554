@@ -126,7 +126,7 @@ export class PluginVerifyError extends PluginBaseModule {
 
             this.continueVerify = true;
 
-            const prj = mls.actual[5].project;
+            const prj = mls.actualProject;
             if (!prj) throw new Error('Not found project');
 
             await initCompileMonaco(prj);

@@ -293,7 +293,7 @@ export class PluginProjectInfo extends PluginBaseModule {
 
         try {
 
-            const project = this.project ? +this.project : mls.actual[5].project;
+            const project = this.project ? +this.project : mls.actualProject;
             if (!project) return;
             this.setInfos(project);
             this.deps = this.getDependencies();
@@ -307,7 +307,7 @@ export class PluginProjectInfo extends PluginBaseModule {
 
     private getDependencies(): IDependenciesInfo[] {
 
-        const project = this.project ? +this.project : mls.actual[5].project;
+        const project = this.project ? +this.project : mls.actualProject;
         let deps: number[] = [];
         if (project) deps = mls.l5.getProjectDependencies(project, false);
         const allDependencies: IDependenciesInfo[] = [];

@@ -129,7 +129,7 @@ export class PluginExploreList extends PluginBaseModule {
     private setEvents() {
 
         mls.events.addEventListener([2, 5], ['ProjectSelected'], (ev) => {
-            if (this.project === mls.actual[5].project) return;
+            if (this.project === mls.actualProject) return;
             this.init();
         });
 
@@ -390,7 +390,7 @@ export class PluginExploreList extends PluginBaseModule {
         const style = this.inFilter && inHistory ? 'display:none' : '';
         const actualL2 = (mls.actual[2] as any)[this.position]?.shortName;
 
-        const validProject = this.project === 0 && mls.actual[5].project !== file.project && file.project !== 0 ? false : true;
+        const validProject = this.project === 0 && mls.actualProject !== file.project && file.project !== 0 ? false : true;
 
         let auxValidProject = '';
         //if (!validProject) auxValidProject = ';user-select: none; pointer-events: none; opacity: .5;';
@@ -678,18 +678,9 @@ export class PluginExploreList extends PluginBaseModule {
     private fireEventThisProject = 0;
     private fireEventLoadProject(): void {
 
-        /*if (this.fireEventThisProject === mls.actual[5].project) return;
-        this.fireEventThisProject = mls.actual[5].project as number;
-
-        const info = {} as mls.events.IProjectLoaded;
-        info.project = mls.actual[5].project as number;
-        info.level = 2;
-        info.needCompile = true;
-
-        mls.events.fire([(+(this.levelFiles as any) as any)], ['ProjectLoaded'], JSON.stringify(info), 0);*/
-        if (this.fireEventThisProject === mls.actual[5].project) return;
-        this.fireEventThisProject = mls.actual[5].project as number;
-        readProjectTypescriptAndCompile(mls.actual[5].project as number, '', true);
+        if (this.fireEventThisProject === mls.actualProject) return;
+        this.fireEventThisProject = mls.actualProject as number;
+        readProjectTypescriptAndCompile(mls.actualProject as number, '', true);
     }
 
     private changeListTimeout: number = 0;
@@ -718,7 +709,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = mls.actual[5].project || 0;
+        this.project = mls.actualProject || 0;
         const prjs = mls.l5.getProjectDetails(this.project)?.prj_dependencies || []
         this.myDep = [... prjs];
         this.myDep.push(this.project);
@@ -791,7 +782,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = mls.actual[5].project as number;
+        this.project = mls.actualProject as number;
         this.getFiles();
     }
 
@@ -847,7 +838,7 @@ export class PluginExploreList extends PluginBaseModule {
             if (isClick) return;
             el.innerText = 'updated';
 
-            const ret = await mls.l2.typescript.compileAll(mls.actual[5].project as number);
+            const ret = await mls.l2.typescript.compileAll(mls.actualProject as number);
             this.setFilesErros(ret);
 
             this.changeList(500);

@@ -91,7 +91,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
         const lang = this.father?.getMessageKey(messages);
         this.msg = lang ? messages[lang] : message_en;
 
-        const { project } = mls.actual[5] || 0;
+        const  project  = mls.actualProject || 0;
         setState('l2.addFile.project', project);
 
         return html`
@@ -161,7 +161,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
     private handleInputInput(e: KeyboardEvent) {
         const target = e.target as HTMLInputElement;
         if (!target) return;
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if (project === undefined) throw new Error('No project selected');
         const name = this.inputShortName?.value || '';
         this.error = '';
@@ -228,7 +228,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     }
     private async getPlugins(): Promise<mls.plugin.MenuAction[]> {
-        let { project } = mls.actual[5];
+        let project = mls.actualProject;
         return await loadPluginProject(project || 0, 'l2NewFile');
     }
 

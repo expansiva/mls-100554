@@ -39,7 +39,7 @@ export function createTool(): ITool {
         async execute(args: Args): Promise<string> {
             const { filters } = args;
             if (!filters || filters.length === 0) return `## Arquivos filtrados: \n\n []`;
-            const actualProject = mls.actual[5].project;
+            const actualProject = mls.actualProject;
             if (!actualProject) throw new Error('Project ID is missing or invalid. Cannot filter files without a valid project context.');
             // Get files with explicit typing
             const files: FileObj[] = Object.keys(mls.stor.files)

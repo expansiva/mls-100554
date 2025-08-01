@@ -22,14 +22,14 @@ export class WCDToolboxItemActionEditAttrOut extends CollabLitElement {
 
 
     render() {
- 
+
         if (!this.info) return html``;
         if (!this.info.hasVariation) return html`This attribute has no variation`;
 
         return html`
             ${repeat(this.info.variations, ((key: IVariation) => key.attr) as any, ((k: IVariation, index: any) => { return this.renderVariantItem(k) }) as any)}  
             ${this.renderAddVariation(this.info)}  
-        `;  
+        `;
     }
 
     renderVariantItem(v: IVariation) {
@@ -44,7 +44,7 @@ export class WCDToolboxItemActionEditAttrOut extends CollabLitElement {
     renderAddVariation(info: IAttr) {
         const array = Object.keys(this.languages);
 
-        if (array.length <= 1) return; 
+        if (array.length <= 1) return;
 
         return html` 
             <addvariation .info=${info}>
@@ -106,7 +106,7 @@ export class WCDToolboxItemActionEditAttrOut extends CollabLitElement {
         dispatchEventConciliate();
 
         const evento = new CustomEvent('setconfig', {
-            detail: { vl: `fatherforceUpdate`, me:this },
+            detail: { vl: `fatherforceUpdate`, me: this },
             bubbles: true,
             composed: true,
         });
@@ -137,7 +137,7 @@ export class WCDToolboxItemActionEditAttrOut extends CollabLitElement {
     }
 
     private async setLanguages() {
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if (!project) {
             this.languages = {
                 'English': { acronym: 'en', name: 'English' }
@@ -163,7 +163,7 @@ export class WCDToolboxItemActionEditAttrOut extends CollabLitElement {
 
 
 
-    
+
 
 
 }

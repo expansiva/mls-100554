@@ -704,7 +704,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actual[5].project;
+                const prj = mls.actualProject;
                 if (!prj) throw new Error('Not found project actual');
 
                 const forkProjectId = await this.getIDProject(0, opt.ownerDest, opt.repoDest);
@@ -798,7 +798,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actual[5].project;
+                const prj = mls.actualProject;
                 if (!prj) {
                     reject(new Error('Not Found project!'));
                     return;
@@ -848,7 +848,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actual[5].project;
+                const prj = mls.actualProject;
                 if (!prj) {
                     reject(new Error('Not Found project!'));
                     return;
@@ -925,7 +925,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actual[5].project;
+                const prj = mls.actualProject;
                 if (!prj) {
                     reject(new Error('Not Found project!'));
                     return;
@@ -988,7 +988,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actual[5].project;
+                const prj = mls.actualProject;
                 if (!prj) {
                     reject(new Error('Not Found project!'));
                     return;
@@ -1271,7 +1271,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
     private getVersionFromFilesIO(options: { owner: string; repo: string; branchName: string; files: mls.stor.IFileInfo[]; }): Promise<{ [key: string]: string; } | undefined> {
         return new Promise<{ [key: string]: string } | undefined>(async (resolve, reject) => {
 
-            const prj = mls.actual[5].project;
+            const prj = mls.actualProject;
             if (!prj) throw new Error('Not found project actual')
             const uB = await dL.getMyKeysBranch(prj);
 
@@ -1898,7 +1898,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actual[5].project;
+                const prj = mls.actualProject;
                 if (!prj) throw new Error('Not found project actual')
                 //const info = await this.getMyKeysBranch(project);
                 const id = await this.getIDProject(0, option.owner, option.repo);

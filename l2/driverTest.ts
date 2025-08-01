@@ -85,8 +85,6 @@ export class DriverTest extends CollabLitElement {
 
     private async load() {
 
-        //const prj = mls.actual[5].project;
-
         if (!this.iptDriver || !this.textlog || !this.iptClass) return;
 
         this.textlog.innerText = '';
@@ -344,7 +342,7 @@ export class DriverTest extends CollabLitElement {
             const inp = document.createElement('input');
             inp.setAttribute(aux + 'hv', 'ipt');
             inp.setAttribute(aux + 'param', p.name);
-            if (p.tp === 'project') inp.value = mls.actual[5].project?.toString() as string;
+            if (p.tp === 'project') inp.value = mls.actualProject?.toString() as string;
 
             return inp;
 
@@ -357,7 +355,7 @@ export class DriverTest extends CollabLitElement {
             Object.keys(mls.stor.files).forEach((i) => {
 
                 const f = mls.stor.files[i];
-                if (f.project !== mls.actual[5].project) return;
+                if (f.project !== mls.actualProject) return;
 
                 const opt = document.createElement('option');
                 opt.value = i;
@@ -378,7 +376,7 @@ export class DriverTest extends CollabLitElement {
             Object.keys(mls.stor.files).forEach((i) => {
 
                 const f = mls.stor.files[i];
-                if (f.project !== mls.actual[5].project) return;
+                if (f.project !== mls.actualProject) return;
 
                 const opt = document.createElement('option');
                 opt.value = i;

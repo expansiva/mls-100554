@@ -305,7 +305,7 @@ export class WcdAddWidgetDialog100554 extends CollabLitElement {
         const elOverlay = getOverlay();
         if (!elOverlay) return;
 
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if (!project) return;
 
         const listIndex = await loadPluginProject(project, 'l3AddWidget', false);

@@ -32,7 +32,7 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
         promises.push(_createProjectModel(baseProject, info.indexModules));
     }
 
-    const prj = mls.actual[5].project;
+    const prj = mls.actualProject;
     if (prj && prj !== baseProject) {
         const actual = await mls.stor.localDB.readPrjInfo(prj);
         if (actual && actual.indexModules && actual.indexModules !== '') {

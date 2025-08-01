@@ -55,7 +55,7 @@ export class PluginCssTokens extends StateLitElement {
     private needOrder: boolean = true;
 
     private async getTokensColor() {
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
         if(!project) throw new Error('Invalid project selected')
         const tokens = await getTokens(project)
         const resumeTokensByTheme = tokens.find((tk) => tk.themeName === this.theme);

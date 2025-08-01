@@ -53,7 +53,7 @@ async function updateTokensProject(context: mls.msg.ExecutionContext) {
     if (!step || step.type !== 'flexible') throw new Error(`[${agentName}] Invalid next pendent step on updateTokensProject`);
     if (!step.content) throw new Error(`[${agentName}] Not found "content" in flexible result`);
     console.info({ tokens: step.content });
-    const actualProject = mls.actual[5].project;
+    const actualProject = mls.actualProject;
     if (!actualProject) throw new Error('No Project selected');
 
     const tokens = step.content;
@@ -104,7 +104,7 @@ O novo conjunto de tokens deve manter a estrutura, formato e regras dos tokens o
 }
 
 async function systemTokens(): Promise<mls.msg.IAMessageInputType> {
-    const actualProject = mls.actual[5].project || 100554;
+    const actualProject = mls.actualProject || 100554;
     const tokens = await getTokens(actualProject);
     const tokensModel = tokens[0];
     return {

@@ -581,7 +581,7 @@ export class PluginGithubL4Project extends CollabLitElement {
 
     private async initInfoProject() {
 
-        const prj = mls.actual[5].project;
+        const prj = mls.actualProject;
         if (!prj) return;
 
         const info = getMyKeysBranch(prj);

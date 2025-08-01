@@ -200,7 +200,7 @@ export class CollabTiles extends CollabLitElement {
 
     private async changeConfig(tiles: ITilesItem[]) {
 
-        const prj = mls.actual[5].project;
+        const prj = mls.actualProject;
         if (!prj) return;
 
 

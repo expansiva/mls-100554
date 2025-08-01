@@ -4,6 +4,8 @@ import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtml, getTokens, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
+import { createAllModels } from './_100554_collabLibModel';
+
 import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
 import { StateLitElement } from './_100554_stateLitElement';
 import { PreviewModeSinglePage } from './_100554_previewModeSinglePage';
@@ -297,7 +299,7 @@ export class ServicePreviewView extends StateLitElement {
             this.father.setError('');
             this.setDevice(iframe);
             this.setTheme(iframe);
-            this.setMyFile();
+            await this.setMyFile();
 
             if (!this.models
                 || this.models.ts?.storFile.hasError
@@ -395,7 +397,7 @@ export class ServicePreviewView extends StateLitElement {
         if (iframe.contentDocument) iframe.contentDocument.documentElement.setAttribute('data-device', this.mode);
     }
 
-    private setMyFile(): void {
+    private async setMyFile() {
 
         if (!this.page || this.page === '') throw new Error(this.msg.pageNotDefined);
         mls.actual[0].setFullName(this.page);
@@ -419,8 +421,11 @@ export class ServicePreviewView extends StateLitElement {
         });
 
         if (!mls.stor.files[key]) throw new Error(this.msg.notFoundStorfile + ': ' + key);
-        if (!mls.editor.models[mkey]) throw new Error(this.msg.notFoundStorfile + ' mfile: ' + mkey);
+        if (!mls.editor.models[mkey]) {
+            await createAllModels(file);
+        }
 
+        if (!mls.editor.models[mkey]) throw new Error(this.msg.notFoundStorfile + ': ' + mkey);
         this.file = mls.stor.files[key];
         this.models = mls.editor.models[mkey];
     }

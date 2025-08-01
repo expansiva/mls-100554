@@ -147,7 +147,7 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
 
     async onSearch() {
         this.clear();
-        const project = mls.actual[5].project;
+        const project = mls.actualProject;
         if (!project) {
             this.logs.push('No project selected');
             return;

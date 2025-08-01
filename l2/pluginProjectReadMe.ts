@@ -72,7 +72,7 @@ export class PluginProjectReadMe extends PluginBaseModule {
 
     private async setReadme() {
 
-        const project = mls.actual[5].project;
+        const project = mls.actualProject;
         if (!project) {
             return;
         }
@@ -98,7 +98,7 @@ export class PluginProjectReadMe extends PluginBaseModule {
 
     private async onChangeMd() {
 
-        const project = mls.actual[5].project;
+        const project = mls.actualProject;
         if (!project) return;
         const fileName = 'README';
         if (!this.mkEditor) return;
@@ -116,7 +116,7 @@ export class PluginProjectReadMe extends PluginBaseModule {
 
     private async createFile(shortName: string, extension: string, folder: string, content: string): Promise<mls.stor.IFileInfo> {
 
-        const project = mls.actual[5].project;
+        const project = mls.actualProject;
         if (!project) throw new Error('Invalid project');
         const params = {
             project,

@@ -18,7 +18,7 @@ import {
 } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentProjectSearch2";
-const project: number = mls.actual[5].project || 1;
+const project: number = mls.actualProject || 1;
 
 export function createAgent(): IAgent {
     return {

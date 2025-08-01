@@ -142,7 +142,7 @@ export class CssHelperIndex extends StateLitElement {
     private baseProject = 100554;
     private async getAvaliablesPlugins(): Promise<IHelpers[]> {
 
-        const { project } = mls.actual[5];
+        const project = mls.actualProject;
 
         const allPlugins = await loadPluginProject(project || 0, 'l2StyleHelper');
 
