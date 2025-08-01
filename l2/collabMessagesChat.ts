@@ -6,7 +6,13 @@ import { collab_chevron_left, collab_gear, collab_translate, collab_circle_excla
 import { IAgent } from './_100554_aiAgentBase';
 import { getTemporaryContext, formatTimestamp, getNextResultStep, notifyThreadChange } from './_100554_aiAgentHelper';
 import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, getMessage, getMessagesByThreadId } from './_100554_msgDBController';
-import { loadChatPreferences, getBotsContext } from './_100554_collabMessageHelper';
+import {
+    loadChatPreferences,
+    getBotsContext,
+    registerToken,
+    loadNotificationPreferences,
+    loadNotificationToken
+} from './_100554_collabMessageHelper';
 import { collabImport } from './_100554_collabImport';
 
 import './_100554_collabMessagesTaskInfo';
@@ -607,15 +613,27 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.isLoadingMessages = true;
         try {
             if (!this.userId) return;
-            const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId);
+            const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId, threadInfo.thread.lastMessageTime || '');
             await updateThread(threadByServer.thread.threadId, threadByServer.thread);
+            threadInfo = await this.updateMessagesOnDb(threadInfo, threadByServer.messages);
             await updateUsers(threadByServer.users);
-            await this.loadAllMessages(threadInfo);
+            if (threadInfo.messages && threadInfo.messages.length >= 100) await this.loadAllMessages(threadInfo);
+            this.checkForRegisterNotification();
+
         } catch (err: any) {
             throw new Error('Error on loading messages: ' + err.message);
         } finally {
             this.isLoadingMessages = false;
         }
+    }
+    private alreadyCheckForRegisterToken: boolean = false;
+    private async checkForRegisterNotification() {
+        console.info({ alreadyCheckForRegisterToken: this.alreadyCheckForRegisterToken })
+        if (this.alreadyCheckForRegisterToken) return;
+        this.alreadyCheckForRegisterToken = true;
+        const notificationPreference = loadNotificationPreferences();
+        if (notificationPreference === 'denied') return;
+        await registerToken();
     }
 
     private async loadAllMessages(threadInfo: IThreadInfo): Promise<void> {
@@ -623,6 +641,13 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (!messages || messages.length === 0 || !this.actualThread || !this.userId) {
             return;
         }
+        threadInfo = await this.updateMessagesOnDb(threadInfo, messages);
+        if (messages.length < 100) return;
+        return this.loadAllMessages(threadInfo);
+    }
+
+    private async updateMessagesOnDb(threadInfo: IThreadInfo, messages: mls.msg.Message[] | undefined) {
+        if (!messages) return threadInfo;
         const newMessages: mls.msg.MessagePerformanceCache[] = [];
         for await (let mm of messages) {
             const messageId = `${mm.threadId}/${mm.createAt}`
@@ -630,7 +655,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
             const tempMessage: mls.msg.MessagePerformanceCache = { ...mm, footers: messageOld?.footers || [] };
             newMessages.push(tempMessage);
         }
-
         await addMessages(newMessages);
         this.actualMessages = this.mergeMessages(this.actualMessages, newMessages);
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
@@ -649,8 +673,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
             threadInfo.thread = thread;
             notifyThreadChange(thread);
         }
-        if (messages.length < 100) return;
-        return this.loadAllMessages(threadInfo);
+
+        return threadInfo;
     }
 
     private async onTitleClick() {
@@ -915,11 +939,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return taskData.task;
     }
 
-    private async getThreadInfo(threadId: string, userId: string): Promise<IThreadInfo> {
+    private async getThreadInfo(threadId: string, userId: string, lastOrderAt: string): Promise<IThreadInfo> {
         try {
             const response = await mls.api.msgGetThreadUpdate({
                 threadId,
-                userId
+                userId,
+                lastOrderAt
             });
             return response;
         } catch (err: any) {
@@ -989,7 +1014,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
 interface IThreadInfo {
     thread: mls.msg.ThreadPerformanceCache,
-    users: mls.msg.User[]
+    users: mls.msg.User[],
+    messages?: mls.msg.Message[] | undefined
 }
 
 interface IMessage extends mls.msg.MessagePerformanceCache {

@@ -6,7 +6,13 @@ import { StateLitElement } from './_100554_stateLitElement';
 
 import { ServiceBase } from './_100554_serviceBase';
 import { loadChatPreferences, saveChatPreferences } from './_100554_collabMessageHelper';
-import { IChatPreferences, TranslateMode } from './_100554_collabMessageHelper';
+import {
+    IChatPreferences,
+    TranslateMode,
+    loadNotificationPreferences,
+    registerToken,
+    saveNotificationPreferences
+} from './_100554_collabMessageHelper';
 import { listThreads } from './_100554_msgDBController';
 
 import {
@@ -14,7 +20,8 @@ import {
     collab_minus,
     collab_ban,
     collab_dot,
-    collab_message
+    collab_message,
+    collab_bell
 } from './_100554_collabIcons';
 
 /// **collab_i18n_start** 
@@ -32,6 +39,12 @@ const message_pt = {
     preferLanguage: 'Idioma preferido',
     threadMaintenance: 'Thread para manutenção',
     userTitle: 'Usuário',
+    chatNotification: 'Preferências de notificação',
+    infoNotification: 'Avisamos quando houver mudanças e novas mensagens, sem pop-ups, só sincronismo, mais velocidade para você',
+    moreNotification: 'Saiba mais',
+    notificationStatusEnabled: 'Notificações ativadas',
+    notificationStatusFailed: 'Não foi possivel ativar as notificações, verificar permissões no browser',
+    btnEnableNotifications: 'Ativar notificações',
 }
 
 const message_en = {
@@ -48,6 +61,12 @@ const message_en = {
     preferLanguage: 'Preferred language',
     threadMaintenance: 'Thread for maintenance',
     userTitle: 'User',
+    chatNotification: 'Notification Preferences',
+    infoNotification: 'We\'ll notify you when there are changes and new messages — no pop-ups, just seamless syncing for faster performance.',
+    moreNotification: 'Learn more',
+    notificationStatusEnabled: 'Notifications enabled',
+    btnEnableNotifications: 'Enable notifications',
+    notificationStatusFailed: 'Unable to enable notifications, check browser permissions',
 }
 
 type MessageType = typeof message_en;
@@ -72,13 +91,18 @@ export class CollabMessagesSettings100554 extends StateLitElement {
         threadMaintenance: ''
     };
 
+    @state() notificationPreferences?: NotificationPermission | null;
+
     @property() labelOk: string = '';
     @property() labelError: string = '';
     @property() labelOkPref: string = '';
     @property() labelErrorPref: string = '';
+    @property() labelOkNotification: string = '';
+    @property() labelErrorNotification: string = '';
+
     @property() isSavingUser: boolean = false;
     @property() isSavingChat: boolean = false;
-
+    @property() isSavingNotification: boolean = false;
 
     @query('.avatar img') userAvatarEl: HTMLImageElement | undefined;
 
@@ -103,6 +127,8 @@ export class CollabMessagesSettings100554 extends StateLitElement {
         return html`
             ${this.renderUser()}
             ${this.renderChatPreferences()}
+            ${this.renderChatNotifications()}
+
         `;
     }
 
@@ -222,6 +248,89 @@ export class CollabMessagesSettings100554 extends StateLitElement {
         `
     }
 
+    private renderChatNotifications() {
+        this.notificationPreferences = this.getNotificationStatus();
+        return html`
+        <div>
+            <h4>${collab_bell} ${this.msg.chatNotification}</h4>
+            <div class="section notification-preferences">
+                ${this.notificationPreferences === 'granted' ?
+                html`
+                        <div>${this.msg.notificationStatusEnabled}</div>
+                        ${this.renderReadMore()}
+
+                    ` :
+                html`
+                    <button
+                        @click=${this.onEnabledNotifications}
+                        ?disabled=${this.isSavingNotification}
+                    >
+                        ${this.isSavingNotification ? html`<span class="loader"></span>` : this.msg.btnEnableNotifications}
+                    </button>
+                    <br>
+                    ${this.labelOkNotification ? html`<small class="saving-ok">${this.labelOkNotification}<small>` : ''}
+                    ${this.labelErrorNotification ? html`<small class="saving-error">${this.labelErrorNotification}<small>` : ''}   
+                    ${this.renderReadMore()}
+                    `
+            }
+            </div>
+        </div>
+
+        `
+    }
+
+    private getNotificationStatus(): NotificationPermission | null {
+        const notificationPreferences = loadNotificationPreferences();
+
+        if ('Notification' in window) {
+            const permission = Notification.permission;
+            if (permission === this.notificationPreferences) return notificationPreferences;
+            if (permission === 'granted' && notificationPreferences === 'denied') {
+                saveNotificationPreferences('default');
+                return 'default'
+            }
+            if (permission === 'denied' && notificationPreferences === 'granted') {
+                saveNotificationPreferences('denied');
+                return 'default'
+            }
+        }
+
+        return notificationPreferences;
+    }
+
+    private renderReadMore() {
+        return html`
+            <details>
+                <summary>${this.msg.moreNotification}</summary>
+                <div>
+                    <span>${this.msg.infoNotification}</span>
+                </div>   
+            </details>
+         
+        `
+    }
+
+    private async onEnabledNotifications() {
+        this.labelErrorNotification = '';
+        this.labelOkNotification = '';
+
+        this.isSavingNotification = true;
+        try {
+            saveNotificationPreferences('default');
+            const token = await registerToken();
+            this.notificationPreferences = loadNotificationPreferences();
+            this.isSavingNotification = false;
+            if (token === null) this.labelOkNotification = this.msg.notificationStatusFailed;
+            else this.labelOkNotification = this.msg.notificationStatusEnabled;
+        } catch (err: any) {
+            this.isSavingNotification = false;
+            console.error('Error on enable notificatin:', err.message);
+            this.labelErrorNotification = err.message;
+        }
+
+
+    }
+
     private refreshAvatar() {
         const collabInit = document.querySelector('collab-init-100554')
         if (!collabInit) return;
@@ -235,7 +344,6 @@ export class CollabMessagesSettings100554 extends StateLitElement {
     private async getUserPerfil() {
         try {
             const response = await mls.api.msgGetUserUpdate({ userId: "" });
-            console.info(response)
             return response.user;
         } catch (err: any) {
             this.serviceBase?.setError(err.message);
@@ -261,7 +369,9 @@ export class CollabMessagesSettings100554 extends StateLitElement {
                 userId: this.userPerfil.userId,
                 avatar_url: this.userPerfil.avatar_url,
                 name: this.userPerfil.name,
-                status: this.userPerfil.status
+                status: this.userPerfil.status,
+                deviceId: this.userPerfil.deviceId || '',
+                notificationToken: this.userPerfil.notificationToken
             });
 
             if (response.statusCode !== 200) {
