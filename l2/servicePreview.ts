@@ -339,7 +339,7 @@ export class ServicePreview100554 extends ServiceBase {
         mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => { this.onModelHTMLCreated(ev); });
         mls.events.addEventListener([2, 5], ['FileAction'], this.onMLSFileAction.bind(this));
         mls.events.addListener(2, 'styleChanged' as any, this.onStyleChanged.bind(this));
-        mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
+        //mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
         mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['LevelChanged'] as any, this.onLevelChange.bind(this));
         mls.events.addListener(3, 'L3EditEvents' as any, this.onL3EditEvents.bind(this));
 
@@ -483,7 +483,7 @@ export class ServicePreview100554 extends ServiceBase {
             if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
             // if ((this.visible === 'false') && !((fileAction.action as any) === 'openBackground')) return;
-            const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated'];
+            const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated', 'editorChanged'];
 
             if (
                 fileAction.position === this.position ||
@@ -492,6 +492,11 @@ export class ServicePreview100554 extends ServiceBase {
 
             const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
             const storFileHTML = mls.stor.files[keyToFileInfo];
+
+            if (fileAction.action === 'editorChanged', fileAction.extension === '.test.ts') {
+                this.onTsTestChanged();
+                return;
+            }
 
             if (fileAction.action === 'open' || (fileAction.action as any) === 'openBackground') {
                 setState('preview.pausePreview', false);
