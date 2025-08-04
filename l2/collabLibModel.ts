@@ -480,7 +480,6 @@ async function _checkSameContent(modelBase: mls.editor.IModelBase, storFile: mls
     if (sameContent) {
         if (storFile.status !== 'renamed' && (storFile.status !== 'new')) {
             storFile.status = 'nochange';
-            console.info('limpou')
             await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
         }
     } else {

@@ -661,7 +661,7 @@ export class ServiceSource100554 extends ServiceBase {
         const lastemitter = getState(`less.${info.position}.emitter`) || 'editor';
 
         if (this.lessCSS && this._ed1) {
-            const uri = this.getUri(`_${info.storFile.project}_${info.storFile.shortName}`, '.less');
+            const uri = this.getUri(info.storFile, '.less');
             const lastSelector = this.lessCSS.selector;
             this.lessCSS = new LessCSS(uri.toString(), this._ed1, info.position as 'left' | 'right');
             this.lessCSS.setEditor(this._ed1);
@@ -745,7 +745,7 @@ export class ServiceSource100554 extends ServiceBase {
     private initProviders(modelBase: mls.editor.IModelBase) {
 
         if (!modelBase) return;
-        const uri = this.getUri(`_${modelBase.storFile.project}_${modelBase.storFile.shortName}`, modelBase.storFile.extension as any);
+        const uri = this.getUri(modelBase.storFile, modelBase.storFile.extension as any);
         switch (modelBase.storFile.extension) {
             case ('.less'):
                 this.initModelStyle(uri, modelBase.model);
@@ -1115,8 +1115,8 @@ export class ServiceSource100554 extends ServiceBase {
         } as monaco.editor.IEditorOptions;
     }
 
-    private getUri(shortFN: string, ftype: '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts'): monaco.Uri {
-        return monaco.Uri.parse(`file://server/${shortFN}${ftype}`);
+    private getUri(storFile:mls.stor.IFileInfo, ftype: '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts'): monaco.Uri {
+        return monaco.Uri.parse(`file://server/_${storFile.project}_${storFile.folder ? storFile.folder + '_' : ''}${storFile.shortName}${ftype}`);
     }
 
     private async createModel(project: number, shortName: string, ext: '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts', content?: string): Promise<mls.editor.IModelBase | undefined> {
@@ -1203,7 +1203,7 @@ export class ServiceSource100554 extends ServiceBase {
         const storFile = await mls.stor.addOrUpdateFile({ project, level, shortName, extension, versionRef: new Date().toISOString(), folder: '' });
         if (!storFile) throw new Error('Invalid storFile');
 
-        const uri = this.getUri(shortName, extension);
+        const uri = this.getUri(storFile, extension);
         let model = monaco.editor.getModel(uri);
         if (model) {
             this.mConfEditor = model;
