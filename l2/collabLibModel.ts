@@ -8,7 +8,7 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 
 export async function readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true) {
 
-    if (projectsLoaded.includes(project)) return;
+    if (projectsLoaded.includes(project)) return; 
     if (mls.istrace) console.log('loading files from project ' + project);
     projectsLoaded.push(project);
 
@@ -51,11 +51,11 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
     const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
 
-    let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName);
+    let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName, storFileBase.folder);
 
     if (storFiles.less && (!fileModels || !fileModels.style)) {
         await createModel(storFiles.less, needCompile);
-    }else if (!storFiles.less && (!fileModels || !fileModels.style)) {
+    } else if (!storFiles.less && (!fileModels || !fileModels.style)) {
         storFiles.less = await createStorFiles(storFiles.ts, '.less');
         await createModel(storFiles.less, needCompile);
     }
@@ -66,14 +66,14 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
     if (storFiles.html && (!fileModels || !fileModels.html)) {
         await createModel(storFiles.html, needCompile);
-    }else if (!storFiles.html && (!fileModels || !fileModels.html)) {
+    } else if (!storFiles.html && (!fileModels || !fileModels.html)) {
         storFiles.html = await createStorFiles(storFiles.ts, '.html');
         await createModel(storFiles.html, needCompile);
     }
 
     if (storFiles.test && (!fileModels || !fileModels.test)) {
         await createModel(storFiles.test, needCompile);
-    }else if (!storFiles.test && (!fileModels || !fileModels.test)) {
+    } else if (!storFiles.test && (!fileModels || !fileModels.test)) {
         storFiles.test = await createStorFiles(storFiles.ts, '.test.ts');
         await createModel(storFiles.test, needCompile);
     }
@@ -85,7 +85,7 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
         await createModel(storFiles.defs, needCompile);
     }
 
-    fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName);
+    fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName, storFileBase.folder);
 
     return fileModels;
 
@@ -93,11 +93,11 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
 export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boolean = true): Promise<mls.editor.IModelBase | undefined> {
 
-    let fileModels = mls.editor.getModels(storFile.project, storFile.shortName);
+    let fileModels = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder);
     const prop = mapExt[storFile.extension];
     if (fileModels && fileModels[prop]) return fileModels[prop];
 
-    const key = `${storFile.project}_${storFile.shortName}_${storFile.extension}`;
+    const key = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder) + storFile.extension;
 
     if (modelPromises.has(key)) {
         return modelPromises.get(key)!;
@@ -130,6 +130,8 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
     try {
         const result = await promise;
         return result;
+    } catch (e: any) {
+        throw new Error('[createModel] ' + e.message);
     } finally {
         modelPromises.delete(key);
     }
@@ -154,7 +156,7 @@ type Extesion = '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts';
 
 async function _createProjectModel(project: number, contentTS: string): Promise<mls.editor.IModels> {
 
-    let projectModel = mls.editor.getModels(project, '');
+    let projectModel = mls.editor.getModels(project, '', '');
     if (projectModel && projectModel.ts) return projectModel;
     const ftype = ".d.ts";
     const info: mls.stor.IFileInfo = {
@@ -191,16 +193,15 @@ async function _createProjectModel(project: number, contentTS: string): Promise<
 
 async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content?: string): Promise<mls.editor.IModelBase | undefined> {
 
-
     let src: string | Blob | null | undefined = undefined;
     let haveInfo: boolean = false;
     let info: mls.stor.IFileInfoValue | null = null;
-
-    if (ext !== '.d.ts') {
+    
+    if (ext !== '.d.ts') { 
 
         if (!storFile) throw new Error(`Invalid file: ${ext}`);
 
-        if (storFile.project !== 0) {
+        if (storFile.project !== 0) { 
             info = storFile.getValueInfo ? await storFile.getValueInfo() : null;
             haveInfo = !!info && !!info.content;
         }
@@ -270,7 +271,7 @@ async function _afterUpdate(storFile: mls.stor.IFileInfo, model: monaco.editor.I
         return;
     }
     if (storFile.status === 'renamed') {
-        const models = mls.editor.getModels(storFile.project, storFile.shortName);
+        const models = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder);
         if (!models || models[tp] === undefined) return;
         const modelByType = models[tp];
         if (!modelByType) return;
@@ -354,7 +355,7 @@ async function _updateModelStatusLess(modelBase: mls.editor.IModelStyle, changed
 
     let modelValue = modelBase.model.getValue();
 
-    let fileModels = mls.editor.getModels(modelBase.storFile.project, modelBase.storFile.shortName);
+    let fileModels = mls.editor.getModels(modelBase.storFile.project, modelBase.storFile.shortName, modelBase.storFile.folder);
 
     if (!fileModels) throw new Error('[_updateModelStatusLess] Not found file models')
 
@@ -479,6 +480,7 @@ async function _checkSameContent(modelBase: mls.editor.IModelBase, storFile: mls
     if (sameContent) {
         if (storFile.status !== 'renamed' && (storFile.status !== 'new')) {
             storFile.status = 'nochange';
+            console.info('limpou')
             await mls.stor.localStor.setContent(storFile, { content: null }); // clear localstorage
         }
     } else {
@@ -543,7 +545,7 @@ function _dispatchEventLessChanged(position: 'left' | 'right' | 'all', storFile:
     mls.events.fire([2], ['LessChangedEditor'] as any, JSON.stringify({ position, storFile }));
 }
 
-async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext:string): Promise<mls.stor.IFileInfo> {
+async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext: string): Promise<mls.stor.IFileInfo> {
 
     if (!fileBase) throw new Error('[createStorFiles] Invalid file base!');
 

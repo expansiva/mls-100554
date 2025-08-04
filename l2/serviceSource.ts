@@ -103,7 +103,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (this.isModeHistory && this.menu.selectTool) this.menu.selectTool('History');
 
-        if (op === EToolsSource.icTs) {
+        if (op === EToolsSource.icTs) { 
             this.showActiveModel();
             this.updateActionBasedOnError('ts', this.activeModels?.ts?.model.id);
             if (this._ed1) this.highlightReviewLines(this._ed1);
@@ -209,7 +209,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icTs);
         this.updatedMSizeEditor();
 
-        if (!this.activeModels) this.openLastFile(this.level, this.position);
+        //if (!this.activeModels) this.openLastFile(this.level, this.position);
 
         if (this.editorEl) {
             const bgEl = this.editorEl.querySelector('.monaco-editor-background');
@@ -696,7 +696,7 @@ export class ServiceSource100554 extends ServiceBase {
 
             const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
 
-            let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName);
+            let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName, storFileBase.folder);
 
             [storFiles.ts, storFiles.html, storFiles.less, storFiles.test, storFiles.defs].forEach((storF) => {
                 if (storF && !storF.inLocalStorage && storF.isLocalVersionOutdated) storF.isLocalVersionOutdated = false;
@@ -1508,7 +1508,10 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         if (!actualProject) return;
         const lastOpenedFile = getLastOpenedFiles(actualProject);
         const lastL2 = lastOpenedFile[2] as OpenedFileL2;
-        if (!lastL2) return;
+        if (!lastL2) {
+            this.openService('_100554_serviceProject', position, this.level)
+            return;
+        }
         const lastL2ByPosition = lastL2[position];
 
         if (!lastL2ByPosition) return;
@@ -1516,12 +1519,12 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const keyStorFile = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
         const storFile = mls.stor.files[keyStorFile];
         if (!storFile) return;
-        let models = mls.editor.getModels(project, shortName);
+        let models = mls.editor.getModels(project, shortName, folder);
         if (!models) {
             models = await createAllModels(storFile)
         }
         if (!models) return;
-        
+
         this.activeModels = models;
         await readProjectTypescriptAndCompile(actualProject, '', true)
         if (models && models.ts) mls.editor.forceModelUpdate(models.ts.model);

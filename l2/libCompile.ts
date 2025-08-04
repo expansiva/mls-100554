@@ -206,22 +206,20 @@ async function loadMyNeedsToCompile(
         if (tags.length <= 0) return;
         const info = convertTagToFileName(tags[0]);
         if (!info) return;
-        const name = `_${info.project}_${info.shortName}`
-        mls.actual[0].setFullName(name);
-        const f = mls.stor.files[name];
-        const { project, path } = mls.actual[0];
-        if (!project || !path) return;
+        const key = mls.stor.getKeyToFiles(info.project, 2, info.shortName, info.folder, '.ts');
+        const f = mls.stor.files[key];
+        const { project, shortName, folder } = info;
+        if (!project || !shortName) return;
 
-        const ipath = { project, shortName: path, folder: f ? f.folder : '' };
+        const ipath = { project, shortName: shortName, folder: f ? f.folder : folder };
         const enhacementName = await getEnhancementFromFetch(ipath);
         if (!enhacementName) throw new Error('enhacementName not valid');
         if (enhacementName === '_blank') return;
 
         if (!myModules[enhacementName]) {
 
-            mls.actual[0].setFullName(enhacementName);
-            const ipathenhacement = { project: mls.actual[0].project || 0, shortName: mls.actual[0].path || '', folder: f ? f.folder : '' };
-
+            const info = mls.l2.getPath(enhacementName)
+            const ipathenhacement = { project: info.project , shortName: info.shortName, folder: info.folder };
             const mModule = await mls.l2.enhancement.getEnhancementModule(ipathenhacement);
 
             myModules[enhacementName] = {
@@ -256,9 +254,9 @@ async function loadMyNeedsToCompile(
 
 }
 
-async function getEnhancementFromFetch(file: { project: number, shortName: string }) {
+async function getEnhancementFromFetch(file: { project: number, shortName: string, folder:string }) {
 
-    const url = `/_${file.project}_${file.shortName}`;
+    const url = getImportUrl(file);
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
@@ -278,6 +276,14 @@ async function getEnhancementFromFetch(file: { project: number, shortName: strin
 
     return enhancementMatch[1];
 
+}
+
+function getImportUrl(info: mls.cbe.IPath): string{
+    let url = `/_${info.project}_${info.shortName}`;
+    if (info.folder) {
+        url = `/_${info.project}_${info.folder}/${info.shortName}`
+    }
+    return url;
 }
 
 async function getJSImporMap(myImportsMap: string[], enhacementName: string, myModules: any) {
@@ -300,11 +306,12 @@ async function getJSImporMap(myImportsMap: string[], enhacementName: string, myM
 
 async function getJS(myImports: string[], enhacementName: string, mfile: mls.cbe.IPath, myModules: any) {
     if (!myModules[enhacementName]) throw new Error('Enhacement not found ');
-    if (myImports.includes(`/_${mfile.project}_${mfile.shortName}`)) return;
-    myImports.push(`/_${mfile.project}_${mfile.shortName}`);
-    const keyTestFile = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, '', '.test.ts');
+    let key = getImportUrl(mfile);
+    if (myImports.includes(key)) return;
+    myImports.push(key);
+    const keyTestFile = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, mfile.folder, '.test.ts');
     const storFileTest = mls.stor.files[keyTestFile];
-    if (storFileTest) myImports.push(`/_${mfile.project}_${mfile.shortName}.test.js`);
+    if (storFileTest) myImports.push(`${key}.test.js`);
 }
 
 
