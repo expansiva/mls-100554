@@ -5,7 +5,7 @@ import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
 import { collabImport } from './_100554_collabImport';
 
-/// **collab_i18n_start**
+/// **collab_i18n_start** 
 const message_pt = {
     updatedToday: 'atualizado hoje',
     updated: 'atualizado',
@@ -89,6 +89,11 @@ export function getMyKeysBranch(project: number): { branch: string, owner: strin
 
     }
 
+}
+
+export function createPath(project: number, shortName: string, folder: string) {
+    if (!folder) return `_${project}_${shortName}`
+    else return `_${project}_${folder}/${shortName}`
 }
 
 export function generateCompactTimestamp() {
@@ -281,7 +286,7 @@ export function convertColorToHex(color: string) {
 }
 
 export async function getEnhancementName(file: { project: number, shortName: string, folder: string }): Promise<string> {
-    const key = mls.l2.getKey({ project: file.project, shortName: file.shortName, folder: file.folder });
+    const key = mls.editor.getKeyModel(file.project, file.shortName, file.folder);
     const mmodel = mls.editor.models[key];
     if (!mmodel || !mmodel.ts) throw new Error('model invalid');
     if (!mmodel.ts.compilerResults) throw new Error('model ts not compiled yet');
@@ -355,7 +360,7 @@ export async function getListNewFilesToDeleteByGroup(group: string, project: num
     );
 
     for await (let storFile of filesLocal) {
-        const keyModel = mls.l2.getKey(storFile);
+        const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
         let models: mls.editor.IModels | undefined = mls.editor.models[keyModel];
         if (!models) models = await mls.editor.addModels(storFile.project, storFile.shortName, '')
         if (models && models.ts) {
@@ -398,7 +403,7 @@ export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
     }
 
     for (const data of modelsToDelete) {
-        const keyModel = mls.l2.getKey(data);
+        const keyModel = mls.editor.getKeyModel(data.project, data.shortName, data.folder);
         mls.editor.deleteModels(data.project, data.shortName, true);
         yield `Model deleted : ${keyModel}`;
     }
@@ -459,7 +464,7 @@ export function findStorFileInProjectsOrDeps(
         if (storFile) break;
     }
     return storFile;
-    
+
 }
 
 

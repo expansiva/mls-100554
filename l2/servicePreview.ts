@@ -6,7 +6,7 @@ import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_service
 import { StateLitElement } from './_100554_stateLitElement';
 import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
-import { selectLevel } from './_100554_libCommom';
+import { createPath } from './_100554_libCommom';
 
 import { globalState, setState, initState, getState } from './_100554_collabState';
 import { convertTagToFileName } from './_100554_utilsLit';
@@ -1199,63 +1199,6 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.menu.refresh) this.menu.refresh();
     }
 
-    private async preview2(mode: string) {
-
-        if (!(mls.actual[2] as any).left || !this.watch) return true;
-        const fullname = `_${(mls.actual[2] as any).left.project}_${(mls.actual[2] as any).left.shortName}`;
-
-        if (this.menu.updateTitle) this.menu.updateTitle();
-        await this.fireWcdChanges();
-
-        this.lastModePreview = mode;
-        this.lastLevel = this.level;
-        this.page = fullname;
-
-        const container = document.createElement('div');
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.height = '100%';
-
-
-        if (mode === 'insights') {
-            const insights = document.createElement('plugin-preview-insights-100554');
-            container.appendChild(insights);
-            insights.setAttribute('page', fullname);
-            insights.setAttribute('level', this.level.toString());
-            this.configureButtonsRight(false);
-
-        } else {
-            const doc = document.createElement('service-preview-view-100554');
-            doc.setAttribute('page', fullname);
-            doc.setAttribute('level', this.level.toString());
-            doc.setAttribute('mode', mode);
-            doc.setAttribute('actualtheme', this.actualTheme);
-            doc.setAttribute('lang', this.lang);
-            doc.style.flex = '1';
-            (doc as any).father = this;
-            this.elPreview = doc;
-            container.appendChild(doc);
-
-            const consoleEl = document.createElement('collab-console-100554');
-            consoleEl.setAttribute('mode', 'disabled');
-            consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
-            container.appendChild(consoleEl);
-
-            const testResultEl = this.createTestElement();
-            container.appendChild(testResultEl);
-
-            const iframe = this.querySelector('iframe') as HTMLIFrameElement;
-            if (iframe && iframe.contentDocument) iframe.contentDocument.body.innerHTML = '';
-            this.configureButtonsRight(true);
-            mls.events.fire(3, 'WCDEventChange' as any);
-        }
-
-        if (!this.previewContent) return;
-        this.previewContent.innerHTML = '';
-        this.previewContent.appendChild(container);
-        return true;
-    }
-
     private createTestElement() {
         const testResultEl = document.createElement('collab-result-container-100554');
         const testResultElActions = document.createElement('div');
@@ -1486,10 +1429,6 @@ export class ServicePreview100554 extends ServiceBase {
 
     }
 
-    private createPath(project: number, shortName: string, folder: string) {
-        if (!folder) return `_${project}_${shortName}`
-        else return `${folder}/_${project}_${shortName}`
-    }
 
     private previewL2(mode: string) {
         if (!mls.actual[2].left) {
@@ -1497,7 +1436,7 @@ export class ServicePreview100554 extends ServiceBase {
             return;
         }
         const { project, shortName, folder } = mls.actual[2].left;
-        const fullname = this.createPath(project, shortName, folder);
+        const fullname = createPath(project, shortName, folder);
         this.createPreview(mode, fullname);
     }
 
@@ -1511,7 +1450,7 @@ export class ServicePreview100554 extends ServiceBase {
             this.clearPreview();
             return;
         };
-        const fullname = this.createPath(project, path, '');
+        const fullname = `${ project }_${path}`;
         this.createPreview(mode, fullname);
     }
 
@@ -1628,7 +1567,7 @@ export class ServicePreview100554 extends ServiceBase {
                 this.menu.title = '< Projects';
                 break;
             case 7:
-                this.menu.title = mls.actual[7].path || 'No page selected >>';
+                this.menu.title = `${mls.actual[7].path} >>` || 'No page selected >>';
                 break;
             default:
                 this.menu.title = '';
