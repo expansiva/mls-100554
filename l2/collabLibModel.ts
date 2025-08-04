@@ -372,7 +372,8 @@ async function _updateModelStatusLess(modelBase: mls.editor.IModelStyle, changed
         await mls.l2.typescript.compileAndPostProcess(fileModels.ts, true, true);
     }
 
-    _dispatchEventLessChanged(position, modelBase.storFile)
+    //_dispatchEventLessChanged(position, modelBase.storFile)
+    _dispatchEventChanged(position, modelBase.storFile);
     await _checkSameContent(modelBase, modelBase.storFile);
 
     _dispatchEventEditorEvents(position, modelBase.storFile);
@@ -389,7 +390,8 @@ async function _updateModelStatusTest(modelBase: mls.editor.IModelStyle, changed
     let position = _getPosition(modelBase.model.id, 'test');
 
     _dispatchEventEditorEvents(position, modelBase.storFile);
-    _dispatchEventTsTestChanged(position, modelBase.storFile);
+    _dispatchEventChanged(position, modelBase.storFile);
+    //_dispatchEventTsTestChanged(position, modelBase.storFile);
 
 
 }
@@ -402,7 +404,8 @@ async function _updateModelStatusDefs(modelBase: mls.editor.IModelStyle, changed
     await _checkSameContent(modelBase, modelBase.storFile);
     let position = _getPosition(modelBase.model.id, 'defs');
     _dispatchEventEditorEvents(position, modelBase.storFile);
-    _dispatchEventTsDefsChanged(position, modelBase.storFile);
+    _dispatchEventChanged(position, modelBase.storFile);
+    //_dispatchEventTsDefsChanged(position, modelBase.storFile);
 
 }
 
@@ -515,6 +518,15 @@ function _dispatchEventStatusOrErrorChanged(position: 'left' | 'right' | 'all', 
         return;
     }
     mls.events.fireFileAction('statusOrErrorChanged', storFile, position, 0);
+}
+
+function _dispatchEventChanged(position: 'left' | 'right' | 'all', storFile: mls.stor.IFileInfo) {
+    if (position === 'all') {
+        mls.events.fireFileAction('editorChanged', storFile, 'left', 200);
+        mls.events.fireFileAction('editorChanged', storFile, 'right', 200);
+        return;
+    }
+    mls.events.fireFileAction('editorChanged', storFile, position, 200);
 }
 
 function _dispatchEventTsDefsChanged(position: 'left' | 'right' | 'all', storFile: mls.stor.IFileInfo) {

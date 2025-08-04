@@ -527,7 +527,7 @@ export class ServiceSave extends ServiceBase {
                     file.project !== mls.actualProject
                 ) continue;
 
-                const obj = this.setProjectLevelShortName(objProjects, file.project, file.level, file.shortName);
+                const obj = this.setProjectLevelShortName(objProjects, file.project, file.level, file.folder, file.shortName);
 
                 obj.push(await this.configItem(file));
 
@@ -548,7 +548,7 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
-    private setProjectLevelShortName(obj: any, prj: number, level: number, shortname: string): any[] {
+    private setProjectLevelShortName(obj: any, prj: number, level: number, folder:string, shortname: string): any[] {
 
         if (!obj[prj]) obj[prj] = { [level]: {} };
         const pj = obj[prj];
@@ -556,9 +556,10 @@ export class ServiceSave extends ServiceBase {
         if (!pj[level]) pj[level] = {};
         const l = pj[level];
 
-        if (!l[shortname]) l[shortname] = [];
+        const key = folder ? folder + '/' + shortname : shortname;
+        if (!l[key]) l[key] = [];
 
-        return l[shortname];
+        return l[key];
     }
 
     private oIcon = {
@@ -1162,7 +1163,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private async afterUpdate(storFile: mls.stor.IFileInfo) {
-        const mmodel: mls.editor.IModels | undefined = mls.editor.getModels(storFile.project, storFile.shortName);
+        const mmodel: mls.editor.IModels | undefined = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder);
         storFile.inLocalStorage = false;
         if (storFile.status === 'deleted') {
             await this.deleteFile(storFile);

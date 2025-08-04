@@ -49,7 +49,7 @@ export class ServiceSource100554 extends ServiceBase {
         mls.events.addListener(2, 'FileAction', this.onMLSEvents.bind(this));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
         mls.events.addListener(2, 'DomAction', (ev) => this.syncDom(ev));
-        mls.events.addListener(2, 'LessChangedEditor' as any, (ev) => this.lessChangedEditor(ev));
+        //mls.events.addListener(2, 'LessChangedEditor' as any, (ev) => this.lessChangedEditor(ev));
         //mls.events.addListener(2, 'CreateModelHTML' as any, (ev) => this.checkToCreateModelHTML(ev));
         this.initMonaco_GlobalEditor();
     }
@@ -103,7 +103,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (this.isModeHistory && this.menu.selectTool) this.menu.selectTool('History');
 
-        if (op === EToolsSource.icTs) { 
+        if (op === EToolsSource.icTs) {
             this.showActiveModel();
             this.updateActionBasedOnError('ts', this.activeModels?.ts?.model.id);
             if (this._ed1) this.highlightReviewLines(this._ed1);
@@ -633,6 +633,17 @@ export class ServiceSource100554 extends ServiceBase {
 
         };
 
+        const onEditorChanged = async (): Promise<void> => {
+
+            const keyFiles = mls.stor.getKeyToFiles(fileAction.project, fileAction.level, fileAction.shortName, fileAction.folder, fileAction.extension);
+            const storFile = mls.stor.files[keyFiles];
+            if (!storFile) return;
+
+            if(storFile.extension === '.less') await this.lessChangedEditor(storFile, fileAction.position)
+
+                
+        };
+
         if (mls.istrace) console.time('onAction_' + fileAction.action + '_' + fileAction.position);
 
         await this.initMonaco(); // init if needed
@@ -640,6 +651,7 @@ export class ServiceSource100554 extends ServiceBase {
             case 'open': await onOpen(); break;
             case 'editorEvents': await onEditorEvents(); break;
             case 'updatedOnServer': await onUpdatedOnServer(); break;
+            case 'editorChanged': await onEditorChanged(); break;
             default: {
                 // console.error('invalid action: ' + fileAction.action);
             }
@@ -647,23 +659,24 @@ export class ServiceSource100554 extends ServiceBase {
         if (mls.istrace) console.timeEnd('onAction_' + fileAction.action + '_' + fileAction.position);
     }
 
-    private async lessChangedEditor(ev: mls.events.IEvent): Promise<void> {
+    private async lessChangedEditor(storFile: mls.stor.IFileInfo, position:string): Promise<void> {
+    //private async lessChangedEditor(ev: mls.events.IEvent): Promise<void> {
 
-        if (!ev.desc || ev.level !== 2) return;
+        /*if (!ev.desc || ev.level !== 2) return;
 
         const info = JSON.parse(ev.desc);
-        if (info.position !== this.position) return;
+        if (info.position !== this.position) return;*/
 
-        const keyModel = mls.editor.getKeyModel(info.storFile.project, info.storFile.shortName, info.storFile.folder);
+        const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
         const models = mls.editor.models[keyModel];
         if (!models || !models.style) this.setError('[lessChangedEditor] Not found model');
 
-        const lastemitter = getState(`less.${info.position}.emitter`) || 'editor';
+        const lastemitter = getState(`less.${position}.emitter`) || 'editor';
 
         if (this.lessCSS && this._ed1) {
-            const uri = this.getUri(info.storFile, '.less');
+            const uri = this.getUri(storFile, '.less');
             const lastSelector = this.lessCSS.selector;
-            this.lessCSS = new LessCSS(uri.toString(), this._ed1, info.position as 'left' | 'right');
+            this.lessCSS = new LessCSS(uri.toString(), this._ed1, position as 'left' | 'right');
             this.lessCSS.setEditor(this._ed1);
             this.lessCSS.setSelector(lastSelector);
             const monacoPosition = this._ed1.getPosition();
@@ -1115,7 +1128,7 @@ export class ServiceSource100554 extends ServiceBase {
         } as monaco.editor.IEditorOptions;
     }
 
-    private getUri(storFile:mls.stor.IFileInfo, ftype: '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts'): monaco.Uri {
+    private getUri(storFile: mls.stor.IFileInfo, ftype: '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts'): monaco.Uri {
         return monaco.Uri.parse(`file://server/_${storFile.project}_${storFile.folder ? storFile.folder + '_' : ''}${storFile.shortName}${ftype}`);
     }
 
