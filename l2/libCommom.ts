@@ -442,6 +442,27 @@ export async function loadModuleFromProjectOrDependency(name: string, folder: st
 
 }
 
+export function findStorFileInProjectsOrDeps(
+    projectActual: number,
+    level: number,
+    fileName: string,
+    folder: string,
+    extension: string): mls.stor.IFileInfo {
+
+    const deps = mls.l5.getProjectDependencies(projectActual, false);
+    const keyActual = mls.stor.getKeyToFiles(projectActual, level, fileName, folder, extension);
+    let storFile = mls.stor.files[keyActual];
+    if (storFile) return storFile;
+    for (let dep of deps) {
+        const keyDep = mls.stor.getKeyToFiles(dep, level, fileName, folder, extension);
+        storFile = mls.stor.files[keyDep];
+        if (storFile) break;
+    }
+    return storFile;
+    
+}
+
+
 
 const STORAGE_KEY = '_100554_serviceInit';
 

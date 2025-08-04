@@ -6,14 +6,14 @@ import { CollabLitElement } from './_100554_collabLitElement';
 import { getConfigProject, createConfigFile } from './_100554_libProjectConfig';
 import { initManagerCoachMark } from "./_100554_collabManagerCoachMarks";
 import { getTokensCss } from './_100554_designSystemBase';
-import { getProjectDetails, setProjectDetails, getLastOpenedFiles } from './_100554_libCommom';
+import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps } from './_100554_libCommom';
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
     if (!on1CompileMonaco) return true;
     try {
         await mls.editor.InitMonaco();
-        const prjModel = mls.editor.getModels(project, '');
+        const prjModel = mls.editor.getModels(project, '', '');
         if (!prjModel || !prjModel.ts) {
             const info = await mls.stor.localDB.readPrjInfo(project);
             mls.editor.createModelProjectDefinition(project, info.indexModules);
@@ -85,11 +85,12 @@ export class CollabInit extends CollabLitElement {
         await this.loadProjectBase();
         await this.loadLastProject();
         await this.setLastOpenedFiles();
+        this.setDefaultFiles();
         this.showMessagesIfNeeded();
         const services = await this.getServices();
         this.checkURLParams();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
-        
+
     }
 
     /**
@@ -270,7 +271,7 @@ export class CollabInit extends CollabLitElement {
         if (window.traceLifeCycle) console.info('setProjectActual');
         const project = this.getLastProjectSelected();
         mls.setActualProject(project || 0);
-        mls.actual[5].project = project || 0;
+        // mls.actual[5].project = project || 0;
         return project;
     }
 
@@ -322,11 +323,21 @@ export class CollabInit extends CollabLitElement {
                 return;
             }
 
-            if (typeof value === 'object' && value !== null) {
+            if (level === 2 && typeof value === 'object' && value !== null) {
                 this.restoreSideFile(value.left, level, 'left', actual);
                 this.restoreSideFile(value.right, level, 'right', actual);
             }
         });
+    }
+
+    private FILEL6 = 'projects';
+    private FILEL5 = 'modules';
+    private setDefaultFiles() {
+        if (!this.actualProject) return;
+        const defaultL6 = findStorFileInProjectsOrDeps(this.actualProject, 2, this.FILEL6, '', '.ts');
+        const defaultL5 = findStorFileInProjectsOrDeps(this.actualProject, 2, this.FILEL5, '', '.ts');
+        if (defaultL6) mls.actual[6].setFullName(`_${defaultL6.project}_${defaultL6.shortName}`);
+        if (defaultL5) mls.actual[5].setFullName(`_${defaultL5.project}_${defaultL5.shortName}`);
     }
 
     private restoreSideFile(
