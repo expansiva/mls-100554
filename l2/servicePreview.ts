@@ -1446,6 +1446,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private previewByLevel(mode: string, level: number) {
+
         if (!mls.actual[level]) {
             this.clearPreview();
             return;
@@ -1455,7 +1456,7 @@ export class ServicePreview100554 extends ServiceBase {
             this.clearPreview();
             return;
         };
-        const fullname = `${ project }_${path}`;
+        const fullname = `_${ project }_${path}`;
         this.createPreview(mode, fullname);
     }
 
