@@ -56,7 +56,7 @@ export async function validateStyle(modelStyle: mls.editor.IModelStyle) {
 
     const model: monaco.editor.ITextModel = modelStyle.model;
     const { project, shortName, folder } = modelStyle.storFile;
-    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, '', '.less');
+    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!model || !storFileLess) return;
 
@@ -189,8 +189,8 @@ export function isCommentLine(line: string) {
 
 export async function compileStyleUsingMFile(modelStyle: mls.editor.IModelStyle, theme: string = 'Default') {
     const model: monaco.editor.ITextModel = modelStyle.model;
-    const { project, shortName } = modelStyle.storFile;
-    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, '', '.less');
+    const { project, shortName, folder } = modelStyle.storFile;
+    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!model || !storFileLess) return;
     let val = model.getValue();
@@ -205,9 +205,9 @@ export async function compileStyleUsingMFile(modelStyle: mls.editor.IModelStyle,
 }
 
 
-export async function compileStyleUsingStorFile(shortName: string, project: number, theme: string = 'Default') {
+export async function compileStyleUsingStorFile(shortName: string, project: number, folder:string, theme: string = 'Default') {
 
-    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, '', '.less');
+    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.less');
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!storFileLess) return;
 

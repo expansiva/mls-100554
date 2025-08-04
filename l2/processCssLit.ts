@@ -9,7 +9,7 @@ export async function injectStyle(modelTS: mls.editor.IModelTS, theme: string): 
 
 export async function injectStyleWithoutShadowRoot(modelTS: mls.editor.IModelTS, theme: string): Promise<void> {
     if (!modelTS) return;
-    const modelStyle = mls.editor.getModels(modelTS.storFile.project, modelTS.storFile.shortName)?.style;
+    const modelStyle = mls.editor.getModels(modelTS.storFile.project, modelTS.storFile.shortName, modelTS.storFile.folder)?.style;
     if (!modelStyle) return;
 
 
