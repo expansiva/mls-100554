@@ -7,6 +7,8 @@ import { StateLitElement } from './_100554_stateLitElement';
 import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { createPath } from './_100554_libCommom';
+import { collabImport } from './_100554_collabImport';
+
 
 import { globalState, setState, initState, getState } from './_100554_collabState';
 import { convertTagToFileName } from './_100554_utilsLit';
@@ -100,7 +102,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private themes: string[] = ['Default'];
 
-    private actualTheme = 'Default';
+    private actualTheme = '';
 
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
 
@@ -261,13 +263,11 @@ export class ServicePreview100554 extends ServiceBase {
     public onServiceClick(visible: boolean, reinit: boolean) {
 
         if (!visible) return;
-
         if (this.elPreview) {
             this.lastLevel = this.level;
             this.elPreview.setAttribute('level', this.level.toString());
             this.changeTools();
         } else {
-
             this.onReloader();
         }
     }
@@ -398,6 +398,7 @@ export class ServicePreview100554 extends ServiceBase {
     private onReloader(): void {
         clearTimeout(this.timeEvent);
         this.timeEvent = setTimeout(async () => {
+
             this.preview(this.lastModePreview);
             mls.events.fire((+(this.level as any)) as any, 'L3EditEvents' as any, `{"action":"navigation", "position":"right"}`, 500);
         }, 500);
@@ -493,18 +494,16 @@ export class ServicePreview100554 extends ServiceBase {
             const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
             const storFileHTML = mls.stor.files[keyToFileInfo];
 
-            if (fileAction.action === 'editorChanged', fileAction.extension === '.test.ts') {
+            if (fileAction.action === 'editorChanged' && fileAction.extension === '.test.ts') {
                 this.onTsTestChanged();
                 return;
             }
 
             if (fileAction.action === 'open' || (fileAction.action as any) === 'openBackground') {
                 setState('preview.pausePreview', false);
-
                 this.setModel(storFileHTML);
-
                 this.actualFile = storFileHTML;
-
+                this.setThemeByModule();
                 if (!this.watch && this.menu.selectTool) {
                     this.menu.selectTool('watchPreview');
                 }
@@ -969,7 +968,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async onBtTestListClick() {
 
-        if (!(mls.actual[2] as any).left) return;
+        if (!mls.actual[2].left) return;
         if (!this.menu || !this.menu.tools || !this.menu.tools.testList) return;
         const selectedIndex = this.menu.tools.testList.selected as number[];
         const [testIndex, actionIndex] = selectedIndex;
@@ -1052,7 +1051,7 @@ export class ServicePreview100554 extends ServiceBase {
     private onBtDarkLightClick() {
 
         this.light = !this.light;
-        if (!(mls.actual[2] as any).left || !this.watch) return this.light;
+        if (!mls.actual[2].left || !this.watch) return this.light;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         if (htmlEl) {
             if (this.light) htmlEl.removeAttribute('data-theme');
@@ -1185,6 +1184,34 @@ export class ServicePreview100554 extends ServiceBase {
 
         if (this.menu.tools.languages) this.menu.tools.languages.options = languagesOptions;
         if (this.menu.refresh) this.menu.refresh();
+    }
+
+    private async getFileModuleName(): Promise<string> {
+        if (!this.actualFile || !this.actualFile.folder) return 'Default';
+        const { project, folder } = this.actualFile;
+        const keyToModuleFile = mls.stor.getKeyToFiles(project, 2, 'module', folder, '.ts');
+        const storFile = mls.stor.files[keyToModuleFile];
+        if (!storFile) return 'Default';
+        const mModule = await collabImport({ folder, project, shortName: 'module' });
+        if (!mModule || !mModule.moduleConfig || !mModule.moduleConfig.theme) return 'Default';
+        return mModule.moduleConfig.theme
+    }
+
+    private async setThemeByModule() {
+
+        if (!this.actualFile) return;
+        const theme = await this.getFileModuleName();
+        if (!this.actualTheme) {
+            this.actualTheme = theme;
+            if (this.menu.tools.theme) {
+                const index = this.menu.tools.theme.options.findIndex((item) => item.text === theme);
+                if (this.menu.tools.theme) {
+                    this.menu.tools.theme.selected = index;
+                }
+            }
+            this.onStyleChanged();
+        }
+
     }
 
     private async setTheme() {
@@ -1442,6 +1469,8 @@ export class ServicePreview100554 extends ServiceBase {
         }
         const { project, shortName, folder } = mls.actual[2].left;
         const fullname = createPath(project, shortName, folder);
+        this.actualFile = mls.actual[2].left;
+        this.setThemeByModule();
         this.createPreview(mode, fullname);
     }
 
@@ -1456,7 +1485,20 @@ export class ServicePreview100554 extends ServiceBase {
             this.clearPreview();
             return;
         };
-        const fullname = `_${ project }_${path}`;
+
+        function getFolderAndName(path: string) {
+            const parts = path.split('/');
+            const shortName = parts.pop() || '';
+            const folder = parts.join('/');
+            return { folder, shortName };
+        }
+
+        const { folder, shortName } = getFolderAndName(path)
+        const keyStorFile = mls.stor.getKeyToFiles(project, level, shortName, folder, '.ts');
+        const storFile = mls.stor.files[keyStorFile];
+        const fullname = `_${project}_${path}`;
+        this.actualFile = storFile;
+        this.setThemeByModule();
         this.createPreview(mode, fullname);
     }
 
