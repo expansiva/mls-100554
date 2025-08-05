@@ -182,7 +182,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
             || `/// <mls shortName="${fileAction.newshortName}" project="${fileAction.newProject}" enhancement="${fileAction.newEnhancement}" />
 				\n// typescript new file\n`;
 
-        const modelBE = await this.createModelBE1(fileAction.newshortName as string, fileAction.newProject as number,
+        const modelBE = await this.createModelBE1(fileAction.newshortName as string, fileAction.newProject as number, fileAction.folder,
             newBeSource, true);
 
         this.showActiveModel();
@@ -234,7 +234,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
         }
 
         if (storFile.extension === '.ts') {
-            mls.editor.deleteModels(storFile.project, storFile.shortName, true);
+            mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
         }
 
         this.removeEventsStorFile(storFile);
@@ -267,7 +267,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
         this.activeThisService();
 
-        let fileModels = mls.editor.getModels(fileAction.project, fileAction.shortName);
+        let fileModels = mls.editor.getModels(fileAction.project, fileAction.shortName, fileAction.folder );
 
         if (!fileModels) fileModels = await this.createModelBE2(storFile, false, true);
 
@@ -333,8 +333,8 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
     private async createModelBE_clone(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string) {
 
-        const { project, shortName } = storFile;
-        let fileModels = mls.editor.getModels(project, shortName);
+        const { project, shortName, folder } = storFile;
+        let fileModels = mls.editor.getModels(project, shortName, folder);
 
         if (!fileModels || !fileModels.ts) fileModels = await this.createModelBE2(storFile, false, true);
         let modelTS = fileModels.ts;
@@ -349,7 +349,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
         defaultTS = defaultTS.replace(regex, newTag);
         defaultTS = this.changeClassName(defaultTS, newProject, newShortName);
 
-        modelTS = await this.createModelBE1(newShortName, newProject, defaultTS, true);
+        modelTS = await this.createModelBE1(newShortName, newProject, storFile.folder, defaultTS, true);
         this.tripleslashChangeVariable(modelTS.model, 'shortName', newShortName);
         this.tripleslashChangeVariable(modelTS.model, 'project', newProject.toString());
     }
@@ -430,11 +430,11 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
             this.activeThisService();
 
-            let fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
+            let fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName, storFileTS.folder);
 
             if (!fileModels) {
                 await this.createModelBE2(storFileTS, true, true);
-                fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName);
+                fileModels = mls.editor.getModels(storFileTS.project, storFileTS.shortName, storFileTS.folder);
                 if (!fileModels) console.info('No file models');
                 this.activeModels = fileModels;
                 (mls.editor.editors as any)[this.getKeyEditor] = fileModels;
@@ -496,7 +496,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
     }
 
-    private async createModelBE1(shortName: string, project: number, defaultTS: string, activateModel: boolean): Promise<mls.editor.IModelTS> {
+    private async createModelBE1(shortName: string, project: number, folder:string, defaultTS: string, activateModel: boolean): Promise<mls.editor.IModelTS> {
 
         const level = 2;
         const extension = '.ts';
@@ -512,7 +512,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
             storFile.status = 'new';
         }
 
-        let fileModels = mls.editor.getModels(project, shortName);
+        let fileModels = mls.editor.getModels(project, shortName, folder);
         if (fileModels && fileModels.ts) return fileModels.ts;
 
         const src: string = storFile ? (await storFile.getContent(defaultTS)) as string || defaultTS : defaultTS;
@@ -525,7 +525,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
         this.addEventsModelTS(storFile, modelBase);
 
         await this.updateModelStatus(modelBase, false); // first compilation
-        fileModels = mls.editor.getModels(project, shortName);
+        fileModels = mls.editor.getModels(project, shortName, folder);
         if (activateModel) this.activeModels = fileModels;
         return modelBase as mls.editor.IModelTS;
     }
@@ -533,9 +533,9 @@ export class ServiceSourceL1100554 extends ServiceBase {
     private async createModelBE2(storFile: mls.stor.IFileInfo, activedModel: boolean, compile: boolean): Promise<mls.editor.IModels> {
         // load source from repository
 
-        const { project, shortName, extension } = storFile;
+        const { project, shortName, extension, folder } = storFile;
 
-        let fileModels = mls.editor.getModels(project, shortName);
+        let fileModels = mls.editor.getModels(project, shortName, folder);
         if (fileModels && fileModels.ts && fileModels.html && fileModels.style) return fileModels;
 
         let modelTS: mls.editor.IModelTS | undefined;
@@ -546,7 +546,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
         if (compile) await this.updateModelStatus(modelTS, false);
 
-        fileModels = mls.editor.getModels(project, shortName);
+        fileModels = mls.editor.getModels(project, shortName, folder);
         if (activedModel) this.activeModels = fileModels;
         if (!fileModels) throw new Error(`Invalid models for file: _${project}_${shortName}.ts`);
         return fileModels;
@@ -601,7 +601,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
     private async afterUpdate(storFile: mls.stor.IFileInfo) {
 
-        const models = mls.editor.getModels(storFile.project, storFile.shortName);
+        const models = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder);
         if (!models || !models.ts) return;
 
         if (storFile.status === 'deleted') {
@@ -643,7 +643,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
     private async deleteFile(storFile: mls.stor.IFileInfo) {
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-        mls.editor.deleteModels(storFile.project, storFile.shortName, true);
+        mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
         this.removeEventsStorFile(storFile);
         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
         delete mls.stor.files[keyFiles];

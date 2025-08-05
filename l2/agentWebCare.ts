@@ -87,7 +87,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
 
     await forceServiceInstance(2, '_100554_serviceSource')
 
-    const info = getInfoPage(step.content.page)
+    const info =  getInfoPage(step.content.page)
 
     const contentHTML = step.content.html ? step.content.html : undefined;
     const contentTS = step.content.ts ? step.content.ts : undefined;
@@ -313,20 +313,26 @@ async function systemDefinitionBaseLessInstruction(json: any): Promise<mls.msg.I
 
 }
 
-function getInfoPage(fullName: string): { project: number, shortName: string } {
+function getInfoPage(fullName: string): { project: number, shortName: string, folder:string } {
 
     let pr = fullName.substring(1).split("_")[0];
     let prID: number = Number(pr);
     if (isNaN(prID)) prID = 0; // error
 
-    const shortName = fullName.substring(pr.length + 2);
-    return {project:prID, shortName}
+    let shortName = fullName.substring(pr.length + 2);
+    let folder = '';
+    let split = shortName.split('/');
+    if (split.length >= 2) {
+        shortName = split.pop() || shortName;
+        folder = split.join('/');
+    }
+    return {project:prID, shortName, folder}
 
 }
 
-function getModel(info: { project: number, shortName: string }):mls.editor.IModels | undefined {
+function getModel(info: { project: number, shortName: string, folder:string }):mls.editor.IModels | undefined {
     
-    const key = mls.editor.getKeyModel(info.project,  info.shortName);
+    const key = mls.editor.getKeyModel(info.project,  info.shortName, info.folder);
     return mls.editor.models[key];
 
 }

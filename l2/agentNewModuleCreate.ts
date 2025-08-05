@@ -330,7 +330,8 @@ async function generateOrganism(payload3: PayLoad3, project: number, folder: str
         const organism = payload3.organism[index];
         const shortTagName = organism.organismTag;
         const fullName = convertTagToFileName(`${shortTagName}-${project}`);
-        const { shortName } = mls.l2.getPath(fullName)
+        const { shortName } = fullName || {};
+        if(!shortName) throw new Error('[generateOrganism] Not found shortName')
         const enhancement = '_100554_enhancementLit';
 
         await createNewFile(
@@ -353,7 +354,8 @@ async function generateTable(payload3: PayLoad3, project: number, folder: string
         const shortNameAux = sanitizeMeta(entity.entityName.toLowerCase(), project, folder);
         const aux = prepareNameTable(shortNameAux);
         const fullName = convertTagToFileName(`${aux}-${project}`);
-        const { shortName } = mls.l2.getPath(fullName)
+        const { shortName } = fullName || {};
+        if(!shortName) throw new Error('[generateTable] Not found shortName')
         const enhancement = '_100554_enhancementLit';
 
 
@@ -379,7 +381,8 @@ function generateTsTable(payload: PayLoad3, project: number, folder: string, ind
         const shortNameAux = sanitizeMeta(entity.entityName.toLowerCase(), project, folder);
         const aux = prepareNameTable(shortNameAux);
         const fullName = convertTagToFileName(`${aux}-${project}`);
-        const { shortName } = mls.l2.getPath(fullName)
+        const { shortName } = fullName || {};
+        if(!shortName) throw new Error('[generateTsTable] Not found shortName')
         const enhancement = '_100554_enhancementLit';
         const tagName = `${shortNameAux}-${project}`;
         const groupName = payload.finalModuleDetails.moduleName;
@@ -438,7 +441,8 @@ function generateTsOrganism(payload: PayLoad3, project: number, folder: string, 
         const organism = payload.organism[index];
         const tagName = organism.organismTag;
         const fullName = convertTagToFileName(`${tagName}-${project}`);
-        const { shortName } = mls.l2.getPath(fullName)
+        const { shortName } = fullName || {};
+        if(!shortName) throw new Error('[generateTsOrganism] Not found shortName')
         const enhancement = '_100554_enhancementLit';
         const groupName = payload.finalModuleDetails.moduleName;
         const fileName = `_${project}_${shortName}`
@@ -483,7 +487,7 @@ function generateTsPage(payload: PayLoad3, project: number, folder: string, inde
     const enhancement = '_100554_enhancementLit';
     const groupName = payload.finalModuleDetails.moduleName;
     const fileName = `_${project}_${shortName}`
-    const tagName = convertFileNameToTag(fileName);
+    const tagName = convertFileNameToTag({shortName, project, folder});
 
     const ts = `
 /// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
@@ -506,7 +510,7 @@ function generateHtmlPage(payload: PayLoad3, project: number, folder: string, in
     const pageWirefame = payload.pagesWireframe[index];
     const shortName = pageWirefame.pageName;
     const fileName = `_${project}_${shortName}`
-    const pagetagName = convertFileNameToTag(fileName);
+    const pagetagName = convertFileNameToTag({shortName, project, folder});
 
     const suffix = `-${project}`;
 
@@ -539,7 +543,7 @@ export async function getListFilesToDelete(group: string, project: number, folde
     );
 
     for await (let storFile of filesLocal) {
-        const keyModel = mls.l2.getKey(storFile);
+        const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
         let models: mls.editor.IModels | undefined = mls.editor.models[keyModel];
         if (!models) models = await mls.editor.addModels(storFile.project, storFile.shortName, '')
         if (models && models.ts) {
@@ -581,8 +585,8 @@ export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
     }
 
     for (const data of modelsToDelete) {
-        const keyModel = mls.l2.getKey(data);
-        mls.editor.deleteModels(data.project, data.shortName, true);
+        const keyModel = mls.editor.getKeyModel(data.project, data.shortName, data.folder);
+        mls.editor.deleteModels(data.project, data.shortName, data.folder, true);
         yield `Model deleted : ${keyModel}`;
     }
 
@@ -645,7 +649,8 @@ function generateOrganismDefsFromLLM(payload: PayLoad3, index: number, project: 
 
     let shortName1 = sanitizeMeta(organism.organismTag, project, folder);
     const fileName = convertTagToFileName(`${shortName1}-${project}`);
-    const { shortName } = mls.l2.getPath(fileName);
+    const { shortName } = fileName || {};
+    if(!shortName) throw new Error('[generateOrganismDefsFromLLM] Not found shortName')
 
     const tableImports = extractTablesFromDataNeeds(organism.organismDataNeeds);
 

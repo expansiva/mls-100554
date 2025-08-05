@@ -17,6 +17,7 @@ const message_pt = {
     addNewFile: "adicionar novo arquivo",
     filter: "Filtrar",
     localProject: "Todos projetos",
+    projectFolder: "Pasta",
     totalFiles: "arquivos totais",
     filesWithErrors: "arquivos com erros",
     filesInLocalStorage: "arquivos no armazenamento local",
@@ -34,6 +35,7 @@ const message_en = {
     update: 'update',
     addNewFile: 'add new file',
     filter: 'Filter',
+    projectFolder: "Folder",
     localProject: 'Upstream project',
     totalFiles: 'total files',
     filesWithErrors: 'files with errors',
@@ -218,7 +220,7 @@ export class PluginExploreList extends PluginBaseModule {
                 ${this.renderHeader()}
                 <ul>
                     ${this.renderHistory()}
-                    ${this.renderList()}
+                    ${this.project === -1 ? this.renderFolder() :this.renderList()}
                 </ul>
             </div>
         `;
@@ -263,6 +265,8 @@ export class PluginExploreList extends PluginBaseModule {
                         <div class="groupFilterRadio">
                             <input id="${this.position}radioProjectActual" name="projectFind" type="radio" checked="checked" value="${this.projectLabel}" @click="${this.clickRadioProjectActual}">
                             <label for="${this.position}radioProjectActual">${this.projectLabel}</label>
+                            <input id="${this.position}radioProjectFolder" name="projectFind" type="radio" value="-1" @click="${this.clickRadioProject1}">
+                            <label for="${this.position}radioProjectFolder">${this.msg.projectFolder}</label>
                             <input id="${this.position}radioProjectZero" name="projectFind" type="radio" value="0" @click="${this.clickRadioProject0}">
                             <label for="${this.position}radioProjectZero">${this.msg.localProject}</label>
                         </div>
@@ -321,6 +325,51 @@ export class PluginExploreList extends PluginBaseModule {
                                     ${this.renderLiItem(file, index, false)}
                                 `
                         }
+
+                        return this.renderLiItem(file, index, false)
+
+                    }) as any
+                )}
+                `
+            }
+        `;
+    }
+
+    renderFolder() {
+
+        const folders: Record<string, mls.stor.IFileInfo[]> = {};
+        this.files.forEach((f) => {
+            let folder = f.folder;
+            if (!f.folder) folder = '000000';
+            if (folders[folder]) folders[folder].push(f);
+            else folders[folder] = [f];
+        });
+        let keys = Object.keys(folders).sort();
+
+        if (keys.length <= 0) return html``;
+
+        return html`
+        ${repeat(keys, ((item: string) => item) as any, ((key: string, index: any) => {
+
+            return html`
+                <li class="headerTitle">${key === '000000' ? 'root' : key} </li>
+                ${this.renderFolder2(folders[key])}
+            `
+            }) as any
+        )}`
+
+
+    }
+
+    renderFolder2(files: mls.stor.IFileInfo[]) {
+
+        return html`
+            ${files.length <= 0 ? '' :
+                html`
+                    ${repeat(
+                    files,
+                    ((item: mls.stor.IFileInfo) => item.project + '_' + item.shortName + '_' + item.folder) as any,
+                    ((file: mls.stor.IFileInfo, index: any) => {
 
                         return this.renderLiItem(file, index, false)
 
@@ -394,8 +443,6 @@ export class PluginExploreList extends PluginBaseModule {
         const validProject = this.project === 0 && mls.actualProject !== file.project && file.project !== 0 ? false : true;
 
         let auxValidProject = '';
-        //if (!validProject) auxValidProject = ';user-select: none; pointer-events: none; opacity: .5;';
-        //if (this.project !== 0 && file.project !== this.project) auxValidProject = 'display:none';
 
         return html`
             <li @click="${this.clickOptOpen}" class="${file.shortName === actualL2 && file.folder === actualL2Folder ? 'selected' : ''}" style="${style}${auxValidProject}" .myFile=${file} .nameFilter="${nameFilter}" ?disabled=${!validProject}>
@@ -789,6 +836,17 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
+    private async clickRadioProject1(e: MouseEvent) {
+
+        this.info.tot = 0;
+        this.info.version = 0;
+        this.info.storage = 0;
+        this.info.error = 0;
+        this.project = -1;
+        await this.getFiles();
+
+    }
+
     private clickRadioProjectActual(e: MouseEvent): void {
 
         this.info.tot = 0;
@@ -921,7 +979,7 @@ export class PluginExploreList extends PluginBaseModule {
                 sf.extension !== ext
             ) continue;
 
-            if (this.project !== 0 && sf.project !== this.project) continue;
+            if (this.project > 0  && sf.project !== this.project) continue;
 
             if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
                 continue;

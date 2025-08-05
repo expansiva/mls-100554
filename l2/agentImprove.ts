@@ -174,7 +174,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
 }
 
 function getModel(info: { project: number, shortName: string, folder: string }): mls.editor.IModels | undefined {
-    const key = mls.editor.getKeyModel(info.project, info.shortName);
+    const key = mls.editor.getKeyModel(info.project, info.shortName, info.folder);
     return mls.editor.models[key];
 }
 

@@ -102,7 +102,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     const key = mls.stor.getKeyToFiles(step.result.project, 2, step.result.shortName, '', '.html');
     const file = mls.stor.files[key];
 
-    const m = mls.editor.getModels(project, pageName);
+    const m = mls.editor.getModels(project, pageName, '');
     if (m && m.html) m.html.model.setValue(fileHTML)
     else if(file) {
 
