@@ -157,7 +157,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		const { branch, owner, repo } = dL.getMyKeysBranch(file.project);
 
 		if (!branch || !owner || !repo) return 'https://github.com/';
-		const url = `https://github.com/${owner}/${repo}/blob/${branch}/l2/${file.shortName}${file.extension}`;
+		let url = `https://github.com/${owner}/${repo}/blob/${branch}/l2/${file.shortName}${file.extension}`;
+		if (file.folder) url = `https://github.com/${owner}/${repo}/blob/${branch}/l2/${file.folder}/${file.shortName}${file.extension}`;
 		return url;
 	}
 
@@ -898,7 +899,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-	private addVariableIO2(owner:string, repo:string, newVariable: string, secret: string): Promise<boolean> {
+	private addVariableIO2(owner: string, repo: string, newVariable: string, secret: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1038,7 +1039,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
-			if (!repo || !owner ) {
+			if (!repo || !owner) {
 				reject(new Error('Information invalid!'));
 				return;
 			}
@@ -1062,16 +1063,16 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 						enabled: true,
 						default_workflow_permissions: 'write',
 						allowed_actions: 'all',
-						can_approve_pull_request_reviews:true
+						can_approve_pull_request_reviews: true
 					}),
 					referrerPolicy: 'no-referrer',
 				});
 
-				if (![200,204].includes(retFetch.status)) {
+				if (![200, 204].includes(retFetch.status)) {
 					throw new Error(`Error: set permission action`);
 				}
 
-				
+
 				resolve(true);
 
 			} catch (err) {
