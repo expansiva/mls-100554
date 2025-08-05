@@ -405,7 +405,7 @@ export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
 
     for (const data of modelsToDelete) {
         const keyModel = mls.editor.getKeyModel(data.project, data.shortName, data.folder);
-        mls.editor.deleteModels(data.project, data.shortName, true);
+        mls.editor.deleteModels(data.project, data.shortName, data.folder, true);
         yield `Model deleted : ${keyModel}`;
     }
 

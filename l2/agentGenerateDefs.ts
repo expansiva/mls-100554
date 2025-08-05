@@ -4,7 +4,7 @@ import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { forceServiceInstance } from './_100554_libCommom';
 import { getPromptByHtml } from './_100554_aiPrompts';
 import { getState } from './_100554_collabState';
-import { ServiceSource100554 } from './_100554_serviceSource';
+import { createAllModels } from './_100554_collabLibModel';
 
 
 import {
@@ -121,13 +121,14 @@ export const defs: mls.l4.BaseDefs = ${JSON.stringify(result, null, 2)}
         storFileDefs = await createStorFile(result.meta.projectId, result.meta.shortName, result.meta.folder || '', template, '.defs.ts');
         storFileDefs.updatedAt = new Date().toISOString();
     } else {
-        let models = mls.editor.getModels(result.meta.projectId, result.meta.shortName);
+        let models = mls.editor.getModels(result.meta.projectId, result.meta.shortName, result.meta.folder);
         if (!models || !models.defs) {
-            const position: string = 'left';
-            const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
-            if (!serviceSource) throw new Error('Not found service source instance');
-            await serviceSource.createModels(storFileTs);
-            models = mls.editor.getModels(result.meta.projectId, result.meta.shortName);
+            //const position: string = 'left';
+            //const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
+            //if (!serviceSource) throw new Error('Not found service source instance');
+            //await serviceSource.createModels(storFileTs);
+            await createAllModels(storFileTs);
+            models = mls.editor.getModels(result.meta.projectId, result.meta.shortName, result.meta.folder);
             if (!models || !models.defs) throw new Error('Erro, model error on AddModels, stoping');
             models.defs.model.setValue(template);
             storFileDefs.updatedAt = new Date().toISOString();

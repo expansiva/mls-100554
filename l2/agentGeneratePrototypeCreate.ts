@@ -305,8 +305,9 @@ async function generateOrganism(payload3: PayLoad3, project: number, folder: str
         const organism = payload3.organism[index];
         const shortTagName = organism.organismTag;
         const fullName = convertTagToFileName(`${shortTagName}-${project}`);
-        const { shortName } = mls.l2.getPath(fullName)
         const enhancement = '_100554_enhancementLit';
+        const { shortName } = fullName || {};
+        if (!shortName) throw new Error('[generateOrganism] Not found shortName')
 
         await createNewFile(
             { project, position: 'right', shortName, enhancement, sourceTS: ts.trim(), sourceHTML: html, sourceDefs: defs, openPreview: false }
@@ -324,7 +325,8 @@ function generateTsOrganism(payload: PayLoad3, project: number, folder: string, 
         const organism = payload.organism[index];
         const tagName = organism.organismTag;
         const fullName = convertTagToFileName(`${tagName}-${project}`);
-        const { shortName } = mls.l2.getPath(fullName)
+        const { shortName } = fullName || {};
+        if (!shortName) throw new Error('[generateTsOrganism] Not found shortName')
         const enhancement = '_100554_enhancementLit';
         const groupName = payload.finalModuleDetails.moduleName;
         const fileName = `_${project}_${shortName}`
@@ -369,7 +371,7 @@ function generateTsPage(payload: PayLoad3, project: number, folder: string, inde
     const enhancement = '_100554_enhancementLit';
     const groupName = payload.finalModuleDetails.moduleName;
     const fileName = `_${project}_${shortName}`
-    const tagName = convertFileNameToTag(fileName);
+    const tagName = convertFileNameToTag({ shortName, project, folder });
 
     const ts = `
 /// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
@@ -392,7 +394,7 @@ function generateHtmlPage(payload: PayLoad3, project: number, folder: string, in
     const pageWirefame = payload.pagesWireframe[index];
     const shortName = pageWirefame.pageName;
     const fileName = `_${project}_${shortName}`
-    const pagetagName = convertFileNameToTag(fileName);
+    const pagetagName = convertFileNameToTag({ shortName, folder, project });
 
     const suffix = `-${project}`;
 
@@ -435,7 +437,8 @@ function generateOrganismDefsFromLLM(payload: PayLoad3, index: number, project: 
 
     let shortName1 = sanitizeMeta(organism.organismTag, project, folder);
     const fileName = convertTagToFileName(`${shortName1}-${project}`);
-    const { shortName } = mls.l2.getPath(fileName);
+    const { shortName } = fileName || {};
+    if (!shortName) throw new Error('[generateOrganismDefsFromLLM] Not found shortName')
 
     const defs: mls.l4.BaseDefs = {
         meta: {
@@ -542,7 +545,8 @@ export async function generateOrganismPrototype(payload3: PayLoad3, payLoadProto
         const organism = payload3.organism[indexOrganism];
         const shortTagName = organism.organismTag;
         const fullName = convertTagToFileName(`${shortTagName}-${project}`);
-        const { shortName } = mls.l2.getPath(fullName)
+        const { shortName } = fullName || {};
+        if (!shortName) throw new Error('[generateOrganismDefsFromLLM] Not found shortName')
         const enhancement = '_100554_enhancementLit';
 
         await createNewFile(
@@ -558,39 +562,40 @@ export async function generateOrganismPrototype(payload3: PayLoad3, payLoadProto
 
 
 async function generateTsOrganismPrototype(
-  payload: PayLoad3,
-  images: Record<string, string>,
-  source: string,
-  project: number,
-  indexOrganism: number
+    payload: PayLoad3,
+    images: Record<string, string>,
+    source: string,
+    project: number,
+    indexOrganism: number
 ) {
-  try {
-    const organism = payload.organism[indexOrganism];
-    const tagName = organism.organismTag;
-    const fullName = convertTagToFileName(`${tagName}-${project}`);
-    const { shortName } = mls.l2.getPath(fullName);
-    const enhancement = '_100554_enhancementLit';
-    const groupName = payload.finalModuleDetails.moduleName;
+    try {
+        const organism = payload.organism[indexOrganism];
+        const tagName = organism.organismTag;
+        const fullName = convertTagToFileName(`${tagName}-${project}`);
+        const { shortName } = fullName || {};
+        if (!shortName) throw new Error('[generateTsOrganismPrototype] Not found shortName')
+        const enhancement = '_100554_enhancementLit';
+        const groupName = payload.finalModuleDetails.moduleName;
 
-    await updateTokensTheme(project, 'Default', payload.tokens);
-    const resolvedImages = await getAllImages(images);
+        await updateTokensTheme(project, 'Default', payload.tokens);
+        const resolvedImages = await getAllImages(images);
 
-    let finalSource = source;
-    for (const [key, url] of Object.entries(resolvedImages)) {
-      const pattern = new RegExp(`\\[${key}\\]`, 'g');
-      finalSource = finalSource.replace(pattern, url);
-    }
+        let finalSource = source;
+        for (const [key, url] of Object.entries(resolvedImages)) {
+            const pattern = new RegExp(`\\[${key}\\]`, 'g');
+            finalSource = finalSource.replace(pattern, url);
+        }
 
-    const ts = `
+        const ts = `
 /// <mls shortName="${shortName}" project="${project}" enhancement="${enhancement}" groupName="${groupName}" />
 
 ${finalSource}
 `;
 
-    return ts;
-  } catch (err: any) {
-    return `// Error: ${err.message}`;
-  }
+        return ts;
+    } catch (err: any) {
+        return `// Error: ${err.message}`;
+    }
 }
 
 function generateLessOrganismPrototype(payload: PayLoad3, source: string, project: number, indexOrganism: number): string {
@@ -600,27 +605,27 @@ function generateLessOrganismPrototype(payload: PayLoad3, source: string, projec
 `
 }
 
- async function getAllImages(
-  imageMap: Record<string, string>
+async function getAllImages(
+    imageMap: Record<string, string>
 ): Promise<Record<string, string>> {
-  const resolved: Record<string, string> = {};
+    const resolved: Record<string, string> = {};
 
-  for (const [key, query] of Object.entries(imageMap)) {
-    try {
-      const result = await getImages(query, 1, 1);
-      if (result.images && result.images.length > 0) {
-        const image = result.images[0];
-        resolved[key] = image.urls.regular;
-      } else {
-        resolved[key] = `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
-      }
-    } catch (err) {
-      console.warn(`Failed to get image for "${query}":`, err);
-      resolved[key] = `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
+    for (const [key, query] of Object.entries(imageMap)) {
+        try {
+            const result = await getImages(query, 1, 1);
+            if (result.images && result.images.length > 0) {
+                const image = result.images[0];
+                resolved[key] = image.urls.regular;
+            } else {
+                resolved[key] = `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
+            }
+        } catch (err) {
+            console.warn(`Failed to get image for "${query}":`, err);
+            resolved[key] = `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
+        }
     }
-  }
 
-  return resolved;
+    return resolved;
 }
 
 

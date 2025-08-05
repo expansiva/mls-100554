@@ -251,7 +251,7 @@ export async function undoFile(storFile: mls.stor.IFileInfo, removeProject: bool
 
     storFile.getValueInfo = undefined;
 
-    const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName);
+    const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
     if (!mls.editor.models[keyToModel]) return;
 
     const prop = mapExtUndo[storFile.extension];
@@ -319,7 +319,7 @@ function replaceTripleslashAndTag(storFile: mls.stor.IFileInfo, newProject: numb
 async function deleteFileSystem(storFile: mls.stor.IFileInfo) {
 
     await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-    mls.editor.deleteModels(storFile.project, storFile.shortName, true);
+    mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
     const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
     delete mls.stor.files[keyFiles];
 }
