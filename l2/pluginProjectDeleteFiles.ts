@@ -136,7 +136,7 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
     }
 
     private getFileKey(file: mls.stor.IFileInfo): string {
-        return `_${file.project}_${file.shortName}${file.extension}`;
+        return file.folder ? `_${file.project}_${file.folder}/${file.shortName}${file.extension}` : `_${file.project}_${file.shortName}${file.extension}`;
     }
 
     private clear() {
@@ -152,7 +152,7 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
             this.logs.push('No project selected');
             return;
         }
-        this.filesToDelete = await getListNewFilesToDeleteByGroup(this.groupName, project, '');
+        this.filesToDelete = await getListNewFilesToDeleteByGroup(this.groupName, project, this.groupName);
         this.selectedFiles = new Map(
             this.filesToDelete.map(file => [this.getFileKey(file), file])
         );
@@ -166,7 +166,7 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
             this.logs.push(log);
             this.requestUpdate();
         }
-        
+
         this.logs.push('All files removed');
         const key = mls.stor.getKeyToFiles(100554, 2, 'pluginProjectDeleteFiles', '', '.ts');
         const storFile = mls.stor.files[key];

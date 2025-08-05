@@ -16,6 +16,8 @@ import {
   collab_file_half_dashed
 } from './_100554_collabIcons';
 import { globalState, getState, initState } from './_100554_collabState';
+import { collabImport } from './_100554_collabImport';
+
 
 import { ServiceSource100554 } from './_100554_serviceSource';
 
@@ -419,8 +421,6 @@ export class PluginPreviewInsights100554 extends StateLitElement {
           <section>
             ${this.renderUserRequestsEnhancements()}
           </section>
-    
-  
       </div>
         `
   }
@@ -682,18 +682,13 @@ export class PluginPreviewInsights100554 extends StateLitElement {
   private async setInfos() {
 
     if (!this.page) throw new Error(`Page not found: ${this.page}`);
-    mls.actual[0].setFullName(this.page);
 
-    const { project, path } = mls.actual[0];
-    if (!project || !path) throw new Error(`Project or path invalids: ${this.page}`);
-
-    const f = mls.actual[0].getStorFile();
-
-    const mkey = mls.l2.getKey({ project, shortName: path, folder: f ? f.folder : '' });
-    
+    const { project, folder, shortName } = mls.l2.getPath(this.page);
+    if (!project || !shortName) throw new Error(`Project or shortName invalids: ${this.page}`);
+    const mkey = mls.editor.getKeyModel(project, shortName, folder);
     this.models = mls.editor.models[mkey];
 
-    const moduleDefs = await import(`./${this.page}.defs.js?cache_bust=${Date.now()}`);
+    const moduleDefs = await collabImport({ project, folder, shortName });
     if (!moduleDefs) throw new Error('Invalid module defs.ts:' + mkey);
     if (!moduleDefs.defs) throw new Error('Invalid const defs in module .defs.ts:' + mkey);
 
@@ -713,7 +708,7 @@ export class PluginPreviewInsights100554 extends StateLitElement {
 
     if ('compileEmbedding' in result) delete result.compileEmbedding;
 
-    let models = mls.editor.getModels(result.meta.projectId, result.meta.shortName);
+    let models = mls.editor.getModels(result.meta.projectId, result.meta.shortName, result.meta.folder);
     if (!models) models = await mls.editor.addModels(result.meta.projectId, result.meta.shortName, result.meta.folder || '')
     if (!models) throw new Error('Erro, model error on AddModels, stoping');
 
