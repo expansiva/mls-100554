@@ -510,7 +510,7 @@ export class ServiceSource100554 extends ServiceBase {
     private async showHistorie2() {
 
         if (!this.menu.tabs || !this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
-        const { shortName, project } = this.activeModels.ts.storFile;
+        const { shortName, project, folder } = this.activeModels.ts.storFile;
 
         const div = document.createElement('div');
         const scr = document.createElement('script');
@@ -530,6 +530,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         const wc = document.createElement('mls-history-list-100554');
         wc.setAttribute('project', project.toString());
+        wc.setAttribute('folder', folder);
         wc.setAttribute('shortName', shortName);
         wc.setAttribute('level', '2');
         if (this.menu.tabs.selected !== undefined) wc.setAttribute('extension', obj[this.menu.tabs.selected]);
