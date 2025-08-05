@@ -485,7 +485,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				if (file.status === 'new') resolve([]);
 
-				const filename = file.shortName + (file.extension.startsWith('.') ? file.extension : '.' + file.extension);
+				let filename = file.shortName + (file.extension.startsWith('.') ? file.extension : '.' + file.extension);
+				if (file.folder) filename = file.folder + '/' + filename;
 				const oid = file.versionRef;
 				const data = await this.getHistoryIO(file.project, file.level.toString(), filename, oid);
 				if (data.length <= 0) resolve([]);
