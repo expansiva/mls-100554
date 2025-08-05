@@ -15,14 +15,14 @@ const staticImports = new Set<string>(); // Tracks modules imported outside dev 
 
 export async function collabImport(opts: CollabImportOptions): Promise<any> {
 
-    const moduleId = `${opts.project}-${opts.folder}/${opts.shortName}`;
+    const moduleId = opts.folder ? `${opts.project}-${opts.folder}/${opts.shortName}` : `${opts.project}-/${opts.shortName}`;
     const isDev = await fileInDevelopment(opts);
 
     if (!isDev) {
         const url = getUrlFromFileInfo(opts, null);
         staticImports.add(moduleId);
         return import(/* @vite-ignore */ url);
-        
+
     }
 
     const version = await getFileVersion(opts);
@@ -46,7 +46,7 @@ async function fileInDevelopment(opts: CollabImportOptions): Promise<boolean> {
 }
 
 async function getFileVersion(opts: CollabImportOptions): Promise<string> {
-    const modelKey = mls.editor.getKeyModel(opts.project, opts.shortName);
+    const modelKey = mls.editor.getKeyModel(opts.project, opts.shortName, opts.folder);
     const model = mls.editor.models[modelKey];
     if (!model || !model.ts) return '';
     const crcActual = mls.common.crc.crc32(model.ts.model.getValue()).toString(16);
@@ -54,6 +54,6 @@ async function getFileVersion(opts: CollabImportOptions): Promise<string> {
 }
 
 function getUrlFromFileInfo(opts: CollabImportOptions, version: string | null): string {
-    const base = `/_${opts.project}_${opts.shortName}`;
+    const base = opts.folder ? `/_${opts.project}_${opts.folder}/${opts.shortName}` : `/_${opts.project}_${opts.shortName}`;
     return version ? `${base}?t=${version}` : base;
 }
