@@ -91,6 +91,12 @@ const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls
 }
 
 const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> => {
+    const projectStart = context.task?.iaCompressed?.longMemory['project'];
+    if (mls.actualProject?.toString() !== projectStart) {
+        const div = document.createElement('div');
+        div.innerHTML = 'This task may only be continued on project: ' + projectStart;
+        return div;
+    }
     return startClarification(context, stepId);
 }
 

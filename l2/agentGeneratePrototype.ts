@@ -53,7 +53,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context.task) {
         // const inputs: any = await getPrompts(context.message.content || getPromptMock());
         const inputs: any = await getPrompts(getPromptMock());
-        await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
+        await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt, { "project": mls.actualProject?.toString() || '0' });
         return;
     }
     const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
@@ -75,6 +75,12 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 
 const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number, readOnly: boolean): Promise<HTMLDivElement | null> => {
+    const projectStart = context.task?.iaCompressed?.longMemory['project'];
+    if (mls.actualProject?.toString() !== projectStart) {
+        const div = document.createElement('div');
+        div.innerHTML = 'This task may only be continued on project: ' + projectStart;
+        return div;
+    }
     return startClarification(context, stepId, readOnly);
 }
 
