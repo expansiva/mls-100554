@@ -51,19 +51,11 @@ Examples: Stripe (payment), Sentry (error tracking), Google Analytics (usage tra
 
 7. Analyze the user’s preferences and the type of website being built. Then create a .less token system based on default design tokens and tailored to this module. Store the results in the “tokens” field.
 Guidelines:
-- Include tokens for:
-	•	Colors: primary, secondary, accent, background, surface, text (normal, secondary, disabled), border, link (normal, hover, visited), overlay.
-	•	Spacing: from xxs to xxl (use rem units).
-	•	Typography: font families, sizes (xs–xxl), font weights, line heights.
-	•	Border radius: xs to lg.
-	•	Shadows: at least 3 levels (sm, md, lg).
-	•	Transitions: base, fast, slow (with easing).
-	•	Z-index: modal, tooltip, dropdown.
-- Token names must follow the naming pattern: token-category-name, e.g., color-primary, spacing-md.
+- Use the existing token names as a base. Do not create new names — just keep the current structure (e.g., text-primary-color, bg-primary-color, @font-size-12, etc.).
+- Replace the token values as needed to match the new design.
 - Use scalable units (like rem or em) instead of fixed px values where possible.
 - Colors should reflect the platform’s visual identity and accessibility best practices (e.g., minimum contrast ratios).
 - For dark mode support, generate a variant of each color token by prefixing with _dark- (e.g., color-background → _dark-color-background), using appropriate values for dark interfaces.
-
 
 ## Output format (JSON):
 ```json
