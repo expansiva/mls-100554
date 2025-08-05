@@ -90,7 +90,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     @property() levelFiles: number = 2;
 
-    @property() project: number = 1;
+    @property() modeView: number = 1; // -1: mode folder; 0: all project
 
     @property() projectLabel: string = '1';
 
@@ -131,7 +131,7 @@ export class PluginExploreList extends PluginBaseModule {
     private setEvents() {
 
         mls.events.addEventListener([2, 5], ['ProjectSelected'], (ev) => {
-            if (this.project === mls.actualProject) return;
+            if (this.modeView === mls.actualProject) return;
             this.init();
         });
 
@@ -220,7 +220,7 @@ export class PluginExploreList extends PluginBaseModule {
                 ${this.renderHeader()}
                 <ul>
                     ${this.renderHistory()}
-                    ${this.project === -1 ? this.renderFolder() :this.renderList()}
+                    ${this.modeView === -1 ? this.renderFolder() :this.renderList()}
                 </ul>
             </div>
         `;
@@ -293,7 +293,7 @@ export class PluginExploreList extends PluginBaseModule {
             ${this.history.length <= 0 ? '' :
                 html`
                     <li class="headerTitle">
-                        ${+this.project === 0 ? `${this.msg.history} (All Projects)` : `${this.msg.history}`}
+                        ${+this.modeView === 0 ? `${this.msg.history} (All Projects)` : `${this.msg.history}`}
                     </li>
                     ${repeat(
                     this.history,
@@ -399,7 +399,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     renderLiItem(file: mls.stor.IFileInfo, index: number, inHistory: boolean) {
 
-        const name = this.getAllName(file);
+        const name = this.getAllName(file, inHistory);
         const nameFilter = inHistory ? '*******' : name.toLocaleLowerCase();
 
         let auxVersion = '';
@@ -440,7 +440,7 @@ export class PluginExploreList extends PluginBaseModule {
         const actualL2 = (mls.actual[2] as any)[this.position]?.shortName;
         const actualL2Folder = (mls.actual[2] as any)[this.position]?.folder;
 
-        const validProject = this.project === 0 && mls.actualProject !== file.project && file.project !== 0 ? false : true;
+        const validProject = this.modeView === 0 && mls.actualProject !== file.project && file.project !== 0 ? false : true;
 
         let auxValidProject = '';
 
@@ -468,14 +468,20 @@ export class PluginExploreList extends PluginBaseModule {
 
     //------------ ACTIONS -----------------
 
-    private getAllName(file: mls.stor.IFileInfo): string {
+    private getAllName(file: mls.stor.IFileInfo, isHistory = false): string {
         let name = '';
         const folder = file.folder ? '_' + file.folder : '';
-        if (this.project === 0) {
+        if (this.modeView === 0) {
             name = '_' + file.project + folder + '/' + file.shortName
+        } else if (folder && this.modeView === -1) {
+            name =  file.shortName
         } else if (folder) {
-            name = folder + '/' + file.shortName
-        } else name = file.shortName;
+            name =  folder+'/'+file.shortName
+        }
+        else name = file.shortName;
+
+        if (isHistory && folder) name = folder + '/' + file.shortName;
+
         return name;
     }
 
@@ -769,11 +775,11 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = mls.actualProject || 0;
-        const prjs = mls.l5.getProjectDetails(this.project)?.prj_dependencies || []
+        this.modeView = mls.actualProject || 0;
+        const prjs = mls.l5.getProjectDetails(this.modeView)?.prj_dependencies || []
         this.myDep = [...prjs];
-        this.myDep.push(this.project);
-        this.projectLabel = this.project.toString();
+        this.myDep.push(this.modeView);
+        this.projectLabel = this.modeView.toString();
         this.fireEventLoadProject();
         await this.getFiles();
 
@@ -815,7 +821,7 @@ export class PluginExploreList extends PluginBaseModule {
         const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
 
         if (iptName) iptName.value = '';
-        if (iptProj) iptProj.value = this.project.toString();
+        if (iptProj) iptProj.value = this.modeView.toString();
 
         elContentAux.style.display = 'none';
 
@@ -831,7 +837,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = 0;
+        this.modeView = 0;
         await this.getFiles();
 
     }
@@ -842,7 +848,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = -1;
+        this.modeView = -1;
         await this.getFiles();
 
     }
@@ -853,7 +859,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = mls.actualProject as number;
+        this.modeView = mls.actualProject as number;
         this.getFiles();
     }
 
@@ -973,13 +979,15 @@ export class PluginExploreList extends PluginBaseModule {
 
             const sf = mls.stor.files[i];
             if (
-                //sf.project !== this.project  ||
+                //sf.project !== this.modeView  ||
                 !this.myDep.includes(sf.project) ||
                 sf.level !== +(this.levelFiles as any) ||
                 sf.extension !== ext
             ) continue;
 
-            if (this.project > 0  && sf.project !== this.project) continue;
+            if (this.modeView === mls.actualProject && sf.project !== this.modeView) continue;
+
+            if (this.modeView === -1 && sf.project !== mls.actualProject) continue;
 
             if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
                 continue;
@@ -1050,12 +1058,12 @@ export class PluginExploreList extends PluginBaseModule {
 
                 let key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
 
-                if (!mls.stor.files[key] && +this.project === 0) {
+                if (!mls.stor.files[key] && +this.modeView === 0) {
                     await mls.stor.server.loadProjectInfoIfNeeded(i.project);
                     key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
                 }
 
-                if (!mls.stor.files[key] || (i.project !== +this.project && +this.project !== 0)) continue;
+                if (!mls.stor.files[key] || (i.project !== +this.modeView && +this.modeView !== 0)) continue;
 
                 if (i.project !== mls.actualProject && !this.myDep.includes(i.project)) continue;
 
