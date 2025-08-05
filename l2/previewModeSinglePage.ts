@@ -85,6 +85,14 @@ export class PreviewModeSinglePage {
                         return { path: args.path, namespace: 'virtual' };
                     }
 
+                    if (args.path.indexOf("/l2/") &&
+                        !args.importer.startsWith("https://")) {
+                        return {
+                            path: '/'+args.path.replace('/l2/', ''),
+                            namespace: 'virtual',
+                        };
+                    }
+
 
                     return null;
                 });
