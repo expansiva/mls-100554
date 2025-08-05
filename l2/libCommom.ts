@@ -398,7 +398,8 @@ export async function* deleteAllFiles(filesToDelete: mls.stor.IFileInfo[]) {
         yield `Storfile deleted: ${keyFiles}`;
 
         const ext = fileToDelete.extension.replace('.ts', '.js');
-        const targetKey = `https://collab.codes/local/_${fileToDelete.project}_${fileToDelete.shortName}${ext}?v=`;
+        let targetKey = `https://collab.codes/local/_${fileToDelete.project}_${fileToDelete.shortName}${ext}?v=`;
+        if (fileToDelete.folder) targetKey = `https://collab.codes/local/_${fileToDelete.project}_${fileToDelete.folder}/${fileToDelete.shortName}${ext}?v=`;
         filesToDeleteCache.add(targetKey);
     }
 
