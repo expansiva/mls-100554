@@ -513,6 +513,26 @@ function getAllUserOpenedFiles(): Record<string, UserOpenedFiles> {
     return raw ? JSON.parse(raw) : {};
 }
 
+export function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank'): string{
+
+    const { project, shortName, folder } = file;
+
+    switch (file.extension) {
+        case ('.ts'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n// typescript new file\n`;
+
+        case ('.html'): return `<h1>${file.shortName}</h1>`;
+
+        case ('.less'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n${convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
+
+        case ('.test.ts'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
+
+        case ('.defs.ts'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n`;
+
+        default: return '';
+    }
+    
+}
+
 export type OpenedFile = string | OpenedFileL2;
 export type UserOpenedFiles = Record<number, OpenedFile>;
 export type OpenedFileL2 = { left?: string; right?: string };
@@ -527,4 +547,16 @@ interface ICalculateTotalStringSize {
 interface IRetProjectDetails {
     project: number,
     dependencies: number[]
+}
+
+interface IRetProjectDetails {
+    project: number,
+    dependencies: number[]
+}
+
+interface IInfoFile{
+    project: number,
+    folder:string,
+    shortName: string,
+    extension:string
 }
