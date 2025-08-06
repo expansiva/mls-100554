@@ -2,7 +2,7 @@
 
 import { removeTokensFromSource } from './_100554_enhancementStyle';
 import { getTokensLess } from './_100554_designSystemBase';
-import { getEnhancementName } from './_100554_libCommom';
+import { getEnhancementName, getBaseTemplate } from './_100554_libCommom';
 import { setErrorOnModel } from './_100554_validateLit'
 import { convertFileNameToTag } from './_100554_utilsLit'
 
@@ -529,65 +529,28 @@ function _dispatchEventChanged(position: 'left' | 'right' | 'all', storFile: mls
     mls.events.fireFileAction('editorChanged', storFile, position, 200);
 }
 
-function _dispatchEventTsDefsChanged(position: 'left' | 'right' | 'all', storFile: mls.stor.IFileInfo) {
-    if (position === 'all') {
-        mls.events.fire([2], ['tsDefsChanged'] as any, JSON.stringify({ position: 'left', storFile }), 200);
-        mls.events.fire([2], ['tsDefsChanged'] as any, JSON.stringify({ position: 'right', storFile }), 200);
-        return;
-    }
-    mls.events.fire([2], ['tsDefsChanged'] as any, JSON.stringify({ position, storFile }), 200);
-}
-
-function _dispatchEventTsTestChanged(position: 'left' | 'right' | 'all', storFile: mls.stor.IFileInfo) {
-    if (position === 'all') {
-        mls.events.fire([2], ['tsTestChanged'] as any, JSON.stringify({ position: 'left', storFile }), 200);
-        mls.events.fire([2], ['tsTestChanged'] as any, JSON.stringify({ position: 'right', storFile }), 200);
-        return;
-    }
-    mls.events.fire([2], ['tsTestChanged'] as any, JSON.stringify({ position, storFile }), 200);
-}
-
-function _dispatchEventLessChanged(position: 'left' | 'right' | 'all', storFile: mls.stor.IFileInfo) {
-    if (position === 'all') {
-        mls.events.fire([2], ['LessChangedEditor'] as any, JSON.stringify({ position: 'left', storFile }), 100);
-        mls.events.fire([2], ['LessChangedEditor'] as any, JSON.stringify({ position: 'right', storFile }), 200);
-        return;
-    }
-    mls.events.fire([2], ['LessChangedEditor'] as any, JSON.stringify({ position, storFile }));
-}
-
 async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext: string): Promise<mls.stor.IFileInfo> {
 
     if (!fileBase) throw new Error('[createStorFiles] Invalid file base!');
 
     const { folder, shortName, project } = fileBase;
 
-    const template = `/// <mls shortName="${shortName}" project="${project}" enhancement="_blank" folder="${folder}" />\n\n// typescript new file\n`;
-
-    const templateHTML = `<h1>${shortName}</h1>`;
-
-    const templateLess = `/// <mls shortName="${shortName}" project="${project}" enhancement="enhancementStyle" folder="${folder}" />\n\n${convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
-
-    const templateTest = `/// <mls shortName="${shortName}" project="${project}" enhancement="_blank" folder="${folder}" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
-
-    const templateDefs = `/// <mls shortName="${shortName}" project="${project}" enhancement="_blank" folder="${folder}" />\n\n`;
-
     let source = '';
     switch (ext) {
         case ('.ts'):
-            source = template;
+            source = getBaseTemplate({ folder, shortName, project, extension: '.ts' }, '_100554_enhancementLit');
             break;
         case ('.html'):
-            source = templateHTML;
+            source = getBaseTemplate({ folder, shortName, project, extension: '.html' });
             break;
         case ('.less'):
-            source = templateLess;
+            source = getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
             break;
         case ('.test.ts'):
-            source = templateTest;
+            source = getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
             break;
         case ('.defs.ts'):
-            source = templateDefs;
+            source = getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
             break;
     }
 

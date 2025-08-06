@@ -3,7 +3,7 @@
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { selectLevel, forceServiceInstance } from './_100554_libCommom';
+import { selectLevel, forceServiceInstance, getBaseTemplate } from './_100554_libCommom';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles } from './_100554_collabLibStor';
 import { createAllModels, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import { ServiceBase } from './_100554_serviceBase';
@@ -16,7 +16,7 @@ const message_pt = {
     update: "atualizar",
     addNewFile: "adicionar novo arquivo",
     filter: "Filtrar",
-    localProject: "Todos projetos",
+    localProject: "Todos",
     projectFolder: "Pasta",
     totalFiles: "arquivos totais",
     filesWithErrors: "arquivos com erros",
@@ -36,7 +36,7 @@ const message_en = {
     addNewFile: 'add new file',
     filter: 'Filter',
     projectFolder: "Folder",
-    localProject: 'Upstream project',
+    localProject: 'All',
     totalFiles: 'total files',
     filesWithErrors: 'files with errors',
     filesInLocalStorage: 'file in local storage',
@@ -90,7 +90,9 @@ export class PluginExploreList extends PluginBaseModule {
 
     @property() levelFiles: number = 2;
 
-    @property() modeView: number = 1; // -1: mode folder; 0: all project
+    @property() project: number = 1; // -1: mode folder; 0: all project
+
+    @property() modeView: number = 0; // 0: alphabetical; 1: folder
 
     @property() projectLabel: string = '1';
 
@@ -131,7 +133,7 @@ export class PluginExploreList extends PluginBaseModule {
     private setEvents() {
 
         mls.events.addEventListener([2, 5], ['ProjectSelected'], (ev) => {
-            if (this.modeView === mls.actualProject) return;
+            if (this.project === mls.actualProject) return;
             this.init();
         });
 
@@ -204,7 +206,8 @@ export class PluginExploreList extends PluginBaseModule {
 
     async updated(changedProperties: Map<string | number | symbol, unknown>) {
         super.updated(changedProperties);
-        if (changedProperties.has('mode') && this.mode === 'list') {
+        const propMode = changedProperties.get('mode');
+        if (propMode && this.mode === 'list') {
             this.init();
         }
     }
@@ -220,7 +223,7 @@ export class PluginExploreList extends PluginBaseModule {
                 ${this.renderHeader()}
                 <ul>
                     ${this.renderHistory()}
-                    ${this.modeView === -1 ? this.renderFolder() :this.renderList()}
+                    ${this.modeView === 1 ? this.renderFolder() : this.renderList()}
                 </ul>
             </div>
         `;
@@ -252,27 +255,42 @@ export class PluginExploreList extends PluginBaseModule {
 
             auxS = `<b>[${this.info.storage}]</b> <span class="fa fa-location-dot"></span> <b>${this.msg.filesInLocalStorage}.</b>`;
         }
-        //verifyChangeInList
+
         return html`
         <div class="groupHeader">
-            <div class="groupAction"> 
-                <a @click="${this.verifyChangeInList}" id="${this.position}listUpdateFiles">${this.msg.updateListVerify}</a>
-                ${this.position === 'left' ? html`<a @click="${this.showAdd}">${this.msg.addNewFile}</a>` : ''}
-            </div>
-            <div class="groupFilter">
-                
-                    <form>
-                        <div class="groupFilterRadio">
-                            <input id="${this.position}radioProjectActual" name="projectFind" type="radio" checked="checked" value="${this.projectLabel}" @click="${this.clickRadioProjectActual}">
-                            <label for="${this.position}radioProjectActual">${this.projectLabel}</label>
-                            <input id="${this.position}radioProjectFolder" name="projectFind" type="radio" value="-1" @click="${this.clickRadioProject1}">
-                            <label for="${this.position}radioProjectFolder">${this.msg.projectFolder}</label>
-                            <input id="${this.position}radioProjectZero" name="projectFind" type="radio" value="0" @click="${this.clickRadioProject0}">
-                            <label for="${this.position}radioProjectZero">${this.msg.localProject}</label>
-                        </div>
-                    </form>
-                <input name="projectFilter" type="text" placeholder="Filter" @input="${this.filterLiChange}">
-            </div>
+            <header class="toolbar">
+                <div class="toolbar__left">
+                    <input name="projectFilter" class="toolbar__search" type="text" placeholder="Filter" @input="${this.filterLiChange}">
+                </div>
+
+                <div class="toolbar__center">
+                    <div class="toolbar__radio-group">
+                        <label @click="${this.clickRadioProjectActual}" title="project">
+                            <input type="radio" name="${this.position}project" value="${this.projectLabel}" checked />
+                            <span>${this.projectLabel}</span>
+                        </label>
+                        <label @click="${this.clickRadioProject0}" title="all project">
+                            <input type="radio" name="${this.position}project" value="0" />
+                            <span>${this.msg.localProject}</span>
+                        </label>
+                    </div>
+
+                    <div class="toolbar__radio-group">
+                        <label @click="${this.clickRadioSortAlph}" title="sort alphabetical">
+                            <input type="radio" name="${this.position}group"  value="alphabetical" checked />
+                            <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 576 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M183.6 469.6C177.5 476.2 169 480 160 480s-17.5-3.8-23.6-10.4l-88-96c-11.9-13-11.1-33.3 2-45.2s33.3-11.1 45.2 2L128 365.7 128 64c0-17.7 14.3-32 32-32s32 14.3 32 32l0 301.7 32.4-35.4c11.9-13 32.2-13.9 45.2-2s13.9 32.2 2 45.2l-88 96zM320 320c0-17.7 14.3-32 32-32l128 0c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9L429.3 416l50.7 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-128 0c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9L402.7 352 352 352c-17.7 0-32-14.3-32-32zM416 32c12.1 0 23.2 6.8 28.6 17.7l64 128 16 32c7.9 15.8 1.5 35-14.3 42.9s-35 1.5-42.9-14.3L460.2 224l-88.4 0-7.2 14.3c-7.9 15.8-27.1 22.2-42.9 14.3s-22.2-27.1-14.3-42.9l16-32 64-128C392.8 38.8 403.9 32 416 32zM395.8 176l40.4 0L416 135.6 395.8 176z"/></svg>
+                            </span>
+                        </label>
+                        <label @click="${this.clickRadioSortFolder}" title="sort folder">
+                            <input type="radio" name="${this.position}group" value="folder" />
+                            <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 576 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32l0 96L0 384c0 35.3 28.7 64 64 64l192 0 0-64L64 384l0-224 192 0 0-64L64 96l0-64zM288 192c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-128c0-17.7-14.3-32-32-32l-98.7 0c-8.5 0-16.6-3.4-22.6-9.4L409.4 9.4c-6-6-14.1-9.4-22.6-9.4L320 0c-17.7 0-32 14.3-32 32l0 160zm0 288c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-128c0-17.7-14.3-32-32-32l-98.7 0c-8.5 0-16.6-3.4-22.6-9.4l-13.3-13.3c-6-6-14.1-9.4-22.6-9.4L320 288c-17.7 0-32 14.3-32 32l0 160z"/></svg></span>
+                        </label>
+                    </div>
+                    <button class="toolbar__add-button" title="new file" @click="${this.showAdd}">+</button>
+                </div>
+            </header>
             <div class="groupInfo">
                 <span style="margin-right:10px">
                     [${this.info.tot}]
@@ -284,7 +302,7 @@ export class PluginExploreList extends PluginBaseModule {
                 ${auxS ? html`<span .innerHTML="${auxS}" style="margin-right:10px"></span>` : ''}
             </div>
         </div>
-        `;
+        `
     }
 
     renderHistory() {
@@ -293,7 +311,7 @@ export class PluginExploreList extends PluginBaseModule {
             ${this.history.length <= 0 ? '' :
                 html`
                     <li class="headerTitle">
-                        ${+this.modeView === 0 ? `${this.msg.history} (All Projects)` : `${this.msg.history}`}
+                        ${+this.project === 0 ? `${this.msg.history} (All Projects)` : `${this.msg.history}`}
                     </li>
                     ${repeat(
                     this.history,
@@ -340,9 +358,12 @@ export class PluginExploreList extends PluginBaseModule {
         const folders: Record<string, mls.stor.IFileInfo[]> = {};
         this.files.forEach((f) => {
             let folder = f.folder;
-            if (!f.folder) folder = '000000';
-            if (folders[folder]) folders[folder].push(f);
-            else folders[folder] = [f];
+            let aux = this.project === 0 ? f.project + '/' : '';
+            if (!f.folder) folder = 'root';
+
+            const keyFolder = aux + folder;
+            if (folders[keyFolder]) folders[keyFolder].push(f);
+            else folders[keyFolder] = [f];
         });
         let keys = Object.keys(folders).sort();
 
@@ -352,10 +373,10 @@ export class PluginExploreList extends PluginBaseModule {
         ${repeat(keys, ((item: string) => item) as any, ((key: string, index: any) => {
 
             return html`
-                <li class="headerTitle">${key === '000000' ? 'root' : key} </li>
+                <li class="headerTitle">${key}</li>
                 ${this.renderFolder2(folders[key])}
             `
-            }) as any
+        }) as any
         )}`
 
 
@@ -381,11 +402,13 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     getTitleInLocalStorage(ts: mls.stor.IFileInfo, html: mls.stor.IFileInfo, less: mls.stor.IFileInfo, test: mls.stor.IFileInfo, defs: mls.stor.IFileInfo) {
-        const tsLocal = ts && ts.inLocalStorage;
-        const htmlLocal = html && html.inLocalStorage;
-        const styleLocal = less && less.inLocalStorage;
-        const testLocal = test && test.inLocalStorage;
-        const defsLocal = defs && defs.inLocalStorage;
+
+
+        const tsLocal = ts && ts.inLocalStorage && this.verifyDifBaseTemplate(ts);
+        const htmlLocal = html && html.inLocalStorage && this.verifyDifBaseTemplate(html);
+        const styleLocal = less && less.inLocalStorage && this.verifyDifBaseTemplate(less);
+        const testLocal = test && test.inLocalStorage && this.verifyDifBaseTemplate(test);
+        const defsLocal = defs && defs.inLocalStorage && this.verifyDifBaseTemplate(defs);
 
         let rc = '';
         if (tsLocal) rc = rc + '.ts ';
@@ -440,7 +463,7 @@ export class PluginExploreList extends PluginBaseModule {
         const actualL2 = (mls.actual[2] as any)[this.position]?.shortName;
         const actualL2Folder = (mls.actual[2] as any)[this.position]?.folder;
 
-        const validProject = this.modeView === 0 && mls.actualProject !== file.project && file.project !== 0 ? false : true;
+        const validProject = this.project === 0 && mls.actualProject !== file.project && file.project !== 0 ? false : true;
 
         let auxValidProject = '';
 
@@ -470,17 +493,17 @@ export class PluginExploreList extends PluginBaseModule {
 
     private getAllName(file: mls.stor.IFileInfo, isHistory = false): string {
         let name = '';
-        const folder = file.folder ? '_' + file.folder : '';
-        if (this.modeView === 0) {
-            name = '_' + file.project + folder + '/' + file.shortName
-        } else if (folder && this.modeView === -1) {
-            name =  file.shortName
-        } else if (folder) {
-            name =  folder+'/'+file.shortName
+        const folder = file.folder ?  file.folder : '';
+        if (this.modeView === 0 && this.project === 0) {
+            name = '_' + file.project + '_' + folder + '/' + file.shortName
+        } else if (this.modeView === 0 && this.project > 0) {
+            name = folder ? folder + '/' + file.shortName : file.shortName;
+        } else {
+            name = file.shortName;
         }
-        else name = file.shortName;
 
         if (isHistory && folder) name = folder + '/' + file.shortName;
+        if (isHistory && this.project === 0) name = file.project + '_' +folder + '/' + file.shortName;
 
         return name;
     }
@@ -754,7 +777,6 @@ export class PluginExploreList extends PluginBaseModule {
         this.showLoading(false);
         clearTimeout(this.changeListTimeout);
         this.changeListTimeout = setTimeout(async () => {
-
             await this.init();
 
         }, time);
@@ -775,11 +797,11 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.modeView = mls.actualProject || 0;
-        const prjs = mls.l5.getProjectDetails(this.modeView)?.prj_dependencies || []
+        this.project = mls.actualProject || 0;
+        const prjs = mls.l5.getProjectDetails(this.project)?.prj_dependencies || []
         this.myDep = [...prjs];
-        this.myDep.push(this.modeView);
-        this.projectLabel = this.modeView.toString();
+        this.myDep.push(this.project);
+        this.projectLabel = this.project.toString();
         this.fireEventLoadProject();
         await this.getFiles();
 
@@ -821,7 +843,7 @@ export class PluginExploreList extends PluginBaseModule {
         const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
 
         if (iptName) iptName.value = '';
-        if (iptProj) iptProj.value = this.modeView.toString();
+        if (iptProj) iptProj.value = this.project.toString();
 
         elContentAux.style.display = 'none';
 
@@ -837,7 +859,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.modeView = 0;
+        this.project = 0;
         await this.getFiles();
 
     }
@@ -848,7 +870,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.modeView = -1;
+        this.project = -1;
         await this.getFiles();
 
     }
@@ -859,8 +881,16 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.modeView = mls.actualProject as number;
+        this.project = mls.actualProject as number;
         this.getFiles();
+    }
+
+    private clickRadioSortAlph(e: MouseEvent): void {
+        this.modeView = 0;
+    }
+
+    private clickRadioSortFolder(e: MouseEvent): void {
+        this.modeView = 1;
     }
 
     private inFilter = false;
@@ -957,7 +987,7 @@ export class PluginExploreList extends PluginBaseModule {
     private async getFiles() {
 
         try {
-            const arraySf: mls.stor.IFileInfo[] = this.getFilesProject();
+            const arraySf: mls.stor.IFileInfo[] = await this.getFilesProject();
             const arraySfHistory: mls.stor.IFileInfo[] = await this.getFileHistory();
             this.files = [...arraySf];
             this.history = [...arraySfHistory];
@@ -967,27 +997,26 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
-    private getFilesProject(): mls.stor.IFileInfo[] {
+    private async getFilesProject(): Promise<mls.stor.IFileInfo[]> {
 
         if (!window['mls']) return [];
         this.filesInLocal = [];
         const arraySf: mls.stor.IFileInfo[] = [];
         const ext = (this.extensionLevel as any)[this.levelFiles as any] as string;
 
-
         for (const i of Object.keys(mls.stor.files)) {
 
             const sf = mls.stor.files[i];
             if (
-                //sf.project !== this.modeView  ||
+                //sf.project !== this.project  ||
                 !this.myDep.includes(sf.project) ||
                 sf.level !== +(this.levelFiles as any) ||
                 sf.extension !== ext
             ) continue;
 
-            if (this.modeView === mls.actualProject && sf.project !== this.modeView) continue;
+            if (this.project === mls.actualProject && sf.project !== this.project) continue;
 
-            if (this.modeView === -1 && sf.project !== mls.actualProject) continue;
+            if (this.project === -1 && sf.project !== mls.actualProject) continue;
 
             if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
                 continue;
@@ -997,9 +1026,7 @@ export class PluginExploreList extends PluginBaseModule {
             }
             else if ([2, 4, 5, 6, 7].includes(mls.actualLevel) && sf.shortName.startsWith('be')) {
                 continue;
-            }
-
-            this.info.tot++;
+            } 
 
             const keyHtml = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.html');
             const keyStyle = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.less');
@@ -1011,16 +1038,20 @@ export class PluginExploreList extends PluginBaseModule {
             const testFile = mls.stor.files[keyTestFile];
             const defsFile = mls.stor.files[keyDefsFile];
 
-            const htmlLocal = htmlFile && htmlFile.inLocalStorage;
-            const styleLocal = styleFile && styleFile.inLocalStorage;
-            const testLocal = testFile && testFile.inLocalStorage;
-            const defsLocal = defsFile && defsFile.inLocalStorage;
+ 
+
+
+            const htmlLocal = htmlFile && htmlFile.inLocalStorage && await this.isDifBaseTemplate(htmlFile);
+            const styleLocal = styleFile && styleFile.inLocalStorage && await this.isDifBaseTemplate(styleFile);
+            const testLocal = testFile && testFile.inLocalStorage && await this.isDifBaseTemplate(testFile);
+            const defsLocal = defsFile && defsFile.inLocalStorage && await this.isDifBaseTemplate(defsFile); 
 
             const htmlError = htmlFile && htmlFile.hasError;
-            const styleError = styleFile && styleFile.hasError;
+            const styleError = styleFile && styleFile.hasError 
             const testError = testFile && testFile.hasError;
             const defsError = defsFile && defsFile.hasError;
 
+            this.info.tot++;
 
             if (sf.isLocalVersionOutdated) this.info.version++;
             if (sf.inLocalStorage || htmlLocal || styleLocal || testLocal || defsLocal) {
@@ -1035,6 +1066,51 @@ export class PluginExploreList extends PluginBaseModule {
         arraySf.sort((a, b) => a.shortName.localeCompare(b.shortName));
 
         return arraySf;
+
+    }
+
+    private dataDifBaseTemplate: Record<string, boolean> = {};
+    private verifyDifBaseTemplate(file: mls.stor.IFileInfo): boolean {
+
+        const { folder, shortName, project, extension } = file;
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, extension);
+
+        if (this.dataDifBaseTemplate[key] === undefined) return file.inLocalStorage;
+
+        return this.dataDifBaseTemplate[key];
+
+    }
+
+    private async isDifBaseTemplate(file: mls.stor.IFileInfo): Promise<boolean> {
+
+        if (!file.inLocalStorage || !file.getValueInfo) return false;
+
+        const vl = await file.getValueInfo();
+        const { folder, shortName, project, extension } = file;
+
+        let source = '';
+        switch (file.extension) {
+            case ('.ts'):
+                source = getBaseTemplate({ folder, shortName, project, extension: '.ts' }, '_100554_enhancementLit');
+                break;
+            case ('.html'):
+                source = getBaseTemplate({ folder, shortName, project, extension: '.html' });
+                break;
+            case ('.less'):
+                source = getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
+                break;
+            case ('.test.ts'):
+                source = getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
+                break;
+            case ('.defs.ts'):
+                source = getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
+                break;
+        }
+
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, extension);
+        if (!this.dataDifBaseTemplate[key]) this.dataDifBaseTemplate[key] = vl.content !== source;
+
+        return vl.content !== source;
 
     }
 
@@ -1058,12 +1134,12 @@ export class PluginExploreList extends PluginBaseModule {
 
                 let key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
 
-                if (!mls.stor.files[key] && +this.modeView === 0) {
+                if (!mls.stor.files[key] && +this.project === 0) {
                     await mls.stor.server.loadProjectInfoIfNeeded(i.project);
                     key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
                 }
 
-                if (!mls.stor.files[key] || (i.project !== +this.modeView && +this.modeView !== 0)) continue;
+                if (!mls.stor.files[key] || (i.project !== +this.project && +this.project !== 0)) continue;
 
                 if (i.project !== mls.actualProject && !this.myDep.includes(i.project)) continue;
 
@@ -1080,11 +1156,18 @@ export class PluginExploreList extends PluginBaseModule {
             }
 
             const diff = this.filesInLocal.filter(a =>
-                !arraySfHistory.some(b => b.shortName === a.shortName)
+                !arraySfHistory.some(b => b.shortName === a.shortName && b.folder === a.folder)
             );
 
-            arraySfHistory = [...arraySfHistory, ...diff];
-            return arraySfHistory;
+            arraySfHistory = [...arraySfHistory, ...diff]
+
+            return arraySfHistory.filter((obj, index, self) =>
+                index === self.findIndex(o =>
+                    o.project === obj.project &&
+                    o.shortName === obj.shortName &&
+                    o.folder === obj.folder
+                )
+            );
 
         }
         catch (e: any) {

@@ -2,6 +2,7 @@
 
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { createModel, createAllModels } from './_100554_collabLibModel'
+import { getBaseTemplate } from './_100554_libCommom';
 
 export async function createStorFile(req: IReqCreateStorFile, needCreateModel:boolean): Promise<mls.stor.IFileInfo> {
 
@@ -42,15 +43,15 @@ export async function createAllFiles(req: IReqCreateAllFiles, needCreateModel:bo
 
     const { folder, shortName, project } = req;
 
-    const template = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="${req.enhancement}" folder="${req.folder}" />\n\n// typescript new file\n`;
+    const template = getBaseTemplate({ folder, shortName, project, extension: '.ts' }, req.enhancement);
 
-    const templateHTML = `<h1>${req.shortName}</h1>`;
+    const templateHTML = getBaseTemplate({ folder, shortName, project, extension: '.html' });
 
-    const templateLess = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="enhancementStyle" folder="${req.folder}" />\n\n${convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
+    const templateLess = getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
 
-    const templateTest = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="_blank" folder="${req.folder}" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
+    const templateTest = getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
 
-    const templateDefs = `/// <mls shortName="${req.shortName}" project="${req.project}" enhancement="_blank" folder="${req.folder}" />\n\n`;
+    const templateDefs = getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
 
     const newTSSource = req.tsSource || template;
     const newHTMLSource = req.htmlSource || templateHTML;
@@ -215,6 +216,8 @@ export async function cloneAllFiles(storFile: mls.stor.IFileInfo, newProject: nu
 
 export async function undoFile(storFile: mls.stor.IFileInfo, removeProject: boolean = true): Promise<void> {
 
+    storFile.getValueInfo = undefined;
+    
     if (storFile.status === 'nochange' && !storFile.inLocalStorage) {
         return;
     }
@@ -249,7 +252,7 @@ export async function undoFile(storFile: mls.stor.IFileInfo, removeProject: bool
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
     }
 
-    storFile.getValueInfo = undefined;
+    
 
     const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
     if (!mls.editor.models[keyToModel]) return;
